@@ -1,0 +1,14 @@
+# Application dependencies
+
+require:
+    - play 1.2.4
+    - elcuk -> elcuk-module 1.0
+    - org.jsoup -> jsoup 1.6.1
+
+
+repositories:
+    - local:
+        type: iBiblio
+        root: "file://Users/wyattpan/.m2/repository/"
+        contains:
+            - elcuk -> *
