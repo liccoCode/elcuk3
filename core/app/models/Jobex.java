@@ -7,7 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 /**
- * Created by IntelliJ IDEA.
+ * 利用 Play Framework 的 Async Job, 使用一个 JobDriver 来驱动这些 Jobex 以便提供
+ * 了能够暂时关闭这个 Jobex 的功能。
  * User: wyattpan
  * Date: 12/29/11
  * Time: 1:05 AM
