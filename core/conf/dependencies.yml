@@ -2,13 +2,13 @@
 
 require:
     - play 1.2.4
-    - elcuk -> elcuk-module 1.0
     - org.jsoup -> jsoup 1.6.1
+    - com.elcuk2 -> mws 1.0
 
 
 repositories:
-    - local:
+    - My Local Repo:
         type: iBiblio
-        root: "file://Users/wyattpan/.m2/repository/"
+        root: "file:///${user.home}/.m2/repository/"
         contains:
-            - elcuk -> *
+            - com.elcuk2 -> *

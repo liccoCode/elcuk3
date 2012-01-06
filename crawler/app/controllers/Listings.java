@@ -35,9 +35,9 @@ public class Listings extends Controller {
         } else {
             renderJSON("{flag:false, message:'invalid market[us,uk,de,it]'}");
         }
-//        String html = WS.url(String.format("%s/dp/%s", url.toString(), asin)).get().getString("UTF-8");
-//        IO.writeContent(html, new File(String.format("g:/%s.%s.html", asin, market)), "UTF-8");
-        String html = IO.readContentAsString(new File(String.format("g:/%s.%s.html", asin, market)), "UTF-8");
+        String html = WS.url(String.format("%s/dp/%s", url.toString(), asin)).get().getString("UTF-8");
+        IO.writeContent(html, new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
+//        String html = IO.readContentAsString(new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
         renderJSON(new Listing(html).parseFromHTML());
     }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListInboundShipmentItemsResponse xmlns="http://mws.amazonaws.com/FulfillmentInboundShipment/2010-10-01/">
+  <ListInboundShipmentItemsResult>
+    <!--Optional:-->
+    <ItemData>
+      <!--1 or more repetitions:-->
+      <member>
+        <!--Optional:-->
+        <ShipmentId>string</ShipmentId>
+        <SellerSKU>string</SellerSKU>
+        <!--Optional:-->
+        <FulfillmentNetworkSKU>string</FulfillmentNetworkSKU>
+        <QuantityShipped>100</QuantityShipped>
+        <!--Optional:-->
+        <QuantityReceived>100</QuantityReceived>
+      </member>
+    </ItemData>
+    <!--Optional:-->
+    <NextToken>string</NextToken>
+  </ListInboundShipmentItemsResult>
+  <ResponseMetadata>
+    <RequestId>string</RequestId>
+  </ResponseMetadata>
+</ListInboundShipmentItemsResponse>

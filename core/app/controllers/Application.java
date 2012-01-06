@@ -1,14 +1,8 @@
 package controllers;
 
-import com.elcuk.model.crawl.Listing;
-import play.*;
-import play.db.DB;
-import play.mvc.*;
+import play.mvc.Controller;
 
-import java.util.*;
-
-import models.*;
-import play.utils.Utils;
+import java.util.Arrays;
 
 public class Application extends Controller {
 

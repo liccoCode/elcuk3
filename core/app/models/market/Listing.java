@@ -4,8 +4,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import play.db.jpa.Model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import java.util.List;
 
 /**
  * Listing 对应的是不同渠道上 Listing 的信息
@@ -15,6 +18,15 @@ import javax.persistence.Entity;
  */
 @Entity
 public class Listing extends Model {
+
+
+    /**
+     * 不能级联删除, 并且删除 Listing 的时候需要保证 Selling 都已经处理了
+     */
+    @OneToMany(mappedBy = "listing", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    public List<Selling> sellings;
+
+
     @Column(unique = true)
     public String listingId;
 

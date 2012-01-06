@@ -4,6 +4,7 @@ cted from https://github.com/ulrich/macaron-factory/blob/master/.gitignore
 # except for .gitignore
 !.gitignore
 *.jar
+*.class
 
 # Ignore Play! working directory #
 db

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CreateInboundShipmentPlanResponse xmlns="http://mws.amazonaws.com/FulfillmentInboundShipment/2010-10-01/">
+  <CreateInboundShipmentPlanResult>
+    <!--Optional:-->
+    <InboundShipmentPlans>
+      <!--1 or more repetitions:-->
+      <member>
+        <!--Optional:-->
+        <ShipmentId>string</ShipmentId>
+        <!--Optional:-->
+        <DestinationFulfillmentCenterId>string</DestinationFulfillmentCenterId>
+        <!--Optional:-->
+        <ShipToAddress>
+          <Name>string</Name>
+          <AddressLine1>string</AddressLine1>
+          <!--Optional:-->
+          <AddressLine2>string</AddressLine2>
+          <!--Optional:-->
+          <DistrictOrCounty>string</DistrictOrCounty>
+          <!--Optional:-->
+          <City>string</City>
+          <StateOrProvinceCode>string</StateOrProvinceCode>
+          <CountryCode>string</CountryCode>
+          <!--Optional:-->
+          <PostalCode>string</PostalCode>
+        </ShipToAddress>
+        <!--Optional:-->
+        <LabelPrepType>string</LabelPrepType>
+        <!--Optional:-->
+        <Items>
+          <!--1 or more repetitions:-->
+          <member>
+            <!--Optional:-->
+            <SellerSKU>string</SellerSKU>
+            <!--Optional:-->
+            <FulfillmentNetworkSKU>string</FulfillmentNetworkSKU>
+            <!--Optional:-->
+            <Quantity>100</Quantity>
+          </member>
+        </Items>
+      </member>
+    </InboundShipmentPlans>
+  </CreateInboundShipmentPlanResult>
+  <ResponseMetadata>
+    <RequestId>string</RequestId>
+  </ResponseMetadata>
+</CreateInboundShipmentPlanResponse>
