@@ -1,14 +1,21 @@
 # Application dependencies
 
 require:
-    - play 1.2.4
+    - play
     - org.jsoup -> jsoup 1.6.1
-    - com.elcuk2 -> mws 1.0
+    - elcuk -> mws 1.0
 
 
 repositories:
-    - My Local Repo:
+    - My Local Repo Mac:
         type: iBiblio
         root: "file:///${user.home}/.m2/repository/"
         contains:
             - com.elcuk2 -> *
+            - elcuk -> *
+    - My Local Repo Win:
+        type: iBiblio
+        root: "file://e:/.m2/repository/"
+        contains:
+            - com.elcuk2 -> *
+            - elcuk -> *

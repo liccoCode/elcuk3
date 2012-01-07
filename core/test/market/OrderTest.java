@@ -2,7 +2,6 @@ package market;
 
 import models.market.Account;
 import models.market.Orderr;
-import org.junit.Test;
 import play.test.UnitTest;
 
 import java.util.Date;
@@ -14,7 +13,8 @@ import java.util.Date;
  * Time: 11:10 AM
  */
 public class OrderTest extends UnitTest {
-    @Test
+
+    //    @Test
     public void saveOrder() {
         Orderr order = new Orderr();
         order.paymentDate = new Date();
@@ -24,8 +24,6 @@ public class OrderTest extends UnitTest {
         order.address = "address";
         order.email = "df";
         order.orderId = "88d8d8d8";
-        
-
         order.save();
     }
 }

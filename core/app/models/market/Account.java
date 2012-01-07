@@ -18,38 +18,48 @@ public class Account extends Model {
      */
     public enum M {
         AMAZON_UK,
-        AMAZON_US,
         AMAZON_DE,
         AMAZON_IT,
+        AMAZON_FR,
+        AMAZON_ES,
+        AMAZON_US,
         EBAY_UK;
 
         public String toString() {
             switch(this) {
                 case AMAZON_UK:
                     return "amazon.co.uk";
-                case AMAZON_US:
-                    return "amazon.com";
                 case AMAZON_DE:
                     return "amazon.de";
                 case AMAZON_IT:
                     return "amazon.it";
+                case AMAZON_FR:
+                    return "amazon.fr";
+                case AMAZON_ES:
+                    return "amazon.es";
+                case AMAZON_US:
+                    return "amazon.com";
                 case EBAY_UK:
                     return "ebay.co.uk";
                 default:
                     return "amazon.co.uk";
             }
         }
-        
+
         public static M val(String str) {
             String strLowercase = str.toLowerCase();
             if(strLowercase.equals("amazon_uk") || strLowercase.equals("amazon.co.uk")) {
                 return AMAZON_UK;
-            } else if(strLowercase.equals("amazon_us") || strLowercase.equals("amazon.com")) {
-                return AMAZON_US;
+            } else if(strLowercase.equals("amazon_fr") || strLowercase.equals("amazon.fr")) {
+                return AMAZON_FR;
+            } else if(strLowercase.equals("amazon_es") || strLowercase.equals("amazon.es")) {
+                return AMAZON_ES;
             } else if(strLowercase.equals("amazon_de") || strLowercase.equals("amazon.de")) {
                 return AMAZON_DE;
             } else if(strLowercase.equals("amazon_it") || strLowercase.equals("amazon.it")) {
                 return AMAZON_IT;
+            } else if(strLowercase.equals("amazon_us") || strLowercase.equals("amazon.com")) {
+                return AMAZON_US;
             } else if(strLowercase.equals("ebay_uk") || strLowercase.equals("ebay.co.uk")) {
                 return EBAY_UK;
             } else {

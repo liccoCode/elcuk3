@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 12/29/11
  * Time: 1:04 AM
  */
-@Every("5s")
+@Every("5mn")
 public class JobDriver extends Job {
     @Override
     public void doJob() throws Exception {

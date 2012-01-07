@@ -6,6 +6,7 @@ import play.db.jpa.Model;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import java.util.Date;
 
 /**
  * 订单的具体订单项
@@ -21,7 +22,18 @@ public class OrderItem extends Model {
     @OneToOne
     public Selling selling;
 
+    @OneToOne
     public Product product;
+
+    /**
+     * 冗余字段, 产品名称
+     */
+    public String productName;
+
+    /**
+     * 冗余字段, 订单项产生的时间
+     */
+    public Date createDate;
 
     /**
      * 这个商品的销售
@@ -50,4 +62,32 @@ public class OrderItem extends Model {
      */
     public Integer quantity;
 
+    /**
+     * 一个中性的记录消息的地方
+     */
+    public String memo = "";
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(!(o instanceof OrderItem)) return false;
+        if(!super.equals(o)) return false;
+
+        OrderItem orderItem = (OrderItem) o;
+
+        if(!order.orderId.equals(orderItem.order.orderId)) return false;
+        if(!product.sku.equals(orderItem.product.sku)) return false;
+        if(!selling.sellingId.equals(orderItem.selling.sellingId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + order.orderId.hashCode();
+        result = 31 * result + selling.sellingId.hashCode();
+        result = 31 * result + product.sku.hashCode();
+        return result;
+    }
 }
