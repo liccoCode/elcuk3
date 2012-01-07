@@ -2,10 +2,7 @@ package models.market;
 
 import play.db.jpa.Model;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 /**
  * 每一个 Selling 都拥有一个 PriceStrategy, 控制其调价的所有信息;
@@ -35,17 +32,20 @@ public class PriceStrategy extends Model {
         FixedPrice
     }
 
-    @OneToOne
+    @OneToOne(mappedBy = "priceStrategy")
     public Selling selling;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     public T type;
 
     /**
      * 成本, 计算价格的基础.
      */
+    @Column(nullable = false)
     public Float cost;
 
+    @Column(nullable = false)
     public Float margin;
 
     /**
@@ -53,6 +53,7 @@ public class PriceStrategy extends Model {
      * <p/>
      * 最低价格, 可在成本的上下浮动, 这个作为判断调价的最低价格的门槛而不是成本
      */
+    @Column(nullable = false)
     public Float lowest;
 
     // ----------------
@@ -62,7 +63,8 @@ public class PriceStrategy extends Model {
      * <p/>
      * 最高利润, 如果价格可以浮动, 那么在最高与最低
      */
-    public Float maxMargin;
+    @Column(nullable = false)
+    public Float max;
 
     /**
      * 基础的运费价格

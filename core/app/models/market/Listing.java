@@ -132,13 +132,13 @@ public class Listing extends Model {
 
         JsonArray offers = lst.get("offers").getAsJsonArray();
         List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
+        if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
+            for(ListingOffer of : tobeChangeed.offers) {
+                of.delete();
+            }
+        }
         for(JsonElement offerEl : offers) {
             JsonObject offer = offerEl.getAsJsonObject();
-            if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
-                for(ListingOffer of : tobeChangeed.offers) {
-                    of.delete();
-                }
-            }
             ListingOffer off = new ListingOffer();
             off.name = offer.get("name").getAsString();
             off.offerId = offer.get("offerId").getAsString();

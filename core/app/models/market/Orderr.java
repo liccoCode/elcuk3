@@ -79,6 +79,12 @@ public class Orderr extends Model {
      */
     @Enumerated(EnumType.STRING)
     public Account.M market;
+
+    /**
+     * 订单是通过某一个账户下产生的; 这是一个单向的关系, 不需要 Account 知道. 需要的时候直接使用 SQL 语句进行反向查询
+     */
+    @OneToOne
+    public Account account;
     //-------------- Basic ----------------
 
 

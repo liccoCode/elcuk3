@@ -51,7 +51,7 @@ public class Selling extends Model {
     @ManyToOne
     public Listing listing;
 
-    @OneToOne(mappedBy = "selling", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     public PriceStrategy priceStrategy;
 
     /**
@@ -86,11 +86,11 @@ public class Selling extends Model {
      * 动态计算的每天的销量
      */
     @Transient
-    public Float ps;
+    public Float ps = 0f;
 
-    public Float price;
+    public Float price = 0f;
 
-    public Float shippingPrice;
+    public Float shippingPrice = 0f;
 
     /**
      * 这个 Selling 所属的哪一个用户

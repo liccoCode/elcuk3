@@ -9,7 +9,9 @@ import play.libs.WS;
 import play.mvc.Controller;
 
 /**
- * Created by IntelliJ IDEA.
+ * Listing 的引入:
+ * 1. 手动根据 ASIN 添加进入系统
+ * 2. 通过 Categry 批量抓取进入系统
  * User: wyattpan
  * Date: 12/28/11
  * Time: 12:49 AM
@@ -24,9 +26,7 @@ public class Listings extends Controller {
      */
     public static void crawl(String market, String asin) {
         Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
-        WS.HttpResponse response = WS.url(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin)).get();
-        Logger.info(response.toString());
-        JsonElement listing = response.getJson();
+        JsonElement listing = WS.url(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin)).get().getJson();
         Listing tobeSave = Listing.parseListingFromCrawl(listing);
         tobeSave.save();
         renderJSON(JSON.toJSONString(tobeSave));

@@ -1,8 +1,11 @@
 package models.market;
 
-import play.db.jpa.Model;
+import org.hibernate.annotations.GenericGenerator;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 /**
@@ -13,7 +16,11 @@ import javax.persistence.ManyToOne;
  * Time: 上午1:33
  */
 @Entity
-public class ListingOffer extends Model {
+public class ListingOffer extends GenericModel {
+    @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
+    public String id;
 
     @ManyToOne
     public Listing listing;
@@ -46,5 +53,31 @@ public class ListingOffer extends Model {
                 ", fba=" + fba +
                 ", buybox=" + buybox +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(!(o instanceof ListingOffer)) return false;
+        if(!super.equals(o)) return false;
+
+        ListingOffer that = (ListingOffer) o;
+
+        if(!listing.listingId.equals(that.listing.listingId)) return false;
+        if(!listing.market.toString().equals(that.listing.market.toString())) return false;
+        if(!name.equals(that.name)) return false;
+        if(!offerId.equals(that.offerId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + listing.listingId.hashCode();
+        result = 31 * result + listing.market.toString().hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + offerId.hashCode();
+        return result;
     }
 }
