@@ -67,8 +67,13 @@ public class Listing {
         this.byWho = titleEl.parent().nextElementSibling().text();
 
         Element reviewSumery = root.select(".asinReviewsSummary").first();
-        this.reviews = Extra.flt(reviewSumery.nextElementSibling().text()).intValue();
-        this.rating = Extra.flt(reviewSumery.select(".swSprite").first().text());
+        if(reviewSumery == null) { // 还没有 review 呢
+            this.reviews = 0;
+            this.rating = 0f;
+        } else {
+            this.reviews = Extra.flt(reviewSumery.nextElementSibling().text()).intValue();
+            this.rating = Extra.flt(reviewSumery.select(".swSprite").first().text());
+        }
 
         Element totalOffersEl = root.select("#secondaryUsedAndNew a").first();
         if(totalOffersEl == null) this.totalOffers = 1;
@@ -97,11 +102,19 @@ public class Listing {
             buybox.offerId = root.select("#merchantID").val().toUpperCase();
             buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
         } else {
-            buybox.fba = true;
+            Element fbaTextLink = root.select("#SSOFpopoverLink").first();
+            if(fbaTextLink == null) {
+                buybox.name = "Currently unavailable";
+                buybox.fba = true;
+                buybox.offerId = root.select("#merchantID").val().toUpperCase();
+            } else {
+                buybox.fba = false;
+                buybox.buybox = false;
+                buybox.name = fbaTextLink.previousElementSibling().text();
+            }
+
             buybox.price = Extra.flt(root.select("#actualPriceValue").text());
             buybox.shipprice = 0;
-            buybox.offerId = root.select("#merchantID").val().toUpperCase();
-            buybox.name = root.select("#SSOFpopoverLink").first().previousElementSibling().text();
         }
         offers.add(buybox);
 

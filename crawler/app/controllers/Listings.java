@@ -2,8 +2,11 @@ package controllers;
 
 import models.Listing;
 import play.data.validation.Validation;
+import play.libs.IO;
 import play.libs.WS;
 import play.mvc.Controller;
+
+import java.io.File;
 
 public class Listings extends Controller {
 
@@ -37,7 +40,7 @@ public class Listings extends Controller {
             renderJSON("{flag:false, message:'invalid market[us,uk,de,it]'}");
         }
         String html = WS.url(String.format("%s/dp/%s", url.toString(), asin)).get().getString("UTF-8");
-//        IO.writeContent(html, new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
+        IO.writeContent(html, new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
 //        String html = IO.readContentAsString(new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
         renderJSON(new Listing(html).parseFromHTML());
     }
