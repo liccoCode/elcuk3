@@ -224,6 +224,8 @@ public class Orderr extends Model {
 
 
                 FulfillmentDataType ffdt = odt.getFulfillmentData();
+                orderr.shipLevel = ffdt.getShipServiceLevel();
+
                 AddressType addtype = ffdt.getAddress();
                 orderr.city = addtype.getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
                 orderr.province = addtype.getState();

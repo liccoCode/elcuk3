@@ -1,7 +1,9 @@
 package market;
 
 import models.market.Listing;
+import org.junit.Before;
 import org.junit.Test;
+import play.test.Fixtures;
 import play.test.UnitTest;
 
 /**
@@ -11,13 +13,16 @@ import play.test.UnitTest;
  * Time: 11:06 PM
  */
 public class ListingTest extends UnitTest {
+    @Before
+    public void setup() {
+        Fixtures.deleteDatabase();
+        Fixtures.loadModels("ListingAndOffers.yml");
+    }
 
     @Test
-    public void testCreate() {
-        Listing listing = new Listing();
-        listing.asin = System.currentTimeMillis() + "";
-        listing.market = "amazon.com";
-        listing.title = "titititititle";
-        listing.save();
+    public void lisingOwner() {
+        Listing li = Listing.find("byAsin", "B005QSWWUW").first();
+        System.out.println(li.offers);
+        System.out.println("Delete: " + li.delete());
     }
 }
