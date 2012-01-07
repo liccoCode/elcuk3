@@ -106,13 +106,12 @@ public class Listing {
             if(fbaTextLink == null) {
                 buybox.name = "Currently unavailable";
                 buybox.fba = true;
-                buybox.offerId = root.select("#merchantID").val().toUpperCase();
             } else {
                 buybox.fba = false;
                 buybox.buybox = false;
                 buybox.name = fbaTextLink.previousElementSibling().text();
             }
-
+            buybox.offerId = root.select("#merchantID").val().toUpperCase();
             buybox.price = Extra.flt(root.select("#actualPriceValue").text());
             buybox.shipprice = 0;
         }
