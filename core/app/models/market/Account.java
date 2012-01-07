@@ -1,9 +1,12 @@
 package models.market;
 
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
@@ -77,18 +80,22 @@ public class Account extends Model {
     /**
      * 哪一个市场
      */
+    @Required
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     public M type;
 
     /**
      * 市场登陆用户名
      */
+    @Required
     @Column(nullable = false)
     public String username;
 
     /**
      * 市场登陆的密码
      */
+    @Required
     @Column(nullable = false)
     public String password;
 
@@ -100,5 +107,17 @@ public class Account extends Model {
     /**
      * 是否可用
      */
-    public boolean closeable;
+    public boolean closeable = false;
+
+    public void setType(M type) {
+        this.type = type;
+        if(this.type != null && this.username != null)
+            this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+        if(this.type != null && this.username != null)
+            this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
+    }
 }

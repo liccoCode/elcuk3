@@ -3,6 +3,7 @@ package models.market;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import models.product.Product;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -27,6 +28,9 @@ public class Listing extends Model {
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
     public List<ListingOffer> offers;
+
+    @ManyToOne
+    public Product product;
 
     /**
      * 用来表示唯一的 ListingId, [asin]_[market]

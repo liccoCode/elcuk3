@@ -1,0 +1,6 @@
+market.Account(easyacceu):
+    uniqueName: amazon.co.uk_easyacc.eu@gmail.com
+    type: AMAZON_UK
+    username: easyacc.eu@gmail.com
+    password: 6XC$X5oY!jj
+    closeable: false
