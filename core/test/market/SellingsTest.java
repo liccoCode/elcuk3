@@ -46,4 +46,24 @@ public class SellingsTest extends FunctionalTest {
         Logger.info(GET("/market/listings/crawl?market=uk&asin=B005K8TW6A").out.toString());
         Logger.info(GET("/market/sellings/assoListing?msku=71ARG9101-BPU&listingId=B005K8TW6A_amazon.co.uk").out.toString());
     }
+
+    @Test
+    public void testPriceStrategyUpdate() {
+        PriceStrategy ps = PriceStrategy.findById(1);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("ps.id", ps.id + "");
+        params.put("ps.type", PriceStrategy.T.FixedPrice.name());
+        params.put("ps.cost", ps.cost + "");
+        params.put("ps.lowest", ps.lowest + "");
+        params.put("ps.max", ps.margin + "");
+        POST("/market/sellings/strategyU", params);
+    }
+
+    @Test
+    public void testSellingUpdate() {
+        Selling selling = Selling.findById(1);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("s.", "");
+        POST("/market/sellings/u", params);
+    }
 }

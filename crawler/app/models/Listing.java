@@ -17,6 +17,14 @@ import java.util.List;
  */
 public class Listing {
 
+    /**
+     * 这个 listing 是哪个市场的
+     */
+    public enum T {
+        AMAZON,
+        EBAY
+    }
+
     public Listing(String html) {
         this.html = html;
     }
@@ -54,7 +62,26 @@ public class Listing {
 
     public List<ListingOffer> offers;
 
-    public Listing parseFromHTML() {
+    /**
+     * 根据指定的抓取的 Listing 类型进行解析
+     *
+     * @param type
+     * @return
+     */
+    public Listing parseFromHTML(T type) {
+        switch(type) {
+            case AMAZON:
+                parseAmazon();
+                break;
+            case EBAY:
+                parseEbay();
+
+        }
+        this.html = null;// 清空 html
+        return this;
+    }
+
+    private Listing parseAmazon() {
         // html
         Element root = Jsoup.parse(html);
 
@@ -101,14 +128,43 @@ public class Listing {
             buybox.shipprice = Extra.flt(noFbaPrice.select(".plusShippingText").text());
             buybox.offerId = root.select("#merchantID").val().toUpperCase();
             buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
+            buybox.fba = false;
         } else {
             Element fbaTextLink = root.select("#SSOFpopoverLink").first();
             if(fbaTextLink == null) {
-                buybox.name = "Currently unavailable";
+                /**
+                 *  没有 fbalink 还几种情况:
+                 *  1. 产品正常销售, Amazon 绿色
+                 *  2. 产品无法销售, Currently unavailable 红色
+                 *  3. 产品预期到货, 橙色
+                 */
+                Element tmpEl = root.select(".availGreen").first();
+                boolean goon = true; // 是否继续处理
+                if(tmpEl == null) {
+                    tmpEl = root.select(".availRed").first();
+                } else { // availGreen
+                    goon = false;
+                    buybox.name = tmpEl.parent().select("b").first().text();
+                    buybox.buybox = buybox.fba = true; // Selled by Amazon.
+                }
+                if(tmpEl == null) {
+                    //TODO 搜索橙色的
+                } else if(goon) { // availRed
+                    goon = false;
+                    buybox.name = tmpEl.text();
+                    buybox.buybox = buybox.fba = false;
+                }
+                if(tmpEl == null) {
+                    //绿色, 红色, 橙色都找不到了... 直接记录 offers 什么都没找到
+                    buybox.name = "Find Nothing.";
+                    buybox.buybox = buybox.fba = false;
+                } else if(goon) {
+                    goon = false;
+                    buybox.name = "橙色的提示, 预期到货";
+                    buybox.buybox = buybox.fba = false;
+                }
+            } else { // 正常抓取到了 FBA
                 buybox.fba = true;
-            } else {
-                buybox.fba = false;
-                buybox.buybox = false;
                 buybox.name = fbaTextLink.previousElementSibling().text();
             }
             buybox.offerId = root.select("#merchantID").val().toUpperCase();
@@ -133,9 +189,12 @@ public class Listing {
                 Logger.error("Parse More Buyers have some error! [%s]", e.getMessage());
             }
         }
-
         this.offers = offers;
-        this.html = null;// 清空 html
+        return this;
+    }
+
+    private Listing parseEbay() {
+        // Not Yet...
         return this;
     }
 }

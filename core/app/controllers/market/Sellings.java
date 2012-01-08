@@ -1,6 +1,8 @@
 package controllers.market;
 
+import com.alibaba.fastjson.JSON;
 import models.market.Listing;
+import models.market.PriceStrategy;
 import models.market.Selling;
 import org.jsoup.helper.Validate;
 import play.data.validation.Valid;
@@ -25,6 +27,19 @@ public class Sellings extends Controller {
         Validate.notNull(s.priceStrategy);
         s.save();
         renderJSON(s);
+    }
+
+    public static void r(Long id) {
+        renderJSON(JSON.toJSONString(Selling.findById(id)));
+    }
+
+    public static void u(@Valid Selling s) {
+        renderJSON(JSON.toJSONString(s.save()));
+    }
+
+    public static void strategyU(PriceStrategy ps) {
+        validation.required(ps.id);
+        renderJSON(ps.save());
     }
 
     /**
