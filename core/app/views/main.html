@@ -14,56 +14,54 @@
 #{get 'moreScripts' /}
     <script type="text/javascript">
         $(function() { //初始化 Menu
-            $('.nav dl').mouseover(
-                    function(e) {
-                        $(e.currentTarget).children('dd').toggleClass('navDisplay').toggleClass('navInvisable');
-                    }).mouseout(function(e) {
-                        $(e.currentTarget).children('dd').toggleClass('navDisplay').toggleClass('navInvisable');
-                    });
+            $("ul.dropdown li").hover(function() {
+                $(this).addClass("hover");
+                $('ul:first', this).css('visibility', 'visible');
+            }, function() {
+                $(this).removeClass("hover");
+                $('ul:first', this).css('visibility', 'hidden');
+            });
+            $("ul.dropdown li ul li:has(ul)").find("a:first").append(" &raquo; ");
         });
     </script>
 </head>
 <body>
 <div class="container_12 header">
-    <ul class="nav">
+    <ul class="dropdown">
         <li>
-            <div class="grid_3 alpha omega">
-                <dl>
-                    <dt><a href="@{Application.index()}">首页</a></dt>
-                </dl>
-            </div>
+            <a>首页</a>
+            <ul>
+                <li><a href="@{Application.index()}">Home</a></li>
+            </ul>
         </li>
         <li>
-            <div class="grid_3 alpha omega">
-                <dl>
-                    <dt><a href="#">市场模块</a></dt>
-                    <dd class="navInvisable"><a href="#">Listing</a></dd>
-                    <dd class="navInvisable"><a href="#">Listing</a></dd>
-                </dl>
-            </div>
+            <a>市场模块</a>
+            <ul>
+                <li><a href="#">Listing</a></li>
+                <li><a href="#">Listing</a></li>
+            </ul>
         </li>
         <li>
-            <div class="grid_3 alpha omega">
-                <dl>
-                    <dt><a href="@{Products.index(1, 20)}">产品模块</a></dt>
-                    <dd class="navInvisable"><a href="#">Listing</a></dd>
-                </dl>
-            </div>
+            <a>产品模块</a>
+            <ul>
+                <li><a href="@{Products.p_index(1, 20)}">Product</a></li>
+                <li><a href="@{Products.c_index(1, 20)}">Category</a></li>
+                <li><a href="#">Whouse</a></li>
+            </ul>
         </li>
         <li>
-            <div class="grid_3 alpha omega">
-                <dl>
-                    <dt><a href="#">采购模块</a></dt>
-                    <dd class="navInvisable"><a href="#">Listing</a></dd>
-                </dl>
-            </div>
+            <a>采购模块</a>
+            <ul>
+                <li><a href="#">Category</a></li>
+                <li><a href="#">Category</a></li>
+                <li><a href="#">Whouse</a></li>
+            </ul>
         </li>
     </ul>
 </div>
 <div class="container_12 page">
 #{doLayout /}
 </div>
-
 <div class="container_12 footer">
     footer
 </div>

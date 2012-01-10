@@ -1,49 +1,167 @@
-.header {
-    margin-top: 10px;
+.header{
+    margin-top:10px;
 }
 
-.header div {
-    height: 24px;
-    border: 1px solid #4080ff;
-    padding: 0 9px;
+.header div{
+    height:24px;
+    border:1px solid #4080ff;
+    padding:0 9px;
 }
 
-.nav {
-    list-style-type: none;
-    text-align: center;
+ul.dropdown{
+    font-size:15px;
+    margin:0;
 }
 
-.nav li {
-    padding: 0;
-    margin: 0;
+ul.dropdown ul{
+    margin:0;
+    visibility:hidden;
 }
 
-.nav a {
-    text-decoration: none;
+ul.dropdown, ul.dropdown ul{
+    list-style-type:none;
 }
 
-.nav dt, dd {
-    margin-top: 2px;
-    border: 1px solid #400000;
+ul.dropdown li{
+    height:23px;
+    text-align:center;
+    padding-top:5px;
+    margin-left:0;
+    border:1px solid #ccc;
+    background:url("/public/images/nav1.jpg");
 }
 
-.navInvisable {
-    display: none;
+ul.dropdown a{
+    position:relative;
+    width:100%;
+    text-decoration:none;
+    color:black;
+    display:inline-block;
 }
 
-.navDisplay {
-    display: block;
+ul.dropdown li a:hover{
+    background:url("/public/images/nav_hover.jpg");
+    color:#608040;
+}
+
+ul.dropdown > li{
+    width:24.5%;
+    display:inline-block;
+}
+
+ul.dropdown a{
+    position:relative;
+    top:-3px;
 }
 
 /* Page */
-.page {
-    margin-top: 10px;
-    height: 100%;
+.page{
+    margin-top:10px;
+    height:100%;
 }
 
 /* Footer */
-.footer {
-    margin-top: 10px;
-    background: #600020;
-    text-align: center;
+.footer{
+    margin-top:10px;
+    background:#600020;
+    text-align:center;
+}
+
+/*{{{ buttons */
+
+button{
+    border-width:1px;
+    border-bottom:0.2em solid #666;
+    font-size:1em;
+    padding:0.3em 0.6em;
+    color:#fff;
+    line-height:1;
+    text-shadow:0 0 0.1em #222;
+    cursor:pointer;
+    background-color:#5D689A;
+    -moz-box-shadow:0 0.1em 0.2em rgba(0, 0, 0, 0.5);
+    -moz-border-radius:10.2em;
+
+    -webkit-box-shadow:0 0.1em 0.2em rgba(0, 0, 0, 0.5);
+    -webkit-border-radius:10.2em;
+}
+
+button em{
+    color:yellow;
+    font-style:normal;
+}
+
+/* button.custom */
+button.custom{
+    background:transparent url(/public/images/form/btn/normal.png) 0 0 no-repeat;
+    height:32px;
+    width:99px;
+    border:0;
+    outline:0;
+}
+
+button.custom:hover{
+    background-position:0 -34px;
+}
+
+button.custom:active{
+    background-position:0 -68px;
+}
+
+button.custom span{
+    position:relative;
+    top:-1px;
+}
+
+button.custom.large{
+    background-image:url(/public/images/form/btn/large.png);
+    width:119px;
+}
+
+button.custom.low{
+    background-image:url(/public/images/form/btn/low_small.png);
+    width:75px;
+    height:24px;
+    font-size:11px;
+}
+
+button.low:hover{
+    background-position:0 -26px;
+}
+
+button.low:active{
+    background-position:0 -52px;
+}
+
+button.custom.low.large{
+    background-image:url(/public/images/form/btn/low_large.png);
+    width:115px;
+}
+
+button.custom.low.medium{
+    background-image:url(/public/images/form/btn/low.png);
+    width:94px;
+}
+
+button.custom.low.xlarge{
+    background-image:url(/public/images/form/btn/low_xlarge.png);
+    width:155px;
+}
+
+button.delete{
+    background-image:url(/public/images/form/btn/delete.png);
+    width:94px;
+    height:24px;
+}
+
+button.delete:hover{
+    background-position:0 -26px;
+}
+
+button.delete:active{
+    background-position:0 -52px;
+}
+
+button.custom.low span{
+    top:-2px;
 }
