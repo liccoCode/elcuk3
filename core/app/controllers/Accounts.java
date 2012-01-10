@@ -1,4 +1,4 @@
-package controllers.market;
+package controllers;
 
 import com.alibaba.fastjson.JSON;
 import models.market.Account;
@@ -18,7 +18,7 @@ public class Accounts extends Controller {
 
     public static void c(@Valid Account acc) {
         if(Validation.hasErrors()) {
-            renderJSON(Validation.errors());
+            renderJSON(validation.errorsMap());
         }
         acc.save();
         renderJSON(acc);
@@ -30,7 +30,7 @@ public class Accounts extends Controller {
 
     public static void u(@Valid Account acc) {
         if(Validation.hasErrors()) {
-            renderJSON(Validation.errors());
+            renderJSON(validation.errorsMap());
         }
         if(acc.uniqueName != null && acc.id != null) {
             acc.save();

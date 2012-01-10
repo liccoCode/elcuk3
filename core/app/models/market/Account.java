@@ -120,4 +120,14 @@ public class Account extends Model {
         if(this.type != null && this.username != null)
             this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
     }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "uniqueName='" + uniqueName + '\'' +
+                ", type=" + type +
+                ", username='" + username + '\'' +
+                ", closeable=" + closeable +
+                '}';
+    }
 }

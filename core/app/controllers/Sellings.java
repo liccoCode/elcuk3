@@ -1,4 +1,4 @@
-package controllers.market;
+package controllers;
 
 import com.alibaba.fastjson.JSON;
 import models.market.Listing;

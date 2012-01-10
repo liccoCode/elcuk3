@@ -158,4 +158,19 @@ public class Listing extends Model {
         if(oldListing != null) tobeChangeed.save();
         return tobeChangeed;
     }
+
+    @Override
+    public String toString() {
+        return "Listing{" +
+                "listingId='" + listingId + '\'' +
+                ", title='" + title + '\'' +
+                ", reviews=" + reviews +
+                ", rating=" + rating +
+                ", byWho='" + byWho + '\'' +
+                ", saleRank=" + saleRank +
+                ", displayPrice=" + displayPrice +
+                ", lastUpdateTime=" + lastUpdateTime +
+                ", nextUpdateTime=" + nextUpdateTime +
+                '}';
+    }
 }

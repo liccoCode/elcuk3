@@ -20,7 +20,7 @@ public class Listings extends Controller {
         validation.required(market);
         validation.required(asin);
         if(Validation.hasErrors()) {
-            renderJSON(Validation.errors());
+            renderJSON(validation.errorsMap());
         }
         market = market.toLowerCase();
         StringBuilder url = new StringBuilder("http://www.amazon.");

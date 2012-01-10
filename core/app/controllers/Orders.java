@@ -1,4 +1,4 @@
-package controllers.market;
+package controllers;
 
 import models.market.Orderr;
 import play.mvc.Controller;

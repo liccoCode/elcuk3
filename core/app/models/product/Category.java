@@ -2,10 +2,7 @@ package models.product;
 
 import play.db.jpa.Model;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.List;
 
 /**
@@ -23,6 +20,10 @@ public class Category extends Model {
     @Column(nullable = false, unique = true)
     public String categoryId;
 
+    @Column(nullable = false, unique = true)
     public String name;
+
+    @Lob
+    public String memo;
 
 }

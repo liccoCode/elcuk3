@@ -1,0 +1,49 @@
+.header {
+    margin-top: 10px;
+}
+
+.header div {
+    height: 24px;
+    border: 1px solid #4080ff;
+    padding: 0 9px;
+}
+
+.nav {
+    list-style-type: none;
+    text-align: center;
+}
+
+.nav li {
+    padding: 0;
+    margin: 0;
+}
+
+.nav a {
+    text-decoration: none;
+}
+
+.nav dt, dd {
+    margin-top: 2px;
+    border: 1px solid #400000;
+}
+
+.navInvisable {
+    display: none;
+}
+
+.navDisplay {
+    display: block;
+}
+
+/* Page */
+.page {
+    margin-top: 10px;
+    height: 100%;
+}
+
+/* Footer */
+.footer {
+    margin-top: 10px;
+    background: #600020;
+    text-align: center;
+}
