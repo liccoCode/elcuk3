@@ -1,0 +1,11 @@
+<!-- 利用 Category 生成下拉菜单 -->
+<select name="p.category.categoryId">
+#{list items:_cates, as:'cat'}
+    #{if cat.categoryId == _catId}
+        <option selected value="${cat.categoryId}">${cat.categoryId}:${cat.name}</option>
+    #{/if}
+    #{else }
+        <option value="${cat.categoryId}">${cat.categoryId}:${cat.name}</option>
+    #{/else}
+#{/list}
+</select>

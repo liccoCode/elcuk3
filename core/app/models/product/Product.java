@@ -2,6 +2,7 @@ package models.product;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import exception.FastException;
+import helper.Patterns;
 import models.market.Listing;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -71,5 +72,24 @@ public class Product extends Model {
             }
         }
 
+    }
+
+    /**
+     * 验证这个 SKU 是否合法
+     *
+     * @param sku
+     * @return
+     */
+    public static boolean validSKU(String sku) {
+        //71SNS1-B2PE, 71-SNS1-B2PE
+        if(sku == null || sku.trim().isEmpty()) return false;
+        String[] parts = sku.split("-");
+        if(parts.length == 2) { //做一次兼容
+            String part0 = parts[0].substring(0, 2);
+            parts = new String[]{part0, parts[0].substring(2), parts[1]};
+        }
+        if(parts.length != 3) return false;
+        if(!Patterns.Nub.matcher(parts[0]).matches()) return false;
+        return true;
     }
 }

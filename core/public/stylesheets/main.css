@@ -165,3 +165,80 @@ button.delete:active{
 button.custom.low span{
     top:-2px;
 }
+
+/* 添加元素的表格通用的 */
+.add_form{
+    width:100%;
+}
+
+.add_form .label{
+    padding:4px 4px 0 4px;
+    text-align:right;
+    font-size:12px;
+}
+
+.add_form input[type='text'],
+.add_form textarea{
+    border:1px solid maroon;
+    margin-left:0;
+    margin-right:0;
+}
+
+div.end{
+    height:1px;
+    border:0 none;
+    border-bottom:1px solid #333;
+}
+
+.tb_footer input.page{
+    text-align:left;
+    border:1px dashed black;
+    width:30px;
+}
+
+.tabs{
+    list-style:none;
+    margin:0 !important;
+    padding:0;
+    height:30px;
+    border-bottom:1px solid #666;
+}
+
+.tabs li{
+    float:left;
+    text-indent:0;
+    padding:0;
+    margin:0 !important;
+    list-style-image:none !important;
+}
+
+.tabs a{
+    background:url(/public/images/blue.png) no-repeat -553px 0;
+    font-size:11px;
+    display:block;
+    height:30px;
+    line-height:30px;
+    width:82px;
+    text-align:center;
+    text-decoration:none;
+    color:#000;
+    padding:0;
+    margin:0;
+    position:relative;
+    top:1px;
+}
+
+.tabs a:active{
+    outline:none;
+}
+
+.tabs a:hover{
+    background-position:-553px -31px;
+    color:#fff;
+}
+
+.tabs .current, .tabs .current:hover, .tabs li.current a{
+    background-position:-553px -62px;
+    cursor:default !important;
+    color:#000 !important;
+}

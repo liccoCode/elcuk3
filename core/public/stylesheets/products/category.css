@@ -1,0 +1,85 @@
+.add_cat{
+    background:#fff;
+    display:none;
+    border:2px solid #333;
+    width:350px;
+    padding:15px;
+    opacity:0.9;
+    overflow:auto;
+
+    /*圆角 + 阴影*/
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    -moz-box-shadow:0 0 50px #ccc;
+    -webkit-box-shadow:0 0 50px #ccc;
+}
+
+.add_cat h2{
+    border-bottom:1px solid #333;
+}
+
+.add_cat textarea{
+    width:100%;
+}
+
+.cats_table{
+    border:1px solid gray;
+    border-right:0;
+    border-bottom:0;
+    border-collapse:separate;
+    border-spacing:0;
+    font-size:11px;
+    width:100%;
+}
+
+.cats_table td, .cats_table th{
+    min-height:25px;
+    border-width:0;
+    text-align:center;
+    border-right:1px solid black;
+    border-bottom:1px solid black;
+}
+
+.cats_table td input{
+    position:relative;
+    border:0;
+    width:100%;
+    height:100%;
+    text-align:center;
+}
+
+.cats_table td input:focus{
+    background:#ffffc0;
+}
+
+.cats_table td input[readonly]{
+    cursor:pointer;
+}
+
+.cats_table td.action{
+    width:5%;
+}
+
+.cat_memo div{
+    display:none;
+    text-align:left;
+    padding:5px;
+    border-bottom:1px dashed gray;
+    border-right:1px solid black;
+}
+
+.cat_memo div textarea{
+    position:relative;
+    border:0;
+    width:100%;
+    height:100%;
+    text-align:left;
+}
+
+.cat_memo div textarea:focus{
+    background:#ffffc0;
+}
+
+.cat_memo td{
+    border:0;
+}

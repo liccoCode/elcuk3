@@ -1,21 +1,21 @@
 /*产品模块中的所有 CSS*/
 .proList{
-    background:#ccc;
 }
 
-.func{
+.pfunc{
 }
 
 #prodAll{
 }
 
-.addProduct{
+.add_prod{
     background:#fff;
     display:none;
     border:2px solid #333;
     width:450px;
     padding:15px;
-    opacity:0.7;
+    opacity:0.9;
+    overflow:auto;
 
     /*圆角 + 阴影*/
     -moz-border-radius:6px;
@@ -24,18 +24,8 @@
     -webkit-box-shadow:0 0 50px #ccc;
 }
 
-.addProduct h2{
+.add_prod h2{
     border-bottom:1px solid #333;
-}
-
-#add_prod{
-    overflow:auto;
-}
-
-#add_prod input[type='text']{
-    border:1px solid maroon;
-    margin-left:0;
-    margin-right:0;
 }
 
 #add_prod input[readonly]{
@@ -43,12 +33,6 @@
     border:0 none;
     border-left:1px solid maroon;
     border-top:1px solid maroon;
-}
-
-#add_prod .label{
-    padding:4px 4px 0 4px;
-    text-align:right;
-    font-size:12px;
 }
 
 #add_prod .v1{
@@ -59,8 +43,94 @@
     width:99.5%;
 }
 
-#add_prod div.end{
-    height:1px;
+.itemList{
+}
+
+.prod_table{
+    border:1px solid gray;
+    border-right:0;
+    border-bottom:0;
+    border-collapse:separate;
+    border-spacing:0;
+    font-size:11px;
+    width:100%;
+}
+
+.itemList td, .itemList th{
+    text-align:center;
+    border-right:1px solid black;
+    border-bottom:1px solid black;
+}
+
+.itemList .prodItem td.sku{
+    width:20%;
+}
+
+.itemList .prodItem td.name{
+    width:50%;
+}
+
+/* 产品的信息 */
+.prod{
+}
+
+.prod table{
+    margin-left:10px;
+    position:relative;
+    width:99%;
+}
+
+.prod table td.label{
+    text-align:right;
+    padding:0 10px;
+}
+
+.prod table input{
     border:0 none;
-    border-bottom:1px solid #333;
+    width:97%;
+    padding-left:5px;
+}
+
+.prod table input:focus{
+    background:#FFFFC6;
+}
+
+.prodItem td.p_id{
+    cursor:pointer;
+}
+
+.prodDetail{
+    display:none;
+}
+
+.relateSKU{
+}
+
+.relateSKU > div{
+    display:inline-block;
+    float:left;
+}
+
+.relateSKU div.skus{
+    display:block;
+    float:none;
+    clear:both;
+    border-top:1px dashed black;
+}
+
+.relateSKU div.label{
+    border-right:1px dashed black;
+    width:19.9%;
+}
+
+.relateSKU div.input{
+    width:80%;
+}
+
+div.panes{
+    border-bottom:1px solid red;
+}
+
+div.panes button{
+    float:left;
 }

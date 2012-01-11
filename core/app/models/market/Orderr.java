@@ -2,6 +2,7 @@ package models.market;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
+import helper.Patterns;
 import models.finance.SaleFee;
 import models.product.Product;
 import play.Logger;
@@ -14,7 +15,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * 系统内的核心订单
@@ -203,7 +203,6 @@ public class Orderr extends Model {
     public String memo;
 
     // -------------------------
-    private static final Pattern A2Z = Pattern.compile("[a-zA-Z]*");
 
     public static List<Orderr> parseALLOrderXML(File file) {
         AmazonEnvelopeType envelopeType = JAXB.unmarshal(file, AmazonEnvelopeType.class);
@@ -212,7 +211,7 @@ public class Orderr extends Model {
             OrderType odt = message.getOrder();
 
             String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
-            if(amazonOrderId.startsWith("S02") || A2Z.matcher(amazonOrderId).matches()) {
+            if(amazonOrderId.startsWith("S02") || Patterns.A2Z.matcher(amazonOrderId).matches()) {
                 Logger.info("OrderId {} Can Not Be Add to Normal Order", amazonOrderId);
                 continue;
             }

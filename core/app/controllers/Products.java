@@ -31,13 +31,12 @@ public class Products extends Controller {
 
     public static void c_index(Integer p, Integer s) {
         if(p == null || p < 0) p = 1; // 判断在页码
-        if(s == null || s < 10 || s > 100) s = 20; // 判断显示的条数控制
+        if(s == null || s < 1 || s > 100) s = 20; // 判断显示的条数控制
         List<Category> cates = Category.all().fetch(p, s);
-        render(cates);
+        Long count = Category.count();
+        render(cates, count, p, s);
     }
 
-
-    // ---------- 等到页面编写完成后将下面删除
 
     /**
      * 创建一个 Product; 仅仅是单独的创建一个 Product,
@@ -49,11 +48,22 @@ public class Products extends Controller {
         if(Validation.hasErrors()) {
             renderJSON(validation.errorsMap());
         }
-        if(p.category == null || Category.find("categoryId=?", p.category.categoryId).first() == null) {
+        Category cat = Category.find("categoryId=?", p.category.categoryId).first();
+        if(p.category == null || cat == null)
             renderJSON(new Error("categoryId", "no match category", new String[]{}));
-        }
+        if(!Product.validSKU(p.sku))
+            renderJSON(new Error("sku", "Not valid SKU format", new String[]{}));
+        p.category = cat;
         p.save();
-        renderJSON(p);
+        renderJSON(JSON.toJSONString(p));
+    }
+
+    public static void c_create(@Valid Category c) {
+        if(Validation.hasErrors()) {
+            renderJSON(validation.errorsMap());
+        }
+        c.save();
+        renderJSON(c);
     }
 
     public static void u(Product p) {

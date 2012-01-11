@@ -1,3 +1,81 @@
 #{extends 'main.html'/}
 #{set title:'Category' /}
+#{set 'moreStyles'}
+    #{stylesheet 'products/category.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'products/category.js'/}
+#{/set}
+<div class="catList">
+    <div class="cfunc">
+        <div class="grid_12">
+            <input type="checkbox" id='prodAll'/>
+            <label for="prodAll">
+                <button>全选</button>
+            </label> |
+            <button class="prodInput" rel='#add_cat'>添加类别</button>
+        </div>
 
+        <div id="add_cat" class="add_cat">
+            <h2>添加一个新的 Category</h2>
+        #{form @Products.c_create(), id:'add_cat_form'}
+            <table class="add_form">
+                <tr>
+                    <td class="label"><label for="c.categoryId">CategoryId</label></td>
+                    <td><input type="text" id="c.categoryId" name="c.categoryId"></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="c.name">Name</label></td>
+                    <td><input type="text" id="c.name" name="c.name"></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="c.memo">Memo</label></td>
+                    <td><textarea rows="5" id='c.memo' name="c.memo"></textarea></td>
+                </tr>
+            </table>
+            <button type="button" class="close">关闭</button>
+            <button type="reset">重置</button>
+        #{/form}
+            <button id='addCategoryBtn'>创建</button>
+        </div>
+    </div>
+    <div class="cList">
+    #{if cates.size() == 0}
+        等待添加新类别
+    #{/if}
+    #{else }
+        <table class="cats_table">
+            <tr>
+                <th>Id</th>
+                <th>CategoryId</th>
+                <th>Name</th>
+                <th>&nbsp;</th>
+            </tr>
+            #{list items:cates, as:'cat'}
+                <tr class="cat_info cat_${cat_parity}" id='cat_${cat.id}'>
+                    <td><input readonly type='text' name="c.id" value="${cat.id}"></td>
+                    <td><input type='text' name="c.categoryId" value="${cat.categoryId}"></td>
+                    <td><input type='text' name="c.name" value="${cat.name}"></td>
+                    <td class="action"><a rel='#add_cat' href="#" catid='${cat.id}'><img
+                            src='/public/images/table/save.png'></a></td>
+                </tr>
+                <tr class="cat_memo" id='cat_memo_${cat.id}'>
+                    <td colspan="4">
+                        <div>
+                            <textarea rows="5" name="c.memo">${cat.memo.empty ? '没有信息' : cat.memo}</textarea>
+                        </div>
+                    </td>
+                </tr>
+            #{/list}
+            <tr class="tb_footer">
+                <td colspan="4">
+                    <div>
+                        总共 ${count} 条记录,  ${p} / ${(count / s) < 1 ? 1 : (count / s).toInteger()} 页
+                        跳到 <input type="text" class="page" psize="${s}" name="page"> 页
+                    </div>
+                </td>
+            </tr>
+        </table>
+    #{/else}
+    </div>
+</div>
