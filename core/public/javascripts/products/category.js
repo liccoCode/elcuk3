@@ -58,6 +58,7 @@ $(function() {
         var params = {};
         var valClosure = function(i, d) {
             var o = $(d);
+            if(!o.attr('name')) return;
             params[o.attr('name')] = o.val();
         };
         $('#cat_' + catid + " :input").map(valClosure);
@@ -66,6 +67,7 @@ $(function() {
         return false;
     });
 
+    // 分页 input 框
     $('input.page').keyup(function(e) {
         if(e.keyCode != 13) return false;
         var o = $(this);

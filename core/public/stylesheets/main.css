@@ -11,11 +11,13 @@
 ul.dropdown{
     font-size:15px;
     margin:0;
+    z-index:99;
 }
 
 ul.dropdown ul{
     margin:0;
     visibility:hidden;
+    z-index:99;
 }
 
 ul.dropdown, ul.dropdown ul{
@@ -23,6 +25,7 @@ ul.dropdown, ul.dropdown ul{
 }
 
 ul.dropdown li{
+    z-index:99;
     height:23px;
     text-align:center;
     padding-top:5px;
@@ -32,24 +35,28 @@ ul.dropdown li{
 }
 
 ul.dropdown a{
+    z-index:99;
+    color:#8020c0;
     position:relative;
     width:100%;
     text-decoration:none;
-    color:black;
     display:inline-block;
 }
 
 ul.dropdown li a:hover{
+    z-index:99;
     background:url("/public/images/nav_hover.jpg");
     color:#608040;
 }
 
 ul.dropdown > li{
+    z-index:99;
     width:24.5%;
     display:inline-block;
 }
 
 ul.dropdown a{
+    z-index:99;
     position:relative;
     top:-3px;
 }
@@ -164,6 +171,28 @@ button.delete:active{
 
 button.custom.low span{
     top:-2px;
+}
+
+/* 通用的弹出(添加Product,Category,Whouse)对话框 */
+.add_dialog{
+    background:#fff;
+    display:none;
+    border:2px solid #333;
+    width:350px;
+    height:400px;
+    padding:15px;
+    opacity:0.9;
+    overflow:auto;
+
+    /*圆角 + 阴影*/
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    -moz-box-shadow:0 0 50px #ccc;
+    -webkit-box-shadow:0 0 50px #ccc;
+}
+
+.add_dialog h2{
+    border-bottom:1px solid #333;
 }
 
 /* 添加元素的表格通用的 */

@@ -1,23 +1,3 @@
-.add_cat{
-    background:#fff;
-    display:none;
-    border:2px solid #333;
-    width:350px;
-    padding:15px;
-    opacity:0.9;
-    overflow:auto;
-
-    /*圆角 + 阴影*/
-    -moz-border-radius:6px;
-    -webkit-border-radius:6px;
-    -moz-box-shadow:0 0 50px #ccc;
-    -webkit-box-shadow:0 0 50px #ccc;
-}
-
-.add_cat h2{
-    border-bottom:1px solid #333;
-}
-
 .add_cat textarea{
     width:100%;
 }
