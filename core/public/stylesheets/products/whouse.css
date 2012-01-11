@@ -1,0 +1,40 @@
+.whs_table{
+    width:100%;
+    border:0 none;
+    border-top:1px solid black;
+    border-left:1px solid black;
+}
+
+.whs_table th, .whs_table td{
+    border:0 none;
+    text-align:center;
+    border-right:1px solid black;
+    border-bottom:1px solid black;
+}
+
+.whs_table .wh_memo{
+    display:none;
+}
+
+.whs_table input{
+    border:0;
+    width:99%;
+    text-align:center;
+}
+
+.whs_table input:focus{
+    background:#ffffc0;
+}
+
+.whs_table textarea{
+    border:0 none;
+    width:99%;
+}
+
+.whs_table textarea:focus{
+    background:#ffffc0;
+}
+
+.whs_table input[readonly] {
+    cursor:pointer;
+}

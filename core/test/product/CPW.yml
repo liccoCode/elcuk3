@@ -1,0 +1,20 @@
+product.Category(c1):
+  categoryId: 90
+  name: 电池
+  memo: 电池的 memo
+
+product.Product(10HTCG14-1900S):
+  sku: 10HTCG14-1900S
+  productName: SANER® 1900mAh rechargeable Li-ion Battery for HTC Sensation - Extra Long Lif...
+  category: c1
+
+product.Product(71ACA500-B2PE):
+  sku: 71ACA500-B2PE
+  productName: EasyAcc Black Leather Protective Case Cover and Flip Stand for Acer iconia ta...
+  category: c1
+
+product.Product(15SSI9100-MR2SP):
+  sku: 15SSI9100-MR2SP
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone -...
+  category: c1
+

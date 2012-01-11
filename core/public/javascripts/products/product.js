@@ -8,7 +8,7 @@ $(function() {
     });
     $('.prod_table .prodItem').map(function(d) {
         var o = $(this);
-        o.children('td:eq(0)').toggle(function() {
+        o.toggle(function() {
             o.next().fadeIn(500);
         }, function() {
             o.next().fadeOut(500);
@@ -37,7 +37,7 @@ $(function() {
                 }
             },
             error:function(xhr, sta, err) {
-                alert(err)
+                alert(err);
             }
         });
         return false;

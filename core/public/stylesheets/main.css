@@ -63,6 +63,7 @@ ul.dropdown a{
 
 /* Page */
 .page{
+    z-index:0;
     margin-top:10px;
     height:100%;
 }
@@ -175,6 +176,7 @@ button.custom.low span{
 
 /* 通用的弹出(添加Product,Category,Whouse)对话框 */
 .add_dialog{
+    z-index:999;
     background:#fff;
     display:none;
     border:2px solid #333;

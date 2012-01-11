@@ -95,7 +95,7 @@
     background:#FFFFC6;
 }
 
-.prodItem td.p_id{
+.prodItem {
     cursor:pointer;
 }
 

@@ -70,17 +70,17 @@
                 <th>Country</th>
             </tr>
             #{list items:whs, as:'wh'}
-                <tr class="cat_info cat_${wh_parity}" id='cat_${wh.id}'>
+                <tr class="cat_info cat_${wh_parity}" id='wh_${wh.id}'>
                     <td><input readonly type='text' name="w.id" value="${wh.id}"></td>
                     <td><input type='text' name="w.name" value="${wh.name}"></td>
                     <td><input type='text' name="c.city" value="${wh.city}"></td>
                     <td><input type='text' name="c.province" value="${wh.province}"></td>
                     <td><input type='text' name="c.postalCode" value="${wh.postalCode}"></td>
-                    <td class="action"><a rel='#add_cat' href="#" catid='${wh.id}'><img
+                    <td class="action"><a href="javascript:;" whid='${wh.id}'><img
                             src='/public/images/table/save.png'></a></td>
                 </tr>
                 <tr class="wh_memo" id='wh_memo_${wh.id}'>
-                    <td colspan="4">
+                    <td colspan="6">
                         <div>
                             <textarea rows="5" name="w.memo">${wh.memo.empty ? '没有信息' : wh.memo}</textarea>
                         </div>
@@ -88,7 +88,7 @@
                 </tr>
             #{/list}
             <tr class="tb_footer">
-                <td colspan="4">
+                <td colspan="6">
                     <div>
                         总共 ${count} 条记录,  ${p} / ${(count / s) < 1 ? 1 : (count / s).toInteger()} 页
                         跳到 <input type="text" class="page" psize="${s}" name="page"> 页
