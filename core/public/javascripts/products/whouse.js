@@ -12,6 +12,14 @@ $(function(){
         });
     });
 
+    $('.wh_memo textarea').each(function(i){
+        if(i % 2 == 0){
+            $(this).tooltip({position:'center left', offset:[0, -10], tipClass:'tooltip_form'});
+        }else{
+            $(this).tooltip({position:'center right', offset:[5, 10], tipClass:'tooltip_form'});
+        }
+    });
+
     $('.whs_table .cat_info a[whid]').map(function(){
         var o = $(this);
         var whid = o.attr("whid");

@@ -10,9 +10,10 @@ import play.test.UnitTest;
  * Date: 1/11/12
  * Time: 5:10 PM
  */
-public class CPWSetUp extends UnitTest{
+public class CPWSetUp extends UnitTest {
     @Test
     public void setup() {
+        Fixtures.deleteDatabase();
         Fixtures.loadModels("product/CPW.yml");
     }
 }

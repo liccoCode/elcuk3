@@ -80,9 +80,15 @@
                             src='/public/images/table/save.png'></a></td>
                 </tr>
                 <tr class="wh_memo" id='wh_memo_${wh.id}'>
-                    <td colspan="6">
+                    <td colspan="2">
                         <div>
-                            <textarea rows="5" name="w.memo">${wh.memo.empty ? '没有信息' : wh.memo}</textarea>
+                            <textarea title="Address" rows="5"
+                                      name="w.address">${wh.address.empty ? '没有信息' : wh.address}</textarea>
+                        </div>
+                    </td>
+                    <td colspan="4">
+                        <div>
+                            <textarea title="Memo" rows="5" name="w.memo">${wh.memo.empty ? '没有信息' : wh.memo}</textarea>
                         </div>
                     </td>
                 </tr>

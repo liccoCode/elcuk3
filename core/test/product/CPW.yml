@@ -18,3 +18,24 @@ product.Product(15SSI9100-MR2SP):
   productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone -...
   category: c1
 
+
+product.Whouse(w1):
+  name: FBA_UK
+  city: Longdon
+  province: unknow
+  postalCode: DI83D
+  country: UK
+#  address: >
+#  dkfjdkjkdf
+  memo: No memo
+
+product.Whouse(w2):
+  name: FBA_DE
+  city: Longdon
+  province: unknow
+  postalCode: P92DH
+  country: DE
+#  address: >
+#  dkfjdkjkdf
+  memo: 法国 FBA 的城市是错误的...
+
