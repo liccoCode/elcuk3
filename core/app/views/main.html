@@ -10,20 +10,9 @@
 #{stylesheet 'main.css'/}
 #{get 'moreStyles' /}
     <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
-#{script src:'jquery.tools.min.js'/}
+#{script 'jquery.tools.min.js'/}
+#{script 'main.js'/}
 #{get 'moreScripts' /}
-    <script type="text/javascript">
-        $(function() { //初始化 Menu
-            $("ul.dropdown li").hover(function() {
-                $(this).addClass("hover");
-                $('ul:first', this).css('visibility', 'visible');
-            }, function() {
-                $(this).removeClass("hover");
-                $('ul:first', this).css('visibility', 'hidden');
-            });
-            $("ul.dropdown li ul li:has(ul)").find("a:first").append(" &raquo; ");
-        });
-    </script>
 </head>
 <body>
 <div class="container_12 header">

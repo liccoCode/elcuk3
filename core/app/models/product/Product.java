@@ -1,11 +1,11 @@
 package models.product;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import exception.FastException;
 import helper.Patterns;
 import models.market.Listing;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.List;
@@ -64,11 +64,11 @@ public class Product extends Model {
     @PreRemove
     public void checkDelete() {
         if(this.listings != null && this.listings.size() > 0) {
-            throw new FastException("Product [" + this.sku + "] have relate Listing, cannot be delete.");
+            throw new FastRuntimeException("Product [" + this.sku + "] have relate Listing, cannot be delete.");
         }
         for(ProductQTY qty : this.qtys) {
             if(qty.pending + qty.unsellable + qty.qty > 0) {
-                throw new FastException("Product [" + this.sku + "] hava quantity, cannot be delete.");
+                throw new FastRuntimeException("Product [" + this.sku + "] hava quantity, cannot be delete.");
             }
         }
 

@@ -1,9 +1,11 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
+import exception.VErrorRuntimeException;
 import helper.Pagers;
 import models.product.Category;
 import models.product.Product;
+import models.product.ProductQTY;
 import models.product.Whouse;
 import play.data.validation.Error;
 import play.data.validation.Valid;
@@ -27,8 +29,9 @@ public class Products extends Controller {
         Pagers.fixPage(p, s);
         List<Category> cates = Category.all().fetch();
         List<Product> prods = Product.all().fetch(p, s);
+        List<Whouse> whs = Whouse.all().fetch();
         Long count = Product.count();
-        render(prods, cates, count, p, s);
+        render(prods, cates, count, p, s, whs);
     }
 
     public static void c_index(Integer p, Integer s) {
@@ -53,7 +56,7 @@ public class Products extends Controller {
         }
         Category cat = Category.find("categoryId=?", p.category.categoryId).first();
         if(p.category == null || cat == null)
-            renderJSON(new Error("categoryId", "no match category", new String[]{}));
+            renderJSON(new Error("categoryId", "No matched category", new String[]{}));
         if(!Product.validSKU(p.sku))
             renderJSON(new Error("sku", "Not valid SKU format", new String[]{}));
         p.category = cat;
@@ -77,23 +80,16 @@ public class Products extends Controller {
         renderJSON(w);
     }
 
-
-    public static void u(Product p) {
-        validation.required(p.id);
-        validation.required(p.sku);
-        renderJSON(p.save());
+    public static void pt_create(ProductQTY pt) {
+        validation.required(pt.qty);
+        if(Validation.hasErrors()) {
+            renderJSON(validation.errorsMap());
+        }
+        try {
+            pt.saveAndUpdate();
+        } catch(VErrorRuntimeException e) {
+            renderJSON(e.getError());
+        }
+        renderJSON("{\"flag\":\"true\"}");
     }
-
-    public static void r(String sku) {
-        validation.required(sku);
-        Product prod = Product.find("sku=?", sku).first();
-        renderJSON(JSON.toJSONString(prod));
-    }
-
-    public static void d(String sku) {
-        validation.required(sku);
-        Product prod = Product.find("sku=?", sku).first();
-        renderJSON(JSON.toJSONString(prod.delete()));
-    }
-
 }

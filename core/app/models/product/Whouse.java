@@ -1,9 +1,9 @@
 package models.product;
 
-import exception.FastException;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.List;
@@ -63,7 +63,7 @@ public class Whouse extends Model {
             for(ProductQTY qty : this.qtys) {
                 if(qty.qty + qty.pending + qty.unsellable > 0) {
                     Logger.warn("Unexpect operation.");
-                    throw new FastException("Ops, warehouse " + this.name + " have product quantity, so cannot be remove.");
+                    throw new FastRuntimeException("Ops, warehouse " + this.name + " have product quantity, so cannot be remove.");
                 }
             }
         }

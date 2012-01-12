@@ -202,6 +202,15 @@ button.custom.low span{
     width:100%;
 }
 
+table.add_form{
+    border:0 none;
+}
+
+table.add_form th,
+table.add_form td{
+    border:0 none;
+}
+
 .add_form .label{
     padding:4px 4px 0 4px;
     text-align:right;
@@ -289,4 +298,8 @@ div.end{
     -moz-box-shadow:0 0 10px #000;
     -webkit-box-shadow:0 0 10px #000;
 
+}
+
+.float_left{
+    float:left;
 }
