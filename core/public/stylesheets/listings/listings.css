@@ -1,0 +1,136 @@
+.page > div{
+    height:96%;
+    overflow:auto;
+}
+
+#l_list_btns{
+    height:4%;
+    overflow:hidden;
+    background:#F4F4F4;
+    margin-bottom:5px;
+}
+#l_list_btns > button{
+    position:relative;
+    font-size:11px;
+    top:25%;
+    height:50%;
+    text-align:center;
+    margin:0 5px;
+}
+
+ul, li{
+    list-style-type:none;
+    margin-left:3px;
+}
+
+/* 最左侧的 Category And Product 的导航栏*/
+#l_CatAndProd{
+    background:#F4F4F4;
+}
+
+#cat_prod_list ul{
+    display:none;
+}
+
+#cat_prod_list .sub_prod a{
+    /*Category 级别*/
+    color:#004B91;
+}
+
+#cat_prod_list .sub_prod a:focus{
+    border:1px dashed orange;
+}
+
+#l_CatAndProd li{
+    position:relative;
+    width:90%;
+    float:left;
+}
+
+#l_CatAndProd li a{
+    color:black;
+    text-decoration:none;
+}
+
+#l_CatAndProd li a:hover{
+    color:#FFFFC0;
+}
+
+.sub_prod_hover{
+    display:block;
+}
+
+/* ------------------- ------------------------*/
+
+#l_ListAndSell{
+    background:#F4F4F4;
+}
+
+.l_List_table{
+    width:100%;
+    border:1px solid #004B91;
+}
+
+.l_List_table th,td{
+    border-left:1px solid #004B91;
+    border-bottom:1px solid #004B91;
+    font-size:11px;
+    text-align:center;
+}
+.l_List_table td{
+    font-size:10px;
+    padding:2px;
+    text-align:center;
+}
+
+.l_List_table_item{
+    cursor:pointer;
+}
+.l_List_table_item:hover{
+    background:#E8D1A3;
+}
+
+/* ------------------------------------------------- */
+
+#l_ListAndSell > div{
+    height:47%;
+    width:100%;
+    float:left;
+}
+
+#l_Details{
+    background:#F4F4F4;
+}
+
+/* --------------------------------------------------- */
+.l_tabs{
+    margin:0;
+}
+.l_tabs li{
+    margin:0 5px 0 0;
+    padding:0;
+    background:#B1C6D8;
+    position:relative;
+    float:left;
+}
+.l_tabs li a{
+    padding:5px 5px 5px 5px;
+    display:block;
+    position:relative;
+    height:100%;
+    color:black;
+    text-decoration:none;
+}
+.l_tabs li:hover{
+    background:#004B91;
+}
+.l_panels{
+    border-top:1px solid black;
+    clear:both;
+}
+.l_current{
+    background:#004B91;
+}
+.l_checked{
+    background:#F3E378;
+}

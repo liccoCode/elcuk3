@@ -1,0 +1,52 @@
+#{extends 'main.html'/}
+#{set title:'Listing'/}
+#{set 'moreStyles'}
+    #{stylesheet 'listings/listings.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'listings/listings.js'/}
+#{/set}
+<div class="grid_12" id="l_list_btns">
+    <button title="根据选定的 Product, 去抓取一个 Listing" id='craw_listing_btn'>Craw</button>
+</div>
+<div class="grid_2" id="l_CatAndProd">
+    <ul id="cat_prod_list">
+    #{list items:cats, as:'cat'}
+        <li>
+            <a class="l_cat" id="cat_${cat.id}" title="${cat.memo}" href="javascript:;">${cat.categoryId}
+                :${cat.name}</a>
+            <ul class="sub_prod">
+                #{if cat.products.size() == 0}
+                    <li><a href="javascript:;"><span style="color:gray;">没有 Product</span></a></li>
+                #{/if}
+                #{else }
+                    #{list items:cat.products, as:'prod'}
+                        <li>
+                            <a href="javascript:;" class="l_prod" id='pord_${prod.sku}'
+                               title="${prod.productName}">${prod.sku}</a>
+                        </li>
+                    #{/list}
+                #{/else}
+            </ul>
+        </li>
+    #{/list}
+    </ul>
+</div>
+<div class="grid_4" id="l_ListAndSell">
+    <div id="l_List">请选择 Product</div>
+    <hr style="height:2px;margin-bottom:5px;">
+    <div id="l_Sell">请选择 Listing</div>
+</div>
+<div class="grid_6" id="l_Details">
+    <ul class="l_tabs">
+        <li><a href="#">Product</a></li>
+        <li><a href="#">Listing</a></li>
+        <li><a href="#">Selling</a></li>
+    </ul>
+    <div class="l_panels">
+        <div id="prod">Product 信息</div>
+        <div id="listing">Listing 信息</div>
+        <div id="selling">Selling 信息</div>
+    </div>
+</div>
+
