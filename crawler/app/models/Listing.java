@@ -1,6 +1,7 @@
 package models;
 
 import helper.Extra;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -60,6 +61,8 @@ public class Listing {
 
     public int totalOffers;
 
+    public String picUrls;
+
     public List<ListingOffer> offers;
 
     /**
@@ -87,6 +90,15 @@ public class Listing {
 
         this.asin = root.select("#ASIN").val().toUpperCase();
         this.listingId = String.format("%s_%s", this.asin, root.select("#navLogoPrimary > span").text());
+//        Elements images = root.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
+        Element img = root.select("#prodImage").first();
+        if(img != null) {
+            //http://ecx.images-amazon.com/images/I/41p1LIEYgYL._SL75_AA30_.jpg
+            //http://ecx.images-amazon.com/images/I/41p1LIEYgYL._SL500_AA300_.jpg
+            this.picUrls = StringUtils.splitByWholeSeparator(img.attr("src"), "._")[0] + "._SL500_AA300_.jpg";
+        } else {
+            this.picUrls = "";
+        }
 
         // Basic Listing Infos
         Element titleEl = root.select("#btAsinTitle").first();
