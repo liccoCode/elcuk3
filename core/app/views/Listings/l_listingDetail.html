@@ -1,3 +1,73 @@
 <div>
-    ${lst.listingId}
+    <div class="grid_6 alpha omega">
+        <button id="l_sale">上架</button>
+        <button id="l_recrawl">重新抓取</button>
+    </div>
+    <div class="grid_6 alpha omega">
+        <div class="l_list_basic">
+            <div>
+                <span class="l_label">ListingId:</span>
+                <span class="l_val">${lst.listingId}</span>
+                <span class="l_label">RS:</span>
+                <span class="l_val">${lst.reviews}</span>
+                <span class="l_label">RT:</span>
+                <span class="l_val">${lst.rating}</span>
+            </div>
+            <div>
+                <span class="l_label">ASIN:</span>
+                <span class="l_val">${lst.asin}</span>
+                <span class="l_label">Market:</span>
+                <span class="l_val">${lst.market}</span>
+                <span class="l_label">SaleRank:</span>
+                <span class="l_val" title="仅供参考">${lst.saleRank}</span>
+            </div>
+            <div>
+                <span class="l_label">Title:</span>
+                <span style="width:80%;" class="l_val">${lst.title}</span>
+            </div>
+        </div>
+        <div class="l_list_img"><img src="${lst.picUrls} " title="${lst.title}"></div>
+        <div class="l_list_html">
+            <span>${lst.technicalDetails.raw()}</span>
+            <span>${lst.productDescription.raw()}</span>
+        </div>
+        <div class="l_list_offers">
+            <ul>
+            #{list items:lst.offers, as:'offer'}
+                <li>
+                    <div class="l_list_offer">
+                        <span class="l_label">Name:</span>
+                        <span class="l_val">${offer.name}</span>
+                        <span class="l_label">OfferId:</span>
+                        <span class="l_val">${offer.offerId ? offer.offerId : "&nbsp;".raw()}</span>
+                        <span class="l_label">Price:</span>
+                        <span class="l_val">${offer.price}</span>
+                        <span class="l_label">Shipping:</span>
+                        <span class="l_val">${offer.shipprice}</span>
+                        <span class="l_label">FBA:</span>
+                        #{if offer.fba}
+                            <span class="l_val" style="color:green;">${offer.fba}</span>
+                        #{/if}
+                        #{else }
+                            <span class="l_val">${offer.fba}</span>
+                        #{/else}
+                        <span class="l_label">BuyBox:</span>
+                        #{if offer.buybox}
+                            <span class="l_val" style="color:green">${offer.buybox}</span>
+                        #{/if}
+                        #{else }
+                            <span class="l_val">${offer.buybox}</span>
+                        #{/else}
+                        <div class="clear"></div>
+                    </div>
+                </li>
+            #{/list}
+            </ul>
+        </div>
+    </div>
 </div>
+<script type="text/javascript">
+    $('#l_recrawl').click(function(){
+        alert("还未实现!" + $.HASH.val());
+    });
+</script>

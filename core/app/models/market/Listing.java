@@ -101,6 +101,24 @@ public class Listing extends Model {
         this.listingId = String.format("%s_%s", this.asin, this.market.toString());
     }
 
+
+    /**
+     * 从所有 ListingOffer 中查找自己
+     *
+     * @return
+     */
+    public ListingOffer easyacceu() {
+        if(this.offers == null) return null;
+        for(ListingOffer offer : this.offers) {
+            if("easyacceu".equals(offer.name.toLowerCase()) ||
+                    "easyacc".equals(offer.name.toLowerCase()) ||
+                    "easyacc.eu@gmail.com".equals(offer.name.toLowerCase())) {
+                return offer;
+            }
+        }
+        return null;
+    }
+
     /**
      * 返回可以访问具体网站的链接
      *

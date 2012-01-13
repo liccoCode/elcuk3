@@ -1,11 +1,12 @@
+#{if prod == null}
+SKU 错误
+#{/if}
+#{elseif prod.listings.size() <= 0}
+没有关联的 Listing
+#{/elseif}
+#{else }
 <div id='list_middle'>
     <table class="l_List_table">
-    #{if prod == null}
-        <tr>
-            <td>产品的 SKU 错误, 无法加载</td>
-        </tr>
-    #{/if}
-    #{else }
         <tr>
             <th>Asin</th>
             <th>M</th>
@@ -14,7 +15,7 @@
             <th>By</th>
         </tr>
         #{list items:prod.listings, as:'lst'}
-            <tr class="l_List_table_item" id="listing_${lst.listingId}" title="${lst.title}">
+            <tr class="l_List_table_item" lid="listing_${lst.listingId}" title="${lst.title}">
                 <td><a target="_blank" href="${lst.link()}">${lst.asin}</a></td>
                 <td>${lst.market.name()}</td>
                 <td>${lst.reviews}</td>
@@ -22,27 +23,21 @@
                 <td>${lst.byWho}</td>
             </tr>
         #{/list}
-    #{/else}
     </table>
 </div>
 
 <script type="text/javascript">
     $('.l_List_table_item').click(function(){
-        var lid = $(this).addClass('l_checked').attr('id').substr(8); //切割掉前面的 listing_ 前缀
-        $("#listing_" + $.HASH['listing']).removeClass('l_checked');
+        var lid = $(this).addClass('l_checked').attr('lid').substr(8); //切割掉前面的 listing_ 前缀
+        $("tr[lid='listing_" + $.HASH['listing'] + "']").removeClass('l_checked');
         $.HASH['listing'] = lid;
         window.location.hash = $.HASH.val();
         // listing
-        var listingDiv = $('#listing');
-        if(listingDiv.html() != 'Listing 信息') {
-           $('.l_tabs a:eq(1)').click();
-            return false;
-        }
         $.get('/listings/l_listingDetail', {lid:lid}, function(data){
-            listingDiv.html(data);
+            $('#listing').html(data);
             $('.l_tabs a:eq(1)').click();
         });
         return false;
     });
 </script>
-
+#{/else}

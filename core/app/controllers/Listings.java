@@ -1,10 +1,10 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import com.google.gson.JsonElement;
 import models.Server;
 import models.market.Account;
 import models.market.Listing;
+import models.market.ListingOffer;
 import models.product.Category;
 import models.product.Product;
 import play.Logger;
@@ -68,7 +68,10 @@ public class Listings extends Controller {
         Listing tobeSave = Listing.parseListingFromCrawl(listing);
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
-        renderJSON(JSON.toJSONString(tobeSave));
+
+        tobeSave.product = null;
+        for(ListingOffer of : tobeSave.offers) of.listing = null;
+        renderJSON(tobeSave);
     }
 
     /**

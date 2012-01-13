@@ -9,6 +9,7 @@
     background:#F4F4F4;
     margin-bottom:5px;
 }
+
 #l_list_btns > button{
     position:relative;
     font-size:11px;
@@ -71,12 +72,13 @@ ul, li{
     border:1px solid #004B91;
 }
 
-.l_List_table th,td{
+.l_List_table th, td{
     border-left:1px solid #004B91;
     border-bottom:1px solid #004B91;
     font-size:11px;
     text-align:center;
 }
+
 .l_List_table td{
     font-size:10px;
     padding:2px;
@@ -86,6 +88,7 @@ ul, li{
 .l_List_table_item{
     cursor:pointer;
 }
+
 .l_List_table_item:hover{
     background:#E8D1A3;
 }
@@ -102,10 +105,66 @@ ul, li{
     background:#F4F4F4;
 }
 
+.l_list_basic{
+    /*Listing详细信息*/
+}
+
+.l_list_basic > div{
+    position:relative;
+    width:100%;
+}
+
+.l_list_basic span{
+    display:block;
+    float:left;
+}
+
+.l_list_basic .l_label{
+    width:5em;
+    color:#004B91;
+    /*border-right:1px dashed orange;*/
+    text-align:center;
+    padding:0 2px;
+}
+
+.l_list_basic .l_val{
+    border-bottom:1px dashed orange;
+}
+
+.l_list_img{
+    padding:0 15%;
+}
+
+.l_list_html span{
+    display:block;
+    padding:5px;
+}
+
+.l_list_offer{
+    border-left:2px solid orange;
+    margin-top:.5em;
+    padding-left:.7em;
+}
+
+.l_list_offer .l_label{
+    text-align:left;
+}
+
+.l_list_offer .l_val{
+    text-align:left;
+}
+
+.l_list_offer span{
+    width:23%;
+    display:block;
+    float:left;
+}
+
 /* --------------------------------------------------- */
 .l_tabs{
     margin:0;
 }
+
 .l_tabs li{
     margin:0 5px 0 0;
     padding:0;
@@ -113,6 +172,7 @@ ul, li{
     position:relative;
     float:left;
 }
+
 .l_tabs li a{
     padding:5px 5px 5px 5px;
     display:block;
@@ -121,16 +181,20 @@ ul, li{
     color:black;
     text-decoration:none;
 }
+
 .l_tabs li:hover{
     background:#004B91;
 }
+
 .l_panels{
     border-top:1px solid black;
     clear:both;
 }
+
 .l_current{
     background:#004B91;
 }
+
 .l_checked{
     background:#F3E378;
 }
