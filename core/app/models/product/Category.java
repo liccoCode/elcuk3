@@ -15,6 +15,7 @@ import java.util.List;
 public class Category extends Model {
 
     @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+    @OrderBy("sku")
     public List<Product> products;
 
     @Column(nullable = false, unique = true)

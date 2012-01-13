@@ -1,22 +1,39 @@
-product.Category(c1):
+product.Category(90):
   categoryId: 90
   name: 电池
   memo: 电池的 memo
 
+product.Category(10):
+  categoryId: 10
+  name: 手机电池
+  memo: 手机电池的 memo
+
+product.Category(71):
+  categoryId: 71
+  name: 平板电脑皮套
+  memo: 平板电脑的皮套 memo
+
+product.Category(15):
+  categoryId: 15
+  name: 手机保护壳
+  memo: 手机保护壳的 memo
+
+# -------------------------------------------------------------------------
+
 product.Product(10HTCG14-1900S):
   sku: 10HTCG14-1900S
   productName: SANER® 1900mAh rechargeable Li-ion Battery for HTC Sensation - Extra Long Lif...
-  category: c1
+  category: 10
 
 product.Product(71ACA500-B2PE):
   sku: 71ACA500-B2PE
   productName: EasyAcc Black Leather Protective Case Cover and Flip Stand for Acer iconia ta...
-  category: c1
+  category: 71
 
 product.Product(15SSI9100-MR2SP):
   sku: 15SSI9100-MR2SP
   productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone -...
-  category: c1
+  category: 15
 
 
 product.Whouse(w1):
@@ -38,4 +55,13 @@ product.Whouse(w2):
 #  address: >
 #  dkfjdkjkdf
   memo: 法国 FBA 的城市是错误的...
+
+# -----------------------------------------------------------------------------
+Server(s1):
+  name: redmine server
+  ratio: 1
+  type: CRAWLER
+  url: http://r.easyacceu.com:9001
+  username:
+  password:
 

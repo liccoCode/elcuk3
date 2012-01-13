@@ -2,10 +2,13 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# Import Secure routes
+*      /                                                    module:secure
+
+
 # Home page
 GET     /                                                   Application.index
-
-GET     /index.json                                         Application.indexjson
+GET     /pass                                               Application.pwd
 
 # Ignore favicon requests
 GET     /favicon.ico                                        404

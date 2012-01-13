@@ -1,6 +1,5 @@
 package models.product;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import helper.Patterns;
 import models.market.Listing;
 import play.data.validation.Required;
@@ -23,7 +22,6 @@ public class Product extends Model {
      * 需要检测 Product 相关的数据
      */
     @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JSONField(serialize = false)
     public List<Listing> listings;
 
     @ManyToOne

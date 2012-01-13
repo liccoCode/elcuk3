@@ -5,6 +5,10 @@
     border-left:1px solid gray;
 }
 
+.whs_table th{
+    background:#F4F4F4;
+}
+
 .whs_table th, .whs_table td{
     border:0 none;
     text-align:center;
@@ -39,4 +43,8 @@
 
 .whs_table input[readonly]{
     cursor:pointer;
+}
+
+.cList{
+    margin-top:2px;
 }

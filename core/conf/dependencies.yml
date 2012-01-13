@@ -2,6 +2,7 @@
 
 require:
     - play
+    - play -> secure
     - org.jsoup -> jsoup 1.6.1
     - elcuk -> mws 1.0
     - com.alibaba -> fastjson 1.1.15-SNAPSHOT

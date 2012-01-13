@@ -12,6 +12,10 @@
     width:100%;
 }
 
+.cats_table th{
+    background:#F4F4F4;
+}
+
 .cats_table td, .cats_table th{
     min-height:25px;
     border-width:0;

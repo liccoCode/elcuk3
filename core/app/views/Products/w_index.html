@@ -49,13 +49,13 @@
                     <td><textarea rows="5" id='w.memo' name="w.memo"></textarea></td>
                 </tr>
             </table>
-            <button type="button" class="close">关闭</button>
-            <button type="reset">重置</button>
+            <button type="button" class="close float_left">关闭</button>
+            <button type="reset" class="float_left">重置</button>
         #{/form}
-            <button id='addWhBtn'>创建</button>
+            <button id='addWhBtn' class="float_left">创建</button>
         </div>
     </div>
-    <div class="cList">
+    <div class="cList grid_12">
     #{if whs.size() == 0}
         等待添加新类别
     #{/if}

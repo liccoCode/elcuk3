@@ -63,6 +63,12 @@ public class Listing extends Model {
     public String productDescription;
 
     /**
+     * 抓取的图片的 URLs, 使用 Pagers.SPLIT(|-|) 进行分割
+     */
+    @Lob
+    public String picUrls;
+
+    /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
      */
     public Integer saleRank;
@@ -93,6 +99,30 @@ public class Listing extends Model {
 
     private void initListingId() {
         this.listingId = String.format("%s_%s", this.asin, this.market.toString());
+    }
+
+    /**
+     * 返回可以访问具体网站的链接
+     *
+     * @return 如果正常判断则返回对应网站链接, 否则返回 #
+     */
+    public String link() {
+        //http://www.amazon.co.uk/dp/B005UNXHC0
+        String baseAmazon = "http://www.%s/dp/%s";
+        //http://www.ebay.co.uk/itm/170724459305
+        String baseEbay = "http://www.%s/itm/%s";
+        switch(this.market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return String.format(baseAmazon, this.market.toString(), this.asin);
+            case EBAY_UK:
+                return String.format(baseEbay, this.market.toString(), this.asin);
+        }
+        return "#";
     }
 
     /**
@@ -129,6 +159,7 @@ public class Listing extends Model {
         tobeChangeed.productDescription = lst.get("productDescription").getAsString();
         tobeChangeed.saleRank = lst.get("saleRank").getAsInt();
         tobeChangeed.totalOffers = lst.get("totalOffers").getAsInt();
+        tobeChangeed.picUrls = lst.get("picUrls").getAsString();
 
         JsonArray offers = lst.get("offers").getAsJsonArray();
         List<ListingOffer> newOffers = new ArrayList<ListingOffer>();

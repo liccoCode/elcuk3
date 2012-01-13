@@ -1,17 +1,18 @@
 package controllers;
 
+import play.libs.Crypto;
 import play.mvc.Controller;
+import play.mvc.With;
 
-import java.util.Arrays;
-
+@With(Secure.class)
 public class Application extends Controller {
 
     public static void index() {
         render();
     }
 
-    public static void indexjson() {
-        renderJSON(Arrays.asList("838", "dkfj", "2888", "1k2jk"));
+    public static void pwd(String p) {
+        renderText(Crypto.encryptAES(p));
     }
 
 }

@@ -11,15 +11,18 @@ import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
+ * 产品模块的基本的类别的基本操作在此
  * User: Wyatt
  * Date: 12-1-7
  * Time: 上午11:57
  */
+@With(Secure.class)
+@Check("normal")
 public class Products extends Controller {
 
     /**

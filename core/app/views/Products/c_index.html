@@ -33,13 +33,13 @@
                     <td><textarea rows="5" id='c.memo' name="c.memo"></textarea></td>
                 </tr>
             </table>
-            <button type="button" class="close">关闭</button>
-            <button type="reset">重置</button>
+            <button type="button" class="close float_left">关闭</button>
+            <button type="reset" class="float_left">重置</button>
         #{/form}
-            <button id='addCategoryBtn'>创建</button>
+            <button id='addCategoryBtn' class="float_left">创建</button>
         </div>
     </div>
-    <div class="cList">
+    <div class="cList grid_12">
     #{if cates.size() == 0}
         等待添加新类别
     #{/if}
