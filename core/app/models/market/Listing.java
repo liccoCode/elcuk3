@@ -46,6 +46,7 @@ public class Listing extends Model {
     public Account.M market;
 
     @Column(nullable = false)
+    @Lob
     public String title;
     /**
      * title xxxx by [??]

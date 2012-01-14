@@ -5,12 +5,14 @@
     </div>
     <div class="grid_6 alpha omega">
         <div class="l_list_basic">
+            <h2 style="margin-bottom:10px;">BasicInfo</h2>
+
             <div>
                 <span class="l_label">ListingId:</span>
                 <span class="l_val">${lst.listingId}</span>
-                <span class="l_label">RS:</span>
+                <span class="l_label" title="Reviews">RS:</span>
                 <span class="l_val">${lst.reviews}</span>
-                <span class="l_label">RT:</span>
+                <span class="l_label" title="Rating">RT:</span>
                 <span class="l_val">${lst.rating}</span>
             </div>
             <div>
@@ -33,6 +35,7 @@
         </div>
         <div class="l_list_offers">
             <ul>
+                <h2>ListingOffers</h2>
             #{list items:lst.offers, as:'offer'}
                 <li>
                     <div class="l_list_offer">
