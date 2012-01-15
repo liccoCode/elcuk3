@@ -1,0 +1,38 @@
+#{if lst.sellings.size() == 0}
+此 Listing 还没有绑定的 Selling
+#{/if}
+#{else }
+<div>
+    <table class="l_sell_list">
+        <tr>
+            <th title="MerchantSKU">MSku</th>
+            <th title="Market">M</th>
+            <th>State</th>
+            <th>Type</th>
+        </tr>
+        #{list items:lst.sellings, as:'sell'}
+            <tr title="Account name is ${sell.account.username}" class="l_sell_list_item" msku="${sell.merchantSKU}">
+                <td>${sell.merchantSKU}</td>
+                <td>${sell.market.name()}</td>
+                <td>${sell.state}</td>
+                <td>${sell.type}</td>
+            </tr>
+        #{/list}
+    </table>
+</div>
+<script type="text/javascript">
+    $('.l_sell_list .l_sell_list_item').click(function(){
+        var msku = $(this).addClass('l_checked').attr('msku');
+        $("tr[msku='" + $.HASH['selling'] + "']").removeClass('l_checked');
+        $.HASH['selling'] = msku;
+        window.location.hash = $.HASH.val();
+
+        //selling detail
+        $.get('/listings/l_sellingDetail', {msku:$.HASH['selling']}, function(data){
+            $('#selling').html(data);
+            $('.l_tabs a:eq(2)').click();
+        });
+    });
+</script>
+#{/else}
+

@@ -14,6 +14,6 @@ public class CPWSetUp extends UnitTest {
     @Test
     public void setup() {
         Fixtures.deleteDatabase();
-        Fixtures.loadModels("product/CPW.yml");
+        Fixtures.loadModels("product/CPW.yml", "users.yml");
     }
 }

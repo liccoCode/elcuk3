@@ -1,6 +1,92 @@
 <div>
     <div class="grid_6 alpha omega">
-        <button id="l_sale">上架</button>
+        <button id="l_sale" title="这个更多的是给已经存在的 Listing 上架(跟他的产品)">上架</button>
+        <button id="l_bind_selling" rel="#l_bind_selling_2">绑定一个 Selling</button>
+        <div id="l_bind_selling_2" class="add_dialog">
+            <h2>手动绑定一个 Selling</h2>
+
+            <div id="l_bind_selling_div">
+                <form>
+                    <span class="l_label">Title:</span>
+                    <span class="l_val" style="width:80%;"><input id='s_title' type="text" readonly style="width:100%;"></span>
+
+                    <hr style="margin-bottom:1em;">
+
+                    <span class="l_label" title="成本价格/GBP">Cost:</span>
+                    <span class="l_val"><input type="text" name="s.priceStrategy.cost"></span>
+                    <span class="l_label" title="利润率">Margin:</span>
+                    <span class="l_val"><input type="text" name="s.priceStrategy.margin"></span>
+                    <span class="l_label" title="最低价格/GBP">Lowest:</span>
+                    <span class="l_val"><input type="text" name="s.priceStrategy.lowest"></span>
+                    <span class="l_label" title="最高价格/GBP">Max:</span>
+                    <span class="l_val"><input type="text" name="s.priceStrategy.max"></span>
+                    <span class="l_label" title="运费/GBP">ShipPrice:</span>
+                    <span class="l_val"><input type="text" name="s.priceStrategy.shippingPrice" value="0"></span>
+                    <span class="l_label" title="多于一个时增加的运费/GBP">ShipPlus:</span>
+                    <span class="l_val"><input type="text" name="s.priceStrategy.shippingPlus" value="0"></span>
+                    <span class="l_label" title="运费/GBP">Type:</span>
+                    <span class="l_val">
+                        <select name="s.priceStrategy.type">
+                        #{list items:models.market.PriceStrategy.T.values(), as:'t'}
+                            <option value="${t.name()}">${t}</option>
+                        #{/list}
+                        </select>
+                    </span>
+
+                    <hr style="margin-bottom:1em;">
+
+                    <span class="l_label" title="MerchantSKU">MSku:</span>
+                    <span class="l_val"><input type="text" id="s_merchantsku" name="s.merchantSKU"></span>
+                    <span class="l_label">ASIN:</span>
+                    <span class="l_val"><input id="s_asin" readonly type="text" name="s.asin"></span>
+                    <span class="l_label">State:</span>
+                    <span class="l_val">
+                        <select name="s.state" class="select_width">
+                        #{list items:models.market.Selling.S.values(), as:'s'}
+                            <option value="${s.name()}">${s}</option>
+                        #{/list}
+                        </select>
+                    </span>
+                    <span class="l_label">PS:</span>
+                    <span class="l_val"><input type="text" name="s.ps" value="5"></span>
+                    <span class="l_label">Account:</span>
+                    <span class="l_val">
+                        #{if accs.size() == 0}
+                            没有用户
+                        #{/if}
+                        #{else }
+                            <select name="s.account.uniqueName" class="select_width">
+                                #{list items:accs, as:'acc'}
+                                    <option value="${acc.uniqueName}">${acc.uniqueName}</option>
+                                #{/list}
+                            </select>
+                        #{/else}
+                    </span>
+                    <span class="l_label">Type:</span>
+                    <span class="l_val">
+                        <select name="s.type" class="select_width">
+                        #{list items:models.market.Selling.T.values(), as:'t'}
+                            <option value="${t.name()}">${t}</option>
+                        #{/list}
+                        </select>
+                    </span>
+                    <span class="l_label">Market:</span>
+                    <span class="l_val">
+                        <select name="s.market" class="select_width">
+                        #{list items:models.market.Account.M.values(), as:'m'}
+                            <option value="${m.name()}">${m}</option>
+                        #{/list}
+                        </select>
+                    </span>
+
+                    <div class="clear"></div>
+                    <hr style="margin-top:5px;">
+                    <button type="reset" class="float_left">重置</button>
+                    <button onclick="return false;" class="float_left">按 ESC 关闭</button>
+                </form>
+                <button class="float_left" id="l_bind_selling_btn">关联</button>
+            </div>
+        </div>
         <button id="l_recrawl">重新抓取</button>
     </div>
     <div class="grid_6 alpha omega">
@@ -72,5 +158,32 @@
 <script type="text/javascript">
     $('#l_recrawl').click(function(){
         alert("还未实现!" + $.HASH.val());
+    });
+
+    $('#l_bind_selling').overlay({
+        onLoad:function(){
+            $('#s_title').val($('tr[lid="listing_' + $.HASH.listing + '"]:eq(0)').attr('title'));
+            $('#s_asin').val($.HASH.listing.split('_')[0]);
+            $('#s_merchantsku').val($.HASH.listing.split('_')[0] + "," + $.HASH.sku);
+        }
+    });
+    $('#l_bind_selling_btn').click(function(){
+        $.varClosure.params = {lid:$.HASH.listing};
+        $('#l_bind_selling_div :input').map($.varClosure);
+        $.ajax({
+            url:'/listings/bindSelling',
+            data:$.varClosure.params,
+            dataType:'json',
+            success:function(data){
+                if(data['message']){
+                    alert(data['key'] + ":" + data['message']);
+                }else{
+                    alert('绑定成功.');
+                }
+            },
+            error:function(xhr, state, err){
+                alert(err);
+            }
+        });
     });
 </script>

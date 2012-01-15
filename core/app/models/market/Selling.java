@@ -83,14 +83,23 @@ public class Selling extends Model {
 
 
     /**
-     * 动态计算的每天的销量
+     * 给这个 Selling 人工设置的 PS 值
      */
-    @Transient
     public Float ps = 0f;
 
     public Float price = 0f;
 
     public Float shippingPrice = 0f;
+
+    /**
+     * 动态计算使用的 N 天销量
+     */
+    @Transient
+    public Float d1 = 0f;
+    @Transient
+    public Float d7 = 0f;
+    @Transient
+    public Float d30 = 0f;
 
     /**
      * 这个 Selling 所属的哪一个用户

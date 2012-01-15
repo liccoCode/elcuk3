@@ -31,11 +31,16 @@ SKU 错误
         var lid = $(this).addClass('l_checked').attr('lid').substr(8); //切割掉前面的 listing_ 前缀
         $("tr[lid='listing_" + $.HASH['listing'] + "']").removeClass('l_checked');
         $.HASH['listing'] = lid;
+        $.HASH['selling'] = '';
         window.location.hash = $.HASH.val();
         // listing
         $.get('/listings/l_listingDetail', {lid:lid}, function(data){
             $('#listing').html(data);
             $('.l_tabs a:eq(1)').click();
+        });
+        // selling
+        $.get('/listings/l_selling', {lid:lid}, function(data){
+            $('#l_Sell').html(data);
         });
         return false;
     });

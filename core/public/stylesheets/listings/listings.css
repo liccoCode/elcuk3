@@ -62,11 +62,6 @@ ul, li{
 }
 
 /* ------------------- ------------------------*/
-
-#l_ListAndSell{
-    background:#F4F4F4;
-}
-
 .l_List_table{
     width:100%;
     border:1px solid #004B91;
@@ -95,6 +90,10 @@ ul, li{
 
 /* ------------------------------------------------- */
 
+#l_ListAndSell{
+    background:#F4F4F4;
+}
+
 #l_ListAndSell > div{
     height:47%;
     width:100%;
@@ -122,12 +121,12 @@ ul, li{
 .l_list_basic .l_label{
     width:5em;
     color:#004B91;
-    /*border-right:1px dashed orange;*/
     text-align:center;
     padding:0 2px;
 }
 
 .l_list_basic .l_val{
+    width:35%;
     border-bottom:1px dashed orange;
 }
 
@@ -158,6 +157,100 @@ ul, li{
     width:23%;
     display:block;
     float:left;
+}
+
+/* Listing 页面的 Product Tab */
+.l_prod_info{
+    margin-top:.6em;
+    border-left:2px solid orange;
+}
+
+.l_prod_info span{
+    position:relative;
+    display:block;
+    float:left;
+}
+
+.l_prod_info span.l_label{
+    text-align:center;
+    width:30%;
+}
+
+.l_prod_info span.l_val{
+    width:67%;
+    border-bottom:1px dashed orange;
+}
+
+.l_prod_qtys{
+    margin-top:5px;
+}
+
+.l_prod_qtys ul{
+    margin:0;
+}
+
+.l_prod_qtys li{
+    position:relative;
+    float:left;
+    width:97%;
+    border-left:2px solid purple;
+    margin-top:5px;
+}
+
+.l_prod_qtys span{
+    padding:3px 5px;
+    display:block;
+    float:left;
+    width:22.5%;
+    text-align:center;
+}
+
+.l_prod_qtys span.l_val{
+    text-align:left;
+}
+
+/* Selling 列表*/
+.l_sell_list{
+    border-top:1px solid black;
+    border-left:1px solid black;
+    width:100%;
+}
+
+.l_sell_list th, .l_sell_list td{
+    font-size:10px;
+    text-align:center;
+    border-right:1px solid black;
+    border-bottom:1px solid black;
+}
+
+.l_sell_list tr{
+    cursor:pointer;
+}
+
+/* 绑定 Selling DIV*/
+#l_bind_selling_div span{
+    float:left;
+    display:block;
+    margin-top:2px;
+}
+
+#l_bind_selling_div span.l_label{
+    text-align:center;
+    width:20%;
+}
+
+#l_bind_selling_div span.l_val{
+    width:30%;
+}
+
+#l_bind_selling_div input{
+    position:relative;
+    width:100%;
+}
+
+.select_width{
+    position:relative;
+    width:100%;
 }
 
 /* --------------------------------------------------- */

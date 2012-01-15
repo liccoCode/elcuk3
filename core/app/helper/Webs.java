@@ -6,7 +6,7 @@ package helper;
  * Date: 12-1-11
  * Time: 上午3:55
  */
-public class Pagers {
+public class Webs {
 
     public static final String SPLIT = "|-|";
 

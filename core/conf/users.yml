@@ -21,3 +21,11 @@ User(jason):
   password: '42afb327703cd6a584c64d15aa473b64'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
+
+market.Account(easyacc):
+  username: easyacc.eu@gmail.com
+  password: passwd
+  type: AMAZON_UK
+  token: >
+          This is token.
+  closeable: false

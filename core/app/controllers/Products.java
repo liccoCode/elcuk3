@@ -2,7 +2,7 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import exception.VErrorRuntimeException;
-import helper.Pagers;
+import helper.Webs;
 import models.product.Category;
 import models.product.Product;
 import models.product.ProductQTY;
@@ -29,7 +29,7 @@ public class Products extends Controller {
      * 展示所有的 Product
      */
     public static void p_index(Integer p, Integer s) {
-        Pagers.fixPage(p, s);
+        Webs.fixPage(p, s);
         List<Category> cates = Category.all().fetch();
         List<Product> prods = Product.all().fetch(p, s);
         List<Whouse> whs = Whouse.all().fetch();
@@ -38,14 +38,14 @@ public class Products extends Controller {
     }
 
     public static void c_index(Integer p, Integer s) {
-        Pagers.fixPage(p, s);
+        Webs.fixPage(p, s);
         List<Category> cates = Category.all().fetch(p, s);
         Long count = Category.count();
         render(cates, count, p, s);
     }
 
     public static void w_index(Integer p, Integer s) {
-        Pagers.fixPage(p, s);
+        Webs.fixPage(p, s);
         List<Whouse> whs = Whouse.all().fetch(p, s);
         Long count = Whouse.count();
         render(whs, count, p, s);

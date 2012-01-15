@@ -64,7 +64,7 @@ public class Listing extends Model {
     public String productDescription;
 
     /**
-     * 抓取的图片的 URLs, 使用 Pagers.SPLIT(|-|) 进行分割
+     * 抓取的图片的 URLs, 使用 Webs.SPLIT(|-|) 进行分割
      */
     @Lob
     public String picUrls;

@@ -1,3 +1,42 @@
 <div>
-${prod.id} : ${prod.sku} : ${prod.productName}
+    <div class="l_prod_info">
+        <span class="l_label">Title:</span>
+        <span class="l_val">${prod.productName}</span>
+        <span class="l_label">SKU:</span>
+        <span class="l_val">${prod.sku}</span>
+        <span class="l_label">Category:</span>
+        <span class="l_val">${prod.category.name}</span>
+        <span class="l_label">Length:</span>
+        <span class="l_val">${prod.lengths ? prod.lengths : 0}</span>
+        <span class="l_label">Heigh:</span>
+        <span class="l_val">${prod.heigh ? prod.heigh : 0}</span>
+        <span class="l_label">Width:</span>
+        <span class="l_val">${prod.width ? prod.width : 0}</span>
+        <span class="l_label">Weight:</span>
+        <span class="l_val">${prod.weight ? prod.weight : 0}</span>
+
+        <div class="clear"></div>
+    </div>
+    <div class="l_prod_qtys">
+        <h2 style="margin-bottom:0.1em;">库存信息</h2>
+    #{if prod.qtys.size() == 0}
+        此商品暂时还没有库存
+    #{/if}
+    #{else }
+        <ul>
+            #{list items:prod.qtys,as:'qty'}
+                <li>
+                    <span class="l_label">Whouse:</span>
+                    <span class="l_val">${qty.whouse.name}</span>
+                    <span class="l_label">Pending:</span>
+                    <span class="l_val">${qty.pending}</span>
+                    <span class="l_label">Qty:</span>
+                    <span class="l_val">${qty.qty}</span>
+                    <span class="l_label">Unsellable:</span>
+                    <span class="l_val">${qty.unsellable}</span>
+                </li>
+            #{/list}
+        </ul>
+    #{/else}
+    </div>
 </div>

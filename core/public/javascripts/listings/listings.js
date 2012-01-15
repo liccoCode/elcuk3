@@ -25,12 +25,13 @@ $(function(){
             alert("请输入 ASIN.");
             return false;
         }
+        alert("命令已提交...");
         $.ajax({
             url:'/listings/crawl',
-            data:{market:market, asin:asin, sku:$.HASH.sku},
+            data:{market:market.trim(), asin:asin.trim(), sku:$.HASH.sku},
             dataType:'json',
             success:function(data){
-                alert('成功添加并绑定 Listing:' + JSON.stringify(data));
+                alert('成功添加并绑定 Listing:{' + data['listingId'] + "}\r\n[" + data['title'] + "]");
             },
             error:function(xhr, sta, err){
                 alert(err);
@@ -50,6 +51,7 @@ $(function(){
         $.HASH.sku = $(this).addClass('l_checked').text();
         window.location.hash = $.HASH.val();
         var l_ListDiv = $('#l_List');
+        $.mask.load();
         if(l_ListDiv.html().trim() == '请选择 Product' ||
                 l_ListDiv.html().trim() == 'SKU 错误' ||
                 l_ListDiv.html().trim() == '没有关联的 Listing'){
@@ -66,7 +68,7 @@ $(function(){
                 $('.l_tabs a:eq(0)').click();
             });
         }
+        $.mask.close();
         return false;
     });
-
 });
