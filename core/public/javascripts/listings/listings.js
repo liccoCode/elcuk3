@@ -50,15 +50,10 @@ $(function(){
         $('#pord_' + $.HASH.sku).removeClass('l_checked');
         $.HASH.sku = $(this).addClass('l_checked').text();
         window.location.hash = $.HASH.val();
-        var l_ListDiv = $('#l_List');
         $.mask.load();
-        if(l_ListDiv.html().trim() == '请选择 Product' ||
-                l_ListDiv.html().trim() == 'SKU 错误' ||
-                l_ListDiv.html().trim() == '没有关联的 Listing'){
-            $.get('/listings/l_listing', {sku:$.HASH.sku}, function(data){
-                l_ListDiv.html(data);
-            });
-        }
+        $.get('/listings/l_listing', {sku:$.HASH.sku}, function(data){
+            $('#l_List').html(data);
+        });
         var prodDiv = $('#prod');
         if(prodDiv.html() != 'Product 信息'){
             $('.l_tabs a:eq(0)').click();

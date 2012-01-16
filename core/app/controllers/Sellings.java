@@ -3,7 +3,6 @@ package controllers;
 import models.market.Listing;
 import models.market.Selling;
 import org.jsoup.helper.Validate;
-import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -20,11 +19,16 @@ public class Sellings extends Controller {
     /**
      * 远程更新, 并且更新本地数据库
      */
-    public static void deploy(@Valid Selling selling) {
-        if(Validation.hasErrors()) renderJSON(new Error("Selling", "selling params have missing[" +
-                "merchantSKU, standerPrice, title, state] something.", new String[]{}));
-        selling.deploy(selling.merchantSKU);
-        renderJSON(selling);
+    public static void deploy(@Valid Selling s) {
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        s.deploy(s.merchantSKU);
+        renderJSON(s);
+    }
+
+    public static void update(@Valid Selling s) {
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        s.localUpdate(s.merchantSKU);
+        renderJSON(s);
     }
 
     /**

@@ -207,7 +207,28 @@ public class Selling extends Model {
          */
         Selling oldOne = Selling.find("merchantSKU=?", merchantSKU).first();
         if(oldOne == null) throw new VErrorRuntimeException("Selling.merchantSKU", "MerchantSKU Selling is not valid!");
+        sellingParamsCopy(oldOne);
+        //TODO Images....
 
+        //TODO 更新网络
+
+        //if net update success
+        oldOne.save();
+    }
+
+    public void localUpdate(String merchantSKU) {
+        Selling oldOne = Selling.find("merchantSKU=?", merchantSKU).first();
+        if(oldOne == null) throw new VErrorRuntimeException("Selling.merchantSKU", "MerchantSKU Selling is not valid!");
+        sellingParamsCopy(oldOne);
+        oldOne.save();
+    }
+
+    /**
+     * 将当前对象的值复制到老的 Selling 对象中去
+     *
+     * @param oldOne
+     */
+    private void sellingParamsCopy(Selling oldOne) {
         oldOne.title = StringUtils.isNotBlank(this.title) ? this.title : oldOne.title;
         oldOne.modelNumber = StringUtils.isNotBlank(this.modelNumber) ? this.modelNumber : oldOne.modelNumber;
         oldOne.manufacturer = StringUtils.isNotBlank(this.manufacturer) ? this.manufacturer : oldOne.manufacturer;
@@ -222,14 +243,10 @@ public class Selling extends Model {
         oldOne.legalDisclaimerDesc = StringUtils.isNotBlank(this.legalDisclaimerDesc) ? this.legalDisclaimerDesc : oldOne.legalDisclaimerDesc;
 //        oldOne.launchDate = (this.launchDate != null) ? this.launchDate : oldOne.launchDate; // launchDate 可以不用修改的
         oldOne.sellerWarrantyDesc = StringUtils.isNotBlank(this.sellerWarrantyDesc) ? this.sellerWarrantyDesc : oldOne.sellerWarrantyDesc;
-        //TODO Images....
+
         oldOne.productDesc = StringUtils.isNotBlank(this.productDesc) ? this.productDesc : oldOne.productDesc;
         oldOne.searchTerms = StringUtils.isNotBlank(this.searchTerms) ? this.searchTerms : oldOne.searchTerms;
         oldOne.platinumKeywords = StringUtils.isNotBlank(this.platinumKeywords) ? this.platinumKeywords : oldOne.platinumKeywords;
-
-        //TODO 更新网络
-
-        //if net update success
-        oldOne.save();
     }
+
 }

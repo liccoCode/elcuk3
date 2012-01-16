@@ -26,6 +26,16 @@
                     <span class="l_val_25"><input type="text" name="s.condition_" value="${sell.condition_}"></span>
                     <span class="l_label">Manufacturer</span>
                     <span class="l_val_25"><input type="text" name="s.manufacturer" value="${sell.manufacturer}"></span>
+                    <span class="l_label">State</span>
+                    <span class="l_val_25">
+                        <select name="s.state">
+                        #{list items:models.market.Selling.S.values(), as:'s'}
+                            <option value="${s.name()}">${s}</option>
+                        #{/list}
+                        </select>
+                    </span>
+                    <span class="l_label" title="自己设置的每天的 PS 值">PS</span>
+                    <span class="l_val_25"><input type="text" name="s.ps" value="${sell.ps}"></span>
                     <span class="l_label">StanderPrice</span>
                     <span class="l_val_25"><input type="text" name="s.standerPrice" value="${sell.standerPrice}"></span>
                     <span class="l_label">SalePrice</span>
@@ -38,10 +48,7 @@
                     <span class="l_val_25"><input type="text" name="s.RBN" class="date" value="${sell.RBN}"></span>
                     <span class="l_label">LaunchDate</span>
                     <span class="l_val_25"><input type="date" name="s.launchDate" value="${sell.launchDate}"></span>
-                    <span class="l_label" title="Legal Disclaimer Description">LegalDesc</span>
-                    <span class="l_val">
-                        <textarea rows="3" name="s.legalDisclaimerDesc">${sell.legalDisclaimerDesc}</textarea>
-                    </span>
+
                 </div>
             </div>
             <div id="l_sell_panel_2">
@@ -52,6 +59,10 @@
                 <span class="l_label" title="Seller Warranty Description">Warranty</span>
                 <span class="l_val">
                     <textarea rows="5" name="s.sellerWarrantyDesc">${sell.sellerWarrantyDesc}</textarea>
+                </span>
+                <span class="l_label" title="Legal Disclaimer Description">LegalDesc</span>
+                <span class="l_val">
+                    <textarea rows="3" name="s.legalDisclaimerDesc">${sell.legalDisclaimerDesc}</textarea>
                 </span>
             </div>
             <div id="l_sell_panel_3">
@@ -69,6 +80,7 @@
     <div class="clear"></div>
     <div class="l_sell_btns">
         <button id="l_sell_update_btn">更新</button>
+        <button id="l_sell_updatelocal_btn">本地更新</button>
         <button id="l_sell_hold_btn" title="暂停销售">Hold</button>
         <button id="l_sell_down_btn">下架</button>
     </div>
@@ -91,7 +103,7 @@
     $('.l_sell_info_tabs').tabs('.l_sell_info_panels > div');
     window.location.hash = $.HASH.val();
 
-    $('#l_sell_update_btn').click(function(){
+    var basicUpdate = function(){
         $.varClosure.params = {};
         $('.l_sell_info_panels :input').map($.varClosure);
         for(var i = 0; i < 5; i++){
@@ -115,17 +127,37 @@
         $.varClosure.params['s.keyFetures'] = keyFetures.substring(0, keyFetures.length - 3);
         $.varClosure.params['s.searchTerms'] = searchTerms.substring(0, searchTerms.length - 3);
         $.varClosure.params['s.platinumKeywords'] = platkeys.substring(0, platkeys.length - 3);
-
+    };
+    $('#l_sell_update_btn').click(function(){
+        basicUpdate();
         $.ajax({
             url:'/sellings/deploy',
             data:$.varClosure.params,
             dataType:'json',
             success:function(data){
-
+                if(data['merchantSKU'] != undefined && data['merchantSKU'] == $.HASH.selling){
+                    alert('本地更新成功.');
+                }else{
+                    alert("更新失败:\r\n " + JSON.stringify(data));
+                }
             },
             error:function(xhr, state, err){
                 alert(err);
             }
         });
+    });
+
+    $('#l_sell_updatelocal_btn').click(function(){
+        basicUpdate();
+        $.ajax({
+            url:'/sellings/update',
+            data:$.varClosure.params,
+            dataType:'json',
+            success:function(data){
+            },
+            error:function(xhr, state, err){
+                alert(err);
+            }
+        })
     });
 </script>
