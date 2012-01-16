@@ -3,11 +3,13 @@ package models.market;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import exception.VErrorRuntimeException;
 import models.product.Product;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,6 +20,12 @@ import java.util.List;
  */
 @Entity
 public class Listing extends Model {
+    /**
+     * Condition
+     */
+    public enum C {
+        NEW
+    }
 
 
     /**
@@ -85,6 +93,22 @@ public class Listing extends Model {
 
     public Long nextUpdateTime;
 
+    // ----------------- 上架会需要使用到的信息 ------------------
+    public Date launchDate;
+    public String condition_;
+    /**
+     * Number of the same product contained within one package.
+     * For example, if you are selling a case of 10 packages of socks, ItemPackageQuantity would be 10.
+     */
+    public Integer packageQuantity = 1;
+    /**
+     * Number of discrete items included in the product you are offering for sale, such that each item
+     * is not packaged for individual sale.
+     * For example, if you are selling a case of 10 packages of socks, and each package contains 3 pairs
+     * of socks, NumberOfItems would be 30.
+     */
+    public Integer numberOfItems = 1;
+
 
     public void setAsin(String asin) {
         this.asin = asin;
@@ -100,6 +124,31 @@ public class Listing extends Model {
 
     private void initListingId() {
         this.listingId = String.format("%s_%s", this.asin, this.market.toString());
+    }
+
+    /**
+     * 将一个手动创建的 Selling 绑定到一个 Listing 身上, 其中需要经过一些操作
+     *
+     * @param s
+     * @return
+     */
+    public Selling bindSelling(Selling s) {
+        s.listing = this;
+        s.price = s.priceStrategy.cost * s.priceStrategy.margin;
+        s.shippingPrice = s.priceStrategy.shippingPrice;
+
+        // --- Selling 可处理信息的处理
+        s.title = this.title;
+        s.condition_ = C.NEW.toString();
+        s.standerPrice = s.priceStrategy.max;
+        s.productDesc = this.productDescription; // 这个肯定是需要人工处理下的.
+
+
+        // Account 暂时处理, 仅仅使用这一个用户
+        Account acc = Account.find("uniqueName=?", s.account.uniqueName).first();
+        if(acc == null) throw new VErrorRuntimeException("Listing.Account", "Account is invalid.", new String[]{});
+        s.account = acc;
+        return s.save();
     }
 
 

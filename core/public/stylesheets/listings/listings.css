@@ -253,6 +253,37 @@ ul, li{
     width:100%;
 }
 
+/* Selling 详细信息 tab */
+.l_sell_btns{
+    height:10%;
+}
+
+.l_sell_info_panels span{
+    float:left;
+    display:block;
+}
+
+.l_sell_info_panels textarea,
+.l_sell_info_panels input[type=text]{
+    width:100%;
+}
+
+.l_sell_info_panels .l_label{
+    margin-top:5px;
+    text-align:center;
+    width:23%;
+}
+
+.l_sell_info_panels .l_val{
+    margin-top:5px;
+    width:75%;
+}
+
+.l_val_25{
+    margin-top:5px;
+    width:25%;
+}
+
 /* --------------------------------------------------- */
 .l_tabs{
     margin:0;
@@ -281,7 +312,12 @@ ul, li{
 
 .l_panels{
     border-top:1px solid black;
+    height:93%;
     clear:both;
+}
+
+.l_panels > div{
+    height:100%;
 }
 
 .l_current{

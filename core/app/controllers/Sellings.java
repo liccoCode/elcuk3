@@ -1,11 +1,11 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import models.market.Listing;
-import models.market.PriceStrategy;
 import models.market.Selling;
 import org.jsoup.helper.Validate;
+import play.data.validation.Error;
 import play.data.validation.Valid;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 
 /**
@@ -16,30 +16,15 @@ import play.mvc.Controller;
  */
 public class Sellings extends Controller {
 
+
     /**
-     * 仅仅是手动的添加一个 Selling 与其必须的 PriceStrategy 进入系统;
-     * <p/>
-     * 不涉及其需要关联的 Listing
-     *
-     * @param s
+     * 远程更新, 并且更新本地数据库
      */
-    public static void c(@Valid Selling s) {
-        Validate.notNull(s.priceStrategy);
-        s.save();
-        renderJSON(s);
-    }
-
-    public static void r(Long id) {
-        renderJSON(JSON.toJSONString(Selling.findById(id)));
-    }
-
-    public static void u(@Valid Selling s) {
-        renderJSON(JSON.toJSONString(s.save()));
-    }
-
-    public static void strategyU(PriceStrategy ps) {
-        validation.required(ps.id);
-        renderJSON(ps.save());
+    public static void deploy(@Valid Selling selling) {
+        if(Validation.hasErrors()) renderJSON(new Error("Selling", "selling params have missing[" +
+                "merchantSKU, standerPrice, title, state] something.", new String[]{}));
+        selling.deploy(selling.merchantSKU);
+        renderJSON(selling);
     }
 
     /**

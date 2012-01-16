@@ -1,8 +1,12 @@
 package models.market;
 
+import exception.VErrorRuntimeException;
+import org.apache.commons.lang.StringUtils;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -67,6 +71,7 @@ public class Selling extends Model {
      * 2. 在 ebay 上架的唯一的 itemId;
      */
     @Column(nullable = false, unique = true)
+    @Required
     public String merchantSKU;
 
     @Column(nullable = false)
@@ -76,6 +81,7 @@ public class Selling extends Model {
     public Account.M market;
 
     @Enumerated(EnumType.STRING)
+    @Required
     public S state;
 
     @Enumerated(EnumType.STRING)
@@ -100,6 +106,76 @@ public class Selling extends Model {
     public Float d7 = 0f;
     @Transient
     public Float d30 = 0f;
+    @Transient
+    public Float d365 = 0f;
+    @Transient
+    public Float dAll = 0f;
+
+    // ----------------------- 上架会需要使用到的信息 ----------------------------
+    @Lob
+    @Required
+    public String title;
+    public String modelNumber;
+    public String manufacturer;
+    /**
+     * 使用  Webs.SPLIT 进行分割, 最多 5 行
+     */
+    public String keyFetures;
+    /**
+     * Recommended Browse Nodes;
+     * 使用 , 进行分割, 一般为 2 个
+     */
+    public String RBN;
+    /**
+     * For most products, this will be identical to the model number;
+     * however, some manufacturers distinguish part number from model number
+     */
+    public String manufacturerPartNumber;
+    /**
+     * 如果这个 Condition 不为空, 那么则覆盖掉 Listing 中的 Condition
+     */
+    public String condition_;
+    @Required
+    public Float standerPrice;
+    public Float salePrice;
+    /**
+     * 促销产品价格的开始日期
+     */
+    public Date startDate;
+    /**
+     * 促销产品价格的结束日期
+     */
+    public Date endDate;
+
+    /**
+     * Does your item have a legal disclaimer associated with it?
+     */
+    @Lob
+    public String legalDisclaimerDesc;
+    public Date launchDate;
+    @Lob
+    public String sellerWarrantyDesc;
+
+    /**
+     * 核心的产品描述
+     */
+    @Lob
+    public String productDesc;
+
+    /**
+     * 使用 Webs.SPLIT 进行分割, 5 行
+     */
+    @Lob
+    public String searchTerms;
+
+    /**
+     * 使用 Webs.SPLIT 进行分割, 5 行
+     */
+    @Lob
+    public String platinumKeywords;
+
+    // ---- Images ????
+
 
     /**
      * 这个 Selling 所属的哪一个用户
@@ -117,5 +193,43 @@ public class Selling extends Model {
         this.market = market;
         if(this.asin != null && this.market != null)
             this.sellingId = String.format("%s_%s", this.asin, this.market.toString());
+    }
+
+    /**
+     * 将传入的 Selling 的数据更新到 渠道上并且更新数据库
+     */
+    public void deploy(String merchantSKU) {
+        /**
+         * 1. 根据 selling 找到数据库中存在的
+         * 2. 更新可以更新的字段;
+         * 3. 在网络上进行更新;
+         * 4. 网络更新成功后, 在本地数据库更新
+         */
+        Selling oldOne = Selling.find("merchantSKU=?", merchantSKU).first();
+        if(oldOne == null) throw new VErrorRuntimeException("Selling.merchantSKU", "MerchantSKU Selling is not valid!");
+
+        oldOne.title = StringUtils.isNotBlank(this.title) ? this.title : oldOne.title;
+        oldOne.modelNumber = StringUtils.isNotBlank(this.modelNumber) ? this.modelNumber : oldOne.modelNumber;
+        oldOne.manufacturer = StringUtils.isNotBlank(this.manufacturer) ? this.manufacturer : oldOne.manufacturer;
+        oldOne.keyFetures = StringUtils.isNotBlank(this.keyFetures) ? this.keyFetures : oldOne.keyFetures;
+        oldOne.RBN = StringUtils.isNotBlank(this.RBN) ? this.RBN : oldOne.RBN;
+        oldOne.manufacturerPartNumber = StringUtils.isNotBlank(this.manufacturerPartNumber) ? this.manufacturerPartNumber : oldOne.manufacturerPartNumber;
+        oldOne.condition_ = StringUtils.isNotBlank(condition_) ? this.condition_ : oldOne.condition_;
+        oldOne.standerPrice = (this.standerPrice != null && this.standerPrice > 0) ? this.standerPrice : oldOne.standerPrice;
+        oldOne.salePrice = (this.salePrice != null && this.salePrice > 0) ? this.salePrice : oldOne.salePrice;
+        oldOne.startDate = (this.startDate != null) ? this.startDate : oldOne.startDate;
+        oldOne.endDate = (this.endDate != null) ? this.endDate : oldOne.endDate;
+        oldOne.legalDisclaimerDesc = StringUtils.isNotBlank(this.legalDisclaimerDesc) ? this.legalDisclaimerDesc : oldOne.legalDisclaimerDesc;
+//        oldOne.launchDate = (this.launchDate != null) ? this.launchDate : oldOne.launchDate; // launchDate 可以不用修改的
+        oldOne.sellerWarrantyDesc = StringUtils.isNotBlank(this.sellerWarrantyDesc) ? this.sellerWarrantyDesc : oldOne.sellerWarrantyDesc;
+        //TODO Images....
+        oldOne.productDesc = StringUtils.isNotBlank(this.productDesc) ? this.productDesc : oldOne.productDesc;
+        oldOne.searchTerms = StringUtils.isNotBlank(this.searchTerms) ? this.searchTerms : oldOne.searchTerms;
+        oldOne.platinumKeywords = StringUtils.isNotBlank(this.platinumKeywords) ? this.platinumKeywords : oldOne.platinumKeywords;
+
+        //TODO 更新网络
+
+        //if net update success
+        oldOne.save();
     }
 }

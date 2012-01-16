@@ -112,16 +112,7 @@ public class Listings extends Controller {
     public static void bindSelling(Selling s, String lid) {
         Listing lst = Listing.find("listingId=?", lid).first();
         if(lst == null) renderJSON(new Error("Listing", "Not valid listingId.", new String[]{}));
-        s.listing = lst;
-        s.price = s.priceStrategy.cost * s.priceStrategy.margin;
-        s.shippingPrice = s.priceStrategy.shippingPrice;
-
-        // Account 暂时处理, 仅仅使用这一个用户
-        Account acc = Account.find("uniqueName=?", s.account.uniqueName).first();
-        if(acc == null) renderJSON(new Error("Listing.Account", "Account is invalid.", new String[]{}));
-        s.account = acc;
-
-        s.save();
+        lst.bindSelling(s);
         s.listing = null;
         renderJSON(s);
     }
