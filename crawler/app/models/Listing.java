@@ -118,12 +118,13 @@ public class Listing {
         if(totalOffersEl == null) this.totalOffers = 1;
         else this.totalOffers = Extra.flt(totalOffersEl.text()).intValue();
 
-        Element middlePd = root.select("#productDetails").first();
-        this.technicalDetails = middlePd.previousElementSibling().outerHtml();
+        Element middlePd = root.select("#technical_details").first();
+        this.technicalDetails = middlePd.parent().outerHtml();
 
         Element saleRankEl = root.select("#SalesRank").first();
         if(saleRankEl == null) this.saleRank = 5001;
-        else this.saleRank = Extra.flt(saleRankEl.childNode(2).toString()).intValue();
+        else
+            this.saleRank = Extra.flt(saleRankEl.childNode(2).toString().replaceAll(",", "").replaceAll(".", "")/*由于排名没有小数点后面, 所以直接去除这个*/).intValue();
         if(this.saleRank <= 0) this.saleRank = 1000; // 如果到达这一步表示其有排名, 但是没有大类别排名, 所以给予一个 1000 的自定义排名
 
 
