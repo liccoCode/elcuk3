@@ -1,6 +1,6 @@
 package models.market;
 
-import com.elcuk.mws.jaxb.ordertracking.*;
+import com.elcuk.mws.decode.ordertracking.*;
 import helper.Currency;
 import helper.Patterns;
 import models.finance.SaleFee;
