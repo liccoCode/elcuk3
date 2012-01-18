@@ -1,40 +1,4 @@
-product.Category(90):
-  categoryId: 90
-  name: 电池
-  memo: 电池的 memo
-
-product.Category(10):
-  categoryId: 10
-  name: 手机电池
-  memo: 手机电池的 memo
-
-product.Category(71):
-  categoryId: 71
-  name: 平板电脑皮套
-  memo: 平板电脑的皮套 memo
-
-product.Category(15):
-  categoryId: 15
-  name: 手机保护壳
-  memo: 手机保护壳的 memo
-
-# -------------------------------------------------------------------------
-
-product.Product(10HTCG14-1900S):
-  sku: 10HTCG14-1900S
-  productName: SANER® 1900mAh rechargeable Li-ion Battery for HTC Sensation - Extra Long Lif...
-  category: 10
-
-product.Product(71ACA500-B2PE):
-  sku: 71ACA500-B2PE
-  productName: EasyAcc Black Leather Protective Case Cover and Flip Stand for Acer iconia ta...
-  category: 71
-
-product.Product(15SSI9100-MR2SP):
-  sku: 15SSI9100-MR2SP
-  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone -...
-  category: 15
-
+# ----------------------------- Warhouse ------------------------------------
 
 product.Whouse(w1):
   name: FBA_UK
@@ -64,4 +28,513 @@ Server(s1):
   url: http://r.easyacceu.com:9001
   username:
   password:
+
+
+# -----------------  系统内的初始化 Category ------------------------
+product.Category(10):
+  categoryId: 10
+  name: Cellphone Battery
+  memo: 手机电池类别​
+
+product.Category(11):
+  categoryId: 11
+  name: Travel Adaptor
+  memo: Travel Adaptor, 这个需要 jamin 确认
+
+product.Category(15):
+  categoryId: 15
+  name: Cellphone Case
+  memo: 手机皮套与手机外壳​
+
+product.Category(50):
+  categoryId: 50
+  name: LED Light
+  memo: 自行车上的等, 这个类别的名称需要修改
+
+product.Category(67):
+  categoryId: 67
+  name: Kitchen Case
+  memo: 厨房用品
+
+product.Category(68):
+  categoryId: 68
+  name: Stationery
+  memo: 文具(现在是放大镜), 需要确认
+
+product.Category(69):
+  categoryId: 69
+  name: Clock
+  memo: 时钟
+
+product.Category(70):
+  categoryId: 70
+  name: Keyboard
+  memo: 键盘, 或者带有键盘的产品
+
+product.Category(71):
+  categoryId: 71
+  name: Package Case
+  memo: 电脑或者平板电脑包
+
+product.Category(72):
+  categoryId: 72
+  name: Screen Protector
+  memo: 屏幕保护膜
+
+product.Category(80):
+  categoryId: 80
+  name: External Battery
+  memo: 外置电源
+
+# ------------------------------ Product&ProductQTY  ---------------------------------------
+
+product.Product(10HTCEVO3D-1900S):
+  sku: 10HTCEVO3D-1900S
+  productName: SANER® 1900mAh rechargeable Li-ion Battery for HTC EVO 3D - Extra Long Life, Compatible with HTC Shooter, Amaze 4G, Sensation XL)
+  category: 10
+product.ProductQTY(1):
+  inbound: 0
+  pending: 2
+  qty: 97
+  unsellable: 3
+  product: 10HTCEVO3D-1900S
+  whouse: w1
+
+
+product.Product(10HTCG14-1900S):
+  sku: 10HTCG14-1900S
+  productName: SANER® 1900mAh rechargeable Li-ion Battery for HTC Sensation - Extra Long Life, Compatible with HTC Sensation/G14/Z710E, HTC Sensation XE/ Z715E
+  category: 10
+product.ProductQTY(2):
+  inbound: 0
+  pending: 4
+  qty: 286
+  unsellable: 3
+  product: 10HTCG14-1900S
+  whouse: w1
+
+
+product.Product(10SMI9100-1800S):
+  sku: 10SMI9100-1800S
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone -...
+  category: 10
+product.ProductQTY(3):
+  inbound: 0
+  pending: 3
+  qty: 307
+  unsellable: 1
+  product: 10SMI9100-1800S
+  whouse: w1
+
+product.Product(10SMS5830-1500S):
+  sku: 10SMS5830-1500S
+  productName: SANER® 1500mAh rechargeable Li-ion Battery for Samsung Galaxy ACE S5830 - Extra Long Life,Compatible with Samsung Galaxy GIO/S5670, Galaxy Fit/B7510.
+  category: 10
+product.ProductQTY(5):
+  inbound: 0
+  pending: 3
+  qty: 194
+  unsellable: 0
+  product: 10SMS5830-1500S
+  whouse: w1
+
+product.Product(11CPAIN1-WS1):
+  sku: 11CPAIN1-WS1
+  productName: EasyAcc Top Quality International Adaptor All-In-One Travel Adaptor Universal Adaptor for Worldwide Travelling International Adaptor
+  category: 11
+product.ProductQTY(6):
+  inbound: 0
+  pending: 0
+  qty: 18
+  unsellable: 0
+  product: 11CPAIN1-WS1
+  whouse: w1
+
+product.Product(15BB9900-LUBK2SP):
+  sku: 15BB9900-LUBK2SP
+  productName: EasyAcc Black Leather Flip Case Cover for Blackberry Bold 9900 +2 Screen Protectors for Blackberry Bold 9900
+  category: 15
+product.ProductQTY(8):
+  inbound: 0
+  pending: 0
+  qty: 50
+  unsellable: 0
+  product: 15BB9900-LUBK2SP
+  whouse: w1
+
+product.Product(15BB9900-MBE2SP):
+  sku: 15BB9900-MBE2SP
+  productName: EasyAcc Black Leather Flip Case Cover for Blackberry Bold 9900 +2 Screen Protectors for Blackberry Bold 9900
+  category: 15
+product.ProductQTY(9):
+  inbound: 0
+  pending: 0
+  qty: 23
+  unsellable: 0
+  product: 15BB9900-MBE2SP
+  whouse: w1
+
+product.Product(15BB9900-MBK2SP):
+  sku: 15BB9900-MBK2SP
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for BlackBerry 9900 Phone - Black + 2 Screen Protectors for BlackBerry 9900
+  category: 15
+product.ProductQTY(10):
+  inbound: 0
+  pending: 0
+  qty: 30
+  unsellable: 0
+  product: 15BB9900-MBK2SP
+  whouse: w1
+
+product.Product(15HTCEVO3D-LUB2SP):
+  sku: 15HTCEVO3D-LUB2SP
+  productName: EasyAcc Black Leather Flip Case Cover for HTC EVO 3D + 2 Screen Protectors for HTC EVO 3D
+  category: 15
+product.ProductQTY(11):
+  inbound: 0
+  pending: 0
+  qty: 28
+  unsellable: 0
+  product: 15HTCEVO3D-LUB2SP
+  whouse: w1
+
+product.Product(15HTCG14-LUB2SP):
+  sku: 15HTCG14-LUB2SP
+  productName: EasyAcc Black Leather Flip Case Cover for HTC Sensation / Sensation XE +2 Screen Protectors for HTC Sensation / Sensation XE
+  category: 15
+product.ProductQTY(12):
+  inbound: 0
+  pending: 0
+  qty: 28
+  unsellable: 0
+  product: 15HTCG14-LUB2SP
+  whouse: w1
+
+product.Product(15HTCG14-MB2SP):
+  sku: 15HTCG14-MB2SP
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for HTC Sensation 4G / Sensation XE Phone - Black + 2 Screen Protectors for HTC Sensation / Sensation XE
+  category: 15
+product.ProductQTY(13):
+  inbound: 0
+  pending: 0
+  qty: 4
+  unsellable: 0
+  product: 15HTCG14-MB2SP
+  whouse: w1
+
+product.Product(15HTCG14-MS2SP):
+  sku: 15HTCG14-MS2SP
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for HTC Sensation 4G / Sensation XE Phone - Silver White + 2 Screen Protectors for HTC Sensation / Sensation XE
+  category: 15
+product.ProductQTY(14):
+  inbound: 0
+  pending: 0
+  qty: 17
+  unsellable: 0
+  product: 15HTCG14-MS2SP
+  whouse: w1
+
+product.Product(15SS5ACE-LUB2SP):
+  sku: 15SS5ACE-LUB2SP
+  productName: EasyAcc Black Leather Flip Case Cover for samsung galaxy ace s5830 + 2 Screen Protectors for samsung galaxy ace s5830
+  category: 15
+product.ProductQTY(15):
+  inbound: 0
+  pending: 1
+  qty: 11
+  unsellable: 1
+  product: 15SS5ACE-LUB2SP
+  whouse: w1
+
+product.Product(15SSI9100-LUB2SP):
+  sku: 15SSI9100-LUB2SP
+  productName: EasyAcc Black Leather Flip Case Cover for Samsung Galaxy S2/II I9100 + 2 Screen Protectors for Samsung I9100
+  category: 15
+product.ProductQTY(16):
+  inbound: 0
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 15SSI9100-LUB2SP
+  whouse: w1
+
+product.Product(15SSI9100-MB2SP):
+  sku: 15SSI9100-MB2SP
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone - Black + 2 Screen Protectors for Samsung I9100
+  category: 15
+product.ProductQTY(17):
+  inbound: 0
+  pending: 0
+  qty: 30
+  unsellable: 0
+  product: 15SSI9100-MB2SP
+  whouse: w1
+
+product.Product(15SSI9100-MR2SP):
+  sku: 15SSI9100-MR2SP
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone - Sliver white + 2 Screen Protectors for Samsung I9100
+  category: 15
+product.ProductQTY(18):
+  inbound: 0
+  pending: 0
+  qty: 29
+  unsellable: 0
+  product: 15SSI9100-MR2SP
+  whouse: w1
+
+# 609132508189	EasyAcc Black Leather Protective Case and Multi Angle Stand for HP Touchpad Tablet + 2 Screen Protectors for HP Touchpad 16/32GB
+# 277 37 0 3
+
+product.Product(67CDTIMER-BLUE):
+  sku: 67CDTIMER-BLUE
+  productName: EasyAcc Brand new silicone Aluminum Metal Hard case for Samsung I9100 Phone - Sliver white + 2 Screen Protectors for Samsung I9100
+  category: 67
+product.ProductQTY(19):
+  inbound: 0
+  pending: 0
+  qty: 0
+  unsellable: 9
+  product: 67CDTIMER-BLUE
+  whouse: w1
+
+product.Product(68-MAGGLASS-3X75BG):
+  sku: 68-MAGGLASS-3X75BG
+  productName: Magnifying Glass
+  category: 68
+product.ProductQTY(20):
+  inbound: 0
+  pending: 4
+  qty: 96
+  unsellable: 80
+  product: 68-MAGGLASS-3X75BG
+  whouse: w1
+
+product.Product(69-NGLEDCL-7CWG):
+  sku: 69-NGLEDCL-7CWG
+  productName: TECHNOPRO 7 LED COLOR CHANGE DIGITAL ALARM THERMOMETER CLOCK
+  category: 69
+product.ProductQTY(21):
+  inbound: 0
+  pending: 0
+  qty: 2
+  unsellable: 0
+  product: 69-NGLEDCL-7CWG
+  whouse: w1
+
+product.Product(69-UNLCDCL-THAWG):
+  sku: 69-UNLCDCL-THAWG
+  productName: Digital LCD Temperature and Humidity Meter Clock Alarm
+  category: 69
+product.ProductQTY(22):
+  inbound: 0
+  pending: 4
+  qty: 0
+  unsellable: 0
+  product: 69-UNLCDCL-THAWG
+  whouse: w1
+
+product.Product(71-ASUSTF101-B2PG):
+  sku: 71-ASUSTF101-B2PG
+  productName: EasyAcc Black Leather Protective Case Cover and Flip Stand for Asus Eee Pad Transformer TF101 10.1 Tablet + 2 Screen Protectors for TF101 16/32GB
+  category: 71
+product.ProductQTY(23):
+  inbound: 400
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71-ASUSTF101-B2PG
+  whouse: w1
+
+product.Product(71-SAMGT101-B2PE):
+  sku: 71-SAMGT101-B2PE
+  productName: EasyAcc Black Leather Protective Case Cover and Flip Stand for Samsung Galaxy Tab 10.1 Tablet + 2 Pack Screen Protectors for Galaxy P7500/P7510 16G/32G
+  category: 71
+product.ProductQTY(24):
+  inbound: 128
+  pending: 0
+  qty: 0
+  unsellable: 7
+  product: 71-SAMGT101-B2PE
+  whouse: w1
+
+product.Product(71ACA500-B2PE):
+  sku: 71ACA500-B2PE
+  productName: EasyAcc Black Leather Protective Case Cover and Flip Stand for Acer iconia tab a500 10.1 inch LED Tablet + 2 Pack Screen Protectors for Acer A500 16G/32G
+  category: 71
+product.ProductQTY(25):
+  inbound: 0
+  pending: 0
+  qty: 22
+  unsellable: 0
+  product: 71ACA500-B2PE
+  whouse: w1
+
+product.Product(71ARG9101-BPU):
+  sku: 71ARG9101-BPU
+  productName: EasyAcc Black PU Leather Protective Case Cover for Archos Gen9 10.1 inch Tablet 8GB/16GB
+  category: 71
+product.ProductQTY(26):
+  inbound: 52
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71ARG9101-BPU
+  whouse: w1
+
+product.Product(71ARG980-BPU):
+  sku: 71ARG980-BPU
+  productName: EasyAcc Black PU Leather Protective Case Cover for Archos Gen9 80 (8 inch) Tablet 8GB/16GB
+  category: 71
+product.ProductQTY(27):
+  inbound: 0
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71ARG980-BPU
+  whouse: w1
+
+product.Product(71ARIN101-B2PE):
+  sku: 71ARIN101-B2PE
+  productName: EasyAcc Black Protective Folio Case Cover and Flip Stand for ARCHOS 101 8GB/16GB 10.1 inch Internet Tablet + 2 x Screen Protectors for ARCHOS 10.1
+  category: 71
+product.ProductQTY(28):
+  inbound: 912
+  pending: 2
+  qty: 1
+  unsellable: 18
+  product: 71ARIN101-B2PE
+  whouse: w1
+
+product.Product(71ASTF201-BPU360):
+  sku: 71ASTF201-BPU360
+  productName: EasyAcc Black High Quality PU Leather Protective Case and Multi Angle Stand for Asus EEE Pad Transformer Prime TF201 10.1" WiFi/3G 16/32GB
+  category: 71
+product.ProductQTY(29):
+  inbound: 0
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71ASTF201-BPU360
+  whouse: w1
+
+product.Product(71ASTF201-BRPU3S):
+  sku: 71ASTF201-BRPU3S
+  productName: EasyAcc Brown High Quality PU Leather Protective Case and Multi Angle Stand for Asus EEE Pad Transformer Prime TF201 10.1" WiFi/3G 16/32GB
+  category: 71
+product.ProductQTY(30):
+  inbound: 0
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71ASTF201-BRPU3S
+  whouse: w1
+
+product.Product(71KD4-B2PE):
+  sku: 71KD4-B2PE
+  productName: EasyAcc Black Leather Protective Cover Case and Multi Angle Stand for New Kindle 4 Wi-Fi/3G 6" E Ink Display Reader + 2 Screen Protectors for Kindle ebook
+  category: 71
+product.ProductQTY(31):
+  inbound: 134
+  pending: 1
+  qty: 37
+  unsellable: 0
+  product: 71KD4-B2PE
+  whouse: w1
+
+product.Product(71KD4-B2PLE):
+  sku: 71KD4-B2PLE
+  productName: EasyAcc Black Leather Protective Cover Case with Built in Light for New Kindle 4 Wi-Fi/3G 6" E Ink Display Reader + 2 Screen Protectors for Kindle ebook
+  category: 71
+product.ProductQTY(32):
+  inbound: 104
+  pending: 7
+  qty: 0
+  unsellable: 4
+  product: 71KD4-B2PLE
+  whouse: w1
+
+product.Product(71LNA1-BRPU360):
+  sku: 71LNA1-BRPU360
+  productName: EasyAcc Brown High Quality PU Leather Protective Case and Multi Angle Stand for Lenovo A1 7 inch Multi Touch Tablet WiFi/3G 16/32GB
+  category: 71
+product.ProductQTY(33):
+  inbound: 200
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71LNA1-BRPU360
+  whouse: w1
+
+product.Product(71LNTPAD-BPU360):
+  sku: 71LNTPAD-BPU360
+  productName: EasyAcc Black High Quality PU Leather Protective Case and Multi Angle Stand for Lenovo ThinkPad X Series 10.1 inch Tablet PC WiFi/3G 16/32GB
+  category: 71
+product.ProductQTY(34):
+  inbound: 50
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71LNTPAD-BPU360
+  whouse: w1
+
+product.Product(71SNS1-B2PE):
+  sku: 71SNS1-B2PE
+  productName: EasyAcc Black Leather Protective Case and Multi Angle Stand for Sony Tablet S1 9.4" WiFi/3G + 2 Screen Protectors for Sony Tablet S1 16/32GB
+  category: 71
+product.ProductQTY(35):
+  inbound: 100
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 71SNS1-B2PE
+  whouse: w1
+
+product.Product(72-TSAT100-2RE):
+  sku: 72-TSAT100-2RE
+  productName: EasyAcc 2 Two pack of Clear Filem LCD Front Screen Shield Scratch Protector Guard for Toshiba Thrive AT100 10.1-inch Tablet
+  category: 72
+product.ProductQTY(36):
+  inbound: 0
+  pending: 0
+  qty: 0
+  unsellable: 0
+  product: 72-TSAT100-2RE
+  whouse: w1
+
+product.Product(72ASEPSL101-2RE):
+  sku: 72ASEPSL101-2RE
+  productName: EasyAcc 2 Two pack of Clear Filem LCD Front Screen Shield Scratch Protector Guard for Asus EeePad Slider SL101 10.1-inch Tablet 16G/32G
+  category: 72
+product.ProductQTY(37):
+  inbound: 0
+  pending: 0
+  qty: 20
+  unsellable: 0
+  product: 72ASEPSL101-2RE
+  whouse: w1
+
+product.Product(80-QW1A56-BE):
+  sku: 80-QW1A56-BE
+  productName: EasyAcc 5600mAh Portable Emergency Universal USB external/extended battery pack and charger with LED flashlight for iPhone4S/iPad2, Nokia lumia 800/N9/N8, Samsung Android Phones(galaxy S2 i9100 8G/16G,note,nexus,S i9000,mini s5570,ace s5830), HTC Android Phones (Sensation,XE,XL,Desire HD,Incredible S,EVO 3D,Wildfire S,Desire S/Z,Hero,ChaCha,Titan), Motorola (Razr,Defy plus, Atrix,Flipout,Milestone 2),LG Optimus (3d,2x,one), Sony Ericsson xperia (X10,X10 mini pro,arc,X8),Blackberry (Bold 9900,9780,9700,Curve 8520,3G 9300,8900,torch 9800); Nintendo Sony PSP and Much more USB charging device. [Small size and stylish, but High capacity! With EU AC Charger!]
+  category: 80
+product.ProductQTY(38):
+  inbound: 0
+  pending: 8
+  qty: 155
+  unsellable: 1
+  product: 80-QW1A56-BE
+  whouse: w1
+
+product.Product(80QW84-2AECUPB):
+  sku: 80QW84-2AECUPB
+  productName: EasyAcc 8400mAh Portable Emergency Universal USB external/extended battery pack and charger with LED flashlight for iPhone4S/iPad2, Nokia lumia 800/N9/N8, Samsung Android Phones(galaxy S2 i9100 8G/16G,note,nexus,S i9000,mini s5570,ace s5830), HTC Android Phones (Sensation,XE,XL,Desire HD,Incredible S,EVO 3D,Wildfire S,Desire S/Z,Hero,ChaCha,Titan), Motorola (Razr,Defy plus, Atrix,Flipout,Milestone 2),LG Optimus (3d,2x,one), Sony Ericsson xperia (X10,X10 mini pro,arc,X8),Blackberry (Bold 9900,9780,9700,Curve 8520,3G 9300,8900,torch 9800); Nintendo Sony PSP and Much more USB charging device. [2 Output 5V/2.0A, 5V/0.6A - 8400mAh gives up to 18 hours of extra talk time on your phone!]
+  category: 80
+product.ProductQTY(39):
+  inbound: 0
+  pending: 1
+  qty: 12
+  unsellable: 1
+  product: 80QW84-2AECUPB
+  whouse: w1
+
 

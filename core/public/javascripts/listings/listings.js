@@ -54,15 +54,11 @@ $(function(){
         $.get('/listings/l_listing', {sku:$.HASH.sku}, function(data){
             $('#l_List').html(data);
         });
-        var prodDiv = $('#prod');
-        if(prodDiv.html() != 'Product 信息'){
+        $('.l_tabs a:eq(0)').click();
+        $.get('/listings/l_prodDetail', {sku:$.HASH.sku}, function(data){
+            $('#prod').html(data);
             $('.l_tabs a:eq(0)').click();
-        }else{
-            $.get('/listings/l_prodDetail', {sku:$.HASH.sku}, function(data){
-                prodDiv.html(data);
-                $('.l_tabs a:eq(0)').click();
-            });
-        }
+        });
         $.mask.close();
         return false;
     });

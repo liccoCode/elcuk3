@@ -71,6 +71,10 @@
     width:20%;
 }
 
+.itemList .prodItem:hover{
+    background:#E8D1A3;
+}
+
 .itemList .prodItem td.name{
     width:50%;
 }

@@ -133,6 +133,11 @@ public class Listing extends Model {
      * @return
      */
     public Selling bindSelling(Selling s) {
+        /**
+         * 检查这个 Selling 是否已经存在
+         */
+        if(Selling.exist(s.merchantSKU)) return s;
+
         s.listing = this;
         s.price = s.priceStrategy.cost * s.priceStrategy.margin;
         s.shippingPrice = s.priceStrategy.shippingPrice;

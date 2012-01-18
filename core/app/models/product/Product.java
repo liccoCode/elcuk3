@@ -45,6 +45,7 @@ public class Product extends Model {
     public String sku;
 
     @Required
+    @Lob
     public String productName;
 
     public Float lengths;

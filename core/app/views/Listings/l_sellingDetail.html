@@ -131,7 +131,7 @@
     $('#l_sell_update_btn').click(function(){
         basicUpdate();
         $.ajax({
-            url:'/sellings/deploy',
+            url:'/listings/deploy',
             data:$.varClosure.params,
             dataType:'json',
             success:function(data){
@@ -150,7 +150,7 @@
     $('#l_sell_updatelocal_btn').click(function(){
         basicUpdate();
         $.ajax({
-            url:'/sellings/update',
+            url:'/listings/update',
             data:$.varClosure.params,
             dataType:'json',
             success:function(data){

@@ -31,6 +31,11 @@ public class ProductQTY extends Model {
     public Integer pending = 0;
 
     /**
+     * 正在入库的库存; 还是需要记录的
+     */
+    public Integer inbound = 0;
+
+    /**
      * 仓库中不可销售的
      */
     public Integer unsellable = 0;

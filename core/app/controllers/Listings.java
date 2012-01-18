@@ -10,9 +10,11 @@ import models.product.Category;
 import models.product.Product;
 import play.Logger;
 import play.data.validation.Error;
+import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.libs.WS;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ import java.util.List;
  * Date: 12/28/11
  * Time: 12:49 AM
  */
+@With(GzipFilter.class)
 public class Listings extends Controller {
 
     public static void l_index() {
@@ -79,6 +82,21 @@ public class Listings extends Controller {
         2. 没有 Controller 方法会对应一个页面, 而我需要具体的页面
         3. 这样做能够为后续的操作提供修改的空间
       */
+
+    /**
+     * 远程更新, 并且更新本地数据库
+     */
+    public static void deploy(@Valid Selling s) {
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        s.deploy(s.merchantSKU);
+        renderJSON(s);
+    }
+
+    public static void update(@Valid Selling s) {
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        s.localUpdate(s.merchantSKU);
+        renderJSON(s);
+    }
 
 
     /**

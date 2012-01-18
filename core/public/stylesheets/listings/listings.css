@@ -44,11 +44,12 @@ ul, li{
 
 #l_CatAndProd li{
     position:relative;
-    width:90%;
     float:left;
+    width:120%;
 }
 
 #l_CatAndProd li a{
+    font-size:11px;
     color:black;
     text-decoration:none;
 }
@@ -84,7 +85,7 @@ ul, li{
     cursor:pointer;
 }
 
-.l_List_table_item:hover{
+.l_List_table_item:hover, .l_sell_list_item:hover{
     background:#E8D1A3;
 }
 

@@ -223,6 +223,11 @@ public class Selling extends Model {
         oldOne.save();
     }
 
+
+    public static boolean exist(String merchantSKU) {
+        return Selling.find("merchantSKU=?", merchantSKU).first() != null;
+    }
+
     /**
      * 将当前对象的值复制到老的 Selling 对象中去
      *
