@@ -105,7 +105,8 @@ public class Listing {
         this.title = titleEl.text();
         this.byWho = titleEl.parent().nextElementSibling().text();
 
-        Element reviewSumery = root.select(".asinReviewsSummary").first();
+        // 通过 titleEl 的 id 定位元素后, 再进行 reviewSummary 的定位.
+        Element reviewSumery = titleEl.parent().parent().nextElementSibling().select(".asinReviewsSummary").first();
         if(reviewSumery == null) { // 还没有 review 呢
             this.reviews = 0;
             this.rating = 0f;
