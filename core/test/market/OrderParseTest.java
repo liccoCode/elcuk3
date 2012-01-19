@@ -26,7 +26,7 @@ public class OrderParseTest extends UnitTest {
 
     @Test
     public void testParse() {
-        List<Orderr> orders = Orderr.parseALLOrderXML(new File("/Users/wyattpan/elcuk-data/2011/10/11/8141580584.xml"));
+        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/10/11/8141580584.xml"), Account.M.AMAZON_UK);
         Account acc = Account.findById(1l);
 //        List<Orderr> orders = Orderr.parseALLOrderXML(new File("F:/elcuk-data/2011/12/01/9018095104.xml"));
         for(Orderr or : orders) {

@@ -1,11 +1,11 @@
-$(function() {
+$(function(){
     var triggers = $(".prodInput").overlay();
-    $('.cat_info :input').map(function() {
+    $('.cat_info :input').map(function(){
         var t = $(this);
         if(!t.attr('readonly'))return false;
-        t.toggle(function() {
+        t.toggle(function(){
             $(this).parent().parent().next().find('div').slideDown(400);
-        }, function() {
+        }, function(){
             $(this).parent().parent().next().find('div').slideUp(400);
         });
     });
@@ -15,34 +15,34 @@ $(function() {
      * 根据参数, 修改或者添加 Category
      * @param act
      */
-    function ajax_cat(act, params) {
+    function ajax_cat(act, params){
         var save = true;
-        if(act == 'save') save = true; else if(act == 'edit') save = false;
+        if(act == 'save') save = true;else if(act == 'edit') save = false;
         $.ajax({
             url:'/products/c_create',
             data:params,
             dataType:'json',
-            success:function(data) {
-                if(data.id && data['categoryId'] == params['c.categoryId']) { //成功
+            success:function(data){
+                if(data.id && data['categoryId'] == params['c.categoryId']){ //成功
                     // 清零 Form 数据
-                    alert('Category: [' + data['categoryId'] + ']' + (save ? '添加' : '修改') + '成功.');
-                    if(save) {
+                    alert('Category: [' + data['categoryId'] + ']' + (save ? '添加' :'修改') + '成功.');
+                    if(save){
                         // 将数据按照格式添加到页面最上面
                     }
-                } else { //失败
+                }else{ //失败
                     alert("添加失败:\r\n " + JSON.stringify(data));
                 }
             },
-            error:function(xhr, ajaxstat, err) {
+            error:function(xhr, ajaxstat, err){
                 alert(err);
             }
         });
     }
 
     //添加 category
-    $('#addCategoryBtn').click(function() {
+    $('#addCategoryBtn').click(function(){
         var params = {};
-        addCatForm.find(':input').each(function(i, o) {
+        addCatForm.find(':input').each(function(i, o){
             var ji = $(o);
             if(!ji.attr('name')) return;
             params[ji.attr("name")] = ji.val();
@@ -51,12 +51,12 @@ $(function() {
     });
 
     // 修改 category
-    $(".cats_table td.action a").click(function() {
+    $(".cats_table td.action a").click(function(){
         var t = $(this);
         var catid = t.attr('catid');
         if(!catid)return false;
         var params = {};
-        var valClosure = function(i, d) {
+        var valClosure = function(i, d){
             var o = $(d);
             if(!o.attr('name')) return;
             params[o.attr('name')] = o.val();
@@ -67,10 +67,4 @@ $(function() {
         return false;
     });
 
-    // 分页 input 框
-    $('input.page').keyup(function(e) {
-        if(e.keyCode != 13) return false;
-        var o = $(this);
-        window.location.href = '/products/c_index?&p=' + o.val() + "&s=" + o.attr('psize');
-    });
 });

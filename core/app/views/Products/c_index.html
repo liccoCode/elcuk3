@@ -70,8 +70,7 @@
             <tr class="tb_footer">
                 <td colspan="4">
                     <div>
-                        总共 ${count} 条记录,  ${p} / ${(count / s) < 1 ? 1 : (count / s).toInteger()} 页
-                        跳到 <input type="text" class="page" psize="${s}" name="page"> 页
+                        #{pagefoottext items:cates, count:count, p:p, s:s, action:'/products/c_index'/}
                     </div>
                 </td>
             </tr>

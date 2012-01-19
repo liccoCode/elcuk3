@@ -204,7 +204,54 @@ public class Orderr extends Model {
 
     // -------------------------
 
-    public static List<Orderr> parseALLOrderXML(File file) {
+    /**
+     * 订单抓取第一步, 获取订单(FBA 为主)
+     * 解析的文件中的所有订单; 需要区别市场
+     *
+     * @param file
+     * @param market
+     * @return
+     */
+    public static List<Orderr> parseAllOrderXML(File file, Account.M market) {
+        switch(market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return allOrderXML_Amazon(file);
+            case EBAY_UK:
+                return allOrderXML_Ebay(file);
+            default:
+                return new ArrayList<Orderr>();
+        }
+    }
+
+    /**
+     * 抓取订单第二步
+     * 更新相信的订单信息, 比如 buyer, 地址等.
+     *
+     * @param file
+     * @param market
+     * @return
+     */
+    public static List<Orderr> parseUpdateOrderXML(File file, Account.M market) {
+        return new ArrayList<Orderr>();
+    }
+
+    public static List<Orderr> allOrderXML_Ebay(File file) {
+        //TODO 暂时还没有实现.
+        return new ArrayList<Orderr>();
+    }
+
+    /**
+     * 解析产生的订单, 这一部分主要提供的是 Amazon 的
+     *
+     * @param file
+     * @return
+     */
+    public static List<Orderr> allOrderXML_Amazon(File file) {
         AmazonEnvelopeType envelopeType = JAXB.unmarshal(file, AmazonEnvelopeType.class);
         List<Orderr> orders = new ArrayList<Orderr>();
         for(MessageType message : envelopeType.getMessage()) {

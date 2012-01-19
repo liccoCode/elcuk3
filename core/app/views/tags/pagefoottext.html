@@ -1,0 +1,16 @@
+<!-- 生成最下面翻页使用的一串  Text 文本 -->
+#{set maxPage:(java.lang.Math.ceil((_count / _s).toFloat()).intValue())/}
+当前显示 ${_items.size()} 记录,总共 ${_count} 条记录,  ${_p} / ${(_count / _items.size()) < 1 ? 1 : maxPage} 页
+跳到 <input type="text" class="page" psize="${_s}" id="pagefooter" value="${_p + 1}"> 页
+<script type="text/javascript">
+    // 分页 input 框
+    $('input#pagefooter').keyup(function(e){
+        if(e.keyCode != 13) return false;
+        var o = $(this);
+        if(o.val() > new Number('${maxPage}')){
+            alert('不允许超过最大页码');
+            return false;
+        }
+        window.location.href = '${_action}?&p=' + o.val() + "&s=" + o.attr('psize');
+    });
+</script>
