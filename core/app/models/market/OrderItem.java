@@ -102,7 +102,7 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> ajaxHighChartSelling(String msku, Date from, Date to) {
-        Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_SALE_LINE, msku), Map.class);
+        Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime()), Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
@@ -193,7 +193,8 @@ public class OrderItem extends GenericModel {
         hightChartMap.put("series_aus", amazonUs);
         hightChartMap.put("series_euk", ebayUk);
 
-        if(hightChartMap.size() > 0) Cache.add(String.format(Caches.AJAX_SALE_LINE, msku), hightChartMap, "20mn");
+        if(hightChartMap.size() > 0)
+            Cache.add(String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime()), hightChartMap, "20mn");
         return hightChartMap;
     }
 
