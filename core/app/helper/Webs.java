@@ -24,5 +24,4 @@ public class Webs {
         if(p == null || p < 0) p = 1; // 判断在页码
         if(s == null || s < 1 || s > 100) s = 20; // 判断显示的条数控制 
     }
-
 }

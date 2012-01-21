@@ -1,6 +1,9 @@
 package jobs;
 
+import models.market.Account;
 import play.jobs.Job;
+
+import java.util.List;
 
 /**
  * 每隔一段时间到 Amazon 上进行订单的抓取
@@ -12,5 +15,6 @@ import play.jobs.Job;
 public class OrderFetchJob extends Job {
     @Override
     public void doJob() throws Exception {
+        List<Account> accs = Account.all().fetch();
     }
 }

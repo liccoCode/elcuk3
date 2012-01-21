@@ -21,4 +21,24 @@ $(function(){
         if(!o.attr('name')) return false;
         $.varClosure.params[o.attr("name")] = o.val();
     };
+
+    $.DateUtil = {
+        /**
+         * 按照给与的 date 基准时间, 然后进行 day 天数的添加减少
+         * @param date
+         * @param day
+         */
+        addDay:function(day, date){
+            if(date){
+                if($.type(date) != 'date'){
+                    throw 'the date is not type of Date';
+                }
+            }else{
+                date = new Date();
+            }
+            var newDate = new Date();
+            newDate.setDate(date.getDate() + day);
+            return newDate;
+        }
+    }
 });

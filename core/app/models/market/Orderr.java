@@ -7,14 +7,12 @@ import models.finance.SaleFee;
 import models.product.Product;
 import play.Logger;
 import play.data.validation.Email;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import javax.xml.bind.JAXB;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 系统内的核心订单
@@ -23,7 +21,7 @@ import java.util.List;
  * Time: 10:18 AM
  */
 @Entity
-public class Orderr extends Model {
+public class Orderr extends GenericModel {
     /**
      * 订单的状态 State
      */
@@ -91,7 +89,7 @@ public class Orderr extends Model {
     /**
      * 订单的编码
      */
-    @Column(unique = true, nullable = false)
+    @Id
     public String orderId;
 
     /**
@@ -205,11 +203,63 @@ public class Orderr extends Model {
     // -------------------------
 
     /**
+     * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
+     */
+    public void updateOrderInfo(Orderr orderr) {
+        if(orderr.address != null) this.address = orderr.address;
+        if(orderr.address1 != null) this.address1 = orderr.address1;
+        if(orderr.arriveDate != null) this.arriveDate = orderr.arriveDate;
+        if(orderr.buyer != null) this.buyer = orderr.buyer;
+        if(orderr.city != null) this.city = orderr.city;
+        if(orderr.country != null) this.country = orderr.country;
+        if(orderr.createDate != null) this.createDate = orderr.createDate;
+        if(orderr.email != null) this.email = orderr.email;
+        if(orderr.market != null) this.market = orderr.market;
+        if(orderr.memo != null) this.memo = orderr.memo;
+        if(orderr.paymentDate != null) this.paymentDate = orderr.paymentDate;
+        if(orderr.phone != null) this.phone = orderr.phone;
+        if(orderr.postalCode != null) this.postalCode = orderr.postalCode;
+        if(orderr.province != null) this.province = orderr.province;
+        if(orderr.reciver != null) this.reciver = orderr.reciver;
+        if(orderr.shipDate != null) this.shipDate = orderr.shipDate;
+        if(orderr.shipLevel != null) this.shipLevel = orderr.shipLevel;
+        if(orderr.shippingAmount != null) this.shippingAmount = orderr.shippingAmount;
+        if(orderr.shippingService != null) this.shippingService = orderr.shippingService;
+        if(orderr.state != null) this.state = orderr.state;
+        if(orderr.totalAmount != null) this.totalAmount = orderr.totalAmount;
+        if(orderr.trackNo != null) this.trackNo = orderr.trackNo;
+
+        // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
+        Set<OrderItem> newlyOi = new HashSet<OrderItem>();
+        for(OrderItem noi : orderr.items) {
+            for(OrderItem oi : this.items) {
+                if(oi.equals(noi)) {
+                    if(noi.createDate != null) oi.createDate = noi.createDate;
+                    if(noi.discountPrice != null) oi.discountPrice = noi.discountPrice;
+                    if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
+                    if(noi.memo != null) oi.memo = noi.memo;
+                    if(noi.price != null) oi.price = noi.price;
+                    if(noi.productName != null) oi.productName = noi.productName;
+                    if(noi.quantity != null) oi.quantity = noi.quantity;
+                    if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
+                    if(noi.product != null) oi.product = noi.product;
+                    if(noi.selling != null) oi.selling = noi.selling;
+                } else {
+                    newlyOi.add(noi);
+                }
+            }
+        }
+        for(OrderItem noi : newlyOi) this.items.add(noi);
+
+        this.save();
+    }
+
+    /**
      * 订单抓取第一步, 获取订单(FBA 为主)
      * 解析的文件中的所有订单; 需要区别市场
      *
      * @param file
-     * @param market
+     * @param market 确认是哪一个市场的, Amazon 还是 Ebay
      * @return
      */
     public static List<Orderr> parseAllOrderXML(File file, Account.M market) {
@@ -318,6 +368,7 @@ public class Orderr extends Model {
                     Logger.error("Selling[%s %s] is not in SELLING, it can not be happed!!", oid.getASIN().toUpperCase(), orderr.market.toString());
                     continue;
                 }
+                oi.id = String.format("%s_%s", orderr.orderId, product.sku);
 
                 // price calculate
                 oi.price = oi.discountPrice = oi.feesAmaount = oi.shippingPrice = 0f; // 初始化值
@@ -445,5 +496,25 @@ public class Orderr extends Model {
         sb.append(", memo='").append(memo).append('\'');
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Orderr orderr = (Orderr) o;
+
+        if(!orderId.equals(orderr.orderId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + orderId.hashCode();
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 <!-- 生成最下面翻页使用的一串  Text 文本 -->
 #{set maxPage:(java.lang.Math.ceil((_count / _s).toFloat()).intValue())/}
-当前显示 ${_items.size()} 记录,总共 ${_count} 条记录,  ${_p} / ${(_count / _items.size()) < 1 ? 1 : maxPage} 页
+当前显示 ${_items.size() < _s ? _items.size() : _s} 记录,总共 ${_count} 条记录,  ${_p} / ${(_count / _items.size()) < 1 ? 1 : maxPage} 页
 跳到 <input type="text" class="page" psize="${_s}" id="pagefooter" value="${_p + 1}"> 页
 <script type="text/javascript">
     // 分页 input 框

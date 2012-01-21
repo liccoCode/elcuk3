@@ -121,6 +121,7 @@ public class Account extends Model {
             this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
     }
 
+
     @Override
     public String toString() {
         return "Account{" +

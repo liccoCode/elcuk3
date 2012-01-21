@@ -1,12 +1,16 @@
 package models.market;
 
 import exception.VErrorRuntimeException;
+import helper.Caches;
+import models.product.ProductQTY;
 import org.apache.commons.lang.StringUtils;
+import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -110,6 +114,14 @@ public class Selling extends Model {
     public Float d365 = 0f;
     @Transient
     public Float dAll = 0f;
+    @Transient
+    public Integer qty = 0;
+
+    /**
+     * 这个产品现在存有的货物还能够周转多少天
+     */
+    @Transient
+    public Float turnOver = 0f;
 
     // ----------------------- 上架会需要使用到的信息 ----------------------------
     @Lob
@@ -223,11 +235,6 @@ public class Selling extends Model {
         oldOne.save();
     }
 
-
-    public static boolean exist(String merchantSKU) {
-        return Selling.find("merchantSKU=?", merchantSKU).first() != null;
-    }
-
     /**
      * 将当前对象的值复制到老的 Selling 对象中去
      *
@@ -254,4 +261,92 @@ public class Selling extends Model {
         oldOne.platinumKeywords = StringUtils.isNotBlank(this.platinumKeywords) ? this.platinumKeywords : oldOne.platinumKeywords;
     }
 
+    public static boolean exist(String merchantSKU) {
+        return Selling.find("merchantSKU=?", merchantSKU).first() != null;
+    }
+
+    /**
+     * 加载指定时间段内的 Selling 的销量排名数据;其中涉及到计算: day(1-N), turnover
+     * PS: 这份数据肯定是需要进行缓存的..
+     *
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static List<Selling> salesRankWithTime() {
+        List<Selling> cached = Cache.get(Caches.SALE_SELLING, List.class);
+        if(cached != null && cached.size() > 0) return cached;
+        Map<String, Selling> sellingMap = new HashMap<String, Selling>();
+
+        List<OrderItem> items = OrderItem.all().fetch();
+
+        Long now = System.currentTimeMillis();
+
+        // 通过 OrderItem 计算每一个产品的销量.
+        for(OrderItem item : items) {
+            if(!sellingMap.containsKey(item.selling.merchantSKU)) {
+                sellingMap.put(item.selling.merchantSKU, item.selling);
+            }
+            Selling current = sellingMap.get(item.selling.merchantSKU);
+            Long differTime = now - item.createDate.getTime();
+
+            // 一天内的
+            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0) current.d1 += item.quantity;
+            // 七天内的
+            if(differTime <= TimeUnit.DAYS.toMillis(7)) current.d7 += item.quantity;
+            // 三十天的
+            if(differTime <= TimeUnit.DAYS.toMillis(30)) current.d30 += item.quantity;
+            // 365 天的
+            if(differTime <= TimeUnit.DAYS.toMillis(365)) current.d365 += item.quantity;
+            // 总共
+            current.dAll += item.quantity;
+        }
+
+        // 通过 Selling 与 Product 库存计算 TurnOver
+        for(Selling sell : sellingMap.values()) {
+            List<ProductQTY> qtys = sell.listing.product.qtys;
+            Integer quantity = 0;
+            for(ProductQTY qty : qtys) {
+                quantity += qty.qty;
+            }
+            sell.qty = quantity;
+            // 当前这个 Selling 所具有的库存 / 计算的 7 天的平均销量
+            if(sell.d7 == 0) {
+                sell.turnOver = -1f; // 如果 7 天内没有销量, 那么 turnOver 则直接调整为 -1, 标示值不可参考
+            } else {
+                sell.turnOver = new Float(quantity / (sell.d7 / 7.0));
+            }
+        }
+
+        // 最后对 Selling 进行排序
+        List<Selling> sellings = new ArrayList<Selling>(sellingMap.values());
+        Collections.sort(sellings, new Comparator<Selling>() {
+            @Override
+            public int compare(Selling s1, Selling s2) {
+                return (int) (s2.d30 - s1.d30);
+            }
+        });
+        if(sellings.size() > 0) Cache.add(Caches.SALE_SELLING, sellings, "20mn"); // 缓存 10 分钟
+        return sellings;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Selling selling = (Selling) o;
+
+        if(merchantSKU != null ? !merchantSKU.equals(selling.merchantSKU) : selling.merchantSKU != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (merchantSKU != null ? merchantSKU.hashCode() : 0);
+        return result;
+    }
 }

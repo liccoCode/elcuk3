@@ -1,0 +1,95 @@
+#{extends 'main.html'/}
+#{set title:'Analyze'/}
+#{set 'moreStyles'}
+    #{stylesheet 'analyzes/analyzes.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'analyzes/analyzes.js'/}
+    #{script 'highcharts.src.js'/}
+#{/set}
+<div class="uper">
+    <div id='a_chart' class="grid_8"></div>
+    <div class="grid_4" style="background:#0150D1">信息</div>
+</div>
+
+<div class="middleFunc grid_12" style="background:#498CE2">
+    <ul>
+    *{<li>}*
+    *{<span>Market:</span>}*
+    *{<select>}*
+    *{#{list items:models.market.Account.M.values(), as:'m'}}*
+    *{<option value="${m.name()}">${m}</option>}*
+    *{#{/list}}*
+    *{</select>}*
+    *{</li>}*
+        <li>&nbsp;</li>
+        <li>
+            <span>From</span>
+            <input type="date" name="from" id='a_from' style="height:.8em;width:6.5em;">
+        </li>
+        <li>
+            <span>To</span>
+            <input type="date" name="to" id='a_to' style="height:.8em;width:6.5em;">
+        </li>
+        <li>&nbsp;</li>
+        <li>
+            <span>MSku</span>
+            <input type="text" name="msku" id='a_msku'>
+        </li>
+        <li>&nbsp;</li>
+        <li>
+            <button id="a_search">搜索</button>
+        </li>
+    </ul>
+</div>
+
+<div class="down grid_12" style="background:#B1C6D8">
+    <table>
+        <tr>
+            <th title="可双击下面 MerchantSKU">MerchantSKU</th>
+            <th>ASIN</th>
+            <th>Market</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>PS</th>
+            <th>Day1</th>
+            <th>Day7</th>
+            <th>Day30</th>
+            <th>Day365</th>
+            <th>DayALL</th>
+            <th>TurnOver</th>
+            <th>Type</th>
+        </tr>
+    #{list items:sells, as:'sell'}
+        #{if sell.d30 > 0 && sell_index <= 10}
+            <tr>
+                <td class="msku" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
+                <td class="sid" title="${sell.sellingId}"><a href="${sell.listing.link()}">${sell.asin}</a></td>
+                <td>${sell.market.toString()}</td>
+                <td>${sell.price}</td>
+                <td>${sell.qty}</td>
+                <td>${sell.ps}</td>
+                <td>${sell.d1}</td>
+                <td>${sell.d7.format('#.##')}/${(sell.d7 / 7).format("#.##")}</td>
+                <td>${sell.d30.format('#.##')}/${(sell.d30 / 30).format("#.##")}</td>
+                <td>${sell.d365.format('#.##')}/${(sell.d365 / 365).format("#.##")}</td>
+                <td>${sell.dAll.format("#")}</td>
+                #{if sell.turnOver < 5 && sell.turnOver >= 0}
+                    <td style="color:red;">${sell.turnOver.format("#.##")}</td>
+                #{/if}
+                #{else }
+                    <td>${sell.turnOver.format("#.##")}</td>
+                #{/else}
+                <td>${sell.type}</td>
+            </tr>
+        #{/if}
+    #{/list}
+        <tr class="tb_footer">
+            <td colspan="13">
+                <div>
+                #{pagefoottext items:sells, count:count, p:p, s:s, action:'/products/c_index'/}
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
