@@ -15,6 +15,18 @@ $(function(){
                 day:'%y.%m.%d'
             }
         },
+        plotOptions:{
+            series:{
+                cursor:'pointer',
+                point:{
+                    events:{
+                        click:function(){
+                            alert(this.series.name + ":::::" + this.x + ":::" + this.y);
+                        }
+                    }
+                }
+            }
+        },
         yAxis:{
             title:{
                 text:'Sales'
@@ -32,7 +44,7 @@ $(function(){
             formatter:function(){
                 var cur = new Date(this.x);
                 return '<strong>' + this.series.name + '</strong><br/>' +
-                        'Date:' + (cur.toLocaleDateString()) + '<br/>' +
+                        'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
                         'Sales: ' + this.y;
             }
         },
@@ -85,7 +97,7 @@ $(function(){
     // 访问页面, 利用 Ajax 加载所有订单的销量
     var preMonth = $.DateUtil.addDay(-30);
     var now = new Date();
-    ajax_line('all', {from:preMonth.toLocaleDateString(), to:now.toLocaleDateString(), msku:'all'});
+    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'});
     $('#a_from').data("dateinput").setValue(preMonth);
     $('#a_to').data("dateinput").setValue(now);
 
@@ -108,8 +120,13 @@ $(function(){
     });
 
 
-    $('.msku').dblclick(function(){
-        $('#a_msku').val($(this).text());
+    // 最下方的 Selling Sale 列表信息
+    $.mask.load();
+    $.get('/analyzes/index_sell', {'p.page':1, 'p.size':10}, function(html){
+        $('#selling_down').html(html);
+        $('.msku').dblclick(function(){
+            $('#a_msku').val($(this).text());
+        });
+        $.mask.close();
     });
-
 });

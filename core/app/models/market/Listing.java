@@ -136,7 +136,7 @@ public class Listing extends Model {
         /**
          * 检查这个 Selling 是否已经存在
          */
-        if(Selling.exist(s.merchantSKU)) return s;
+        if(Selling.exist(s.sellingId)) return s;
 
         s.listing = this;
         s.price = s.priceStrategy.cost * s.priceStrategy.margin;

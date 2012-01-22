@@ -39,6 +39,12 @@ $(function(){
             var newDate = new Date();
             newDate.setDate(date.getDate() + day);
             return newDate;
+        },
+        /**
+         * mm/dd/yyyy 格式的年月日
+         */
+        fmt1:function(date){
+            return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
         }
     }
 });

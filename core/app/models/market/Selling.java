@@ -6,7 +6,7 @@ import models.product.ProductQTY;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.*;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 10:48 AM
  */
 @Entity
-public class Selling extends Model {
+public class Selling extends GenericModel {
 
     /**
      * Selling 的状态
@@ -63,21 +63,25 @@ public class Selling extends Model {
     public PriceStrategy priceStrategy;
 
     /**
-     * 唯一的 SellingId, [asin]_[market], 这个可重复, 因为会有多个 Selling 实际上
-     * 是上架的一个 Listing; 这个字段也想当与一个冗余字段.
+     * 上架后用来唯一标示这个 Selling 的 Id;
+     * 唯一的 SellingId, [merchantSKU]_[market]
      */
-    @Column(nullable = false)
+    @Id
     public String sellingId;
 
+
     /**
-     * 上架后用来唯一标示这个 Selling 的 Id;
      * 1. 在 Amazon 上架的唯一的 merchantSKU;
-     * 2. 在 ebay 上架的唯一的 itemId;
+     * 2. 在 ebay 上唯一的 itemid(因为 ebay 的 itemid 是唯一的, 所以对于 ebay 的 selling, merchantSKU 与 asin 将会一样)
      */
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     @Required
     public String merchantSKU;
 
+    /**
+     * 1. 在 Amazon 上单个市场中唯一的 ASIN
+     * 2. 在 ebay 上架的唯一的 itemId;
+     */
     @Column(nullable = false)
     public String asin;
 
@@ -195,16 +199,16 @@ public class Selling extends Model {
     @ManyToOne
     public Account account;
 
-    public void setAsin(String asin) {
-        this.asin = asin;
-        if(this.asin != null && this.market != null)
-            this.sellingId = String.format("%s_%s", this.asin, this.market.toString());
+    public void setMerchantSKU(String merchantSKU) {
+        this.merchantSKU = merchantSKU;
+        if(this.merchantSKU != null && this.market != null)
+            this.sellingId = String.format("%s_%s", this.merchantSKU, this.market.toString());
     }
 
     public void setMarket(Account.M market) {
         this.market = market;
-        if(this.asin != null && this.market != null)
-            this.sellingId = String.format("%s_%s", this.asin, this.market.toString());
+        if(this.merchantSKU != null && this.market != null)
+            this.sellingId = String.format("%s_%s", this.merchantSKU, this.market.toString());
     }
 
     /**

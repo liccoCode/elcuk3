@@ -1,11 +1,14 @@
 package controllers;
 
+import models.PageInfo;
 import models.market.OrderItem;
 import models.market.Selling;
 import play.data.binding.As;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,6 +18,7 @@ import java.util.List;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
+@With({GzipFilter.class})
 public class Analyzes extends Controller {
     public static void index() {
         List<Selling> sells = Selling.salesRankWithTime();
@@ -22,6 +26,24 @@ public class Analyzes extends Controller {
         long s = 10;
         long count = sells.size();
         render(sells, p, s, count);
+    }
+
+    /**
+     * Analyze 页面下部分的 Selling 信息
+     */
+    public static void index_sell(PageInfo<Selling> p) {
+        List<Selling> sells = Selling.salesRankWithTime();
+        List<Selling> items = new ArrayList<Selling>();
+        if(sells.size() == 0) {
+            p.items = items;
+            render(p);
+        }
+        p.count = (long) sells.size();
+        for(int i = p.begin; i < p.end; i++) {
+            items.add(sells.get(i));
+        }
+        p.items = items;
+        render(p);
     }
 
     /**

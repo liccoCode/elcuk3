@@ -63,6 +63,10 @@ public class ListingBindTest extends FunctionalTest {
             params.put("s.type", "FBA");
 
             POST("/listings/bindSelling", params);
+            params.put("s.market", Account.M.AMAZON_DE.name());
+            POST("/listings/bindSelling", params);
+            params.put("s.market", Account.M.AMAZON_FR.name());
+            POST("/listings/bindSelling", params);
         }
     }
 }

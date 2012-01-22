@@ -1,0 +1,71 @@
+<!-- 生成 Analyzes 页面下方的 selling 信息 -->
+<table>
+    <tr>
+        <th title="可双击下面 MerchantSKU">MerchantSKU</th>
+        <th>ASIN</th>
+        <th>Market</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>PS</th>
+        <th>Day1</th>
+        <th>Day7</th>
+        <th>Day30</th>
+        <th>Day365</th>
+        <th>DayALL</th>
+        <th>TurnOver</th>
+        <th>Type</th>
+    </tr>
+#{list items:p.items, as:'sell'}
+    #{if sell.d30 > 0 && sell_index <= 10}
+        <tr>
+            <td class="msku" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
+            <td class="sid" title="${sell.sellingId}"><a href="${sell.listing.link()}">${sell.asin}</a></td>
+            <td>${sell.market.toString()}</td>
+            <td>${sell.price}</td>
+            <td>${sell.qty}</td>
+            <td>${sell.ps}</td>
+            <td>${sell.d1}</td>
+            <td>${sell.d7.format('#.##')}/${(sell.d7 / 7).format("#.##")}</td>
+            <td>${sell.d30.format('#.##')}/${(sell.d30 / 30).format("#.##")}</td>
+            <td>${sell.d365.format('#.##')}/${(sell.d365 / 365).format("#.##")}</td>
+            <td>${sell.dAll.format("#")}</td>
+            #{if sell.turnOver < 5 && sell.turnOver >= 0}
+                <td style="color:red;">${sell.turnOver.format("#.##")}</td>
+            #{/if}
+            #{else }
+                <td>${sell.turnOver.format("#.##")}</td>
+            #{/else}
+            <td>${sell.type}</td>
+        </tr>
+    #{/if}
+#{/list}
+    <tr class="tb_footer">
+        <td colspan="13">
+            <div>
+                当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count} 条记录,  ${p.page}
+                / ${p.totalPage} 页
+                跳到 <input type="text" class="page" psize="${p.size}" id="pagefooter" value="${p.page + 1}"> 页
+                <script type="text/javascript">
+                    // 分页 input 框
+                    $('input#pagefooter').keyup(function(e){
+                        if(e.keyCode != 13) return false;
+                        var o = $(this);
+                        if(o.val() > new Number('${p.totalPage}')){
+                            alert('不允许超过最大页码');
+                            return false;
+                        }
+                        // Ajax 事件需要重新加载
+                        $.mask.load();
+                        $.get('/analyzes/index_sell', {'p.page':o.val(), 'p.size':10}, function(html){
+                            $('#selling_down').html(html);
+                            $('.msku').dblclick(function(){
+                                $('#a_msku').val($(this).text());
+                            });
+                            $.mask.close();
+                        });
+                    });
+                </script>
+            </div>
+        </td>
+    </tr>
+</table>
