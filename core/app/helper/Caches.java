@@ -13,7 +13,13 @@ public class Caches {
     public static final String SALE_SELLING = "salesRankWithTime";
 
     /**
-     * Analyzes 页面的 Ajax 获取分析数据的 Line 图时使用的带有 msku 的缓存 key, 需要补充 msku 值区分唯一, 两个时间的毫秒数.
+     * Analyzes 页面的 Ajax 获取分析数据的 Line(销量) 图时使用的带有 msku 的缓存 key, 需要补充 msku 值区分唯一, 两个时间的毫秒数.
      */
     public static final String AJAX_SALE_LINE = "ajaxHighChartSelling_%s_%s_%s";
+
+    /**
+     * Analyzes 页面的 Ajax 获取分析数据的 Line(销售额) 图时使用的带有 msku 的缓存 key, 需要补充 msku 值区分唯一, 两个时间的毫秒数.
+     */
+    public static final String AJAX_PRICE_LINE = "ajaxHighChartSales_%s_%s_%s";
+
 }

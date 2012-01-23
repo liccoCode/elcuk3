@@ -1,6 +1,8 @@
 $(function(){
     $('.middleFunc :date').dateinput({format:'mm/dd/yyyy'});
-    var c1 = {
+
+    /* 查看 Sellings 的销售量的 HightChart Options 对象 */
+    var sells = {
         chart:{
             renderTo:'a_chart',
             defaultSeriesType:'line',
@@ -52,13 +54,80 @@ $(function(){
         ]
     };
 
-    function ajax_line(msku, params){
+    /* 查看 Sellings 的销售额的 HightChart Options 对象 */
+    var sales = {
+        chart:{
+            renderTo:'a_sales',
+            defaultSeriesType:'line',
+            marginBottom:50
+        },
+        title:{
+            text:'Selling Price Sales'
+        },
+        xAxis:{
+            type:'datetime',
+            dateTimeLabelFormats:{
+                day:'%y.%m.%d'
+            }
+        },
+        plotOptions:{
+            series:{
+                cursor:'pointer',
+                point:{
+                    events:{
+                        click:function(){
+                            alert(this.series.name + ":::::" + this.x + ":::" + this.y);
+                        }
+                    }
+                }
+            }
+        },
+        yAxis:{
+            title:{
+                text:'Prices'
+            },
+            min:0,
+            plotLines:[
+                {
+                    value:0,
+                    width:1,
+                    color:'#808080'
+                }
+            ]
+        },
+        tooltip:{
+            formatter:function(){
+                var cur = new Date(this.x);
+                return '<strong>' + this.series.name + '</strong><br/>' +
+                        'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
+                        'Sales: ' + this.y;
+            }
+        },
+        series:[
+        ]
+    };
+
+
+    /**
+     * 加载并且绘制 Selling 的销售额与销售量
+     * @param msku
+     * @param params
+     * @param type -1:销售量, 1:销售额
+     */
+    function ajax_line(msku, params, type){
         $.ajax({
-            url:'/analyzes/ajaxLine',
+            url:'/analyzes/' + (type < 0 ? 'ajaxSells' :'ajaxSales'),
             data:params,
             dataType:'json',
             success:function(data){
-                c1.title.text = 'Selling [' + msku + '] Sales';
+                var curtOpt;
+                if(type < 0){
+                    curtOpt = sells;
+                    sells.title.text = 'Selling [' + msku + '] Sales';
+                }else{
+                    curtOpt = sales;
+                    sales.title.text = 'Selling [' + msku + '] Prices';
+                }
                 var series = [];
 
                 /**
@@ -85,8 +154,8 @@ $(function(){
                 dealLine('afr');
                 dealLine('ait');
 
-                c1.series = series;
-                new Highcharts.Chart(c1);
+                curtOpt.series = series;
+                new Highcharts.Chart(curtOpt);
             },
             error:function(xhr, state, err){
                 alert(err);
@@ -97,7 +166,7 @@ $(function(){
     // 访问页面, 利用 Ajax 加载所有订单的销量
     var preMonth = $.DateUtil.addDay(-30);
     var now = new Date();
-    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'});
+    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'}, -1);
     $('#a_from').data("dateinput").setValue(preMonth);
     $('#a_to').data("dateinput").setValue(now);
 
@@ -116,7 +185,7 @@ $(function(){
             $.varClosure.params['from'] = from.getFullYear() + "-" + (from.getMonth() + 1) + "-" + from.getDay();
             $.varClosure.params['to'] = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDay();
         }
-        ajax_line(msku, $.varClosure.params);
+        ajax_line(msku, $.varClosure.params, -1);
     });
 
 
@@ -129,4 +198,8 @@ $(function(){
         });
         $.mask.close();
     });
+
+//    $('#a_sales')
+    // test
+    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'}, 1);
 });

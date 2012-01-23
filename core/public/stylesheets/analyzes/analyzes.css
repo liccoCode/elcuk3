@@ -1,9 +1,13 @@
 /* ------------------- */
 .uper{
-    height:40%;
+    height:30%;
 }
 
-#a_chart{
+.uper2{
+    height:30%;
+}
+
+#a_chart, #a_sales{
     height:100%;
 }
 

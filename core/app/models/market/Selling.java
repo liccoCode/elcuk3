@@ -281,7 +281,8 @@ public class Selling extends GenericModel {
         if(cached != null && cached.size() > 0) return cached;
         Map<String, Selling> sellingMap = new HashMap<String, Selling>();
 
-        List<OrderItem> items = OrderItem.all().fetch();
+        List<OrderItem> items = OrderItem.find("SELECT oi FROM OrderItem oi WHERE oi.order.state NOT IN (?,?,?)",
+                Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
 
         Long now = System.currentTimeMillis();
 

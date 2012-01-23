@@ -46,6 +46,16 @@ public class Analyzes extends Controller {
         render(p);
     }
 
+    public static void ajaxSales(String msku,
+                                 @As("MM/dd/yyyy") Date from,
+                                 @As("MM/dd/yyyy") Date to) {
+        validation.required(msku);
+        validation.required(from);
+        validation.required(to);
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        renderJSON(OrderItem.ajaxHighChartSales(msku, from, to));
+    }
+
     /**
      * 加载指定 Selling 的时间段内的销量数据
      *
@@ -53,9 +63,9 @@ public class Analyzes extends Controller {
      * @param from
      * @param to
      */
-    public static void ajaxLine(String msku,
-                                @As("MM/dd/yyyy") Date from,
-                                @As("MM/dd/yyyy") Date to) {
+    public static void ajaxSells(String msku,
+                                 @As("MM/dd/yyyy") Date from,
+                                 @As("MM/dd/yyyy") Date to) {
         validation.required(msku);
         validation.required(from);
         validation.required(to);

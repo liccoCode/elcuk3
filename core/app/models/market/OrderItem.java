@@ -27,10 +27,10 @@ public class OrderItem extends GenericModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public Orderr order;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public Selling selling;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public Product product;
 
     /**
@@ -78,20 +78,6 @@ public class OrderItem extends GenericModel {
     /**
      * <pre>
      * 通过 OrderItem 计算指定的 msku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
-     * yAxis,
-     * xAxis:{
-     *   type: 'datetime',
-     *   dateTimeLabelFormats: {
-     *     day: '%y.%m.%d'
-     *   }
-     * }
-     * series:
-     *     series: [{
-     *       data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4],
-     *       pointStart: Date.UTC(2010, 0, 1),
-     *       pointInterval: 24 * 3600 * 1000 // one day
-     *   }]
-     *
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
      * </pre>
      *
@@ -112,12 +98,12 @@ public class OrderItem extends GenericModel {
         List<OrderItem> orderItems;
         if("all".equalsIgnoreCase(msku)) {
             orderItems = OrderItem.find(
-                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=?",
-                    from, to).fetch();
+                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
+                    from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
         } else {
             orderItems = OrderItem.find(
-                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=?",
-                    msku, from, to).fetch();
+                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
+                    msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
         }
 
         int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
@@ -195,6 +181,112 @@ public class OrderItem extends GenericModel {
 
         if(hightChartMap.size() > 0)
             Cache.add(String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime()), hightChartMap, "20mn");
+        return hightChartMap;
+    }
+
+    /**
+     * 加载指定参数的 Selling 的销售额情况
+     *
+     * @param msku
+     * @param from
+     * @param to
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> ajaxHighChartSales(String msku, Date from, Date to) {
+        Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_PRICE_LINE, msku, from.getTime(), to.getTime()), Map.class);
+        if(cached != null && cached.size() > 0) return cached;
+        /**
+         * 加载出限定时间内的指定 Msku 的 OrderItem
+         * 按照天过滤成销量数据
+         * 组装成 HightChart 的格式
+         */
+        List<OrderItem> orderItems;
+        if("all".equalsIgnoreCase(msku)) {
+            orderItems = OrderItem.find(
+                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
+                    from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+        } else {
+            orderItems = OrderItem.find(
+                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
+                    msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+        }
+
+        int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
+        // 按照每天进行分割
+        List<Float> allSales = new ArrayList<Float>();
+        List<Float> amazonUk = new ArrayList<Float>();
+        List<Float> amazonDe = new ArrayList<Float>();
+        List<Float> amazonEs = new ArrayList<Float>();
+        List<Float> amazonIt = new ArrayList<Float>();
+        List<Float> amazonFr = new ArrayList<Float>();
+        List<Float> amazonUs = new ArrayList<Float>();
+        List<Float> ebayUk = new ArrayList<Float>();
+
+
+        // 从 from 时间开始, 按照每 24 小时进行一个时区进行划分, 将 OrderItem 划分到每个时间区间中去
+        for(long begin = from.getTime(); begin <= to.getTime(); begin += TimeUnit.DAYS.toMillis(1)) {
+            float all = 0;
+            float auk = 0;
+            float aus = 0;
+            float ade = 0;
+            float ait = 0;
+            float afr = 0;
+            float aes = 0;
+            float euk = 0;
+
+            for(OrderItem itm : orderItems) {
+                if(itm.createDate.getTime() > begin && itm.createDate.getTime() <= (begin + TimeUnit.DAYS.toMillis(1))) {
+                    all += itm.price;
+                    switch(itm.selling.market) {
+                        case AMAZON_UK:
+                            auk += itm.price;
+                            break;
+                        case AMAZON_DE:
+                            ade += itm.price;
+                            break;
+                        case AMAZON_FR:
+                            afr += itm.price;
+                            break;
+                        case AMAZON_IT:
+                            ait += itm.price;
+                            break;
+                        case AMAZON_US:
+                            auk += itm.price;
+                            break;
+                        case AMAZON_ES:
+                            aes += itm.price;
+                            break;
+                        case EBAY_UK:
+                            euk += itm.price;
+                    }
+                }
+            }
+            // 每一个时间区间需要一组销量数据
+            allSales.add(all);
+            amazonUk.add(auk);
+            amazonDe.add(ade);
+            amazonIt.add(ait);
+            amazonFr.add(afr);
+            amazonEs.add(aes);
+            amazonUs.add(aus);
+            ebayUk.add(euk);
+        }
+
+
+        Map<String, Object> hightChartMap = new HashMap<String, Object>();
+        hightChartMap.put("days", days);
+        hightChartMap.put("series_all", allSales);
+        hightChartMap.put("series_auk", amazonUk);
+        hightChartMap.put("series_ade", amazonDe);
+        hightChartMap.put("series_afr", amazonFr);
+        hightChartMap.put("series_aes", amazonEs);
+        hightChartMap.put("series_ait", amazonIt);
+        hightChartMap.put("series_aus", amazonUs);
+        hightChartMap.put("series_euk", ebayUk);
+
+        if(hightChartMap.size() > 0)
+            Cache.add(String.format(Caches.AJAX_PRICE_LINE, msku, from.getTime(), to.getTime()), hightChartMap, "20mn");
         return hightChartMap;
     }
 
