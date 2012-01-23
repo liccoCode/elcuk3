@@ -100,7 +100,7 @@
 
     // -- 为了进行 Tab 化
     window.location.hash = '';
-    $('.l_sell_info_tabs').tabs('.l_sell_info_panels > div');
+    $('.l_sell_info_tabs').tabs('.l_sell_info_panels > div', {current:'l_current'});
     window.location.hash = $.HASH.val();
 
     var basicUpdate = function(){

@@ -35,7 +35,21 @@
                     <td>${ord.email}</td>
                     <td>${ord.createDate.format("yyyy-MM-dd HH:mm:ss")}</td>
                     <td>${ord.paymentDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
-                    <td>${ord.state}</td>
+                    #{if ord.state == models.market.Orderr.S.PENDING}
+                        <td style="color:#4169e1;">${ord.state}</td>
+                    #{/if}
+                    #{elseif ord.state == models.market.Orderr.S.PAYMENT}
+                        <td style="color:orange;">${ord.state}</td>
+                    #{/elseif}
+                    #{elseif ord.state == models.market.Orderr.S.CANCEL}
+                        <td style="color:red;">${ord.state}</td>
+                    #{/elseif}
+                    #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
+                        <td style="color:green;">${ord.state}</td>
+                    #{/elseif}
+                    #{else }
+                        <td>${ord.state}</td>
+                    #{/else}
                 </tr>
                 <tr class="order_detail" id="orderDetail_${ord.orderId}">
                     <td colspan="9">
@@ -47,14 +61,14 @@
                             <div>
                                 <table>
                                     <tr>
-                                        <td class="l_label">ID</td>
-                                        <td class="l_val">${ord.id}</td>
                                         <td class="l_label">OrderId</td>
                                         <td class="l_val">${ord.orderId}</td>
                                         <td class="l_label">Address</td>
                                         <td class="l_val">${ord.address}</td>
                                         <td class="l_label">Address1</td>
                                         <td class="l_val">${ord.address1}</td>
+                                        <td class="l_label">Reciver</td>
+                                        <td class="l_val">${ord.reciver}</td>
                                     </tr>
                                     <tr>
                                         <td class="l_label">ArriveDate</td>
@@ -83,8 +97,7 @@
                                         <td class="l_val">${ord.postalCode}</td>
                                         <td class="l_label">Province</td>
                                         <td class="l_val">${ord.province}</td>
-                                        <td class="l_label">Reciver</td>
-                                        <td class="l_val">${ord.reciver}</td>
+                                        <td colspan="2">&nbsp;</td>
                                     </tr>
                                     <tr>
                                         <td class="l_label">ShipDate</td>
@@ -103,6 +116,9 @@
                                         #{/if}
                                         #{elseif ord.state == models.market.Orderr.S.PAYMENT}
                                             <td class="l_val" style="color:orange;">${ord.state}</td>
+                                        #{/elseif}
+                                        #{elseif ord.state == models.market.Orderr.S.CANCEL}
+                                            <td class="l_val" style="color:red;">${ord.state}</td>
                                         #{/elseif}
                                         #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
                                             <td class="l_val" style="color:green;">${ord.state}</td>
