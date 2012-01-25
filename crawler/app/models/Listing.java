@@ -7,8 +7,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * 抓取使用的 Listing 信息
@@ -89,7 +91,8 @@ public class Listing {
         Element root = Jsoup.parse(html);
 
         this.asin = root.select("#ASIN").val().toUpperCase();
-        this.listingId = String.format("%s_%s", this.asin, root.select("#navLogoPrimary > span").text());
+        Element site = root.select("#navLogoPrimary > span").first();
+        this.listingId = String.format("%s_%s", this.asin, site.text());
 //        Elements images = root.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
         Element img = root.select("#prodImage").first();
         if(img != null) {
@@ -138,8 +141,8 @@ public class Listing {
         ListingOffer buybox = new ListingOffer();
         buybox.buybox = true;
         if(noFbaPrice != null) {
-            buybox.price = Extra.flt(noFbaPrice.select(".price").text());
-            buybox.shipprice = Extra.flt(noFbaPrice.select(".plusShippingText").text());
+            buybox.price = amazonPrice(site.text(), noFbaPrice.select(".price").text());
+            buybox.shipprice = amazonPrice(site.text(), noFbaPrice.select(".plusShippingText").text());
             buybox.offerId = root.select("#merchantID").val().toUpperCase();
             buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
             buybox.fba = false;
@@ -182,7 +185,7 @@ public class Listing {
                 buybox.name = fbaTextLink.previousElementSibling().text();
             }
             buybox.offerId = root.select("#merchantID").val().toUpperCase();
-            buybox.price = Extra.flt(root.select(".priceLarge").text());
+            buybox.price = amazonPrice(site.text(), root.select(".priceLarge").text());
             buybox.shipprice = 0;
         }
         offers.add(buybox);
@@ -194,9 +197,9 @@ public class Listing {
                 ListingOffer moreSeller = new ListingOffer();
                 moreSeller.offerId = seller.id().split("_")[2].toUpperCase();
                 moreSeller.name = seller.select(".mbcMerch >td").first().text();
-                moreSeller.price = Extra.flt(seller.select(".mbcPriceCell").text());
+                moreSeller.price = amazonPrice(site.text(), seller.select(".mbcPriceCell").text());
                 String shippingText = seller.select(".plusShippingText").text().toUpperCase();
-                moreSeller.shipprice = Extra.flt(shippingText);
+                moreSeller.shipprice = amazonPrice(site.text(), shippingText);
                 if(shippingText.contains("&") || shippingText.contains("FREE")) moreSeller.fba = true;
                 offers.add(moreSeller);
             } catch(Exception e) {
@@ -205,6 +208,26 @@ public class Listing {
         }
         this.offers = offers;
         return this;
+    }
+
+    static final NumberFormat nf_de = NumberFormat.getIntegerInstance(Locale.GERMAN);
+    static final NumberFormat nf_uk = NumberFormat.getCurrencyInstance(Locale.UK);
+    static final NumberFormat nf_us = NumberFormat.getCurrencyInstance(Locale.US);
+
+    private Float amazonPrice(String site, String priceStr) {
+        try {
+
+            if("amazon.co.uk".equals(site.toLowerCase())) {
+                return nf_uk.parse(priceStr).floatValue();
+            } else if("amazon.com".equals(site.toLowerCase())) {
+                return nf_us.parse(priceStr).floatValue();
+            } else {
+                return nf_de.parse(priceStr.split(" ")[1]).floatValue();
+            }
+        } catch(Exception e) {
+            Logger.warn("AmazonPrice parse error. [" + e.getMessage() + "]");
+            return 0f;
+        }
     }
 
     private Listing parseEbay() {
