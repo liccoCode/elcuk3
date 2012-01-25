@@ -118,7 +118,7 @@ public class Listings extends Controller {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
         }
         if(tobeSave == null)
-            renderJSON(new Error("Listing", "Listing is null!", new String[]{}));
+            renderJSON(new Error("Listing", "The Crawl Listing(" + asin + "," + market + ") is not exist!", new String[]{}));
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
 
