@@ -252,6 +252,9 @@ public class Listing extends Model {
                 case AMAZON_UK:
                     off.price = offer.get("price").getAsFloat();
                     break;
+                case AMAZON_US:
+                    off.price = Currency.USD.toGBP(offer.get("price").getAsFloat());
+                    break;
                 case AMAZON_DE:
                 case AMAZON_FR:
                 default:

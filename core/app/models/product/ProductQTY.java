@@ -73,6 +73,7 @@ public class ProductQTY extends Model {
             if(pqty != null) {// 如果有已经存在的 ProductQTY, 那么则累加数据
                 if(this.qty == null) throw new VErrorRuntimeException("ProductQty.qty", "Must input value");
                 pqty.qty += this.qty;
+                if(this.inbound != null) pqty.inbound += this.inbound;
                 if(this.pending != null) pqty.pending += this.pending;
                 if(this.unsellable != null) pqty.unsellable += this.unsellable;
                 pqty.save();

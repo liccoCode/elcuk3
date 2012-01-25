@@ -108,40 +108,39 @@ public class JobRequest extends Model {
      * 根据 Account 检查是否需要有不同类型的 Job 创建
      *
      * @param acc
+     * @param type
      * @return
      */
     public static JobRequest checkJob(Account acc, T type) {
-        JobRequest job;
         switch(type) {
             case ALL_FBA_ORDER_FETCH:
-                if(!acc.type.name().startsWith("AMAZON"))
-                    throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_FETCH JOB!");
-                job = JobRequest.find("account=? AND type=? ORDER BY requestDate DESC", acc, T.ALL_FBA_ORDER_FETCH).first();
-                //每 3 小时需要抓取一次订单
-                if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(3)) {
-                    JobRequest njob = new JobRequest();
-                    njob.account = acc;
-                    njob.requestDate = njob.lastUpdateDate = new Date();
-                    njob.state = S.NEW;
-                    njob.type = T.ALL_FBA_ORDER_FETCH;
-                    return njob;
-                }
-                return null;
-
+                return newJob(3, T.ALL_FBA_ORDER_FETCH, acc);
             case ALL_FBA_ORDER_SHIPPED:
-                if(!acc.type.name().startsWith("AMAZON"))
-                    throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
-                job = JobRequest.find("account=? AND type=? ORDER BY requestDate DESC", acc, T.ALL_FBA_ORDER_SHIPPED).first();
-                // 每 8 消失抓取一次发货
-                if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(8)) {
-                    JobRequest njob = new JobRequest();
-                    njob.account = acc;
-                    njob.requestDate = njob.lastUpdateDate = new Date();
-                    njob.state = S.NEW;
-                    njob.type = T.ALL_FBA_ORDER_SHIPPED;
-                    return njob;
-                }
-                return null;
+                return newJob(8, T.ALL_FBA_ORDER_SHIPPED, acc);
+        }
+        return null;
+    }
+
+    /**
+     * 具体的检查某个类型的 JobRequest 是否需要进行创建.
+     *
+     * @param interval 创建下一个 JobRequest 的时间间隔.
+     * @param type     这个 JobRequest 的类型
+     * @param acc      哪一个账户
+     * @return
+     */
+    private static JobRequest newJob(int interval, T type, Account acc) {
+        if(!acc.type.name().startsWith("AMAZON"))
+            throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
+        JobRequest job = JobRequest.find("account=? AND type=? ORDER BY requestDate DESC", acc, type).first();
+        // 每 8 消失抓取一次发货
+        if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
+            JobRequest njob = new JobRequest();
+            njob.account = acc;
+            njob.requestDate = njob.lastUpdateDate = new Date();
+            njob.state = S.NEW;
+            njob.type = type;
+            return njob;
         }
         return null;
     }
@@ -211,6 +210,10 @@ public class JobRequest extends Model {
      * 处理下载好的文件
      */
     public void dealWith() {
+        Collection<Orderr> orders = null;
+        List<String> orderIds = new ArrayList<String>();
+        Map<String, Orderr> orderrMap = new HashMap<String, Orderr>();
+        Map<String, Orderr> oldOrderrMap = new HashMap<String, Orderr>();
         switch(this.type) {
             case ALL_FBA_ORDER_FETCH:
                 /**
@@ -218,10 +221,10 @@ public class JobRequest extends Model {
                  * 2. 手动从数据库中加载出需要更新的 Order (managed),  然后再将这些处于被管理状态的 Order 进行更新;
                  * 3. 将数据库中没有加载到的 Order 给新保存
                  */
-                List<Orderr> orders = Orderr.parseAllOrderXML(new File(this.path), this.account.type); // 1. 解析出订单
-                List<String> orderIds = new ArrayList<String>();
-                Map<String, Orderr> orderrMap = new HashMap<String, Orderr>();
-                Map<String, Orderr> oldOrderrMap = new HashMap<String, Orderr>();
+                orders = Orderr.parseAllOrderXML(new File(this.path), this.account.type); // 1. 解析出订单
+                orderIds.clear();
+                orderrMap.clear();
+                oldOrderrMap.clear();
                 for(Orderr or : orders) {
                     orderrMap.put(or.orderId, or);
                     orderIds.add(or.orderId);
@@ -234,11 +237,37 @@ public class JobRequest extends Model {
                 }
                 for(Orderr newOrd : orders) { // 3. 将数据库中没有加载到的 Order 给新保存
                     if(oldOrderrMap.containsKey(newOrd.orderId)) continue;
+                    // 由于 Account 在 XML 文件中解析不出来, 所以在创建的时候需要讲讲这个 Order 的 Account 与对应申请 JobRequest 的关联上
+                    newOrd.account = this.account;
                     newOrd.save();
                     Logger.info("Save Order: " + newOrd.orderId);
                 }
                 break;
             case ALL_FBA_ORDER_SHIPPED:
+                /**
+                 * 1. 将需要更新的数据从 csv 文件中提取出来
+                 * 2. 加载出需要进行更新的 Order(managed), 然后将这些处于被管理的 Order 对象进行更新;
+                 * 3. 如果在更新过程中出现系统中没有出现的订单, 那么则输出日志
+                 */
+                orders = Orderr.parseUpdateOrderXML(new File(this.path), this.account.type);
+                orderIds.clear();
+                orderrMap.clear();
+                oldOrderrMap.clear();
+                for(Orderr or : orders) {
+                    orderrMap.put(or.orderId, or);
+                    orderIds.add(or.orderId);
+                }
+
+                List<Orderr> managedOrderrs_2 = Orderr.find("orderId IN ('" + StringUtils.join(orderIds, "','") + "')").fetch();
+                for(Orderr or : managedOrderrs_2) {
+                    Orderr newOrder = orderrMap.get(or.orderId);
+                    or.updateOrderInfo(newOrder);
+                    oldOrderrMap.put(or.orderId, or);
+                }
+                for(Orderr newOrd : orders) {
+                    if(oldOrderrMap.containsKey(newOrd.orderId)) continue;
+                    Logger.warn("Update Order [" + newOrd.orderId + "] is not exist.");
+                }
                 break;
         }
     }

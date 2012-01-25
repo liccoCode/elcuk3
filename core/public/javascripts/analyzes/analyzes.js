@@ -138,11 +138,8 @@ $(function(){
                     var line = {};
                     line.name = lineName.toUpperCase();
                     line.data = [];
-                    var now = new Date();
                     for(var d = data['days']; d > 0; d--){
-                        var curt = new Date();
-                        curt.setDate(now.getDate() - d);
-                        line.data.push([curt.getTime(), data['series_' + lineName].shift()]);
+                        line.data.push([$.DateUtil.addDay(-d + 1, $('#a_to').data('dateinput').getValue()).getTime(), data['series_' + lineName].shift()]);
                     }
                     series.push(line);
                     return false;

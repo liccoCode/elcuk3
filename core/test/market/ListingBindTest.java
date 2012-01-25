@@ -1,6 +1,5 @@
 package market;
 
-import models.market.Account;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
@@ -28,7 +27,16 @@ public class ListingBindTest extends FunctionalTest {
         for(String line : lines) {
             if(line.startsWith("#") || StringUtils.isBlank(line)) continue;
             String[] args = StringUtils.split(line, " ");
-            GET("/listings/crawl?market=uk&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
+            // 每一个 SKU 都帮顶 3 个国家的 Listing.
+            if("609132508189".equals(args[0].split(",")[0])) {
+                GET("/listings/crawl?market=uk&asin=" + args[1] + "&sku=71-HPTOUCH-B2PG");
+                GET("/listings/crawl?market=de&asin=" + args[1] + "&sku=71-HPTOUCH-B2PG");
+                GET("/listings/crawl?market=fr&asin=" + args[1] + "&sku=71-HPTOUCH-B2PG");
+            } else {
+                GET("/listings/crawl?market=uk&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
+                GET("/listings/crawl?market=de&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
+                GET("/listings/crawl?market=fr&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
+            }
         }
     }
 
@@ -48,7 +56,7 @@ public class ListingBindTest extends FunctionalTest {
 
             params.put("s.account.uniqueName", "amazon.co.uk_easyacc.eu@gmail.com");
             params.put("s.asin", listing.asin);
-            params.put("s.market", Account.M.AMAZON_UK.name());
+            params.put("s.market", listing.market.name());
             params.put("s.merchantSKU", args[0]);
             Float basicPrice = listing.displayPrice == null ? 3 : listing.displayPrice;
             params.put("s.priceStrategy.cost", (basicPrice * 0.5) + "");
@@ -62,10 +70,6 @@ public class ListingBindTest extends FunctionalTest {
             params.put("s.state", "NEW");
             params.put("s.type", "FBA");
 
-            POST("/listings/bindSelling", params);
-            params.put("s.market", Account.M.AMAZON_DE.name());
-            POST("/listings/bindSelling", params);
-            params.put("s.market", Account.M.AMAZON_FR.name());
             POST("/listings/bindSelling", params);
         }
     }

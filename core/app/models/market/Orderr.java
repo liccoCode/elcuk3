@@ -2,12 +2,15 @@ package models.market;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
+import helper.Dates;
 import helper.Patterns;
 import models.finance.SaleFee;
 import models.product.Product;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
+import play.libs.IO;
 
 import javax.persistence.*;
 import javax.xml.bind.JAXB;
@@ -235,27 +238,29 @@ public class Orderr extends GenericModel {
         if(orderr.totalAmount != null) this.totalAmount = orderr.totalAmount;
         if(orderr.trackNo != null) this.trackNo = orderr.trackNo;
 
-        // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
-        Set<OrderItem> newlyOi = new HashSet<OrderItem>();
-        for(OrderItem noi : orderr.items) {
-            for(OrderItem oi : this.items) {
-                if(oi.equals(noi)) {
-                    if(noi.createDate != null) oi.createDate = noi.createDate;
-                    if(noi.discountPrice != null) oi.discountPrice = noi.discountPrice;
-                    if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
-                    if(noi.memo != null) oi.memo = noi.memo;
-                    if(noi.price != null) oi.price = noi.price;
-                    if(noi.productName != null) oi.productName = noi.productName;
-                    if(noi.quantity != null) oi.quantity = noi.quantity;
-                    if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
-                    if(noi.product != null) oi.product = noi.product;
-                    if(noi.selling != null) oi.selling = noi.selling;
-                } else {
-                    newlyOi.add(noi);
+        if(orderr.items != null) {
+            // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
+            Set<OrderItem> newlyOi = new HashSet<OrderItem>();
+            for(OrderItem noi : orderr.items) {
+                for(OrderItem oi : this.items) {
+                    if(oi.equals(noi)) {
+                        if(noi.createDate != null) oi.createDate = noi.createDate;
+                        if(noi.discountPrice != null) oi.discountPrice = noi.discountPrice;
+                        if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
+                        if(noi.memo != null) oi.memo = noi.memo;
+                        if(noi.price != null) oi.price = noi.price;
+                        if(noi.productName != null) oi.productName = noi.productName;
+                        if(noi.quantity != null) oi.quantity = noi.quantity;
+                        if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
+                        if(noi.product != null) oi.product = noi.product;
+                        if(noi.selling != null) oi.selling = noi.selling;
+                    } else {
+                        newlyOi.add(noi);
+                    }
                 }
             }
+            for(OrderItem noi : newlyOi) this.items.add(noi);
         }
-        for(OrderItem noi : newlyOi) this.items.add(noi);
 
         this.save();
     }
@@ -292,13 +297,58 @@ public class Orderr extends GenericModel {
      * @param market
      * @return
      */
-    public static List<Orderr> parseUpdateOrderXML(File file, Account.M market) {
-        return new ArrayList<Orderr>();
+    public static Set<Orderr> parseUpdateOrderXML(File file, Account.M market) {
+        switch(market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return allUpdateOrderXML_Amazon(file);
+            case EBAY_UK:
+            default:
+                Logger.warn("parseUpdateOrderXML is not support the Ebay market!");
+                return new HashSet<Orderr>();
+        }
+    }
+
+    public static Set<Orderr> allUpdateOrderXML_Amazon(File file) {
+        List<String> lines = IO.readLines(file, "UTF-8");
+        Set<Orderr> orderrs = new HashSet<Orderr>();
+        lines.remove(0); //删除第一行标题
+        for(String line : lines) {
+            // 在解析 csv 文件的时候会发现有重复的项出现, 不过这没关系, 
+            String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
+            Orderr order = new Orderr();
+            order.orderId = vals[0];
+            order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
+            order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
+            order.shippingService = vals[42];
+            if(StringUtils.isNotBlank(vals[43])) {
+                order.trackNo = vals[43];
+                order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
+            }
+            order.email = vals[10];
+            order.buyer = vals[11];
+            order.phone = vals[12];
+            order.shipLevel = vals[23];
+            order.reciver = vals[24];
+            order.address = vals[25];
+            order.address1 = (vals[26] + " " + vals[27]).trim();
+            order.city = vals[28];
+            order.province = vals[29];
+            order.postalCode = vals[30];
+            order.country = vals[31];
+
+            orderrs.add(order);
+        }
+        return orderrs;
     }
 
     public static List<Orderr> allOrderXML_Ebay(File file) {
         //TODO 暂时还没有实现.
-        return new ArrayList<Orderr>();
+        throw new UnsupportedOperationException("allOrderXML_Ebay 还没有实现!");
     }
 
     /**
@@ -360,7 +410,13 @@ public class Orderr extends GenericModel {
                 oi.quantity = oid.getQuantity();
                 oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
 
-                Product product = Product.find("sku=?", oid.getSKU().split(",")[0].toUpperCase()).first();
+                String sku = oid.getSKU().split(",")[0].toUpperCase();
+                Product product;
+                if("609132508189".equals(sku)) { // 这里做一个针对性的判断
+                    product = Product.find("sku=?", "71-HPTOUCH-B2PG").first();
+                } else {
+                    product = Product.find("sku=?", sku).first();
+                }
                 Selling selling = Selling.find("asin=? AND market=?", oid.getASIN().toUpperCase(), orderr.market).first();
                 if(product != null) oi.product = product;
                 else {

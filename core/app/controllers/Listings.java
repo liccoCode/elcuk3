@@ -111,7 +111,14 @@ public class Listings extends Controller {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
         JsonElement listing = WS.url(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin)).get().getJson();
-        Listing tobeSave = Listing.parseListingFromCrawl(listing);
+        Listing tobeSave = null;
+        try {
+            tobeSave = Listing.parseListingFromCrawl(listing);
+        } catch(Exception e) {
+            renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
+        }
+        if(tobeSave == null)
+            renderJSON(new Error("Listing", "Listing is null!", new String[]{}));
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
 

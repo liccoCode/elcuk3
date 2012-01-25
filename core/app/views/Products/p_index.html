@@ -154,6 +154,7 @@
                                         <tr>
                                             <th>Id</th>
                                             <th>Whouse</th>
+                                            <th>Inbound</th>
                                             <th>Qty</th>
                                             <th>Pending</th>
                                             <th>Unsellabel</th>
@@ -164,6 +165,7 @@
                                                 <td>${qty.id}</td>
                                                 <td>${qty.whouse.name}</td>
                                                 <!-- TODO 库存的修改不应该如此轻易的求改, 后续可能后被取消直接修改库存值 -->
+                                                <td><input type="text" name="pt.inbound" value="${qty.inbound}"></td>
                                                 <td><input type="text" name="pt.qty" value="${qty.qty}"></td>
                                                 <td><input type="text" name="pt.pending" value="${qty.pending}"></td>
                                                 <td><input type="text" name="pt.unsellable" value="${qty.unsellable}">
@@ -204,7 +206,10 @@
                                                 <td class="label"><label for="pt.qty">Qty</label></td>
                                                 <td><input class="v1 float_left" type="text" name="pt.qty" id="pt.qty">
                                                 </td>
-                                                <td colspan="2">&nbsp;</td>
+                                                <td class="label"><label for="pt.inbound">Inbound</label></td>
+                                                <td><input class="v1 float_left" type="text" name="pt.inbound"
+                                                           id="pt.inbound">
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td class="label"><label for="pt.pending">Pending</label></td>

@@ -67,6 +67,8 @@ ul.dropdown a{
 
 /* Footer */
 .footer{
+    clear:both;
+    height:20px;
     margin-top:10px;
     background:#600020;
     text-align:center;

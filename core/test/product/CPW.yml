@@ -477,6 +477,18 @@ product.ProductQTY(34):
   product: 71LNTPAD-BPU360
   whouse: w1
 
+product.Product(71-HPTOUCH-B2PG):
+  sku: 71-HPTOUCH-B2PG
+  productName: EasyAcc Black Leather Protective Case and Multi Angle Stand for HP Touchpad Tablet + 2 Screen Protectors for HP Touchpad 16/32GB
+  category: 71
+product.ProductQTY(40):
+  inbound: 277
+  pending: 4
+  qty: 13
+  unsellable: 0
+  product: 71-HPTOUCH-B2PG
+  whouse: w1
+
 product.Product(71SNS1-B2PE):
   sku: 71SNS1-B2PE
   productName: EasyAcc Black Leather Protective Case and Multi Angle Stand for Sony Tablet S1 9.4" WiFi/3G + 2 Screen Protectors for Sony Tablet S1 16/32GB
