@@ -210,7 +210,7 @@ public class Listing {
         return this;
     }
 
-    static final NumberFormat nf_de = NumberFormat.getIntegerInstance(Locale.GERMAN);
+    static final NumberFormat nf_de = NumberFormat.getNumberInstance(Locale.GERMAN);
     static final NumberFormat nf_uk = NumberFormat.getCurrencyInstance(Locale.UK);
     static final NumberFormat nf_us = NumberFormat.getCurrencyInstance(Locale.US);
 
