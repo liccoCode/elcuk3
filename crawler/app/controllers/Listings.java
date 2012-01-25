@@ -43,6 +43,7 @@ public class Listings extends Controller {
         IO.writeContent(html, new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
 //        String html = IO.readContentAsString(new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
         // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
-        renderJSON(new Listing(html).parseFromHTML(Listing.T.AMAZON));
+        Listing lst = new Listing(html).parseFromHTML(Listing.T.AMAZON);
+        renderJSON(lst == null ? new Listing() : lst);
     }
 }

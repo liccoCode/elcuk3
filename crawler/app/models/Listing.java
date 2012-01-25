@@ -28,9 +28,13 @@ public class Listing {
         EBAY
     }
 
+    public Listing() {
+    }
+
     public Listing(String html) {
         this.html = html;
     }
+
 
     public String listingId;
 
