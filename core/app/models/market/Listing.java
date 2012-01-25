@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import exception.VErrorRuntimeException;
+import helper.Currency;
 import models.product.Product;
 import play.db.jpa.Model;
 
@@ -246,7 +247,16 @@ public class Listing extends Model {
             ListingOffer off = new ListingOffer();
             off.name = offer.get("name").getAsString();
             off.offerId = offer.get("offerId").getAsString();
-            off.price = offer.get("price").getAsFloat();
+            // 价格根据不同的市场进行转换成 GBP 价格
+            switch(tobeChangeed.market) {
+                case AMAZON_UK:
+                    off.price = offer.get("price").getAsFloat();
+                    break;
+                case AMAZON_DE:
+                case AMAZON_FR:
+                default:
+                    off.price = Currency.EUR.toGBP(offer.get("price").getAsFloat());
+            }
             off.shipprice = offer.get("shipprice").getAsFloat();
             off.fba = offer.get("fba").getAsBoolean();
             off.buybox = offer.get("buybox").getAsBoolean();

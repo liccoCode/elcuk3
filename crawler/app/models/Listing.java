@@ -182,7 +182,7 @@ public class Listing {
                 buybox.name = fbaTextLink.previousElementSibling().text();
             }
             buybox.offerId = root.select("#merchantID").val().toUpperCase();
-            buybox.price = Extra.flt(root.select("#actualPriceValue").text());
+            buybox.price = Extra.flt(root.select(".priceLarge").text());
             buybox.shipprice = 0;
         }
         offers.add(buybox);
