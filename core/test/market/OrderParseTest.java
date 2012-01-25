@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import play.Logger;
+import play.db.jpa.JPA;
 import play.test.Fixtures;
 import play.test.UnitTest;
 
@@ -77,8 +78,9 @@ public class OrderParseTest extends UnitTest {
                     Logger.info("Save Order: " + newOrd.orderId);
                 }
             } catch(Exception e) {
-                Logger.error("不是 AllOrders.xml 但不管::" + e.getMessage());
+                Logger.error(file.getName() + " 不是 AllOrders.xml 但不管::" + e.getMessage());
             }
+            JPA.em().flush();
         }
     }
 }

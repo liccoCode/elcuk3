@@ -81,9 +81,15 @@ public class Orderr extends GenericModel {
     /**
      * 订单是通过某一个账户下产生的; 这是一个单向的关系, 不需要 Account 知道. 需要的时候直接使用 SQL 语句进行反向查询
      */
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public Account account;
     //-------------- Basic ----------------
+
+    /**
+     * 发送邮件到达了什么阶段. 默认从 0 开始;
+     * TODO 具体的 0,1,2,3... 还需要进行讨论
+     */
+    public int emailed = 0;
 
 
     /**

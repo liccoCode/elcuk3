@@ -24,8 +24,9 @@ User(jason):
 
 market.Account(easyacc):
   username: easyacc.eu@gmail.com
-  password: passwd
+  password: 6XC$X5oY!jj
   type: AMAZON_UK
-  token: >
-          This is token.
+  token: 3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf
+  accessKey: AKIAI6EBPJLG64HWDBGQ
+  merchantId: AJUR3R8UN71M4
   closeable: false

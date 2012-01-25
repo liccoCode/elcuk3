@@ -19,7 +19,8 @@
     #{if sell.d30 > 0 && sell_index <= 10}
         <tr>
             <td class="msku" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
-            <td class="sid" title="${sell.sellingId}"><a href="${sell.listing.link()}">${sell.asin}</a></td>
+            <td class="sid" title="${sell.sellingId}"><a target="_blank" href="${sell.listing.link()}">${sell.asin}</a>
+            </td>
             <td>${sell.market.toString()}</td>
             <td>${sell.price}</td>
             <td>${sell.qty}</td>
@@ -28,10 +29,13 @@
             <td>${sell.d7.format('#.##')}/${(sell.d7 / 7).format("#.##")}</td>
             <td>${sell.d30.format('#.##')}/${(sell.d30 / 30).format("#.##")}</td>
             <td>${sell.d365.format('#.##')}/${(sell.d365 / 365).format("#.##")}</td>
-            <td>${sell.dAll.format("#")}</td>
-            #{if sell.turnOver < 5 && sell.turnOver >= 0}
+            <td>${sell.dAll.format("#.##")}</td>
+            #{if sell.turnOver < 8 && sell.turnOver >= 0}
                 <td style="color:red;">${sell.turnOver.format("#.##")}</td>
             #{/if}
+            #{elseif sell.turnOver < 0}
+                <td style="color:purple;">(无库存)</td>
+            #{/elseif}
             #{else }
                 <td>${sell.turnOver.format("#.##")}</td>
             #{/else}

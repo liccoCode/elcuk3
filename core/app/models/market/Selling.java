@@ -295,15 +295,19 @@ public class Selling extends GenericModel {
             Long differTime = now - item.createDate.getTime();
 
             // 一天内的
-            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0) current.d1 += item.quantity;
+            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
+                current.d1 = current.d1 + item.quantity;
             // 七天内的
-            if(differTime <= TimeUnit.DAYS.toMillis(7)) current.d7 += item.quantity;
+            if(differTime <= TimeUnit.DAYS.toMillis(7))
+                current.d7 = current.d7 + item.quantity;
             // 三十天的
-            if(differTime <= TimeUnit.DAYS.toMillis(30)) current.d30 += item.quantity;
+            if(differTime <= TimeUnit.DAYS.toMillis(30))
+                current.d30 = current.d30 + item.quantity;
             // 365 天的
-            if(differTime <= TimeUnit.DAYS.toMillis(365)) current.d365 += item.quantity;
+            if(differTime <= TimeUnit.DAYS.toMillis(365))
+                current.d365 = current.d365 + item.quantity;
             // 总共
-            current.dAll += item.quantity;
+            current.dAll = current.dAll + item.quantity;
         }
 
         // 通过 Selling 与 Product 库存计算 TurnOver

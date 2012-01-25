@@ -24,7 +24,7 @@ public class OrderItem extends GenericModel {
     @Id
     public String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     public Orderr order;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -98,12 +98,12 @@ public class OrderItem extends GenericModel {
         List<OrderItem> orderItems;
         if("all".equalsIgnoreCase(msku)) {
             orderItems = OrderItem.find(
-                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
-                    from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=?",
+                    from, to).fetch();
         } else {
             orderItems = OrderItem.find(
-                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
-                    msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=?",
+                    msku, from, to).fetch();
         }
 
         int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
@@ -130,6 +130,9 @@ public class OrderItem extends GenericModel {
             int euk = 0;
 
             for(OrderItem itm : orderItems) {
+                // 由于使用 JPQL 查询的时候,添加了 State 的 where 限制不能够生效, 所以直接使用程序控制了
+                if(itm.order.state == Orderr.S.CANCEL || itm.order.state == Orderr.S.REFUNDED || itm.order.state == Orderr.S.RETURNNEW)
+                    continue;
                 if(itm.createDate.getTime() > begin && itm.createDate.getTime() <= (begin + TimeUnit.DAYS.toMillis(1))) {
                     all += itm.quantity;
                     switch(itm.selling.market) {
@@ -204,12 +207,12 @@ public class OrderItem extends GenericModel {
         List<OrderItem> orderItems;
         if("all".equalsIgnoreCase(msku)) {
             orderItems = OrderItem.find(
-                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
-                    from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                    "SELECT oi FROM OrderItem oi WHERE oi.createDate>=? AND oi.createDate<=?",
+                    from, to).fetch();
         } else {
             orderItems = OrderItem.find(
-                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND oi.order.state NOT IN(?,?,?)",
-                    msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                    "SELECT oi FROM OrderItem oi WHERE oi.selling.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=?",
+                    msku, from, to).fetch();
         }
 
         int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
@@ -236,6 +239,9 @@ public class OrderItem extends GenericModel {
             float euk = 0;
 
             for(OrderItem itm : orderItems) {
+                // 由于使用 JPQL 查询的时候,添加了 State 的 where 限制不能够生效, 所以直接使用程序控制了
+                if(itm.order.state == Orderr.S.CANCEL || itm.order.state == Orderr.S.REFUNDED || itm.order.state == Orderr.S.RETURNNEW)
+                    continue;
                 if(itm.createDate.getTime() > begin && itm.createDate.getTime() <= (begin + TimeUnit.DAYS.toMillis(1))) {
                     all += itm.price;
                     switch(itm.selling.market) {

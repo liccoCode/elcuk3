@@ -16,12 +16,12 @@ public class Accounts extends Controller {
     public static void p(Integer page) {
     }
 
-    public static void c(@Valid Account acc) {
+    public static void c(@Valid Account a) {
         if(Validation.hasErrors()) {
             renderJSON(validation.errorsMap());
         }
-        acc.save();
-        renderJSON(acc);
+        a.save();
+        renderJSON(a);
     }
 
     public static void r(Long id) {

@@ -100,9 +100,18 @@ public class Account extends Model {
     public String password;
 
     /**
-     * 不同市场所拥有的钥匙
+     * 不同市场所拥有的钥匙;
+     * Secret Key; [Amazon]
+     * Toekn; [Ebay]
      */
     public String token;
+
+    public String accessKey;
+
+    /**
+     * Amazon MerchantID
+     */
+    public String merchantId;
 
     /**
      * 是否可用

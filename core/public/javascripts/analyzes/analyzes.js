@@ -186,6 +186,7 @@ $(function(){
             $.varClosure.params['to'] = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDay();
         }
         ajax_line(msku, $.varClosure.params, -1);
+        ajax_line(msku, $.varClosure.params, 1);
     });
 
 
@@ -199,7 +200,5 @@ $(function(){
         $.mask.close();
     });
 
-//    $('#a_sales')
-    // test
     ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'}, 1);
 });
