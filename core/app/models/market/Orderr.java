@@ -402,7 +402,7 @@ public class Orderr extends GenericModel {
                  * 1. 将 orderitem 的基本信息补充完全
                  * 2. 检查 orderitems List 中时候已经存在相同的产品了, 如果有这修改已经存在的产品的数量否则才添加新的
                  */
-                if(oid.getQuantity() <= 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
+                if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
 
                 OrderItem oi = new OrderItem();
                 oi.order = orderr;

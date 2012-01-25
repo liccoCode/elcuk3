@@ -49,28 +49,29 @@ public class ListingBindTest extends FunctionalTest {
             if(line.startsWith("#") || StringUtils.isBlank(line)) continue;
             String[] args = StringUtils.split(line, " ");
 
-            Listing listing = Listing.find("listingId=?", args[1].trim() + "_amazon.co.uk").first();
+            List<Listing> listings = Listing.find("asin=?", args[1].trim()).fetch();
+            for(Listing listing : listings) {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("lid", listing.listingId);
 
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("lid", listing.listingId);
+                params.put("s.account.uniqueName", "amazon.co.uk_easyacc.eu@gmail.com");
+                params.put("s.asin", listing.asin);
+                params.put("s.market", listing.market.name());
+                params.put("s.merchantSKU", args[0]);
+                Float basicPrice = listing.displayPrice == null ? 3 : listing.displayPrice;
+                params.put("s.priceStrategy.cost", (basicPrice * 0.5) + "");
+                params.put("s.priceStrategy.lowest", (basicPrice * 0.15) + "");
+                params.put("s.priceStrategy.margin", 0.5 + "");
+                params.put("s.priceStrategy.max", (basicPrice * 1.5) + "");
+                params.put("s.priceStrategy.shippingPlus", "0");
+                params.put("s.priceStrategy.shippingPrice", "0");
+                params.put("s.priceStrategy.type", "FixedPrice");
+                params.put("s.ps", "5");
+                params.put("s.state", "NEW");
+                params.put("s.type", "FBA");
 
-            params.put("s.account.uniqueName", "amazon.co.uk_easyacc.eu@gmail.com");
-            params.put("s.asin", listing.asin);
-            params.put("s.market", listing.market.name());
-            params.put("s.merchantSKU", args[0]);
-            Float basicPrice = listing.displayPrice == null ? 3 : listing.displayPrice;
-            params.put("s.priceStrategy.cost", (basicPrice * 0.5) + "");
-            params.put("s.priceStrategy.lowest", (basicPrice * 0.15) + "");
-            params.put("s.priceStrategy.margin", 0.5 + "");
-            params.put("s.priceStrategy.max", (basicPrice * 1.5) + "");
-            params.put("s.priceStrategy.shippingPlus", "0");
-            params.put("s.priceStrategy.shippingPrice", "0");
-            params.put("s.priceStrategy.type", "FixedPrice");
-            params.put("s.ps", "5");
-            params.put("s.state", "NEW");
-            params.put("s.type", "FBA");
-
-            POST("/listings/bindSelling", params);
+                POST("/listings/bindSelling", params);
+            }
         }
     }
 }
