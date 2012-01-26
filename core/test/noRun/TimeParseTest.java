@@ -58,6 +58,13 @@ public class TimeParseTest {
     @Test
     public void testParseDate() throws DatatypeConfigurationException {
         System.out.println(Dates.parseXMLGregorianDate("2012-01-23T10:33:33+00:00"));
+    }
 
+    @Test
+    public void testFilesName() {
+        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2012/back/"), new String[]{"xml", "csv"}, true));
+        for(File f : files) {
+            System.out.println(f.getName());
+        }
     }
 }

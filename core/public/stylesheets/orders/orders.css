@@ -15,6 +15,7 @@
     border:0 none;
     border-right:1px solid black;
     border-bottom:1px solid black;
+    padding:0 1px;
 }
 
 .orderList .orList table td.l_label{
