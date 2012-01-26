@@ -299,14 +299,12 @@ public class OrderItem extends GenericModel {
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
-        if(!(o instanceof OrderItem)) return false;
+        if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
 
         OrderItem orderItem = (OrderItem) o;
 
-        if(!order.orderId.equals(orderItem.order.orderId)) return false;
-        if(!product.sku.equals(orderItem.product.sku)) return false;
-        if(!selling.sellingId.equals(orderItem.selling.sellingId)) return false;
+        if(!id.equals(orderItem.id)) return false;
 
         return true;
     }
@@ -314,9 +312,7 @@ public class OrderItem extends GenericModel {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + order.orderId.hashCode();
-        result = 31 * result + selling.sellingId.hashCode();
-        result = 31 * result + product.sku.hashCode();
+        result = 31 * result + id.hashCode();
         return result;
     }
 }

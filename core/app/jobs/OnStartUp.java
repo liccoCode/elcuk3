@@ -18,7 +18,7 @@ public class OnStartUp extends Job {
         // 1. 初始化系统内的用户
         long users = User.count();
         if(users == 0) {
-            User.deleteAll();
+            Fixtures.delete(User.class);
             Fixtures.loadModels("users.yml");
         }
     }

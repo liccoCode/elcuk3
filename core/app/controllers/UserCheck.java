@@ -39,13 +39,13 @@ public class UserCheck extends Secure.Security {
             }
         }
         if("guest".equals(profile)) {
-            return user.power.ordinal() > User.P.GUEST.ordinal();
+            return user.power.ordinal() >= User.P.GUEST.ordinal();
         } else if("normal".equals(profile)) {
-            return user.power.ordinal() > User.P.NORMAL.ordinal();
+            return user.power.ordinal() >= User.P.NORMAL.ordinal();
         } else if("manager".equals(profile)) {
-            return user.power.ordinal() > User.P.MANAGER.ordinal();
+            return user.power.ordinal() >= User.P.MANAGER.ordinal();
         } else if("root".equals(profile)) {
-            return user.power.ordinal() > User.P.ROOT.ordinal();
+            return user.power.ordinal() >= User.P.ROOT.ordinal();
         }
         return false;
     }

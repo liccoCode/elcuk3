@@ -39,4 +39,30 @@ public class Jobex extends Model {
         Class<Job> jobClz = (Class<Job>) Class.forName(className);
         return jobClz.newInstance();
     }
+
+    /**
+     * 立即执行
+     *
+     * @return
+     * @throws ClassNotFoundException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    public Job now() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        Job job = newInstance();
+        job.now();
+        this.lastUpdateTime = System.currentTimeMillis();
+        this.save();
+        return job;
+    }
+
+    public void updateJobAttrs(Jobex njob) {
+        this.close = njob.close;
+        if(njob.className != null && !njob.className.trim().isEmpty())
+            this.className = njob.className;
+        if(njob.duration != null && !njob.duration.trim().isEmpty())
+            this.duration = njob.duration;
+        this.lastUpdateTime = System.currentTimeMillis();
+        this.save();
+    }
 }

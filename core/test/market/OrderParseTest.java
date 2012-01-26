@@ -50,7 +50,7 @@ public class OrderParseTest extends UnitTest {
     public void parseOrders() {
 //        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2011/12/32/"), new String[]{"xml"}, true));
 //        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2011/12/33/"), new String[]{"xml"}, true));
-        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2012/01/"), new String[]{"xml"}, true));
+        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2012/back/"), new String[]{"xml"}, true));
         Account acc = Account.findById(1l);
         for(File file : files) {
             Logger.info("Parse: " + file.getAbsolutePath());

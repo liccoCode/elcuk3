@@ -1,0 +1,77 @@
+#{extends 'main.html'/}
+#{set title:'Asynchronous Jobs'/}
+#{set 'moreStyles'}
+    #{stylesheet 'jobs/jobs.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'jobs/jobs.js'/}
+#{/set}
+<div class="jobDiv">
+    <div class="jobFunc">
+        <button class="add_job" rel="#add_job">添加 Job</button>
+        <div id="add_job" class="add_dialog">
+            <h2>添加一个 Asynchronous Job</h2>
+
+            <form id="job_add_form">
+                <table class="add_form">
+                    <tr>
+                        <td class="label"><label for="j_className">ClassName</label></td>
+                        <td><input type="text" id="j_className" name="j.className"></td>
+                    </tr>
+                    <tr>
+                        <td class="label"><label for="j_duration">Duration</label></td>
+                        <td><input type="text" id="j_duration" name="j.duration"></td>
+                    </tr>
+                    <tr>
+                        <td class="label"><label for="j_close">Close</label></td>
+                        <td><input type="checkbox" id="j_close" name="j.close" value=""></td>
+                    </tr>
+                </table>
+                <button type="button" class="close float_left">关闭</button>
+                <button type="reset" class="float_left">重置</button>
+            </form>
+            <button id='add_job_btn' class="float_left">创建</button>
+        </div>
+    </div>
+    <hr>
+    <div class="jobList grid_12">
+    #{if jobs.size() == 0}
+        无任务
+    #{/if}
+    #{else }
+        <table class="j_list">
+            <tr>
+                <th>Id</th>
+                <th>ClassName</th>
+                <th>Duration</th>
+                <th>LastUpdateTime</th>
+                <th>Closed</th>
+                <th>Func</th>
+            </tr>
+            #{list items:jobs, as:'job'}
+                <tr class="job_itm">
+                    <td>
+                    ${job.id}
+                        <input type="hidden" name="j.id" value="${job.id}">
+                    </td>
+                    <td><input type="text" name="j.className" value="${job.className}"></td>
+                    <td><input type="text" name="j.duration" value="${job.duration}"></td>
+                    <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
+                    <td>
+                        #{if job.close}
+                            <input type="checkbox" name="j.close" checked>
+                        #{/if}
+                        #{else }
+                            <input type="checkbox" name="j.close">
+                        #{/else}
+                    </td>
+                    <td style="width:15%">
+                        <a class="runOnce" jid='${job.id}' href="javascript:;" title="立即执行一次">执行</a>
+                        <a class="j_update" jid='${job.id}' href="javascript:;" title="更新修改了的参数">更新</a>
+                    </td>
+                </tr>
+            #{/list}
+        </table>
+    #{/else}
+    </div>
+</div>

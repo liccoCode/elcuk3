@@ -1,0 +1,31 @@
+.jobList table{
+    border-left:1px solid black;
+    border-top:1px solid black;
+    width:100%;
+}
+
+.jobList table td,
+.jobList table th{
+    text-align:center;
+    border-right:1px solid black;
+    border-bottom:1px solid black;
+}
+
+.jobList table th{
+    background:#F4F4F4;
+}
+
+.j_list input[type=text]{
+    border:0 none;
+    width:99%;
+    text-align:center;
+}
+
+.j_list input[type=text]:focus{
+    background:#F3E378;
+}
+
+#add_job{
+    display:none;
+}
+

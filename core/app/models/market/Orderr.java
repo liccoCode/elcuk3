@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPA;
 import play.libs.IO;
 
 import javax.persistence.*;
@@ -241,6 +242,9 @@ public class Orderr extends GenericModel {
         if(orderr.items != null) {
             // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
             Set<OrderItem> newlyOi = new HashSet<OrderItem>();
+            if("302-9156293-0335516".equals(orderr.orderId)) {
+                System.out.println("find it!");
+            }
             for(OrderItem noi : orderr.items) {
                 for(OrderItem oi : this.items) {
                     if(oi.equals(noi)) {
@@ -254,11 +258,13 @@ public class Orderr extends GenericModel {
                         if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
                         if(noi.product != null) oi.product = noi.product;
                         if(noi.selling != null) oi.selling = noi.selling;
-                    } else {
+                    } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
                         newlyOi.add(noi);
                     }
                 }
             }
+            // 如果有两个相同的 object_id 相同的对象添加进入 Orderr.items 进行级联保存或者更新, 那么会在 hibernate 进行保存更新
+            // 检查唯一性的时候发生异常! 所以上面的 JPA.em().contains(oi) 判断很有必要!
             for(OrderItem noi : newlyOi) this.items.add(noi);
         }
 
@@ -490,6 +496,9 @@ public class Orderr extends GenericModel {
      * @return
      */
     private static boolean addIntoOrderItemList(List<OrderItem> list, OrderItem oi) {
+        if("302-9156293-0335516".equals(oi.order.orderId)) {
+            System.out.println("find it!");
+        }
         if(list.contains(oi)) {
             for(OrderItem item : list) {
                 if(!item.equals(oi)) continue;

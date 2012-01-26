@@ -24,7 +24,7 @@ public class TimeParseTest {
 
     @Test
     public void testTimeParser() {
-        System.out.println(Time.parseDuration("1"));
+        System.out.println(Time.parseDuration("10j"));
     }
 
     @Test
