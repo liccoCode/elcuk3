@@ -2,11 +2,9 @@ package models.market;
 
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.libs.Crypto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
@@ -139,5 +137,15 @@ public class Account extends Model {
                 ", username='" + username + '\'' +
                 ", closeable=" + closeable +
                 '}';
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.password = Crypto.encryptAES(this.password);
+    }
+
+    @PostLoad
+    public void postLoad() {
+        this.password = Crypto.decryptAES(this.password);
     }
 }

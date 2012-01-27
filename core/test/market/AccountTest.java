@@ -1,5 +1,6 @@
 package market;
 
+import com.alibaba.fastjson.JSON;
 import models.market.Account;
 import org.junit.Test;
 import play.mvc.Http;
@@ -21,7 +22,7 @@ public class AccountTest extends FunctionalTest {
         Fixtures.delete(Account.class);
     }
 
-    @Test
+    //    @Test
     public void createAccount() {
         Map<String, String> params = new HashMap<String, String>();
         params.put("a.type", Account.M.AMAZON_UK.name());
@@ -31,7 +32,7 @@ public class AccountTest extends FunctionalTest {
         System.out.println(response.out.toString());
     }
 
-    @Test
+    //    @Test
     public void updateAccount() {
         Account acc = Account.find("uniqueName", "amazon.co.uk_easyacc.eu@gmail.com").first();
         Map<String, String> params = new HashMap<String, String>();
@@ -41,5 +42,11 @@ public class AccountTest extends FunctionalTest {
         params.put("a.password", acc.password);
         params.put("a.token", "token!!"); //update
         System.out.println(POST("/market/accounts/u", params).out.toString());
+    }
+
+    @Test
+    public void readAccount() {
+        Account acc = Account.findById(1l);
+        System.out.println(JSON.toJSONString(acc));
     }
 }
