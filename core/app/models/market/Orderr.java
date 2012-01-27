@@ -6,6 +6,8 @@ import helper.Dates;
 import helper.Patterns;
 import models.finance.SaleFee;
 import models.product.Product;
+import models.product.ProductQTY;
+import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Email;
@@ -44,11 +46,6 @@ public class Orderr extends GenericModel {
          * 发货了的
          */
         SHIPPED,
-
-        /**
-         * 成功执行了的
-         */
-        SUCCESS,
 
         /**
          * 做了 refund 返款的的
@@ -212,6 +209,51 @@ public class Orderr extends GenericModel {
 
     // -------------------------
 
+    @PrePersist
+    public void postPersist() {
+        /**
+         * PS: 原本这个方法是应该在 OrderItem 中的, 不过由于 OrderItem 中的 PrePersist 会因为在级联保存中的 flush 危险, 所以就挪到 Order 的 Prepersist 中了
+         * 在这里保存 OrderItem 的地方判断这个 OrderItem 的库存应该扣除哪一个仓库的;
+         * 1. 根据 account 找到判断哪一个 仓库
+         * 2. 根据 product 与 仓库 找到哪一个 ProductQTY
+         * 3. 进行扣除
+         */
+        if("amazon.co.uk_easyacc.eu@gmail.com".equalsIgnoreCase(this.account.uniqueName)) {
+            Whouse w = Whouse.find("name=?", "FBA_UK").first();
+            if(this.items == null || this.items.size() <= 0) return;
+            for(OrderItem oi : this.items) {
+                ProductQTY qty = ProductQTY.find(
+                        "whouse=? AND product=?",
+                        w,
+                        oi.product).first();
+                if(qty == null) {
+                    Logger.error("Product[" + oi.product.sku + "] in Whouse[amazon.co.uk_easyacc.eu@gmail.com] have no QTY!");
+                } else {
+                    // 新创建一个 Order + OrderItem
+                    switch(this.state) {
+                        // 此时讲库存从 qty 转移到预留库存中去
+                        case PENDING:
+                        case PAYMENT:
+                            qty.qty -= oi.quantity;
+                            qty.pending += oi.quantity;
+                            break;
+                        // 直接将库存扣除
+                        case SHIPPED:
+                        case RETURNNEW:
+                            qty.qty -= oi.quantity;
+                            break;
+                        // 这个无法做库存操作... 原本扣除的库存不从这里进入系统
+                        case REFUNDED:
+                        case CANCEL:
+                        default:
+                            Logger.info("Have Order[" + this.orderId + "](OrderItem[" + oi.id + "]) is REFUNDED state.");
+                    }
+                    qty.save();
+                }
+            }
+        }
+    }
+
     /**
      * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
      */
@@ -242,9 +284,6 @@ public class Orderr extends GenericModel {
         if(orderr.items != null) {
             // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
             Set<OrderItem> newlyOi = new HashSet<OrderItem>();
-            if("302-9156293-0335516".equals(orderr.orderId)) {
-                System.out.println("find it!");
-            }
             for(OrderItem noi : orderr.items) {
                 for(OrderItem oi : this.items) {
                     if(oi.equals(noi)) {
@@ -258,6 +297,47 @@ public class Orderr extends GenericModel {
                         if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
                         if(noi.product != null) oi.product = noi.product;
                         if(noi.selling != null) oi.selling = noi.selling;
+
+                        // 在更新 OrderItem 的时候, 需要根据新老 Order 的 state 处理 ProductQTY 的库存
+                        if("amazon.co.uk_easyacc.eu@gmail.com".equalsIgnoreCase(this.account.uniqueName)) {//主账号的 FBA 仓库
+                            Whouse w = Whouse.find("name=?", "FBA_UK").first();
+                            ProductQTY qty = ProductQTY.find(
+                                    "whouse=? AND product=?",
+                                    w,// Generic Problem
+                                    oi.product).first();
+                            if(qty == null) {
+                                Logger.error("Product[" + oi.product.sku + "] in Whouse[amazon.co.uk_easyacc.eu@gmail.com] have no QTY!");
+                            } else {
+                                /**
+                                 * 1. 在更新的时候正常只能够扣除库存, 不允许添加库存
+                                 * 2. 唯一一个例外则是如果这个订单被取消了, 那么被系统扣除的库存全部重新进入系统
+                                 */
+                                switch(orderr.state) {
+                                    case CANCEL: // 如果目标状态为 CANCEL
+                                        switch(this.state) {
+                                            case PENDING:// 这两个状态把库存加回去
+                                            case PAYMENT:
+                                                qty.pending -= oi.quantity;
+                                                qty.qty += oi.quantity;
+                                                break;
+                                            default:
+                                                // do nothing...
+                                        }
+                                        break;
+                                    case SHIPPED: // 如果目标状态为 SHIPPED
+                                        switch(this.state) {
+                                            case PENDING:
+                                            case PAYMENT:
+                                                qty.pending -= oi.quantity;
+                                                break;
+                                            default:
+                                                // do nothing...
+                                        }
+                                }
+                                qty.save();
+                            }
+                        }
+
                     } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
                         newlyOi.add(noi);
                     }
@@ -496,9 +576,6 @@ public class Orderr extends GenericModel {
      * @return
      */
     private static boolean addIntoOrderItemList(List<OrderItem> list, OrderItem oi) {
-        if("302-9156293-0335516".equals(oi.order.orderId)) {
-            System.out.println("find it!");
-        }
         if(list.contains(oi)) {
             for(OrderItem item : list) {
                 if(!item.equals(oi)) continue;

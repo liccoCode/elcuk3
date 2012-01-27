@@ -73,7 +73,11 @@ public class JobRequest extends Model {
         /**
          * 下载完成了, 结束;
          */
-        END
+        END,
+        /**
+         * 这个任务接受了进行关闭
+         */
+        CLOSE
     }
 
     @OneToOne
@@ -270,5 +274,7 @@ public class JobRequest extends Model {
                 }
                 break;
         }
+        this.state = S.CLOSE;
+        this.save();
     }
 }

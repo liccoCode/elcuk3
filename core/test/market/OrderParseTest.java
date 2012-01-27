@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import play.Logger;
-import play.db.jpa.JPA;
 import play.test.Fixtures;
 import play.test.UnitTest;
 
@@ -87,6 +86,7 @@ public class OrderParseTest extends UnitTest {
 
                     for(Orderr newOrd : orders) { // 3. 将数据库中没有加载到的 Order 给新保存
                         if(oldOrderrMap.containsKey(newOrd.orderId)) continue;
+                        newOrd.account = Account.find("uniqueName=?", "amazon.co.uk_easyacc.eu@gmail.com").first();
                         newOrd.save();
                         Logger.info("Save Order: " + newOrd.orderId);
                     }
@@ -94,7 +94,6 @@ public class OrderParseTest extends UnitTest {
             } catch(Exception e) {
                 Logger.error(file.getName() + " 不是 AllOrders.xml 但不管::" + e.getMessage());
             }
-            JPA.em().flush();
         }
     }
 }

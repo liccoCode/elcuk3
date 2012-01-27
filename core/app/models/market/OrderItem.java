@@ -76,6 +76,12 @@ public class OrderItem extends GenericModel {
     public String memo = "";
 
     /**
+     * 在 OrderItem 根据保存的时候, 会减少其相对应的 SKU 的库存[成功保存了 OrderItem 以后处理库存]
+     *
+     * @see Orderr updateOrderInfo 更新 OrderItem + 库存部分
+     */
+
+    /**
      * <pre>
      * 通过 OrderItem 计算指定的 msku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
