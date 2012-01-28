@@ -2,6 +2,7 @@ package controllers;
 
 import models.Server;
 import play.mvc.Controller;
+import play.mvc.With;
 
 /**
  * Created by IntelliJ IDEA.
@@ -9,6 +10,7 @@ import play.mvc.Controller;
  * Date: 12-1-7
  * Time: 上午1:58
  */
+@With({Secure.class, GzipFilter.class})
 public class Servers extends Controller {
 
     public static void c(Server s) {

@@ -12,7 +12,7 @@ import play.mvc.With;
  * Date: 12-1-7
  * Time: 上午11:41
  */
-@With({GzipFilter.class})
+@With({Secure.class, GzipFilter.class})
 public class Sellings extends Controller {
 
 

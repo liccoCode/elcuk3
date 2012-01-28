@@ -246,7 +246,7 @@ public class Orderr extends GenericModel {
                         case REFUNDED:
                         case CANCEL:
                         default:
-                            Logger.info("Have Order[" + this.orderId + "](OrderItem[" + oi.id + "]) is REFUNDED state.");
+                            Logger.info("Have Order[" + this.orderId + "](OrderItem[" + oi.id + "]) is " + this.state + " state.");
                     }
                     qty.save();
                 }
@@ -499,7 +499,11 @@ public class Orderr extends GenericModel {
                 String sku = oid.getSKU().split(",")[0].toUpperCase();
                 Product product;
                 if("609132508189".equals(sku)) { // 这里做一个针对性的判断
+                    Logger.info("Fix SKU 609132508189 to 71-HPTOUCH-B2PG");
                     product = Product.find("sku=?", "71-HPTOUCH-B2PG").first();
+                } else if("8Z-0JR3-1BHG".equals(sku)) { // Power Bank 的销售还是需要囊括进来的
+                    Logger.info("Fix SKU 8Z-0JR3-1BHG to 80-QW1A56-BE");
+                    product = Product.find("sku=?", "80-QW1A56-BE").first();
                 } else {
                     product = Product.find("sku=?", sku).first();
                 }
@@ -513,7 +517,7 @@ public class Orderr extends GenericModel {
                 if(selling != null) oi.selling = selling;
                 else {
                     // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("Selling[%s %s] is not in SELLING, it can not be happed!!", oid.getASIN().toUpperCase(), orderr.market.toString());
+                    Logger.error("Selling[%s %s] is not in SELLING, it can not be happed!", oid.getASIN().toUpperCase(), orderr.market.toString());
                     continue;
                 }
                 oi.id = String.format("%s_%s", orderr.orderId, product.sku);

@@ -18,7 +18,7 @@ import java.util.List;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
-@With({GzipFilter.class})
+@With({Secure.class, GzipFilter.class})
 public class Analyzes extends Controller {
     public static void index() {
         List<Selling> sells = Selling.salesRankWithTime();
