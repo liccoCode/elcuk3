@@ -5,6 +5,7 @@ import models.market.Account;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 /**
  * 对 Accounts 的操作
@@ -12,6 +13,7 @@ import play.mvc.Controller;
  * Date: 12-1-7
  * Time: 上午6:20
  */
+@With({Secure.class, GzipFilter.class})
 public class Accounts extends Controller {
     public static void p(Integer page) {
     }

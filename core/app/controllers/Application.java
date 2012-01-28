@@ -4,7 +4,7 @@ import play.libs.Crypto;
 import play.mvc.Controller;
 import play.mvc.With;
 
-@With(Secure.class)
+@With({Secure.class, GzipFilter.class})
 public class Application extends Controller {
 
     public static void index() {
