@@ -97,6 +97,12 @@ public class OrderItem extends GenericModel {
         Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime()), Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
+         * 举例: 2011-12-29 00:00:00 ~ 2012-1-28 00:00:00 ; 总共时间间隔为 30 天, 但实际上是需要
+         * 2011-12-29 00:00:00 ~ 2012-1-28 23:59:59; 总共时间间隔应该为 31 天.
+         */
+        to.setTime(to.getTime() + (TimeUnit.DAYS.toMillis(1))); // 修正为 2012-1-30 00:00:00 , 不修改为 1-29 23:59:59 是后面进行时间分割需要
+        int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
+        /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
@@ -112,7 +118,6 @@ public class OrderItem extends GenericModel {
                     msku, from, to).fetch();
         }
 
-        int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
         // 按照每天进行分割
         List<Integer> allSales = new ArrayList<Integer>();
         List<Integer> amazonUk = new ArrayList<Integer>();
@@ -206,6 +211,12 @@ public class OrderItem extends GenericModel {
         Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_PRICE_LINE, msku, from.getTime(), to.getTime()), Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
+         * 举例: 2011-12-29 00:00:00 ~ 2012-1-28 00:00:00 ; 总共时间间隔为 30 天, 但实际上是需要
+         * 2011-12-29 00:00:00 ~ 2012-1-28 23:59:59; 总共时间间隔应该为 31 天.
+         */
+        to.setTime(to.getTime() + (TimeUnit.DAYS.toMillis(1))); // 修正为 2012-1-30 00:00:00 , 不修改为 1-29 23:59:59 是后面进行时间分割需要
+        int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
+        /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
@@ -221,7 +232,6 @@ public class OrderItem extends GenericModel {
                     msku, from, to).fetch();
         }
 
-        int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
         // 按照每天进行分割
         List<Float> allSales = new ArrayList<Float>();
         List<Float> amazonUk = new ArrayList<Float>();
