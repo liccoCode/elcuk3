@@ -331,7 +331,7 @@ public class Selling extends GenericModel {
         Collections.sort(sellings, new Comparator<Selling>() {
             @Override
             public int compare(Selling s1, Selling s2) {
-                return (int) (s2.d30 - s1.d30);
+                return (int) (s2.d7 - s1.d7);
             }
         });
         if(sellings.size() > 0) Cache.add(Caches.SALE_SELLING, sellings, "20mn"); // 缓存 10 分钟
