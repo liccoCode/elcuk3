@@ -89,5 +89,11 @@ public class TimeParseTest {
         System.out.println(day7Before.monthOfYear().get());
         System.out.println(day7Before.dayOfMonth().get());
         System.out.println(day7Before.toString("yyyy-MM-dd"));
+
+        System.out.println("----------------------");
+        System.out.println(it.toDateTime().toString("yyyy-MM-dd"));
+        System.out.println(Instant.now().getMillis());
+        System.out.println(Instant.parse("2012-02-05").toDateTime().toString("yyyy-MM-dd"));
+        System.out.println(new DateTime(1328446988397l).toString("yyyy-MM-dd HH:mm:ss"));
     }
 }

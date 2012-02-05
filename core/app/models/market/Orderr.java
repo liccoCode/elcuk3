@@ -273,14 +273,12 @@ public class Orderr extends GenericModel {
         if(cached != null && cached.size() > 0) return cached;
 
         Instant it = Instant.now();
-        DateTime pre7Day = it.minus(Duration.standardDays(days)).toDateTime();
-        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?",
-                Instant.parse(pre7Day.toString("yyyy-MM-dd")).toDate(),
-                it.toDate()).fetch();
+        Date pre7Day = Instant.parse(it.minus(Duration.standardDays(days)).toDateTime().toString("yyyy-MM-dd")).toDate();
+        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, it.toDate()).fetch();
 
         Map<String, Map<String, AtomicInteger>> odmaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
 
-        for(long begin = pre7Day.getMillis(); begin <= it.getMillis(); begin += Duration.standardDays(1).getMillis()) {
+        for(long begin = pre7Day.getTime(); begin <= it.getMillis(); begin += Duration.standardDays(1).getMillis()) {
             for(Orderr or : orders) {
                 /**
                  * 1. 这些状态不进入销售成功的订单记录
