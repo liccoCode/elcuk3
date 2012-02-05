@@ -38,14 +38,14 @@ public class OrderFetchJob extends Job {
         Logger.info("OrderFetchJob step1 done!");
 
         // 3. 更新状态的 Job
-        List<JobRequest> tobeUpdateState = JobRequest.find("state IN (?,?)", JobRequest.S.REQUEST, JobRequest.S.PROCRESS).fetch();
+        List<JobRequest> tobeUpdateState = JobRequest.find("state IN (?,?) AND procressState!='_CANCELLED_'", JobRequest.S.REQUEST, JobRequest.S.PROCRESS).fetch();
         for(JobRequest job : tobeUpdateState) {
             job.updateState();
         }
         Logger.info("OrderFetchJob step2 done!");
 
         // 4. 获取 ReportId
-        List<JobRequest> tobeFetchReportId = JobRequest.find("state=?", JobRequest.S.DONE).fetch();
+        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_'", JobRequest.S.DONE).fetch();
         for(JobRequest job : tobeFetchReportId) {
             job.updateReportId();
         }
