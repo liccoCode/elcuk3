@@ -11,6 +11,16 @@ import java.util.List;
  * Time: 5:34 AM
  */
 public class PageInfo<T> {
+    public PageInfo() {
+    }
+
+    public PageInfo(int size, Long count, int page, List<T> items) {
+        this.size = size;
+        this.count = count;
+        this.page = page;
+        this.items = items;
+    }
+
     public PageInfo(int page) {
         this.page = page;
         this.size = 20;

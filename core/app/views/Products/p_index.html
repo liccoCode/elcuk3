@@ -1,240 +1,315 @@
 #{extends 'main.html' /}
 #{set title:'Product' /}
-#{set 'moreStyles'}
-    #{stylesheet 'products/product.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script 'products/product.js'/}
 #{/set}
-<div class="proList">
-<div class="pfunc">
-    <div class="grid_12"> <!-- Funciton Bar -->
-        <input type="checkbox" id='prodAll'/>
-        <label for="prodAll">
-            <button>全选</button>
-        </label> |
-        <button class="prodInput" rel='#add_prod'>添加产品</button>
-    </div>
 
-    <!-- Add Product Form -->
-    <div class="add_prod" id="add_prod">
-        <h2>添加一个新的 Product</h2>
+<div class="row" style="margin:10px 0;">
+    <div class="span12">
+        <!-- BTN-1-BEGIN -->
+        <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_prod">添加</a>
 
-    #{form @Products.p_create(), id:'add_prod_form'}
-        <table class="add_form">
-            <tr>
-                <td class="label"><label for="p.sku">SKU</label></td>
-                <td colspan="7"><input type="text" id='p.sku' name="p.sku"></td>
-            </tr>
-            <tr>
-                <td class="label"><label for="p.productName">PName</label></td>
-                <td colspan="7"><input class="v2" type="text" id='p.productName'
-                                       name="p.productName"></td>
-            </tr>
-            <tr>
-                <td class="label"><label for="p.lengths">L</label></td>
-                <td><input class="v1" type="text" id='p.lengths' name="p.lengths"></td>
-                <td class="label"><label for="p.heigh">H</label></td>
-                <td><input class="v1" type="text" id='p.heigh' name="p.heigh"></td>
-                <td class="label"><label for="p.width">W</label></td>
-                <td><input class="v1" type="text" id='p.width' name="p.width"></td>
-                <td class="label"><label for="p.weight">Wt</label></td>
-                <td><input class="v1" type="text" id='p.weight' name="p.weight"></td>
-            </tr>
-            <tr>
-                <td class="label"><label>Category</label></td>
-                <td colspan="7">
-                    #{if cates.size() == 0}
-                        <input type="text" name="p.nocat" value="请添加 Category" readonly>
-                    #{/if}
-                    #{else }
-                        #{cat_select cates:cates, catId:0 /}
-                    #{/else}
-                </td>
-            </tr>
-        </table>
-        <div class="end">&nbsp;</div>
+        <div id="add_modal" class="modal hide fade">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
 
-        <button type="button" class="close float_left">关闭</button>
-        <button type="reset" class="float_left">重置</button>
-    #{/form}
-        <button type="button" class="float_left" id='addProdPostBtn'>创建</button>
+                <h3>添加 Product</h3>
+            </div>
+            <div class="modal-body">
+                <form id='add_prod_form' class="form-horizontal">
+                    <fieldset>
+                        <div class="control-group">
+                            <label for="p.sku">SKU</label>
+
+                            <div class="controls">
+                                <input type="text" id="p.sku" name="p.sku"">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="p.productName">ProductName</label>
+
+                            <div class="controls">
+                                <input type="text" id="p.productName" name="p.productName">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="p.lengths">Length</label>
+
+                            <div class="controls">
+                                <input type="text" id="p.lengths" name="p.lengths">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="p.heigh">Heigh</label>
+
+                            <div class="controls">
+                                <input type="text" id="p.heigh" name="p.heigh">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="p.width">Width</label>
+
+                            <div class="controls">
+                                <input type="text" id="p.width" name="p.width">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="p.weight">Weight</label>
+
+                            <div class="controls">
+                                <input type="text" id="p.weight" name="p.weight">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Category</label>
+
+                            <div class="controls">
+                            #{if cates.size() == 0}
+                                <input type="text" name="p.nocat" value="请添加 Category" readonly>
+                            #{/if}
+                            #{else }
+                                #{cat_select cates:cates, catId:0 /}
+                            #{/else}
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="addProdPostBtn">Save</a>
+                <a href="#" class="btn" data-dismiss="modal">Close</a>
+            </div>
+        </div>
+        <!-- BTN-1-END -->
     </div>
 </div>
-<div class="itemList grid_12">
-#{if prods.size() <= 0}
-    等待添加新产品
+
+
+<div class="row">
+<div class="span12">
+#{if prods.size() == 0}
+等待添加新产品
 #{/if}
 #{else }
-    <table class="prod_table">
-        <tr>
-            <th>Id</th>
-            <th>SKU</th>
-            <th>Name</th>
-            <th>L</th>
-            <th>H</th>
-            <th>W</th>
-            <th>Wt</th>
-        </tr>
-        #{list items:prods, as:'prod'}
-            <tr class="prodItem">
-                <td class="p_id">${prod.id}</td>
-                <td class="sku">${prod.sku}</td>
-                <td class="name">${prod.productName}</td>
-                <td>${prod.lengths == null ? 0 : prod.lengths}</td>
-                <td>${prod.heigh == null ? 0 : prod.heigh}</td>
-                <td>${prod.width == null ? 0 : prod.width}</td>
-                <td>${prod.weight == null ? 0 : prod.weight}</td>
-            </tr>
-            <tr class="prodDetail"> <!-- 将 ProductQTY 添加进入一个 Tab -->
-                <td colspan="7">
-                    <ul class="tabs">
-                        <li><a href="#">基本信息</a></li>
-                        <li><a href="#">库存信息</a></li>
-                    </ul>
-                    <!-- 基本信息 Tab -->
-                    <div class="panes prod">
-                        <div id="prod_info_${prod.id}">
+<table class="table table-striped">
+<tr>
+    <th>Id</th>
+    <th>SKU</th>
+    <th>Name</th>
+    <th>L</th>
+    <th>H</th>
+    <th>W</th>
+    <th>Wt</th>
+</tr>
+    #{list items:prods, as:'prod'}
+    <tr data-toggle="collapse" data-target="#prod_details_${prod.id}">
+        <td>${prod.id}</td>
+        <td>${prod.sku}</td>
+        <td>${prod.productName}</td>
+        <td>${prod.lengths == null ? 0 : prod.lengths}</td>
+        <td>${prod.heigh == null ? 0 : prod.heigh}</td>
+        <td>${prod.width == null ? 0 : prod.width}</td>
+        <td>${prod.weight == null ? 0 : prod.weight}</td>
+    </tr>
+    <tr>
+        <td colspan="7">
+            <div class="collapse" id="prod_details_${prod.id}">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#basic_${prod.id}">基本信息</a></li>
+                    <li><a data-toggle="tab" href="#qty_${prod.id}">库存信息</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="basic_${prod.id}">
+                        <table>
+                            <tr>
+                                <td>SKU</td>
+                                <td colspan="7"><input type="text" name="p.sku" value="${prod.sku}"></td>
+                            </tr>
+                            <tr>
+                                <td>PName</td>
+                                <td colspan="7">
+                                    <input type="text" style="width:98%" name="p.productName" value="${prod.productName}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="#" rel="tooltip" data-original-title="Length / CM">L</a>
+                                </td>
+                                <td>
+                                    <input type="text" name="p.lengths" value="${prod.lengths == null ? 0 : prod.lengths}">
+                                </td>
+                                <td>
+                                    <a href="#" rel="tooltip" data-original-title="Heigh / CM">H</a>
+                                </td>
+                                <td>
+                                    <input type="text" name="p.heigh" value="${prod.heigh == null ? 0 : prod.heigh}">
+                                </td>
+                                <td>
+                                    <a href="#" rel="tooltip" data-original-title="Weight / CM">W</a>
+                                </td>
+                                <td>
+                                    <input type="text" name="p.width" value="${prod.width == null ? 0 : prod.width}">
+                                </td>
+                                <td>
+                                    <a href="#" rel="tooltip" data-original-title="Weight / KG">Wt</a>
+                                </td>
+                                <td>
+                                    <input type="text" name="p.weight" value="${prod.weight == null ? 0 : prod.weight}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Category</td>
+                                <td>
+                                    #{cat_select cates:cates, catId:prod.category.categoryId/}
+                                    <input type="hidden" name="p.id" value="${prod.id}">
+                                </td>
+                                <td colspan="6">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td colspan="8">
+                                    <div class="relateSKU">
+                                        <div class="label label-info">Relate SKUs</div>
+                                        <div class="input"><input type="text" name="relateSKU"
+                                                                  style="width:98%"></div>
+                                        <div class="skus">存放关联 Product 的显示的地方</div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="8">
+                                    <a href="#" pid='${prod.id}' class="btn btn-primary saveProdInfo">保存</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="qty_${prod.id}">
+                        #{if prod.qtys.size() == 0}
+                            没有库存
+                        #{/if}
+                        #{else }
                             <table>
                                 <tr>
-                                    <td class="label">SKU</td>
-                                    <td colspan="7"><input type="text" name="p.sku" value="${prod.sku}"></td>
+                                    <th>QId</th>
+                                    <th>Whouse</th>
+                                    <th>Inbound</th>
+                                    <th>Qty</th>
+                                    <th>Pending</th>
+                                    <th>Unsellabel</th>
+                                    <th>&nbsp;</th>
                                 </tr>
-                                <tr>
-                                    <td class="label">PName</td>
-                                    <td colspan="7"><input type="text" name="p.productName"
-                                                           value="${prod.productName}"></td>
-                                </tr>
-                                <tr>
-                                    <td class="label">L</td>
-                                    <td><input type="text" name="p.lengths"
-                                               value="${prod.lengths == null ? 0 : prod.lengths}"></td>
-                                    <td class="label">H</td>
-                                    <td><input type="text" name="p.heigh"
-                                               value="${prod.heigh == null ? 0 : prod.heigh}"></td>
-                                    <td class="label">W</td>
-                                    <td><input type="text" name="p.width"
-                                               value="${prod.width == null ? 0 : prod.width}"></td>
-                                    <td class="label">Wt</td>
-                                    <td><input type="text" name="p.weight"
-                                               value="${prod.weight == null ? 0 : prod.weight}"></td>
-                                </tr>
-                                <tr>
-                                    <td class="label">Category</td>
-                                    <td>
-                                        #{cat_select cates:cates, catId:prod.category.categoryId/}
-                                        <input type="hidden" name="p.id" value="${prod.id}">
-                                    </td>
-                                    <td colspan="6">&nbsp;</td>
-                                </tr>
+                                #{list items:prod.qtys, as:'qty'}
+                                    <tr class="prodQtyItem" id="prodQtyItem_${qty.id}">
+                                        <td>${qty.id}</td>
+                                        <td>${qty.whouse.name}</td>
+                                        <!-- TODO 库存的修改不应该如此轻易的求改, 后续可能后被取消直接修改库存值 -->
+                                        <td><input type="text" name="pt.inbound" value="${qty.inbound}"></td>
+                                        <td><input type="text" name="pt.qty" value="${qty.qty}"></td>
+                                        <td><input type="text" name="pt.pending" value="${qty.pending}"></td>
+                                        <td><input type="text" name="pt.unsellable" value="${qty.unsellable}"></td>
+                                        <td>
+                                            <a ptid='${qty.id}' href="javascript:;">
+                                                <img src="/public/images/table/save.png">
+                                            </a>
+                                            <input type="hidden" name="pt.id" value="${qty.id}">
+                                        </td>
+                                    </tr>
+                                #{/list}
                                 <tr>
                                     <td colspan="8">
-                                        <div class="relateSKU">
-                                            <div class="label">Relate SKUs</div>
-                                            <div class="input"><input type="text" name="relateSKU"></div>
-                                            <div class="skus">存放关联 Product 的显示的地方</div>
+                                        <a data-toggle="modal" href="#add_modal_${prod.id}" class="btn btn-primary">库存</a>
+
+                                        <div id="add_modal_${prod.id}" class="modal hide fade">
+                                            <div class="modal-header">
+                                                <a class="close" data-dismiss="modal">×</a>
+
+                                                <h3> 为 <span style="color:#ff6020">[${prod.sku}]</span> 添加 ProductQTY
+                                                </h3>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <form class="form-horizontal">
+                                                    <fieldset>
+                                                        <div class="control-group">
+                                                            <label for="pt.whouse.id">Whouse</label>
+
+                                                            <div class="controls">
+                                                                <select name="pt.whouse.id" id="pt.whouse.id">
+                                                                    #{list items:whs, as:'wh'}
+                                                                        <option value="${wh.id}">${wh.id}
+                                                                            :${wh.name}</option>
+                                                                    #{/list}
+                                                                </select>
+                                                                <input type="hidden" name="pt.product.id" value="${prod.id}">
+                                                                <input type="hidden" name="pt.product.sku" value="${prod.sku}">
+                                                                <input type="hidden" name="pt.save" value="true">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="control-group">
+                                                            <label for="pt.qty">Qty</label>
+
+                                                            <div class="controls">
+                                                                <input type="text" name="pt.qty" id="pt.qty">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="control-group">
+                                                            <label for="pt.inbound">Inbound</label>
+
+                                                            <div class="controls">
+                                                                <input type="text" name="pt.inbound" id="pt.inbound">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="control-group">
+                                                            <label for="pt.pending">Pending</label>
+
+                                                            <div class="controls">
+                                                                <input type="text" name="pt.pending" id="pt.pending">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="control-group">
+                                                            <label for="pt.unsellable">Unsellable</label>
+
+                                                            <div class="controls">
+                                                                <input type="text" name="pt.unsellable" id="pt.unsellable">
+                                                            </div>
+                                                        </div>
+
+                                                    </fieldset>
+                                                </form>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <a href="#" class="btn btn-primary addProdQtyBtn" pid="${prod.id}">Save</a>
+                                                <a href="#" class="btn" data-dismiss="modal">Close</a>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td colspan="8">
-                                        <button type="button" class="saveProdInfo" pid='${prod.id}'>保存</button>
-                                    </td>
-                                </tr>
                             </table>
-                        </div>
-                        <!-- 库存信息 Tab -->
-                        <div>
-                            <div class="prodQty">
-                                #{if prod.qtys.size() == 0}
-                                    没有库存
-                                #{/if}
-                                #{else }
-                                    <table>
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Whouse</th>
-                                            <th>Inbound</th>
-                                            <th>Qty</th>
-                                            <th>Pending</th>
-                                            <th>Unsellabel</th>
-                                            <th>&nbsp;</th>
-                                        </tr>
-                                        #{list items:prod.qtys, as:'qty'}
-                                            <tr class="prodQtyItem" id="prodQtyItem_${qty.id}">
-                                                <td>${qty.id}</td>
-                                                <td>${qty.whouse.name}</td>
-                                                <!-- TODO 库存的修改不应该如此轻易的求改, 后续可能后被取消直接修改库存值 -->
-                                                <td><input type="text" name="pt.inbound" value="${qty.inbound}"></td>
-                                                <td><input type="text" name="pt.qty" value="${qty.qty}"></td>
-                                                <td><input type="text" name="pt.pending" value="${qty.pending}"></td>
-                                                <td><input type="text" name="pt.unsellable" value="${qty.unsellable}">
-                                                </td>
-                                                <td>
-                                                    <a ptid='${qty.id}' href="javascript:;"><img
-                                                            src="/public/images/table/save.png"></a>
-                                                    <input type="hidden" name="pt.id" value="${qty.id}">
-                                                </td>
-                                            </tr>
-                                        #{/list}
-                                    </table>
-                                #{/else}
-                            </div>
-                            <div>
-                                <button type="button" class="addProdQtyPromtBtn" pid="${prod.id}"
-                                        rel='#addProdQtyForm_${prod.id}'>添加库存
-                                </button>
-                                <div id="addProdQtyForm_${prod.id}" class="add_prod">
-                                    <h2>为 <span style="color:#ff6020;">${prod.sku}</span> 添加 ProductQty</h2>
-
-                                    #{form @Products.pt_create()}
-                                        <table class="add_form">
-                                            <tr>
-                                                <td class="label"><label for="pt.whouse.id">Whouse</label></td>
-                                                <td colspan="3">
-                                                    <select class="float_left" name="pt.whouse.id" id="pt.whouse.id">
-                                                        #{list items:whs, as:'wh'}
-                                                            <option value="${wh.id}">${wh.id}:${wh.name}</option>
-                                                        #{/list}
-                                                    </select>
-                                                    <input type="hidden" name="pt.product.id" value="${prod.id}">
-                                                    <input type="hidden" name="pt.product.sku" value="${prod.sku}">
-                                                    <input type="hidden" name="pt.save" value="true">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="label"><label for="pt.qty">Qty</label></td>
-                                                <td><input class="v1 float_left" type="text" name="pt.qty" id="pt.qty">
-                                                </td>
-                                                <td class="label"><label for="pt.inbound">Inbound</label></td>
-                                                <td><input class="v1 float_left" type="text" name="pt.inbound"
-                                                           id="pt.inbound">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="label"><label for="pt.pending">Pending</label></td>
-                                                <td><input class="v1 float_left" type="text" name="pt.pending"
-                                                           id="pt.pending"></td>
-                                                <td class="label"><label for="pt.unsellable">Unsellable</label></td>
-                                                <td><input class="v1 float_left" type="text" name="pt.unsellable"
-                                                           id="pt.unsellable"></td>
-                                            </tr>
-                                        </table>
-                                        <div class="end">&nbsp;</div>
-                                        <button type="button" class="close">关闭</button>
-                                        <button type="reset">重置</button>
-                                    #{/form}
-                                    <button type="button" class="addProdQtyBtn" pid='${prod.id}'>创建</button>
-
-                                </div>
-                            </div>
-                        </div>
+                        #{/else}
                     </div>
-                </td>
-            </tr>
-        #{/list}
-    </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+    #{/list}
+<tr>
+    <td colspan="7">
+        #{bootstrap_pager c:pi.count, p:pi.page, s:pi.size, u:'/products/p_index'/}
+    </td>
+</tr>
+</table>
 #{/else}
 </div>
 </div>
-

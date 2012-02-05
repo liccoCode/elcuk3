@@ -1,40 +1,5 @@
 $(function(){
-    $('.whsInput').overlay();
     var whsForm = $('#add_whs_form');
-
-    // 仓库的 memo 点击事件
-    $('.whs_table .cat_info').map(function(){
-        var o = $(this);
-        o.children('td:eq(0)').toggle(function(){
-            o.next().fadeIn(400);
-        }, function(){
-            o.next().fadeOut(400);
-        });
-    });
-
-    $('.wh_memo textarea').each(function(i){
-        if(i % 2 == 0){
-            $(this).tooltip({position:'center left', offset:[0, -10], tipClass:'tooltip_form'});
-        }else{
-            $(this).tooltip({position:'center right', offset:[5, 10], tipClass:'tooltip_form'});
-        }
-    });
-
-    $('.whs_table .cat_info a[whid]').map(function(){
-        var o = $(this);
-        var whid = o.attr("whid");
-        o.click(function(){
-            var params = {};
-            var varClosure = function(){
-                var i = $(this);
-                if(!i.attr('name'))return false;
-                params[i.attr('name')] = i.val();
-            };
-            $('#wh_' + whid + ' :input').map(varClosure);
-            $('#wh_memo_' + whid + " :input").map(varClosure);
-            ajax_whs('edit', params);
-        });
-    });
 
     /**
      * Whouse 的添加与更新的 ajax 方法
@@ -42,38 +7,60 @@ $(function(){
      * @param params
      */
     function ajax_whs(act, params){
-        var save = true;
-        if(act == 'save') save = true;
-        else if(act == 'edit') save = false;
+        var action = 0; // 0-save, 1-update, 2-remove
+        if(act == 'save') action = 0;
+        else if(act == 'edit') action = 1;
+        else if(act == 'remove') action = 2;
         else return false;
 
         $.ajax({
-            url:'/products/w_create',
+            url:(action == 2 ? '/products/w_remove' :'/products/w_create'),
             data:params,
             dataType:'json',
             success:function(data){
-                if(data.name && data['name'] == params['w.name']){ //成功
+                if((data.name && data['name'] == params['w.name']) || data['flag']){ //成功
                     // 清零 Form 数据
-                    alert('SKU: [' + data['name'] + ']' + (save ? '添加' :'修改') + '成功.');
+                    var text = '';
+                    switch(action){
+                        case 0:
+                            text = '添加';
+                            break;
+                        case 1:
+                            text = '修改';
+                            break;
+                        case 2:
+                            text = '删除';
+                    }
+                    alert('SKU: [' + data['name'] + ']' + text + '成功.');
                     // 将数据按照格式添加到页面最上面
                 }else{ //失败
                     alert("添加失败:\r\n " + JSON.stringify(data));
                 }
             },
             error:function(xhr, sta, err){
-                alert(err);
+                alert(xhr.responseText);
             }
         });
         return false;
     }
 
+    $('#wh_list_table a[update]').click(function(){
+        $.varClosure.params = {};
+        var whid = $(this).attr('whid');
+        $('#wh_' + whid + ' :input').map($.varClosure);
+        $('#wh_memo_' + whid + " :input").map($.varClosure);
+        ajax_whs('edit', $.varClosure.params);
+    });
+
+    $('#wh_list_table a[remove]').click(function(){
+        var whname = $(this).attr('whname');
+        if(!confirm('确认删除 ' + whname + ' 吗?'))return false;
+        ajax_whs('remove', {id:$(this).attr('whid')});
+    });
+
     $('#addWhBtn').click(function(){
-        var params = {};
-        whsForm.find(':input').map(function(){
-            var o = $(this);
-            if(!o.attr('name'))return false;
-            params[o.attr('name')] = o.val();
-        });
-        ajax_whs('save', params);
+        $.varClosure.params = {};
+        whsForm.find(':input').map($.varClosure);
+        ajax_whs('save', $.varClosure.params);
     });
 });

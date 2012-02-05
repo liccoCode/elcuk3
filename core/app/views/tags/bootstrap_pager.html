@@ -1,0 +1,23 @@
+*{
+c(ount): 总数据量
+p(age): 当前页码
+s(ize): 当前页面显示的条数
+u(rl): 方法
+}*
+#{set maxPage:(java.lang.Math.ceil((_c / _s).toFloat()).intValue())/}
+#{set begin: ((_p - 3) >= 1) ? (_p - 3) : 1 /}
+#{set end: ((_p + 3) <= maxPage) ? (_p + 3) : maxPage/}
+<div class="pagination pagination-centered">
+    <ul>
+        <li><a href="${_u + "?p=1&s=" + _s}">首页</a></li>
+    #{list items:begin..end, as:'i'}
+        #{if _p == i}
+            <li class="active"><a href="#">${i}</a></li>
+        #{/if}
+        #{else }
+            <li><a href="${_u + "?p=" + i + "&s=" + _s}">${i}</a></li>
+        #{/else}
+    #{/list}
+        <li><a href="${_u + "?p=" + maxPage + "&s=" + _s}">尾页</a></li>
+    </ul>
+</div>

@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import models.PageInfo;
 import models.market.Account;
 import models.market.Orderr;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +29,8 @@ public class Orders extends Controller {
         Webs.fixPage(p, s);
         List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, s);
         Long count = Orderr.count();
-        render(orders, count, p, s);
+        PageInfo<Orderr> pi = new PageInfo<Orderr>(s, count, p, orders);
+        render(orders, count, p, s, pi);
     }
 
     public static void ini(String m) {

@@ -1,22 +1,6 @@
 $(function(){
-    var triggers = $(".prodInput").overlay();
-    var qtyTrigger = $('.addProdQtyPromtBtn').map(function(){
-        $(this).overlay();
-    });
     var postForm = $('#add_prod_form'); //缓存
-
-    // 产品详细信息的 tab
-    $('tr.prodDetail ul.tabs').map(function(){
-        $(this).tabs('div.panes > div');
-    });
-    $('.prod_table .prodItem').map(function(d){
-        var o = $(this);
-        o.toggle(function(){
-            o.next().fadeIn(500);
-        }, function(){
-            o.next().fadeOut(500);
-        });
-    });
+    $('a[rel=tooltip]').tooltip();
 
     /**
      * 更新或者保存 Product 基本信息; 返回 false 防止冒泡
@@ -76,35 +60,32 @@ $(function(){
         postForm.find(':input').map($.varClosure);
         if('p.nocat' in $.varClosure.params){
             alert('请选择 Category!');
-            //            return;
+            return false;
         }
         ajax_prod('save', $.varClosure.params);
     });
 
     // Prod 更新按钮
-    $('button.saveProdInfo').click(function(){
-        var o = $(this);
-        var id = o.attr('pid');
+    $('.saveProdInfo').click(function(){
+        var id = $(this).attr('pid');
         $.varClosure.params = {};
-        $('#prod_info_' + id + ' :input').map($.varClosure);
+        $('#basic_' + id + ' :input').map($.varClosure);
         delete $.varClosure.params['relateSKU']; //这个参数不进行提交
         ajax_prod('edit', $.varClosure.params);
     });
 
     // ProdQt 添加按钮
     $('.addProdQtyBtn').click(function(){
-        var o = $(this);
-        var pid = o.attr('pid');
+        var pid = $(this).attr('pid');
         $.varClosure.params = {};
-        $('#addProdQtyForm_' + pid + ' :input').map($.varClosure);
+        $('#add_modal_' + pid + ' :input').map($.varClosure);
         ajax_prodQty('save', $.varClosure.params);
     });
 
     // ProdQt 更新按钮
     $('.prodQtyItem a[ptid]').click(function(){
         if(!confirm("确认更新吗?"))return false;
-        var o = $(this);
-        var ptid = o.attr('ptid');
+        var ptid = $(this).attr('ptid');
         $.varClosure.params = {};
         $('#prodQtyItem_' + ptid + ' :input').map($.varClosure);
         ajax_prodQty('edit', $.varClosure.params);

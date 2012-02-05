@@ -1,42 +1,45 @@
-<div>
-    <div class="l_prod_info">
-        <span class="l_label">Title:</span>
-        <span class="l_val">${prod.productName}</span>
-        <span class="l_label">SKU:</span>
-        <span class="l_val">${prod.sku}</span>
-        <span class="l_label">Category:</span>
-        <span class="l_val">${prod.category.name}</span>
-        <span class="l_label">Length:</span>
-        <span class="l_val">${prod.lengths ? prod.lengths : 0}</span>
-        <span class="l_label">Heigh:</span>
-        <span class="l_val">${prod.heigh ? prod.heigh : 0}</span>
-        <span class="l_label">Width:</span>
-        <span class="l_val">${prod.width ? prod.width : 0}</span>
-        <span class="l_label">Weight:</span>
-        <span class="l_val">${prod.weight ? prod.weight : 0}</span>
+<table class="table table-bordered">
+    <tr>
+        <td class="label">Title:</td>
+        <td colspan="9">${prod.productName}</td>
+    </tr>
+    <tr>
+        <td class="label">SKU:</td>
+        <td>${prod.sku}</td>
+        <td class="label">Category:</td>
+        <td>${prod.category.name}</td>
+        <td class="label">Length:</td>
+        <td>${prod.lengths ? prod.lengths : 0}</td>
+        <td class="label">Heigh:</td>
+        <td>${prod.heigh ? prod.width : 0}</td>
+        <td class="label">Weight:</td>
+        <td>${prod.weight ? prod.weight : 0}</td>
+    </tr>
+</table>
 
-        <div class="clear"></div>
-    </div>
+<div>
     <div class="l_prod_qtys">
         <h2 style="margin-bottom:0.1em;">库存信息</h2>
     #{if prod.qtys.size() == 0}
         此商品暂时还没有库存
     #{/if}
     #{else }
-        <ul>
-            #{list items:prod.qtys,as:'qty'}
-                <li>
-                    <span class="l_label">Whouse:</span>
-                    <span class="l_val">${qty.whouse.name}</span>
-                    <span class="l_label">Pending:</span>
-                    <span class="l_val">${qty.pending}</span>
-                    <span class="l_label">Qty:</span>
-                    <span class="l_val">${qty.qty}</span>
-                    <span class="l_label">Unsellable:</span>
-                    <span class="l_val">${qty.unsellable}</span>
-                </li>
-            #{/list}
-        </ul>
+        #{list items:prod.qtys,as:'qty'}
+            <blockquote>
+                <table class="table">
+                    <tr>
+                        <td class="label">Whouse:</td>
+                        <td>${qty.whouse.name}</td>
+                        <td class="label">Pending:</td>
+                        <td>${qty.pending}</td>
+                        <td class="label">Qty:</td>
+                        <td>${qty.qty}</td>
+                        <td class="label">Unsellable:</td>
+                        <td>${qty.unsellable}</td>
+                    </tr>
+                </table>
+            </blockquote>
+        #{/list}
     #{/else}
     </div>
 </div>

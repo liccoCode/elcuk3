@@ -1,66 +1,99 @@
 #{extends 'main.html'/}
 #{set title:'Whouse'/}
-#{set 'moreStyles'}
-    #{stylesheet 'products/whouse.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script 'products/whouse.js'/}
 #{/set}
-<div class="whsList">
-    <div class="wfunc">
-        <div class="grid_12">
-            <input type="checkbox" id='prodAll'/>
-            <label for="prodAll">
-                <button>全选</button>
-            </label> |
-            <button class="whsInput" rel='#add_wh'>添加仓库</button>
-        </div>
+<div class="row" style="margin:10px 0;">
+    <div class="span12">
+        <!-- BTN-1-BEGIN -->
+        <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_wh">添加</a>
 
-        <div id="add_wh" class="add_wh add_dialog">
-            <h2>添加一个新的 Whouse</h2>
-        #{form @Products.w_create(), id:'add_whs_form'}
-            <table class="add_form">
-                <tr>
-                    <td class="label"><label for="w.name">Name</label></td>
-                    <td><input type="text" id="w.name" name="w.name"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="w.city">City</label></td>
-                    <td><input type="text" id="w.city" name="w.city"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="w.province">Province</label></td>
-                    <td><input type="text" id="w.province" name="w.province"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="w.postalCode">PostalCode</label></td>
-                    <td><input type="text" id="w.postalCode" name="w.postalCode"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="w.country">Country</label></td>
-                    <td><input type="text" id="w.country" name="w.country"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="w.address">Address</label></td>
-                    <td><input type="text" id="w.address" name="w.address"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="w.memo">Memo</label></td>
-                    <td><textarea rows="5" id='w.memo' name="w.memo"></textarea></td>
-                </tr>
-            </table>
-            <button type="button" class="close float_left">关闭</button>
-            <button type="reset" class="float_left">重置</button>
-        #{/form}
-            <button id='addWhBtn' class="float_left">创建</button>
+        <div id="add_modal" class="modal hide fade">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+
+                <h3>添加 Whouse</h3>
+            </div>
+            <div class="modal-body">
+                <form id='add_whs_form' class="form-horizontal">
+                    <fieldset>
+                        <div class="control-group">
+                            <label for="w.name">Name</label>
+
+                            <div class="controls">
+                                <input type="text" id="w.name" name="w.name">
+
+                                <p class="help-block">Category 的 Id, 例如皮套为 71</p>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="w.city">City</label>
+
+                            <div class="controls">
+                                <input type="text" id="w.city" name="w.city">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="w.province">Province</label>
+
+                            <div class="controls">
+                                <input type="text" id="w.province" name="w.province">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="w.postalCode">PostalCode</label>
+
+                            <div class="controls">
+                                <input type="text" id="w.postalCode" name="w.postalCode">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="w.country">Country</label>
+
+                            <div class="controls">
+                                <input type="text" id="w.country" name="w.country">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="w.address">Address</label>
+
+                            <div class="controls">
+                                <input type="text" id="w.address" name="w.address">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="w.memo">Memo</label>
+
+                            <div class="controls">
+                                <textarea id="w.memo" name="w.memo"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="addWhBtn">Save</a>
+                <a href="#" class="btn" data-dismiss="modal">Close</a>
+            </div>
         </div>
+        <!-- BTN-1-END -->
     </div>
-    <div class="cList grid_12">
+</div>
+
+<div class="row">
+    <div class="span12">
     #{if whs.size() == 0}
         等待添加新类别
     #{/if}
     #{else }
-        <table class="whs_table">
+        <table class="table table-striped" id="wh_list_table">
             <tr>
                 <th>Id</th>
                 <th>Name</th>
@@ -68,37 +101,46 @@
                 <th>Province</th>
                 <th>PostCode</th>
                 <th>Country</th>
+                <th>&nbsp;</th>
             </tr>
             #{list items:whs, as:'wh'}
-                <tr class="cat_info cat_${wh_parity}" id='wh_${wh.id}'>
-                    <td><input readonly type='text' name="w.id" value="${wh.id}"></td>
-                    <td><input type='text' name="w.name" value="${wh.name}"></td>
-                    <td><input type='text' name="c.city" value="${wh.city}"></td>
-                    <td><input type='text' name="c.province" value="${wh.province}"></td>
-                    <td><input type='text' name="c.postalCode" value="${wh.postalCode}"></td>
-                    <td class="action"><a href="javascript:;" whid='${wh.id}'><img
-                            src='/public/images/table/save.png'></a></td>
-                </tr>
-                <tr class="wh_memo" id='wh_memo_${wh.id}'>
-                    <td colspan="2">
-                        <div>
-                            <textarea title="Address" rows="5"
-                                      name="w.address">${wh.address.empty ? '没有信息' : wh.address}</textarea>
+                <tr id='wh_${wh.id}'>
+                    <td data-toggle="collapse" data-target="#wh_m_${wh.id}">${wh.id}</td>
+                    <td><input type='text' name="w.name" style="width:100%" value="${wh.name}"></td>
+                    <td><input type='text' name="c.city" style="width:100%" value="${wh.city}"></td>
+                    <td><input type='text' name="c.province" style="width:100%" value="${wh.province}"></td>
+                    <td><input type='text' name="c.postalCode" style="width:100%" value="${wh.postalCode}"></td>
+                    <td><input type='text' name="c.country" style="width:100%" value="${wh.country}"></td>
+                    <td class="action">
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Action <span
+                                    class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#" update whid="${wh.id}">Update</a></li>
+                                <li><a href="#" remove whid="${wh.id}" whname="${wh.name}">Remove</a></li>
+                            </ul>
                         </div>
                     </td>
-                    <td colspan="4">
-                        <div>
-                            <textarea title="Memo" rows="5" name="w.memo">${wh.memo.empty ? '没有信息' : wh.memo}</textarea>
+                </tr>
+                <tr id='wh_memo_${wh.id}'>
+                    <td colspan="7">
+                        <div class="row-fluid collapse" id="wh_m_${wh.id}">
+                            <div class="span4">
+                                <textarea title="Address" rows="5" style="width:100%"
+                                          name="w.address">${wh.address.empty ? '没有信息' : wh.address}</textarea>
+                            </div>
+                            <div class="span7">
+                                <textarea title="Memo" rows="5" style="width:100%"
+                                          name="w.memo">${wh.memo.empty ? '没有信息' : wh.memo}</textarea>
+                            </div>
                         </div>
                     </td>
                 </tr>
             #{/list}
             <tr class="tb_footer">
-                <td colspan="6">
-                    <div>
-                        总共 ${count} 条记录,  ${p} / ${(count / s) < 1 ? 1 : (count / s).toInteger()} 页
-                        跳到 <input type="text" class="page" psize="${s}" name="page"> 页
-                    </div>
+                <td colspan="7">
+                    #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/products/w_index'/}
                 </td>
             </tr>
         </table>

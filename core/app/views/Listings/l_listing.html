@@ -6,7 +6,8 @@ SKU 错误
 #{/elseif}
 #{else }
 <div id='list_middle'>
-    <table class="l_List_table">
+    <table class="table table-bordered">
+        <caption>Listings</caption>
         <tr>
             <th>Asin</th>
             <th>M</th>
@@ -15,7 +16,7 @@ SKU 错误
             <th>By</th>
         </tr>
         #{list items:prod.listings, as:'lst'}
-            <tr class="l_List_table_item" lid="listing_${lst.listingId}" title="${lst.title}">
+            <tr class="l_List_table_item" lid="listing_${lst.listingId}" title="${lst.title}" style="cursor:pointer">
                 <td><a target="_blank" href="${lst.link()}">${lst.asin}</a></td>
                 <td>${lst.market.name()}</td>
                 <td>${lst.reviews}</td>
@@ -28,15 +29,14 @@ SKU 错误
 
 <script type="text/javascript">
     $('.l_List_table_item').click(function(){
-        var lid = $(this).addClass('l_checked').attr('lid').substr(8); //切割掉前面的 listing_ 前缀
-        $("tr[lid='listing_" + $.HASH['listing'] + "']").removeClass('l_checked');
+        var lid = $(this).attr('lid').substr(8); //切割掉前面的 listing_ 前缀
         $.HASH['listing'] = lid;
         $.HASH['selling'] = '';
         window.location.hash = $.HASH.val();
         // listing
         $.get('/listings/l_listingDetail', {lid:lid}, function(data){
             $('#listing').html(data);
-            $('.l_tabs a:eq(1)').click();
+            $('.tabs a:eq(1)').tab('show');
         });
         // selling
         $.get('/listings/l_selling', {lid:lid}, function(data){

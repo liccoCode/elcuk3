@@ -1,45 +1,65 @@
 #{extends 'main.html'/}
 #{set title:'Asynchronous Jobs'/}
-#{set 'moreStyles'}
-    #{stylesheet 'jobs/jobs.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script 'jobs/jobs.js'/}
 #{/set}
-<div class="jobDiv">
-    <div class="jobFunc">
-        <button class="add_job" rel="#add_job">添加 Job</button>
-        <div id="add_job" class="add_dialog">
-            <h2>添加一个 Asynchronous Job</h2>
 
-            <form id="job_add_form">
-                <table class="add_form">
-                    <tr>
-                        <td class="label"><label for="j_className">ClassName</label></td>
-                        <td><input type="text" id="j_className" name="j.className"></td>
-                    </tr>
-                    <tr>
-                        <td class="label"><label for="j_duration">Duration</label></td>
-                        <td><input type="text" id="j_duration" name="j.duration"></td>
-                    </tr>
-                    <tr>
-                        <td class="label"><label for="j_close">Close</label></td>
-                        <td><input type="checkbox" id="j_close" name="j.close" value=""></td>
-                    </tr>
-                </table>
-                <button type="button" class="close float_left">关闭</button>
-                <button type="reset" class="float_left">重置</button>
-            </form>
-            <button id='add_job_btn' class="float_left">创建</button>
+<div class="row" style="margin:10px 0">
+    <div class="span12">
+        <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_wh">添加</a>
+
+        <div id="add_modal" class="modal hide fade">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+
+                <h3>添加一个 Asynchronous Job</h3>
+            </div>
+            <div class="modal-body">
+                <form id="job_add_form" class="form-horizontal">
+                    <fieldset>
+                        <div class="control-group">
+                            <label for="j_className">ClassName</label>
+
+                            <div class="controls">
+                                <input type="text" id="j_className" name="j.className">
+
+                                <p class="help-block">Job 的类限定类名</p>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="j_duration">Duration</label>
+
+                            <div class="controls">
+                                <input type="text" id="j_duration" name="j.duration">
+
+                                <p class="help-block">Job 的执行周期, 可以使用 1s, 1mn, 1h 三个单位时间</p>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="j_close">Close</label>
+
+                            <div class="controls">
+                                <input type="checkbox" id="j_close" name="j.close" value="">
+
+                                <p class="help-block">Job 是否能够关闭, 如果关闭则不会执行</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
         </div>
     </div>
-    <hr>
-    <div class="jobList grid_12">
+</div>
+
+<div class="row">
+    <div class="span12">
     #{if jobs.size() == 0}
         无任务
     #{/if}
     #{else }
-        <table class="j_list">
+        <table class="table table-striped">
             <tr>
                 <th>Id</th>
                 <th>ClassName</th>
@@ -49,7 +69,7 @@
                 <th>Func</th>
             </tr>
             #{list items:jobs, as:'job'}
-                <tr class="job_itm">
+                <tr class="job_itm" id='job_itm_${job.id}'>
                     <td>
                     ${job.id}
                         <input type="hidden" name="j.id" value="${job.id}">
@@ -65,9 +85,15 @@
                             <input type="checkbox" name="j.close">
                         #{/else}
                     </td>
-                    <td style="width:15%">
-                        <a class="runOnce" jid='${job.id}' href="javascript:;" title="立即执行一次">执行</a>
-                        <a class="j_update" jid='${job.id}' href="javascript:;" title="更新修改了的参数">更新</a>
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Action
+                                <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a id='runOnce' href="#" jid='${job.id}' title="立即执行一次">执行</a></li>
+                                <li><a id='j_update' href="#" jid='${job.id}' title="更新修改了的参数">更新</a></li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             #{/list}

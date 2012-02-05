@@ -5,18 +5,18 @@ require:
     - play -> secure
     - org.jsoup -> jsoup 1.6.1
     - elcuk -> mws 1.0
-    - com.alibaba -> fastjson 1.1.15-SNAPSHOT
+    - com.alibaba -> fastjson 1.1.15
 
 
 repositories:
     - alibaba Snapshots:
         type: iBiblio
-        root: "http://code.alibabatech.com/mvn/snapshots/"
+        root: "http://code.alibabatech.com/mvn/releases/"
         contains:
             - com.alibaba -> *
     - alibaba:
         type: iBiblio
-        root: "http://code.alibabatech.com/mvn/releases/"
+        root: "http://code.alibabatech.com/mvn/snapshots/"
         contains:
             - com.alibaba -> *
     - My Local Repo Mac:

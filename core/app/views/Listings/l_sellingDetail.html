@@ -1,92 +1,147 @@
-<div style="height:100%;">
-    <ul class="l_sell_info_tabs l_tabs">
-        <li><a href="#">&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;</a></li>
-        <li><a href="#">&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;</a></li>
-        <li><a href="#">&nbsp;&nbsp;&nbsp;3&nbsp;&nbsp;&nbsp;</a></li>
+<div class="tabbable">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#s_1" data-toggle="tab">1</a></li>
+        <li><a href="#s_2" data-toggle="tab">2</a></li>
+        <li><a href="#s_3" data-toggle="tab">3</a></li>
     </ul>
-    <div class="clear"></div>
-    <div class="l_sell_info_tab_div" style="height:86%;">
-        <div class="l_sell_info_panels">
-            <div id="l_sell_panel_1">
-                <div>
-                    <span class="l_label" title="MerchantSKU">Title</span>
-                    <span class="l_val">
-                        <textarea style="width:100%;" name="s.title" rows="3">${sell.title}</textarea>
-                    </span>
-                    <span class="l_label" title="MerchantSKU">MSku</span>
-                    <span class="l_val"><input type="text" name="s.merchantSKU" readonly
-                                               value="${sell.merchantSKU}"></span>
-                    <span class="l_label" title="Model Number">ModerNO</span>
-                    <span class="l_val"><input type="text" name="s.modelNumber" value="${sell.modelNumber}"></span>
-                    <span class="l_label">KeyFeatures</span>
-                    <span class="l_val" id='kf'>
-                        <!-- Dynamic -->
-                    </span>
-                    <span class="l_label">Condition</span>
-                    <span class="l_val_25"><input type="text" name="s.condition_" value="${sell.condition_}"></span>
-                    <span class="l_label">Manufacturer</span>
-                    <span class="l_val_25"><input type="text" name="s.manufacturer" value="${sell.manufacturer}"></span>
-                    <span class="l_label">State</span>
-                    <span class="l_val_25">
-                        <select name="s.state">
-                        #{list items:models.market.Selling.S.values(), as:'s'}
-                            <option value="${s.name()}">${s}</option>
-                        #{/list}
-                        </select>
-                    </span>
-                    <span class="l_label" title="自己设置的每天的 PS 值">PS</span>
-                    <span class="l_val_25"><input type="text" name="s.ps" value="${sell.ps}"></span>
-                    <span class="l_label">StanderPrice</span>
-                    <span class="l_val_25"><input type="text" name="s.standerPrice" value="${sell.standerPrice}"></span>
-                    <span class="l_label">SalePrice</span>
-                    <span class="l_val_25"><input type="text" name="s.salePrice" value="${sell.salePrice}"></span>
-                    <span class="l_label">StartDate</span>
-                    <span class="l_val_25"><input type="date" name="s.startDate" value="${sell.startDate}"></span>
-                    <span class="l_label">EndDate</span>
-                    <span class="l_val_25"><input type="date" name="s.endDate" value="${sell.endDate}"></span>
-                    <span class="l_label" title="Recommended Browse Nodes">RBN</span>
-                    <span class="l_val_25"><input type="text" name="s.RBN" class="date" value="${sell.RBN}"></span>
-                    <span class="l_label">LaunchDate</span>
-                    <span class="l_val_25"><input type="date" name="s.launchDate" value="${sell.launchDate}"></span>
+    <div class="tab-content" id="l_sell_info_panels">
+        <div class="tab-pane active" id="s_1">
+            <div class="container-fluid">
+                <div class="span1 label large">Title:</div>
+                <div class="span10">
+                    <textarea name="s.title" rows="2" class="span12">${sell.title}</textarea>
+                </div>
 
+                <div class="span1 label large">MSKU:</div>
+                <div class="span4">
+                    <input type="text" name="s.merchantSKU" readonly value="${sell.merchantSKU}">
+                </div>
+
+                <div class="span1 label large">
+                    <a href="#" rel="tooltip" data-original-title="Amazon 上架使用的 Moder Number 参数">MN:</a>
+                </div>
+                <div class="span5">
+                    <input type="text" name="s.modelNumber" value="${sell.modelNumber}">
+                </div>
+
+                <div class="span1 label large">Condition:</div>
+                <div class="span4">
+                    <input type="text" name="s.condition_" value="${sell.condition_}">
+                </div>
+
+                <div class="span1 label large">
+                    <a href="#" rel="tooltip" data-original-title="Amazon 上架使用的 Manufacturer 参数">MFer:</a>
+                </div>
+                <div class="span5">
+                    <input type="text" name="s.manufacturer" value="${sell.manufacturer}">
+                </div>
+
+                <div class="span1 label large">State:</div>
+                <div class="span4">
+                    <select name="s.state" class="span8">
+                    #{list items:models.market.Selling.S.values(), as:'s'}
+                        <option value="${s.name()}">${s}</option>
+                    #{/list}
+                    </select>
+                </div>
+
+                <div class="span1 label large">
+                    <a href="#" rel="tooltip" data-original-title="自己设置的每天的 PS 值">PS:</a>
+                </div>
+                <div class="span5">
+                    <input type="text" name="s.ps" value="${sell.ps}">
+                </div>
+
+                <div class="span1 label large">
+                    <a href="#" rel="tooltip" data-original-title="Amazon 上架使用的 StanderPrice 参数">SPrice:</a>
+                </div>
+                <div class="span4">
+                    <input type="text" name="s.standerPrice" value="${sell.standerPrice}">
+                </div>
+
+                <div class="span1 label large">SalePrice:</div>
+                <div class="span5">
+                    <input type="text" name="s.salePrice" value="${sell.salePrice}">
+                </div>
+
+                <div class="span1 label large">StartDate:</div>
+                <div class="span4">
+                    <input type="date" name="s.startDate" value="${sell.startDate}">
+                </div>
+
+                <div class="span1 label large">EndDate:</div>
+                <div class="span5">
+                    <input type="date" name="s.endDate" value="${sell.endDate}">
+                </div>
+
+                <div class="span1 label large">
+                    <a href="#" rel="tooltip" data-original-title="Recommended Browse Nodes">RBN</a>
+                </div>
+                <div class="span4">
+                    <input type="text" name="s.RBN" value="${sell.RBN}">
+                </div>
+
+                <div class="span1 label large">LaunchDate:</div>
+                <div class="span5">
+                    <input type="date" name="s.launchDate" value="${sell.launchDate}">
+                </div>
+
+
+                <div class="span1 label large">KeyFeatures:</div>
+                <div class="span4">
+                    <span id='kf'></span>
                 </div>
             </div>
-            <div id="l_sell_panel_2">
-                <span class="l_label" title="Product Description">ProductDesc</span>
-                <span class="l_val">
-                    <textarea rows="5" name="s.productDesc">${sell.productDesc}</textarea>
-                </span>
-                <span class="l_label" title="Seller Warranty Description">Warranty</span>
-                <span class="l_val">
-                    <textarea rows="5" name="s.sellerWarrantyDesc">${sell.sellerWarrantyDesc}</textarea>
-                </span>
-                <span class="l_label" title="Legal Disclaimer Description">LegalDesc</span>
-                <span class="l_val">
-                    <textarea rows="3" name="s.legalDisclaimerDesc">${sell.legalDisclaimerDesc}</textarea>
-                </span>
+        </div>
+        <div class="tab-pane" id="s_2">
+            <div class="span1 label large">ProductDesc:</div>
+            <div class="span10">
+                <textarea rows="5" class="span12" name="s.productDesc">${sell.productDesc}</textarea>
             </div>
-            <div id="l_sell_panel_3">
-                <span class="l_label">SearchTerms</span>
-                <span class="l_val" id='st'>
-                        <!-- Dynamic -->
-                </span>
-                <span class="l_label" title="Platinum Keywrods">PKeys</span>
-                <span class="l_val" id='pk'>
-                        <!-- Dynamic -->
-                </span>
+
+            <div class="span1 label large">
+                <a href="#" rel="tooltip" data-original-title="Seller Warranty Description">Warranty:</a>
+            </div>
+            <div class="span10">
+                <textarea rows="5" class="span12" name="s.sellerWarrantyDesc">${sell.sellerWarrantyDesc}</textarea>
+            </div>
+
+            <div class="span1 label large">
+                <a href="#" rel="tooltip" data-original-title="Legal Disclaimer Description">LegalDesc:</a>
+            </div>
+            <div class="span10">
+                <textarea rows="3" class="span12" name="s.legalDisclaimerDesc">${sell.legalDisclaimerDesc}</textarea>
+            </div>
+        </div>
+        <div class="tab-pane" id="s_3">
+            <div class="span1 label large">SearchTerms:</div>
+            <div class="span4">
+                <span id="st"></span>
+                <!-- Dynamic -->
+            </div>
+
+            <div class="span1 label large">
+                <a href="#" rel="tooltip" data-original-title="Platinum Keywrods">PKeys:</a>
+            </div>
+            <div class="span5">
+            <span class="l_val" id='pk'>
+                    <!-- Dynamic -->
+            </span>
             </div>
         </div>
     </div>
-    <div class="clear"></div>
-    <div class="l_sell_btns">
-        <button id="l_sell_update_btn">更新</button>
-        <button id="l_sell_updatelocal_btn">本地更新</button>
-        <button id="l_sell_hold_btn" title="暂停销售">Hold</button>
-        <button id="l_sell_down_btn">下架</button>
-    </div>
+</div>
+<div>
+    <a href="#" id="l_sell_update_btn" class="btn">更新</a>
+    <a href="#" id="l_sell_updatelocal_btn" class="btn">本地更新</a>
+    <a href="#" id="l_sell_hold_btn" class="btn">暂停销售</a>
+    <a href="#" id="l_sell_down_btn" class="btn">下架</a>
 </div>
 
 <script type="text/javascript">
+
+    $('a[rel="tooltip"]').tooltip();
+
     var searchTerms = '${sell.searchTerms}'.split("|-|");
     var platkeys = '${sell.platinumKeywords}'.split("|-|");
     var keyFeatures = '${sell.keyFetures}'.split("|-|");
@@ -95,17 +150,17 @@
         $('#st').append('<input type="text" st="' + i + '" name="searchTerms[' + i + ']" value="' + (searchTerms[i] ? searchTerms[i] :'') + '">');
         $('#pk').append('<input type="text" pk="' + i + '" name="platinumKeywords[' + i + ']" value="' + (platkeys[i] ? platkeys[i] :'') + '">');
     }
-    $(':date').dateinput();
+    $(':input[type=date]').dateinput();
 
 
     // -- 为了进行 Tab 化
     window.location.hash = '';
-    $('.l_sell_info_tabs').tabs('.l_sell_info_panels > div', {current:'l_current'});
+
     window.location.hash = $.HASH.val();
 
     var basicUpdate = function(){
         $.varClosure.params = {};
-        $('.l_sell_info_panels :input').map($.varClosure);
+        $('#l_sell_info_panels :input').map($.varClosure);
         for(var i = 0; i < 5; i++){
             delete $.varClosure.params['keyFetures[' + i + ']'];
             delete $.varClosure.params['searchTerms[' + i + ']'];
@@ -142,7 +197,7 @@
                 }
             },
             error:function(xhr, state, err){
-                alert(err);
+                alert(xhr.responseText);
             }
         });
     });
@@ -154,9 +209,10 @@
             data:$.varClosure.params,
             dataType:'json',
             success:function(data){
+                alert('更新成功!');
             },
             error:function(xhr, state, err){
-                alert(err);
+                alert(xhr.responseText);
             }
         })
     });

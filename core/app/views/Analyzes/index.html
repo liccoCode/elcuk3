@@ -1,50 +1,46 @@
-#{extends 'main.html'/}
+#{extends 'main_fluid.html'/}
 #{set title:'Analyze'/}
 #{set 'moreStyles'}
-    #{stylesheet 'analyzes/analyzes.css'/}
+    #{stylesheet 'dateinput.css'/}
 #{/set}
 #{set 'moreScripts'}
     #{script 'analyzes/analyzes.js'/}
-    #{script 'highcharts.src.js'/}
+    #{script 'highcharts.js'/}
+    #{script 'jquery.tools.date.min.js'/}
 #{/set}
-<div class="uper">
-    <div id='a_chart' class="grid_8"></div>
-    <div class="grid_4">需要什么样的信息? 销量相关</div>
-</div>
-<div class="uper2">
-    <div id="a_sales" class="grid_8"></div>
-    <div class="grid_4">需要什么样的信息2? 销售额相关</div>
-</div>
+<div class="row-fluid">
+    <div class="row" id="uper">
+        <div class="span4">需要什么样的信息? 销售相关</div>
+        <div class="span7" id="a_chart" style="height:250px"></div>
+    </div>
 
-<div class="middleFunc grid_12" style="background:#498CE2">
-    <ul>
-    *{<li>}*
-    *{<span>Market:</span>}*
-    *{<select>}*
-    *{#{list items:models.market.Account.M.values(), as:'m'}}*
-    *{<option value="${m.name()}">${m}</option>}*
-    *{#{/list}}*
-    *{</select>}*
-    *{</li>}*
-        <li>&nbsp;</li>
-        <li>
-            <span>From</span>
-            <input type="date" name="from" id='a_from' style="height:.8em;width:6.5em;">
-        </li>
-        <li>
-            <span>To</span>
-            <input type="date" name="to" id='a_to' style="height:.8em;width:6.5em;">
-        </li>
-        <li>&nbsp;</li>
-        <li>
-            <span>MSku</span>
-            <input type="text" name="msku" id='a_msku'>
-        </li>
-        <li>&nbsp;</li>
-        <li>
-            <button id="a_search">搜索</button>
-        </li>
-    </ul>
-</div>
+    <div class="row" id="uper2">
+        <div class="span4">需要什么样的信息? 销售额相关</div>
+        <div class="span7" id="a_sales" style="height:250px"></div>
+    </div>
 
-<div id="selling_down" class="down grid_12"></div>
+    <div class="row" id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
+        <div class="span2">
+            <span class="span2 label label-success large">From:</span>
+            <input class="span8" type="date" id="a_from" name="from">
+        </div>
+
+        <div class="span2">
+            <span class="span2 label label-success large">TO:</span>
+            <input class="span8" type="date" id="a_to" name="to">
+        </div>
+
+        <div class="span2">
+            <span class="span2 label label-success large">MSKU:</span>
+            <input class="span8" type="text" name="msku" id='a_msku' placeHolder="[ALL]所有产品的销量/销售额">
+        </div>
+
+        <div class="span1">
+            <a href="#" class="btn" id="a_search">搜索</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id="selling_down" style="margin-left:20px"></div>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 $(function(){
-    $('.middleFunc :date').dateinput({format:'mm/dd/yyyy'});
+    $('#a_toolbar :input[type=date]').dateinput({format:'mm/dd/yyyy'});
 
     /* 查看 Sellings 的销售量的 HightChart Options 对象 */
     var sells = {
@@ -115,7 +115,6 @@ $(function(){
      * @param type -1:销售量, 1:销售额
      */
     function ajax_line(msku, params, type){
-        $.mask.load();
         $.ajax({
             url:'/analyzes/' + (type < 0 ? 'ajaxSells' :'ajaxSales'),
             data:params,
@@ -154,11 +153,9 @@ $(function(){
 
                 curtOpt.series = series;
                 new Highcharts.Chart(curtOpt);
-                $.mask.close();
             },
             error:function(xhr, state, err){
                 alert(err);
-                $.mask.close();
             }
         });
     }
@@ -172,7 +169,7 @@ $(function(){
 
     $('#a_search').click(function(){
         $.varClosure.params = {};
-        $(".middleFunc :input").map($.varClosure);
+        $("#a_toolbar :input").map($.varClosure);
         if(!$.varClosure.params['msku']){
             alert('MerchantSKU 不允许为空! 或者可输入 ALL 进行所有订单查询!');
             return false;
@@ -182,8 +179,8 @@ $(function(){
             alert('使用默认的一个月时间间隔.');
             var now = new Date();
             var from = $.DateUtil.addDay(-30, now);
-            $.varClosure.params['from'] = from.getFullYear() + "-" + (from.getMonth() + 1) + "-" + from.getDay();
-            $.varClosure.params['to'] = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDay();
+            $.varClosure.params['from'] = $.DateUtil.fmt1(from);
+            $.varClosure.params['to'] = $.DateUtil.fmt1(now);
         }
         ajax_line(msku, $.varClosure.params, -1);
         ajax_line(msku, $.varClosure.params, 1);
@@ -191,13 +188,11 @@ $(function(){
 
 
     // 最下方的 Selling Sale 列表信息
-    $.mask.load();
     $.get('/analyzes/index_sell', {'p.page':1, 'p.size':10}, function(html){
         $('#selling_down').html(html);
         $('.msku').dblclick(function(){
             $('#a_msku').val($(this).text());
         });
-        $.mask.close();
     });
 
     ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'}, 1);

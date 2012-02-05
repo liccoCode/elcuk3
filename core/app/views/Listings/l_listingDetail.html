@@ -1,175 +1,231 @@
-<div>
-    <div class="grid_6 alpha omega">
-        <button id="l_sale" title="这个更多的是给已经存在的 Listing 上架(跟他的产品)">上架</button>
-        <button id="l_bind_selling" rel="#l_bind_selling_2">绑定一个 Selling</button>
-        <div id="l_bind_selling_2" class="add_dialog">
-            <h2>手动绑定一个 Selling</h2>
+<div class="row">
+    <div class="span12" style="margin-bottom:5px">
+        <a href="#" id='l_sale' class="btn btn-small" rel="popover" data-content="向这个 Listing 上进行上架[<span style='color:red'>未完成</span>]" data-original-title="上架">上架</a>
+        <!-- Bind Selling BTN BEGIN -->
+        <a class="btn btn-small" id="l_bselling"
+           rel="popover" data-content="手动绑定一个 Selling.如果这个 Selling 存在则进行绑定, 否则会抓取回 Selling 进行绑定." data-original-title="绑 Selling"
+           data-toggle="modal" href="#bind_selling_modal">绑 Selling</a>
 
-            <div id="l_bind_selling_div">
-                <form>
-                    <span class="l_label">Title:</span>
-                    <span class="l_val" style="width:80%;"><input id='s_title' type="text" readonly style="width:100%;"></span>
+        <div id='bind_selling_modal' class="modal hide fade">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
 
-                    <hr style="margin-bottom:1em;">
-
-                    <span class="l_label" title="成本价格/GBP">Cost:</span>
-                    <span class="l_val"><input type="text" name="s.priceStrategy.cost"></span>
-                    <span class="l_label" title="利润率">Margin:</span>
-                    <span class="l_val"><input type="text" name="s.priceStrategy.margin"></span>
-                    <span class="l_label" title="最低价格/GBP">Lowest:</span>
-                    <span class="l_val"><input type="text" name="s.priceStrategy.lowest"></span>
-                    <span class="l_label" title="最高价格/GBP">Max:</span>
-                    <span class="l_val"><input type="text" name="s.priceStrategy.max"></span>
-                    <span class="l_label" title="运费/GBP">ShipPrice:</span>
-                    <span class="l_val"><input type="text" name="s.priceStrategy.shippingPrice" value="0"></span>
-                    <span class="l_label" title="多于一个时增加的运费/GBP">ShipPlus:</span>
-                    <span class="l_val"><input type="text" name="s.priceStrategy.shippingPlus" value="0"></span>
-                    <span class="l_label" title="运费/GBP">Type:</span>
-                    <span class="l_val">
-                        <select name="s.priceStrategy.type">
-                        #{list items:models.market.PriceStrategy.T.values(), as:'t'}
-                            <option value="${t.name()}">${t}</option>
-                        #{/list}
-                        </select>
-                    </span>
-
-                    <hr style="margin-bottom:1em;">
-
-                    <span class="l_label" title="MerchantSKU">MSku:</span>
-                    <span class="l_val"><input type="text" id="s_merchantsku" name="s.merchantSKU"></span>
-                    <span class="l_label">ASIN:</span>
-                    <span class="l_val"><input id="s_asin" readonly type="text" name="s.asin"></span>
-                    <span class="l_label">State:</span>
-                    <span class="l_val">
-                        <select name="s.state" class="select_width">
-                        #{list items:models.market.Selling.S.values(), as:'s'}
-                            <option value="${s.name()}">${s}</option>
-                        #{/list}
-                        </select>
-                    </span>
-                    <span class="l_label">PS:</span>
-                    <span class="l_val"><input type="text" name="s.ps" value="5"></span>
-                    <span class="l_label">Account:</span>
-                    <span class="l_val">
-                        #{if accs.size() == 0}
-                            没有用户
-                        #{/if}
-                        #{else }
-                            <select name="s.account.uniqueName" class="select_width">
-                                #{list items:accs, as:'acc'}
-                                    <option value="${acc.uniqueName}">${acc.uniqueName}</option>
+                <h3>手动绑定一个 Selling</h3>
+            </div>
+            <div class="modal-body">
+                <form id="bind_selling_form" class="form-horizontal">
+                    <table class="table">
+                        <tr>
+                            <td colspan="4" class="label-info">价格信息</td>
+                        </tr>
+                        <tr>
+                            <td>Title:</td>
+                            <td colspan="3">
+                                <textarea rows="3" class="input-large uneditable-input uneditable-textarea span5" readonly name="s.title" id="s_title"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Cost:</td>
+                            <td><input name="s.priceStrategy.cost" class="span10" placeHolder="输入产品所有成本(含运输)/GBP"></td>
+                            <td>Margin:</td>
+                            <td><input name="s.priceStrategy.margin" class="span10" placeHolder="产品的利润率"></td>
+                        </tr>
+                        <tr>
+                            <td>Lowest:</td>
+                            <td><input name="s.priceStrategy.lowest" class="span10" placeHolder="最低价格/GBP"></td>
+                            <td>Max:</td>
+                            <td><input name="s.priceStrategy.max" class="span10" placeHolder="最高价格/GBP"></td>
+                        </tr>
+                        <tr>
+                            <td>ShipPrice:</td>
+                            <td>
+                                <input name="s.priceStrategy.shippingPrice" class="span10" value="0" placeHolder="运费/GBP">
+                            </td>
+                            <td>ShipPlus:</td>
+                            <td>
+                                <input name="s.priceStrategy.shippingPlus" class="span10" value="0" placeHolder="多于一个时增加的运费/GBP">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Type:</td>
+                            <td colspan="3">
+                                <select name="s.priceStrategy.type" class="span10">
+                                #{list items:models.market.PriceStrategy.T.values(), as:'t'}
+                                    <option value="${t.name()}">${t}</option>
                                 #{/list}
-                            </select>
-                        #{/else}
-                    </span>
-                    <span class="l_label">Type:</span>
-                    <span class="l_val">
-                        <select name="s.type" class="select_width">
-                        #{list items:models.market.Selling.T.values(), as:'t'}
-                            <option value="${t.name()}">${t}</option>
-                        #{/list}
-                        </select>
-                    </span>
-                    <span class="l_label">Market:</span>
-                    <span class="l_val">
-                        <select name="s.market" class="select_width">
-                        #{list items:models.market.Account.M.values(), as:'m'}
-                            <option value="${m.name()}">${m}</option>
-                        #{/list}
-                        </select>
-                    </span>
-
-                    <div class="clear"></div>
-                    <hr style="margin-top:5px;">
-                    <button type="reset" class="float_left">重置</button>
-                    <button onclick="return false;" class="float_left">按 ESC 关闭</button>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="label-info">Selling 信息</td>
+                        </tr>
+                        <tr>
+                            <td>MSKU:</td>
+                            <td><input name="s.merchantSKU" id="s_merchantsku" class="span10"></td>
+                            <td>ASIN:</td>
+                            <td><input name="s.asin" id="s_asin" class="span10"></td>
+                        </tr>
+                        <tr>
+                            <td>State:</td>
+                            <td>
+                                <select name="s.state" class="span10">
+                                #{list items:models.market.Selling.S.values(), as:'s'}
+                                    <option value="${s.name()}">${s}</option>
+                                #{/list}
+                                </select>
+                            </td>
+                            <td>PS:</td>
+                            <td><input name="s.ps" class="span10" value="5"></td>
+                        </tr>
+                        <tr>
+                            <td>Market:</td>
+                            <td>
+                                <select name="s.market" class="span10">
+                                #{list items:models.market.Account.M.values(), as:'m'}
+                                    <option value="${m.name()}">${m}</option>
+                                #{/list}
+                                </select>
+                            </td>
+                            <td>Type:</td>
+                            <td>
+                                <select name="s.type" class="span10">
+                                #{list items:models.market.Selling.T.values(), as:'t'}
+                                    <option value="${t.name()}">${t}</option>
+                                #{/list}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Account:</td>
+                            <td colspan="3">
+                            #{if accs.size() == 0}
+                                <span class="span10">没有用户</span>
+                            #{/if}
+                            #{else }
+                                <select name="s.account.uniqueName" class="span10">
+                                    #{list items:accs, as:'acc'}
+                                        <option value="${acc.uniqueName}">${acc.uniqueName}</option>
+                                    #{/list}
+                                </select>
+                            #{/else}
+                            </td>
+                        </tr>
+                    </table>
                 </form>
-                <button class="float_left" id="l_bind_selling_btn">关联</button>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="l_bind_selling_btn">绑定</a>
+                <a href="#" class="btn" data-dismiss="modal">Close</a>
             </div>
         </div>
-        <button id="l_recrawl">重新抓取</button>
-    </div>
-    <div class="grid_6 alpha omega">
-        <div class="l_list_basic">
-            <h2 style="margin-bottom:10px;">BasicInfo</h2>
-
-            <div>
-                <span class="l_label">ListingId:</span>
-                <span class="l_val">${lst.listingId}</span>
-                <span class="l_label" title="Reviews">RS:</span>
-                <span class="l_val">${lst.reviews}</span>
-                <span class="l_label" title="Rating">RT:</span>
-                <span class="l_val">${lst.rating}</span>
-            </div>
-            <div>
-                <span class="l_label">ASIN:</span>
-                <span class="l_val">${lst.asin}</span>
-                <span class="l_label">Market:</span>
-                <span class="l_val">${lst.market}</span>
-                <span class="l_label">SaleRank:</span>
-                <span class="l_val" title="仅供参考">${lst.saleRank}</span>
-            </div>
-            <div>
-                <span class="l_label">Title:</span>
-                <span style="width:80%;" class="l_val">${lst.title}</span>
-            </div>
-        </div>
-        <div class="l_list_img"><img src="${lst.picUrls} " title="${lst.title}"></div>
-        <div class="l_list_html">
-            <span>${lst.technicalDetails.raw()}</span>
-            <span>${lst.productDescription.raw()}</span>
-        </div>
-        <div class="l_list_offers">
-            <ul>
-                <h2>ListingOffers</h2>
-            #{list items:lst.offers, as:'offer'}
-                <li>
-                    <div class="l_list_offer">
-                        <span class="l_label">Name:</span>
-                        <span class="l_val">${offer.name}</span>
-                        <span class="l_label">OfferId:</span>
-                        <span class="l_val">${offer.offerId ? offer.offerId : "&nbsp;".raw()}</span>
-                        <span class="l_label">Price:</span>
-                        <span class="l_val">${offer.price}</span>
-                        <span class="l_label">Shipping:</span>
-                        <span class="l_val">${offer.shipprice}</span>
-                        <span class="l_label">FBA:</span>
-                        #{if offer.fba}
-                            <span class="l_val" style="color:green;">${offer.fba}</span>
-                        #{/if}
-                        #{else }
-                            <span class="l_val">${offer.fba}</span>
-                        #{/else}
-                        <span class="l_label">BuyBox:</span>
-                        #{if offer.buybox}
-                            <span class="l_val" style="color:green">${offer.buybox}</span>
-                        #{/if}
-                        #{else }
-                            <span class="l_val">${offer.buybox}</span>
-                        #{/else}
-                        <div class="clear"></div>
-                    </div>
-                </li>
-            #{/list}
-            </ul>
-        </div>
+        <!-- Bind Selling BTN END -->
     </div>
 </div>
+
+<div class="row">
+    <div class="span11">
+        <blockquote>
+            <h2>BasicInfo</h2>
+            <table class="table table-bordered">
+                <tr>
+                    <td class="label">Title:</td>
+                    <td colspan="5">
+                        <span id="ll_title">${lst.title}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">ListingId:</td>
+                    <td>${lst.listingId}</td>
+                    <td class="label">RS:</td>
+                    <td><a href="#" rel="tooltip" data-original-title="Reviews 的数量">${lst.reviews}</a></td>
+                    <td class="label">RT:</td>
+                    <td><a href="#" rel="tooltip" data-original-title="Rating 的值">${lst.rating}</a></td>
+                </tr>
+                <tr>
+                    <td class="label">ASIN:</td>
+                    <td>${lst.asin}</td>
+                    <td class="label">Market:</td>
+                    <td>${lst.market}</td>
+                    <td class="label">SaleRank:</td>
+                    <td><a href="#" rel="tooltip" data-original-title="这个 SaleRank 仅供参考">${lst.saleRank}</a></td>
+                </tr>
+            </table>
+        </blockquote>
+    </div>
+    <div class="span6 offset5">
+        <img src="${lst.picUrls} " title="${lst.title}">
+    </div>
+    <div class="span11">
+        <blockquote>
+        ${lst.technicalDetails.raw()}
+        </blockquote>
+    </div>
+    <div class="span11">
+        <blockquote>
+        ${lst.productDescription.raw()}
+        </blockquote>
+    </div>
+    <div class="span11">
+        <blockquote>
+            <h2>ListingOffers</h2>
+
+        #{list items:lst.offers, as:'offer'}
+            <blockquote>
+                <div class="container-fluid">
+                    <div class="span3"><span class="label">Name:</span>${offer.name}</div>
+                    <div class="span3">
+                        <span class="label">OfferId:</span>${offer.offerId ? offer.offerId : "&nbsp;".raw()}</div>
+                    <div class="span3"><span class="label">Price:</span>${offer.price}</div>
+                    <div class="span3"><span class="label">Shipping:</span>${offer.shipprice}</div>
+                    <div class="span3">
+                        #{if offer.fba}
+                            <span class="label label-important">FBA:</span>
+                            <span style="color:green;">${offer.fba}</span>
+                        #{/if}
+                        #{else }
+                            <span class="label">FBA:</span>
+                            <span>${offer.fba}</span>
+                        #{/else}
+                    </div>
+                    <div class="span3">
+                        #{if offer.buybox}
+                            <span class="label label-important">BuyBox:</span>
+                            <span style="color:green">${offer.buybox}</span>
+                        #{/if}
+                        #{else }
+                            <span class="label">BuyBox:</span>
+                            <span>${offer.buybox}</span>
+                        #{/else}
+                    </div>
+                </div>
+            </blockquote>
+        #{/list}
+        </blockquote>
+    </div>
+</div>
+
+
 <script type="text/javascript">
+    $('.btn[rel="popover"]').popover({placement:'bottom'});
+    $('a[rel="tooltip"]').tooltip();
+
     $('#l_recrawl').click(function(){
         alert("还未实现!" + $.HASH.val());
     });
 
-    $('#l_bind_selling').overlay({
-        onLoad:function(){
-            $('#s_title').val($('tr[lid="listing_' + $.HASH.listing + '"]:eq(0)').attr('title'));
-            $('#s_asin').val($.HASH.listing.split('_')[0]);
-            $('#s_merchantsku').val($.HASH.listing.split('_')[0] + "," + $.HASH.sku);
-        }
+    $('#l_sale').click(function(){
+        alert('暂时还没有实现!');
+        return false;
+    });
+
+    $('#bind_selling_modal').on('show', function(){
+        $('#s_title').val($('#ll_title').text());
+        $('#s_asin').val($.HASH.listing.split('_')[0]);
+        $('#s_merchantsku').val($.HASH.listing.split('_')[0] + "," + $.HASH.sku);
     });
     $('#l_bind_selling_btn').click(function(){
         $.varClosure.params = {lid:$.HASH.listing};
-        $('#l_bind_selling_div :input').map($.varClosure);
+        $('#bind_selling_form :input').map($.varClosure);
         $.ajax({
             url:'/listings/bindSelling',
             data:$.varClosure.params,

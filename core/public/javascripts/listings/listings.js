@@ -12,8 +12,9 @@ $(function(){
         }
     };
 
-    $('.l_tabs').tabs('div.l_panels > div', {current:'l_current'});
+    $('.btn[rel="popover"]').popover({placement:'bottom'});
 
+    //抓取并绑定 Listing 的按钮
     $('#craw_listing_btn').click(function(){
         if(!$.HASH.parse().sku){
             alert('请选择一个 Product!');
@@ -40,26 +41,19 @@ $(function(){
         return false;
     });
 
-    $('#cat_prod_list .l_cat').toggle(function(){
-        $(this).next().css('display', 'block');
-    }, function(){
-        $(this).next().css('display', 'none');
-    });
-
-    $('#cat_prod_list .sub_prod a.l_prod').click(function(){
-        $('#pord_' + $.HASH.sku).removeClass('l_checked');
-        $.HASH.sku = $(this).addClass('l_checked').text();
+    // 左侧 SKU 导航的点击事件
+    $('#cat_prod_list a[sku]').click(function(){
+        $('#pord_' + $.HASH.sku).parent().removeClass('active');
+        $.HASH.sku = $(this).parent().addClass('active').children().text();
         window.location.hash = $.HASH.val();
-        $.mask.load();
         $.get('/listings/l_listing', {sku:$.HASH.sku}, function(data){
             $('#l_List').html(data);
         });
         $('.l_tabs a:eq(0)').click();
         $.get('/listings/l_prodDetail', {sku:$.HASH.sku}, function(data){
             $('#prod').html(data);
-            $('.l_tabs a:eq(0)').click();
+            $('.tabs a:first').tab('show');
         });
-        $.mask.close();
         return false;
     });
 });

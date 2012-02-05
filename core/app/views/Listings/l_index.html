@@ -1,53 +1,61 @@
-#{extends 'main.html'/}
+#{extends 'main_fluid.html'/}
 #{set title:'Listing'/}
 #{set 'moreStyles'}
-    #{stylesheet 'listings/listings.css'/}
+    #{stylesheet 'dateinput.css'/}
 #{/set}
 #{set 'moreScripts'}
     #{script 'listings/listings.js'/}
+    #{script 'jquery.tools.date.min.js'/}}
 #{/set}
-<div class="grid_12" id="l_list_btns">
-    <button title="根据选定的 Product, 去抓取一个 Listing" id='craw_listing_btn'>Craw</button>
-    <button title="自己的产品上架">上架--等等再说</button>
-</div>
-<div class="grid_2" id="l_CatAndProd">
-    <ul id="cat_prod_list">
-    #{list items:cats, as:'cat'}
-        <li>
-            <a class="l_cat" id="cat_${cat.id}" title="${cat.memo}" href="javascript:;">${cat.categoryId}
-                :${cat.name}</a>
-            <ul class="sub_prod">
-                #{if cat.products.size() == 0}
-                    <li><a href="javascript:;"><span style="color:gray;">没有 Product</span></a></li>
-                #{/if}
-                #{else }
-                    #{list items:cat.products, as:'prod'}
-                        <li>
-                            <a href="javascript:;" class="l_prod" id='pord_${prod.sku}'
-                               title="${prod.productName}">${prod.sku}</a>
-                        </li>
-                    #{/list}
-                #{/else}
-            </ul>
-        </li>
-    #{/list}
-    </ul>
-</div>
-<div class="grid_4" id="l_ListAndSell">
-    <div id="l_List">请选择 Product</div>
-    <hr style="height:2px;margin-bottom:5px;">
-    <div id="l_Sell">请选择 Listing</div>
-</div>
-<div class="grid_6" id="l_Details">
-    <ul class="l_tabs">
-        <li><a href="#">Product</a></li>
-        <li><a href="#">Listing</a></li>
-        <li><a href="#">Selling</a></li>
-    </ul>
-    <div class="l_panels">
-        <div id="prod">Product 信息</div>
-        <div id="listing">Listing 信息</div>
-        <div id="selling">Selling 信息</div>
+
+<div class="row" style="margin:10px 0">
+    <div class="span3">&nbsp;</div>
+    <div class="span8">
+        <a href="#" class="btn btn-primary" id="craw_listing_btn" rel="popover" data-content="根据选定的 Product, 去抓取一个并绑定这个 Listing 到所选择的 Product 身上" data-original-title="抓取绑定">抓取</a>
+        <a href="#" class="btn btn-primary" id="" rel="popover" data-content="根据已经拥有的 Product 信息, 向某一个市场进行上架操作[<span style='color:red'>未完成</span>]" data-original-title="上架一个 Listing">上架</a>
     </div>
 </div>
 
+<div class="row-fluid">
+    <div class="span3 well" id="l_CatAndProd">
+        <ul id="cat_prod_list" class="nav nav-tabs nav-stacked">
+        #{list items:cats, as:'cat'}
+            <li>
+                <a data-toggle="collapse" data-target="#cat_sku_${cat.id}" id="cat_${cat.id}" title="${cat.memo}" href="#">${cat.categoryId}
+                    : ${cat.name}</a>
+                <ul class="nav nav-list collapse" id='cat_sku_${cat.id}'>
+                    #{if cat.products.size() == 0}
+                        <li><a href="#"><span style="color:gray;">没有 Product</span></a></li>
+                    #{/if}
+                    #{else }
+                        #{list items:cat.products, as:'prod'}
+                            <li>
+                                <a href="#" sku id='pord_${prod.sku}' title="${prod.productName}">${prod.sku}</a>
+                            </li>
+                        #{/list}
+                    #{/else}
+                </ul>
+            </li>
+        #{/list}
+        </ul>
+    </div>
+
+    <div class="span8 well" id="l_ListAndSell">
+        <div id="l_List">请选择 Product</div>
+        <hr style="height:2px;margin-bottom:5px;">
+        <div id="l_Sell">请选择 Listing</div>
+    </div>
+
+    <div class="span8 well" id="l_Details">
+        <ul class="tabs nav nav-pills">
+            <li class="active"><a href="#prod" data-toggle="tab">Product</a></li>
+            <li><a href="#listing" data-toggle="tab">Listing</a></li>
+            <li><a href="#selling" data-toggle="tab">Selling</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="prod">Product 信息</div>
+            <div class="tab-pane" id="listing">Listing 信息</div>
+            <div class="tab-pane" id="selling">Selling 信息</div>
+        </div>
+    </div>
+</div>

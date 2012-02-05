@@ -1,50 +1,68 @@
 #{extends 'main.html'/}
 #{set title:'Category' /}
-#{set 'moreStyles'}
-    #{stylesheet 'products/category.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script 'products/category.js'/}
 #{/set}
-<div class="catList">
-    <div class="cfunc">
-        <div class="grid_12">
-            <input type="checkbox" id='prodAll'/>
-            <label for="prodAll">
-                <button>全选</button>
-            </label> |
-            <button class="prodInput" rel='#add_cat'>添加类别</button>
-        </div>
+<div class="row" style="margin:10px 0;">
+    <div class="span12">
+        <!-- BTN-1-BEGIN -->
+        <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_category">添加</a>
 
-        <div id="add_cat" class="add_cat add_dialog">
-            <h2>添加一个新的 Category</h2>
-        #{form @Products.c_create(), id:'add_cat_form'}
-            <table class="add_form">
-                <tr>
-                    <td class="label"><label for="c.categoryId">CategoryId</label></td>
-                    <td><input type="text" id="c.categoryId" name="c.categoryId"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="c.name">Name</label></td>
-                    <td><input type="text" id="c.name" name="c.name"></td>
-                </tr>
-                <tr>
-                    <td class="label"><label for="c.memo">Memo</label></td>
-                    <td><textarea rows="5" id='c.memo' name="c.memo"></textarea></td>
-                </tr>
-            </table>
-            <button type="button" class="close float_left">关闭</button>
-            <button type="reset" class="float_left">重置</button>
-        #{/form}
-            <button id='addCategoryBtn' class="float_left">创建</button>
+        <div id="add_modal" class="modal hide fade">
+            <div class="modal-header">
+                <a class="close" data-dismiss="modal">×</a>
+
+                <h3>添加 Category</h3>
+            </div>
+
+            <div class="modal-body">
+                <form id='add_cat_form' class="form-horizontal">
+                    <fieldset>
+                        <div class="control-group">
+                            <label for="c.categoryId">CategoryId</label>
+
+                            <div class="controls">
+                                <input type="text" id="c.categoryId" name="c.categoryId">
+
+                                <p class="help-block">Category 的 Id, 例如皮套为 71</p>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="c.name">Name</label>
+
+                            <div class="controls">
+                                <input type="text" id="c.name" name="c.name">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="c.memo">Memo</label>
+
+                            <div class="controls">
+                                <textarea id="c.memo" name="c.memo"></textarea>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="addCategoryBtn">Save</a>
+                <a href="#" class="btn" data-dismiss="modal">Close</a>
+            </div>
         </div>
+        <!-- BTN-1-END -->
     </div>
-    <div class="cList grid_12">
+</div>
+
+<div class="row">
+    <div class="span12">
     #{if cates.size() == 0}
         等待添加新类别
     #{/if}
     #{else }
-        <table class="cats_table">
+        <table class="table table-striped">
             <tr>
                 <th>Id</th>
                 <th>CategoryId</th>
@@ -53,25 +71,25 @@
             </tr>
             #{list items:cates, as:'cat'}
                 <tr class="cat_info cat_${cat_parity}" id='cat_${cat.id}'>
-                    <td><input readonly type='text' name="c.id" value="${cat.id}"></td>
+                    <td data-toggle="collapse" data-target="#cat_m_${cat.id}">
+                        <input readonly type='text' name="c.id" value="${cat.id}">
+                    </td>
                     <td><input type='text' name="c.categoryId" value="${cat.categoryId}"></td>
                     <td><input type='text' name="c.name" value="${cat.name}"></td>
-                    <td class="action"><a rel='#add_cat' href="#" catid='${cat.id}'><img
-                            src='/public/images/table/save.png'></a></td>
+                    <td><a href="#" class="btn btn-small btn-primary" cid="${cat.id}">Save</a></td>
                 </tr>
                 <tr class="cat_memo" id='cat_memo_${cat.id}'>
                     <td colspan="4">
-                        <div>
-                            <textarea rows="5" name="c.memo">${cat.memo.empty ? '没有信息' : cat.memo}</textarea>
+                        <div id="cat_m_${cat.id}" class="collapse">
+                            <textarea rows="5" style="width:98%"
+                                      name="c.memo">${cat.memo.empty ? '没有信息' : cat.memo}</textarea>
                         </div>
                     </td>
                 </tr>
             #{/list}
-            <tr class="tb_footer">
+            <tr>
                 <td colspan="4">
-                    <div>
-                        #{pagefoottext items:cates, count:count, p:p, s:s, action:'/products/c_index'/}
-                    </div>
+                    #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/products/c_index'/}
                 </td>
             </tr>
         </table>

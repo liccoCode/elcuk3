@@ -3,6 +3,7 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import exception.VErrorRuntimeException;
 import helper.Webs;
+import models.PageInfo;
 import models.product.Category;
 import models.product.Product;
 import models.product.ProductQTY;
@@ -34,21 +35,26 @@ public class Products extends Controller {
         List<Product> prods = Product.all().fetch(p, s);
         List<Whouse> whs = Whouse.all().fetch();
         Long count = Product.count();
-        render(prods, cates, count, p, s, whs);
+        PageInfo<Product> pi = new PageInfo<Product>(s, count, p, prods);
+        render(prods, cates, count, p, s, whs, pi);
     }
 
     public static void c_index(Integer p, Integer s) {
         Webs.fixPage(p, s);
         List<Category> cates = Category.all().fetch(p, s);
         Long count = Category.count();
-        render(cates, count, p, s);
+
+        PageInfo<Category> pi = new PageInfo<Category>(s, count, p, cates);
+        render(cates, count, p, s, pi);
     }
 
     public static void w_index(Integer p, Integer s) {
         Webs.fixPage(p, s);
         List<Whouse> whs = Whouse.all().fetch(p, s);
         Long count = Whouse.count();
-        render(whs, count, p, s);
+
+        PageInfo<Whouse> pi = new PageInfo<Whouse>(s, count, p, whs);
+        render(whs, count, p, s, pi);
     }
 
 
@@ -72,6 +78,7 @@ public class Products extends Controller {
             renderJSON(validation.errorsMap());
         }
         c.save();
+        c.products = null;
         renderJSON(c);
     }
 
@@ -94,5 +101,12 @@ public class Products extends Controller {
             renderJSON(e.getError());
         }
         renderJSON("{\"flag\":\"true\"}");
+    }
+
+    public static void w_remove(long id) {
+        validation.required(id);
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        Boolean flag = Whouse.delete("id=?", id) > 0;
+        renderJSON("{\"flag\":\"" + flag + "\"}");
     }
 }

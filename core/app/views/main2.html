@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>#{get 'title' /}</title>
+    <meta charset="${_response_encoding}">
+    <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/reset.css'}">
+    <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/960.css'}">
+    <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/text.css'}">
+#{stylesheet 'main.css'/}
+#{get 'moreStyles' /}
+    <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+#{script 'jquery.tools.min.js'/}
+#{script 'main.js'/}
+#{get 'moreScripts' /}
+</head>
+<body>
+<div class="container_12 header">
+    <div class="grid_12">
+        <ul class="dropdown">
+            <li>
+                <a>首页</a>
+                <ul>
+                    <li><a href="@{Application.index()}">Home</a></li>
+                    <li><a href="@{Secure.logout()}">Logout</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>市场模块</a>
+                <ul>
+                    <li><a href="@{Listings.l_index()}">Listing</a></li>
+                    <li><a href="@{Orders.o_index(1, 20)}">Order</a></li>
+                    <li><a href="@{Analyzes.index()}">Analyzes</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>产品模块</a>
+                <ul>
+                    <li><a href="@{Products.p_index(1, 20)}">Product</a></li>
+                    <li><a href="@{Products.c_index(1, 20)}">Category</a></li>
+                    <li><a href="@{Products.w_index(1, 20)}">Whouse</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>采购模块</a>
+                <ul>
+                    <li><a href="#">Category</a></li>
+                    <li><a href="#">Category</a></li>
+                    <li><a href="#">Whouse</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>系统模块</a>
+                <ul>
+                    <li><a href="@{Jobs.index()}">系统任务管理</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="container_12 page">
+#{doLayout /}
+</div>
+<div class="container_12 footer">
+    footer
+</div>
+</body>
+</html>

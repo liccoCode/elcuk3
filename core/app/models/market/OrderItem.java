@@ -94,7 +94,8 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> ajaxHighChartSelling(String msku, Date from, Date to) {
-        Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime()), Map.class);
+        String cached_key = String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime());
+        Map<String, Object> cached = Cache.get(cached_key, Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
          * 举例: 2011-12-29 00:00:00 ~ 2012-1-28 00:00:00 ; 总共时间间隔为 30 天, 但实际上是需要
@@ -194,7 +195,7 @@ public class OrderItem extends GenericModel {
         hightChartMap.put("series_euk", ebayUk);
 
         if(hightChartMap.size() > 0)
-            Cache.add(String.format(Caches.AJAX_SALE_LINE, msku, from.getTime(), to.getTime()), hightChartMap, "20mn");
+            Cache.add(cached_key, hightChartMap, "20mn");
         return hightChartMap;
     }
 
@@ -208,7 +209,9 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> ajaxHighChartSales(String msku, Date from, Date to) {
-        Map<String, Object> cached = Cache.get(String.format(Caches.AJAX_PRICE_LINE, msku, from.getTime(), to.getTime()), Map.class);
+        //在最前面计算出 key 是因为日期 to 会进行修正, 并且其又影响了 cached_key
+        String cached_key = String.format(Caches.AJAX_PRICE_LINE, msku, from.getTime(), to.getTime());
+        Map<String, Object> cached = Cache.get(cached_key, Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
          * 举例: 2011-12-29 00:00:00 ~ 2012-1-28 00:00:00 ; 总共时间间隔为 30 天, 但实际上是需要
@@ -308,7 +311,7 @@ public class OrderItem extends GenericModel {
         hightChartMap.put("series_euk", ebayUk);
 
         if(hightChartMap.size() > 0)
-            Cache.add(String.format(Caches.AJAX_PRICE_LINE, msku, from.getTime(), to.getTime()), hightChartMap, "20mn");
+            Cache.add(cached_key, hightChartMap, "20mn");
         return hightChartMap;
     }
 
