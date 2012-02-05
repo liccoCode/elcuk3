@@ -1,6 +1,36 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
-<div class="grid_12">
-    WelCome to Elcuk2!<br/>
-    这里将会显示一些基础的数据
+#{set 'moreScripts'}
+    #{script 'Application/application.js'/}
+#{/set}
+<div class="row">
+    <div class="span11">
+        <h2 class="label label-info" style="font-size:12px">订单信息</h2>
+        <table class="table">
+            <tr>
+                <th>日期</th>
+                <th>PENDING</th>
+                <th>PAYMENT</th>
+                <th>SHIPPED</th>
+                <th>REFUNDED</th>
+                <th>RETURNNEW</th>
+                <th>CANCEL</th>
+                <th><a href="#" rel="tooltip" data-original-title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
+            </tr>
+        #{list items:odmaps.keySet(), as:'key'}
+            <tr>
+                <td>${key}</td>
+                <td>${odmaps.get(key).get('PENDING')}</td>
+                <td>${odmaps.get(key).get('PAYMENT')}</td>
+                <td>${odmaps.get(key).get('SHIPPED')}</td>
+                <td>${odmaps.get(key).get('REFUNDED')}</td>
+                <td>${odmaps.get(key).get('RETURNNEW')}</td>
+                <td>
+                    <a href="#" rel="tooltip" data-original-title="取消的订单的数据查看功能需要吗?<span style='color:red'>[未完成]</span>">${odmaps.get(key).get('CANCEL')}</a>
+                </td>
+                <td>${odmaps.get(key).get('SUCC')}</td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
 </div>

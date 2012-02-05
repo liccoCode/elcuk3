@@ -4,6 +4,9 @@ import helper.Dates;
 import models.market.Account;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.junit.Test;
 import play.libs.IO;
 import play.libs.Time;
@@ -12,7 +15,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -66,5 +71,23 @@ public class TimeParseTest {
         for(File f : files) {
             System.out.println(f.getName());
         }
+    }
+
+    @Test
+    public void testJodeTime() {
+        Instant it = Instant.now();
+        System.out.println(it.minus(Duration.standardDays(7)));
+        System.out.println(it.minus(Duration.standardDays(7)).getMillis());
+        System.out.println(new Date().getTime() - TimeUnit.DAYS.toMillis(7));
+        System.out.println(Instant.parse("2012-01-29").getMillis());
+
+        // ------
+        System.out.println("------------------------");
+        Instant it2 = Instant.now();
+        DateTime day7Before = it2.minus(Duration.standardDays(7)).toDateTime();
+        System.out.println(day7Before.year().get());
+        System.out.println(day7Before.monthOfYear().get());
+        System.out.println(day7Before.dayOfMonth().get());
+        System.out.println(day7Before.toString("yyyy-MM-dd"));
     }
 }

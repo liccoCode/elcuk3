@@ -1,6 +1,7 @@
 package models.market;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
+import helper.Caches;
 import helper.Currency;
 import helper.Dates;
 import helper.Patterns;
@@ -9,7 +10,11 @@ import models.product.Product;
 import models.product.ProductQTY;
 import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import play.Logger;
+import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
@@ -19,6 +24,7 @@ import javax.persistence.*;
 import javax.xml.bind.JAXB;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 系统内的核心订单
@@ -252,6 +258,102 @@ public class Orderr extends GenericModel {
                 }
             }
         }
+    }
+
+    /**
+     * 前台页面使用的, 查看最近 N 天内的订单情况分布的表格
+     *
+     * @param days
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
+        String cached_key = String.format(Caches.FRONT_ORDER_TABLE, days);
+        Map cached = Cache.get(cached_key, Map.class);
+        if(cached != null && cached.size() > 0) return cached;
+
+        Instant it = Instant.now();
+        DateTime pre7Day = it.minus(Duration.standardDays(days)).toDateTime();
+        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?",
+                Instant.parse(pre7Day.toString("yyyy-MM-dd")).toDate(),
+                it.toDate()).fetch();
+
+        Map<String, Map<String, AtomicInteger>> odmaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
+
+        for(long begin = pre7Day.getMillis(); begin <= it.getMillis(); begin += Duration.standardDays(1).getMillis()) {
+            for(Orderr or : orders) {
+                /**
+                 * 1. 这些状态不进入销售成功的订单记录
+                 * 2. 排除不在当前时间区间内的订单
+                 */
+                if(or.createDate.getTime() < begin || or.createDate.getTime() > (begin + Duration.standardDays(1).getMillis()))
+                    continue;
+                String key = new DateTime(begin).toString("yyyy-MM-dd");
+                if(odmaps.containsKey(key)) {
+                    Map<String, AtomicInteger> lineMap = odmaps.get(key);
+                    AtomicInteger succ = lineMap.get("SUCC");
+                    switch(or.state) {
+                        case PENDING:
+                            lineMap.get(S.PENDING.name()).incrementAndGet();
+                            succ.incrementAndGet();
+                            break;
+                        case PAYMENT:
+                            lineMap.get(S.PAYMENT.name()).incrementAndGet();
+                            succ.incrementAndGet();
+                            break;
+                        case SHIPPED:
+                            lineMap.get(S.SHIPPED.name()).incrementAndGet();
+                            succ.incrementAndGet();
+                            break;
+                        case REFUNDED:
+                            lineMap.get(S.REFUNDED.name()).incrementAndGet();
+                            break;
+                        case RETURNNEW:
+                            lineMap.get(S.RETURNNEW.name()).incrementAndGet();
+                            break;
+                        case CANCEL:
+                            lineMap.get(S.CANCEL.name()).incrementAndGet();
+                    }
+                } else {
+                    // 一行数据的所有值的 Map; 所有数据初始化
+                    Map<String, AtomicInteger> lineMap = new HashMap<String, AtomicInteger>();
+                    lineMap.put(S.PENDING.name(), new AtomicInteger(0));
+                    lineMap.put(S.PAYMENT.name(), new AtomicInteger(0));
+                    lineMap.put(S.SHIPPED.name(), new AtomicInteger(0));
+                    lineMap.put(S.REFUNDED.name(), new AtomicInteger(0));
+                    lineMap.put(S.RETURNNEW.name(), new AtomicInteger(0));
+                    lineMap.put(S.CANCEL.name(), new AtomicInteger(0));
+                    AtomicInteger succ = new AtomicInteger(0);
+                    switch(or.state) {
+                        case PENDING:
+                            lineMap.get(S.PENDING.name()).incrementAndGet();
+                            succ.incrementAndGet();
+                            break;
+                        case PAYMENT:
+                            lineMap.get(S.PAYMENT.name()).incrementAndGet();
+                            succ.incrementAndGet();
+                            break;
+                        case SHIPPED:
+                            lineMap.get(S.SHIPPED.name()).incrementAndGet();
+                            succ.incrementAndGet();
+                            break;
+                        case REFUNDED:
+                            lineMap.get(S.REFUNDED.name()).incrementAndGet();
+                            break;
+                        case RETURNNEW:
+                            lineMap.get(S.RETURNNEW.name()).incrementAndGet();
+                            break;
+                        case CANCEL:
+                            lineMap.get(S.CANCEL.name()).incrementAndGet();
+                    }
+                    lineMap.put("SUCC", succ);
+                    odmaps.put(key, lineMap);
+                }
+            }
+        }
+        if(odmaps.size() > 0)
+            Cache.add(cached_key, odmaps, "2h");
+        return odmaps;
     }
 
     /**
