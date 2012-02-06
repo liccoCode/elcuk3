@@ -46,6 +46,7 @@ $(function(){
         $('#pord_' + $.HASH.sku).parent().removeClass('active');
         $.HASH.sku = $(this).parent().addClass('active').children().text();
         window.location.hash = $.HASH.val();
+        $('#l_CatAndProd').mask('加载中...');
         $.get('/listings/l_listing', {sku:$.HASH.sku}, function(data){
             $('#l_List').html(data);
         });
@@ -53,6 +54,7 @@ $(function(){
         $.get('/listings/l_prodDetail', {sku:$.HASH.sku}, function(data){
             $('#prod').html(data);
             $('.tabs a:first').tab('show');
+            $('#l_CatAndProd').unmask();
         });
         return false;
     });

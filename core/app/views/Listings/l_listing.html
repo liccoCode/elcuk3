@@ -33,6 +33,7 @@ SKU 错误
         $.HASH['listing'] = lid;
         $.HASH['selling'] = '';
         window.location.hash = $.HASH.val();
+        $('#l_ListAndSell').mask('加载中...');
         // listing
         $.get('/listings/l_listingDetail', {lid:lid}, function(data){
             $('#listing').html(data);
@@ -41,6 +42,7 @@ SKU 错误
         // selling
         $.get('/listings/l_selling', {lid:lid}, function(data){
             $('#l_Sell').html(data);
+            $('#l_ListAndSell').unmask();
         });
         return false;
     });

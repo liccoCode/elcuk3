@@ -6,10 +6,12 @@ $(function(){
      * 更新或者保存 Product 基本信息; 返回 false 防止冒泡
      * @param act
      * @param params
+     * @param maskId 需要进行 Mask 的 jquery Select
      */
-    function ajax_prod(act, params){
+    function ajax_prod(act, params, maskId){
         var save = true;
         if(act == 'save') save = true;else if(act == 'edit') save = false;else return false;
+        $(maskId).mask('加载中...');
         $.ajax({
             url:'/products/p_create',
             data:params,
@@ -22,17 +24,26 @@ $(function(){
                 }else{ //失败
                     alert("添加失败:\r\n " + JSON.stringify(data));
                 }
+                $(maskId).unmask();
             },
             error:function(xhr, sta, err){
-                alert(err);
+                alert(xhr.responseText);
+                $(maskId).unmask();
             }
         });
         return false;
     }
 
-    function ajax_prodQty(act, params){
+    /**
+     * 添加,更新 ProductQTY;
+     * @param act 更新/保存; save, edit
+     * @param params 更新的 ProductQTY 参数
+     * @param maskId 需要进行 Mask 的 jquery Select
+     */
+    function ajax_prodQty(act, params, maskId){
         var save = true;
         if(act == 'save') save = true;else if(act == 'edit') save = false;else return false;
+        $(maskId).mask('加载中...');
         $.ajax({
             url:'/products/pt_create',
             data:params,
@@ -45,9 +56,11 @@ $(function(){
                 }else{ //失败
                     alert("添加失败:\r\n " + JSON.stringify(data));
                 }
+                $(maskId).unmask();
             },
             error:function(xhr, sta, err){
-                alert(err);
+                alert(xhr.responseText);
+                $(maskId).unmask();
             }
         });
         return false;
@@ -62,7 +75,7 @@ $(function(){
             alert('请选择 Category!');
             return false;
         }
-        ajax_prod('save', $.varClosure.params);
+        ajax_prod('save', $.varClosure.params, '#add_modal');
     });
 
     // Prod 更新按钮
@@ -71,7 +84,7 @@ $(function(){
         $.varClosure.params = {};
         $('#basic_' + id + ' :input').map($.varClosure);
         delete $.varClosure.params['relateSKU']; //这个参数不进行提交
-        ajax_prod('edit', $.varClosure.params);
+        ajax_prod('edit', $.varClosure.params, '#prod_details_' + id);
     });
 
     // ProdQt 添加按钮
@@ -79,7 +92,7 @@ $(function(){
         var pid = $(this).attr('pid');
         $.varClosure.params = {};
         $('#add_modal_' + pid + ' :input').map($.varClosure);
-        ajax_prodQty('save', $.varClosure.params);
+        ajax_prodQty('save', $.varClosure.params, '#add_modal_' + pid);
     });
 
     // ProdQt 更新按钮
@@ -88,6 +101,6 @@ $(function(){
         var ptid = $(this).attr('ptid');
         $.varClosure.params = {};
         $('#prodQtyItem_' + ptid + ' :input').map($.varClosure);
-        ajax_prodQty('edit', $.varClosure.params);
+        ajax_prodQty('edit', $.varClosure.params, '#prod_details_' + ptid);
     });
 });

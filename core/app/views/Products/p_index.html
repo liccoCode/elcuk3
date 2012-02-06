@@ -192,7 +192,8 @@
                     </div>
                     <div class="tab-pane" id="qty_${prod.id}">
                         #{if prod.qtys.size() == 0}
-                            没有库存
+                            没有库存<br/>
+                            <a data-toggle="modal" href="#add_modal_${prod.id}" class="btn btn-primary">库存</a>
                         #{/if}
                         #{else }
                             <table>

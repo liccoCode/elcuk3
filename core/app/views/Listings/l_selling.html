@@ -25,11 +25,12 @@
     $('.l_sell_list_item').click(function(){
         $.HASH['selling'] = $(this).attr('msku');
         window.location.hash = $.HASH.val();
-
+        $('#l_ListAndSell').mask('加载中...');
         //selling detail
         $.get('/listings/l_sellingDetail', {msku:$.HASH['selling']}, function(data){
             $('#selling').html(data);
             $('.tabs a:eq(2)').tab('show');
+            $('#l_ListAndSell').unmask();
         });
     });
 </script>

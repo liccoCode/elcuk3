@@ -115,6 +115,7 @@ $(function(){
      * @param type -1:销售量, 1:销售额
      */
     function ajax_line(msku, params, type){
+        $('#selling_down').mask('加载中...');
         $.ajax({
             url:'/analyzes/' + (type < 0 ? 'ajaxSells' :'ajaxSales'),
             data:params,
@@ -153,9 +154,11 @@ $(function(){
 
                 curtOpt.series = series;
                 new Highcharts.Chart(curtOpt);
+                $('#selling_down').unmask();
             },
             error:function(xhr, state, err){
                 alert(err);
+                $('#selling_down').unmask();
             }
         });
     }
