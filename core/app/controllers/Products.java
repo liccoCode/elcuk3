@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import exception.VErrorRuntimeException;
 import helper.Webs;
 import models.PageInfo;
+import models.market.Account;
 import models.product.Category;
 import models.product.Product;
 import models.product.ProductQTY;
@@ -52,9 +53,10 @@ public class Products extends Controller {
         Webs.fixPage(p, s);
         List<Whouse> whs = Whouse.all().fetch(p, s);
         Long count = Whouse.count();
+        List<Account> accs = Account.all().fetch();
 
         PageInfo<Whouse> pi = new PageInfo<Whouse>(s, count, p, whs);
-        render(whs, count, p, s, pi);
+        render(whs, accs, count, p, s, pi);
     }
 
 
@@ -83,9 +85,9 @@ public class Products extends Controller {
     }
 
     public static void w_create(@Valid Whouse w) {
-        if(Validation.hasErrors()) {
-            renderJSON(validation.errorsMap());
-        }
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        if(w.account == null && !w.account.isPersistent() && w.type != Whouse.T.FBA)
+            renderJSON(new Error("account", "Account is not Persistent!", new String[]{}));
         w.save();
         renderJSON(w);
     }
@@ -108,5 +110,15 @@ public class Products extends Controller {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         Boolean flag = Whouse.delete("id=?", id) > 0;
         renderJSON("{\"flag\":\"" + flag + "\"}");
+    }
+
+    public static void w_bind_a(Whouse w) {
+        validation.required(w.id);
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        if(!w.isPersistent() || !w.account.isPersistent())
+            renderJSON(new Error("whouse", "Whouse or Accoutn is not persistent!", new String[]{}));
+        if(w.type == Whouse.T.FBA) w.save();
+        w.qtys = null;
+        renderJSON(w);
     }
 }

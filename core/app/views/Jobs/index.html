@@ -49,6 +49,10 @@
                     </fieldset>
                 </form>
             </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="add_job_btn">Save</a>
+                <a href="#" class="btn" data-dismiss="modal">Close</a>
+            </div>
         </div>
     </div>
 </div>
@@ -60,6 +64,7 @@
     #{/if}
     #{else }
         <table class="table table-striped">
+            <caption class="label label-info">Jobs</caption>
             <tr>
                 <th>Id</th>
                 <th>ClassName</th>
@@ -90,10 +95,44 @@
                             <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Action
                                 <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a id='runOnce' href="#" jid='${job.id}' title="立即执行一次">执行</a></li>
-                                <li><a id='j_update' href="#" jid='${job.id}' title="更新修改了的参数">更新</a></li>
+                                <li><a class='runOnce' href="#" jid='${job.id}' title="立即执行一次">执行</a></li>
+                                <li><a class='j_update' href="#" jid='${job.id}' title="更新修改了的参数">更新</a></li>
                             </ul>
                         </div>
+                    </td>
+                </tr>
+            #{/list}
+        </table>
+    #{/else}
+    </div>
+</div>
+
+<div class="row">
+    <div class="span12">
+    #{if jobReqs.size() == 0}
+        没有 JobRequest
+    #{/if}
+    #{else }
+        <table class="table table-striped">
+            <caption class="label label-info">JobRequests</caption>
+            <tr>
+                <th>Id</th>
+                <th>RequestDate</th>
+                <th>RequestId</th>
+                <th>ReportId</th>
+                <th>State</th>
+                <th>Type</th>
+                <th>Path</th>
+            </tr>
+            #{list items:jobReqs, as:'req'}
+                <tr>
+                    <td>${req.id}</td>
+                    <td>${req.requestDate}</td>
+                    <td>${req.requestId}</td>
+                    <td>${req.reportId}</td>
+                    <td>${req.state}</td>
+                    <td>${req.type}</td>
+                    <td><a href="#" rel="tooltip" data-original-title="${req.path}">${req.path?.substring(0, 3)}...</a>
                     </td>
                 </tr>
             #{/list}

@@ -63,4 +63,24 @@ $(function(){
         whsForm.find(':input').map($.varClosure);
         ajax_whs('save', $.varClosure.params);
     });
+
+    $('.modal-footer a[accbind]').click(function(){
+        var o = $(this);
+        var wid = o.attr('wid');
+        $.varClosure.params = {};
+        $('#add_whouse_' + wid + " :input").map($.varClosure);
+        $.varClosure.params['w.id'] = wid;
+        if(o.attr('wtype') != 'FBA'){
+            alert('只有 FBA 的仓库才需要绑定一个 Account!');
+            return false;
+        }
+        $.post('/products/w_bind_a', $.varClosure.params, function(data){
+            try{
+                alert('绑定成功!\r\n' + JSON.stringify(data));
+            }catch(e){
+                alert(data);
+            }
+        }, 'json');
+        return false;
+    });
 });

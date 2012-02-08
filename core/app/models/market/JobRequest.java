@@ -1,6 +1,9 @@
 package models.market;
 
 import helper.AWS;
+import models.product.Product;
+import models.product.ProductQTY;
+import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.jpa.Model;
@@ -32,12 +35,18 @@ public class JobRequest extends Model {
         /**
          * 从 Amazon 上抓取会已经发送出去的订单
          */
-        ALL_FBA_ORDER_SHIPPED;
+        ALL_FBA_ORDER_SHIPPED,
+        /**
+         * 用来同步系统中库存与 FBA 库存的量
+         */
+        MANAGE_FBA_INVENTORY_ARCHIVED;
 
         public String toString() {
             switch(this) {
                 case ALL_FBA_ORDER_SHIPPED:
                     return "_GET_AMAZON_FULFILLED_SHIPMENTS_DATA_";
+                case MANAGE_FBA_INVENTORY_ARCHIVED:
+                    return "_GET_FBA_MYI_ALL_INVENTORY_DATA_";
                 case ALL_FBA_ORDER_FETCH:
                 default:
                     return "_GET_XML_ALL_ORDERS_DATA_BY_ORDER_DATE_";
@@ -117,10 +126,15 @@ public class JobRequest extends Model {
      */
     public static JobRequest checkJob(Account acc, T type) {
         switch(type) {
+            // 每一个小时抓取一次新订单
             case ALL_FBA_ORDER_FETCH:
-                return newJob(3, T.ALL_FBA_ORDER_FETCH, acc);
+                return newJob(1, T.ALL_FBA_ORDER_FETCH, acc);
+            // 每 8 小时更新一次发货的订单
             case ALL_FBA_ORDER_SHIPPED:
                 return newJob(8, T.ALL_FBA_ORDER_SHIPPED, acc);
+            // 每 8 小时进行一次 FBA 仓库同步
+            case MANAGE_FBA_INVENTORY_ARCHIVED:
+                return newJob(8, T.MANAGE_FBA_INVENTORY_ARCHIVED, acc);
         }
         return null;
     }
@@ -137,7 +151,6 @@ public class JobRequest extends Model {
         if(!acc.type.name().startsWith("AMAZON"))
             throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
         JobRequest job = JobRequest.find("account=? AND type=? ORDER BY requestDate DESC", acc, type).first();
-        // 每 8 消失抓取一次发货
         if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
             JobRequest njob = new JobRequest();
             njob.account = acc;
@@ -153,8 +166,7 @@ public class JobRequest extends Model {
      * 发出请求
      */
     public void request() {
-        if(this.type == T.ALL_FBA_ORDER_FETCH ||
-                this.type == T.ALL_FBA_ORDER_SHIPPED) {
+        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
             Logger.debug("(step1)JobRequest request " + this.type + " REQUEST Job.");
             try {
                 AWS.requestReport_step1(this);
@@ -168,8 +180,7 @@ public class JobRequest extends Model {
      * 更新 Job 状态
      */
     public void updateState() {
-        if(this.type == T.ALL_FBA_ORDER_FETCH ||
-                this.type == T.ALL_FBA_ORDER_SHIPPED) {
+        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
             Logger.debug("(step2)JobRequest request " + this.type + " UPDATE_STATE Job.");
             try {
                 AWS.requestState_step2(this);
@@ -183,8 +194,7 @@ public class JobRequest extends Model {
      * 获取 ReportId
      */
     public void updateReportId() {
-        if(this.type == T.ALL_FBA_ORDER_FETCH ||
-                this.type == T.ALL_FBA_ORDER_SHIPPED) {
+        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
             Logger.debug("JobRequest request " + this.type + " UPDATE_REPORTID Job.");
             try {
                 AWS.requestReportId_step3(this);
@@ -199,8 +209,7 @@ public class JobRequest extends Model {
      */
     public void downLoad() {
         if(this.state != S.DOWN) return;
-        if(this.type == T.ALL_FBA_ORDER_FETCH ||
-                this.type == T.ALL_FBA_ORDER_SHIPPED) {
+        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
             Logger.debug("JobRequest request " + this.type + " DOWNLOAD Job.");
             try {
                 AWS.requestReportDown_step4(this);
@@ -236,7 +245,7 @@ public class JobRequest extends Model {
                 List<Orderr> managedOrderrs = Orderr.find("orderId IN ('" + StringUtils.join(orderIds, "','") + "')").fetch();
                 for(Orderr or : managedOrderrs) { // 2. 手动从数据库中加载出需要更新的 Order (managed),  然后再将这些处于被管理状态的 Order 进行更新;
                     Orderr newOrder = orderrMap.get(or.orderId);
-                    or.updateOrderInfo(newOrder);
+                    or.updateAttrs(newOrder);
                     oldOrderrMap.put(or.orderId, or);
                 }
                 for(Orderr newOrd : orders) { // 3. 将数据库中没有加载到的 Order 给新保存
@@ -265,12 +274,40 @@ public class JobRequest extends Model {
                 List<Orderr> managedOrderrs_2 = Orderr.find("orderId IN ('" + StringUtils.join(orderIds, "','") + "')").fetch();
                 for(Orderr or : managedOrderrs_2) {
                     Orderr newOrder = orderrMap.get(or.orderId);
-                    or.updateOrderInfo(newOrder);
+                    or.updateAttrs(newOrder);
                     oldOrderrMap.put(or.orderId, or);
                 }
                 for(Orderr newOrd : orders) {
                     if(oldOrderrMap.containsKey(newOrd.orderId)) continue;
                     Logger.warn("Update Order [" + newOrd.orderId + "] is not exist.");
+                }
+                break;
+            case MANAGE_FBA_INVENTORY_ARCHIVED:
+                Whouse wh = Whouse.find("account=?", this.account).first();
+                List<ProductQTY> qtys = wh.fbaCSVParse(new File(this.path));
+                /**
+                 * 只会寻找与 Whouse 所拥有的 ProductQTY 进行更新;
+                 * 如果 FBA 网站上更新出来有新的 ProductQTY, 但系统内没有添加, 则不会更新.
+                 */
+                for(ProductQTY managerdQty : wh.qtys) {
+                    for(ProductQTY nqty : qtys) {
+                        if(managerdQty.product.sku.equals(nqty.product.sku)) {
+                            managerdQty.updateAttrs(nqty);
+                        }
+                    }
+                }
+                // 对系统内没有但 FBA 上有的 ProductQTY 进行系统内添加修复!
+                for(ProductQTY qty : qtys) {
+                    if(qty.save) continue; // 排除已经更新了的.
+                    Product prod = Product.find("sku=?", qty.product.sku).first();
+                    if(prod == null) {
+                        Logger.warn("The Product[" + qty.product.sku + "] that ProductQTY belongs to is not exist in System!!!");
+                    } else {
+                        qty.product = prod;
+                        qty.whouse = wh;
+                        qty.save();
+                        Logger.info("ProductQTY " + qty.product.sku + " fix add from FBA to Elcuk2.");
+                    }
                 }
                 break;
         }

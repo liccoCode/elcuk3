@@ -38,28 +38,32 @@ public class OrderFetchJob extends Job {
         Logger.info("OrderFetchJob step1 done!");
 
         // 3. 更新状态的 Job
-        List<JobRequest> tobeUpdateState = JobRequest.find("state IN (?,?) AND procressState!='_CANCELLED_'", JobRequest.S.REQUEST, JobRequest.S.PROCRESS).fetch();
+        List<JobRequest> tobeUpdateState = JobRequest.find("state IN (?,?) AND procressState!='_CANCELLED_' AND type IN (?,?)",
+                JobRequest.S.REQUEST, JobRequest.S.PROCRESS, JobRequest.T.ALL_FBA_ORDER_FETCH, JobRequest.T.ALL_FBA_ORDER_SHIPPED).fetch();
         for(JobRequest job : tobeUpdateState) {
             job.updateState();
         }
         Logger.info("OrderFetchJob step2 done!");
 
         // 4. 获取 ReportId
-        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_'", JobRequest.S.DONE).fetch();
+        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_' AND type IN (?,?)",
+                JobRequest.S.DONE, JobRequest.T.ALL_FBA_ORDER_FETCH, JobRequest.T.ALL_FBA_ORDER_SHIPPED).fetch();
         for(JobRequest job : tobeFetchReportId) {
             job.updateReportId();
         }
         Logger.info("OrderFetchJob step3 done!");
 
         // 5. 下载 report 文件
-        List<JobRequest> tobeDownload = JobRequest.find("state=?", JobRequest.S.DOWN).fetch();
+        List<JobRequest> tobeDownload = JobRequest.find("state=? AND type IN (?,?)",
+                JobRequest.S.DOWN, JobRequest.T.ALL_FBA_ORDER_FETCH, JobRequest.T.ALL_FBA_ORDER_SHIPPED).fetch();
         for(JobRequest job : tobeDownload) {
             job.downLoad();
         }
         Logger.info("OrderFetchJob step4 done!");
 
         // 6. 处理下载好的文件
-        List<JobRequest> tobeDeal = JobRequest.find("state=?", JobRequest.S.END).fetch();
+        List<JobRequest> tobeDeal = JobRequest.find("state=? AND type IN (?,?)",
+                JobRequest.S.END, JobRequest.T.ALL_FBA_ORDER_FETCH, JobRequest.T.ALL_FBA_ORDER_SHIPPED).fetch();
         for(JobRequest job : tobeDeal) {
             job.dealWith();
         }

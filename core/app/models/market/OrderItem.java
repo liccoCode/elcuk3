@@ -78,7 +78,7 @@ public class OrderItem extends GenericModel {
     /**
      * 在 OrderItem 根据保存的时候, 会减少其相对应的 SKU 的库存[成功保存了 OrderItem 以后处理库存]
      *
-     * @see Orderr updateOrderInfo 更新 OrderItem + 库存部分
+     * @see Orderr updateAttrs 更新 OrderItem + 库存部分
      */
 
     /**

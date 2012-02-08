@@ -357,7 +357,7 @@ public class Orderr extends GenericModel {
     /**
      * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
      */
-    public void updateOrderInfo(Orderr orderr) {
+    public void updateAttrs(Orderr orderr) {
         if(orderr.address != null) this.address = orderr.address;
         if(orderr.address1 != null) this.address1 = orderr.address1;
         if(orderr.arriveDate != null) this.arriveDate = orderr.arriveDate;

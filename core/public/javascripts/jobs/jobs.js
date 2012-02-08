@@ -1,4 +1,6 @@
 $(function(){
+    $('a[rel=tooltip]').tooltip();
+
 
     $('#add_job_btn').click(function(){
         $.varClosure.params = {};
@@ -19,7 +21,7 @@ $(function(){
         return false;
     });
 
-    $('#runOnce').click(function(){
+    $('.runOnce').click(function(){
         $.ajax({
             url:'/jobs/now',
             data:{id:$(this).attr('jid')},
@@ -28,12 +30,12 @@ $(function(){
                 if(data['flag']) alert('执行成功.')
             },
             error:function(xhr, state, error){
-                alert(error);
+                alert(xhr.responseText);
             }
         });
     });
 
-    $('#j_update').click(function(){
+    $('.j_update').click(function(){
         var o = $(this);
         var jid = o.attr('jid');
         $.varClosure.params = {};
@@ -48,7 +50,7 @@ $(function(){
                 else alert("更新失败!");
             },
             error:function(xhr, state, error){
-                alert(error);
+                alert(xhr.responseText);
             }
         });
     });

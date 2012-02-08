@@ -1,6 +1,7 @@
 package controllers;
 
 import models.Jobex;
+import models.market.JobRequest;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.libs.Time;
@@ -22,8 +23,9 @@ public class Jobs extends Controller {
 
     public static void index() {
         List<Jobex> jobs = Jobex.all().fetch();
+        List<JobRequest> jobReqs = JobRequest.find("ORDER BY requestDate DESC").fetch(10);
 
-        render(jobs);
+        render(jobs, jobReqs);
     }
 
     public static void listing() {

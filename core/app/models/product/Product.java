@@ -21,20 +21,20 @@ public class Product extends Model {
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
      */
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<Listing> listings;
 
     @ManyToOne
     public Category category;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
     public List<Product> relates;
 
     /**
      * Product 的所有库存;
      * 将产品删除了, 库存不允许删除, 库存记录变为"孤儿"
      */
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
     public List<ProductQTY> qtys;
 
     /**
@@ -56,6 +56,12 @@ public class Product extends Model {
 
     public Float weight;
 
+    public Product() {
+    }
+
+    public Product(String sku) {
+        this.sku = sku;
+    }
 
     /**
      * 删除 Product 前需要检查与 Product 有直接关系的各种对象.

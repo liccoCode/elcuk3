@@ -1,6 +1,7 @@
 package models.product;
 
 import exception.VErrorRuntimeException;
+import play.Logger;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -95,6 +96,30 @@ public class ProductQTY extends Model {
             pqty.unsellable = this.unsellable;
             pqty.save();
         }
+    }
+
+    /**
+     * 将 New ProductQTY 中的数据同步回当前被管理的 ProductQTY 中, 如果同步成功, 则会将 this.save 设置为 true;
+     *
+     * @param nqty
+     */
+    public void updateAttrs(ProductQTY nqty) {
+        if(!nqty.product.sku.equals(this.product.sku)) {
+            Logger.warn("ProductQTY.product[" + this.product.sku + "/" + nqty.product.sku + "] Is Not the same, can not be update!");
+            return;
+        }
+        if(!nqty.whouse.equals(this.whouse)) {
+            Logger.warn("ProductQTY.whouse[" + this.whouse.name + "/" + nqty.whouse.name + "] Is Not the same,, can not be update!");
+            return;
+        }
+        if(nqty.inbound != null) this.inbound = nqty.inbound;
+        if(nqty.pending != null) this.pending = nqty.pending;
+        if(nqty.qty != null) this.qty = nqty.qty;
+        if(nqty.unsellable != null) this.unsellable = nqty.unsellable;
+
+        this.save = true;
+
+        this.save();
     }
 
 }

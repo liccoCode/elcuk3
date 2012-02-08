@@ -73,7 +73,7 @@ public class OrderParseTest extends UnitTest {
                 System.out.println("Managerd Orders: " + managedOrderrs.size());
                 for(Orderr or : managedOrderrs) { // 2. 手动从数据库中加载出需要更新的 Order (managed),  然后再将这些处于被管理状态的 Order 进行更新;
                     Orderr newOrder = orderrMap.get(or.orderId);
-                    or.updateOrderInfo(newOrder);
+                    or.updateAttrs(newOrder);
                     oldOrderrMap.put(or.orderId, or);
                 }
                 System.out.println("Save Unsaved Order...");

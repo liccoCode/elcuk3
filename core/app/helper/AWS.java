@@ -46,6 +46,7 @@ public class AWS {
         switch(job.type) {
             case ALL_FBA_ORDER_FETCH:
             case ALL_FBA_ORDER_SHIPPED:
+            case MANAGE_FBA_INVENTORY_ARCHIVED:
                 MarketplaceWebService service = client(job);
 
                 RequestReportRequest res = new RequestReportRequest()
@@ -158,6 +159,7 @@ public class AWS {
                             job.reportId + ".xml");
                     break;
                 case ALL_FBA_ORDER_SHIPPED:
+                case MANAGE_FBA_INVENTORY_ARCHIVED:
                     filename = String.format(REPORT_BASE_PATH,
                             cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
                             job.reportId + ".csv");
