@@ -118,6 +118,7 @@ public class ProductQTY extends Model {
         if(nqty.unsellable != null) this.unsellable = nqty.unsellable;
 
         this.save = true;
+        nqty.save = true;
 
         this.save();
     }
