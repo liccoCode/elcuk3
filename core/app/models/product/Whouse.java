@@ -118,6 +118,7 @@ public class Whouse extends Model {
         for(String line : lines) {
             String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
             String sku = vals[0].split(",")[0].trim().toUpperCase();
+            if("609132508189".equals(sku)) sku = "71-HPTOUCH-B2PG"; //对历史错误数据的修复 @_@
             if(!qtyMap.containsKey(sku)) {
                 ProductQTY qty = new ProductQTY();
                 qty.whouse = this;
