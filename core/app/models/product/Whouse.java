@@ -117,7 +117,7 @@ public class Whouse extends Model {
         Map<String, ProductQTY> qtyMap = new HashMap<String, ProductQTY>();
         for(String line : lines) {
             String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
-            String sku = vals[0].trim().toUpperCase();
+            String sku = vals[0].split(",")[0].trim().toUpperCase();
             if(!qtyMap.containsKey(sku)) {
                 ProductQTY qty = new ProductQTY();
                 qty.whouse = this;
@@ -127,8 +127,12 @@ public class Whouse extends Model {
                 qty.pending = NumberUtils.toInt(vals[12]);
                 qty.product = new Product(sku);
                 qtyMap.put(sku, qty);
-            } else {
-                Logger.warn(file.getAbsolutePath() + "/" + file.getName() + " have repeat MerchantSKU!");
+            } else { // 兼容 MerchantSKU 不一样, 但是 SKU 一样的 ProductQTY.
+                ProductQTY qty = qtyMap.get(sku);
+                qty.inbound += NumberUtils.toInt(vals[16]);
+                qty.qty += NumberUtils.toInt(vals[10]);
+                qty.unsellable = NumberUtils.toInt(vals[11]);
+                qty.pending = NumberUtils.toInt(vals[12]);
             }
         }
         return new ArrayList<ProductQTY>(qtyMap.values());

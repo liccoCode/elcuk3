@@ -306,7 +306,7 @@ public class JobRequest extends Model {
                         qty.product = prod;
                         qty.whouse = wh;
                         qty.save();
-                        Logger.info("ProductQTY " + qty.product.sku + " fix add from FBA to Elcuk2.");
+                        Logger.info("ProductQTY " + qty.product.sku + " synchronize from FBA to System.");
                     }
                 }
                 break;
