@@ -31,4 +31,9 @@ public class Caches {
      */
     public static final String FRONT_ORDER_TABLE = "front_order_table_%s";
 
+    /**
+     * 根据不同类型的 Server 给缓存起来, 拥有也 type 参数
+     */
+    public static final String SERVERS = "server_%s";
+
 }

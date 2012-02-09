@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import exception.VErrorRuntimeException;
 import helper.Currency;
 import models.product.Product;
+import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -127,6 +128,28 @@ public class Listing extends Model {
         this.listingId = String.format("%s_%s", this.asin, this.market.toString());
     }
 
+    public void updateAttrs(Listing newListing) {
+        if(!this.equals(newListing)) return; // 不是一个 Listing 则不允许更新了
+//        newListing.asin 这个不更新
+        if(newListing.market != null) this.market = newListing.market;
+        if(StringUtils.isNotBlank(newListing.byWho)) this.byWho = newListing.byWho;
+        if(StringUtils.isNotBlank(newListing.title)) this.title = newListing.title;
+        if(newListing.reviews != null) this.reviews = newListing.reviews;
+        if(newListing.rating != null) this.rating = newListing.rating;
+        if(StringUtils.isNotBlank(newListing.technicalDetails)) this.technicalDetails = newListing.technicalDetails;
+        if(StringUtils.isNotBlank(newListing.productDescription))
+            this.productDescription = newListing.productDescription;
+        if(newListing.saleRank != null) this.saleRank = newListing.saleRank;
+        if(newListing.totalOffers != null) this.totalOffers = newListing.totalOffers;
+        if(StringUtils.isNotBlank(newListing.picUrls)) this.picUrls = newListing.picUrls;
+        if(newListing.offers != null && newListing.offers.size() > 0) {
+            for(ListingOffer lo : this.offers) lo.delete(); //清理掉原来的 ListingOffers
+            this.offers = newListing.offers;
+        }
+        this.lastUpdateTime = System.currentTimeMillis();
+        this.save();
+    }
+
     /**
      * 将一个手动创建的 Selling 绑定到一个 Listing 身上, 其中需要经过一些操作
      *
@@ -206,7 +229,7 @@ public class Listing extends Model {
      * @param listingJson
      * @return
      */
-    public static Listing parseListingFromCrawl(JsonElement listingJson) {
+    public static Listing parseAndUpdateListingFromCrawl(JsonElement listingJson) {
         /**
          * 根据 market 与 asin 先从数据库中加载, 如果存在则更新返回一个持久状态的 Listing 对象,
          * 否则返回一个瞬时状态的 Listing 对象
@@ -239,9 +262,7 @@ public class Listing extends Model {
         JsonArray offers = lst.get("offers").getAsJsonArray();
         List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
         if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
-            for(ListingOffer of : tobeChangeed.offers) {
-                of.delete();
-            }
+            for(ListingOffer of : tobeChangeed.offers) of.delete();
         }
         for(JsonElement offerEl : offers) {
             JsonObject offer = offerEl.getAsJsonObject();
@@ -275,6 +296,26 @@ public class Listing extends Model {
         tobeChangeed.lastUpdateTime = System.currentTimeMillis();
         if(oldListing != null) tobeChangeed.save();
         return tobeChangeed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Listing listing = (Listing) o;
+
+        if(!listingId.equals(listing.listingId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + listingId.hashCode();
+        return result;
     }
 
     @Override

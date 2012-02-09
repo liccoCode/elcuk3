@@ -113,7 +113,7 @@ public class Listings extends Controller {
         JsonElement listing = WS.url(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin)).get().getJson();
         Listing tobeSave = null;
         try {
-            tobeSave = Listing.parseListingFromCrawl(listing);
+            tobeSave = Listing.parseAndUpdateListingFromCrawl(listing);
         } catch(Exception e) {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
         }

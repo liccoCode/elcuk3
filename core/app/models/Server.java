@@ -1,5 +1,6 @@
 package models;
 
+import helper.Caches;
 import play.cache.Cache;
 import play.db.jpa.Model;
 
@@ -39,10 +40,10 @@ public class Server extends Model {
 
     @SuppressWarnings("unchecked")
     public static Server server(T type) {
-        List<Server> servers = (List<Server>) Cache.get("Server_" + type.toString());
+        List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
         if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
             servers = Server.find("type=?", type).fetch();
-            Cache.add("Server_" + type.toString(), servers, "5mn");
+            Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "30mn");
         }
         //TODO 根据 ratio 计算获取哪一个
         return servers.get(0);
