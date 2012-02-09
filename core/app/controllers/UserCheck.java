@@ -11,7 +11,7 @@ import play.mvc.Scope;
  * Time: 12:42 AM
  */
 public class UserCheck extends Secure.Security {
-    public static final String U = "user.name[%s]";
+    public static final String U = "user.name[%s][%s]";
 
     static boolean authenticate(String username, String password) {
         User user;
@@ -22,17 +22,18 @@ public class UserCheck extends Secure.Security {
             user = User.connect(username, password);
         }
         if(user != null) {
-            Cache.add(ukey(), user);
+            Cache.add(ukey(username), user);
         }
         return user != null;
     }
 
     static boolean check(String profile) {
-        User user = Cache.get(ukey(), User.class);
+        String username = Secure.Security.connected();
+        User user = Cache.get(ukey(username), User.class);
         if(user == null) {
             if(Secure.Security.isConnected()) {
-                user = User.find("username=?", Secure.Security.connected()).first();
-                if(user != null) Cache.add(ukey(), user);
+                user = User.find("username=?", username).first();
+                if(user != null) Cache.add(ukey(username), user);
                 else return false;
             } else {
                 return false;
@@ -54,10 +55,11 @@ public class UserCheck extends Secure.Security {
     /**
      * 根据 Session, 获取登陆后存储在 Cache 中的 User 的  key;
      *
+     * @param username
      * @return
      */
-    public static String ukey() {
-        return String.format(U, Scope.Session.current().getId());
+    public static String ukey(String username) {
+        return String.format(U, username, Scope.Session.current().getId());
     }
 
 }

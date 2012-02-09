@@ -25,6 +25,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="@{Application.index()}">Home</a></li>
+                            <li><a href="#change_passwd" data-toggle="modal">修改密码</a></li>
                             <li><a href="@{Secure.login()}">Logout</a></li>
                         </ul>
                     </li>
@@ -72,6 +73,31 @@
 <div class="container-fluid" id="container">
 #{doLayout /}
 </div>
+
+<div id="change_passwd" class="modal hide fade">
+    <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+
+        <h3>修改用户名密码</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form" style="text-align:center">
+            <label class="label label-info large span2">Username:</label>
+            <input name="u.username" type="text" class="input-large span3" readonly placeholder="Username" value="${controllers.Secure.Security.connected()}">
+            <label class="label label-info large span2">New Password:</label>
+            <input name="u.password" type="password" class="input-large span3" placeholder="NewPassword">
+            <label class="label label-info large span2">Confirm:</label>
+            <input name="c_password" type="password" class="input-large span3" placeholder="Confirm New Password">
+
+            <div class="label label-warning" style="font-size:12px">修改密码前最好重新登陆一次后再进行修改!</div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="#" id="change_passwd_btn" class="btn btn-primary">Save</a>
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
+    </div>
+</div>
+
 #{script 'bootstrap.js'/}
 </body>
 </html>

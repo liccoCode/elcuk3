@@ -2,7 +2,8 @@ $(function(){
     $.varClosure = function(){
         var o = $(this);
         if(!o.attr('name')) return false;
-        $.varClosure.params[o.attr("name")] = o.val();
+        if(o.val())
+            $.varClosure.params[o.attr("name")] = o.val().trim();
     };
 
     $.DateUtil = {
