@@ -37,7 +37,7 @@ public class ListingCrawlJob extends Job {
         /**
          * 1. 检查是否可以运行这次任务
          * 2. 从队列中依次拿出任务并根据参数进行速度调节
-         * 3. 将任务分发到不同的线程中去
+         * 3. 将任务分发到不同的子 Job 中去
          */
         if(!flag.get()) {
             Logger.debug("Last Time Job is not DONE yet...");
@@ -58,6 +58,10 @@ public class ListingCrawlJob extends Job {
         Logger.debug("ListingCrawlJob.Queue left " + QUEUE.size());
     }
 
+    /**
+     * 最后执行 Listing 更新的地方; 使用 Job 的原因是在这里使用了多线程, 但 Play! 在 Job 中开启的线程中使用
+     * JPA 保存等的时候无法进行, 所以只能继承 Job 来让 Play! 自动开启 JPA 与事务.
+     */
     public class Worker extends Job<Listing> {
         private String listingId;
 
