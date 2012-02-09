@@ -99,10 +99,10 @@ public class User extends Model {
      * @param passwd
      */
     public void changePasswd(String passwd) {
-        User managedUser = JPA.em().merge(this);
-        managedUser.password = passwd;
+        User managedU = JPA.em().merge(this);
+        managedU.password = passwd;
         this.password = passwd;
-        managedUser.save();
+        managedU.save();
     }
 
 
