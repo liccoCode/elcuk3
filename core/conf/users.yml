@@ -1,24 +1,24 @@
 User(wyatt):
   username: 'wyatt'
-  password: '42afb327703cd6a584c64d15aa473b64'
+  password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
 
 User(jamin):
   username: 'jamin'
-  password: '42afb327703cd6a584c64d15aa473b64'
+  password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
 
 User(su):
   username: 'su'
-  password: '42afb327703cd6a584c64d15aa473b64'
+  password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
 
 User(jason):
   username: 'jason'
-  password: '42afb327703cd6a584c64d15aa473b64'
+  password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
 
