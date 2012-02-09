@@ -99,6 +99,7 @@ public class User extends Model {
      * @param passwd
      */
     public void changePasswd(String passwd) {
+        //  由于 User 会被保存在 Cache 中, 那么 User 则处于游离状态, 为了保持缓存中游离对象, 所以需要将缓存中的游离对象进行一次更新
         User managedU = JPA.em().merge(this);
         managedU.password = passwd;
         this.password = passwd;
