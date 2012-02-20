@@ -90,7 +90,7 @@ public class ListingCrawlJob extends Job {
                 needCheckListing.check();
                 needCheckListing.save();
             } catch(Exception e) {
-                Logger.warn("ListingCrawlJob:" + e.getMessage());
+                Logger.warn("ListingCrawlJob[" + listingId + "]:" + e.getMessage());
             }
         }
 
