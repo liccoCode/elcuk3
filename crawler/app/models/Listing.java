@@ -203,8 +203,12 @@ public class Listing {
                 moreSeller.name = seller.select(".mbcMerch >td").first().text();
                 moreSeller.price = amazonPrice(site.text(), seller.select(".mbcPriceCell").text());
                 String shippingText = seller.select(".plusShippingText").text().toUpperCase();
-                moreSeller.shipprice = amazonPrice(site.text(), shippingText);
-                if(shippingText.contains("&") || shippingText.contains("FREE")) moreSeller.fba = true;
+                if(shippingText.contains("&") || shippingText.contains("FREE")) {
+                    moreSeller.fba = true;
+                    moreSeller.shipprice = 0f;
+                } else {
+                    moreSeller.shipprice = amazonPrice(site.text(), shippingText);
+                }
                 offers.add(moreSeller);
             } catch(Exception e) {
                 Logger.error("Parse More Buyers have some error! [%s]", e.getMessage());
