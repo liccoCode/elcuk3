@@ -6,7 +6,9 @@ import com.google.gson.JsonObject;
 import exception.VErrorRuntimeException;
 import helper.Currency;
 import models.product.Product;
+import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -78,6 +80,11 @@ public class Listing extends Model {
      */
     @Lob
     public String picUrls;
+
+    /**
+     * 此 Listing 是否需要进行警告的的标识, 并且记录警告了多少次.
+     */
+    public Integer warnningTimes;
 
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
@@ -296,6 +303,49 @@ public class Listing extends Model {
         tobeChangeed.lastUpdateTime = System.currentTimeMillis();
         if(oldListing != null) tobeChangeed.save();
         return tobeChangeed;
+    }
+
+    /**
+     * 根据 Listing 的状态, 进行 Listing 的检查;
+     * 1. 如果这个 Listing 是我们自己的, 检查是否被跟.
+     */
+    public void check() {
+        /**
+         * 1. 判断是否为自己的 Listing
+         *  1.1 检查此 Listing 是否有被其他卖家上架!
+         */
+        if(this.selfSalesAmazon()) {
+            if(this.offers == null || this.offers.size() == 0) {
+                Logger.warn("Listing [" + this.listingId + "] have no offers!");
+                return;
+            }
+            for(ListingOffer off : this.offers) {
+                if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
+                    Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+                } else if(!"AJUR3R8UN71M4".equals(off.offerId) ||
+                        !off.name.equalsIgnoreCase("EasyAcc")) {
+                    // Mail 警告
+                    if(this.warnningTimes == null) this.warnningTimes = 0;
+                    this.warnningTimes++; // 查询也记录一次
+                    if(this.warnningTimes > 4) {
+                        Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
+                    } else {
+                        Mails.listingOffersWarning(off);
+                    }
+                } else {
+                    this.warnningTimes = 0; // 其余的归零
+                }
+            }
+        } else {
+            // 不是自己的 Listing 暂时不做操作...
+        }
+    }
+
+    private boolean selfSalesAmazon() {
+        return "EasyAcc".equalsIgnoreCase(this.byWho) ||
+                "Saner".equalsIgnoreCase(this.byWho) ||
+                StringUtils.startsWithIgnoreCase(this.title, "Saner") ||
+                StringUtils.startsWithIgnoreCase(this.title, "EasyAcc");
     }
 
     @Override

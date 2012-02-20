@@ -86,7 +86,9 @@ public class ListingCrawlJob extends Job {
                         Server.server(Server.T.CRAWLER).url,
                         listing.market.name().split("_")[1],
                         listing.asin)).get().getJson();
-                Listing.parseAndUpdateListingFromCrawl(lst);
+                Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
+                needCheckListing.check();
+                needCheckListing.save();
             } catch(Exception e) {
                 Logger.warn("ListingCrawlJob:" + e.getMessage());
             }
