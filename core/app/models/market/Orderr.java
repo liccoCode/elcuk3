@@ -24,6 +24,7 @@ import javax.persistence.*;
 import javax.xml.bind.JAXB;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -671,6 +672,43 @@ public class Orderr extends GenericModel {
         }
         return orders;
     }
+
+
+    /**
+     * 查看某一天订单的饼图数据
+     *
+     * @param msku
+     * @param date
+     * @return
+     */
+    public static Map<String, AtomicInteger> orderPieChart(String msku, Date date) {
+        DateTime day = Instant.parse(new DateTime(date.getTime()).toString("yyyy-MM-dd")).toDateTime();
+        Date dayBegin = day.toDate();
+        Date dayEnd = day.plusDays(1).toDate();
+
+        List<Orderr> orderrs = Orderr.find("createDate>=? AND createDate<=?", dayBegin, dayEnd).fetch();
+
+        Map<String, AtomicInteger> rtMap = new LinkedHashMap<String, AtomicInteger>();
+        for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime(); begin += TimeUnit.HOURS.toMillis(1)) {
+            rtMap.put(begin.toString(), new AtomicInteger(0));
+            for(Orderr or : orderrs) {
+                for(OrderItem oi : or.items) {
+                    if(oi.selling.merchantSKU.equals(msku) ||
+                            "all".equalsIgnoreCase(msku)) {//如果搜索的 MerchantSKU 为 all 也进行计算
+                        if(or.createDate.getTime() < begin || or.createDate.getTime() > begin + TimeUnit.HOURS.toMillis(1))
+                            continue;
+
+                        if(rtMap.containsKey(begin.toString())) {
+                            rtMap.get(begin.toString()).incrementAndGet(); //因为是统计的订单, 所以数量都是以 1 递增
+                        }
+                    }
+                }
+            }
+        }
+
+        return rtMap;
+    }
+
 
     /**
      * 判断将 OrderItem 是否能够添加如已经存在的 List[OrderItem]

@@ -75,6 +75,7 @@ public class TimeParseTest {
 
     @Test
     public void testJodeTime() {
+        System.out.println("---------" + Instant.parse("2012-02-21").getMillis());
         Instant it = Instant.now();
         System.out.println(it.minus(Duration.standardDays(7)));
         System.out.println(it.minus(Duration.standardDays(7)).getMillis());

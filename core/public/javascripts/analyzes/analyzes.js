@@ -23,7 +23,10 @@ $(function(){
                 point:{
                     events:{
                         click:function(){
-                            alert(this.series.name + ":::::" + this.x + ":::" + this.y);
+                            var msku = localStorage.getItem('msku');
+                            window.open('/analyzes/pie?msku=' + msku + "&date=" + $.DateUtil.fmt1(new Date(this.x)),
+                                    msku,
+                                    'width=520,height=620,location=yes,status=yes');
                         }
                     }
                 }
@@ -153,6 +156,7 @@ $(function(){
                 dealLine('ait');
 
                 curtOpt.series = series;
+                localStorage.setItem("msku", msku);
                 new Highcharts.Chart(curtOpt);
                 $('#selling_down').unmask();
             },

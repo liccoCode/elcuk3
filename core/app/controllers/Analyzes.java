@@ -2,7 +2,9 @@ package controllers;
 
 import models.PageInfo;
 import models.market.OrderItem;
+import models.market.Orderr;
 import models.market.Selling;
+import org.joda.time.DateTime;
 import play.data.binding.As;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -11,6 +13,8 @@ import play.mvc.With;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 数据分析页面的控制器
@@ -71,5 +75,21 @@ public class Analyzes extends Controller {
         validation.required(to);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         renderJSON(OrderItem.ajaxHighChartSelling(msku, from, to));
+    }
+
+    /**
+     * 给出某一天订单销量的时间区间饼图
+     *
+     * @param msku
+     */
+    public static void pie(String msku,
+                           @As("MM/dd/yyyy") Date date) {
+        Map<String, AtomicInteger> dataMap = Orderr.orderPieChart(msku, date);
+        List<String> datax = new ArrayList<String>();
+        for(String key : dataMap.keySet()) {
+            datax.add("'" + new DateTime(Long.parseLong(key)).toString("HH:mm:ss") + "'");
+        }
+        List<AtomicInteger> datay = new ArrayList<AtomicInteger>(dataMap.values());
+        render(datax, datay, date);
     }
 }
