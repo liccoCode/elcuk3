@@ -505,30 +505,38 @@ public class Orderr extends GenericModel {
         Set<Orderr> orderrs = new HashSet<Orderr>();
         lines.remove(0); //删除第一行标题
         for(String line : lines) {
-            // 在解析 csv 文件的时候会发现有重复的项出现, 不过这没关系, 
+            // 在解析 csv 文件的时候会发现有重复的项出现, 不过这没关系,
             String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
-            Orderr order = new Orderr();
-            order.orderId = vals[0];
-            order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
-            order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
-            order.shippingService = vals[42];
-            if(StringUtils.isNotBlank(vals[43])) {
-                order.trackNo = vals[43];
-                order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
-            }
-            order.email = vals[10];
-            order.buyer = vals[11];
-            order.phone = vals[12];
-            order.shipLevel = vals[23];
-            order.reciver = vals[24];
-            order.address = vals[25];
-            order.address1 = (vals[26] + " " + vals[27]).trim();
-            order.city = vals[28];
-            order.province = vals[29];
-            order.postalCode = vals[30];
-            order.country = vals[31];
+            try {
+                if(vals[0].toUpperCase().startsWith("S")) {
+                    Logger.info("Skip Self Order[" + vals[0] + "].");
+                    continue;
+                }
+                Orderr order = new Orderr();
+                order.orderId = vals[0];
+                order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
+                order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
+                order.shippingService = vals[42];
+                if(StringUtils.isNotBlank(vals[43])) {
+                    order.trackNo = vals[43];
+                    order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
+                }
+                order.email = vals[10];
+                order.buyer = vals[11];
+                order.phone = vals[12];
+                order.shipLevel = vals[23];
+                order.reciver = vals[24];
+                order.address = vals[25];
+                order.address1 = (vals[26] + " " + vals[27]).trim();
+                order.city = vals[28];
+                order.province = vals[29];
+                order.postalCode = vals[30];
+                order.country = vals[31];
 
-            orderrs.add(order);
+                orderrs.add(order);
+            } catch(Exception e) {
+                Logger.warn("Parse Order[" + vals[0] + "] update Error. [" + e.getMessage() + "]");
+            }
         }
         return orderrs;
     }

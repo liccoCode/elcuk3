@@ -18,13 +18,12 @@ import java.util.Set;
 public class OrderUpdateParseTest extends UnitTest {
     @Test
     public void testParse() {
-        Set<Orderr> orders = Orderr.parseUpdateOrderXML(new File("/Users/wyattpan/elcuk2-data/2012/1/24/9968684844.csv"), Account.M.AMAZON_UK);
+        Set<Orderr> orders = Orderr.parseUpdateOrderXML(new File("/Users/wyattpan/elcuk2-logs/23/10495025944.csv"), Account.M.AMAZON_UK);
         for(Orderr or : orders) {
             System.out.println(or);
         }
     }
 
-    @Test
     public void testParse2() {
         JobRequest job = JobRequest.findById(2l);
         job.dealWith();

@@ -32,13 +32,13 @@ public class OrderParseTest extends UnitTest {
 
     private String home = System.getProperty("user.home");
 
-    //    @Test
+    @Test
     public void testParse() {
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/10/11/8141580584.xml"), Account.M.AMAZON_UK);
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9566254144.xml"), Account.M.AMAZON_UK);
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9566893024.xml"), Account.M.AMAZON_UK);
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9567535464.xml"), Account.M.AMAZON_UK);
-        List<Orderr> orders = Orderr.parseAllOrderXML(new File(home + "/elcuk-data/2012/01/02/9584115364.xml"), Account.M.AMAZON_UK);
+        List<Orderr> orders = Orderr.parseAllOrderXML(new File(home + "/elcuk2-logs/23/10495025884.xml"), Account.M.AMAZON_UK);
         Account acc = Account.findById(1l);
 //        List<Orderr> orders = Orderr.parseALLOrderXML(new File("F:/elcuk-data/2011/12/01/9018095104.xml"));
         for(Orderr or : orders) {
@@ -47,7 +47,7 @@ public class OrderParseTest extends UnitTest {
         }
     }
 
-    @Test
+    //    @Test
     public void parseOrders() {
 //        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2011/12/32/"), new String[]{"xml"}, true));
 //        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk-data/2011/12/33/"), new String[]{"xml"}, true));
