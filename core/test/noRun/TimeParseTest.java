@@ -105,7 +105,13 @@ public class TimeParseTest {
         System.out.println(0x01f9);
         System.out.println(0x0000);
 
-
         System.out.println(0xff0f);
+    }
+
+    @Test
+    public void testJodeDate() {
+        DateTime dt = DateTime.now();
+        System.out.println(DateTime.parse(String.format("%s-%s-%s", dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth())));
+        System.out.println(dt.toString("yy"));
     }
 }
