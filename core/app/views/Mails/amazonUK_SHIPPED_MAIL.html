@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Thanks for purchasing from Easyacc on Amazon</title>
+</head>
+<body>
+内容是什么????
+
+OrderId: ${order.orderId}
+<br/>
+<ol>
+#{list items:order.items, as:'oi'}
+<li>${oi.productName}</li>
+#{/list}
+</ol>
+</body>
+</html>

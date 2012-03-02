@@ -97,4 +97,15 @@ public class TimeParseTest {
         System.out.println(Instant.parse("2012-02-05").toDateTime().toString("yyyy-MM-dd"));
         System.out.println(new DateTime(1328446988397l).toString("yyyy-MM-dd HH:mm:ss"));
     }
+
+    @Test
+    public void testSign() {
+        System.out.println(0x00f0);
+        System.out.println(0x00ff);
+        System.out.println(0x01f9);
+        System.out.println(0x0000);
+
+
+        System.out.println(0xff0f);
+    }
 }

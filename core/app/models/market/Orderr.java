@@ -94,10 +94,15 @@ public class Orderr extends GenericModel {
     //-------------- Basic ----------------
 
     /**
-     * 发送邮件到达了什么阶段. 默认从 0 开始;
-     * TODO 具体的 0,1,2,3... 还需要进行讨论
+     * 发送邮件到达了什么阶段. 默认从 0x0000 开始;(16进制)
+     * 从最前面的位开始
+     * 0x0000 : 还没有发送邮件[SHIPPED_MAIL]
+     * 0x000f : 订单成功发货以后发送邮件
+     * 0x00f0 : 订单的货物抵达以后发送邀请留 Review 的邮件
+     * 0x0f00 : 待定
+     * 0xf000 : 待定
      */
-    public int emailed = 0;
+    public int emailed = 0x0000;
 
 
     /**
@@ -763,6 +768,48 @@ public class Orderr extends GenericModel {
 
     public void setPostalCode(String postalCode1) {
         if(postalCode1 != null) this.postalCode = postalCode1.toUpperCase();
+    }
+
+    /**
+     * 将 0x0000 这种 16 进制的第几位修改成 'char'
+     * @param bit
+     */
+    public void emailed(int bit, char c) {
+        if(c != 'f' && c != 'F' && c != '0') throw new IllegalArgumentException("Just only '1' or '0' is valid!");
+        StringBuilder mailedHex = new StringBuilder(Integer.toHexString(this.emailed));
+        int prefix = 4 - mailedHex.length();
+        for(int i = 0; i < prefix; i++) {
+            mailedHex.insert(0, '0');
+        }
+        switch(bit) {
+            case 1: // 0x000!
+                mailedHex.setCharAt(mailedHex.length() - 1, c);
+                break;
+            case 2: // 0x00!0
+                mailedHex.setCharAt(mailedHex.length() - 2, c);
+                break;
+            case 3: // 0x0!00
+                mailedHex.setCharAt(mailedHex.length() - 3, c);
+                break;
+            case 4: //0x!000
+                mailedHex.setCharAt(mailedHex.length() - 4, c);
+                break;
+        }
+        this.emailed = Integer.valueOf(mailedHex.toString(), 16);
+    }
+
+    /**
+     * 获取第 bit 位上的值
+     * @param bit
+     * @return
+     */
+    public char emailed(int bit) {
+        StringBuilder mailedHex = new StringBuilder(Integer.toHexString(this.emailed));
+        int prefix = 4 - mailedHex.length();
+        for(int i = 0; i < prefix; i++) {
+            mailedHex.insert(0, '0');
+        }
+        return mailedHex.charAt(bit);
     }
 
     @Override

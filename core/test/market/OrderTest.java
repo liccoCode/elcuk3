@@ -6,6 +6,7 @@ import com.elcuk.jaxb.Price;
 import models.market.Account;
 import models.market.Orderr;
 import org.junit.Test;
+import play.Logger;
 import play.test.UnitTest;
 
 import javax.xml.bind.JAXB;
@@ -19,7 +20,7 @@ import java.util.Date;
  * Date: 1/6/12
  * Time: 11:10 AM
  */
-public class OrderTest /*extends UnitTest*/ {
+public class OrderTest extends UnitTest {
 
     //    @Test
     public void saveOrder() {
@@ -34,7 +35,7 @@ public class OrderTest /*extends UnitTest*/ {
         order.save();
     }
 
-    @Test
+//    @Test
     public void testEncode() {
 
         Price price = new Price();
@@ -57,5 +58,37 @@ public class OrderTest /*extends UnitTest*/ {
         StringWriter sw = new StringWriter();
         JAXB.marshal(price, sw);
         System.out.println(sw.toString());
+    }
+
+    @Test
+    public void testEmailed() {
+        Orderr or2 = Orderr.findById("302-0924220-3736363");
+        or2.emailed(1, '0');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(1, 'f');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(2, '0');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(2, 'f');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(3, '0');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(3, 'f');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(4, '0');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        or2.emailed(4, 'f');
+        Logger.info("================:" + or2.emailed + "::" + Integer.toHexString(or2.emailed));
+        /*
+        12-02-28 11:28:19 [play] INFO  ~ ================:0::0
+        12-02-28 11:28:19 [play] INFO  ~ ================:15::f
+        12-02-28 11:28:19 [play] INFO  ~ ================:15::f
+        12-02-28 11:28:19 [play] INFO  ~ ================:255::ff
+        12-02-28 11:28:19 [play] INFO  ~ ================:255::ff
+        12-02-28 11:28:19 [play] INFO  ~ ================:4095::fff
+        12-02-28 11:28:19 [play] INFO  ~ ================:4095::fff
+        12-02-28 11:28:19 [play] INFO  ~ ================:65535::ffff
+
+         */
     }
 }
