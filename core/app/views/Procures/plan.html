@@ -1,0 +1,28 @@
+#{extends 'main_fluid.html'/}
+#{set title:'采购计划'/}
+#{set 'moreScripts'}
+    #{script 'procures/plan.js'/}
+#{/set}
+
+<div class="row-fluid">
+    <div class="span2 well">
+        <div>
+            <a class="btn">创建计划</a>
+        </div>
+        <div>
+            <ul id="plan_list" class="nav nav-pills nav-stacked">
+            #{list items:plans, as:'plan'}
+                <li>
+                    <a href="#" pid="${plan.id}">${plan.id}</a>
+                </li>
+            #{/list}
+            </ul>
+        </div>
+    </div>
+    <div class="span9 well">
+        <div>
+            <a class="btn" id="addpi">添加产品</a>
+        </div>
+        <div id="plan_info"></div>
+    </div>
+</div>

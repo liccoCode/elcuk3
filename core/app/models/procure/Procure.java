@@ -1,8 +1,10 @@
 package models.procure;
 
+import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -11,6 +13,7 @@ import java.util.List;
  * Date: 3/2/12
  * Time: 12:45 PM
  */
+@Entity
 public class Procure extends GenericModel {
     @OneToOne
     public Plan plan; // 此采购单属于哪一份采购计划中划分出来的.
@@ -21,7 +24,7 @@ public class Procure extends GenericModel {
     /**
      * 此采购单中所具有的 PItem
      */
-    @OneToMany
+    @OneToMany(mappedBy = "procure")
     public List<PItem> items;
 
 
@@ -31,7 +34,19 @@ public class Procure extends GenericModel {
     @Column(unique = true, nullable = true)
     public String procureNo; // 与工厂签订的合同号
 
+    public Date createDate;
+
     @Lob
     public String memo;
 
+
+    public static String cId() {
+        DateTime now = DateTime.now();
+        Procure pl = Procure.find("createDate>=? AND createDate<=? ORDER BY id LIMIT 1",
+                DateTime.parse(String.format("%s-%s-%s", now.getYear(), now.getMonthOfYear(), "01")).toDate(),
+                now.toDate()
+        ).first();
+        Integer nb = Integer.valueOf(pl.id.split("_")[1]);
+        return String.format("PR%s_%s", now.toString("yyMMdd"), nb + 1);
+    }
 }

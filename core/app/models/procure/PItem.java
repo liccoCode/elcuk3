@@ -23,13 +23,22 @@ public class PItem extends Model {
     public Selling selling; // asin, 去往的 Selling/Listing
 
     @OneToOne
-    public Account.M market; // market, 去往的市场
-
-    @OneToOne
     public Whouse whouse; // whouse, 自己的存放仓库
 
     @OneToOne
     public Supplier supplier; // 采购的工厂
+
+
+    @ManyToOne
+    public Plan plan;
+
+    @ManyToOne
+    public Procure procure;
+
+    @ManyToOne
+    public Shipment shipment;
+
+    public Account.M market; // market, 去往的市场
 
     /**
      * PItem 的几个状态

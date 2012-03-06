@@ -17,7 +17,7 @@ SKU 错误
         </tr>
         #{list items:prod.listings, as:'lst'}
             <tr class="l_List_table_item" lid="listing_${lst.listingId}" title="${lst.title}" style="cursor:pointer">
-                <td><a target="_blank" href="${lst.link()}">${lst.asin}</a></td>
+                <td><a target="_blank" href="${helper.Webs.link(lst)}">${lst.asin}</a></td>
                 <td>${lst.market.name()}</td>
                 <td>${lst.reviews}</td>
                 <td>${lst.rating}</td>

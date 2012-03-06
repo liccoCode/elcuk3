@@ -1,6 +1,9 @@
 package models.procure;
 
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 /**
  * 购买商品的工厂
@@ -8,5 +11,16 @@ import play.db.jpa.Model;
  * Date: 3/2/12
  * Time: 12:18 PM
  */
-public class Supplier extends Model {
+@Entity
+public class Supplier extends GenericModel {
+
+    @Id
+    public String id;
+
+    public String name;
+
+    public String address;
+
+    public String contacter;
+
 }

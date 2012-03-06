@@ -1,0 +1,59 @@
+<div id="info">
+    <span class="label large label-info">Info:</span><br/>
+${plan.id}, ${plan.createDate}, ${plan.creater.username}
+</div>
+<div id="items">
+    <hr/>
+    <span class="label large label-info">Items:</span><br/>
+
+    <table id="info_table" class="table table-striped table-bordered">
+        <tr>
+            <th class="span1">Id</th>
+            <th class="span4">Title</th>
+            <th class="span2">Whouse</th>
+            <th class="span2">ASIN</th>
+            <th class="span2">Market</th>
+            <th class="span2">SKU</th>
+            <th class="span2">Price</th>
+            <th class="span1">QTY</th>
+            <th class="span1">Supplier</th>
+            <th class="span2">&nbsp;</th>
+        </tr>
+    #{list items:plan.items, as:'pi'}
+        <tr id="${pi.id}_item">
+            <td>${pi.id}</td>
+            <td>${pi.title.subSequence(0, (30 > pi.title.length() ? pi.title.length() : 30))}...</td>
+            <td>${pi.whouse.name}</td>
+            <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
+            <td>${pi.selling.market}</td>
+            <td>${pi.product.sku}</td>
+            <td><input type="text" name="pi.price" value="${pi.price}"></td>
+            <td><input type="text" name="pi.qty" value="${pi.qty}"></td>
+            <td>
+                #{select name:'pi.supplier', items:sups, value:pi.supplier.id}#{/select}
+            </td>
+            <td>
+                <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        Action
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" pid="${pi.id}">更新</a></li>
+                        <li><a href="#" did="${pi.id}">删除</a></li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    #{/list}
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        $('#info_table a[pid]').click(function(){
+            var pid = $(this).attr('pid');
+            alert($('#' + pid + '_item').html());
+        });
+    });
+</script>

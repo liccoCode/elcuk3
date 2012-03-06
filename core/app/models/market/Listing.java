@@ -205,31 +205,7 @@ public class Listing extends Model {
         return null;
     }
 
-    /**
-     * 返回可以访问具体网站的链接
-     *
-     * @return 如果正常判断则返回对应网站链接, 否则返回 #
-     */
-    public String link() {
-        //http://www.amazon.co.uk/dp/B005UNXHC0
-        String baseAmazon = "http://www.%s/dp/%s";
-        //http://www.ebay.co.uk/itm/170724459305
-        String baseEbay = "http://www.%s/itm/%s";
-        switch(this.market) {
-            case AMAZON_US:
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return String.format(baseAmazon, this.market.toString(), this.asin);
-            case EBAY_UK:
-                return String.format(baseEbay, this.market.toString(), this.asin);
-        }
-        return "#";
-    }
-
-    /**
+   /**
      * 根据从 Crawler 抓取回来的 ListingJSON数据转换成系统内使用的 Listing + LisitngOffer 对象,
      * 并更新返回已经存在的 Listing 的持久对象或者返回未保存的 Listing 瞬时对象
      *
