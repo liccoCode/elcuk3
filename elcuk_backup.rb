@@ -4,6 +4,7 @@ require "rubygems"
     将当天的数据库备份文件下载回来
 =end
 
+backupPath = '~/backup-db'
 a = 'root@e.easyacceu.com'
 SSH = "ssh #{a} "
 SCP = "scp #{a}:"
@@ -21,5 +22,5 @@ system(SCP + "~/backup/elcuk.sql.#{date}.7z /Volumes/wyatt/backup/")
 #使用 tar czf
 system(SSH + "'mysqldump -uroot -pcrater10lake elcuk2 > ~/backup-db/elcuk2.sql.#{date};" + 
 "cd ~/backup-db;tar czf elcuk2.sql.#{date}.tar.gz elcuk2.sql.#{date};rm ~/backup-db/elcuk2.sql.#{date}'") if not exist
-system(SCP + "~/backup-db/elcuk2.sql.#{date}.tar.gz /Volumes/wyatt/backup/")
+system(SCP + "~/backup-db/elcuk2.sql.#{date}.tar.gz #{backupPath}")
 
