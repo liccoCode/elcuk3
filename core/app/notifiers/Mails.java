@@ -62,12 +62,12 @@ public class Mails extends Mailer {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
         }
-        setSubject("Thanks for purchasing from Easyacc On Amazon");
+        setSubject("Thanks for purchasing EasyAcc Product on Amazon.co.uk");
         mailBase();
         if(Play.mode.isProd()) {
             addRecipient(order.email);
         } else {
-            addRecipient("wppurking@gmail.com");
+            addRecipient("all@easyacceu.com");
         }
 
         final Future<Boolean> future = send(order);

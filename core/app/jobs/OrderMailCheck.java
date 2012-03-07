@@ -33,7 +33,7 @@ public class OrderMailCheck extends Job {
             if(e == 'f' || e == 'F') {
                 Logger.debug("Order[" + ord.orderId + "] has mailed [SHIPPED_MAIL]");
             } else {
-                Mails.amazonUK_SHIPPED_MAIL(ord);
+                //Mails.amazonUK_SHIPPED_MAIL(ord);
             }
         }
 
@@ -43,8 +43,8 @@ public class OrderMailCheck extends Job {
          */
         List<Orderr> needReview = Orderr.find("state=? AND createDate<=? AND createDate>=?",
                 Orderr.S.SHIPPED,
-                // 只在 46 天前到 16 天前的订单中寻找需要发送 Review 的
-                DateTime.parse(dt.plusDays(-16).toString("yyyy-MM-dd")).toDate(),
+                // 只在 46 天前到 5 天前的订单中寻找需要发送 Review 的
+                DateTime.parse(dt.plusDays(-5).toString("yyyy-MM-dd")).toDate(),
                 DateTime.parse(dt.plusDays(-46).toString("yyyy-MM-dd")).toDate()
         ).fetch();
         for(Orderr ord : needReview) {
