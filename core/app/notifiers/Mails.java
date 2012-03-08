@@ -6,6 +6,7 @@ import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
+import play.exceptions.MailException;
 import play.mvc.Mailer;
 
 import java.util.concurrent.Future;
@@ -32,6 +33,7 @@ public class Mails extends Mailer {
 
     /**
      * 给 Amazon UK 的卖家发送货物已经发送的邮件;
+     * //TODO 暂时还没有适合的内容给我.
      *
      * @param order
      */
@@ -67,12 +69,16 @@ public class Mails extends Mailer {
         if(Play.mode.isProd()) {
             addRecipient(order.email);
         } else {
-            addRecipient("all@easyacceu.com");
+            addRecipient("wppurking@gmail.com");
         }
 
-        final Future<Boolean> future = send(order);
+        try {
+            final Future<Boolean> future = send(order);
 
-        new Thread(new MailsHelper.MAIL_CALLBACK_1(future, order, 2, 'f')).start();
+            new Thread(new MailsHelper.MAIL_CALLBACK_1(future, order, 2, 'f')).start();
+        } catch(MailException e) {
+            Logger.warn("Order[" + order.orderId + "] Send Error! " + e.getMessage());
+        }
     }
 
     private static void mailBase() {
