@@ -46,7 +46,7 @@ public class Listings extends Controller {
         try {
             renderJSON(new Listing(html).parseFromHTML(Listing.T.AMAZON));
         } catch(NullPointerException e) {
-            renderJSON(new Listing());
+            renderJSON(new Listing(e.getMessage()));
         }
     }
 }
