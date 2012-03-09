@@ -19,6 +19,7 @@ public class OrderMailCheck extends Job {
 
     @Override
     public void doJob() throws Exception {
+        Logger.info("OrderMailCheck Check SHIPPED_MAIL...");
         /**
          * 1. Check 将需要发送 "货物已经发送了的邮件加载出来进行发送"
          */
@@ -39,6 +40,7 @@ public class OrderMailCheck extends Job {
         }
 
 
+        Logger.info("OrderMailCheck Check REVIEW_MAIL...");
         /**
          * 2. Check 需要发送邀请 Review 的邮件的订单
          */
@@ -48,7 +50,12 @@ public class OrderMailCheck extends Job {
                 DateTime.parse(dt.plusDays(-26).toString("yyyy-MM-dd")).toDate(),
                 DateTime.parse(dt.plusDays(-46).toString("yyyy-MM-dd")).toDate()
         ).fetch();
+        Logger.info(String.format("Load %s Orders From %s To %s.",
+                needReview.size(),
+                dt.plusDays(-46).toString("yyyy-MM-dd"),
+                dt.plusDays(-26).toString("yyyy-MM-dd")));
         int i = 0;
+        int mailed = 0;
         for(Orderr ord : needReview) {
             if(i >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
             if(i % 20 == 0) {//每发送了 20 封邮件则等待 5s 后再发送.
@@ -58,10 +65,12 @@ public class OrderMailCheck extends Job {
             if(e == 'f' || e == 'F') Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             else {
                 Mails.amazonUK_REVIEW_MAIL(ord);
+                mailed++;
                 Thread.sleep(350);//每封邮件不能发送那么快
             }
             i++;
         }
+        Logger.info(String.format("Mailed %s Orders", mailed));
 
     }
 }
