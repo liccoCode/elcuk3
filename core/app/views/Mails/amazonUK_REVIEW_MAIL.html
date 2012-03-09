@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Thanks for purchasing EasyAcc Product on Amazon.co.uk</title>
+    <title>Thanks for purchasing EasyAcc Products on Amazon.co.uk</title>
 </head>
 <body>
 Dear ${order.buyer == null ? 'Customer' : order.buyer}:
 <br/><br/>
-Thanks for your recent order from EasyAcc. We invite you to submit reviews for the products you purchased, share an
-experience that would benefit other customers. Your input will make online marketplace more reliable and help customer
-choose best products on Amazon.
+It has been one week since you purchased the<br/>
+#{list items:order.items, as:'oi'}
+<a href="${helper.Webs.link(oi.selling)}">${oi.selling.title}</a><br/>
+#{/list}
+from EasyAcc on Amazon.co.uk. We want to check back and see how it is doing.
 <br/><br/>
-You can review your products by following simple steps:
-<br/>
-Step 1: Log into your Amazon.co.uk account. Click on "Your Account" in the upper right hand corner to go "Your Account"
-page, then click "Your Order" to your orders page.<br/>
-Step 2: Click on "Available Actions" button next to the product you purchased from us, choose "Write a Product Review"
-in the drop down menu and follow the instructions. This is your assessment of the overall quality of the product and
-comments for the Amazon community.
+If for any reason you are not completely satisfied with our products and services, please just hit reply and drop us an
+email, we will take your matter very seriously and do our best to solve the issue. Your comments will help us to improve
+our products and services.
 <br/><br/>
-We take our 100% satisfaction guarantee seriously and hope you are completely happy with your purchase from us. If for
-any reason you are not completely satisfied, please contact our customer service team by email support@easyacceu.com.
-Thanks for your patronage! We are waiting for your review.
+Meanwhile, we invite you to create a product review via the link below:<br/>
+#{list items:order.items, as:'oi'}
+<a href="${helper.Webs.reviewLink(oi.selling)}">${helper.Webs.reviewLink(oi.selling)}</a><br/>
+#{/list}
+<br/><br/>
+Your review would benefit other customers and our business.<br/>
+Thanks for your support to our business.
 <br/><br/>
 Warmest regards
 <br/>
-EasyAcc
+EasyAcc Customer Satifaction Team
 </body>
 </html>
