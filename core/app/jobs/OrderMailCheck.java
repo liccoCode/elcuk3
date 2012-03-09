@@ -57,13 +57,13 @@ public class OrderMailCheck extends Job {
         int i = 0;
         int mailed = 0;
         for(Orderr ord : needReview) {
-            if(i >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
             if(i % 20 == 0) {//每发送了 20 封邮件则等待 5s 后再发送.
                 Thread.sleep(5000);
             }
             char e = ord.emailed(2);
             if(e == 'f' || e == 'F') Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             else {
+                if(i >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
                 Mails.amazonUK_REVIEW_MAIL(ord);
                 mailed++;
                 Thread.sleep(350);//每封邮件不能发送那么快
