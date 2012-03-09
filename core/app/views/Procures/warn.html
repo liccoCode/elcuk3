@@ -1,0 +1,87 @@
+#{extends 'main_fluid.html'/}
+#{set title:'采购计划'/}
+#{set 'moreScripts'}
+    #{script 'procures/plan.js'/}
+#{/set}
+
+<div class="row">
+    <ul class="nav nav-pills" style="margin-bottom:0">
+        <li class="active"><a href="#amazon_uk" data-toggle="tab">AMAZON_UK</a></li>
+        <li><a href="#amazon_de" data-toggle="tab">AMAZON_DE</a></li>
+        <li><a href="#amazon_fr" data-toggle="tab">AMAZON_FR</a></li>
+        <li><a href="#amazon_us" data-toggle="tab">AMAZON_US</a></li>
+        <li><a href="#ebay_uk" data-toggle="tab">EBAY_UK</a></li>
+    </ul>
+    <div class="tab-content">
+
+        <div class="tab-pane active" id="amazon_uk">
+            <ul class="nav nav-tabs">
+            #{list items:avaCats.get('AMAZON_UK'), as:'cat'}
+                <li><a href="#auk_${cat}" data-toggle="tab">${cat}</a></li>
+            #{/list}
+            </ul>
+            <!-- cate->item -->
+            <div class="tab-content">
+            #{list items:avaCats.get('AMAZON_UK'), as:'cat'}
+                <div class="tab-pane" id="auk_${cat}">${cat}</div>
+            #{/list}
+            </div>
+        </div>
+
+        <div class="tab-pane" id="amazon_de">
+            <ul class="nav nav-tabs">
+            #{list items:avaCats.get('AMAZON_DE'), as:'cat'}
+                <li><a href="#ade_${cat}" data-toggle="tab">${cat}</a></li>
+            #{/list}
+            </ul>
+            <!-- cate->item -->
+            <div class="tab-content">
+            #{list items:avaCats.get('AMAZON_DE'), as:'cat'}
+                <div class="tab-pane" id="ade_${cat}">${cat}</div>
+            #{/list}
+            </div>
+        </div>
+
+        <div class="tab-pane" id="amazon_fr">
+            <ul class="nav nav-tabs">
+            #{list items:avaCats.get('AMAZON_FR'), as:'cat'}
+                <li><a href="#afr_${cat}" data-toggle="tab">${cat}</a></li>
+            #{/list}
+            </ul>
+            <!-- cate->item -->
+            <div class="tab-content">
+            #{list items:avaCats.get('AMAZON_FR'), as:'cat'}
+                <div class="tab-pane" id="afr_${cat}">${cat}</div>
+            #{/list}
+            </div>
+        </div>
+
+        <div class="tab-pane" id="amazon_us">
+            <ul class="nav nav-tabs">
+            #{list items:avaCats.get('AMAZON_US'), as:'cat'}
+                <li><a href="#aus_${cat}" data-toggle="tab">${cat}</a></li>
+            #{/list}
+            </ul>
+            <!-- cate->item -->
+            <div class="tab-content">
+            #{list items:avaCats.get('AMAZON_US'), as:'cat'}
+                <div class="tab-pane" id="aus_${cat}">${cat}</div>
+            #{/list}
+            </div>
+        </div>
+
+        <div class="tab-pane" id="ebay_uk">
+            <ul class="nav nav-tabs">
+            #{list items:avaCats.get('EBAY_UK'), as:'cat'}
+                <li><a href="#euk_${cat}" data-toggle="tab">${cat}</a></li>
+            #{/list}
+            </ul>
+            <!-- cate->item -->
+            <div class="tab-content">
+            #{list items:avaCats.get('EBAY_UK'), as:'cat'}
+                <div class="tab-pane" id="euk_${cat}">${cat}</div>
+            #{/list}
+            </div>
+        </div>
+    </div>
+</div>

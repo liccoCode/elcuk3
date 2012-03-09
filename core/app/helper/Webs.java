@@ -78,6 +78,21 @@ public class Webs {
         return "#";
     }
 
+    public static String reviewLink(Selling selling) {
+        //http://www.amazon.co.uk/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=B003TQ3NCY
+        String baseAmazon = "http://www.%s/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=%s";
+        switch(selling.market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return String.format(baseAmazon, selling.market.toString(), selling.asin);
+        }
+        return "#";
+    }
+
     public static Future<Boolean> systemMail(String subject, String content) {
         HtmlEmail email = new HtmlEmail();
         try {

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import exception.VErrorRuntimeException;
 import helper.Currency;
+import models.procure.PItem;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -205,7 +206,7 @@ public class Listing extends Model {
         return null;
     }
 
-   /**
+    /**
      * 根据从 Crawler 抓取回来的 ListingJSON数据转换成系统内使用的 Listing + LisitngOffer 对象,
      * 并更新返回已经存在的 Listing 的持久对象或者返回未保存的 Listing 瞬时对象
      *
@@ -316,6 +317,16 @@ public class Listing extends Model {
             // 不是自己的 Listing 暂时不做操作...
         }
     }
+
+    /**
+     * 返回这条
+     *
+     * @return
+     */
+    public PItem calculatePItem() {
+        return null;
+    }
+
 
     private boolean selfSalesAmazon() {
         return "EasyAcc".equalsIgnoreCase(this.byWho) ||
