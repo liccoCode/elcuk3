@@ -55,19 +55,22 @@ public class OrderMailCheck extends Job {
                 dt.plusDays(-46).toString("yyyy-MM-dd"),
                 dt.plusDays(-26).toString("yyyy-MM-dd")));
         int mailed = 0;
+        int checked = 0;
+        int sended = 0;
         for(Orderr ord : needReview) {
-            if(mailed % 20 == 0) {//每发送了 20 封邮件则等待 5s 后再发送.
-                Thread.sleep(5000);
-            }
+            checked++;
             char e = ord.emailed(2);
-            if(e == 'f' || e == 'F') Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
-            else {
-                if(mailed++ >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
+            if(e == 'f' || e == 'F') {
+                sended++;
+                Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
+            } else {
+                if(mailed >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
+                mailed++;
                 Mails.amazonUK_REVIEW_MAIL(ord);
-                Thread.sleep(350);//每封邮件不能发送那么快
+                Thread.sleep(500);//每封邮件不能发送那么快
             }
         }
-        Logger.info(String.format("Mailed %s Orders", mailed));
+        Logger.info(String.format("Mailed(%s), Sended(%s),Checked(%s), Total(%s) Orders", mailed, sended, checked, needReview.size()));
 
     }
 }
