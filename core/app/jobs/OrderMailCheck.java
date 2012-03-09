@@ -47,7 +47,7 @@ public class OrderMailCheck extends Job {
         List<Orderr> needReview = Orderr.find("state=? AND createDate<=? AND createDate>=?",
                 Orderr.S.SHIPPED,
                 // 只在 46 天前到 5 天前的订单中寻找需要发送 Review 的
-                DateTime.parse(dt.plusDays(-26).toString("yyyy-MM-dd")).toDate(),
+                DateTime.parse(dt.plusDays(-7).toString("yyyy-MM-dd")).toDate(),
                 DateTime.parse(dt.plusDays(-46).toString("yyyy-MM-dd")).toDate()
         ).fetch();
         Logger.info(String.format("Load %s Orders From %s To %s.",
