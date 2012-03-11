@@ -6,9 +6,9 @@
 <body>
 Dear ${order.buyer == null ? 'Customer' : order.buyer}:
 <br/><br/>
-It has been one week since you purchased the<br/>
+It has been a period of time since you purchased the<br/>
 #{list items:order.items, as:'oi'}
-<a href="${helper.Webs.link(oi.selling)}">${oi.selling.title}</a><br/>
+<a target="_blank" href="${helper.Webs.link(oi.selling)}">${oi.selling.title.size() > 75 ? oi.selling.title.substring(0, 74) + "..." : oi.selling.title}</a><br/>
 #{/list}
 from EasyAcc on Amazon.co.uk. We want to check back and see how it is doing.
 <br/><br/>
@@ -18,7 +18,7 @@ our products and services.
 <br/><br/>
 Meanwhile, we invite you to create a product review via the link below:<br/>
 #{list items:order.items, as:'oi'}
-<a href="${helper.Webs.reviewLink(oi.selling)}">${helper.Webs.reviewLink(oi.selling)}</a><br/>
+<a target="_blank" href="${helper.Webs.reviewLink(oi.selling)}">${helper.Webs.reviewLink(oi.selling)}</a><br/>
 #{/list}
 <br/><br/>
 Your review would benefit other customers and our business.<br/>

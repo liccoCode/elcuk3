@@ -1,5 +1,6 @@
 package jobs;
 
+import models.market.OrderItem;
 import models.market.Orderr;
 import notifiers.Mails;
 import org.joda.time.DateTime;
@@ -59,6 +60,13 @@ public class OrderMailCheck extends Job {
         int sended = 0;
         for(Orderr ord : needReview) {
             checked++;
+            // 仅仅发送 EasyAcc 开头的标题的产品的邮件.
+            boolean ctn = true;
+            for(OrderItem oi : ord.items) {
+                if(oi.easyacc()) ctn = false;
+            }
+            if(!ctn) continue;
+
             char e = ord.emailed(2);
             if(e == 'f' || e == 'F') {
                 sended++;

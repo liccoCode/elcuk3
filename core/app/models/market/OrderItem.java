@@ -2,6 +2,7 @@ package models.market;
 
 import helper.Caches;
 import models.product.Product;
+import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 
@@ -313,6 +314,15 @@ public class OrderItem extends GenericModel {
         if(hightChartMap.size() > 0)
             Cache.add(cached_key, hightChartMap, "20mn");
         return hightChartMap;
+    }
+
+    /**
+     * 判断这个 OrderItem 所属的产品是不是 Easyacc 的.
+     *
+     * @return
+     */
+    public boolean easyacc() {
+        return StringUtils.startsWith(this.productName.toLowerCase(), "easyacc");
     }
 
     @Override
