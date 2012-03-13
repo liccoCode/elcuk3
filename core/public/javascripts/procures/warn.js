@@ -50,25 +50,10 @@ $(function(){
                 }, 'json');
             });
 
-//            // onwork
-//            $(':input[onwork][sid]').keyup(function(e){
-//                if(e.keyCode != 13) return false;
-//                var o = $(this);
-//                $(o.parent()).mask('更新中...');
-//                $.post('/procures/pitem', {id:o.attr('sid'), 'p.onWork':o.val()}, function(e){
-//                    try{
-//                        if(e.flag) alert('更新成功.');
-//                    }catch(e){
-//                        alert(JSON.stringify(e));
-//                    }
-//                    $(o.parent()).unmask();
-//                }, 'json');
-//            });
-
             $('ul a[invi]').click(function(e){
                 if(!confirm('却要要隐藏? 隐藏后需要从 Listing 页面进行状态修改为非 DOWN 才重新可见.')) return false;
                 $('#warnItm').mask('更新中...');
-                $.post('/procures/invisible', {}, function(e){
+                $.post('/procures/invisible', {'s.sellingId':$(this).attr('sid'), 's.state':'DOWN'}, function(e){
                     try{
                         if(e.flag) alert('更新成功.');
                         else throw "no [flag] property."

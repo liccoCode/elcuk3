@@ -23,6 +23,10 @@
     </tr>
 
 #{list items:pitms, as:'pi'}
+    #{set ps_7:((pi.selling.d7 <= 0 ? 1 : pi.selling.d7) / 7)/}
+    #{set day1:(pi.in / ps_7) /}
+    #{set day2:(pi.onWay / ps_7) /}
+    #{set day3:(pi.onWork / ps_7) /}
     <tr>
         <td>${pi.product.sku}</td>
         <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
@@ -34,32 +38,35 @@
         <td><input ps sid="${pi.selling.sellingId}" type="text" class="span1" value="${pi.selling.ps}"></td>
         <td>${(pi.selling.d7 / 7).format('#.##')}</td>
         <td>${pi.in}</td>
-        <td>${(pi.in / (pi.selling.d7 / 7)).format('#.##')}</td>
+        <td>${day1.format('#.##')}</td>
         <td>
             <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="onWay" type="text" class="span1" value="${pi.onWay}">
         </td>
-        <td>${(pi.onWay / (pi.selling.d7 / 7)).format('#.##')}</td>
+        <td>${day2.format('#.##')}</td>
         <td>
             <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="onWork" type="text" class="span1" value="${pi.onWork}">
         </td>
-        <td>${(pi.onWork / (pi.selling.d7 / 7)).format('#.##')}</td>
+        <td>${day3.format('#.##')}</td>
         <td>${pi.in + pi.onWay + pi.onWork}</td>
         <td>
-        ${((pi.in + pi.onWay + pi.onWork) / ((pi.selling.d7 <= 0 ? 1 : pi.selling.d7) / 7)).format('#.##')}
-            |[(${pi.in} + ${pi.onWay} + ${pi.onWork}) / ${((pi.selling.d7 <= 0 ? 1 : pi.selling.d7) / 7).format('#.##')}
-            ]
+        ${((pi.in + pi.onWay + pi.onWork) / ps_7).format('#.##')}
+            &nbsp;&nbsp;[&nbsp;(${pi.in} + ${pi.onWay} + ${pi.onWork}) / ${ps_7.format('#.##')}&nbsp;]
         </td>
         <td>
-            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="airPatch" type="text" class="span1" value="${pi.airPatch}">
+            #{set airPatch:(21 - day1 - day2) * ps_7/}
+        ${(airPatch <= 0 ? 0 : airPatch).format('#.##')}
         </td>
         <td>
-            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="airBuy" type="text" class="span1" value="${pi.airBuy}">
+            #{set airBuy:(35 - day1 - day2 - day3) * ps_7/}
+        ${(airBuy <= 0 ? 0 : airBuy).format('#.##')}
         </td>
         <td>
-            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="seaPatch" type="text" class="span1" value="${pi.seaPatch}">
+            #{set seaPatch:(42 - day1 - day2) * ps_7/}
+        ${(seaPatch <= 0 ? 0 : seaPatch).format('#.##')}
         </td>
         <td>
-            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="seaBuy" type="text" class="span1" value="${pi.seaBuy}">
+            #{set seaBuy:(56 - day1 - day2 - day3) * ps_7/}
+        ${(seaBuy <= 0 ? 0 : seaBuy).format('#.##')}
         </td>
         <td>
             <div class="btn-group">

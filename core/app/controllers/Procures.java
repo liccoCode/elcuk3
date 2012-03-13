@@ -77,6 +77,7 @@ public class Procures extends Controller {
         if(!s.isPersistent()) renderJSON(new Error("SellingId", "The Selling is not Persistent.", new String[]{}));
         try {
             s.save();
+            Cache.delete(String.format(Caches.WARN_ITEM_SELLING, s.market.name().toLowerCase(), s.listing.product.category.categoryId));
         } catch(Exception e) {
             renderJSON(new Error("Exception", e.getClass().getSimpleName() + ":" + e.getMessage(), new String[]{}));
         }
