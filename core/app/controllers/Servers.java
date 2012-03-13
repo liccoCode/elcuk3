@@ -1,8 +1,11 @@
 package controllers;
 
 import models.Server;
+import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -13,20 +16,19 @@ import play.mvc.With;
 @With({Secure.class, GzipFilter.class})
 public class Servers extends Controller {
 
-    public static void c(Server s) {
-        Server saved = s.save();
-        if(saved != null) {
-            renderJSON(saved);
-        } else {
-            renderJSON("{flag: false}");
+    public static void index() {
+        List<Server> sers = Server.all().fetch();
+        render(sers);
+    }
+
+    public static void update(Server s) {
+        if(!s.isPersistent()) renderJSON(new Error("Server.Id", "The Server is not persistent!", new String[]{}));
+        try {
+            s.save();
+        } catch(Exception e) {
+            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
         }
+        renderJSON("{\"flag\":\"true\"}");
     }
 
-    public static void r(Long id) {
-        renderJSON(Server.findById(id));
-    }
-
-    public static void p(Integer page) {
-        renderJSON(Server.all().fetch(page, 10));
-    }
 }

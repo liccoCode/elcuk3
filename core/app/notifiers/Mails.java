@@ -64,7 +64,8 @@ public class Mails extends Mailer {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
         }
-        setSubject("Thanks for purchasing EasyAcc Product on Amazon.co.uk");
+        //Re: Order information from Amazon seller EasyAcc (Order: 202-2288972-1381905)
+        setSubject("Thanks for purchasing EasyAcc Product on Amazon (Order: " + order.orderId + ")");
         mailBase();
         if(Play.mode.isProd()) {
             addRecipient(order.email);
