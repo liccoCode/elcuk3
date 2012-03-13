@@ -1,7 +1,10 @@
 package controllers;
 
+import helper.Caches;
 import models.Server;
+import play.cache.Cache;
 import play.data.validation.Error;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -23,8 +26,11 @@ public class Servers extends Controller {
 
     public static void update(Server s) {
         if(!s.isPersistent()) renderJSON(new Error("Server.Id", "The Server is not persistent!", new String[]{}));
+        validation.required(s.type);
+        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         try {
             s.save();
+            Cache.decr(String.format(Caches.SERVERS, s.type.toString()));
         } catch(Exception e) {
             renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
         }

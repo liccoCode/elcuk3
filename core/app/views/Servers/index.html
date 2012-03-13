@@ -28,7 +28,7 @@
             #{select name:'s.type', items:models.Server.T.values(), value:s.type}#{/select}
         </td>
         <td>
-            <input type="text" class="span6" value="${s.url}">
+            <input type="text" class="span6" name="s.url" value="${s.url}">
         </td>
         <td>
             <a href="#" class="btn" sid='${s.id}'>更新</a>
