@@ -4,10 +4,6 @@ import models.User;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import java.util.Date;
 import java.util.List;
 
@@ -17,13 +13,13 @@ import java.util.List;
  * Date: 3/2/12
  * Time: 12:42 PM
  */
-@Entity
+//@Entity
 public class Plan extends GenericModel {
 
-    @OneToOne
+    //    @OneToOne
     public User creater;
 
-    @Id
+    //    @Id
     public String id;
 
     public Date createDate;
@@ -34,7 +30,7 @@ public class Plan extends GenericModel {
     /**
      * 此采购单中的采购单元
      */
-    @OneToMany(mappedBy = "plan")
+//    @OneToMany(mappedBy = "plan")
     public List<PItem> items;
 
     public static String cId() {

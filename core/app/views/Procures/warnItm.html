@@ -1,0 +1,74 @@
+<table id="warnItm" class="table table-bordered table-striped">
+    <tr>
+        <th>SKU</th>
+        <th>ASIN</th>
+        <th>MerchantSKU</th>
+        <th>Whouse</th>
+        <th>Account</th>
+        <th><a href="#" rel="tooltip" data-original-title="设定的 PS, 修改后按下回车进行保存">PS</a></th>
+        <th><a href="#" rel="tooltip" data-original-title="计算出来的 PS">PS_7</a></th>
+        <th>在库</th>
+        <th>天数1</th>
+        <th><a href="#" rel="tooltip" data-original-title="修改后按下回车进行保存">在途</a></th>
+        <th>天数2</th>
+        <th><a href="#" rel="tooltip" data-original-title="修改后按下回车进行保存">在产</a></th>
+        <th>天数3</th>
+        <th>库存总数</th>
+        <th>天数4</th>
+        <th>空运补货</th>
+        <th>空运采货</th>
+        <th>海运补货</th>
+        <th>海运采货</th>
+        <th><a href="#" rel="tooltip" data-original-title="这个页面的数据每隔 30 分钟才会更新一次">操作</a></th>
+    </tr>
+
+#{list items:pitms, as:'pi'}
+    <tr>
+        <td>${pi.product.sku}</td>
+        <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
+        <td>
+            <a href="#" rel="tooltip" data-original-title="SellingId:<br/>${pi.selling.sellingId}">${pi.selling.merchantSKU}</a>
+        </td>
+        <td>${pi.whouse.name}</td>
+        <td>${pi.selling.account.username}</td>
+        <td><input ps sid="${pi.selling.sellingId}" type="text" class="span1" value="${pi.selling.ps}"></td>
+        <td>${(pi.selling.d7 / 7).format('#.##')}</td>
+        <td>${pi.in}</td>
+        <td>${(pi.in / (pi.selling.d7 / 7)).format('#.##')}</td>
+        <td>
+            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="onWay" type="text" class="span1" value="${pi.onWay}">
+        </td>
+        <td>${(pi.onWay / (pi.selling.d7 / 7)).format('#.##')}</td>
+        <td>
+            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="onWork" type="text" class="span1" value="${pi.onWork}">
+        </td>
+        <td>${(pi.onWork / (pi.selling.d7 / 7)).format('#.##')}</td>
+        <td>${pi.in + pi.onWay + pi.onWork}</td>
+        <td>
+        ${((pi.in + pi.onWay + pi.onWork) / ((pi.selling.d7 <= 0 ? 1 : pi.selling.d7) / 7)).format('#.##')}
+            |[(${pi.in} + ${pi.onWay} + ${pi.onWork}) / ${((pi.selling.d7 <= 0 ? 1 : pi.selling.d7) / 7).format('#.##')}
+            ]
+        </td>
+        <td>
+            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="airPatch" type="text" class="span1" value="${pi.airPatch}">
+        </td>
+        <td>
+            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="airBuy" type="text" class="span1" value="${pi.airBuy}">
+        </td>
+        <td>
+            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="seaPatch" type="text" class="span1" value="${pi.seaPatch}">
+        </td>
+        <td>
+            <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="seaBuy" type="text" class="span1" value="${pi.seaBuy}">
+        </td>
+        <td>
+            <div class="btn-group">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Act <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a invi sid="${pi.selling.sellingId}" href="#">Invisible</a></li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+#{/list}
+</table>

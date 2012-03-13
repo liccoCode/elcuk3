@@ -73,12 +73,19 @@ public class OrderMailCheck extends Job {
                 Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             } else {
                 if(mailed >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
-                mailed++;
-                Mails.amazonUK_REVIEW_MAIL(ord);
-                Thread.sleep(500);//每封邮件不能发送那么快
+                switch(ord.market) {
+                    case AMAZON_UK:
+                        mailed++;
+                        Mails.amazonUK_REVIEW_MAIL(ord);
+                        Thread.sleep(500);//每封邮件不能发送那么快
+                        break;
+                    case AMAZON_DE:
+                        break;
+                    default:
+                        Logger.info("Uncatched Region..." + ord.market);
+                }
             }
         }
         Logger.info(String.format("Mailed(%s), Sended(%s),Checked(%s), Total(%s) Orders", mailed, sended, checked, needReview.size()));
-
     }
 }

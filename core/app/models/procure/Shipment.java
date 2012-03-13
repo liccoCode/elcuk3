@@ -3,9 +3,6 @@ package models.procure;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import java.util.Date;
 import java.util.List;
 
@@ -15,13 +12,13 @@ import java.util.List;
  * Date: 3/2/12
  * Time: 12:53 PM
  */
-@Entity
+//@Entity
 public class Shipment extends GenericModel {
 
-    @OneToMany(mappedBy = "shipment")
+    //    @OneToMany(mappedBy = "shipment")
     public List<PItem> items;
 
-    @Id
+    //    @Id
     public String id;
 
     public Date createDate;

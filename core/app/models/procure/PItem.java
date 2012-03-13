@@ -6,7 +6,10 @@ import models.product.Product;
 import models.product.Whouse;
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Lob;
+import javax.persistence.Transient;
 
 /**
  * 采购模块使用的基础单元, 采购分析页面由此对象承载信息, 采购的流动由此对象承载信息.
@@ -14,28 +17,28 @@ import javax.persistence.*;
  * Date: 3/2/12
  * Time: 12:01 PM
  */
-@Entity
+//@Entity
 public class PItem extends Model {
-    @OneToOne
+    //    @OneToOne
     public Product product;//sku, category , 所对应的具体产品
 
-    @OneToOne
+    //    @OneToOne
     public Selling selling; // asin, 去往的 Selling/Listing
 
-    @OneToOne
+    //    @OneToOne
     public Whouse whouse; // whouse, 自己的存放仓库
 
-    @OneToOne
+    //    @OneToOne
     public Supplier supplier; // 采购的工厂
 
 
-    @ManyToOne
+    //    @ManyToOne
     public Plan plan;
 
-    @ManyToOne
+    //    @ManyToOne
     public Procure procure;
 
-    @ManyToOne
+    //    @ManyToOne
     public Shipment shipment;
 
     public Account.M market; // market, 去往的市场
@@ -88,4 +91,36 @@ public class PItem extends Model {
     public Integer seaPatch; // 海运补货
     @Transient
     public Integer seaBuy; // 海运采购
+
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("PItem{");
+//        sb.append("whouse=").append(whouse);
+//        sb.append(", supplier=").append(supplier);
+//        sb.append(", plan=").append(plan);
+//        sb.append(", procure=").append(procure);
+//        sb.append(", shipment=").append(shipment);
+//        sb.append(", market=").append(market);
+        sb.append(" title='").append(title).append('\'');
+        sb.append(", qty=").append(qty);
+        sb.append(", price=").append(price);
+        sb.append(", state=").append(state);
+        sb.append(", memo='").append(memo).append('\'');
+        sb.append(", in=").append(in);
+        sb.append(", inDay=").append(inDay);
+        sb.append(", onWay=").append(onWay);
+        sb.append(", onWayDay=").append(onWayDay);
+        sb.append(", onWork=").append(onWork);
+        sb.append(", onWorkDay=").append(onWorkDay);
+        sb.append(", airPatch=").append(airPatch);
+        sb.append(", airBuy=").append(airBuy);
+        sb.append(", seaPatch=").append(seaPatch);
+        sb.append(", seaBuy=").append(seaBuy);
+        sb.append(", selling=").append(selling);
+        sb.append(", product=").append(product);
+        sb.append('}');
+        return sb.toString();
+    }
 }

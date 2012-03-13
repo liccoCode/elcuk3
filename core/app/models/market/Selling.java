@@ -2,8 +2,13 @@ package models.market;
 
 import exception.VErrorRuntimeException;
 import helper.Caches;
+import helper.PH;
+import models.procure.PItem;
 import models.product.ProductQTY;
+import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
@@ -338,6 +343,116 @@ public class Selling extends GenericModel {
         return sellings;
     }
 
+    /**
+     * 将 Selling 进行排序, 按照此 Selling 能够销售的天数从少到多进行排序;
+     * ps: 考虑 在库, 在途, 在产 这几个库存
+     *
+     * @param sellings
+     * @return
+     */
+    public static List<Selling> sortSellingWithQtyLeftTime(List<Selling> sellings) {
+        final Map<String, Long> cacheD7 = new HashMap<String, Long>();
+        Collections.sort(sellings, new Comparator<Selling>() {
+            @Override
+            public int compare(Selling s1, Selling s2) {
+                // 在库
+                Whouse wh1 = Whouse.find("account=?", s1.account).first();
+                Whouse wh2 = Whouse.find("account=?", s2.account).first();
+
+                List<ProductQTY> qty1 = ProductQTY.find("product=? AND whouse=?", s1.listing.product, wh1).fetch();
+                List<ProductQTY> qty2 = ProductQTY.find("product=? AND whouse=?", s2.listing.product, wh2).fetch();
+
+                int in = 0;
+                int in2 = 0;
+                for(ProductQTY q : qty1) in += q.qty;
+                for(ProductQTY q : qty2) in2 += q.qty;
+
+                PItem pi1 = PH.unMarsh(String.format("%s_%s", s1.listing.product.sku, s1.sellingId));
+                PItem pi2 = PH.unMarsh(String.format("%s_%s", s1.listing.product.sku, s1.sellingId));
+                // 在途
+                // 在产
+                int onWay = 0;
+                int onWork = 0;
+                int onWay2 = 0;
+                int onWork2 = 0;
+                if(pi1 != null && pi2 != null) {
+                    onWay = pi1.onWay == null ? 0 : pi1.onWay;
+                    onWork = pi1.onWork == null ? 0 : pi1.onWork;
+                    onWay2 = pi2.onWay == null ? 0 : pi2.onWay;
+                    onWork2 = pi2.onWork == null ? 0 : pi2.onWork;
+                }
+                Long d71 = cacheD7.get(s1.sellingId); // 对反复寻找的 selling 的销量可进行缓存, 减少数据库访问.
+                DateTime now = DateTime.now();
+                if(d71 == null) {
+                    d71 = OrderItem.count("selling=? AND createDate>=? AND createDate<=?",
+                            s1, DateTime.parse(now.plusDays(-6).toString("yyyy-MM-dd")).toDate(), now.toDate());
+                    cacheD7.put(s1.sellingId, d71);
+                }
+                s1.d7 = d71 <= 0 ? 1 : d71.floatValue();
+
+                Long d72 = cacheD7.get(s2.sellingId);
+                if(d72 == null) {
+                    d72 = OrderItem.count("selling=? AND createDate>=? AND createDate<=?",
+                            s2, DateTime.parse(now.plusDays(-6).toString("yyyy-MM-dd")).toDate(), now.toDate());
+                    cacheD7.put(s2.sellingId, d72);
+                }
+                s2.d7 = d72 <= 0 ? 1 : d72.floatValue();
+
+                s1.dAll = (in + onWay + onWork) / s1.d7;
+                s2.dAll = (in2 + onWay2 + onWork2) / s2.d7;
+
+
+                return (int) (s1.dAll - s2.dAll);
+            }
+        });
+        return sellings;
+    }
+
+    /**
+     * 返回这个 Listing 所对应的分析页面的 PItem 对象
+     *
+     * @return
+     */
+    public PItem calculatePItem() {
+        PItem pi = new PItem();
+        pi.product = this.listing.product;
+        pi.selling = this;
+        pi.selling.ps = pi.selling.ps == null ? 1 : pi.selling.ps;
+        pi.whouse = Whouse.find("account=?", this.account).first();
+
+
+        // 库存
+        List<ProductQTY> qtys = ProductQTY.find("product=? AND whouse=?", this.listing.product, pi.whouse).fetch();
+        if(qtys.size() > 1)
+            Logger.warn("Product [" + pi.product.sku + "] have more than ONE ProductQTY in the same Whouse.");
+
+        pi.in = 0;
+        for(ProductQTY p : qtys) pi.in += p.qty;
+
+        // 在库, 在途, 在产
+        // 将使用 JSON 存储起来的 PItem 重新加载出来. 当 Plan, Procure, Shipmenet 完成后会修改过通过计算获取
+        PItem opi = PH.unMarsh(pi.product.sku + "_" + pi.selling.sellingId);
+
+        pi.onWay = 0;
+        pi.onWork = 0;
+        pi.airBuy = 0;
+        pi.airPatch = 0;
+        pi.seaBuy = 0;
+        pi.seaPatch = 0;
+        if(opi != null) {
+            pi.onWay = opi.onWay == null ? 0 : opi.onWay;
+            pi.onWork = opi.onWork == null ? 0 : opi.onWork;
+            pi.airBuy = opi.airBuy == null ? 0 : opi.airBuy;
+            pi.airPatch = opi.airPatch == null ? 0 : opi.airPatch;
+            pi.seaBuy = opi.seaBuy == null ? 0 : opi.seaBuy;
+            pi.seaPatch = opi.seaPatch == null ? 0 : opi.seaPatch;
+        }
+
+        // 7 天销量, -- 在 sortSellingWithQtyLeftTime 方法中计算过了.
+
+        PH.marsh(pi);
+        return pi;
+    }
 
     @Override
     public boolean equals(Object o) {

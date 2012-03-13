@@ -1,9 +1,15 @@
 package controllers;
 
+import helper.Caches;
+import helper.PH;
 import models.market.Account;
 import models.market.Listing;
+import models.market.Selling;
+import models.procure.PItem;
 import models.procure.Plan;
 import models.procure.Supplier;
+import play.cache.Cache;
+import play.data.validation.Error;
 import play.mvc.Controller;
 
 import java.util.*;
@@ -51,7 +57,44 @@ public class Procures extends Controller {
         render(avaCats);
     }
 
+    @SuppressWarnings("unchecked")
     public static void warnItm(String market, String cat, int page) {
-        List<Listing> lists = Listing.find("market=? AND product.category.categoryId=?", Account.M.val(market), cat).fetch(page, 20);
+        List<Selling> sellings = Cache.get(String.format(Caches.WARN_ITEM_SELLING, market, cat), List.class);
+        if(sellings == null) {
+            sellings = Selling.find("market=? AND listing.product.category.categoryId=? AND state!=?", Account.M.val(market), cat, Selling.S.DOWN).fetch();
+            Selling.sortSellingWithQtyLeftTime(sellings);
+            if(sellings != null && sellings.size() > 0)
+                Cache.add(String.format(Caches.WARN_ITEM_SELLING, market, cat), sellings, "30mn");
+        }
+        List<PItem> pitms = new ArrayList<PItem>();
+        for(int i = (page - 1); i < ((40 * page) > sellings.size() ? sellings.size() : (40 * page)); i++)
+            pitms.add(sellings.get(i).calculatePItem());
+
+        render(pitms);
     }
+
+    public static void ps(Selling s) {
+        if(!s.isPersistent()) renderJSON(new Error("SellingId", "The Selling is not Persistent.", new String[]{}));
+        try {
+            s.save();
+        } catch(Exception e) {
+            renderJSON(new Error("Exception", e.getClass().getSimpleName() + ":" + e.getMessage(), new String[]{}));
+        }
+        renderJSON("{\"flag\":\"true\"}");
+    }
+
+    public static void pitem(PItem p, String id) {
+        PItem pi = PH.unMarsh(id);
+        if(pi == null) renderJSON(new Error("Pitem", "Is not exist!", new String[]{}));
+        if(p.onWay != null) pi.onWay = p.onWay;
+        if(p.onWork != null) pi.onWork = p.onWork;
+        if(p.seaBuy != null) pi.seaBuy = p.seaBuy;
+        if(p.seaPatch != null) pi.seaPatch = p.seaPatch;
+        if(p.airBuy != null) pi.airBuy = p.airBuy;
+        if(p.airPatch != null) pi.airPatch = p.airPatch;
+        PH.marsh(pi, id);
+        renderJSON("{\"flag\":\"true\"}");
+    }
+
+
 }

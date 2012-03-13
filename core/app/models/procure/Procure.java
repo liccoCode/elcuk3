@@ -3,7 +3,6 @@ package models.procure;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
@@ -13,30 +12,30 @@ import java.util.List;
  * Date: 3/2/12
  * Time: 12:45 PM
  */
-@Entity
+//@Entity
 public class Procure extends GenericModel {
-    @OneToOne
+    //    @OneToOne
     public Plan plan; // 此采购单属于哪一份采购计划中划分出来的.
 
-    @OneToOne
+    //    @OneToOne
     public Shipment shipment; // 此采购单属于哪一个运输单
 
     /**
      * 此采购单中所具有的 PItem
      */
-    @OneToMany(mappedBy = "procure")
+//    @OneToMany(mappedBy = "procure")
     public List<PItem> items;
 
 
-    @Id
+    //    @Id
     public String id;
 
-    @Column(unique = true, nullable = true)
+    //    @Column(unique = true, nullable = true)
     public String procureNo; // 与工厂签订的合同号
 
     public Date createDate;
 
-    @Lob
+    //    @Lob
     public String memo;
 
 

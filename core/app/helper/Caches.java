@@ -36,4 +36,9 @@ public class Caches {
      */
     public static final String SERVERS = "server_%s";
 
+    /**
+     * 根据 market, cat 来进行缓存不同 Market 与 Category 的 Selling, 给"缺货预警"页面使用
+     */
+    public static final String WARN_ITEM_SELLING = "warn_item_%s_%s";
+
 }

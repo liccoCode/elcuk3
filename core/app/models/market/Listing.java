@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import exception.VErrorRuntimeException;
 import helper.Currency;
-import models.procure.PItem;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -317,16 +316,6 @@ public class Listing extends Model {
             // 不是自己的 Listing 暂时不做操作...
         }
     }
-
-    /**
-     * 返回这条
-     *
-     * @return
-     */
-    public PItem calculatePItem() {
-        return null;
-    }
-
 
     private boolean selfSalesAmazon() {
         return "EasyAcc".equalsIgnoreCase(this.byWho) ||

@@ -22,6 +22,8 @@ GET     /{controller}/page/{page}                           {controller}.p
 GET     /market/{controller}/page/{page}                    market.{controller}.p
 GET     /product/{controller}/page/{page}                   product.{controller}.p
 
+*       /procures/invisible                                 procures.ps
+
 # Catch all
 *       /{controller}/{action}                              {controller}.{action}
 *       /market/{controller}/{action}                       market.{controller}.{action}

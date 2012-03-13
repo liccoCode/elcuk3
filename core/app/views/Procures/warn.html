@@ -1,7 +1,7 @@
 #{extends 'main_fluid.html'/}
 #{set title:'采购计划'/}
 #{set 'moreScripts'}
-    #{script 'procures/plan.js'/}
+    #{script 'procures/warn.js'/}
 #{/set}
 
 <div class="row">
@@ -17,7 +17,7 @@
         <div class="tab-pane active" id="amazon_uk">
             <ul class="nav nav-tabs">
             #{list items:avaCats.get('AMAZON_UK'), as:'cat'}
-                <li><a href="#auk_${cat}" data-toggle="tab">${cat}</a></li>
+                <li><a ct href="#auk_${cat}" data-toggle="tab">${cat}</a></li>
             #{/list}
             </ul>
             <!-- cate->item -->
@@ -31,7 +31,7 @@
         <div class="tab-pane" id="amazon_de">
             <ul class="nav nav-tabs">
             #{list items:avaCats.get('AMAZON_DE'), as:'cat'}
-                <li><a href="#ade_${cat}" data-toggle="tab">${cat}</a></li>
+                <li><a ct href="#ade_${cat}" data-toggle="tab">${cat}</a></li>
             #{/list}
             </ul>
             <!-- cate->item -->
@@ -45,7 +45,7 @@
         <div class="tab-pane" id="amazon_fr">
             <ul class="nav nav-tabs">
             #{list items:avaCats.get('AMAZON_FR'), as:'cat'}
-                <li><a href="#afr_${cat}" data-toggle="tab">${cat}</a></li>
+                <li><a ct href="#afr_${cat}" data-toggle="tab">${cat}</a></li>
             #{/list}
             </ul>
             <!-- cate->item -->
@@ -59,7 +59,7 @@
         <div class="tab-pane" id="amazon_us">
             <ul class="nav nav-tabs">
             #{list items:avaCats.get('AMAZON_US'), as:'cat'}
-                <li><a href="#aus_${cat}" data-toggle="tab">${cat}</a></li>
+                <li><a ct href="#aus_${cat}" data-toggle="tab">${cat}</a></li>
             #{/list}
             </ul>
             <!-- cate->item -->
@@ -73,7 +73,7 @@
         <div class="tab-pane" id="ebay_uk">
             <ul class="nav nav-tabs">
             #{list items:avaCats.get('EBAY_UK'), as:'cat'}
-                <li><a href="#euk_${cat}" data-toggle="tab">${cat}</a></li>
+                <li><a ct href="#euk_${cat}" data-toggle="tab">${cat}</a></li>
             #{/list}
             </ul>
             <!-- cate->item -->

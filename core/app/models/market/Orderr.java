@@ -631,7 +631,7 @@ public class Orderr extends GenericModel {
                 if(selling != null) oi.selling = selling;
                 else {
                     // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("Selling[%s %s] is not in SELLING, it can not be happed!", oid.getASIN().toUpperCase(), orderr.market.toString());
+                    Logger.error("Selling[%s_%s] is not in SELLING, it can not be happed!", oid.getASIN().toUpperCase(), orderr.market.toString());
                     continue;
                 }
                 oi.id = String.format("%s_%s", orderr.orderId, product.sku);
@@ -772,6 +772,7 @@ public class Orderr extends GenericModel {
 
     /**
      * 将 0x0000 这种 16 进制的第几位修改成 'char'
+     *
      * @param bit
      */
     public void emailed(int bit, char c) {
@@ -800,6 +801,7 @@ public class Orderr extends GenericModel {
 
     /**
      * 获取第 bit 位上的值
+     *
      * @param bit
      * @return
      */
