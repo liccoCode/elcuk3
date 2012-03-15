@@ -3,6 +3,7 @@ package jobs;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
+import notifiers.Mails;
 import play.Logger;
 import play.jobs.Job;
 
@@ -60,10 +61,13 @@ public class FeedbackCrawlJob extends Job {
             for(int i = 1; i <= 2; i++) {
                 List<Feedback> feedbacks = acc.fetchFeedback(i);
                 Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+
+                //这段代码在 Feedbacks 也使用了, 但不好将其抽取出来
                 for(Feedback f : feedbacks) {
                     f.orderr = Orderr.findById(f.orderId);
                     f.account = acc;
                     f.merge()._save(); // 系统中有则更新, 没有则创建
+                    if(f.score <= 3 && f.state == Feedback.S.HANDLING) Mails.feedbackWarnning(f);
                 }
             }
         } catch(Exception e) {

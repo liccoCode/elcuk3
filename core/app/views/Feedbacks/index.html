@@ -1,0 +1,55 @@
+#{extends 'main.html'/}
+#{set title:'Feedbacks'/}
+#{set 'moreScripts'}
+    #{script 'feedbacks/index.js'/}
+#{/set}
+<div class="row">
+    <div class="well span6" style="margin-left:0">
+    #{select id:'h_market', name:'h_market', class:'span2', items:models.market.Account.M.values()}#{/select}
+    #{select id:'h_acc', name:'h_acc', class:'span2', items:accs, labelProperty:'username'}#{/select}
+        <a href="#" class="btn" id="s_feedback_btn">手动抓取 Feedback</a>
+    </div>
+</div>
+<div class="row">&nbsp;</div>
+<div class="row">
+
+    <table class="table table-bordered">
+        <tr style="background:#F1F4F8">
+            <th>OrderId</th>
+            <th>CreateDate</th>
+            <th>Market</th>
+            <th>Account</th>
+            <th>State</th>
+            <th>Email</th>
+            <th>Score</th>
+            <th>Comment</th>
+            <th>Memo</th>
+        </tr>
+    #{list items:feds, as:'f'}
+        #{set st:f.state == models.market.Feedback.S.HANDLING/}
+        #{set sc:f.score <= 3/}
+        <tr style="background: ${(st && sc) == true ? '#FFEACD' : '#F4F4F4'}">
+            <td>${f.orderId}</td>
+            <td>${f.createDate.format('yyyy-MM-dd')}</td>
+            <td>${f.market}</td>
+            <td><a href="#" rel="tooltip" data-original-title="${f.account.uniqueName}">${f.account.username}</a></td>
+            <td>
+                <span style="color:${st ? 'red' : 'green'}">${f.state}</span>
+            </td>
+            <td>${f.email}</td>
+            <!-- 判断颜色 -->
+            <td>
+                <span style="color:${sc ? 'red' : 'green'}">${f.score}</span>
+            </td>
+            <td>${f.comment}</td>
+            <td>${f.memo}</td>
+        </tr>
+    #{/list}
+        <tr class="tb_footer">
+            <td colspan="9">
+            #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/feedbacks/index'/}
+            </td>
+        </tr>
+    </table>
+</div>
+

@@ -1,5 +1,6 @@
 package models.market;
 
+import exception.NotLoginFastException;
 import helper.Constant;
 import helper.HTTP;
 import org.apache.commons.io.FileUtils;
@@ -219,6 +220,7 @@ public class Account extends Model {
             String body = HTTP.get(new HttpGet("https://sellercentral.amazon.co.uk"));
             Document doc = Jsoup.parse(body);
             Element countries = doc.select("#merchant-website").first();
+            if(countries == null) throw new NotLoginFastException();
             String value = null;
             for(Element ct : countries.select("option")) {
                 switch(m) {

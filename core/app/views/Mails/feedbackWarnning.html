@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Feedback Warnning for Order ${f.orderId}</title>
+</head>
+<body>
+<h3>
+    Comment: <strong>${f.comment}</strong>
+</h3>
+<br/>
+Score: <span style="color:red;">${f.score}</span>
+<br/>
+<a target="_blank" href="https://sellercentral.amazon.co.uk/gp/orders-v2/details/?ie=UTF8&orderID=${f.orderId}">${f.orderId}</a>
+</body>
+</html>

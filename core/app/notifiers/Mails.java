@@ -1,5 +1,6 @@
 package notifiers;
 
+import models.market.Feedback;
 import models.market.Listing;
 import models.market.ListingOffer;
 import models.market.Orderr;
@@ -80,6 +81,18 @@ public class Mails extends Mailer {
         } catch(MailException e) {
             Logger.warn("Order[" + order.orderId + "] Send Error! " + e.getMessage());
         }
+    }
+
+    /**
+     * 系统内部使用, 当抓取到的 Feedback 为
+     *
+     * @param f
+     */
+    public static void feedbackWarnning(Feedback f) {
+        setSubject("Feedback Warnning! Score:" + f.score + " (Order: " + f.orderId + ")");
+        mailBase();
+        addRecipient("services@easyacceu.com");
+        send(f);
     }
 
     private static void mailBase() {

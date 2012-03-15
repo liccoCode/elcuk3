@@ -94,12 +94,13 @@ public class Feedback extends GenericModel {
         for(Element feb : feedbacks) {
             if("#ffffff".equals(feb.attr("bgcolor"))) continue;
             Feedback feedback = new Feedback();
-            feedback.state = S.END;
             Elements tds = feb.select("td");
             //time
             feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
             //score
             feedback.score = NumberUtils.toFloat(tds.get(1).text());
+            if(feedback.score <= 3) feedback.state = S.HANDLING;
+            else feedback.state = S.END;
             //comments
             feedback.comment = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();
