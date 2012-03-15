@@ -14,12 +14,18 @@ import java.util.List;
  */
 public class OrderParseJobTest extends UnitTest {
 
-    @Test
+    //    @Test
     public void testJobRequestOrderParse() {
         List<JobRequest> jobs = JobRequest.find("state=?", JobRequest.S.END).fetch();
         for(JobRequest job : jobs) {
             if(job.path == null || job.path.trim().isEmpty()) continue;
             job.dealWith();
         }
+    }
+
+    @Test
+    public void testOneOrderParseJobRequest() {
+        JobRequest job = JobRequest.findById(1163l);
+        job.dealWith();
     }
 }

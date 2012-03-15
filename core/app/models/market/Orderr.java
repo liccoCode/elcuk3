@@ -387,65 +387,72 @@ public class Orderr extends GenericModel {
         if(orderr.totalAmount != null) this.totalAmount = orderr.totalAmount;
         if(orderr.trackNo != null) this.trackNo = orderr.trackNo;
 
-        if(orderr.items != null) {
+        if(orderr.items != null && orderr.items.size() > 0) {
             // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
             Set<OrderItem> newlyOi = new HashSet<OrderItem>();
-            for(OrderItem noi : orderr.items) {
-                for(OrderItem oi : this.items) {
-                    if(oi.equals(noi)) {
-                        if(noi.createDate != null) oi.createDate = noi.createDate;
-                        if(noi.discountPrice != null) oi.discountPrice = noi.discountPrice;
-                        if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
-                        if(noi.memo != null) oi.memo = noi.memo;
-                        if(noi.price != null) oi.price = noi.price;
-                        if(noi.productName != null) oi.productName = noi.productName;
-                        if(noi.quantity != null) oi.quantity = noi.quantity;
-                        if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
-                        if(noi.product != null) oi.product = noi.product;
-                        if(noi.selling != null) oi.selling = noi.selling;
+            if(this.items.size() == 0) { // 如果原始的 Order 中一个 OrderItem 都没有
+                for(OrderItem noi : orderr.items) {
+                    if(noi.isPersistent()) continue;
+                    newlyOi.add(noi);
+                }
+            } else { // 如果原始的 Order 中有 OrderItem
+                for(OrderItem noi : orderr.items) {
+                    for(OrderItem oi : this.items) {
+                        if(oi.equals(noi)) {
+                            if(noi.createDate != null) oi.createDate = noi.createDate;
+                            if(noi.discountPrice != null) oi.discountPrice = noi.discountPrice;
+                            if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
+                            if(noi.memo != null) oi.memo = noi.memo;
+                            if(noi.price != null) oi.price = noi.price;
+                            if(noi.productName != null) oi.productName = noi.productName;
+                            if(noi.quantity != null) oi.quantity = noi.quantity;
+                            if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
+                            if(noi.product != null) oi.product = noi.product;
+                            if(noi.selling != null) oi.selling = noi.selling;
 
-                        // 在更新 OrderItem 的时候, 需要根据新老 Order 的 state 处理 ProductQTY 的库存
-                        if("amazon.co.uk_easyacc.eu@gmail.com".equalsIgnoreCase(this.account.uniqueName)) {//主账号的 FBA 仓库
-                            Whouse w = Whouse.find("name=?", "FBA_UK").first();
-                            ProductQTY qty = ProductQTY.find(
-                                    "whouse=? AND product=?",
-                                    w,// Generic Problem
-                                    oi.product).first();
-                            if(qty == null) {
-                                Logger.error("Product[" + oi.product.sku + "] in Whouse[amazon.co.uk_easyacc.eu@gmail.com] have no QTY!");
-                            } else {
-                                /**
-                                 * 1. 在更新的时候正常只能够扣除库存, 不允许添加库存
-                                 * 2. 唯一一个例外则是如果这个订单被取消了, 那么被系统扣除的库存全部重新进入系统
-                                 */
-                                switch(orderr.state) {
-                                    case CANCEL: // 如果目标状态为 CANCEL
-                                        switch(this.state) {
-                                            case PENDING:// 这两个状态把库存加回去
-                                            case PAYMENT:
-                                                qty.pending -= oi.quantity;
-                                                qty.qty += oi.quantity;
-                                                break;
-                                            default:
-                                                // do nothing...
-                                        }
-                                        break;
-                                    case SHIPPED: // 如果目标状态为 SHIPPED
-                                        switch(this.state) {
-                                            case PENDING:
-                                            case PAYMENT:
-                                                qty.pending -= oi.quantity;
-                                                break;
-                                            default:
-                                                // do nothing...
-                                        }
+                            // 在更新 OrderItem 的时候, 需要根据新老 Order 的 state 处理 ProductQTY 的库存
+                            if("amazon.co.uk_easyacc.eu@gmail.com".equalsIgnoreCase(this.account.uniqueName)) {//主账号的 FBA 仓库
+                                Whouse w = Whouse.find("name=?", "FBA_UK").first();
+                                ProductQTY qty = ProductQTY.find(
+                                        "whouse=? AND product=?",
+                                        w,// Generic Problem
+                                        oi.product).first();
+                                if(qty == null) {
+                                    Logger.error("Product[" + oi.product.sku + "] in Whouse[amazon.co.uk_easyacc.eu@gmail.com] have no QTY!");
+                                } else {
+                                    /**
+                                     * 1. 在更新的时候正常只能够扣除库存, 不允许添加库存
+                                     * 2. 唯一一个例外则是如果这个订单被取消了, 那么被系统扣除的库存全部重新进入系统
+                                     */
+                                    switch(orderr.state) {
+                                        case CANCEL: // 如果目标状态为 CANCEL
+                                            switch(this.state) {
+                                                case PENDING:// 这两个状态把库存加回去
+                                                case PAYMENT:
+                                                    qty.pending -= oi.quantity;
+                                                    qty.qty += oi.quantity;
+                                                    break;
+                                                default:
+                                                    // do nothing...
+                                            }
+                                            break;
+                                        case SHIPPED: // 如果目标状态为 SHIPPED
+                                            switch(this.state) {
+                                                case PENDING:
+                                                case PAYMENT:
+                                                    qty.pending -= oi.quantity;
+                                                    break;
+                                                default:
+                                                    // do nothing...
+                                            }
+                                    }
+                                    qty.save();
                                 }
-                                qty.save();
                             }
-                        }
 
-                    } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
-                        newlyOi.add(noi);
+                        } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
+                            newlyOi.add(noi);
+                        }
                     }
                 }
             }
