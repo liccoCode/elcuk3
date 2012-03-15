@@ -52,18 +52,22 @@ public class FeedbackCrawlJob extends Job {
      * @param market
      */
     private void fetchAccountFeedback(Account acc, Account.M market) {
-        if(market != Account.M.AMAZON_UK &&
-                market != Account.M.AMAZON_FR &&
-                market != Account.M.AMAZON_DE) return;
-        acc.changeRegion(market);
-        for(int i = 1; i <= 2; i++) {
-            List<Feedback> feedbacks = acc.fetchFeedback(i);
-            Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
-            for(Feedback f : feedbacks) {
-                f.orderr = Orderr.findById(f.orderId);
-                f.account = acc;
-                f.merge()._save(); // 系统中有则更新, 没有则创建
+        try {
+            if(market != Account.M.AMAZON_UK &&
+                    market != Account.M.AMAZON_FR &&
+                    market != Account.M.AMAZON_DE) return;
+            acc.changeRegion(market);
+            for(int i = 1; i <= 2; i++) {
+                List<Feedback> feedbacks = acc.fetchFeedback(i);
+                Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+                for(Feedback f : feedbacks) {
+                    f.orderr = Orderr.findById(f.orderId);
+                    f.account = acc;
+                    f.merge()._save(); // 系统中有则更新, 没有则创建
+                }
             }
+        } catch(Exception e) {
+            Logger.warn(String.format("Account %s Market %s fetch feedback have some error!", acc.username, market));
         }
     }
 

@@ -2,6 +2,7 @@ package jobs;
 
 import models.Jobex;
 import play.Logger;
+import play.Play;
 import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.Time;
@@ -19,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 public class JobDriver extends Job {
     @Override
     public void doJob() throws Exception {
+        if(Play.mode.isDev()) {
+            Logger.debug(String.format("In Dev mode JobDriver is not running..."));
+            return;
+        }
         Logger.debug("JobDriver Start...");
         int all = 0;
         int success = 0;

@@ -158,13 +158,14 @@ public class Account extends Model {
     public void loginWebSite() {
         switch(this.type) {
             case AMAZON_UK:
+                String body = "";
                 try {
                     /**
                      * 1. Visit the website, fetch the new Cookie.
                      * 2. With the website params and user/password to login.
                      */
                     HttpGet home = new HttpGet("https://sellercentral.amazon.co.uk");
-                    String body = EntityUtils.toString(HTTP.client().execute(home).getEntity());
+                    body = EntityUtils.toString(HTTP.client().execute(home).getEntity());
 
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/homepage.html"), body);
@@ -195,6 +196,11 @@ public class Account extends Model {
 
                     HTTP.client().getCookieStore().clearExpired(new Date());
                 } catch(Exception e) {
+                    try {
+                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/error.html"), body);
+                    } catch(IOException e1) {
+                        //ignore.
+                    }
                     Logger.warn(e.getClass().getSimpleName() + "|" + e.getMessage());
                 }
                 break;
