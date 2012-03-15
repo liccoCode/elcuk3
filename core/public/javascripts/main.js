@@ -2,8 +2,12 @@ $(function(){
     $.varClosure = function(){
         var o = $(this);
         if(!o.attr('name')) return false;
-        if(o.val())
-            $.varClosure.params[o.attr("name")] = o.val().trim();
+        if(o.val()){
+            if(o.val().trim() in {on:1, off:1}) // 判断 input:checked 标签.
+                $.varClosure.params[o.attr("name")] = o.is(':checked');
+            else
+                $.varClosure.params[o.attr("name")] = o.val().trim();
+        }
     };
 
     $.DateUtil = {

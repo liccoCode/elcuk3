@@ -23,7 +23,7 @@
         <td><input type="text" name="s.name" value="${s.name}"></td>
         <td><input type="text" name="s.username" value="${s.username}"></td>
         <td><input type="text" name="s.password" value="${s.password}"></td>
-        <td><input type="text" class="span1" value="${s.ratio}"></td>
+        <td><input type="text" name="s.ratio" class="span1" value="${s.ratio}"></td>
         <td>
             #{select name:'s.type', items:models.Server.T.values(), value:s.type}#{/select}
         </td>

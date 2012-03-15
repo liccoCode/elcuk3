@@ -2,9 +2,7 @@
     <tr>
         <th>SKU</th>
         <th>ASIN</th>
-        <th>MerchantSKU</th>
         <th>Whouse</th>
-        <th>Account</th>
         <th><a href="#" rel="tooltip" data-original-title="设定的 PS, 修改后按下回车进行保存">PS</a></th>
         <th><a href="#" rel="tooltip" data-original-title="计算出来的 PS">PS_7</a></th>
         <th>在库</th>
@@ -28,13 +26,11 @@
     #{set day2:(pi.onWay / ps_7) /}
     #{set day3:(pi.onWork / ps_7) /}
     <tr>
-        <td>${pi.product.sku}</td>
-        <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
         <td>
-            <a href="#" rel="tooltip" data-original-title="SellingId:<br/>${pi.selling.sellingId}">${pi.selling.merchantSKU}</a>
+            <a href="#" rel="tooltip" data-original-title="MerchantSKU: ${pi.selling.merchantSKU}<br/>Account: ${pi.selling.account.username}">${pi.product.sku}</a>
         </td>
+        <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
         <td>${pi.whouse.name}</td>
-        <td>${pi.selling.account.username}</td>
         <td><input ps sid="${pi.selling.sellingId}" type="text" class="span1" value="${pi.selling.ps}"></td>
         <td>${(pi.selling.d7 / 7).format('#.##')}</td>
         <td>${pi.in}</td>
@@ -49,8 +45,9 @@
         <td>${day3.format('#.##')}</td>
         <td>${pi.in + pi.onWay + pi.onWork}</td>
         <td>
-        ${((pi.in + pi.onWay + pi.onWork) / ps_7).format('#.##')}
-            &nbsp;&nbsp;[&nbsp;(${pi.in} + ${pi.onWay} + ${pi.onWork}) / ${ps_7.format('#.##')}&nbsp;]
+            <a href="#" rel="tooltip" data-original-title="(${pi.in} + ${pi.onWay} + ${pi.onWork}) / ${ps_7.format('#.##')}">
+            ${((pi.in + pi.onWay + pi.onWork) / ps_7).format('#.##')}
+            </a>
         </td>
         <td>
             #{set airPatch:(21 - day1 - day2) * ps_7/}

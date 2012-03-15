@@ -83,12 +83,7 @@
                     <td><input type="text" name="j.duration" value="${job.duration}"></td>
                     <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
                     <td>
-                        #{if job.close}
-                            <input type="checkbox" name="j.close" checked>
-                        #{/if}
-                        #{else }
-                            <input type="checkbox" name="j.close">
-                        #{/else}
+                        <input type="checkbox" name="j.close" ${job.close ? 'checked' : ''}>
                     </td>
                     <td>
                         <div class="btn-group">

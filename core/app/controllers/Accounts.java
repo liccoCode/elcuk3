@@ -1,11 +1,11 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import models.market.Account;
-import play.data.validation.Valid;
-import play.data.validation.Validation;
+import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * 对 Accounts 的操作
@@ -15,30 +15,31 @@ import play.mvc.With;
  */
 @With({Secure.class, GzipFilter.class})
 public class Accounts extends Controller {
-    public static void p(Integer page) {
+    public static void index() {
+        List<Account> accs = Account.all().fetch();
+
+        render(accs);
     }
 
-    public static void c(@Valid Account a) {
-        if(Validation.hasErrors()) {
-            renderJSON(validation.errorsMap());
+    public static void update(Account a) {
+        if(!a.isPersistent()) renderJSON(new Error("Account", "Account is not persistent!", new String[]{}));
+        try {
+            a.save();
+        } catch(Exception e) {
+            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
         }
-        a.save();
-        renderJSON(a);
+        renderJSON("{\"flag\":\"true\"}");
     }
 
-    public static void r(Long id) {
-        renderJSON(JSON.toJSONString(Account.findById(id)));
+    public static void create(Account a, String type) {
+        if(a.isPersistent()) renderJSON(new Error("Account", "Account is exist, can not be CREATE!", new String[]{}));
+        try {
+            a.type = Account.M.val(type);
+            a.save();
+        } catch(Exception e) {
+            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
+        }
+        renderJSON("{\"flag\":\"true\"}");
     }
 
-    public static void u(@Valid Account acc) {
-        if(Validation.hasErrors()) {
-            renderJSON(validation.errorsMap());
-        }
-        if(acc.uniqueName != null && acc.id != null) {
-            acc.save();
-            renderJSON(acc);
-        } else {
-            renderJSON("{flag: false}");
-        }
-    }
 }

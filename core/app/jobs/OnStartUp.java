@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.HTTP;
 import models.User;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
@@ -21,5 +22,6 @@ public class OnStartUp extends Job {
             Fixtures.delete(User.class);
             Fixtures.loadModels("users.yml");
         }
+        HTTP.init();
     }
 }
