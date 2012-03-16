@@ -55,4 +55,14 @@ public class Feedbacks extends Controller {
         rt.put("count", feedbacks.size() + "");
         renderJSON(rt);
     }
+
+    public static void update(Feedback f) {
+        if(!f.isPersistent()) renderJSON(new Error("Feedback", "Feedback is not persistent!", new String[]{}));
+        try {
+            f.save();
+        } catch(Exception e) {
+            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
+        }
+        renderJSON("{\"flag\":\"true\"}");
+    }
 }

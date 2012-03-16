@@ -24,6 +24,7 @@
             <th>Score</th>
             <th>Comment</th>
             <th>Memo</th>
+            <th>&nbsp;</th>
         </tr>
     #{list items:feds, as:'f'}
         #{set st:f.state == models.market.Feedback.S.HANDLING/}
@@ -43,10 +44,19 @@
             </td>
             <td>${f.comment}</td>
             <td>${f.memo}</td>
+            <td>
+                <div class="btn-group">
+                    <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">Act
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a rsv fid="${f.orderId}" href="#">Reslove</a></li>
+                    </ul>
+                </div>
+            </td>
         </tr>
     #{/list}
         <tr class="tb_footer">
-            <td colspan="9">
+            <td colspan="10">
             #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/feedbacks/index'/}
             </td>
         </tr>
