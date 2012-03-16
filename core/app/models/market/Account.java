@@ -1,6 +1,7 @@
 package models.market;
 
 import exception.NotLoginFastException;
+import exception.NotSupportChangeRegionFastException;
 import helper.Constant;
 import helper.HTTP;
 import org.apache.commons.io.FileUtils;
@@ -89,6 +90,93 @@ public class Account extends Model {
                 return null;
             }
         }
+
+        /**
+         * 账户对应的网站的后台首页
+         *
+         * @return
+         */
+        public String homePage() {
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString();
+                case EBAY_UK:
+                    return "unknow..";
+                default:
+                    return "Not Support.";
+            }
+        }
+
+        /**
+         * 账户对应的网站的后台登陆 URL
+         *
+         * @return
+         */
+        public String loginPage() {
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/sign-in/sign-in.html/ref=xx_login_lgin_home";
+                case EBAY_UK:
+                    return "unknow..";
+                default:
+                    return "Not Support.";
+            }
+        }
+
+        /**
+         * 账户对应的网站的 feedback 抓取的地址
+         *
+         * @param page
+         * @return
+         */
+        public String feedbackPage(int page) {
+            //https://sellercentral.amazon.co.uk/gp/feedback-manager/view-all-feedback.html?ie=UTF8&sortType=sortByDate&pageSize=50&dateRange=&descendingOrder=1&currentPage=1
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/feedback-manager/view-all-feedback.html?ie=UTF8&sortType=sortByDate&pageSize=50&dateRange=&descendingOrder=1&currentPage=" + page;
+                case EBAY_UK:
+                    return "unknow..";
+                default:
+                    return "Not Support.";
+            }
+        }
+
+        /**
+         * 仅仅只有 Amazon Europe 才有的区域转换
+         *
+         * @param marketplaceID
+         * @return
+         */
+        public String changeRegion(String marketplaceID) {
+            //https://sellercentral.amazon.de/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=A1PA6795UKMFR9
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                    return "https://sellercentral." + this.toString() + "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" + marketplaceID;
+                case AMAZON_US:
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
     }
 
     /**
@@ -159,17 +247,18 @@ public class Account extends Model {
     public void loginWebSite() {
         switch(this.type) {
             case AMAZON_UK:
+            case AMAZON_DE:
                 String body = "";
                 try {
                     /**
                      * 1. Visit the website, fetch the new Cookie.
                      * 2. With the website params and user/password to login.
                      */
-                    HttpGet home = new HttpGet("https://sellercentral.amazon.co.uk");
+                    HttpGet home = new HttpGet(this.type.homePage());
                     body = EntityUtils.toString(HTTP.client().execute(home).getEntity());
 
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/homepage.html"), body);
+                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".homepage.html"), body);
 
                     Document doc = Jsoup.parse(body);
                     Elements inputs = doc.select("form[name=signin] input");
@@ -179,7 +268,7 @@ public class Account extends Model {
                         return;
                     }
 
-                    HttpPost login = new HttpPost("https://sellercentral.amazon.co.uk/gp/sign-in/sign-in.html/ref=xx_login_lgin_home");
+                    HttpPost login = new HttpPost(this.type.loginPage());
                     List<NameValuePair> params = new ArrayList<NameValuePair>();
                     for(Element el : inputs) {
                         String att = el.attr("name");
@@ -190,7 +279,7 @@ public class Account extends Model {
                     login.setEntity(new UrlEncodedFormEntity(params));
                     body = EntityUtils.toString(HTTP.client().execute(login).getEntity());
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/afterLogin.html"), body);
+                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body);
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
                     if(navBar != null) Logger.info("Login Successful!");
                     else Logger.warn("Login Failed!");
@@ -198,7 +287,7 @@ public class Account extends Model {
                     HTTP.client().getCookieStore().clearExpired(new Date());
                 } catch(Exception e) {
                     try {
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/error.html"), body);
+                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".error.html"), body);
                     } catch(IOException e1) {
                         //ignore.
                     }
@@ -217,7 +306,7 @@ public class Account extends Model {
      */
     public void changeRegion(M m) {
         try {
-            String body = HTTP.get(new HttpGet("https://sellercentral.amazon.co.uk"));
+            String body = HTTP.get(new HttpGet(this.type.homePage()));
             Document doc = Jsoup.parse(body);
             Element countries = doc.select("#merchant-website").first();
             if(countries == null) throw new NotLoginFastException();
@@ -249,9 +338,7 @@ public class Account extends Model {
                 Logger.warn("Value parse Error!");
                 return;
             }
-            HTTP.get(new HttpGet("https://sellercentral.amazon.co.uk/gp/utilities/set-rainier-prefs.html?ie=UTF8&url=" +
-                    "https%3A%2F%2Fsellercentral.amazon.co.uk%2Fgp%2Ffeedback-manager%2Fhome.html%2Fref%3" +
-                    "Dag_feedback_dmar_allfeedbk%3Fie%3DUTF8%26_mpc%3D1&marketplaceID=" + value));
+            HTTP.get(new HttpGet(this.type.changeRegion(value)));
         } catch(IOException e) {
             e.printStackTrace();
         }
@@ -261,16 +348,19 @@ public class Account extends Model {
         HttpGet feedback = null;
         switch(this.type) {
             case AMAZON_UK:
-                feedback = new HttpGet("https://sellercentral.amazon.co.uk/gp/feedback-manager/view-all-feedback.html?ie=UTF8&sortType=sortByDate&pageSize=50&dateRange=&currentPage=" + page + "&descendingOrder=1");
+            case AMAZON_DE:
+                feedback = new HttpGet(this.type.feedbackPage(page));
                 try {
                     String body = HTTP.get(feedback);
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/feedback.p" + page + ".html"), body);
+                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + "feedback_p" + page + ".html"), body);
                     return Feedback.parseFeedBackFromHTML(body);
                 } catch(Exception e) {
-                    Logger.warn("Feedback page can not found Or the session is invalid!");
+                    Logger.warn("[" + this.type + "] Feedback page can not found Or the session is invalid!");
                 }
                 break;
+            default:
+                Logger.warn("Not support fetch [" + this.type + "] Feedback.");
         }
         return new ArrayList<Feedback>();
     }

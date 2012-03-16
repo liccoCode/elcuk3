@@ -71,7 +71,7 @@ public class FeedbackCrawlJob extends Job {
                 }
             }
         } catch(Exception e) {
-            Logger.warn(String.format("Account %s Market %s fetch feedback have some error!", acc.username, market));
+            Logger.warn(String.format("Account %s Market %s fetch feedback have some error![%s]", acc.username, market, e.getMessage()));
         }
     }
 
