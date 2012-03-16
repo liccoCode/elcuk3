@@ -1,5 +1,6 @@
 package jobs;
 
+import models.market.Feedback;
 import models.market.OrderItem;
 import models.market.Orderr;
 import notifiers.Mails;
@@ -65,7 +66,17 @@ public class OrderMailCheck extends Job {
             for(OrderItem oi : ord.items) {
                 if(oi.easyacc()) ctn = false;
             }
-            if(!ctn) continue;
+            if(!ctn) {
+                Logger.debug(String.format("Skip %s, because of [Not EasyAcc]", ord.orderId));
+                continue;
+            }
+
+            // Orderr 的 feedback <= 3 的不发送
+            Feedback fbk = Feedback.findById(ord.orderId);
+            if(fbk != null && fbk.score <= 3) {
+                Logger.debug(String.format("Skip %s, because of [Score below 3]", ord.orderId));
+                continue;
+            }
 
             char e = ord.emailed(2);
             if(e == 'f' || e == 'F') {

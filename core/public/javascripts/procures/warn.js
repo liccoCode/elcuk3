@@ -1,11 +1,8 @@
 $(function(){
 
-    $('a[data-toggle="tab"][ct]').on('shown', function(e){
+    function loadPage(o, cat, market, page){
         $('#container').mask('加载中...');
-        var o = $(e.target);
-        var cat = o.text();
-        var market = o.parents('div.tab-content div[id]').attr('id');
-        $(o.attr('href')).load('/procures/warnItm', {cat:cat, market:market, page:1}, function(r){
+        $(o.attr('href')).load('/procures/warnItm', {cat:cat, market:market, page:page}, function(r){
             $('a[rel=tooltip]').tooltip({placement:'top'});
             $('#container').unmask();
 
@@ -50,6 +47,7 @@ $(function(){
                 }, 'json');
             });
 
+            // Invisible 操作
             $('ul a[invi]').click(function(e){
                 if(!confirm('却要要隐藏? 隐藏后需要从 Listing 页面进行状态修改为非 DOWN 才重新可见.')) return false;
                 $('#warnItm').mask('更新中...');
@@ -63,6 +61,34 @@ $(function(){
                     $('#warnItm').unmask();
                 }, 'json');
             });
+
+            // Pager 翻页
+            $('a[plink]').click(function(){
+                var oi = $(this);
+                var p = page;
+                switch(oi.attr('href').split('#')[1]){
+                    case 'o':
+                        p = 1;
+                        break;
+                    case 'p':
+                        p = (p - 1 <= 0 ? 1 :p - 1);
+                        break;
+                    case 'n':
+                        p += 1;
+                        break;
+                    case 'l':
+                        p = oi.attr('count');
+                        break;
+                }
+                loadPage(o, cat, market, p);
+            });
         });
+    }
+
+    $('a[data-toggle="tab"][ct]').on('shown', function(e){
+        var o = $(e.target);
+        var cat = o.text().toLowerCase();
+        var market = o.parents('div.tab-content div[id]').attr('id');
+        loadPage(o, cat, market, 1);
     });
 });

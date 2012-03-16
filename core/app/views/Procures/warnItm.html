@@ -22,27 +22,36 @@
 
 #{list items:pitms, as:'pi'}
     #{set ps_7:((pi.selling.d7 <= 0 ? 1 : pi.selling.d7) / 7)/}
+    #{set ps:pi.selling.ps/}
     #{set day1:(pi.in / ps_7) /}
     #{set day2:(pi.onWay / ps_7) /}
     #{set day3:(pi.onWork / ps_7) /}
+    #{set mday1:(pi.in / ps) /}
+    #{set mday2:(pi.onWay / ps) /}
+    #{set mday3:(pi.onWork / ps) /}
     <tr>
         <td>
             <a href="#" rel="tooltip" data-original-title="MerchantSKU: ${pi.selling.merchantSKU}<br/>Account: ${pi.selling.account.username}">${pi.product.sku}</a>
         </td>
         <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
         <td>${pi.whouse.name}</td>
-        <td><input ps sid="${pi.selling.sellingId}" type="text" class="span1" value="${pi.selling.ps}"></td>
-        <td>${(pi.selling.d7 / 7).format('#.##')}</td>
+        <td>
+            <input ps sid="${pi.selling.sellingId}" type="text" class="span1" style="color:orange;" value="${pi.selling.ps}">
+        </td>
+        <td><span style="color:green;">${(pi.selling.d7 / 7).format('#.##')}</span></td>
         <td>${pi.in}</td>
-        <td>${day1.format('#.##')}</td>
+        <td><span style="color:orange;">${mday1.format('#.##')}</span> |
+            <span style="color:green;">${day1.format('#.##')}</span></td>
         <td>
             <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="onWay" type="text" class="span1" value="${pi.onWay}">
         </td>
-        <td>${day2.format('#.##')}</td>
+        <td><span style="color:orange;">${mday2.format('#.##')}</span> |
+            <span style="color:green;">${day2.format('#.##')}</span></td>
         <td>
             <input pid="${pi.product.sku + "_" + pi.selling.sellingId}" name="onWork" type="text" class="span1" value="${pi.onWork}">
         </td>
-        <td>${day3.format('#.##')}</td>
+        <td><span style="color:orange;">${mday3.format('#.##')}</span> |
+            <span style="color:green;">${day3.format('#.##')}</span></td>
         <td>${pi.in + pi.onWay + pi.onWork}</td>
         <td>
             <a href="#" rel="tooltip" data-original-title="(${pi.in} + ${pi.onWay} + ${pi.onWork}) / ${ps_7.format('#.##')}">
@@ -51,19 +60,27 @@
         </td>
         <td>
             #{set airPatch:(21 - day1 - day2) * ps_7/}
-        ${(airPatch <= 0 ? 0 : airPatch).format('#.##')}
+            #{set mairPatch:(21 - mday1 - mday2) * ps/}
+            <span style="color:orange;">${(mairPatch <= 0 ? 0 : mairPatch).format('#.##')}</span> |
+            <span style="color:green;">${(airPatch <= 0 ? 0 : airPatch).format('#.##')}</span>
         </td>
         <td>
             #{set airBuy:(35 - day1 - day2 - day3) * ps_7/}
-        ${(airBuy <= 0 ? 0 : airBuy).format('#.##')}
+            #{set mairBuy:(35 - mday1 - mday2 - mday3) * ps/}
+            <span style="color:orange;">${(mairBuy <= 0 ? 0 : mairBuy).format('#.##')}</span> |
+            <span style="color:green;">${(airBuy <= 0 ? 0 : airBuy).format('#.##')}</span>
         </td>
         <td>
             #{set seaPatch:(42 - day1 - day2) * ps_7/}
-        ${(seaPatch <= 0 ? 0 : seaPatch).format('#.##')}
+            #{set mseaPatch:(42 - mday1 - mday2) * ps/}
+            <span style="color:orange;">${(mseaPatch <= 0 ? 0 : mseaPatch).format('#.##')}</span> |
+            <span style="color:green;">${(seaPatch <= 0 ? 0 : seaPatch).format('#.##')}</span>
         </td>
         <td>
             #{set seaBuy:(56 - day1 - day2 - day3) * ps_7/}
-        ${(seaBuy <= 0 ? 0 : seaBuy).format('#.##')}
+            #{set mseaBuy:(56 - mday1 - mday2 - mday3) * ps/}
+            <span style="color:orange;">${(mseaBuy <= 0 ? 0 : mseaBuy).format('#.##')}</span> |
+            <span style="color:green;">${(seaBuy <= 0 ? 0 : seaBuy).format('#.##')}</span>
         </td>
         <td>
             <div class="btn-group">
@@ -75,4 +92,16 @@
         </td>
     </tr>
 #{/list}
+    <tr>
+        <td colspan="18">
+            <div class="pagination pagination-centered">
+                <ul>
+                    <li><a plink href="#o">首页</a></li>
+                    <li><a plink href="#p">上一页</a></li>
+                    <li><a plink href="#n">下一页</a></li>
+                    <li><a plink href="#l" count='${pif.totalPage}'>尾页(${pif.size}/${pif.count})</a></li>
+                </ul>
+            </div>
+        </td>
+    </tr>
 </table>

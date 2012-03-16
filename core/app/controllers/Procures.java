@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Caches;
 import helper.PH;
+import models.PageInfo;
 import models.market.Account;
 import models.market.Listing;
 import models.market.Selling;
@@ -61,16 +62,21 @@ public class Procures extends Controller {
     public static void warnItm(String market, String cat, int page) {
         List<Selling> sellings = Cache.get(String.format(Caches.WARN_ITEM_SELLING, market, cat), List.class);
         if(sellings == null) {
-            sellings = Selling.find("market=? AND listing.product.category.categoryId=? AND state!=?", Account.M.val(market), cat, Selling.S.DOWN).fetch();
+            if("all".equals(cat))
+                sellings = Selling.find("market=? AND state!=?", Account.M.val(market), Selling.S.DOWN).fetch();
+            else
+                sellings = Selling.find("market=? AND listing.product.category.categoryId=? AND state!=?", Account.M.val(market), cat, Selling.S.DOWN).fetch();
             Selling.sortSellingWithQtyLeftTime(sellings);
             if(sellings != null && sellings.size() > 0)
                 Cache.add(String.format(Caches.WARN_ITEM_SELLING, market, cat), sellings, "30mn");
         }
         List<PItem> pitms = new ArrayList<PItem>();
-        for(int i = (page - 1); i < ((40 * page) > sellings.size() ? sellings.size() : (40 * page)); i++)
+        int size = ((40 * page) > sellings.size() ? sellings.size() : (40 * page));
+        for(int i = (page - 1) * 40; i < size; i++)
             pitms.add(sellings.get(i).calculatePItem());
 
-        render(pitms);
+        PageInfo<Selling> pif = new PageInfo<Selling>(pitms.size(), (long) sellings.size(), page, sellings);
+        render(pitms, pif);
     }
 
     public static void ps(Selling s) {
