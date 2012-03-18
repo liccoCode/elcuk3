@@ -54,8 +54,8 @@ $(function(){
         ['g+h','/'],
         ['g+s','/analyzes/index'],
         ['g+o','/orders/o_index?s=20&p=1'],
-        ['g+l','http://localhost:9000/listings/l_index'],
-        ['g+p+w','http://localhost:9000/procures/warn']
+        ['g+l','/listings/l_index'],
+        ['g+p+w','/procures/warn']
     ];
 
     var bindkey = function(k, url) {
