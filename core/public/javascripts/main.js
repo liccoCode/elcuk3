@@ -46,5 +46,24 @@ $(function(){
             return date.getFullYear() + "-" + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ':' + date.getMinutes() + ":" + date.getSeconds();
         }
 
+    };
+
+
+    // ---- Key board shor
+    $.keys = [
+        ['g+h','/'],
+        ['g+s','/analyzes/index'],
+        ['g+o','/orders/o_index?s=20&p=1'],
+        ['g+l','http://localhost:9000/listings/l_index'],
+        ['g+p+w','http://localhost:9000/procures/warn']
+    ];
+
+    var bindkey = function(k, url) {
+        key(k, function(){location.href=url;return false;})
+    };
+
+    for(var i = 0; i < $.keys.length; i++) {
+        var pair = $.keys[i];
+        bindkey(pair[0], pair[1]);
     }
 });

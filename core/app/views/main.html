@@ -10,6 +10,7 @@
 #{get 'moreStyles' /}
 #{script 'jquery.1.7.1.min.js'/}
 #{script 'jquery.loadmask.min.js'/}
+#{script 'keymaster.min.js'/}
 #{script 'main.js'/}
 #{get 'moreScripts' /}
 </head>
@@ -25,7 +26,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="@{Application.index()}">Home</a></li>
-                            <li><a href="#change_passwd" data-toggle="modal">修改密码</a></li>
+                            <li><a href="#change_passwd" data-toggle="modal">Password</a></li>
                             <li><a href="@{Secure.login()}">Logout</a></li>
                         </ul>
                     </li>
@@ -33,9 +34,9 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Listings.l_index()}">Listing</a></li>
-                            <li><a href="@{Orders.o_index(1, 20)}">Order</a></li>
-                            <li><a href="@{Analyzes.index()}">Selling Analyze</a></li>
+                            <li><a href="@{Listings.l_index()}">(L)isting</a></li>
+                            <li><a href="@{Orders.o_index(1, 20)}">(O)rder</a></li>
+                            <li><a href="@{Analyzes.index()}">(S)elling Analyze</a></li>
                             <li><a href="@{Feedbacks.index(1, 50)}">Feedbacks</a></li>
                         </ul>
                     </li>
@@ -54,10 +55,10 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Procures.plan(1, 20)}">采购计划</a></li>
-                            <li><a href="#">采购单</a></li>
-                            <li><a href="#">货运单</a></li>
-                            <li><a href="@{Procures.warn()}">缺货预警</a></li>
+                            <li><a href="@{Procures.plan(1, 20)}">Plan</a></li>
+                            <li><a href="#">Procure</a></li>
+                            <li><a href="#">Shipment</a></li>
+                            <li><a href="@{Procures.warn()}">Plan Warnning</a></li>
                         </ul>
                     </li>
 
