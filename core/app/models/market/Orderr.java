@@ -85,6 +85,10 @@ public class Orderr extends GenericModel {
      */
     @OneToOne(fetch = FetchType.LAZY)
     public Account account;
+
+    @OneToMany(mappedBy = "order")
+    @OrderBy("cost DESC")
+    public List<SaleFee> fees;
     //-------------- Basic ----------------
 
     /**

@@ -60,6 +60,7 @@
                             <ul class="nav nav-tabs">
                                 <li class="active"><a data-toggle="tab" href="#basic_${ord.orderId}">基本信息</a></li>
                                 <li><a data-toggle="tab" href="#od_${ord.orderId}">订单信息</a></li>
+                                <li><a data-toggle="tab" href="#fee_${ord.orderId}">订单费用</a></li>
                             </ul>
 
                             <div class="tab-content">
@@ -164,6 +165,28 @@
                                                 <td>${item.productName}</td>
                                                 <td>${item.createDate}</td>
                                                 <td>${item.memo}</td>
+                                            </tr>
+                                        #{/list}
+                                    </table>
+                                </div>
+
+
+                                <div class="tab-pane" id="fee_${ord.orderId}">
+                                    <table class="table table-bordered">
+                                        <tr>
+                                            <th>Cost</th>
+                                            <th>Cost(USD)</th>
+                                            <th>Date</th>
+                                            <th>FeeType</th>
+                                            <th>Qty</th>
+                                        </tr>
+                                        #{list items:ord.fees, as:'f'}
+                                            <tr>
+                                                <td>${f.cost} ${f.currency.name()}</td>
+                                                <td>${f.usdCost.format('#.###')} USD</td>
+                                                <td>${f.date.format('yyyy-MM-dd')}</td>
+                                                <td>${f.type.name}</td>
+                                                <td>${f.qty}</td>
                                             </tr>
                                         #{/list}
                                     </table>
