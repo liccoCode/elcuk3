@@ -326,7 +326,7 @@ public class SaleFee extends GenericModel {
                 ps.setFloat(i++, f.cost);
                 ps.setString(i++, f.currency.toString());
                 ps.setDate(i++, new java.sql.Date(f.date.getTime()));
-                ps.setString(i++, f.market.toString());
+                ps.setString(i++, f.market.name());
                 ps.setString(i++, f.memo);
                 ps.setString(i++, f.orderId);
                 ps.setInt(i++, f.qty);
