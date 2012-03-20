@@ -2,13 +2,10 @@ package jobs;
 
 import models.finance.SaleFee;
 import models.market.Account;
-import org.apache.commons.lang.StringUtils;
 import play.jobs.Job;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 用来抓取各个市场的 Finance 信息的任务;

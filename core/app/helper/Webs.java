@@ -84,6 +84,11 @@ public class Webs {
         return "#";
     }
 
+    /**
+     * 根据 Selling 来获取此 Selling 在不同市场上的留 Review 的地址
+     * @param selling
+     * @return
+     */
     public static String reviewLink(Selling selling) {
         //http://www.amazon.co.uk/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=B003TQ3NCY
         String baseAmazon = "http://www.%s/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=%s";
@@ -99,6 +104,12 @@ public class Webs {
         return "#";
     }
 
+    /**
+     * 简单的发送 HTML 的系统邮件
+     * @param subject 邮件标题
+     * @param content 邮件内容
+     * @return
+     */
     public static Future<Boolean> systemMail(String subject, String content) {
         HtmlEmail email = new HtmlEmail();
         try {
@@ -115,6 +126,12 @@ public class Webs {
         return Mail.send(email);
     }
 
+    /**
+     * 根据市场来提取文本中的价格.  主要是区分 Locale, 例如 13.22 在 de 为 13,22;
+     * @param market
+     * @param priceStr
+     * @return
+     */
     public static Float amazonPrice(Account.M market, String priceStr) {
         try {
             switch(market) {
@@ -136,4 +153,11 @@ public class Webs {
         return -0.1f;
     }
 
+    /**
+     * 简单的获取 Exception 的文本
+     * @return
+     */
+    public static String E(Exception e) {
+        return e.getClass().getSimpleName() + "|" + e.getMessage();
+    }
 }

@@ -112,6 +112,6 @@ public class TimeParseTest {
     public void testJodeDate() {
         DateTime dt = DateTime.now();
         System.out.println(DateTime.parse(String.format("%s-%s-%s", dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth())));
-        System.out.println(dt.toString("yy"));
+        System.out.println(dt.toString("yyyy.MM.dd_HH'h'"));
     }
 }

@@ -200,7 +200,7 @@ public enum Currency {
             Logger.info("[" + json.get("lhs").getAsString() + " TO " + json.get("rhs").getAsString() + "]");
             return NumberUtils.toFloat(json.get("rhs").getAsString().split(" ")[0], -1);
         } catch(Exception e) {
-            Logger.warn(e.getClass().getSimpleName() + "|" + e.getMessage());
+            Logger.warn(Webs.E(e));
         }
         return -1f;
     }

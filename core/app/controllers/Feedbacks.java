@@ -61,7 +61,7 @@ public class Feedbacks extends Controller {
         try {
             f.save();
         } catch(Exception e) {
-            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
+            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
         }
         renderJSON("{\"flag\":\"true\"}");
     }

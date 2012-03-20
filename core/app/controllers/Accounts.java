@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Webs;
 import models.market.Account;
 import play.data.validation.Error;
 import play.mvc.Controller;
@@ -26,7 +27,7 @@ public class Accounts extends Controller {
         try {
             a.save();
         } catch(Exception e) {
-            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
+            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
         }
         renderJSON("{\"flag\":\"true\"}");
     }
@@ -37,7 +38,7 @@ public class Accounts extends Controller {
             a.type = Account.M.val(type);
             a.save();
         } catch(Exception e) {
-            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
+            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
         }
         renderJSON("{\"flag\":\"true\"}");
     }

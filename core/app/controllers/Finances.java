@@ -1,14 +1,19 @@
 package controllers;
 
 import helper.Constant;
+import helper.Webs;
 import models.finance.SaleFee;
 import models.market.Account;
+import org.apache.commons.io.FileUtils;
+import play.data.validation.*;
+import play.data.validation.Error;
 import play.db.jpa.JPA;
 import play.libs.Files;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +42,7 @@ public class Finances extends Controller {
             }
             renderText("Saved: " + fees.size() + " fees");
         } catch(Exception e) {
-            renderText(e.getClass().getSimpleName() + "|" + e.getMessage());
+            renderText(Webs.E(e));
         }
     }
 
@@ -52,7 +57,11 @@ public class Finances extends Controller {
      */
     public static void upload(File f) {
         String path = Constant.E_FINANCE + "/fix/" + f.getName().split("\\.")[0] + ".txt";
-        Files.copy(f, new File(path));
+        try {
+            FileUtils.copyFile(f, new File(path));
+        } catch(IOException e) {
+            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
+        }
         Map<String, String> rt = new HashMap<String, String>();
         rt.put("flag", "true");
         rt.put("path", path);

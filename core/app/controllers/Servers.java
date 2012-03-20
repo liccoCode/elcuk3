@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Caches;
+import helper.Webs;
 import models.Server;
 import play.cache.Cache;
 import play.data.validation.Error;
@@ -32,7 +33,7 @@ public class Servers extends Controller {
             s.save();
             Cache.decr(String.format(Caches.SERVERS, s.type.toString()));
         } catch(Exception e) {
-            renderJSON(new Error("Exception", e.getClass().getSimpleName() + "|" + e.getMessage(), new String[]{}));
+            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
         }
         renderJSON("{\"flag\":\"true\"}");
     }

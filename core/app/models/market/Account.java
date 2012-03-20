@@ -4,6 +4,7 @@ import exception.NotLoginFastException;
 import exception.NotSupportChangeRegionFastException;
 import helper.Constant;
 import helper.HTTP;
+import helper.Webs;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -180,7 +181,7 @@ public class Account extends Model {
         }
 
         public String flatFinance() {
-           //https://sellercentral.amazon.co.uk/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
+            //https://sellercentral.amazon.co.uk/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
             switch(this) {
                 case AMAZON_UK:
                 case AMAZON_DE:
@@ -308,7 +309,7 @@ public class Account extends Model {
                     } catch(IOException e1) {
                         //ignore.
                     }
-                    Logger.warn(e.getClass().getSimpleName() + "|" + e.getMessage());
+                    Logger.warn(Webs.E(e));
                 }
                 break;
             default:
@@ -363,6 +364,7 @@ public class Account extends Model {
 
     /**
      * 抓取 Account 对应网站的 FeedBack
+     *
      * @param page
      * @return
      */
@@ -390,17 +392,18 @@ public class Account extends Model {
 
     /**
      * 下载 7 天的 Flat Finance
+     *
      * @return
      */
     public File briefFlatFinance() {
         try {
             String body = HTTP.get(new HttpGet(this.type.flatFinance()));
             DateTime dt = DateTime.now();
-            File f = new File(String.format("%s/%s/%s.txt", Constant.E_FINANCE, this.type, dt.toString("yyyy.MM.dd")));
+            File f = new File(String.format("%s/%s/%s.txt", Constant.E_FINANCE, this.type, dt.toString("yyyy.MM.dd_HH'h'")));
             FileUtils.writeStringToFile(f, body);
             return f;
         } catch(IOException e) {
-            Logger.warn(e.getClass().getSimpleName() + "|" + e.getMessage());
+            Logger.warn(Webs.E(e));
         }
         return null;
     }
