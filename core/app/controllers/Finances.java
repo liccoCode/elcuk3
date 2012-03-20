@@ -6,7 +6,6 @@ import models.finance.SaleFee;
 import models.market.Account;
 import org.apache.commons.io.FileUtils;
 import play.data.validation.Error;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -34,10 +33,7 @@ public class Finances extends Controller {
         try {
             List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + name + ".txt"), Account.<Account>findById(1l));
             SaleFee.clearOldSaleFee(fees);
-            for(int i = 0; i < fees.size(); i++) {
-                if(i % 100 == 0) JPA.em().flush();
-                fees.get(i).save();
-            }
+            for(SaleFee fee : fees) fee.save();
             renderText("Saved: " + fees.size() + " fees");
         } catch(Exception e) {
             renderText(Webs.E(e));
