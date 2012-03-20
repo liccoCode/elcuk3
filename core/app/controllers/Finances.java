@@ -5,6 +5,7 @@ import helper.Webs;
 import models.finance.SaleFee;
 import models.market.Account;
 import org.apache.commons.io.FileUtils;
+import play.Logger;
 import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -40,6 +41,7 @@ public class Finances extends Controller {
         } catch(Exception e) {
             PrintWriter pw = new PrintWriter(new StringWriter());
             e.printStackTrace(pw);
+            Logger.error(pw.toString());
             renderText(Webs.E(e) + "\r\n<br/><br/>" + pw.toString());
         }
     }
