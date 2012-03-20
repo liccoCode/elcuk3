@@ -11,6 +11,8 @@ import play.mvc.With;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,9 @@ public class Finances extends Controller {
             for(SaleFee fee : fees) fee.save();
             renderText("Saved: " + fees.size() + " fees");
         } catch(Exception e) {
-            renderText(Webs.E(e));
+            PrintWriter pw = new PrintWriter(new StringWriter());
+            e.printStackTrace(pw);
+            renderText(Webs.E(e) + "\r\n<br/><br/>" + pw.toString());
         }
     }
 
