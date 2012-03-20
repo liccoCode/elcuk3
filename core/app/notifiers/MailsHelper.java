@@ -53,7 +53,7 @@ public class MailsHelper {
 
                 order.emailed(bit, c);
                 // 如果发送成功则将 emailed 标志位的第一位致 'f' 标识已经发送成功, 并将标志位的改变同步到数据库.
-                conn = DB.datasource.getConnection();
+                conn = DB.datasource.getConnection(); // 通过连接池新获取的数据库链接, 所以要记得释放
                 if(conn.createStatement() // 因为在 Play! 中, 使用了新线程, 并且使用了 JPA 所以需要通过 datasource 来获取数据库操作链接(无事务)
                         .executeUpdate("UPDATE Orderr SET emailed=" + order.emailed + " WHERE orderId='" + order.orderId + "'") == 1)
                     Logger.info("Order[" + order.orderId + "] email send success!");

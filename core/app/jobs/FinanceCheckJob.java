@@ -24,7 +24,7 @@ public class FinanceCheckJob extends Job {
             File file = acc.briefFlatFinance();
             List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc);
             SaleFee.clearOldSaleFee(fees);
-            for(SaleFee fe : fees) fe.save();
+            SaleFee.batchSaveWithJDBC(fees);
         }
     }
 }

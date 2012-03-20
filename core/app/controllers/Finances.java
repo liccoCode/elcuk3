@@ -36,13 +36,13 @@ public class Finances extends Controller {
         try {
             List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + name + ".txt"), Account.<Account>findById(1l));
             SaleFee.clearOldSaleFee(fees);
-            for(SaleFee fee : fees) fee.save();
+            SaleFee.batchSaveWithJDBC(fees);
             renderText("Saved: " + fees.size() + " fees");
         } catch(Exception e) {
-            PrintWriter pw = new PrintWriter(new StringWriter());
-            e.printStackTrace(pw);
-            Logger.error(pw.toString());
-            renderText(Webs.E(e) + "\r\n<br/><br/>" + pw.toString());
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            Logger.error(sw.toString());
+            renderText(Webs.E(e) + "\r\n<br/><br/>" + sw.toString());
         }
     }
 

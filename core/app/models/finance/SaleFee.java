@@ -1,5 +1,6 @@
 package models.finance;
 
+import exception.DBException;
 import helper.Currency;
 import helper.Webs;
 import models.market.Account;
@@ -11,11 +12,13 @@ import org.hibernate.annotations.GenericGenerator;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
+import play.db.DB;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.util.*;
 
 /**
@@ -307,6 +310,37 @@ public class SaleFee extends GenericModel {
         return fees;
     }
 
+    /**
+     * 由于这个数据量比较大, 所以提供一个批处理保存.
+     *
+     * @param fees
+     */
+    public static void batchSaveWithJDBC(List<SaleFee> fees) {
+        try {
+            PreparedStatement ps = DB.getConnection().prepareStatement(
+                    "INSERT INTO SaleFee(id, cost, currency, `date`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            for(SaleFee f : fees) {
+                int i = 1;
+                ps.setString(i++, UUID.randomUUID().toString());
+                ps.setFloat(i++, f.cost);
+                ps.setString(i++, f.currency.toString());
+                ps.setDate(i++, new java.sql.Date(f.date.getTime()));
+                ps.setString(i++, f.market.toString());
+                ps.setString(i++, f.memo);
+                ps.setString(i++, f.orderId);
+                ps.setInt(i++, f.qty);
+                ps.setFloat(i++, f.usdCost);
+                ps.setString(i++, f.account.id + "");
+                ps.setString(i++, f.order == null ? null : f.order.orderId);
+                ps.setString(i++, f.type == null ? null : f.type.name);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch(Exception e) {
+            throw new DBException(e);
+        }
+    }
 
     @Override
     public String toString() {
