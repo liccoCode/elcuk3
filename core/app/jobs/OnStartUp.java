@@ -1,7 +1,9 @@
 package jobs;
 
+import helper.Currency;
 import helper.HTTP;
 import models.User;
+import models.finance.FeeType;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
@@ -22,6 +24,15 @@ public class OnStartUp extends Job {
             Fixtures.delete(User.class);
             Fixtures.loadModels("users.yml");
         }
+
+        long feeTypes = FeeType.count();
+        if(feeTypes == 0) {
+            Fixtures.delete(FeeType.class);
+            Fixtures.loadModels("feetypes.yml");
+        }
+
+
         HTTP.init();
+        Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
     }
 }

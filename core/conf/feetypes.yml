@@ -1,0 +1,104 @@
+finance.FeeType(amazon):
+  name: 'Amazon'
+  memo: '与 FBA 相关的费用'
+
+finance.FeeType(fbaperorderfulfilmentfee):
+  name: 'fbaperorderfulfilmentfee'
+  memo: 'FBA 为每一个订单收取的处理费用'
+  parent: amazon
+
+finance.FeeType(fbaperunitfulfilmentfee):
+  name: 'fbaperunitfulfilmentfee'
+  memo: 'FBA 为每一个订单中的单项产品收取的服务费用'
+  parent: amazon
+
+finance.FeeType(fbaweightbasedfee):
+  name: 'fbaweightbasedfee'
+  memo: 'FBA 根据重量收取的服务费用'
+  parent: amazon
+
+finance.FeeType(shippingchargeback):
+  name: 'shippingchargeback'
+  memo: '???'
+  parent: amazon
+
+finance.FeeType(shippingholdback):
+  name: 'shippingholdback'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(fbastoragefee):
+  name: 'fbastoragefee'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(subscription):
+  name: 'subscription'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(mdotcomrevenuecorrection):
+  name: 'mdotcomrevenuecorrection'
+  memo: '也不知道这个是什么费用, 但属于退费. 仅有的一次退了 742.76 GBP'
+  parent: amazon
+
+finance.FeeType(goodwill):
+  name: 'goodwill'
+  memo: '也不知道这个是什么费用...'
+  parent: amazon
+
+finance.FeeType(shipping):
+  name: 'shipping'
+  memo: '运输费用'
+  parent: amazon
+
+finance.FeeType(commission):
+  name: 'commission'
+  memo: 'Amazon 市场收取的提成费用'
+  parent: amazon
+
+finance.FeeType(promorebates):
+  name: 'promorebates'
+  memo: '促销费用??'
+  parent: amazon
+
+finance.FeeType(cross-borderfulfilmentfee):
+  name: 'cross-borderfulfilmentfee'
+  memo: 'Amazon Europe 特有的, 夸市场时 FBA 收取的费用'
+  parent: amazon
+
+finance.FeeType(refundcommission):
+  name: 'refundcommission'
+  memo: '退还的 Amazon 市场提成, 主要出现在客户取消订单'
+  parent: amazon
+
+finance.FeeType(giftwrapchargeback):
+  name: 'giftwrapchargeback'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(giftwrap):
+  name: 'giftwrap'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(fbatransportationfee):
+  name: 'fbatransportationfee'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(refundreimbursal):
+  name: 'refundreimbursal'
+  memo: ''
+  parent: amazon
+
+finance.FeeType(balanceadjustment):
+  name: 'balanceadjustment'
+  memo: '费用调整'
+  parent: amazon
+
+
+finance.FeeType(productcharges):
+  name: 'productcharges'
+  memo: '就是 Principal 费用, 即商品销售的价格'
+

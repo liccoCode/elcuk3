@@ -1,0 +1,10 @@
+#{extends 'main.html'/}
+#{set title:'Finances'/}
+#{set 'moreScripts'}
+#{/set}
+<div>
+    <form action="@{Finances.upload()}" method="post" enctype="multipart/form-data">
+        <input type="file" name="f">
+        <input type="submit" value="OK">
+    </form>
+</div>

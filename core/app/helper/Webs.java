@@ -1,5 +1,6 @@
 package helper;
 
+import models.market.Account;
 import models.market.Listing;
 import models.market.Selling;
 import org.apache.commons.mail.EmailException;
@@ -8,6 +9,8 @@ import play.Logger;
 import play.Play;
 import play.libs.Mail;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.concurrent.Future;
 
 /**
@@ -19,6 +22,9 @@ import java.util.concurrent.Future;
 public class Webs {
 
     public static final String SPLIT = "|-|";
+    public static final NumberFormat nf_de = NumberFormat.getNumberInstance(Locale.GERMAN);
+    public static final NumberFormat nf_uk = NumberFormat.getCurrencyInstance(Locale.UK);
+    public static final NumberFormat nf_us = NumberFormat.getCurrencyInstance(Locale.US);
 
     /**
      * <pre>
@@ -108,4 +114,26 @@ public class Webs {
         }
         return Mail.send(email);
     }
+
+    public static Float amazonPrice(Account.M market, String priceStr) {
+        try {
+            switch(market) {
+                case AMAZON_US:
+                    return nf_us.parse(priceStr).floatValue();
+                case AMAZON_UK:
+                    return nf_uk.parse(priceStr).floatValue();
+                case AMAZON_DE:
+                case AMAZON_FR:
+                case AMAZON_ES:
+                case AMAZON_IT:
+                    return nf_de.parse(priceStr).floatValue();
+                default:
+                    Logger.warn("Not Support Market." + market);
+            }
+        } catch(Exception e) {
+            Logger.warn("AmazonPrice parse error.(" + market + ") [" + e.getMessage() + "]");
+        }
+        return -0.1f;
+    }
+
 }

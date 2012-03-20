@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.Currency;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
@@ -28,7 +29,9 @@ public class FeedbackCrawlJob extends Job {
      */
     @Override
     public void doJob() {
-        List<Account> accs = Account.all().fetch();
+        Currency.updateCRY();// 附带在 FeedbackCrawlJob 的周期更新一次 Currency.
+
+        List<Account> accs = Account.find("closeable=?", false).fetch();
         for(Account acc : accs) {
             switch(acc.type) {
                 case AMAZON_DE:

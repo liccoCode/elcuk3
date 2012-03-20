@@ -75,12 +75,6 @@ public class Orderr extends GenericModel {
     public List<OrderItem> items;
 
     /**
-     * 此订单关联的费用, 如果订单删除, 费用也删除.
-     */
-    @OneToMany(cascade = CascadeType.ALL)
-    public List<SaleFee> saleFees;
-
-    /**
      * 订单所属的市场
      */
     @Enumerated(EnumType.STRING)

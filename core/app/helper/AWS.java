@@ -36,7 +36,7 @@ public class AWS {
     /**
      * 年/月/日/文件名
      */
-    public static final String REPORT_BASE_PATH = System.getProperty("user.home") + "/elcuk2-data/%s/%s/%s/%s";
+    public static final String REPORT_BASE_PATH = Constant.E_DATE + "/%s/%s/%s/%s";
 
     public static void requestReport_step1(JobRequest job) {
         if(job.state != JobRequest.S.NEW) {

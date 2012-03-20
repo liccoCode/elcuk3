@@ -12,6 +12,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -170,8 +171,24 @@ public class Account extends Model {
                 case AMAZON_ES:
                 case AMAZON_FR:
                 case AMAZON_IT:
-                    return "https://sellercentral." + this.toString() + "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" + marketplaceID;
                 case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" + marketplaceID;
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+        public String flatFinance() {
+           //https://sellercentral.amazon.co.uk/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=";
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();
@@ -344,6 +361,11 @@ public class Account extends Model {
         }
     }
 
+    /**
+     * 抓取 Account 对应网站的 FeedBack
+     * @param page
+     * @return
+     */
     public List<Feedback> fetchFeedback(int page) {
         HttpGet feedback = null;
         switch(this.type) {
@@ -363,6 +385,24 @@ public class Account extends Model {
                 Logger.warn("Not support fetch [" + this.type + "] Feedback.");
         }
         return new ArrayList<Feedback>();
+    }
+
+
+    /**
+     * 下载 7 天的 Flat Finance
+     * @return
+     */
+    public File briefFlatFinance() {
+        try {
+            String body = HTTP.get(new HttpGet(this.type.flatFinance()));
+            DateTime dt = DateTime.now();
+            File f = new File(String.format("%s/%s/%s.txt", Constant.E_FINANCE, this.type, dt.toString("yyyy.MM.dd")));
+            FileUtils.writeStringToFile(f, body);
+            return f;
+        } catch(IOException e) {
+            Logger.warn(e.getClass().getSimpleName() + "|" + e.getMessage());
+        }
+        return null;
     }
 
     @Override

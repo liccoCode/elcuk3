@@ -22,6 +22,18 @@ import java.util.Date;
  */
 public class OrderTest extends UnitTest {
 
+    @Test
+    public void testFindOrderWithHibernateFirstCache() {
+        Orderr o1 = Orderr.findById("026-0029259-0221158");
+        Orderr o2 = Orderr.findById("026-0029259-0221158");
+        System.out.println("User FindById Find: " + (o1 == o2) + "||o1:" + o1.hashCode() + "....o2:" + o2.hashCode());
+
+        Orderr o3 = Orderr.find("orderId", "026-0029259-0221158").first();
+        Orderr o4 = Orderr.find("orderId", "026-0029259-0221158").first();
+        System.out.println("User Find(orderId) Find: " + (o3 == o4) + "||o3:" + o3.hashCode() + "....o4:" + o4.hashCode());
+
+    }
+
     //    @Test
     public void saveOrder() {
         Orderr order = new Orderr();
@@ -60,7 +72,7 @@ public class OrderTest extends UnitTest {
         System.out.println(sw.toString());
     }
 
-    @Test
+//    @Test
     public void testEmailed() {
         Orderr or2 = Orderr.findById("302-0924220-3736363");
         or2.emailed(1, '0');
