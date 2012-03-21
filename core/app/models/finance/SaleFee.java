@@ -145,7 +145,6 @@ public class SaleFee extends GenericModel {
                     fee.orderId = orderId;
                     fee.account = acc;
                     fee.market = market;
-                    fee.date = DateTime.parse(params[0], DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
 
                     FeeType type = cachedFeeType(typeStr, cachedFeeType);
 
@@ -163,7 +162,6 @@ public class SaleFee extends GenericModel {
 
                     if(StringUtils.isBlank(orderId)) {
                         // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
-                        //TODO 这里需要考虑的一点是是不是有很多的
                         fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
                     } else {
                         fee.orderId = orderId;
@@ -177,6 +175,8 @@ public class SaleFee extends GenericModel {
                     float cost = 0;
                     String priceStr = params[6];
 
+                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的
+                    fee.date = DateTime.parse(params[0], DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
                     switch(market) {
                         case AMAZON_UK:
                             cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());
@@ -256,7 +256,6 @@ public class SaleFee extends GenericModel {
 
                 if(StringUtils.isBlank(orderId)) {
                     // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
-                    //TODO 这里需要考虑的一点是是不是有很多的
                     fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
                 } else {
                     fee.orderId = orderId;
@@ -286,8 +285,8 @@ public class SaleFee extends GenericModel {
                     case AMAZON_FR:
                     case AMAZON_ES:
                     case AMAZON_IT:
-                        //TODO 需要等到有这些国家的 Report 以后才知道是什么样子的
-                        fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                        //TODO  ES,IT 没有上, 所以没有 Report 可看, 暂时与 DE, FR 一样的解析
+                        fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
                         cost = Webs.amazonPriceNumber(market, priceStr);
                         usdCost = Currency.EUR.toUSD(cost);
                         fee.currency = Currency.EUR;
