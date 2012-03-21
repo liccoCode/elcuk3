@@ -77,7 +77,7 @@ public class OrderMailCheck extends Job {
 
         int notEasyAcc = 0;
         int below3 = 0;
-        int notUK = 0;
+        int noMarket = 0;
         int noEmail = 0;
         for(Orderr ord : needReview) {
             checked++;
@@ -123,12 +123,12 @@ public class OrderMailCheck extends Job {
                         Thread.sleep(500);
                         break;
                     default:
-                        notUK++;
+                        noMarket++;
                         Logger.info("Uncatched Region..." + ord.market);
                 }
             }
         }
-        Logger.info(String.format("Send(%s uk| %s de), [NotEasyAcc(%s), Below3(%s), NotUK(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
-                sendUk, sendDe, notEasyAcc, below3, notUK, noEmail, mailed, checked, needReview.size()));
+        Logger.info(String.format("Send(%s uk| %s de), [NotEasyAcc(%s), Below3(%s), NoMarket(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
+                sendUk, sendDe, notEasyAcc, below3, noMarket, noEmail, mailed, checked, needReview.size()));
     }
 }
