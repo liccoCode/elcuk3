@@ -1,6 +1,7 @@
 package notifiers;
 
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.DB;
 import play.utils.FastRuntimeException;
@@ -73,5 +74,13 @@ public class MailsHelper {
                 }
             }
         }
+    }
+
+    public static boolean check(Orderr order) {
+        if(StringUtils.isBlank(order.email)) {
+            Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
+            return false;
+        }
+        return true;
     }
 }

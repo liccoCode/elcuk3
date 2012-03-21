@@ -71,7 +71,9 @@ public class OrderMailCheck extends Job {
 
         int mailed = 0;
         int checked = 0;
-        int send = 0;
+
+        int sendUk = 0;
+        int sendDe = 0;
 
         int notEasyAcc = 0;
         int below3 = 0;
@@ -108,15 +110,17 @@ public class OrderMailCheck extends Job {
                 mailed++;
                 Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             } else {
-                if(send >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
+                if((sendUk + sendDe) >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
                 switch(ord.market) {
                     case AMAZON_UK:
-                        send++;
+                        sendUk++;
                         Mails.amazonUK_REVIEW_MAIL(ord);
                         Thread.sleep(500);//每封邮件不能发送那么快
                         break;
                     case AMAZON_DE:
-                        notUK++;
+                        sendDe++;
+                        Mails.amazonDE_REVIEW_MAIL(ord);
+                        Thread.sleep(500);
                         break;
                     default:
                         notUK++;
@@ -124,7 +128,7 @@ public class OrderMailCheck extends Job {
                 }
             }
         }
-        Logger.info(String.format("Send(%s), [NotEasyAcc(%s), Below3(%s), NotUK(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
-                send, notEasyAcc, below3, notUK, noEmail, mailed, checked, needReview.size()));
+        Logger.info(String.format("Send(%s uk| %s de), [NotEasyAcc(%s), Below3(%s), NotUK(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
+                sendUk, sendDe, notEasyAcc, below3, notUK, noEmail, mailed, checked, needReview.size()));
     }
 }

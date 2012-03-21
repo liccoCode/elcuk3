@@ -79,11 +79,17 @@ public class Procures extends Controller {
         render(pitms, pif);
     }
 
-    public static void ps(Selling s) {
+    /**
+     * 负责 Selling 的 Ps 修改与 Invisible 状态
+     *
+     * @param s
+     * @param cat
+     */
+    public static void ps(Selling s, String cat) {
         if(!s.isPersistent()) renderJSON(new Error("SellingId", "The Selling is not Persistent.", new String[]{}));
         try {
             s.save();
-            Cache.delete(String.format(Caches.WARN_ITEM_SELLING, s.market.name().toLowerCase(), s.listing.product.category.categoryId));
+            Cache.delete(String.format(Caches.WARN_ITEM_SELLING, s.market.name().toLowerCase(), cat));
         } catch(Exception e) {
             renderJSON(new Error("Exception", e.getClass().getSimpleName() + ":" + e.getMessage(), new String[]{}));
         }

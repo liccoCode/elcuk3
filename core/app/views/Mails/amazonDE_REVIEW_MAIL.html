@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${title}</title>
+</head>
+<body>
+Guten Tag ${order.buyer == null ? 'Kunden' : order.buyer}:
+<br/><br/>
+Es war eine Zeit, da Sie die<br/>
+#{list items:order.items, as:'oi'}
+<a target="_blank" title="${oi.selling.title}" href="${helper.Webs.link(oi.selling)}">${oi.selling.title.size() > 75 ? oi.selling.title.substring(0, 74) + "..." : oi.selling.title}</a><br/>
+[a]${helper.Webs.link(oi.selling)}[/a]
+<br/>
+<br/>
+#{/list}
+gekauft von EasyAcc auf Amazon.de. Wir wollen ein zu prüfen und sehen, wie sie tut.
+<br/><br/>
+Wenn Sie aus irgendeinem Grund nicht vollständig mit unseren Produkten und Leistungen zufrieden sind, bitte einfach
+getroffen Antwort und schreiben Sie uns eine E-Mail, werden wir Ihre Angelegenheit sehr ernst nehmen und unser Bestes
+tun, um das Problem zu lösen. Ihre Kommentare helfen uns, unsere Produkte und Dienstleistungen zu verbessern.
+<br/><br/>
+Falls unterdessen alles in Ordnung ist, laden wir Sie dazu ein, unter folgendem Link eine Kundenrezension zu schreiben:
+<br/>
+#{list items:order.items, as:'oi'}
+<a target="_blank" href="${helper.Webs.reviewLink(oi.selling)}">${helper.Webs.reviewLink(oi.selling)}</a><br/>
+#{/list}
+<br/><br/>
+Danke für Ihre Unterstützung unserer Firma.
+<br/><br/>
+EasyAcc Team Kundenzufriedenheit
+</body>
+</html>

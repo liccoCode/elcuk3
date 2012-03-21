@@ -55,33 +55,50 @@ public class Mails extends Mailer {
         new Thread(new MailsHelper.MAIL_CALLBACK_1(future, order, 1, 'f')).start();
     }
 
+
+    // ------------------- Review 邮件 --------------------------------
+
     /**
      * 给 Amazon UK 的卖家发送邀请留 Review 的邮件;
      *
      * @param order
      */
-    public static void amazonUK_REVIEW_MAIL(final Orderr order) {
-        if(StringUtils.isBlank(order.email)) {
-            Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
+    public static void amazonUK_REVIEW_MAIL(Orderr order) {
+        reviewMailBase(order);
+    }
+
+    public static void amazonDE_REVIEW_MAIL(Orderr order) {
+        reviewMailBase(order);
+    }
+
+    /**
+     * 发送 Review 邮件的基本方法, 其他的仅仅是套用一个方法对应一个模板
+     *
+     * @param order
+     */
+    private static void reviewMailBase(Orderr order) {
+        if(!MailsHelper.check(order)) return;
+
+        String title = order.reviewMailTitle();
+        if(StringUtils.isBlank(title)) {
+            Logger.error("!!!! Order[" + order.orderId + "] Mail can not be send !!!!");
             return;
         }
-        //Re: Order information from Amazon seller EasyAcc (Order: 202-2288972-1381905)
-        setSubject("Thanks for purchasing EasyAcc Product on Amazon (Order: " + order.orderId + ")");
+        setSubject(title);
         mailBase();
-        if(Play.mode.isProd()) {
-            addRecipient(order.email);
-        } else {
-            addRecipient("wppurking@gmail.com");
-        }
+        if(Play.mode.isProd()) addRecipient(order.email);
+        else addRecipient("wppurking@gmail.com");
 
         try {
-            final Future<Boolean> future = send(order);
+            final Future<Boolean> future = send(order, title);
 
             new Thread(new MailsHelper.MAIL_CALLBACK_1(future, order, 2, 'f')).start();
         } catch(MailException e) {
             Logger.warn("Order[" + order.orderId + "] Send Error! " + e.getMessage());
         }
     }
+
+    // -----------------------------------------------------------------
 
     /**
      * 系统内部使用, 当抓取到的 Feedback 为

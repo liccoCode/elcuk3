@@ -819,6 +819,45 @@ public class Orderr extends GenericModel {
         return mailedHex.charAt(bit);
     }
 
+    /**
+     * Review 邮件的 Title 生成
+     *
+     * @return
+     */
+    public String reviewMailTitle() {
+        /**
+         *  1. 首先寻找 Saner 或 Fencer, 找到第一个出现的产品即选择
+         *  2. 再使用默认的 Title
+         *
+         *  ps: 所有的 Title 计算出来了直接返回, 不进行参数组装什么的.
+         */
+        switch(this.market) {
+            case AMAZON_UK:
+                for(OrderItem oi : this.items) {
+                    String ti = oi.selling.listing.title.toLowerCase();
+                    if(StringUtils.startsWith(ti, "saner")) {
+                        return "Thanks for purchasing Saner Products from EasyAcc on Amazon.co.uk (Order: " + this.orderId + ")";
+                    } else if(StringUtils.startsWith(ti, "fencer")) {
+                        return "Thanks for purchasing Fencer Products from EasyAcc on Amazon.co.uk (Order: " + this.orderId + ")";
+                    }
+                }
+                return "Thanks for purchasing EasyAcc Product on Amazon.co.uk (Order: " + this.orderId + ")";
+            case AMAZON_DE:
+                for(OrderItem oi : this.items) {
+                    String ti = oi.selling.listing.title.toLowerCase();
+                    if(StringUtils.startsWith(ti, "saner")) {
+                        return "Vielen Dank für den Kauf SANER Produkte aus EasyAcc auf Amazon.de (Bestellung: " + this.orderId + ")";
+                    } else if(StringUtils.startsWith(ti, "fencer")) {
+                        return "Vielen Dank für den Kauf Fencer Produkte aus EasyAcc auf Amazon.de (Bestellung: " + this.orderId + ")";
+                    }
+                }
+                return "Vielen Dank für den Kauf EasyAcc Produkte auf Amazon.de (Bestellung: " + this.orderId + ")";
+            default:
+                Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
+                return "";
+        }
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
