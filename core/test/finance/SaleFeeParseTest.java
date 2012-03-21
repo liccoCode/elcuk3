@@ -24,7 +24,7 @@ public class SaleFeeParseTest extends UnitTest {
     @Test
     public void testParse() {
         Account acc = Account.findById(1l);
-        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Volumes/wyatt/Downloads/report (1).txt"), acc);
+        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Volumes/wyatt/Downloads/report (1).txt"), acc, Account.M.AMAZON_UK);
         for(SaleFee f : fees) {
             f.save();
         }
@@ -48,7 +48,7 @@ public class SaleFeeParseTest extends UnitTest {
             if(NumberUtils.toInt(name.split("\\.")[0].split("f")[1]) < 5) continue;
 
             System.out.println("----------------" + f1.getAbsolutePath() + "/" + name + "-------------------");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(f1, acc);
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(f1, acc, Account.M.AMAZON_UK);
             for(SaleFee f : fees) {
                 f.save();
             }

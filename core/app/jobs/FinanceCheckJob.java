@@ -21,10 +21,13 @@ public class FinanceCheckJob extends Job {
     public void doJob() {
         List<Account> accs = Account.find("closeable=?", false).fetch();
         for(Account acc : accs) {
-            File file = acc.briefFlatFinance();
-            List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc);
-            SaleFee.clearOldSaleFee(fees);
-            SaleFee.batchSaveWithJDBC(fees);
+            for(Account.M m : Account.M.values()) {
+                if(m == Account.M.EBAY_UK || m == Account.M.AMAZON_US) continue;
+                File file = acc.briefFlatFinance(m);
+                List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc, m);
+                SaleFee.clearOldSaleFee(fees);
+                SaleFee.batchSaveWithJDBC(fees);
+            }
         }
     }
 }

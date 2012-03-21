@@ -123,7 +123,7 @@ public class SaleFee extends GenericModel {
      * @param acc
      * @return
      */
-    public static List<SaleFee> flagFinanceParse(File file, Account acc) {
+    public static List<SaleFee> flagFinanceParse(File file, Account acc, Account.M market) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
         Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
         Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();
@@ -144,7 +144,7 @@ public class SaleFee extends GenericModel {
                     SaleFee fee = new SaleFee();
                     fee.orderId = orderId;
                     fee.account = acc;
-                    fee.market = acc.type;
+                    fee.market = market;
                     fee.date = DateTime.parse(params[0], DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
 
                     FeeType type = cachedFeeType(typeStr, cachedFeeType);
@@ -177,9 +177,9 @@ public class SaleFee extends GenericModel {
                     float cost = 0;
                     String priceStr = params[6];
 
-                    switch(acc.type) {
+                    switch(market) {
                         case AMAZON_UK:
-                            cost = NumberUtils.toFloat(priceStr.substring(1).trim());
+                            cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());
                             usdCost = Currency.GBP.toUSD(cost);
                             fee.currency = Currency.GBP;
                             break;
@@ -187,7 +187,7 @@ public class SaleFee extends GenericModel {
                         case AMAZON_FR:
                         case AMAZON_ES:
                         case AMAZON_IT:
-                            cost = Webs.amazonPrice(acc.type, priceStr.substring(3).trim());
+                            cost = Webs.amazonPriceNumber(market, priceStr.substring(3).trim());
                             usdCost = Currency.EUR.toUSD(cost);
                             fee.currency = Currency.EUR;
                             break;
@@ -219,7 +219,7 @@ public class SaleFee extends GenericModel {
      * @param acc
      * @return
      */
-    public static List<SaleFee> flat2FinanceParse(File file, Account acc) {
+    public static List<SaleFee> flat2FinanceParse(File file, Account acc, Account.M market) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
         Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
         Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();
@@ -252,7 +252,7 @@ public class SaleFee extends GenericModel {
 
                 SaleFee fee = new SaleFee();
                 fee.account = acc;
-                fee.market = acc.type;
+                fee.market = market;
 
                 if(StringUtils.isBlank(orderId)) {
                     // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
@@ -275,10 +275,10 @@ public class SaleFee extends GenericModel {
 
                 float usdCost = 0;
                 float cost = 0;
-                switch(acc.type) {
+                switch(market) {
                     case AMAZON_UK:
                         fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
-                        cost = NumberUtils.toFloat(priceStr);
+                        cost = Webs.amazonPriceNumber(market, priceStr);
                         usdCost = Currency.GBP.toUSD(cost);
                         fee.currency = Currency.GBP;
                         break;
@@ -288,7 +288,7 @@ public class SaleFee extends GenericModel {
                     case AMAZON_IT:
                         //TODO 需要等到有这些国家的 Report 以后才知道是什么样子的
                         fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
-                        cost = Webs.amazonPrice(acc.type, priceStr);
+                        cost = Webs.amazonPriceNumber(market, priceStr);
                         usdCost = Currency.EUR.toUSD(cost);
                         fee.currency = Currency.EUR;
                         break;

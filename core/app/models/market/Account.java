@@ -395,11 +395,15 @@ public class Account extends Model {
      *
      * @return
      */
-    public File briefFlatFinance() {
+    public File briefFlatFinance(M market) {
         try {
+            this.loginWebSite();
+            this.changeRegion(market);
+            Logger.debug("Downloading File...");
             String body = HTTP.get(new HttpGet(this.type.flatFinance()));
             DateTime dt = DateTime.now();
-            File f = new File(String.format("%s/%s/%s.txt", Constant.E_FINANCE, this.type, dt.toString("yyyy.MM.dd_HH'h'")));
+            File f = new File(String.format("%s/%s/%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM.dd_HH'h'")));
+            Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
             FileUtils.writeStringToFile(f, body);
             return f;
         } catch(IOException e) {

@@ -30,11 +30,11 @@ public class Finances extends Controller {
     /**
      * 用来修复手动更新 Amazon 的定时 Payment 报表
      *
-     * @param name
+     * @param n
      */
-    public static void fix(String name) {
+    public static void fix(String n, String m) {
         try {
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + name + ".txt"), Account.<Account>findById(1l));
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + n + ".txt"), Account.<Account>findById(1l), Account.M.val(m));
             SaleFee.clearOldSaleFee(fees);
             SaleFee.batchSaveWithJDBC(fees);
             renderText("Saved: " + fees.size() + " fees");

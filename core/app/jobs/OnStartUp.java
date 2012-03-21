@@ -4,6 +4,7 @@ import helper.Currency;
 import helper.HTTP;
 import models.User;
 import models.finance.FeeType;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
@@ -34,5 +35,11 @@ public class OnStartUp extends Job {
 
         HTTP.init();
         Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
+
+
+        // 仅仅在 Production 环境下才开启的初始化任务
+        if(Play.mode.isProd()) {
+            new KeepSessionJob().doJob(); // 将系统内的所有账户都登陆
+        }
     }
 }

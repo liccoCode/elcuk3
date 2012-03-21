@@ -22,9 +22,14 @@ import java.util.concurrent.Future;
 public class Webs {
 
     public static final String SPLIT = "|-|";
-    public static final NumberFormat nf_de = NumberFormat.getNumberInstance(Locale.GERMAN);
-    public static final NumberFormat nf_uk = NumberFormat.getCurrencyInstance(Locale.UK);
-    public static final NumberFormat nf_us = NumberFormat.getCurrencyInstance(Locale.US);
+    //这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)
+    public static final NumberFormat NN_DE = NumberFormat.getNumberInstance(Locale.GERMANY);
+    public static final NumberFormat NN_UK = NumberFormat.getNumberInstance(Locale.UK);
+
+    //这种是可以解析  £1,234.23(UK), $1,234.23(US), 1.234,23 €(DE)
+    public static final NumberFormat NC_UK = NumberFormat.getCurrencyInstance(Locale.UK);
+    public static final NumberFormat NC_US = NumberFormat.getCurrencyInstance(Locale.US);
+    public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     /**
      * <pre>
@@ -86,6 +91,7 @@ public class Webs {
 
     /**
      * 根据 Selling 来获取此 Selling 在不同市场上的留 Review 的地址
+     *
      * @param selling
      * @return
      */
@@ -106,6 +112,7 @@ public class Webs {
 
     /**
      * 简单的发送 HTML 的系统邮件
+     *
      * @param subject 邮件标题
      * @param content 邮件内容
      * @return
@@ -127,23 +134,51 @@ public class Webs {
     }
 
     /**
-     * 根据市场来提取文本中的价格.  主要是区分 Locale, 例如 13.22 在 de 为 13,22;
+     * 这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)
+     *
      * @param market
      * @param priceStr
      * @return
      */
-    public static Float amazonPrice(Account.M market, String priceStr) {
+    public static Float amazonPriceNumber(Account.M market, String priceStr) {
         try {
             switch(market) {
                 case AMAZON_US:
-                    return nf_us.parse(priceStr).floatValue();
                 case AMAZON_UK:
-                    return nf_uk.parse(priceStr).floatValue();
+                    return NN_UK.parse(priceStr).floatValue();
                 case AMAZON_DE:
                 case AMAZON_FR:
                 case AMAZON_ES:
                 case AMAZON_IT:
-                    return nf_de.parse(priceStr).floatValue();
+                    return NN_DE.parse(priceStr).floatValue();
+                default:
+                    Logger.warn("Not Support Market." + market);
+            }
+        } catch(Exception e) {
+            Logger.warn("AmazonPrice parse error.(" + market + ") [" + e.getMessage() + "]");
+        }
+        return -0.1f;
+    }
+
+    /**
+     * 这种是可以解析  £1,234.23(UK), $1,234.23(US), 1.234,23 €(DE)
+     *
+     * @param market
+     * @param priceStr
+     * @return
+     */
+    public static Float amazonPriceCurrency(Account.M market, String priceStr) {
+        try {
+            switch(market) {
+                case AMAZON_US:
+                    return NC_US.parse(priceStr).floatValue();
+                case AMAZON_UK:
+                    return NC_UK.parse(priceStr).floatValue();
+                case AMAZON_DE:
+                case AMAZON_FR:
+                case AMAZON_ES:
+                case AMAZON_IT:
+                    return NC_DE.parse(priceStr).floatValue();
                 default:
                     Logger.warn("Not Support Market." + market);
             }
@@ -155,6 +190,7 @@ public class Webs {
 
     /**
      * 简单的获取 Exception 的文本
+     *
      * @return
      */
     public static String E(Exception e) {
