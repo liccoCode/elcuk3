@@ -4,6 +4,7 @@ import models.market.Feedback;
 import models.market.OrderItem;
 import models.market.Orderr;
 import notifiers.Mails;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
@@ -25,7 +26,7 @@ public class OrderMailCheck extends Job {
         /**
          * 1. Check 将需要发送 "货物已经发送了的邮件加载出来进行发送"
          */
-        DateTime dt = DateTime.now();
+        DateTime dt = DateTime.parse(DateTime.now().toString("yyyy-MM-dd")); // 仅仅保留 年月日
         List<Orderr> orders = Orderr.find("state=? AND createDate>=? AND createDate<=?",
                 Orderr.S.SHIPPED,
                 // 只在 20 天内的订单中寻找没有发送 SHIPPED 邮件的
@@ -56,47 +57,74 @@ public class OrderMailCheck extends Job {
                 needReview.size(),
                 dt.plusDays(-46).toString("yyyy-MM-dd"),
                 dt.plusDays(-12).toString("yyyy-MM-dd")));
+        /**
+         * 1. 加载出来所有需要检查的 all
+         * 2. 检查过的邮件 checked 
+         * 3. 成功发送了的邮件 send
+         * 4. 已经发送了的邮件 mailed
+         * 5. 检查了但没有发送的
+         *  a. not EasyAcc
+         *  b. score <= 3
+         *  c. not UK
+         *  d. noEmail
+         */
+
         int mailed = 0;
         int checked = 0;
-        int sended = 0;
+        int send = 0;
+
+        int notEasyAcc = 0;
+        int below3 = 0;
+        int notUK = 0;
+        int noEmail = 0;
         for(Orderr ord : needReview) {
             checked++;
-            // 仅仅发送 EasyAcc 开头的标题的产品的邮件.
+            // check: 仅仅发送 EasyAcc 开头的标题的产品的邮件.
             boolean ctn = true;
-            for(OrderItem oi : ord.items) {
-                if(oi.easyacc()) ctn = false;
-            }
+            for(OrderItem oi : ord.items) if(!oi.easyacc()) ctn = false;
             if(!ctn) {
                 Logger.debug(String.format("Skip %s, because of [Not EasyAcc]", ord.orderId));
+                notEasyAcc++;
                 continue;
             }
 
-            // Orderr 的 feedback <= 3 的不发送
+            // check: Orderr 的 feedback <= 3 的不发送
             Feedback fbk = Feedback.findById(ord.orderId);
             if(fbk != null && fbk.score <= 3) {
                 Logger.debug(String.format("Skip %s, because of [Score below 3]", ord.orderId));
+                below3++;
+                continue;
+            }
+
+            // check: Order 没有 Email
+            if(StringUtils.isBlank(ord.email)) {
+                Logger.warn("Order[" + ord.orderId + "] do not have Email Address!");
+                noEmail++;
                 continue;
             }
 
             char e = ord.emailed(2);
             if(e == 'f' || e == 'F') {
-                sended++;
+                mailed++;
                 Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             } else {
-                if(mailed >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
+                if(send >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
                 switch(ord.market) {
                     case AMAZON_UK:
-                        mailed++;
+                        send++;
                         Mails.amazonUK_REVIEW_MAIL(ord);
                         Thread.sleep(500);//每封邮件不能发送那么快
                         break;
                     case AMAZON_DE:
+                        notUK++;
                         break;
                     default:
+                        notUK++;
                         Logger.info("Uncatched Region..." + ord.market);
                 }
             }
         }
-        Logger.info(String.format("Mailed(%s), Sended(%s),Checked(%s), Total(%s) Orders", mailed, sended, checked, needReview.size()));
+        Logger.info(String.format("Send(%s), [NotEasyAcc(%s), Below3(%s), NotUK(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
+                send, notEasyAcc, below3, notUK, noEmail, mailed, checked, needReview.size()));
     }
 }

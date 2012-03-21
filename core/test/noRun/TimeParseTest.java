@@ -114,4 +114,12 @@ public class TimeParseTest {
         System.out.println(DateTime.parse(String.format("%s-%s-%s", dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth())));
         System.out.println(dt.toString("yyyy.MM.dd_HH'h'"));
     }
+
+    @Test
+    public void testDate() {
+        DateTime d1 = DateTime.now();
+        String format = "yyyy-MM-dd HH:mm:ss";
+        System.out.println(d1.plusDays(-12).toString(format));
+        System.out.println(d1.plusDays(-46).toString(format));
+    }
 }
