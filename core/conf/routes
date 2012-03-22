@@ -9,6 +9,7 @@
 # Home page
 GET     /                                                   Application.index
 GET     /pass                                               Application.pwd
+GET     /cc                                                 Application.cc
 
 # Ignore favicon requests
 GET     /favicon.ico                                        404

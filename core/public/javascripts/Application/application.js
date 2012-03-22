@@ -19,4 +19,11 @@ $(function(){
         }, 'json');
         return false;
     });
+
+    $('#cci').click(function(){
+        $.post('/application/clearCache', {}, function(r){
+            if(r.flag) alert('清理首页缓存成功');
+            else alert('清理失败.')
+        });
+    });
 });

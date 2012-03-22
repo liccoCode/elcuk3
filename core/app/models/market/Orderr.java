@@ -1,7 +1,6 @@
 package models.market;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
-import helper.Caches;
 import helper.Currency;
 import helper.Dates;
 import helper.Patterns;
@@ -14,7 +13,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import play.Logger;
-import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
@@ -272,10 +270,6 @@ public class Orderr extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
-        String cached_key = String.format(Caches.FRONT_ORDER_TABLE, days);
-        Map cached = Cache.get(cached_key, Map.class);
-        if(cached != null && cached.size() > 0) return cached;
-
         Instant it = Instant.now();
         Date pre7Day = Instant.parse(it.minus(Duration.standardDays(days)).toDateTime().toString("yyyy-MM-dd")).toDate();
         List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, it.toDate()).fetch();
@@ -353,8 +347,6 @@ public class Orderr extends GenericModel {
                 }
             }
         }
-        if(odmaps.size() > 0)
-            Cache.add(cached_key, odmaps, "2h");
         return odmaps;
     }
 
