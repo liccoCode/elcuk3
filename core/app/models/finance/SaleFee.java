@@ -320,6 +320,7 @@ public class SaleFee extends GenericModel {
                     "INSERT INTO SaleFee(id, cost, currency, `date`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for(SaleFee f : fees) {
+                saleFeeCheck(f);
                 int i = 1;
                 ps.setString(i++, UUID.randomUUID().toString());
                 ps.setFloat(i++, f.cost);
@@ -339,6 +340,23 @@ public class SaleFee extends GenericModel {
         } catch(Exception e) {
             throw new DBException(e);
         }
+    }
+
+    /**
+     * 对需要保存的 SaleFee 进行检查, 在 batchSaveWithJDBC 执行过程中进行处理
+     */
+    private static void saleFeeCheck(SaleFee f) {
+        try {
+            if(f.type != null && "productcharges".equals(f.type.name) && f.cost <= 0 && f.order != null) {
+                DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "'");
+                Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
+            }
+        } catch(Exception e) {
+            String message = "Order[" + f.orderId + "] state update to REFUNDED failed!";
+            Logger.warn(message);
+            Webs.systemMail("SaleFeeCheck Error!", message + "\r\n<br/><br/>" + Webs.S(e));
+        }
+
     }
 
     @Override

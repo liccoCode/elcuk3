@@ -9,6 +9,8 @@ import play.Logger;
 import play.Play;
 import play.libs.Mail;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.Future;
@@ -195,5 +197,17 @@ public class Webs {
      */
     public static String E(Exception e) {
         return e.getClass().getSimpleName() + "|" + e.getMessage();
+    }
+
+    /**
+     * 直接把 Exception 的堆栈信息全部打印出来
+     *
+     * @param e
+     * @return
+     */
+    public static String S(Exception e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

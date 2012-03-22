@@ -381,9 +381,13 @@ public class Orderr extends GenericModel {
         if(orderr.shipLevel != null) this.shipLevel = orderr.shipLevel;
         if(orderr.shippingAmount != null) this.shippingAmount = orderr.shippingAmount;
         if(orderr.shippingService != null) this.shippingService = orderr.shippingService;
-        if(orderr.state != null) this.state = orderr.state;
         if(orderr.totalAmount != null) this.totalAmount = orderr.totalAmount;
         if(orderr.trackNo != null) this.trackNo = orderr.trackNo;
+        if(orderr.state != null) {
+            // 这几个状态是不可逆的, 如果有其他地方将订单更新成这几个状态, 那么此订单的状态不允许再进行更改!
+            if(orderr.state == S.REFUNDED || orderr.state == S.CANCEL || orderr.state == S.RETURNNEW) return;
+            this.state = orderr.state;
+        }
 
         if(orderr.items != null && orderr.items.size() > 0) {
             // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
