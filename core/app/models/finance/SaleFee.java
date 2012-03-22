@@ -347,8 +347,8 @@ public class SaleFee extends GenericModel {
      */
     private static void saleFeeCheck(SaleFee f) {
         try {
-            if(f.type != null && "productcharges".equals(f.type.name) && f.cost <= 0 && f.order != null) {
-                DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "'");
+            if(f.type != null && "productcharges".equals(f.type.name) && f.cost <= 0 && f.order != null && StringUtils.isNotBlank(f.orderId)) {
+                DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
                 Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
             }
         } catch(Exception e) {
