@@ -33,6 +33,11 @@ public class Orders extends Controller {
         render(orders, count, p, s, pi);
     }
 
+    public static void get(String oid, String m) {
+        Orderr ord = Orderr.findById(oid);
+        render(ord, m);
+    }
+
     public static void ini(String m) {
         List<File> files = new ArrayList<File>(FileUtils.listFiles(new File(System.getProperty("user.home") + "/elcuk-data/2012/back/" + m), new String[]{"xml", "csv"}, true));
         Account acc = Account.findById(1l);

@@ -20,6 +20,13 @@ $(function(){
         });
     });
 
+    // Guide to Google Translate Comment
+    $('a[trans]').click(function(){
+        var o = $(this);
+        window.open('http://translate.google.com/?text=' + escape(o.text()), '_blank');
+        return false;
+    });
+
     // Reslove Feedback
     $('a[rsv]').click(function(){
         var o = $(this);

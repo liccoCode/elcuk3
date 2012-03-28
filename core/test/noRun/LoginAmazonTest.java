@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -32,5 +34,14 @@ public class LoginAmazonTest {
             if(f.score >= 3) continue;
             System.out.println(f);
         }
+    }
+
+    @Test
+    public void testURLEncode() throws UnsupportedEncodingException {
+        //http://translate.google.com/?text=
+        String ss = "Schutzfolie passt nicht einmal ann&auml;hernd auf ein Sensation XE; Tiete kratzer in der Plastikschale, die das Handy halten soll; Klebestelle zw. Plastik und Kunstleder (oder was das sein sollte) unvollst&auml;ndig was bedeutet, dass wenn ich das Teil benutzt h&auml;tte, sich das &quot;Ledercase&quot; nach wenigen Stunden vom Handy verabschiedet h&auml;tte... zur&uuml;ck an Verk&auml;ufer.";
+        System.out.println(URLEncoder.encode(ss));
+        System.out.println("==================");
+        System.out.println(URLEncoder.encode(ss, "UTF-8"));
     }
 }

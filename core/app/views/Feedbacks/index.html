@@ -4,62 +4,94 @@
     #{script 'feedbacks/index.js'/}
 #{/set}
 <div class="row">
-    <div class="well span6" style="margin-left:0">
+    <div class="span5">
     #{select id:'h_market', name:'h_market', class:'span2', items:models.market.Account.M.values()}#{/select}
     #{select id:'h_acc', name:'h_acc', class:'span2', items:accs, labelProperty:'username'}#{/select}
-        <a href="#" class="btn" id="s_feedback_btn">手动抓取 Feedback</a>
+        <a href="#" class="btn btn-mini" id="s_feedback_btn">手动抓取 Feedback</a>
+    </div>
+    <div class="span6">
+        <table class="table">
+            <tr>
+                <th>Account</th>
+                <th>Market</th>
+                <th>Day7(HANDLING/ALL)</th>
+                <th>Day30(HANDLING/ALL)</th>
+                <th>All(HANDLING/ALL)</th>
+            </tr>
+        #{list items:accs, as:'ac'}
+            #{list items:models.market.Account.M.values(), as:'m'}
+                <tr>
+                    <td>${ac.uniqueName}</td>
+                    <td>${m.name()}</td>
+                    <td>
+                        #{a @Feedbacks.list(models.market.Feedback.S.HANDLING, -7, m.name())}${accFeds.get(ac.id + "d7h" + m.name())}#{/a}
+                        / ${accFeds.get(ac.id + "d7" + m.name())}
+                    </td>
+                    <td>
+                        #{a @Feedbacks.list(models.market.Feedback.S.HANDLING, -30, m.name())}${accFeds.get(ac.id + "d30h" + m.name())}#{/a}
+                        / ${accFeds.get(ac.id + "d30" + m.name())}
+                    </td>
+                    <td>
+                        #{a @Feedbacks.list(models.market.Feedback.S.HANDLING, 0, m.name())}${accFeds.get(ac.id + "dallh" + m.name())}#{/a}
+                        / ${accFeds.get(ac.id + "dall" + m.name())}
+                    </td>
+                </tr>
+            #{/list}
+        #{/list}
+        </table>
     </div>
 </div>
-<div class="row">&nbsp;</div>
 <div class="row">
-
-    <table class="table table-bordered">
-        <tr style="background:#F1F4F8">
-            <th>OrderId</th>
-            <th>CreateDate</th>
-            <th>Market</th>
-            <th>Account</th>
-            <th>State</th>
-            <th>Email</th>
-            <th>Score</th>
-            <th>Comment</th>
-            <th>Memo</th>
-            <th>&nbsp;</th>
-        </tr>
-    #{list items:feds, as:'f'}
-        #{set st:f.state == models.market.Feedback.S.HANDLING/}
-        #{set sc:f.score <= 3/}
-        <tr style="background: ${(st && sc) == true ? '#FFEACD' : '#F4F4F4'}">
-            <td>${f.orderId}</td>
-            <td>${f.createDate.format('yyyy-MM-dd')}</td>
-            <td>${f.market}</td>
-            <td><a href="#" rel="tooltip" data-original-title="${f.account.uniqueName}">${f.account.username}</a></td>
-            <td>
-                <span style="color:${st ? 'red' : 'green'}">${f.state}</span>
-            </td>
-            <td>${f.email}</td>
-            <!-- 判断颜色 -->
-            <td>
-                <span style="color:${sc ? 'red' : 'green'}">${f.score}</span>
-            </td>
-            <td>${f.comment}</td>
-            <td>${f.memo}</td>
-            <td>
-                <div class="btn-group">
-                    <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">Act
-                        <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a rsv fid="${f.orderId}" href="#">Reslove</a></li>
-                    </ul>
-                </div>
-            </td>
-        </tr>
-    #{/list}
-        <tr class="tb_footer">
-            <td colspan="10">
-            #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/feedbacks/index'/}
-            </td>
-        </tr>
-    </table>
+    <div class="">
+        <table class="table table-bordered">
+            <tr style="background:#F1F4F8">
+                <th>OrderId</th>
+                <th>SKU</th>
+                <th>CreateDate</th>
+                <th>Market</th>
+                <th>Account</th>
+                <th>State</th>
+                <th>Score</th>
+                <th>Comment</th>
+                <th>Memo</th>
+                <th>&nbsp;</th>
+            </tr>
+        #{list items:feds, as:'f'}
+            #{set st:f.state == models.market.Feedback.S.HANDLING/}
+            #{set sc:f.score <= 3/}
+            <tr style="background: ${(st && sc) == true ? '#FFEACD' : '#F4F4F4'}">
+                <td>#{a @Orders.get(f.orderId,f.comment)}${f.orderId}#{/a}</td>
+                <td>${models.market.Orderr.itemSkus(f.orderr)}</td>
+                <td class="span1">${f.createDate.format('yyyy-MM-dd')}</td>
+                <td><a href="#" rel="tooltip" data-original-title="${f.email}">${f.market}</a></td>
+                <td><a href="#" rel="tooltip" data-original-title="${f.account.uniqueName}">${f.account.username}</a>
+                </td>
+                <td class="span1">
+                    <span style="color:${st ? 'red' : 'green'}">${f.state}</span>
+                </td>
+                <!-- 判断颜色 -->
+                <td class="span1">
+                    <span style="color:${sc ? 'red' : 'green'}">${f.score}</span>
+                </td>
+                <td class="span6"><a href="#" trans>${f.comment}</a></td>
+                <td class="span3">${f.memo}</td>
+                <td>
+                    <div class="btn-group">
+                        <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">Act
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a rsv fid="${f.orderId}" href="#">Reslove</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        #{/list}
+            <tr class="tb_footer">
+                <td colspan="10">
+                #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/feedbacks/index'/}
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 

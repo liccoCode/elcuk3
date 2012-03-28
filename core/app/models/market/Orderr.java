@@ -85,7 +85,7 @@ public class Orderr extends GenericModel {
     public Account account;
 
     @OneToMany(mappedBy = "order")
-    @OrderBy("cost DESC")
+    @OrderBy("date ASC,cost DESC")
     public List<SaleFee> fees;
     //-------------- Basic ----------------
 
@@ -765,6 +765,20 @@ public class Orderr extends GenericModel {
         } else {
             return S.PENDING;
         }
+    }
+
+    /**
+     * 此订单所关联的所有 OrderItem 的 SKU
+     *
+     * @return
+     */
+    public static String itemSkus(Orderr ord) {
+        StringBuilder sbd = new StringBuilder();
+        if(ord == null) return sbd.toString();
+        for(OrderItem itm : ord.items) {
+            sbd.append(itm.product.sku).append(" ");
+        }
+        return sbd.toString();
     }
 
     public void setPostalCode(String postalCode1) {

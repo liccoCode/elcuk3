@@ -1,0 +1,153 @@
+#{extends 'main.html'/}
+#{set title:'Orders'/}
+#{set 'moreScripts'}
+#{/set}
+
+#{if ord == null}
+读取的 Order 不存在!
+#{/if}
+#{else }
+<div class="row">
+    <div class="span12"><span class="label large label-success">Order Basic</span></div>
+    <div class="span12">
+        <table class="table table-bordered">
+            <tr>
+                <td class="l_label">OrderId</td>
+                <td class="l_val">${ord.orderId}</td>
+                <td class="l_label">Address</td>
+                <td class="l_val">${ord.address}</td>
+                <td class="l_label">Address1</td>
+                <td class="l_val">${ord.address1}</td>
+                <td class="l_label">Reciver</td>
+                <td class="l_val">${ord.reciver}</td>
+            </tr>
+            <tr>
+                <td class="l_label">ArriveDate</td>
+                <td class="l_val">${ord.arriveDate}</td>
+                <td class="l_label">Buyer</td>
+                <td class="l_val">${ord.buyer}</td>
+                <td class="l_label">City</td>
+                <td class="l_val">${ord.city}</td>
+                <td class="l_label">Country</td>
+                <td class="l_val">${ord.country}</td>
+            </tr>
+            <tr>
+                <td class="l_label">CreateDate</td>
+                <td class="l_val">${ord.createDate}</td>
+                <td class="l_label">Email</td>
+                <td class="l_val">${ord.email}</td>
+                <td class="l_label">Market</td>
+                <td class="l_val">${ord.market.toString()}</td>
+                <td class="l_label">PaymentDate</td>
+                <td class="l_val">${ord.paymentDate}</td>
+            </tr>
+            <tr>
+                <td class="l_label">Phone</td>
+                <td class="l_val">${ord.phone}</td>
+                <td class="l_label">PostalCode</td>
+                <td class="l_val">${ord.postalCode}</td>
+                <td class="l_label">Province</td>
+                <td class="l_val">${ord.province}</td>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="l_label">ShipDate</td>
+                <td class="l_val">${ord.shipDate}</td>
+                <td class="l_label">ShipLevel</td>
+                <td class="l_val">${ord.shipLevel}</td>
+                <td class="l_label">ShippingAmount</td>
+                <td class="l_val">${ord.shippingAmount}</td>
+                <td class="l_label">ShippingService</td>
+                <td class="l_val">${ord.shippingService}</td>
+            </tr>
+            <tr>
+                <td class="l_label">State</td>
+                #{if ord.state == models.market.Orderr.S.PENDING}
+                    <td class="l_val" style="color:#4169e1;">${ord.state}</td>
+                #{/if}
+                #{elseif ord.state == models.market.Orderr.S.PAYMENT}
+                    <td class="l_val" style="color:orange;">${ord.state}</td>
+                #{/elseif}
+                #{elseif ord.state == models.market.Orderr.S.CANCEL}
+                    <td class="l_val" style="color:red;">${ord.state}</td>
+                #{/elseif}
+                #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
+                    <td class="l_val" style="color:green;">${ord.state}</td>
+                #{/elseif}
+                #{else }
+                    <td class="l_val">${ord.state}</td>
+                #{/else}
+                <td class="l_label">TotalAmount</td>
+                <td class="l_val">${ord.totalAmount}</td>
+                <td class="l_label">TrackNo.</td>
+                <td class="l_val">${ord.trackNo}</td>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="l_label">Memo</td>
+                <td colspan="7" class="l_val">${ord.memo}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="span12"><span class="label large label-success">Order Items</span></div>
+    <div class="span12">
+        <table class="table table-bordered">
+            <tr>
+                <th>SKU</th>
+                <th>Id</th>
+                <th>Qty</th>
+                <th>Price/GBP</th>
+                <th>ShipPrice</th>
+                <th>ProductName</th>
+                <th>CreateDate</th>
+                <th>Memo</th>
+            </tr>
+            #{list items:ord.items, as:'item'}
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.price}</td>
+                    <td>${item.shippingPrice}</td>
+                    <td><a target="_blank" href="${helper.Webs.link(item.selling)}">${item.productName}</a></td>
+                    <td>${item.createDate}</td>
+                    <td>${item.memo}</td>
+                    <td>${item.product.sku}</td>
+                </tr>
+            #{/list}
+        </table>
+    </div>
+
+    <div class="span12"><span class="label large label-success">Order Feedback</span></div>
+    <div class="span12">
+        <table class="table">
+            <tr>
+                <td>${m}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="span12"><span class="label large label-success">Order Fees</span></div>
+    <div class="span12">
+        <table class="table table-bordered">
+            <tr>
+                <th>Cost</th>
+                <th>Cost(USD)</th>
+                <th>Date</th>
+                <th>FeeType</th>
+                <th>Qty</th>
+            </tr>
+            #{list items:ord.fees, as:'f'}
+                <tr>
+                    <td>${f.cost} ${f.currency.name()}</td>
+                    <td>${f.usdCost.format('#.###')} USD</td>
+                    <td>${f.date.format('yyyy-MM-dd')}</td>
+                    <td>${f.type.name}</td>
+                    <td>${f.qty}</td>
+                </tr>
+            #{/list}
+        </table>
+    </div>
+</div>
+#{/else}
+

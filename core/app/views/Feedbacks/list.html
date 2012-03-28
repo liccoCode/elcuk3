@@ -1,0 +1,54 @@
+#{extends 'main_fluid.html'/}
+#{set title:'Feedbacks'/}
+#{set 'moreScripts'}
+    #{script 'feedbacks/index.js'/}
+#{/set}
+<div class="row">
+    <div class="">
+        <table class="table table-bordered">
+            <tr style="background:#F1F4F8">
+                <th>OrderId</th>
+                <th>CreateDate</th>
+                <th>Market</th>
+                <th>Account</th>
+                <th>State</th>
+                <th>Email</th>
+                <th>Score</th>
+                <th>Comment</th>
+                <th>Memo</th>
+                <th>&nbsp;</th>
+            </tr>
+        #{list items:feds, as:'f'}
+            #{set st:f.state == models.market.Feedback.S.HANDLING/}
+            #{set sc:f.score <= 3/}
+            <tr style="background: ${(st && sc) == true ? '#FFEACD' : '#F4F4F4'}">
+                <td>#{a @Orders.get(f.orderId,f.comment)}${f.orderId}#{/a}</td>
+                <td>${f.createDate.format('yyyy-MM-dd')}</td>
+                <td>${f.market}</td>
+                <td><a href="#" rel="tooltip" data-original-title="${f.account.uniqueName}">${f.account.username}</a>
+                </td>
+                <td>
+                    <span style="color:${st ? 'red' : 'green'}">${f.state}</span>
+                </td>
+                <td>${f.email}</td>
+                <!-- 判断颜色 -->
+                <td>
+                    <span style="color:${sc ? 'red' : 'green'}">${f.score}</span>
+                </td>
+                <td><a href="#" trans>${f.comment}</a></td>
+                <td>${f.memo}</td>
+                <td>
+                    <div class="btn-group">
+                        <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">Act
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a rsv fid="${f.orderId}" href="#">Reslove</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+</div>
+

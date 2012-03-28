@@ -79,6 +79,12 @@ public class Feedback extends GenericModel {
         this.state = S.END;
     }
 
+    /**
+     * 从 Amazon 的网页上解析出需要的 Feedback 信息
+     *
+     * @param html
+     * @return
+     */
     public static List<Feedback> parseFeedBackFromHTML(String html) {
         Document doc = Jsoup.parse(html);
 
@@ -117,6 +123,30 @@ public class Feedback extends GenericModel {
             feedbackList.add(feedback);
         }
         return feedbackList;
+    }
+
+    /**
+     * 查找 N 天以前到现在的某一个 Account 的得分小于指定值的 Feedback 的数量
+     *
+     * @param beforeDays 一般为附属, 传入 0, 那么则表示查找所有的
+     * @param acc
+     * @param score
+     * @return
+     */
+    public static Long feedbackCount(int beforeDays, Account acc, Account.M market, float score, S state) {
+        if(score <= 0) score = 1;
+        if(beforeDays > 0) beforeDays = -beforeDays;
+        if(beforeDays == 0) {
+            if(state == null) return Feedback.count("account=? AND score<=? AND market=?", acc, score, market);
+            else return Feedback.count("account=? AND score<=? AND state=? AND market=?", acc, score, state, market);
+        } else {
+            DateTime dt = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
+            Date bdt = dt.plusDays(beforeDays).toDate();
+            if(state == null)
+                return Feedback.count("createDate>=? AND createDate<=? AND account=? AND score<=? AND market=?", bdt, dt.toDate(), acc, score, market);
+            else
+                return Feedback.count("createDate>=? AND createDate<=? AND account=? AND score<=? AND state=? AND market=?", bdt, dt.toDate(), acc, score, state, market);
+        }
     }
 
     @Override
