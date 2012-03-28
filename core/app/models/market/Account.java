@@ -402,7 +402,7 @@ public class Account extends Model {
             Logger.debug("Downloading File...");
             String body = HTTP.get(new HttpGet(this.type.flatFinance()));
             DateTime dt = DateTime.now();
-            File f = new File(String.format("%s/%s/%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM.dd_HH'h'")));
+            File f = new File(String.format("%s/%s/%s/%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM"), dt.toString("yyyy.MM.dd_HH'h'")));
             Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
             FileUtils.writeStringToFile(f, body);
             return f;

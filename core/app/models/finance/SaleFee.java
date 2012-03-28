@@ -134,6 +134,7 @@ public class SaleFee extends GenericModel {
             lines.remove(0);
             lines.remove(0); //删除最上面的四行
 
+            int i = 0;
             for(String line : lines) {
                 try {
                     String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
@@ -154,8 +155,10 @@ public class SaleFee extends GenericModel {
                         else if("promorebates".equals(typeStr4))
                             fee.type = cachedFeeType("promorebates", cachedFeeType);
                         else {
+                            i++;
                             Logger.warn("Type not found! [" + typeStr + "]");
-                            Webs.systemMail("Type not found!", "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]");
+                            if(i < 5)
+                                Webs.systemMail("Type not found!", "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]");
                         }
                     } else
                         fee.type = type;
@@ -201,8 +204,10 @@ public class SaleFee extends GenericModel {
 
                     fees.add(fee);
                 } catch(Exception e) {
-                    Logger.warn("SaleFee Parse Have Error! [" + line + "]");
-                    Webs.systemMail("SaleFee Parse Have Error!", "<h3>" + line + "</h3>");
+                    i++;//防止行数太多, 发送太多的邮件
+                    Logger.warn("SaleFee Parse Have Error! [" + file.getAbsolutePath() + "|" + line + "]");
+                    if(i < 5)
+                        Webs.systemMail("SaleFee Parse Have Error!", "<h3>" + file.getAbsolutePath() + "|" + line + "</h3>");
                 }
             }
         } catch(IOException e) {
@@ -229,76 +234,86 @@ public class SaleFee extends GenericModel {
             lines.remove(0);
             lines.remove(0);// 删除最上面的 2 行
 
+            int i = 0;
             for(String line : lines) {
-                String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
-                String orderId = params[7];
-                String priceStr = params[14];
-                String dateStr = params[16];
-                String qtyStr = params[22];
+                try {
+                    String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
+                    String orderId = params[7];
+                    String priceStr = params[14];
+                    String dateStr = params[16];
+                    String qtyStr = params[22];
 
-                String typeStr = StringUtils.replace(
-                        StringUtils.join(StringUtils.split(params[13].toLowerCase(), " "), ""),
-                        "fulfillment",
-                        "fulfilment");
-                // 修正 FlatV2 与系统中 FeeType 名称不一样但费用是一样的费用名称
-                // 将 FlatV2 中的 principal 转换成 productcharges 类型
-                if("principal".equals(typeStr)) typeStr = "productcharges";
-                    // 将 FlatV2 中的 storagefee 修正为 fbastoragefee
-                else if("storagefee".equals(typeStr)) typeStr = "fbastoragefee";
-                    // 将 FlatV2 中的 shippinghb 修正为 shippingholdback
-                else if("shippinghb".equals(typeStr)) typeStr = "shippingholdback";
-                    // 将 FlatV2 中的 subscriptionfee 修正为 subscription
-                else if("subscriptionfee".equals(typeStr)) typeStr = "subscription";
+                    String typeStr = StringUtils.replace(
+                            StringUtils.join(StringUtils.split(params[13].toLowerCase(), " "), ""),
+                            "fulfillment",
+                            "fulfilment");
+                    // 修正 FlatV2 与系统中 FeeType 名称不一样但费用是一样的费用名称
+                    // 将 FlatV2 中的 principal 转换成 productcharges 类型
+                    if("principal".equals(typeStr)) typeStr = "productcharges";
+                        // 将 FlatV2 中的 storagefee 修正为 fbastoragefee
+                    else if("storagefee".equals(typeStr)) typeStr = "fbastoragefee";
+                        // 将 FlatV2 中的 shippinghb 修正为 shippingholdback
+                    else if("shippinghb".equals(typeStr)) typeStr = "shippingholdback";
+                        // 将 FlatV2 中的 subscriptionfee 修正为 subscription
+                    else if("subscriptionfee".equals(typeStr)) typeStr = "subscription";
 
-                SaleFee fee = new SaleFee();
-                fee.account = acc;
-                fee.market = market;
+                    SaleFee fee = new SaleFee();
+                    fee.account = acc;
+                    fee.market = market;
 
-                if(StringUtils.isBlank(orderId)) {
-                    // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
-                    fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
-                } else {
-                    fee.orderId = orderId;
-                    Orderr ord = cachedOrder(orderId, cachedOrder);
-                    if(ord == null && !StringUtils.startsWith(orderId, "S"))
-                        Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
-                    else fee.order = ord;
+                    if(StringUtils.isBlank(orderId)) {
+                        // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
+                        fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
+                    } else {
+                        fee.orderId = orderId;
+                        Orderr ord = cachedOrder(orderId, cachedOrder);
+                        if(ord == null && !StringUtils.startsWith(orderId, "S"))
+                            Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
+                        else fee.order = ord;
+                    }
+
+                    FeeType type = cachedFeeType(typeStr, cachedFeeType);
+                    if(type == null) {
+                        i++;
+                        Logger.warn("Type not found! [" + typeStr + "]");
+                        if(i < 5)
+                            Webs.systemMail("Type not found In FlatV2 Method!", "Type not found! [Type:" + typeStr + "]");
+                    } else
+                        fee.type = type;
+
+                    float usdCost = 0;
+                    float cost = 0;
+                    switch(market) {
+                        case AMAZON_UK:
+                            fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                            cost = Webs.amazonPriceNumber(market, priceStr);
+                            usdCost = Currency.GBP.toUSD(cost);
+                            fee.currency = Currency.GBP;
+                            break;
+                        case AMAZON_DE:
+                        case AMAZON_FR:
+                        case AMAZON_ES:
+                        case AMAZON_IT:
+                            //TODO  ES,IT 没有上, 所以没有 Report 可看, 暂时与 DE, FR 一样的解析
+                            fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
+                            cost = Webs.amazonPriceNumber(market, priceStr);
+                            usdCost = Currency.EUR.toUSD(cost);
+                            fee.currency = Currency.EUR;
+                            break;
+                        default:
+                            Logger.warn("SaleFee Can not parse market: " + acc.type);
+                    }
+                    fee.usdCost = usdCost;
+                    fee.cost = cost;
+                    if(StringUtils.isNotBlank(qtyStr)) fee.qty = NumberUtils.toInt(qtyStr);
+
+                    fees.add(fee);
+                } catch(Exception e) {
+                    i++; //防止行数太多, 发送太多的邮件
+                    Logger.warn("SaleFee V2 Parse Have Error! [" + file.getAbsolutePath() + "|" + line + "]");
+                    if(i < 5)
+                        Webs.systemMail("SaleFee V2 Parse Have Error!", "<h3>" + file.getAbsolutePath() + "|" + line + "</h3>");
                 }
-
-                FeeType type = cachedFeeType(typeStr, cachedFeeType);
-                if(type == null) {
-                    Logger.warn("Type not found! [" + typeStr + "]");
-                    Webs.systemMail("Type not found In FlatV2 Method!", "Type not found! [Type:" + typeStr + "]");
-                } else
-                    fee.type = type;
-
-                float usdCost = 0;
-                float cost = 0;
-                switch(market) {
-                    case AMAZON_UK:
-                        fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
-                        cost = Webs.amazonPriceNumber(market, priceStr);
-                        usdCost = Currency.GBP.toUSD(cost);
-                        fee.currency = Currency.GBP;
-                        break;
-                    case AMAZON_DE:
-                    case AMAZON_FR:
-                    case AMAZON_ES:
-                    case AMAZON_IT:
-                        //TODO  ES,IT 没有上, 所以没有 Report 可看, 暂时与 DE, FR 一样的解析
-                        fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
-                        cost = Webs.amazonPriceNumber(market, priceStr);
-                        usdCost = Currency.EUR.toUSD(cost);
-                        fee.currency = Currency.EUR;
-                        break;
-                    default:
-                        Logger.warn("SaleFee Can not parse market: " + acc.type);
-                }
-                fee.usdCost = usdCost;
-                fee.cost = cost;
-                if(StringUtils.isNotBlank(qtyStr)) fee.qty = NumberUtils.toInt(qtyStr);
-
-                fees.add(fee);
             }
 
         } catch(IOException e) {
