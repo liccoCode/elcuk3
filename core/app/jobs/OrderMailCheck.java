@@ -110,7 +110,7 @@ public class OrderMailCheck extends Job {
                 mailed++;
                 Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             } else {
-                if((sendUk + sendDe) >= 160) break; // 暂时每一次只发送 160 封, 因为量不大
+                if((sendUk + sendDe) >= 100) break; // 暂时每一次只发送 100 封, 因为量不大
                 switch(ord.market) {
                     case AMAZON_UK:
                         sendUk++;
