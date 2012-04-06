@@ -23,7 +23,7 @@ public class Jobs extends Controller {
 
     public static void index() {
         List<Jobex> jobs = Jobex.all().fetch();
-        List<JobRequest> jobReqs = JobRequest.find("ORDER BY requestDate DESC").fetch(10);
+        List<JobRequest> jobReqs = JobRequest.find("ORDER BY requestDate DESC").fetch(30);
 
         render(jobs, jobReqs);
     }
