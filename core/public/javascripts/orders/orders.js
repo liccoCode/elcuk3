@@ -27,14 +27,20 @@ $(function(){
         }
         if(page) $.varClosure.params['p.page'] = page;
 
+        var order_list = $('#order_list');
+        order_list.mask('查询中...');
         //虽然很多地方使用了 $.varClosure.params 这个动态参数, 但是由于每一个页面的 JS 的 Var Context 不同, 所以不会产生影响
         $.get('/Orders/o_search', $.varClosure.params, function(html){
-            $("#order_list").html(html);
-            $('a[rel=tooltip]').tooltip({placement:'top'});
-            $('.pagination a[page]').click(function(){
-                do_search(o, $(this).attr('page'));
-                return false;
-            })
+            try{
+                order_list.html(html);
+                $('a[rel=tooltip]').tooltip({placement:'top'});
+                $('.pagination a[page]').click(function(){
+                    do_search(o, $(this).attr('page'));
+                    return false;
+                });
+            }finally{
+                order_list.unmask();
+            }
         }, 'html');
 
         /*

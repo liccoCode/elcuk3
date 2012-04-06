@@ -55,7 +55,7 @@ $(function(){
     $.keys = [
         ['g+h', '/'],
         ['g+s', '/analyzes/index'],
-        ['g+o', '/orders/o_index?s=20&p=1'],
+        ['g+o', '/orders/o_index?s=35&p=1'],
         ['g+l', '/listings/l_index'],
         ['g+p+w', '/procures/warn']
     ];
