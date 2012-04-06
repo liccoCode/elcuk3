@@ -32,7 +32,9 @@ $(function(){
          * mm/dd/yyyy 格式的年月日
          */
         fmt1:function(date){
-            return (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+            var month = date.getMonth() + 1;
+            var ddate = date.getDate();
+            return (month < 10 ? '0' + month :month) + '/' + (ddate < 10 ? '0' + ddate :ddate) + '/' + date.getFullYear();
         },
         /**
          * yyyy-MM-dd 格式的年月日
@@ -51,18 +53,21 @@ $(function(){
 
     // ---- Key board shor
     $.keys = [
-        ['g+h','/'],
-        ['g+s','/analyzes/index'],
-        ['g+o','/orders/o_index?s=20&p=1'],
-        ['g+l','/listings/l_index'],
-        ['g+p+w','/procures/warn']
+        ['g+h', '/'],
+        ['g+s', '/analyzes/index'],
+        ['g+o', '/orders/o_index?s=20&p=1'],
+        ['g+l', '/listings/l_index'],
+        ['g+p+w', '/procures/warn']
     ];
 
-    var bindkey = function(k, url) {
-        key(k, function(){location.href=url;return false;})
+    var bindkey = function(k, url){
+        key(k, function(){
+            location.href = url;
+            return false;
+        })
     };
 
-    for(var i = 0; i < $.keys.length; i++) {
+    for(var i = 0; i < $.keys.length; i++){
         var pair = $.keys[i];
         bindkey(pair[0], pair[1]);
     }

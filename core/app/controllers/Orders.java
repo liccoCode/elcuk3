@@ -1,12 +1,14 @@
 package controllers;
 
 import helper.Webs;
+import models.OrderPOST;
 import models.PageInfo;
 import models.market.Account;
 import models.market.Orderr;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
+import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -30,12 +32,29 @@ public class Orders extends Controller {
         List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, s);
         Long count = Orderr.count();
         PageInfo<Orderr> pi = new PageInfo<Orderr>(s, count, p, orders);
-        render(orders, count, p, s, pi);
+        List<Account> accs = Account.all().fetch();
+
+
+        render(orders, count, p, s, pi, accs);
     }
 
     public static void get(String oid, String m) {
         Orderr ord = Orderr.findById(oid);
         render(ord, m);
+    }
+
+    /**
+     * Orders 页面的搜索方法
+     *
+     * @param p
+     */
+    @CacheFor("5mn")
+    public static void o_search(OrderPOST p) {
+        List<Orderr> orders = p.query();
+        Long count = p.count();
+        PageInfo<Orderr> pi = new PageInfo<Orderr>(p.size, count, p.page, orders);
+
+        render(pi);
     }
 
     public static void ini(String m) {
