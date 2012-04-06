@@ -17,7 +17,7 @@
                 <option value="${_.name()}">${_}</option>
             #{/list}
             </select>
-            <select id="o_acc" name="p.account" class="span2" size="1">
+            <select id="o_acc" name="p.account.id" class="span2" size="1">
                 <option value="">Account</option>
             #{list items:accs}
                 <option value="${_.id}">${_.uniqueName}</option>
@@ -44,6 +44,8 @@
         <div class="span3" id="search_btns">
             <fieldset>
                 <legend>Search Button</legend>
+                <a href="#" day="1" class="btn btn-info" rel="popover" data-content="按照设置搜索条件搜索 1 天内的订单(结果缓存5mn)">1
+                    Day</a>
                 <a href="#" day="7" class="btn btn-info" rel="popover" data-content="按照设置搜索条件搜索 7 天内的订单(结果缓存5mn)">7
                     Day</a>
                 <a href="#" day="30" class="btn btn-info" rel="popover" data-content="按照设置搜索条件搜索 30 天内的订单(结果缓存5mn)">30

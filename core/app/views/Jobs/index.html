@@ -114,6 +114,7 @@
             <caption class="label label-info">JobRequests</caption>
             <tr>
                 <th>Id</th>
+                <th>Acc</th>
                 <th>RequestDate</th>
                 <th>RequestId</th>
                 <th>ReportId</th>
@@ -124,7 +125,10 @@
             #{list items:jobReqs, as:'req'}
                 <tr>
                     <td>${req.id}</td>
-                    <td>${req.requestDate}</td>
+                    <td>
+                        <a href="#" rel="tooltip" data-original-title="${req?.account?.uniqueName}">${req.account.id}</a>
+                    </td>
+                    <td>${req.requestDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
                     <td>${req.requestId}</td>
                     <td>${req.reportId}</td>
                     <td>${req.state}</td>

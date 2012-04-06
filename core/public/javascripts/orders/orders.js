@@ -10,12 +10,10 @@ $(function(){
         var now = new Date();
 
         switch(o.attr('day')){
+            case '1':
             case '7':
-                $.varClosure.params['p.from'] = $.DateUtil.fmt1($.DateUtil.addDay(-7, now));
-                $.varClosure.params['p.to'] = $.DateUtil.fmt1(now);
-                break;
             case '30':
-                $.varClosure.params['p.from'] = $.DateUtil.fmt1($.DateUtil.addDay(-30, now));
+                $.varClosure.params['p.from'] = $.DateUtil.fmt1($.DateUtil.addDay(Number('-' + o.attr('day')), now));
                 $.varClosure.params['p.to'] = $.DateUtil.fmt1(now);
                 break;
             case '-1':
