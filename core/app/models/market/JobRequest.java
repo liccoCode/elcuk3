@@ -39,10 +39,17 @@ public class JobRequest extends Model {
         /**
          * 用来同步系统中库存与 FBA 库存的量
          */
-        MANAGE_FBA_INVENTORY_ARCHIVED;
+        MANAGE_FBA_INVENTORY_ARCHIVED,
+
+        /**
+         * 在 Amazon 上活动的 Listing
+         */
+        ACTIVE_LISTINGS;
 
         public String toString() {
             switch(this) {
+                case ACTIVE_LISTINGS:
+                    return "_GET_MERCHANT_LISTINGS_DATA_";
                 case ALL_FBA_ORDER_SHIPPED:
                     return "_GET_AMAZON_FULFILLED_SHIPMENTS_DATA_";
                 case MANAGE_FBA_INVENTORY_ARCHIVED:
