@@ -287,7 +287,6 @@ public class SaleFee extends GenericModel {
                     switch(market) {
                         case AMAZON_UK:
                             fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
-                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
                             cost = Webs.amazonPriceNumber(market, priceStr);
                             usdCost = Currency.GBP.toUSD(cost);
                             fee.currency = Currency.GBP;
@@ -296,9 +295,9 @@ public class SaleFee extends GenericModel {
                         case AMAZON_FR:
                         case AMAZON_ES:
                         case AMAZON_IT:
-                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
                             fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
-                            cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr);
+                            // Amazon 的每一次收款的 FlatV2 文件中的数据格式没有改变, 还是根据的价格来进行处理的, 所以还是按照 Market 来解析
+                            cost = Webs.amazonPriceNumber(market, priceStr);
                             usdCost = Currency.EUR.toUSD(cost);
                             fee.currency = Currency.EUR;
                             break;
