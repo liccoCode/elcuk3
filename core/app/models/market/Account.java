@@ -399,10 +399,10 @@ public class Account extends Model {
         try {
             this.loginWebSite();
             this.changeRegion(market);
-            Logger.debug("Downloading File...");
+            Logger.info("Downloading [%s] File...", this.username);
             String body = HTTP.get(new HttpGet(this.type.flatFinance()));
             DateTime dt = DateTime.now();
-            File f = new File(String.format("%s/%s/%s/%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM"), dt.toString("yyyy.MM.dd_HH'h'")));
+            File f = new File(String.format("%s/%s/%s/%s_%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, dt.toString("yyyy.MM.dd_HH'h'")));
             Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
             FileUtils.writeStringToFile(f, body);
             return f;
