@@ -102,7 +102,8 @@ public class OrderPOST {
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
         if(StringUtils.isNotBlank(this.search)) {
             this.search = StringUtils.replace(this.search, "'", "''");
-            sbd.append("AND (address LIKE '%").append(this.search).append("%' OR ").
+            sbd.append("AND (orderId LIKE '%").append(this.search).append("%' OR ").
+                    append("address LIKE '%").append(this.search).append("%' OR ").
                     append("address1 LIKE '%").append(this.search).append("%' OR ").
                     append("buyer LIKE '%").append(this.search).append("%' OR ").
                     append("city LIKE '%").append(this.search).append("%' OR ").
