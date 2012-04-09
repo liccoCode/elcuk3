@@ -27,9 +27,14 @@ public class FBAQtySyncJob extends Job {
             if(wh.account == null) {
                 Logger.warn("Whouse [" + wh.name + "] is FBA but is not bind an Account right now!!");
             } else {
-                JobRequest job = JobRequest.checkJob(wh.account, JobRequest.T.MANAGE_FBA_INVENTORY_ARCHIVED);
-                if(job == null) continue;
-                job.request();
+                if(wh.account.closeable) {
+                    Logger.warn("Whouse [%s], Account [%s] is closed.", wh.name, wh.account.uniqueName);
+                    return;
+                } else {
+                    JobRequest job = JobRequest.checkJob(wh.account, JobRequest.T.MANAGE_FBA_INVENTORY_ARCHIVED, wh.account.marketplaceId());
+                    if(job == null) continue;
+                    job.request();
+                }
             }
         }
         Logger.info("FBAQtySyncJob checks Job(step1).");

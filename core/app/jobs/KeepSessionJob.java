@@ -18,7 +18,7 @@ public class KeepSessionJob extends Job {
 
     @Override
     public void doJob() {
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedAcc();
         for(Account ac : accs) {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
             ac.loginWebSite();

@@ -2,6 +2,7 @@ package models.market;
 
 import exception.NotLoginFastException;
 import exception.NotSupportChangeRegionFastException;
+import helper.AWS;
 import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
@@ -389,6 +390,24 @@ public class Account extends Model {
         return new ArrayList<Feedback>();
     }
 
+    /**
+     * 返回这个市场所对应的 MarketPlaceId, 仅仅支持 UK/DE/FR, 其他市场默认返回 UK 的
+     *
+     * @return
+     */
+    public AWS.MID marketplaceId() {
+        switch(this.type) {
+            case AMAZON_UK:
+                return AWS.MID.A1F83G8C2ARO7P;
+            case AMAZON_DE:
+                return AWS.MID.A1PA6795UKMFR9;
+            case AMAZON_FR:
+                return AWS.MID.A13V1IB3VIYZZH;
+            default:
+                return AWS.MID.A1F83G8C2ARO7P;
+        }
+    }
+
 
     /**
      * 下载 7 天的 Flat Finance
@@ -410,6 +429,15 @@ public class Account extends Model {
             Logger.warn(Webs.E(e));
         }
         return null;
+    }
+
+    /**
+     * 搜索开发的所有账户
+     *
+     * @return
+     */
+    public static List<Account> openedAcc() {
+        return Account.find("closeable=?", false).fetch();
     }
 
     @Override

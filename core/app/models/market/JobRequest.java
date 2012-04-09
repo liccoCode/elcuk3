@@ -42,7 +42,7 @@ public class JobRequest extends Model {
         MANAGE_FBA_INVENTORY_ARCHIVED,
 
         /**
-         * 在 Amazon 上活动的 Listing
+         * 在 Amazon 上活动的 Listing, 这份日志用于同步 SKU 与 Amazon 上的 Listing
          */
         ACTIVE_LISTINGS;
 
@@ -117,6 +117,9 @@ public class JobRequest extends Model {
 
     public String procressState;
 
+    @Enumerated(EnumType.STRING)
+    public AWS.MID marketplaceId;
+
     public String path;
 
     /*这份 Report 请求的数据的时间段*/
@@ -125,23 +128,26 @@ public class JobRequest extends Model {
 
 
     /**
-     * 根据 Account 检查是否需要有不同类型的 Job 创建
+     * 根据 Account 检查是否需要有不同类型的 Job 创建;
      *
      * @param acc
      * @param type
+     * @param mid  需要使用哪一个市场的数据;
      * @return
      */
-    public static JobRequest checkJob(Account acc, T type) {
+    public static JobRequest checkJob(Account acc, T type, AWS.MID mid) {
         switch(type) {
             // 每一个小时抓取一次新订单
             case ALL_FBA_ORDER_FETCH:
-                return newJob(1, T.ALL_FBA_ORDER_FETCH, acc);
+                return newJob(1, T.ALL_FBA_ORDER_FETCH, acc, mid);
             // 每 8 小时更新一次发货的订单
             case ALL_FBA_ORDER_SHIPPED:
-                return newJob(8, T.ALL_FBA_ORDER_SHIPPED, acc);
+                return newJob(8, T.ALL_FBA_ORDER_SHIPPED, acc, mid);
             // 每 8 小时进行一次 FBA 仓库同步
             case MANAGE_FBA_INVENTORY_ARCHIVED:
-                return newJob(8, T.MANAGE_FBA_INVENTORY_ARCHIVED, acc);
+                return newJob(8, T.MANAGE_FBA_INVENTORY_ARCHIVED, acc, mid);
+            case ACTIVE_LISTINGS:
+                return newJob(24, T.ACTIVE_LISTINGS, acc, mid);
         }
         return null;
     }
@@ -154,26 +160,46 @@ public class JobRequest extends Model {
      * @param acc      哪一个账户
      * @return
      */
-    private static JobRequest newJob(int interval, T type, Account acc) {
+    private static JobRequest newJob(int interval, T type, Account acc, AWS.MID mid) {
         if(!acc.type.name().startsWith("AMAZON"))
             throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
-        JobRequest job = JobRequest.find("account=? AND type=? ORDER BY requestDate DESC", acc, type).first();
+        JobRequest job = JobRequest.find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();
+
+        //先判断 Job 不为空的情况
         if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
             JobRequest njob = new JobRequest();
             njob.account = acc;
             njob.requestDate = njob.lastUpdateDate = new Date();
             njob.state = S.NEW;
             njob.type = type;
+            njob.marketplaceId = mid;
             return njob;
         }
         return null;
     }
 
     /**
+     * 检查这些状态是否是位可以提交的任务
+     *
+     * @return
+     */
+    private boolean checkAvailableType() {
+        switch(this.type) {
+            case ALL_FBA_ORDER_FETCH:
+            case ALL_FBA_ORDER_SHIPPED:
+            case MANAGE_FBA_INVENTORY_ARCHIVED:
+            case ACTIVE_LISTINGS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * 发出请求
      */
     public void request() {
-        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
+        if(checkAvailableType()) {
             Logger.debug("(step1)JobRequest request " + this.type + " REQUEST Job.");
             try {
                 AWS.requestReport_step1(this);
@@ -187,7 +213,7 @@ public class JobRequest extends Model {
      * 更新 Job 状态
      */
     public void updateState() {
-        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
+        if(checkAvailableType()) {
             Logger.debug("(step2)JobRequest request " + this.type + " UPDATE_STATE Job.");
             try {
                 AWS.requestState_step2(this);
@@ -201,7 +227,7 @@ public class JobRequest extends Model {
      * 获取 ReportId
      */
     public void updateReportId() {
-        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
+        if(checkAvailableType()) {
             Logger.debug("JobRequest request " + this.type + " UPDATE_REPORTID Job.");
             try {
                 AWS.requestReportId_step3(this);
@@ -216,7 +242,7 @@ public class JobRequest extends Model {
      */
     public void downLoad() {
         if(this.state != S.DOWN) return;
-        if(this.type == T.ALL_FBA_ORDER_FETCH || this.type == T.ALL_FBA_ORDER_SHIPPED || this.type == T.MANAGE_FBA_INVENTORY_ARCHIVED) {
+        if(checkAvailableType()) {
             Logger.debug("JobRequest request " + this.type + " DOWNLOAD Job.");
             try {
                 AWS.requestReportDown_step4(this);
@@ -316,6 +342,9 @@ public class JobRequest extends Model {
                         Logger.info("ProductQTY " + qty.product.sku + " synchronize from FBA to System.");
                     }
                 }
+                break;
+            case ACTIVE_LISTINGS:
+                //TODO 完成解析 Amazon 的 Active Listing Report 的功能!
                 break;
         }
         this.state = S.CLOSE;

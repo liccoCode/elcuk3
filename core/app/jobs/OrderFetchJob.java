@@ -18,7 +18,7 @@ public class OrderFetchJob extends Job {
     @Override
     public void doJob() throws Exception {
         // 对每一个用户都是如此
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedAcc();
         /**
          * 1. 检查对应的市场是否需要进行创建新的 Job, 需要则创建, 否则返回 null
          * 2. 处理需要进行发送请求的 Job;
@@ -30,7 +30,7 @@ public class OrderFetchJob extends Job {
         // 1,2. 需要创建新的 Job
         for(Account acc : accs) {
             for(JobRequest.T type : JobRequest.T.values()) {
-                JobRequest job = JobRequest.checkJob(acc, type);
+                JobRequest job = JobRequest.checkJob(acc, type, acc.marketplaceId());
                 if(job == null) continue;
                 job.request();
             }

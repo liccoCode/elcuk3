@@ -19,7 +19,7 @@ public class FinanceCheckJob extends Job {
 
     @Override
     public void doJob() {
-        List<Account> accs = Account.find("closeable=?", false).fetch();
+        List<Account> accs = Account.openedAcc();
         for(Account acc : accs) {
             for(Account.M m : Account.M.values()) {
                 if(m == Account.M.EBAY_UK || m == Account.M.AMAZON_US) continue;

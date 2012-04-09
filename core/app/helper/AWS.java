@@ -32,7 +32,22 @@ import java.util.concurrent.TimeUnit;
  * Time: 6:10 PM
  */
 public class AWS {
-    public static IdList MERCHANT_IDS = new IdList(Arrays.asList("A1F83G8C2ARO7P"));
+
+    public enum MID {
+        /**
+         * UK
+         */
+        A1F83G8C2ARO7P,
+        /**
+         * DE
+         */
+        A1PA6795UKMFR9,
+        /**
+         * FR
+         */
+        A13V1IB3VIYZZH
+    }
+
     /**
      * 年/月/日/文件名
      */
@@ -47,11 +62,12 @@ public class AWS {
             case ALL_FBA_ORDER_FETCH:
             case ALL_FBA_ORDER_SHIPPED:
             case MANAGE_FBA_INVENTORY_ARCHIVED:
+            case ACTIVE_LISTINGS:
                 MarketplaceWebService service = client(job);
 
                 RequestReportRequest res = new RequestReportRequest()
                         .withMerchant(job.account.merchantId)
-                        .withMarketplaceIdList(AWS.MERCHANT_IDS) // only have the uk MarketplaceId.
+                        .withMarketplaceIdList(new IdList(Arrays.asList(job.marketplaceId.name()))) // only have the uk MarketplaceId.
                         .withReportType(job.type.toString())
                         .withReportOptions("ShowSalesChannel=true");
                 try {
@@ -151,18 +167,19 @@ public class AWS {
         try {
             GetReportResponse rep = client.getReport(req);
             Calendar cal = Calendar.getInstance();
-            String filename = "";
+            String filename = String.format(REPORT_BASE_PATH,
+                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
+                    job.reportId);
             switch(job.type) {
                 case ALL_FBA_ORDER_FETCH:
-                    filename = String.format(REPORT_BASE_PATH,
-                            cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
-                            job.reportId + ".xml");
+                    filename += ".xml";
+                    break;
+                case ACTIVE_LISTINGS:
+                    filename += ".txt";
                     break;
                 case ALL_FBA_ORDER_SHIPPED:
                 case MANAGE_FBA_INVENTORY_ARCHIVED:
-                    filename = String.format(REPORT_BASE_PATH,
-                            cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
-                            job.reportId + ".csv");
+                    filename += ".csv";
                     break;
             }
             FileUtils.writeByteArrayToFile(new File(filename), byteBuffer.toByteArray());
