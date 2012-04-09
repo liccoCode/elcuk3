@@ -2,6 +2,7 @@ package jobs;
 
 import models.finance.SaleFee;
 import models.market.Account;
+import play.Logger;
 import play.jobs.Job;
 
 import java.io.File;
@@ -23,10 +24,12 @@ public class FinanceCheckJob extends Job {
         for(Account acc : accs) {
             for(Account.M m : Account.M.values()) {
                 if(m == Account.M.EBAY_UK || m == Account.M.AMAZON_US) continue;
+                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.username, m.name());
                 File file = acc.briefFlatFinance(m);
                 List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc, m);
                 SaleFee.clearOldSaleFee(fees);
                 SaleFee.batchSaveWithJDBC(fees);
+                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Done", acc.username, m.name());
             }
         }
     }
