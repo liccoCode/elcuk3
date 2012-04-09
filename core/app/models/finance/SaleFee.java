@@ -190,7 +190,8 @@ public class SaleFee extends GenericModel {
                         case AMAZON_FR:
                         case AMAZON_ES:
                         case AMAZON_IT:
-                            cost = Webs.amazonPriceNumber(market, priceStr.substring(3).trim());
+                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
+                            cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(3).trim());
                             usdCost = Currency.EUR.toUSD(cost);
                             fee.currency = Currency.EUR;
                             break;
@@ -286,6 +287,7 @@ public class SaleFee extends GenericModel {
                     switch(market) {
                         case AMAZON_UK:
                             fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
                             cost = Webs.amazonPriceNumber(market, priceStr);
                             usdCost = Currency.GBP.toUSD(cost);
                             fee.currency = Currency.GBP;
@@ -294,9 +296,9 @@ public class SaleFee extends GenericModel {
                         case AMAZON_FR:
                         case AMAZON_ES:
                         case AMAZON_IT:
-                            //TODO  ES,IT 没有上, 所以没有 Report 可看, 暂时与 DE, FR 一样的解析
+                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
                             fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
-                            cost = Webs.amazonPriceNumber(market, priceStr);
+                            cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr);
                             usdCost = Currency.EUR.toUSD(cost);
                             fee.currency = Currency.EUR;
                             break;

@@ -24,9 +24,9 @@ public class SaleFeeParseTest extends UnitTest {
     @Test
     public void testParse() {
         Account acc = Account.findById(1l);
-        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Volumes/wyatt/Downloads/report (1).txt"), acc, Account.M.AMAZON_UK);
+        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.de/2012.04/2012.04.06_04h.txt"), acc, Account.M.AMAZON_DE);
         for(SaleFee f : fees) {
-            f.save();
+            System.out.println(String.format("OrderId: %s, Cost: %s %s, USD_Cost: %s USD", f.orderId, f.cost, f.currency.name(), f.usdCost));
         }
     }
 
