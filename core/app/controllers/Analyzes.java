@@ -25,11 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @With({Secure.class, GzipFilter.class})
 public class Analyzes extends Controller {
     public static void index() {
-        List<Selling> sells = Selling.salesRankWithTime();
-        long p = 1l;
-        long s = 10;
-        long count = sells.size();
-        render(sells, p, s, count);
+        render();
     }
 
     /**
@@ -50,31 +46,22 @@ public class Analyzes extends Controller {
         render(p);
     }
 
-    public static void ajaxSales(String msku,
-                                 @As("MM/dd/yyyy") Date from,
-                                 @As("MM/dd/yyyy") Date to) {
-        validation.required(msku);
-        validation.required(from);
-        validation.required(to);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        renderJSON(OrderItem.ajaxHighChartSales(msku, from, to));
-    }
-
     /**
-     * 加载指定 Selling 的时间段内的销量数据
+     * 加载指定 Selling 的时间段内的销量与销售额数据
      *
      * @param msku
      * @param from
      * @param to
      */
     public static void ajaxSells(String msku,
+                                 String type,
                                  @As("MM/dd/yyyy") Date from,
                                  @As("MM/dd/yyyy") Date to) {
         validation.required(msku);
         validation.required(from);
         validation.required(to);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        renderJSON(OrderItem.ajaxHighChartSelling(msku, from, to));
+        renderJSON(OrderItem.ajaxHighChartSelling(msku, type, from, to));
     }
 
     /**

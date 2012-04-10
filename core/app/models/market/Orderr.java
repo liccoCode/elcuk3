@@ -613,7 +613,7 @@ public class Orderr extends GenericModel {
 
                 String sku = Product.merchantSKUtoSKU(oid.getSKU());
                 Product product = Product.findById(sku);
-                Selling selling = Selling.find("asin=? AND market=?", oid.getASIN().toUpperCase(), orderr.market).first();
+                Selling selling = Selling.findById(String.format("%s_%s", oid.getSKU().toUpperCase(), orderr.market.toString()));
                 if(product != null) oi.product = product;
                 else {
                     // TODO 发送邮件提醒自己有产品不存在!

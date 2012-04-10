@@ -117,27 +117,23 @@ $(function(){
      * @param params
      * @param type -1:销售量, 1:销售额
      */
-    function ajax_line(msku, params, type){
+    function ajax_line(msku, params){
         $('#selling_down').mask('加载中...');
         $.ajax({
-            url:'/analyzes/' + (type < 0 ? 'ajaxSells' :'ajaxSales'),
+            url:'/analyzes/ajaxSells',
             data:params,
             dataType:'json',
             success:function(data){
-                var curtOpt;
-                if(type < 0){
-                    curtOpt = sells;
-                    sells.title.text = 'Selling [' + msku + '] Sales';
-                }else{
-                    curtOpt = sales;
-                    sales.title.text = 'Selling [' + msku + '] Prices';
-                }
-                var series = [];
+                var display_sku = (data['type'] == 'sku' ? msku.split(',')[0] :msku);
+                sells.title.text = 'Selling [' + display_sku + '] Sales';
+                sales.title.text = 'Selling [' + display_sku + '] Prices';
+                var sell_series = [];
+                var sale_series = [];
 
                 /**
                  *  处理一条一条的曲线
                  */
-                function dealLine(lineName){
+                function dealLine(lineName, series){
                     if(!data['series_' + lineName]) return false;
                     var line = {};
                     line.name = lineName.toUpperCase();
@@ -149,15 +145,21 @@ $(function(){
                     return false;
                 }
 
-                dealLine('all');
-                dealLine('auk');
-                dealLine('ade');
-                dealLine('afr');
-                dealLine('ait');
+                dealLine('all', sell_series);
+                dealLine('auk', sell_series);
+                dealLine('ade', sell_series);
+                dealLine('afr', sell_series);
 
-                curtOpt.series = series;
+                dealLine('allM', sale_series);
+                dealLine('aukM', sale_series);
+                dealLine('adeM', sale_series);
+                dealLine('afrM', sale_series);
+
+                sells.series = sell_series;
+                sales.series = sale_series;
                 localStorage.setItem("msku", msku);
-                new Highcharts.Chart(curtOpt);
+                new Highcharts.Chart(sells);
+                new Highcharts.Chart(sales);
                 $('#selling_down').unmask();
             },
             error:function(xhr, state, err){
@@ -170,10 +172,21 @@ $(function(){
     // 访问页面, 利用 Ajax 加载所有订单的销量
     var preMonth = $.DateUtil.addDay(-30);
     var now = new Date();
-    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'}, -1);
     $('#a_from').data("dateinput").setValue(preMonth);
     $('#a_to').data("dateinput").setValue(now);
 
+    // 最下方的 Selling Sale 列表信息
+    $.get('/analyzes/index_sell', {'p.page':1, 'p.size':10}, function(html){
+        $('#selling_down').html(html);
+        $('.msku').dblclick(function(){
+            $('#a_msku').val($(this).text());
+        });
+    });
+
+    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all', type:'msku'});
+
+
+    // Search Btn
     $('#a_search').click(function(){
         $.varClosure.params = {};
         $("#a_toolbar :input").map($.varClosure);
@@ -189,18 +202,6 @@ $(function(){
             $.varClosure.params['from'] = $.DateUtil.fmt1(from);
             $.varClosure.params['to'] = $.DateUtil.fmt1(now);
         }
-        ajax_line(msku, $.varClosure.params, -1);
-        ajax_line(msku, $.varClosure.params, 1);
+        ajax_line(msku, $.varClosure.params);
     });
-
-
-    // 最下方的 Selling Sale 列表信息
-    $.get('/analyzes/index_sell', {'p.page':1, 'p.size':10}, function(html){
-        $('#selling_down').html(html);
-        $('.msku').dblclick(function(){
-            $('#a_msku').val($(this).text());
-        });
-    });
-
-    ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all'}, 1);
 });

@@ -3,10 +3,16 @@ $(function(){
         var o = $(this);
         if(!o.attr('name')) return false;
         if(o.val()){
-            if(o.val().trim() in {on:1, off:1}) // 判断 input:checked 标签.
-                $.varClosure.params[o.attr("name")] = o.is(':checked');
-            else
-                $.varClosure.params[o.attr("name")] = o.val().trim();
+            switch(o.attr('type')){
+                case 'checkbox':
+                    $.varClosure.params[o.attr("name")] = o.is(':checked');
+                    break;
+                case 'radio':
+                    if(o.is(':checked')) $.varClosure.params[o.attr("name")] = o.val().trim();
+                    break;
+                default:
+                    $.varClosure.params[o.attr("name")] = o.val().trim();
+            }
         }
     };
 

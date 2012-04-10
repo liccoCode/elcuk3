@@ -131,7 +131,7 @@
                     <td>${req.requestDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
                     <td>${req.requestId}</td>
                     <td>${req.reportId}</td>
-                    <td>${req.state}</td>
+                    <td><a href="#" rel="tooltip" data-original-title="${req.procressState}">${req.state}</a></td>
                     <td>${req.type}</td>
                     <td><a href="#" rel="tooltip" data-original-title="${req.path}">${req.path?.substring(0, 3)}...</a>
                     </td>

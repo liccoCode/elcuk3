@@ -10,8 +10,7 @@
         <th>Day1</th>
         <th>Day7</th>
         <th>Day30</th>
-        <th>Day365</th>
-        <th>DayALL</th>
+        <th>Day180</th>
         <th>TurnOver</th>
         <th>Type</th>
     </tr>
@@ -19,7 +18,8 @@
     #{if sell_index <= 10}
         <tr>
             <td class="msku" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
-            <td class="sid" title="${sell.sellingId}"><a target="_blank" href="${helper.Webs.link(sell)}">${sell.asin}</a>
+            <td class="sid" title="${sell.sellingId}">
+                <a target="_blank" href="${helper.Webs.link(sell)}">${sell.asin}</a>
             </td>
             <td>${sell.market.toString()}</td>
             <td>${sell.price}</td>
@@ -28,8 +28,7 @@
             <td>${sell.d1}</td>
             <td>${sell.d7.format('#.##')}/${(sell.d7 / 7).format("#.##")}</td>
             <td>${sell.d30.format('#.##')}/${(sell.d30 / 30).format("#.##")}</td>
-            <td>${sell.d365.format('#.##')}/${(sell.d365 / 365).format("#.##")}</td>
-            <td>${sell.dAll.format("#.##")}</td>
+            <td>${sell.d180.format('#.##')}/${(sell.d180 / 180).format("#.##")}</td>
             #{if sell.turnOver < 8 && sell.turnOver >= 0}
                 <td style="color:red;">${sell.turnOver.format("#.##")}</td>
             #{/if}

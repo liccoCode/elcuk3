@@ -126,7 +126,7 @@ public class Selling extends GenericModel {
     @Transient
     public Float d30 = 0f;
     @Transient
-    public Float d365 = 0f;
+    public Float d180 = 0f;
     @Transient
     public Float dAll = 0f;
     @Transient
@@ -292,38 +292,45 @@ public class Selling extends GenericModel {
         if(cached != null && cached.size() > 0) return cached;
         Map<String, Selling> sellingMap = new HashMap<String, Selling>();
 
-        List<OrderItem> items = OrderItem.find("SELECT oi FROM OrderItem oi WHERE oi.order.state NOT IN (?,?,?)",
-                Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+        /**
+         * 1. 将一年内的 OrderItem 加载出来, 作为基础数据进行统计
+         * 2. 根据 MerchantSKU(Selling) 来区分来进行排名区分
+         * 3. 计算 d1, d7, d30, d180 天的销量数据
+         */
 
-        Long now = System.currentTimeMillis();
+        DateTime nowDate = DateTime.now();
+        List<OrderItem> items = OrderItem.find("createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
+                DateTime.parse(nowDate.toString("yyyy-MM-dd")).plusDays(-180).toDate(), DateTime.parse(nowDate.toString("yyyy-MM-dd")).toDate(), Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+
+        Long now = nowDate.getMillis();
 
         // 通过 OrderItem 计算每一个产品的销量.
         for(OrderItem item : items) {
+            String sellKey = null;
             try {
-                if(!sellingMap.containsKey(item.selling.merchantSKU)) {
-                    sellingMap.put(item.selling.merchantSKU, item.selling);
+                sellKey = String.format("%s_%s", item.selling.merchantSKU, item.order.market.toString());
+                if(!sellingMap.containsKey(sellKey)) {
+                    sellingMap.put(sellKey, item.selling);
                 }
             } catch(EntityNotFoundException e) {
                 Logger.warn(Webs.E(e));
                 continue; // 没有这个 Selling 则跳过
             }
-            Selling current = sellingMap.get(item.selling.merchantSKU);
+            Selling current = sellingMap.get(sellKey);
             Long differTime = now - item.createDate.getTime();
 
             // 一天内的
             if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                current.d1 = current.d1 + item.quantity;
+                current.d1 += item.quantity;
             // 七天内的
             if(differTime <= TimeUnit.DAYS.toMillis(7))
-                current.d7 = current.d7 + item.quantity;
+                current.d7 += item.quantity;
             // 三十天的
             if(differTime <= TimeUnit.DAYS.toMillis(30))
-                current.d30 = current.d30 + item.quantity;
-            // 365 天的
-            if(differTime <= TimeUnit.DAYS.toMillis(365))
-                current.d365 = current.d365 + item.quantity;
-            // 总共
-            current.dAll = current.dAll + item.quantity;
+                current.d30 += item.quantity;
+            // 180 天的
+            if(differTime <= TimeUnit.DAYS.toMillis(180))
+                current.d180 += item.quantity;
         }
 
         // 通过 Selling 与 Product 库存计算 TurnOver
@@ -350,7 +357,7 @@ public class Selling extends GenericModel {
                 return (int) (s2.d7 - s1.d7);
             }
         });
-        if(sellings.size() > 0) Cache.add(Caches.SALE_SELLING, sellings, "20mn"); // 缓存 10 分钟
+        if(sellings.size() > 0) Cache.add(Caches.SALE_SELLING, sellings, "30mn"); // 缓存 30 分钟
         return sellings;
     }
 
