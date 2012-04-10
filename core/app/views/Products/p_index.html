@@ -22,7 +22,7 @@
                             <label for="p.sku">SKU</label>
 
                             <div class="controls">
-                                <input type="text" id="p.sku" name="p.sku"">
+                                <input type="text" id="p.sku" name="p.sku">
                             </div>
                         </div>
 
@@ -100,7 +100,6 @@
 #{else }
 <table class="table table-striped">
 <tr>
-    <th>Id</th>
     <th>SKU</th>
     <th>Name</th>
     <th>L</th>
@@ -109,8 +108,7 @@
     <th>Wt</th>
 </tr>
     #{list items:prods, as:'prod'}
-    <tr data-toggle="collapse" data-target="#prod_details_${prod.id}">
-        <td>${prod.id}</td>
+    <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
         <td>${prod.sku}</td>
         <td>${prod.productName}</td>
         <td>${prod.lengths == null ? 0 : prod.lengths}</td>
@@ -120,14 +118,14 @@
     </tr>
     <tr>
         <td colspan="7">
-            <div class="collapse" id="prod_details_${prod.id}">
+            <div class="collapse" id="prod_details_${prod.sku}">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a data-toggle="tab" href="#basic_${prod.id}">基本信息</a></li>
-                    <li><a data-toggle="tab" href="#qty_${prod.id}">库存信息</a></li>
+                    <li class="active"><a data-toggle="tab" href="#basic_${prod.sku}">基本信息</a></li>
+                    <li><a data-toggle="tab" href="#qty_${prod.sku}">库存信息</a></li>
                 </ul>
 
                 <div class="tab-content">
-                    <div class="tab-pane active" id="basic_${prod.id}">
+                    <div class="tab-pane active" id="basic_${prod.sku}">
                         <table>
                             <tr>
                                 <td>SKU</td>
@@ -169,7 +167,7 @@
                                 <td>Category</td>
                                 <td>
                                     #{cat_select cates:cates, catId:prod.category.categoryId/}
-                                    <input type="hidden" name="p.id" value="${prod.id}">
+                                    <input type="hidden" name="p.id" value="${prod.sku}">
                                 </td>
                                 <td colspan="6">&nbsp;</td>
                             </tr>
@@ -185,15 +183,15 @@
                             </tr>
                             <tr>
                                 <td colspan="8">
-                                    <a href="#" pid='${prod.id}' class="btn btn-primary saveProdInfo">保存</a>
+                                    <a href="#" pid='${prod.sku}' class="btn btn-primary saveProdInfo">保存</a>
                                 </td>
                             </tr>
                         </table>
                     </div>
-                    <div class="tab-pane" id="qty_${prod.id}">
+                    <div class="tab-pane" id="qty_${prod.sku}">
                         #{if prod.qtys.size() == 0}
                             没有库存<br/>
-                            <a data-toggle="modal" href="#add_modal_${prod.id}" class="btn btn-primary">库存</a>
+                            <a data-toggle="modal" href="#add_modal_${prod.sku}" class="btn btn-primary">库存</a>
                         #{/if}
                         #{else }
                             <table>
@@ -225,9 +223,9 @@
                                 #{/list}
                                 <tr>
                                     <td colspan="8">
-                                        <a data-toggle="modal" href="#add_modal_${prod.id}" class="btn btn-primary">库存</a>
+                                        <a data-toggle="modal" href="#add_modal_${prod.sku}" class="btn btn-primary">库存</a>
 
-                                        <div id="add_modal_${prod.id}" class="modal hide fade">
+                                        <div id="add_modal_${prod.sku}" class="modal hide fade">
                                             <div class="modal-header">
                                                 <a class="close" data-dismiss="modal">×</a>
 
@@ -248,7 +246,6 @@
                                                                             :${wh.name}</option>
                                                                     #{/list}
                                                                 </select>
-                                                                <input type="hidden" name="pt.product.id" value="${prod.id}">
                                                                 <input type="hidden" name="pt.product.sku" value="${prod.sku}">
                                                                 <input type="hidden" name="pt.save" value="true">
                                                             </div>
@@ -291,7 +288,7 @@
                                             </div>
 
                                             <div class="modal-footer">
-                                                <a href="#" class="btn btn-primary addProdQtyBtn" pid="${prod.id}">Save</a>
+                                                <a href="#" class="btn btn-primary addProdQtyBtn" pid="${prod.sku}">Save</a>
                                                 <a href="#" class="btn" data-dismiss="modal">Close</a>
                                             </div>
                                         </div>

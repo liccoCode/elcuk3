@@ -299,8 +299,13 @@ public class Selling extends GenericModel {
 
         // 通过 OrderItem 计算每一个产品的销量.
         for(OrderItem item : items) {
-            if(!sellingMap.containsKey(item.selling.merchantSKU)) {
-                sellingMap.put(item.selling.merchantSKU, item.selling);
+            try {
+                if(!sellingMap.containsKey(item.selling.merchantSKU)) {
+                    sellingMap.put(item.selling.merchantSKU, item.selling);
+                }
+            } catch(EntityNotFoundException e) {
+                Logger.warn(Webs.E(e));
+                continue; // 没有这个 Selling 则跳过
             }
             Selling current = sellingMap.get(item.selling.merchantSKU);
             Long differTime = now - item.createDate.getTime();
@@ -454,13 +459,13 @@ public class Selling extends GenericModel {
                 String t_fulfilchannel = null;
                 if(market == Account.M.AMAZON_FR) {
                     t_asin = args[11].trim();
-                    t_msku = args[2].trim();
+                    t_msku = args[2].trim().toUpperCase();
                     t_title = args[0].trim();
                     t_price = args[3].trim();
                     t_fulfilchannel = args[13].trim();
                 } else {
                     t_asin = args[16].trim();
-                    t_msku = args[3].trim();
+                    t_msku = args[3].trim().toUpperCase();
                     t_title = args[0].trim();
                     t_price = args[4].trim();
                     t_fulfilchannel = args[26].trim();
