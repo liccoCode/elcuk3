@@ -5,6 +5,7 @@ import com.amazonaws.mws.MarketplaceWebServiceClient;
 import com.amazonaws.mws.MarketplaceWebServiceConfig;
 import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
+import models.market.Account;
 import models.market.JobRequest;
 import org.apache.commons.io.FileUtils;
 import play.Logger;
@@ -37,15 +38,32 @@ public class AWS {
         /**
          * UK
          */
-        A1F83G8C2ARO7P,
+        A1F83G8C2ARO7P {
+            @Override
+            public Account.M market() {
+                return Account.M.AMAZON_UK;
+            }
+        },
         /**
          * DE
          */
-        A1PA6795UKMFR9,
+        A1PA6795UKMFR9 {
+            @Override
+            public Account.M market() {
+                return Account.M.AMAZON_DE;
+            }
+        },
         /**
          * FR
          */
-        A13V1IB3VIYZZH
+        A13V1IB3VIYZZH {
+            @Override
+            public Account.M market() {
+                return Account.M.AMAZON_FR;
+            }
+        };
+
+        public abstract Account.M market();
     }
 
     /**
@@ -116,6 +134,8 @@ public class AWS {
             job.procressState = info.getReportProcessingStatus();
             if("_DONE_".equals(job.procressState)) {
                 job.state = JobRequest.S.DONE;
+            } else if("_DONE_NO_DATA_".equals(job.procressState)) {
+                job.state = JobRequest.S.CLOSE;
             } else {
                 job.state = JobRequest.S.PROCRESS;
             }

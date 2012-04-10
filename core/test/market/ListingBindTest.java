@@ -1,6 +1,7 @@
 package market;
 
 import models.market.Listing;
+import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,15 +29,10 @@ public class ListingBindTest extends FunctionalTest {
             if(line.startsWith("#") || StringUtils.isBlank(line)) continue;
             String[] args = StringUtils.split(line, " ");
             // 每一个 SKU 都帮顶 3 个国家的 Listing.
-            if("609132508189".equals(args[0].split(",")[0])) {
-                GET("/listings/crawl?market=uk&asin=" + args[1] + "&sku=71-HPTOUCH-B2PG");
-                GET("/listings/crawl?market=de&asin=" + args[1] + "&sku=71-HPTOUCH-B2PG");
-                GET("/listings/crawl?market=fr&asin=" + args[1] + "&sku=71-HPTOUCH-B2PG");
-            } else {
-                GET("/listings/crawl?market=uk&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
-                GET("/listings/crawl?market=de&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
-                GET("/listings/crawl?market=fr&asin=" + args[1] + "&sku=" + args[0].split(",")[0]);
-            }
+            String sku = Product.merchantSKUtoSKU(args[0]);
+            GET("/listings/crawl?market=uk&asin=" + args[1] + "&sku=" + sku);
+            GET("/listings/crawl?market=de&asin=" + args[1] + "&sku=" + sku);
+            GET("/listings/crawl?market=fr&asin=" + args[1] + "&sku=" + sku);
         }
     }
 

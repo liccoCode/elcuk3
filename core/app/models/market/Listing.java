@@ -9,7 +9,7 @@ import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.List;
  * Time: 10:27 PM
  */
 @Entity
-public class Listing extends Model {
+public class Listing extends GenericModel {
     /**
      * Condition
      */
@@ -47,7 +47,7 @@ public class Listing extends Model {
     /**
      * 用来表示唯一的 ListingId, [asin]_[market]
      */
-    @Column(unique = true)
+    @Id
     public String listingId;
 
     @Column(nullable = false)

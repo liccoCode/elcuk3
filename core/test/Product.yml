@@ -34,8 +34,8 @@ product.Product(72ASEPSL101-2RE):
 product.Product(69-UNLCDCL-THAWG):
     sku: 69-UNLCDCL-THAWG
 
-product.Product(609132508189):
-    sku: 609132508189
+product.Product(71-HPTOUCH-B2PG):
+    sku: 71-HPTOUCH-B2PG
 
 product.Product(80-QW1A56-BE):
     sku: 80-QW1A56-BE
@@ -57,8 +57,5 @@ product.Product(15HTCG14-LUB2SP):
 
 product.Product(71-ASUSTF101-B2PG):
     sku: 71-ASUSTF101-B2PG
-
-product.Product(8Z-0JR3-1BHG):
-    sku: 8Z-0JR3-1BHG
 
 

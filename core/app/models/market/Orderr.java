@@ -611,22 +611,13 @@ public class Orderr extends GenericModel {
                 oi.quantity = oid.getQuantity();
                 oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
 
-                String sku = oid.getSKU().split(",")[0].toUpperCase();
-                Product product;
-                if("609132508189".equals(sku)) { // 这里做一个针对性的判断
-                    Logger.info("Fix SKU 609132508189 to 71-HPTOUCH-B2PG");
-                    product = Product.find("sku=?", "71-HPTOUCH-B2PG").first();
-                } else if("8Z-0JR3-1BHG".equals(sku)) { // Power Bank 的销售还是需要囊括进来的
-                    Logger.info("Fix SKU 8Z-0JR3-1BHG to 80-QW1A56-BE");
-                    product = Product.find("sku=?", "80-QW1A56-BE").first();
-                } else {
-                    product = Product.find("sku=?", sku).first();
-                }
+                String sku = Product.merchantSKUtoSKU(oid.getSKU());
+                Product product = Product.findById(sku);
                 Selling selling = Selling.find("asin=? AND market=?", oid.getASIN().toUpperCase(), orderr.market).first();
                 if(product != null) oi.product = product;
                 else {
                     // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("SKU[%s] is not in PRODUCT, it can not be happed!!", oid.getSKU().split(",")[0].toUpperCase());
+                    Logger.error("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
                     continue; // 发生了这个错误, 这跳过这个 orderitem 
                 }
                 if(selling != null) oi.selling = selling;

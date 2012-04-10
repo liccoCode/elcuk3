@@ -344,7 +344,7 @@ public class JobRequest extends Model {
                 }
                 break;
             case ACTIVE_LISTINGS:
-                //TODO 完成解析 Amazon 的 Active Listing Report 的功能!
+                Selling.dealSellingFromActiveListingsReport(new File(this.path), this.account, this.marketplaceId.market());
                 break;
         }
         this.state = S.CLOSE;

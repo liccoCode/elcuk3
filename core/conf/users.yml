@@ -30,3 +30,12 @@ market.Account(easyacc):
   accessKey: AKIAI6EBPJLG64HWDBGQ
   merchantId: AJUR3R8UN71M4
   closeable: false
+
+market.Account(easyacc_de):
+  username: easyacc.de@gmail.com
+  password: 6XC$X5oY!jj
+  type: AMAZON_UK
+  token: fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF
+  accessKey: AKIAIAEPZK5CZEIVZFCQ
+  merchantId: A22H6OV6Q7XBYK
+  closeable: false

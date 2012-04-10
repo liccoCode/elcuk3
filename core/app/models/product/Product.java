@@ -2,8 +2,10 @@ package models.product;
 
 import helper.Patterns;
 import models.market.Listing;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -16,7 +18,7 @@ import java.util.List;
  * Time: 10:55 AM
  */
 @Entity
-public class Product extends Model {
+public class Product extends GenericModel {
     /**
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
@@ -40,8 +42,7 @@ public class Product extends Model {
     /**
      * 唯一的标示
      */
-    @Column(nullable = false, unique = true)
-    @Required
+    @Id
     public String sku;
 
     @Required
@@ -96,5 +97,33 @@ public class Product extends Model {
         if(parts.length != 3) return false;
         if(!Patterns.Nub.matcher(parts[0]).matches()) return false;
         return true;
+    }
+
+    /**
+     * 根据 Amazon 输入的 MerchantSKU 来查找 Product, 会自动将 MerchantSKU 转换成系统内使用的 SKU;
+     * 这里面拥有两个兼容性判断.
+     *
+     * @param msku
+     * @return
+     */
+    public static Product findByMerchantSKU(String msku) {
+        return Product.findById(merchantSKUtoSKU(msku));
+    }
+
+    /**
+     * 将 Amazon 上的 MerchantSKU 转换成 SKU, 并且对 Amazon 上几个错误的 MerchantSKU 进行处理
+     *
+     * @param merchantSKU
+     * @return
+     */
+    public static String merchantSKUtoSKU(String merchantSKU) {
+        Validate.notNull(merchantSKU);
+        // ------ fix -----------
+//                if("609132508189".equals(t_msku)) t_msku = "71-HPTOUCH-B2PG"; //对历史错误数据的修复 @_@
+//                if("8Z-0JR3-1BHG".equals(t_msku.toUpperCase())) t_msku = "80-QW1A56-BE"; // Power Bank 的销售还是需要囊括进来的
+        String sku = StringUtils.split(merchantSKU, ",")[0].toUpperCase();
+        if("609132508189".equals(sku)) sku = "71-HPTOUCH-B2PG";
+        else if("8Z-0JR3-1BHG".equals(sku)) sku = "80-QW1A56-BE";
+        return sku;
     }
 }

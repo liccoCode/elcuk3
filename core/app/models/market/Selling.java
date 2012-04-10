@@ -3,10 +3,14 @@ package models.market;
 import exception.VErrorRuntimeException;
 import helper.Caches;
 import helper.PH;
+import helper.Webs;
 import models.procure.PItem;
+import models.product.Product;
 import models.product.ProductQTY;
 import models.product.Whouse;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -14,6 +18,8 @@ import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -405,6 +411,128 @@ public class Selling extends GenericModel {
                 return (int) (s1.dAll - s2.dAll);
             }
         });
+        return sellings;
+    }
+
+
+    /**
+     * 处理 Amazon 的 Active Listing Report 文档, 如果有新 Listing/Selling 则与系统进行同步处理.
+     * 如果系统中有的, Amazon 上没有, 则先不做处理.
+     *
+     * @param file
+     * @return
+     */
+    public static List<Selling> dealSellingFromActiveListingsReport(File file, Account acc, Account.M market) {
+        List<Selling> sellings = new ArrayList<Selling>();
+        List<String> lines = null;
+        try {
+            lines = FileUtils.readLines(file);
+        } catch(IOException e) {
+            Logger.warn("File [%s] IO Error!", file.getAbsolutePath());
+            return sellings;
+        }
+
+        lines.remove(0); // 删除第一行的标题
+
+        for(String line : lines) {
+            try {
+                String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+
+                /**
+                 * 1. 解析出 Listing, 并且将 Listing 绑定到对应的 Product 身上
+                 *  a. 注意需要先查找系统中是否有对应的 Listing, 如果有则不做处理
+                 *  b. 如果没有对应的 Listing 那么则创建一个新的 Listing 并且保存下来;(Listing 的详细信息等待抓取线程自己去进行更新)
+                 *
+                 * 2. 创建 Selling, 因为这份文件是自己的, 所以接触出来的 Listing 数据就是自己的 Selling
+                 *  a. 注意需要先查找系统中是否有, 有的话则不做处理
+                 *  b. 没有的话则创建 Selling 并且绑定 Listing
+                 */
+                String t_asin = null;
+                String t_msku = null;
+                String t_title = null;
+                String t_price = null;
+                String t_fulfilchannel = null;
+                if(market == Account.M.AMAZON_FR) {
+                    t_asin = args[11].trim();
+                    t_msku = args[2].trim();
+                    t_title = args[0].trim();
+                    t_price = args[3].trim();
+                    t_fulfilchannel = args[13].trim();
+                } else {
+                    t_asin = args[16].trim();
+                    t_msku = args[3].trim();
+                    t_title = args[0].trim();
+                    t_price = args[4].trim();
+                    t_fulfilchannel = args[26].trim();
+                }
+
+                String lid = String.format("%s_%s", t_asin, market.toString());
+                Listing lst = Listing.findById(lid);
+                Product prod = Product.findByMerchantSKU(t_msku);
+                if(prod == null) {
+                    String warnMsg = "[Warnning!] Listing[" + lid + "] Missing Product[" + t_msku + "].";
+                    Logger.warn(warnMsg);
+                    Webs.systemMail(warnMsg, String.format("Listing %s Missing Product %s.", lid, t_msku));
+                    continue;// 如果 Product 不存在, 需要跳过这个 Listing!
+                }
+
+                if(lst != null) Logger.info("Listing[%s] is exist.", lid);
+                else {
+                    lst = new Listing();
+                    lst.listingId = lid;
+                    lst.market = market;
+                    lst.asin = t_asin;
+                    lst.product = prod;
+                    lst.title = t_title;
+                    lst.displayPrice = NumberUtils.toFloat(t_price);
+                    lst.lastUpdateTime = System.currentTimeMillis();
+                    lst.save();
+                }
+
+                String sid = String.format("%s_%s", t_msku, market.toString());
+                Selling selling = Selling.findById(sid);
+                if(selling != null) Logger.info("Selling[%s] is exist.", sid);
+                else {
+                    selling = new Selling();
+                    selling.sellingId = sid;
+                    selling.asin = lst.asin;
+                    selling.condition_ = "NEW";
+                    selling.market = market;
+                    selling.merchantSKU = t_msku;
+
+                    selling.title = lst.title;
+                    selling.account = acc;
+                    selling.shippingPrice = 0f;
+                    selling.standerPrice = selling.price = lst.displayPrice;
+                    selling.ps = 2f;
+                    selling.state = S.SELLING;
+
+                    PriceStrategy priceStrategy = new PriceStrategy();
+                    if(StringUtils.isNotBlank(t_fulfilchannel) && StringUtils.startsWith(t_fulfilchannel.toLowerCase(), "amazon")) {
+                        priceStrategy.type = PriceStrategy.T.FixedPrice;
+                        selling.type = T.FBA;
+                    } else {
+                        priceStrategy.type = PriceStrategy.T.LowestPrice;
+                        selling.type = T.AMAZON;
+                    }
+
+                    // 新添加的 PriceStrategy,
+                    priceStrategy.cost = lst.displayPrice * 0.5f; //成本价格位展示价格的 50%
+                    priceStrategy.margin = 0.3f;//利润位 30%
+                    priceStrategy.lowest = priceStrategy.cost * 1.05f; //最低价格位成本价格的 1.05 倍
+                    priceStrategy.max = priceStrategy.cost * 3f; //最高价格位成本价格的 3 倍
+                    selling.priceStrategy = priceStrategy;
+                    selling.listing = lst;
+
+                    selling.save();
+                }
+                sellings.add(selling);
+            } catch(Exception e) {
+                String warMsg = "Skip Add one Listing/Selling. Line[" + line + "]";
+                Logger.warn(warMsg);
+                Webs.systemMail(warMsg, String.format("%s <br/>\r\n%s", warMsg, Webs.E(e)));
+            }
+        }
         return sellings;
     }
 
