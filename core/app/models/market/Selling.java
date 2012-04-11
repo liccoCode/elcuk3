@@ -70,6 +70,9 @@ public class Selling extends GenericModel {
     @ManyToOne
     public Listing listing;
 
+    @OneToMany(mappedBy = "selling", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    public List<SellingQTY> qtys;
+
     @OneToOne(cascade = CascadeType.ALL)
     public PriceStrategy priceStrategy;
 
@@ -248,6 +251,16 @@ public class Selling extends GenericModel {
         if(oldOne == null) throw new VErrorRuntimeException("Selling.merchantSKU", "MerchantSKU Selling is not valid!");
         sellingParamsCopy(oldOne);
         oldOne.save();
+    }
+
+    /**
+     * 指定一个 Whouse, 加载出此 Selling 在此仓库中的唯一的库存
+     *
+     * @param whouse
+     * @return
+     */
+    public SellingQTY uniqueQTY(Whouse whouse) {
+        return SellingQTY.findById(String.format("%s_%s", this.merchantSKU.toUpperCase(), whouse.id));
     }
 
     /**
@@ -477,6 +490,9 @@ public class Selling extends GenericModel {
                     t_price = args[4].trim();
                     t_fulfilchannel = args[26].trim();
                 }
+
+                // 如果属于 UnUsedSKU 那么则跳过这个解析
+                if(Product.unUsedSKU(t_msku)) continue;
 
                 String lid = String.format("%s_%s", t_asin, market.toString());
                 Listing lst = Listing.findById(lid);

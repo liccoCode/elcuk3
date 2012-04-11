@@ -1,6 +1,7 @@
 package models.product;
 
 import models.market.Account;
+import models.market.SellingQTY;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
@@ -136,6 +137,38 @@ public class Whouse extends Model {
             }
         }
         return new ArrayList<ProductQTY>(qtyMap.values());
+    }
+
+    /**
+     * 从 FBA 的 CSV report 文件中解析出系统中存在或者不存在的 SellingQTY, 但不做保存到数据库的处理.
+     *
+     * @param file
+     * @return
+     */
+    public List<SellingQTY> fbaCSVParseSQTY(File file) {
+        List<String> lines = IO.readLines(file);
+        lines.remove(0);
+
+        List<SellingQTY> qtys = new ArrayList<SellingQTY>();
+        for(String line : lines) {
+            String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
+
+            // 如果属于 UnUsedSKU 那么则跳过这个解析
+            if(Product.unUsedSKU(vals[0])) continue;
+
+            String sqtyId = String.format("%s_%s", vals[0].toUpperCase(), this.id);
+            SellingQTY qty = SellingQTY.findById(sqtyId);
+            if(qty == null) qty = new SellingQTY(sqtyId);
+
+            qty.inbound = NumberUtils.toInt(vals[16]);
+            qty.qty = NumberUtils.toInt(vals[10]);
+            qty.unsellable = NumberUtils.toInt(vals[11]);
+            qty.pending = NumberUtils.toInt(vals[12]);
+
+            qtys.add(qty);
+        }
+
+        return qtys;
     }
 
     @Override

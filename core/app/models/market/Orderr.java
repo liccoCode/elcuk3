@@ -611,6 +611,10 @@ public class Orderr extends GenericModel {
                 oi.quantity = oid.getQuantity();
                 oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
 
+
+                // 如果属于 UnUsedSKU 那么则跳过这个解析
+                if(Product.unUsedSKU(oid.getSKU())) continue;
+
                 String sku = Product.merchantSKUtoSKU(oid.getSKU());
                 Product product = Product.findById(sku);
                 Selling selling = Selling.findById(String.format("%s_%s", oid.getSKU().toUpperCase(), orderr.market.toString()));

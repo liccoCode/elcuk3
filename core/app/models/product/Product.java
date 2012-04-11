@@ -9,7 +9,9 @@ import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -125,5 +127,36 @@ public class Product extends GenericModel {
         if("609132508189".equals(sku)) sku = "71-HPTOUCH-B2PG";
         else if("8Z-0JR3-1BHG".equals(sku)) sku = "80-QW1A56-BE";
         return sku;
+    }
+
+
+    /**
+     * 这几个为从 Amazon 解析回来的 SKU 存在, 但不需要在系统中再出现的 SKU, 为 Amazon 与系统中的同步做过滤
+     */
+    private static final Map<String, Integer> UN_USE_SKU = new HashMap<String, Integer>();
+
+    static {
+        UN_USE_SKU.put("15HTCG14-MB2SP", 1);
+        UN_USE_SKU.put("15HTCG14-MS2SP", 1);
+        UN_USE_SKU.put("15SS5ACE-LUB2SP", 1);
+        UN_USE_SKU.put("15SSI9100-LUB2SP", 1);
+        UN_USE_SKU.put("4N-GGOQ-2H0M", 1);
+        UN_USE_SKU.put("50-TPLED-2B21BG", 1);
+        UN_USE_SKU.put("67-STRASSABS-80W29SG", 1);
+        UN_USE_SKU.put("70-SMP1000-BTKBBG", 1);
+        UN_USE_SKU.put("71-APSL13-BG", 1);
+        UN_USE_SKU.put("71-APSL15-BG", 1);
+        UN_USE_SKU.put("71SMGT101-BPU", 1);
+        UN_USE_SKU.put("71-SAMGT101-BPU", 1);
+    }
+
+    /**
+     * 判断是否属于不再用来与 Amazon 同步的 SKU
+     *
+     * @param merchantSKU Amazon 上的使用的 MerchantSKU
+     * @return
+     */
+    public static boolean unUsedSKU(String merchantSKU) {
+        return UN_USE_SKU.containsKey(Product.merchantSKUtoSKU(merchantSKU));
     }
 }

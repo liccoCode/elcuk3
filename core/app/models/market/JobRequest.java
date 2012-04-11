@@ -1,6 +1,7 @@
 package models.market;
 
 import helper.AWS;
+import helper.Webs;
 import models.product.Product;
 import models.product.ProductQTY;
 import models.product.Whouse;
@@ -317,6 +318,10 @@ public class JobRequest extends Model {
                 break;
             case MANAGE_FBA_INVENTORY_ARCHIVED:
                 Whouse wh = Whouse.find("account=?", this.account).first();
+
+                /**
+                 * ================== 1. ProductQTY 兼容处理 =====================
+                 */
                 List<ProductQTY> qtys = wh.fbaCSVParse(new File(this.path));
                 /**
                  * 只会寻找与 Whouse 所拥有的 ProductQTY 进行更新;
@@ -342,6 +347,29 @@ public class JobRequest extends Model {
                         Logger.info("ProductQTY " + qty.product.sku + " synchronize from FBA to System.");
                     }
                 }
+
+                /**
+                 * ================= 2. SellingQTY 新的处理 =======================
+                 */
+                List<SellingQTY> sqtys = wh.fbaCSVParseSQTY(new File(this.path));
+                for(SellingQTY sqty : sqtys) {
+                    // 解析出来的 SellingQTY, 如果系统中拥有则进行更新, 否则绑定到 Selling 身上
+                    if(!sqty.isPersistent()) {
+                        String sid = String.format("%s_%s", sqty.id.split("_")[0].toUpperCase(), wh.account.type.toString());
+                        try {
+                            sqty.attach2Selling(sqty.id.split("_")[0], wh);
+                        } catch(Exception e) {
+                            String warmsg = "FBA CSV Report hava Selling[" + sid + "] that system can not be found!";
+                            Logger.warn(warmsg);
+                            Webs.systemMail(warmsg, warmsg + "<br/>\r\n" + Webs.E(e) +
+                                    ";<br/>\r\n需要通过 Amazon 与系统内的 Selling 进行同步, 处理掉丢失的 Product 与 Selling, 然后再重新进行 FBA 库存的解析.");
+                        }
+                    } else {
+                        sqty.save();
+                    }
+                }
+
+
                 break;
             case ACTIVE_LISTINGS:
                 Selling.dealSellingFromActiveListingsReport(new File(this.path), this.account, this.marketplaceId.market());
