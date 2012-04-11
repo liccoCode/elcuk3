@@ -169,19 +169,50 @@ $(function(){
         });
     }
 
+
+    /**
+     * Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
+     * @param t
+     * @param page
+     * @param size
+     */
+    function sellRankLoad(t, page, size){
+        var type = 'msku';
+        if(!size) size = 10;
+        if(t > 0) type = 'msku';
+        else if(t < 0) type = 'sku';
+        var tgt = $('#' + type);
+        tgt.mask('加载中...');
+        tgt.load('/analyzes/index_' + type, {'p.page':page, 'p.size':size}, function(){
+            try{
+                $('.msku').dblclick(function(){
+                    $('#a_msku').val($(this).text());
+                });
+                $('#pagefooter_' + type).keyup(function(e){
+                    if(e.keyCode != 13) return false;
+                    var o = $(this);
+                    if(o.val() > new Number(o.attr('totalPage'))){
+                        alert('不允许超过最大页码');
+                        return false;
+                    }
+                    // Ajax 事件需要重新加载
+                    sellRankLoad(t, o.val());
+                });
+            }finally{
+                tgt.unmask();
+            }
+        });
+    }
+
     // 访问页面, 利用 Ajax 加载所有订单的销量
     var preMonth = $.DateUtil.addDay(-30);
     var now = new Date();
     $('#a_from').data("dateinput").setValue(preMonth);
     $('#a_to').data("dateinput").setValue(now);
 
-    // 最下方的 Selling Sale 列表信息
-    $.get('/analyzes/index_sell', {'p.page':1, 'p.size':10}, function(html){
-        $('#selling_down').html(html);
-        $('.msku').dblclick(function(){
-            $('#a_msku').val($(this).text());
-        });
-    });
+    // 最下方的 Selling[MerchantSKU, SKU] 列表信息
+    sellRankLoad(1, 1);
+    sellRankLoad(-1, 1);
 
     ajax_line('all', {from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'all', type:'msku'});
 

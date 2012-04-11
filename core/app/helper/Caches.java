@@ -11,7 +11,7 @@ public class Caches {
      * Selling 的销量排名的 Selling 的缓存 key
      * PS: 缓存 20mn
      */
-    public static final String SALE_SELLING = "salesRankWithTime";
+    public static final String SALE_SELLING = "salesRankWithTime_%s";
 
     /**
      * Analyzes 页面的 Ajax 获取分析数据的 Line(销量) 图时使用的带有 msku 的缓存 key, 需要补充 msku 值区分唯一, 两个时间的毫秒数.

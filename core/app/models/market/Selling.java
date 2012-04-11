@@ -294,14 +294,16 @@ public class Selling extends GenericModel {
     }
 
     /**
-     * 加载指定时间段内的 Selling 的销量排名数据;其中涉及到计算: day(1-N), turnover
+     * 加载指定时间段内的 Selling 的销量排名数据(以 MerchantSKU 来进行判断);
+     * 其中涉及到计算: day(1-N), turnover
      * PS: 这份数据肯定是需要进行缓存的..
      *
+     * @param t >0 :按照 MerchantSKU 排序; <0 :按照 SKU 排序
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<Selling> salesRankWithTime() {
-        List<Selling> cached = Cache.get(Caches.SALE_SELLING, List.class);
+    public static List<Selling> salesRankWithTime(int t) {
+        List<Selling> cached = Cache.get(String.format(Caches.SALE_SELLING, t), List.class);
         if(cached != null && cached.size() > 0) return cached;
         Map<String, Selling> sellingMap = new HashMap<String, Selling>();
 
@@ -311,9 +313,9 @@ public class Selling extends GenericModel {
          * 3. 计算 d1, d7, d30, d180 天的销量数据
          */
 
-        DateTime nowDate = DateTime.now();
+        DateTime nowDate = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         List<OrderItem> items = OrderItem.find("createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
-                DateTime.parse(nowDate.toString("yyyy-MM-dd")).plusDays(-180).toDate(), DateTime.parse(nowDate.toString("yyyy-MM-dd")).toDate(), Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                nowDate.plusDays(-180).toDate(), nowDate.toDate(), Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
 
         Long now = nowDate.getMillis();
 
@@ -321,7 +323,12 @@ public class Selling extends GenericModel {
         for(OrderItem item : items) {
             String sellKey = null;
             try {
-                sellKey = String.format("%s_%s", item.selling.merchantSKU, item.order.market.toString());
+                if(Product.unUsedSKU(item.product.sku)) continue;
+                if(t > 0) {
+                    sellKey = String.format("%s_%s", item.selling.merchantSKU, item.selling.account.id);
+                } else if(t < 0) {
+                    sellKey = item.product.sku;
+                }
                 if(!sellingMap.containsKey(sellKey)) {
                     sellingMap.put(sellKey, item.selling);
                 }
@@ -346,20 +353,22 @@ public class Selling extends GenericModel {
                 current.d180 += item.quantity;
         }
 
-        // 通过 Selling 与 Product 库存计算 TurnOver
+
+        List<SellingQTY> turnOverQty = new ArrayList<SellingQTY>();
         for(Selling sell : sellingMap.values()) {
-            List<ProductQTY> qtys = sell.listing.product.qtys;
             Integer quantity = 0;
-            for(ProductQTY qty : qtys) {
-                quantity += qty.qty;
-            }
+
+            /**
+             * 1. 按照 MerchantSKU 则计算每一个 Product 的库存即可
+             * 2. 按照 SKU 则需要找到此 SKU 的所有 Selling 然后找到所有的库存进行计算
+             */
+            if(t > 0) turnOverQty = sell.qtys;// 按照 MerchantSKU 则计算每一个 Product 的库存即可
+            else if(t < 0) turnOverQty = SellingQTY.qtysAccodingSKU(Product.findByMerchantSKU(sell.merchantSKU));
+
+            for(SellingQTY qty : turnOverQty) quantity += qty.qty;
             sell.qty = quantity;
-            // 当前这个 Selling 所具有的库存 / 计算的 7 天的平均销量
-            if(sell.d7 == 0) {
-                sell.turnOver = -1f; // 如果 7 天内没有销量, 那么 turnOver 则直接调整为 -1, 标示值不可参考
-            } else {
-                sell.turnOver = new Float(quantity / (sell.d7 / 7.0));
-            }
+            if(sell.d7 <= 0) sell.turnOver = -1f;
+            else sell.turnOver = (quantity < 0 ? 0 : quantity) / (sell.d7 / 7f);
         }
 
         // 最后对 Selling 进行排序
@@ -370,7 +379,7 @@ public class Selling extends GenericModel {
                 return (int) (s2.d7 - s1.d7);
             }
         });
-        if(sellings.size() > 0) Cache.add(Caches.SALE_SELLING, sellings, "30mn"); // 缓存 30 分钟
+        if(sellings.size() > 0) Cache.add(String.format(Caches.SALE_SELLING, t), sellings, "30mn"); // 缓存 30 分钟
         return sellings;
     }
 

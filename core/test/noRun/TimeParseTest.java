@@ -122,4 +122,11 @@ public class TimeParseTest {
         System.out.println(d1.plusDays(-12).toString(format));
         System.out.println(d1.plusDays(-46).toString(format));
     }
+
+    @Test
+    public void testDatePlus1() {
+        DateTime dt = DateTime.parse(DateTime.now().plusDays(1).toString("yyyy-MM-dd"));
+        System.out.println(dt.toString("yyyy-MM-dd HH:mm:ss"));
+        System.out.println(dt.plusDays(-180).toString("yyyy-MM-dd HH:mm:ss"));
+    }
 }

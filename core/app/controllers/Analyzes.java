@@ -31,8 +31,23 @@ public class Analyzes extends Controller {
     /**
      * Analyze 页面下部分的 Selling 信息
      */
-    public static void index_sell(PageInfo<Selling> p) {
-        List<Selling> sells = Selling.salesRankWithTime();
+    public static void index_msku(PageInfo<Selling> p) {
+        List<Selling> sells = Selling.salesRankWithTime(1);
+        List<Selling> items = new ArrayList<Selling>();
+        if(sells.size() == 0) {
+            p.items = items;
+            render(p);
+        }
+        p.count = (long) sells.size();
+        for(int i = p.begin; i < p.end; i++) {
+            items.add(sells.get(i));
+        }
+        p.items = items;
+        render(p);
+    }
+
+    public static void index_sku(PageInfo<Selling> p) {
+        List<Selling> sells = Selling.salesRankWithTime(-1);
         List<Selling> items = new ArrayList<Selling>();
         if(sells.size() == 0) {
             p.items = items;

@@ -30,6 +30,7 @@ public class OrderFetchJob extends Job {
         // 1,2. 需要创建新的 Job
         for(Account acc : accs) {
             for(JobRequest.T type : JobRequest.T.values()) {
+                if(type != JobRequest.T.ALL_FBA_ORDER_FETCH && type != JobRequest.T.ALL_FBA_ORDER_SHIPPED) continue;
                 JobRequest job = JobRequest.checkJob(acc, type, acc.marketplaceId());
                 if(job == null) continue;
                 job.request();

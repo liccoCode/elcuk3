@@ -3,11 +3,11 @@
     <tr>
         <th title="可双击下面 MerchantSKU">MerchantSKU</th>
         <th>ASIN</th>
-        <th>Market</th>
+        <th>Account</th>
         <th>Price</th>
         <th>Qty</th>
         <th>PS</th>
-        <th>Day1</th>
+        <th title="计算的是昨天的数据, 不包含今天; Day7, Day30, Day180 相同" style="color:grey;">Day1</th>
         <th>Day7</th>
         <th>Day30</th>
         <th>Day180</th>
@@ -21,7 +21,7 @@
             <td class="sid" title="${sell.sellingId}">
                 <a target="_blank" href="${helper.Webs.link(sell)}">${sell.asin}</a>
             </td>
-            <td>${sell.market.toString()}</td>
+            <td>${sell.account.toString()}</td>
             <td>${sell.price}</td>
             <td>${sell.qty}</td>
             <td>${sell.ps}</td>
@@ -33,7 +33,7 @@
                 <td style="color:red;">${sell.turnOver.format("#.##")}</td>
             #{/if}
             #{elseif sell.turnOver < 0}
-                <td style="color:purple;">(无库存)</td>
+                <td style="color:purple;">(7天内无销量!)</td>
             #{/elseif}
             #{else }
                 <td>${sell.turnOver.format("#.##")}</td>
@@ -47,25 +47,9 @@
             <div>
                 当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count} 条记录,  ${p.page}
                 / ${p.totalPage} 页
-                跳到 <input type="text" class="page" psize="${p.size}" id="pagefooter" value="${p.page + 1}"> 页
-                <script type="text/javascript">
-                    // 分页 input 框
-                    $('#pagefooter').keyup(function(e){
-                        if(e.keyCode != 13) return false;
-                        var o = $(this);
-                        if(o.val() > new Number('${p.totalPage}')){
-                            alert('不允许超过最大页码');
-                            return false;
-                        }
-                        // Ajax 事件需要重新加载
-                        $.get('/analyzes/index_sell', {'p.page':o.val(), 'p.size':10}, function(html){
-                            $('#selling_down').html(html);
-                            $('.msku').dblclick(function(){
-                                $('#a_msku').val($(this).text());
-                            });
-                        });
-                    });
-                </script>
+                跳到
+                <input type="text" class="page" psize="${p.size}" totalPage="${p.totalPage}" id="pagefooter_msku" value="${p.page + 1}">
+                页
             </div>
         </td>
     </tr>

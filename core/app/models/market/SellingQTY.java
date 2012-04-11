@@ -7,6 +7,7 @@ import org.apache.commons.lang.Validate;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * 将库存绑定到 Selling 级别, 不再统一到 Product 身上;
@@ -87,5 +88,9 @@ public class SellingQTY extends GenericModel {
         this.whouse = whouse;
         this.id = String.format("%s_%s", merchantSKU.toUpperCase(), whouse.id);
         this.save();
+    }
+
+    public static List<SellingQTY> qtysAccodingSKU(Product prod) {
+        return SellingQTY.find("product=?", prod).fetch();
     }
 }

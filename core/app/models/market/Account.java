@@ -442,12 +442,7 @@ public class Account extends Model {
 
     @Override
     public String toString() {
-        return "Account{" +
-                "uniqueName='" + uniqueName + '\'' +
-                ", type=" + type +
-                ", username='" + username + '\'' +
-                ", closeable=" + closeable +
-                '}';
+        return this.username.split("@")[0];
     }
 
 }
