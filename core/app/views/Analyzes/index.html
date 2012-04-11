@@ -33,12 +33,14 @@
         <div class="span3">
             <span class="span1 label label-success large">MSKU:</span>
             <input class="span3" type="text" name="msku" id='a_msku' placeHolder="[ALL]所有产品的销量/销售额">
+            <input type="hidden" name="acc.id" id="a_acc_id">
             <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
             <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
         </div>
 
         <div class="span1">
             <a href="#" class="btn" id="a_search">搜索</a>
+            <span class="label label-info inline" id="a_acc_id_label">all</span>
         </div>
     </div>
 

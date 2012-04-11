@@ -303,7 +303,8 @@ public class Selling extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static List<Selling> salesRankWithTime(int t) {
-        List<Selling> cached = Cache.get(String.format(Caches.SALE_SELLING, t), List.class);
+        String cacke_key = String.format(Caches.SALE_SELLING, t);
+        List<Selling> cached = Cache.get(cacke_key, List.class);
         if(cached != null && cached.size() > 0) return cached;
         Map<String, Selling> sellingMap = new HashMap<String, Selling>();
 
@@ -379,7 +380,7 @@ public class Selling extends GenericModel {
                 return (int) (s2.d7 - s1.d7);
             }
         });
-        if(sellings.size() > 0) Cache.add(String.format(Caches.SALE_SELLING, t), sellings, "30mn"); // 缓存 30 分钟
+        if(sellings.size() > 0) Cache.add(cacke_key, sellings, "30mn"); // 缓存 30 分钟
         return sellings;
     }
 

@@ -187,6 +187,9 @@ $(function(){
             try{
                 $('.msku').dblclick(function(){
                     $('#a_msku').val($(this).text());
+                    $('#a_acc_id').val($(this).attr('aid'));
+                    var display = {1:'easyacc.eu', 2:'easyacc.de'};
+                    if(type == 'msku') $('#a_acc_id_label').html(display[$(this).attr('aid')]);
                 });
                 $('#pagefooter_' + type).keyup(function(e){
                     if(e.keyCode != 13) return false;

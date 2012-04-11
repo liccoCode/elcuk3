@@ -17,7 +17,7 @@
 #{list items:p.items, as:'sell'}
     #{if sell_index <= 10}
         <tr>
-            <td class="msku" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
+            <td class="msku" aid="${sell.account.id}" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
             <td class="sid" title="${sell.sellingId}">
                 <a target="_blank" href="${helper.Webs.link(sell)}">${sell.asin}</a>
             </td>

@@ -1,6 +1,7 @@
 package controllers;
 
 import models.PageInfo;
+import models.market.Account;
 import models.market.OrderItem;
 import models.market.Orderr;
 import models.market.Selling;
@@ -70,13 +71,14 @@ public class Analyzes extends Controller {
      */
     public static void ajaxSells(String msku,
                                  String type,
+                                 Account acc,
                                  @As("MM/dd/yyyy") Date from,
                                  @As("MM/dd/yyyy") Date to) {
         validation.required(msku);
         validation.required(from);
         validation.required(to);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        renderJSON(OrderItem.ajaxHighChartSelling(msku, type, from, to));
+        renderJSON(OrderItem.ajaxHighChartSelling(msku, acc, type, from, to));
     }
 
     /**

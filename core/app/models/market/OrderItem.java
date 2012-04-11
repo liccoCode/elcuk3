@@ -89,13 +89,13 @@ public class OrderItem extends GenericModel {
      * </pre>
      *
      * @param msku
+     * @param acc
      * @param from
-     * @param to
-     * @return {series_size, days, series_n}
+     * @param to   @return {series_size, days, series_n}
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> ajaxHighChartSelling(String msku, String type, Date from, Date to) {
-        String cached_key = String.format(Caches.AJAX_SALE_LINE, msku + (StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type) ? "_sku" : ""), from.getTime(), to.getTime());
+    public static Map<String, Object> ajaxHighChartSelling(String msku, Account acc, String type, Date from, Date to) {
+        String cached_key = String.format(Caches.AJAX_SALE_LINE, msku + (StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type) ? "_sku" : "") + "_" + (acc == null ? "0" : acc.id), from.getTime(), to.getTime());
         Map<String, Object> cached = Cache.get(cached_key, Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
@@ -115,8 +115,12 @@ public class OrderItem extends GenericModel {
         } else {
             if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
                 orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(msku), from, to).fetch();
-            else
-                orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", msku, from, to).fetch();
+            else {
+                if(acc == null)
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", msku, from, to).fetch();
+                else
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", msku, acc, from, to).fetch();
+            }
         }
 
         // 按照每天进行分割 --- 销量
