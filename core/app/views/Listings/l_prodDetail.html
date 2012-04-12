@@ -16,30 +16,3 @@
         <td>${prod.weight ? prod.weight : 0}</td>
     </tr>
 </table>
-
-<div>
-    <div class="l_prod_qtys">
-        <h2 style="margin-bottom:0.1em;">库存信息</h2>
-    #{if prod.qtys.size() == 0}
-        此商品暂时还没有库存
-    #{/if}
-    #{else }
-        #{list items:prod.qtys,as:'qty'}
-            <blockquote>
-                <table class="table">
-                    <tr>
-                        <td class="label">Whouse:</td>
-                        <td>${qty.whouse.name}</td>
-                        <td class="label">Pending:</td>
-                        <td>${qty.pending}</td>
-                        <td class="label">Qty:</td>
-                        <td>${qty.qty}</td>
-                        <td class="label">Unsellable:</td>
-                        <td>${qty.unsellable}</td>
-                    </tr>
-                </table>
-            </blockquote>
-        #{/list}
-    #{/else}
-    </div>
-</div>

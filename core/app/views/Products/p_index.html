@@ -19,7 +19,7 @@
                 <form id='add_prod_form' class="form-horizontal">
                     <fieldset>
                         <div class="control-group">
-                            <label for="p.sku">SKU</label>
+                            <label class="control-label" for="p.sku">SKU</label>
 
                             <div class="controls">
                                 <input type="text" id="p.sku" name="p.sku">
@@ -27,7 +27,7 @@
                         </div>
 
                         <div class="control-group">
-                            <label for="p.productName">ProductName</label>
+                            <label class="control-label" for="p.productName">ProductName</label>
 
                             <div class="controls">
                                 <input type="text" id="p.productName" name="p.productName">
@@ -35,7 +35,7 @@
                         </div>
 
                         <div class="control-group">
-                            <label for="p.lengths">Length</label>
+                            <label class="control-label" for="p.lengths">Length</label>
 
                             <div class="controls">
                                 <input type="text" id="p.lengths" name="p.lengths">
@@ -43,7 +43,7 @@
                         </div>
 
                         <div class="control-group">
-                            <label for="p.heigh">Heigh</label>
+                            <label class="control-label" for="p.heigh">Heigh</label>
 
                             <div class="controls">
                                 <input type="text" id="p.heigh" name="p.heigh">
@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="control-group">
-                            <label for="p.width">Width</label>
+                            <label class="control-label" for="p.width">Width</label>
 
                             <div class="controls">
                                 <input type="text" id="p.width" name="p.width">
@@ -59,7 +59,7 @@
                         </div>
 
                         <div class="control-group">
-                            <label for="p.weight">Weight</label>
+                            <label class="control-label" for="p.weight">Weight</label>
 
                             <div class="controls">
                                 <input type="text" id="p.weight" name="p.weight">
@@ -67,14 +67,14 @@
                         </div>
 
                         <div class="control-group">
-                            <label>Category</label>
+                            <label class="control-label">Category</label>
 
                             <div class="controls">
                             #{if cates.size() == 0}
                                 <input type="text" name="p.nocat" value="请添加 Category" readonly>
                             #{/if}
                             #{else }
-                                #{cat_select cates:cates, catId:0 /}
+                                #{select name:'p.category.id', items:cates, labelProperty:'toString'}#{/select}
                             #{/else}
                             </div>
                         </div>

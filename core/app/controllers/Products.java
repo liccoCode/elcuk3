@@ -1,6 +1,5 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import helper.Webs;
 import models.PageInfo;
 import models.Ret;
@@ -72,17 +71,16 @@ public class Products extends Controller {
 
 
     public static void p_create(@Valid Product p) {
+        if(p.isPersistent()) renderJSON(new Ret(String.format("The Product[%s] is exist!", p.sku)));
         if(Validation.hasErrors()) {
             renderJSON(validation.errorsMap());
         }
-        Category cat = Category.find("categoryId=?", p.category.categoryId).first();
-        if(p.category == null || cat == null)
-            renderJSON(new Error("categoryId", "No matched category", new String[]{}));
+        if(p.category == null)
+            renderJSON(new Ret("No matched category"));
         if(!Product.validSKU(p.sku))
-            renderJSON(new Error("sku", "Not valid SKU format", new String[]{}));
-        p.category = cat;
+            renderJSON(new Ret("Not valid SKU format"));
         p.save();
-        renderJSON(JSON.toJSONString(p));
+        renderJSON(new Ret(true, "Product[" + p.sku + "] Save Success!"));
     }
 
     public static void p_u(Product p) {
