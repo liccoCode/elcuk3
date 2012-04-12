@@ -1,13 +1,11 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
-import exception.VErrorRuntimeException;
 import helper.Webs;
 import models.PageInfo;
 import models.market.Account;
 import models.product.Category;
 import models.product.Product;
-import models.product.ProductQTY;
 import models.product.Whouse;
 import play.data.validation.Error;
 import play.data.validation.Valid;
@@ -92,18 +90,6 @@ public class Products extends Controller {
         renderJSON(w);
     }
 
-    public static void pt_create(ProductQTY pt) {
-        validation.required(pt.qty);
-        if(Validation.hasErrors()) {
-            renderJSON(validation.errorsMap());
-        }
-        try {
-            pt.saveAndUpdate();
-        } catch(VErrorRuntimeException e) {
-            renderJSON(e.getError());
-        }
-        renderJSON("{\"flag\":\"true\"}");
-    }
 
     public static void w_remove(long id) {
         validation.required(id);
@@ -118,7 +104,6 @@ public class Products extends Controller {
         if(!w.isPersistent() || !w.account.isPersistent())
             renderJSON(new Error("whouse", "Whouse or Accoutn is not persistent!", new String[]{}));
         if(w.type == Whouse.T.FBA) w.save();
-        w.qtys = null;
         renderJSON(w);
     }
 }

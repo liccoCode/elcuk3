@@ -34,12 +34,6 @@ public class Product extends GenericModel {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
     public List<Product> relates;
 
-    /**
-     * Product 的所有库存;
-     * 将产品删除了, 库存不允许删除, 库存记录变为"孤儿"
-     */
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.ALL}, orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<ProductQTY> qtys;
 
     /**
      * 唯一的标示
@@ -74,12 +68,6 @@ public class Product extends GenericModel {
         if(this.listings != null && this.listings.size() > 0) {
             throw new FastRuntimeException("Product [" + this.sku + "] have relate Listing, cannot be delete.");
         }
-        for(ProductQTY qty : this.qtys) {
-            if(qty.pending + qty.unsellable + qty.qty > 0) {
-                throw new FastRuntimeException("Product [" + this.sku + "] hava quantity, cannot be delete.");
-            }
-        }
-
     }
 
     /**

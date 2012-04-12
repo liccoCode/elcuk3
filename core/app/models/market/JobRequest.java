@@ -2,8 +2,6 @@ package models.market;
 
 import helper.AWS;
 import helper.Webs;
-import models.product.Product;
-import models.product.ProductQTY;
 import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
@@ -318,39 +316,6 @@ public class JobRequest extends Model {
                 break;
             case MANAGE_FBA_INVENTORY_ARCHIVED:
                 Whouse wh = Whouse.find("account=?", this.account).first();
-
-                /**
-                 * ================== 1. ProductQTY 兼容处理 =====================
-                 */
-                List<ProductQTY> qtys = wh.fbaCSVParse(new File(this.path));
-                /**
-                 * 只会寻找与 Whouse 所拥有的 ProductQTY 进行更新;
-                 * 如果 FBA 网站上更新出来有新的 ProductQTY, 但系统内没有添加, 则不会更新.
-                 */
-                for(ProductQTY managerdQty : wh.qtys) {
-                    for(ProductQTY nqty : qtys) {
-                        if(managerdQty.product.sku.equals(nqty.product.sku)) {
-                            managerdQty.updateAttrs(nqty);
-                        }
-                    }
-                }
-                // 对系统内没有但 FBA 上有的 ProductQTY 进行系统内添加修复!
-                for(ProductQTY qty : qtys) {
-                    if(qty.save) continue; // 排除已经更新了的.
-                    Product prod = Product.find("sku=?", qty.product.sku).first();
-                    if(prod == null) {
-                        Logger.warn("The Product[" + qty.product.sku + "] that ProductQTY belongs to is not exist in System!!!");
-                    } else {
-                        qty.product = prod;
-                        qty.whouse = wh;
-                        qty.save();
-                        Logger.info("ProductQTY " + qty.product.sku + " synchronize from FBA to System.");
-                    }
-                }
-
-                /**
-                 * ================= 2. SellingQTY 新的处理 =======================
-                 */
                 List<SellingQTY> sqtys = wh.fbaCSVParseSQTY(new File(this.path));
                 for(SellingQTY sqty : sqtys) {
                     // 解析出来的 SellingQTY, 如果系统中拥有则进行更新, 否则绑定到 Selling 身上

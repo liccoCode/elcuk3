@@ -6,7 +6,6 @@ import helper.PH;
 import helper.Webs;
 import models.procure.PItem;
 import models.product.Product;
-import models.product.ProductQTY;
 import models.product.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -397,24 +396,18 @@ public class Selling extends GenericModel {
             @Override
             public int compare(Selling s1, Selling s2) {
                 // 在库
-                Whouse wh1 = Whouse.find("account=?", s1.account).first();
-                Whouse wh2 = Whouse.find("account=?", s2.account).first();
-
-                List<ProductQTY> qty1 = ProductQTY.find("product=? AND whouse=?", s1.listing.product, wh1).fetch();
-                List<ProductQTY> qty2 = ProductQTY.find("product=? AND whouse=?", s2.listing.product, wh2).fetch();
-
                 int in = 0;
                 int in2 = 0;
-                for(ProductQTY q : qty1) in += q.qty;
-                for(ProductQTY q : qty2) in2 += q.qty;
+                for(SellingQTY q : s1.qtys) in += q.qty;
+                for(SellingQTY q : s2.qtys) in2 += q.qty;
 
                 PItem pi1 = PH.unMarsh(String.format("%s_%s", s1.listing.product.sku, s1.sellingId));
                 PItem pi2 = PH.unMarsh(String.format("%s_%s", s1.listing.product.sku, s1.sellingId));
                 // 在途
-                // 在产
                 int onWay = 0;
-                int onWork = 0;
                 int onWay2 = 0;
+                // 在产
+                int onWork = 0;
                 int onWork2 = 0;
                 if(pi1 != null && pi2 != null) {
                     onWay = pi1.onWay == null ? 0 : pi1.onWay;
@@ -586,14 +579,8 @@ public class Selling extends GenericModel {
         pi.selling.ps = pi.selling.ps == null ? 1 : pi.selling.ps;
         pi.whouse = Whouse.find("account=?", this.account).first();
 
-
-        // 库存
-        List<ProductQTY> qtys = ProductQTY.find("product=? AND whouse=?", this.listing.product, pi.whouse).fetch();
-        if(qtys.size() > 1)
-            Logger.warn("Product [" + pi.product.sku + "] have more than ONE ProductQTY in the same Whouse.");
-
         pi.in = 0;
-        for(ProductQTY p : qtys) pi.in += p.qty;
+        for(SellingQTY p : this.qtys) pi.in += p.qty;
 
         // 在库, 在途, 在产
         // 将使用 JSON 存储起来的 PItem 重新加载出来. 当 Plan, Procure, Shipmenet 完成后会修改过通过计算获取
