@@ -52,9 +52,9 @@
             <tr>
                 <th>Qid</th>
                 <th>Inbound</th>
-                <th>Pending</th>
                 <th>Qty</th>
                 <th>Unsellable</th>
+                <th>Pending</th>
                 <th>Selling</th>
                 <th>Whouse</th>
                 <th>&nbsp;</th>
@@ -62,10 +62,16 @@
             #{list items:qtys, as:'q'}
                 <tr id="prod_qty_${q.id}">
                     <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
-                    <td><input type="text" class="input-mini" name="q.inbound" value="${q.inbound}"></td>
-                    <td><input type="text" class="input-mini" name="q.pending" value="${q.pending}"></td>
-                    <td><input type="text" class="input-mini" name="q.qty" value="${q.qty}"></td>
-                    <td><input type="text" class="input-mini" name="q.unsellable" value="${q.unsellable}"></td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#4A8BF4;" name="q.inbound" value="${q.inbound}">
+                    </td>
+                    <td><input type="text" class="input-mini" style="color:#9BD444;" name="q.qty" value="${q.qty}"></td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="q.unsellable" value="${q.unsellable}">
+                    </td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
+                    </td>
                     <td>${q.selling.sellingId}</td>
                     <td>${q.whouse.name}</td>
                     <td><a href="#" class="btn btn-mini btn-primary" qid="${q.id}">保存</a></td>
