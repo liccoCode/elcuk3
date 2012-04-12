@@ -1,8 +1,8 @@
 package controllers;
 
 import helper.Webs;
+import models.Ret;
 import models.market.Account;
-import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -23,24 +23,24 @@ public class Accounts extends Controller {
     }
 
     public static void update(Account a) {
-        if(!a.isPersistent()) renderJSON(new Error("Account", "Account is not persistent!", new String[]{}));
+        if(!a.isPersistent()) renderJSON(new Ret("Account is not persistent!"));
         try {
             a.save();
         } catch(Exception e) {
-            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
+            renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret(true));
     }
 
     public static void create(Account a, String type) {
-        if(a.isPersistent()) renderJSON(new Error("Account", "Account is exist, can not be CREATE!", new String[]{}));
+        if(a.isPersistent()) renderJSON(new Ret("Account is exist, can not be CREATE!"));
         try {
             a.type = Account.M.val(type);
             a.save();
         } catch(Exception e) {
-            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
+            renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret(true));
     }
 
 }

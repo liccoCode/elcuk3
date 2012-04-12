@@ -3,12 +3,12 @@ package controllers;
 import exception.NotLoginFastException;
 import helper.Webs;
 import models.PageInfo;
+import models.Ret;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
 import notifiers.Mails;
 import org.joda.time.DateTime;
-import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -74,7 +74,7 @@ public class Feedbacks extends Controller {
      * @param page
      */
     public static void feedback(String market, Account acc, int page) {
-        if(!acc.isPersistent()) renderJSON(new Error("Account", "Account is not persistent!", new String[]{}));
+        if(!acc.isPersistent()) renderJSON(new Ret("Account is not persistent!"));
         try {
             acc.changeRegion(Account.M.val(market));
         } catch(NotLoginFastException e) {
@@ -97,12 +97,12 @@ public class Feedbacks extends Controller {
     }
 
     public static void update(Feedback f) {
-        if(!f.isPersistent()) renderJSON(new Error("Feedback", "Feedback is not persistent!", new String[]{}));
+        if(!f.isPersistent()) renderJSON(new Ret("Feedback is not persistent!"));
         try {
             f.save();
         } catch(Exception e) {
-            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
+            renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret());
     }
 }

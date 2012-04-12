@@ -3,7 +3,7 @@
 #{set 'moreScripts'}
     #{script 'feedbacks/index.js'/}
 #{/set}
-<div class="row">
+<div class="row" id="btns_div">
     <div class="span5">
     #{select id:'h_market', name:'h_market', class:'span2', items:models.market.Account.M.values()}#{/select}
     #{select id:'h_acc', name:'h_acc', class:'span2', items:accs, labelProperty:'username'}#{/select}
@@ -21,18 +21,18 @@
         #{list items:accs, as:'ac'}
             #{list items:models.market.Account.M.values(), as:'m'}
                 <tr>
-                    <td>${ac.uniqueName}</td>
+                    <td>${ac}</td>
                     <td>${m.name()}</td>
                     <td>
-                        #{a @Feedbacks.list(models.market.Feedback.S.HANDLING, -7, m.name())}${accFeds.get(ac.id + "d7h" + m.name())}#{/a}
+                        <a target="_blank" href="@{Feedbacks.list(models.market.Feedback.S.HANDLING, -7, m.name())}">${accFeds.get(ac.id + "d7h" + m.name())}</a>
                         / ${accFeds.get(ac.id + "d7" + m.name())}
                     </td>
                     <td>
-                        #{a @Feedbacks.list(models.market.Feedback.S.HANDLING, -30, m.name())}${accFeds.get(ac.id + "d30h" + m.name())}#{/a}
+                        <a target="_blank" href="@{Feedbacks.list(models.market.Feedback.S.HANDLING, -30, m.name())}">${accFeds.get(ac.id + "d30h" + m.name())}</a>
                         / ${accFeds.get(ac.id + "d30" + m.name())}
                     </td>
                     <td>
-                        #{a @Feedbacks.list(models.market.Feedback.S.HANDLING, 0, m.name())}${accFeds.get(ac.id + "dallh" + m.name())}#{/a}
+                        <a target="_blank" href="@{Feedbacks.list(models.market.Feedback.S.HANDLING, 0, m.name())}">${accFeds.get(ac.id + "dallh" + m.name())}</a>
                         / ${accFeds.get(ac.id + "dall" + m.name())}
                     </td>
                 </tr>
@@ -60,7 +60,7 @@
             #{set st:f.state == models.market.Feedback.S.HANDLING/}
             #{set sc:f.score <= 3/}
             <tr style="background: ${(st && sc) == true ? '#FFEACD' : '#F4F4F4'}">
-                <td>#{a @Orders.get(f.orderId,f.comment)}${f.orderId}#{/a}</td>
+                <td>#{a @Orders.o_detail(f.orderId,f.comment)}${f.orderId}#{/a}</td>
                 <td>${models.market.Orderr.itemSkus(f.orderr)}</td>
                 <td class="span1">${f.createDate.format('yyyy-MM-dd')}</td>
                 <td><a href="#" rel="tooltip" data-original-title="${f.email}">${f.market}</a></td>

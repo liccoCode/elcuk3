@@ -135,7 +135,7 @@ public class Products extends Controller {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         Boolean flag = Whouse.delete("id=?", id) > 0;
-        renderJSON("{\"flag\":\"" + flag + "\"}");
+        renderJSON(new Ret(flag));
     }
 
     public static void w_bind_a(Whouse w) {

@@ -1,8 +1,8 @@
 package controllers;
 
 import models.Jobex;
+import models.Ret;
 import models.market.JobRequest;
-import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.libs.Time;
 import play.mvc.Controller;
@@ -57,13 +57,13 @@ public class Jobs extends Controller {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         Jobex job = Jobex.findById(id);
-        if(job == null) renderJSON(new Error("Job", "Job is not exist!", new String[]{}));
+        if(job == null) renderJSON(new Ret("Job is not exist!"));
         try {
             job.now();
         } catch(Exception e) {
             throw new FastRuntimeException(e.getMessage());
         }
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret());
     }
 
     public static void close(long id) {

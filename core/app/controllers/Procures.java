@@ -2,7 +2,9 @@ package controllers;
 
 import helper.Caches;
 import helper.PH;
+import helper.Webs;
 import models.PageInfo;
+import models.Ret;
 import models.market.Account;
 import models.market.Listing;
 import models.market.Selling;
@@ -10,7 +12,6 @@ import models.procure.PItem;
 import models.procure.Plan;
 import models.procure.Supplier;
 import play.cache.Cache;
-import play.data.validation.Error;
 import play.mvc.Controller;
 
 import java.util.*;
@@ -86,19 +87,19 @@ public class Procures extends Controller {
      * @param cat
      */
     public static void ps(Selling s, String cat) {
-        if(!s.isPersistent()) renderJSON(new Error("SellingId", "The Selling is not Persistent.", new String[]{}));
+        if(!s.isPersistent()) renderJSON(new Ret("The Selling is not Persistent."));
         try {
             s.save();
             Cache.delete(String.format(Caches.WARN_ITEM_SELLING, s.market.name().toLowerCase(), cat));
         } catch(Exception e) {
-            renderJSON(new Error("Exception", e.getClass().getSimpleName() + ":" + e.getMessage(), new String[]{}));
+            renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret());
     }
 
     public static void pitem(PItem p, String id) {
         PItem pi = PH.unMarsh(id);
-        if(pi == null) renderJSON(new Error("Pitem", "Is not exist!", new String[]{}));
+        if(pi == null) renderJSON(new Ret("Is not exist!"));
         if(p.onWay != null) pi.onWay = p.onWay;
         if(p.onWork != null) pi.onWork = p.onWork;
         if(p.seaBuy != null) pi.seaBuy = p.seaBuy;
@@ -106,7 +107,7 @@ public class Procures extends Controller {
         if(p.airBuy != null) pi.airBuy = p.airBuy;
         if(p.airPatch != null) pi.airPatch = p.airPatch;
         PH.marsh(pi, id);
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret());
     }
 
 

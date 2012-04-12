@@ -10,12 +10,13 @@ $(function(){
         }
         var market = $('#h_market').val();
         var acc = $('#h_acc').val();
+        $('#btns_div').mask("抓取中...");
         $.post('/feedbacks/feedback', {market:market, 'acc.id':acc, page:page}, function(r){
             try{
                 if(r.flag) alert('成功抓取了' + r.count + ' 条 FeedBack.');
-                else throw 'No [flag] property!'
-            }catch(e){
-                alert(JSON.stringify(r));
+                else alert(r.message);
+            }finally{
+                $('#btns_div').unmask();
             }
         });
     });
@@ -34,9 +35,7 @@ $(function(){
         $.post('/feedbacks/update', {'f.orderId':o.attr('fid'), 'f.state':'SLOVED'}, function(r){
             try{
                 if(r.flag) alert('更新成功.');
-                else throw 'No [flag] property!';
-            }catch(e){
-                alert(JSON.stringify(r));
+                else alert(r.message);
             }finally{
                 $(o.parents('tr')).unmask();
             }

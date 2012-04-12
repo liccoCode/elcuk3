@@ -15,11 +15,10 @@ $(function(){
                 $.post('/procures/ps', {'s.sellingId':o.attr('sid'), 's.ps':o.val(), cat:cat}, function(e){
                     try{
                         if(e.flag) alert('更新成功.');
-                        else throw "no [flag] property."
-                    }catch(e){
-                        alert(JSON.stringify(e));
+                        else alert(e.message);
+                    }finally{
+                        $(o.parent()).unmask();
                     }
-                    $(o.parent()).unmask();
                 }, 'json');
             });
 
@@ -39,11 +38,10 @@ $(function(){
                 $.post('/procures/pitem', params, function(e){
                     try{
                         if(e.flag) alert('更新成功.');
-                        else throw "no [flag] property."
-                    }catch(e){
-                        alert(JSON.stringify(e));
+                        else alert(e.message);
+                    }finally{
+                        $(o.parent()).unmask();
                     }
-                    $(o.parent()).unmask();
                 }, 'json');
             });
 
@@ -54,11 +52,10 @@ $(function(){
                 $.post('/procures/invisible', {'s.sellingId':$(this).attr('sid'), 's.state':'DOWN', cat:cat}, function(e){
                     try{
                         if(e.flag) alert('更新成功.');
-                        else throw "no [flag] property."
-                    }catch(e1){
-                        alert(JSON.stringify(e));
+                        else alert(e.message);
+                    }finally{
+                        $('#warnItm').unmask();
                     }
-                    $('#warnItm').unmask();
                 }, 'json');
             });
 

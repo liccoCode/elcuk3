@@ -4,7 +4,7 @@
     #{script 'servers/index.js'/}
 #{/set}
 
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped" id="server_table">
     <tr>
         <th>Id</th>
         <th>Name</th>
@@ -16,7 +16,7 @@
         <th>&nbsp;</th>
     </tr>
 #{list items:sers, as:'s'}
-    <tr>
+    <tr id="server_${s.id}">
         <td>
             <input type="hidden" name="s.id" value="${s.id}">${s.id}
         </td>

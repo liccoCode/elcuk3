@@ -82,7 +82,7 @@
     </div>
     <a data-toggle="modal" href="#addUser" class="btn btn-primar">添加用户</a>
 </div>
-<table class="table table-bordered table-striped">
+<table class="table table-bordered table-striped" id="account_table">
     <tr>
         <th>Id</th>
         <th>Username</th>
@@ -96,7 +96,7 @@
         <th>&nbsp;</th>
     </tr>
 #{list items:accs, as:'a'}
-    <tr>
+    <tr id="account_${a.id}">
         <td>
             <input type="hidden" name="a.id" value="${a.id}">${a.id}
         </td>

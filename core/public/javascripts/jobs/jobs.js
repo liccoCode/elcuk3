@@ -22,16 +22,9 @@ $(function(){
     });
 
     $('.runOnce').click(function(){
-        $.ajax({
-            url:'/jobs/now',
-            data:{id:$(this).attr('jid')},
-            dataType:'json',
-            success:function(data){
-                if(data['flag']) alert('执行成功.')
-            },
-            error:function(xhr, state, error){
-                alert(xhr.responseText);
-            }
+        $.post('/jobs/now', {id:$(this).attr('jid')}, function(r){
+            if(r.flag) alert("执行成功.");
+            else alert(r.message);
         });
     });
 

@@ -1,5 +1,6 @@
 package controllers;
 
+import models.Ret;
 import models.market.Orderr;
 import play.cache.Cache;
 import play.cache.CacheFor;
@@ -20,12 +21,12 @@ public class Application extends Controller {
 
     public static void clearCache() {
         Cache.delete("home.page");
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret());
     }
 
     public static void cc() {
         Cache.clear();
-        renderJSON("{\"flag\":\"true\"}");
+        renderJSON(new Ret());
     }
 
 }
