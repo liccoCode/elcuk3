@@ -55,7 +55,7 @@
                 <th>Qty</th>
                 <th>Unsellable</th>
                 <th>Pending</th>
-                <th>Selling</th>
+                <th>ASIN</th>
                 <th>Whouse</th>
                 <th>&nbsp;</th>
             </tr>
@@ -72,7 +72,8 @@
                     <td>
                         <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
                     </td>
-                    <td>${q.selling.sellingId}</td>
+                    <td><a target="_blank" href="${helper.Webs.link(q.selling)}">${q.selling.asin}</a>
+                        | ${q.selling.market}</td>
                     <td>${q.whouse.name}</td>
                     <td><a href="#" class="btn btn-mini btn-primary" qid="${q.id}">保存</a></td>
                 </tr>
