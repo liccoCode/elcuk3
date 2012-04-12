@@ -6,26 +6,29 @@
 <body>
 Guten Tag ${order.buyer == null ? 'Kunden' : order.buyer}:
 <br/><br/>
-Es war eine Zeit, da Sie die<br/>
+es war eine Zeit, da Sie die<br/>
 #{list items:order.items, as:'oi'}
 <a target="_blank" title="${oi.selling.title}" href="${helper.Webs.link(oi.selling)}">${oi.selling.title.size() > 75 ? oi.selling.title.substring(0, 74) + "..." : oi.selling.title}</a><br/>
 ${helper.Webs.link(oi.selling)}
 <br/>
 <br/>
 #{/list}
-gekauft von EasyAcc auf Amazon.de. Wir wollen ein zu prüfen und sehen, wie sie tut.
+von EasyAcc über Amazon gekauft haben. Wir würden uns gerne vergewissern, ob mit der Lieferung alles in Ordnung war.
 <br/><br/>
-Wenn Sie aus irgendeinem Grund nicht vollständig mit unseren Produkten und Leistungen zufrieden sind, bitte einfach
-getroffen Antwort und schreiben Sie uns eine E-Mail, werden wir Ihre Angelegenheit sehr ernst nehmen und unser Bestes
-tun, um das Problem zu lösen. Ihre Kommentare helfen uns, unsere Produkte und Dienstleistungen zu verbessern.
+Sollte es einen Anlass zur Unzufriedenheit mit dem Produkt oder unserem Service gegeben haben, antworten Sie doch bitte
+auf diese Mail und schreiben Sie uns den Grund für Ihre Beanstandung. Wir werden Ihre Angelegenheit dann sogleich prüfen
+und alles tun, um das Problem zu lösen. Ihre Rückmeldung hilft uns dabei, Service und Produktangebot zu
+verbessern.
 <br/><br/>
-Falls unterdessen alles in Ordnung ist, laden wir Sie dazu ein, unter folgendem Link eine Kundenrezension zu schreiben:
+Falls Sie zufrieden waren, freuen wir uns über Ihr Feedback unter:
 <br/>
 #{list items:order.items, as:'oi'}
 <a target="_blank" href="${helper.Webs.reviewLink(oi.selling)}">${helper.Webs.reviewLink(oi.selling)}</a><br/>
 #{/list}
 <br/><br/>
-Danke für Ihre Unterstützung unserer Firma.
+Ihre Hinweise kommen sowohl unseren Kunden als auch unserem Unternehmen zugute.
+<br/>
+Vielen Dank für Ihre Unterstützung!
 <br/><br/>
 EasyAcc Team Kundenzufriedenheit
 <br/>
