@@ -27,4 +27,8 @@ public class Category extends Model {
     @Lob
     public String memo;
 
+    @Override
+    public String toString() {
+        return String.format("%s:%s", this.categoryId, this.name);
+    }
 }

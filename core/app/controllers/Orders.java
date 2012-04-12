@@ -38,7 +38,7 @@ public class Orders extends Controller {
         render(orders, count, p, s, pi, accs);
     }
 
-    public static void get(String oid, String m) {
+    public static void o_detail(String oid, String m) {
         Orderr ord = Orderr.findById(oid);
         render(ord, m);
     }

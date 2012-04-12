@@ -103,4 +103,31 @@ $(function(){
         $('#prodQtyItem_' + ptid + ' :input').map($.varClosure);
         ajax_prodQty('edit', $.varClosure.params, '#prod_details_' + ptid);
     });
+
+
+    /**
+     * ========================  Product Details Page ============================
+     */
+        // Product 更新
+    $('#prod_basic a[sku]').click(function(){
+        $.varClosure.params = {};
+        $('#prod_basic :input').map($.varClosure);
+        $.post('/products/p_u', $.varClosure.params, function(r){
+            if(r.flag) alert("更新成功.");
+            else alert(JSON.stringify(r));
+        });
+    });
+
+
+    // SellingQTY 更新
+    $('#prod_sqty a[qid]').click(function(){
+        var qid = $(this).attr('qid');
+        $.varClosure.params = {};
+        $('#prod_qty_' + qid + " :input").map($.varClosure);
+        $.post('/products/p_sqty_u', $.varClosure.params, function(r){
+            if(r.flag) alert('更新成功.');
+            else alert(JSON.stringify(r));
+        });
+
+    })
 });

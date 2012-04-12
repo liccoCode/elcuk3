@@ -3,7 +3,9 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import helper.Webs;
 import models.PageInfo;
+import models.Ret;
 import models.market.Account;
+import models.market.SellingQTY;
 import models.product.Category;
 import models.product.Product;
 import models.product.Whouse;
@@ -32,10 +34,16 @@ public class Products extends Controller {
         Webs.fixPage(p, s);
         List<Category> cates = Category.all().fetch();
         List<Product> prods = Product.all().fetch(p, s);
-        List<Whouse> whs = Whouse.all().fetch();
         Long count = Product.count();
         PageInfo<Product> pi = new PageInfo<Product>(s, count, p, prods);
-        render(prods, cates, count, p, s, whs, pi);
+        render(prods, cates, pi);
+    }
+
+    public static void p_detail(String sku) {
+        Product p = Product.findByMerchantSKU(sku);
+        List<Category> cats = Category.all().fetch();
+        List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(p);
+        render(p, cats, qtys);
     }
 
     public static void c_index(Integer p, Integer s) {
@@ -58,7 +66,11 @@ public class Products extends Controller {
     }
 
 
-    // ------  创建与保存对象  --------------
+    /**
+     * ========== Product ===============
+     */
+
+
     public static void p_create(@Valid Product p) {
         if(Validation.hasErrors()) {
             renderJSON(validation.errorsMap());
@@ -73,6 +85,30 @@ public class Products extends Controller {
         renderJSON(JSON.toJSONString(p));
     }
 
+    public static void p_u(Product p) {
+        try {
+            if(p.isPersistent()) p.save();
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.E(e)));
+        }
+        renderJSON(new Ret());
+    }
+
+
+    public static void p_sqty_u(SellingQTY q) {
+        try {
+            if(q.isPersistent()) q.save();
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.E(e)));
+        }
+        renderJSON(new Ret(true));
+    }
+
+
+    /**
+     * ========== Category ===============
+     */
+
     public static void c_create(@Valid Category c) {
         if(Validation.hasErrors()) {
             renderJSON(validation.errorsMap());
@@ -81,6 +117,12 @@ public class Products extends Controller {
         c.products = null;
         renderJSON(c);
     }
+
+
+    /**
+     * ========== Whouse ===============
+     */
+
 
     public static void w_create(@Valid Whouse w) {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());

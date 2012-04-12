@@ -1,0 +1,79 @@
+#{extends 'main.html' /}
+#{set title:'Product' /}
+#{set 'moreScripts'}
+    #{script 'products/product.js'/}
+#{/set}
+
+#{if p == null}
+读取的 Product 不存在!
+#{/if}
+#{else }
+<div class="row">
+    <div class="span12"><span class="label label-success">Product Basic</span></div>
+    <div class="span12">
+        <table class="table table-bordered" id="prod_basic">
+            <tr>
+                <td>SKU</td>
+                <td>${p.sku}<input type="hidden" name="p.sku" value="${p.sku}"></td>
+                <td>L</td>
+                <td><input type="text" class="input-mini" name="p.lengths" value="${p.lengths == null ? 0 : p.lengths}">
+                </td>
+                <td>H</td>
+                <td><input type="text" class="input-mini" name="p.heigh" value="${p.heigh == null ? 0 : p.heigh}"></td>
+                <td>W</td>
+                <td><input type="text" class="input-mini" name="p.width" value="${p.width == null ? 0 : p.width}"></td>
+                <td>Wt</td>
+                <td><input type="text" class="input-mini" name="p.weight" value="${p.weight == null ? 0 : p.weight}">
+                </td>
+            </tr>
+            <tr>
+                <td>Title</td>
+                <td colspan="9"><input type="text" name="p.productName" class="span10" value="${p.productName}">
+                </td>
+            </tr>
+            <tr>
+                <td>Category</td>
+                <td>
+                    #{select name:'p.category.id', items:cats, labelProperty:'toString', value:p.category.id}#{/select}
+
+                </td>
+                <td colspan="8">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="10"><a href="#" class="btn btn-mini btn-primary" sku="${p.sku}">保存</a></td>
+            </tr>
+        </table>
+    </div>
+
+
+    <div class="span12"><span class="label label-success">Product (Selling)QTY</span></div>
+    <div class="span12">
+        <table class="table table-bordered" id="prod_sqty">
+            <tr>
+                <th>Qid</th>
+                <th>Inbound</th>
+                <th>Pending</th>
+                <th>Qty</th>
+                <th>Unsellable</th>
+                <th>Selling</th>
+                <th>Whouse</th>
+                <th>&nbsp;</th>
+            </tr>
+            #{list items:qtys, as:'q'}
+                <tr id="prod_qty_${q.id}">
+                    <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
+                    <td><input type="text" class="input-mini" name="q.inbound" value="${q.inbound}"></td>
+                    <td><input type="text" class="input-mini" name="q.pending" value="${q.pending}"></td>
+                    <td><input type="text" class="input-mini" name="q.qty" value="${q.qty}"></td>
+                    <td><input type="text" class="input-mini" name="q.unsellable" value="${q.unsellable}"></td>
+                    <td>${q.selling.sellingId}</td>
+                    <td>${q.whouse.name}</td>
+                    <td><a href="#" class="btn btn-mini btn-primary" qid="${q.id}">保存</a></td>
+                </tr>
+            #{/list}
+        </table>
+    </div>
+
+
+</div>
+#{/else}

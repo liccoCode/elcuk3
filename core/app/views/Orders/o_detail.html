@@ -12,80 +12,80 @@
     <div class="span12">
         <table class="table table-bordered">
             <tr>
-                <td class="l_label">OrderId</td>
-                <td class="l_val">${ord.orderId}</td>
-                <td class="l_label">Address</td>
-                <td class="l_val">${ord.address}</td>
-                <td class="l_label">Address1</td>
-                <td class="l_val">${ord.address1}</td>
-                <td class="l_label">Reciver</td>
-                <td class="l_val">${ord.reciver}</td>
+                <td>OrderId</td>
+                <td>${ord.orderId}</td>
+                <td>Address</td>
+                <td>${ord.address}</td>
+                <td>Address1</td>
+                <td>${ord.address1}</td>
+                <td>Reciver</td>
+                <td>${ord.reciver}</td>
             </tr>
             <tr>
-                <td class="l_label">ArriveDate</td>
-                <td class="l_val">${ord.arriveDate}</td>
-                <td class="l_label">Buyer</td>
-                <td class="l_val">${ord.buyer}</td>
-                <td class="l_label">City</td>
-                <td class="l_val">${ord.city}</td>
-                <td class="l_label">Country</td>
-                <td class="l_val">${ord.country}</td>
+                <td>ArriveDate</td>
+                <td>${ord.arriveDate}</td>
+                <td>Buyer</td>
+                <td>${ord.buyer}</td>
+                <td>City</td>
+                <td>${ord.city}</td>
+                <td>Country</td>
+                <td>${ord.country}</td>
             </tr>
             <tr>
-                <td class="l_label">CreateDate</td>
-                <td class="l_val">${ord.createDate}</td>
-                <td class="l_label">Email</td>
-                <td class="l_val">${ord.email}</td>
-                <td class="l_label">Market</td>
-                <td class="l_val">${ord.market.toString()}</td>
-                <td class="l_label">PaymentDate</td>
-                <td class="l_val">${ord.paymentDate}</td>
+                <td>CreateDate</td>
+                <td>${ord.createDate}</td>
+                <td>Email</td>
+                <td>${ord.email}</td>
+                <td>Market</td>
+                <td>${ord.market.toString()}</td>
+                <td>PaymentDate</td>
+                <td>${ord.paymentDate}</td>
             </tr>
             <tr>
-                <td class="l_label">Phone</td>
-                <td class="l_val">${ord.phone}</td>
-                <td class="l_label">PostalCode</td>
-                <td class="l_val">${ord.postalCode}</td>
-                <td class="l_label">Province</td>
-                <td class="l_val">${ord.province}</td>
+                <td>Phone</td>
+                <td>${ord.phone}</td>
+                <td>PostalCode</td>
+                <td>${ord.postalCode}</td>
+                <td>Province</td>
+                <td>${ord.province}</td>
                 <td colspan="2">&nbsp;</td>
             </tr>
             <tr>
-                <td class="l_label">ShipDate</td>
-                <td class="l_val">${ord.shipDate}</td>
-                <td class="l_label">ShipLevel</td>
-                <td class="l_val">${ord.shipLevel}</td>
-                <td class="l_label">ShippingAmount</td>
-                <td class="l_val">${ord.shippingAmount}</td>
-                <td class="l_label">ShippingService</td>
-                <td class="l_val">${ord.shippingService}</td>
+                <td>ShipDate</td>
+                <td>${ord.shipDate}</td>
+                <td>ShipLevel</td>
+                <td>${ord.shipLevel}</td>
+                <td>ShippingAmount</td>
+                <td>${ord.shippingAmount}</td>
+                <td>ShippingService</td>
+                <td>${ord.shippingService}</td>
             </tr>
             <tr>
-                <td class="l_label">State</td>
+                <td>State</td>
                 #{if ord.state == models.market.Orderr.S.PENDING}
-                    <td class="l_val" style="color:#4169e1;">${ord.state}</td>
+                    <td style="color:#4169e1;">${ord.state}</td>
                 #{/if}
                 #{elseif ord.state == models.market.Orderr.S.PAYMENT}
-                    <td class="l_val" style="color:orange;">${ord.state}</td>
+                    <td style="color:orange;">${ord.state}</td>
                 #{/elseif}
                 #{elseif ord.state == models.market.Orderr.S.CANCEL}
-                    <td class="l_val" style="color:red;">${ord.state}</td>
+                    <td style="color:red;">${ord.state}</td>
                 #{/elseif}
                 #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
-                    <td class="l_val" style="color:green;">${ord.state}</td>
+                    <td style="color:green;">${ord.state}</td>
                 #{/elseif}
                 #{else }
-                    <td class="l_val">${ord.state}</td>
+                    <td>${ord.state}</td>
                 #{/else}
-                <td class="l_label">TotalAmount</td>
-                <td class="l_val">${ord.totalAmount}</td>
-                <td class="l_label">TrackNo.</td>
-                <td class="l_val">${ord.trackNo}</td>
+                <td>TotalAmount</td>
+                <td>${ord.totalAmount}</td>
+                <td>TrackNo.</td>
+                <td>${ord.trackNo}</td>
                 <td colspan="2">&nbsp;</td>
             </tr>
             <tr>
-                <td class="l_label">Memo</td>
-                <td colspan="7" class="l_val">${ord.memo}</td>
+                <td>Memo</td>
+                <td colspan="7">${ord.memo}</td>
             </tr>
         </table>
     </div>
