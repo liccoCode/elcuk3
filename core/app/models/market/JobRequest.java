@@ -146,7 +146,8 @@ public class JobRequest extends Model {
             case MANAGE_FBA_INVENTORY_ARCHIVED:
                 return newJob(8, T.MANAGE_FBA_INVENTORY_ARCHIVED, acc, mid);
             case ACTIVE_LISTINGS:
-                return newJob(24, T.ACTIVE_LISTINGS, acc, mid);
+                //一般情况下, 这个 Job 应该是关闭状态, 手动运行. 数据库中记录的这些数据也可以删除, 因为其需要最新的数据.
+                return newJob(1, T.ACTIVE_LISTINGS, acc, mid);
         }
         return null;
     }
