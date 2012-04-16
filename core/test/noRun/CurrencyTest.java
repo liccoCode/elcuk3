@@ -1,5 +1,7 @@
 package noRun;
 
+import helper.Webs;
+import models.market.Account;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -82,5 +84,22 @@ public class CurrencyTest {
         System.out.println("NN_FR2:" + nn_fr2.format(1234.23));
         System.out.println("NN_IT:" + nn_it.format(1234.23));
         System.out.println("NN_IT2:" + nn_it2.format(1234.23));
+    }
+
+    @Test
+    public void parseCurrency() {
+        /**
+         *                             // 从 [EUR -1,61] 变成了 [€-1.21]
+         cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(1).trim());
+         */
+        String priceStr = "EUR -1,61";
+        String priceStr2 = "€-1.21";
+        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(1).trim()));
+        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr.substring(3).trim()));
+        System.out.println("------------------------");
+        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr2.substring(1).trim()));
+        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr2.substring(3).trim()));
+        System.out.println("------------------------");
+        System.out.println(Webs.amazonPriceCurrency(Account.M.AMAZON_UK, priceStr2));
     }
 }

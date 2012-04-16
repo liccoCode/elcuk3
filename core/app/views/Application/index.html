@@ -19,17 +19,25 @@
                 <th><a href="#" rel="tooltip" data-original-title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
             </tr>
         #{list items:odmaps.keySet(), as:'key'}
+            #{set row:odmaps.get(key)/}
             <tr>
                 <td>${key}</td>
-                <td>${odmaps.get(key).get('PENDING')}</td>
-                <td>${odmaps.get(key).get('PAYMENT')}</td>
-                <td>${odmaps.get(key).get('SHIPPED')}</td>
-                <td>${odmaps.get(key).get('REFUNDED')}</td>
-                <td>${odmaps.get(key).get('RETURNNEW')}</td>
-                <td>
-                    <a href="#" rel="tooltip" data-original-title="取消的订单的数据查看功能需要吗?<span style='color:red'>[未完成]</span>">${odmaps.get(key).get('CANCEL')}</a>
-                </td>
-                <td>${odmaps.get(key).get('SUCC')}</td>
+                #{list items:models.market.Orderr.S.values(), as:'s'}
+                    <td><a href="#" rel="popover" data-original-title="${s.name()} 细节" data-content="
+                    UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>
+                    DE: ${row.get(s.name() + "_" + "AMAZON_DE")}<br/>
+                    FR: ${row.get(s.name() + "_" + "AMAZON_FR")}<br/><hr/>
+                    EasyAcc.EU: ${row.get(s.name() + "_" + "easyacc.eu")}<br/>
+                    EasyAcc.DE: ${row.get(s.name() + "_" + "easyacc.de")}<br/>
+                    ">${row.get(s.name())}</a></td>
+                #{/list}
+                <td><a href="#" rel="popover" data-original-title="订单数细节" data-content="
+                    UK: ${row.get("all_" + "AMAZON_UK")}<br/>
+                    DE: ${row.get("all_" + "AMAZON_DE")}<br/>
+                    FR: ${row.get("all_" + "AMAZON_FR")}<br/><hr/>
+                    EasyAcc.EU: ${row.get("all_" + "easyacc.eu")}<br/>
+                    EasyAcc.DE: ${row.get("all_" + "easyacc.de")}<br/>
+                ">${row.get('all')}</a></td>
             </tr>
         #{/list}
         </table>

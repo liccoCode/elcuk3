@@ -8,7 +8,6 @@ import models.finance.SaleFee;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.joda.time.Instant;
 import play.Logger;
 import play.data.validation.Email;
@@ -216,87 +215,97 @@ public class Orderr extends GenericModel {
     // -------------------------
 
     /**
-     * 前台页面使用的, 查看最近 N 天内的订单情况分布的表格
+     * <pre>
+     * 前台页面使用的, 查看最近 N 天内的订单情况分布的表格;
+     * 把所有需要展示的数据做成 2 级 Map:
+     *  - 第一级为时间
+     *  - 第二级为数据行
+     *   > 每一个数据行根据不同的 key 包含不维度的数据
+     *   > all: 所有 state 的统计值
+     *   > state: 根据日期, 所有 market, Account 的统计值
+     *   > state_[market]: 根据状态 + 市场来区分的订单数据
+     *   > all_[market]: 排除状态, 市场整天的订单数据
+     *   > state_[account]: 根据状态 + 账户来区分的订单数据
+     *   > all_[account]: 排除状态, 账户整天的订单数据
+     * </pre>
      *
      * @param days
      * @return
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
-        Instant it = Instant.now();
-        Date pre7Day = Instant.parse(it.minus(Duration.standardDays(days)).toDateTime().toString("yyyy-MM-dd")).toDate();
-        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, it.toDate()).fetch();
+        DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
+        Date pre7Day = now.plusDays(-10).toDate();
+        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, now.toDate()).fetch();
+
+        List<Account> accs = Account.all().fetch();
 
         Map<String, Map<String, AtomicInteger>> odmaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
 
-        for(long begin = pre7Day.getTime(); begin <= it.getMillis(); begin += Duration.standardDays(1).getMillis()) {
-            for(Orderr or : orders) {
-                /**
-                 * 1. 这些状态不进入销售成功的订单记录
-                 * 2. 排除不在当前时间区间内的订单
+        for(Orderr or : orders) {
+            DateTime ct = new DateTime(or.createDate);
+            String key = ct.toString("yyyy-MM-dd");
+
+            if(odmaps.containsKey(key)) {
+                Map<String, AtomicInteger> dateRow = odmaps.get(key);
+                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                dateRow.get(String.format("all")).incrementAndGet();
+                dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
+                dateRow.get(String.format("all_%s", or.account.toString())).incrementAndGet();
+            } else {
+                //row key: [state]_[market.name/account.toString]
+                Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
+                for(S s : S.values()) {
+                    dateRow.put(s.name(), new AtomicInteger(0)); // ALL
+                    for(Account.M m : Account.M.values()) {
+                        dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
+                        dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
+                    }
+                    for(Account a : accs) {
+                        dateRow.put(String.format("%s_%s", s.name(), a.toString()), new AtomicInteger(0)); // Account
+                        dateRow.put(String.format("all_%s", a.toString()), new AtomicInteger(0));
+                    }
+                }
+                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                dateRow.put(String.format("all"), new AtomicInteger(1));
+                dateRow.put(String.format("all_%s", or.market.name()), new AtomicInteger(1));
+                dateRow.put(String.format("all_%s", or.account.toString()), new AtomicInteger(1));
+                odmaps.put(key, dateRow);
+            }
+        }
+
+        // 统计总订单数
+        for(String dateKey : odmaps.keySet()) {
+            // 2012-04-19 ->
+            for(S s : S.values()) {
+                /* -> pending
+                 * -> pending_uk
+                 * -> pending_easyacc.eu
                  */
-                if(or.createDate.getTime() < begin || or.createDate.getTime() > (begin + Duration.standardDays(1).getMillis()))
-                    continue;
-                String key = new DateTime(begin).toString("yyyy-MM-dd");
-                if(odmaps.containsKey(key)) {
-                    Map<String, AtomicInteger> lineMap = odmaps.get(key);
-                    AtomicInteger succ = lineMap.get("SUCC");
-                    switch(or.state) {
-                        case PENDING:
-                            lineMap.get(S.PENDING.name()).incrementAndGet();
-                            succ.incrementAndGet();
-                            break;
-                        case PAYMENT:
-                            lineMap.get(S.PAYMENT.name()).incrementAndGet();
-                            succ.incrementAndGet();
-                            break;
-                        case SHIPPED:
-                            lineMap.get(S.SHIPPED.name()).incrementAndGet();
-                            succ.incrementAndGet();
-                            break;
-                        case REFUNDED:
-                            lineMap.get(S.REFUNDED.name()).incrementAndGet();
-                            break;
-                        case RETURNNEW:
-                            lineMap.get(S.RETURNNEW.name()).incrementAndGet();
-                            break;
-                        case CANCEL:
-                            lineMap.get(S.CANCEL.name()).incrementAndGet();
+                Map<String, AtomicInteger> rowMap = odmaps.get(dateKey);
+                AtomicInteger rowSum = new AtomicInteger(0); // ALL 统计
+                AtomicInteger rowMarketSum = new AtomicInteger(0); // Market 统计
+                AtomicInteger rowAccountSUm = new AtomicInteger(0); // Account 统计
+
+                for(String dataRowKey : rowMap.keySet()) {
+                    // each Row Data, 在已经限制了 Date 的日期下的每一行的数据将 state 相同的进行统计计算
+                    if(dataRowKey.equals(s.name())) {
+                        rowSum.addAndGet(rowMap.get(dataRowKey).get());
                     }
-                } else {
-                    // 一行数据的所有值的 Map; 所有数据初始化
-                    Map<String, AtomicInteger> lineMap = new HashMap<String, AtomicInteger>();
-                    lineMap.put(S.PENDING.name(), new AtomicInteger(0));
-                    lineMap.put(S.PAYMENT.name(), new AtomicInteger(0));
-                    lineMap.put(S.SHIPPED.name(), new AtomicInteger(0));
-                    lineMap.put(S.REFUNDED.name(), new AtomicInteger(0));
-                    lineMap.put(S.RETURNNEW.name(), new AtomicInteger(0));
-                    lineMap.put(S.CANCEL.name(), new AtomicInteger(0));
-                    AtomicInteger succ = new AtomicInteger(0);
-                    switch(or.state) {
-                        case PENDING:
-                            lineMap.get(S.PENDING.name()).incrementAndGet();
-                            succ.incrementAndGet();
-                            break;
-                        case PAYMENT:
-                            lineMap.get(S.PAYMENT.name()).incrementAndGet();
-                            succ.incrementAndGet();
-                            break;
-                        case SHIPPED:
-                            lineMap.get(S.SHIPPED.name()).incrementAndGet();
-                            succ.incrementAndGet();
-                            break;
-                        case REFUNDED:
-                            lineMap.get(S.REFUNDED.name()).incrementAndGet();
-                            break;
-                        case RETURNNEW:
-                            lineMap.get(S.RETURNNEW.name()).incrementAndGet();
-                            break;
-                        case CANCEL:
-                            lineMap.get(S.CANCEL.name()).incrementAndGet();
+
+                    for(Account.M m : Account.M.values()) {
+                        if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
+                            rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
                     }
-                    lineMap.put("SUCC", succ);
-                    odmaps.put(key, lineMap);
+
+                    for(Account acc : accs) {
+                        if(dataRowKey.equals(String.format("%s_%s", s.name(), acc.toString())))
+                            rowAccountSUm.addAndGet(rowMap.get(dataRowKey).get());
+                    }
                 }
             }
         }
@@ -657,14 +666,12 @@ public class Orderr extends GenericModel {
     }
 
     private static S parseOrderState(String orderState) {
-        // {Shipped=7729, Cancelled=339, Shipping=1, Pending=1723}, 一个 11MB 的文件中的类型
+        // {"Pending"=>226233, "Shipped"=>1284685, "Cancelled"=>28538, "Shipping"=>1342}, 半年的更新文件
         String orderSt = orderState.toLowerCase();
         if("pending".equals(orderSt)) {
             return S.PENDING;
         } else if("shipped".equals(orderSt)) {
             return S.SHIPPED;
-        } else if("unshipped".equals(orderSt)) {
-            return S.PAYMENT;
         } else if("shipping".equals(orderSt)) {
             return S.PAYMENT;
         } else if("cancelled".equals(orderSt)) {

@@ -1,5 +1,6 @@
 $(function(){
     $('a[rel=tooltip]').tooltip({placement:'right'});
+    $('a[rel=popover]').popover({placement:'bottom'});
 
     $('#change_passwd_btn').click(function(){
         $.varClosure.params = {};

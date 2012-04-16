@@ -7,6 +7,7 @@ import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -442,7 +443,7 @@ public class Account extends Model {
 
     @Override
     public String toString() {
-        return this.username.split("@")[0];
+        return StringUtils.split(this.username, "@")[0];
     }
 
 }

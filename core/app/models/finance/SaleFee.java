@@ -192,7 +192,14 @@ public class SaleFee extends GenericModel {
                         case AMAZON_IT:
                             // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
                             // 从 [EUR -1,61] 变成了 [€-1.21]
-                            cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(1).trim());
+                            /**
+                             * 我怕了 Amazon 了, 针对非 UK 市场, 一会 EUR 格式, 一会 € 格式, 所以在这里进行判断是哪一种格式再进行解析
+                             */
+                            if(StringUtils.contains(priceStr, "EUR")) {// [EUR -1,61] 格式
+                                cost = Webs.amazonPriceNumber(market, priceStr.substring(3).trim());
+                            } else { // [€-1.21] 格式
+                                cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(1).trim());
+                            }
                             usdCost = Currency.EUR.toUSD(cost);
                             fee.currency = Currency.EUR;
                             break;
