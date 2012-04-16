@@ -1,7 +1,10 @@
 package models;
 
+import models.market.Selling;
+import org.apache.commons.lang.StringUtils;
 import play.utils.FastRuntimeException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,5 +83,42 @@ public class PageInfo<T> {
         if(this.totalPage == 0 && this.count != null)
             this.totalPage = ((this.count / (float) this.size) < 1 ? 1 : new Double(Math.ceil(this.count / (float) this.size)).intValue());
         return this.totalPage;
+    }
+
+    /**
+     * PageInfo 针对 Selling 过滤与搜索的方法; 支持 SKU/MSKU/ASIN 的搜索
+     *
+     * @param items
+     * @param p
+     * @return
+     */
+    public static List<Selling> fixItemSize(List<Selling> items, PageInfo<Selling> p) {
+        List<Selling> ar = new ArrayList<Selling>();
+        List<Selling> allow = new ArrayList<Selling>();
+        if(items == null || items.size() == 0) return ar;
+
+        /**
+         * 1. 根据 p.param 过滤出符合的集合;
+         * 2. 然后再在符合的集合中进行分页;
+         */
+        if(StringUtils.isNotBlank(p.param)) {
+            for(Selling se : items) {
+                if(StringUtils.containsIgnoreCase(se.merchantSKU, p.param) ||
+                        StringUtils.containsIgnoreCase(se.asin, p.param))
+                    allow.add(se);
+            }
+        } else {
+            allow = items;
+        }
+
+        int index = p.begin;
+        int size = (p.size <= allow.size() ? p.size : allow.size());
+        for(; ar.size() <= size; ) {
+            if(index >= size) break;
+            ar.add(allow.get(index++));
+        }
+        p.count = (long) allow.size();
+
+        return ar;
     }
 }

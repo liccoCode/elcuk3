@@ -34,31 +34,13 @@ public class Analyzes extends Controller {
      */
     public static void index_msku(PageInfo<Selling> p) {
         List<Selling> sells = Selling.salesRankWithTime(1);
-        List<Selling> items = new ArrayList<Selling>();
-        if(sells.size() == 0) {
-            p.items = items;
-            render(p);
-        }
-        p.count = (long) sells.size();
-        for(int i = p.begin; i < p.end; i++) {
-            items.add(sells.get(i));
-        }
-        p.items = items;
+        p.items = PageInfo.fixItemSize(sells, p);
         render(p);
     }
 
     public static void index_sku(PageInfo<Selling> p) {
         List<Selling> sells = Selling.salesRankWithTime(-1);
-        List<Selling> items = new ArrayList<Selling>();
-        if(sells.size() == 0) {
-            p.items = items;
-            render(p);
-        }
-        p.count = (long) sells.size();
-        for(int i = p.begin; i < p.end; i++) {
-            items.add(sells.get(i));
-        }
-        p.items = items;
+        p.items = PageInfo.fixItemSize(sells, p);
         render(p);
     }
 

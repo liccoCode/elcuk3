@@ -13,7 +13,8 @@
 #{list items:p.items, as:'sell'}
     #{if sell_index <= 10}
         <tr>
-            <td class="msku" title="${sell.merchantSKU}">${sell.merchantSKU.split(",")[0]}</td>
+            #{set sku:models.product.Product.merchantSKUtoSKU(sell.merchantSKU)/}
+            <td class="msku" style="cursor:pointer;" aid="0" title="${sku}">${sku}</td>
             <td>${sell.qty}</td>
             <td>${(sell.d7 / 7).format("#.##")}</td>
             #{if sell.turnOver < 8 && sell.turnOver >= 0}
