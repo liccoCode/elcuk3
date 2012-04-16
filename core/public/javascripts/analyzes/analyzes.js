@@ -146,7 +146,7 @@ $(function(){
      * @param type -1:销售量, 1:销售额
      */
     function ajax_line(params){
-        $('#selling_down').mask('加载中...');
+        $('#myTabContent').mask('加载中...');
         $.ajax({
             url:'/analyzes/ajaxSells',
             data:params,
@@ -188,11 +188,11 @@ $(function(){
                 localStorage.setItem("msku", params['msku']);
                 new Highcharts.Chart(sells);
                 new Highcharts.Chart(sales);
-                $('#selling_down').unmask();
+                $('#myTabContent').unmask();
             },
             error:function(xhr, state, err){
                 alert(err);
-                $('#selling_down').unmask();
+                $('#myTabContent').unmask();
             }
         });
     }
