@@ -235,13 +235,12 @@ public class Orderr extends GenericModel {
     @SuppressWarnings("unchecked")
     public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
         DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-        Date pre7Day = now.plusDays(-10).toDate();
-        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, now.toDate()).fetch();
+        if(days > 0) days = -days;
+        Date pre7Day = now.plusDays(days).toDate();
+        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, now.plusDays(1).toDate()).fetch();
 
         List<Account> accs = Account.all().fetch();
-
-        Map<String, Map<String, AtomicInteger>> odmaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
-
+        Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
         for(Orderr or : orders) {
             DateTime ct = new DateTime(or.createDate);
             String key = ct.toString("yyyy-MM-dd");
@@ -309,7 +308,21 @@ public class Orderr extends GenericModel {
                 }
             }
         }
-        return odmaps;
+
+        // 将 key 排序, 按照日期倒序
+        List<String> dateKey = new ArrayList<String>(odmaps.keySet());
+        Collections.sort(dateKey, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                DateTime dt1 = DateTime.parse(o1);
+                DateTime dt2 = DateTime.parse(o2);
+                return (int) (dt1.getMillis() - dt2.getMillis());
+            }
+        });
+
+        Map<String, Map<String, AtomicInteger>> afSort = new LinkedHashMap<String, Map<String, AtomicInteger>>();
+        for(String key : dateKey) afSort.put(key, odmaps.get(key));
+        return afSort;
     }
 
     /**

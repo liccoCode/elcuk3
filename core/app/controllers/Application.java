@@ -15,7 +15,7 @@ public class Application extends Controller {
 
     @CacheFor(value = "2h", id = "home.page")
     public static void index() {
-        Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(7);
+        Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
         render(odmaps);
     }
 
