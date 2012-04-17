@@ -80,12 +80,12 @@ public class Product extends GenericModel {
         //71SNS1-B2PE, 71-SNS1-B2PE
         if(sku == null || sku.trim().isEmpty()) return false;
         String[] parts = sku.split("-");
+        String part0 = parts[0].substring(0, 2);
         if(parts.length == 2) { //做一次兼容
-            String part0 = parts[0].substring(0, 2);
             parts = new String[]{part0, parts[0].substring(2), parts[1]};
         }
         if(parts.length != 3) return false;
-        if(!Patterns.Nub.matcher(parts[0]).matches()) return false;
+        if(!Patterns.Nub.matcher(part0).matches()) return false;
         return true;
     }
 
