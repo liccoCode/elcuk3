@@ -49,4 +49,16 @@ public class Listings extends Controller {
             renderJSON(new Listing(e.getMessage()));
         }
     }
+
+    /**
+     * 抓取这个 Listing 的 Review, 一次性最多抓取 5 页或者抓取到最后一页中所有的 Reviews;
+     * @param market
+     * @param asin
+     */
+    public static void crawlReview(String market, String asin) {
+        /**
+         * 持续抓取, 直到抓取回来的次数 > 5 或者次数与最大页面一样则不再进行抓取;
+         * 抓取过程中解析出得 Review 全部返回.
+         */
+    }
 }

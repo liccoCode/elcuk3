@@ -1,10 +1,12 @@
-package models.market;
+package models;
 
+import models.Listing;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 某一个 Listing 所拥有的 Review 消息
@@ -12,16 +14,14 @@ import java.util.Date;
  * Date: 4/17/12
  * Time: 4:33 PM
  */
-public class AmazonListingReview extends GenericModel {
+public class AmazonListingReview {
 
-    @ManyToOne
     public Listing listing;
 
     /**
      * Amazon Listing Review 的 Id:
      * [listingId]_[username]_[title] 的 md5Hex 值
      */
-    @Id
     public String alrId;
 
     /**
@@ -87,4 +87,13 @@ public class AmazonListingReview extends GenericModel {
      */
     public String comment = "";
 
+
+    /**
+     * 这个是给抓取服务器自己使用的字段; 最后一页
+     */
+    public int maxPage = 0;
+
+    public static List<AmazonListingReview> parseReviewFromHTML(String html) {
+        return null;
+    }
 }

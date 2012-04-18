@@ -1,6 +1,7 @@
 package noRun;
 
 import models.product.Product;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,5 +24,11 @@ public class ProductValidTest {
         Assert.assertFalse(Product.validSKU("71-KDT-BPUL-2S"));
         Assert.assertFalse(Product.validSKU("71KDT-BPUL-2S-id"));
         Assert.assertFalse(Product.validSKU("7KDT-BPUL-2S"));
+    }
+
+    @Test
+    public void testHash() {
+        System.out.println("The best solution until new battery technology available");
+        System.out.println(DigestUtils.md5Hex("The best solution until new battery technology available"));
     }
 }
