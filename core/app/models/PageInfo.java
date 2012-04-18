@@ -111,13 +111,13 @@ public class PageInfo<T> {
             allow = items;
         }
 
+        p.count = (long) allow.size();
         int index = p.begin;
         int size = (p.size <= allow.size() ? p.size : allow.size());
         for(; ar.size() <= size; ) {
-            if(index >= size) break;
+            if(index >= p.count) break;
             ar.add(allow.get(index++));
         }
-        p.count = (long) allow.size();
 
         return ar;
     }

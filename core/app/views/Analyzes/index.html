@@ -20,26 +20,34 @@
     </div>
 
     <div class="row-fluid" id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
-        <div class="span5" id="dbcick_param"> <!-- 双击产品的时候使用 -->
-            <span class="label label-success">From:</span>
-            <input type="date" id="a_from" name="from">
+        <div class="span6" id="dbcick_param"> <!-- 双击产品的时候使用 -->
+            <div class="span3">
+                <span class="label label-success">From:</span>
+                <input type="date" class="span2" id="a_from" name="from">
+            </div>
 
-            <span class="label label-success">TO:</span>
-            <input type="date" id="a_to" name="to">
-
-            <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
-            <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
+            <div class="span3">
+                <span class="label label-success">TO:</span>
+                <input type="date" class="span2" id="a_to" name="to">
+            </div>
+            <div class="span3">
+                <span class="label label-important inline">
+                    <a href="#" rel="popover" data-content="影响双击 Selling 后上面出现的线的搜索方式, 搜索曲线时是让系统将字符串认作 MSKU 还是 SKU." data-original-title="作用">L:</a>
+                </span>
+                <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
+                <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
+                <span class="label label-success inline" id="a_acc_id_label">EasyAcc</span>
+            </div>
 
             <input type="hidden" name="acc.id" id="a_acc_id">
             <input type="hidden" name="msku" id="a_msku">
-            <span class="label label-info inline" id="a_acc_id_label">EasyAcc</span>
         </div>
 
         <div class="span3"> <!-- 点击 Search Selling 的时候使用 -->
             <i class="icon-search"></i>
             <input type="text" class="search-query" name="p.param" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN">
 
-            <a href="#" class="btn" id="a_search">搜索</a>
+            <a href="#" class="btn btn-small" id="a_search">搜索</a>
         </div>
     </div>
 

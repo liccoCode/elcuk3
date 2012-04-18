@@ -2,6 +2,7 @@ $(function(){
     // init page
     (function(){
         $('#a_toolbar :input[type=date]').dateinput({format:'mm/dd/yyyy'});
+        $('a[rel=popover]').popover();
         setTabType("sku");
         $(':radio[name=type]').attr('disabled', 'disabled');// 最开始为 SKU tab, 不允许使用 MSKU/SKU 单选
         $('#tab a[data-toggle="tab"]').on('shown', function(e){
@@ -153,8 +154,9 @@ $(function(){
             dataType:'json',
             success:function(data){
                 var display_sku = params['msku'];
-                sells.title.text = 'Selling [' + display_sku + '] Sales';
-                sales.title.text = 'Selling [' + display_sku + '] Prices';
+                var prefix = 'Selling [<span style="color:orange">' + display_sku + '</span> | ' + params['type'].toUpperCase() + ']';
+                sells.title.text = prefix + ' Sales';
+                sales.title.text = prefix + ' Prices';
                 var sell_series = [];
                 var sale_series = [];
 
@@ -247,6 +249,12 @@ $(function(){
     // 给 搜索 按钮添加事件
     $('#a_search').click(function(){
         var tab_type = localStorage.getItem('tab_type');
-        sellRankLoad((tab_type == 'msku' ? 1 :-1), $('#pagefooter_sku').val());
+        sellRankLoad((tab_type == 'msku' ? 1 :-1), ($('#pagefooter_sku').val() - 1)/*搜索框中保持当前页码不变*/);
+        return false;
     });
+    $('#a_param').keyup(function(e){
+        if(e.keyCode == 13) $('#a_search').click();
+        return false;
+    });
+
 });
