@@ -47,7 +47,7 @@ public class PageInfo<T> {
     public int end;
 
     public void setPage(int page) {
-        if(page < 0) page = 1;
+        if(page <= 0) page = 1;
         this.page = page;
     }
 
