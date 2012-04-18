@@ -1,11 +1,15 @@
 package models;
 
-import models.Listing;
-import play.db.jpa.GenericModel;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,11 +20,9 @@ import java.util.List;
  */
 public class AmazonListingReview {
 
-    public Listing listing;
-
     /**
      * Amazon Listing Review 的 Id:
-     * [listingId]_[username]_[title] 的 md5Hex 值
+     * [listingId]_[userid]_[title.trim()] 的 md5Hex 值
      */
     public String alrId;
 
@@ -50,9 +52,9 @@ public class AmazonListingReview {
 
 
     /**
-     * 点击了 Helpful 按钮的 NO
+     * 所有点击了 HelpFul Click 的统计
      */
-    public Integer helpDown;
+    public Integer helpClick;
 
     /**
      * 用户名字
@@ -64,7 +66,7 @@ public class AmazonListingReview {
      */
     public String userid;
 
-    public Date reviewDate;
+    public String reviewDate;
 
     /**
      * Amazon 会判断这个 Review 是不是为购买了这个商品的客户发出.
@@ -87,13 +89,148 @@ public class AmazonListingReview {
      */
     public String comment = "";
 
+    public static List<AmazonListingReview> parseReviewFromHTML(Document doc) {
+        Element rtr = doc.select("#productReviews tr").first();
+        Elements reviews = rtr.select("td > div");
+
+        String asin = doc.select(".asinReviewsSummary").attr("name");
+        String market = doc.select("#navLogoPrimary").text();
+
+        List<AmazonListingReview> reviewList = new ArrayList<AmazonListingReview>();
+        for(Element r : reviews) {
+            AmazonListingReview review = new AmazonListingReview();
+            review.listingId = String.format("%s_%s", asin, market);
+
+            String ratingStr = r.select("> div span.swSprite").first().text();
+            review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
+            review.lastRating = review.rating; // 对 LastRating 的初始化
+
+            review.title = r.select("> div span b").text().trim();
+
+            String helpfulStr = r.select("> div").first().text();
+            int[] two = {0, 0};
+            if(isHelpfulStr(helpfulStr)) {
+                String[] words = StringUtils.split(helpfulStr);
+                int n = 0; // 存储数字的索引
+                for(String s : words) {
+                    s = StringUtils.remove(s, "sur "); // 在 FR, [sur 1] 为第二个数字, 但是 sur 与 1 之间那个符号不是空格, 所以做删除处理
+                    int number = NumberUtils.toInt(s, -1);
+                    if(number != -1) two[n++] = number;
+                }
+            }
+            review.helpUp = two[0];
+            review.helpClick = two[1];
+
+            Element user = r.select("> div div div a").first();
+            review.username = user.text();
+            review.userid = StringUtils.splitPreserveAllTokens(user.attr("href"), "/")[6];
+
+            String[] dates = StringUtils.split(StringUtils.remove(r.select("> div span nobr").first().text(), "."), " ");
+            review.reviewDate = DateTime.parse(String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2]), DateTimeFormat.forPattern("dd MMM yyyy")).toString("yyyy-MM-dd");
+
+            Element purchasedEl = r.select("> div span.crVerifiedStripe").first();
+            review.purchased = purchasedEl != null;
+
+            review.review = r.ownText();
+
+            review.alrId = DigestUtils.md5Hex(String.format("%s_%s_%s", review.listingId, review.userid, review.title));
+
+            reviewList.add(review);
+        }
+        return reviewList;
+    }
 
     /**
-     * 这个是给抓取服务器自己使用的字段; 最后一页
+     * 支持 DE 与 FR 语言中的月份字符串转换成 英语 月份的字符串
+     *
+     * @param m
+     * @return
      */
-    public int maxPage = 0;
+    private static String dateMap(String m) {
+        // de -> uk
+        if("Januar".equalsIgnoreCase(m)) return "January";
+        else if("Februar".equalsIgnoreCase(m)) return "February";
+        else if("März".equalsIgnoreCase(m)) return "March";
+        else if("April".equalsIgnoreCase(m)) return "April";
+        else if("Mai".equalsIgnoreCase(m)) return "May";
+        else if("Juni".equalsIgnoreCase(m)) return "June";
+        else if("Juli".equalsIgnoreCase(m)) return "July";
+        else if("August".equalsIgnoreCase(m)) return "August";
+        else if("September".equalsIgnoreCase(m)) return "September";
+        else if("Oktober".equalsIgnoreCase(m)) return "October";
+        else if("November".equalsIgnoreCase(m)) return "November";
+        else if("Dezember".equalsIgnoreCase(m)) return "December";
+            // fr -> uk
+        else if("janvier".equalsIgnoreCase(m)) return "January";
+        else if("février".equalsIgnoreCase(m)) return "February";
+        else if("mars".equalsIgnoreCase(m)) return "March";
+        else if("avril".equalsIgnoreCase(m)) return "April";
+        else if("mai".equalsIgnoreCase(m)) return "May";
+        else if("juin".equalsIgnoreCase(m)) return "June";
+        else if("juillet".equalsIgnoreCase(m)) return "July";
+        else if("août".equalsIgnoreCase(m)) return "August";
+        else if("septembre".equalsIgnoreCase(m)) return "September";
+        else if("octobre".equalsIgnoreCase(m)) return "October";
+        else if("novembre".equalsIgnoreCase(m)) return "November";
+        else if("décembre".equalsIgnoreCase(m)) return "December";
+        else return m;
+    }
 
-    public static List<AmazonListingReview> parseReviewFromHTML(String html) {
-        return null;
+
+    /**
+     * 判断字符串是否为 HelpFul 的字符串, 会需要用来解析 helpUp 与 helpDown
+     *
+     * @param str
+     * @return
+     */
+    private static boolean isHelpfulStr(String str) {
+        return StringUtils.containsIgnoreCase(str, "review helpful") || // uk
+                StringUtils.containsIgnoreCase(str, "Rezension hilfreich") || // de
+                StringUtils.containsIgnoreCase(str, "commentaire utile"); // fr
+    }
+
+    /**
+     * 解析出 Review 页面的最大页数
+     *
+     * @param doc Jsoup 解析的 Document
+     * @return
+     */
+    public static int maxPage(Document doc) {
+        Element page = doc.select("span.paging").first();
+        if(page == null) return 1;
+        Elements links = page.select("a");
+
+        int maxLinkIndex = links.size() - 2;
+
+        Element maxLink = links.get(maxLinkIndex < 0 ? 0 : maxLinkIndex);
+        String[] params = StringUtils.split(maxLink.attr("href"), "&");
+        for(String param : params) {
+            if(!StringUtils.containsIgnoreCase(param, "pageNumber")) continue;
+            return NumberUtils.toInt(StringUtils.split(param, "=")[1], 1);
+        }
+        return 1;
+    }
+
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("AmazonListingReview");
+        sb.append("{alrId='").append(alrId).append('\'');
+        sb.append(", listingId='").append(listingId).append('\'');
+        sb.append(", rating=").append(rating);
+        sb.append(", title='").append(title).append('\'');
+        sb.append(", review='").append(review).append('\'');
+        sb.append(", helpUp=").append(helpUp);
+        sb.append(", helpClick=").append(helpClick);
+        sb.append(", username='").append(username).append('\'');
+        sb.append(", userid='").append(userid).append('\'');
+        sb.append(", reviewDate=").append(reviewDate);
+        sb.append(", purchased=").append(purchased);
+        sb.append(", resolved=").append(resolved);
+        sb.append(", lastRating=").append(lastRating);
+        sb.append(", comment='").append(comment).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
