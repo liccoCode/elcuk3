@@ -1,7 +1,11 @@
 package models.market;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import java.util.Date;
@@ -12,6 +16,7 @@ import java.util.Date;
  * Date: 4/17/12
  * Time: 4:33 PM
  */
+@Entity
 public class AmazonListingReview extends GenericModel {
 
     @ManyToOne
@@ -50,9 +55,9 @@ public class AmazonListingReview extends GenericModel {
 
 
     /**
-     * 点击了 Helpful 按钮的 NO
+     * 所有点击了 HelpFul Click 的统计
      */
-    public Integer helpDown;
+    public Integer helpClick;
 
     /**
      * 用户名字
@@ -87,4 +92,52 @@ public class AmazonListingReview extends GenericModel {
      */
     public String comment = "";
 
+    /**
+     * 解析单个 Review JsonElement
+     *
+     * @param jsonReviewElement
+     * @return
+     */
+    public static AmazonListingReview parseAmazonReviewJson(JsonElement jsonReviewElement) {
+        JsonObject rwObj = jsonReviewElement.getAsJsonObject();
+        AmazonListingReview review = new AmazonListingReview();
+        review.alrId = rwObj.get("alrId").getAsString();
+        review.listingId = rwObj.get("listingId").getAsString();
+        review.rating = rwObj.get("rating").getAsFloat();
+        review.lastRating = rwObj.get("lastRating").getAsFloat();
+        review.title = rwObj.get("title").getAsString();
+        review.review = rwObj.get("review").getAsString();
+        review.helpUp = rwObj.get("helpUp").getAsInt();
+        review.helpClick = rwObj.get("helpClick").getAsInt();
+        review.username = rwObj.get("username").getAsString();
+        review.userid = rwObj.get("userid").getAsString();
+        review.reviewDate = DateTime.parse(rwObj.get("reviewDate").getAsString()).toDate();
+        review.purchased = rwObj.get("purchased").getAsBoolean();
+        review.resolved = rwObj.get("resolved").getAsBoolean();
+
+        return review;
+    }
+
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("AmazonListingReview");
+        sb.append("{comment='").append(comment).append('\'');
+        sb.append(", alrId='").append(alrId).append('\'');
+        sb.append(", listingId='").append(listingId).append('\'');
+        sb.append(", rating=").append(rating);
+        sb.append(", title='").append(title).append('\'');
+        sb.append(", review='").append(review).append('\'');
+        sb.append(", helpUp=").append(helpUp);
+        sb.append(", helpClick=").append(helpClick);
+        sb.append(", username='").append(username).append('\'');
+        sb.append(", userid='").append(userid).append('\'');
+        sb.append(", reviewDate=").append(reviewDate);
+        sb.append(", purchased=").append(purchased);
+        sb.append(", resolved=").append(resolved);
+        sb.append(", lastRating=").append(lastRating);
+        sb.append('}');
+        return sb.toString();
+    }
 }

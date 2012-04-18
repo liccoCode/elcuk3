@@ -75,20 +75,20 @@ public class Account extends Model {
         }
 
         public static M val(String str) {
-            String strLowercase = str.toLowerCase();
-            if(strLowercase.equals("amazon_uk") || strLowercase.equals("amazon.co.uk") || strLowercase.equals("www.amazon.co.uk")) {
+            String s = str.toLowerCase();
+            if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") || s.equals("www.amazon.co.uk")) {
                 return AMAZON_UK;
-            } else if(strLowercase.equals("amazon_fr") || strLowercase.equals("amazon.fr") || strLowercase.equals("www.amazon.fr")) {
+            } else if(s.equals("afr") || s.equals("amazon_fr") || s.equals("amazon.fr") || s.equals("www.amazon.fr")) {
                 return AMAZON_FR;
-            } else if(strLowercase.equals("amazon_es") || strLowercase.equals("amazon.es") || strLowercase.equals("www.amazon.es")) {
+            } else if(s.equals("aes") || s.equals("amazon_es") || s.equals("amazon.es") || s.equals("www.amazon.es")) {
                 return AMAZON_ES;
-            } else if(strLowercase.equals("amazon_de") || strLowercase.equals("amazon.de") || strLowercase.equals("www.amazon.de")) {
+            } else if(s.equals("ade") || s.equals("amazon_de") || s.equals("amazon.de") || s.equals("www.amazon.de")) {
                 return AMAZON_DE;
-            } else if(strLowercase.equals("amazon_it") || strLowercase.equals("amazon.it") || strLowercase.equals("www.amazon.it")) {
+            } else if(s.equals("ait") || s.equals("amazon_it") || s.equals("amazon.it") || s.equals("www.amazon.it")) {
                 return AMAZON_IT;
-            } else if(strLowercase.equals("amazon_us") || strLowercase.equals("amazon.com") || strLowercase.equals("www.amazon.com")) {
+            } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") || s.equals("www.amazon.com")) {
                 return AMAZON_US;
-            } else if(strLowercase.equals("ebay_uk") || strLowercase.equals("ebay.co.uk") || strLowercase.equals("www.ebay.co.uk")) {
+            } else if(s.equals("euk") || s.equals("ebay_uk") || s.equals("ebay.co.uk") || s.equals("www.ebay.co.uk")) {
                 return EBAY_UK;
             } else {
                 return null;

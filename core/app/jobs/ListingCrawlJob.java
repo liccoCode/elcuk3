@@ -84,7 +84,7 @@ public class ListingCrawlJob extends Job {
             try {
                 JsonElement lst = WS.url(String.format("%s/listings/%s/%s",
                         Server.server(Server.T.CRAWLER).url,
-                        listing.market.name().split("_")[1],
+                        listing.market.name(),
                         listing.asin)).get().getJson();
                 Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
                 needCheckListing.check();
