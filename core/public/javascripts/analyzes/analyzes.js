@@ -249,7 +249,9 @@ $(function(){
     // 给 搜索 按钮添加事件
     $('#a_search').click(function(){
         var tab_type = localStorage.getItem('tab_type');
-        sellRankLoad((tab_type == 'msku' ? 1 :-1), ($('#pagefooter_sku').val() - 1)/*搜索框中保持当前页码不变*/);
+        var page = $('#pagefooter_sku').val() - 1;
+        /*搜索框中保持当前页码不变*/
+        sellRankLoad((tab_type == 'msku' ? 1 :-1), page <= 0 ? 1 :page);
         return false;
     });
     $('#a_param').keyup(function(e){
