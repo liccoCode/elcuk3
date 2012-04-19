@@ -84,12 +84,18 @@ public class ListingReviewCrawlJob extends Job {
                  * TODO 这里单独加载每一个 Review 而不是使用批量加载, 尽管会有性能影响, 但现在这个不是问题的时候不考虑
                  */
                 JsonArray array = reviews.getAsJsonArray();
+                listing.lastUpdateTime = System.currentTimeMillis();
                 for(JsonElement e : array) {
                     AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                     AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
-                    if(fromDB == null) review.save();// 创建新的
-                    else fromDB.updateAttr(review); // 更新
+                    if(fromDB == null) {
+                        review.listing = listing;
+                        review.save();// 创建新的
+                    } else {
+                        fromDB.updateAttr(review); // 更新
+                    }
                 }
+                listing.save();
             } catch(Exception e) {
                 Logger.warn("Listing Review[%s] have [%s].", url, Webs.E(e));
             }

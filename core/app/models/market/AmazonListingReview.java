@@ -9,6 +9,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import java.util.Date;
 
@@ -47,6 +48,7 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 具体的 Review 的内容
      */
+    @Lob
     public String review;
 
 

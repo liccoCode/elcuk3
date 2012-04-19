@@ -90,13 +90,16 @@ public class AmazonListingReview {
     public String comment = "";
 
     public static List<AmazonListingReview> parseReviewFromHTML(Document doc) {
+        List<AmazonListingReview> reviewList = new ArrayList<AmazonListingReview>();
         Element rtr = doc.select("#productReviews tr").first();
+        if(rtr == null) return reviewList;
+
         Elements reviews = rtr.select("td > div");
+        if(reviews == null) return reviewList;
 
         String asin = doc.select(".asinReviewsSummary").attr("name");
         String market = doc.select("#navLogoPrimary").text();
 
-        List<AmazonListingReview> reviewList = new ArrayList<AmazonListingReview>();
         for(Element r : reviews) {
             AmazonListingReview review = new AmazonListingReview();
             review.listingId = String.format("%s_%s", asin, market);
