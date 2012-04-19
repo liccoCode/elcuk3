@@ -36,7 +36,12 @@ public class HTTP {
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
-            client = new DefaultHttpClient(new ThreadSafeClientConnManager(), params);
+
+            ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
+            multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
+            multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
+
+            client = new DefaultHttpClient(multipThread, params);
             client.setRedirectStrategy(new DefaultRedirectStrategy() {
                 @Override
                 public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {

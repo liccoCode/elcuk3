@@ -29,6 +29,8 @@ public class ListingSchedulJob extends Job {
         int MAX_SIZE_PER_TIME = 10;
 
         long now = System.currentTimeMillis();
+
+        // ------ Listing ---------
         List<Listing> listings = Listing.find("lastUpdateTime<=? ORDER BY lastUpdateTime ASC",
                 (now - TimeUnit.MINUTES.toMillis(40))).fetch(MAX_SIZE_PER_TIME);
         Logger.info("[" + new DateTime(now).toString("yyyy-MM-dd HH:mm:ss") + "] have " + listings.size() + " size Listing to be deal!");
@@ -40,5 +42,19 @@ public class ListingSchedulJob extends Job {
             ListingCrawlJob.QUEUE.add(li.listingId);
             Logger.debug("Add Listing[" + li.listingId + "] to Update Queue.");
         }
+
+        // ----- Review ---------
+        List<Listing> reviews = Listing.find("lastUpdateTime<=? ORDER BY lastUpdateTime ASC",
+                now - TimeUnit.HOURS.toMillis(20)).fetch(MAX_SIZE_PER_TIME);
+        Logger.info("[" + new DateTime(now).toString("yyyy-MM-dd HH:mm:ss") + "] have " + reviews.size() + " size Listing need to fetch Reviews!");
+        for(Listing r : reviews) {
+            if(ListingReviewCrawlJob.QUEUE.contains(r.listingId)) {
+                Logger.debug("Skip Listing[" + r.listingId + "], it`s exist!");
+                continue;
+            }
+            ListingReviewCrawlJob.QUEUE.add(r.listingId);
+            Logger.debug("Add Listing[" + r.listingId + "] to Fetch Review Queue.");
+        }
+
     }
 }

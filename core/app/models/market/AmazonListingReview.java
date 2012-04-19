@@ -2,8 +2,10 @@ package models.market;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -92,6 +94,30 @@ public class AmazonListingReview extends GenericModel {
      */
     public String comment = "";
 
+    public AmazonListingReview updateAttr(AmazonListingReview newReview) {
+        if(StringUtils.isBlank(newReview.alrId))
+            throw new FastRuntimeException("AmazonListingReview.alrId can not be blank!");
+        if(!this.equals(newReview))
+            throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
+
+//        if(StringUtils.isNotBlank(newReview.listingId)) this.listingId = newReview.listingId; //这个不修改
+        if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
+            this.comment += String.format("\r\nRating from %s to %s on %s", this.rating, newReview.rating, DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            this.lastRating = newReview.rating;
+        }
+        if(newReview.rating != null) this.rating = newReview.rating;
+        if(StringUtils.isNotBlank(newReview.title)) this.title = newReview.title;
+        if(StringUtils.isNotBlank(newReview.review)) this.review = newReview.review;
+        if(newReview.helpUp != null && newReview.helpUp > 0) this.helpUp = newReview.helpUp;
+        if(newReview.helpClick != null && newReview.helpClick > 0) this.helpClick = newReview.helpClick;
+        if(StringUtils.isNotBlank(newReview.userid)) this.userid = newReview.userid;
+        if(StringUtils.isNotBlank(newReview.username)) this.username = newReview.username;
+        //reviewDate 不修改了
+        if(newReview.purchased != null) this.purchased = newReview.purchased;
+        // resolved 不做处理
+        return this.save();
+    }
+
     /**
      * 解析单个 Review JsonElement
      *
@@ -139,5 +165,25 @@ public class AmazonListingReview extends GenericModel {
         sb.append(", lastRating=").append(lastRating);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        AmazonListingReview that = (AmazonListingReview) o;
+
+        if(alrId != null ? !alrId.equals(that.alrId) : that.alrId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (alrId != null ? alrId.hashCode() : 0);
+        return result;
     }
 }

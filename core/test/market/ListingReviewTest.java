@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import helper.HTTP;
 import models.market.AmazonListingReview;
+import org.junit.Assert;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -16,8 +17,13 @@ import java.io.IOException;
  * Time: 5:33 PM
  */
 public class ListingReviewTest extends UnitTest {
-
     @Test
+    public void testExist() {
+        AmazonListingReview rew = AmazonListingReview.findById("kdjfkd");
+        Assert.assertNull(rew);
+    }
+
+    //    @Test
     public void testParseReview() throws IOException {
         //http://localhost:9001/reviews/afr/B005JSG7GE
 //        WS.HttpResponse re = WS.url("http://localhost:9001/reviews/afr/B005JSG7GE").get();

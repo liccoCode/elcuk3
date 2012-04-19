@@ -1,14 +1,13 @@
 package jobs;
 
 import com.google.gson.JsonElement;
+import helper.HTTP;
 import models.Server;
 import models.market.Listing;
 import play.Logger;
 import play.jobs.Job;
-import play.libs.WS;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -40,7 +39,7 @@ public class ListingCrawlJob extends Job {
          * 3. 将任务分发到不同的子 Job 中去
          */
         if(!flag.get()) {
-            Logger.debug("Last Time Job is not DONE yet...");
+            Logger.info("Last Time Job is not DONE yet...");
             return; // FLAG 为 false 则跳过这次任务
         }
 
@@ -52,7 +51,7 @@ public class ListingCrawlJob extends Job {
                 Logger.debug("Wow! Queue is empty!");
                 continue;
             }
-            new Worker(listingId).now().get(10, TimeUnit.SECONDS); // 不需要结果, 但需要为每个结果等待 10s
+            new Worker(listingId).now(); // 不需要结果, 但需要为每个结果等待 10s
         }
         flag.set(true);
         Logger.debug("ListingCrawlJob.Queue left " + QUEUE.size());
@@ -82,10 +81,8 @@ public class ListingCrawlJob extends Job {
                 return;
             }
             try {
-                JsonElement lst = WS.url(String.format("%s/listings/%s/%s",
-                        Server.server(Server.T.CRAWLER).url,
-                        listing.market.name(),
-                        listing.asin)).get().getJson();
+                JsonElement lst = HTTP.json(String.format("%s/listings/%s/%s",
+                        Server.server(Server.T.CRAWLER).url, listing.market.name(), listing.asin));
                 Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
                 needCheckListing.check();
                 needCheckListing.save();

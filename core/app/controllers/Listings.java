@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.gson.JsonElement;
+import helper.HTTP;
 import models.Server;
 import models.market.Account;
 import models.market.Listing;
@@ -12,7 +13,6 @@ import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.libs.WS;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -110,9 +110,9 @@ public class Listings extends Controller {
         validation.required(asin);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
-        JsonElement listing = WS.url(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin)).get().getJson();
         Listing tobeSave = null;
         try {
+            JsonElement listing = HTTP.json(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
             tobeSave = Listing.parseAndUpdateListingFromCrawl(listing);
         } catch(Exception e) {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));

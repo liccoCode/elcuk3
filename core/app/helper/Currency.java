@@ -3,7 +3,6 @@ package helper;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
-import play.libs.WS;
 
 /**
  * 不同货币单位的枚举类
