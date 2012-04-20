@@ -12,56 +12,56 @@
     <div class="span12">
         <table class="table table-bordered">
             <tr>
-                <td>OrderId</td>
+                <td>OrderId:</td>
                 <td>${ord.orderId}</td>
-                <td>Address</td>
+                <td>Address:</td>
                 <td>${ord.address}</td>
-                <td>Address1</td>
+                <td>Address1:</td>
                 <td>${ord.address1}</td>
-                <td>Reciver</td>
+                <td>Reciver:</td>
                 <td>${ord.reciver}</td>
             </tr>
             <tr>
-                <td>ArriveDate</td>
+                <td>ArriveDate:</td>
                 <td>${ord.arriveDate}</td>
-                <td>Buyer</td>
+                <td>Buyer:</td>
                 <td>${ord.buyer}</td>
-                <td>City</td>
+                <td>City:</td>
                 <td>${ord.city}</td>
-                <td>Country</td>
+                <td>Country:</td>
                 <td>${ord.country}</td>
             </tr>
             <tr>
-                <td>CreateDate</td>
+                <td>CreateDate:</td>
                 <td>${ord.createDate}</td>
-                <td>Email</td>
+                <td>Email:</td>
                 <td>${ord.email}</td>
-                <td>Market</td>
+                <td>Market:</td>
                 <td>${ord.market.toString()}</td>
-                <td>PaymentDate</td>
+                <td>PaymentDate:</td>
                 <td>${ord.paymentDate}</td>
             </tr>
             <tr>
-                <td>Phone</td>
+                <td>Phone:</td>
                 <td>${ord.phone}</td>
-                <td>PostalCode</td>
+                <td>PostalCode:</td>
                 <td>${ord.postalCode}</td>
-                <td>Province</td>
+                <td>Province:</td>
                 <td>${ord.province}</td>
                 <td colspan="2">&nbsp;</td>
             </tr>
             <tr>
-                <td>ShipDate</td>
+                <td>ShipDate:</td>
                 <td>${ord.shipDate}</td>
-                <td>ShipLevel</td>
+                <td>ShipLevel:</td>
                 <td>${ord.shipLevel}</td>
-                <td>ShippingAmount</td>
+                <td>ShippingAmount:</td>
                 <td>${ord.shippingAmount}</td>
-                <td>ShippingService</td>
+                <td>ShippingService:</td>
                 <td>${ord.shippingService}</td>
             </tr>
             <tr>
-                <td>State</td>
+                <td>State:</td>
                 #{if ord.state == models.market.Orderr.S.PENDING}
                     <td style="color:#4169e1;">${ord.state}</td>
                 #{/if}
@@ -77,11 +77,12 @@
                 #{else }
                     <td>${ord.state}</td>
                 #{/else}
-                <td>TotalAmount</td>
+                <td>TotalAmount:</td>
                 <td>${ord.totalAmount}</td>
-                <td>TrackNo.</td>
+                <td>TrackNo:</td>
                 <td>${ord.trackNo}</td>
-                <td colspan="2">&nbsp;</td>
+                <td>UserId:</td>
+                <td>${ord.userid}</td>
             </tr>
             <tr>
                 <td>Memo</td>
