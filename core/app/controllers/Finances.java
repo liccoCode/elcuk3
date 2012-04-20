@@ -32,9 +32,10 @@ public class Finances extends Controller {
      *
      * @param n
      */
-    public static void fix(String n, String m) {
+    public static void fix(String n, String m, Account a) {
         try {
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + n + ".txt"), Account.<Account>findById(1l), Account.M.val(m));
+            if(!a.isPersistent()) renderText("Account is not Persistent!");
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + n + ".txt"), a, Account.M.val(m));
             SaleFee.clearOldSaleFee(fees);
             SaleFee.batchSaveWithJDBC(fees);
             renderText("Saved: " + fees.size() + " fees");
