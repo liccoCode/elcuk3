@@ -2,6 +2,7 @@ package models.market;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
@@ -118,6 +119,16 @@ public class AmazonListingReview extends GenericModel {
         if(newReview.purchased != null) this.purchased = newReview.purchased;
         // resolved 不做处理
         return this.save();
+    }
+
+
+    /**
+     * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
+     */
+    public void listingReviewCheck() {
+        if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
+        if(this.rating != null && this.rating > 3) return;
+        Mails.listingReviewWarn(this);
     }
 
     /**

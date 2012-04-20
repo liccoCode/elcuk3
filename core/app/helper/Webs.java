@@ -1,6 +1,7 @@
 package helper;
 
 import models.market.Account;
+import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.Selling;
 import org.apache.commons.mail.EmailException;
@@ -72,6 +73,12 @@ public class Webs {
         return "#";
     }
 
+    public static String link(String listingId) {
+        String[] args = listingId.split("_");
+        Account.M market = Account.M.val(args[1]);
+        return String.format("http://www.%s/dp/%s", market.toString(), args[0]);
+    }
+
     public static String link(Selling selling) {
         //http://www.amazon.co.uk/dp/B005UNXHC0
         String baseAmazon = "http://www.%s/dp/%s";
@@ -108,6 +115,22 @@ public class Webs {
             case AMAZON_ES:
             case AMAZON_IT:
                 return String.format(baseAmazon, selling.market.toString(), selling.asin);
+        }
+        return "#";
+    }
+
+    public static String userReviewLink(AmazonListingReview r) {
+        String baseAmazon = "http://www.%s/gp/pdp/profile/%s";
+        String[] args = r.listingId.split("_");
+        Account.M market = Account.M.val(args[1]);
+        switch(market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return String.format(baseAmazon, market.toString(), r.userid);
         }
         return "#";
     }

@@ -1,9 +1,6 @@
 package notifiers;
 
-import models.market.Feedback;
-import models.market.Listing;
-import models.market.ListingOffer;
-import models.market.Orderr;
+import models.market.*;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
@@ -106,12 +103,28 @@ public class Mails extends Mailer {
      * @param f
      */
     public static void feedbackWarnning(Feedback f) {
-        setSubject("Feedback Warnning! Score:" + f.score + " (Order: " + f.orderId + ")");
+        setSubject("Feedback Warnning! Score: %s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
         send(f);
     }
 
+
+    /**
+     * 系统内部使用的, 拥有 <= 3 分的 Review 的警告邮件
+     *
+     * @param r
+     */
+    public static void listingReviewWarn(AmazonListingReview r) {
+        String title = String.format("ListingReview Warnning! Rating: %s Listing: %s", r.rating, r.listingId);
+        setSubject(title);
+        mailBase();
+        addRecipient("services@easyacceu.com");
+        send(r, title);
+    }
+
+
+    // ----------------------------------------------
     private static void mailBase() {
         if(Play.mode.isProd()) {
             setFrom("EasyAcc <support@easyacceu.com>");

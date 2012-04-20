@@ -129,6 +129,7 @@ public class ListingWorkers extends Job {
                     } else {
                         fromDB.updateAttr(review); // 更新
                     }
+                    review.listingReviewCheck();
                 }
                 listing.save();
             } catch(Exception e) {
