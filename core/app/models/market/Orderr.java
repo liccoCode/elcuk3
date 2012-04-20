@@ -507,7 +507,7 @@ public class Orderr extends GenericModel {
 
             String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
             if(amazonOrderId.startsWith("S02") || Patterns.A2Z.matcher(amazonOrderId).matches()) {
-                Logger.info("OrderId {} Can Not Be Add to Normal Order", amazonOrderId);
+                Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
                 continue;
             }
 
