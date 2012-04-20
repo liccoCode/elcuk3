@@ -9,6 +9,8 @@ import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
@@ -140,6 +142,11 @@ public class Orderr extends GenericModel {
      * 快递接收人姓名
      */
     public String reciver;
+
+    /**
+     * 用来关联其他 Amazon 消息的用户的标识符
+     */
+    public String userid;
 
     /**
      * 联系地址(街道, 等等)
@@ -792,6 +799,22 @@ public class Orderr extends GenericModel {
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
                 return "";
+        }
+    }
+
+    /**
+     * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充
+     */
+    public void orderInfoParse(Document doc) {
+        Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
+        if(lin == null) return;
+        String url = lin.parent().select("a").attr("href");
+        String[] args = StringUtils.split(url, "&");
+        for(String pa : args) {
+            if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
+            this.userid = StringUtils.split(pa, "=")[1];
+            this.save();
+            break;
         }
     }
 
