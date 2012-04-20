@@ -114,6 +114,7 @@ public class OrderPOST {
                     append("province LIKE '%").append(this.search).append("%' OR ").
                     append("reciver LIKE '%").append(this.search).append("%' OR ").
                     append("memo LIKE '%").append(this.search).append("%' OR ").
+                    append("userid LIKE '%").append(this.search).append("%' OR ").
                     append("trackNo LIKE '%").append(this.search).append("%') ");
         }
 
