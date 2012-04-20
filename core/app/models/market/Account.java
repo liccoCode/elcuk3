@@ -326,7 +326,7 @@ public class Account extends Model {
      */
     public void changeRegion(M m) {
         try {
-            String body = HTTP.get(new HttpGet(this.type.homePage()));
+            String body = HTTP.get(this.type.homePage());
             Document doc = Jsoup.parse(body);
             Element countries = doc.select("#merchant-website").first();
             if(countries == null) throw new NotLoginFastException();
@@ -358,8 +358,8 @@ public class Account extends Model {
                 Logger.warn("Value parse Error!");
                 return;
             }
-            HTTP.get(new HttpGet(this.type.changeRegion(value)));
-        } catch(IOException e) {
+            HTTP.get(this.type.changeRegion(value));
+        } catch(Exception e) {
             e.printStackTrace();
         }
     }
@@ -375,9 +375,8 @@ public class Account extends Model {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
-                feedback = new HttpGet(this.type.feedbackPage(page));
                 try {
-                    String body = HTTP.get(feedback);
+                    String body = HTTP.get(this.type.feedbackPage(page));
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + "feedback_p" + page + ".html"), body);
                     return Feedback.parseFeedBackFromHTML(body);
@@ -420,7 +419,7 @@ public class Account extends Model {
             this.loginWebSite();
             this.changeRegion(market);
             Logger.info("Downloading [%s] File...", this.username);
-            String body = HTTP.get(new HttpGet(this.type.flatFinance()));
+            String body = HTTP.get(this.type.flatFinance());
             DateTime dt = DateTime.now();
             File f = new File(String.format("%s/%s/%s/%s_%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, dt.toString("yyyy.MM.dd_HH'h'")));
             Logger.info("File Save to :[" + f.getAbsolutePath() + "]");

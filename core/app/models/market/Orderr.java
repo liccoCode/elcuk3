@@ -142,6 +142,11 @@ public class Orderr extends GenericModel {
     public String reciver;
 
     /**
+     * 用来关联其他 Amazon 消息的用户的标识符
+     */
+    public String userid;
+
+    /**
      * 联系地址(街道, 等等)
      */
     public String address;

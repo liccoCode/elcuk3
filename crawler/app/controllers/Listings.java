@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.HTTP;
 import models.ARW;
 import models.AmazonListingReview;
 import models.Listing;
@@ -12,7 +13,6 @@ import play.Logger;
 import play.Play;
 import play.data.validation.Validation;
 import play.libs.IO;
-import play.libs.WS;
 import play.mvc.Controller;
 import play.utils.FastRuntimeException;
 
@@ -37,7 +37,7 @@ public class Listings extends Controller {
         }
         MT m = MT.val(market);
         if(m == null) renderJSON("{flag:false, message:'invalid market[us,uk,de,it,es,fr]'}");
-        String html = WS.url(ARW.listing(m, asin)).get().getString();
+        String html = HTTP.get(ARW.listing(m, asin));
         IO.writeContent(html, new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
 //        String html = IO.readContentAsString(new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
         // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
@@ -68,7 +68,7 @@ public class Listings extends Controller {
             String url = ARW.review(m, asin, p);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
-            String html = WS.url(url).get().getString();
+            String html = HTTP.get(url);
 
             if(Play.mode == Play.Mode.DEV)
                 FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/reviews/%s/%s_%s.html", System.getProperty("user.home"), m.name(), asin, p)), html);
