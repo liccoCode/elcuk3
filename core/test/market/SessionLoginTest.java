@@ -13,12 +13,12 @@ import play.test.UnitTest;
  * Time: 9:29 AM
  */
 public class SessionLoginTest extends UnitTest {
-    //    @Test
+    @Test
     public void testLoginTwice() throws InterruptedException {
         new KeepSessionJob().doJob();
     }
 
-    @Test
+    //    @Test
     public void testFeedbackFetch() {
         Account ac = Account.findById(1l);
         ac.loginWebSite();

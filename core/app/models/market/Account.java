@@ -197,6 +197,22 @@ public class Account extends Model {
                     throw new NotSupportChangeRegionFastException();
             }
         }
+
+        public String orderDetail(String oid) {
+            //https://sellercentral.amazon.co.uk/gp/orders-v2/details?orderID=203-5364157-2572327
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/orders-v2/details?orderID=" + oid;
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
     }
 
     /**

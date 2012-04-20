@@ -9,6 +9,8 @@ import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
@@ -797,6 +799,22 @@ public class Orderr extends GenericModel {
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
                 return "";
+        }
+    }
+
+    /**
+     * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充
+     */
+    public void orderInfoParse(Document doc) {
+        Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
+        if(lin == null) return;
+        String url = lin.parent().select("a").attr("href");
+        String[] args = StringUtils.split(url, "&");
+        for(String pa : args) {
+            if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
+            this.userid = StringUtils.split(pa, "=")[1];
+            this.save();
+            break;
         }
     }
 
