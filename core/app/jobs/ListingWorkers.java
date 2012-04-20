@@ -126,10 +126,11 @@ public class ListingWorkers extends Job {
                     if(fromDB == null) {
                         review.listing = listing;
                         review.save();// 创建新的
+                        review.listingReviewCheck();
                     } else {
                         fromDB.updateAttr(review); // 更新
+                        fromDB.listingReviewCheck();
                     }
-                    review.listingReviewCheck();
                 }
                 listing.save();
             } catch(Exception e) {

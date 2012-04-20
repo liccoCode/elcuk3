@@ -13,7 +13,7 @@ import play.test.UnitTest;
 public class ListingReviewMailTest extends UnitTest {
     @Test
     public void test() {
-        AmazonListingReview review = AmazonListingReview.findById("aad377a694ba71c467b2710215879eb3");
+        AmazonListingReview review = AmazonListingReview.findById("034b7762514b8ccac6dfba2d3371e558");
         review.listingReviewCheck();
     }
 
