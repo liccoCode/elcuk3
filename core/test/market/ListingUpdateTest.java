@@ -1,6 +1,6 @@
 package market;
 
-import jobs.ListingCrawlJob;
+import jobs.ListingDriverlJob;
 import jobs.ListingSchedulJob;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -16,6 +16,6 @@ public class ListingUpdateTest extends UnitTest {
     public void crawling() throws InterruptedException {
         new ListingSchedulJob().now();
         Thread.sleep(5000);
-        new ListingCrawlJob().now();
+        new ListingDriverlJob().now();
     }
 }

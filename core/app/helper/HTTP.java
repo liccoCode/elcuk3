@@ -86,6 +86,7 @@ public class HTTP {
     }
 
     public static JsonElement json(String url) throws IOException {
+        Logger.debug("HTTP Json [%s]", url);
         String json = get(new HttpGet(url));
         try {
             return new JsonParser().parse(json);

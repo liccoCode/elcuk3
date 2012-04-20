@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.Webs;
 import models.Jobex;
 import play.Logger;
 import play.Play;
@@ -51,7 +52,7 @@ public class JobDriver extends Job {
                         job.save();
                         success++;
                     } catch(Exception e) {
-                        Logger.error("Job %s: %s", job.className, e.getMessage());
+                        Logger.error("Job %s: %s", job.className, Webs.E(e));
                     }
                 } else {
                     Logger.debug("Skip Job %s", job.className);
