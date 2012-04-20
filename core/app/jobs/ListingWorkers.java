@@ -9,6 +9,7 @@ import models.market.AmazonListingReview;
 import models.market.Listing;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.Play;
 import play.jobs.Job;
 
 /**
@@ -41,12 +42,16 @@ public class ListingWorkers extends Job {
                 new L(lid).doJob(); // 不需要结果, 但需要为每个结果等待 10s
                 break;
             case R:
-                DateTime now = DateTime.now();
-                int hourOfDay = now.getHourOfDay();
-                if(hourOfDay >= 3 && hourOfDay <= 5) {
-                    new R(lid).doJob();
+                if(Play.mode.isProd()) {
+                    DateTime now = DateTime.now();
+                    int hourOfDay = now.getHourOfDay();
+                    if(hourOfDay >= 3 && hourOfDay <= 5) {
+                        new R(lid).doJob();
+                    } else {
+                        Logger.info("Hour Of Day [%s] is not within 3~5", hourOfDay);
+                    }
                 } else {
-                    Logger.info("Hour Of Day [%s] is not within 3~5", hourOfDay);
+                    new R(lid).doJob();
                 }
                 break;
         }
