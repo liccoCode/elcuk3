@@ -4,6 +4,7 @@ import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
 import helper.Dates;
 import helper.Patterns;
+import helper.Webs;
 import models.finance.SaleFee;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
@@ -810,11 +811,14 @@ public class Orderr extends GenericModel {
         if(lin == null) return;
         String url = lin.parent().select("a").attr("href");
         String[] args = StringUtils.split(url, "&");
-        Logger.info("Log for a while, href:[%s]", url);
         for(String pa : args) {
-            if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
-            this.userid = StringUtils.split(pa, "=")[1];
-            this.save();
+            try {
+                if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
+                this.userid = StringUtils.split(pa, "=")[1];
+                this.save();
+            } catch(Exception e) {
+                Logger.warn("Orderr.orderInfoParse error, url[%s], E[%s]", url, Webs.E(e));
+            }
             break;
         }
     }
