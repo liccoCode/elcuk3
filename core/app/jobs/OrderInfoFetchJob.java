@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.HTTP;
+import helper.Webs;
 import models.market.Orderr;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -27,11 +28,15 @@ public class OrderInfoFetchJob extends Job {
         if(Play.mode.isProd()) size = 50;
         List<Orderr> orders = Orderr.find("state=? order by createDate desc", Orderr.S.SHIPPED).fetch(size);
         for(Orderr ord : orders) {
-            String url = ord.account.type.orderDetail(ord.orderId);
-            Logger.info("OrderInfo fetch [%s].", url);
-            String html = HTTP.get(url);
-            Document doc = Jsoup.parse(html);
-            ord.orderInfoParse(doc);
+            try {
+                String url = ord.account.type.orderDetail(ord.orderId);
+                Logger.info("OrderInfo fetch [%s].", url);
+                String html = HTTP.get(url);
+                Document doc = Jsoup.parse(html);
+                ord.orderInfoParse(doc);
+            } catch(Exception e) {
+                Logger.warn("Parse Order Info Error! [%s]", Webs.E(e));
+            }
         }
     }
 }

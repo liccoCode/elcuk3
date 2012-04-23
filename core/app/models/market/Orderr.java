@@ -810,6 +810,7 @@ public class Orderr extends GenericModel {
         if(lin == null) return;
         String url = lin.parent().select("a").attr("href");
         String[] args = StringUtils.split(url, "&");
+        Logger.info("Log for a while, href:[%s]", url);
         for(String pa : args) {
             if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
             this.userid = StringUtils.split(pa, "=")[1];
