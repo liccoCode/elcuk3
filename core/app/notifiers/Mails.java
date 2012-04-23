@@ -111,16 +111,23 @@ public class Mails extends Mailer {
 
 
     /**
-     * 系统内部使用的, 拥有 <= 3 分的 Review 的警告邮件
+     * 系统内部使用的, 拥有 <= 3 分的 Review 的警告邮件;
+     * 如果这个 AmazonListingReview 发送邮件的次数大于 3 次, 则不再进行发送.
      *
      * @param r
      */
     public static void listingReviewWarn(AmazonListingReview r) {
-        String title = String.format("ListingReview Warnning! Rating: %s Listing: %s", r.rating, r.listingId);
+        //{WARN}[Review] R: 3.0 A: B004KHXU5Q M:amazon.co.uk
+        if(r.mailedTimes != null && r.mailedTimes > 3) return;
+        String[] args = StringUtils.split(r.listingId, "_");
+        String title = String.format("{WARN}[Review] R:%s A:%s M:%s", r.rating, args[0], args[1]);
         setSubject(title);
         mailBase();
         addRecipient("services@easyacceu.com");
         send(r, title);
+        // send 方法没有抛出异常则表示邮件发送成功
+        r.mailedTimes += 1;
+        r.save();
     }
 
 

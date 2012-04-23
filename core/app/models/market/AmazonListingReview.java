@@ -93,6 +93,11 @@ public class AmazonListingReview extends GenericModel {
     public Float lastRating;
 
     /**
+     * 记录发送的邮件的次数. 大于 3 次则不再提醒.
+     */
+    public Integer mailedTimes = 0;
+
+    /**
      * 给程序自己使用的, 非人为使用的 Comment; 用来记录变化的
      */
     public String comment = "";
