@@ -99,7 +99,9 @@ public class Feedback extends GenericModel {
     }
 
     /**
-     * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket
+     * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket;
+     * <p/>
+     * 检查完 OsTicket 与 Mail 发送后, 相关的参数印象在全部成功后在次方法中更新
      */
     public void checkMailAndTicket() {
         /**
@@ -108,9 +110,11 @@ public class Feedback extends GenericModel {
          */
         if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
 
+        if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
+
         if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
 
-        if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
+        this.save();
     }
 
     /**
@@ -148,7 +152,6 @@ public class Feedback extends GenericModel {
             }
             if(obj.get("flag").getAsBoolean()) { // 成功创建
                 this.osTicketId = obj.get("tid").getAsString();
-                this.save();
             } else {
                 Logger.warn("Order[%s] Feedback post to OsTicket failed because of [%s]",
                         this.orderId, obj.get("message").getAsString());
@@ -241,5 +244,25 @@ public class Feedback extends GenericModel {
         sb.append(", state=").append(state);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Feedback feedback = (Feedback) o;
+
+        if(orderId != null ? !orderId.equals(feedback.orderId) : feedback.orderId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
+        return result;
     }
 }

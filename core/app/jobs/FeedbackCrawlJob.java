@@ -68,8 +68,8 @@ public class FeedbackCrawlJob extends Job {
                 for(Feedback f : feedbacks) {
                     f.orderr = Orderr.findById(f.orderId);
                     f.account = acc;
-                    f.<Feedback>merge().save(); // 系统中有则更新, 没有则创建
-                    f.checkMailAndTicket();
+                    Feedback mfeed = f.merge(); // 系统中有则更新, 没有则创建
+                    mfeed.checkMailAndTicket();
                 }
             }
         } catch(Exception e) {

@@ -48,7 +48,7 @@ public class ListingWorkers extends Job {
                     if(hourOfDay >= 3 && hourOfDay <= 5) {
                         new R(lid).doJob();
                     } else {
-                        Logger.info("Hour Of Day [%s] is not within 3~5", hourOfDay);
+                        Logger.debug("Hour Of Day [%s] is not within 3~5", hourOfDay);
                     }
                 } else {
                     new R(lid).doJob();
