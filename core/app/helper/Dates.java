@@ -1,5 +1,7 @@
 package helper;
 
+import org.joda.time.DateTime;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import java.util.Date;
@@ -23,5 +25,13 @@ public class Dates {
 
     public static Date parseXMLGregorianDate(String expression) {
         return df.newXMLGregorianCalendar(expression).toGregorianCalendar().getTime();
+    }
+
+    public static String date2DateTime(Date date) {
+        if(date == null) {
+            return DateTime.now().toString("yyyy-MM-dd HH:mm:ss");
+        } else {
+            return new DateTime(date).toString("yyyy-MM-dd HH:mm:ss");
+        }
     }
 }

@@ -1,13 +1,22 @@
 package models.market;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import helper.Dates;
+import helper.HTTP;
 import helper.Webs;
+import notifiers.Mails;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
 
@@ -63,6 +72,16 @@ public class Feedback extends GenericModel {
     public Account.M market;
 
     /**
+     * 发送邮件警告的次数, 最多 3 次;
+     */
+    public Integer mailedTimes = 0;
+
+    /**
+     * 关联的 OsTicket 系统中的 Id, 如果没有则需要向 OsTicket 系统指定的 URL 创建 Ticket.
+     */
+    public String osTicketId;
+
+    /**
      * 是否解决了,等等状态
      */
     public S state;
@@ -77,6 +96,66 @@ public class Feedback extends GenericModel {
         this.email = email;
         this.comment = comment;
         this.state = S.END;
+    }
+
+    /**
+     * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket
+     */
+    public void checkMailAndTicket() {
+        /**
+         * 1. 判断是否需要发送警告邮件;
+         * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
+         */
+        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
+
+        if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
+
+        if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
+    }
+
+    /**
+     * 向 OsTicket 系统开启一个新的 Ticket
+     *
+     * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
+     */
+    public void openOsTicket(String title) {
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        String name = this.orderId;
+        if(this.orderr != null)
+            name = String.format("%s - %s", this.orderr.buyer, this.market.toString());
+
+        String subject = title;
+        if(StringUtils.isBlank(subject))
+            subject = "You left a negative feedback, Please give us a chance to make up!"; //TODO  默认的 Title 很需要
+
+        params.add(new BasicNameValuePair("name", name));
+        params.add(new BasicNameValuePair("email", this.email));
+        params.add(new BasicNameValuePair("phone", ""));
+        params.add(new BasicNameValuePair("phone_ext", ""));
+        params.add(new BasicNameValuePair("topicId", "1")); // 固定这个 TopicId 为 1; OsTicket 系统里面为 Support
+        params.add(new BasicNameValuePair("submit_x", "Submit Ticket"));
+        params.add(new BasicNameValuePair("subject", subject));
+        params.add(new BasicNameValuePair("message",
+                String.format("OrderId: %s CreateDate: %s \r\n Comment:\r\n%s",
+                        this.orderId, Dates.date2DateTime(this.createDate), this.comment)));
+
+        try {
+            JsonElement jsonel = HTTP.postJson("http://t.easyacceu.com/open_api.php", params);
+            JsonObject obj = jsonel.getAsJsonObject();
+            if(obj == null) {
+                Logger.error("Feedback.openOsTicket fetch content Error!");
+                return;
+            }
+            if(obj.get("flag").getAsBoolean()) { // 成功创建
+                this.osTicketId = obj.get("tid").getAsString();
+                this.save();
+            } else {
+                Logger.warn("Order[%s] Feedback post to OsTicket failed because of [%s]",
+                        this.orderId, obj.get("message").getAsString());
+            }
+        } catch(Exception e) {
+            Logger.error("Feedback.openOsTicket fetch IO Error!");
+        }
     }
 
     /**

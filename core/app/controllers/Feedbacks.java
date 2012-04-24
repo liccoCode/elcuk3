@@ -7,7 +7,6 @@ import models.Ret;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
-import notifiers.Mails;
 import org.joda.time.DateTime;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -88,7 +87,7 @@ public class Feedbacks extends Controller {
             f.orderr = Orderr.findById(f.orderId);
             f.account = acc;
             f.merge()._save(); // 系统中有则更新, 没有则创建
-            if(f.score <= 3 && f.state == Feedback.S.HANDLING) Mails.feedbackWarnning(f);
+            f.checkMailAndTicket();
         }
         Map<String, String> rt = new HashMap<String, String>();
         rt.put("flag", "true");

@@ -3,6 +3,7 @@ package helper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.*;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
@@ -19,6 +20,7 @@ import play.Logger;
 import play.Play;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Play 中利用 AsyncHttpClient 的 HTTP 请求
@@ -84,12 +86,35 @@ public class HTTP {
         try {
             return EntityUtils.toString(client().execute(new HttpGet(url)).getEntity());
         } catch(IOException e) {
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return "";
         }
     }
 
+    public static String post(String url, List<NameValuePair> params) {
+        HttpPost post = new HttpPost(url);
+        try {
+            post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+            return EntityUtils.toString(client().execute(post).getEntity());
+        } catch(Exception e) {
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            return "";
+        }
+    }
+
+    public static JsonElement postJson(String url, List<NameValuePair> params) {
+        Logger.debug("HTTP.post Json [%s]", url);
+        String json = post(url, params);
+        try {
+            return new JsonParser().parse(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
     public static JsonElement json(String url) {
-        Logger.debug("HTTP Json [%s]", url);
+        Logger.debug("HTTP.get Json [%s]", url);
         String json = get(url);
         try {
             return new JsonParser().parse(json);

@@ -103,10 +103,14 @@ public class Mails extends Mailer {
      * @param f
      */
     public static void feedbackWarnning(Feedback f) {
-        setSubject("Feedback Warnning! Score: %s (Order: %s)", f.score, f.orderId);
+        if(f.mailedTimes != null && f.mailedTimes > 3) return;
+        setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
         send(f);
+        // send 方法没有抛出异常则表示邮件发送成功
+        f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
+        f.save();
     }
 
 
@@ -126,7 +130,7 @@ public class Mails extends Mailer {
         addRecipient("services@easyacceu.com");
         send(r, title);
         // send 方法没有抛出异常则表示邮件发送成功
-        r.mailedTimes += 1;
+        r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
         r.save();
     }
 

@@ -4,7 +4,6 @@ import helper.Currency;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
-import notifiers.Mails;
 import play.Logger;
 import play.jobs.Job;
 
@@ -69,8 +68,8 @@ public class FeedbackCrawlJob extends Job {
                 for(Feedback f : feedbacks) {
                     f.orderr = Orderr.findById(f.orderId);
                     f.account = acc;
-                    f.merge()._save(); // 系统中有则更新, 没有则创建
-                    if(f.score <= 3 && f.state == Feedback.S.HANDLING) Mails.feedbackWarnning(f);
+                    f.<Feedback>merge().save(); // 系统中有则更新, 没有则创建
+                    f.checkMailAndTicket();
                 }
             }
         } catch(Exception e) {
