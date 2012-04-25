@@ -86,8 +86,7 @@ public class Feedbacks extends Controller {
         for(Feedback f : feedbacks) {
             f.orderr = Orderr.findById(f.orderId);
             f.account = acc;
-            f.merge()._save(); // 系统中有则更新, 没有则创建
-            f.checkMailAndTicket();
+            f.<Feedback>merge().checkMailAndTicket();// 系统中有则更新, 没有则创建
         }
         Map<String, String> rt = new HashMap<String, String>();
         rt.put("flag", "true");
