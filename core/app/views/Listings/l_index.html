@@ -21,9 +21,9 @@
         <ul id="cat_prod_list" class="nav nav-tabs nav-stacked">
         #{list items:cats, as:'cat'}
             <li>
-                <a data-toggle="collapse" data-target="#cat_sku_${cat.id}" id="cat_${cat.id}" title="${cat.memo}" href="#">${cat.categoryId}
+                <a data-toggle="collapse" data-target="#cat_sku_${cat.categoryId}" id="cat_${cat.categoryId}" title="${cat.memo}" href="#">${cat.categoryId}
                     : ${cat.name}</a>
-                <ul class="nav nav-list collapse" id='cat_sku_${cat.id}'>
+                <ul class="nav nav-list collapse" id='cat_sku_${cat.categoryId}'>
                     #{if cat.products.size() == 0}
                         <li><a href="#"><span style="color:gray;">没有 Product</span></a></li>
                     #{/if}

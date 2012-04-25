@@ -64,23 +64,21 @@
     #{else }
         <table class="table table-striped">
             <tr>
-                <th>Id</th>
                 <th>CategoryId</th>
                 <th>Name</th>
                 <th>&nbsp;</th>
             </tr>
             #{list items:cates, as:'cat'}
-                <tr class="cat_info cat_${cat_parity}" id='cat_${cat.id}'>
-                    <td data-toggle="collapse" data-target="#cat_m_${cat.id}">
-                        <input readonly type='text' name="c.id" value="${cat.id}">
+                <tr class="cat_info cat_${cat_parity}" id='cat_${cat.categoryId}'>
+                    <td data-toggle="collapse" data-target="#cat_m_${cat.categoryId}">
+                        <input readonly type='text' name="c.categoryId" value="${cat.categoryId}">
                     </td>
-                    <td><input type='text' name="c.categoryId" value="${cat.categoryId}"></td>
                     <td><input type='text' name="c.name" value="${cat.name}"></td>
-                    <td><a href="#" class="btn btn-small btn-primary" cid="${cat.id}">Save</a></td>
+                    <td><a href="#" class="btn btn-small btn-primary" cid="${cat.categoryId}">Save</a></td>
                 </tr>
-                <tr class="cat_memo" id='cat_memo_${cat.id}'>
+                <tr class="cat_memo" id='cat_memo_${cat.categoryId}'>
                     <td colspan="4">
-                        <div id="cat_m_${cat.id}" class="collapse">
+                        <div id="cat_m_${cat.categoryId}" class="collapse">
                             <textarea rows="5" style="width:98%"
                                       name="c.memo">${cat.memo.empty ? '没有信息' : cat.memo}</textarea>
                         </div>

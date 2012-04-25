@@ -1,24 +1,24 @@
 package models.product;
 
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.List;
 
 /**
- * Category 类别
+ * 产品分层中第一级别的 Category 类别
  * User: Wyatt
  * Date: 12-1-7
  * Time: 上午11:44
  */
 @Entity
-public class Category extends Model {
+public class Category extends GenericModel {
 
     @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @OrderBy("sku")
     public List<Product> products;
 
-    @Column(nullable = false, unique = true)
+    @Id
     public String categoryId;
 
     @Column(nullable = false, unique = true)

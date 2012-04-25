@@ -13,7 +13,7 @@ $(function(){
             data:params,
             dataType:'json',
             success:function(data){
-                if(data.id && data['categoryId'] == params['c.categoryId']){ //成功
+                if(data['categoryId'] == params['c.categoryId']){ //成功
                     // 清零 Form 数据
                     alert('Category: [' + data['categoryId'] + ']' + (save ? '添加' :'修改') + '成功.');
                     $('#add_modal').modal('hide');
