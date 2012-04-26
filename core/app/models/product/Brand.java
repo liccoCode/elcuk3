@@ -2,7 +2,9 @@ package models.product;
 
 import play.db.jpa.GenericModel;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.util.List;
 
 /**
@@ -11,6 +13,7 @@ import java.util.List;
  * Date: 4/25/12
  * Time: 3:21 PM
  */
+@Entity
 public class Brand extends GenericModel {
 
     /**
@@ -19,5 +22,9 @@ public class Brand extends GenericModel {
     @Id
     public String name;
 
-    public List<Family> families;
+    /**
+     * Brand 可以附属与很多类别
+     */
+    @ManyToMany(mappedBy = "brands")
+    public List<Category> categories;
 }

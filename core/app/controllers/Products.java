@@ -102,20 +102,6 @@ public class Products extends Controller {
         renderJSON(new Ret(true));
     }
 
-
-    /**
-     * ========== Category ===============
-     */
-
-    public static void c_create(@Valid Category c) {
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        if(!c.isPersistent()) renderJSON(new Error("Category", "Category is not Persistent!", new String[]{}));
-        c.save();
-        c.products = null;
-        renderJSON(c);
-    }
-
-
     /**
      * ========== Whouse ===============
      */

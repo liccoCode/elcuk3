@@ -18,6 +18,9 @@ public class Category extends GenericModel {
     @OrderBy("sku")
     public List<Product> products;
 
+    @ManyToMany
+    public List<Brand> brands;
+
     @Id
     public String categoryId;
 

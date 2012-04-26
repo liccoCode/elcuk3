@@ -9,7 +9,7 @@ $(function(){
         var save = true;
         if(act == 'save') save = true;else if(act == 'edit') save = false;
         $.ajax({
-            url:'/products/c_create',
+            url:'/categorys/cc',
             data:params,
             dataType:'json',
             success:function(data){
