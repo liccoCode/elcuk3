@@ -1,0 +1,45 @@
+<div><span class="label label-success">Basic Info</span></div>
+<div>
+    <table class="table table-bordered">
+        <tr>
+            <td class="span1">Brand:</td>
+            <td>${brand.name}</td>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+            <td class="span1">Memo</td>
+            <td colspan="3">${brand.memo}</td>
+        </tr>
+    </table>
+</div>
+
+
+<div><span class="label label-success">Relate Category</span></div>
+<div id="category_${brand.name}">
+    <table class="table table-bordered">
+        <tr>
+            <th>CategoryId</th>
+            <th>Name</th>
+            <th class="span1">OP</th>
+        </tr>
+    #{list items:brand.categories, as:'cat'}
+        <tr id="${brand.name}">
+            <td>${cat.categoryId}</td>
+            <td>${cat.name}</td>
+            <td>
+                <button class="btn btn-warning" unbind cid="${cat.categoryId}" bid="${brand.name}">UnBind</button>
+            </td>
+        </tr>
+    #{/list}
+        <tr>
+            <td colspan="2">
+            #{select name:'c.categoryId', items:cats, valueProperty:'categoryId'}#{/select}
+                <input type="hidden" name="b.name" value="${brand.name}">
+            </td>
+            <td>
+                <button class="btn btn-primary" bid="${brand.name}" bind>Bind</button>
+            </td>
+        </tr>
+    </table>
+</div>
+

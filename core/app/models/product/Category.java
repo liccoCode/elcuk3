@@ -34,4 +34,24 @@ public class Category extends GenericModel {
     public String toString() {
         return String.format("%s:%s", this.categoryId, this.name);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Category category = (Category) o;
+
+        if(categoryId != null ? !categoryId.equals(category.categoryId) : category.categoryId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (categoryId != null ? categoryId.hashCode() : 0);
+        return result;
+    }
 }

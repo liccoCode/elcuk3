@@ -24,4 +24,24 @@ public class Family extends GenericModel {
 
     @OneToOne
     public Brand brand;
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Family family1 = (Family) o;
+
+        if(family != null ? !family.equals(family1.family) : family1.family != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (family != null ? family.hashCode() : 0);
+        return result;
+    }
 }

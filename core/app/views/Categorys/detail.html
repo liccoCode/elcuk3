@@ -1,0 +1,55 @@
+<div><span class="label label-success">Basic Info</span></div>
+<div id="detail_${cat.categoryId}">
+    <table class="table table-bordered">
+        <tr>
+            <td class="span1">CategoryId:</td>
+            <td>
+            ${cat.categoryId}
+                <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
+            </td>
+            <td class="span1">Name:</td>
+            <td><input class="input-medium" type="text" name="c.name" value="${cat.name}"></td>
+        </tr>
+        <tr>
+            <td class="span1">Memo:</td>
+            <td colspan="3">
+                <textarea name="c.memo" rows="3" cols="30">${cat.memo}</textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <a href="#" id="btn_${cat.categoryId}" class="btn btn-small btn-primary">Save</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<div><span class="label label-success">Relate Brand</span></div>
+<div id="brands_${cat.categoryId}">
+    <table class="table table-bordered">
+        <tr>
+            <th>Brand</th>
+            <th>Memo</th>
+            <th class="span1">Op</th>
+        </tr>
+    #{list items:cat.brands, as:'b'}
+        <tr>
+            <td>${b.name}</td>
+            <td>${b.memo}</td>
+            <td>
+                <button class="btn btn-warning" unbind cid="${cat.categoryId}" bid="${b.name}">UnBind</button>
+            </td>
+        </tr>
+    #{/list}
+        <tr>
+            <td colspan="2">
+            #{select name:'b.name', items:brands, labelProperty:'name', valueProperty:'name'}#{/select}
+                <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
+            </td>
+            <td>
+                <button class="btn btn-primary" cid="${cat.categoryId}" bind>Bind</button>
+            </td>
+        </tr>
+    </table>
+</div>

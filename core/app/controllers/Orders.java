@@ -28,7 +28,9 @@ import java.util.Map;
 public class Orders extends Controller {
 
     public static void o_index(Integer p, Integer s) {
-        Webs.fixPage(p, s);
+        Integer[] fixs = Webs.fixPage(p, s);
+        p = fixs[0];
+        s = fixs[1];
         List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, s);
         Long count = Orderr.count();
         PageInfo<Orderr> pi = new PageInfo<Orderr>(s, count, p, orders);

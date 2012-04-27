@@ -25,7 +25,9 @@ import java.util.Map;
 @With({Secure.class, GzipFilter.class})
 public class Feedbacks extends Controller {
     public static void index(Integer p, Integer s) {
-        Webs.fixPage(p, s);
+        Integer[] fixs = Webs.fixPage(p, s);
+        p = fixs[0];
+        s = fixs[1];
         List<Feedback> feds = Feedback.find("ORDER BY state ASC, score ASC, createDate DESC").fetch(p, s);
         List<Account> accs = Account.all().fetch();
         Map<String, Long> accFeds = new HashMap<String, Long>();
