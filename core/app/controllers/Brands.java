@@ -1,7 +1,5 @@
 package controllers;
 
-import helper.Webs;
-import models.PageInfo;
 import models.Ret;
 import models.product.Brand;
 import models.product.Category;
@@ -17,15 +15,9 @@ import java.util.List;
  */
 public class Brands extends Controller {
 
-    public static void index(Integer p, Integer s) {
-        Integer[] fixs = Webs.fixPage(p, s);
-        p = fixs[0];
-        s = fixs[1];
-        List<Brand> brands = Brand.all().fetch(p, s);
-        Long count = Category.count();
-
-        PageInfo<Brand> pi = new PageInfo<Brand>(s, count, p, brands);
-        render(brands, count, p, s, pi);
+    public static void index() {
+        List<Brand> brands = Brand.all().fetch();
+        render(brands);
     }
 
     public static void detail(String bid) {

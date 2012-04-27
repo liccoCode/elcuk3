@@ -25,7 +25,7 @@ $(function(){
                 try{
                     if(r.flag){
                         alert('绑定成功!');
-                        $('tr[cid=' + o.attr('bid') + ']').dblclick();
+                        $('tr[bid=' + o.attr('bid') + ']').dblclick();
                     }
                     else alert(r.message);
                 }finally{
@@ -38,7 +38,18 @@ $(function(){
     function bindCategoryUnBindBtn(){
         $('button[unbind]').click(function(){
             var o = $(this);
-
+            var bid = o.attr('bid');
+            $('#category_' + bid).mask('解除绑定中...');
+            $.post('/categorys/uBrand', {'c.categoryId':o.attr('cid'), 'b.name':bid}, function(r){
+                try{
+                    if(r.flag){
+                        alert("解除绑定成功!");
+                        $('tr[bid=' + bid + ']').dblclick();
+                    }else alert(r.message);
+                }finally{
+                    $('#category_' + bid).unmask();
+                }
+            });
         });
     }
 

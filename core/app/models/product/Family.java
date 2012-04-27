@@ -4,7 +4,9 @@ import play.db.jpa.GenericModel;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import java.util.List;
 
 /**
  * 根据产品的两级分层再进行 Product 的 SKU 之前的一级细化的 Family 产品族;
@@ -19,11 +21,18 @@ public class Family extends GenericModel {
     @Id
     public String family;
 
+    @OneToMany(mappedBy = "family")
+    public List<Product> products;
+
     @OneToOne
     public Category category;
 
     @OneToOne
     public Brand brand;
+
+    public static List<Family> bcRelateFamily(Brand b, Category c) {
+        return Family.find("category=? AND brand=?", c, b).fetch();
+    }
 
     @Override
     public boolean equals(Object o) {

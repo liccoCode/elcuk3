@@ -37,6 +37,9 @@ public class Product extends GenericModel {
     @OneToMany
     public List<Attribute> attrs;
 
+    @ManyToOne
+    public Family family;
+
 
     /**
      * 唯一的标示
