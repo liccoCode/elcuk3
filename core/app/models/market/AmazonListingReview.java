@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 某一个 Listing 所拥有的 Review 消息
@@ -124,6 +125,10 @@ public class AmazonListingReview extends GenericModel {
         if(newReview.purchased != null) this.purchased = newReview.purchased;
         // resolved 不做处理
         return this.save();
+    }
+
+    public List<Orderr> relateOrder() {
+        return Orderr.find("userid=?", this.userid).fetch();
     }
 
 

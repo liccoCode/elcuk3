@@ -7,6 +7,7 @@ import play.Play;
 import play.exceptions.MailException;
 import play.mvc.Mailer;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -123,12 +124,15 @@ public class Mails extends Mailer {
     public static void listingReviewWarn(AmazonListingReview r) {
         //{WARN}[Review] R: 3.0 A: B004KHXU5Q M:amazon.co.uk
         if(r.mailedTimes != null && r.mailedTimes > 3) return;
+        List<Orderr> ords = r.relateOrder();
+        StringBuilder sbr = new StringBuilder();
+        for(Orderr ord : ords) sbr.append(ord.orderId).append(",");
         String[] args = StringUtils.split(r.listingId, "_");
         String title = String.format("{WARN}[Review] R:%s A:%s M:%s", r.rating, args[0], args[1]);
         setSubject(title);
         mailBase();
         addRecipient("services@easyacceu.com");
-        send(r, title);
+        send(r, title, sbr);
         // send 方法没有抛出异常则表示邮件发送成功
         r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
         r.save();
