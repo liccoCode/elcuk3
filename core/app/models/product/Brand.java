@@ -23,6 +23,8 @@ public class Brand extends GenericModel {
     @Id
     public String name;
 
+    public String fullName;
+
     public String memo;
 
     /**

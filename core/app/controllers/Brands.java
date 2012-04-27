@@ -33,6 +33,7 @@ public class Brands extends Controller {
      * @param b
      */
     public static void bc(Brand b) {
+        //TODO Brand 的创建的 name 与 fullName 的参数需要验证
         if(b.isPersistent()) renderJSON(new Ret("此 Brand 已经在系统中存在."));
 
         b.save();

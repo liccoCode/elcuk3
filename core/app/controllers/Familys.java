@@ -21,6 +21,7 @@ public class Familys extends Controller {
     }
 
     public static void create(Family f) {
+        //TODO Family 的格式还需要进行验证
         if(f != null && f.isPersistent()) renderJSON(new Ret("Family 已经存在, 不需要添加."));
         f.save();
         renderJSON(new Ret());

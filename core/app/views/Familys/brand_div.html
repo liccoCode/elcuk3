@@ -1,11 +1,12 @@
 <table class="table table-condensed">
     <tr>
         <th class="span3">Name</th>
+        <th>FullName</th>
         <th>Memo</th>
     </tr>
 #{list items:brands, as:'b'}
     <tr bid='${b.name}'>
-        <td>${b.name}</td>
+        <td>${b.fullName}</td>
         <td>${b.memo}</td>
     </tr>
 #{/list}
