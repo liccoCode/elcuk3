@@ -100,8 +100,6 @@ public class Feedback extends GenericModel {
 
     /**
      * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket;
-     * <p/>
-     * 检查完 OsTicket 与 Mail 发送后, 相关的参数印象在全部成功后在次方法中更新
      */
     public void checkMailAndTicket() {
         /**
@@ -110,11 +108,17 @@ public class Feedback extends GenericModel {
          */
         if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
 
-        if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
+        try {
+            if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
+        } catch(Exception e) {
+            Logger.warn("checkMailAndTicket OpenTicket Error. [%s]", Webs.E(e));
+        }
 
-        if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
-
-        this.save();
+        try {
+            if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
+        } catch(Exception e) {
+            Logger.warn("checkMailAndTicket Mail Error. [%s]", Webs.E(e));
+        }
     }
 
     /**
@@ -140,8 +144,8 @@ public class Feedback extends GenericModel {
         params.add(new BasicNameValuePair("submit_x", "Submit Ticket"));
         params.add(new BasicNameValuePair("subject", subject));
         params.add(new BasicNameValuePair("message",
-                String.format("OrderId: %s CreateDate: %s \r\n Comment:\r\n%s",
-                        this.orderId, Dates.date2DateTime(this.createDate), this.comment)));
+                String.format("OrderId: %s ; CreateDate: %s ; Score: %s \r\n\r\n Comment:\r\n%s",
+                        this.orderId, Dates.date2DateTime(this.createDate), this.score, this.comment)));
 
         try {
             JsonElement jsonel = HTTP.postJson("http://t.easyacceu.com/open_api.php", params);
@@ -152,6 +156,7 @@ public class Feedback extends GenericModel {
             }
             if(obj.get("flag").getAsBoolean()) { // 成功创建
                 this.osTicketId = obj.get("tid").getAsString();
+                this.save();
             } else {
                 Logger.warn("Order[%s] Feedback post to OsTicket failed because of [%s]",
                         this.orderId, obj.get("message").getAsString());

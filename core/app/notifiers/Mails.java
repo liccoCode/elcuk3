@@ -110,6 +110,7 @@ public class Mails extends Mailer {
         send(f);
         // send 方法没有抛出异常则表示邮件发送成功
         f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
+        f.save();
     }
 
 
