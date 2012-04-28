@@ -19,6 +19,7 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ public class Feedback extends GenericModel {
     @Lob
     public String comment;
 
+    @Lob
     public String memo;
 
     @Enumerated(EnumType.STRING)
@@ -101,24 +103,37 @@ public class Feedback extends GenericModel {
     /**
      * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket;
      */
-    public void checkMailAndTicket() {
+    public boolean checkMailAndTicket() {
         /**
          * 1. 判断是否需要发送警告邮件;
          * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
          */
-        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
+        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return true;
 
-        try {
-            if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
-        } catch(Exception e) {
-            Logger.warn("checkMailAndTicket OpenTicket Error. [%s]", Webs.E(e));
-        }
+        if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
 
-        try {
-            if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
-        } catch(Exception e) {
-            Logger.warn("checkMailAndTicket Mail Error. [%s]", Webs.E(e));
+        if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
+
+        this.save();
+
+        return false;
+    }
+
+    public void updateAttr(Feedback newFeedback) {
+        if(!this.orderId.equalsIgnoreCase(newFeedback.orderId))
+            throw new FastRuntimeException("Feedback OrderId is not the same!");
+        if(newFeedback.score != null && newFeedback.score >= 1) {
+            if(!newFeedback.score.equals(this.score)) { // score 不一样了, 需要记录
+                this.memo += String.format("\r\nScore from %s to %s on %s", this.score, newFeedback.score, DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            } else {
+                this.score = newFeedback.score;
+            }
         }
+        if(StringUtils.isNotBlank(newFeedback.comment)) this.comment = newFeedback.comment;
+        if(newFeedback.state != null && this.state == S.HANDLING) this.state = newFeedback.state;
+        if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
+
+        this.save();
     }
 
     /**
@@ -156,7 +171,6 @@ public class Feedback extends GenericModel {
             }
             if(obj.get("flag").getAsBoolean()) { // 成功创建
                 this.osTicketId = obj.get("tid").getAsString();
-                this.save();
             } else {
                 Logger.warn("Order[%s] Feedback post to OsTicket failed because of [%s]",
                         this.orderId, obj.get("message").getAsString());
