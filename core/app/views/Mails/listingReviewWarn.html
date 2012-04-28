@@ -16,7 +16,7 @@
             <table class="table table-bordered table-striped">
                 <tr>
                     <td>Title:</td>
-                    <td colspan="3">${r.title}</td>
+                    <td colspan="3">${r.title.raw()}</td>
                     <td>Purchased:</td>
                     <td>${r.purchased}</td>
                 </tr>
@@ -34,7 +34,7 @@
                     <td>HelpUp/All</td>
                     <td>${r.helpUp} / ${r.helpClick}</td>
                     <td>Orders</td>
-                    <td>${sbr.tostring()}</td>
+                    <td>${sbr.tostring().raw()}</td>
                 </tr>
                 <tr>
                     <td>Review:</td>
