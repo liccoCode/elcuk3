@@ -2,7 +2,10 @@ package models.product;
 
 import play.db.jpa.GenericModel;
 
+import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.PrePersist;
 import java.util.List;
 
 /**
@@ -11,6 +14,7 @@ import java.util.List;
  * Date: 4/25/12
  * Time: 3:21 PM
  */
+@Entity
 public class Brand extends GenericModel {
 
     /**
@@ -19,5 +23,45 @@ public class Brand extends GenericModel {
     @Id
     public String name;
 
-    public List<Family> families;
+    public String fullName;
+
+    public String memo;
+
+    /**
+     * Brand 可以附属与很多类别
+     */
+    @ManyToMany(mappedBy = "brands")
+    public List<Category> categories;
+
+    @PrePersist
+    public void prePersist() {
+        this.name = this.name.toUpperCase();
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Brand brand = (Brand) o;
+
+        if(name != null ? !name.equals(brand.name) : brand.name != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        return result;
+    }
+
+
+    @Override
+    public String toString() {
+        return String.format("%s: %s", this.name, this.fullName);
+    }
 }

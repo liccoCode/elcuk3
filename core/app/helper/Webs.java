@@ -44,9 +44,11 @@ public class Webs {
      * @param p
      * @param s
      */
-    public static void fixPage(Integer p, Integer s) {
-        if(p == null || p < 0) p = 1; // 判断在页码
-        if(s == null || s < 1 || s > 100) s = 20; // 判断显示的条数控制 
+    public static Integer[] fixPage(Integer p, Integer s) {
+        Integer[] rtVal = new Integer[]{p, s};
+        if(p == null || p < 0) rtVal[0] = 1; // 判断在页码
+        if(s == null || s < 1 || s > 100) rtVal[1] = 20; // 判断显示的条数控制
+        return rtVal;
     }
 
     /**

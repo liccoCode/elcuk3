@@ -1,0 +1,75 @@
+#{extends 'main.html'/}
+#{set title:'Brand' /}
+#{set 'moreScripts'}
+    #{script 'products/brand.js'/}
+#{/set}
+<div>
+    <!-- BTN-1-BEGIN -->
+    <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_category">添加</a>
+
+    <div id="add_modal" class="modal hide fade">
+        <div class="modal-header">
+            <a class="close" data-dismiss="modal">×</a>
+
+            <h3>添加 Brand</h3>
+        </div>
+
+        <div class="modal-body">
+            <form id='add_brand_form' class="form-horizontal">
+                <fieldset>
+                    <div class="control-group">
+                        <label for="b.name" class="control-label">Name</label>
+
+                        <div class="controls">
+                            <input type="text" id="b.name" name="b.name">
+
+                            <p class="help-block">例如: 品牌惠普填写 HP</p>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="b.memo" class="control-label">Memo</label>
+
+                        <div class="controls">
+                            <textarea id="b.memo" name="b.memo"></textarea>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <a href="#" class="btn btn-primary" id="addBrandBtn">Save</a>
+            <a href="#" class="btn" data-dismiss="modal">Close</a>
+        </div>
+    </div>
+    <!-- BTN-1-END -->
+</div>
+
+#{if brands.size() == 0}
+<div class="row">
+    <div>
+        等待添加新品牌
+    </div>
+#{/if}
+#{else }
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span3 well well-small" id="brand_slider" style="height:650px;overflow:auto;">
+                <table class="table table-striped table-bordered table-condensed">
+                    <tr>
+                        <th class="span1">Brand</th>
+                    </tr>
+                    #{list items:brands, as:'b'}
+                        <tr bid="${b.name}">
+                            <td>${b.name}</td>
+                        </tr>
+                    #{/list}
+                </table>
+            </div>
+
+            <div class="span8" id="brand_detail">请选择左侧的 Brand.</div>
+        </div>
+    </div>
+#{/else}
+</div>

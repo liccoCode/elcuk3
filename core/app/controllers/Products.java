@@ -30,7 +30,9 @@ public class Products extends Controller {
      * 展示所有的 Product
      */
     public static void p_index(Integer p, Integer s) {
-        Webs.fixPage(p, s);
+        Integer[] fixs = Webs.fixPage(p, s);
+        p = fixs[0];
+        s = fixs[1];
         List<Category> cates = Category.all().fetch();
         List<Product> prods = Product.all().fetch(p, s);
         Long count = Product.count();
@@ -46,7 +48,9 @@ public class Products extends Controller {
     }
 
     public static void c_index(Integer p, Integer s) {
-        Webs.fixPage(p, s);
+        Integer[] fixs = Webs.fixPage(p, s);
+        p = fixs[0];
+        s = fixs[1];
         List<Category> cates = Category.all().fetch(p, s);
         Long count = Category.count();
 
@@ -55,7 +59,9 @@ public class Products extends Controller {
     }
 
     public static void w_index(Integer p, Integer s) {
-        Webs.fixPage(p, s);
+        Integer[] fixs = Webs.fixPage(p, s);
+        p = fixs[0];
+        s = fixs[1];
         List<Whouse> whs = Whouse.all().fetch(p, s);
         Long count = Whouse.count();
         List<Account> accs = Account.all().fetch();
@@ -101,20 +107,6 @@ public class Products extends Controller {
         }
         renderJSON(new Ret(true));
     }
-
-
-    /**
-     * ========== Category ===============
-     */
-
-    public static void c_create(@Valid Category c) {
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        if(!c.isPersistent()) renderJSON(new Error("Category", "Category is not Persistent!", new String[]{}));
-        c.save();
-        c.products = null;
-        renderJSON(c);
-    }
-
 
     /**
      * ========== Whouse ===============

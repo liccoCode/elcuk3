@@ -46,8 +46,11 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="@{Products.p_index(1, 20)}">Product</a></li>
-                            <li><a href="@{Products.c_index(1, 20)}">Category</a></li>
                             <li><a href="@{Products.w_index(1, 20)}">Whouse</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@{Categorys.index()}">Category</a></li>
+                            <li><a href="@{Brands.index()}">Brand</a></li>
+                            <li><a href="@{Familys.index()}">Family</a></li>
                         </ul>
                     </li>
 

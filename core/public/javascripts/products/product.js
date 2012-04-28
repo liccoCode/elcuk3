@@ -47,5 +47,12 @@ $(function(){
             $('#prod_sqty').unmask();
         });
 
-    })
+    });
+
+
+    $('#family_bind').click(function(){
+        $.post('/products/p_f', {'p.sku':$(this).attr('pid'), 'f.family':$('#family_fix').val()}, function(r){
+            alert(r.message);
+        })
+    });
 });

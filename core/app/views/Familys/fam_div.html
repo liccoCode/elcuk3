@@ -1,0 +1,10 @@
+<table class="table table-condensed">
+    <tr>
+        <th class="span3">Family</th>
+    </tr>
+#{list items:fmys, as:'f'}
+    <tr fid='${f.family}'>
+        <td>${f.family}</td>
+    </tr>
+#{/list}
+</table>

@@ -34,6 +34,12 @@ public class Product extends GenericModel {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
     public List<Product> relates;
 
+    @OneToMany
+    public List<Attribute> attrs;
+
+    @ManyToOne
+    public Family family;
+
 
     /**
      * 唯一的标示
