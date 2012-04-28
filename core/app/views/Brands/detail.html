@@ -1,6 +1,6 @@
 <div><span class="label label-success">Basic Info</span></div>
 <div>
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
         <tr>
             <td class="span1">Brand:</td>
             <td>${brand.name}</td>
@@ -16,7 +16,7 @@
 
 <div><span class="label label-success">Relate Category</span></div>
 <div id="category_${brand.name}">
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
         <tr>
             <th>CategoryId</th>
             <th>Name</th>
@@ -27,7 +27,8 @@
             <td>${cat.categoryId}</td>
             <td>${cat.name}</td>
             <td>
-                <button class="btn btn-warning" unbind cid="${cat.categoryId}" bid="${brand.name}">UnBind</button>
+                <button class="btn btn-mini btn-warning" unbind cid="${cat.categoryId}" bid="${brand.name}">UnBind
+                </button>
             </td>
         </tr>
     #{/list}
@@ -37,7 +38,7 @@
                 <input type="hidden" name="b.name" value="${brand.name}">
             </td>
             <td>
-                <button class="btn btn-primary" bid="${brand.name}" bind>Bind</button>
+                <button class="btn btn-mini btn-primary" bid="${brand.name}" bind>Bind</button>
             </td>
         </tr>
     </table>

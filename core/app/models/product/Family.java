@@ -2,10 +2,7 @@ package models.product;
 
 import play.db.jpa.GenericModel;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.List;
 
 /**
@@ -34,6 +31,11 @@ public class Family extends GenericModel {
         return Family.find("category=? AND brand=?", c, b).fetch();
     }
 
+    @PrePersist
+    private void prePersist() {
+        this.family = this.family.toUpperCase();
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -52,5 +54,11 @@ public class Family extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + (family != null ? family.hashCode() : 0);
         return result;
+    }
+
+
+    @Override
+    public String toString() {
+        return this.family.toUpperCase();
     }
 }

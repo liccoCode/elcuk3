@@ -58,4 +58,10 @@ public class Brand extends GenericModel {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
+
+
+    @Override
+    public String toString() {
+        return String.format("%s: %s", this.name, this.fullName);
+    }
 }

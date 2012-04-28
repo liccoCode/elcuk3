@@ -1,6 +1,6 @@
 <div><span class="label label-success">Basic Info</span></div>
 <div id="detail_${cat.categoryId}">
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
         <tr>
             <td class="span1">CategoryId:</td>
             <td>
@@ -27,7 +27,7 @@
 
 <div><span class="label label-success">Relate Brand</span></div>
 <div id="brands_${cat.categoryId}">
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
         <tr>
             <th>Brand</th>
             <th>Memo</th>
@@ -38,17 +38,17 @@
             <td>${b.name}</td>
             <td>${b.memo}</td>
             <td>
-                <button class="btn btn-warning" unbind cid="${cat.categoryId}" bid="${b.name}">UnBind</button>
+                <button class="btn btn-mini btn-warning" unbind cid="${cat.categoryId}" bid="${b.name}">UnBind</button>
             </td>
         </tr>
     #{/list}
         <tr>
             <td colspan="2">
-            #{select name:'b.name', items:brands, labelProperty:'name', valueProperty:'name'}#{/select}
+            #{select name:'b.name', items:brands, valueProperty:'name'}#{/select}
                 <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
             </td>
             <td>
-                <button class="btn btn-primary" cid="${cat.categoryId}" bind>Bind</button>
+                <button class="btn btn-mini btn-primary" cid="${cat.categoryId}" bind>Bind</button>
             </td>
         </tr>
     </table>
