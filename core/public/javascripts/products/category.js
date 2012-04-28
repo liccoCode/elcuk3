@@ -103,6 +103,37 @@ $(function(){
         });
     }
 
+    function bindAttrSaveBtn(){
+        // 为 Cat 添加 Attrs 的按钮
+        $('#cat_atts_btn').click(function(){
+            var cat_atts = $('#cat_atts');
+            var checks = cat_atts.find(':input');
+            var checked = [];
+            checks.each(function(){
+                var o = $(this);
+                if(!o.is(':checked')) return;
+                checked.push(o.val());
+            });
+
+            var params = {'c.categoryId':$(this).attr('cid')};
+            for(var i = 0; i < checked.length; i++){
+                params['ats[' + i + '].name'] = checked[i];
+            }
+
+            cat_atts.mask("绑定中... ");
+            $.post('/categorys/bindAttrs', params, function(r){
+                try{
+                    if(r.flag) alert("绑定成功!");
+                    else alert(r.message);
+                }finally{
+                    cat_atts.unmask();
+                }
+            });
+            return false;
+        });
+    }
+
+
     // 双击加载详细信息
     $('#cat_slider tr[cid]').dblclick(function(){
         var slider = $('#cat_slider');
@@ -112,8 +143,10 @@ $(function(){
             bindBasicInfoUpdate(cid);
             bindBrandBindBtn();
             bindBrandUnBindBtn();
+            bindAttrSaveBtn();
             slider.unmask();
         });
     });
+
 
 });

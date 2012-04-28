@@ -21,6 +21,12 @@ public class Category extends GenericModel {
     @ManyToMany
     public List<Brand> brands;
 
+    /**
+     * Category 本身就必须拥有一定量的 AttrName , 用来限定其下的产品的属性
+     */
+    @ManyToMany
+    public List<AttrName> attrNames;
+
     @Id
     public String categoryId;
 
@@ -33,6 +39,18 @@ public class Category extends GenericModel {
     @Override
     public String toString() {
         return String.format("%s:%s", this.categoryId, this.name);
+    }
+
+    public void bindAndUnBindAttrs(List<AttrName> attrNames) {
+        /**
+         * 删除的时候有什么限制吗?
+         *  对于 Category 上的, 删除了就删除了, 在 Product 中已经存在的不理会,让其继续存在就好了,
+         *  在这个 Category 下新创建的 Product 才会收到影响
+         */
+        // 把 Category 所有的清理掉, 然后再重新绑定
+        this.attrNames.clear();
+        for(AttrName at : attrNames) this.attrNames.add(at);
+        this.save();
     }
 
     @Override

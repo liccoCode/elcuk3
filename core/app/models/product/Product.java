@@ -34,6 +34,18 @@ public class Product extends GenericModel {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
     public List<Product> relates;
 
+    /**
+     * Product 自身这一个级别上, 可以定制其自己拥有的特殊属性.
+     */
+    @ManyToMany
+    public List<AttrName> attrNames;
+
+    /**
+     * 这个产品从 Category 继承 + 自身的所有的 attrNames 值;
+     * <p/>
+     * 如果某一时刻 Category 或者 Product 身上的 AttrName 被删除了, 这个记录的对应的 AttrName 的值
+     * 不受影响.
+     */
     @OneToMany
     public List<Attribute> attrs;
 

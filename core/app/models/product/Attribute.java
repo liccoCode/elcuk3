@@ -4,6 +4,7 @@ import play.db.jpa.GenericModel;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 
 /**
@@ -27,5 +28,6 @@ public class Attribute extends GenericModel {
     @Id
     public String id;
 
+    @Lob
     public String value;
 }

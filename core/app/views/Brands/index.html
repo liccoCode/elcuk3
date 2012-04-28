@@ -28,6 +28,14 @@
                     </div>
 
                     <div class="control-group">
+                        <label for="b.fullName" class="control-label">Fullname</label>
+
+                        <div class="controls">
+                            <input type="text" id="b.fullName" name="b.fullName">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
                         <label for="b.memo" class="control-label">Memo</label>
 
                         <div class="controls">
@@ -62,7 +70,7 @@
                     </tr>
                     #{list items:brands, as:'b'}
                         <tr bid="${b.name}">
-                            <td>${b.name}</td>
+                            <td>${b}</td>
                         </tr>
                     #{/list}
                 </table>

@@ -3,10 +3,7 @@
     <table class="table table-bordered table-condensed">
         <tr>
             <td class="span1">CategoryId:</td>
-            <td>
-            ${cat.categoryId}
-                <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
-            </td>
+            <td>${cat.categoryId}</td>
             <td class="span1">Name:</td>
             <td><input class="input-medium" type="text" name="c.name" value="${cat.name}"></td>
         </tr>
@@ -14,6 +11,7 @@
             <td class="span1">Memo:</td>
             <td colspan="3">
                 <textarea name="c.memo" rows="3" cols="30">${cat.memo}</textarea>
+                <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
             </td>
         </tr>
         <tr>
@@ -26,8 +24,17 @@
 
 
 <div><span class="label label-success">Relate Brand</span></div>
-<div id="brands_${cat.categoryId}">
-    <table class="table table-bordered table-condensed">
+<div class="row">
+    <div class="span3">
+    #{select name:'b.name', items:brands, valueProperty:'name'}#{/select}
+        <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
+    </div>
+    <div class="span3">
+        <button class="btn btn-mini btn-primary" cid="${cat.categoryId}" bind>Bind</button>
+    </div>
+</div>
+<div id="brands_${cat.categoryId}" style="height:250px;overflow:auto;margin-bottom:18px;">
+    <table class="table table-bordered table-condensed" style="margin-bottom:0;">
         <tr>
             <th>Brand</th>
             <th>Memo</th>
@@ -38,18 +45,23 @@
             <td>${b.name}</td>
             <td>${b.memo}</td>
             <td>
-                <button class="btn btn-mini btn-warning" unbind cid="${cat.categoryId}" bid="${b.name}">UnBind</button>
+                <button class="btn btn-mini btn-warning" unbind cid="${cat.categoryId}" bid="${b.name}">UnBind
+                </button>
             </td>
         </tr>
     #{/list}
-        <tr>
-            <td colspan="2">
-            #{select name:'b.name', items:brands, valueProperty:'name'}#{/select}
-                <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
-            </td>
-            <td>
-                <button class="btn btn-mini btn-primary" cid="${cat.categoryId}" bind>Bind</button>
-            </td>
-        </tr>
     </table>
+</div>
+
+<div><span class="label label-success">Attrs</span></div>
+<div class="row">
+    <div class="span3.5">从下面选择此 Category 所拥有的 Attrs 然后点击</div>
+    <div class="span2"><a href="#" id="cat_atts_btn" cid="${cat.categoryId}" class="btn btn-mini btn-primary">保存</a>
+    </div>
+</div>
+<div style="height:250px;overflow:auto;" class="row-fluid" id="cat_atts">
+#{list items:attrs, as:'a'}
+    <label class="checkbox inline"><input type="checkbox" ${cat.attrNames.contains(a) ? 'checked' : ''} value="${a.name}" lval="${a.fullName}">${a.fullName}
+    </label>
+#{/list}
 </div>

@@ -64,5 +64,6 @@ $(function(){
             bindCategoryUnBindBtn();
             slider.unmask();
         });
+        return false;
     });
 });

@@ -1,6 +1,8 @@
 package controllers;
 
+import helper.Webs;
 import models.Ret;
+import models.product.AttrName;
 import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
@@ -27,9 +29,22 @@ public class Categorys extends Controller {
 
     public static void detail(String cid) {
         Category cat = Category.findById(cid);
+        List<AttrName> attrs = AttrName.all().fetch();
         List<Brand> brands = Brand.all().fetch();
+        for(Brand bingB : cat.brands) brands.remove(bingB);
 
-        render(cat, brands);
+        render(cat, brands, attrs);
+    }
+
+    public static void bindAttrs(List<AttrName> ats, Category c) {
+        if(!c.isPersistent()) renderJSON(new Ret("Category(" + c.categoryId + ") 不存在!"));
+
+        try {
+            c.bindAndUnBindAttrs(ats);
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+        renderJSON(new Ret());
     }
 
     /**
