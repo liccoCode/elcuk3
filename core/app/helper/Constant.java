@@ -12,4 +12,6 @@ public class Constant {
     public static final String E_DATE = String.format("%s/elcuk2-data", Constant.HOME);
 
     public static final String E_FINANCE = String.format("%s/finance", E_DATE);
+
+    public static final String UPLOAD_PATH = String.format("%s/uploads", Constant.E_DATE);
 }

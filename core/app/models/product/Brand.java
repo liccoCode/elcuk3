@@ -1,11 +1,9 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
 import play.db.jpa.GenericModel;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.PrePersist;
+import javax.persistence.*;
 import java.util.List;
 
 /**
@@ -21,10 +19,14 @@ public class Brand extends GenericModel {
      * 品牌名称
      */
     @Id
+    @Expose
     public String name;
 
+    @Expose
     public String fullName;
 
+    @Expose
+    @Lob
     public String memo;
 
     /**

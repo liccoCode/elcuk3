@@ -7,6 +7,7 @@ import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +27,16 @@ public class Application extends Controller {
 
     public static void cc() {
         Cache.clear();
+        renderJSON(new Ret());
+    }
+
+    public static void index2() {
+        render();
+    }
+
+    public static void upload(File file) {
+
+        System.out.println(file.length() / 1024 + " KB");
         renderJSON(new Ret());
     }
 

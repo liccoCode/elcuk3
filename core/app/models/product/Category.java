@@ -1,5 +1,6 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -28,12 +29,15 @@ public class Category extends GenericModel {
     public List<AttrName> attrNames;
 
     @Id
+    @Expose
     public String categoryId;
 
     @Column(nullable = false, unique = true)
+    @Expose
     public String name;
 
     @Lob
+    @Expose
     public String memo;
 
     @Override

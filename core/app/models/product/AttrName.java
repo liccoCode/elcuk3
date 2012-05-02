@@ -1,5 +1,6 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.Column;
@@ -30,11 +31,14 @@ public class AttrName extends GenericModel {
     public List<Product> products;
 
     @Id
+    @Expose
     public String name;
 
     @Column(length = 100)
+    @Expose
     public String fullName;
 
+    @Expose
     public String memo;
 
     @Override
