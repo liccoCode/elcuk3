@@ -212,11 +212,17 @@ public class OrderItem extends GenericModel {
 
     /**
      * 判断这个 OrderItem 所属的产品是不是 Easyacc 的.
+     * 不是判断产品的标题是否为 EasyAcc 而是判断这个产品是否为 EasyAcc 自己销售(不是跟的)
      *
      * @return
      */
     public boolean easyacc() {
-        return StringUtils.startsWith(this.productName.toLowerCase(), "easyacc");
+        String title = this.productName.toLowerCase();
+        if(StringUtils.startsWith(title, "easyacc")) return true;
+        else if(StringUtils.startsWith(title, "nosson")) return true;
+        else if(StringUtils.startsWith(title, "fencer")) return true;
+        else if(StringUtils.startsWith(title, "saner")) return true;
+        else return false;
     }
 
     @Override
