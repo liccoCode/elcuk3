@@ -19,6 +19,7 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ public class Feedback extends GenericModel {
     @Lob
     public String comment;
 
+    @Lob
     public String memo;
 
     @Enumerated(EnumType.STRING)
@@ -100,19 +102,36 @@ public class Feedback extends GenericModel {
 
     /**
      * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket;
-     * <p/>
-     * 检查完 OsTicket 与 Mail 发送后, 相关的参数印象在全部成功后在次方法中更新
      */
-    public void checkMailAndTicket() {
+    public boolean checkMailAndTicket() {
         /**
          * 1. 判断是否需要发送警告邮件;
          * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
          */
-        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
+        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return true;
 
         if(StringUtils.isBlank(this.osTicketId)) this.openOsTicket(null);
 
         if(this.mailedTimes == null || this.mailedTimes <= 3) Mails.feedbackWarnning(this);
+
+        this.save();
+
+        return false;
+    }
+
+    public void updateAttr(Feedback newFeedback) {
+        if(!this.orderId.equalsIgnoreCase(newFeedback.orderId))
+            throw new FastRuntimeException("Feedback OrderId is not the same!");
+        if(newFeedback.score != null && newFeedback.score >= 1) {
+            if(!newFeedback.score.equals(this.score)) { // score 不一样了, 需要记录
+                this.memo += String.format("\r\nScore from %s to %s on %s", this.score, newFeedback.score, DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            } else {
+                this.score = newFeedback.score;
+            }
+        }
+        if(StringUtils.isNotBlank(newFeedback.comment)) this.comment = newFeedback.comment;
+        if(newFeedback.state != null && this.state == S.HANDLING) this.state = newFeedback.state;
+        if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
 
         this.save();
     }
@@ -140,8 +159,8 @@ public class Feedback extends GenericModel {
         params.add(new BasicNameValuePair("submit_x", "Submit Ticket"));
         params.add(new BasicNameValuePair("subject", subject));
         params.add(new BasicNameValuePair("message",
-                String.format("OrderId: %s CreateDate: %s \r\n Comment:\r\n%s",
-                        this.orderId, Dates.date2DateTime(this.createDate), this.comment)));
+                String.format("OrderId: %s ; CreateDate: %s ; Score: %s \r\n\r\n Comment:\r\n%s",
+                        this.orderId, Dates.date2DateTime(this.createDate), this.score, this.comment)));
 
         try {
             JsonElement jsonel = HTTP.postJson("http://t.easyacceu.com/open_api.php", params);

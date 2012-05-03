@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 某一个 Listing 所拥有的 Review 消息
@@ -100,6 +101,7 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 给程序自己使用的, 非人为使用的 Comment; 用来记录变化的
      */
+    @Lob
     public String comment = "";
 
     public AmazonListingReview updateAttr(AmazonListingReview newReview) {
@@ -124,6 +126,10 @@ public class AmazonListingReview extends GenericModel {
         if(newReview.purchased != null) this.purchased = newReview.purchased;
         // resolved 不做处理
         return this.save();
+    }
+
+    public List<Orderr> relateOrder() {
+        return Orderr.find("userid=?", this.userid).fetch();
     }
 
 

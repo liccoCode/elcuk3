@@ -3,7 +3,6 @@ package jobs;
 import helper.Currency;
 import models.market.Account;
 import models.market.Feedback;
-import models.market.Orderr;
 import play.Logger;
 import play.jobs.Job;
 
@@ -66,9 +65,9 @@ public class FeedbackCrawlJob extends Job {
 
                 //这段代码在 Feedbacks 也使用了, 但不好将其抽取出来
                 for(Feedback f : feedbacks) {
-                    f.orderr = Orderr.findById(f.orderId);
-                    f.account = acc;
-                    f.<Feedback>merge().checkMailAndTicket(); // 系统中有则更新, 没有则创建
+                    Feedback manager = Feedback.findById(f.orderId);
+                    manager.updateAttr(f);
+                    manager.checkMailAndTicket();
                 }
             }
         } catch(Exception e) {

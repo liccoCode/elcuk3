@@ -22,28 +22,29 @@ public class OrderMailCheck extends Job {
 
     @Override
     public void doJob() throws Exception {
-        Logger.info("OrderMailCheck Check SHIPPED_MAIL...");
+        Logger.debug("OrderMailCheck Check SHIPPED_MAIL...");
+        DateTime dt = DateTime.parse(DateTime.now().toString("yyyy-MM-dd")); // 仅仅保留 年月日
         /**
          * 1. Check 将需要发送 "货物已经发送了的邮件加载出来进行发送"
+         *
+         List<Orderr> orders = Orderr.find("state=? AND createDate>=? AND createDate<=?",
+         Orderr.S.SHIPPED,
+         // 只在 20 天内的订单中寻找没有发送 SHIPPED 邮件的
+         DateTime.parse(dt.plusDays(-20).toString("yyyy-MM-dd")).toDate(),
+         dt.toDate()
+         ).fetch();
+         for(Orderr ord : orders) {
+         char e = ord.emailed(1);
+         if(e == 'f' || e == 'F') {
+         Logger.debug("Order[" + ord.orderId + "] has mailed [SHIPPED_MAIL]");
+         } else {
+         //Mails.amazonUK_SHIPPED_MAIL(ord);
+         }
+         }
          */
-        DateTime dt = DateTime.parse(DateTime.now().toString("yyyy-MM-dd")); // 仅仅保留 年月日
-        List<Orderr> orders = Orderr.find("state=? AND createDate>=? AND createDate<=?",
-                Orderr.S.SHIPPED,
-                // 只在 20 天内的订单中寻找没有发送 SHIPPED 邮件的
-                DateTime.parse(dt.plusDays(-20).toString("yyyy-MM-dd")).toDate(),
-                dt.toDate()
-        ).fetch();
-        for(Orderr ord : orders) {
-            char e = ord.emailed(1);
-            if(e == 'f' || e == 'F') {
-                Logger.debug("Order[" + ord.orderId + "] has mailed [SHIPPED_MAIL]");
-            } else {
-                //Mails.amazonUK_SHIPPED_MAIL(ord);
-            }
-        }
 
 
-        Logger.info("OrderMailCheck Check REVIEW_MAIL...");
+        Logger.debug("OrderMailCheck Check REVIEW_MAIL...");
         /**
          * 2. Check 需要发送邀请 Review 的邮件的订单
          */
@@ -110,7 +111,10 @@ public class OrderMailCheck extends Job {
                 mailed++;
                 Logger.debug("Order[" + ord.orderId + "] has mailed [REVIEW_MAIL]");
             } else {
-                if((sendUk + sendDe) >= 100) break; // 暂时每一次只发送 100 封, 因为量不大
+                if((sendUk + sendDe) >= 100) {
+                    Logger.info("UK + DE send 100 mails, skip this one.");
+                    break; // 暂时每一次只发送 100 封, 因为量不大
+                }
                 switch(ord.market) {
                     case AMAZON_UK:
                         sendUk++;
