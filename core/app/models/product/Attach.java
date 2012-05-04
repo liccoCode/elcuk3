@@ -1,7 +1,13 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
+import helper.Webs;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,6 +50,7 @@ public class Attach extends Model {
      * 给外部使用的唯一名字, 没有规律
      */
     @Column(nullable = false, unique = true)
+    @Expose
     public String outName;
 
     /**
@@ -51,16 +58,20 @@ public class Attach extends Model {
      * 例如, fid 为 sku, 那么则可以从 SKU 加载出这个 Attach
      */
     @Column(nullable = false)
+    @Expose
     public String fid;
 
+    @Expose
     public P p;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
+    @Expose
     public String fileName;
 
     /**
      * 以 bytes 为单位
      */
+    @Expose
     public Long fileSize;
 
     @Transient
@@ -75,5 +86,42 @@ public class Attach extends Model {
 
     public void setFid(String fid) {
         this.fid = fid.toUpperCase();
+    }
+
+    public File getFile() {
+        if(this.file == null)
+            this.file = new File(this.location);
+        return this.file;
+    }
+
+    public void rm() {
+        // 1. 删除数据库中存储的文件
+        // 2. 删除本地存储的文件
+        String localtion = this.location;
+        this.delete();
+        FileUtils.deleteQuietly(new File(localtion));
+    }
+
+    public static Attach findAttach(Attach a) {
+        if(a == null) throw new FastRuntimeException("Attach is null!");
+        Attach rtAttach = null;
+        if(a.isPersistent())
+            rtAttach = a;
+        else if(StringUtils.isNotBlank(a.fileName))
+            rtAttach = Attach.findByFileName(a.fileName);
+        else if(StringUtils.isNotBlank(a.outName))
+            rtAttach = Attach.findByOutName(a.outName);
+        else
+            Logger.warn("Attach[%s] is Not found.", Webs.exposeGson(a));
+
+        return rtAttach;
+    }
+
+    public static Attach findByFileName(String fileName) {
+        return Attach.find("fileName=?", fileName).first();
+    }
+
+    public static Attach findByOutName(String outName) {
+        return Attach.find("outName=?", outName).first();
     }
 }

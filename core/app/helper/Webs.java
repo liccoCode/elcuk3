@@ -1,5 +1,6 @@
 package helper;
 
+import com.google.gson.GsonBuilder;
 import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Listing;
@@ -234,5 +235,9 @@ public class Webs {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
+    }
+
+    public static String exposeGson(Object o) {
+        return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(o);
     }
 }

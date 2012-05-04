@@ -1,7 +1,8 @@
 #{extends 'main.html' /}
 #{set title:'Product' /}
 #{set 'moreScripts'}
-    #{script 'products/product.js'/}
+    #{script 'products/product_detail.js'/}
+    #{script 'jquery.filedrop.js' /}
 #{/set}
 
 #{if p == null}
@@ -14,7 +15,7 @@
         <table class="table table-bordered" id="prod_basic">
             <tr>
                 <td>SKU</td>
-                <td>${p.sku}<input type="hidden" name="p.sku" value="${p.sku}"></td>
+                <td>${p.sku}<input id="p_sku" type="hidden" name="p.sku" value="${p.sku}"></td>
                 <td>L</td>
                 <td><input type="text" class="input-mini" name="p.lengths" value="${p.lengths == null ? 0 : p.lengths}">
                 </td>
@@ -82,6 +83,11 @@
         </table>
     </div>
 
+    <div class="span12"><span class="label label-success">Images</span></div>
+    <div class="span12" style="height:300px;background:#eee;" id="dropbox">
+        <ul class="thumbnails" id="uploaded"></ul>
+        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+    </div>
 
 </div>
 #{/else}

@@ -1,6 +1,5 @@
 package controllers;
 
-import com.google.gson.GsonBuilder;
 import helper.Constant;
 import helper.Webs;
 import models.PageInfo;
@@ -99,7 +98,7 @@ public class Products extends Controller {
         json.put("attrs", attrs);
         json.put("cAttrs", cAttrs);
 
-        renderJSON(new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(json));
+        renderJSON(Webs.exposeGson(json));
     }
 
     public static void brand_family(Brand b, Category c) {
@@ -125,12 +124,27 @@ public class Products extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+        renderJSON(Webs.exposeGson(a));
+    }
+
+    public static void images(String sku) {
+        List<Attach> imgs = Attach.find("fid=?", sku).fetch();
+        renderJSON(Webs.exposeGson(imgs));
+    }
+
+    public static void rmimage(Attach a) {
+        Attach attach = Attach.findAttach(a);
+        if(attach == null) renderJSON(new Ret("系统中不存在."));
+        try {
+            attach.rm();
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
         renderJSON(new Ret());
     }
 
     public static void pCreate(@Valid Product p) {
-        //TODO 这个方法需要重构
-        throw new UnsupportedOperationException("功能还没有完成");
+        renderJSON(Webs.exposeGson(p));
         /*
         if(p.isPersistent()) renderJSON(new Ret(String.format("The Product[%s] is exist!", p.sku)));
         if(Validation.hasErrors()) {

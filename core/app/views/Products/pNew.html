@@ -1,7 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'Create Product' /}
 #{set 'moreScripts'}
-    #{script 'products/product.js'/}
+    #{script 'products/pNew.js'/}
 #{/set}
 
 <div><span class="label label-success">Basic</span></div>
@@ -77,8 +77,8 @@
     </div>
 </div>
 
-<div><span class="label label-success">Images</span></div>
-<div class="span12" style="height:300px;">
-    <ul class="thumbnails" id="uploaded"></ul>
-    <div style="height:150px;padding-top:145px;text-align:center;background:#eee;">Drag & Drop</div>
+<div class="row">
+    <div>
+        <button id="addProduct" class="btn btn-primary span12">添加</button>
+    </div>
 </div>
