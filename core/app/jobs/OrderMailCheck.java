@@ -132,7 +132,7 @@ public class OrderMailCheck extends Job {
                 }
             }
         }
-        Logger.info(String.format("Send(%s uk| %s de), [NotEasyAcc(%s), Below3(%s), NoMarket(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
-                sendUk, sendDe, notEasyAcc, below3, noMarket, noEmail, mailed, checked, needReview.size()));
+        Logger.info(String.format("%s From %s: Send(%s uk| %s de), [NotEasyAcc(%s), Below3(%s), NoMarket(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",
+                dt.plusDays(-46).toString("yyyy-MM-dd"), dt.plusDays(-12).toString("yyyy-MM-dd"), sendUk, sendDe, notEasyAcc, below3, noMarket, noEmail, mailed, checked, needReview.size()));
     }
 }
