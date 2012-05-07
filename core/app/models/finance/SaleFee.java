@@ -158,7 +158,9 @@ public class SaleFee extends GenericModel {
                             i++;
                             Logger.warn("Type not found! [" + typeStr + "]");
                             if(i < 5)
-                                Webs.systemMail("Type not found!", "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]");
+                                Webs.systemMail("Type not found!",
+                                        "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]\r\b<br/>" +
+                                                "File: " + file.getAbsolutePath());
                         }
                     } else
                         fee.type = type;
@@ -178,8 +180,8 @@ public class SaleFee extends GenericModel {
                     float cost = 0;
                     String priceStr = params[6];
 
-                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的
-                    fee.date = DateTime.parse(params[0], DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
+                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的;
+                    fee.date = DateTime.parse(Webs.dateMap(params[0]), DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
                     switch(market) {
                         case AMAZON_UK:
                             cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());
@@ -372,8 +374,12 @@ public class SaleFee extends GenericModel {
     private static void saleFeeCheck(SaleFee f) {
         try {
             if(f.type != null && "productcharges".equals(f.type.name) && f.cost <= 0 && f.order != null && StringUtils.isNotBlank(f.orderId)) {
-                DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
-                Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
+                if(f.order.state == Orderr.S.REFUNDED) {
+                    Logger.info("Order[%s] state is already %s", f.orderId, f.order.state);
+                } else {
+                    DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
+                    Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
+                }
             }
         } catch(Exception e) {
             String message = "Order[" + f.orderId + "] state update to REFUNDED failed!";

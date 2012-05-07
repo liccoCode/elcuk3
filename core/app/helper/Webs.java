@@ -4,6 +4,7 @@ import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.Selling;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import play.Logger;
@@ -234,5 +235,69 @@ public class Webs {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
+    }
+
+    /**
+     * 支持 DE 与 FR 语言中的月份字符串转换成 英语 月份的字符串
+     *
+     * @param m
+     * @return
+     */
+    public static String dateMap(String m) {
+        return StringUtils.replaceEach(m, new String[]{
+                // de -> uk
+                "Januar",
+                "Februar",
+                "März",
+                "April",
+                "Mai",
+                "Juni",
+                "Juli",
+                "August",
+                "September",
+                "Oktober",
+                "November",
+                "Dezember",
+
+                // fr -> uk
+                "janvier",
+                "février",
+                "mars",
+                "avril",
+                "mai",
+                "juin",
+                "juillet",
+                "août",
+                "septembre",
+                "octobre",
+                "novembre",
+                "décembre"
+        }, new String[]{
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December",
+        });
     }
 }

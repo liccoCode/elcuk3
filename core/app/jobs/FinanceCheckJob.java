@@ -23,13 +23,15 @@ public class FinanceCheckJob extends Job {
         List<Account> accs = Account.openedAcc();
         for(Account acc : accs) {
             for(Account.M m : Account.M.values()) {
-                if(m == Account.M.EBAY_UK || m == Account.M.AMAZON_US) continue;
-                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.username, m.name());
+                if(m == Account.M.EBAY_UK || m == Account.M.AMAZON_US ||
+                        m == Account.M.AMAZON_ES || m == Account.M.AMAZON_IT)
+                    continue;
+                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.uniqueName, m.name());
                 File file = acc.briefFlatFinance(m);
                 List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc, m);
                 SaleFee.clearOldSaleFee(fees);
                 SaleFee.batchSaveWithJDBC(fees);
-                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Done", acc.username, m.name());
+                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Done", acc.uniqueName, m.name());
             }
         }
     }
