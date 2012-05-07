@@ -29,8 +29,8 @@ public class FinanceCheckJob extends Job {
                 Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.uniqueName, m.name());
                 File file = acc.briefFlatFinance(m);
                 List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc, m);
-                SaleFee.clearOldSaleFee(fees);
-                SaleFee.batchSaveWithJDBC(fees);
+                List<SaleFee> filtereFees = SaleFee.clearOldSaleFee(fees);
+                SaleFee.batchSaveWithJDBC(filtereFees);
                 Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Done", acc.uniqueName, m.name());
             }
         }

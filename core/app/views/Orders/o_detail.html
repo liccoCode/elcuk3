@@ -68,11 +68,11 @@
                 #{elseif ord.state == models.market.Orderr.S.PAYMENT}
                     <td style="color:orange;">${ord.state}</td>
                 #{/elseif}
-                #{elseif ord.state == models.market.Orderr.S.CANCEL}
-                    <td style="color:red;">${ord.state}</td>
+                #{elseif ord.state == models.market.Orderr.S.SHIPPED}
+                    <td style="color:green;">${ord.state}</td>
                 #{/elseif}
                 #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
-                    <td style="color:green;">${ord.state}</td>
+                    <td style="color:red;">${ord.state}</td>
                 #{/elseif}
                 #{else }
                     <td>${ord.state}</td>
