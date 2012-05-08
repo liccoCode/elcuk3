@@ -395,7 +395,16 @@ public class Account extends Model {
                     String body = HTTP.get(this.type.feedbackPage(page));
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + "feedback_p" + page + ".html"), body);
-                    return Feedback.parseFeedBackFromHTML(body);
+                    List<Feedback> feedbacks = Feedback.parseFeedBackFromHTML(body);
+                    for(Feedback f : feedbacks) {
+                        try {
+                            f.account = this;
+                            f.orderr = Orderr.findById(f.orderId);
+                        } catch(Exception e) {
+                            Logger.warn(Webs.E(e));
+                        }
+                    }
+                    return feedbacks;
                 } catch(Exception e) {
                     Logger.warn("[" + this.type + "] Feedback page can not found Or the session is invalid!");
                 }
@@ -437,7 +446,8 @@ public class Account extends Model {
             Logger.info("Downloading [%s] File...", this.username);
             String body = HTTP.get(this.type.flatFinance());
             DateTime dt = DateTime.now();
-            File f = new File(String.format("%s/%s/%s/%s_%s.txt", Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, dt.toString("yyyy.MM.dd_HH'h'")));
+            File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
+                    Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
             Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
             FileUtils.writeStringToFile(f, body);
             return f;
@@ -458,7 +468,7 @@ public class Account extends Model {
 
     @Override
     public String toString() {
-        return StringUtils.split(this.username, "@")[0];
+        return StringUtils.split(this.uniqueName, "@")[0];
     }
 
 }

@@ -19,6 +19,8 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -86,12 +88,44 @@ public class SaleFee extends GenericModel {
      * 根据新的 SaleFee 对数据库中存在的老的 SaleFee 进行删除处理.
      *
      * @param newFees
+     * @return 返回需要添加进入数据库的 Fees
      */
-    public static Integer clearOldSaleFee(List<SaleFee> newFees) {
-        Set<String> orderIds = new HashSet<String>();
-        for(SaleFee fe : newFees) orderIds.add(fe.orderId);
+    public static List<SaleFee> clearOldSaleFee(List<SaleFee> newFees) {
+        /**
+         * 1. 将 newFees 涉及到的订单的 Fees 全部加载出来
+         * 2. 以订单为判断, 收集需要删除的 Fee 的订单. 标准为 newFees 的数量 >= 数据库中加载出的 Fees 的数量
+         * 3. 
+         */
+        List<SaleFee> filterFees = new ArrayList<SaleFee>(); // 过滤后需要替换更新的 SaleFee
+        Set<String> orderIds = new HashSet<String>(); // newFees 所涉及的 Order
+        Set<String> filterOrderIds = new HashSet<String>(); // 过滤后需要进行替换更新的 Order
+        Map<String, List<SaleFee>> feeTimes = new HashMap<String, List<SaleFee>>(); // 将 SaleFee 根据 OrderId 区分开
+
+        for(SaleFee fe : newFees) {
+            orderIds.add(fe.orderId);
+            if(feeTimes.containsKey(fe.orderId)) feeTimes.get(fe.orderId).add(fe);
+            else feeTimes.put(fe.orderId, new ArrayList<SaleFee>(Arrays.asList(fe)));
+        }
         // 清理原来的 SaleFees, 确保每个 Order 的 SaleFee 只有一份不会重复
-        return SaleFee.delete("orderId IN ('" + StringUtils.join(orderIds, "','") + "')");
+
+        try {
+            ResultSet rs = DB.executeQuery("select orderId, count(*) as qty from SaleFee where orderId IN ('" + StringUtils.join(orderIds, "','") + "') group by orderId");
+            while(rs.next()) {
+                String orderId = rs.getString("orderId");
+                Integer times = rs.getInt("qty");
+                List<SaleFee> fees = feeTimes.get(orderId);
+                if(times >= fees.size()) { //  如果 newFees 的数量 >= 数据库中的 Fees 的数量, 那么则进行替换更新
+                    filterFees.addAll(fees);
+                    filterOrderIds.add(orderId);
+                }
+            }
+        } catch(SQLException e) {
+            Logger.warn(Webs.E(e));
+        }
+        SaleFee.delete("orderId IN ('" + StringUtils.join(filterOrderIds, "','") + "')");
+        Logger.info("New SaleFee effect Orders[%s], after filter effect Orders[%s], skip %s Orders.",
+                orderIds.size(), filterFees.size(), orderIds.size() - filterOrderIds.size());
+        return filterFees;
     }
 
     private static FeeType cachedFeeType(String key, Map<String, FeeType> cached) {
@@ -158,7 +192,9 @@ public class SaleFee extends GenericModel {
                             i++;
                             Logger.warn("Type not found! [" + typeStr + "]");
                             if(i < 5)
-                                Webs.systemMail("Type not found!", "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]");
+                                Webs.systemMail("Type not found!",
+                                        "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]\r\b<br/>" +
+                                                "File: " + file.getAbsolutePath());
                         }
                     } else
                         fee.type = type;
@@ -178,8 +214,8 @@ public class SaleFee extends GenericModel {
                     float cost = 0;
                     String priceStr = params[6];
 
-                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的
-                    fee.date = DateTime.parse(params[0], DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
+                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的;
+                    fee.date = DateTime.parse(Webs.dateMap(params[0]), DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
                     switch(market) {
                         case AMAZON_UK:
                             cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());
@@ -372,8 +408,12 @@ public class SaleFee extends GenericModel {
     private static void saleFeeCheck(SaleFee f) {
         try {
             if(f.type != null && "productcharges".equals(f.type.name) && f.cost <= 0 && f.order != null && StringUtils.isNotBlank(f.orderId)) {
-                DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
-                Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
+                if(f.order.state == Orderr.S.REFUNDED) {
+                    Logger.info("Order[%s] state is already %s", f.orderId, f.order.state);
+                } else {
+                    DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
+                    Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
+                }
             }
         } catch(Exception e) {
             String message = "Order[" + f.orderId + "] state update to REFUNDED failed!";

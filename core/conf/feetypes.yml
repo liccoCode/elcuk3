@@ -27,6 +27,11 @@ finance.FeeType(shippingholdback):
   memo: ''
   parent: amazon
 
+finance.FeeType(shippingholdback):
+  name: 'labelfee'
+  memo: 'Amazon 市场帮我们 FBA 标所收取的费用'
+  parent: amazon
+
 finance.FeeType(fbastoragefee):
   name: 'fbastoragefee'
   memo: ''

@@ -6,7 +6,6 @@ import models.PageInfo;
 import models.Ret;
 import models.market.Account;
 import models.market.Feedback;
-import models.market.Orderr;
 import org.joda.time.DateTime;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -86,9 +85,8 @@ public class Feedbacks extends Controller {
 
         // 这段代码在  FeedbackCrawlJob 也使用了, 但不好将其抽取出来
         for(Feedback f : feedbacks) {
-            f.orderr = Orderr.findById(f.orderId);
-            f.account = acc;
-            f.<Feedback>merge().checkMailAndTicket();// 系统中有则更新, 没有则创建
+            Feedback manager = f.checkSaveOrUpdate(); // 系统中有则更新, 没有则创建
+            manager.checkMailAndTicket();
         }
         Map<String, String> rt = new HashMap<String, String>();
         rt.put("flag", "true");

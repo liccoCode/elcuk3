@@ -34,4 +34,9 @@ public class Dates {
             return new DateTime(date).toString("yyyy-MM-dd HH:mm:ss");
         }
     }
+
+    public static String date2Date(Date date) {
+        if(date == null) return DateTime.now().toString("yyyy-MM-dd");
+        else return new DateTime(date).toString("yyyy-MM-dd");
+    }
 }

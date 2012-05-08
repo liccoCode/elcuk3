@@ -63,16 +63,18 @@
             <tr>
                 <td>State:</td>
                 #{if ord.state == models.market.Orderr.S.PENDING}
-                    <td style="color:#4169e1;">${ord.state}</td>
+                    <td style="color:#0074CC;">${ord.state}</td>
                 #{/if}
                 #{elseif ord.state == models.market.Orderr.S.PAYMENT}
-                    <td style="color:orange;">${ord.state}</td>
+                    <td style="color:#49AFCD;">${ord.state}</td>
                 #{/elseif}
-                #{elseif ord.state == models.market.Orderr.S.CANCEL}
+                #{elseif ord.state == models.market.Orderr.S.SHIPPED}
+                    <td style="color:#5BB75B;">${ord.state}</td>
+                #{/elseif}
+                #{elseif ord.state == models.market.Orderr.S.REFUNDED ||
+                         ord.state == models.market.Orderr.S.RETURNNEW ||
+                         ord.state == models.market.Orderr.S.CANCEL}
                     <td style="color:red;">${ord.state}</td>
-                #{/elseif}
-                #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
-                    <td style="color:green;">${ord.state}</td>
                 #{/elseif}
                 #{else }
                     <td>${ord.state}</td>

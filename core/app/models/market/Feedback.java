@@ -102,6 +102,8 @@ public class Feedback extends GenericModel {
 
     /**
      * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket;
+     *
+     * @return true: 不需要进行邮件警告与 OsTicket 创建.  false: 需要进行邮件警告与 OsTicket 创建
      */
     public boolean checkMailAndTicket() {
         /**
@@ -119,7 +121,7 @@ public class Feedback extends GenericModel {
         return false;
     }
 
-    public void updateAttr(Feedback newFeedback) {
+    public Feedback updateAttr(Feedback newFeedback) {
         if(!this.orderId.equalsIgnoreCase(newFeedback.orderId))
             throw new FastRuntimeException("Feedback OrderId is not the same!");
         if(newFeedback.score != null && newFeedback.score >= 1) {
@@ -133,7 +135,16 @@ public class Feedback extends GenericModel {
         if(newFeedback.state != null && this.state == S.HANDLING) this.state = newFeedback.state;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
 
-        this.save();
+        return this.save();
+    }
+
+    public Feedback checkSaveOrUpdate() {
+        Feedback manager = Feedback.findById(this.orderId);
+        if(manager != null && manager.isPersistent()) { // 系统中存在过的
+            return manager.updateAttr(this);
+        } else {
+            return this.save();
+        }
     }
 
     /**

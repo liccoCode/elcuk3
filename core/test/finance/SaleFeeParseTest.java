@@ -21,16 +21,16 @@ import java.util.List;
  * Time: 1:51 PM
  */
 public class SaleFeeParseTest extends UnitTest {
-    @Test
+    //    @Test
     public void testParse() {
         Account acc = Account.findById(1l);
-        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.de/2012.04/2012.04.06_04h.txt"), acc, Account.M.AMAZON_DE);
+        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.co.uk/2012.05/easyacc.eu@gmail.com_2012.05.03_21h.txt"), acc, Account.M.AMAZON_DE);
         for(SaleFee f : fees) {
             System.out.println(String.format("OrderId: %s, Cost: %s %s, USD_Cost: %s USD", f.orderId, f.cost, f.currency.name(), f.usdCost));
         }
     }
 
-    //    @Test
+    @Test
     public void testParseThrough() {
         new KeepSessionJob().doJob();
         new FinanceCheckJob().doJob();

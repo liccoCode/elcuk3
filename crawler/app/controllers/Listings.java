@@ -12,7 +12,6 @@ import org.jsoup.nodes.Document;
 import play.Logger;
 import play.Play;
 import play.data.validation.Validation;
-import play.libs.IO;
 import play.mvc.Controller;
 import play.utils.FastRuntimeException;
 
@@ -29,7 +28,7 @@ public class Listings extends Controller {
      * @param market us, uk, de, it
      * @param asin   amazon asin
      */
-    public static void crawl(String market, String asin) {
+    public static void crawl(String market, String asin) throws IOException {
         validation.required(market);
         validation.required(asin);
         if(Validation.hasErrors()) {
@@ -38,8 +37,8 @@ public class Listings extends Controller {
         MT m = MT.val(market);
         if(m == null) renderJSON("{flag:false, message:'invalid market[us,uk,de,it,es,fr]'}");
         String html = HTTP.get(ARW.listing(m, asin));
-        IO.writeContent(html, new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
-//        String html = IO.readContentAsString(new File(String.format("/tmp/%s.%s.html", asin, market)), "UTF-8");
+        if(Play.mode == Play.Mode.DEV)
+            FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
         // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
         try {
             renderJSON(new Listing(html).parseFromHTML(Listing.T.AMAZON));
@@ -68,6 +67,7 @@ public class Listings extends Controller {
             String url = ARW.review(m, asin, p);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
+            HTTP.clearExpiredCookie();
             String html = HTTP.get(url);
 
             if(Play.mode == Play.Mode.DEV)
