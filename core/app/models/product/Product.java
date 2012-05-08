@@ -1,5 +1,6 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
 import helper.Patterns;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
@@ -35,18 +36,12 @@ public class Product extends GenericModel {
     public List<Product> relates;
 
     /**
-     * Product 自身这一个级别上, 可以定制其自己拥有的特殊属性.
-     */
-    @ManyToMany
-    public List<AttrName> attrNames;
-
-    /**
      * 这个产品从 Category 继承 + 自身的所有的 attrNames 值;
      * <p/>
      * 如果某一时刻 Category 或者 Product 身上的 AttrName 被删除了, 这个记录的对应的 AttrName 的值
      * 不受影响.
      */
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product")
     public List<Attribute> attrs;
 
     @ManyToOne
@@ -57,18 +52,24 @@ public class Product extends GenericModel {
      * 唯一的标示
      */
     @Id
+    @Expose
     public String sku;
 
     @Required
     @Lob
+    @Expose
     public String productName;
 
+    @Expose
     public Float lengths;
 
+    @Expose
     public Float heigh;
 
+    @Expose
     public Float width;
 
+    @Expose
     public Float weight;
 
     public Product() {
@@ -86,6 +87,45 @@ public class Product extends GenericModel {
         if(this.listings != null && this.listings.size() > 0) {
             throw new FastRuntimeException("Product [" + this.sku + "] have relate Listing, cannot be delete.");
         }
+    }
+
+    /**
+     * 创建一个全新的 Product
+     */
+    public void createProduct() {
+        /**
+         * 1. 检查 SKU 是否合法
+         * 2. 检查废弃的 SKU
+         * 3. Family 不能为空!
+         * 4. 检查 SKU 前缀是否与 Family 一致
+         * 5. Category 不能为空
+         * 6. 产品的名称不能为空
+         */
+        if(!Product.validSKU(this.sku)) throw new FastRuntimeException("SKU(" + this.sku + ") 不合法!");
+        if(Product.unUsedSKU(this.sku)) throw new FastRuntimeException("SKU(" + this.sku + ") 为废弃 SKU, 不能使用!");
+        if(this.family == null || !this.family.isPersistent())
+            throw new FastRuntimeException("Family 不存在,请先添加后再创建 Product!");
+        if(!StringUtils.startsWith(this.sku, this.family.family))
+            throw new FastRuntimeException("Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
+        if(this.category == null || !this.category.isPersistent())
+            throw new FastRuntimeException("Category 不存在, 请创添加后再创建 Product!");
+        if(StringUtils.isBlank(this.productName))
+            throw new FastRuntimeException("产品的名称不能为空!");
+
+        if(this.attrs != null && this.attrs.size() > 0) {
+            for(Attribute att : this.attrs) {
+                att.id = String.format("%s_%s", this.sku, att.attName.name);
+                att.product = this;
+            }
+        }
+        this.save();
+    }
+
+    /**
+     * 删除 Product 的时候需要做一些判断后, 才能够删除.
+     */
+    public void removeProduct() {
+        this.delete();
     }
 
     /**

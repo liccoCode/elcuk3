@@ -1,5 +1,6 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ import java.util.List;
 public class Family extends GenericModel {
 
     @Id
+    @Expose
     public String family;
 
     @OneToMany(mappedBy = "family")

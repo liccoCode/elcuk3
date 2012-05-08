@@ -4,12 +4,18 @@
     #{script 'products/pNew.js'/}
 #{/set}
 
+<div class="alert alert-success" id="success_link" style="visibility:hidden;">
+    <div class="offset5 span3">
+        <a href="#"><h3>添加成功!</h3></a>
+    </div>
+</div>
+<div class="clearfix"></div>
 <div><span class="label label-success">Basic</span></div>
 <div style="height:200px;overflow:auto;">
     <table class="table table-bordered table-condensed">
         <tr>
             <td>SKU:</td>
-            <td><input type="text" class="input-medium" name="p.sku" value="${p.sku}"></td>
+            <td><input type="text" class="input-medium" name="p.sku" id="p_sku" value="${p.sku}"></td>
             <td>L:</td>
             <td><input type="text" class="input-mini" name="p.lengths" value="${p.lengths}"></td>
             <td>H:</td>
@@ -26,7 +32,7 @@
         <tr>
             <td>Category:</td>
             <td>
-                <select name="p.category" size="1" class="span2.5" id="cat_select">
+                <select name="p.category.categoryId" size="1" class="span2.5" id="cat_select">
                     <option value="0">请选择</option>
                 #{list items:cats, as:'c'}
                     <option value="${c.categoryId}">${c}</option>

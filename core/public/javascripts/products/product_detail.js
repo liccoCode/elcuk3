@@ -36,6 +36,80 @@ $(function(){
         })
     });
 
+    // Attrbutes
+    $('#attr_btn').click(function(){
+        $.varClosure.params = {'p.sku':$('#p_sku').val()};
+        var maskObj = $('#attrs');
+        $('#attrs :input').map($.varClosure);
+        maskObj.mask("更新中...");
+        $.post('/products/p_attr', $.varClosure.params, function(r){
+            try{
+                if(r.flag) alert("更新成功!<br/>" + r.message);
+                else alert(r.message);
+            }finally{
+                maskObj.unmask();
+            }
+        });
+    });
+
+    function afterChangeTextAreaVal(att_id){
+        var v = $('#' + att_id + '_text').val();
+        $('#' + att_id + '_value').html((v.length >= 50 ? v.substring(0, 50) + '...' :v));
+    }
+
+    $('#attrs textarea').blur(function(){
+        afterChangeTextAreaVal($(this).attr('id').replace("_text", ""));
+    });
+    $('#attrs .collapse').on('hide', function(){
+        afterChangeTextAreaVal($(this).attr('id'));
+    });
+
+    var newAttrs = $("#new_attrs :checkbox");
+    newAttrs.click(function(){
+        /**
+         * 1. 删除 #attrs 下所有 att.name 在 newAttrs 集合中的 div 节点
+         * 2. 获取 index
+         * 3. 根据 newAttrs 中 check 的进行重新绘制
+         */
+        newAttrs.each(function(){
+            $('#' + $(this).attr('name')).remove();
+        });
+        var index = $('#attrs .attr').size();
+
+        /**
+         * att -> {id:71LNA1-PPU1_func", name:func, value:'超强的功能'}
+         * @param i
+         * @param att
+         */
+        function template(i, att){
+            var attrTemplate = "<div class='span11 attr' id='" + att.name + "'>";
+            attrTemplate += "<div class='span11'>";
+            attrTemplate += "<label class='inline checkbox'>";
+            attrTemplate += "<input type='checkbox' name='attrs[" + i + "].close'>关闭?&nbsp;";
+            attrTemplate += "<a href='#" + att.id + "' data-toggle='collapse' style='cursor:pointer;overflow:hidden;'> " + att.name + "(" + att.fullName + ") | false | <span id='" + att.id + "_value'>" + att.value + "</span> </a>";
+            attrTemplate += "</label>";
+            attrTemplate += "</div>";
+
+            attrTemplate += "<div id='" + att.id + "' class='collapse span11'>";
+            attrTemplate += '<input type="hidden" name="attrs[' + i + '].id" value="' + att.id + '">';
+            attrTemplate += '<input type="hidden" name="attrs[' + i + '].attName.name" value="' + att.name + '">';
+            attrTemplate += '<textarea id="' + att.id + '_text" rows="4" name="attrs[' + i + '].value" class="span11">' + att.value + '</textarea>';
+            attrTemplate += "</div>";
+
+            attrTemplate += "</div>";
+
+            return attrTemplate;
+        }
+
+        $('#new_attrs :checkbox').each(function(){
+            var o = $(this);
+            if(!o.is(":checked")) return;
+            $(template(index++, {id:$('#p_sku').val() + '_' + o.attr('name'), name:o.attr('name'), value:''})).appendTo("#attrs");
+        });
+
+
+    });
+
     // Drag & Drop Pic
     var template = '<li class="span2">' +
             '<a href="#" target="_blank" class="thumbnail"><img/></a>' +

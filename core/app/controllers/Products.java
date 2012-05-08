@@ -49,7 +49,8 @@ public class Products extends Controller {
         Product p = Product.findByMerchantSKU(sku);
         List<Category> cats = Category.all().fetch();
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(p);
-        render(p, cats, qtys);
+        List<AttrName> attnames = AttrName.productUnuseAttrName(p);
+        render(p, cats, qtys, attnames);
     }
 
     public static void c_index(Integer p, Integer s) {
@@ -111,6 +112,11 @@ public class Products extends Controller {
         renderJSON(fmys);
     }
 
+    /**
+     * 给 Product 关联图片
+     *
+     * @param a
+     */
     public static void upload(Attach a) {
         long subfix = Attach.count("fid=?", a.fid.toUpperCase());
         a.p = Attach.P.SKU;
@@ -144,19 +150,19 @@ public class Products extends Controller {
     }
 
     public static void pCreate(@Valid Product p) {
-        renderJSON(Webs.exposeGson(p));
-        /*
-        if(p.isPersistent()) renderJSON(new Ret(String.format("The Product[%s] is exist!", p.sku)));
-        if(Validation.hasErrors()) {
-            renderJSON(validation.errorsMap());
+        if(p.isPersistent()) renderJSON(new Ret("SKU(" + p.sku + ")已经存在了!"));
+        try {
+            p.createProduct();
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
         }
-        if(p.category == null)
-            renderJSON(new Ret("No matched category"));
-        if(!Product.validSKU(p.sku))
-            renderJSON(new Ret("Not valid SKU format"));
-        p.save();
-        renderJSON(new Ret(true, "Product[" + p.sku + "] Save Success!"));
-        */
+        renderJSON(new Ret(true, "/products/p_detail?sku=71LNTPAD-BPU361"));
+    }
+
+    public static void pRemove(Product p) {
+        if(!p.isPersistent()) renderJSON(new Ret("产品不存在!"));
+        p.removeProduct();
+        renderJSON(new Ret());
     }
 
     public static void p_u(Product p) {
@@ -176,6 +182,24 @@ public class Products extends Controller {
             renderJSON(new Ret(false, Webs.E(e)));
         }
         renderJSON(new Ret(true));
+    }
+
+    public static void p_attr(List<Attribute> attrs, Product p) {
+        int saved = 0;
+        int update = 0;
+        for(Attribute a : attrs) {
+            Attribute ma = Attribute.findById(a.id);
+            if(ma != null && ma.isPersistent()) {
+                update++;
+                ma.updateAttr(a);
+            } else {
+                saved++;
+                a.product = p;
+                a.save();
+            }
+        }
+
+        renderJSON(new Ret(true, "Save:" + saved + ",Update:" + update));
     }
 
     /**

@@ -14,13 +14,18 @@ $(function(){
                         var brd = $(this);
                         if(brd.val() == 0 || brd.val() == '' || brd.val() == undefined) return false;
                         $.getJSON('/products/brand_family', {'b.name':brd.val(), 'c.categoryId':o.val()}, function(f){
-                            var familys = [];
+                            var familys = ['<option value="0">请选择</option>'];
 
                             $.each(f, function(i, fam){
                                 familys.push("<option value='" + fam['family'] + "'>" + fam['family'] + "</option>")
                             });
 
-                            $('#brand_family').html($("<select class='span2' name='p.family.family' size='1'/>").html(familys.join('')));
+                            $('#brand_family')
+                                    .html($("<select class='span2' name='p.family.family' size='1'/>")
+                                    .html(familys.join('')))
+                                    .find('select').change(function(){
+                                        $("#p_sku").val($(this).val());
+                                    });
                         });
                         return false;
                     })
@@ -34,7 +39,8 @@ $(function(){
             // 2.1 从 Category 继承下来的固定的字段
             $.each(fixedAttr, function(i, att){
                 if(!(att['name'] in fixedNames)) fixedNames[att['name']] = 1;
-                fixedAttrEl.push("<p>" + att['fullName'] + ": <input type='hidden' name='p.attrs[" + i + "].attName.name' value='" + att['name'] + "'><input type='text' name='p.attrs[" + i + "].value'></p>");
+                var hidden = "<input type='hidden' name='p.attrs[" + i + "].attName.name' value='" + att['name'] + "'>";
+                fixedAttrEl.push("<p>" + att['fullName'] + ":" + hidden + " <input type='text' name='p.attrs[" + i + "].value'></p>");
             });
             if(fixedAttrEl.length <= 0) $('#cat_attr_div').html('<p>此 Category 暂时没有绑定 AttrName.</p>');
             else $('#cat_attr_div').html(fixedAttrEl.join(''));
@@ -56,7 +62,8 @@ $(function(){
                     /*属性的索引,需要跟着 FixedAttr 的索引增加*/
                     var att = $(checked);
                     var index = (i + fixedAttr.length);
-                    checkedAttEl.push("<p><span class='span1.5'>" + att.val() + "</span>: <input type='hidden' name='p.attrs[" + index + "].attName.name' value='" + att.attr('name') + "'><input type='text' name='p.attrs[" + index + "].value'></p>");
+                    var hidden = "<input type='hidden' name='p.attrs[" + index + "].attName.name' value='" + att.attr('name') + "'>";
+                    checkedAttEl.push("<p><span class='span1.5'>" + att.val() + "</span>:" + hidden + " <input type='text' name='p.attrs[" + index + "].value'></p>");
                 });
                 $('#attr_div').html(checkedAttEl.join(''));
             });
@@ -73,9 +80,14 @@ $(function(){
     $('#addProduct').click(function(){
         $.varClosure.params = {};
         $('#container :input').map($.varClosure);
-        alert(JSON.stringify($.varClosure.params));
+        var success_link = $("#success_link");
+        success_link.css('visibility', 'hidden').css('height', '20px').find('a').attr('href', '#');
         $.post('/products/pCreate', $.varClosure.params, function(r){
-            alert(JSON.stringify(r));
+            if(r.flag){
+                success_link.css('visibility', '').css('height', '50px').find('a').attr('href', r.message);
+            }else{
+                alert(r.message);
+            }
         });
     });
 });

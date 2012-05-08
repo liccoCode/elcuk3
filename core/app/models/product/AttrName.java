@@ -1,12 +1,14 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,12 +25,6 @@ public class AttrName extends GenericModel {
      */
     @ManyToMany(mappedBy = "attrNames")
     public List<Category> categories;
-
-    /**
-     * 被哪一些 Product 所引用
-     */
-    @ManyToMany(mappedBy = "attrNames")
-    public List<Product> products;
 
     @Id
     @Expose
@@ -59,5 +55,12 @@ public class AttrName extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
+    }
+
+    public static List<AttrName> productUnuseAttrName(Product p) {
+        if(p == null) return new ArrayList<AttrName>();
+        List<String> havedAttrs = new ArrayList<String>();
+        if(p.attrs.size() > 0) for(Attribute a : p.attrs) havedAttrs.add(a.attName.name);
+        return AttrName.find("name NOT IN ('" + StringUtils.join(havedAttrs, "','") + "')").fetch();
     }
 }

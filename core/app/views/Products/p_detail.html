@@ -83,11 +83,45 @@
         </table>
     </div>
 
+
+    <div class="span12"><span class="label label-success">Attrbutes</span>&nbsp;&nbsp;
+        <button id="attr_btn" class="btn btn-mini btn-primary">保存</button>
+    </div>
+    <div class="span12" id="new_attrs">
+        <div class="span11">
+            #{list items:attnames, as:'an'}
+                <label class="checkbox inline">
+                    <input type="checkbox" name="${an.name}" value="${an.fullName}">${an.fullName}
+                </label>
+            #{/list}
+        </div>
+    </div>
+    <div class="span12" id="attrs">
+        #{list items:p.attrs, as:'attr'}
+            #{set i:(attr_index - 1)/}
+            <div class="span11 attr" id="${attr.attName.name}">
+                <div class="span11">
+                    <label class="inline checkbox">
+                        <input type="checkbox" name="attrs[${i}].close"  ${attr.close ? "checked=''" : ""}>关闭?&nbsp;
+                        <a href="#${attr.id}" data-toggle="collapse" style="cursor:pointer;overflow:hidden;">
+                        ${attr.attName.fullName}(${attr.attName.name}) | ${attr.close} |
+                            <span id="${attr.id}_value">${attr.value}</span>
+                        </a>
+                    </label>
+                </div>
+                <div id="${attr.id}" class="collapse span11">
+                    <input type="hidden" name="attrs[${i}].id" value="${attr.id}">
+                    <input type="hidden" name="attrs[${i}].attName.name" value="${attr.attName.name}">
+                    <textarea id="${attr.id}_text" rows="4" name="attrs[${i}].value" class="span11">${attr.value}</textarea>
+                </div>
+            </div>
+        #{/list}
+    </div>
+
     <div class="span12"><span class="label label-success">Images</span></div>
     <div class="span12" style="height:300px;background:#eee;" id="dropbox">
         <ul class="thumbnails" id="uploaded"></ul>
         <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
     </div>
-
 </div>
 #{/else}
