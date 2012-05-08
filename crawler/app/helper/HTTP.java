@@ -11,6 +11,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HttpContext;
@@ -19,6 +20,8 @@ import play.Logger;
 import play.Play;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Play 中利用 AsyncHttpClient 的 HTTP 请求
@@ -35,6 +38,8 @@ public class HTTP {
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
+            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
+            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
 
             ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
@@ -86,6 +91,13 @@ public class HTTP {
         } catch(IOException e) {
             return "";
         }
+    }
+
+    /**
+     * 清理过期的 Cookie
+     */
+    public static void clearExpiredCookie() {
+        HTTP.client().getCookieStore().clearExpired(new Date());
     }
 
     public static JsonElement json(String url) {
