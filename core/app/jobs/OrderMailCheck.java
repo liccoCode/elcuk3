@@ -48,7 +48,7 @@ public class OrderMailCheck extends Job {
         /**
          * 2. Check 需要发送邀请 Review 的邮件的订单
          */
-        List<Orderr> needReview = Orderr.find("state=? AND createDate<=? AND createDate>=?",
+        List<Orderr> needReview = Orderr.find("state=? AND createDate<=? AND createDate>=? ORDER BY createDate",
                 Orderr.S.SHIPPED,
                 // 只在 46 天前到 12 天前的订单中寻找需要发送 Review 的
                 DateTime.parse(dt.plusDays(-12).toString("yyyy-MM-dd")).toDate(),
@@ -119,17 +119,16 @@ public class OrderMailCheck extends Job {
                     case AMAZON_UK:
                         sendUk++;
                         Mails.amazonUK_REVIEW_MAIL(ord);
-                        Thread.sleep(500);//每封邮件不能发送那么快
                         break;
                     case AMAZON_DE:
                         sendDe++;
                         Mails.amazonDE_REVIEW_MAIL(ord);
-                        Thread.sleep(500);
                         break;
                     default:
                         noMarket++;
                         Logger.info("Uncatched Region..." + ord.market);
                 }
+                Thread.sleep(500);//每封邮件不能发送那么快
             }
         }
         Logger.info(String.format("%s From %s: Send(%s uk| %s de), [NotEasyAcc(%s), Below3(%s), NoMarket(%s), NoEmail(%s)], Mailed(%s), Checked(%s), Total(%s)",

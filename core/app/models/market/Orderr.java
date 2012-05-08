@@ -90,6 +90,7 @@ public class Orderr extends GenericModel {
     //-------------- Basic ----------------
 
     /**
+     * <pre>
      * 发送邮件到达了什么阶段. 默认从 0x0000 开始;(16进制)
      * 从最前面的位开始
      * 0x0000 : 还没有发送邮件[SHIPPED_MAIL]
@@ -97,6 +98,7 @@ public class Orderr extends GenericModel {
      * 0x00f0 : 订单的货物抵达以后发送邀请留 Review 的邮件
      * 0x0f00 : 待定
      * 0xf000 : 待定
+     * </pre>
      */
     public int emailed = 0x0000;
 
