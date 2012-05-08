@@ -468,7 +468,7 @@ public class Account extends Model {
 
     @Override
     public String toString() {
-        return StringUtils.split(this.username, "@")[0];
+        return StringUtils.split(this.uniqueName, "@")[0];
     }
 
 }
