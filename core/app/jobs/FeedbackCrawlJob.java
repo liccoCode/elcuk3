@@ -48,7 +48,7 @@ public class FeedbackCrawlJob extends Job {
     }
 
     /**
-     * 抓取某一个市场的 N(现在为 2) 页的 feedback
+     * 抓取某一个市场的 N(现在为 5) 页的 feedback
      *
      * @param acc
      * @param market
@@ -59,14 +59,18 @@ public class FeedbackCrawlJob extends Job {
                     market != Account.M.AMAZON_FR &&
                     market != Account.M.AMAZON_DE) return;
             acc.changeRegion(market);
-            for(int i = 1; i <= 2; i++) {
+            for(int i = 1; i <= 5; i++) {
                 List<Feedback> feedbacks = acc.fetchFeedback(i);
-                Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+                if(feedbacks.size() == 0) {
+                    Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
+                    break;
+                } else {
+                    Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+                }
 
                 //这段代码在 Feedbacks 也使用了, 但不好将其抽取出来
                 for(Feedback f : feedbacks) {
-                    Feedback manager = Feedback.findById(f.orderId);
-                    manager.updateAttr(f);
+                    Feedback manager = f.checkSaveOrUpdate();
                     manager.checkMailAndTicket();
                 }
             }

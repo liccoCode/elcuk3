@@ -395,7 +395,16 @@ public class Account extends Model {
                     String body = HTTP.get(this.type.feedbackPage(page));
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + "feedback_p" + page + ".html"), body);
-                    return Feedback.parseFeedBackFromHTML(body);
+                    List<Feedback> feedbacks = Feedback.parseFeedBackFromHTML(body);
+                    for(Feedback f : feedbacks) {
+                        try {
+                            f.account = this;
+                            f.orderr = Orderr.findById(f.orderId);
+                        } catch(Exception e) {
+                            Logger.warn(Webs.E(e));
+                        }
+                    }
+                    return feedbacks;
                 } catch(Exception e) {
                     Logger.warn("[" + this.type + "] Feedback page can not found Or the session is invalid!");
                 }

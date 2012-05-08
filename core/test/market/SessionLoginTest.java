@@ -16,6 +16,7 @@ public class SessionLoginTest extends UnitTest {
     @Test
     public void testLoginTwice() throws InterruptedException {
         new KeepSessionJob().doJob();
+        new FeedbackCrawlJob().doJob();
     }
 
     //    @Test
