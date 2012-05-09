@@ -303,7 +303,7 @@ public class Listing extends GenericModel {
             if(Account.MERCHANT_ID.containsKey(off.offerId)) selfSale++;
 
             // ------- 1
-            if(this.isSelfSale()) {
+            if(Listing.isSelfBuildListing(this.title)) {
                 if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
                     Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
                 } else if(!Account.MERCHANT_ID.containsKey(off.offerId)) {
@@ -326,16 +326,18 @@ public class Listing extends GenericModel {
     }
 
     /**
-     * 判断这个 Listing 是否自己在卖
+     * 判断这个 Listing 是否为自己自建的 Listing
+     * 不是判断产品的标题是否为 EasyAcc 而是判断这个产品是否为 EasyAcc 自己销售(不是跟的)
      *
      * @return
      */
-    public boolean isSelfSale() {
-        if(this.offers == null || this.offers.size() == 0) return false;
-        for(ListingOffer off : this.offers) {
-            if(Account.MERCHANT_ID.containsKey(off.offerId)) return true;
-        }
-        return false;
+    public static boolean isSelfBuildListing(String title) {
+        title = title.toLowerCase();
+        if(StringUtils.startsWith(title, "easyacc")) return true;
+        else if(StringUtils.startsWith(title, "nosson")) return true;
+        else if(StringUtils.startsWith(title, "fencer")) return true;
+        else if(StringUtils.startsWith(title, "saner")) return true;
+        else return false;
     }
 
     @Override

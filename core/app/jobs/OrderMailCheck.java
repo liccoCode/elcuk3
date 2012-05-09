@@ -1,6 +1,7 @@
 package jobs;
 
 import models.market.Feedback;
+import models.market.Listing;
 import models.market.OrderItem;
 import models.market.Orderr;
 import notifiers.Mails;
@@ -84,7 +85,7 @@ public class OrderMailCheck extends Job {
             checked++;
             // check: 仅仅发送 EasyAcc 开头的标题的产品的邮件.
             boolean ctn = true;
-            for(OrderItem oi : ord.items) if(!oi.easyacc()) ctn = false;
+            for(OrderItem oi : ord.items) if(!Listing.isSelfBuildListing(oi.productName)) ctn = false;
             if(!ctn) {
                 Logger.debug(String.format("Skip %s, because of [Not EasyAcc]", ord.orderId));
                 notEasyAcc++;
