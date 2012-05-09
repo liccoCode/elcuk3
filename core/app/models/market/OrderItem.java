@@ -244,4 +244,8 @@ public class OrderItem extends GenericModel {
         result = 31 * result + id.hashCode();
         return result;
     }
+
+    public static List<OrderItem> orderRelateItems(String orderId) {
+        return OrderItem.find("order.orderId=?", orderId).fetch();
+    }
 }

@@ -2,7 +2,7 @@ package models.market;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import helper.Dates;
+import helper.GTs;
 import helper.HTTP;
 import helper.Webs;
 import notifiers.Mails;
@@ -169,9 +169,7 @@ public class Feedback extends GenericModel {
         params.add(new BasicNameValuePair("topicId", "1")); // 固定这个 TopicId 为 1; OsTicket 系统里面为 Support
         params.add(new BasicNameValuePair("submit_x", "Submit Ticket"));
         params.add(new BasicNameValuePair("subject", subject));
-        params.add(new BasicNameValuePair("message",
-                String.format("OrderId: %s ; CreateDate: %s ; Score: %s \r\n\r\n Comment:\r\n%s",
-                        this.orderId, Dates.date2DateTime(this.createDate), this.score, this.comment)));
+        params.add(new BasicNameValuePair("message", GTs.render("OsTicketWarn", GTs.newMap("f", this).build())));
 
         try {
             JsonElement jsonel = HTTP.postJson("http://t.easyacceu.com/open_api.php", params);
