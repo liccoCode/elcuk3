@@ -104,7 +104,7 @@ $(function(){
         $('#new_attrs :checkbox').each(function(){
             var o = $(this);
             if(!o.is(":checked")) return;
-            $(template(index++, {id:$('#p_sku').val() + '_' + o.attr('name'), name:o.attr('name'), value:''})).appendTo("#attrs");
+            $(template(index++, {id:$('#p_sku').val() + '_' + o.attr('name'), fullName:o.val(), name:o.attr('name'), value:''})).appendTo("#attrs");
         });
 
 
