@@ -287,8 +287,8 @@ public class Listing extends GenericModel {
      */
     public void check() {
         /**
-         *  1. 检查此 Listing 是否有被其他卖家上架!
-         *  2. 检查此 Listing 上是否有自己多个店铺上架
+         *  1. 检查此 Listing 上是否有自己多个店铺上架
+         *  2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
          */
         if(this.offers == null || this.offers.size() == 0) {
             Logger.warn("Listing [" + this.listingId + "] have no offers!");
@@ -296,26 +296,31 @@ public class Listing extends GenericModel {
         }
 
         int selfSale = 0;
+        boolean mailed = false;
 
         for(ListingOffer off : this.offers) {
-            // ------- 1
-            if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
-                Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
-            } else if(!Account.MERCHANT_ID.containsKey(off.offerId)) {
-                // Mail 警告
-                if(this.warnningTimes == null) this.warnningTimes = 0;
-                this.warnningTimes++; // 查询也记录一次
-                if(this.warnningTimes > 4) {
-                    Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
-                } else {
-                    Mails.listingOffersWarning(off);
-                }
-            } else {
-                this.warnningTimes = 0; // 其余的归零
-            }
-
-            // -------- 2
+            // -------- 1
             if(Account.MERCHANT_ID.containsKey(off.offerId)) selfSale++;
+
+            // ------- 1
+            if(this.isSelfSale()) {
+                if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
+                    Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+                } else if(!Account.MERCHANT_ID.containsKey(off.offerId)) {
+                    // Mail 警告
+                    if(this.warnningTimes == null) this.warnningTimes = 0;
+                    this.warnningTimes++; // 查询也记录一次
+                    if(this.warnningTimes > 4) {
+                        Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
+                    } else {
+                        if(mailed) continue;
+                        Mails.listingOffersWarning(off);
+                        mailed = true;
+                    }
+                } else {
+                    this.warnningTimes = 0; // 其余的归零
+                }
+            }
         }
         if(selfSale >= 2) Mails.moreOfferOneListing(offers, this);
     }
