@@ -182,6 +182,11 @@ public class Account extends Model {
             }
         }
 
+        /**
+         * 下载 7 天内的 Transaction 数据
+         *
+         * @return
+         */
         public String flatFinance() {
             //https://sellercentral.amazon.co.uk/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
             switch(this) {
@@ -198,6 +203,12 @@ public class Account extends Model {
             }
         }
 
+        /**
+         * Amazon 后台的订单页面
+         *
+         * @param oid
+         * @return
+         */
         public String orderDetail(String oid) {
             //https://sellercentral.amazon.co.uk/gp/orders-v2/details?orderID=203-5364157-2572327
             switch(this) {
@@ -208,6 +219,22 @@ public class Account extends Model {
                 case AMAZON_IT:
                 case AMAZON_US:
                     return "https://sellercentral." + this.toString() + "/gp/orders-v2/details?orderID=" + oid;
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+        public String orderEmail(String oid, String userid) {
+            //https://sellercentral.amazon.de/gp/help/contact/contact.html?ie=UTF8&orderID=303-0041526-1569931&buyerID=A2ZK5SS6MAQO5X
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/help/contact/contact.html?ie=UTF8&orderID=" + oid + "&buyerID=" + userid;
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();

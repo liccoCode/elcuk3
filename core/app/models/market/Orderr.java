@@ -808,21 +808,33 @@ public class Orderr extends GenericModel {
     /**
      * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充
      */
-    public void orderInfoParse(Document doc) {
+    public Orderr orderDetailUserIdAndEmail(Document doc) {
         Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
-        if(lin == null) return;
+        if(lin == null) return this;
         String url = lin.parent().select("a").attr("href");
         String[] args = StringUtils.split(url, "&");
         for(String pa : args) {
             try {
+                // buyerId
                 if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
                 this.userid = StringUtils.split(pa, "=")[1];
-                this.save();
+
+
+                // Email
+                if(StringUtils.isBlank(this.email) || !StringUtils.contains(this.email, "@")) {
+                    String html = doc.outerHtml(); // 通过抓取的 HTML 源代码的 js 代码部分进行的提取.
+                    int head = StringUtils.indexOfIgnoreCase(html, "buyerEmail:");
+                    int end = StringUtils.indexOfIgnoreCase(html, "targetID:");
+                    String sub = html.substring(head + 14, end).trim(); // + 14 为排除 buyerEmail: 家冒号的长度
+                    this.email = sub.substring(0, sub.length() - 2); // 尾部 -2 为排除最后面的冒号与逗号的长度
+                }
+
             } catch(Exception e) {
-                Logger.warn("Orderr.orderInfoParse error, url[%s], E[%s]", url, Webs.E(e));
+                Logger.warn("Orderr.orderDetailUserIdAndEmail error, url[%s], E[%s]", url, Webs.E(e));
             }
             break;
         }
+        return this;
     }
 
     @Override
