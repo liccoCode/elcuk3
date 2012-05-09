@@ -25,8 +25,8 @@ public class OrderInfoFetchJob extends Job {
          * 1. 加载 SHIPPED 状态的订单, 并且限制数量;
          */
         int size = 10;
-        if(Play.mode.isProd()) size = 20; //调整成 20 个订单一次, 每 10 分钟一次;
-        List<Orderr> orders = Orderr.find("state=? AND (userid is null OR userid='') order by createDate desc", Orderr.S.SHIPPED).fetch(size);
+        if(Play.mode.isProd()) size = 30; //调整成 30 个订单一次, 每 10 分钟一次;
+        List<Orderr> orders = Orderr.find("state=? AND (userid is null OR userid='') order by createDate", Orderr.S.SHIPPED).fetch(size);
         for(Orderr ord : orders) {
             try {
                 String url = ord.account.type.orderDetail(ord.orderId);
