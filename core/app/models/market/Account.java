@@ -28,10 +28,7 @@ import play.db.jpa.Model;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
@@ -41,6 +38,8 @@ import java.util.Set;
  */
 @Entity
 public class Account extends Model {
+    public static final Map<String, String> MERCHANT_ID = new HashMap<String, String>();
+
     /**
      * 不同的 Market place
      */
@@ -498,4 +497,22 @@ public class Account extends Model {
         return StringUtils.split(this.uniqueName, "@")[0];
     }
 
+    /**
+     * 初始化 Account 相关的业务;
+     * 1. 将 MerchantID 持久在内存中
+     * 2. 登陆 Account 账户
+     */
+    public static void init() {
+        synchronized(MERCHANT_ID) {
+            List<Account> accs = Account.all().fetch();
+            for(Account ac : accs) {
+                MERCHANT_ID.put(ac.merchantId, ac.uniqueName);
+
+                if(Play.mode.isProd()) {
+                    Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
+                    ac.loginWebSite();
+                }
+            }
+        }
+    }
 }

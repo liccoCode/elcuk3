@@ -1,0 +1,34 @@
+<h3>More Than One Offer in Listing <a target="_blank" href="${helper.Webs.link(lis)}">${lis.asin}</a></h3>
+<br/>
+
+public String name;
+
+public String offerId;
+
+public float price;
+
+public float shipprice;
+
+public boolean fba;
+
+public boolean buybox;
+<table>
+    <tr>
+        <th>Name</th>
+        <th>OfferId</th>
+        <th>Price(GBP)</th>
+        <th>ShippingPrice(GBP)</th>
+        <th>FBA?</th>
+        <th>Buybox?</th>
+    </tr>
+#{list items:offers, as:'off'}
+    <tr>
+        <td>${off.name}</td>
+        <td>${off.offerId}</td>
+        <td>${off.price.format("#.###")}</td>
+        <td>${off.shipprice("#.##")}</td>
+        <td>${off.fba}</td>
+        <td>${off.buybox}</td>
+    </tr>
+#{/list}
+</table>

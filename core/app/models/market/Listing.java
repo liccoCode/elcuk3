@@ -287,41 +287,50 @@ public class Listing extends GenericModel {
      */
     public void check() {
         /**
-         * 1. 判断是否为自己的 Listing
-         *  1.1 检查此 Listing 是否有被其他卖家上架!
+         *  1. 检查此 Listing 是否有被其他卖家上架!
+         *  2. 检查此 Listing 上是否有自己多个店铺上架
          */
-        if(this.selfSalesAmazon()) {
-            if(this.offers == null || this.offers.size() == 0) {
-                Logger.warn("Listing [" + this.listingId + "] have no offers!");
-                return;
-            }
-            for(ListingOffer off : this.offers) {
-                if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
-                    Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
-                } else if(!"AJUR3R8UN71M4".equals(off.offerId) ||
-                        !off.name.equalsIgnoreCase("EasyAcc")) {
-                    // Mail 警告
-                    if(this.warnningTimes == null) this.warnningTimes = 0;
-                    this.warnningTimes++; // 查询也记录一次
-                    if(this.warnningTimes > 4) {
-                        Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
-                    } else {
-                        Mails.listingOffersWarning(off);
-                    }
-                } else {
-                    this.warnningTimes = 0; // 其余的归零
-                }
-            }
-        } else {
-            // 不是自己的 Listing 暂时不做操作...
+        if(this.offers == null || this.offers.size() == 0) {
+            Logger.warn("Listing [" + this.listingId + "] have no offers!");
+            return;
         }
+
+        int selfSale = 0;
+
+        for(ListingOffer off : this.offers) {
+            // ------- 1
+            if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
+                Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+            } else if(!Account.MERCHANT_ID.containsKey(off.offerId)) {
+                // Mail 警告
+                if(this.warnningTimes == null) this.warnningTimes = 0;
+                this.warnningTimes++; // 查询也记录一次
+                if(this.warnningTimes > 4) {
+                    Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
+                } else {
+                    Mails.listingOffersWarning(off);
+                }
+            } else {
+                this.warnningTimes = 0; // 其余的归零
+            }
+
+            // -------- 2
+            if(Account.MERCHANT_ID.containsKey(off.offerId)) selfSale++;
+        }
+        if(selfSale >= 2) Mails.moreOfferOneListing(offers, this);
     }
 
-    private boolean selfSalesAmazon() {
-        return "EasyAcc".equalsIgnoreCase(this.byWho) ||
-                "Saner".equalsIgnoreCase(this.byWho) ||
-                StringUtils.startsWithIgnoreCase(this.title, "Saner") ||
-                StringUtils.startsWithIgnoreCase(this.title, "EasyAcc");
+    /**
+     * 判断这个 Listing 是否自己在卖
+     *
+     * @return
+     */
+    public boolean isSelfSale() {
+        if(this.offers == null || this.offers.size() == 0) return false;
+        for(ListingOffer off : this.offers) {
+            if(Account.MERCHANT_ID.containsKey(off.offerId)) return true;
+        }
+        return false;
     }
 
     @Override

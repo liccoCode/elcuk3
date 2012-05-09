@@ -24,10 +24,17 @@ public class Mails extends Mailer {
      */
     public static void listingOffersWarning(ListingOffer offer) {
         Listing lis = offer.listing;
-        setSubject("{WARNNING!}Listing %s find another seller! [%s|%s]", lis.asin, offer.name, offer.offerId);
+        setSubject("{WARN}[Listing] %s find another seller! [%s|%s]", lis.asin, offer.name, offer.offerId);
         mailBase();
-        addRecipient("all@easyacceu.com");
+        addRecipient("c@easyacceu.com");
         send(lis, offer);
+    }
+
+    public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
+        setSubject("{WARN}[Offer] More than one offer in one Listing.");
+        mailBase();
+        addRecipient("c@easyacceu.com");
+        send(offers, lst);
     }
 
     /**
