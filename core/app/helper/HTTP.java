@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -47,7 +48,7 @@ public class HTTP {
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
             multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
 
-            client = new DefaultHttpClient(multipThread, params);
+            client = new ContentEncodingHttpClient(multipThread, params);
             client.setRedirectStrategy(new DefaultRedirectStrategy() {
                 @Override
                 public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
@@ -96,6 +97,7 @@ public class HTTP {
 
     public static String get(String url) {
         try {
+            HTTP.clearExpiredCookie();
             return EntityUtils.toString(client().execute(new HttpGet(url)).getEntity());
         } catch(IOException e) {
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
@@ -106,6 +108,7 @@ public class HTTP {
     public static String post(String url, List<NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
+            HTTP.clearExpiredCookie();
             post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
             return EntityUtils.toString(client().execute(post).getEntity());
         } catch(Exception e) {

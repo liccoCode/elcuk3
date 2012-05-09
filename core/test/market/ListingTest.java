@@ -1,5 +1,7 @@
 package market;
 
+import com.google.gson.JsonElement;
+import helper.HTTP;
 import models.market.Listing;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -12,8 +14,13 @@ import play.test.UnitTest;
  */
 public class ListingTest extends UnitTest {
     @Test
-    public void testJPATransaction() {
-        Listing li = Listing.findById(1l);
-        li.condition_ = "NEW";
+    public void testParseAndUpdateListingFromCrawl() {
+        JsonElement lst = HTTP.json(String.format("%s/listings/%s/%s", "http://e.easyacceu.com:9001", "uk", "B005JSG7GE"));
+        try {
+            Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
+            needCheckListing.check();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -36,6 +36,7 @@ public class Listings extends Controller {
         }
         MT m = MT.val(market);
         if(m == null) renderJSON("{flag:false, message:'invalid market[us,uk,de,it,es,fr]'}");
+        HTTP.clearExpiredCookie();
         String html = HTTP.get(ARW.listing(m, asin));
         if(Play.mode == Play.Mode.DEV)
             FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);

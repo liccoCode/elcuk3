@@ -3,10 +3,12 @@ package helper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.*;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
@@ -21,6 +23,7 @@ import play.Play;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,7 +48,7 @@ public class HTTP {
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
             multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
 
-            client = new DefaultHttpClient(multipThread, params);
+            client = new ContentEncodingHttpClient(multipThread, params);
             client.setRedirectStrategy(new DefaultRedirectStrategy() {
                 @Override
                 public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
@@ -85,14 +88,6 @@ public class HTTP {
         return HTTP.client;
     }
 
-    public static String get(String url) {
-        try {
-            return EntityUtils.toString(client().execute(new HttpGet(url)).getEntity());
-        } catch(IOException e) {
-            return "";
-        }
-    }
-
     /**
      * 清理过期的 Cookie
      */
@@ -100,8 +95,41 @@ public class HTTP {
         HTTP.client().getCookieStore().clearExpired(new Date());
     }
 
+    public static String get(String url) {
+        try {
+            HTTP.clearExpiredCookie();
+            return EntityUtils.toString(client().execute(new HttpGet(url)).getEntity());
+        } catch(IOException e) {
+            Logger.warn("HTTP.get[%s] [%s]", url, E(e));
+            return "";
+        }
+    }
+
+    public static String post(String url, List<NameValuePair> params) {
+        HttpPost post = new HttpPost(url);
+        try {
+            HTTP.clearExpiredCookie();
+            post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+            return EntityUtils.toString(client().execute(post).getEntity());
+        } catch(Exception e) {
+            Logger.warn("HTTP.post[%s] [%s]", url, E(e));
+            return "";
+        }
+    }
+
+    public static JsonElement postJson(String url, List<NameValuePair> params) {
+        Logger.debug("HTTP.post Json [%s]", url);
+        String json = post(url, params);
+        try {
+            return new JsonParser().parse(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
     public static JsonElement json(String url) {
-        Logger.debug("HTTP Json [%s]", url);
+        Logger.debug("HTTP.get Json [%s]", url);
         String json = get(url);
         try {
             return new JsonParser().parse(json);
@@ -109,6 +137,10 @@ public class HTTP {
             Logger.error("Bad JSON: \n%s", json);
             throw new RuntimeException("Cannot parse JSON (check logs)", e);
         }
+    }
+
+    public static String E(Exception e) {
+        return e.getClass().getSimpleName() + "|" + e.getMessage();
     }
 
 }
