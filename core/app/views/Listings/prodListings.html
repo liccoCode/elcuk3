@@ -1,25 +1,18 @@
-<div class="tabbable tabs-right">
-    <ul class="nav nav-tabs" style="height:250px;margin-left:1px;;font-size:0.9em;overflow-y:auto;overflow-x:hidden;">
-    #{list items:accs, as:'acc'}
+<div class="tabbable tabs-left">
+    <ul class="nav nav-tabs" style="height:280px;margin:0 1px;;font-size:0.9em;overflow-y:auto;overflow-x:hidden;">
+    #{list items:models.market.Account.M.values(), as:'accM'}
         <li class="${acc_index == 1 ? 'active' : ''}">
-            <a style="padding-left:5px;" href="#L_${acc.type.name()}" data-toggle="tab">${acc.type.name()}</a>
+            <a style="padding-left:5px;" href="#${accM.nickName()}" data-toggle="tab">${accM.nickName()}</a>
         </li>
     #{/list}
     </ul>
     <div class="tab-content">
-        <div class="tab-pane active" id="L_AMAZON_UK">
-        #{list items:p.listings, as:'lst'}
-            #{if lst.market.name() == 'AMAZON_UK'}
-            ${lst.asin} = uk<br/>
-            #{/if}
-        #{/list}
-        </div>
-        <div class="tab-pane" id="L_AMAZON_DE">
-        #{list items:p.listings, as:'lst'}
-            #{if lst.market.name() == 'AMAZON_DE'}
-            ${lst.asin} = de<br/>
-            #{/if}
-        #{/list}
-        </div>
+    #{productListings_TabContent mname:'A_UK', lsts:p.listings, act:true/}
+        #{productListings_TabContent mname:'A_DE', lsts:p.listings /}
+        #{productListings_TabContent mname:'A_FR', lsts:p.listings /}
+        #{productListings_TabContent mname:'A_IT', lsts:p.listings /}
+        #{productListings_TabContent mname:'A_ES', lsts:p.listings /}
+        #{productListings_TabContent mname:'A_US', lsts:p.listings /}
+        #{productListings_TabContent mname:'E_UK', lsts:p.listings /}
     </div>
 </div>

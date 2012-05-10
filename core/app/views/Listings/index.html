@@ -5,8 +5,8 @@
 #{/set}
 
 <div class="row-fluid">
-    <div class="span3" style="height:inherit;border-right:1px dashed;margin-right:-1px;background:#F5F5F5;overflow-x:auto;">
-        <select id="account" class="span2" size="1">
+    <div class="span3" style="min-height:700px;border-right:1px dashed;margin-right:-1px;background:#F5F5F5;overflow-x:auto;">
+        <select id="account" class="span5" size="1">
             <option value="0">ALL</option>
         #{list items:accs, as:'ac'}
             <option value="${ac.id}">${ac.prettyName()}</option>
@@ -54,11 +54,11 @@
     </div>
 
     <div class="span9" style="margin-left:1px;">
-        <div class="span5" style="height:250px;border-right:1px dashed;margin:0 -1px 0 0;" id="listings">Listing</div>
+        <div class="span9" style="height:280px;border-right:1px dashed;margin:0 -1px 0 0;" id="listings">Listing</div>
 
-        <div class="span2" style="height:250px;" id="sellings">Selling</div>
+        <div class="span3" style="height:280px;border-right:1px dashed;margin-right:-1px;" id="sellings">Selling</div>
 
-        <div class="span9" style="border-top:1px dashed;margin:-1px 0;">
+        <div class="span12" style="border-top:1px dashed;margin:-1px 0;">
             Down
         </div>
     </div>

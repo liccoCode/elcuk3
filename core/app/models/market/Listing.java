@@ -187,6 +187,41 @@ public class Listing extends GenericModel {
         return s.save();
     }
 
+    /**
+     * NEW, 0
+     * SELLING, 1
+     * NO_INVENTORY, 2
+     * HOlD, 3
+     * DOWN 4
+     *
+     * @return
+     */
+    public Integer[] relateSellingStateQtys(String nickMarketName) {
+        Integer[] stateQtys = {0, 0, 0, 0, 0};
+        for(Selling s : this.sellings) {
+            if(!nickMarketName.equalsIgnoreCase(s.market.nickName())) continue;
+            switch(s.state) {
+                case NEW:
+                    stateQtys[0] += 1;
+                    break;
+                case SELLING:
+                    stateQtys[1] += 1;
+                    break;
+                case NO_INVENTORY:
+                    stateQtys[2] += 1;
+                    break;
+                case HOlD:
+                    stateQtys[3] += 1;
+                    break;
+                case DOWN:
+                    stateQtys[4] += 1;
+                    break;
+                default:
+                    Logger.warn("Other State? Can not happed!");
+            }
+        }
+        return stateQtys;
+    }
 
     /**
      * 从所有 ListingOffer 中查找自己

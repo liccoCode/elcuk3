@@ -1,0 +1,29 @@
+*{
+_mname: Account.M 的 name 值
+_lsts: List[Listing]
+}*
+<div class="tab-pane ${_act ? 'active' : ''}" id="${_mname}">
+    <table class="table table-condensed">
+        <tr>
+            <th>ASIN(${_mname})</th>
+            <th>NEW</th>
+            <th>SELLING</th>
+            <th>NO_INV</th>
+            <th>HOlD</th>
+            <th>DOWN</th>
+        </tr>
+    #{list items:_lsts, as:'lst'}
+        #{if lst.market.nickName() == _mname}
+            #{set sQty:lst.relateSellingStateQtys(_mname)/}
+            <tr>
+                <td><a target="_blank" href="${helper.Webs.link(lst)}">${lst.asin}</a></td>
+                <td>${sQty[0]}</td>
+                <td>${sQty[1]}</td>
+                <td>${sQty[2]}</td>
+                <td>${sQty[3]}</td>
+                <td>${sQty[4]}</td>
+            </tr>
+        #{/if}
+    #{/list}
+    </table>
+</div>

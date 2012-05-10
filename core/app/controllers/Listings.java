@@ -47,6 +47,11 @@ public class Listings extends Controller {
         render(p, accs);
     }
 
+    public static void listingSellings(String lid) {
+        List<Selling> sells = Selling.find("listing.listingId=?", lid).fetch();
+        render(sells);
+    }
+
     public static void reload() {
         try {
             Cache.delete("listings#index");

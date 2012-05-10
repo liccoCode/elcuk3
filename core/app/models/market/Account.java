@@ -46,8 +46,8 @@ public class Account extends Model {
     public enum M {
         AMAZON_UK,
         AMAZON_DE,
-        AMAZON_IT,
         AMAZON_FR,
+        AMAZON_IT,
         AMAZON_ES,
         AMAZON_US,
         EBAY_UK;
@@ -58,10 +58,10 @@ public class Account extends Model {
                     return "amazon.co.uk";
                 case AMAZON_DE:
                     return "amazon.de";
-                case AMAZON_IT:
-                    return "amazon.it";
                 case AMAZON_FR:
                     return "amazon.fr";
+                case AMAZON_IT:
+                    return "amazon.it";
                 case AMAZON_ES:
                     return "amazon.es";
                 case AMAZON_US:
@@ -70,6 +70,27 @@ public class Account extends Model {
                     return "ebay.co.uk";
                 default:
                     return "amazon.co.uk";
+            }
+        }
+
+        public String nickName() {
+            switch(this) {
+                case AMAZON_UK:
+                    return "A_UK";
+                case AMAZON_DE:
+                    return "A_DE";
+                case AMAZON_FR:
+                    return "A_FR";
+                case AMAZON_IT:
+                    return "A_IT";
+                case AMAZON_ES:
+                    return "A_ES";
+                case AMAZON_US:
+                    return "A_US";
+                case EBAY_UK:
+                    return "E_UK";
+                default:
+                    return "A_UK";
             }
         }
 
