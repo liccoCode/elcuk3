@@ -1,6 +1,7 @@
 package models.market;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
+import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.Dates;
 import helper.Patterns;
@@ -107,6 +108,7 @@ public class Orderr extends GenericModel {
      * 订单的编码
      */
     @Id
+    @Expose
     public String orderId;
 
     /**
@@ -221,6 +223,11 @@ public class Orderr extends GenericModel {
      * 订单备用信息
      */
     public String memo;
+
+    /**
+     * 用来记录此订单使用抓取更新的次数
+     */
+    public Integer crawlUpdateTimes = 0;
 
     // -------------------------
 
@@ -828,6 +835,8 @@ public class Orderr extends GenericModel {
                     String sub = html.substring(head + 14, end).trim(); // + 14 为排除 buyerEmail: 家冒号的长度
                     this.email = sub.substring(0, sub.length() - 2); // 尾部 -2 为排除最后面的冒号与逗号的长度
                 }
+
+                this.crawlUpdateTimes++;
 
             } catch(Exception e) {
                 Logger.warn("Orderr.orderDetailUserIdAndEmail error, url[%s], E[%s]", url, Webs.E(e));
