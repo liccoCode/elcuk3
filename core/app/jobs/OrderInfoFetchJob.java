@@ -39,7 +39,7 @@ public class OrderInfoFetchJob extends Job {
                 Document doc = Jsoup.parse(html);
                 ord.orderDetailUserIdAndEmail(doc).save();
             } catch(Exception e) {
-                Logger.warn("Parse Order Info Error! [%s]", Webs.E(e));
+                Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
             }
         }
     }
