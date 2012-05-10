@@ -222,6 +222,7 @@ public class Orderr extends GenericModel {
     /**
      * 订单备用信息
      */
+    @Lob
     public String memo;
 
     /**
@@ -816,8 +817,14 @@ public class Orderr extends GenericModel {
      * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充
      */
     public Orderr orderDetailUserIdAndEmail(Document doc) {
+        this.crawlUpdateTimes++;
         Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
-        if(lin == null) return this;
+        if(lin == null) {
+            // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
+            lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
+            this.state = S.CANCEL;
+            this.memo = lin.text();
+        }
         String url = lin.parent().select("a").attr("href");
         String[] args = StringUtils.split(url, "&");
         for(String pa : args) {
@@ -836,7 +843,6 @@ public class Orderr extends GenericModel {
                     this.email = sub.substring(0, sub.length() - 2); // 尾部 -2 为排除最后面的冒号与逗号的长度
                 }
 
-                this.crawlUpdateTimes++;
 
             } catch(Exception e) {
                 Logger.warn("Orderr.orderDetailUserIdAndEmail error, url[%s], E[%s]", url, Webs.E(e));
