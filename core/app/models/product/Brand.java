@@ -15,6 +15,9 @@ import java.util.List;
 @Entity
 public class Brand extends GenericModel {
 
+    @OneToMany(mappedBy = "brand", fetch = FetchType.EAGER)
+    public List<Family> families;
+
     /**
      * 品牌名称
      */

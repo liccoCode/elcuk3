@@ -1,0 +1,25 @@
+<div class="tabbable tabs-right">
+    <ul class="nav nav-tabs" style="height:250px;margin-left:1px;;font-size:0.9em;overflow-y:auto;overflow-x:hidden;">
+    #{list items:accs, as:'acc'}
+        <li class="${acc_index == 1 ? 'active' : ''}">
+            <a style="padding-left:5px;" href="#L_${acc.type.name()}" data-toggle="tab">${acc.type.name()}</a>
+        </li>
+    #{/list}
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="L_AMAZON_UK">
+        #{list items:p.listings, as:'lst'}
+            #{if lst.market.name() == 'AMAZON_UK'}
+            ${lst.asin} = uk<br/>
+            #{/if}
+        #{/list}
+        </div>
+        <div class="tab-pane" id="L_AMAZON_DE">
+        #{list items:p.listings, as:'lst'}
+            #{if lst.market.name() == 'AMAZON_DE'}
+            ${lst.asin} = de<br/>
+            #{/if}
+        #{/list}
+        </div>
+    </div>
+</div>

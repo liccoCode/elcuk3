@@ -23,10 +23,10 @@ public class Family extends GenericModel {
     @OneToMany(mappedBy = "family")
     public List<Product> products;
 
-    @OneToOne
+    @ManyToOne
     public Category category;
 
-    @OneToOne
+    @ManyToOne
     public Brand brand;
 
     public static List<Family> bcRelateFamily(Brand b, Category c) {

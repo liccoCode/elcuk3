@@ -2,6 +2,8 @@ package controllers;
 
 import com.google.gson.JsonElement;
 import helper.HTTP;
+import helper.Webs;
+import models.Ret;
 import models.Server;
 import models.market.Account;
 import models.market.Listing;
@@ -10,11 +12,14 @@ import models.market.Selling;
 import models.product.Category;
 import models.product.Product;
 import play.Logger;
+import play.cache.Cache;
+import play.cache.CacheFor;
 import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -29,53 +34,29 @@ import java.util.List;
 @With({Secure.class, GzipFilter.class})
 public class Listings extends Controller {
 
-    public static void l_index() {
-        List<Category> cats = Category.find("order by categoryId").fetch();
-        render(cats);
-    }
-
-    /**
-     * 点击了左侧的 Prod_Cat 导航后, 中间加载这个 Product 所关联的 Listing
-     */
-    public static void l_listing(String sku) {
-        validation.required(sku);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Product prod = Product.find("sku=?", sku).first();
-        render(prod);
-    }
-
-    /**
-     * 点击了 Listing 导航后, 中间加载这个 Listing 所关联的 Selling
-     */
-    public static void l_selling(String lid) {
-        validation.required(lid);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Listing lst = Listing.find("listingId=?", lid).first();
-        render(lst);
-    }
-
-    public static void l_listingDetail(String lid) {
-        validation.required(lid);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Listing lst = Listing.find("listingId=?", lid).first();
+    @CacheFor(value = "6h", id = "listings#index")
+    public static void index() {
+        List<Category> cats = Category.find("ORDER BY categoryId").fetch();
         List<Account> accs = Account.all().fetch();
-        render(lst, accs);
+        render(cats, accs);
     }
 
-    public static void l_prodDetail(String sku) {
-        validation.required(sku);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Product prod = Product.find("sku=?", sku).first();
-        render(prod);
+    public static void prodListings(Product p) {
+        if(!p.isPersistent()) throw new FastRuntimeException("Product 不存在!");
+        List<Account> accs = Account.all().fetch();
+        render(p, accs);
     }
 
-    public static void l_sellingDetail(String msku) {
-        validation.required(msku);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Selling sell = Selling.find("merchantSKU=?", msku).first();
-        if(sell == null) renderJSON(new Error("Selling", msku + " is not exist", new String[]{}));
-        render(sell);
+    public static void reload() {
+        try {
+            Cache.delete("listings#index");
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+        renderJSON(new Ret(true, "缓存重新加载"));
     }
+
+    // --------------------------------------
     /*
         PS: 尽管上面的方法几乎一样, 但还是需要区分开;
         1. Play! 会自动将 Controller 方法的调用转换为 redirect

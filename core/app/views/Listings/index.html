@@ -1,0 +1,66 @@
+#{extends 'main.html'/}
+#{set title:'Listing'/}
+#{set 'moreScripts'}
+    #{script 'listings/listings.js'/}
+#{/set}
+
+<div class="row-fluid">
+    <div class="span3" style="height:inherit;border-right:1px dashed;margin-right:-1px;background:#F5F5F5;overflow-x:auto;">
+        <select id="account" class="span2" size="1">
+            <option value="0">ALL</option>
+        #{list items:accs, as:'ac'}
+            <option value="${ac.id}">${ac.prettyName()}</option>
+        #{/list}
+        </select>
+        <ul id="slider" class="nav nav-list nav-collapse" style="font-size:1em;cursor:pointer;">
+            <!-- Category; cursor 继承下去了 -->
+        #{list items:cats, as:'cat'}
+            <li>
+                <a data-toggle="collapse" data-target="#${cat.categoryId}" style="display:inline-block;padding-left:5px;">
+                    <nobr>${cat}(${cat.brands.size()})</nobr>
+                </a>
+            </li>
+            <ul id="${cat.categoryId}" class="nav nav-list collapse"> <!-- Brand -->
+                #{list items:cat.brands, as:'bd'}
+                    <li>
+                        <a data-toggle="collapse" data-target="#${cat.categoryId}_${bd.name}" style="display:inline;padding-left:0;">
+                            <nobr>${bd.name} ${bd.families.size() == 0 ? '(0)' :''}</nobr>
+                        </a>
+                    </li>
+                    <ul id="${cat.categoryId}_${bd.name}" class="nav nav-list collapse"> <!-- Family -->
+                        #{list items:bd.families, as:'fm'}
+                            #{if fm.category == cat}
+                                <li>
+                                    <a data-toggle="collapse" data-target="#${cat.categoryId}_${fm.family}" style="display:inline;padding-left:0;">
+                                        <nobr>${fm.family} (${fm.products.size()})</nobr>
+                                    </a>
+                                </li>
+                                <ul id="${cat.categoryId}_${fm.family}" class="nav nav-list collapse"> <!-- Product -->
+                                    #{list items:fm.products, as:'prod'}
+                                        <li>
+                                            <a level="sku" cid="${cat.categoryId}" bid="${bd.name}" fid="${fm.family}" pid="${prod.sku}" style="display:inline;padding-left:0;font-size:0.9em;">
+                                                <nobr><i class="icon-map-marker"></i>${prod.sku}</nobr>
+                                            </a>
+                                        </li>
+                                    #{/list}
+                                </ul>
+                            #{/if}
+                        #{/list}
+                    </ul>
+                #{/list}
+            </ul>
+        #{/list}
+        </ul>
+    </div>
+
+    <div class="span9" style="margin-left:1px;">
+        <div class="span5" style="height:250px;border-right:1px dashed;margin:0 -1px 0 0;" id="listings">Listing</div>
+
+        <div class="span2" style="height:250px;" id="sellings">Selling</div>
+
+        <div class="span9" style="border-top:1px dashed;margin:-1px 0;">
+            Down
+        </div>
+    </div>
+</div>
+

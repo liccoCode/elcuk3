@@ -497,6 +497,10 @@ public class Account extends Model {
         return StringUtils.split(this.uniqueName, "@")[0];
     }
 
+    public String prettyName() {
+        return String.format("%s.%s", this.type.name(), this.username.split("@")[0]);
+    }
+
     /**
      * 初始化 Account 相关的业务;
      * 1. 将 MerchantID 持久在内存中
