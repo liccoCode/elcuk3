@@ -2,9 +2,8 @@ package jobs;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import helper.HTTP;
+import helper.Crawl;
 import helper.Webs;
-import models.Server;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import org.joda.time.DateTime;
@@ -81,8 +80,7 @@ public class ListingWorkers extends Job {
                 return;
             }
             try {
-                JsonElement lst = HTTP.json(String.format("%s/listings/%s/%s",
-                        Server.server(Server.T.CRAWLER).url, listing.market.name(), listing.asin));
+                JsonElement lst = Crawl.crawlListing(listing.market.name(), listing.asin);
                 Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
                 needCheckListing.check();
                 needCheckListing.save();
@@ -105,10 +103,8 @@ public class ListingWorkers extends Job {
             Listing listing = Listing.findById(listingId);
             // host/reviews/{market}/{asin}
             JsonElement reviews = null;
-            String url = String.format("%s/reviews/%s/%s",
-                    Server.server(Server.T.CRAWLER).url, listing.market.name(), listing.asin);
             try {
-                reviews = HTTP.json(url);
+                reviews = Crawl.crawlReview(listing.market.name(), listing.asin);
                 /**
                  * 解析出所有的 Reviews, 然后从数据库中加载出此 Listing 对应的所有 Reviews 然后进行判断这些 Reviews 是更新还是新添加?
                  *
@@ -134,7 +130,7 @@ public class ListingWorkers extends Job {
                 }
                 listing.save();
             } catch(Exception e) {
-                Logger.warn("Listing Review[%s] have [%s].", url, Webs.E(e));
+                Logger.warn("Listing Review have [%s].", Webs.E(e));
             }
 
         }

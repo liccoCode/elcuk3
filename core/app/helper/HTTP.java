@@ -3,11 +3,14 @@ package helper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.*;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -34,6 +37,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class HTTP {
     private static DefaultHttpClient client;
+    /**
+     * 默认的 Cookie Store
+     */
+    public static final CookieStore COOKIE_STORE = new BasicCookieStore();
 
     public static void init() {
         synchronized(HTTP.class) {
@@ -89,28 +96,76 @@ public class HTTP {
     }
 
     /**
+     * 可以设置不同的 Cookie 池
+     *
+     * @param cookieStore
+     */
+    public static HttpClient cookieStore(CookieStore cookieStore) {
+        if(cookieStore == null) client().setCookieStore(HTTP.COOKIE_STORE);
+        else client().setCookieStore(cookieStore);
+        return client();
+    }
+
+    /**
      * 清理过期的 Cookie
      */
     public static void clearExpiredCookie() {
-        HTTP.client().getCookieStore().clearExpired(new Date());
+        client().getCookieStore().clearExpired(new Date());
     }
 
+    /**
+     * 使用默认 Cookie Store
+     *
+     * @param url
+     * @return
+     */
     public static String get(String url) {
+        return get(null, url);
+    }
+
+    /**
+     * 传入指定的 CookieStore
+     *
+     * @param cookieStore
+     * @param url
+     * @return
+     */
+    public static String get(CookieStore cookieStore, String url) {
         try {
             HTTP.clearExpiredCookie();
-            return EntityUtils.toString(client().execute(new HttpGet(url)).getEntity());
+            return EntityUtils.toString(cookieStore(cookieStore).execute(new HttpGet(url)).getEntity());
         } catch(IOException e) {
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return "";
         }
     }
 
+    /**
+     * 使用默认 Cookie Store
+     *
+     * @param url
+     * @param params
+     * @return
+     */
     public static String post(String url, List<NameValuePair> params) {
+        return post(null, url, params);
+    }
+
+
+    /**
+     * 传入指定的 CookieStore
+     *
+     * @param cookieStore
+     * @param url
+     * @param params
+     * @return
+     */
+    public static String post(CookieStore cookieStore, String url, List<NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
             HTTP.clearExpiredCookie();
             post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-            return EntityUtils.toString(client().execute(post).getEntity());
+            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";

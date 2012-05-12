@@ -184,22 +184,8 @@
         $.varClosure.params['s.platinumKeywords'] = platkeys.substring(0, platkeys.length - 3);
     };
     $('#l_sell_update_btn').click(function(){
-        basicUpdate();
-        $.ajax({
-            url:'/listings/deploy',
-            data:$.varClosure.params,
-            dataType:'json',
-            success:function(data){
-                if(data['merchantSKU'] != undefined && data['merchantSKU'] == $.HASH.selling){
-                    alert('本地更新成功.');
-                }else{
-                    alert("更新失败:\r\n " + JSON.stringify(data));
-                }
-            },
-            error:function(xhr, state, err){
-                alert(xhr.responseText);
-            }
-        });
+        alert("功能暂停.");
+        return false;
     });
 
     $('#l_sell_updatelocal_btn').click(function(){

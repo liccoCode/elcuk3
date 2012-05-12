@@ -1,7 +1,7 @@
 package controllers;
 
 import com.google.gson.JsonElement;
-import helper.HTTP;
+import helper.Crawl;
 import models.Server;
 import models.market.Account;
 import models.market.Listing;
@@ -83,18 +83,9 @@ public class Listings extends Controller {
         3. 这样做能够为后续的操作提供修改的空间
       */
 
-    /**
-     * 远程更新, 并且更新本地数据库
-     */
-    public static void deploy(@Valid Selling s) {
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        s.deploy(s.merchantSKU);
-        renderJSON(s);
-    }
-
     public static void update(@Valid Selling s) {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        s.localUpdate(s.merchantSKU);
+        s.save();
         renderJSON(s);
     }
 
@@ -112,7 +103,7 @@ public class Listings extends Controller {
         Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
         Listing tobeSave = null;
         try {
-            JsonElement listing = HTTP.json(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+            JsonElement listing = Crawl.crawlListing(market, asin);
             tobeSave = Listing.parseAndUpdateListingFromCrawl(listing);
         } catch(Exception e) {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
