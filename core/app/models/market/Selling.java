@@ -7,15 +7,20 @@ import models.product.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.IO;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -231,7 +236,16 @@ public class Selling extends GenericModel {
     }
 
     /**
-     * 将传入的 Selling 的数据更新到 渠道上并且更新数据库
+     * <pre>
+     * 将传入的 Selling 的数据更新到 渠道上并且更新数据库;
+     * PS: 请确保 Selling 中的信息是正确的, 这个方法仅仅根据对应的参数做提交操作, 不再验证数据!
+     * 更新:
+     * 1. price
+     * 2. salePrice, startDate, endDate
+     * 3. productDescription
+     * 4. searchTerms[1~5]
+     * 5. 等待添加
+     * </pre>
      */
     public void deploy() {
         switch(this.market) {
@@ -241,15 +255,72 @@ public class Selling extends GenericModel {
             case AMAZON_IT:
             case AMAZON_UK:
             case AMAZON_US:
+                // 1. 切换 Selling 所在区域
                 this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
                 String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
                 if(Play.mode.isDev())
                     IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
 
 
+                // 2. 设置需要提交的值
                 Document doc = Jsoup.parse(body);
-                doc.select("form[name=productForm] :input");
+                Elements inputs = doc.select("form[name=productForm] input");
+                if(inputs.size() == 0) {
+                    Logger.warn("Listing Update Page Error! Log to ....?");
+                    try {
+                        FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.E_ERROR, this.merchantSKU, this.asin)), body);
+                    } catch(IOException e) {
+                        //ignore..
+                    }
+                    throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+                }
+                Set<NameValuePair> params = new HashSet<NameValuePair>();
+                for(Element el : inputs) {
+                    String name = el.attr("name").toLowerCase().trim();
+                    if("our_price".equals(name) && this.price != null && this.price > 0) {
+                        params.add(new BasicNameValuePair(name, this.price.toString()));
+                    } else if("discounted_price".equals(name) ||
+                            "discounted_price_start_date".equals(name) ||
+                            "discounted_price_end_date".equals(name)) {
+                        if(this.startDate != null && this.endDate != null && this.salePrice != null && this.salePrice > 0) {
+                            params.add(new BasicNameValuePair("discounted_price", this.salePrice.toString()));
+                            params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.startDate)));
+                            params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.endDate)));
+                        }
+                    } else if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
+                        if(this.productDesc.length() > 2000)
+                            throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+                        params.add(new BasicNameValuePair(name, this.productDesc));
+                    } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.searchTerms)) {
+                        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.searchTerms, Webs.SPLIT);
+                        for(int i = 0; i < searchTermsArr.length; i++) {
+                            if(searchTermsArr[i].length() > 50)
+                                throw new FastRuntimeException("SearchTerm length must blew then 50.");
+                            params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
+                        }
+                        // length = 3, 0~2, need 3,4
+                        int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
+                        if(missingIndex > 0) {
+                            for(int i = 1; i <= missingIndex; i++) {
+                                params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
+                            }
+                        }
+                    } else {
+                        params.add(new BasicNameValuePair(name, el.val()));
+                    }
+                }
 
+                // 3. 提交
+                String[] args = StringUtils.split(doc.select("form[name=productForm]").first().attr("action"), ";");
+                ///abis/product/ProcessEditProduct;jsessionid=B8595C92B8A8C968BD2B3A1C6BDD3CAD
+                //https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+                body = HTTP.post(this.account.cookieStore(),
+                        Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
+                        params);
+                if(Play.mode.isDev())
+                    IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+                if(StringUtils.isBlank(body))
+                    throw new FastRuntimeException("Selling update is failed!");
                 break;
             case EBAY_UK:
                 break;

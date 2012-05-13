@@ -243,7 +243,34 @@ public class Account extends Model {
                 case AMAZON_FR:
                 case AMAZON_IT:
                 case AMAZON_US:
-                    return "https://catalog-sc." + sell.market.toString() + "/abis/product/DisplayEditProduct?sku=" + sell.merchantSKU + "&asin=" + sell.asin;
+                    String msku = sell.merchantSKU;
+                    if("68-MAGGLASS-3X75BG,B001OQOK5U".equalsIgnoreCase(sell.merchantSKU)) {
+                        msku = "68-MAGGLASS-3x75BG,B001OQOK5U";
+                    } else if("80-qw1a56-be,2".equalsIgnoreCase(sell.merchantSKU)) {
+                        msku = "80-qw1a56-be,2";
+                    } else if("80-qw1a56-be".equalsIgnoreCase(sell.merchantSKU)) {
+                        msku = "80-qw1a56-be";
+                    }
+                    return "https://catalog-sc." + sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/
+                            + "/abis/product/DisplayEditProduct?sku=" + msku + "&asin=" + sell.asin;
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+
+        public static String listingPostPage(Account.M market, String jsessionId) {
+            //https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+            switch(market) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://catalog-sc." + market.toString() + "/abis/product/ProcessEditProduct" +
+                            (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();
@@ -523,11 +550,8 @@ public class Account extends Model {
             List<Account> accs = Account.all().fetch();
             for(Account ac : accs) {
                 MERCHANT_ID.put(ac.merchantId, ac.uniqueName);
-
-                if(Play.mode.isProd()) {
-                    Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
-                    ac.loginWebSite();
-                }
+                Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
+                ac.loginWebSite();
             }
         }
     }

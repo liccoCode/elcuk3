@@ -25,8 +25,9 @@ import play.Logger;
 import play.Play;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,8 +49,8 @@ public class HTTP {
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
-            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
+            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
+            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
 
             ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
@@ -147,7 +148,7 @@ public class HTTP {
      * @param params
      * @return
      */
-    public static String post(String url, List<NameValuePair> params) {
+    public static String post(String url, Collection<NameValuePair> params) {
         return post(null, url, params);
     }
 
@@ -160,11 +161,11 @@ public class HTTP {
      * @param params
      * @return
      */
-    public static String post(CookieStore cookieStore, String url, List<NameValuePair> params) {
+    public static String post(CookieStore cookieStore, String url, Collection<NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
             HTTP.clearExpiredCookie();
-            post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+            post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
@@ -172,7 +173,7 @@ public class HTTP {
         }
     }
 
-    public static JsonElement postJson(String url, List<NameValuePair> params) {
+    public static JsonElement postJson(String url, Collection<NameValuePair> params) {
         Logger.debug("HTTP.post Json [%s]", url);
         String json = post(url, params);
         try {

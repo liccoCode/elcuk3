@@ -5,6 +5,7 @@ import helper.HTTP;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
+import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
@@ -34,8 +35,10 @@ public class OnStartUp extends Job {
 
 
         HTTP.init();
-        Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
 
-        Account.init();
+        if(Play.mode.isProd()) {
+            Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
+            Account.init();
+        }
     }
 }
