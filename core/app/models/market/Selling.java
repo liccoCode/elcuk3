@@ -360,6 +360,9 @@ public class Selling extends GenericModel {
                 Elements error = doc.select(".messageboxerror li");
                 if(error.size() > 0)
                     throw new FastRuntimeException("Error:" + error.text());
+
+                // 4. 更新回数据库
+                this.save();
                 break;
             case EBAY_UK:
                 break;
