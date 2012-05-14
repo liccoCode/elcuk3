@@ -41,7 +41,9 @@ public class SellingPriceSyncJob extends Job {
                 Listing listing = Listing.findById(String.format("%s_%s", asin, sell.market.toString()));
                 if(listing == null)
                     listing = Listing.parseAndUpdateListingFromCrawl(Crawl.crawlListing(sell.market.name(), asin)).save();
+                //TODO 考虑抓取回来的竞争对手没有价格的话如何处理?
                 float listingLowPrice = listing.lowestPrice();
+                if(listingLowPrice <= 0) continue;
                 if(listingLowPrice < lowestPrice) lowestPrice = listingLowPrice;
             }
 
