@@ -66,7 +66,7 @@ public class Webs {
     }
 
     public static Float scalePointUp(int scala, Float val) {
-        return new BigDecimal(val).setScale(scala, RoundingMode.UP).floatValue();
+        return new BigDecimal(val).setScale(scala, RoundingMode.HALF_UP).floatValue();
     }
 
 

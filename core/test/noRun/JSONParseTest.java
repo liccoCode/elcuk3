@@ -1,6 +1,5 @@
 package noRun;
 
-import helper.Currency;
 import helper.PH;
 import helper.Webs;
 import models.market.Selling;
@@ -38,6 +37,6 @@ public class JSONParseTest {
 
     @Test
     public void testNumber() {
-        System.out.println(Webs.scale2PointUp(Currency.GBP.toEUR(Currency.EUR.toGBP(26.99f))));
+        System.out.println(Webs.scale2PointUp(33.990017f));
     }
 }
