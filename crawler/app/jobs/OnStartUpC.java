@@ -11,7 +11,7 @@ import play.jobs.OnApplicationStart;
  * Time: 11:10 AM
  */
 @OnApplicationStart
-public class OnStartUp extends Job {
+public class OnStartUpC extends Job {
     @Override
     public void doJob() throws Exception {
         HTTP.init();

@@ -1,14 +1,14 @@
 package models;
 
 /**
- * Listing 相关的买家信息
+ * ListingC 相关的买家信息
  * User: Wyatt
  * Date: 12-1-2
  * Time: 下午4:37
  */
-public class ListingOffer {
+public class ListingOfferC {
 
-    public ListingOffer() {
+    public ListingOfferC() {
         this.fba = false;
         this.buybox = false;
     }

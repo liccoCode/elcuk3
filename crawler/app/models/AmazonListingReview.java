@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 某一个 Listing 所拥有的 Review 消息
+ * 某一个 ListingC 所拥有的 Review 消息
  * User: wyattpan
  * Date: 4/17/12
  * Time: 4:33 PM
@@ -21,7 +21,7 @@ import java.util.List;
 public class AmazonListingReview {
 
     /**
-     * Amazon Listing Review 的 Id:
+     * Amazon ListingC Review 的 Id:
      * [listingId]_[userid]_[title.trim()] 的 md5Hex 值
      */
     public String alrId;

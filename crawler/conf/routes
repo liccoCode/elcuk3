@@ -4,8 +4,8 @@
 
 # Home page
 GET      /                                                Application.index
-GET      /listings/{market}/{asin}                        Listings.crawl
-GET      /reviews/{market}/{asin}                         Listings.crawlReview
+GET      /listings/{market}/{asin}                        ListingCs.crawl
+GET      /reviews/{market}/{asin}                         ListingCs.crawlReview
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

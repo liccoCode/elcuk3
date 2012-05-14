@@ -47,8 +47,8 @@ public class Listings extends Controller {
         render(p, accs);
     }
 
-    public static void listingSellings(String lid) {
-        List<Selling> sells = Selling.find("listing.listingId=?", lid).fetch();
+    public static void listingSellings(String lid, Selling.S s) {
+        List<Selling> sells = Selling.find("listing.listingId=? AND state=?", lid, s).fetch();
         render(sells);
     }
 
