@@ -1,6 +1,5 @@
 package market;
 
-import com.alibaba.fastjson.JSON;
 import models.market.Account;
 import org.junit.Test;
 import play.mvc.Http;
@@ -47,6 +46,5 @@ public class AccountTest extends FunctionalTest {
     @Test
     public void readAccount() {
         Account acc = Account.findById(1l);
-        System.out.println(JSON.toJSONString(acc));
     }
 }
