@@ -2,6 +2,7 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import helper.Patterns;
+import models.market.Account;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -126,6 +127,21 @@ public class Product extends GenericModel {
      */
     public void removeProduct() {
         this.delete();
+    }
+
+    /**
+     * 如果指定 Market, 并且正确, 那么则从此 SKU 下属的 Listing 中过滤出对应市场的 Listing, 否则与 this.listings 相同
+     *
+     * @param market
+     * @return
+     */
+    public List<Listing> listings(String market) {
+        Account.M m = Account.M.val(market);
+        if(m == null) {
+            return this.listings;
+        } else {
+            return Listing.find("product.sku=? AND market=?", this.sku, Account.M.val(market)).fetch();
+        }
     }
 
     /**

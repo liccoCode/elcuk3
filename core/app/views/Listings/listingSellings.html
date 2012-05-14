@@ -1,0 +1,20 @@
+<table class="table table-bordered table-condensed span11">
+    <tr>
+        <th>SellingId</th>
+        <th>MSKU</th>
+        <th>Market</th>
+        <th>State</th>
+        <th>Type</th>
+        <th>Acc</th>
+    </tr>
+#{list items:sells, as:'sell'}
+    <tr>
+        <td>${sell.sellingId}</td>
+        <td>${sell.merchantSKU}</td>
+        <td>${sell.market}</td>
+        <td>${sell.state}</td>
+        <td>${sell.type}</td>
+        <td>${sell.account.prettyName()}</td>
+    </tr>
+#{/list}
+</table>

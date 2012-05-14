@@ -19,7 +19,6 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -41,15 +40,22 @@ public class Listings extends Controller {
         render(cats, accs);
     }
 
-    public static void prodListings(Product p) {
-        if(!p.isPersistent()) throw new FastRuntimeException("Product 不存在!");
-        List<Account> accs = Account.all().fetch();
-        render(p, accs);
+    public static void prodListings(Product p, String m) {
+        List<Listing> lsts = p.listings(m);
+        render(lsts);
     }
 
-    public static void listingSellings(String lid, Selling.S s) {
-        List<Selling> sells = Selling.find("listing.listingId=? AND state=?", lid, s).fetch();
+    public static void listingSellings(Listing l, Account a) {
+        List<Selling> sells = l.sellings(a);
         render(sells);
+    }
+
+    /**
+     * 详细的查看 Listing
+     */
+    public static void listing(String lid) {
+        Listing lst = Listing.findById(lid);
+        render(lst);
     }
 
     public static void reload() {

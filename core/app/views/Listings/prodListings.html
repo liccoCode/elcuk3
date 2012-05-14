@@ -1,18 +1,18 @@
-<div class="tabbable tabs-left">
-    <ul class="nav nav-tabs" style="height:280px;margin:0 1px;;font-size:0.9em;overflow-y:auto;overflow-x:hidden;">
-    #{list items:models.market.Account.M.values(), as:'accM'}
-        <li class="${acc_index == 1 ? 'active' : ''}">
-            <a style="padding-left:5px;" href="#${accM.nickName()}" data-toggle="tab">${accM.nickName()}</a>
-        </li>
-    #{/list}
-    </ul>
-    <div class="tab-content">
-    #{productListings_TabContent mname:'A_UK', lsts:p.listings, act:true/}
-        #{productListings_TabContent mname:'A_DE', lsts:p.listings /}
-        #{productListings_TabContent mname:'A_FR', lsts:p.listings /}
-        #{productListings_TabContent mname:'A_IT', lsts:p.listings /}
-        #{productListings_TabContent mname:'A_ES', lsts:p.listings /}
-        #{productListings_TabContent mname:'A_US', lsts:p.listings /}
-        #{productListings_TabContent mname:'E_UK', lsts:p.listings /}
-    </div>
-</div>
+<table class="table table-bordered table-condensed span11">
+    <tr>
+        <th>ListingId</th>
+        <th class="span6">Title</th>
+        <th>Review</th>
+    </tr>
+#{list items:lsts, as:'l'}
+    <tr lid="${l.listingId}" style="cursor:pointer;">
+        <td><a href="@{Listings.listing(l.listingId)}" target="_blank">${l.listingId}</a></td>
+        <td title="${l.title}">
+            <a href="${helper.Webs.link(l)}" target="_blank">${l.title.length() <= 100 ? l.title : (l.title.subSequence(0, 100) + "...")}</a>
+        </td>
+        <td>${l.reviews}
+            (<span style="color:${l.rating <= 3 ? 'red;' : 'green'}">${l.rating}</span>)
+        </td>
+    </tr>
+#{/list}
+</table> 

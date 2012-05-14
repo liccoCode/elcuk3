@@ -188,6 +188,7 @@ public class Listing extends GenericModel {
     }
 
     /**
+     * 加载此 Listing 所具有的所有 Selling 的状态的个数
      * NEW, 0
      * SELLING, 1
      * NO_INVENTORY, 2
@@ -221,6 +222,20 @@ public class Listing extends GenericModel {
             }
         }
         return stateQtys;
+    }
+
+    /**
+     * 通过 Account 此 Listing 所属的所有 Selling 中过滤出指定 Account 的; 否则与 this.sellings 一样
+     *
+     * @param a
+     * @return
+     */
+    public List<Selling> sellings(Account a) {
+        if(a != null && a.id != null && a.id > 0) {
+            return Selling.find("listing=? AND account=?", this, a).fetch();
+        } else {
+            return this.sellings;
+        }
     }
 
     /**

@@ -6,12 +6,6 @@
 
 <div class="row-fluid">
     <div class="span3" style="min-height:700px;border-right:1px dashed;margin-right:-1px;background:#F5F5F5;overflow-x:auto;">
-        <select id="account" class="span5" size="1">
-            <option value="0">ALL</option>
-        #{list items:accs, as:'ac'}
-            <option value="${ac.id}">${ac.prettyName()}</option>
-        #{/list}
-        </select>
         <ul id="slider" class="nav nav-list nav-collapse" style="font-size:1em;cursor:pointer;">
             <!-- Category; cursor 继承下去了 -->
         #{list items:cats, as:'cat'}
@@ -54,12 +48,37 @@
     </div>
 
     <div class="span9" style="margin-left:1px;">
-        <div class="span9" style="height:280px;border-right:1px dashed;margin:0 -1px 0 0;" id="listings">Listing</div>
+        <div class="span12" id="listings" style="min-height:350px;max-height:700px;overflow-y:auto;">
+            <div class="span12">
+                <div class="span3">
+                    <select id="market" class="span12" size="1">
+                        <option id="">All Market</option>
+                    #{list items:models.market.Account.M.values(), as:'m'}
+                        <option value="${m}">${m.nickName()}</option>
+                    #{/list}
+                    </select>
+                </div>
+            </div>
 
-        <div class="span3" style="height:280px;border-right:1px dashed;margin-right:-1px;" id="sellings">Selling</div>
+            <div class="span12" id="l_list">
+                listings
+            </div>
+        </div>
 
-        <div class="span12" style="border-top:1px dashed;margin:-1px 0;">
-            Down
+        <div class="span12" id="sellings" style="border-top:1px dashed;margin:-1px 0;min-height:350px;max-height:700px;overflow-y:auto;">
+            <div class="span12">
+                <div class="span3">
+                    <select id="account" class="span12" size="1">
+                        <option value="0">All Account</option>
+                    #{list items:accs, as:'ac'}
+                        <option value="${ac.id}">${ac.prettyName()}</option>
+                    #{/list}
+                    </select>
+                </div>
+            </div>
+            <div class="span12" id="s_list">
+                sellings
+            </div>
         </div>
     </div>
 </div>
