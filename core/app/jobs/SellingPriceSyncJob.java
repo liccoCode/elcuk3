@@ -1,16 +1,19 @@
 package jobs;
 
 import helper.Crawl;
+import helper.Currency;
 import models.market.Listing;
 import models.market.PriceStrategy;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import play.Logger;
 import play.jobs.Job;
 
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
+ * 针对 Selling 身上设置的 priceMatchAsin 中的 ASIN 进行调价跟踪
  * User: wyattpan
  * Date: 5/12/12
  * Time: 3:23 PM
@@ -43,11 +46,35 @@ public class SellingPriceSyncJob extends Job {
             }
 
             //3
+            float before = (sell.salePrice == null || sell.salePrice <= 0) ? sell.price : sell.salePrice;
             if(sell.priceStrategy.type == PriceStrategy.T.LowestPrice) {
-                sell.price = lowestPrice + sell.priceStrategy.differ;
+                switch(sell.market) {
+                    case AMAZON_UK:
+                        sell.salePrice = Currency.GBP.toGBP(lowestPrice) + sell.priceStrategy.differ;
+                        break;
+                    case AMAZON_DE:
+                    case AMAZON_ES:
+                    case AMAZON_IT:
+                    case AMAZON_FR:
+                        sell.salePrice = Currency.GBP.toEUR(lowestPrice) + sell.priceStrategy.differ;
+                        break;
+                    case AMAZON_US:
+                        sell.salePrice = Currency.GBP.toUSD(lowestPrice) + sell.priceStrategy.differ;
+                        break;
+                }
+                if(sell.salePrice < sell.priceStrategy.lowest)
+                    sell.salePrice = sell.priceStrategy.lowest;
+
+                if(sell.startDate == null || sell.endDate == null) {
+                    sell.startDate = DateTime.now().plusMonths(-6).toDate();
+                    sell.endDate = DateTime.now().plusMonths(18).toDate();
+                }
             }
 
+            //4
             sell.deploy();
+            Logger.info("Selling[%s] price from %s to %s, change: %s",
+                    sell.sellingId, before, sell.salePrice, sell.salePrice - before);
         }
     }
 }

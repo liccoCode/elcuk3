@@ -220,23 +220,29 @@ public class Listing {
         return this;
     }
 
+    /**
+     * 都使用 NumberInstance 而不是 CurrencyInstance, 不需要她们的单位符号
+     */
     static final NumberFormat nf_de = NumberFormat.getNumberInstance(Locale.GERMAN);
-    static final NumberFormat nf_uk = NumberFormat.getCurrencyInstance(Locale.UK);
-    static final NumberFormat nf_us = NumberFormat.getCurrencyInstance(Locale.US);
+    static final NumberFormat nf_uk = NumberFormat.getNumberInstance(Locale.UK);
+    static final NumberFormat nf_us = NumberFormat.getNumberInstance(Locale.US);
 
     private Float amazonPrice(String site, String priceStr) {
         try {
 
             if("amazon.co.uk".equals(site.toLowerCase())) {
-                return nf_uk.parse(priceStr).floatValue();
+                return nf_uk.parse(priceStr.substring(1)).floatValue();
             } else if("amazon.com".equals(site.toLowerCase())) {
-                return nf_us.parse(priceStr).floatValue();
-            } else {
+                return nf_us.parse(priceStr.substring(1)).floatValue();
+            } else if("amazon.de".equals(site) || "amazon.fr".equals(site) ||
+                    "amazon.es".equals(site) || "amazon.it".equals(site)) {
                 return nf_de.parse(priceStr.split(" ")[1]).floatValue();
+            } else {
+                return -1f;
             }
         } catch(Exception e) {
             Logger.warn("AmazonPrice parse error. [" + e.getMessage() + "]");
-            return 0f;
+            return -1f;
         }
     }
 

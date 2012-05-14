@@ -270,16 +270,18 @@ public class Listing extends GenericModel {
             switch(tobeChangeed.market) {
                 case AMAZON_UK:
                     off.price = offer.get("price").getAsFloat();
+                    off.shipprice = offer.get("shipprice").getAsFloat();
                     break;
                 case AMAZON_US:
                     off.price = Currency.USD.toGBP(offer.get("price").getAsFloat());
+                    off.shipprice = Currency.USD.toGBP(offer.get("shipprice").getAsFloat());
                     break;
                 case AMAZON_DE:
                 case AMAZON_FR:
                 default:
                     off.price = Currency.EUR.toGBP(offer.get("price").getAsFloat());
+                    off.shipprice = Currency.EUR.toGBP(offer.get("shipprice").getAsFloat());
             }
-            off.shipprice = offer.get("shipprice").getAsFloat();
             off.fba = offer.get("fba").getAsBoolean();
             off.buybox = offer.get("buybox").getAsBoolean();
             off.listing = tobeChangeed;

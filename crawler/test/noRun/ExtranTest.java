@@ -2,6 +2,8 @@ package noRun;
 
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
@@ -28,5 +30,14 @@ public class ExtranTest {
         System.out.println(nf_uk.parse(price_uk));
         System.out.println(nf_eu.parse(price_de.split(" ")[1]));
         System.out.println(nf_us.parse(price_us));
+
+        System.out.println("---");
+        System.out.println(nf_eu.format(7.99));
+    }
+
+    @Test
+    public void interSuffix() {
+        BigDecimal bid = new BigDecimal(32.985).setScale(2, RoundingMode.UP);
+        System.out.println(bid.floatValue());
     }
 }

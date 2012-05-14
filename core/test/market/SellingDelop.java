@@ -48,12 +48,32 @@ public class SellingDelop extends UnitTest {
         sell.deploy();
     }
 
-    @Test
+    //    @Test
     public void testDelop3() {
         // DE 的账户与 DE 的 Selling
         Account.<Account>findById(2l).loginWebSite();
         Selling sell = Selling.findById("72LNA1-C2P_amazon.de");
         sell.deploy();
+    }
+
+    //    @Test
+    public void testParseSelectVal() {
+        String select = "<select name=\"item_width-uom\" onchange=\"setFieldValues('item_length-uom,item_height-uom', this.value);\"><option value=\"\">- Select -</option><option value=\"IN\">Inches</option>\n" +
+                "<option value=\"FT\">Feet</option>\n" +
+                "<option value=\"MM\">Millimeters</option>\n" +
+                "<option value=\"CM\" selected=\"selected\">Centimeters</option>\n" +
+                "<option value=\"DM\">Decimeters</option>\n" +
+                "<option value=\"M\">Meters</option></select>";
+        Element sel = Jsoup.parse(select).select("select").first();
+        System.out.println(sel.attr("name") + ":::" + sel.select("option[selecte]").val());
+    }
+
+    @Test
+    public void testErrorMessage() throws IOException {
+        Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/80-QW1A56-BE_B005JSG7GE_posted_2.html"), "UTF-8");
+        Elements error = doc.select(".messageboxerror li");
+        if(error.size() > 0)
+            System.out.println(error.text());
     }
 
     //    @Test

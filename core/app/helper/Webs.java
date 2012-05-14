@@ -14,6 +14,8 @@ import play.libs.Mail;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.Future;
@@ -52,6 +54,21 @@ public class Webs {
         if(s == null || s < 1 || s > 100) rtVal[1] = 20; // 判断显示的条数控制
         return rtVal;
     }
+
+    /**
+     * 保留小数点后面两位, 并且向上取整
+     *
+     * @param val
+     * @return
+     */
+    public static Float scale2PointUp(Float val) {
+        return scalePointUp(2, val);
+    }
+
+    public static Float scalePointUp(int scala, Float val) {
+        return new BigDecimal(val).setScale(scala, RoundingMode.UP).floatValue();
+    }
+
 
     /**
      * 返回可以访问具体网站的链接
@@ -187,6 +204,21 @@ public class Webs {
             Logger.warn("AmazonPrice parse error.(" + market + ") [" + e.getMessage() + "]");
         }
         return -0.1f;
+    }
+
+    public static String priceLocalNumberFormat(Account.M market, Float price) {
+        switch(market) {
+            case AMAZON_US:
+                return NN_UK.format(price);
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return NN_DE.format(price);
+            default:
+                return NN_UK.format(price);
+        }
     }
 
     /**

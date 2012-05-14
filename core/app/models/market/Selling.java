@@ -1,5 +1,6 @@
 package models.market;
 
+import com.google.gson.annotations.Expose;
 import helper.*;
 import models.procure.PItem;
 import models.product.Product;
@@ -79,6 +80,7 @@ public class Selling extends GenericModel {
     public List<SellingQTY> qtys;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @Expose
     public PriceStrategy priceStrategy;
 
     /**
@@ -86,6 +88,7 @@ public class Selling extends GenericModel {
      * 唯一的 SellingId, [merchantSKU]_[market]
      */
     @Id
+    @Expose
     public String sellingId;
 
 
@@ -95,6 +98,7 @@ public class Selling extends GenericModel {
      */
     @Column(nullable = false)
     @Required
+    @Expose
     public String merchantSKU;
 
     /**
@@ -102,16 +106,20 @@ public class Selling extends GenericModel {
      * 2. 在 ebay 上架的唯一的 itemId;
      */
     @Column(nullable = false)
+    @Expose
     public String asin;
 
     @Enumerated(EnumType.STRING)
+    @Expose
     public Account.M market;
 
     @Enumerated(EnumType.STRING)
     @Required
+    @Expose
     public S state;
 
     @Enumerated(EnumType.STRING)
+    @Expose
     public T type;
 
 
@@ -120,13 +128,16 @@ public class Selling extends GenericModel {
      */
     public Float ps = 0f;
 
+    @Expose
     public Float price = 0f;
 
+    @Expose
     public Float shippingPrice = 0f;
 
     /**
      * 使用 "," 分隔的, 与此 Selling 对应市场的 ASIN, 当有多个 ASIN 的时候,用来追踪最低价格
      */
+    @Expose
     public String priceMatchAsin;
 
     /**
@@ -151,7 +162,7 @@ public class Selling extends GenericModel {
     @Transient
     public Float turnOver = 0f;
 
-    // ----------------------- 上架会需要使用到的信息 ----------------------------
+    // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Lob
     @Required
     public String title;
@@ -163,7 +174,7 @@ public class Selling extends GenericModel {
     public String keyFetures;
     /**
      * Recommended Browse Nodes;
-     * 使用 , 进行分割, 一般为 2 个
+     * 使用 [,] 进行分割, 一般为 2 个
      */
     public String RBN;
     /**
@@ -177,14 +188,18 @@ public class Selling extends GenericModel {
     public String condition_;
     @Required
     public Float standerPrice;
+
+    @Expose
     public Float salePrice;
     /**
      * 促销产品价格的开始日期
      */
+    @Expose
     public Date startDate;
     /**
      * 促销产品价格的结束日期
      */
+    @Expose
     public Date endDate;
 
     /**
@@ -216,6 +231,8 @@ public class Selling extends GenericModel {
 
     // ---- Images ????
 
+    // -------------------------- ebay 上架使用的信息 TBD ---------------------
+
 
     /**
      * 这个 Selling 所属的哪一个用户
@@ -242,6 +259,7 @@ public class Selling extends GenericModel {
      * 更新:
      * 1. price
      * 2. salePrice, startDate, endDate
+     *  --- price, salePrice 会根据 Amazon 检查, 仅保留小数点后两位
      * 3. productDescription
      * 4. searchTerms[1~5]
      * 5. 等待添加
@@ -264,6 +282,7 @@ public class Selling extends GenericModel {
 
                 // 2. 设置需要提交的值
                 Document doc = Jsoup.parse(body);
+                // ----- Input 框框
                 Elements inputs = doc.select("form[name=productForm] input");
                 if(inputs.size() == 0) {
                     Logger.warn("Listing Update Page Error! Log to ....?");
@@ -278,19 +297,15 @@ public class Selling extends GenericModel {
                 for(Element el : inputs) {
                     String name = el.attr("name").toLowerCase().trim();
                     if("our_price".equals(name) && this.price != null && this.price > 0) {
-                        params.add(new BasicNameValuePair(name, this.price.toString()));
+                        params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, Webs.scale2PointUp(this.price))));
                     } else if("discounted_price".equals(name) ||
                             "discounted_price_start_date".equals(name) ||
                             "discounted_price_end_date".equals(name)) {
                         if(this.startDate != null && this.endDate != null && this.salePrice != null && this.salePrice > 0) {
-                            params.add(new BasicNameValuePair("discounted_price", this.salePrice.toString()));
+                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, Webs.scale2PointUp(this.salePrice))));
                             params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.startDate)));
                             params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.endDate)));
                         }
-                    } else if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
-                        if(this.productDesc.length() > 2000)
-                            throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
-                        params.add(new BasicNameValuePair(name, this.productDesc));
                     } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.searchTerms)) {
                         String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.searchTerms, Webs.SPLIT);
                         for(int i = 0; i < searchTermsArr.length; i++) {
@@ -310,17 +325,39 @@ public class Selling extends GenericModel {
                     }
                 }
 
+                // ------------ TextArea 框框
+                Elements textareas = doc.select("form[name=productForm] textarea");
+                for(Element text : textareas) {
+                    String name = text.attr("name");
+                    if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
+                        if(this.productDesc.length() > 2000)
+                            throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+                        params.add(new BasicNameValuePair(name, this.productDesc));
+                    } else {
+                        params.add(new BasicNameValuePair(name, text.val()));
+                    }
+                }
+
+                // ------------ Select 框框
+                Elements selects = doc.select("form[name=productForm] select");
+                for(Element select : selects) {
+                    params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
+                }
+
+
                 // 3. 提交
                 String[] args = StringUtils.split(doc.select("form[name=productForm]").first().attr("action"), ";");
-                ///abis/product/ProcessEditProduct;jsessionid=B8595C92B8A8C968BD2B3A1C6BDD3CAD
-                //https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
                 body = HTTP.post(this.account.cookieStore(),
                         Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
                         params);
+                if(StringUtils.isBlank(body)) // 这个最先检查
+                    throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
                 if(Play.mode.isDev())
                     IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-                if(StringUtils.isBlank(body))
-                    throw new FastRuntimeException("Selling update is failed!");
+                doc = Jsoup.parse(body);
+                Elements error = doc.select(".messageboxerror li");
+                if(error.size() > 0)
+                    throw new FastRuntimeException("Error:" + error.text());
                 break;
             case EBAY_UK:
                 break;
