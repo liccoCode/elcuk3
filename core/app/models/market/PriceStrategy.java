@@ -67,6 +67,11 @@ public class PriceStrategy extends Model {
     public Float max;
 
     /**
+     * 当时用匹配 LowestPrice 策略的时候, 允许进行 differ 的微调.
+     */
+    public Float differ = 0f;
+
+    /**
      * 基础的运费价格
      */
     public Float shippingPrice = 0f;

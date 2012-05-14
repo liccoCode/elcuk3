@@ -3,11 +3,14 @@ package helper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.*;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -22,8 +25,9 @@ import play.Logger;
 import play.Play;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,6 +38,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class HTTP {
     private static DefaultHttpClient client;
+    /**
+     * 默认的 Cookie Store
+     */
+    public static final CookieStore COOKIE_STORE = new BasicCookieStore();
 
     public static void init() {
         synchronized(HTTP.class) {
@@ -41,8 +49,8 @@ public class HTTP {
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
-            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
+            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
+            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
 
             ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
@@ -89,35 +97,83 @@ public class HTTP {
     }
 
     /**
+     * 可以设置不同的 Cookie 池
+     *
+     * @param cookieStore
+     */
+    public static HttpClient cookieStore(CookieStore cookieStore) {
+        if(cookieStore == null) client().setCookieStore(HTTP.COOKIE_STORE);
+        else client().setCookieStore(cookieStore);
+        return client();
+    }
+
+    /**
      * 清理过期的 Cookie
      */
     public static void clearExpiredCookie() {
-        HTTP.client().getCookieStore().clearExpired(new Date());
+        client().getCookieStore().clearExpired(new Date());
     }
 
+    /**
+     * 使用默认 Cookie Store
+     *
+     * @param url
+     * @return
+     */
     public static String get(String url) {
+        return get(null, url);
+    }
+
+    /**
+     * 传入指定的 CookieStore
+     *
+     * @param cookieStore
+     * @param url
+     * @return
+     */
+    public static String get(CookieStore cookieStore, String url) {
         try {
             HTTP.clearExpiredCookie();
-            return EntityUtils.toString(client().execute(new HttpGet(url)).getEntity());
+            return EntityUtils.toString(cookieStore(cookieStore).execute(new HttpGet(url)).getEntity());
         } catch(IOException e) {
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return "";
         }
     }
 
-    public static String post(String url, List<NameValuePair> params) {
+    /**
+     * 使用默认 Cookie Store
+     *
+     * @param url
+     * @param params
+     * @return
+     */
+    public static String post(String url, Collection<NameValuePair> params) {
+        return post(null, url, params);
+    }
+
+
+    /**
+     * 传入指定的 CookieStore
+     *
+     * @param cookieStore
+     * @param url
+     * @param params
+     * @return
+     */
+    public static String post(CookieStore cookieStore, String url, Collection<NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
             HTTP.clearExpiredCookie();
-            post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-            return EntityUtils.toString(client().execute(post).getEntity());
+            post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
+            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
         }
     }
 
-    public static JsonElement postJson(String url, List<NameValuePair> params) {
+    public static JsonElement postJson(String url, Collection<NameValuePair> params) {
         Logger.debug("HTTP.post Json [%s]", url);
         String json = post(url, params);
         try {

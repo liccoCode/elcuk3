@@ -41,8 +41,8 @@ public class HTTP {
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
-            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(8));
+            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
+            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
 
             ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接

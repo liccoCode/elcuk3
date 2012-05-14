@@ -9,12 +9,10 @@ import helper.Webs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,7 +23,10 @@ import play.Play;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -39,6 +40,10 @@ import java.util.*;
 @Entity
 public class Account extends Model {
     public static final Map<String, String> MERCHANT_ID = new HashMap<String, String>();
+    /**
+     * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
+     */
+    private static final Map<String, CookieStore> COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
 
     /**
      * 不同的 Market place
@@ -245,16 +250,48 @@ public class Account extends Model {
             }
         }
 
-        public String orderEmail(String oid, String userid) {
-            //https://sellercentral.amazon.de/gp/help/contact/contact.html?ie=UTF8&orderID=303-0041526-1569931&buyerID=A2ZK5SS6MAQO5X
-            switch(this) {
+        /**
+         * 模拟人工方式修改 Listing 信息的地址
+         *
+         * @return
+         */
+        public static String listingEditPage(Selling sell) {
+            //https://catalog-sc.amazon.co.uk/abis/product/DisplayEditProduct?sku=71APNIP-BSLPU&asin=B007LE3Y88
+            switch(sell.market) {
                 case AMAZON_UK:
                 case AMAZON_DE:
                 case AMAZON_ES:
                 case AMAZON_FR:
                 case AMAZON_IT:
                 case AMAZON_US:
-                    return "https://sellercentral." + this.toString() + "/gp/help/contact/contact.html?ie=UTF8&orderID=" + oid + "&buyerID=" + userid;
+                    String msku = sell.merchantSKU;
+                    if("68-MAGGLASS-3X75BG,B001OQOK5U".equalsIgnoreCase(sell.merchantSKU)) {
+                        msku = "68-MAGGLASS-3x75BG,B001OQOK5U";
+                    } else if("80-qw1a56-be,2".equalsIgnoreCase(sell.merchantSKU)) {
+                        msku = "80-qw1a56-be,2";
+                    } else if("80-qw1a56-be".equalsIgnoreCase(sell.merchantSKU)) {
+                        msku = "80-qw1a56-be";
+                    }
+                    return "https://catalog-sc." + sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/
+                            + "/abis/product/DisplayEditProduct?sku=" + msku + "&asin=" + sell.asin;
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+
+        public static String listingPostPage(Account.M market, String jsessionId) {
+            //https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+            switch(market) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://catalog-sc." + market.toString() + "/abis/product/ProcessEditProduct" +
+                            (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();
@@ -309,8 +346,17 @@ public class Account extends Model {
      */
     public boolean closeable = false;
 
-    @Transient
-    public Set<Cookie> cookies;
+
+    /**
+     * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆, 他们的 Cookie 各不影响
+     *
+     * @return
+     */
+    public CookieStore cookieStore() {
+        if(!COOKIE_STORE_MAP.containsKey(this.uniqueName))
+            COOKIE_STORE_MAP.put(this.uniqueName, new BasicCookieStore());
+        return COOKIE_STORE_MAP.get(this.uniqueName);
+    }
 
     public void setType(M type) {
         this.type = type;
@@ -337,8 +383,7 @@ public class Account extends Model {
                      * 1. Visit the website, fetch the new Cookie.
                      * 2. With the website params and user/password to login.
                      */
-                    HttpGet home = new HttpGet(this.type.homePage());
-                    body = EntityUtils.toString(HTTP.client().execute(home).getEntity());
+                    body = HTTP.get(this.cookieStore(), this.type.homePage());
 
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".homepage.html"), body);
@@ -351,7 +396,6 @@ public class Account extends Model {
                         return;
                     }
 
-                    HttpPost login = new HttpPost(this.type.loginPage());
                     List<NameValuePair> params = new ArrayList<NameValuePair>();
                     for(Element el : inputs) {
                         String att = el.attr("name");
@@ -359,8 +403,7 @@ public class Account extends Model {
                         else if("password".equals(att)) params.add(new BasicNameValuePair(att, this.password));
                         else params.add(new BasicNameValuePair(att, el.val()));
                     }
-                    login.setEntity(new UrlEncodedFormEntity(params));
-                    body = EntityUtils.toString(HTTP.client().execute(login).getEntity());
+                    body = HTTP.post(this.cookieStore(), this.type.loginPage(), params);
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body);
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
@@ -389,7 +432,7 @@ public class Account extends Model {
      */
     public void changeRegion(M m) {
         try {
-            String body = HTTP.get(this.type.homePage());
+            String body = HTTP.get(this.cookieStore(), this.type.homePage());
             Document doc = Jsoup.parse(body);
             Element countries = doc.select("#merchant-website").first();
             if(countries == null) throw new NotLoginFastException();
@@ -421,7 +464,7 @@ public class Account extends Model {
                 Logger.warn("Value parse Error!");
                 return;
             }
-            HTTP.get(this.type.changeRegion(value));
+            HTTP.get(this.cookieStore(), this.type.changeRegion(value));
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -439,7 +482,7 @@ public class Account extends Model {
             case AMAZON_UK:
             case AMAZON_DE:
                 try {
-                    String body = HTTP.get(this.type.feedbackPage(page));
+                    String body = HTTP.get(this.cookieStore(), this.type.feedbackPage(page));
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + "feedback_p" + page + ".html"), body);
                     List<Feedback> feedbacks = Feedback.parseFeedBackFromHTML(body);
@@ -491,7 +534,7 @@ public class Account extends Model {
             this.loginWebSite();
             this.changeRegion(market);
             Logger.info("Downloading [%s] File...", this.username);
-            String body = HTTP.get(this.type.flatFinance());
+            String body = HTTP.get(this.cookieStore(), this.type.flatFinance());
             DateTime dt = DateTime.now();
             File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
                     Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
@@ -532,11 +575,8 @@ public class Account extends Model {
             List<Account> accs = Account.all().fetch();
             for(Account ac : accs) {
                 MERCHANT_ID.put(ac.merchantId, ac.uniqueName);
-
-                if(Play.mode.isProd()) {
-                    Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
-                    ac.loginWebSite();
-                }
+                Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
+                ac.loginWebSite();
             }
         }
     }

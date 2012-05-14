@@ -29,13 +29,19 @@ public class OrderInfoFetchJob extends Job {
         List<Orderr> orders = Orderr.find("state=? AND (userid is null OR userid='') order by createDate", Orderr.S.SHIPPED).fetch(size);
         for(Orderr ord : orders) {
             try {
+                if(ord.crawlUpdateTimes > 4) {
+                    Logger.warn("Order|%s| crawl more then 4 times.", ord.orderId);
+                    continue;
+                }
                 String url = ord.account.type.orderDetail(ord.orderId);
                 Logger.info("OrderInfo(UserId) [%s].", url);
                 String html = HTTP.get(url);
                 Document doc = Jsoup.parse(html);
                 ord.orderDetailUserIdAndEmail(doc).save();
             } catch(Exception e) {
-                Logger.warn("Parse Order Info Error! [%s]", Webs.E(e));
+                ord.crawlUpdateTimes++;
+                ord.save();
+                Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
             }
         }
     }

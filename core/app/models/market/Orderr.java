@@ -1,6 +1,7 @@
 package models.market;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
+import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.Dates;
 import helper.Patterns;
@@ -107,6 +108,7 @@ public class Orderr extends GenericModel {
      * 订单的编码
      */
     @Id
+    @Expose
     public String orderId;
 
     /**
@@ -220,7 +222,13 @@ public class Orderr extends GenericModel {
     /**
      * 订单备用信息
      */
+    @Lob
     public String memo;
+
+    /**
+     * 用来记录此订单使用抓取更新的次数
+     */
+    public Integer crawlUpdateTimes = 0;
 
     // -------------------------
 
@@ -809,8 +817,14 @@ public class Orderr extends GenericModel {
      * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充
      */
     public Orderr orderDetailUserIdAndEmail(Document doc) {
+        this.crawlUpdateTimes++;
         Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
-        if(lin == null) return this;
+        if(lin == null) {
+            // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
+            lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
+            this.state = S.CANCEL;
+            this.memo = lin.text();
+        }
         String url = lin.parent().select("a").attr("href");
         String[] args = StringUtils.split(url, "&");
         for(String pa : args) {
@@ -828,6 +842,7 @@ public class Orderr extends GenericModel {
                     String sub = html.substring(head + 14, end).trim(); // + 14 为排除 buyerEmail: 家冒号的长度
                     this.email = sub.substring(0, sub.length() - 2); // 尾部 -2 为排除最后面的冒号与逗号的长度
                 }
+
 
             } catch(Exception e) {
                 Logger.warn("Orderr.orderDetailUserIdAndEmail error, url[%s], E[%s]", url, Webs.E(e));

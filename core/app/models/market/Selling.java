@@ -1,20 +1,27 @@
 package models.market;
 
-import exception.VErrorRuntimeException;
-import helper.Caches;
-import helper.PH;
-import helper.Webs;
+import com.google.gson.annotations.Expose;
+import helper.*;
 import models.procure.PItem;
 import models.product.Product;
 import models.product.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.IO;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -73,6 +80,7 @@ public class Selling extends GenericModel {
     public List<SellingQTY> qtys;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @Expose
     public PriceStrategy priceStrategy;
 
     /**
@@ -80,6 +88,7 @@ public class Selling extends GenericModel {
      * 唯一的 SellingId, [merchantSKU]_[market]
      */
     @Id
+    @Expose
     public String sellingId;
 
 
@@ -89,6 +98,7 @@ public class Selling extends GenericModel {
      */
     @Column(nullable = false)
     @Required
+    @Expose
     public String merchantSKU;
 
     /**
@@ -96,16 +106,20 @@ public class Selling extends GenericModel {
      * 2. 在 ebay 上架的唯一的 itemId;
      */
     @Column(nullable = false)
+    @Expose
     public String asin;
 
     @Enumerated(EnumType.STRING)
+    @Expose
     public Account.M market;
 
     @Enumerated(EnumType.STRING)
     @Required
+    @Expose
     public S state;
 
     @Enumerated(EnumType.STRING)
+    @Expose
     public T type;
 
 
@@ -114,9 +128,17 @@ public class Selling extends GenericModel {
      */
     public Float ps = 0f;
 
+    @Expose
     public Float price = 0f;
 
+    @Expose
     public Float shippingPrice = 0f;
+
+    /**
+     * 使用 "," 分隔的, 与此 Selling 对应市场的 ASIN, 当有多个 ASIN 的时候,用来追踪最低价格
+     */
+    @Expose
+    public String priceMatchAsin;
 
     /**
      * 动态计算使用的 N 天销量
@@ -140,7 +162,7 @@ public class Selling extends GenericModel {
     @Transient
     public Float turnOver = 0f;
 
-    // ----------------------- 上架会需要使用到的信息 ----------------------------
+    // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Lob
     @Required
     public String title;
@@ -152,7 +174,7 @@ public class Selling extends GenericModel {
     public String keyFetures;
     /**
      * Recommended Browse Nodes;
-     * 使用 , 进行分割, 一般为 2 个
+     * 使用 [,] 进行分割, 一般为 2 个
      */
     public String RBN;
     /**
@@ -166,14 +188,18 @@ public class Selling extends GenericModel {
     public String condition_;
     @Required
     public Float standerPrice;
+
+    @Expose
     public Float salePrice;
     /**
      * 促销产品价格的开始日期
      */
+    @Expose
     public Date startDate;
     /**
      * 促销产品价格的结束日期
      */
+    @Expose
     public Date endDate;
 
     /**
@@ -205,6 +231,8 @@ public class Selling extends GenericModel {
 
     // ---- Images ????
 
+    // -------------------------- ebay 上架使用的信息 TBD ---------------------
+
 
     /**
      * 这个 Selling 所属的哪一个用户
@@ -225,31 +253,117 @@ public class Selling extends GenericModel {
     }
 
     /**
-     * 将传入的 Selling 的数据更新到 渠道上并且更新数据库
+     * <pre>
+     * 将传入的 Selling 的数据更新到 渠道上并且更新数据库;
+     * PS: 请确保 Selling 中的信息是正确的, 这个方法仅仅根据对应的参数做提交操作, 不再验证数据!
+     * 更新:
+     * 1. price
+     * 2. salePrice, startDate, endDate
+     *  --- price, salePrice 会根据 Amazon 检查, 仅保留小数点后两位
+     * 3. productDescription
+     *  --- 检查字符串最多 2000 个
+     * 4. searchTerms[1~5]
+     *  --- 检查每一行最多 50 个
+     * 5. 等待添加
+     * </pre>
      */
-    public void deploy(String merchantSKU) {
-        /**
-         * 1. 根据 selling 找到数据库中存在的
-         * 2. 更新可以更新的字段;
-         * 3. 在网络上进行更新;
-         * 4. 网络更新成功后, 在本地数据库更新
-         */
-        Selling oldOne = Selling.find("merchantSKU=?", merchantSKU).first();
-        if(oldOne == null) throw new VErrorRuntimeException("Selling.merchantSKU", "MerchantSKU Selling is not valid!");
-        sellingParamsCopy(oldOne);
-        //TODO Images....
+    public void deploy() {
+        switch(this.market) {
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_UK:
+            case AMAZON_US:
+                // 1. 切换 Selling 所在区域
+                this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+                String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+                if(Play.mode.isDev())
+                    IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
 
-        //TODO 更新网络
 
-        //if net update success
-        oldOne.save();
-    }
+                // 2. 设置需要提交的值
+                Document doc = Jsoup.parse(body);
+                // ----- Input 框框
+                Elements inputs = doc.select("form[name=productForm] input");
+                if(inputs.size() == 0) {
+                    Logger.warn("Listing Update Page Error! Log to ....?");
+                    try {
+                        FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.E_ERROR, this.merchantSKU, this.asin)), body);
+                    } catch(IOException e) {
+                        //ignore..
+                    }
+                    throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+                }
+                Set<NameValuePair> params = new HashSet<NameValuePair>();
+                for(Element el : inputs) {
+                    String name = el.attr("name").toLowerCase().trim();
+                    if("our_price".equals(name) && this.price != null && this.price > 0) {
+                        params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, Webs.scale2PointUp(this.price))));
+                    } else if("discounted_price".equals(name) ||
+                            "discounted_price_start_date".equals(name) ||
+                            "discounted_price_end_date".equals(name)) {
+                        if(this.startDate != null && this.endDate != null && this.salePrice != null && this.salePrice > 0) {
+                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, Webs.scale2PointUp(this.salePrice))));
+                            params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.startDate)));
+                            params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.endDate)));
+                        }
+                    } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.searchTerms)) {
+                        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.searchTerms, Webs.SPLIT);
+                        for(int i = 0; i < searchTermsArr.length; i++) {
+                            if(searchTermsArr[i].length() > 50)
+                                throw new FastRuntimeException("SearchTerm length must blew then 50.");
+                            params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
+                        }
+                        // length = 3, 0~2, need 3,4
+                        int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
+                        if(missingIndex > 0) {
+                            for(int i = 1; i <= missingIndex; i++) {
+                                params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
+                            }
+                        }
+                    } else {
+                        params.add(new BasicNameValuePair(name, el.val()));
+                    }
+                }
 
-    public void localUpdate(String merchantSKU) {
-        Selling oldOne = Selling.find("merchantSKU=?", merchantSKU).first();
-        if(oldOne == null) throw new VErrorRuntimeException("Selling.merchantSKU", "MerchantSKU Selling is not valid!");
-        sellingParamsCopy(oldOne);
-        oldOne.save();
+                // ------------ TextArea 框框
+                Elements textareas = doc.select("form[name=productForm] textarea");
+                for(Element text : textareas) {
+                    String name = text.attr("name");
+                    if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
+                        if(this.productDesc.length() > 2000)
+                            throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+                        params.add(new BasicNameValuePair(name, this.productDesc));
+                    } else {
+                        params.add(new BasicNameValuePair(name, text.val()));
+                    }
+                }
+
+                // ------------ Select 框框
+                Elements selects = doc.select("form[name=productForm] select");
+                for(Element select : selects) {
+                    params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
+                }
+
+
+                // 3. 提交
+                String[] args = StringUtils.split(doc.select("form[name=productForm]").first().attr("action"), ";");
+                body = HTTP.post(this.account.cookieStore(),
+                        Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
+                        params);
+                if(StringUtils.isBlank(body)) // 这个最先检查
+                    throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+                if(Play.mode.isDev())
+                    IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+                doc = Jsoup.parse(body);
+                Elements error = doc.select(".messageboxerror li");
+                if(error.size() > 0)
+                    throw new FastRuntimeException("Error:" + error.text());
+                break;
+            case EBAY_UK:
+                break;
+        }
     }
 
     /**
@@ -265,27 +379,31 @@ public class Selling extends GenericModel {
     /**
      * 将当前对象的值复制到老的 Selling 对象中去
      *
-     * @param oldOne
+     * @param newSelling
+     * @return 返回更新后的
      */
-    private void sellingParamsCopy(Selling oldOne) {
-        oldOne.title = StringUtils.isNotBlank(this.title) ? this.title : oldOne.title;
-        oldOne.modelNumber = StringUtils.isNotBlank(this.modelNumber) ? this.modelNumber : oldOne.modelNumber;
-        oldOne.manufacturer = StringUtils.isNotBlank(this.manufacturer) ? this.manufacturer : oldOne.manufacturer;
-        oldOne.keyFetures = StringUtils.isNotBlank(this.keyFetures) ? this.keyFetures : oldOne.keyFetures;
-        oldOne.RBN = StringUtils.isNotBlank(this.RBN) ? this.RBN : oldOne.RBN;
-        oldOne.manufacturerPartNumber = StringUtils.isNotBlank(this.manufacturerPartNumber) ? this.manufacturerPartNumber : oldOne.manufacturerPartNumber;
-        oldOne.condition_ = StringUtils.isNotBlank(condition_) ? this.condition_ : oldOne.condition_;
-        oldOne.standerPrice = (this.standerPrice != null && this.standerPrice > 0) ? this.standerPrice : oldOne.standerPrice;
-        oldOne.salePrice = (this.salePrice != null && this.salePrice > 0) ? this.salePrice : oldOne.salePrice;
-        oldOne.startDate = (this.startDate != null) ? this.startDate : oldOne.startDate;
-        oldOne.endDate = (this.endDate != null) ? this.endDate : oldOne.endDate;
-        oldOne.legalDisclaimerDesc = StringUtils.isNotBlank(this.legalDisclaimerDesc) ? this.legalDisclaimerDesc : oldOne.legalDisclaimerDesc;
-//        oldOne.launchDate = (this.launchDate != null) ? this.launchDate : oldOne.launchDate; // launchDate 可以不用修改的
-        oldOne.sellerWarrantyDesc = StringUtils.isNotBlank(this.sellerWarrantyDesc) ? this.sellerWarrantyDesc : oldOne.sellerWarrantyDesc;
+    public Selling updateAttr(Selling newSelling) {
+        if(StringUtils.isNotBlank(newSelling.title)) this.title = newSelling.title;
+        if(StringUtils.isNotBlank(newSelling.modelNumber)) this.modelNumber = newSelling.modelNumber;
+        if(StringUtils.isNotBlank(newSelling.manufacturer)) this.manufacturer = newSelling.manufacturer;
+        if(StringUtils.isNotBlank(newSelling.keyFetures)) this.keyFetures = newSelling.keyFetures;
+        if(StringUtils.isNotBlank(this.RBN)) this.RBN = newSelling.RBN;
+        if(StringUtils.isNotBlank(this.manufacturerPartNumber))
+            this.manufacturerPartNumber = newSelling.manufacturerPartNumber;
+        if(StringUtils.isNotBlank(condition_)) this.condition_ = newSelling.condition_;
+        if(newSelling.standerPrice != null && newSelling.standerPrice > 0) this.standerPrice = newSelling.standerPrice;
+        if(newSelling.salePrice != null && newSelling.salePrice > 0) this.salePrice = newSelling.salePrice;
+        if(newSelling.startDate != null) this.startDate = newSelling.startDate;
+        if(newSelling.endDate != null) this.endDate = newSelling.endDate;
+        if(StringUtils.isNotBlank(newSelling.legalDisclaimerDesc))
+            this.legalDisclaimerDesc = newSelling.legalDisclaimerDesc;
+        if(StringUtils.isNotBlank(this.sellerWarrantyDesc)) this.sellerWarrantyDesc = newSelling.sellerWarrantyDesc;
 
-        oldOne.productDesc = StringUtils.isNotBlank(this.productDesc) ? this.productDesc : oldOne.productDesc;
-        oldOne.searchTerms = StringUtils.isNotBlank(this.searchTerms) ? this.searchTerms : oldOne.searchTerms;
-        oldOne.platinumKeywords = StringUtils.isNotBlank(this.platinumKeywords) ? this.platinumKeywords : oldOne.platinumKeywords;
+        if(StringUtils.isNotBlank(this.productDesc)) this.productDesc = newSelling.productDesc;
+        if(StringUtils.isNotBlank(this.searchTerms)) this.searchTerms = newSelling.searchTerms;
+        if(StringUtils.isNotBlank(this.platinumKeywords)) this.platinumKeywords = newSelling.platinumKeywords;
+
+        return this.save();
     }
 
     public static boolean exist(String merchantSKU) {

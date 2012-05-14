@@ -241,6 +241,20 @@ public class Listing extends GenericModel {
     }
 
     /**
+     * 从 ListingOffer 中价格最低的价格
+     *
+     * @return 如果没有 ListingOffer 则返回 -1
+     */
+    public Float lowestPrice() {
+        float lowest = Float.MAX_VALUE;
+        if(this.offers == null || this.offers.size() == 0) return -1f;
+        for(ListingOffer offer : this.offers) {
+            if(offer.price < lowest) lowest = offer.price;
+        }
+        return lowest;
+    }
+
+    /**
      * 根据从 Crawler 抓取回来的 ListingJSON数据转换成系统内使用的 Listing + LisitngOffer 对象,
      * 并更新返回已经存在的 Listing 的持久对象或者返回未保存的 Listing 瞬时对象
      *
@@ -291,16 +305,18 @@ public class Listing extends GenericModel {
             switch(tobeChangeed.market) {
                 case AMAZON_UK:
                     off.price = offer.get("price").getAsFloat();
+                    off.shipprice = offer.get("shipprice").getAsFloat();
                     break;
                 case AMAZON_US:
                     off.price = Currency.USD.toGBP(offer.get("price").getAsFloat());
+                    off.shipprice = Currency.USD.toGBP(offer.get("shipprice").getAsFloat());
                     break;
                 case AMAZON_DE:
                 case AMAZON_FR:
                 default:
                     off.price = Currency.EUR.toGBP(offer.get("price").getAsFloat());
+                    off.shipprice = Currency.EUR.toGBP(offer.get("shipprice").getAsFloat());
             }
-            off.shipprice = offer.get("shipprice").getAsFloat();
             off.fba = offer.get("fba").getAsBoolean();
             off.buybox = offer.get("buybox").getAsBoolean();
             off.listing = tobeChangeed;
