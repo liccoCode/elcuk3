@@ -39,7 +39,18 @@ import java.util.*;
  */
 @Entity
 public class Account extends Model {
-    public static final Map<String, String> MERCHANT_ID = new HashMap<String, String>();
+    private static Map<String, String> MERCHANT_ID;
+
+    /**
+     * 当使用 MERCHANT_ID 为 final 的时候, 在 OnStartUP 中的 loadModules 初始化报错...
+     *
+     * @return
+     */
+    public static Map<String, String> merchant_id() {
+        if(MERCHANT_ID == null) MERCHANT_ID = new HashMap<String, String>();
+        return MERCHANT_ID;
+    }
+
     /**
      * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
      */
@@ -571,7 +582,7 @@ public class Account extends Model {
      * 2. 登陆 Account 账户
      */
     public static void init() {
-        synchronized(MERCHANT_ID) {
+        synchronized(Account.class) {
             List<Account> accs = Account.all().fetch();
             for(Account ac : accs) {
                 MERCHANT_ID.put(ac.merchantId, ac.uniqueName);

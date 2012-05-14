@@ -351,13 +351,13 @@ public class Listing extends GenericModel {
 
         for(ListingOffer off : this.offers) {
             // -------- 1
-            if(Account.MERCHANT_ID.containsKey(off.offerId)) selfSale++;
+            if(Account.merchant_id().containsKey(off.offerId)) selfSale++;
 
             // ------- 1
             if(Listing.isSelfBuildListing(this.title)) {
                 if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
                     Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
-                } else if(!Account.MERCHANT_ID.containsKey(off.offerId)) {
+                } else if(!Account.merchant_id().containsKey(off.offerId)) {
                     // Mail 警告
                     if(this.warnningTimes == null) this.warnningTimes = 0;
                     this.warnningTimes++; // 查询也记录一次
