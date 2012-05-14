@@ -261,7 +261,9 @@ public class Selling extends GenericModel {
      * 2. salePrice, startDate, endDate
      *  --- price, salePrice 会根据 Amazon 检查, 仅保留小数点后两位
      * 3. productDescription
+     *  --- 检查字符串最多 2000 个
      * 4. searchTerms[1~5]
+     *  --- 检查每一行最多 50 个
      * 5. 等待添加
      * </pre>
      */
