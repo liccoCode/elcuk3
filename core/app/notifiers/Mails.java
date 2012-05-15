@@ -122,14 +122,14 @@ public class Mails extends Mailer {
 
 
     /**
-     * 系统内部使用的, 拥有 <= 3 分的 Review 的警告邮件;
-     * 如果这个 AmazonListingReview 发送邮件的次数大于 3 次, 则不再进行发送.
+     * 系统内部使用的, 拥有 <= 4 分的 Review 的警告邮件;
+     * 如果这个 AmazonListingReview 发送邮件的次数大于 1 次, 则不再进行发送.
      *
      * @param r
      */
     public static void listingReviewWarn(AmazonListingReview r) {
         //{WARN}[Review] R: 3.0 A: B004KHXU5Q M:amazon.co.uk
-        if(r.mailedTimes != null && r.mailedTimes > 3) return;
+        if(r.mailedTimes != null && r.mailedTimes >= 1) return;
         List<Orderr> ords = r.relateOrder();
         StringBuilder sbr = new StringBuilder();
         for(Orderr ord : ords) sbr.append(ord.orderId).append(",");
