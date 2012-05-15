@@ -74,7 +74,7 @@ public class SellingPriceSyncJob extends Job {
                 }
 
                 // 最后对价格进行 1. 向上取整, 精确到 2 位. 2. 0.49/0.99 上下调整
-                sell.salePrice = Currency.upDown(Webs.scale2PointUp(sell.salePrice));
+                sell.salePrice = Webs.scale2PointUp(Currency.upDown(sell.salePrice));
             }
 
             //4

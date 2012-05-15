@@ -106,19 +106,16 @@ public class CurrencyTest {
 
     @Test
     public void testPriceUpDown() {
-        Float p1 = 32.99f;
-        Float p2 = 31.75f;
-        Float p3 = 31.23f;
-        Float p4 = 31.50f;
-        Float p5 = 31.48f;
-
-        Float p6 = 32.1f;
-
+        Float p1 = 33.9963f;
         System.out.println(Currency.upDown(p1));
-        System.out.println(Currency.upDown(p2));
-        System.out.println(Currency.upDown(p3));
-        System.out.println(Currency.upDown(p4));
-        System.out.println(Currency.upDown(p5));
-        System.out.println(Currency.upDown(p6));
+
+
+        Float p6 = 50.996f;
+
+        System.out.println(Webs.scale2PointUp(p1));
+        System.out.println(Webs.scale2PointUp(33.000f));
+
+        System.out.println(Currency.upDown(Webs.scale2PointUp(p6)));
+        System.out.println(Webs.scale2PointUp(Currency.upDown(p6)));
     }
 }
