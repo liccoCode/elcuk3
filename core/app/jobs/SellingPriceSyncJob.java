@@ -80,7 +80,7 @@ public class SellingPriceSyncJob extends Job {
             }
 
             //4
-            sell.deploy();
+//            sell.deploy();
             Logger.info("Selling[%s] price from %s to %s, change: %s",
                     sell.sellingId, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before));
         }

@@ -85,4 +85,9 @@ public class PriceStrategy extends Model {
         //TODO 根据 PriceStrategy 所拥有的信息进行价格的计算; 这里的算法可以很复杂 @_@
         return new Float[]{10f, 0f};
     }
+
+    public Float getDiffer() {
+        if(this.differ == null) this.differ = 0f;
+        return this.differ;
+    }
 }
