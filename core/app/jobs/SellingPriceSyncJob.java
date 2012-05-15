@@ -2,6 +2,7 @@ package jobs;
 
 import helper.Crawl;
 import helper.Currency;
+import helper.Webs;
 import models.market.Listing;
 import models.market.PriceStrategy;
 import models.market.Selling;
@@ -71,12 +72,15 @@ public class SellingPriceSyncJob extends Job {
                     sell.startDate = DateTime.now().plusMonths(-6).toDate();
                     sell.endDate = DateTime.now().plusMonths(18).toDate();
                 }
+
+                // 最后对价格进行 1. 向上取整, 精确到 2 位. 2. 0.49/0.99 上下调整
+                sell.salePrice = Currency.upDown(Webs.scale2PointUp(sell.salePrice));
             }
 
             //4
             sell.deploy();
             Logger.info("Selling[%s] price from %s to %s, change: %s",
-                    sell.sellingId, before, sell.salePrice, sell.salePrice - before);
+                    sell.sellingId, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before));
         }
     }
 }

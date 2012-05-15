@@ -299,12 +299,12 @@ public class Selling extends GenericModel {
                 for(Element el : inputs) {
                     String name = el.attr("name").toLowerCase().trim();
                     if("our_price".equals(name) && this.price != null && this.price > 0) {
-                        params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, Webs.scale2PointUp(this.price))));
+                        params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.price)));
                     } else if("discounted_price".equals(name) ||
                             "discounted_price_start_date".equals(name) ||
                             "discounted_price_end_date".equals(name)) {
                         if(this.startDate != null && this.endDate != null && this.salePrice != null && this.salePrice > 0) {
-                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, Webs.scale2PointUp(this.salePrice))));
+                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.salePrice)));
                             params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.startDate)));
                             params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.endDate)));
                         }
