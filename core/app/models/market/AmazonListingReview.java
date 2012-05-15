@@ -139,7 +139,7 @@ public class AmazonListingReview extends GenericModel {
     public void listingReviewCheck() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0) return;// 判断这个 Listing 是我们自己有上架的
-        if(this.rating != null && this.rating > 3) return;
+        if(this.rating != null && this.rating > 4) return;
         Mails.listingReviewWarn(this);
     }
 

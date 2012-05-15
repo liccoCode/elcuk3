@@ -1,6 +1,7 @@
 package noRun;
 
 import helper.PH;
+import helper.Webs;
 import models.market.Selling;
 import models.procure.PItem;
 import models.product.Product;
@@ -32,5 +33,10 @@ public class JSONParseTest {
     @Test
     public void testUnMarsh() {
         System.out.println(PH.unMarsh("90-d9jdj-dfj_93498_amazon.co.uk"));
+    }
+
+    @Test
+    public void testNumber() {
+        System.out.println(Webs.scale2PointUp(33.990017f));
     }
 }

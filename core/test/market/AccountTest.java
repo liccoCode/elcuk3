@@ -1,6 +1,7 @@
 package market;
 
 import models.market.Account;
+import org.junit.Test;
 import play.mvc.Http;
 import play.test.Fixtures;
 import play.test.FunctionalTest;
@@ -42,4 +43,8 @@ public class AccountTest extends FunctionalTest {
         System.out.println(POST("/market/accounts/u", params).out.toString());
     }
 
+    @Test
+    public void readAccount() {
+        Account acc = Account.findById(1l);
+    }
 }

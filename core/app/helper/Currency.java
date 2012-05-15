@@ -4,6 +4,9 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * 不同货币单位的枚举类
  * User: Wyatt
@@ -202,6 +205,20 @@ public enum Currency {
             Logger.warn(Webs.E(e));
         }
         return -1f;
+    }
+
+    /**
+     * 将数字的小数点上下调整到 0.49 与 0.99, 以 0.5 为界限
+     *
+     * @param price
+     * @return
+     */
+    public static Float upDown(Float price) {
+        int intPart = new BigDecimal(price).setScale(2, RoundingMode.DOWN).intValue();
+        float floatPart = price - intPart;
+        if(floatPart >= 0.5) floatPart = 0.99f;
+        else floatPart = 0.49f;
+        return intPart + floatPart;
     }
 }
 

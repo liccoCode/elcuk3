@@ -1,5 +1,6 @@
 package noRun;
 
+import helper.Currency;
 import helper.Webs;
 import models.market.Account;
 import org.apache.commons.lang.StringUtils;
@@ -101,5 +102,20 @@ public class CurrencyTest {
         System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr2.substring(3).trim()));
         System.out.println("------------------------");
         System.out.println(Webs.amazonPriceCurrency(Account.M.AMAZON_UK, priceStr2));
+    }
+
+    @Test
+    public void testPriceUpDown() {
+        Float p1 = 33.9963f;
+        System.out.println(Currency.upDown(p1));
+
+
+        Float p6 = 50.996f;
+
+        System.out.println(Webs.scale2PointUp(p1));
+        System.out.println(Webs.scale2PointUp(33.000f));
+
+        System.out.println(Currency.upDown(Webs.scale2PointUp(p6)));
+        System.out.println(Webs.scale2PointUp(Currency.upDown(p6)));
     }
 }

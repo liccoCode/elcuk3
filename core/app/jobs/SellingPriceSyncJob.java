@@ -2,6 +2,7 @@ package jobs;
 
 import helper.Crawl;
 import helper.Currency;
+import helper.Webs;
 import models.market.Listing;
 import models.market.PriceStrategy;
 import models.market.Selling;
@@ -41,7 +42,9 @@ public class SellingPriceSyncJob extends Job {
                 Listing listing = Listing.findById(String.format("%s_%s", asin, sell.market.toString()));
                 if(listing == null)
                     listing = Listing.parseAndUpdateListingFromCrawl(Crawl.crawlListing(sell.market.name(), asin)).save();
+                //TODO 考虑抓取回来的竞争对手没有价格的话如何处理?
                 float listingLowPrice = listing.lowestPrice();
+                if(listingLowPrice <= 0) continue;
                 if(listingLowPrice < lowestPrice) lowestPrice = listingLowPrice;
             }
 
@@ -69,12 +72,17 @@ public class SellingPriceSyncJob extends Job {
                     sell.startDate = DateTime.now().plusMonths(-6).toDate();
                     sell.endDate = DateTime.now().plusMonths(18).toDate();
                 }
+
+                // 最后对价格进行 1. 向上取整, 精确到 2 位. 2. 0.49/0.99 上下调整
+                float beforeUpDown = sell.salePrice;
+                sell.salePrice = Webs.scale2PointUp(Currency.upDown(sell.salePrice));
+                Logger.info("Through Updown: %s to %s", beforeUpDown, sell.salePrice);
             }
 
             //4
-            sell.deploy();
+//            sell.deploy();
             Logger.info("Selling[%s] price from %s to %s, change: %s",
-                    sell.sellingId, before, sell.salePrice, sell.salePrice - before);
+                    sell.sellingId, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before));
         }
     }
 }
