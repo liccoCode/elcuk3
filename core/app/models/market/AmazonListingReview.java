@@ -2,6 +2,9 @@ package models.market;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
+import helper.Dates;
+import helper.Webs;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -32,70 +35,90 @@ public class AmazonListingReview extends GenericModel {
      * [listingId]_[username]_[title] 的 md5Hex 值
      */
     @Id
+    @Expose
     public String alrId;
 
     /**
      * 一个冗余字段
      */
+    @Expose
     public String listingId;
 
 
     /**
      * Review 的得分
      */
+    @Expose
     public Float rating;
 
+    @Expose
     public String title;
 
     /**
      * 具体的 Review 的内容
      */
     @Lob
+    @Expose
     public String review;
 
 
     /**
      * 点击了 Helpful 按钮的 YES
      */
+    @Expose
     public Integer helpUp;
 
 
     /**
      * 所有点击了 HelpFul Click 的统计
      */
+    @Expose
     public Integer helpClick;
 
     /**
      * 用户名字
      */
+    @Expose
     public String username;
 
     /**
      * 关联的用户 Id
      */
+    @Expose
     public String userid;
 
+    @Expose
     public Date reviewDate;
+
+    /**
+     * Review 创建的时间
+     */
+    @Expose
+    public Date createDate;
 
     /**
      * Amazon 会判断这个 Review 是不是为购买了这个商品的客户发出.
      */
+    @Expose
     public Boolean purchased;
 
     /**
      * 标记为是否解决了这个 Review; 当然只有当 Review <= 3 的时候才需要进行处理!
      */
+    @Expose
     public Boolean resolved = false;
 
     /**
      * 上次一的 LastRating;
      * 更新这个字段的时机为当当前的 rating 与 lastRating 的数据不一样的时候才进行更新, 并且还会记录到 Comment 中去
      */
+    @Expose
     public Float lastRating;
 
     /**
      * 记录发送的邮件的次数. 大于 3 次则不再提醒.
      */
+    @Expose
     public Integer mailedTimes = 0;
 
     /**
@@ -104,15 +127,26 @@ public class AmazonListingReview extends GenericModel {
     @Lob
     public String comment = "";
 
+    /**
+     * 主要是为了记录 createDate 日期
+     *
+     * @return
+     */
+    public AmazonListingReview createReview() {
+        this.createDate = this.reviewDate;
+        return this.save();
+    }
+
     public AmazonListingReview updateAttr(AmazonListingReview newReview) {
         if(StringUtils.isBlank(newReview.alrId))
             throw new FastRuntimeException("AmazonListingReview.alrId can not be blank!");
         if(!this.equals(newReview))
             throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
 
+        this.listingId = newReview.listingId;
 //        if(StringUtils.isNotBlank(newReview.listingId)) this.listingId = newReview.listingId; //这个不修改
         if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
-            this.comment += String.format("\r\nRating from %s to %s on %s", this.rating, newReview.rating, DateTime.now().toString("yyyy-MM-dd HH:mm:ss"));
+            this.comment += String.format("\r\n%s:%s", Dates.date2Date(null), Webs.exposeGson(this));
             this.lastRating = newReview.rating;
         }
         if(newReview.rating != null) this.rating = newReview.rating;
@@ -139,7 +173,9 @@ public class AmazonListingReview extends GenericModel {
     public void listingReviewCheck() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0) return;// 判断这个 Listing 是我们自己有上架的
-        if(this.rating != null && this.rating > 4) return;
+        if((this.rating != null && this.rating > 4) || // Rating > 4 的不处理
+                this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) // 超过 70 天的不处理
+            return;
         Mails.listingReviewWarn(this);
     }
 
@@ -174,9 +210,8 @@ public class AmazonListingReview extends GenericModel {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("AmazonListingReview");
-        sb.append("{comment='").append(comment).append('\'');
-        sb.append(", alrId='").append(alrId).append('\'');
-        sb.append(", listingId='").append(listingId).append('\'');
+        sb.append("{alrId='").append(alrId).append('\'');
+        sb.append(", listingId='").append(listing.listingId).append('\'');//使用了 model
         sb.append(", rating=").append(rating);
         sb.append(", title='").append(title).append('\'');
         sb.append(", review='").append(review).append('\'');
@@ -185,9 +220,12 @@ public class AmazonListingReview extends GenericModel {
         sb.append(", username='").append(username).append('\'');
         sb.append(", userid='").append(userid).append('\'');
         sb.append(", reviewDate=").append(reviewDate);
+        sb.append(", createDate=").append(createDate);
         sb.append(", purchased=").append(purchased);
         sb.append(", resolved=").append(resolved);
         sb.append(", lastRating=").append(lastRating);
+        sb.append(", mailedTimes=").append(mailedTimes);
+        sb.append(", comment='").append(comment).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -50,6 +50,7 @@ public class SellingPriceSyncJob extends Job {
 
             //3
             float before = (sell.salePrice == null || sell.salePrice <= 0) ? sell.price : sell.salePrice;
+            String suffix = "";
             if(sell.priceStrategy.type == PriceStrategy.T.LowestPrice) {
                 switch(sell.market) {
                     case AMAZON_UK:
@@ -76,13 +77,14 @@ public class SellingPriceSyncJob extends Job {
                 // 最后对价格进行 1. 向上取整, 精确到 2 位. 2. 0.49/0.99 上下调整
                 float beforeUpDown = sell.salePrice;
                 sell.salePrice = Webs.scale2PointUp(Currency.upDown(sell.salePrice));
-                Logger.info("Through Updown: %s to %s", beforeUpDown, sell.salePrice);
+                suffix = String.format("Through Updown: %s to %s", beforeUpDown, sell.salePrice);
             }
 
             //4
-//            sell.deploy();
-            Logger.info("Selling[%s] price from %s to %s, change: %s",
-                    sell.sellingId, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before));
+            sell.deploy();
+            Logger.info("Selling[%s:%s] price from %s to %s, change: %s; %s",
+                    sell.sellingId, sell.asin, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before),
+                    suffix);
         }
     }
 }

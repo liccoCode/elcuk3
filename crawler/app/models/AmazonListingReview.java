@@ -8,6 +8,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,51 +95,60 @@ public class AmazonListingReview {
         Element rtr = doc.select("#productReviews tr").first();
         if(rtr == null) return reviewList;
 
-        Elements reviews = rtr.select("td > div");
+        Elements reviews = rtr.select("td > div[style]");
         if(reviews == null) return reviewList;
 
         String asin = doc.select(".asinReviewsSummary").attr("name");
         String market = doc.select("#navLogoPrimary").text();
 
         for(Element r : reviews) {
-            AmazonListingReview review = new AmazonListingReview();
-            review.listingId = String.format("%s_%s", asin, market);
-
-            String ratingStr = r.select("> div span.swSprite").first().text();
-            review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
-            review.lastRating = review.rating; // 对 LastRating 的初始化
-
-            review.title = r.select("> div span b").text().trim();
-
-            String helpfulStr = r.select("> div").first().text();
-            int[] two = {0, 0};
-            if(isHelpfulStr(helpfulStr)) {
-                String[] words = StringUtils.split(helpfulStr);
-                int n = 0; // 存储数字的索引
-                for(String s : words) {
-                    s = StringUtils.remove(s, "sur "); // 在 FR, [sur 1] 为第二个数字, 但是 sur 与 1 之间那个符号不是空格, 所以做删除处理
-                    int number = NumberUtils.toInt(s, -1);
-                    if(number != -1) two[n++] = number;
+            try {
+                AmazonListingReview review = new AmazonListingReview();
+                Element fromListing = r.select("> div b a").first();
+                if(fromListing != null) {
+                    String asinUrl = StringUtils.splitByWholeSeparator(fromListing.attr("href"), "dp/")[1];
+                    asin = StringUtils.splitByWholeSeparator(asinUrl, "/ref")[0];
                 }
+                review.listingId = String.format("%s_%s", asin, market);
+
+                String ratingStr = r.select("> div span.swSprite").first().text();
+                review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
+                review.lastRating = review.rating; // 对 LastRating 的初始化
+
+                review.title = r.select("> div span b").text().trim();
+
+                String helpfulStr = r.select("> div").first().text();
+                int[] two = {0, 0};
+                if(isHelpfulStr(helpfulStr)) {
+                    String[] words = StringUtils.split(helpfulStr);
+                    int n = 0; // 存储数字的索引
+                    for(String s : words) {
+                        s = StringUtils.remove(s, "sur "); // 在 FR, [sur 1] 为第二个数字, 但是 sur 与 1 之间那个符号不是空格, 所以做删除处理
+                        int number = NumberUtils.toInt(s, -1);
+                        if(number != -1) two[n++] = number;
+                    }
+                }
+                review.helpUp = two[0];
+                review.helpClick = two[1];
+
+                Element user = r.select("> div div div a").first();
+                review.username = user.text();
+                review.userid = StringUtils.splitPreserveAllTokens(user.attr("href"), "/")[6];
+
+                String[] dates = StringUtils.split(StringUtils.remove(r.select("> div span nobr").first().text(), "."), " ");
+                review.reviewDate = DateTime.parse(String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2]), DateTimeFormat.forPattern("dd MMM yyyy")).toString("yyyy-MM-dd");
+
+                Element purchasedEl = r.select("> div span.crVerifiedStripe").first();
+                review.purchased = purchasedEl != null;
+
+                review.review = r.ownText();
+
+                review.alrId = DigestUtils.md5Hex(String.format("%s_%s", review.listingId, review.userid));
+
+                reviewList.add(review);
+            } catch(Exception e) {
+                Logger.warn(String.format("%s|%s", e.getClass().getSimpleName(), e.getMessage()));
             }
-            review.helpUp = two[0];
-            review.helpClick = two[1];
-
-            Element user = r.select("> div div div a").first();
-            review.username = user.text();
-            review.userid = StringUtils.splitPreserveAllTokens(user.attr("href"), "/")[6];
-
-            String[] dates = StringUtils.split(StringUtils.remove(r.select("> div span nobr").first().text(), "."), " ");
-            review.reviewDate = DateTime.parse(String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2]), DateTimeFormat.forPattern("dd MMM yyyy")).toString("yyyy-MM-dd");
-
-            Element purchasedEl = r.select("> div span.crVerifiedStripe").first();
-            review.purchased = purchasedEl != null;
-
-            review.review = r.ownText();
-
-            review.alrId = DigestUtils.md5Hex(String.format("%s_%s_%s", review.listingId, review.userid, review.title));
-
-            reviewList.add(review);
         }
         return reviewList;
     }

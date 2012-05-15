@@ -120,8 +120,12 @@ public class ListingWorkers extends Job {
                     AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                     AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
                     if(fromDB == null) {
-                        review.listing = listing;
-                        review.save();// 创建新的
+                        if(listing.listingId.equals(review.listingId))
+                            review.listing = listing;
+                        else
+                            review.listing = Listing.findById(review.listingId);
+                        review.createDate = review.reviewDate;
+                        review.createReview();// 创建新的
                         review.listingReviewCheck();
                     } else {
                         fromDB.updateAttr(review); // 更新
