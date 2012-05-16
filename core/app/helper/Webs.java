@@ -206,11 +206,18 @@ public class Webs {
         return -0.1f;
     }
 
+    /**
+     * 将价格转换成不同市场格式的价格,例如: 1999.99 , uk: 1,999.99; de: 1.999,99 ...
+     *
+     * @param market
+     * @param price
+     * @return
+     */
     public static String priceLocalNumberFormat(Account.M market, Float price) {
         switch(market) {
             case AMAZON_US:
-                return NN_UK.format(price);
             case AMAZON_UK:
+                return NN_UK.format(price);
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:

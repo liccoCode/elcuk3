@@ -81,10 +81,14 @@ public class SellingPriceSyncJob extends Job {
             }
 
             //4
-            sell.deploy();
-            Logger.info("Selling[%s:%s] price from %s to %s, change: %s; %s",
-                    sell.sellingId, sell.asin, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before),
-                    suffix);
+            try {
+                sell.deploy();
+                Logger.info("Selling[%s:%s] price from %s to %s, change: %s; %s",
+                        sell.sellingId, sell.asin, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before),
+                        suffix);
+            } catch(Exception e) {
+                Logger.warn("SellingPriceSyncJob Deploy to Amazon Failed! %s", Webs.E(e));
+            }
         }
     }
 }
