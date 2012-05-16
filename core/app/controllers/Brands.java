@@ -4,6 +4,7 @@ import models.Ret;
 import models.product.Brand;
 import models.product.Category;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * Date: 4/26/12
  * Time: 11:28 AM
  */
+@With({Secure.class, GzipFilter.class})
 public class Brands extends Controller {
 
     public static void index() {

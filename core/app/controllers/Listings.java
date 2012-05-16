@@ -53,6 +53,7 @@ public class Listings extends Controller {
     /**
      * 详细的查看 Listing
      */
+//    @CacheFor(value = "10mn")
     public static void listing(String lid) {
         Listing lst = Listing.findById(lid);
         render(lst);

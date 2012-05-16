@@ -4,4 +4,121 @@
     #{script 'listings/listings.js'/}
 #{/set}
 
-${lst.listingId}
+<ul id="listingTab" class="nav nav-tabs">
+    <li class="active"><a href="#basic" data-toggle="tab">Basic</a></li>
+    <li><a href="#review" data-toggle="tab">Review</a></li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">New<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a href="#amazon" data-toggle="tab">@Amazon</a></li>
+            <li><a href="#ebay" data-toggle="tab">@eBay</a></li>
+        </ul>
+    </li>
+</ul>
+<div id="listingTabContent" class="tab-content">
+    <div class="tab-pane fade active in" id="basic">
+        <div><label class="label label-info">Basic</label></div>
+        <div style="min-height:300px;">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <th>ListingId:</th>
+                    <td>${lst.listingId}</td>
+                    <th>ASIN:</th>
+                    <td>${lst.asin}</td>
+                    <th>Market:</th>
+                    <td>${lst.market}</td>
+                    <th>SKU:</th>
+                    <td>${lst.product.sku}</td>
+                </tr>
+                <tr>
+                    <th>Title(${lst.title.length()}):</th>
+                    <td colspan="7">${lst.title}</td>
+                </tr>
+                <tr>
+                    <th>ByWho:</th>
+                    <td>${lst.byWho}</td>
+                    <th>Rating:</th>
+                    <td style="color:${lst.rating < 4 ? 'red' : 'green'}">${lst.rating}</td>
+                    <th>Reviews:</th>
+                    <td>${lst.reviews}</td>
+                    <th>SaleRank:</th>
+                    <td>${lst.saleRank}</td>
+                </tr>
+                <tr>
+                    <th>DisplayPrice:</th>
+                    <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.displayPrice)}</td>
+                    <th>OurPrice:</th>
+                    <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.easyacceu()?.price)}</td>
+                    <th>LoestPrice:</th>
+                    <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.lowestPrice())}</td>
+                </tr>
+                <tr>
+                    <td colspan="8">
+                        <div class="offset3"><img src="${lst.picUrls}" alt=""></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div><label class="label label-info">Technical</label></div>
+        <div style="min-height:200px;">
+        ${lst.technicalDetails.raw()}
+        </div>
+
+        <div><label class="label label-info">ProductDesc</label></div>
+        <div style="min-height:300px;">
+        ${lst.productDescription.raw()}
+        </div>
+
+        <div><label class="label label-info">Offers</label></div>
+        <div style="min-height:300px;">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <th>Name</th>
+                    <th>BuyBox?</th>
+                    <th>FBA?</th>
+                    <th>OfferId</th>
+                    <th>Price</th>
+                    <th>ShippingPrice</th>
+                </tr>
+            #{list items:lst.offers, as:'offer'}
+                <tr>
+                    <td>${offer.name}</td>
+                    <td>${offer.buybox}</td>
+                    <td>${offer.fba}</td>
+                    <td>${offer.offerId}</td>
+                    <td>${helper.Webs.priceLocalCurrencyFormat(lst.market,offer.price)}</td>
+                    <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, offer.shipprice)}</td>
+                </tr>
+            #{/list}
+            </table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="review">
+    #{list items:lst.listingReviews, as:'review'}
+        #{set bad:(review.rating <= 3)/}
+        <dl id="${review.alrId}">
+            <dt>${review.title} |
+                <span style="color:${bad ? 'red' : 'green'};">${review.rating}</span> |
+            ${bad ? 'Sad' : 'Glad'} |
+            ${review.username} |
+                <a target="_blank" href="${helper.Webs.userReviewLink(review)}">${review.userid}</a>
+            </dt>
+            <dd>${review.review}</dd>
+            <dt>VP: ${review.purchased} |
+                Up/Click: ${review.helpUp}/${review.helpClick} |
+                RDate: ${review.reviewDate.format("yyyy-MM-dd")} |
+                CDate: ${review.createDate.format("yyyy-MM-dd")}
+            </dt>
+            <dd>${review.comment.isEmpty() ? 'No Comment' : review.comment}</dd>
+        </dl>
+    #{/list}
+
+    </div>
+    <div class="tab-pane fade" id="amazon">
+        Amazon
+    </div>
+    <div class="tab-pane fade" id="ebay">
+        eBay 上架 TBD...
+    </div>
+</div>

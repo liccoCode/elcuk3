@@ -11,6 +11,7 @@ import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ import java.util.List;
  * Date: 4/26/12
  * Time: 11:05 AM
  */
+@With({Secure.class, GzipFilter.class})
 public class Categorys extends Controller {
 
     public static void index() {

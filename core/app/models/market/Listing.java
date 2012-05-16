@@ -41,6 +41,10 @@ public class Listing extends GenericModel {
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
     public List<ListingOffer> offers;
 
+    @OneToMany(mappedBy = "listing")
+    @OrderBy(value = "createDate DESC")
+    public List<AmazonListingReview> listingReviews;
+
     @ManyToOne
     public Product product;
 
@@ -246,9 +250,8 @@ public class Listing extends GenericModel {
     public ListingOffer easyacceu() {
         if(this.offers == null) return null;
         for(ListingOffer offer : this.offers) {
-            if("easyacceu".equals(offer.name.toLowerCase()) ||
-                    "easyacc".equals(offer.name.toLowerCase()) ||
-                    "easyacc.eu@gmail.com".equals(offer.name.toLowerCase())) {
+            if("AJUR3R8UN71M4".equalsIgnoreCase(offer.offerId) ||
+                    "A22H6OV6Q7XBYK".equalsIgnoreCase(offer.offerId)) {
                 return offer;
             }
         }

@@ -3,6 +3,7 @@ package controllers;
 import models.Ret;
 import models.product.AttrName;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * Date: 4/28/12
  * Time: 2:59 PM
  */
+@With({Secure.class, GzipFilter.class})
 public class Attrs extends Controller {
 
     public static void index() {

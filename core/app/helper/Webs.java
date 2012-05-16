@@ -257,6 +257,30 @@ public class Webs {
     }
 
     /**
+     * 将数字按照市场的 Currency 格式输出出来. £1,234.23(UK), $1,234.23(US), 1.234,23 €(DE)
+     *
+     * @param market
+     * @param price
+     * @return
+     */
+    public static String priceLocalCurrencyFormat(Account.M market, Float price) {
+        if(price == null) price = 0f;
+        switch(market) {
+            case AMAZON_US:
+                return NC_US.format(price);
+            case AMAZON_UK:
+                return NC_UK.format(price);
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return NC_DE.format(price);
+            default:
+                return NC_UK.format(price);
+        }
+    }
+
+    /**
      * 简单的获取 Exception 的文本
      *
      * @return
