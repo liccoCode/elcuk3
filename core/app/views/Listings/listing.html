@@ -102,7 +102,7 @@
                 <span style="color:${bad ? 'red' : 'green'};">${review.rating}</span> |
             ${bad ? 'Sad' : 'Glad'} |
             ${review.username} |
-                <a target="_blank" href="${helper.Webs.userReviewLink(review)}">${review.userid}</a>
+                <a target="_blank" href="${review.userReviewLink()}">${review.userid}</a>
             </dt>
             <dd>${review.review}</dd>
             <dt>VP: ${review.purchased} |

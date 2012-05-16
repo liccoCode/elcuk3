@@ -1,6 +1,8 @@
 package mails;
 
 import models.market.AmazonListingReview;
+import models.market.Orderr;
+import notifiers.Mails;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -13,8 +15,15 @@ import play.test.UnitTest;
 public class ListingReviewMailTest extends UnitTest {
     @Test
     public void test() {
-        AmazonListingReview review = AmazonListingReview.findById("034b7762514b8ccac6dfba2d3371e558");
+        AmazonListingReview review = AmazonListingReview.findById("8ec405dff807142c7960c2c6d0df2270");
         review.listingReviewCheck();
+    }
+
+    @Test
+    public void testMailReviewMail() {
+        Orderr ord = Orderr.findById("302-1888247-6527562");
+
+        Mails.amazonUK_REVIEW_MAIL(ord);
     }
 
 }
