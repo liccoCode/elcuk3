@@ -266,6 +266,9 @@ public class Selling extends GenericModel {
      *  --- 检查每一行最多 50 个
      * 5. 等待添加
      * </pre>
+     *
+     * @throws play.utils.FastRuntimeException
+     *          deploy 方法失败会抛出异常
      */
     public void deploy() {
         switch(this.market) {
