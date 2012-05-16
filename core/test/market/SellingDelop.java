@@ -94,15 +94,15 @@ public class SellingDelop extends UnitTest {
             } else if("discounted_price".equals(name) ||
                     "discounted_price_start_date".equals(name) ||
                     "discounted_price_end_date".equals(name)) {
-                if(sell.startDate != null && sell.endDate != null && sell.salePrice != null && sell.salePrice > 0) {
-                    params.add(new BasicNameValuePair("discounted_price", sell.salePrice.toString()));
-                    params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(sell.market, sell.startDate)));
-                    params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(sell.market, sell.endDate)));
+                if(sell.aps.startDate != null && sell.aps.endDate != null && sell.aps.salePrice != null && sell.aps.salePrice > 0) {
+                    params.add(new BasicNameValuePair("discounted_price", sell.aps.salePrice.toString()));
+                    params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(sell.market, sell.aps.startDate)));
+                    params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(sell.market, sell.aps.endDate)));
                 }
-            } else if("product_description".equals(name) && StringUtils.isNotBlank(sell.productDesc)) {
-                params.add(new BasicNameValuePair(name, sell.productDesc));
-            } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(sell.searchTerms)) {
-                String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(sell.searchTerms, Webs.SPLIT);
+            } else if("product_description".equals(name) && StringUtils.isNotBlank(sell.aps.productDesc)) {
+                params.add(new BasicNameValuePair(name, sell.aps.productDesc));
+            } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(sell.aps.searchTerms)) {
+                String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(sell.aps.searchTerms, Webs.SPLIT);
                 for(int i = 0; i < searchTermsArr.length; i++) {
                     params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
                 }

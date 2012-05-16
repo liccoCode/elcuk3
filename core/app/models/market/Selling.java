@@ -2,6 +2,7 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.embedded.AmazonProps;
 import models.procure.PItem;
 import models.product.Product;
 import models.product.Whouse;
@@ -166,69 +167,10 @@ public class Selling extends GenericModel {
     @Lob
     @Required
     public String title;
-    public String modelNumber;
-    public String manufacturer;
-    /**
-     * 使用  Webs.SPLIT 进行分割, 最多 5 行
-     */
-    public String keyFetures;
-    /**
-     * Recommended Browse Nodes;
-     * 使用 [,] 进行分割, 一般为 2 个
-     */
-    public String RBN;
-    /**
-     * For most products, this will be identical to the model number;
-     * however, some manufacturers distinguish part number from model number
-     */
-    public String manufacturerPartNumber;
-    /**
-     * 如果这个 Condition 不为空, 那么则覆盖掉 Listing 中的 Condition
-     */
-    public String condition_;
-    @Required
-    public Float standerPrice;
 
+    @Embedded
     @Expose
-    public Float salePrice;
-    /**
-     * 促销产品价格的开始日期
-     */
-    @Expose
-    public Date startDate;
-    /**
-     * 促销产品价格的结束日期
-     */
-    @Expose
-    public Date endDate;
-
-    /**
-     * Does your item have a legal disclaimer associated with it?
-     */
-    @Lob
-    public String legalDisclaimerDesc;
-    public Date launchDate;
-    @Lob
-    public String sellerWarrantyDesc;
-
-    /**
-     * 核心的产品描述
-     */
-    @Lob
-    public String productDesc;
-
-    /**
-     * 使用 Webs.SPLIT 进行分割, 5 行
-     */
-    @Lob
-    public String searchTerms;
-
-    /**
-     * 使用 Webs.SPLIT 进行分割, 5 行
-     */
-    @Lob
-    public String platinumKeywords;
-
+    public AmazonProps aps;
     // ---- Images ????
 
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
@@ -306,13 +248,13 @@ public class Selling extends GenericModel {
                     } else if("discounted_price".equals(name) ||
                             "discounted_price_start_date".equals(name) ||
                             "discounted_price_end_date".equals(name)) {
-                        if(this.startDate != null && this.endDate != null && this.salePrice != null && this.salePrice > 0) {
-                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.salePrice)));
-                            params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.startDate)));
-                            params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.endDate)));
+                        if(this.aps.startDate != null && this.aps.endDate != null && this.aps.salePrice != null && this.aps.salePrice > 0) {
+                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.aps.salePrice)));
+                            params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
+                            params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
                         }
-                    } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.searchTerms)) {
-                        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.searchTerms, Webs.SPLIT);
+                    } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms)) {
+                        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.aps.searchTerms, Webs.SPLIT);
                         for(int i = 0; i < searchTermsArr.length; i++) {
                             if(searchTermsArr[i].length() > 50)
                                 throw new FastRuntimeException("SearchTerm length must blew then 50.");
@@ -334,10 +276,10 @@ public class Selling extends GenericModel {
                 Elements textareas = doc.select("form[name=productForm] textarea");
                 for(Element text : textareas) {
                     String name = text.attr("name");
-                    if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
-                        if(this.productDesc.length() > 2000)
+                    if("product_description".equals(name) && StringUtils.isNotBlank(this.aps.productDesc)) {
+                        if(this.aps.productDesc.length() > 2000)
                             throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
-                        params.add(new BasicNameValuePair(name, this.productDesc));
+                        params.add(new BasicNameValuePair(name, this.aps.productDesc));
                     } else {
                         params.add(new BasicNameValuePair(name, text.val()));
                     }
@@ -390,24 +332,28 @@ public class Selling extends GenericModel {
      */
     public Selling updateAttr(Selling newSelling) {
         if(StringUtils.isNotBlank(newSelling.title)) this.title = newSelling.title;
-        if(StringUtils.isNotBlank(newSelling.modelNumber)) this.modelNumber = newSelling.modelNumber;
-        if(StringUtils.isNotBlank(newSelling.manufacturer)) this.manufacturer = newSelling.manufacturer;
-        if(StringUtils.isNotBlank(newSelling.keyFetures)) this.keyFetures = newSelling.keyFetures;
-        if(StringUtils.isNotBlank(this.RBN)) this.RBN = newSelling.RBN;
-        if(StringUtils.isNotBlank(this.manufacturerPartNumber))
-            this.manufacturerPartNumber = newSelling.manufacturerPartNumber;
-        if(StringUtils.isNotBlank(condition_)) this.condition_ = newSelling.condition_;
-        if(newSelling.standerPrice != null && newSelling.standerPrice > 0) this.standerPrice = newSelling.standerPrice;
-        if(newSelling.salePrice != null && newSelling.salePrice > 0) this.salePrice = newSelling.salePrice;
-        if(newSelling.startDate != null) this.startDate = newSelling.startDate;
-        if(newSelling.endDate != null) this.endDate = newSelling.endDate;
-        if(StringUtils.isNotBlank(newSelling.legalDisclaimerDesc))
-            this.legalDisclaimerDesc = newSelling.legalDisclaimerDesc;
-        if(StringUtils.isNotBlank(this.sellerWarrantyDesc)) this.sellerWarrantyDesc = newSelling.sellerWarrantyDesc;
+        if(StringUtils.isNotBlank(newSelling.aps.modelNumber)) this.aps.modelNumber = newSelling.aps.modelNumber;
+        if(StringUtils.isNotBlank(newSelling.aps.manufacturer)) this.aps.manufacturer = newSelling.aps.manufacturer;
+        if(StringUtils.isNotBlank(newSelling.aps.keyFetures)) this.aps.keyFetures = newSelling.aps.keyFetures;
+        if(StringUtils.isNotBlank(this.aps.RBN)) this.aps.RBN = newSelling.aps.RBN;
+        if(StringUtils.isNotBlank(this.aps.manufacturerPartNumber))
+            this.aps.manufacturerPartNumber = newSelling.aps.manufacturerPartNumber;
+        if(StringUtils.isNotBlank(this.aps.condition_)) this.aps.condition_ = newSelling.aps.condition_;
+        if(newSelling.aps.standerPrice != null && newSelling.aps.standerPrice > 0)
+            this.aps.standerPrice = newSelling.aps.standerPrice;
+        if(newSelling.aps.salePrice != null && newSelling.aps.salePrice > 0)
+            this.aps.salePrice = newSelling.aps.salePrice;
+        if(newSelling.aps.startDate != null) this.aps.startDate = newSelling.aps.startDate;
+        if(newSelling.aps.endDate != null) this.aps.endDate = newSelling.aps.endDate;
+        if(StringUtils.isNotBlank(newSelling.aps.legalDisclaimerDesc))
+            this.aps.legalDisclaimerDesc = newSelling.aps.legalDisclaimerDesc;
+        if(StringUtils.isNotBlank(this.aps.sellerWarrantyDesc))
+            this.aps.sellerWarrantyDesc = newSelling.aps.sellerWarrantyDesc;
 
-        if(StringUtils.isNotBlank(this.productDesc)) this.productDesc = newSelling.productDesc;
-        if(StringUtils.isNotBlank(this.searchTerms)) this.searchTerms = newSelling.searchTerms;
-        if(StringUtils.isNotBlank(this.platinumKeywords)) this.platinumKeywords = newSelling.platinumKeywords;
+        if(StringUtils.isNotBlank(this.aps.productDesc)) this.aps.productDesc = newSelling.aps.productDesc;
+        if(StringUtils.isNotBlank(this.aps.searchTerms)) this.aps.searchTerms = newSelling.aps.searchTerms;
+        if(StringUtils.isNotBlank(this.aps.platinumKeywords))
+            this.aps.platinumKeywords = newSelling.aps.platinumKeywords;
 
         return this.save();
     }
@@ -651,14 +597,14 @@ public class Selling extends GenericModel {
                     selling = new Selling();
                     selling.sellingId = sid;
                     selling.asin = lst.asin;
-                    selling.condition_ = "NEW";
+                    selling.aps.condition_ = "NEW";
                     selling.market = market;
                     selling.merchantSKU = t_msku;
 
                     selling.title = lst.title;
                     selling.account = acc;
                     selling.shippingPrice = 0f;
-                    selling.standerPrice = selling.price = lst.displayPrice;
+                    selling.aps.standerPrice = selling.price = lst.displayPrice;
                     selling.ps = 2f;
                     selling.state = S.SELLING;
 

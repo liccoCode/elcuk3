@@ -179,9 +179,9 @@ public class Listing extends GenericModel {
 
         // --- Selling 可处理信息的处理
         s.title = this.title;
-        s.condition_ = C.NEW.toString();
-        s.standerPrice = s.priceStrategy.max;
-        s.productDesc = this.productDescription; // 这个肯定是需要人工处理下的.
+        s.aps.condition_ = C.NEW.toString();
+        s.aps.standerPrice = s.priceStrategy.max;
+        s.aps.productDesc = this.productDescription; // 这个肯定是需要人工处理下的.
 
 
         // Account 暂时处理, 仅仅使用这一个用户

@@ -49,42 +49,42 @@ public class SellingPriceSyncJob extends Job {
             }
 
             //3
-            float before = (sell.salePrice == null || sell.salePrice <= 0) ? sell.price : sell.salePrice;
+            float before = (sell.aps.salePrice == null || sell.aps.salePrice <= 0) ? sell.price : sell.aps.salePrice;
             String suffix = "";
             if(sell.priceStrategy.type == PriceStrategy.T.LowestPrice) {
                 switch(sell.market) {
                     case AMAZON_UK:
-                        sell.salePrice = Currency.GBP.toGBP(lowestPrice) + sell.priceStrategy.differ;
+                        sell.aps.salePrice = Currency.GBP.toGBP(lowestPrice) + sell.priceStrategy.differ;
                         break;
                     case AMAZON_DE:
                     case AMAZON_ES:
                     case AMAZON_IT:
                     case AMAZON_FR:
-                        sell.salePrice = Currency.GBP.toEUR(lowestPrice) + sell.priceStrategy.differ;
+                        sell.aps.salePrice = Currency.GBP.toEUR(lowestPrice) + sell.priceStrategy.differ;
                         break;
                     case AMAZON_US:
-                        sell.salePrice = Currency.GBP.toUSD(lowestPrice) + sell.priceStrategy.differ;
+                        sell.aps.salePrice = Currency.GBP.toUSD(lowestPrice) + sell.priceStrategy.differ;
                         break;
                 }
-                if(sell.salePrice < sell.priceStrategy.lowest)
-                    sell.salePrice = sell.priceStrategy.lowest;
+                if(sell.aps.salePrice < sell.priceStrategy.lowest)
+                    sell.aps.salePrice = sell.priceStrategy.lowest;
 
-                if(sell.startDate == null || sell.endDate == null) {
-                    sell.startDate = DateTime.now().plusMonths(-6).toDate();
-                    sell.endDate = DateTime.now().plusMonths(18).toDate();
+                if(sell.aps.startDate == null || sell.aps.endDate == null) {
+                    sell.aps.startDate = DateTime.now().plusMonths(-6).toDate();
+                    sell.aps.endDate = DateTime.now().plusMonths(18).toDate();
                 }
 
                 // 最后对价格进行 1. 向上取整, 精确到 2 位. 2. 0.49/0.99 上下调整
-                float beforeUpDown = sell.salePrice;
-                sell.salePrice = Webs.scale2PointUp(Currency.upDown(sell.salePrice));
-                suffix = String.format("Through Updown: %s to %s", beforeUpDown, sell.salePrice);
+                float beforeUpDown = sell.aps.salePrice;
+                sell.aps.salePrice = Webs.scale2PointUp(Currency.upDown(sell.aps.salePrice));
+                suffix = String.format("Through Updown: %s to %s", beforeUpDown, sell.aps.salePrice);
             }
 
             //4
             try {
                 sell.deploy();
                 Logger.info("Selling[%s:%s] price from %s to %s, change: %s; %s",
-                        sell.sellingId, sell.asin, before, sell.salePrice, Webs.scale2PointUp(sell.salePrice - before),
+                        sell.sellingId, sell.asin, before, sell.aps.salePrice, Webs.scale2PointUp(sell.aps.salePrice - before),
                         suffix);
             } catch(Exception e) {
                 Logger.warn("SellingPriceSyncJob Deploy to Amazon Failed! %s", Webs.E(e));
