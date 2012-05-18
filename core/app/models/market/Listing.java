@@ -346,7 +346,7 @@ public class Listing extends GenericModel {
         }
         tobeChangeed.offers = newOffers;
         tobeChangeed.lastUpdateTime = System.currentTimeMillis();
-        if(oldListing != null) tobeChangeed.save();
+        if(oldListing != null) return tobeChangeed.save();
         return tobeChangeed;
     }
 

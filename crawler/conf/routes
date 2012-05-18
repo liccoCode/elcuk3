@@ -5,6 +5,7 @@
 # Home page
 GET      /                                                Application.index
 GET      /listings/{market}/{asin}                        ListingCs.crawl
+GET      /offers/{market}/{asin}                          ListingCs.crawlOffers
 GET      /reviews/{market}/{asin}                         ListingCs.crawlReview
 
 # Ignore favicon requests

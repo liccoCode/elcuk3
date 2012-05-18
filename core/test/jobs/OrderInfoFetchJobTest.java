@@ -38,7 +38,7 @@ public class OrderInfoFetchJobTest extends UnitTest {
         ord.orderDetailUserIdAndEmail(doc);
     }
 
-    @Test
+    //    @Test
     public void testDownloadFile() throws IOException {
         String html = FileUtils.readFileToString(new File("/Users/wyattpan/elcuk2-data/203-6007669-8343509_email.html"));
         int head = StringUtils.indexOfIgnoreCase(html, "buyerEmail:");
@@ -47,7 +47,7 @@ public class OrderInfoFetchJobTest extends UnitTest {
         System.out.println("[" + sub.substring(0, sub.length() - 2) + "]");
     }
 
-    @Test
+    //    @Test
     public void testOrderDetailUserId() throws IOException {
         String html = FileUtils.readFileToString(new File("/Users/wyattpan/elcuk2-data/203-6007669-8343509_email.html"));
         Document doc = Jsoup.parse(html);
@@ -57,5 +57,19 @@ public class OrderInfoFetchJobTest extends UnitTest {
         assertEquals("547hqxp7bxk5tzk@marketplace.amazon.co.uk", ord.email);
         assertEquals("A1BUFNIMGMLXIU", ord.userid);
         ord.save();
+    }
+
+    @Test
+    public void testOrderInfoRefunded() throws IOException {
+//        Account.<Account>findById(1l).loginWebSite();
+        Orderr ord = Orderr.findById("203-5553740-1399515");
+
+//        String html = HTTP.get(ord.account.cookieStore(), ord.account.type.orderDetail(ord.orderId));
+
+//        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-data/" + ord.orderId + "_refuned.html"), html);
+        Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/203-5553740-1399515_refuned.html"), "UTF-8");
+
+        ord.orderDetailUserIdAndEmail(doc);
+
     }
 }

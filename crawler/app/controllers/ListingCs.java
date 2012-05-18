@@ -1,9 +1,9 @@
 package controllers;
 
 import helper.HTTP;
-import models.ARW;
 import models.AmazonListingReview;
 import models.ListingC;
+import models.ListingOfferC;
 import models.MT;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,14 +37,31 @@ public class ListingCs extends Controller {
         MT m = MT.val(market);
         if(m == null) renderJSON("{flag:false, message:'invalid market[us,uk,de,it,es,fr]'}");
         HTTP.clearExpiredCookie();
-        String html = HTTP.get(ARW.listing(m, asin));
-        if(Play.mode == Play.Mode.DEV)
+        String html = HTTP.get(m.listing(asin));
+        if(Play.mode.isDev())
             FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
         // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
         try {
-            renderJSON(new ListingC(html).parseFromHTML(ListingC.T.AMAZON));
+            renderJSON(new ListingC(m, html).parseFromHTML(ListingC.T.AMAZON));
         } catch(NullPointerException e) {
-            renderJSON(new ListingC(e.getMessage()));
+            renderJSON(new ListingC(m, e.getMessage()));
+        }
+    }
+
+    public static void crawlOffers(String market, String asin) throws IOException {
+        ////http://www.amazon.co.uk/gp/offer-listing/B007TR9VRU
+        MT m = MT.val(market);
+        if(m == null) throw new FastRuntimeException("Market is inValid!");
+        String url = m.offers(asin);
+        if(StringUtils.isBlank(url)) throw new FastRuntimeException("Offer URL null, an unsupport Market.");
+        HTTP.clearExpiredCookie();
+        String html = HTTP.get(url);
+        if(Play.mode.isDev())
+            FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/offers/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
+        try {
+            renderJSON(new ListingOfferC(m).parseOffers(html));
+        } catch(Exception e) {
+            render(new ListingOfferC());
         }
     }
 
@@ -65,13 +82,13 @@ public class ListingCs extends Controller {
             if(p > maxPage) continue;
             MT m = MT.val(market);
             if(m == null) throw new FastRuntimeException("Market is inValid!");
-            String url = ARW.review(m, asin, p);
+            String url = m.review(asin, p);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
             HTTP.clearExpiredCookie();
             String html = HTTP.get(url);
 
-            if(Play.mode == Play.Mode.DEV)
+            if(Play.mode.isDev())
                 FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/reviews/%s/%s_%s.html", System.getProperty("user.home"), m.name(), asin, p)), html);
 
             Document doc = Jsoup.parse(html);

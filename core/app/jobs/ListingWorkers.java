@@ -2,14 +2,18 @@ package jobs;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import helper.Crawl;
 import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Listing;
+import models.market.ListingOffer;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用来更新 Listing 的 Review 信息的线程, 这个线程并不需要执行得那么频繁, 基本上每 24 小时执行一次即可.
@@ -82,6 +86,12 @@ public class ListingWorkers extends Job {
             try {
                 JsonElement lst = Crawl.crawlListing(listing.market.name(), listing.asin);
                 Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
+                try {
+                    if(needCheckListing.offers == null || needCheckListing.offers.size() == 0)
+                        new O(needCheckListing).now().get(10, TimeUnit.SECONDS); // 等待 10 s
+                } catch(Exception e) {
+                    Logger.warn("Listing (%s) no offers.", this.listingId);
+                }
                 needCheckListing.check();
                 needCheckListing.save();
             } catch(Exception e) {
@@ -89,6 +99,35 @@ public class ListingWorkers extends Job {
             }
         }
 
+
+        /**
+         * 这个仅仅附属与 ListingWorker.L , 只有当通过这个方法抓取的 Offers 为 0 的时候,才需要进行详细的 Offers 页面进行一次补充抓取
+         */
+        static class O extends Job<Listing> {
+            private Listing listing;
+
+            O(Listing listing) {
+                this.listing = listing;
+            }
+
+            @Override
+            public void doJob() {
+                JsonElement offersJson = Crawl.crawlOffers(this.listing.market.name(), this.listing.asin);
+                JsonArray offers = offersJson.getAsJsonArray();
+                for(JsonElement offer : offers) {
+                    ListingOffer off = new ListingOffer();
+                    JsonObject of = offer.getAsJsonObject();
+                    off.name = of.get("name").getAsString();
+                    off.offerId = of.get("offerId").getAsString();
+                    off.price = of.get("price").getAsFloat();
+                    off.shipprice = of.get("shipprice").getAsFloat();
+                    off.fba = of.get("fba").getAsBoolean();
+                    off.buybox = of.get("buybox").getAsBoolean();
+                    off.listing = this.listing;
+                    this.listing.offers.add(off);
+                }
+            }
+        }
     }
 
     public static class R extends Job<AmazonListingReview> {

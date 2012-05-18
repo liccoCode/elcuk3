@@ -11,10 +11,7 @@ import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
@@ -135,6 +132,11 @@ public class AmazonListingReview extends GenericModel {
     public AmazonListingReview createReview() {
         this.createDate = this.reviewDate;
         return this.save();
+    }
+
+    @PostPersist
+    public void postPersist() {
+        if(this.purchased == null) this.purchased = false;
     }
 
     public AmazonListingReview updateAttr(AmazonListingReview newReview) {

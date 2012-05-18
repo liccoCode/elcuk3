@@ -35,4 +35,56 @@ public enum MT {
             return null;
         }
     }
+
+    public String review(String asin, int page) {
+        //http://www.amazon.it/product-reviews/{ASIN}?pageNumber={PAGE}&sortBy=bySubmissionDateDescending
+        switch(this) {
+            case AUK:
+                return String.format("http://www.amazon.co.uk/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", asin, page);
+            case AUS:
+                return String.format("http://www.amazon.com/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", asin, page);
+            case ADE:
+            case AES:
+            case AIT:
+            case AFR:
+                return String.format("http://www.amazon.%s/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", this.name().toLowerCase(), asin, page);
+            default:
+                return "";
+        }
+    }
+
+    public String listing(String asin) {
+        //http://www.amazon.co.uk/dp/B007TR9VRU
+        switch(this) {
+            case AUK:
+                return String.format("http://www.amazon.co.uk/dp/%s", asin);
+            case AUS:
+                return String.format("http://www.amazon.com/dp/%s", asin);
+            case ADE:
+            case AES:
+            case AIT:
+            case AFR:
+                return String.format("http://www.amazon.%s/dp/%s", this.name().toLowerCase(), asin);
+            default:
+                return "";
+        }
+    }
+
+    public String offers(String asin) {
+        //http://www.amazon.co.uk/gp/offer-listing/B007TR9VRU
+        switch(this) {
+            case AUK:
+                return String.format("http://www.amazon.co.uk/gp/offer-listing/%s", asin);
+            case AUS:
+                return String.format("http://www.amazon.com/gp/offer-listing/%s", asin);
+            case ADE:
+            case AES:
+            case AIT:
+            case AFR:
+                return String.format("http://www.amazon.%s/gp/offer-listing/%s", this.name().toLowerCase(), asin);
+            default:
+                return "";
+        }
+
+    }
 }

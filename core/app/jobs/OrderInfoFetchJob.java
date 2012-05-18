@@ -26,7 +26,8 @@ public class OrderInfoFetchJob extends Job {
          */
         int size = 10;
         if(Play.mode.isProd()) size = 30; //调整成 30 个订单一次, 每 10 分钟一次;
-        List<Orderr> orders = Orderr.find("state=? AND (userid is null OR userid='') order by createDate", Orderr.S.SHIPPED).fetch(size);
+        List<Orderr> orders = Orderr.find("(state=? OR state=?) AND (userid is null OR userid='') order by createDate",
+                Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
         for(Orderr ord : orders) {
             try {
                 if(ord.crawlUpdateTimes > 4) {
@@ -35,7 +36,7 @@ public class OrderInfoFetchJob extends Job {
                 }
                 String url = ord.account.type.orderDetail(ord.orderId);
                 Logger.info("OrderInfo(UserId) [%s].", url);
-                String html = HTTP.get(url);
+                String html = HTTP.get(ord.account.cookieStore(), url);
                 Document doc = Jsoup.parse(html);
                 ord.orderDetailUserIdAndEmail(doc).save();
             } catch(Exception e) {
