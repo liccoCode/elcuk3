@@ -94,7 +94,8 @@ public class ListingC {
         Element root = Jsoup.parse(html);
 
         this.asin = root.select("#ASIN").val().toUpperCase();
-        this.listingId = String.format("%s_%s", this.asin, this.market);
+        Element site = root.select("#navLogoPrimary > span").first();
+        this.listingId = String.format("%s_%s", this.asin, site);
 //        Elements images = root.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
         Element img = root.select("#prodImage").first();
         if(img != null) {
