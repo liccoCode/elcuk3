@@ -36,7 +36,7 @@ public class OrderInfoFetchJob extends Job {
                 }
                 String url = ord.account.type.orderDetail(ord.orderId);
                 Logger.info("OrderInfo(UserId) [%s].", url);
-                String html = HTTP.get(url);
+                String html = HTTP.get(ord.account.cookieStore(), url);
                 Document doc = Jsoup.parse(html);
                 ord.orderDetailUserIdAndEmail(doc).save();
             } catch(Exception e) {
