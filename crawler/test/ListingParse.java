@@ -1,4 +1,5 @@
 import models.ListingC;
+import models.MT;
 import org.junit.Test;
 import play.libs.IO;
 import play.test.UnitTest;
@@ -14,7 +15,7 @@ import java.io.File;
 public class ListingParse extends UnitTest {
     @Test
     public void testParseAvailable() {
-        ListingC l = new ListingC(IO.readContentAsString(new File("/Users/wyattpan/elcuk2-data/listings/AUK/B007TR9VRU.html")));
+        ListingC l = new ListingC(MT.AUK, IO.readContentAsString(new File("/Users/wyattpan/elcuk2-data/listings/AUK/B007TR9VRU.html")));
         l.parseFromHTML(ListingC.T.AMAZON);
     }
 }

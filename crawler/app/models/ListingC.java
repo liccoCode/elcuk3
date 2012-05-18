@@ -1,16 +1,15 @@
 package models;
 
 import helper.Extra;
+import helper.Webs;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * 抓取使用的 ListingC 信息
@@ -28,10 +27,10 @@ public class ListingC {
         EBAY
     }
 
-    public ListingC() {
-    }
+    public MT market;
 
-    public ListingC(String html) {
+    public ListingC(MT market, String html) {
+        this.market = market;
         this.html = html;
     }
 
@@ -95,8 +94,7 @@ public class ListingC {
         Element root = Jsoup.parse(html);
 
         this.asin = root.select("#ASIN").val().toUpperCase();
-        Element site = root.select("#navLogoPrimary > span").first();
-        this.listingId = String.format("%s_%s", this.asin, site.text());
+        this.listingId = String.format("%s_%s", this.asin, this.market);
 //        Elements images = root.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
         Element img = root.select("#prodImage").first();
         if(img != null) {
@@ -148,8 +146,8 @@ public class ListingC {
             ListingOfferC buybox = new ListingOfferC();
             buybox.buybox = true;
             if(noFbaPrice != null) {
-                buybox.price = amazonPrice(site.text(), noFbaPrice.select(".price").text());
-                buybox.shipprice = amazonPrice(site.text(), noFbaPrice.select(".plusShippingText").text());
+                buybox.price = ListingC.amazonPrice(this.market, noFbaPrice.select(".price").text());
+                buybox.shipprice = ListingC.amazonPrice(this.market, noFbaPrice.select(".plusShippingText").text());
                 buybox.offerId = root.select("#merchantID").val().toUpperCase();
                 buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
                 buybox.fba = false;
@@ -192,7 +190,7 @@ public class ListingC {
                     buybox.name = fbaTextLink.previousElementSibling().text();
                 }
                 buybox.offerId = root.select("#merchantID").val().toUpperCase();
-                buybox.price = amazonPrice(site.text(), root.select(".priceLarge").text());
+                buybox.price = ListingC.amazonPrice(this.market, root.select(".priceLarge").text());
                 buybox.shipprice = 0;
             }
             offers.add(buybox);
@@ -207,13 +205,13 @@ public class ListingC {
                 ListingOfferC moreSeller = new ListingOfferC();
                 moreSeller.offerId = seller.id().split("_")[2].toUpperCase();
                 moreSeller.name = seller.select(".mbcMerch >td").first().text();
-                moreSeller.price = amazonPrice(site.text(), seller.select(".mbcPriceCell").text());
+                moreSeller.price = ListingC.amazonPrice(this.market, seller.select(".mbcPriceCell").text());
                 String shippingText = seller.select(".plusShippingText").text().toUpperCase();
                 if(shippingText.contains("&") || shippingText.contains("FREE")) {
                     moreSeller.fba = true;
                     moreSeller.shipprice = 0f;
                 } else {
-                    moreSeller.shipprice = amazonPrice(site.text(), shippingText);
+                    moreSeller.shipprice = ListingC.amazonPrice(this.market, shippingText);
                 }
                 offers.add(moreSeller);
             } catch(Exception e) {
@@ -224,25 +222,20 @@ public class ListingC {
         return this;
     }
 
-    /**
-     * 都使用 NumberInstance 而不是 CurrencyInstance, 不需要她们的单位符号
-     */
-    static final NumberFormat nf_de = NumberFormat.getNumberInstance(Locale.GERMAN);
-    static final NumberFormat nf_uk = NumberFormat.getNumberInstance(Locale.UK);
-    static final NumberFormat nf_us = NumberFormat.getNumberInstance(Locale.US);
-
-    private Float amazonPrice(String site, String priceStr) {
+    public static Float amazonPrice(MT mt, String priceStr) {
         try {
+            switch(mt) {
+                case AUK:
+                case AUS:
+                    return Webs.amazonPriceNumber(mt, priceStr.substring(1));
+                case ADE:
+                case AIT:
+                case AES:
+                case AFR:
+                    return Webs.amazonPriceNumber(mt, priceStr.split(" ")[1]);
+                default:
+                    return -1f;
 
-            if("amazon.co.uk".equals(site.toLowerCase())) {
-                return nf_uk.parse(priceStr.substring(1)).floatValue();
-            } else if("amazon.com".equals(site.toLowerCase())) {
-                return nf_us.parse(priceStr.substring(1)).floatValue();
-            } else if("amazon.de".equals(site) || "amazon.fr".equals(site) ||
-                    "amazon.es".equals(site) || "amazon.it".equals(site)) {
-                return nf_de.parse(priceStr.split(" ")[1]).floatValue();
-            } else {
-                return -1f;
             }
         } catch(Exception e) {
             Logger.warn("AmazonPrice parse error. [" + e.getMessage() + "]");
