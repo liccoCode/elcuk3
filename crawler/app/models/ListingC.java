@@ -142,59 +142,63 @@ public class ListingC {
 
         // ListingOffers Infos
         List<ListingOfferC> offers = new ArrayList<ListingOfferC>();
-        // buybox
+        // buybox, 并不是一定会有 buybox(异常)
         Element noFbaPrice = root.select("#pricePlusShippingQty").first();
-        ListingOfferC buybox = new ListingOfferC();
-        buybox.buybox = true;
-        if(noFbaPrice != null) {
-            buybox.price = amazonPrice(site.text(), noFbaPrice.select(".price").text());
-            buybox.shipprice = amazonPrice(site.text(), noFbaPrice.select(".plusShippingText").text());
-            buybox.offerId = root.select("#merchantID").val().toUpperCase();
-            buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
-            buybox.fba = false;
-        } else {
-            Element fbaTextLink = root.select("#SSOFpopoverLink").first();
-            if(fbaTextLink == null) {
-                /**
-                 *  没有 fbalink 还几种情况:
-                 *  1. 产品正常销售, Amazon 绿色
-                 *  2. 产品无法销售, Currently unavailable 红色
-                 *  3. 产品预期到货, 橙色
-                 */
-                Element tmpEl = root.select(".availGreen").first();
-                boolean goon = true; // 是否继续处理
-                if(tmpEl == null) {
-                    tmpEl = root.select(".availRed").first();
-                } else { // availGreen
-                    goon = false;
-                    buybox.name = tmpEl.parent().select("b").first().text();
-                    buybox.buybox = buybox.fba = true; // Selled by Amazon.
+        try {
+            ListingOfferC buybox = new ListingOfferC();
+            buybox.buybox = true;
+            if(noFbaPrice != null) {
+                buybox.price = amazonPrice(site.text(), noFbaPrice.select(".price").text());
+                buybox.shipprice = amazonPrice(site.text(), noFbaPrice.select(".plusShippingText").text());
+                buybox.offerId = root.select("#merchantID").val().toUpperCase();
+                buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
+                buybox.fba = false;
+            } else {
+                Element fbaTextLink = root.select("#SSOFpopoverLink").first();
+                if(fbaTextLink == null) {
+                    /**
+                     *  没有 fbalink 还几种情况:
+                     *  1. 产品正常销售, Amazon 绿色
+                     *  2. 产品无法销售, Currently unavailable 红色
+                     *  3. 产品预期到货, 橙色
+                     */
+                    Element tmpEl = root.select(".availGreen").first();
+                    boolean goon = true; // 是否继续处理
+                    if(tmpEl == null) {
+                        tmpEl = root.select(".availRed").first();
+                    } else { // availGreen
+                        goon = false;
+                        buybox.name = tmpEl.parent().select("b").first().text();
+                        buybox.buybox = buybox.fba = true; // Selled by Amazon.
+                    }
+                    if(tmpEl == null) {
+                        //TODO 搜索橙色的
+                    } else if(goon) { // availRed
+                        goon = false;
+                        buybox.name = tmpEl.text();
+                        buybox.buybox = buybox.fba = false;
+                    }
+                    if(tmpEl == null) {
+                        //绿色, 红色, 橙色都找不到了... 直接记录 offers 什么都没找到
+                        buybox.name = "Find Nothing.";
+                        buybox.buybox = buybox.fba = false;
+                    } else if(goon) {
+                        goon = false;
+                        buybox.name = "橙色的提示, 预期到货";
+                        buybox.buybox = buybox.fba = false;
+                    }
+                } else { // 正常抓取到了 FBA
+                    buybox.fba = true;
+                    buybox.name = fbaTextLink.previousElementSibling().text();
                 }
-                if(tmpEl == null) {
-                    //TODO 搜索橙色的
-                } else if(goon) { // availRed
-                    goon = false;
-                    buybox.name = tmpEl.text();
-                    buybox.buybox = buybox.fba = false;
-                }
-                if(tmpEl == null) {
-                    //绿色, 红色, 橙色都找不到了... 直接记录 offers 什么都没找到
-                    buybox.name = "Find Nothing.";
-                    buybox.buybox = buybox.fba = false;
-                } else if(goon) {
-                    goon = false;
-                    buybox.name = "橙色的提示, 预期到货";
-                    buybox.buybox = buybox.fba = false;
-                }
-            } else { // 正常抓取到了 FBA
-                buybox.fba = true;
-                buybox.name = fbaTextLink.previousElementSibling().text();
+                buybox.offerId = root.select("#merchantID").val().toUpperCase();
+                buybox.price = amazonPrice(site.text(), root.select(".priceLarge").text());
+                buybox.shipprice = 0;
             }
-            buybox.offerId = root.select("#merchantID").val().toUpperCase();
-            buybox.price = amazonPrice(site.text(), root.select(".priceLarge").text());
-            buybox.shipprice = 0;
+            offers.add(buybox);
+        } catch(Exception e) {
+            Logger.warn(e.getClass().getSimpleName() + "|" + e.getMessage() + "|" + "No Buybox.");
         }
-        offers.add(buybox);
 
         // more sellers
         Elements moreSellers = root.select("#more-buying-choice-content-div > .mbcOffers tr[id]");
