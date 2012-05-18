@@ -5,6 +5,7 @@ import play.data.validation.Required;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -21,16 +22,26 @@ public class AmazonProps {
      * 使用  Webs.SPLIT 进行分割, 最多 5 行
      */
     public String keyFetures;
+    @Transient
+    public String[] keyFeturess;
     /**
      * Recommended Browse Nodes;
      * 使用 [,] 进行分割, 一般为 2 个
      */
     public String RBN;
+
+    @Transient
+    public String[] rbns;
     /**
      * For most products, this will be identical to the model number;
      * however, some manufacturers distinguish part number from model number
      */
     public String manufacturerPartNumber;
+
+    /**
+     * Amazon 上表示打包这个产品的数量
+     */
+    public Integer quantity;
     /**
      * 如果这个 Condition 不为空, 那么则覆盖掉 Listing 中的 Condition
      */
@@ -72,11 +83,17 @@ public class AmazonProps {
     @Lob
     public String searchTerms;
 
+    @Transient
+    public String[] searchTermss;
+
     /**
      * 使用 Webs.SPLIT 进行分割, 5 行
      */
     @Lob
     public String platinumKeywords;
+
+    @Transient
+    public String[] platinumKeywordss;
 
     @Expose
     public String upc;

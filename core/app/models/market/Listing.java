@@ -13,7 +13,6 @@ import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -105,22 +104,6 @@ public class Listing extends GenericModel {
     public Long lastUpdateTime;
 
     public Long nextUpdateTime;
-
-    // ----------------- 上架会需要使用到的信息 ------------------
-    public Date launchDate;
-    public String condition_;
-    /**
-     * Number of the same product contained within one package.
-     * For example, if you are selling a case of 10 packages of socks, ItemPackageQuantity would be 10.
-     */
-    public Integer packageQuantity = 1;
-    /**
-     * Number of discrete items included in the product you are offering for sale, such that each item
-     * is not packaged for individual sale.
-     * For example, if you are selling a case of 10 packages of socks, and each package contains 3 pairs
-     * of socks, NumberOfItems would be 30.
-     */
-    public Integer numberOfItems = 1;
 
 
     public void setAsin(String asin) {

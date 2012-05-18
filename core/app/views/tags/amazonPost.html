@@ -1,1 +1,92 @@
-Post Amazon Param...
+<div>Butons..</div>
+#{set pro:lst.product/}
+<table class="table table-condensed">
+    <tr>
+        <th>Title:</th>
+        <td colspan="3"><textarea rows="2" class="span10">${pro.productName}</textarea></td>
+    </tr>
+    <tr>
+        <th>MSKU:</th>
+        <td><input type="text" name="s.sku" value="${pro.sku}"></td>
+        <th>Qty:</th>
+        <td><input type="text" name="s.aps.quantity" value="1"></td>
+    </tr>
+    <tr>
+        <th>UPC:</th>
+        <td><input type="text" name="s.aps.upc"></td>
+        <th>Condition:</th>
+        <td><input type="text" name="s.aps.condition_"></td>
+    </tr>
+    <tr>
+        <th>Manufac:</th>
+        <td><input type="text" name="s.aps.manufacturer" value="EasyAcc"></td>
+        <th>PartNumber:</th>
+        <td><input type="text" name="s.aps.manufacturerPartNumber"></td>
+    </tr>
+
+    <tr>
+        <th>RBN:</th>
+        <td>
+            <input type="text" name="s.aps.rbns[0]">
+        </td>
+        <td>
+            <input type="text" name="s.aps.rbns[1]">
+        </td>
+    </tr>
+
+    <tr>
+        <th>Price:</th>
+        <td><input type="text" name="s.aps.standerPrice"></td>
+        <th>SalePrice:</th>
+        <td><input type="text" name="s.aps.salePrice"></td>
+    </tr>
+
+    <tr>
+        <th>StartDate</th>
+        <td><input type="text" name="s.aps.startDate" value="2011-01-01"></td>
+        <th>EndtDate</th>
+        <td><input type="text" name="s.aps.endDate" value="2015-01-01"></td>
+    </tr>
+
+    <tr>
+        <th rowspan="5">Technical:</th>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.keyFeturess[0]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.keyFeturess[1]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.keyFeturess[2]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.keyFeturess[3]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.keyFeturess[4]"></td>
+    </tr>
+
+
+    <tr>
+        <th rowspan="5">SearchTerms:</th>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.searchTermss[0]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.searchTermss[1]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.searchTermss[2]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.searchTermss[3]"></td>
+    </tr>
+    <tr>
+        <td colspan="3"><input type="text" class="span8" name="s.aps.searchTermss[4]"></td>
+    </tr>
+
+    <tr>
+        <th>ProductDesc:</th>
+        <td colspan="3">
+            <textarea rows="10" name="s.aps.productDesc" class="span10"></textarea>
+        </td>
+    </tr>
+</table>
