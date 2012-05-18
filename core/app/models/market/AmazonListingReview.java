@@ -130,7 +130,7 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     public AmazonListingReview createReview() {
-        this.createDate = this.reviewDate;
+        this.createDate = new Date();
         return this.save();
     }
 
@@ -149,7 +149,8 @@ public class AmazonListingReview extends GenericModel {
 //        if(StringUtils.isNotBlank(newReview.listingId)) this.listingId = newReview.listingId; //这个不修改
         if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
             this.comment += String.format("\r\n%s:%s", Dates.date2Date(null), Webs.exposeGson(this));
-            this.lastRating = newReview.rating;
+            this.lastRating = this.rating;
+            this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
         if(StringUtils.isNotBlank(newReview.title)) this.title = newReview.title;
