@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * 抓取使用的 Listing 信息
+ * 抓取使用的 ListingC 信息
  * User: Wyatt
  * Date: 12-1-2
  * Time: 下午4:36
  */
-public class Listing {
+public class ListingC {
 
     /**
      * 这个 listing 是哪个市场的
@@ -28,10 +28,10 @@ public class Listing {
         EBAY
     }
 
-    public Listing() {
+    public ListingC() {
     }
 
-    public Listing(String html) {
+    public ListingC(String html) {
         this.html = html;
     }
 
@@ -69,15 +69,15 @@ public class Listing {
 
     public String picUrls;
 
-    public List<ListingOffer> offers;
+    public List<ListingOfferC> offers;
 
     /**
-     * 根据指定的抓取的 Listing 类型进行解析
+     * 根据指定的抓取的 ListingC 类型进行解析
      *
      * @param type
      * @return
      */
-    public Listing parseFromHTML(T type) {
+    public ListingC parseFromHTML(T type) {
         switch(type) {
             case AMAZON:
                 parseAmazon();
@@ -90,7 +90,7 @@ public class Listing {
         return this;
     }
 
-    private Listing parseAmazon() {
+    private ListingC parseAmazon() {
         // html
         Element root = Jsoup.parse(html);
 
@@ -107,7 +107,7 @@ public class Listing {
             this.picUrls = "";
         }
 
-        // Basic Listing Infos
+        // Basic ListingC Infos
         Element titleEl = root.select("#btAsinTitle").first();
         this.title = titleEl.text();
         this.byWho = titleEl.parent().nextElementSibling().text();
@@ -141,10 +141,10 @@ public class Listing {
         this.productDescription = root.select("#productDescription").outerHtml();
 
         // ListingOffers Infos
-        List<ListingOffer> offers = new ArrayList<ListingOffer>();
+        List<ListingOfferC> offers = new ArrayList<ListingOfferC>();
         // buybox
         Element noFbaPrice = root.select("#pricePlusShippingQty").first();
-        ListingOffer buybox = new ListingOffer();
+        ListingOfferC buybox = new ListingOfferC();
         buybox.buybox = true;
         if(noFbaPrice != null) {
             buybox.price = amazonPrice(site.text(), noFbaPrice.select(".price").text());
@@ -200,7 +200,7 @@ public class Listing {
         Elements moreSellers = root.select("#more-buying-choice-content-div > .mbcOffers tr[id]");
         for(Element seller : moreSellers) {
             try {
-                ListingOffer moreSeller = new ListingOffer();
+                ListingOfferC moreSeller = new ListingOfferC();
                 moreSeller.offerId = seller.id().split("_")[2].toUpperCase();
                 moreSeller.name = seller.select(".mbcMerch >td").first().text();
                 moreSeller.price = amazonPrice(site.text(), seller.select(".mbcPriceCell").text());
@@ -246,7 +246,7 @@ public class Listing {
         }
     }
 
-    private Listing parseEbay() {
+    private ListingC parseEbay() {
         // Not Yet...
         return this;
     }

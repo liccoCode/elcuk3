@@ -3,7 +3,7 @@ package controllers;
 import helper.HTTP;
 import models.ARW;
 import models.AmazonListingReview;
-import models.Listing;
+import models.ListingC;
 import models.MT;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Listings extends Controller {
+public class ListingCs extends Controller {
 
     /**
-     * 根据市场, asin 来抓取 Listing
+     * 根据市场, asin 来抓取 ListingC
      *
      * @param market us, uk, de, it
      * @param asin   amazon asin
@@ -42,14 +42,14 @@ public class Listings extends Controller {
             FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
         // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
         try {
-            renderJSON(new Listing(html).parseFromHTML(Listing.T.AMAZON));
+            renderJSON(new ListingC(html).parseFromHTML(ListingC.T.AMAZON));
         } catch(NullPointerException e) {
-            renderJSON(new Listing(e.getMessage()));
+            renderJSON(new ListingC(e.getMessage()));
         }
     }
 
     /**
-     * 抓取这个 Listing 的 Review, 一次性最多抓取 5 页或者抓取到最后一页中所有的 Reviews;
+     * 抓取这个 ListingC 的 Review, 一次性最多抓取 5 页或者抓取到最后一页中所有的 Reviews;
      *
      * @param market
      * @param asin
