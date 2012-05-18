@@ -240,7 +240,7 @@ public class ListingC {
 
             }
         } catch(Exception e) {
-            Logger.warn("AmazonPrice parse error. [" + e.getMessage() + "]");
+            Logger.warn("ListingC.amazonPrice error.(" + mt.toString() + ") [" + priceStr + "|" + e.getMessage() + "]");
             return -1f;
         }
     }

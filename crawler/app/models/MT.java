@@ -15,6 +15,27 @@ public enum MT {
     AIT,
     EUK;
 
+    public String toString() {
+        switch(this) {
+            case AUK:
+                return "amazon.co.uk";
+            case ADE:
+                return "amazon.de";
+            case AIT:
+                return "amazon.it";
+            case AFR:
+                return "amazon.fr";
+            case AES:
+                return "amazon.es";
+            case AUS:
+                return "amazon.com";
+            case EUK:
+                return "ebay.co.uk";
+            default:
+                return "amazon.co.uk";
+        }
+    }
+
     public static MT val(String market) {
         String s = market.toLowerCase();
         if("uk".equals(s) || s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") || s.equals("www.amazon.co.uk")) {
@@ -40,14 +61,12 @@ public enum MT {
         //http://www.amazon.it/product-reviews/{ASIN}?pageNumber={PAGE}&sortBy=bySubmissionDateDescending
         switch(this) {
             case AUK:
-                return String.format("http://www.amazon.co.uk/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", asin, page);
             case AUS:
-                return String.format("http://www.amazon.com/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", asin, page);
             case ADE:
             case AES:
             case AIT:
             case AFR:
-                return String.format("http://www.amazon.%s/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", this.name().toLowerCase(), asin, page);
+                return String.format("http://www.%s/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", this.toString(), asin, page);
             default:
                 return "";
         }
@@ -57,14 +76,12 @@ public enum MT {
         //http://www.amazon.co.uk/dp/B007TR9VRU
         switch(this) {
             case AUK:
-                return String.format("http://www.amazon.co.uk/dp/%s", asin);
             case AUS:
-                return String.format("http://www.amazon.com/dp/%s", asin);
             case ADE:
             case AES:
             case AIT:
             case AFR:
-                return String.format("http://www.amazon.%s/dp/%s", this.name().toLowerCase(), asin);
+                return String.format("http://www.%s/dp/%s", this.toString(), asin);
             default:
                 return "";
         }
@@ -74,14 +91,12 @@ public enum MT {
         //http://www.amazon.co.uk/gp/offer-listing/B007TR9VRU
         switch(this) {
             case AUK:
-                return String.format("http://www.amazon.co.uk/gp/offer-listing/%s", asin);
             case AUS:
-                return String.format("http://www.amazon.com/gp/offer-listing/%s", asin);
             case ADE:
             case AES:
             case AIT:
             case AFR:
-                return String.format("http://www.amazon.%s/gp/offer-listing/%s", this.name().toLowerCase(), asin);
+                return String.format("http://www.%s/gp/offer-listing/%s", this.toString(), asin);
             default:
                 return "";
         }

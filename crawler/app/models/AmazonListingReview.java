@@ -1,6 +1,5 @@
 package models;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -23,7 +22,7 @@ public class AmazonListingReview {
 
     /**
      * Amazon ListingC Review 的 Id:
-     * [listingId]_[userid]_[title.trim()] 的 md5Hex 值
+     * ([listingId]_[userid])toUppercase()
      */
     public String alrId;
 
@@ -115,7 +114,7 @@ public class AmazonListingReview {
                 review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
                 review.lastRating = review.rating; // 对 LastRating 的初始化
 
-                review.title = r.select("> div span b").text().trim();
+                review.title = r.select("> div > div > div > a:eq(0) > span").text().trim();
 
                 String helpfulStr = r.select("> div").first().text();
                 int[] two = {0, 0};
@@ -143,7 +142,7 @@ public class AmazonListingReview {
 
                 review.review = r.ownText();
 
-                review.alrId = DigestUtils.md5Hex(String.format("%s_%s", review.listingId, review.userid));
+                review.alrId = String.format("%s_%s", review.listingId, review.userid).toUpperCase();
 
                 reviewList.add(review);
             } catch(Exception e) {

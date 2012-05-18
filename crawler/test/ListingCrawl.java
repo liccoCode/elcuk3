@@ -49,7 +49,7 @@ public class ListingCrawl extends UnitTest {
         Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc).size());
     }
 
-    @Test
+    //    @Test
     public void testParseReviewUK() throws IOException {
         //UK
         Document doc = Jsoup.parse(new File(ListingCrawl.HOME + "/elcuk2-data/reviews/AUK/B005JSG7GE_1.html"), "UTF-8");
@@ -57,13 +57,13 @@ public class ListingCrawl extends UnitTest {
 
     }
 
-    @Test
+    //    @Test
     public void testParseVedioReview() throws IOException {
         Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/reviews/ADE/B004BTWMEI_10.html"), "UTF-8");
         Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc).size());
     }
 
-    @Test
+    //    @Test
     public void testParseListingFromReview() throws IOException {
         Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/reviews/AUK/B005JSG7GE_2.html"), "UTF-8");
         AmazonListingReview.parseReviewFromHTML(doc);

@@ -84,7 +84,7 @@ public class Webs {
                     Logger.warn("Not Support Market." + market);
             }
         } catch(Exception e) {
-            Logger.warn("AmazonPrice parse error.(" + market + ") [" + e.getMessage() + "]");
+            Logger.warn("Webs.amazonPriceNumber error.(" + market + ") [" + priceStr + "|" + e.getMessage() + "]");
         }
         return -0.1f;
     }
@@ -134,7 +134,7 @@ public class Webs {
                     Logger.warn("Not Support Market." + market);
             }
         } catch(Exception e) {
-            Logger.warn("AmazonPrice parse error.(" + market + ") [" + e.getMessage() + "]");
+            Logger.warn("Webs.amazonPriceCurrency error.(" + market + ") [" + priceStr + "|" + e.getMessage() + "]");
         }
         return -0.1f;
     }
