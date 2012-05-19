@@ -58,20 +58,22 @@ public class FeedbackCrawlJob extends Job {
             if(market != Account.M.AMAZON_UK &&
                     market != Account.M.AMAZON_FR &&
                     market != Account.M.AMAZON_DE) return;
-            acc.changeRegion(market);
-            for(int i = 1; i <= 5; i++) {
-                List<Feedback> feedbacks = acc.fetchFeedback(i);
-                if(feedbacks.size() == 0) {
-                    Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
-                    break;
-                } else {
-                    Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
-                }
+            synchronized(acc.cookieStore()) { // 将 CookieStore 锁住, 防止更改了 Region 以后有其他的地方进行操作.
+                acc.changeRegion(market);
+                for(int i = 1; i <= 5; i++) {
+                    List<Feedback> feedbacks = acc.fetchFeedback(i);
+                    if(feedbacks.size() == 0) {
+                        Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
+                        break;
+                    } else {
+                        Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+                    }
 
-                //这段代码在 Feedbacks 也使用了, 但不好将其抽取出来
-                for(Feedback f : feedbacks) {
-                    Feedback manager = f.checkSaveOrUpdate();
-                    manager.checkMailAndTicket();
+                    //这段代码在 Feedbacks 也使用了, 但不好将其抽取出来
+                    for(Feedback f : feedbacks) {
+                        Feedback manager = f.checkSaveOrUpdate();
+                        manager.checkMailAndTicket();
+                    }
                 }
             }
         } catch(Exception e) {

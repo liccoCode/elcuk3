@@ -57,6 +57,31 @@ public class Account extends Model {
         AMAZON_US,
         EBAY_UK;
 
+        /**
+         * Amazon MarketPlaceId, 在 Amazon 上用来区分 uk/de/us 等等市场的 ID
+         * !! TODO US 市场的暂时还没有
+         *
+         * @return
+         */
+        public String amid() {
+            switch(this) {
+                case AMAZON_UK:
+                    return "A1F83G8C2ARO7P";
+                case AMAZON_DE:
+                    return "A1PA6795UKMFR9";
+                case AMAZON_IT:
+                    return "APJ6JRA9NG5V4";
+                case AMAZON_FR:
+                    return "A13V1IB3VIYZZH";
+                case AMAZON_ES:
+                    return "A1RKKUPIHCS9HS";
+                case AMAZON_US:
+                case EBAY_UK:
+                default:
+                    return "";
+            }
+        }
+
         public String toString() {
             switch(this) {
                 case AMAZON_UK:
@@ -251,8 +276,9 @@ public class Account extends Model {
                     } else if("80-qw1a56-be".equalsIgnoreCase(sell.merchantSKU)) {
                         msku = "80-qw1a56-be";
                     }
-                    return "https://catalog-sc." + sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/
-                            + "/abis/product/DisplayEditProduct?sku=" + msku + "&asin=" + sell.asin;
+                    return String.format("https://catalog-sc.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                            sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);
+
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();
@@ -510,10 +536,13 @@ public class Account extends Model {
      */
     public File briefFlatFinance(M market) {
         try {
-            this.loginWebSite();
-            this.changeRegion(market);
-            Logger.info("Downloading [%s] File...", this.username);
-            String body = HTTP.get(this.cookieStore(), this.type.flatFinance());
+            String body = "";
+            synchronized(this.cookieStore()) { // 在与 Amazon 交互下载文件的时候需要锁住 CookieStore
+                this.loginWebSite();
+                this.changeRegion(market);
+                Logger.info("Downloading [%s] File...", this.username);
+                body = HTTP.get(this.cookieStore(), this.type.flatFinance());
+            }
             DateTime dt = DateTime.now();
             File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
                     Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
