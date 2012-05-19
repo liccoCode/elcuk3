@@ -197,7 +197,9 @@ public class Selling extends GenericModel {
     /**
      * <pre>
      * 将传入的 Selling 的数据更新到 渠道上并且更新数据库;
-     * PS: 请确保 Selling 中的信息是正确的, 这个方法仅仅根据对应的参数做提交操作, 不再验证数据!
+     * PS:
+     *  - 请确保 Selling 中的信息是正确的, 这个方法仅仅根据对应的参数做提交操作, 不再验证数据!
+     *  - 此方法进行了 synchronized, 因为更新的时候需要将其使用的 Cookie 给锁住, 不能进行更换
      * 更新:
      * 1. price
      * 2. salePrice, startDate, endDate
@@ -213,104 +215,104 @@ public class Selling extends GenericModel {
      *          deploy 方法失败会抛出异常
      */
     public void deploy() {
-        switch(this.market) {
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_UK:
-            case AMAZON_US:
-                // 1. 切换 Selling 所在区域
-                this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
-                String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
-                if(Play.mode.isDev())
-                    IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+        synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
+            switch(this.market) {
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_UK:
+                case AMAZON_US:
+                    // 1. 切换 Selling 所在区域
+                    this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+                    String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+                    if(Play.mode.isDev())
+                        IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
 
 
-                // 2. 设置需要提交的值
-                Document doc = Jsoup.parse(body);
-                // ----- Input 框框
-                Elements inputs = doc.select("form[name=productForm] input");
-                if(inputs.size() == 0) {
-                    Logger.warn("Listing Update Page Error! Log to ....?");
-                    try {
-                        FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.E_ERROR, this.merchantSKU, this.asin)), body);
-                    } catch(IOException e) {
-                        //ignore..
+                    // 2. 设置需要提交的值
+                    Document doc = Jsoup.parse(body);
+                    // ----- Input 框框
+                    Elements inputs = doc.select("form[name=productForm] input");
+                    if(inputs.size() == 0) {
+                        Logger.warn("Listing Update Page Error! Log to ....?");
+                        try {
+                            FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.E_ERROR, this.merchantSKU, this.asin)), body);
+                        } catch(IOException e) {
+                            //ignore..
+                        }
+                        throw new FastRuntimeException("Display Post page visit Error. Please try again.");
                     }
-                    throw new FastRuntimeException("Display Post page visit Error. Please try again.");
-                }
-                Set<NameValuePair> params = new HashSet<NameValuePair>();
-                for(Element el : inputs) {
-                    String name = el.attr("name").toLowerCase().trim();
-                    if("our_price".equals(name) && this.price != null && this.price > 0) {
-                        params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.price)));
-                    } else if("discounted_price".equals(name) ||
-                            "discounted_price_start_date".equals(name) ||
-                            "discounted_price_end_date".equals(name)) {
-                        if(this.aps.startDate != null && this.aps.endDate != null && this.aps.salePrice != null && this.aps.salePrice > 0) {
-                            params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.aps.salePrice)));
-                            params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
-                            params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
-                        }
-                    } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms)) {
-                        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.aps.searchTerms, Webs.SPLIT);
-                        for(int i = 0; i < searchTermsArr.length; i++) {
-                            if(searchTermsArr[i].length() > 50)
-                                throw new FastRuntimeException("SearchTerm length must blew then 50.");
-                            params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
-                        }
-                        // length = 3, 0~2, need 3,4
-                        int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
-                        if(missingIndex > 0) {
-                            for(int i = 1; i <= missingIndex; i++) {
-                                params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
+                    Set<NameValuePair> params = new HashSet<NameValuePair>();
+                    for(Element el : inputs) {
+                        String name = el.attr("name").toLowerCase().trim();
+                        if("our_price".equals(name) && this.price != null && this.price > 0) {
+                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.price)));
+                        } else if("discounted_price".equals(name) ||
+                                "discounted_price_start_date".equals(name) ||
+                                "discounted_price_end_date".equals(name)) {
+                            if(this.aps.startDate != null && this.aps.endDate != null && this.aps.salePrice != null && this.aps.salePrice > 0) {
+                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.aps.salePrice)));
+                                params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
+                                params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
                             }
+                        } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms)) {
+                            String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.aps.searchTerms, Webs.SPLIT);
+                            for(int i = 0; i < searchTermsArr.length; i++) {
+                                if(searchTermsArr[i].length() > 50)
+                                    throw new FastRuntimeException("SearchTerm length must blew then 50.");
+                                params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
+                            }
+                            // length = 3, 0~2, need 3,4
+                            int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
+                            if(missingIndex > 0) {
+                                for(int i = 1; i <= missingIndex; i++) {
+                                    params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
+                                }
+                            }
+                        } else {
+                            params.add(new BasicNameValuePair(name, el.val()));
                         }
-                    } else {
-                        params.add(new BasicNameValuePair(name, el.val()));
                     }
-                }
-
-                // ------------ TextArea 框框
-                Elements textareas = doc.select("form[name=productForm] textarea");
-                for(Element text : textareas) {
-                    String name = text.attr("name");
-                    if("product_description".equals(name) && StringUtils.isNotBlank(this.aps.productDesc)) {
-                        if(this.aps.productDesc.length() > 2000)
-                            throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
-                        params.add(new BasicNameValuePair(name, this.aps.productDesc));
-                    } else {
-                        params.add(new BasicNameValuePair(name, text.val()));
+                    // ------------ TextArea 框框
+                    Elements textareas = doc.select("form[name=productForm] textarea");
+                    for(Element text : textareas) {
+                        String name = text.attr("name");
+                        if("product_description".equals(name) && StringUtils.isNotBlank(this.aps.productDesc)) {
+                            if(this.aps.productDesc.length() > 2000)
+                                throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+                            params.add(new BasicNameValuePair(name, this.aps.productDesc));
+                        } else {
+                            params.add(new BasicNameValuePair(name, text.val()));
+                        }
                     }
-                }
-
-                // ------------ Select 框框
-                Elements selects = doc.select("form[name=productForm] select");
-                for(Element select : selects) {
-                    params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
-                }
+                    // ------------ Select 框框
+                    Elements selects = doc.select("form[name=productForm] select");
+                    for(Element select : selects) {
+                        params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
+                    }
 
 
-                // 3. 提交
-                String[] args = StringUtils.split(doc.select("form[name=productForm]").first().attr("action"), ";");
-                body = HTTP.post(this.account.cookieStore(),
-                        Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
-                        params);
-                if(StringUtils.isBlank(body)) // 这个最先检查
-                    throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
-                if(Play.mode.isDev())
-                    IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-                doc = Jsoup.parse(body);
-                Elements error = doc.select(".messageboxerror li");
-                if(error.size() > 0)
-                    throw new FastRuntimeException("Error:" + error.text());
+                    // 3. 提交
+                    String[] args = StringUtils.split(doc.select("form[name=productForm]").first().attr("action"), ";");
+                    body = HTTP.post(this.account.cookieStore(),
+                            Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
+                            params);
+                    if(StringUtils.isBlank(body)) // 这个最先检查
+                        throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+                    if(Play.mode.isDev())
+                        IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+                    doc = Jsoup.parse(body);
+                    Elements error = doc.select(".messageboxerror li");
+                    if(error.size() > 0)
+                        throw new FastRuntimeException("Error:" + error.text());
 
-                // 4. 更新回数据库
-                this.save();
-                break;
-            case EBAY_UK:
-                break;
+                    // 4. 更新回数据库
+                    this.save();
+                    break;
+                case EBAY_UK:
+                    break;
+            }
         }
     }
 
