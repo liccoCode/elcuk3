@@ -16,11 +16,18 @@ import java.util.Date;
  */
 @Embeddable
 public class AmazonProps {
+    @Lob
+    @Required
+    @Expose
+    public String title;
+    @Expose
     public String modelNumber;
+    @Expose
     public String manufacturer;
     /**
      * 使用  Webs.SPLIT 进行分割, 最多 5 行
      */
+    @Expose
     public String keyFetures;
     @Transient
     public String[] keyFeturess;
@@ -28,6 +35,7 @@ public class AmazonProps {
      * Recommended Browse Nodes;
      * 使用 [,] 进行分割, 一般为 2 个
      */
+    @Expose
     public String RBN;
 
     @Transient
@@ -36,17 +44,22 @@ public class AmazonProps {
      * For most products, this will be identical to the model number;
      * however, some manufacturers distinguish part number from model number
      */
+    @Expose
     public String manufacturerPartNumber;
 
     /**
      * Amazon 上表示打包这个产品的数量
      */
+    @Expose
     public Integer quantity;
     /**
      * 如果这个 Condition 不为空, 那么则覆盖掉 Listing 中的 Condition
      */
+    @Expose
     public String condition_;
+
     @Required
+    @Expose
     public Float standerPrice;
 
     @Expose
@@ -66,21 +79,26 @@ public class AmazonProps {
      * Does your item have a legal disclaimer associated with it?
      */
     @Lob
+    @Expose
     public String legalDisclaimerDesc;
+    @Expose
     public Date launchDate;
     @Lob
+    @Expose
     public String sellerWarrantyDesc;
 
     /**
      * 核心的产品描述
      */
     @Lob
+    @Expose
     public String productDesc;
 
     /**
      * 使用 Webs.SPLIT 进行分割, 5 行
      */
     @Lob
+    @Expose
     public String searchTerms;
 
     @Transient
@@ -90,6 +108,7 @@ public class AmazonProps {
      * 使用 Webs.SPLIT 进行分割, 5 行
      */
     @Lob
+    @Expose
     public String platinumKeywords;
 
     @Transient

@@ -1,5 +1,10 @@
 package models;
 
+import play.data.validation.Error;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * 前台返回结果使用
  * User: wyattpan
@@ -36,5 +41,16 @@ public class Ret {
 
     public Ret() {
         this(true);
+    }
+
+    public Ret(Map<String, List<Error>> errors) {
+        this(false);
+        if(errors != null) {
+            StringBuilder sbd = new StringBuilder();
+            for(String key : errors.keySet()) {
+                sbd.append(String.format("%s -> %s \r\n", key, errors.get(key)));
+            }
+            this.message = sbd.toString();
+        }
     }
 }

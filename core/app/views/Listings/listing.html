@@ -16,13 +16,13 @@
     </li>
 </ul>
 <div id="listingTabContent" class="tab-content">
-    <div class="tab-pane fade active in" id="basic">
+    <div class="tab-pane fade in" id="basic"> <!-- TODO 测试完后将 active 补回去-->
         <div><label class="label label-info">Basic</label></div>
         <div style="min-height:300px;">
             <table class="table table-bordered table-condensed">
                 <tr>
                     <th>ListingId:</th>
-                    <td>${lst.listingId}</td>
+                    <td id="lid">${lst.listingId}</td>
                     <th>ASIN:</th>
                     <td>${lst.asin}</td>
                     <th>Market:</th>
@@ -115,7 +115,7 @@
     #{/list}
 
     </div>
-    <div class="tab-pane fade" id="amazon">
+    <div class="tab-pane fade active in" id="amazon">
     #{amazonPost /}
     </div>
     <div class="tab-pane fade" id="ebay">

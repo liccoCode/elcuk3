@@ -36,4 +36,13 @@ $(function(){
 
     });
 
+    $('#s_sale').click(function(){
+        $.varClosure.params = {'s.listing.listingId':$('#lid').text()};
+        $("#amazon :input").map($.varClosure);
+        $.post('/listings/saleAmazonListing', $.varClosure.params, function(r){
+            if(r.flag) alert('更新成功.');
+            else alert(r.message);
+        });
+    });
+
 });

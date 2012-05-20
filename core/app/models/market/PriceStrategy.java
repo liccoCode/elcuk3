@@ -32,6 +32,31 @@ public class PriceStrategy extends Model {
         FixedPrice
     }
 
+    public PriceStrategy() {
+    }
+
+    /**
+     * <pre>
+     * 绑定此 Selling 的默认 PriceStrategy 对象
+     *  - Type: FixedPrice
+     *  - Margin: 0.3
+     *  - Lowest: 0.85 * selling.aps.salePrice
+     *  - Max: 1.5 * selling.aps.salePrice
+     *  - Cost: 0.6 * selling.aps.salePrice
+     * </pre>
+     *
+     * @param selling
+     */
+    public PriceStrategy(Selling selling) {
+        this.selling = selling;
+        this.type = T.FixedPrice;
+        this.margin = 0.3f;
+        this.lowest = selling.aps.salePrice * 0.85f;
+        this.max = selling.aps.salePrice * 1.5f;
+        this.differ = 0f;
+        this.cost = selling.aps.salePrice * 0.6f;
+    }
+
     @OneToOne(mappedBy = "priceStrategy")
     public Selling selling;
 

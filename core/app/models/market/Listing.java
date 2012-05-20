@@ -3,16 +3,27 @@ package models.market;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import helper.Currency;
+import com.google.gson.annotations.Expose;
+import helper.*;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import play.Logger;
+import play.Play;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Listing 对应的是不同渠道上 Listing 的信息
@@ -50,58 +61,74 @@ public class Listing extends GenericModel {
      * 用来表示唯一的 ListingId, [asin]_[market]
      */
     @Id
+    @Expose
     public String listingId;
 
     @Column(nullable = false)
+    @Expose
     public String asin;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Expose
     public Account.M market;
 
     @Column(nullable = false)
     @Lob
+    @Expose
     public String title;
     /**
      * title xxxx by [??]
      */
+    @Expose
     public String byWho;
 
+    @Expose
     public Integer reviews;
 
+    @Expose
     public Float rating;
 
     @Lob
+    @Expose
     public String technicalDetails;
 
     @Lob
+    @Expose
     public String productDescription;
 
     /**
      * 抓取的图片的 URLs, 使用 Webs.SPLIT(|-|) 进行分割
      */
     @Lob
+    @Expose
     public String picUrls;
 
     /**
      * 此 Listing 是否需要进行警告的的标识, 并且记录警告了多少次.
      */
+    @Expose
     public Integer warnningTimes;
 
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
      */
+    @Expose
     public Integer saleRank;
 
+    @Expose
     public Integer totalOffers;
 
     /**
      * 代表从 Category 页面抓取的时候显示的价格, 或者 buybox 的价格.
      */
+    @Expose
     public Float displayPrice;
 
+    @Expose
     public Long lastUpdateTime;
 
+    @Expose
     public Long nextUpdateTime;
 
 
@@ -141,6 +168,207 @@ public class Listing extends GenericModel {
         }
         this.lastUpdateTime = System.currentTimeMillis();
         this.save();
+    }
+
+    /**
+     * <pre>
+     * 此 Listing 进行上架
+     * TODO: 包含一些写死的 Selling 默认值
+     * - type=FBA
+     * - priceStrategy
+     * - state=NEW (形成一个占位符, 具体的开始销售在 Selling 对象自身完成)
+     * </pre>
+     *
+     * @param lst
+     * @param selling
+     * @return
+     */
+    public static Selling saleAmazon(Listing lst, Selling selling) {
+        /**
+         * 0. 属性的逻辑性检查
+         *  - TODO UPC 相同的 Selling 需要对 MSKU 进行一致性检查
+         * 1. 将 Listing 相关信息同步到 Selling 上
+         * 2. 检查 UPC 的值, 这个值需要在这检查一下已经使用过的 UPC 与还没有使用的 UPC.
+         * 3. 开始上架
+         */
+        selling.listing = lst;
+        selling.price = selling.aps.salePrice;
+        selling.market = lst.market;
+
+        selling.type = Selling.T.FBA;
+        selling.priceStrategy = new PriceStrategy(selling);
+        selling.state = Selling.S.NEW;
+
+        selling.aps.keyFetures = StringUtils.join(selling.aps.keyFeturess, Webs.SPLIT);
+        selling.aps.searchTerms = StringUtils.join(selling.aps.searchTermss, Webs.SPLIT);
+        selling.aps.RBN = StringUtils.join(selling.aps.rbns, ",");
+
+        synchronized(selling.account.cookieStore()) {
+            selling.account.changeRegion(selling.market);
+            /**
+             * !. 前提,在确定了账户的 Region 的情况下!
+             * 1. 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 的 classify 页面, 有一个隐藏 token
+             * 2. 拿着隐藏 Token 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 进入 identify 页面
+             * 3. 提交创建 Selling 的参数
+             */
+
+            // --------------   1   -------------------
+            String body = HTTP.get(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/);
+            if(Play.mode.isDev())
+                Devs.fileLog(String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
+
+            Document doc = Jsoup.parse(body);
+            Elements inputs = doc.select("form[name=selectProductTypeForm] input");
+            Set<NameValuePair> classifyHiddenParams = new HashSet<NameValuePair>();
+            for(Element input : inputs) {
+                String name = input.attr("name");
+                if("newCategory".equals(name)) { //TODO 这里的类别先写死, 需要将这个类别与系统内的类别挂钩
+                    classifyHiddenParams.add(new BasicNameValuePair(name, "consumer_electronics/consumer_electronics"));
+                } else classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
+            }
+
+            body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/, classifyHiddenParams);
+            if(Play.mode.isDev())
+                Devs.fileLog(String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
+            doc = Jsoup.parse(body);
+
+            //  ------------------ 2 -----------------
+            Set<NameValuePair> addSellingPrams = new HashSet<NameValuePair>();
+            inputs = doc.select("form[name=productForm] input");
+            if(inputs == null || inputs.size() <= 7) throw new FastRuntimeException("没有进入第二步 Identify 页面!");
+            for(Element input : inputs) {
+                String name = input.attr("name");
+                String tagType = input.attr("type");
+                if("radio".equals(tagType)) { //对于 radio 的只能选择 checked 的,不能让后面的元素把前面的值给覆盖了.
+                    if(StringUtils.isBlank(input.attr("checked"))) continue;
+                    addSellingPrams.add(new BasicNameValuePair(name, input.val()));
+                } else if("checkbox".equals(tagType)) {
+                    /**
+                     * Amazon  中 checkbox 都是不需要提交的. 都有一个 hidden 的元素与其对应
+                     * - offering_can_be_gift_wrapped
+                     * - offering_can_be_gift_messaged
+                     * - connector_gender(female/female)
+                     * - connector_gender(male/male)
+                     * - connector_gender(male/female)
+                     * - hot_shoe_included
+                     * - traffic_features_description(Traffic only)
+                     * - traffic_features_description(Live HD traffic)
+                     * - traffic_features_description(Live traffic)
+                     * - are_batteries_included
+                     * - is_discontinued_by_manufacturer
+                     * 有以上这么些元素收到影响
+                     */
+
+                } else { // 非 Radio 的 input 按照如下处理
+                    if("item_name".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.title));
+                    else if("manufacturer".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturer));
+                    else if("brand_name".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, "EasyAcc")); // ?? 这个品牌的名字现在都使用我们自己的?
+                    else if("part_number".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturerPartNumber)); //TODO 不记得了...
+                    else if("model".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.modelNumber)); // TODO 不记得了...
+                    else if("external_id".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.upc));
+                    else if("offering_sku".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.merchantSKU));
+                    else if("our_price".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(selling.market, selling.aps.standerPrice)));
+                    else if("discounted_price".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(selling.market, selling.aps.salePrice)));
+                    else if("discounted_price_start_date".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
+                    else if("discounted_price_end_date".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, Dates.listingUpdateFmt(selling.market, selling.aps.endDate)));
+                    else if("Offer_Inventory_Quantity".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.quantity + ""));
+                    else if("activeClientTimeOnTask".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
+                    else if("matchAsin".equals(name))
+                        addSellingPrams.add(new BasicNameValuePair(name, "QjAwODNRWDhBVw==")); // 在 JS 方法 preProcessMatch 执行时, 已经将 matchAsin 计算出来了,固定值
+                    else if("encoded_session_hidden_map".equals(name)) {
+                        addSellingPrams.add(new BasicNameValuePair(name, input.val()));
+                        // 在发现了 encoded_session_hidden_map 以后需要添加这样一个属性(JS 动态添加的)
+                        addSellingPrams.add(new BasicNameValuePair("sessionMapPresent", "true"));
+                    } else if(StringUtils.startsWith(name, "bullet_point")) {
+                        int fetureSize = selling.aps.keyFeturess.length;
+                        for(int i = 0; i < fetureSize; i++)
+                            addSellingPrams.add(new BasicNameValuePair("bullet_point[" + i + "]", selling.aps.keyFeturess[i]));
+                        if(fetureSize < 5) { // 不足 5 个
+                            for(int i = 0; i < (5 - fetureSize); i++)
+                                addSellingPrams.add(new BasicNameValuePair("bullet_point[" + (i + fetureSize) + "]", ""));
+                        }
+                    } else if(StringUtils.startsWith(name, "generic_keywords")) {
+                        int searchTermsSize = selling.aps.searchTermss.length;
+                        for(int i = 0; i < searchTermsSize; i++)
+                            addSellingPrams.add(new BasicNameValuePair("generic_keywords[" + i + "]", selling.aps.searchTermss[i]));
+                        if(searchTermsSize < 5) {
+                            for(int i = 0; i < (5 - searchTermsSize); i++)
+                                addSellingPrams.add(new BasicNameValuePair("generic_keywords[" + (i + searchTermsSize) + "]", ""));
+                        }
+                    } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
+                        //TODO 这里没有检查 recommended_browse_nodes, 请在 Controller 中检查.
+                        addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns[0]));
+                        addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[1]", selling.aps.rbns[1]));
+                    } else {
+                        addSellingPrams.add(new BasicNameValuePair(name, input.val()));
+                    }
+                }
+            }
+
+            Elements textAreas = doc.select("form[name=productForm] textarea");
+            /**
+             * Product Description
+             * Condition Note -- 有需要再补充
+             * Seller Warranty Description -- 有需要再补充
+             */
+            for(Element textarea : textAreas) {
+                String name = textarea.attr("name");
+                if("product_description".equals(name))
+                    addSellingPrams.add(new BasicNameValuePair(name, selling.aps.productDesc));
+                else
+                    addSellingPrams.add(new BasicNameValuePair(name, textarea.val()));
+            }
+
+            Elements selects = doc.select("form[name=productForm] select");
+            for(Element select : selects) {
+                String name = select.attr("name");
+                // Condition
+                if("offering_condition".equals(name))
+                    addSellingPrams.add(new BasicNameValuePair(name, "New|New")); // 商品的 Condition 设置为 NEW
+                else
+                    addSellingPrams.add(new BasicNameValuePair(name, select.select("option[selected]").val()));
+            }
+            // -------------  3 -----------------
+            /**
+             * 上架时候的错误信息全部返回给前台.
+             */
+            for(NameValuePair n : addSellingPrams) {
+                if(StringUtils.isBlank(n.getValue())) continue;
+                System.out.println(n);
+            }
+            body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/, addSellingPrams);
+            if(Play.mode.isDev())
+                Devs.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
+
+            doc = Jsoup.parse(body);
+            Element form = doc.select("form").first();
+            if(form == null) throw new FastRuntimeException(
+                    String.format("提交的参数错误.(详细错误信息咨询 IT 查看 E_LOG/listing_sale/%s.%s.step3.html)",
+                            selling.merchantSKU, selling.account.id));
+
+            for(Element hidden : doc.select("input")) {
+                String name = hidden.attr("name");
+                if("newItemAsin".equals(name)) selling.asin = hidden.val();
+            }
+            // 最后再检查是否添加成功?
+            if(StringUtils.isBlank(selling.asin)) throw new FastRuntimeException("未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!");
+        }
+
+        //测试使用的 UPC 614444720150
+        return selling.save();
     }
 
 

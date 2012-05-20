@@ -1,0 +1,46 @@
+package helper;
+
+
+import org.apache.commons.io.FileUtils;
+import play.Logger;
+
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: wyattpan
+ * Date: 5/20/12
+ * Time: 3:13 PM
+ */
+public class Devs {
+    public enum T {
+        /**
+         * 上架 Listing 相关的错误
+         */
+        SALES
+    }
+
+    /**
+     * 需要记录下来的, 发生错误的单个文件的日志, 例如更新 Listing 失败时候的向 Amazon 获取的 html 页面
+     *
+     * @param fileName
+     * @param content
+     * @param f
+     */
+    public static void fileLog(String fileName, String content, T f) {
+        String baseUrl = "";
+        switch(f) {
+            case SALES:
+                baseUrl = Constant.L_LISTING;
+                break;
+            default:
+                baseUrl = "";
+        }
+        try {
+            FileUtils.writeStringToFile(new File(String.format("%s/%s", baseUrl, fileName)), content, "UTF-8");
+        } catch(IOException e) {
+            Logger.warn("Devs.fileLog write file error.", Webs.E(e));
+        }
+    }
+}

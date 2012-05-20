@@ -1,5 +1,6 @@
 package models.market;
 
+import com.google.gson.annotations.Expose;
 import exception.NotLoginFastException;
 import exception.NotSupportChangeRegionFastException;
 import helper.AWS;
@@ -287,6 +288,60 @@ public class Account extends Model {
         }
 
         /**
+         * 模拟人工上架使用的链接.
+         * - Amazon: 由于 Amazon 上架方式, 其需要访问两次这个页面, 一次 CLASSIFY 一次 IDENTIFY
+         *
+         * @return
+         */
+        public String saleSellingLink() {
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://catalog-sc.%s/abis/Classify/SelectCategory", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+        public String saleSellingPostLink() {
+            //https://catalog-sc.amazon.co.uk/abis/product/ProcessCreateProduct
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://catalog-sc.%s/abis/product/ProcessCreateProduct", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+        public String saleSellingStateLink() {
+            //https://sellercentral.amazon.de/gp/ezdpc-gui/inventory-status/status.html
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://sellercentral.%s/gp/ezdpc-gui/inventory-status/status.html", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+
+        /**
          * 模拟人工方式修改 Listing 信息的地址
          *
          * @return
@@ -334,12 +389,14 @@ public class Account extends Model {
                     throw new NotSupportChangeRegionFastException();
             }
         }
+
     }
 
     /**
      * 用于限制唯一性的字段; [type]_[username]
      */
     @Column(unique = true, nullable = false)
+    @Expose
     public String uniqueName;
 
     /**
@@ -348,6 +405,7 @@ public class Account extends Model {
     @Required
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Expose
     public M type;
 
     /**
@@ -355,6 +413,7 @@ public class Account extends Model {
      */
     @Required
     @Column(nullable = false)
+    @Expose
     public String username;
 
     /**
@@ -362,6 +421,7 @@ public class Account extends Model {
      */
     @Required
     @Column(nullable = false)
+    @Expose
     public String password;
 
     /**
@@ -369,18 +429,21 @@ public class Account extends Model {
      * Secret Key; [Amazon]
      * Toekn; [Ebay]
      */
+    @Expose
     public String token;
-
+    @Expose
     public String accessKey;
 
     /**
      * Amazon MerchantID
      */
+    @Expose
     public String merchantId;
 
     /**
      * 是否可用
      */
+    @Expose
     public boolean closeable = false;
 
 
@@ -577,7 +640,7 @@ public class Account extends Model {
             }
             DateTime dt = DateTime.now();
             File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
-                    Constant.E_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
+                    Constant.D_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
             Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
             FileUtils.writeStringToFile(f, body);
             return f;

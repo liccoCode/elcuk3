@@ -164,10 +164,6 @@ public class Selling extends GenericModel {
     public Float turnOver = 0f;
 
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
-    @Lob
-    @Required
-    public String title;
-
     @Embedded
     @Expose
     public AmazonProps aps;
@@ -180,6 +176,7 @@ public class Selling extends GenericModel {
      * 这个 Selling 所属的哪一个用户
      */
     @ManyToOne
+    @Expose
     public Account account;
 
     public void setMerchantSKU(String merchantSKU) {
@@ -237,7 +234,7 @@ public class Selling extends GenericModel {
                     if(inputs.size() == 0) {
                         Logger.warn("Listing Update Page Error! Log to ....?");
                         try {
-                            FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.E_ERROR, this.merchantSKU, this.asin)), body);
+                            FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, this.merchantSKU, this.asin)), body);
                         } catch(IOException e) {
                             //ignore..
                         }
@@ -333,7 +330,7 @@ public class Selling extends GenericModel {
      * @return 返回更新后的
      */
     public Selling updateAttr(Selling newSelling) {
-        if(StringUtils.isNotBlank(newSelling.title)) this.title = newSelling.title;
+        if(StringUtils.isNotBlank(newSelling.aps.title)) this.aps.title = newSelling.aps.title;
         if(StringUtils.isNotBlank(newSelling.aps.modelNumber)) this.aps.modelNumber = newSelling.aps.modelNumber;
         if(StringUtils.isNotBlank(newSelling.aps.manufacturer)) this.aps.manufacturer = newSelling.aps.manufacturer;
         if(StringUtils.isNotBlank(newSelling.aps.keyFetures)) this.aps.keyFetures = newSelling.aps.keyFetures;
@@ -603,7 +600,7 @@ public class Selling extends GenericModel {
                     selling.market = market;
                     selling.merchantSKU = t_msku;
 
-                    selling.title = lst.title;
+                    selling.aps.title = lst.title;
                     selling.account = acc;
                     selling.shippingPrice = 0f;
                     selling.aps.standerPrice = selling.price = lst.displayPrice;

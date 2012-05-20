@@ -35,7 +35,7 @@ public class Finances extends Controller {
     public static void fix(String n, String m, Account a) {
         try {
             if(!a.isPersistent()) renderText("Account is not Persistent!");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.E_FINANCE + "/fix/" + n + ".txt"), a, Account.M.val(m));
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.D_FINANCE + "/fix/" + n + ".txt"), a, Account.M.val(m));
             SaleFee.clearOldSaleFee(fees);
             SaleFee.batchSaveWithJDBC(fees);
             renderText("Saved: " + fees.size() + " fees");
@@ -57,7 +57,7 @@ public class Finances extends Controller {
      * @param f
      */
     public static void upload(File f) {
-        String path = Constant.E_FINANCE + "/fix/" + f.getName().split("\\.")[0] + ".txt";
+        String path = Constant.D_FINANCE + "/fix/" + f.getName().split("\\.")[0] + ".txt";
         try {
             FileUtils.copyFile(f, new File(path));
         } catch(IOException e) {

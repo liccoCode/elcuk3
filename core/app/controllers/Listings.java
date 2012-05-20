@@ -17,6 +17,7 @@ import play.cache.CacheFor;
 import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -52,11 +53,14 @@ public class Listings extends Controller {
 
     /**
      * 详细的查看 Listing
+     *
+     * @param lid ListingId
      */
 //    @CacheFor(value = "10mn")
     public static void listing(String lid) {
         Listing lst = Listing.findById(lid);
-        render(lst);
+        List<Account> accs = Account.all().fetch();
+        render(lst, accs);
     }
 
     public static void reload() {
@@ -66,6 +70,27 @@ public class Listings extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
         renderJSON(new Ret(true, "缓存重新加载"));
+    }
+
+    public static void saleAmazonListing(Selling s) {
+        /**
+         * 从前台上传来的一系列的值检查
+         */
+
+        Validation.required(Messages.get("s.title"), s.aps.title);
+        Validation.required(Messages.get("s.upc"), s.aps.upc);
+        Validation.required(Messages.get("s.manufac"), s.aps.manufacturer);
+        Validation.required(Messages.get("s.rbn"), s.aps.rbns);
+        Validation.required(Messages.get("s.price"), s.aps.standerPrice);
+        Validation.required(Messages.get("s.tech"), s.aps.keyFeturess);
+        Validation.required(Messages.get("s.keys"), s.aps.searchTermss);
+        Validation.required(Messages.get("s.prodDesc"), s.aps.productDesc);
+        Validation.required(Messages.get("s.msku_req"), s.merchantSKU);
+        if(Validation.hasErrors()) renderJSON(new Ret(Validation.current().errorsMap()));
+        if(Selling.exist(s.merchantSKU)) renderJSON(new Ret(Messages.get("s.msku")));
+
+        // 在 Controller 里面将值处理好
+        Listing.saleAmazon(s.listing, s);
     }
 
     // --------------------------------------

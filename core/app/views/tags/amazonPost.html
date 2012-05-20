@@ -1,15 +1,23 @@
-<div>Butons..</div>
+<div style="margin-bottom:5px;">
+    <button class="btn btn-primary" id="s_sale">Sale</button>
+</div>
 #{set pro:lst.product/}
 <table class="table table-condensed">
     <tr>
         <th>Title:</th>
-        <td colspan="3"><textarea rows="2" class="span10">${pro.productName}</textarea></td>
+        <td colspan="3"><textarea rows="2" name="s.aps.title" class="span10">${pro.productName}</textarea></td>
     </tr>
     <tr>
         <th>MSKU:</th>
-        <td><input type="text" name="s.sku" value="${pro.sku}"></td>
-        <th>Qty:</th>
-        <td><input type="text" name="s.aps.quantity" value="1"></td>
+        <td><input type="text" name="s.merchantSKU" value="${pro.sku}"></td>
+        <th>Acc:</th>
+        <td>
+            <select name="s.account.id" size="1">
+            #{list items:accs, as:'acc'}
+                <option value="${acc.id}">${acc.prettyName()}</option>
+            #{/list}
+            </select>
+        </td>
     </tr>
     <tr>
         <th>UPC:</th>
@@ -27,11 +35,11 @@
     <tr>
         <th>RBN:</th>
         <td>
-            <input type="text" name="s.aps.rbns[0]">
+            <input type="text" class="input-mini" name="s.aps.rbns[0]">
+            <input type="text" class="input-mini" name="s.aps.rbns[1]">
         </td>
-        <td>
-            <input type="text" name="s.aps.rbns[1]">
-        </td>
+        <th>Qty:</th>
+        <td><input type="text" name="s.aps.quantity" value="1"></td>
     </tr>
 
     <tr>
