@@ -111,21 +111,6 @@ public class Listings extends Controller {
         renderJSON(tobeSave);
     }
 
-
-    /**
-     * 在 Amazon 上已经存在了 Selling, 将 Selling 重新帮顶到系统中的 Listing 身上.
-     *
-     * @param s
-     * @param lid
-     */
-    public static void bindSelling(Selling s, String lid) {
-        Listing lst = Listing.find("listingId=?", lid).first();
-        if(lst == null) renderJSON(new Error("Listing", "Not valid listingId.", new String[]{}));
-        lst.bindSelling(s);
-        s.listing = null;
-        renderJSON(s);
-    }
-
     /**
      * 为某一个 Listing 进行上架;
      * 区分 Market(Amazon, Ebay), Account

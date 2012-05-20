@@ -3,7 +3,6 @@ package models.market;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import exception.VErrorRuntimeException;
 import helper.Currency;
 import models.product.Product;
 import notifiers.Mails;
@@ -144,35 +143,6 @@ public class Listing extends GenericModel {
         this.save();
     }
 
-    /**
-     * 将一个手动创建的 Selling 绑定到一个 Listing 身上, 其中需要经过一些操作
-     *
-     * @param s
-     * @return
-     */
-    public Selling bindSelling(Selling s) {
-        /**
-         * 检查这个 Selling 是否已经存在
-         */
-        if(Selling.exist(s.sellingId)) return s;
-
-        s.listing = this;
-        s.price = s.priceStrategy.cost * s.priceStrategy.margin;
-        s.shippingPrice = s.priceStrategy.shippingPrice;
-
-        // --- Selling 可处理信息的处理
-        s.title = this.title;
-        s.aps.condition_ = C.NEW.toString();
-        s.aps.standerPrice = s.priceStrategy.max;
-        s.aps.productDesc = this.productDescription; // 这个肯定是需要人工处理下的.
-
-
-        // Account 暂时处理, 仅仅使用这一个用户
-        Account acc = Account.find("uniqueName=?", s.account.uniqueName).first();
-        if(acc == null) throw new VErrorRuntimeException("Listing.Account", "Account is invalid.", new String[]{});
-        s.account = acc;
-        return s.save();
-    }
 
     /**
      * 加载此 Listing 所具有的所有 Selling 的状态的个数
