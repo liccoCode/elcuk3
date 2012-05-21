@@ -187,10 +187,20 @@ public class Listing extends GenericModel {
         /**
          * 0. 属性的逻辑性检查
          *  - TODO UPC 相同的 Selling 需要对 MSKU 进行一致性检查
+         *  - merchantSKU 的格式为 [sku,upc] 如果不一样, 则抛异常
          * 1. 将 Listing 相关信息同步到 Selling 上
          * 2. 检查 UPC 的值, 这个值需要在这检查一下已经使用过的 UPC 与还没有使用的 UPC.
          * 3. 开始上架
          */
+        try {
+            if(!StringUtils.equals(StringUtils.split(selling.merchantSKU, ",")[1], selling.aps.upc))
+                throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc]");
+        } catch(FastRuntimeException e) {
+            throw e;
+        } catch(Exception e) {
+            throw new FastRuntimeException(String.format("(%s) 解析 MerchantSKU 的格式错误!", selling.merchantSKU));
+        }
+
         selling.listing = lst;
         selling.price = selling.aps.salePrice;
         selling.market = lst.market;

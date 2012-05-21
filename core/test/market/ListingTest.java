@@ -32,13 +32,14 @@ public class ListingTest extends UnitTest {
     public void testSaleAmazon() {
         Listing lst = Listing.findById("B005UO12HQ_amazon.co.uk");
         Selling sell = new Selling();
-        sell.merchantSKU = "10HTCEVO3D-1900S,3";
         sell.account = Account.findById(1l);
         sell.listing = lst;
 
         sell.aps = new AmazonProps();
         sell.aps.title = "SANER® 1900mAh rechargeable Li-ion Battery for HTC EVO 3D - Extra Long Life, Compatible with HTC Shooter, Amaze 4G, Sensation XL)";
         sell.aps.upc = "614444720150";
+//        sell.merchantSKU = String.format("10HTCEVO3D-1900S,%s", sell.aps.upc);
+        sell.merchantSKU = String.format("10HTCEVO3D-1900S,3");
         //614444720150
         //0600743015066
         sell.aps.manufacturerPartNumber = "EasyAcc";
