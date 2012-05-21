@@ -6,7 +6,7 @@
 
     <p>&nbsp;</p>
 
-    <p>* 现在在系统中通过 Listing 上架还没有将模板功能实现, 所以现在的参数, 都需要自己手动填写.</p>
+    <p>* 现在在系统中通过 Product 上架还没有将模板功能实现, 所以现在的参数, 都需要自己手动填写.</p>
 
     <p>* Preview 功能拥有提示 Amazon 不允许的标签的功能, 能够方便的在这里检查出不允许的标签并查看到预览效果.</p>
 
@@ -17,8 +17,10 @@
     <p>* UPC 会检查并且给出已经上架的 Selling (需要处理历史数据...).</p>
 
     <p>* RBN 可以的参考信息还需要进行补全.</p>
+
+    <p>* 现在还不支持从 Listing 上架 Selling, 只能够通过 Product 上架, 会自动创建 Listing, Selling.</p>
 </div>
-#{set pro:lst.product/}
+#{set pro:p/}
 <table class="table table-condensed">
     <tr>
         <th>Title:</th>
@@ -26,7 +28,10 @@
     </tr>
     <tr>
         <th>MSKU:</th>
-        <td><input type="text" name="s.merchantSKU" readonly="" value="${pro.sku}"></td>
+        <td>
+            <input type="text" name="s.merchantSKU" readonly="" value="${pro.sku}">
+            <input type="hidden" name="p.sku" value="${pro.sku}">
+        </td>
         <th>Acc:</th>
         <td>
             <select name="s.account.id" size="1">
@@ -44,11 +49,11 @@
                 <button class="btn btn-small btn-warning">@</button>
             </div>
         </td>
-        <th>Market/Condition:</th>
+        <th>Condition/Market:</th>
         <td>
             <div class="input-prepend">
                 <input type="text" readonly="" name="s.aps.condition_" value="NEW" class="span1">
-                <span class="add-on">${lst.market}</span>
+            #{markets id:'market', class:'span2', name:'s.market'/}
             </div>
         </td>
     </tr>
@@ -63,7 +68,9 @@
         <th>RBN:</th>
         <td>
             <div class="input-prepend">
-                <a id="rbn_help" class="btn btn-small" href="#" rel="popover" data-original-title="RBN Helper" data-content="等待添加..">
+                <a id="rbn_help" class="btn btn-small" href="#" rel="popover" data-original-title="RBN Helper" data-content="
+                Elektronik & Foto > Festnetztelefone, VOIP & Zubehör > Telefonzubehör > Akkus und Batterien -> 316905011<hr/>
+                Elektronik & Foto > Handys & Zubehör > Handyzubehör > Akkus -> 364919031">
                     <i class="icon-info-sign"></i>
                 </a>
                 <input type="text" class="input-mini" name="s.aps.rbns[0]">
@@ -78,7 +85,7 @@
         <th>Price:</th>
         <td>
             <div class="input-prepend">
-                <span class="add-on">#{marketCurrency market:lst.market/}</span>
+                <span class="currency add-on">?</span>
                 <input type="text" class="span2" name="s.aps.standerPrice" placeHolder="Ex:19.99">
             </div>
         </td>
@@ -86,7 +93,7 @@
         <td>
             <div class="input-prepend">
                 <div class="input-prepend">
-                    <span class="add-on">#{marketCurrency market:lst.market/}</span>
+                    <span class="currency add-on">?</span>
                     <input type="text" class="span2" name="s.aps.salePrice" placeHolder="Ex:15.99">
                 </div>
             </div>
@@ -106,13 +113,13 @@
             <div class="input-prepend">
                 <label style="display:inline;">From: </label>
                 <a class="btn btn-small"
-                   href="#" rel="popover" data-original-title="Selling Helper" data-content="输入参考的 SellingId (属于 Category <span style='color:blue;'>${lst.product.category}</span>) 加载 Technical, SearchTerms, Desc 供参考">
+                   href="#" rel="popover" data-original-title="Selling Helper" data-content="输入参考的 SellingId (属于 Category <span style='color:blue;'>${pro.category}</span>) 加载 Technical, SearchTerms, Desc 供参考">
                     <i class="icon-info-sign"></i>
                 </a>
                 <input type="text" class="span2" data-provide="typeahead" style="margin:auto;" data-items="8" data-source="${sellingDataSource}">
-                <a class="btn btn-primary">
+                <button class="btn btn-primary">
                     <i class="icon-refresh icon-white"></i>
-                </a>
+                </button>
             </div>
         </td>
     </tr>

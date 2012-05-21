@@ -1,6 +1,9 @@
 <table class="table table-bordered table-condensed span12">
     <tr>
-        <th>ListingId</th>
+        <th>
+            ListingId
+            (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)
+        </th>
         <th class="span6">Title</th>
         <th>Review</th>
     </tr>

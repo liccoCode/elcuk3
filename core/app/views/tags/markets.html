@@ -1,0 +1,6 @@
+<select id="${_id}" class='${_class}' name='${_name}' size="1">
+    <option value="">All Market</option>
+#{list items:models.market.Account.M.values(), as:'m'}
+    <option value="${m.name()}">${m}</option>
+#{/list}
+</select>

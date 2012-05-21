@@ -48,6 +48,5 @@ public class LinkExtensions extends JavaExtensions {
                 return String.format(baseAmazon, selling.market.toString(), selling.asin);
         }
         return "#";
-
     }
 }

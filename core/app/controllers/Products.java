@@ -1,10 +1,12 @@
 package controllers;
 
+import com.google.gson.Gson;
 import helper.Constant;
 import helper.Webs;
 import models.PageInfo;
 import models.Ret;
 import models.market.Account;
+import models.market.Selling;
 import models.market.SellingQTY;
 import models.product.*;
 import org.apache.commons.io.FileUtils;
@@ -12,11 +14,13 @@ import play.Logger;
 import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +54,13 @@ public class Products extends Controller {
         List<Category> cats = Category.all().fetch();
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(p);
         List<AttrName> attnames = AttrName.productUnuseAttrName(p);
-        render(p, cats, qtys, attnames);
+        List<Account> accs = Account.all().fetch();
+
+        List<String> sellingIds = new ArrayList<String>();
+        List<Selling> cateSellings = Selling.find("listing.product.category=?", p.category).fetch();
+        for(Selling s : cateSellings) sellingIds.add(s.sellingId);
+        renderArgs.put("sellingDataSource", new Gson().toJson(sellingIds));
+        render(p, cats, qtys, attnames, accs);
     }
 
     public static void c_index(Integer p, Integer s) {
@@ -200,6 +210,41 @@ public class Products extends Controller {
         }
 
         renderJSON(new Ret(true, "Save:" + saved + ",Update:" + update));
+    }
+
+    public static void saleAmazonListing(Selling s, Product p) {
+        /**
+         * 从前台上传来的一系列的值检查
+         */
+        Validation.required(Messages.get("s.title"), s.aps.title);
+        Validation.required(Messages.get("s.upc"), s.aps.upc);
+        Validation.required(Messages.get("s.manufac"), s.aps.manufacturer);
+        Validation.required(Messages.get("s.rbn"), s.aps.rbns);
+        Validation.required(Messages.get("s.price"), s.aps.standerPrice);
+        Validation.required(Messages.get("s.tech"), s.aps.keyFeturess);
+        Validation.required(Messages.get("s.keys"), s.aps.searchTermss);
+        Validation.required(Messages.get("s.prodDesc"), s.aps.productDesc);
+        Validation.required(Messages.get("s.msku_req"), s.merchantSKU);
+        if(Validation.hasErrors()) renderJSON(new Ret(Validation.current().errorsMap()));
+        if(Selling.exist(s.merchantSKU)) renderJSON(new Ret(Messages.get("s.msku")));
+
+        // 在 Controller 里面将值处理好
+        Selling se = p.saleAmazon(s);
+        renderJSON(Webs.exposeGson(se));
+    }
+
+    public static void upcCheck(String upc) {
+        /**
+         * UPC 的检查;
+         * 1. 在哪一些 Selling 身上使用过?
+         * 2. 通过 UPC 与
+         */
+        try {
+            List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
+            renderJSON(Webs.exposeGson(upcSellings));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     /**

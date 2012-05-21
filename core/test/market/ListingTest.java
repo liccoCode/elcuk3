@@ -60,6 +60,6 @@ public class ListingTest extends UnitTest {
 
         sell.aps.productDesc = "ProductDesc";
 
-        Listing.saleAmazon(lst, sell);
+//        Product.saleAmazon(sell);
     }
 }

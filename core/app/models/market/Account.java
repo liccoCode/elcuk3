@@ -94,6 +94,27 @@ public class Account extends Model {
             }
         }
 
+        /**
+         * 返回 html 页面中单位的格式
+         *
+         * @return
+         */
+        public String htmlCurrency() {
+            switch(this) {
+                case AMAZON_US:
+                    return "$";
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                    return "&euro;";
+                case AMAZON_UK:
+                case EBAY_UK:
+                default:
+                    return "&pound;";
+            }
+        }
+
         public String toString() {
             switch(this) {
                 case AMAZON_UK:

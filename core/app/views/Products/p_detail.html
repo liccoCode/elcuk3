@@ -9,119 +9,144 @@
 读取的 Product 不存在!
 #{/if}
 #{else }
-<div class="row">
-    <div class="span12"><span class="label label-success">Product Basic</span></div>
-    <div class="span12">
-        <table class="table table-bordered" id="prod_basic">
-            <tr>
-                <td>SKU</td>
-                <td>${p.sku}<input id="p_sku" type="hidden" name="p.sku" value="${p.sku}"></td>
-                <td>L</td>
-                <td><input type="text" class="input-mini" name="p.lengths" value="${p.lengths == null ? 0 : p.lengths}">
-                </td>
-                <td>H</td>
-                <td><input type="text" class="input-mini" name="p.heigh" value="${p.heigh == null ? 0 : p.heigh}"></td>
-                <td>W</td>
-                <td><input type="text" class="input-mini" name="p.width" value="${p.width == null ? 0 : p.width}"></td>
-                <td>Wt</td>
-                <td><input type="text" class="input-mini" name="p.weight" value="${p.weight == null ? 0 : p.weight}">
-                </td>
-            </tr>
-            <tr>
-                <td>Title</td>
-                <td colspan="9"><input type="text" name="p.productName" class="span10" value="${p.productName}">
-                </td>
-            </tr>
-            <tr>
-                <td>Category</td>
-                <td>${p.category}</td>
-                <td>Brand</td>
-                <td>${p?.family?.brand}</td>
-                <td>Family</td>
-                <td>${p?.family?.family}</td>
-                <td colspan="4">&nbsp;</td>
-            </tr>
-            <tr>
-                <td colspan="10"><a href="#" class="btn btn-mini btn-primary" sku="${p.sku}">保存</a></td>
-            </tr>
-        </table>
-    </div>
+<ul class="nav nav-tabs">
+    <li class="active"><a href="#basic" data-toggle="tab">Info</a></li>
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">上架<b class="caret"></b></a>
+        <ul class="dropdown-menu">
+            <li><a href="#amazon" data-toggle="tab">@Amazon</a></li>
+            <li><a href="#ebay" data-toggle="tab">@eBay</a></li>
+        </ul>
+    </li>
+</ul>
 
 
-    <div class="span12"><span class="label label-success">Product (Selling)QTY</span></div>
-    <div class="span12">
-        <table class="table table-bordered" id="prod_sqty">
-            <tr>
-                <th>Qid</th>
-                <th>Inbound</th>
-                <th>Qty</th>
-                <th>Unsellable</th>
-                <th>Pending</th>
-                <th>ASIN</th>
-                <th>Whouse</th>
-                <th>&nbsp;</th>
-            </tr>
-            #{list items:qtys, as:'q'}
-                <tr id="prod_qty_${q.id}">
-                    <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
+<div class="tab-content">
+    <div class="tab-pane fade in " id="basic"><!-- TODO active -->
+        <div><span class="label label-success">Product Basic</span></div>
+        <div>
+            <table class="table table-bordered" id="prod_basic">
+                <tr>
+                    <td>SKU</td>
+                    <td>${p.sku}<input id="p_sku" type="hidden" name="p.sku" value="${p.sku}"></td>
+                    <td>L</td>
                     <td>
-                        <input type="text" class="input-mini" style="color:#4A8BF4;" name="q.inbound" value="${q.inbound}">
+                        <input type="text" class="input-mini" name="p.lengths" value="${p.lengths == null ? 0 : p.lengths}">
                     </td>
-                    <td><input type="text" class="input-mini" style="color:#9BD444;" name="q.qty" value="${q.qty}"></td>
+                    <td>H</td>
+                    <td><input type="text" class="input-mini" name="p.heigh" value="${p.heigh == null ? 0 : p.heigh}">
+                    </td>
+                    <td>W</td>
+                    <td><input type="text" class="input-mini" name="p.width" value="${p.width == null ? 0 : p.width}">
+                    </td>
+                    <td>Wt</td>
                     <td>
-                        <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="q.unsellable" value="${q.unsellable}">
+                        <input type="text" class="input-mini" name="p.weight" value="${p.weight == null ? 0 : p.weight}">
                     </td>
-                    <td>
-                        <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
-                    </td>
-                    <td><a target="_blank" href="${helper.Webs.link(q.selling)}">${q.selling.asin}</a>
-                        | ${q.selling.market}</td>
-                    <td>${q.whouse.name}</td>
-                    <td><a href="#" class="btn btn-mini btn-primary" qid="${q.id}">保存</a></td>
                 </tr>
-            #{/list}
-        </table>
-    </div>
+                <tr>
+                    <td>Title</td>
+                    <td colspan="9"><input type="text" name="p.productName" class="span10" value="${p.productName}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    <td>${p.category}</td>
+                    <td>Brand</td>
+                    <td>${p?.family?.brand}</td>
+                    <td>Family</td>
+                    <td>${p?.family?.family}</td>
+                    <td colspan="4">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="10"><a href="#" class="btn btn-mini btn-primary" sku="${p.sku}">保存</a></td>
+                </tr>
+            </table>
+        </div>
 
 
-    <div class="span12"><span class="label label-success">Attrbutes</span>&nbsp;&nbsp;
-        <button id="attr_btn" class="btn btn-mini btn-primary">保存</button>
-    </div>
-    <div class="span12" id="new_attrs">
-        <div class="span11">
-            #{list items:attnames, as:'an'}
-                <label class="checkbox inline">
-                    <input type="checkbox" name="${an.name}" value="${an.fullName}">${an.fullName}
-                </label>
+        <div><span class="label label-success">Product (Selling)QTY</span></div>
+        <div>
+            <table class="table table-bordered" id="prod_sqty">
+                <tr>
+                    <th>Qid</th>
+                    <th>Inbound</th>
+                    <th>Qty</th>
+                    <th>Unsellable</th>
+                    <th>Pending</th>
+                    <th>ASIN</th>
+                    <th>Whouse</th>
+                    <th>&nbsp;</th>
+                </tr>
+                #{list items:qtys, as:'q'}
+                    <tr id="prod_qty_${q.id}">
+                        <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#4A8BF4;" name="q.inbound" value="${q.inbound}">
+                        </td>
+                        <td><input type="text" class="input-mini" style="color:#9BD444;" name="q.qty" value="${q.qty}">
+                        </td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="q.unsellable" value="${q.unsellable}">
+                        </td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
+                        </td>
+                        <td><a target="_blank" href="${helper.Webs.link(q.selling)}">${q.selling.asin}</a>
+                            | ${q.selling.market}</td>
+                        <td>${q.whouse.name}</td>
+                        <td><a href="#" class="btn btn-mini btn-primary" qid="${q.id}">保存</a></td>
+                    </tr>
+                #{/list}
+            </table>
+        </div>
+
+
+        <div><span class="label label-success">Attrbutes</span>&nbsp;&nbsp;
+            <button id="attr_btn" class="btn btn-mini btn-primary">保存</button>
+        </div>
+        <div id="new_attrs">
+            <div>
+                #{list items:attnames, as:'an'}
+                    <label class="checkbox inline">
+                        <input type="checkbox" name="${an.name}" value="${an.fullName}">${an.fullName}
+                    </label>
+                #{/list}
+            </div>
+        </div>
+        <div id="attrs">
+            #{list items:p.attrs, as:'attr'}
+                #{set i:(attr_index - 1)/}
+                <div class="attr" id="${attr.attName.name}">
+                    <div>
+                        <label class="inline checkbox">
+                            <input type="checkbox" name="attrs[${i}].close"  ${attr.close ? "checked=''" : ""}>关闭?&nbsp;
+                            <a href="#${attr.id}" data-toggle="collapse" style="cursor:pointer;overflow:hidden;">
+                            ${attr.attName.fullName}(${attr.attName.name}) | ${attr.close} |
+                                <span id="${attr.id}_value">${attr.value}</span>
+                            </a>
+                        </label>
+                    </div>
+                    <div id="${attr.id}" class="collapse">
+                        <input type="hidden" name="attrs[${i}].id" value="${attr.id}">
+                        <input type="hidden" name="attrs[${i}].attName.name" value="${attr.attName.name}">
+                        <textarea id="${attr.id}_text" rows="4" name="attrs[${i}].value">${attr.value}</textarea>
+                    </div>
+                </div>
             #{/list}
         </div>
-    </div>
-    <div class="span12" id="attrs">
-        #{list items:p.attrs, as:'attr'}
-            #{set i:(attr_index - 1)/}
-            <div class="span11 attr" id="${attr.attName.name}">
-                <div class="span11">
-                    <label class="inline checkbox">
-                        <input type="checkbox" name="attrs[${i}].close"  ${attr.close ? "checked=''" : ""}>关闭?&nbsp;
-                        <a href="#${attr.id}" data-toggle="collapse" style="cursor:pointer;overflow:hidden;">
-                        ${attr.attName.fullName}(${attr.attName.name}) | ${attr.close} |
-                            <span id="${attr.id}_value">${attr.value}</span>
-                        </a>
-                    </label>
-                </div>
-                <div id="${attr.id}" class="collapse span11">
-                    <input type="hidden" name="attrs[${i}].id" value="${attr.id}">
-                    <input type="hidden" name="attrs[${i}].attName.name" value="${attr.attName.name}">
-                    <textarea id="${attr.id}_text" rows="4" name="attrs[${i}].value" class="span11">${attr.value}</textarea>
-                </div>
-            </div>
-        #{/list}
+
+        <div class="clearfix"></div>
+        <div><span class="label label-success">Images</span></div>
+        <div style="min-height:300px;background:#eee;" id="dropbox">
+            <ul class="thumbnails" id="uploaded"></ul>
+            <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+        </div>
     </div>
 
-    <div class="span12"><span class="label label-success">Images</span></div>
-    <div class="span12" style="height:300px;background:#eee;" id="dropbox">
-        <ul class="thumbnails" id="uploaded"></ul>
-        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+    <div class="tab-pane fade in active" id="amazon">
+        #{amazonPost /}
     </div>
+    <div class="tab-pane fade in" id="ebay">eBay TBD</div>
 </div>
 #{/else}
