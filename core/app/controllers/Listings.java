@@ -1,5 +1,6 @@
 package controllers;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import helper.Crawl;
 import helper.Webs;
@@ -21,6 +22,7 @@ import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,6 +62,11 @@ public class Listings extends Controller {
     public static void listing(String lid) {
         Listing lst = Listing.findById(lid);
         List<Account> accs = Account.all().fetch();
+
+        List<String> sellingIds = new ArrayList<String>();
+        List<Selling> cateSellings = Selling.find("listing.product.category=?", lst.product.category).fetch();
+        for(Selling s : cateSellings) sellingIds.add(s.sellingId);
+        renderArgs.put("sellingDataSource", new Gson().toJson(sellingIds));
         render(lst, accs);
     }
 
@@ -76,7 +83,6 @@ public class Listings extends Controller {
         /**
          * 从前台上传来的一系列的值检查
          */
-
         Validation.required(Messages.get("s.title"), s.aps.title);
         Validation.required(Messages.get("s.upc"), s.aps.upc);
         Validation.required(Messages.get("s.manufac"), s.aps.manufacturer);
@@ -90,7 +96,22 @@ public class Listings extends Controller {
         if(Selling.exist(s.merchantSKU)) renderJSON(new Ret(Messages.get("s.msku")));
 
         // 在 Controller 里面将值处理好
-        Listing.saleAmazon(s.listing, s);
+        Selling se = Listing.saleAmazon(s.listing, s);
+        renderJSON(Webs.exposeGson(se));
+    }
+
+    public static void upcCheck(String upc) {
+        /**
+         * UPC 的检查;
+         * 1. 在哪一些 Selling 身上使用过?
+         * 2. 通过 UPC 与
+         */
+        try {
+            List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
+            renderJSON(Webs.exposeGson(upcSellings));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     // --------------------------------------

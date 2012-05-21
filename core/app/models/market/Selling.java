@@ -176,7 +176,6 @@ public class Selling extends GenericModel {
      * 这个 Selling 所属的哪一个用户
      */
     @ManyToOne
-    @Expose
     public Account account;
 
     public void setMerchantSKU(String merchantSKU) {

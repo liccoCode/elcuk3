@@ -1,0 +1,13 @@
+*{
+根据 Market(Account.M) 来输出数值的符号
+_market: Account.M 值
+}*
+#{if _market == models.market.Account.M.AMAZON_UK}
+&pound;
+#{/if}
+#{elseif _market == models.market.Account.M.AMAZON_US}
+$
+#{/elseif}
+#{else }
+&euro;
+#{/else}
