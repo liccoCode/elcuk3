@@ -361,6 +361,22 @@ public class Account extends Model {
             }
         }
 
+        public String uploadImageLink() {
+            //https://catalog-sc.amazon.co.uk/abis/image/AddImage.ajax
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://catalog-sc.%s/abis/image/AddImage.ajax", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
 
         /**
          * 模拟人工方式修改 Listing 信息的地址

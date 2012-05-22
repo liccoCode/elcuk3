@@ -1,14 +1,21 @@
 package market;
 
 import com.google.gson.JsonElement;
+import helper.GTs;
 import helper.HTTP;
 import models.embedded.AmazonProps;
 import models.market.Account;
 import models.market.Listing;
 import models.market.Selling;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import play.test.UnitTest;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +35,7 @@ public class ListingTest extends UnitTest {
         }
     }
 
-    @Test
+    //    @Test
     public void testSaleAmazon() {
         Listing lst = Listing.findById("B005UO12HQ_amazon.co.uk");
         Selling sell = new Selling();
@@ -61,5 +68,18 @@ public class ListingTest extends UnitTest {
         sell.aps.productDesc = "ProductDesc";
 
 //        Product.saleAmazon(sell);
+    }
+
+    @Test
+    public void testSellingUploadImage() {
+        Account acc = Account.findById(1l);
+        acc.changeRegion(Account.M.AMAZON_DE);
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("asin", "B0083QX8AW"));
+        System.out.println(HTTP.upload(acc.cookieStore(),
+                acc.type.uploadImageLink(),
+                params,
+                GTs.MapBuilder.map("MAIN", new File("/Users/wyattpan/elcuk2-data/uploads/10HTCEVO3D-1900S_0.jpg"))
+                        .put("PT01", new File("/Users/wyattpan/elcuk2-data/uploads/10HTCEVO3D-1900S_1.jpg")).build()));
     }
 }

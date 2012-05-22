@@ -18,7 +18,11 @@ public class Devs {
         /**
          * 上架 Listing 相关的错误
          */
-        SALES
+        SALES,
+        /**
+         * 上传图片错误的信息
+         */
+        IMGUPLOAD
     }
 
     /**
@@ -33,6 +37,9 @@ public class Devs {
         switch(f) {
             case SALES:
                 baseUrl = Constant.L_LISTING;
+                break;
+            case IMGUPLOAD:
+                baseUrl = Constant.L_IMAGEUPLOAD;
                 break;
             default:
                 baseUrl = "";

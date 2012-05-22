@@ -61,6 +61,9 @@ public class Attach extends Model {
     @Expose
     public String fid;
 
+    /**
+     * TODO 这个没使用到
+     */
     @Expose
     public P p;
 

@@ -1,10 +1,7 @@
 <table class="table table-bordered table-condensed span12">
     <tr>
-        <th>
-            ListingId
-            (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)
-        </th>
-        <th class="span6">Title</th>
+        <th>ListingId</th>
+        <th class="span6">Title (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)</th>
         <th>Review</th>
     </tr>
 #{list items:lsts, as:'l'}

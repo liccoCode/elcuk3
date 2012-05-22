@@ -116,4 +116,10 @@ public class AmazonProps {
 
     @Expose
     public String upc;
+
+    /**
+     * 此 Selling 所对应的图片名字与顺序. 使用 Webs.SPLIT 进行分割
+     */
+    @Expose
+    public String imageName;
 }

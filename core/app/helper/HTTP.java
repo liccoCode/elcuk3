@@ -10,6 +10,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -23,11 +27,14 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.Play;
+import play.libs.MimeTypes;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -166,6 +173,34 @@ public class HTTP {
         try {
             HTTP.clearExpiredCookie();
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
+            return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
+        } catch(Exception e) {
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            return "";
+        }
+    }
+
+    /**
+     * 上传文件的 API
+     *
+     * @param cookieStore 使用的 Cookie
+     * @param url         访问的地址
+     * @param params      需要提交的其他参数
+     * @param uploadFiles 上传多个文件的集合(key: fileParamName, Val: File)
+     * @return 返回上传的结果
+     */
+    public static String upload(CookieStore cookieStore, String url, Collection<NameValuePair> params, Map<String, File> uploadFiles) {
+        HttpPost post = new HttpPost(url);
+        MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        try {
+            for(NameValuePair nv : params)
+                multipartEntity.addPart(nv.getName(), new StringBody(nv.getValue()));
+
+            for(String fileParamName : uploadFiles.keySet()) {
+                File file = uploadFiles.get(fileParamName);
+                multipartEntity.addPart(fileParamName, new FileBody(file, MimeTypes.getMimeType(file.getName())));
+            }
+            post.setEntity(multipartEntity);
             return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));

@@ -1,9 +1,12 @@
 package models.market;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
 import models.procure.PItem;
+import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
 import org.apache.commons.io.FileUtils;
@@ -188,6 +191,53 @@ public class Selling extends GenericModel {
         this.market = market;
         if(this.merchantSKU != null && this.market != null)
             this.sellingId = String.format("%s_%s", this.merchantSKU, this.market.toString());
+    }
+
+    /**
+     * 这个 Selling 向 Amazon 上传图片.;
+     * 将所有图片都上传一遍;
+     */
+    public void uploadAmazonImg(String imageName, boolean waterMark) {
+        String dealImageNames = imageName;
+        if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
+        if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
+        String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
+        if(images.length > 8) {  // 如果有更多的图片,仅仅使用前 8 张, 并且也只存储 8 张图片的名字
+            images = Arrays.copyOfRange(images, 0, 7);
+            this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
+        }
+        /**
+         * MAIN   主图
+         * PT01~08  , 2~9 号图片.
+         */
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("asin", "B0083QX8AW"));
+        Map<String, File> uploadImages = new HashMap<String, File>();
+        for(int i = 0; i < images.length; i++) {
+            String fileParamName;
+            if(i == 0) fileParamName = "MAIN";
+            else fileParamName = "PT0" + i;
+            Attach attch = Attach.findByFileName(images[i]);
+            if(attch == null) throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
+            if(waterMark) {
+                // TODO 如果需要打水印, 在这里处理
+                throw new UnsupportedOperationException("功能还没实现.");
+            } else {
+                uploadImages.put(fileParamName, new File(attch.location));
+            }
+        }
+        synchronized(this.account.cookieStore()) {
+            this.account.changeRegion(this.market); // 切换到这个 Selling 的市场
+            String body = HTTP.upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params, uploadImages);
+            if(Play.mode.isDev())
+                Devs.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, Devs.T.IMGUPLOAD);
+            JsonObject imgRsp = new JsonParser().parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
+            //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
+            //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
+            if("failure".equals(imgRsp.get("status").getAsString()))
+                throw new FastRuntimeException(imgRsp.get("errorMessage").getAsString());
+        }
+        this.save();
     }
 
     /**

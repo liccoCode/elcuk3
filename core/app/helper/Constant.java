@@ -37,6 +37,11 @@ public class Constant {
      */
     public static final String L_LISTING = String.format("%s/listing_sale", E_LOGS);
 
+    /**
+     * 存在系统的 "日志" 文件夹中的 Listing 上传图片的异常 html 页面
+     */
+    public static final String L_IMAGEUPLOAD = String.format("%s/image_upload", E_LOGS);
+
 
     public static final String UPLOAD_PATH = String.format("%s/uploads", Constant.E_DATE);
 
