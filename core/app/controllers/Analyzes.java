@@ -51,6 +51,7 @@ public class Analyzes extends Controller {
      * @param from
      * @param to
      */
+    @Check("manager")
     public static void ajaxSells(String msku,
                                  String type,
                                  Account acc,

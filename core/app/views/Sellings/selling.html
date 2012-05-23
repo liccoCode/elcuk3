@@ -1,0 +1,208 @@
+#{extends 'main.html'/}
+#{set title:'Selling Info'/}
+#{set 'moreScripts'}
+    #{script 'sellings/selling.js'/}
+#{/set}
+#{if s.market.isAmazon()}
+<div class="row">
+    <div class="span12">
+        <div class="btn-group" style="margin:5px 0;">
+            <button class="btn btn-warning"
+                    data-content="直接更新到数据库"
+                    placement='bottom' rel="popover" data-original-title="Local Update Button">
+                Update
+            </button>
+            <button class="btn btn-warning"
+                    data-content="更新到 Amazon 同时更新到数据库"
+                    placement='bottom' rel="popover" data-original-title="Sync To Amazon Button">
+                Deploy
+            </button>
+            <button class="btn btn-warning"
+                    data-content="从 Amazon 同步回来更新到数据库"
+                    placement='bottom' rel="popover" data-original-title="Sync From Amazon Button">
+                Sync
+            </button>
+        </div>
+    </div>
+    <div class="span12">
+        <table class="table table-condensed">
+            <tr id="image_tr">
+                <th rowspan="2">Images</th>
+                <td colspan="3">
+                    <ul class="thumbnails" id="images" sku='${s.merchantSKU.split(",")[0]}'></ul>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <div class="input-prepend">
+                        <button id="img_cal" placement='left' class="btn btn-small" rel="popover" data-original-title="Image Preview Button"
+                                data-content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值."
+                                ><i class="icon-eye-open"></i></button>
+                        <button class="btn btn-small" placement='left' rel="popover" data-original-title="Image Upload Button"
+                                data-content="图片按照 0~8 设置好编号以后,点击此按钮会直接更新到 Selling 并保存, 与其他信息的更新分开."
+                                ><i class="icon-picture"></i></button>
+                        <input type="text" style="width:80%" name="s.aps.imageName" readonly value="${s.aps.imageName}">
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Title:</th>
+                <td colspan="3"><textarea rows="2" name="s.aps.title" class="span10">${s.aps.title}</textarea></td>
+            </tr>
+            <tr>
+                <th>MSKU:</th>
+                <td>
+                    <input type="text" name="s.merchantSKU" readonly="" value="${s.merchantSKU}">
+                    <input type="hidden" name="s.sellingId" id="s_sellingId" value="${s.sellingId}">
+                    <input type="hidden" name="p.sku" value="${s.listing.product.sku}">
+                </td>
+                <th>Acc:</th>
+                <td>
+                    <select name="s.account.id" size="1">
+                        <option value="${s.account.id}">${s.account.prettyName()}</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th>UPC:</th>
+                <td>
+                    <div class="input-prepend">
+                        <input type="text" style="width:110px;" readonly name="s.aps.upc" value="${s.aps.upc}">
+                        <span class="add-on"><a target="_blank" href="${s.asinLink()}">${s.asin}</a></span>
+                    </div>
+                </td>
+                <th>Condition/Market:</th>
+                <td>
+                    <div class="input-prepend">
+                        <input type="text" readonly="" name="s.aps.condition_" value="${s.aps.condition_}" class="span1">
+                        <select name="s.market" class="span2">
+                            <option value="${s.market.name()}">${s.market}</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <th>Manufac:</th>
+                <td><input type="text" name="s.aps.manufacturer" value="${s.aps.manufacturer}"></td>
+                <th>PartNumber:</th>
+                <td><input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}"></td>
+            </tr>
+
+            <tr>
+                <th>RBN:</th>
+                <td>
+                    <div class="input-prepend">
+                        #{rbn_info /}
+                        <input type="text" style="width:80px;" name="s.aps.rbns[0]" value="${s.aps?.rbns[0]}">
+                        <input type="text" style="width:80px;" name="s.aps.rbns[1]" value="${s.aps?.rbns[1]}">
+                    </div>
+                </td>
+                <th>Qty(非库存):</th>
+                <td><input type="text" name="s.aps.quantity" value="${s.aps.quantity}"></td>
+            </tr>
+
+            <tr>
+                <th>Price:</th>
+                <td>
+                    <div class="input-prepend">
+                        <span class="currency add-on">${s.market.htmlCurrency().raw()}</span>
+                        <input type="text" class="span2" name="s.aps.standerPrice" placeHolder="Ex:19.99" value="${s.aps.standerPrice}">
+                    </div>
+                </td>
+                <th>SalePrice:</th>
+                <td>
+                    <div class="input-prepend">
+                        <div class="input-prepend">
+                            <span class="currency add-on">${s.market.htmlCurrency().raw()}</span>
+                            <input type="text" class="span2" name="s.aps.salePrice" placeHolder="Ex:15.99" value="${s.aps.salePrice}">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <th>StartDate</th>
+                <td><input type="text" name="s.aps.startDate" value="${s.aps.startDate.format("yyyy-MM-dd")}"></td>
+                <th>EndtDate</th>
+                <td><input type="text" name="s.aps.endDate" value="${s.aps.endDate.format("yyyy-MM-dd")}"></td>
+            </tr>
+
+            <tr>
+                <th rowspan="5">Technical:</th>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.keyFeturess[0]" value="${s.aps.keyFeturess[0]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.keyFeturess[1]" value="${s.aps.keyFeturess[1]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.keyFeturess[2]" value="${s.aps.keyFeturess[2]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.keyFeturess[3]" value="${s.aps.keyFeturess[3]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.keyFeturess[4]" value="${s.aps.keyFeturess[4]}">
+                </td>
+            </tr>
+
+
+            <tr>
+                <th rowspan="5">SearchTerms:</th>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.searchTermss[0]" value="${s.aps.searchTermss[0]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.searchTermss[1]" value="${s.aps.searchTermss[1]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.searchTermss[2]" value="${s.aps.searchTermss[2]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.searchTermss[3]" value="${s.aps.searchTermss[3]}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <input type="text" class="span8" name="s.aps.searchTermss[4]" value="${s.aps.searchTermss[4]}">
+                </td>
+            </tr>
+
+            <tr>
+                <th>ProductDesc:</th>
+                <td colspan="3">
+                    <div class="input-prepend">
+                        <textarea rows="10" name="s.aps.productDesc" class="span10">${s.aps.productDesc}</textarea>
+
+                        <div class="clearfix"></div>
+                        <span class="add-on">2000 bytes left</span>
+                        <button class="btn">Preview</button>
+                    </div>
+                    <div style='margin-top:-1px;border-top:1px dashed;'></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+#{/if}
+#{elseif s.market.isEbay()}
+Ebay
+#{/elseif}
+#{else }
+Market ${s.market} 还不支持!
+#{/else}

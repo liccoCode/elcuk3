@@ -5,7 +5,6 @@ $(function(){
     ACCOUNT = $("#account");
     MARKET = $("#market");
 
-
     function loadGlobalVar(){
         return {
             account:ACCOUNT.val(),
@@ -32,6 +31,7 @@ $(function(){
 
         LISTINGS.load("/listings/prodListings", {'p.sku':$(this).attr('pid'), 'm':amVal['market']}, function(){
             LISTINGS.unmask();
+            SELLINGS.html('');
             listingRelateSelling();
         });
 

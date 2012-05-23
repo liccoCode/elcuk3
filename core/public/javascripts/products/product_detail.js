@@ -18,7 +18,6 @@ $(function(){
         });
     });
 
-
     // SellingQTY 更新
     $('#prod_sqty a[qid]').click(function(){
         var qid = $(this).attr('qid');
@@ -32,7 +31,6 @@ $(function(){
         });
 
     });
-
 
     // Attrbutes
     $('#attr_btn').click(function(){
@@ -105,7 +103,6 @@ $(function(){
             $(template(index++, {id:$('#p_sku').val() + '_' + o.attr('name'), fullName:o.val(), name:o.attr('name'), value:''})).appendTo("#attrs");
         });
 
-
     });
 
     // Drag & Drop Pic
@@ -117,7 +114,6 @@ $(function(){
     var dropbox = $('#dropbox');
     var uploaded = $('#uploaded');
     var message = $(".message");
-
 
     // 初始化页面的时候加载此 Product 对应的图片
     $.getJSON('/products/images', {sku:$('#p_sku').val()}, function(imgs){
@@ -162,7 +158,6 @@ $(function(){
             return false;
         });
     }
-
 
     // 图片的 Drag&Drop DIV 初始化
     dropbox.filedrop({
@@ -231,7 +226,6 @@ $(function(){
         }
     });
 
-
     // -------------- 上架 Amazon 的相关功能
 
     // UPC 检查
@@ -282,16 +276,10 @@ $(function(){
         $('span.currency').html(currency);
     });
 
-    // ProductDESC 输入, 字数计算
-    $("textarea[name=s\\.aps\\.productDesc]").keyup(function(){
-        var o = $(this);
-        var length = o.css('color', 'black').val().length;
-        if(length > 2000) o.css('color', 'red');
-        o.siblings('span').html((2000 - length) + " bytes left");
-    });
-
-    // 预览按钮
-    $("textarea[name=s\\.aps\\.productDesc] ~ button").click(function(){
+    /**
+     * 预览 ProductDesc 的方法
+     */
+    function previewBtn(){
         var ownerDiv = $(this).parent();
         var htmlPreview = ownerDiv.find(":input").val();
         var invalidTag = false;
@@ -309,8 +297,15 @@ $(function(){
             }
         });
         if(invalidTag) alert("使用了 Amazon 不允许的 Tag, 请查看预览中的红色高亮部分!");
-    });
+    }
 
+    // ProductDESC 输入, 字数计算
+    $("textarea[name=s\\.aps\\.productDesc]").blur(previewBtn).keyup(function(){
+        var o = $(this);
+        var length = o.css('color', 'black').val().length;
+        if(length > 2000) o.css('color', 'red');
+        o.siblings('span').html((2000 - length) + " bytes left");
+    })/*预览按钮*/.find('~ button').click(previewBtn);
 
     // Amazon 上架
     $('#s_sale').click(function(){

@@ -1,0 +1,16 @@
+*{
+RBN 的信息可重用的 tag
+}*
+<button id="rbn_info" class="btn btn-small" rel="popover" data-original-title="RBN Helper" data-content="
+<p>316905011 - Elektronik & Foto > Festnetztelefone, VOIP & Zubehör > Telefonzubehör > Akkus und Batterien</p>
+<p>364919031 - Elektronik & Foto > Handys & Zubehör > Handyzubehör > Akkus</p>">
+    <i class="icon-info-sign"></i>
+</button>
+<script type="text/javascript">
+    $(function(){
+        $("#rbn_info").popover({trigger:'manual', placement:'top', width:'auto'}).click(function(){
+            $(this).popover('toggle');
+            return false;
+        });
+    });
+</script>

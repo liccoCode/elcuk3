@@ -188,9 +188,7 @@ public class Product extends GenericModel {
         selling.priceStrategy = new PriceStrategy(selling);
         selling.state = Selling.S.NEW;
 
-        selling.aps.keyFetures = StringUtils.join(selling.aps.keyFeturess, Webs.SPLIT);
-        selling.aps.searchTerms = StringUtils.join(selling.aps.searchTermss, Webs.SPLIT);
-        selling.aps.RBN = StringUtils.join(selling.aps.rbns, ",");
+        selling.aps.arryParamSetUP(1);
 
         synchronized(selling.account.cookieStore()) {
             selling.account.changeRegion(selling.market);

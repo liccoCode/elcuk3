@@ -4,6 +4,8 @@ import com.google.gson.annotations.Expose;
 import helper.Webs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
@@ -24,6 +26,7 @@ import java.io.File;
  * Time: 10:34 AM
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Attach extends Model {
 
     /**

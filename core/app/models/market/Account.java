@@ -69,6 +69,14 @@ public class Account extends Model {
         AMAZON_US,
         EBAY_UK;
 
+        public boolean isAmazon() {
+            return (StringUtils.startsWith(this.name(), "AMAZON"));
+        }
+
+        public boolean isEbay() {
+            return (StringUtils.startsWith(this.name(), "EBAY"));
+        }
+
         /**
          * Amazon MarketPlaceId, 在 Amazon 上用来区分 uk/de/us 等等市场的 ID
          * !! TODO US 市场的暂时还没有

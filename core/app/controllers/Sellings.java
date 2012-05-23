@@ -1,7 +1,10 @@
 package controllers;
 
+import ext.LinkExtensions;
+import models.Ret;
 import models.market.Listing;
 import models.market.Selling;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -32,5 +35,18 @@ public class Sellings extends Controller {
         Validate.notNull(listing);
         selling.listing = listing;
         selling.save();
+    }
+
+    public static void selling(String sid) {
+        Selling s = Selling.findById(sid);
+        s.aps.arryParamSetUP(-1);
+        render(s);
+    }
+
+    public static void imageUpload(Selling s, String imgs) {
+        if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ")" + "不存在!"));
+        if(StringUtils.isBlank(s.aps.imageName) && StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
+        s.uploadAmazonImg(imgs, false);
+        renderJSON(new Ret(true, LinkExtensions.asinLink(s)));
     }
 }

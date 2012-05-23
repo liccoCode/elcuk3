@@ -226,7 +226,6 @@ public class Products extends Controller {
         Validation.required(Messages.get("s.prodDesc"), s.aps.productDesc);
         Validation.required(Messages.get("s.msku_req"), s.merchantSKU);
         if(Validation.hasErrors()) renderJSON(new Ret(Validation.current().errorsMap()));
-        if(Selling.exist(s.merchantSKU)) renderJSON(new Ret(Messages.get("s.msku")));
 
         // 在 Controller 里面将值处理好
         Selling se = p.saleAmazon(s);

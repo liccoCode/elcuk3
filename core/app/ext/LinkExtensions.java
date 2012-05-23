@@ -49,4 +49,23 @@ public class LinkExtensions extends JavaExtensions {
         }
         return "#";
     }
+
+    public static String asinLink(Selling selling) {
+        //http://www.amazon.co.uk/dp/B005UNXHC0
+        String baseAmazon = "http://www.%s/dp/%s";
+        //http://www.ebay.co.uk/itm/170724459305
+        String baseEbay = "http://www.%s/itm/%s";
+        switch(selling.market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return String.format(baseAmazon, selling.market.toString(), selling.asin);
+            case EBAY_UK:
+                return String.format(baseEbay, selling.market.toString(), selling.asin);
+        }
+        return "#";
+    }
 }

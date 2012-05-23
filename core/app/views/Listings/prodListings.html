@@ -1,7 +1,7 @@
-<table class="table table-bordered table-condensed span12">
+<table class="table table-bordered table-condensed">
     <tr>
         <th>ListingId</th>
-        <th class="span6">Title (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)</th>
+        <th>Title (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)</th>
         <th>Review</th>
     </tr>
 #{list items:lsts, as:'l'}
@@ -10,7 +10,7 @@
         <td title="${l.title}">
             <a href="${helper.Webs.link(l)}" target="_blank">${l.title.length() <= 100 ? l.title : (l.title.subSequence(0, 100) + "...")}</a>
         </td>
-        <td>${l.reviews}
+        <td>${l.reviews == null ? 0 : l.reviews}
             (<span style="color:${l.rating <= 3 ? 'red;' : 'green'}">${l.rating}</span>)
         </td>
     </tr>
