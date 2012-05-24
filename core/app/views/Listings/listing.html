@@ -17,7 +17,7 @@
                     <th>ListingId:</th>
                     <td id="lid">${lst.listingId}</td>
                     <th>ASIN:</th>
-                    <td>${lst.asin}</td>
+                    <td><a href="${lst.asinLink()}" target="_blank">${lst.asin}</a></td>
                     <th>Market:</th>
                     <td>${lst.market}</td>
                     <th>SKU:</th>
@@ -44,6 +44,14 @@
                     <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.easyacceu()?.price)}</td>
                     <th>LoestPrice:</th>
                     <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.lowestPrice())}</td>
+                    <td colspan="2">
+                        <button lid="${lst.listingId}" class="btn btn-small" rel="tooltip"
+                                *{data-original-title="ReCrawl Button"}*
+                                title="点击重新抓取这个 Listing"
+                                data-loading-text="<a class='icon-repeat'></i>">
+                            <i class="icon-retweet"></i>
+                        </button>
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="8">

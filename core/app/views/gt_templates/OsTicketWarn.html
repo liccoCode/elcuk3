@@ -11,7 +11,7 @@ Not Found OrderItem!
     #{list items:f.orderr.items, as:'oi'}
     - ${oi.product.sku}
     [${oi.productName}]
-    [${helper.Webs.link(oi.selling)}]
+    [${oi.selling.asinLink()}]
 
     #{/list}
 #{/else}

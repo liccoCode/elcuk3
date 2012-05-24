@@ -1,4 +1,5 @@
 $(function(){
+    $('button[rel=tooltip]').tooltip();
     var allSkuLinks = $("#slider a[level=sku]");
     SELLINGS = $("#s_list");
     LISTINGS = $("#l_list");
@@ -37,4 +38,15 @@ $(function(){
 
     });
 
+    $('button[lid]').click(function(){
+        var o = $(this);
+        var lid = o.attr('lid');
+        o.button('loading').tooltip('hide');
+        $.post('/listings/reCrawl', {'l.listingId':lid}, function(r){
+            if(r.flag){
+                o.after("<span><a style='background-color:#DFF0D8;margin-left:10px;padding:8px;' href='/listings/listing?lid=" + lid + "'>更新成功</a></span>");
+            }else alert(r.message);
+            o.button('reset');
+        });
+    });
 });

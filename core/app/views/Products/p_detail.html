@@ -92,7 +92,7 @@
                         <td>
                             <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
                         </td>
-                        <td><a target="_blank" href="${helper.Webs.link(q.selling)}">${q.selling.asin}</a>
+                        <td><a target="_blank" href="${q.selling.asinLink()}">${q.selling.asin}</a>
                             | ${q.selling.market}</td>
                         <td>${q.whouse.name}</td>
                         <td><a href="#" class="btn btn-mini btn-primary" qid="${q.id}">保存</a></td>

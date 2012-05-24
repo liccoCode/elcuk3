@@ -8,7 +8,7 @@
     <tr lid="${l.listingId}" style="cursor:pointer;">
         <td><a href="@{Listings.listing(l.listingId)}" target="_blank">${l.listingId}</a></td>
         <td title="${l.title}">
-            <a href="${helper.Webs.link(l)}" target="_blank">${l.title.length() <= 100 ? l.title : (l.title.subSequence(0, 100) + "...")}</a>
+            <a href="${l.asinLink()}" target="_blank">${l.title.length() <= 100 ? l.title : (l.title.subSequence(0, 100) + "...")}</a>
         </td>
         <td>${l.reviews == null ? 0 : l.reviews}
             (<span style="color:${l.rating <= 3 ? 'red;' : 'green'}">${l.rating}</span>)

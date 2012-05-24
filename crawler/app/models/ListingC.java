@@ -236,12 +236,12 @@ public class ListingC {
                 case AFR:
                     return Webs.amazonPriceNumber(mt, priceStr.split(" ")[1]);
                 default:
-                    return -1f;
+                    return 0f;
 
             }
         } catch(Exception e) {
             Logger.warn("ListingC.amazonPrice error.(" + mt.toString() + ") [" + priceStr + "|" + e.getMessage() + "]");
-            return -1f;
+            return 0f;
         }
     }
 

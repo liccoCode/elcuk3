@@ -112,6 +112,6 @@ $(function(){
         var length = o.css('color', 'black').val().length;
         if(length > 2000) o.css('color', 'red');
         o.siblings('span').html((2000 - length) + " bytes left");
-    })/*自己按一下, 在页面开始的时候计算一次*/.keyup()./*预览按钮*/find('~ button').click(previewBtn);
+    })/*自己按一下, 在页面开始的时候计算一次*/.keyup()./*预览按钮*/find('~ button').click(previewBtn).click();
 
 });

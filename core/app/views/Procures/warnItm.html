@@ -33,7 +33,7 @@
         <td>
             <a href="#" rel="tooltip" data-original-title="MerchantSKU: ${pi.selling.merchantSKU}<br/>Account: ${pi.selling.account.username}">${pi.product.sku}</a>
         </td>
-        <td><a target="_blank" href="${helper.Webs.link(pi.selling)}">${pi.selling.asin}</a></td>
+        <td><a target="_blank" href="${pi.selling.asinLink()}">${pi.selling.asin}</a></td>
         <td>${pi.whouse.name}</td>
         <td>
             <input ps sid="${pi.selling.sellingId}" type="text" class="span1" style="color:orange;" value="${pi.selling.ps}">

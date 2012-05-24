@@ -8,8 +8,8 @@ Dear ${order.buyer == null ? 'Customer' : order.buyer}:
 <br/><br/>
 It has been a period of time since you purchased the<br/>
 #{list items:order.items, as:'oi'}
-<a target="_blank" title="${oi.selling.title}" href="${helper.Webs.link(oi.selling)}">${oi.selling.title.size() > 75 ? oi.selling.title.substring(0, 74) + "..." : oi.selling.title}</a><br/>
-${helper.Webs.link(oi.selling)}
+<a target="_blank" title="${oi.selling.title}" href="${oi.selling.asinLink()}">${oi.selling.title.size() > 75 ? oi.selling.title.substring(0, 74) + "..." : oi.selling.title}</a><br/>
+${oi.selling.asinLink()}
 <br/>
 <br/>
 #{/list}

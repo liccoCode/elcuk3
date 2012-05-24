@@ -86,7 +86,7 @@ public class Webs {
         } catch(Exception e) {
             Logger.warn("Webs.amazonPriceNumber error.(" + market + ") [" + priceStr + "|" + e.getMessage() + "]");
         }
-        return -0.1f;
+        return 0f;
     }
 
     /**
@@ -136,7 +136,7 @@ public class Webs {
         } catch(Exception e) {
             Logger.warn("Webs.amazonPriceCurrency error.(" + market + ") [" + priceStr + "|" + e.getMessage() + "]");
         }
-        return -0.1f;
+        return 0f;
     }
 
     /**

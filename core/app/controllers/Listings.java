@@ -113,17 +113,12 @@ public class Listings extends Controller {
         renderJSON(tobeSave);
     }
 
-    /**
-     * 为某一个 Listing 进行上架;
-     * 区分 Market(Amazon, Ebay), Account
-     * //TODO 还需要完成
-     */
-    public static void sale(String acc, String listingId) {
-        validation.required(acc);
-        validation.required(listingId);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Account acct = Account.find("uniqueName=?", acc).first();
-        Listing listing = Listing.find("listingId=?", listingId).first();
-        throw new UnsupportedOperationException("Recived Account[" + acct + "], Listing[" + listing + "]");
+    public static void reCrawl(Listing l) {
+        if(!l.isPersistent()) renderJSON(new Ret("此 Listing 不存在,不允许 ReCrawl!"));
+        JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
+        Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst);
+        if(nLst.isPersistent()) renderJSON(new Ret());
+        else renderJSON(new Ret("更新失败."));
     }
+
 }

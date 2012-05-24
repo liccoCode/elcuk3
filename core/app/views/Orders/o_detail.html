@@ -112,7 +112,7 @@
                     <td>${item.quantity}</td>
                     <td>${item.price}</td>
                     <td>${item.shippingPrice}</td>
-                    <td><a target="_blank" href="${helper.Webs.link(item.selling)}">${item.productName}</a></td>
+                    <td><a target="_blank" href="${item.selling.asinLink()}">${item.productName}</a></td>
                     <td>${item.createDate}</td>
                     <td>${item.memo}</td>
                     <td>${item.product.sku}</td>

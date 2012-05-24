@@ -19,7 +19,7 @@
         <tr>
             <td class="msku" style="cursor:pointer;" aid="${sell.account.id}" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
             <td class="sid" title="${sell.sellingId}">
-                <a target="_blank" href="${helper.Webs.link(sell)}">${sell.asin}</a>
+                <a target="_blank" href="${sell.asinLink()}">${sell.asin}</a>
             </td>
             <td>${sell.account.toString()}</td>
             <td>${sell.price}</td>
