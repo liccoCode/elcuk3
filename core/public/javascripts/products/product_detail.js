@@ -109,7 +109,7 @@ $(function(){
     var template = '<li class="span2">' +
             '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
             '<div class="progress"><div class="bar"></div></div>' +
-            '<div class="action"><a href="#" class="btn btn-danger btn-mini">X</a></div>' +
+            '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
             '</li>';
     var dropbox = $('#dropbox');
     var uploaded = $('#uploaded');
@@ -123,7 +123,7 @@ $(function(){
             var imgUrl = "/attachs/image?a.fileName=" + img['fileName'];
             imgEL.find("img").attr('src', imgUrl + "&w=140&h=100");
             imgEL.find('a.thumbnail').attr("href", imgUrl);
-            imgEL.find('a.btn').attr('outName', img['outName']).click(rmImage);
+            imgEL.find('a[style]').attr('outName', img['outName']).click(rmImage);
             imgEL.find('div.progress').remove();
             imgEL.appendTo(uploaded);
         });
@@ -157,6 +157,7 @@ $(function(){
             $('a[outName=' + o.attr('outName') + ']').parents('li').remove();
             return false;
         });
+        return false;
     }
 
     // 图片的 Drag&Drop DIV 初始化

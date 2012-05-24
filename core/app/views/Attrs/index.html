@@ -4,36 +4,32 @@
     #{script 'products/attrs.js'/}
 #{/set}
 
-<div class="row">
-    <div class="span12" style="margin:5px 0;">
-        <a data-toggle="modal" href="#addAttr" class="btn btn-primary btn-small">添加</a>
-    </div>
+<div style="margin:5px 0;">
+    <a data-toggle="modal" href="#addAttr" class="btn btn-primary btn-small">添加</a>
 </div>
 
-<div class="row">
-    <div class="span12">
-        <table class="table table-condensed table-bordered">
-            <tr>
-                <th>Name</th>
-                <th>Fullname</th>
-                <th>Memo</th>
-                <th>Cates</th>
-                <th>Op</th>
-            </tr>
-        #{list items:attrs, as:'at'}
-            <tr id="aid_${at.name}">
-                <td>
-                ${at.name}
-                    <input type="hidden" name="a.name" value="${at.name}">
-                </td>
-                <td><input type="text" name="a.fullName" class="input input-medium" value="${at.fullName}"></td>
-                <td><input type="text" name="a.memo" class="input input-large" value="${at.memo}"></td>
-                <td><span class="badge badge-success">${at.categories.size()}</span></td>
-                <td><a href="#" aid="${at.name}" class="btn btn-mini btn-primary">更新</a></td>
-            </tr>
-        #{/list}
-        </table>
-    </div>
+<div>
+    <table class="table table-condensed table-bordered">
+        <tr>
+            <th>Name</th>
+            <th>Fullname</th>
+            <th>Memo</th>
+            <th>Cates</th>
+            <th>Op</th>
+        </tr>
+    #{list items:attrs, as:'at'}
+        <tr id="aid_${at.name}">
+            <td>
+            ${at.name}
+                <input type="hidden" name="a.name" value="${at.name}">
+            </td>
+            <td><input type="text" name="a.fullName" class="input input-medium" value="${at.fullName}"></td>
+            <td><input type="text" name="a.memo" class="input input-large" value="${at.memo}"></td>
+            <td><span class="badge badge-success">${at.categories.size()}</span></td>
+            <td><a href="#" aid="${at.name}" class="btn btn-mini btn-primary">更新</a></td>
+        </tr>
+    #{/list}
+    </table>
 </div>
 
 

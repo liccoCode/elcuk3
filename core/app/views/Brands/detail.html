@@ -2,13 +2,13 @@
 <div>
     <table class="table table-bordered table-condensed">
         <tr>
-            <td class="span1">Brand:</td>
+            <td>Brand:</td>
             <td>${brand.name}</td>
             <td>FullName:</td>
             <td>${brand.fullName}</td>
         </tr>
         <tr>
-            <td class="span1">Memo</td>
+            <td>Memo</td>
             <td colspan="3">${brand.memo}</td>
         </tr>
     </table>
@@ -21,7 +21,7 @@
         <tr>
             <th>CategoryId</th>
             <th>Name</th>
-            <th class="span1">OP</th>
+            <th>OP</th>
         </tr>
     #{list items:brand.categories, as:'cat'}
         <tr id="${brand.name}">

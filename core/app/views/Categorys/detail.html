@@ -2,13 +2,13 @@
 <div id="detail_${cat.categoryId}">
     <table class="table table-bordered table-condensed">
         <tr>
-            <td class="span1">CategoryId:</td>
+            <td>CategoryId:</td>
             <td>${cat.categoryId}</td>
-            <td class="span1">Name:</td>
+            <td>Name:</td>
             <td><input class="input-medium" type="text" name="c.name" value="${cat.name}"></td>
         </tr>
         <tr>
-            <td class="span1">Memo:</td>
+            <td>Memo:</td>
             <td colspan="3">
                 <textarea name="c.memo" rows="3" cols="30">${cat.memo}</textarea>
                 <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
@@ -24,21 +24,18 @@
 
 
 <div><span class="label label-success">Relate Brand</span></div>
-<div class="row">
-    <div class="span3">
-    #{select name:'b.name', items:brands, valueProperty:'name'}#{/select}
-        <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
-    </div>
-    <div class="span3">
-        <button class="btn btn-mini btn-primary" cid="${cat.categoryId}" bind>Bind</button>
-    </div>
+<div class="input-prepend">
+#{select name:'b.name', items:brands, valueProperty:'name'}#{/select}
+    <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
+    <button class="btn btn-mini btn-primary" cid="${cat.categoryId}" bind>Bind</button>
 </div>
+<div class="clearfix"></div>
 <div id="brands_${cat.categoryId}" style="height:250px;overflow:auto;margin-bottom:18px;">
     <table class="table table-bordered table-condensed" style="margin-bottom:0;">
         <tr>
             <th>Brand</th>
             <th>Memo</th>
-            <th class="span1">Op</th>
+            <th>Op</th>
         </tr>
     #{list items:cat.brands, as:'b'}
         <tr>
@@ -54,10 +51,9 @@
 </div>
 
 <div><span class="label label-success">Attrs</span></div>
-<div class="row">
-    <div class="span3.5">从下面选择此 Category 所拥有的 Attrs 然后点击</div>
-    <div class="span2"><a href="#" id="cat_atts_btn" cid="${cat.categoryId}" class="btn btn-mini btn-primary">保存</a>
-    </div>
+<div class="input-prepend">
+    <span>从下面选择此 Category 所拥有的 Attrs 然后点击</span>
+    <a href="#" id="cat_atts_btn" cid="${cat.categoryId}" class="btn btn-mini btn-primary">保存</a>
 </div>
 <div style="height:250px;overflow:auto;" class="row-fluid" id="cat_atts">
 #{list items:attrs, as:'a'}

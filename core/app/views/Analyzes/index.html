@@ -21,22 +21,22 @@
 
     <div class="row-fluid" id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
         <div class="span6" id="dbcick_param"> <!-- 双击产品的时候使用 -->
-            <div class="span3">
+            <div class="span3 input-prepend">
                 <span class="label label-success">From:</span>
-                <input type="date" class="span2" id="a_from" name="from">
+                <input type="date" style="width:120px;" id="a_from" name="from">
             </div>
 
-            <div class="span3">
+            <div class="span3 input-prepend">
                 <span class="label label-success">TO:</span>
-                <input type="date" class="span2" id="a_to" name="to">
+                <input type="date" style="width:120px;" id="a_to" name="to">
             </div>
-            <div class="span3">
-                <span class="label label-important inline">
+            <div class="span3 input-prepend">
+                <span class="label label-important">
                     <a href="#" rel="popover" data-content="影响双击 Selling 后上面出现的线的搜索方式, 搜索曲线时是让系统将字符串认作 MSKU 还是 SKU." data-original-title="作用">L:</a>
                 </span>
                 <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
                 <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
-                <span class="label label-success inline" id="a_acc_id_label">EasyAcc</span>
+                <span class="label label-success" id="a_acc_id_label">EasyAcc</span>
             </div>
 
             <input type="hidden" name="acc.id" id="a_acc_id">
