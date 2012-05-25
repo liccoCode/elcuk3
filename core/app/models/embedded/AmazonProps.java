@@ -171,7 +171,7 @@ public class AmazonProps {
         // 这里使用自己进行字符串
         String[] keyFeturesArr = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
         for(int i = 0; i < keyFeturesArr.length; i++) {
-            if(keyFeturesArr[i].length() > 50)
+            if(keyFeturesArr[i].length() > 2000)
                 throw new FastRuntimeException("Bullet Point Length must blew than 50.");
             params.add(new BasicNameValuePair("bullet_point[" + i + "]", keyFeturesArr[i]));
         }

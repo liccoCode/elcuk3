@@ -53,11 +53,15 @@ public class Sellings extends Controller {
 
     public static void update(Selling s, boolean remote) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
-        if(!remote) { // 非远程, 本地更新
-            s.aps.arryParamSetUP(1);
-            s.save();
-        } else { // 远程更新
-            s.deploy();
+        try {
+            if(!remote) { // 非远程, 本地更新
+                s.aps.arryParamSetUP(1);
+                s.save();
+            } else { // 远程更新
+                s.deploy();
+            }
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
         }
         renderJSON(Webs.exposeGson(s));
     }

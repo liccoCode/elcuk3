@@ -277,37 +277,6 @@ $(function(){
         $('span.currency').html(currency);
     });
 
-    /**
-     * 预览 ProductDesc 的方法
-     */
-    function previewBtn(){
-        var ownerDiv = $(this).parent();
-        var htmlPreview = ownerDiv.find(":input").val();
-        var invalidTag = false;
-        ownerDiv.siblings('div').html(htmlPreview).find('*').map(function(){
-            var nodeName = this.nodeName.toString().toLowerCase();
-            switch(nodeName){
-                case 'br':
-                case 'p':
-                case 'b':
-                case '#text':
-                    break;
-                default:
-                    invalidTag = true;
-                    $(this).css('background', 'yellow');
-            }
-        });
-        if(invalidTag) alert("使用了 Amazon 不允许的 Tag, 请查看预览中的红色高亮部分!");
-    }
-
-    // ProductDESC 输入, 字数计算
-    $("textarea[name=s\\.aps\\.productDesc]").blur(previewBtn).keyup(function(){
-        var o = $(this);
-        var length = o.css('color', 'black').val().length;
-        if(length > 2000) o.css('color', 'red');
-        o.siblings('span').html((2000 - length) + " bytes left");
-    })/*预览按钮*/.find('~ button').click(previewBtn);
-
     // Amazon 上架
     $('#s_sale').click(function(){
         $.varClosure.params = {'s.listing.listingId':$('#lid').text()};

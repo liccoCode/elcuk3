@@ -228,8 +228,12 @@ public class Products extends Controller {
         if(Validation.hasErrors()) renderJSON(new Ret(Validation.current().errorsMap()));
 
         // 在 Controller 里面将值处理好
-        Selling se = p.saleAmazon(s);
-        renderJSON(Webs.exposeGson(se));
+        try {
+            Selling se = p.saleAmazon(s);
+            renderJSON(Webs.exposeGson(se));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     public static void upcCheck(String upc) {
