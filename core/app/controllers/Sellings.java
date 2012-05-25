@@ -1,6 +1,7 @@
 package controllers;
 
 import ext.LinkExtensions;
+import helper.Webs;
 import models.Ret;
 import models.market.Listing;
 import models.market.Selling;
@@ -48,5 +49,16 @@ public class Sellings extends Controller {
         if(StringUtils.isBlank(s.aps.imageName) && StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
         s.uploadAmazonImg(imgs, false);
         renderJSON(new Ret(true, LinkExtensions.asinLink(s)));
+    }
+
+    public static void update(Selling s, boolean remote) {
+        if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
+        if(!remote) { // 非远程, 本地更新
+            s.aps.arryParamSetUP(1);
+            s.save();
+        } else { // 远程更新
+            s.deploy();
+        }
+        renderJSON(Webs.exposeGson(s));
     }
 }

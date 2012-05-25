@@ -71,19 +71,6 @@ public class Listings extends Controller {
     }
 
     // --------------------------------------
-    /*
-        PS: 尽管上面的方法几乎一样, 但还是需要区分开;
-        1. Play! 会自动将 Controller 方法的调用转换为 redirect
-        2. 没有 Controller 方法会对应一个页面, 而我需要具体的页面
-        3. 这样做能够为后续的操作提供修改的空间
-      */
-
-    public static void update(@Valid Selling s) {
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        s.save();
-        renderJSON(s);
-    }
-
 
     /**
      * 抓取指定市场的 Listing 进入系统. 如果 Listing 存在这更新, 否则新创建保存

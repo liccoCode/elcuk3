@@ -19,6 +19,35 @@ $(function(){
         });
     })();
 
+    function baseBtnUpdate(btn, remote){
+        var btnGroup = $(btn).parent();
+        $.varClosure.params = {remote:remote};
+        $('#container :input').map($.varClosure);
+        btnGroup.mask("更新中...");
+        $.post('/sellings/update', $.varClosure.params, function(r){
+            if(r.flag === false) alert(r.message);
+            else{
+                alert("Selling: " + r['sellingId'] + " 更新成功!");
+            }
+            btnGroup.unmask();
+        });
+    }
+
+    // Update 按钮
+    $("button:contains('Update')").click(function(){
+        baseBtnUpdate(this, false);
+    });
+
+    // Deploy 按钮
+    $("button:contains('Deploy')").click(function(){
+        baseBtnUpdate(this, true);
+    });
+
+    // Sync 按钮
+    $("button:contains('Sync')").click(function(){
+        alert('Sync Button');
+    });
+
     /*
      * Image 值计算的功能.
      * 按照图片下方 input 中的索引进行图片的顺序排列, 如果索引不连续, 需要报告异常并停止取值,

@@ -3,11 +3,15 @@ package models.embedded;
 import com.google.gson.annotations.Expose;
 import helper.Webs;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import play.data.validation.Required;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -155,6 +159,48 @@ public class AmazonProps {
 
             tmp = StringUtils.split(this.RBN, ",");
             if(tmp != null) System.arraycopy(tmp, 0, this.rbns, 0, tmp.length);
+        }
+    }
+
+    /**
+     * 上架前进行 keyFeturess(bullet_point)值设置的检查
+     *
+     * @param params
+     */
+    public void bulletPointsCheck(Collection<NameValuePair> params) {
+        // 这里使用自己进行字符串
+        String[] keyFeturesArr = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
+        for(int i = 0; i < keyFeturesArr.length; i++) {
+            if(keyFeturesArr[i].length() > 50)
+                throw new FastRuntimeException("Bullet Point Length must blew than 50.");
+            params.add(new BasicNameValuePair("bullet_point[" + i + "]", keyFeturesArr[i]));
+        }
+        int missingIndex = 5 - keyFeturesArr.length;
+        if(missingIndex > 0) {
+            for(int i = 1; i < missingIndex; i++) {
+                params.add(new BasicNameValuePair("bullet_point[" + (keyFeturesArr.length + i) + "]", ""));
+            }
+        }
+    }
+
+    /**
+     * 上架前进行 searchTerms 值设置的检查
+     *
+     * @param params
+     */
+    public void searchTermsCheck(Collection<NameValuePair> params) {
+        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.searchTerms, Webs.SPLIT);
+        for(int i = 0; i < searchTermsArr.length; i++) {
+            if(searchTermsArr[i].length() > 50)
+                throw new FastRuntimeException("SearchTerm length must blew than 50.");
+            params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
+        }
+        // length = 3, 0~2, need 3,4
+        int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
+        if(missingIndex > 0) {
+            for(int i = 1; i <= missingIndex; i++) {
+                params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
+            }
         }
     }
 }

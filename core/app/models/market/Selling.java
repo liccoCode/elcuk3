@@ -261,6 +261,7 @@ public class Selling extends GenericModel {
      *          deploy 方法失败会抛出异常
      */
     public void deploy() {
+        this.aps.arryParamSetUP(1);//将数组参数转换成字符串再进行处理
         synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
             switch(this.market) {
                 case AMAZON_DE:
@@ -303,19 +304,9 @@ public class Selling extends GenericModel {
                                 params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
                             }
                         } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms)) {
-                            String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.aps.searchTerms, Webs.SPLIT);
-                            for(int i = 0; i < searchTermsArr.length; i++) {
-                                if(searchTermsArr[i].length() > 50)
-                                    throw new FastRuntimeException("SearchTerm length must blew then 50.");
-                                params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
-                            }
-                            // length = 3, 0~2, need 3,4
-                            int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
-                            if(missingIndex > 0) {
-                                for(int i = 1; i <= missingIndex; i++) {
-                                    params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
-                                }
-                            }
+                            this.aps.searchTermsCheck(params);
+                        } else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures)) {
+                            this.aps.bulletPointsCheck(params);
                         } else {
                             params.add(new BasicNameValuePair(name, el.val()));
                         }

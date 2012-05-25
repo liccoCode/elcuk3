@@ -209,7 +209,7 @@ public class Product extends GenericModel {
             Set<NameValuePair> classifyHiddenParams = new HashSet<NameValuePair>();
             for(Element input : inputs) {
                 String name = input.attr("name");
-                if("newCategory".equals(name)) { //TODO 这里的类别先写死, 需要将这个类别与系统内的类别挂钩
+                if("newCategory".equals(name)) { //TODO 这里的类别先写死, 需要将这个类别与系统内的类别挂钩(类别上拥有 name, 具体的值最终全部沉淀到 Product 身上)
                     classifyHiddenParams.add(new BasicNameValuePair(name, "consumer_electronics/consumer_electronics"));
                 } else classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
             }
@@ -280,21 +280,9 @@ public class Product extends GenericModel {
                         // 在发现了 encoded_session_hidden_map 以后需要添加这样一个属性(JS 动态添加的)
                         addSellingPrams.add(new BasicNameValuePair("sessionMapPresent", "true"));
                     } else if(StringUtils.startsWith(name, "bullet_point")) {
-                        int fetureSize = selling.aps.keyFeturess.length;
-                        for(int i = 0; i < fetureSize; i++)
-                            addSellingPrams.add(new BasicNameValuePair("bullet_point[" + i + "]", selling.aps.keyFeturess[i]));
-                        if(fetureSize < 5) { // 不足 5 个
-                            for(int i = 0; i < (5 - fetureSize); i++)
-                                addSellingPrams.add(new BasicNameValuePair("bullet_point[" + (i + fetureSize) + "]", ""));
-                        }
+                        selling.aps.bulletPointsCheck(addSellingPrams);
                     } else if(StringUtils.startsWith(name, "generic_keywords")) {
-                        int searchTermsSize = selling.aps.searchTermss.length;
-                        for(int i = 0; i < searchTermsSize; i++)
-                            addSellingPrams.add(new BasicNameValuePair("generic_keywords[" + i + "]", selling.aps.searchTermss[i]));
-                        if(searchTermsSize < 5) {
-                            for(int i = 0; i < (5 - searchTermsSize); i++)
-                                addSellingPrams.add(new BasicNameValuePair("generic_keywords[" + (i + searchTermsSize) + "]", ""));
-                        }
+                        selling.aps.searchTermsCheck(addSellingPrams);
                     } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
                         //TODO 这里没有检查 recommended_browse_nodes, 请在 Controller 中检查.
                         addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns[0]));
