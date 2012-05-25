@@ -293,11 +293,11 @@ public class Selling extends GenericModel {
                 this.aps.modelNumber = val;
             else if("our_price".equals(name))
                 this.aps.standerPrice = Webs.amazonPriceNumber(this.market, val);
-            else if("discounted_price".equals(name))
+            else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.salePrice = Webs.amazonPriceNumber(this.market, val);
-            else if("discounted_price_start_date".equals(name))
+            else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.startDate = Dates.listingFromFmt(this.market, val);
-            else if("discounted_price_end_date".equals(name))
+            else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.endDate = Dates.listingFromFmt(this.market, val);
             else if("Offer_Inventory_Quantity".equals(name))
                 this.aps.quantity = NumberUtils.toInt(val, 0);
