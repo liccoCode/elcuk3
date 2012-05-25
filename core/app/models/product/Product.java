@@ -168,11 +168,13 @@ public class Product extends GenericModel {
         /**
          * 0. 属性的逻辑性检查
          *  - TODO UPC 相同的 Selling 需要对 MSKU 进行一致性检查
+         *  - merchantSKU 修正为全大写
          *  - merchantSKU 的格式为 [sku,upc] 如果不一样, 则抛异常
          * 1. 将 Listing 相关信息同步到 Selling 上
          * 2. 检查 UPC 的值, 这个值需要在这检查一下已经使用过的 UPC 与还没有使用的 UPC.
          * 3. 开始上架
          */
+        selling.merchantSKU = selling.merchantSKU.toUpperCase();
         try {
             if(!StringUtils.equals(StringUtils.split(selling.merchantSKU, ",")[1], selling.aps.upc))
                 throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc]");
@@ -252,11 +254,11 @@ public class Product extends GenericModel {
                     else if("manufacturer".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturer));
                     else if("brand_name".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, "EasyAcc")); // ?? 这个品牌的名字现在都使用我们自己的?
+                        addSellingPrams.add(new BasicNameValuePair(name, StringUtils.isBlank(selling.aps.brand) ? "EasyAcc" : selling.aps.brand)); // ?? 这个品牌的名字现在都使用我们自己的?
                     else if("part_number".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturerPartNumber)); //TODO 不记得了...
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturerPartNumber));
                     else if("model".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.modelNumber)); // TODO 不记得了...
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.modelNumber));
                     else if("external_id".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.aps.upc));
                     else if("offering_sku".equals(name))

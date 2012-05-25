@@ -65,4 +65,17 @@ public class Sellings extends Controller {
         }
         renderJSON(Webs.exposeGson(s));
     }
+
+    /**
+     * 从 Amazon 上将 Selling 信息同步回来
+     */
+    public static void syncAmazon(String sid) {
+        Selling selling = Selling.findById(sid);
+        try {
+            selling.syncFromAmazon();
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+        renderJSON(new Ret());
+    }
 }

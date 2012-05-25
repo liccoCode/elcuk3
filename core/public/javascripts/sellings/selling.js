@@ -40,12 +40,20 @@ $(function(){
 
     // Deploy 按钮
     $("button:contains('Deploy')").click(function(){
+        if(!confirm("确认要更新到 Amazon 吗?")) return false;
         baseBtnUpdate(this, true);
     });
 
     // Sync 按钮
     $("button:contains('Sync')").click(function(){
-        alert('Sync Button');
+        if(!confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")) return false;
+        var btnGroup = $(this).parent();
+        btnGroup.mask('同步中...');
+        $.post('/sellings/syncAmazon', {sid:$('#s_sellingId').val()}, function(r){
+            if(r.flag) alert("同步成功, 请刷新页面查看最新数据.");
+            else alert(r.message);
+            btnGroup.unmask();
+        });
     });
 
     /*

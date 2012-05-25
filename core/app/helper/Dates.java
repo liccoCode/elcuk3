@@ -2,6 +2,8 @@ package helper;
 
 import models.market.Account;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -51,11 +53,24 @@ public class Dates {
     public static String listingUpdateFmt(Account.M m, Date date) {
         switch(m) {
             case AMAZON_UK:
+            case AMAZON_FR:
                 return new DateTime(date).toString("dd/MM/yyyy");
             case AMAZON_DE:
                 return new DateTime(date).toString("dd.MM.yyyy");
             default:
                 return new DateTime(date).toString("dd/MM/yyyy");
+        }
+    }
+    
+    public static Date listingFromFmt(Account.M m, String dateStr) {
+        switch(m) {
+            case AMAZON_UK:
+            case AMAZON_FR:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+            case AMAZON_DE:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
+            default:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
         }
     }
 }

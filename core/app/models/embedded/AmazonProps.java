@@ -29,11 +29,14 @@ public class AmazonProps {
     @Expose
     public String modelNumber;
     @Expose
+    public String brand;
+    @Expose
     public String manufacturer;
     /**
      * 使用  Webs.SPLIT 进行分割, 最多 5 行
      */
     @Expose
+    @Lob
     public String keyFetures;
     @Transient
     public String[] keyFeturess;

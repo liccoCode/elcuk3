@@ -204,6 +204,7 @@ public class Webs {
      * @return
      */
     public static String E(Exception e) {
+        if(Play.mode.isDev()) e.printStackTrace();
         return e.getClass().getSimpleName() + "|" + e.getMessage();
     }
 

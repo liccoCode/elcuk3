@@ -240,6 +240,103 @@ public class Selling extends GenericModel {
         this.save();
     }
 
+    public void syncFromAmazon() {
+        Document doc = null;
+        Elements inputs = null;
+        synchronized(this.account.cookieStore()) {
+            // 1. 切换 Selling 所在区域
+            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+
+
+            // 2. 获取修改 Selling 的页面, 获取参数
+            String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+            if(Play.mode.isDev())
+                IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            doc = Jsoup.parse(body);
+            // ----- Input 框框
+            inputs = doc.select("form[name=productForm] input");
+            if(inputs.size() == 0) {
+                Logger.warn("Listing Update Page Error! Log to ....?");
+                try {
+                    FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, this.merchantSKU, this.asin)), body);
+                } catch(IOException e) {
+                    //ignore..
+                }
+                throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+            }
+        }
+
+        // 3. 将需要的参数同步重来
+        String msku = doc.select("#offering_sku_display").text().trim();
+        if(!StringUtils.equals(this.merchantSKU, msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
+            throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
+        String[] bulletPoints = new String[5];
+        String[] searchTerms = new String[5];
+        String[] rbns = new String[2];
+
+        this.aps.upc = doc.select("#external_id_display").text().trim();
+        this.aps.productDesc = doc.select("#product_description").text().trim();
+//        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
+//        this.aps.condition_ = doc.select("#offering_condition_display").text(); // 默认为 NEW
+        for(Element input : inputs) {
+            String name = input.attr("name");
+            String val = input.val();
+            if("item_name".equals(name))
+                this.aps.title = val;
+            else if("manufacturer".equals(name))
+                this.aps.manufacturer = val;
+            else if("brand_name".equals(name))
+                this.aps.brand = val;
+            else if("part_number".equals(name))
+                this.aps.manufacturerPartNumber = val;
+            else if("model".equals(name))
+                this.aps.modelNumber = val;
+            else if("our_price".equals(name))
+                this.aps.standerPrice = Webs.amazonPriceNumber(this.market, val);
+            else if("discounted_price".equals(name))
+                this.aps.salePrice = Webs.amazonPriceNumber(this.market, val);
+            else if("discounted_price_start_date".equals(name))
+                this.aps.startDate = Dates.listingFromFmt(this.market, val);
+            else if("discounted_price_end_date".equals(name))
+                this.aps.endDate = Dates.listingFromFmt(this.market, val);
+            else if("Offer_Inventory_Quantity".equals(name))
+                this.aps.quantity = NumberUtils.toInt(val, 0);
+            else if("offering_start_date".equals(name))
+                this.aps.launchDate = Dates.listingFromFmt(this.market, val);
+            else if("legal_disclaimer_description".equals(name))
+                this.aps.legalDisclaimerDesc = val;
+            else if("bullet_point[0]".equals(name))
+                bulletPoints[0] = val;
+            else if("bulletPoints[1]".equals(name))
+                bulletPoints[1] = val;
+            else if("bullet_point[2]".equals(name))
+                bulletPoints[2] = val;
+            else if("bullet_point[3]".equals(name))
+                bulletPoints[3] = val;
+            else if("bullet_point[4]".equals(name))
+                bulletPoints[4] = val;
+            else if("generic_keywords[0]".equals(name))
+                searchTerms[0] = val;
+            else if("generic_keywords[1]".equals(name))
+                searchTerms[1] = val;
+            else if("generic_keywords[2]".equals(name))
+                searchTerms[2] = val;
+            else if("generic_keywords[3]".equals(name))
+                searchTerms[3] = val;
+            else if("generic_keywords[4]".equals(name))
+                searchTerms[4] = val;
+            else if("recommended_browse_nodes[0]".equals(name))
+                rbns[0] = val;
+            else if("recommended_browse_nodes[1]".equals(name))
+                rbns[1] = val;
+//                else ignore
+        }
+        this.aps.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
+        this.aps.searchTerms = StringUtils.join(searchTerms, Webs.SPLIT);
+        this.aps.RBN = StringUtils.join(rbns, ",");
+        this.save();
+    }
+
     /**
      * <pre>
      * 将传入的 Selling 的数据更新到 渠道上并且更新数据库;
@@ -272,12 +369,12 @@ public class Selling extends GenericModel {
                 case AMAZON_US:
                     // 1. 切换 Selling 所在区域
                     this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
-                    String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
-                    if(Play.mode.isDev())
-                        IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
 
 
                     // 2. 设置需要提交的值
+                    String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+                    if(Play.mode.isDev())
+                        IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
                     Document doc = Jsoup.parse(body);
                     // ----- Input 框框
                     Elements inputs = doc.select("form[name=productForm] input");
