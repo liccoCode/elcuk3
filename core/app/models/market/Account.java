@@ -722,7 +722,7 @@ public class Account extends Model {
         synchronized(Account.class) {
             List<Account> accs = Account.all().fetch();
             for(Account ac : accs) {
-                MERCHANT_ID.put(ac.merchantId, ac.uniqueName);
+                merchant_id().put(ac.merchantId, ac.uniqueName);
                 Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
                 ac.loginWebSite();
             }
