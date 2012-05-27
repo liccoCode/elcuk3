@@ -359,7 +359,12 @@ public class Selling extends GenericModel {
      *  --- 检查字符串最多 2000 个
      * 4. searchTerms[1~5]
      *  --- 检查每一行最多 50 个
-     * 5. 等待添加
+     * 5. browse_nodes[2]
+     * 6. manufacturer: manufact
+     * 7. item_name: title
+     * 8. part_number: manufactuerPartNumber
+     * 9. quantity
+     * 10. 等待添加
      * </pre>
      *
      * @throws play.utils.FastRuntimeException
@@ -398,20 +403,34 @@ public class Selling extends GenericModel {
                     Set<NameValuePair> params = new HashSet<NameValuePair>();
                     for(Element el : inputs) {
                         String name = el.attr("name").toLowerCase().trim();
-                        if("our_price".equals(name) && this.price != null && this.price > 0) {
+                        if("our_price".equals(name) && this.price != null && this.price > 0)
                             params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.price)));
-                        } else if("discounted_price".equals(name) ||
-                                "discounted_price_start_date".equals(name) ||
+                        else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms))
+                            this.aps.searchTermsCheck(params);
+                        else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures))
+                            this.aps.bulletPointsCheck(params);
+                        else if("manufacturer".equals(name))
+                            params.add(new BasicNameValuePair(name, this.aps.manufacturer));
+                        else if("item_name".equals(name))
+                            params.add(new BasicNameValuePair(name, this.aps.title));
+                        else if("part_number".equals(name))
+                            params.add(new BasicNameValuePair(name, this.aps.manufacturerPartNumber));
+                        else if("quantity".equals(name))
+                            params.add(new BasicNameValuePair(name, (this.aps.quantity == null ? 0 : this.aps.quantity) + ""));
+                        else if("discounted_price".equals(name) || "discounted_price_start_date".equals(name) ||
                                 "discounted_price_end_date".equals(name)) {
-                            if(this.aps.startDate != null && this.aps.endDate != null && this.aps.salePrice != null && this.aps.salePrice > 0) {
+                            if(this.aps.startDate != null && this.aps.endDate != null &&
+                                    this.aps.salePrice != null && this.aps.salePrice > 0 &&
+                                    this.aps.endDate.getTime() > this.aps.startDate.getTime()) {
                                 params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.aps.salePrice)));
                                 params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
                                 params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
                             }
-                        } else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms)) {
-                            this.aps.searchTermsCheck(params);
-                        } else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures)) {
-                            this.aps.bulletPointsCheck(params);
+                        } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
+                            if(this.aps.rbns != null && this.aps.rbns.length >= 1) {
+                                for(int i = 0; i < this.aps.rbns.length; i++)
+                                    params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.aps.rbns[i]));
+                            }
                         } else {
                             params.add(new BasicNameValuePair(name, el.val()));
                         }
