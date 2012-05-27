@@ -214,7 +214,7 @@ public class Selling extends GenericModel {
          * PT01~08  , 2~9 号图片.
          */
         List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("asin", "B0083QX8AW"));
+        params.add(new BasicNameValuePair("asin", this.asin));
         Map<String, File> uploadImages = new HashMap<String, File>();
         for(int i = 0; i < images.length; i++) {
             String fileParamName;
