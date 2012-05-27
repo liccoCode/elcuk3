@@ -206,10 +206,9 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
         String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
-        if(images.length <= 9) {  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
+        if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
             images = Arrays.copyOfRange(images, 0, 8);
-            this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
-        }
+        this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
         /**
          * MAIN   主图
          * PT01~08  , 2~9 号图片.
@@ -232,14 +231,19 @@ public class Selling extends GenericModel {
         }
         synchronized(this.account.cookieStore()) {
             this.account.changeRegion(this.market); // 切换到这个 Selling 的市场
+            Logger.info("Upload Picture to Amazon AND Synchronized[%s].", this.account.prettyName());
             String body = HTTP.upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params, uploadImages);
             if(Play.mode.isDev())
                 Devs.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, Devs.T.IMGUPLOAD);
             JsonObject imgRsp = new JsonParser().parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
             //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
             //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
-            if("failure".equals(imgRsp.get("status").getAsString()))
+            if("failure".equals(imgRsp.get("status").getAsString())) {
+                Logger.info("Upload Picture to Amazon Failed.(%s)", imgRsp.get("errorMessage").getAsString());
                 throw new FastRuntimeException(imgRsp.get("errorMessage").getAsString());
+            } else {
+                Logger.info("Upload Picture to Amazon Success.(%s)", imgRsp.get("imageUrl").getAsString());
+            }
         }
         this.save();
     }

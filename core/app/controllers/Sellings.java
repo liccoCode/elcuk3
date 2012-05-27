@@ -47,7 +47,11 @@ public class Sellings extends Controller {
     public static void imageUpload(Selling s, String imgs) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ")" + "不存在!"));
         if(StringUtils.isBlank(s.aps.imageName) && StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        s.uploadAmazonImg(imgs, false);
+        try {
+            s.uploadAmazonImg(imgs, false);
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
         renderJSON(new Ret(true, LinkExtensions.asinLink(s)));
     }
 
