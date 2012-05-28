@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,6 +41,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 10:48 AM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
 
     public Selling() {

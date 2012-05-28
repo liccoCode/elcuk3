@@ -3,10 +3,7 @@ package models.market;
 import com.google.gson.annotations.Expose;
 import exception.NotLoginFastException;
 import exception.NotSupportChangeRegionFastException;
-import helper.AWS;
-import helper.Constant;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -385,6 +382,29 @@ public class Account extends Model {
             }
         }
 
+        public String salesAndTrafficByAsinLink(Date from, Date to, int currentPage) {
+            /**
+             * https://sellercentral.amazon.co.uk/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?
+             * fromDate=12/05/2012&
+             * toDate=12/05/2012&
+             * reportID=102:DetailSalesTrafficBySKU&
+             * currentPage=0
+             */
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://sellercentral.amazon.co.uk/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
+                            "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
+                            Dates.listingUpdateFmt(AMAZON_UK, from), Dates.listingUpdateFmt(AMAZON_UK, to), currentPage);
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
 
         /**
          * 模拟人工方式修改 Listing 信息的地址
