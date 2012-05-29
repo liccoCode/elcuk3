@@ -1,4 +1,4 @@
-#{extends 'main_fluid.html'/}
+#{extends 'main.html'/}
 #{set title:'Analyze'/}
 #{set 'moreStyles'}
     #{stylesheet 'dateinput.css'/}
@@ -8,57 +8,65 @@
     #{script 'highcharts.js'/}
     #{script 'jquery.tools.date.min.js'/}
 #{/set}
-<div class="row-fluid">
-    <div class="row-fluid" id="uper">
-        <div class="span4">需要什么样的信息? 销售相关</div>
-        <div class="span7" id="a_chart" style="height:250px"></div>
+
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a href="#sales_charts" data-toggle="tab">Sale Charts</a>
+    </li>
+    <li><a href="#record_charts" data-toggle="tab">Records Charts</a></li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="sales_charts">
+        <div id="a_chart" style="min-height:200px"></div>
+        <div id="a_sales" style="min-height:200px"></div>
     </div>
-
-    <div class="row-fluid" id="uper2">
-        <div class="span4">需要什么样的信息? 销售额相关</div>
-        <div class="span7" id="a_sales" style="height:250px"></div>
+    <div class="tab-pane fade" id="record_charts">
+        <div id="a_pageView" style="min-height:200px;"></div>
+        <div id="a_session" style="min-height:200px;"></div>
     </div>
+</div>
 
-    <div class="row-fluid" id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
-        <div class="span6" id="dbcick_param"> <!-- 双击产品的时候使用 -->
-            <div class="span3 input-prepend">
-                <span class="label label-success">From:</span>
-                <input type="date" style="width:120px;" id="a_from" name="from">
-            </div>
 
-            <div class="span3 input-prepend">
-                <span class="label label-success">TO:</span>
-                <input type="date" style="width:120px;" id="a_to" name="to">
-            </div>
-            <div class="span3 input-prepend">
+<div class="row" id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
+    <div class="span12" id="dbcick_param"> <!-- 双击产品的时候使用 -->
+        <div class="span3 input-prepend">
+            <span class="label label-success">From:</span>
+            <input type="date" style="width:110px;" id="a_from" name="from">
+        </div>
+
+        <div class="span3 input-prepend">
+            <span class="label label-success">TO:</span>
+            <input type="date" style="width:110px;" id="a_to" name="to">
+        </div>
+        <div class="span3 input-prepend">
                 <span class="label label-important">
                     <a href="#" rel="popover" data-content="影响双击 Selling 后上面出现的线的搜索方式, 搜索曲线时是让系统将字符串认作 MSKU 还是 SKU." data-original-title="作用">L:</a>
                 </span>
-                <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
-                <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
-                <span class="label label-success" id="a_acc_id_label">EasyAcc</span>
-            </div>
-
-            <input type="hidden" name="acc.id" id="a_acc_id">
-            <input type="hidden" name="msku" id="a_msku">
+            <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
+            <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
+            <span class="label label-success" id="a_acc_id_label">EasyAcc</span>
         </div>
 
-        <div class="span3"> <!-- 点击 Search Selling 的时候使用 -->
-            <i class="icon-search"></i>
-            <input type="text" class="search-query" name="p.param" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN">
-
-            <a href="#" class="btn btn-small" id="a_search">搜索</a>
-        </div>
+        <input type="hidden" name="acc.id" id="a_acc_id">
+        <input type="hidden" name="msku" id="a_msku">
     </div>
 
-    <div class="row-fluid">
-        <ul id="tab" class="nav nav-tabs">
-            <li class="active"><a href="#sku" data-toggle="tab">SKU</a></li>
-            <li class=""><a href="#msku" data-toggle="tab">MSKU</a></li>
-        </ul>
-        <div id="myTabContent" class="tab-content">
-            <div class="tab-pane fade active in" id="sku"></div>
-            <div class="tab-pane fade" id="msku"></div>
-        </div>
+    <div class="span12" style="margin-bottom:5px;"> <!-- 点击 Search Selling 的时候使用 -->
+        <i class="icon-search"></i>
+        <input type="text" class="search-query" name="p.param" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN">
+
+        <a href="#" class="btn btn-small" id="a_search">搜索</a>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <ul id="tab" class="nav nav-tabs">
+        <li class="active"><a href="#sku" data-toggle="tab">SKU</a></li>
+        <li class=""><a href="#msku" data-toggle="tab">MSKU</a></li>
+    </ul>
+    <div id="myTabContent" class="tab-content">
+        <div class="tab-pane fade active in" id="sku"></div>
+        <div class="tab-pane fade" id="msku"></div>
     </div>
 </div>

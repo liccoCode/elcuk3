@@ -4,15 +4,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import helper.Webs;
+import models.market.Account;
 import models.market.Selling;
 import models.market.SellingRecord;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.junit.Before;
 import org.junit.Test;
 import play.test.UnitTest;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -43,6 +47,36 @@ public class SellingRecordTest extends UnitTest {
             String msku = rowArr.get(3).getAsString();
             msku = StringUtils.splitByWholeSeparator(msku, "\">")[1];
             System.out.println(msku.substring(0, msku.length() - 4) + ":" + rowArr.get(4).getAsInt());
+        }
+    }
+
+    @Test
+    public void testPriceStr() {
+        /*
+         * 1. de: €2,699.37
+         * 2. uk: £2,121.30
+         * 3. fr: €44.99
+         */
+        String de = "€2,699.37";
+        String uk = "£2,121.30";
+        assertEquals(2699.37, Webs.amazonPriceNumber(Account.M.AMAZON_UK, de.substring(1)).doubleValue(), 2);
+        assertEquals(2121.30, Webs.amazonPriceNumber(Account.M.AMAZON_UK, uk.substring(1)).doubleValue(), 2);
+    }
+
+    @Before
+    public void login() {
+        Account acc = Account.findById(1l);
+        acc.loginWebSite();
+    }
+
+    @Test
+    public void testNewRecordFromAmazonBusinessReports() {
+        Account acc = Account.findById(1l);
+        DateTime dt = DateTime.parse("2012-05-04");
+        for(int i = 1; i < 15; i++) {
+            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_UK, dt.plusDays(i).toDate());
+            for(SellingRecord rcd : records)
+                rcd.save();
         }
     }
 

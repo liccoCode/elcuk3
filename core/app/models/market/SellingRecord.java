@@ -8,13 +8,16 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
+import helper.Webs;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 每个 Selling 需要每天记录的信息
@@ -25,12 +28,26 @@ import java.util.List;
 @Entity
 public class SellingRecord extends GenericModel {
 
+    /**
+     * 默认构造函数, 初始化数值
+     */
+    public SellingRecord() {
+        this.pageViews = 0;
+        this.sessions = 0;
+        this.sales = 0f;
+        this.units = 0;
+        this.orders = 0;
+        this.orderCanceld = 0;
+        this.rating = 0f;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Selling selling;
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Account account;
 
+    @Enumerated(EnumType.STRING)
     @Expose
     public Account.M market;
 
@@ -87,6 +104,7 @@ public class SellingRecord extends GenericModel {
      * 销售额
      */
     public Float sales;
+    @Enumerated(EnumType.STRING)
     public Currency currency;
 
     /**
@@ -106,26 +124,68 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static List<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, Account.M market, Date oneDay) {
-        List<SellingRecord> records = new ArrayList<SellingRecord>();
+    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, Account.M market, Date oneDay) {
+        Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
-        do {
-            synchronized(acc.cookieStore()) {
-                String rtJson = HTTP.get(acc.cookieStore(), market.salesAndTrafficByAsinLink(oneDay, oneDay, 0));
+        int curentPage = 0;
+        synchronized(acc.cookieStore()) {
+            acc.changeRegion(market); // 在循环外面, 只改变一次, 并将 Cookie 同步住
+            do {
+                String url = market.salesAndTrafficByAsinLink(oneDay, oneDay, curentPage++);
+                Logger.info("Fetch SellingRecord [%s]", url);
+                String rtJson = HTTP.get(acc.cookieStore(), url);
                 JsonObject data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
                 rows = data.get("rows").getAsJsonArray();
-            }
-            for(JsonElement row : rows) {
-                JsonArray rowArr = row.getAsJsonArray();
-                SellingRecord record = new SellingRecord();
-                record.id = SellingRecord.id("", "", oneDay);
-                record.account = acc;
-                record.market = market;
-                //TODO
+                for(JsonElement row : rows) {
+                    JsonArray rowArr = row.getAsJsonArray();
+                    SellingRecord record = new SellingRecord();
+                    record.account = acc;
+                    record.market = market;
 
-                records.add(record);
-            }
-        } while(rows.size() > 0);
+                    String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
+                    msku = msku.substring(0, msku.length() - 4); /*前面截取了 "> 后最后的 </a> 过滤掉*/
+                    String sid = String.format("%s_%s", msku, market.toString());
+                    record.selling = Selling.findById(sid);
+                    record.sessions = rowArr.get(4).getAsInt();
+                    record.pageViews = rowArr.get(6).getAsInt();
+
+                    // Amazon 的订单数据也抓取回来, 但还是会重新计算
+                    record.units = rowArr.get(9).getAsInt();
+                    /**
+                     * 1. de: €2,699.37
+                     * 2. uk: £2,121.30
+                     * 3. fr: €44.99
+                     * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
+                     */
+                    record.sales = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
+                    switch(market) {
+                        case AMAZON_UK:
+                            record.currency = Currency.GBP;
+                            break;
+                        case AMAZON_DE:
+                        case AMAZON_FR:
+                        case AMAZON_IT:
+                        case AMAZON_ES:
+                            record.currency = Currency.EUR;
+                            break;
+                        case AMAZON_US:
+                            record.currency = Currency.USD;
+                            break;
+                        default:
+                            record.currency = Currency.GBP;
+                    }
+                    record.usdSales = record.currency.toUSD(record.sales);
+                    record.orders = rowArr.get(12).getAsInt();
+                    record.date = oneDay;
+
+
+                    record.id = SellingRecord.id(sid, acc.id + "", oneDay);
+                    records.add(record);
+                }
+
+
+            } while(rows.size() > 0);
+        }
 
         return records;
     }

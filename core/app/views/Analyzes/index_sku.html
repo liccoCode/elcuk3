@@ -39,9 +39,15 @@
             <div>
                 当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count} 条记录,  ${p.page}
                 / ${p.totalPage} 页
-                跳到
+            *{<ul class="pager">}*
+            *{<li>}*
+            *{<a href="#">Previous</a>}*
+            *{</li>}*
+            *{<li>}*
+            *{<a href="#">Next</a>}*
+            *{</li>}*
+            *{</ul>}*
                 <input type="text" class="page" psize="${p.size}" totalPage="${p.totalPage}" id="pagefooter_sku" value="${p.page + 1}">
-                页
             </div>
         </td>
     </tr>

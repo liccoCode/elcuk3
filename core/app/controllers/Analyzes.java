@@ -64,6 +64,10 @@ public class Analyzes extends Controller {
         renderJSON(OrderItem.ajaxHighChartSelling(msku, acc, type, from, to));
     }
 
+    public static void ajaxSellingRecord() {
+
+    }
+
     /**
      * 给出某一天订单销量的时间区间饼图
      *
