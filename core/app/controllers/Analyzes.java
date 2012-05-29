@@ -1,10 +1,10 @@
 package controllers;
 
+import com.alibaba.fastjson.JSON;
+import helper.Webs;
 import models.PageInfo;
-import models.market.Account;
-import models.market.OrderItem;
-import models.market.Orderr;
-import models.market.Selling;
+import models.Ret;
+import models.market.*;
 import org.joda.time.DateTime;
 import play.data.binding.As;
 import play.data.validation.Validation;
@@ -65,8 +65,17 @@ public class Analyzes extends Controller {
         renderJSON(OrderItem.ajaxHighChartSelling(msku, acc, type, from, to));
     }
 
-    public static void ajaxSellingRecord() {
-
+    /**
+     * 查看某一个 Selling 在一段时间内的 PageView, Session 数量
+     */
+    public static void ajaxSellingRecord(String msku,
+                                         @As("MM/dd/yyyy") Date from,
+                                         @As("MM/dd/yyyy") Date to) {
+        try {
+            renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartPVAndSS(msku, from, to)));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
     }
 
     /**

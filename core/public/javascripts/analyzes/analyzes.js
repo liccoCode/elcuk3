@@ -6,11 +6,6 @@ $(function(){
     (function(){
         $('#a_toolbar :input[type=date]').dateinput({format:'mm/dd/yyyy'});
         $('a[rel=popover]').popover();
-        $(':radio[name=type]').attr('disabled', 'disabled');// 最开始为 SKU tab, 不允许使用 MSKU/SKU 单选
-        $('#tab a[data-toggle="tab"]').on('shown', function(e){
-            if(localStorage.getItem('tab_type') == 'sku') $(':radio[name=type]').attr('disabled', 'disabled');
-            else  $(':radio[name=type]').removeAttr('disabled');
-        });
 
         // 访问页面, 利用 Ajax 加载所有订单的销量
         var preMonth = $.DateUtil.addDay(-30);
@@ -21,7 +16,10 @@ $(function(){
         // 最下方的 Selling[MerchantSKU, SKU] 列表信息
         sellRankLoad(MSKU, 1);
         sellRankLoad(SKU, 1);
+        // 销量线
         sales_line({from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'All', type:'msku'});
+        // PageView 线
+        pageViewDefaultContent();
     }());
 
     /**
@@ -75,7 +73,7 @@ $(function(){
     }
 
     /* 查看 Sellings 的销售量的 HightChart Options 对象 */
-    var sells = lineOp('a_units', 'Units').click(
+    var sellOp = lineOp('a_units', 'Units').click(
             function(){
                 var msku = localStorage.getItem('msku');
                 window.open('/analyzes/pie?msku=' + msku + "&date=" + $.DateUtil.fmt1(new Date(this.x)),
@@ -89,7 +87,7 @@ $(function(){
             });
 
     /* 查看 Sellings 的销售额的 HightChart Options 对象 */
-    var sales = lineOp('a_sales', 'Sales').click(
+    var saleOp = lineOp('a_sales', 'Sales').click(
             function(){
                 alert(this.series.name + ":::::" + this.x + ":::" + this.y);
             }).formatter(function(){
@@ -99,6 +97,43 @@ $(function(){
                         'Sales: ' + this.y;
             });
 
+    var pvOp = lineOp('a_pv', 'PageView').click(function(){
+        alert("点击了这个按钮");
+    });
+
+    var ssOp = lineOp('a_ss', 'Session');
+
+    /**
+     * 加载并且绘制 Selling 的 PageView 与 Session 的线条
+     * @params  msku, from, to
+     */
+    function pvSS_line(params){
+        $.getJSON('/analyzes/ajaxSellingRecord', params, function(r){
+            if(r.flag === false) alert(f.message);
+            else{
+                var lines = {
+                    pv_uk:{name:'PageView(uk)', data:[]},
+                    pv_de:{name:'PageView(de)', data:[]},
+                    pv_fr:{name:'PageView(fr)', data:[]},
+                    ss_uk:{name:'Session(uk)', data:[]},
+                    ss_de:{name:'Session(de)', data:[]},
+                    ss_fr:{name:'Session(fr)', data:[]}
+                };
+                pvOp.clearLines();
+                ssOp.clearLines();
+                for(var key in r){
+                    r[key].forEach(function(o){
+                        lines[key].data.push([o['_1'], o['_2']]);
+                    });
+                    if(key.indexOf('pv') >= 0) pvOp.series.push(lines[key]);
+                    else if(key.indexOf('ss') >= 0) ssOp.series.push(lines[key]);
+                }
+                new Highcharts.Chart(pvOp);
+                new Highcharts.Chart(ssOp);
+            }
+        });
+    }
+
     /**
      * 加载并且绘制 Selling 的销售额与销售量的线条
      * @param msku
@@ -107,51 +142,45 @@ $(function(){
      */
     function sales_line(params){
         $('#myTabContent').mask('加载中...');
-        $.ajax({
-            url:'/analyzes/ajaxSells',
-            data:params,
-            dataType:'json',
-            success:function(data){
-                var display_sku = params['msku'];
-                var prefix = 'Selling [<span style="color:orange">' + display_sku + '</span> | ' + params['type'].toUpperCase() + ']';
-                sells.head(prefix + ' Sales');
-                sales.head(prefix + ' Prices');
-                sells.clearLines();
-                sales.clearLines();
-                /**
-                 *  处理一条一条的曲线
-                 */
-                function dealLine(lineName, defOp){
-                    if(!data['series_' + lineName]) return false;
-                    var line = {};
-                    line.name = lineName.toUpperCase();
-                    line.data = [];
-                    for(var d = data['days']; d > 0; d--){
-                        line.data.push([$.DateUtil.addDay(-d + 1, $('#a_to').data('dateinput').getValue()).getTime(), data['series_' + lineName].shift()]);
-                    }
-                    defOp.series.push(line);
-                    return false;
+        $.getJSON('/analyzes/ajaxSells', params, function(data){
+            var display_sku = params['msku'];
+            var prefix = 'Selling [<span style="color:orange">' + display_sku + '</span> | ' + params['type'].toUpperCase() + ']';
+            sellOp.head(prefix + ' Sales');
+            saleOp.head(prefix + ' Prices');
+            sellOp.clearLines();
+            saleOp.clearLines();
+            /**
+             *  处理一条一条的曲线
+             */
+            function dealLine(lineName, defOp){
+                if(!data['series_' + lineName]) return false;
+                var line = {};
+                line.name = lineName.toUpperCase();
+                line.data = [];
+                for(var d = data['days']; d > 0; d--){
+                    line.data.push([
+                        $.DateUtil.addDay(-d + 1, $('#a_to').data('dateinput').getValue()).getTime(),
+                        data['series_' + lineName].shift()
+                    ]);
                 }
-
-                dealLine('all', sells);
-                dealLine('auk', sells);
-                dealLine('ade', sells);
-                dealLine('afr', sells);
-
-                dealLine('allM', sales);
-                dealLine('aukM', sales);
-                dealLine('adeM', sales);
-                dealLine('afrM', sales);
-
-                localStorage.setItem("msku", params['msku']);
-                new Highcharts.Chart(sells);
-                new Highcharts.Chart(sales);
-                $('#myTabContent').unmask();
-            },
-            error:function(xhr, state, err){
-                alert(err);
-                $('#myTabContent').unmask();
+                defOp.series.push(line);
+                return false;
             }
+
+            dealLine('all', sellOp);
+            dealLine('auk', sellOp);
+            dealLine('ade', sellOp);
+            dealLine('afr', sellOp);
+
+            dealLine('allM', saleOp);
+            dealLine('aukM', saleOp);
+            dealLine('adeM', saleOp);
+            dealLine('afrM', saleOp);
+
+            localStorage.setItem("msku", params['msku']);
+            new Highcharts.Chart(sellOp);
+            new Highcharts.Chart(saleOp);
+            $('#myTabContent').unmask();
         });
     }
 
@@ -170,14 +199,22 @@ $(function(){
         tgt.load('/analyzes/index_' + type, {'p.page':page, 'p.size':10, 'p.param':$('#a_param').val()}, function(){
             try{
                 //Selling 的(Ajax Line)双击事件
-                $('.msku').unbind().dblclick(function(){
+                $('.msku,.sku').unbind().dblclick(function(){
                     // 取到并设置: 时间, Type, Account
-                    var accId = $(this).attr('aid');
-                    $.varClosure.params = {type:type};
+                    var o = $(this);
+                    $.varClosure.params = {type:o.attr('class')}; // sku 类型不参加 sid 与 msku 的选择
+                    var accId = o.attr('aid');
                     $('#a_acc_id').val(accId);
-                    $('#a_msku').val($(this).attr('title'));
+                    $('#a_msku').val(o.attr('title'));
                     $('#dbcick_param :input').map($.varClosure);
+
+                    // 绘制销量线
                     sales_line($.varClosure.params);
+                    // 绘制 PageView 线
+                    if($.varClosure.params['type'] === 'msku') // 只有在查看 msku 类型的时候, 才会刷新 PageView
+                        pvSS_line($.varClosure.params);
+                    else
+                        pageViewDefaultContent();//重置 PageView 内容
 
                     var display = {0:'EasyAcc', 1:'EasyAcc.EU', 2:'EasyAcc.DE'};
                     $('#a_acc_id_label').html(display[accId]);
@@ -217,5 +254,15 @@ $(function(){
         if(e.keyCode == 13) $('#a_search').click();
         return false;
     });
+
+    /**
+     * PageView 与 Session 两条曲线在没有加载内容的时候的默认情况
+     */
+    function pageViewDefaultContent(){
+        var template = '<div class="alert alert-success"><h3 style="text-align:center">请双击需要查看的 Selling 查看 PageView & Session</h3></div>';
+        ['a_pv', 'a_ss'].forEach(function(id){
+            $('#' + id).html(template);
+        });
+    }
 
 });

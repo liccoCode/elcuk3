@@ -129,4 +129,14 @@ public class TimeParseTest {
         System.out.println(dt.toString("yyyy-MM-dd HH:mm:ss"));
         System.out.println(dt.plusDays(-180).toString("yyyy-MM-dd HH:mm:ss"));
     }
+
+    @Test
+    public void testCompareJSUTC() {
+        // Date.UTC(2010, 0, 1) -> 1262304000000
+        //2010-01-01 -> 1262275200000
+//        Assert.assertEquals(DateTime.parse("2010-01-01").getMillis(), 1262304000000l);
+        System.out.println("JS Data.UTC: " + Dates.date2DateTime(new DateTime(1262304000000l).toDate()));
+        System.out.println("JS Data.UTC 2: " + Dates.date2DateTime(new DateTime(1333065600000l).toDate()));
+        System.out.println("Java Date: " + Dates.date2DateTime(new DateTime(1262275200000l).toDate()));
+    }
 }

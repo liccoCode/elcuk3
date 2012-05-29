@@ -6,18 +6,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
-import helper.Dates;
-import helper.HTTP;
-import helper.Webs;
+import helper.*;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 每个 Selling 需要每天记录的信息
@@ -143,7 +140,7 @@ public class SellingRecord extends GenericModel {
                     record.market = market;
 
                     String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
-                    msku = msku.substring(0, msku.length() - 4); /*前面截取了 "> 后最后的 </a> 过滤掉*/
+                    msku = msku.substring(0, msku.length() - 4).toUpperCase(); /*前面截取了 "> 后最后的 </a> 过滤掉*/
                     String sid = String.format("%s_%s", msku, market.toString());
                     record.selling = Selling.findById(sid);
                     record.sessions = rowArr.get(4).getAsInt();
@@ -188,6 +185,47 @@ public class SellingRecord extends GenericModel {
         }
 
         return records;
+    }
+
+    /**
+     * 加载出一段时间内指定 Selling 的 PageView 与 Session 数据, 给前台的 HighChar 使用
+     *
+     * @param msku
+     * @param from
+     * @param to
+     * @return
+     */
+    public static Map<String, ArrayList<F.Tuple<Long, Float>>> ajaxHighChartPVAndSS(String msku, Date from, Date to) {
+        /**
+         * 格式 map[lineName, datas]
+         * datas -> [
+         * [1262304000000, 29.9],
+         * [1282304000000, 99.9]
+         * ]
+         */
+        Map<String, ArrayList<F.Tuple<Long, Float>>> highCharLines = GTs.MapBuilder
+                .map("pv_uk", new ArrayList<F.Tuple<Long, Float>>())
+                .put("ss_uk", new ArrayList<F.Tuple<Long, Float>>())
+                .put("pv_de", new ArrayList<F.Tuple<Long, Float>>())
+                .put("ss_de", new ArrayList<F.Tuple<Long, Float>>())
+                .put("pv_fr", new ArrayList<F.Tuple<Long, Float>>())
+                .put("ss_fr", new ArrayList<F.Tuple<Long, Float>>())
+                .build();
+
+        List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
+        for(SellingRecord rcd : records) {
+            if(rcd.market == Account.M.AMAZON_UK) {
+                highCharLines.get("pv_uk").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_uk").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            } else if(rcd.market == Account.M.AMAZON_DE) {
+                highCharLines.get("pv_de").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_de").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            } else if(rcd.market == Account.M.AMAZON_FR) {
+                highCharLines.get("pv_fr").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_fr").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            }
+        }
+        return highCharLines;
     }
 
     /**

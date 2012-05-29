@@ -13,16 +13,15 @@
     <div class="tab-content">
         <div class="tab-pane fade active in" id="sales_charts">
             <div id="a_units" style="min-height:200px"></div>
+            <div class="row">
+                <div id="a_pv" style="min-height:200px;" class="span6"></div>
+                <div id="a_ss" style="min-height:200px;" class="span6"></div>
+            </div>
             <div id="a_sales" style="min-height:200px"></div>
-        </div>
-        <div class="tab-pane fade" id="record_charts">
-            <div id="a_pageView" style="min-height:200px;"></div>
-            <div id="a_session" style="min-height:200px;"></div>
         </div>
     </div>
     <ul class="nav nav-tabs">
         <li class="active"><a href="#sales_charts" data-toggle="tab">Sale Charts</a></li>
-        <li><a href="#record_charts" data-toggle="tab">Records Charts</a></li>
     </ul>
 
 </div>
@@ -40,11 +39,6 @@
         </div>
 
         <div class="span3 input-prepend">
-                <span class="label label-important">
-                    <a href="#" rel="popover" data-content="影响双击 Selling 后上面出现的线的搜索方式, 搜索曲线时是让系统将字符串认作 MSKU 还是 SKU." data-original-title="作用">L:</a>
-                </span>
-            <label class="radio inline"><input type="radio" name="type" value="msku" checked>MSKU</label>
-            <label class="radio inline"><input type="radio" name="type" value="sku">SKU</label>
             <span class="label label-success" id="a_acc_id_label">EasyAcc</span>
             <input type="hidden" name="acc.id" id="a_acc_id">
             <input type="hidden" name="msku" id="a_msku">

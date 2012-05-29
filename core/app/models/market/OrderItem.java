@@ -84,18 +84,21 @@ public class OrderItem extends GenericModel {
 
     /**
      * <pre>
-     * 通过 OrderItem 计算指定的 msku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     * 通过 OrderItem 计算指定的 skuOrmSku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
      * </pre>
      *
-     * @param msku
+     * @param skuOrmSku 需要查询的 SKU 或者对应 Selling 的 sid
      * @param acc
      * @param from
-     * @param to   @return {series_size, days, series_n}
+     * @param to        @return {series_size, days, series_n}
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> ajaxHighChartSelling(String msku, Account acc, String type, Date from, Date to) {
-        String cached_key = String.format(Caches.AJAX_SALE_LINE, msku + (StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type) ? "_sku" : "") + "_" + (acc == null ? "0" : acc.id), from.getTime(), to.getTime());
+    public static Map<String, Object> ajaxHighChartSelling(String skuOrmSku, Account acc, String type, Date from, Date to) {
+        String cached_key = String.format(Caches.AJAX_SALE_LINE,
+                skuOrmSku + (StringUtils.isNotBlank(type) ? type : "") + "_" + (acc == null ? "0" : acc.id),
+                from.getTime(),
+                to.getTime());
         Map<String, Object> cached = Cache.get(cached_key, Map.class);
         if(cached != null && cached.size() > 0) return cached;
         /**
@@ -110,16 +113,16 @@ public class OrderItem extends GenericModel {
          * 组装成 HightChart 的格式
          */
         List<OrderItem> orderItems;
-        if("all".equalsIgnoreCase(msku)) {
+        if("all".equalsIgnoreCase(skuOrmSku)) {
             orderItems = OrderItem.find("createDate>=? AND createDate<=?", from, to).fetch();
         } else {
             if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(msku), from, to).fetch();
+                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(skuOrmSku), from, to).fetch();
             else {
                 if(acc == null)
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", msku, from, to).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", skuOrmSku, from, to).fetch();
                 else
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", msku, acc, from, to).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrmSku, acc, from, to).fetch();
             }
         }
 
