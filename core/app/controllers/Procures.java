@@ -43,6 +43,7 @@ public class Procures extends Controller {
         Map<String, List<String>> avaCats = new HashMap<String, List<String>>();
         Map<String, Set<String>> avaCatsTmp = new HashMap<String, Set<String>>();
         for(Listing li : listings) {
+            if(li.product == null) continue;// 不是我们自己的 Listing
             if(avaCatsTmp.containsKey(li.market.name())) {
                 avaCatsTmp.get(li.market.name()).add(li.product.category.categoryId);
             } else {
