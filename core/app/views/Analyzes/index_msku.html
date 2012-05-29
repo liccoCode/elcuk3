@@ -33,7 +33,7 @@
                 <td style="color:red;">${sell.turnOver.format("#.##")}</td>
             #{/if}
             #{elseif sell.turnOver < 0}
-                <td style="color:purple;">(7天内无销量!)</td>
+                <td style="color:purple;">7天内无销量!</td>
             #{/elseif}
             #{else }
                 <td>${sell.turnOver.format("#.##")}</td>
@@ -44,12 +44,19 @@
 #{/list}
     <tr>
         <td colspan="13">
-            <div>
+            <div class="input-prepend">
+                <div class="pagination span3" style="margin-top:0;">
+                    <ul>
+                        <li><a href="#" page="1">1</a></li>
+                        <li><a href="#" page="${p.page - 1}">Prev</a></li>
+                        <li><a href="#" page="${p.page + 1}">Next</a></li>
+                        <li><a href="#" page="${p.totalPage}">${p.totalPage}</a></li>
+                    </ul>
+                </div>
+                <span class="add-on">
                 当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count} 条记录,  ${p.page}
-                / ${p.totalPage} 页
-                跳到
-                <input type="text" class="page" psize="${p.size}" totalPage="${p.totalPage}" id="pagefooter_msku" value="${p.page + 1}">
-                页
+                    / ${p.totalPage} 页
+                </span>
             </div>
         </td>
     </tr>

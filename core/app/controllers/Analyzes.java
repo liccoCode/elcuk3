@@ -61,6 +61,7 @@ public class Analyzes extends Controller {
         validation.required(from);
         validation.required(to);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        if(!acc.isPersistent()) acc = null;
         renderJSON(OrderItem.ajaxHighChartSelling(msku, acc, type, from, to));
     }
 

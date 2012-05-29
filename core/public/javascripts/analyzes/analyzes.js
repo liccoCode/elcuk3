@@ -1,12 +1,13 @@
 $(function(){
+    MSKU = 'msku';
+    SKU = 'sku';
+
     // init page
     (function(){
         $('#a_toolbar :input[type=date]').dateinput({format:'mm/dd/yyyy'});
         $('a[rel=popover]').popover();
-        setTabType("sku");
         $(':radio[name=type]').attr('disabled', 'disabled');// 最开始为 SKU tab, 不允许使用 MSKU/SKU 单选
         $('#tab a[data-toggle="tab"]').on('shown', function(e){
-            setTabType($(e.target).attr('href').split("#")[1]);
             if(localStorage.getItem('tab_type') == 'sku') $(':radio[name=type]').attr('disabled', 'disabled');
             else  $(':radio[name=type]').removeAttr('disabled');
         });
@@ -18,135 +19,93 @@ $(function(){
         $('#a_to').data("dateinput").setValue(now);
 
         // 最下方的 Selling[MerchantSKU, SKU] 列表信息
-        sellRankLoad(1, 1);
-        sellRankLoad(-1, 1);
-
-        ajax_line({from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'All', type:'msku'});
-
+        sellRankLoad(MSKU, 1);
+        sellRankLoad(SKU, 1);
+        sales_line({from:$.DateUtil.fmt1(preMonth), to:$.DateUtil.fmt1(now), msku:'All', type:'msku'});
     }());
 
-    function setTabType(type){
-        localStorage.setItem('tab_type', type);
+    /**
+     * 用来构造给 HighChart 使用的默认 options 的方法
+     * @param container
+     * @param yName
+     */
+    function lineOp(container, yName){
+        return {
+            chart:{renderTo:container},
+            title:{text:'Chart Title'},
+            xAxis:{type:'datetime', dateTimeLabelFormats:{day:'%y.%m.%d'}},
+            yAxis:{title:{text:yName}, min:0},
+            plotOptions:{
+                series:{
+                    cursor:'pointer',
+                    point:{events:{}}
+                }
+            },
+            tooltip:{},
+            series:[
+            ],
+            /**
+             * 设置这条线的'标题'
+             * @param title
+             */
+            head:function(title){
+                this.title.text = title;
+                return this;
+            },
+            click:function(func){
+                this.plotOptions.series.point.events.click = func;
+                return this;
+            },
+            mouseOver:function(func){
+                this.plotOptions.series.point.events.mouseOver = func;
+                return this;
+            },
+            mouseOut:function(func){
+                this.plotOptions.series.point.events.mouseOut = func;
+                return this;
+            },
+            formatter:function(func){
+                this.tooltip.formatter = func;
+                return this;
+            },
+            clearLines:function(){
+                this.series = [];
+            }
+        }
     }
 
-
     /* 查看 Sellings 的销售量的 HightChart Options 对象 */
-    var sells = {
-        chart:{
-            renderTo:'a_chart',
-            defaultSeriesType:'line',
-            marginBottom:50
-        },
-        title:{
-            text:'Selling Sales'
-        },
-        xAxis:{
-            type:'datetime',
-            dateTimeLabelFormats:{
-                day:'%y.%m.%d'
-            }
-        },
-        plotOptions:{
-            series:{
-                cursor:'pointer',
-                point:{
-                    events:{
-                        click:function(){
-                            var msku = localStorage.getItem('msku');
-                            window.open('/analyzes/pie?msku=' + msku + "&date=" + $.DateUtil.fmt1(new Date(this.x)),
-                                    msku,
-                                    'width=520,height=620,location=yes,status=yes');
-                        }
-                    }
-                }
-            }
-        },
-        yAxis:{
-            title:{
-                text:'Sales'
-            },
-            min:0,
-            plotLines:[
-                {
-                    value:0,
-                    width:1,
-                    color:'#808080'
-                }
-            ]
-        },
-        tooltip:{
-            formatter:function(){
+    var sells = lineOp('a_units', 'Units').click(
+            function(){
+                var msku = localStorage.getItem('msku');
+                window.open('/analyzes/pie?msku=' + msku + "&date=" + $.DateUtil.fmt1(new Date(this.x)),
+                        msku,
+                        'width=520,height=620,location=yes,status=yes');
+            }).formatter(function(){
                 var cur = new Date(this.x);
                 return '<strong>' + this.series.name + '</strong><br/>' +
                         'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
                         'Sales: ' + this.y;
-            }
-        },
-        series:[
-        ]
-    };
+            });
 
     /* 查看 Sellings 的销售额的 HightChart Options 对象 */
-    var sales = {
-        chart:{
-            renderTo:'a_sales',
-            defaultSeriesType:'line',
-            marginBottom:50
-        },
-        title:{
-            text:'Selling Price Sales'
-        },
-        xAxis:{
-            type:'datetime',
-            dateTimeLabelFormats:{
-                day:'%y.%m.%d'
-            }
-        },
-        plotOptions:{
-            series:{
-                cursor:'pointer',
-                point:{
-                    events:{
-                        click:function(){
-                            alert(this.series.name + ":::::" + this.x + ":::" + this.y);
-                        }
-                    }
-                }
-            }
-        },
-        yAxis:{
-            title:{
-                text:'Prices'
-            },
-            min:0,
-            plotLines:[
-                {
-                    value:0,
-                    width:1,
-                    color:'#808080'
-                }
-            ]
-        },
-        tooltip:{
-            formatter:function(){
+    var sales = lineOp('a_sales', 'Sales').click(
+            function(){
+                alert(this.series.name + ":::::" + this.x + ":::" + this.y);
+            }).formatter(function(){
                 var cur = new Date(this.x);
                 return '<strong>' + this.series.name + '</strong><br/>' +
                         'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
                         'Sales: ' + this.y;
-            }
-        },
-        series:[
-        ]
-    };
-
+            });
 
     /**
-     * 加载并且绘制 Selling 的销售额与销售量
+     * 加载并且绘制 Selling 的销售额与销售量的线条
      * @param msku
      * @param params
      * @param type -1:销售量, 1:销售额
      */
-    function ajax_line(params){
+    function sales_line(params){
         $('#myTabContent').mask('加载中...');
         $.ajax({
             url:'/analyzes/ajaxSells',
@@ -155,15 +114,14 @@ $(function(){
             success:function(data){
                 var display_sku = params['msku'];
                 var prefix = 'Selling [<span style="color:orange">' + display_sku + '</span> | ' + params['type'].toUpperCase() + ']';
-                sells.title.text = prefix + ' Sales';
-                sales.title.text = prefix + ' Prices';
-                var sell_series = [];
-                var sale_series = [];
-
+                sells.head(prefix + ' Sales');
+                sales.head(prefix + ' Prices');
+                sells.clearLines();
+                sales.clearLines();
                 /**
                  *  处理一条一条的曲线
                  */
-                function dealLine(lineName, series){
+                function dealLine(lineName, defOp){
                     if(!data['series_' + lineName]) return false;
                     var line = {};
                     line.name = lineName.toUpperCase();
@@ -171,22 +129,20 @@ $(function(){
                     for(var d = data['days']; d > 0; d--){
                         line.data.push([$.DateUtil.addDay(-d + 1, $('#a_to').data('dateinput').getValue()).getTime(), data['series_' + lineName].shift()]);
                     }
-                    series.push(line);
+                    defOp.series.push(line);
                     return false;
                 }
 
-                dealLine('all', sell_series);
-                dealLine('auk', sell_series);
-                dealLine('ade', sell_series);
-                dealLine('afr', sell_series);
+                dealLine('all', sells);
+                dealLine('auk', sells);
+                dealLine('ade', sells);
+                dealLine('afr', sells);
 
-                dealLine('allM', sale_series);
-                dealLine('aukM', sale_series);
-                dealLine('adeM', sale_series);
-                dealLine('afrM', sale_series);
+                dealLine('allM', sales);
+                dealLine('aukM', sales);
+                dealLine('adeM', sales);
+                dealLine('afrM', sales);
 
-                sells.series = sell_series;
-                sales.series = sale_series;
                 localStorage.setItem("msku", params['msku']);
                 new Highcharts.Chart(sells);
                 new Highcharts.Chart(sales);
@@ -199,37 +155,39 @@ $(function(){
         });
     }
 
-
     /**
      * Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
-     * @param t
+     * @param type
      * @param page
-     * @param size
      */
-    function sellRankLoad(t, page){
-        var type = 'msku';
-        if(t > 0) type = 'msku';
-        else if(t < 0) type = 'sku';
+    function sellRankLoad(type, page){
+        if(type != MSKU && type != SKU){
+            alert("只允许 msku 与 sku 两种类型!");
+            return false;
+        }
         var tgt = $('#' + type);
         tgt.mask('加载中...');
         tgt.load('/analyzes/index_' + type, {'p.page':page, 'p.size':10, 'p.param':$('#a_param').val()}, function(){
             try{
                 //Selling 的(Ajax Line)双击事件
                 $('.msku').unbind().dblclick(function(){
-                    // 取到: 时间, Type, Account
+                    // 取到并设置: 时间, Type, Account
                     var accId = $(this).attr('aid');
-                    var msku = $(this).attr('title');
-                    $.varClosure.params = {};
+                    $.varClosure.params = {type:type};
                     $('#a_acc_id').val(accId);
-                    $('#a_msku').val(msku);
+                    $('#a_msku').val($(this).attr('title'));
                     $('#dbcick_param :input').map($.varClosure);
-                    if(localStorage.getItem('tab_type') == 'sku') $.varClosure.params['type'] = 'sku';
-                    ajax_line($.varClosure.params);
+                    sales_line($.varClosure.params);
 
                     var display = {0:'EasyAcc', 1:'EasyAcc.EU', 2:'EasyAcc.DE'};
                     $('#a_acc_id_label').html(display[accId]);
                 });
                 //页脚的翻页事件
+                $('div.pagination a').click(function(){
+                    sellRankLoad(type, $(this).attr('page'));
+                    return false;
+                });
+
                 $('#pagefooter_' + type).keyup(function(e){
                     if(e.keyCode != 13) return false;
                     var o = $(this);
@@ -238,20 +196,21 @@ $(function(){
                         return false;
                     }
                     // Ajax 事件需要重新加载
-                    sellRankLoad(t, o.val());
+                    sellRankLoad(type, o.val());
                 });
             }finally{
                 tgt.unmask();
             }
         });
+        return false;
     }
 
     // 给 搜索 按钮添加事件
     $('#a_search').click(function(){
-        var tab_type = localStorage.getItem('tab_type');
+        var tab_type = $('#tab li[class=active] a').attr('href').substring(1);
         var page = $('#pagefooter_sku').val() - 1;
         /*搜索框中保持当前页码不变*/
-        sellRankLoad((tab_type == 'msku' ? 1 :-1), page <= 0 ? 1 :page);
+        sellRankLoad(tab_type, page <= 0 ? 1 :page);
         return false;
     });
     $('#a_param').keyup(function(e){
