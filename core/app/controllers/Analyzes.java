@@ -69,10 +69,11 @@ public class Analyzes extends Controller {
      * 查看某一个 Selling 在一段时间内的 PageView, Session 数量
      */
     public static void ajaxSellingRecord(String msku,
+                                         Account acc,
                                          @As("MM/dd/yyyy") Date from,
                                          @As("MM/dd/yyyy") Date to) {
         try {
-            renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartPVAndSS(msku, from, to)));
+            renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartPVAndSS(msku, acc, from, to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

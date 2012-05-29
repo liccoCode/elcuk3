@@ -842,6 +842,7 @@ public class Selling extends GenericModel {
         return pi;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -850,7 +851,7 @@ public class Selling extends GenericModel {
 
         Selling selling = (Selling) o;
 
-        if(merchantSKU != null ? !merchantSKU.equals(selling.merchantSKU) : selling.merchantSKU != null) return false;
+        if(sellingId != null ? !sellingId.equals(selling.sellingId) : selling.sellingId != null) return false;
 
         return true;
     }
@@ -858,7 +859,7 @@ public class Selling extends GenericModel {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (merchantSKU != null ? merchantSKU.hashCode() : 0);
+        result = 31 * result + (sellingId != null ? sellingId.hashCode() : 0);
         return result;
     }
 }

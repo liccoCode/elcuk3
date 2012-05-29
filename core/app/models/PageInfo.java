@@ -64,7 +64,7 @@ public class PageInfo<T> {
     }
 
     public int getBegin() {
-        if(this.begin <= 0) this.begin = (this.page - 1) * this.size;
+        if(this.begin <= 0) this.begin = ((this.page < 1 ? 1 : this.page) - 1) * this.size;
         return this.begin;
     }
 

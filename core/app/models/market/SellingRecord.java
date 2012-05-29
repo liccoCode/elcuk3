@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.*;
@@ -36,6 +37,18 @@ public class SellingRecord extends GenericModel {
         this.orders = 0;
         this.orderCanceld = 0;
         this.rating = 0f;
+        this.reviewSize = 0;
+        this.salePrice = 0f;
+        this.date = new Date();
+    }
+
+    public SellingRecord(String id, Selling sell, Date date) {
+        this();
+        this.id = id;
+        this.selling = sell;
+        this.account = sell.account;
+        this.market = this.selling.market;
+        this.date = date;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -98,6 +111,12 @@ public class SellingRecord extends GenericModel {
     public Float rating;
 
     /**
+     * 当天的 Review 的个数
+     */
+    @Expose
+    public Integer reviewSize;
+
+    /**
      * 销售额
      */
     public Float sales;
@@ -115,6 +134,20 @@ public class SellingRecord extends GenericModel {
     @Temporal(TemporalType.DATE)
     @Expose
     public Date date;
+
+    public void updateAttr(SellingRecord nsrd) {
+        if(!StringUtils.equals(this.id, nsrd.id)) throw new FastRuntimeException("不相同的 SellingReocrd 不能进行更新!");
+        if(nsrd.units != null && nsrd.units > 0) this.units = nsrd.units;
+        if(nsrd.orders != null && nsrd.orders > 0) this.orders = nsrd.orders;
+        if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0) this.orderCanceld = nsrd.orderCanceld;
+        if(nsrd.sales != null && nsrd.sales > 0) this.sales = nsrd.sales;
+        if(nsrd.currency != null) this.currency = nsrd.currency;
+        if(nsrd.usdSales != null && nsrd.usdSales > 0) this.usdSales = nsrd.usdSales;
+        if(nsrd.rating != null && nsrd.rating > 0) this.rating = nsrd.rating;
+        if(nsrd.salePrice != null && nsrd.salePrice > 0) this.salePrice = nsrd.salePrice;
+        if(nsrd.pageViews != null && nsrd.pageViews > 0) this.pageViews = nsrd.pageViews;
+        if(nsrd.sessions != null && nsrd.sessions > 0) this.sessions = nsrd.sessions;
+    }
 
     /**
      * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录
@@ -134,50 +167,54 @@ public class SellingRecord extends GenericModel {
                 JsonObject data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
                 rows = data.get("rows").getAsJsonArray();
                 for(JsonElement row : rows) {
-                    JsonArray rowArr = row.getAsJsonArray();
-                    SellingRecord record = new SellingRecord();
-                    record.account = acc;
-                    record.market = market;
+                    try {
+                        JsonArray rowArr = row.getAsJsonArray();
+                        SellingRecord record = new SellingRecord();
+                        record.account = acc;
+                        record.market = market;
 
-                    String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
-                    msku = msku.substring(0, msku.length() - 4).toUpperCase(); /*前面截取了 "> 后最后的 </a> 过滤掉*/
-                    String sid = String.format("%s_%s", msku, market.toString());
-                    record.selling = Selling.findById(sid);
-                    record.sessions = rowArr.get(4).getAsInt();
-                    record.pageViews = rowArr.get(6).getAsInt();
+                        String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
+                        msku = msku.substring(0, msku.length() - 4).toUpperCase(); /*前面截取了 "> 后最后的 </a> 过滤掉*/
+                        String sid = String.format("%s_%s", msku, market.toString());
+                        record.selling = Selling.findById(sid);
+                        record.sessions = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
+                        record.pageViews = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
 
-                    // Amazon 的订单数据也抓取回来, 但还是会重新计算
-                    record.units = rowArr.get(9).getAsInt();
-                    /**
-                     * 1. de: €2,699.37
-                     * 2. uk: £2,121.30
-                     * 3. fr: €44.99
-                     * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
-                     */
-                    record.sales = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
-                    switch(market) {
-                        case AMAZON_UK:
-                            record.currency = Currency.GBP;
-                            break;
-                        case AMAZON_DE:
-                        case AMAZON_FR:
-                        case AMAZON_IT:
-                        case AMAZON_ES:
-                            record.currency = Currency.EUR;
-                            break;
-                        case AMAZON_US:
-                            record.currency = Currency.USD;
-                            break;
-                        default:
-                            record.currency = Currency.GBP;
+                        // Amazon 的订单数据也抓取回来, 但还是会重新计算
+                        record.units = rowArr.get(9).getAsInt();
+                        /**
+                         * 1. de: €2,699.37
+                         * 2. uk: £2,121.30
+                         * 3. fr: €44.99
+                         * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
+                         */
+                        record.sales = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
+                        switch(market) {
+                            case AMAZON_UK:
+                                record.currency = Currency.GBP;
+                                break;
+                            case AMAZON_DE:
+                            case AMAZON_FR:
+                            case AMAZON_IT:
+                            case AMAZON_ES:
+                                record.currency = Currency.EUR;
+                                break;
+                            case AMAZON_US:
+                                record.currency = Currency.USD;
+                                break;
+                            default:
+                                record.currency = Currency.GBP;
+                        }
+                        record.usdSales = record.currency.toUSD(record.sales);
+                        record.orders = rowArr.get(12).getAsInt();
+                        record.date = oneDay;
+
+
+                        record.id = SellingRecord.id(sid, acc.id + "", oneDay);
+                        records.add(record);
+                    } catch(Exception e) {
+                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)", Webs.E(e));
                     }
-                    record.usdSales = record.currency.toUSD(record.sales);
-                    record.orders = rowArr.get(12).getAsInt();
-                    record.date = oneDay;
-
-
-                    record.id = SellingRecord.id(sid, acc.id + "", oneDay);
-                    records.add(record);
                 }
 
 
@@ -195,7 +232,7 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.Tuple<Long, Float>>> ajaxHighChartPVAndSS(String msku, Date from, Date to) {
+    public static Map<String, ArrayList<F.Tuple<Long, Float>>> ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
         /**
          * 格式 map[lineName, datas]
          * datas -> [
@@ -212,7 +249,7 @@ public class SellingRecord extends GenericModel {
                 .put("ss_fr", new ArrayList<F.Tuple<Long, Float>>())
                 .build();
 
-        List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
+        List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
         for(SellingRecord rcd : records) {
             if(rcd.market == Account.M.AMAZON_UK) {
                 highCharLines.get("pv_uk").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));

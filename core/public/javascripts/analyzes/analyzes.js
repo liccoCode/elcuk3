@@ -119,6 +119,8 @@ $(function(){
                     ss_de:{name:'Session(de)', data:[]},
                     ss_fr:{name:'Session(fr)', data:[]}
                 };
+                pvOp.head("Selling[<span style='color:orange;'>" + params['msku'] + "</span>] PV");
+                ssOp.head("Selling[<span style='color:orange;'>" + params['msku'] + "</span>] SS");
                 pvOp.clearLines();
                 ssOp.clearLines();
                 for(var key in r){
