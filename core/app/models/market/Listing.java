@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-import helper.Currency;
+import jobs.ListingWorkers;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +14,7 @@ import play.db.jpa.GenericModel;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Listing 对应的是不同渠道上 Listing 的信息
@@ -268,7 +269,7 @@ public class Listing extends GenericModel {
      * @param listingJson
      * @return
      */
-    public static Listing parseAndUpdateListingFromCrawl(JsonElement listingJson) {
+    public static Listing parseAndUpdateListingFromCrawl(JsonElement listingJson, boolean fullOffer) {
         /**
          * 根据 market 与 asin 先从数据库中加载, 如果存在则更新返回一个持久状态的 Listing 对象,
          * 否则返回一个瞬时状态的 Listing 对象
@@ -298,42 +299,35 @@ public class Listing extends GenericModel {
         tobeChangeed.totalOffers = lst.get("totalOffers").getAsInt();
         tobeChangeed.picUrls = lst.get("picUrls").getAsString();
 
-        JsonArray offers = lst.get("offers").getAsJsonArray();
-        List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
         if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
             for(ListingOffer of : tobeChangeed.offers) of.delete();
         }
-        for(JsonElement offerEl : offers) {
-            JsonObject offer = offerEl.getAsJsonObject();
-            ListingOffer off = new ListingOffer();
-            off.name = offer.get("name").getAsString();
-            off.offerId = offer.get("offerId").getAsString();
-            // 价格根据不同的市场进行转换成 GBP 价格
-            switch(tobeChangeed.market) {
-                case AMAZON_UK:
-                    off.price = offer.get("price").getAsFloat();
-                    off.shipprice = offer.get("shipprice").getAsFloat();
-                    break;
-                case AMAZON_US:
-                    off.price = Currency.USD.toGBP(offer.get("price").getAsFloat());
-                    off.shipprice = Currency.USD.toGBP(offer.get("shipprice").getAsFloat());
-                    break;
-                case AMAZON_DE:
-                case AMAZON_FR:
-                default:
-                    off.price = Currency.EUR.toGBP(offer.get("price").getAsFloat());
-                    off.shipprice = Currency.EUR.toGBP(offer.get("shipprice").getAsFloat());
+        if(fullOffer) {
+            try {
+                new ListingWorkers.O(tobeChangeed).now().get(15, TimeUnit.SECONDS);
+            } catch(Exception e) {
+                Logger.warn("Listing(%s) fetch full offers have something wrong.", tobeChangeed.listingId);
             }
-            off.fba = offer.get("fba").getAsBoolean();
-            off.buybox = offer.get("buybox").getAsBoolean();
-            off.listing = tobeChangeed;
-            newOffers.add(off);
-
-            // set display price
-            if(tobeChangeed.displayPrice == null && off.buybox)
-                tobeChangeed.displayPrice = off.price;
+        } else {
+            JsonArray offers = lst.get("offers").getAsJsonArray();
+            List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
+            for(JsonElement offerEl : offers) {
+                JsonObject offer = offerEl.getAsJsonObject();
+                ListingOffer off = new ListingOffer();
+                off.name = offer.get("name").getAsString();
+                off.offerId = offer.get("offerId").getAsString();
+                off.price = offer.get("price").getAsFloat();
+                off.shipprice = offer.get("shipprice").getAsFloat();
+                off.fba = offer.get("fba").getAsBoolean();
+                off.buybox = offer.get("buybox").getAsBoolean();
+                off.listing = tobeChangeed;
+                newOffers.add(off);
+                // set display price
+                if(tobeChangeed.displayPrice == null && off.buybox)
+                    tobeChangeed.displayPrice = off.price;
+            }
+            tobeChangeed.offers = newOffers;
         }
-        tobeChangeed.offers = newOffers;
         tobeChangeed.lastUpdateTime = System.currentTimeMillis();
         if(oldListing != null) return tobeChangeed.save();
         return tobeChangeed;

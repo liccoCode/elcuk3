@@ -7,7 +7,6 @@ import models.Ret;
 import models.Server;
 import models.market.Account;
 import models.market.Listing;
-import models.market.ListingOffer;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Product;
@@ -15,7 +14,6 @@ import play.Logger;
 import play.cache.Cache;
 import play.cache.CacheFor;
 import play.data.validation.Error;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -86,7 +84,7 @@ public class Listings extends Controller {
         Listing tobeSave = null;
         try {
             JsonElement listing = Crawl.crawlListing(market, asin);
-            tobeSave = Listing.parseAndUpdateListingFromCrawl(listing);
+            tobeSave = Listing.parseAndUpdateListingFromCrawl(listing, true);
         } catch(Exception e) {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
         }
@@ -95,15 +93,14 @@ public class Listings extends Controller {
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
 
-        tobeSave.product = null;
-        for(ListingOffer of : tobeSave.offers) of.listing = null;
-        renderJSON(tobeSave);
+        renderJSON(Webs.exposeGson(tobeSave));
     }
 
     public static void reCrawl(Listing l) {
         if(!l.isPersistent()) renderJSON(new Ret("此 Listing 不存在,不允许 ReCrawl!"));
         JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
-        Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst);
+        Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst, true);
+        nLst.check();
         if(nLst.isPersistent()) renderJSON(new Ret());
         else renderJSON(new Ret("更新失败."));
     }

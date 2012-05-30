@@ -28,7 +28,7 @@ public class ListingTest extends UnitTest {
     public void testParseAndUpdateListingFromCrawl() {
         JsonElement lst = HTTP.json(String.format("%s/listings/%s/%s", "http://e.easyacceu.com:9001", "uk", "B005JSG7GE"));
         try {
-            Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
+            Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst, true);
             needCheckListing.check();
         } catch(Exception e) {
             e.printStackTrace();

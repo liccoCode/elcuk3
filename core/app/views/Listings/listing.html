@@ -44,14 +44,15 @@
                     <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.easyacceu()?.price)}</td>
                     <th>LoestPrice:</th>
                     <td>${helper.Webs.priceLocalCurrencyFormat(lst.market, lst.lowestPrice())}</td>
-                    <td colspan="2">
+                    <td>
                         <button lid="${lst.listingId}" class="btn btn-small" rel="tooltip"
-                                *{data-original-title="ReCrawl Button"}*
+                        *{data-original-title="ReCrawl Button"}*
                                 title="点击重新抓取这个 Listing"
                                 data-loading-text="<a class='icon-repeat'></i>">
                             <i class="icon-retweet"></i>
                         </button>
                     </td>
+                    <td>${lst.lastUpdateTime.asdate("yyyy-MM-dd HH:mm:ss")}</td>
                 </tr>
                 <tr>
                     <td colspan="8">

@@ -17,14 +17,14 @@ public class ListingWorkerTest extends UnitTest {
         new ListingWorkers.R("B007LE3Y88_amazon.co.uk").now();
     }
 
-    @Test
+    //    @Test
     public void testMD5Arlid() {
         System.out.println(DigestUtils.md5Hex("B007LE0UT4_amazon.co.uk_A3BMGM0RX76AXA"));
     }
 
 
-    //    @Test
+    @Test
     public void testListingFullOffer() {
-        new ListingWorkers.L("B007TR9VRU_amazon.co.uk").now();
+        new ListingWorkers.L("B006QK90YK_amazon.de").now();
     }
 }

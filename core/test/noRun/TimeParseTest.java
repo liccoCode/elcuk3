@@ -138,5 +138,6 @@ public class TimeParseTest {
         System.out.println("JS Data.UTC: " + Dates.date2DateTime(new DateTime(1262304000000l).toDate()));
         System.out.println("JS Data.UTC 2: " + Dates.date2DateTime(new DateTime(1333065600000l).toDate()));
         System.out.println("Java Date: " + Dates.date2DateTime(new DateTime(1262275200000l).toDate()));
+        System.out.println(Dates.date2DateTime(new Date(1338348242273l)));
     }
 }

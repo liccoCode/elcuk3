@@ -28,6 +28,10 @@ public class ListingWorkers extends Job {
          */
         L,
         /**
+         * 抓取全部的 Offers
+         */
+        O,
+        /**
          * 抓取 Review
          */
         R
@@ -85,10 +89,12 @@ public class ListingWorkers extends Job {
             }
             try {
                 JsonElement lst = Crawl.crawlListing(listing.market.name(), listing.asin);
-                Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst);
+                Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst, false);
                 try {
-                    if(needCheckListing.offers == null || needCheckListing.offers.size() == 0)
+                    if(needCheckListing.offers == null || needCheckListing.offers.size() == 0) {
+                        Logger.info("Listing (%s) fetch offers...", needCheckListing.listingId);
                         new O(needCheckListing).now().get(10, TimeUnit.SECONDS); // 等待 10 s
+                    }
                 } catch(Exception e) {
                     Logger.warn("Listing (%s) no offers.", this.listingId);
                 }
@@ -103,29 +109,32 @@ public class ListingWorkers extends Job {
         /**
          * 这个仅仅附属与 ListingWorker.L , 只有当通过这个方法抓取的 Offers 为 0 的时候,才需要进行详细的 Offers 页面进行一次补充抓取
          */
-        static class O extends Job<Listing> {
-            private Listing listing;
 
-            O(Listing listing) {
-                this.listing = listing;
-            }
+    }
 
-            @Override
-            public void doJob() {
-                JsonElement offersJson = Crawl.crawlOffers(this.listing.market.name(), this.listing.asin);
-                JsonArray offers = offersJson.getAsJsonArray();
-                for(JsonElement offer : offers) {
-                    ListingOffer off = new ListingOffer();
-                    JsonObject of = offer.getAsJsonObject();
-                    off.name = of.get("name").getAsString();
-                    off.offerId = of.get("offerId").getAsString();
-                    off.price = of.get("price").getAsFloat();
-                    off.shipprice = of.get("shipprice").getAsFloat();
-                    off.fba = of.get("fba").getAsBoolean();
-                    off.buybox = of.get("buybox").getAsBoolean();
-                    off.listing = this.listing;
-                    this.listing.offers.add(off);
-                }
+    public static class O extends Job<Listing> {
+        private Listing listing;
+
+        public O(Listing listing) {
+            this.listing = listing;
+        }
+
+        @Override
+        public void doJob() {
+            JsonElement offersJson = Crawl.crawlOffers(this.listing.market.name(), this.listing.asin);
+            JsonArray offers = offersJson.getAsJsonArray();
+            this.listing.offers.clear();
+            for(JsonElement offer : offers) {
+                ListingOffer off = new ListingOffer();
+                JsonObject of = offer.getAsJsonObject();
+                off.name = of.get("name").getAsString();
+                off.offerId = of.get("offerId").getAsString();
+                off.price = of.get("price").getAsFloat();
+                off.shipprice = of.get("shipprice").getAsFloat();
+                off.fba = of.get("fba").getAsBoolean();
+                off.buybox = of.get("buybox").getAsBoolean();
+                off.listing = this.listing;
+                this.listing.offers.add(off);
             }
         }
     }
