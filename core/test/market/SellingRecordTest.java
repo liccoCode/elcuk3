@@ -31,7 +31,7 @@ public class SellingRecordTest extends UnitTest {
         Date oneDay = DateTime.parse("2012-05-01").toDate();
         List<Selling> sellings = Selling.all().fetch(10);
         for(Selling s : sellings) {
-            System.out.print(SellingRecord.id(s.sellingId, s.account.id + "") + ":");
+            System.out.print(SellingRecord.id(s.sellingId) + ":");
             System.out.println(s.account.type.salesAndTrafficByAsinLink(oneDay, oneDay, 0));
         }
     }

@@ -38,8 +38,8 @@ public class OrderParseTest extends UnitTest {
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9566254144.xml"), Account.M.AMAZON_UK);
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9566893024.xml"), Account.M.AMAZON_UK);
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9567535464.xml"), Account.M.AMAZON_UK);
-        List<Orderr> orders = Orderr.parseAllOrderXML(new File(home + "/elcuk2-logs/23/10495025884.xml"), Account.M.AMAZON_UK);
         Account acc = Account.findById(1l);
+        List<Orderr> orders = Orderr.parseAllOrderXML(new File(home + "/elcuk2-logs/23/10495025884.xml"), acc);
 //        List<Orderr> orders = Orderr.parseALLOrderXML(new File("F:/elcuk-data/2011/12/01/9018095104.xml"));
         for(Orderr or : orders) {
             or.account = acc;
@@ -62,7 +62,7 @@ public class OrderParseTest extends UnitTest {
                 if(file.getName().contains("csv")) {
                     orders = new ArrayList<Orderr>(Orderr.parseUpdateOrderXML(file, Account.M.AMAZON_UK)); // 1. 解析出 XML 中所有的 Order 的最新信息
                 } else {
-                    orders = Orderr.parseAllOrderXML(file, Account.M.AMAZON_UK); // 1. 解析出 XML 中所有的 Order 的最新信息
+                    orders = Orderr.parseAllOrderXML(file, acc); // 1. 解析出 XML 中所有的 Order 的最新信息
                 }
                 List<String> orderIds = new ArrayList<String>();
                 for(Orderr or : orders) {

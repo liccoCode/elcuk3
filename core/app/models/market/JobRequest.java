@@ -267,7 +267,7 @@ public class JobRequest extends Model {
                  * 2. 手动从数据库中加载出需要更新的 Order (managed),  然后再将这些处于被管理状态的 Order 进行更新;
                  * 3. 将数据库中没有加载到的 Order 给新保存
                  */
-                orders = Orderr.parseAllOrderXML(new File(this.path), this.account.type); // 1. 解析出订单
+                orders = Orderr.parseAllOrderXML(new File(this.path), this.account); // 1. 解析出订单
                 orderIds.clear();
                 orderrMap.clear();
                 oldOrderrMap.clear();

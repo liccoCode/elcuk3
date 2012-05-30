@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.Currency;
+import helper.Dates;
 import helper.Webs;
 import models.market.*;
 import org.apache.commons.lang.StringUtils;
@@ -27,15 +28,17 @@ public class SellingRecordCheckJob extends Job {
         List<Selling> sellings = Selling.all().fetch();
 
         if(fixTime == null) fixTime = DateTime.now();
+        Date checkDate = DateTime.parse(fixTime.toString("yyyy-MM-dd")).plusDays(-1).toDate();
         List<OrderItem> orderitems = OrderItem.find("createDate>=? AND createDate<=?",
-                DateTime.parse(fixTime.toString("yyyy-MM-dd")).plusDays(-1).toDate(),/*记录昨天 00:00*/
+                checkDate,/*记录昨天 00:00*/
                 fixTime.toDate()/*当前时间*/).fetch();
 
+        Logger.info("Date (%s), check %s selling...", Dates.date2Date(checkDate), sellings.size());
 
         for(Selling sell : sellings) {
-            String srid = SellingRecord.id(sell.sellingId, sell.account.id + "", fixTime.plusDays(-1).toDate());
+            String srid = SellingRecord.id(sell.sellingId, checkDate);
             SellingRecord record = SellingRecord.findById(srid);
-            if(record == null) record = new SellingRecord(srid, sell, fixTime.plusDays(-1).toDate());
+            if(record == null) record = new SellingRecord(srid, sell, checkDate);
             Map<String, AtomicInteger> currentSellOrderCache = new HashMap<String, AtomicInteger>();
             /**
              * 1. 计算昨天的订单数量 units, orders, orderCanceled, sales(currency), usdSales
@@ -105,9 +108,10 @@ public class SellingRecordCheckJob extends Job {
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
         for(Account acc : accs) {
             SellingRecord tmp = null;
-            if(acc.type == Account.M.AMAZON_UK) {
+            if("AJUR3R8UN71M4".equals(acc.merchantId)) { // UK 账号, uk,de 两个市场的数据都需要
                 records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_UK, fixTime.plusDays(-2).toDate());
                 records.addAll(SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate()));
+                Logger.info("Account(%s) Fetch UK & DE  %s records.", acc.prettyName(), records.size());
 
                 Set<String> rcdIds = new HashSet<String>();
                 for(SellingRecord rcd : records) rcdIds.add(rcd.id);
@@ -140,5 +144,6 @@ public class SellingRecordCheckJob extends Job {
                 */
             }
         }
+
     }
 }

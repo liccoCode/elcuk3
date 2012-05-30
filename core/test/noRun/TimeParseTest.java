@@ -2,6 +2,8 @@ package noRun;
 
 import helper.Dates;
 import models.market.Account;
+import models.market.Selling;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -9,7 +11,6 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.junit.Test;
 import play.libs.IO;
-import play.libs.Time;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.File;
@@ -29,7 +30,17 @@ public class TimeParseTest {
 
     @Test
     public void testTimeParser() {
-        System.out.println(Time.parseDuration("10j"));
+        System.out.println(DigestUtils.shaHex("sdfksjdf"));
+        System.out.println("bff7406309f5b3537172efa46c1c70e5f76e84df");
+        System.out.println("bff7406309f5b3537172efa46c1c70e5f76e84df".length());
+        System.out.println(DigestUtils.md5Hex("sdfksjdf"));
+        System.out.println("7701f76159896a7baf114e92064dcbd5");
+        System.out.println("7701f76159896a7baf114e92064dcbd5".length());
+        System.out.println("10HTCEVO3D-1900S,614444720150_amazon.de".length());
+        System.out.println("68-MAGGLASS-3X75BG,B001OQOK5U_amazon.co.uk".length());
+        Account acc = new Account();
+        acc.id = 1l;
+        System.out.println(Selling.sid("10HTCEVO3D-1900S,614444720150", Account.M.AMAZON_UK, acc));
     }
 
     @Test

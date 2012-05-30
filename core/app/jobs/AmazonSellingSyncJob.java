@@ -24,10 +24,17 @@ public class AmazonSellingSyncJob extends Job {
          * 2. 下载回列表后进行系统内更新
          */
         List<Account> accs = Account.openedAcc();
-        // 每一个账户, 每一个 Amazon 可用的市场, 都需要同步 Listing/Selling 信息
+        // 只需要两个账号 3 个市场的 Active Listing
         for(Account acc : accs) {
-            for(AWS.MID mid : AWS.MID.values()) {
-                JobRequest job = JobRequest.checkJob(acc, JobRequest.T.ACTIVE_LISTINGS, mid);
+            if("AJUR3R8UN71M4".equals(acc.merchantId)) {
+                JobRequest job = JobRequest.checkJob(acc, JobRequest.T.ACTIVE_LISTINGS, AWS.MID.A1F83G8C2ARO7P);
+                if(job == null) continue;
+                job.request();
+                job = JobRequest.checkJob(acc, JobRequest.T.ACTIVE_LISTINGS, AWS.MID.A1PA6795UKMFR9);
+                if(job == null) continue;
+                job.request();
+            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
+                JobRequest job = JobRequest.checkJob(acc, JobRequest.T.ACTIVE_LISTINGS, AWS.MID.A1PA6795UKMFR9);
                 if(job == null) continue;
                 job.request();
             }

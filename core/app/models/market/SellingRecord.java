@@ -7,7 +7,9 @@ import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.*;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.GenericModel;
@@ -24,6 +26,7 @@ import java.util.*;
  * Time: 6:40 PM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class SellingRecord extends GenericModel {
 
     /**
@@ -65,6 +68,7 @@ public class SellingRecord extends GenericModel {
      * hash(sellingId_account.id_market_date) 值, 为 ID
      */
     @Id
+    @Column(length = 40)
     public String id;
 
     /**
@@ -175,7 +179,7 @@ public class SellingRecord extends GenericModel {
 
                         String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
                         msku = msku.substring(0, msku.length() - 4).toUpperCase(); /*前面截取了 "> 后最后的 </a> 过滤掉*/
-                        String sid = String.format("%s_%s", msku, market.toString());
+                        String sid = Selling.sid(msku, market, acc);
                         record.selling = Selling.findById(sid);
                         record.sessions = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
                         record.pageViews = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
@@ -210,7 +214,7 @@ public class SellingRecord extends GenericModel {
                         record.date = oneDay;
 
 
-                        record.id = SellingRecord.id(sid, acc.id + "", oneDay);
+                        record.id = SellingRecord.id(sid, oneDay);
                         records.add(record);
                     } catch(Exception e) {
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)", Webs.E(e));
@@ -269,23 +273,21 @@ public class SellingRecord extends GenericModel {
      * 产生当天的 Id
      *
      * @param sid
-     * @param aid
      * @return
      */
-    public static String id(String sid, String aid) {
-        return id(sid, aid, DateTime.now().toDate());
+    public static String id(String sid) {
+        return id(sid, DateTime.now().toDate());
     }
 
     /**
      * 产生指定天的 Id
      *
      * @param sid
-     * @param aid
      * @param time
      * @return
      */
-    public static String id(String sid, String aid, Date time) {
-        return (String.format("%s_%s_%s", sid, aid, Dates.date2Date(time))).hashCode() + "";
+    public static String id(String sid, Date time) {
+        return DigestUtils.md5Hex(String.format("%s|%s", sid, Dates.date2Date(time)));
     }
 
     @Override

@@ -95,9 +95,10 @@ public class Selling extends GenericModel {
 
     /**
      * 上架后用来唯一标示这个 Selling 的 Id;
-     * 唯一的 SellingId, [merchantSKU]_[market]
+     * sellingId: msku|market.nickName|acc.id
      */
     @Id
+    @Column(length = 70)
     @Expose
     public String sellingId;
 
@@ -186,18 +187,6 @@ public class Selling extends GenericModel {
      */
     @ManyToOne
     public Account account;
-
-    public void setMerchantSKU(String merchantSKU) {
-        this.merchantSKU = merchantSKU;
-        if(this.merchantSKU != null && this.market != null)
-            this.sellingId = String.format("%s_%s", this.merchantSKU, this.market.toString());
-    }
-
-    public void setMarket(Account.M market) {
-        this.market = market;
-        if(this.merchantSKU != null && this.market != null)
-            this.sellingId = String.format("%s_%s", this.merchantSKU, this.market.toString());
-    }
 
     /**
      * 这个 Selling 向 Amazon 上传图片.;
@@ -405,8 +394,9 @@ public class Selling extends GenericModel {
                     Set<NameValuePair> params = new HashSet<NameValuePair>();
                     for(Element el : inputs) {
                         String name = el.attr("name").toLowerCase().trim();
-                        if("our_price".equals(name) && this.price != null && this.price > 0)
-                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.price)));
+                        if("our_price".equals(name) && this.aps.standerPrice != null && this.aps.standerPrice > 0)
+                            /*原本是按照 selling 的市场去填写价格格式, 但 Amazon 在尽可能按照选择的语言进行更换, 语言都更换成英语的同时, 所以价格格式也都是 UK 格式*/
+                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, this.aps.standerPrice)));
                         else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms))
                             this.aps.searchTermsCheck(params);
                         else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures))
@@ -424,7 +414,8 @@ public class Selling extends GenericModel {
                             if(this.aps.startDate != null && this.aps.endDate != null &&
                                     this.aps.salePrice != null && this.aps.salePrice > 0 &&
                                     this.aps.endDate.getTime() > this.aps.startDate.getTime()) {
-                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market, this.aps.salePrice)));
+                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(Account.M.AMAZON_UK/*同 out_price*/, this.aps.salePrice)));
+                                /*TODO 日期格式暂时还是按照 Selling 市场来判断的, 看是否会被 Amazon 改成按照语言的格式来*/
                                 params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
                                 params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
                             }
@@ -521,6 +512,78 @@ public class Selling extends GenericModel {
             this.aps.platinumKeywords = newSelling.aps.platinumKeywords;
 
         return this.save();
+    }
+
+    /**
+     * 返回这个 Listing 所对应的分析页面的 PItem 对象
+     *
+     * @return
+     */
+    public PItem calculatePItem() {
+        PItem pi = new PItem();
+        pi.product = this.listing.product;
+        pi.selling = this;
+        pi.selling.ps = pi.selling.ps == null ? 1 : pi.selling.ps;
+        pi.whouse = Whouse.find("account=?", this.account).first();
+
+        pi.in = 0;
+        for(SellingQTY p : this.qtys) pi.in += p.qty;
+
+        // 在库, 在途, 在产
+        // 将使用 JSON 存储起来的 PItem 重新加载出来. 当 Plan, Procure, Shipmenet 完成后会修改过通过计算获取
+        PItem opi = PH.unMarsh(pi.product.sku + "_" + pi.selling.sellingId);
+
+        pi.onWay = 0;
+        pi.onWork = 0;
+        pi.airBuy = 0;
+        pi.airPatch = 0;
+        pi.seaBuy = 0;
+        pi.seaPatch = 0;
+        if(opi != null) {
+            pi.onWay = opi.onWay == null ? 0 : opi.onWay;
+            pi.onWork = opi.onWork == null ? 0 : opi.onWork;
+            pi.airBuy = opi.airBuy == null ? 0 : opi.airBuy;
+            pi.airPatch = opi.airPatch == null ? 0 : opi.airPatch;
+            pi.seaBuy = opi.seaBuy == null ? 0 : opi.seaBuy;
+            pi.seaPatch = opi.seaPatch == null ? 0 : opi.seaPatch;
+        }
+
+        // 7 天销量, -- 在 sortSellingWithQtyLeftTime 方法中计算过了.
+
+        PH.marsh(pi);
+        return pi;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Selling selling = (Selling) o;
+
+        if(sellingId != null ? !sellingId.equals(selling.sellingId) : selling.sellingId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (sellingId != null ? sellingId.hashCode() : 0);
+        return result;
+    }
+
+    // ------------------------ static method -----------------------
+
+    /**
+     * 返回 Selling 的 Sid
+     *
+     * @return
+     */
+    public static String sid(String msku, Account.M market, Account acc) {
+        return String.format("%s|%s|%s", msku, market.nickName(), acc.id).toUpperCase();
     }
 
     public static boolean exist(String merchantSKU) {
@@ -682,7 +745,6 @@ public class Selling extends GenericModel {
      * 处理 Amazon 的 Active Listing Report 文档, 如果有新 Listing/Selling 则与系统进行同步处理.
      * 如果系统中有的, Amazon 上没有, 则先不做处理.
      *
-     * @param file
      * @return
      */
     public static List<Selling> dealSellingFromActiveListingsReport(File file, Account acc, Account.M market) {
@@ -755,7 +817,7 @@ public class Selling extends GenericModel {
                     lst.save();
                 }
 
-                String sid = String.format("%s_%s", t_msku, market.toString());
+                String sid = Selling.sid(t_msku, market, acc);
                 Selling selling = Selling.findById(sid);
                 if(selling != null) Logger.info("Selling[%s] is exist.", sid);
                 else {
@@ -800,66 +862,5 @@ public class Selling extends GenericModel {
             }
         }
         return sellings;
-    }
-
-    /**
-     * 返回这个 Listing 所对应的分析页面的 PItem 对象
-     *
-     * @return
-     */
-    public PItem calculatePItem() {
-        PItem pi = new PItem();
-        pi.product = this.listing.product;
-        pi.selling = this;
-        pi.selling.ps = pi.selling.ps == null ? 1 : pi.selling.ps;
-        pi.whouse = Whouse.find("account=?", this.account).first();
-
-        pi.in = 0;
-        for(SellingQTY p : this.qtys) pi.in += p.qty;
-
-        // 在库, 在途, 在产
-        // 将使用 JSON 存储起来的 PItem 重新加载出来. 当 Plan, Procure, Shipmenet 完成后会修改过通过计算获取
-        PItem opi = PH.unMarsh(pi.product.sku + "_" + pi.selling.sellingId);
-
-        pi.onWay = 0;
-        pi.onWork = 0;
-        pi.airBuy = 0;
-        pi.airPatch = 0;
-        pi.seaBuy = 0;
-        pi.seaPatch = 0;
-        if(opi != null) {
-            pi.onWay = opi.onWay == null ? 0 : opi.onWay;
-            pi.onWork = opi.onWork == null ? 0 : opi.onWork;
-            pi.airBuy = opi.airBuy == null ? 0 : opi.airBuy;
-            pi.airPatch = opi.airPatch == null ? 0 : opi.airPatch;
-            pi.seaBuy = opi.seaBuy == null ? 0 : opi.seaBuy;
-            pi.seaPatch = opi.seaPatch == null ? 0 : opi.seaPatch;
-        }
-
-        // 7 天销量, -- 在 sortSellingWithQtyLeftTime 方法中计算过了.
-
-        PH.marsh(pi);
-        return pi;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        if(!super.equals(o)) return false;
-
-        Selling selling = (Selling) o;
-
-        if(sellingId != null ? !sellingId.equals(selling.sellingId) : selling.sellingId != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (sellingId != null ? sellingId.hashCode() : 0);
-        return result;
     }
 }

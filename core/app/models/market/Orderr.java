@@ -415,18 +415,18 @@ public class Orderr extends GenericModel {
      * 解析的文件中的所有订单; 需要区别市场
      *
      * @param file
-     * @param market 确认是哪一个市场的, Amazon 还是 Ebay
+     * @param acc  通过账号来确实是哪一个市场
      * @return
      */
-    public static List<Orderr> parseAllOrderXML(File file, Account.M market) {
-        switch(market) {
+    public static List<Orderr> parseAllOrderXML(File file, Account acc) {
+        switch(acc.type) {
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_FR:
             case AMAZON_ES:
             case AMAZON_IT:
-                return allOrderXML_Amazon(file);
+                return allOrderXML_Amazon(file, acc);
             case EBAY_UK:
                 return allOrderXML_Ebay(file);
             default:
@@ -510,7 +510,7 @@ public class Orderr extends GenericModel {
      * @param file
      * @return
      */
-    public static List<Orderr> allOrderXML_Amazon(File file) {
+    public static List<Orderr> allOrderXML_Amazon(File file, Account acc) {
         AmazonEnvelopeType envelopeType = JAXB.unmarshal(file, AmazonEnvelopeType.class);
         List<Orderr> orders = new ArrayList<Orderr>();
         for(MessageType message : envelopeType.getMessage()) {
@@ -569,7 +569,7 @@ public class Orderr extends GenericModel {
 
                 String sku = Product.merchantSKUtoSKU(oid.getSKU());
                 Product product = Product.findById(sku);
-                Selling selling = Selling.findById(String.format("%s_%s", oid.getSKU().toUpperCase(), orderr.market.toString()));
+                Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
                 if(product != null) oi.product = product;
                 else {
                     // TODO 发送邮件提醒自己有产品不存在!

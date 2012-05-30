@@ -2,13 +2,19 @@ package controllers;
 
 import ext.LinkExtensions;
 import helper.Webs;
+import jobs.SellingRecordCheckJob;
 import models.Ret;
 import models.market.Listing;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 控制 Selling
@@ -81,5 +87,18 @@ public class Sellings extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
         renderJSON(new Ret());
+    }
+
+    public static void record(@As("yyyy-MM-dd") Date date, int t) {
+        SellingRecordCheckJob job = new SellingRecordCheckJob();
+        DateTime dt = new DateTime(date);
+        for(int i = 0; i < t; i++) {
+            job.fixTime = dt.plusDays(i);
+            try {
+                job.now().get(60, TimeUnit.SECONDS);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

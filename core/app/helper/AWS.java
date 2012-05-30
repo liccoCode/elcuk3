@@ -202,7 +202,7 @@ public class AWS {
                     filename += ".csv";
                     break;
             }
-            FileUtils.writeByteArrayToFile(new File(filename), byteBuffer.toByteArray());
+            FileUtils.write(new File(filename), byteBuffer.toString("UTF-8"));
             job.path = filename;
             job.state = JobRequest.S.END;
             job.lastUpdateDate = new Date();
