@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
@@ -33,6 +34,7 @@ import java.util.List;
  * Time: 5:15 PM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Feedback extends GenericModel {
 
     public enum S {
@@ -160,7 +162,7 @@ public class Feedback extends GenericModel {
 
         String subject = title;
         if(StringUtils.isBlank(subject))
-            subject = "You left a negative feedback, Please give us a chance to make up!"; //TODO  默认的 Title 很需要
+            subject = "You left a negative feedback, Please give us a chance to make up!";
 
         params.add(new BasicNameValuePair("name", name));
         params.add(new BasicNameValuePair("email", this.email));

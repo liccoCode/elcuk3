@@ -11,6 +11,7 @@ import models.market.SellingQTY;
 import models.product.*;
 import org.apache.commons.io.FileUtils;
 import play.Logger;
+import play.cache.CacheFor;
 import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -143,6 +144,7 @@ public class Products extends Controller {
         renderJSON(Webs.exposeGson(a));
     }
 
+    @CacheFor("15mn")
     public static void images(String sku) {
         List<Attach> imgs = Attach.find("fid=?", sku).fetch();
         renderJSON(Webs.exposeGson(imgs));

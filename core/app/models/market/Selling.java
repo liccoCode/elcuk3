@@ -291,9 +291,9 @@ public class Selling extends GenericModel {
             else if("model".equals(name))
                 this.aps.modelNumber = val;
             else if("our_price".equals(name))
-                this.aps.standerPrice = Webs.amazonPriceNumber(this.market, val);
+                this.aps.standerPrice = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*同 deploy->our_price*/, val);
             else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
-                this.aps.salePrice = Webs.amazonPriceNumber(this.market, val);
+                this.aps.salePrice = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*同 depploy->our_price*/, val);
             else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.startDate = Dates.listingFromFmt(this.market, val);
             else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
@@ -794,7 +794,7 @@ public class Selling extends GenericModel {
                 // 如果属于 UnUsedSKU 那么则跳过这个解析
                 if(Product.unUsedSKU(t_msku)) continue;
 
-                String lid = String.format("%s_%s", t_asin, market.toString());
+                String lid = Listing.lid(t_asin, market);
                 Listing lst = Listing.findById(lid);
                 Product prod = Product.findByMerchantSKU(t_msku);
                 if(prod == null) {

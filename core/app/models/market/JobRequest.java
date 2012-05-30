@@ -321,9 +321,9 @@ public class JobRequest extends Model {
                 for(SellingQTY sqty : sqtys) {
                     // 解析出来的 SellingQTY, 如果系统中拥有则进行更新, 否则绑定到 Selling 身上
                     if(!sqty.isPersistent()) {
-                        String sid = String.format("%s_%s", sqty.id.split("_")[0].toUpperCase(), wh.account.type.toString());
+                        String sid = Selling.sid(sqty.msku(), this.account.type, this.account);
                         try {
-                            sqty.attach2Selling(sqty.id.split("_")[0], wh);
+                            sqty.attach2Selling(sqty.msku(), wh);
                         } catch(Exception e) {
                             String warmsg = "FBA CSV Report hava Selling[" + sid + "] that system can not be found!";
                             Logger.warn(warmsg);

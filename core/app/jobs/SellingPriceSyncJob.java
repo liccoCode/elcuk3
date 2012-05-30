@@ -39,7 +39,7 @@ public class SellingPriceSyncJob extends Job {
             //2
             float lowestPrice = Float.MAX_VALUE;
             for(String asin : asins) {
-                Listing listing = Listing.findById(String.format("%s_%s", asin, sell.market.toString()));
+                Listing listing = Listing.findById(Listing.lid(asin, sell.market));
                 if(listing == null)
                     listing = Listing.parseAndUpdateListingFromCrawl(Crawl.crawlListing(sell.market.name(), asin), false).save();
                 //TODO 考虑抓取回来的竞争对手没有价格的话如何处理?

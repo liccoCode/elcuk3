@@ -93,4 +93,8 @@ public class SellingQTY extends GenericModel {
     public static List<SellingQTY> qtysAccodingSKU(Product prod) {
         return SellingQTY.find("product=?", prod).fetch();
     }
+
+    public String msku() {
+        return this.id.split("_")[0].toUpperCase();
+    }
 }

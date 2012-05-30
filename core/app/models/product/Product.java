@@ -155,7 +155,6 @@ public class Product extends GenericModel {
     /**
      * <pre>
      * 此 Listing 进行上架
-     * TODO: 包含一些写死的 Selling 默认值
      * - type=FBA
      * - priceStrategy
      * - state=NEW (形成一个占位符, 具体的开始销售在 Selling 对象自身完成)
@@ -264,9 +263,9 @@ public class Product extends GenericModel {
                     else if("offering_sku".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.merchantSKU));
                     else if("our_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(selling.market, selling.aps.standerPrice)));
+                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, selling.aps.standerPrice)));
                     else if("discounted_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(selling.market, selling.aps.salePrice)));
+                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, selling.aps.salePrice)));
                     else if("discounted_price_start_date".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
                     else if("discounted_price_end_date".equals(name))
@@ -286,7 +285,6 @@ public class Product extends GenericModel {
                     } else if(StringUtils.startsWith(name, "generic_keywords")) {
                         selling.aps.searchTermsCheck(addSellingPrams);
                     } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
-                        //TODO 这里没有检查 recommended_browse_nodes, 请在 Controller 中检查.
                         addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns[0]));
                         addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[1]", selling.aps.rbns[1]));
                     } else {
@@ -322,10 +320,6 @@ public class Product extends GenericModel {
             /**
              * 上架时候的错误信息全部返回给前台.
              */
-            for(NameValuePair n : addSellingPrams) {
-                if(StringUtils.isBlank(n.getValue())) continue;
-                System.out.println(n);
-            }
             body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/, addSellingPrams);
             if(Play.mode.isDev())
                 Devs.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
@@ -341,7 +335,11 @@ public class Product extends GenericModel {
                 if("newItemAsin".equals(name)) selling.asin = hidden.val();
             }
             // 最后再检查是否添加成功?
-            if(StringUtils.isBlank(selling.asin)) throw new FastRuntimeException("未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!");
+            if(StringUtils.isBlank(selling.asin)) {
+                String msg = doc.select(".messageboxerror").first().text();
+                if(StringUtils.isBlank(msg)) msg = "未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!";
+                throw new FastRuntimeException(msg);
+            }
         }
 
         selling.listing = new Listing(selling, this).save();

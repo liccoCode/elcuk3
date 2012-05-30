@@ -279,11 +279,14 @@ $(function(){
 
     // Amazon 上架
     $('#s_sale').click(function(){
+        var btnDiv = $('#btn_div');
         $.varClosure.params = {'s.listing.listingId':$('#lid').text()};
+        btnDiv.mask("创建中...");
         $("#amazon :input").map($.varClosure);
         $.post('/products/saleAmazonListing', $.varClosure.params, function(r){
             if(r.flag) alert('更新成功.');
             else alert(r.message);
+            btnDiv.unmask();
         });
     });
 

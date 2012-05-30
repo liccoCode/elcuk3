@@ -145,18 +145,15 @@ public class Listing extends GenericModel {
     public void setAsin(String asin) {
         this.asin = asin;
         if(this.market != null && this.asin != null)
-            initListingId();
+            this.listingId = Listing.lid(asin, market);
     }
 
     public void setMarket(Account.M market) {
         this.market = market;
         if(this.asin != null && this.market != null)
-            initListingId();
+            this.listingId = Listing.lid(asin, market);
     }
 
-    private void initListingId() {
-        this.listingId = String.format("%s_%s", this.asin, this.market.toString());
-    }
 
     public void updateAttrs(Listing newListing) {
         if(!this.equals(newListing)) return; // 不是一个 Listing 则不允许更新了
@@ -262,6 +259,86 @@ public class Listing extends GenericModel {
         return lowest;
     }
 
+
+    /**
+     * 根据 Listing 的状态, 进行 Listing 的检查;
+     * 1. 如果这个 Listing 是我们自己的, 检查是否被跟.
+     */
+    public void check() {
+        /**
+         *  1. 检查此 Listing 上是否有自己多个店铺上架
+         *  2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
+         */
+        if(this.offers == null || this.offers.size() == 0) {
+            Logger.warn("Listing [" + this.listingId + "] have no offers!");
+            return;
+        }
+
+        int selfSale = 0;
+        boolean mailed = false;
+
+        for(ListingOffer off : this.offers) {
+            // -------- 1
+            if(Account.merchant_id().containsKey(off.offerId)) selfSale++;
+
+            // ------- 1
+            if(Listing.isSelfBuildListing(this.title)) {
+                if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
+                    Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+                } else if(!Account.merchant_id().containsKey(off.offerId)) {
+                    // Mail 警告
+                    if(this.warnningTimes == null) this.warnningTimes = 0;
+                    this.warnningTimes++; // 查询也记录一次
+                    if(this.warnningTimes > 4) {
+                        Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
+                    } else {
+                        if(mailed) continue;
+                        Mails.listingOffersWarning(off);
+                        mailed = true;
+                    }
+                } else {
+                    this.warnningTimes = 0; // 其余的归零
+                }
+            }
+        }
+        if(selfSale >= 2) Mails.moreOfferOneListing(offers, this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Listing listing = (Listing) o;
+
+        if(!listingId.equals(listing.listingId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + listingId.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Listing{" +
+                "listingId='" + listingId + '\'' +
+                ", title='" + title + '\'' +
+                ", reviews=" + reviews +
+                ", rating=" + rating +
+                ", byWho='" + byWho + '\'' +
+                ", saleRank=" + saleRank +
+                ", displayPrice=" + displayPrice +
+                ", lastUpdateTime=" + lastUpdateTime +
+                ", nextUpdateTime=" + nextUpdateTime +
+                '}';
+    }
+
     /**
      * 根据从 Crawler 抓取回来的 ListingJSON数据转换成系统内使用的 Listing + LisitngOffer 对象,
      * 并更新返回已经存在的 Listing 的持久对象或者返回未保存的 Listing 瞬时对象
@@ -333,49 +410,6 @@ public class Listing extends GenericModel {
         return tobeChangeed;
     }
 
-    /**
-     * 根据 Listing 的状态, 进行 Listing 的检查;
-     * 1. 如果这个 Listing 是我们自己的, 检查是否被跟.
-     */
-    public void check() {
-        /**
-         *  1. 检查此 Listing 上是否有自己多个店铺上架
-         *  2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
-         */
-        if(this.offers == null || this.offers.size() == 0) {
-            Logger.warn("Listing [" + this.listingId + "] have no offers!");
-            return;
-        }
-
-        int selfSale = 0;
-        boolean mailed = false;
-
-        for(ListingOffer off : this.offers) {
-            // -------- 1
-            if(Account.merchant_id().containsKey(off.offerId)) selfSale++;
-
-            // ------- 1
-            if(Listing.isSelfBuildListing(this.title)) {
-                if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
-                    Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
-                } else if(!Account.merchant_id().containsKey(off.offerId)) {
-                    // Mail 警告
-                    if(this.warnningTimes == null) this.warnningTimes = 0;
-                    this.warnningTimes++; // 查询也记录一次
-                    if(this.warnningTimes > 4) {
-                        Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
-                    } else {
-                        if(mailed) continue;
-                        Mails.listingOffersWarning(off);
-                        mailed = true;
-                    }
-                } else {
-                    this.warnningTimes = 0; // 其余的归零
-                }
-            }
-        }
-        if(selfSale >= 2) Mails.moreOfferOneListing(offers, this);
-    }
 
     /**
      * 判断这个 Listing 是否为自己自建的 Listing
@@ -392,38 +426,7 @@ public class Listing extends GenericModel {
         else return false;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        if(!super.equals(o)) return false;
-
-        Listing listing = (Listing) o;
-
-        if(!listingId.equals(listing.listingId)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + listingId.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Listing{" +
-                "listingId='" + listingId + '\'' +
-                ", title='" + title + '\'' +
-                ", reviews=" + reviews +
-                ", rating=" + rating +
-                ", byWho='" + byWho + '\'' +
-                ", saleRank=" + saleRank +
-                ", displayPrice=" + displayPrice +
-                ", lastUpdateTime=" + lastUpdateTime +
-                ", nextUpdateTime=" + nextUpdateTime +
-                '}';
+    public static String lid(String asin, Account.M market) {
+        return String.format("%s_%s", asin.toUpperCase(), market.toString());
     }
 }

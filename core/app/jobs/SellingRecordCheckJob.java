@@ -120,13 +120,17 @@ public class SellingRecordCheckJob extends Job {
                 for(SellingRecord msrc : managedRecords) sellingRecordCache.put(msrc.id, msrc);
 
                 for(SellingRecord rcd : records) { // 寻找已经在系统中的 SellingRecord 进行更新, 否在再创建
-                    if(sellingRecordCache.containsKey(rcd.id)) {
-                        tmp = sellingRecordCache.get(rcd.id);
-                        tmp.pageViews = rcd.pageViews;
-                        tmp.sessions = rcd.sessions;
-                        tmp.save();
-                    } else {
-                        sellingRecordCache.put(rcd.id, rcd.<SellingRecord>save());
+                    try {
+                        if(sellingRecordCache.containsKey(rcd.id)) {
+                            tmp = sellingRecordCache.get(rcd.id);
+                            tmp.pageViews = rcd.pageViews;
+                            tmp.sessions = rcd.sessions;
+                            tmp.save();
+                        } else {
+                            sellingRecordCache.put(rcd.id, rcd.<SellingRecord>save());
+                        }
+                    } catch(Exception e) {
+                        Logger.warn(Webs.E(e));
                     }
                 }
                 /* 暂时不开放这个账户
