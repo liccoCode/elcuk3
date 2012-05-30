@@ -306,7 +306,7 @@ public class Selling extends GenericModel {
                 this.aps.legalDisclaimerDesc = val;
             else if("bullet_point[0]".equals(name))
                 bulletPoints[0] = val;
-            else if("bulletPoints[1]".equals(name))
+            else if("bullet_point[1]".equals(name))
                 bulletPoints[1] = val;
             else if("bullet_point[2]".equals(name))
                 bulletPoints[2] = val;

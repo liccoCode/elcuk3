@@ -22,6 +22,17 @@ import java.util.Date;
  */
 @Embeddable
 public class AmazonProps {
+    public AmazonProps() {
+        // 初始化这些 Lob 字段, 避免 Hibernate 3.6 [Start position [1] cannot cannot exceed overall CLOB length [0]]
+        this.title = "";
+        this.keyFetures = "";
+        this.legalDisclaimerDesc = "";
+        this.sellerWarrantyDesc = "";
+        this.productDesc = "";
+        this.searchTerms = "";
+        this.platinumKeywords = "";
+    }
+
     @Lob
     @Required
     @Expose
