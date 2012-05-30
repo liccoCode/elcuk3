@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Webs;
 import models.Jobex;
 import models.Ret;
 import models.market.JobRequest;
@@ -28,18 +29,17 @@ public class Jobs extends Controller {
         render(jobs, jobReqs);
     }
 
-    public static void listing() {
-        renderHtml("<h1>It`s Ok!</h1>");
-    }
 
     public static void c(Jobex j) {
         validation.required(j.className);
         validation.required(j.duration);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         try {
-            Time.parseDuration(j.duration);
+            // 先解析 Cron, 如果 Cron 表达式错误再解析 Duration 如果还错误,则报错
+            if(!Time.CronExpression.isValidExpression(j.duration))
+                Time.parseDuration(j.duration);
         } catch(IllegalArgumentException e) {
-            renderJSON(validation.errorsMap());
+            renderJSON(new Ret(Webs.E(e)));
         }
         j.save();
         renderJSON(j);

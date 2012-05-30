@@ -45,7 +45,24 @@ public class JobDriver extends Job {
                     continue;
                 }
                 long now = System.currentTimeMillis();
-                if(TimeUnit.MILLISECONDS.toSeconds(now - job.lastUpdateTime) >= Time.parseDuration(job.duration)) {
+
+                /**
+                 * 进行 Cron 表达式与 Play 的 Duration 表达式的处理
+                 * 1. 先进行简单的 Duration 表达式处理, 因为这个最常用
+                 * 2. Duration 解析失败再使用 Cron 表达式进行解析
+                 */
+                boolean run = false;
+                try {
+                    run = TimeUnit.MILLISECONDS.toSeconds(now - job.lastUpdateTime) >= Time.parseDuration(job.duration);
+                } catch(IllegalArgumentException e) {
+                    try {
+                        run = now >= Time.parseCRONExpression(job.duration).getTime();
+                    } catch(IllegalArgumentException pe) {
+                        Logger.error("JobDriver: %s", Webs.E(e));
+                        run = false;
+                    }
+                }
+                if(run) {
                     try {
                         job.newInstance().now();
                         job.lastUpdateTime = now;
@@ -55,6 +72,7 @@ public class JobDriver extends Job {
                         Logger.error("Job %s: %s", job.className, Webs.E(e));
                     }
                 } else {
+                    skip++;
                     Logger.debug("Skip Job %s", job.className);
                 }
             }
