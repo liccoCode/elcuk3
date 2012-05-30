@@ -395,7 +395,7 @@ public class Selling extends GenericModel {
                     for(Element el : inputs) {
                         String name = el.attr("name").toLowerCase().trim();
                         if("our_price".equals(name) && this.aps.standerPrice != null && this.aps.standerPrice > 0)
-                            /*原本是按照 selling 的市场去填写价格格式, 但 Amazon 在尽可能按照选择的语言进行更换, 语言都更换成英语的同时, 所以价格格式也都是 UK 格式*/
+                            /*原本是按照 selling 的市场去填写价格格式, 但 Amazon 在尽可能按照选择的语言进行更换, 语言都更换成英语的同时, 所以价格格式也都是 UK 格式 */
                             params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, this.aps.standerPrice)));
                         else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms))
                             this.aps.searchTermsCheck(params);
