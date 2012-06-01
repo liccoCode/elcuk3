@@ -186,6 +186,7 @@ public class AmazonListingReview extends GenericModel {
         if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
         // Rating <= 4 的发送邮件提醒
         if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
+        this.save();
     }
 
     public void openOsTicket(String title) {
