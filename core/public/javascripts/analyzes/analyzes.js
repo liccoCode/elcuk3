@@ -109,7 +109,7 @@ $(function(){
      */
     function pvSS_line(params){
         $.getJSON('/analyzes/ajaxSellingRecord', params, function(r){
-            if(r.flag === false) alert(f.message);
+            if(r.flag === false) alert(r.message);
             else{
                 var lines = {
                     pv_uk:{name:'PageView(uk)', data:[]},
