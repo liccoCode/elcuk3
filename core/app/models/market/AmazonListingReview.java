@@ -4,10 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.GTs;
 import helper.Webs;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
@@ -124,6 +126,9 @@ public class AmazonListingReview extends GenericModel {
     @Lob
     public String comment = "";
 
+    @Column(columnDefinition = "varchar(32) NOT NULL DEFAULT ''")
+    public String osTicketId;
+
     /**
      * 主要是为了记录 createDate 日期
      *
@@ -176,38 +181,36 @@ public class AmazonListingReview extends GenericModel {
     public void listingReviewCheck() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0) return;// 判断这个 Listing 是我们自己有上架的
-        if((this.rating != null && this.rating > 4) || // Rating > 4 的不处理
-                this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) // 超过 70 天的不处理
+        if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) return;// 超过 70 天的不处理
+        // Rating < 4 的开 OsTicket
+        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
+        // Rating <= 4 的发送邮件提醒
+        if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
+    }
+
+    public void openOsTicket(String title) {
+        if(StringUtils.isNotBlank(this.osTicketId)) {
+            Logger.info("Review OsTicket is exist! %s", this.osTicketId);
             return;
-        Mails.listingReviewWarn(this);
+        }
+
+        String name = String.format("%s - %s", this.username, this.listingId);
+        String email = "Not Found Email...";
+        String subject = title;
+        String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
+
+        List<Orderr> orders = Orderr.findByUserId(this.userid);
+        if(orders.size() > 0) email = orders.get(0).email;
+
+        if(StringUtils.isBlank(subject)) {
+            if(this.listing.market == Account.M.AMAZON_DE) {
+                subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
+            } else { // 除了 DE 使用德语其他的默认使用'英语'
+                subject = "You left a negative product review, may we have a chance to make up?";
+            }
+        }
+        this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
     }
-
-    /**
-     * 解析单个 Review JsonElement
-     *
-     * @param jsonReviewElement
-     * @return
-     */
-    public static AmazonListingReview parseAmazonReviewJson(JsonElement jsonReviewElement) {
-        JsonObject rwObj = jsonReviewElement.getAsJsonObject();
-        AmazonListingReview review = new AmazonListingReview();
-        review.alrId = rwObj.get("alrId").getAsString();
-        review.listingId = rwObj.get("listingId").getAsString();
-        review.rating = rwObj.get("rating").getAsFloat();
-        review.lastRating = rwObj.get("lastRating").getAsFloat();
-        review.title = rwObj.get("title").getAsString();
-        review.review = rwObj.get("review").getAsString();
-        review.helpUp = rwObj.get("helpUp").getAsInt();
-        review.helpClick = rwObj.get("helpClick").getAsInt();
-        review.username = rwObj.get("username").getAsString();
-        review.userid = rwObj.get("userid").getAsString();
-        review.reviewDate = DateTime.parse(rwObj.get("reviewDate").getAsString()).toDate();
-        review.purchased = rwObj.get("purchased").getAsBoolean();
-        review.resolved = rwObj.get("resolved").getAsBoolean();
-
-        return review;
-    }
-
 
     @Override
     public String toString() {
@@ -252,4 +255,31 @@ public class AmazonListingReview extends GenericModel {
         result = 31 * result + (alrId != null ? alrId.hashCode() : 0);
         return result;
     }
+
+    /**
+     * 解析单个 Review JsonElement
+     *
+     * @param jsonReviewElement
+     * @return
+     */
+    public static AmazonListingReview parseAmazonReviewJson(JsonElement jsonReviewElement) {
+        JsonObject rwObj = jsonReviewElement.getAsJsonObject();
+        AmazonListingReview review = new AmazonListingReview();
+        review.alrId = rwObj.get("alrId").getAsString();
+        review.listingId = rwObj.get("listingId").getAsString();
+        review.rating = rwObj.get("rating").getAsFloat();
+        review.lastRating = rwObj.get("lastRating").getAsFloat();
+        review.title = rwObj.get("title").getAsString();
+        review.review = rwObj.get("review").getAsString();
+        review.helpUp = rwObj.get("helpUp").getAsInt();
+        review.helpClick = rwObj.get("helpClick").getAsInt();
+        review.username = rwObj.get("username").getAsString();
+        review.userid = rwObj.get("userid").getAsString();
+        review.reviewDate = DateTime.parse(rwObj.get("reviewDate").getAsString()).toDate();
+        review.purchased = rwObj.get("purchased").getAsBoolean();
+        review.resolved = rwObj.get("resolved").getAsBoolean();
+
+        return review;
+    }
+
 }

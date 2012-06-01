@@ -230,118 +230,6 @@ public class Orderr extends GenericModel {
      */
     public Integer crawlUpdateTimes = 0;
 
-    // -------------------------
-
-    /**
-     * <pre>
-     * 前台页面使用的, 查看最近 N 天内的订单情况分布的表格;
-     * 把所有需要展示的数据做成 2 级 Map:
-     *  - 第一级为时间
-     *  - 第二级为数据行
-     *   > 每一个数据行根据不同的 key 包含不维度的数据
-     *   > all: 所有 state 的统计值
-     *   > state: 根据日期, 所有 market, Account 的统计值
-     *   > state_[market]: 根据状态 + 市场来区分的订单数据
-     *   > all_[market]: 排除状态, 市场整天的订单数据
-     *   > state_[account]: 根据状态 + 账户来区分的订单数据
-     *   > all_[account]: 排除状态, 账户整天的订单数据
-     * </pre>
-     *
-     * @param days
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
-        DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-        if(days > 0) days = -days;
-        Date pre7Day = now.plusDays(days).toDate();
-        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, now.plusDays(1).toDate()).fetch();
-
-        List<Account> accs = Account.all().fetch();
-        Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
-        for(Orderr or : orders) {
-            DateTime ct = new DateTime(or.createDate);
-            String key = ct.toString("yyyy-MM-dd");
-
-            if(odmaps.containsKey(key)) {
-                Map<String, AtomicInteger> dateRow = odmaps.get(key);
-                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
-                dateRow.get(String.format("all")).incrementAndGet();
-                dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
-                dateRow.get(String.format("all_%s", or.account.toString())).incrementAndGet();
-            } else {
-                //row key: [state]_[market.name/account.toString]
-                Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
-                for(S s : S.values()) {
-                    dateRow.put(s.name(), new AtomicInteger(0)); // ALL
-                    for(Account.M m : Account.M.values()) {
-                        dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
-                        dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
-                    }
-                    for(Account a : accs) {
-                        dateRow.put(String.format("%s_%s", s.name(), a.toString()), new AtomicInteger(0)); // Account
-                        dateRow.put(String.format("all_%s", a.toString()), new AtomicInteger(0));
-                    }
-                }
-                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
-                dateRow.put(String.format("all"), new AtomicInteger(1));
-                dateRow.put(String.format("all_%s", or.market.name()), new AtomicInteger(1));
-                dateRow.put(String.format("all_%s", or.account.toString()), new AtomicInteger(1));
-                odmaps.put(key, dateRow);
-            }
-        }
-
-        // 统计总订单数
-        for(String dateKey : odmaps.keySet()) {
-            // 2012-04-19 ->
-            for(S s : S.values()) {
-                /* -> pending
-                 * -> pending_uk
-                 * -> pending_easyacc.eu
-                 */
-                Map<String, AtomicInteger> rowMap = odmaps.get(dateKey);
-                AtomicInteger rowSum = new AtomicInteger(0); // ALL 统计
-                AtomicInteger rowMarketSum = new AtomicInteger(0); // Market 统计
-                AtomicInteger rowAccountSUm = new AtomicInteger(0); // Account 统计
-
-                for(String dataRowKey : rowMap.keySet()) {
-                    // each Row Data, 在已经限制了 Date 的日期下的每一行的数据将 state 相同的进行统计计算
-                    if(dataRowKey.equals(s.name())) {
-                        rowSum.addAndGet(rowMap.get(dataRowKey).get());
-                    }
-
-                    for(Account.M m : Account.M.values()) {
-                        if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
-                            rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
-                    }
-
-                    for(Account acc : accs) {
-                        if(dataRowKey.equals(String.format("%s_%s", s.name(), acc.toString())))
-                            rowAccountSUm.addAndGet(rowMap.get(dataRowKey).get());
-                    }
-                }
-            }
-        }
-
-        // 将 key 排序, 按照日期倒序
-        List<String> dateKey = new ArrayList<String>(odmaps.keySet());
-        Collections.sort(dateKey, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                DateTime dt1 = DateTime.parse(o1);
-                DateTime dt2 = DateTime.parse(o2);
-                return (int) (dt1.getMillis() - dt2.getMillis());
-            }
-        });
-
-        Map<String, Map<String, AtomicInteger>> afSort = new LinkedHashMap<String, Map<String, AtomicInteger>>();
-        for(String key : dateKey) afSort.put(key, odmaps.get(key));
-        return afSort;
-    }
 
     /**
      * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
@@ -410,321 +298,6 @@ public class Orderr extends GenericModel {
         this.save();
     }
 
-    /**
-     * 订单抓取第一步, 获取订单(FBA 为主)
-     * 解析的文件中的所有订单; 需要区别市场
-     *
-     * @param file
-     * @param acc  通过账号来确实是哪一个市场
-     * @return
-     */
-    public static List<Orderr> parseAllOrderXML(File file, Account acc) {
-        switch(acc.type) {
-            case AMAZON_US:
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return allOrderXML_Amazon(file, acc);
-            case EBAY_UK:
-                return allOrderXML_Ebay(file);
-            default:
-                return new ArrayList<Orderr>();
-        }
-    }
-
-    /**
-     * 抓取订单第二步
-     * 更新相信的订单信息, 比如 buyer, 地址等.
-     *
-     * @param file
-     * @param market
-     * @return
-     */
-    public static Set<Orderr> parseUpdateOrderXML(File file, Account.M market) {
-        switch(market) {
-            case AMAZON_US:
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return allUpdateOrderXML_Amazon(file);
-            case EBAY_UK:
-            default:
-                Logger.warn("parseUpdateOrderXML is not support the Ebay market!");
-                return new HashSet<Orderr>();
-        }
-    }
-
-    public static Set<Orderr> allUpdateOrderXML_Amazon(File file) {
-        List<String> lines = IO.readLines(file, "UTF-8");
-        Set<Orderr> orderrs = new HashSet<Orderr>();
-        lines.remove(0); //删除第一行标题
-        for(String line : lines) {
-            // 在解析 csv 文件的时候会发现有重复的项出现, 不过这没关系,
-            String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
-            try {
-                if(vals[0].toUpperCase().startsWith("S")) {
-                    Logger.info("Skip Self Order[" + vals[0] + "].");
-                    continue;
-                }
-                Orderr order = new Orderr();
-                order.orderId = vals[0];
-                order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
-                order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
-                order.shippingService = vals[42];
-                if(StringUtils.isNotBlank(vals[43])) {
-                    order.trackNo = vals[43];
-                    order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
-                }
-                order.email = vals[10];
-                order.buyer = vals[11];
-                order.phone = vals[12];
-                order.shipLevel = vals[23];
-                order.reciver = vals[24];
-                order.address = vals[25];
-                order.address1 = (vals[26] + " " + vals[27]).trim();
-                order.city = vals[28];
-                order.province = vals[29];
-                order.postalCode = vals[30];
-                order.country = vals[31];
-
-                orderrs.add(order);
-            } catch(Exception e) {
-                Logger.warn("Parse Order[" + vals[0] + "] update Error. [" + e.getMessage() + "]");
-            }
-        }
-        return orderrs;
-    }
-
-    public static List<Orderr> allOrderXML_Ebay(File file) {
-        //TODO 暂时还没有实现.
-        throw new UnsupportedOperationException("allOrderXML_Ebay 还没有实现!");
-    }
-
-    /**
-     * 解析产生的订单, 这一部分主要提供的是 Amazon 的
-     *
-     * @param file
-     * @return
-     */
-    public static List<Orderr> allOrderXML_Amazon(File file, Account acc) {
-        AmazonEnvelopeType envelopeType = JAXB.unmarshal(file, AmazonEnvelopeType.class);
-        List<Orderr> orders = new ArrayList<Orderr>();
-        for(MessageType message : envelopeType.getMessage()) {
-            OrderType odt = message.getOrder();
-
-            String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
-            if(amazonOrderId.startsWith("S02") || Patterns.A2Z.matcher(amazonOrderId).matches()) {
-                Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
-                continue;
-            }
-
-            Orderr orderr = new Orderr();
-            orderr.orderId = amazonOrderId;
-            orderr.market = Account.M.val(odt.getSalesChannel());
-            orderr.createDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
-            orderr.state = parseOrderState(odt.getOrderStatus());
-
-            if(orderr.state.ordinal() >= S.PAYMENT.ordinal()) {
-                Date lastUpdateTime = odt.getLastUpdatedDate().toGregorianCalendar().getTime();
-                orderr.paymentDate = lastUpdateTime;
-                orderr.shipDate = lastUpdateTime;
-
-
-                FulfillmentDataType ffdt = odt.getFulfillmentData();
-                orderr.shipLevel = ffdt.getShipServiceLevel();
-
-                AddressType addtype = ffdt.getAddress();
-                orderr.city = addtype.getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
-                orderr.province = addtype.getState();
-                orderr.postalCode = addtype.getPostalCode();
-                orderr.country = addtype.getCountry();
-            }
-
-            List<OrderItemType> oits = odt.getOrderItem();
-            List<OrderItem> orderitems = new ArrayList<OrderItem>();
-
-            Float totalAmount = 0f;
-            Float shippingAmount = 0f;
-            for(OrderItemType oid : oits) {
-                /**
-                 * 0. 检查这个 order 是否需要进行补充 orderitem
-                 * 1. 将 orderitem 的基本信息补充完全
-                 * 2. 检查 orderitems List 中时候已经存在相同的产品了, 如果有这修改已经存在的产品的数量否则才添加新的
-                 */
-                if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
-
-                OrderItem oi = new OrderItem();
-                oi.order = orderr;
-                oi.productName = oid.getProductName();
-                oi.quantity = oid.getQuantity();
-                oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
-
-
-                // 如果属于 UnUsedSKU 那么则跳过这个解析
-                if(Product.unUsedSKU(oid.getSKU())) continue;
-
-                String sku = Product.merchantSKUtoSKU(oid.getSKU());
-                Product product = Product.findById(sku);
-                Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
-                if(product != null) oi.product = product;
-                else {
-                    // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
-                    continue; // 发生了这个错误, 这跳过这个 orderitem 
-                }
-                if(selling != null) oi.selling = selling;
-                else {
-                    // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("Selling[%s_%s] is not in SELLING, it can not be happed!", oid.getASIN().toUpperCase(), orderr.market.toString());
-                    continue;
-                }
-                oi.id = String.format("%s_%s", orderr.orderId, product.sku);
-
-                // price calculate
-                oi.price = oi.discountPrice = oi.feesAmaount = oi.shippingPrice = 0f; // 初始化值
-                if(orderr.state == S.CANCEL) { //基本信息完成后, 如果订单是取消的, 那么价格等都设置为 0 , 不计入计算并
-                    addIntoOrderItemList(orderitems, oi);
-                    continue;
-                }
-
-                ItemPriceType ipt = oid.getItemPrice();
-                if(ipt == null) { //如果价格还没有出来, 表示在 Amazon 上数据还没有及时到位, 暂时不记录价格数据
-                    Logger.warn("Order[%s] orderitem don`t have price yet.", orderr.orderId);
-                } else {
-                    List<ComponentType> costs = oid.getItemPrice().getComponent();
-                    for(ComponentType ct : costs) { // 价格在这个都要统一成为 GBP (英镑), 注意不是 EUR 欧元
-                        AmountType at = ct.getAmount();
-                        String compType = ct.getType().toLowerCase();
-                        Currency currency = Currency.valueOf(at.getCurrency());
-                        if("principal".equals(compType)) {
-                            oi.price = currency.toGBP(at.getValue());
-                            totalAmount += oi.price;
-                        } else if("shipping".equals(compType)) {
-                            oi.shippingPrice = currency.toGBP(at.getValue());
-                            shippingAmount += oi.shippingPrice;
-                        } else if("giftwrap".equals(compType)) {
-                            oi.memo += "\nGiftWrap: " + currency.toGBP(at.getValue()) + " GBP."; //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
-                        }
-                    }
-
-                    // 计算折扣了多少钱
-                    PromotionType promotionType = oid.getPromotion();
-                    if(promotionType != null) {
-                        if(promotionType.getShipPromotionDiscount() != null) {
-                            oi.shippingPrice = oi.shippingPrice - promotionType.getShipPromotionDiscount();
-                        }
-                        if(promotionType.getItemPromotionDiscount() != null) {
-                            oi.discountPrice = promotionType.getItemPromotionDiscount();
-                        }
-                    }
-                }
-
-                addIntoOrderItemList(orderitems, oi);
-            }
-
-            orderr.totalAmount = totalAmount;
-            orderr.shippingAmount = shippingAmount;
-            orderr.items = orderitems;
-            orders.add(orderr);
-        }
-        return orders;
-    }
-
-
-    /**
-     * 查看某一天订单的饼图数据
-     *
-     * @param msku
-     * @param date
-     * @return
-     */
-    public static Map<String, AtomicInteger> orderPieChart(String msku, Date date) {
-        DateTime day = Instant.parse(new DateTime(date.getTime()).toString("yyyy-MM-dd")).toDateTime();
-        Date dayBegin = day.toDate();
-        Date dayEnd = day.plusDays(1).toDate();
-
-        List<Orderr> orderrs = Orderr.find("createDate>=? AND createDate<=?", dayBegin, dayEnd).fetch();
-
-        Map<String, AtomicInteger> rtMap = new LinkedHashMap<String, AtomicInteger>();
-        for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime(); begin += TimeUnit.HOURS.toMillis(1)) {
-            rtMap.put(begin.toString(), new AtomicInteger(0));
-            for(Orderr or : orderrs) {
-                for(OrderItem oi : or.items) {
-                    if(oi.selling.merchantSKU.equals(msku) ||
-                            "all".equalsIgnoreCase(msku)) {//如果搜索的 MerchantSKU 为 all 也进行计算
-                        if(or.createDate.getTime() < begin || or.createDate.getTime() > begin + TimeUnit.HOURS.toMillis(1))
-                            continue;
-
-                        if(rtMap.containsKey(begin.toString())) {
-                            rtMap.get(begin.toString()).incrementAndGet(); //因为是统计的订单, 所以数量都是以 1 递增
-                        }
-                    }
-                }
-            }
-        }
-
-        return rtMap;
-    }
-
-
-    /**
-     * 判断将 OrderItem 是否能够添加如已经存在的 List[OrderItem]
-     *
-     * @param list
-     * @param oi
-     * @return
-     */
-    private static boolean addIntoOrderItemList(List<OrderItem> list, OrderItem oi) {
-        if(list.contains(oi)) {
-            for(OrderItem item : list) {
-                if(!item.equals(oi)) continue;
-                item.quantity = item.quantity + oi.quantity;
-                Logger.info("merge one orderItem[%s] belong to order %s, see the details goto %s",
-                        oi.product.sku,
-                        oi.order.orderId,
-                        "https://sellercentral.amazon.co.uk/gp/orders-v2/details?ie=UTF8&orderID=" + oi.order.orderId
-                );
-            }
-            return false;
-        } else {
-            list.add(oi);
-            return true;
-        }
-    }
-
-    private static S parseOrderState(String orderState) {
-        // {"Pending"=>226233, "Shipped"=>1284685, "Cancelled"=>28538, "Shipping"=>1342}, 半年的更新文件
-        String orderSt = orderState.toLowerCase();
-        if("pending".equals(orderSt)) {
-            return S.PENDING;
-        } else if("shipped".equals(orderSt)) {
-            return S.SHIPPED;
-        } else if("shipping".equals(orderSt)) {
-            return S.PAYMENT;
-        } else if("cancelled".equals(orderSt)) {
-            return S.CANCEL;
-        } else {
-            return S.PENDING;
-        }
-    }
-
-    /**
-     * 此订单所关联的所有 OrderItem 的 SKU
-     *
-     * @return
-     */
-    public static String itemSkus(Orderr ord) {
-        StringBuilder sbd = new StringBuilder();
-        if(ord == null) return sbd.toString();
-        for(OrderItem itm : ord.items) {
-            sbd.append(itm.product.sku).append(" ");
-        }
-        return sbd.toString();
-    }
 
     public void setPostalCode(String postalCode1) {
         if(postalCode1 != null) this.postalCode = postalCode1.toUpperCase();
@@ -901,5 +474,445 @@ public class Orderr extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + orderId.hashCode();
         return result;
+    }
+
+    // -------------------------
+
+    /**
+     * <pre>
+     * 前台页面使用的, 查看最近 N 天内的订单情况分布的表格;
+     * 把所有需要展示的数据做成 2 级 Map:
+     *  - 第一级为时间
+     *  - 第二级为数据行
+     *   > 每一个数据行根据不同的 key 包含不维度的数据
+     *   > all: 所有 state 的统计值
+     *   > state: 根据日期, 所有 market, Account 的统计值
+     *   > state_[market]: 根据状态 + 市场来区分的订单数据
+     *   > all_[market]: 排除状态, 市场整天的订单数据
+     *   > state_[account]: 根据状态 + 账户来区分的订单数据
+     *   > all_[account]: 排除状态, 账户整天的订单数据
+     * </pre>
+     *
+     * @param days
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
+        DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
+        if(days > 0) days = -days;
+        Date pre7Day = now.plusDays(days).toDate();
+        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, now.plusDays(1).toDate()).fetch();
+
+        List<Account> accs = Account.all().fetch();
+        Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
+        for(Orderr or : orders) {
+            DateTime ct = new DateTime(or.createDate);
+            String key = ct.toString("yyyy-MM-dd");
+
+            if(odmaps.containsKey(key)) {
+                Map<String, AtomicInteger> dateRow = odmaps.get(key);
+                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                dateRow.get(String.format("all")).incrementAndGet();
+                dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
+                dateRow.get(String.format("all_%s", or.account.toString())).incrementAndGet();
+            } else {
+                //row key: [state]_[market.name/account.toString]
+                Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
+                for(S s : S.values()) {
+                    dateRow.put(s.name(), new AtomicInteger(0)); // ALL
+                    for(Account.M m : Account.M.values()) {
+                        dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
+                        dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
+                    }
+                    for(Account a : accs) {
+                        dateRow.put(String.format("%s_%s", s.name(), a.toString()), new AtomicInteger(0)); // Account
+                        dateRow.put(String.format("all_%s", a.toString()), new AtomicInteger(0));
+                    }
+                }
+                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
+                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                dateRow.put(String.format("all"), new AtomicInteger(1));
+                dateRow.put(String.format("all_%s", or.market.name()), new AtomicInteger(1));
+                dateRow.put(String.format("all_%s", or.account.toString()), new AtomicInteger(1));
+                odmaps.put(key, dateRow);
+            }
+        }
+
+        // 统计总订单数
+        for(String dateKey : odmaps.keySet()) {
+            // 2012-04-19 ->
+            for(S s : S.values()) {
+                /* -> pending
+                 * -> pending_uk
+                 * -> pending_easyacc.eu
+                 */
+                Map<String, AtomicInteger> rowMap = odmaps.get(dateKey);
+                AtomicInteger rowSum = new AtomicInteger(0); // ALL 统计
+                AtomicInteger rowMarketSum = new AtomicInteger(0); // Market 统计
+                AtomicInteger rowAccountSUm = new AtomicInteger(0); // Account 统计
+
+                for(String dataRowKey : rowMap.keySet()) {
+                    // each Row Data, 在已经限制了 Date 的日期下的每一行的数据将 state 相同的进行统计计算
+                    if(dataRowKey.equals(s.name())) {
+                        rowSum.addAndGet(rowMap.get(dataRowKey).get());
+                    }
+
+                    for(Account.M m : Account.M.values()) {
+                        if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
+                            rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
+                    }
+
+                    for(Account acc : accs) {
+                        if(dataRowKey.equals(String.format("%s_%s", s.name(), acc.toString())))
+                            rowAccountSUm.addAndGet(rowMap.get(dataRowKey).get());
+                    }
+                }
+            }
+        }
+
+        // 将 key 排序, 按照日期倒序
+        List<String> dateKey = new ArrayList<String>(odmaps.keySet());
+        Collections.sort(dateKey, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                DateTime dt1 = DateTime.parse(o1);
+                DateTime dt2 = DateTime.parse(o2);
+                return (int) (dt1.getMillis() - dt2.getMillis());
+            }
+        });
+
+        Map<String, Map<String, AtomicInteger>> afSort = new LinkedHashMap<String, Map<String, AtomicInteger>>();
+        for(String key : dateKey) afSort.put(key, odmaps.get(key));
+        return afSort;
+    }
+
+
+    /**
+     * 订单抓取第一步, 获取订单(FBA 为主)
+     * 解析的文件中的所有订单; 需要区别市场
+     *
+     * @param file
+     * @param acc  通过账号来确实是哪一个市场
+     * @return
+     */
+    public static List<Orderr> parseAllOrderXML(File file, Account acc) {
+        switch(acc.type) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return allOrderXML_Amazon(file, acc);
+            case EBAY_UK:
+                return allOrderXML_Ebay(file);
+            default:
+                return new ArrayList<Orderr>();
+        }
+    }
+
+    /**
+     * 抓取订单第二步
+     * 更新相信的订单信息, 比如 buyer, 地址等.
+     *
+     * @param file
+     * @param market
+     * @return
+     */
+    public static Set<Orderr> parseUpdateOrderXML(File file, Account.M market) {
+        switch(market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return allUpdateOrderXML_Amazon(file);
+            case EBAY_UK:
+            default:
+                Logger.warn("parseUpdateOrderXML is not support the Ebay market!");
+                return new HashSet<Orderr>();
+        }
+    }
+
+    public static Set<Orderr> allUpdateOrderXML_Amazon(File file) {
+        List<String> lines = IO.readLines(file, "UTF-8");
+        Set<Orderr> orderrs = new HashSet<Orderr>();
+        lines.remove(0); //删除第一行标题
+        for(String line : lines) {
+            // 在解析 csv 文件的时候会发现有重复的项出现, 不过这没关系,
+            String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
+            try {
+                if(vals[0].toUpperCase().startsWith("S")) {
+                    Logger.info("Skip Self Order[" + vals[0] + "].");
+                    continue;
+                }
+                Orderr order = new Orderr();
+                order.orderId = vals[0];
+                order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
+                order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
+                order.shippingService = vals[42];
+                if(StringUtils.isNotBlank(vals[43])) {
+                    order.trackNo = vals[43];
+                    order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
+                }
+                order.email = vals[10];
+                order.buyer = vals[11];
+                order.phone = vals[12];
+                order.shipLevel = vals[23];
+                order.reciver = vals[24];
+                order.address = vals[25];
+                order.address1 = (vals[26] + " " + vals[27]).trim();
+                order.city = vals[28];
+                order.province = vals[29];
+                order.postalCode = vals[30];
+                order.country = vals[31];
+
+                orderrs.add(order);
+            } catch(Exception e) {
+                Logger.warn("Parse Order[" + vals[0] + "] update Error. [" + e.getMessage() + "]");
+            }
+        }
+        return orderrs;
+    }
+
+    public static List<Orderr> allOrderXML_Ebay(File file) {
+        //TODO 暂时还没有实现.
+        throw new UnsupportedOperationException("allOrderXML_Ebay 还没有实现!");
+    }
+
+    /**
+     * 解析产生的订单, 这一部分主要提供的是 Amazon 的
+     *
+     * @param file
+     * @return
+     */
+    public static List<Orderr> allOrderXML_Amazon(File file, Account acc) {
+        AmazonEnvelopeType envelopeType = JAXB.unmarshal(file, AmazonEnvelopeType.class);
+        List<Orderr> orders = new ArrayList<Orderr>();
+        for(MessageType message : envelopeType.getMessage()) {
+            OrderType odt = message.getOrder();
+
+            String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
+            if(amazonOrderId.startsWith("S02") || Patterns.A2Z.matcher(amazonOrderId).matches()) {
+                Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
+                continue;
+            }
+
+            Orderr orderr = new Orderr();
+            orderr.orderId = amazonOrderId;
+            orderr.market = Account.M.val(odt.getSalesChannel());
+            orderr.createDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
+            orderr.state = parseOrderState(odt.getOrderStatus());
+
+            if(orderr.state.ordinal() >= S.PAYMENT.ordinal()) {
+                Date lastUpdateTime = odt.getLastUpdatedDate().toGregorianCalendar().getTime();
+                orderr.paymentDate = lastUpdateTime;
+                orderr.shipDate = lastUpdateTime;
+
+
+                FulfillmentDataType ffdt = odt.getFulfillmentData();
+                orderr.shipLevel = ffdt.getShipServiceLevel();
+
+                AddressType addtype = ffdt.getAddress();
+                orderr.city = addtype.getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
+                orderr.province = addtype.getState();
+                orderr.postalCode = addtype.getPostalCode();
+                orderr.country = addtype.getCountry();
+            }
+
+            List<OrderItemType> oits = odt.getOrderItem();
+            List<OrderItem> orderitems = new ArrayList<OrderItem>();
+
+            Float totalAmount = 0f;
+            Float shippingAmount = 0f;
+            for(OrderItemType oid : oits) {
+                /**
+                 * 0. 检查这个 order 是否需要进行补充 orderitem
+                 * 1. 将 orderitem 的基本信息补充完全
+                 * 2. 检查 orderitems List 中时候已经存在相同的产品了, 如果有这修改已经存在的产品的数量否则才添加新的
+                 */
+                if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
+
+                OrderItem oi = new OrderItem();
+                oi.order = orderr;
+                oi.productName = oid.getProductName();
+                oi.quantity = oid.getQuantity();
+                oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
+
+
+                // 如果属于 UnUsedSKU 那么则跳过这个解析
+                if(Product.unUsedSKU(oid.getSKU())) continue;
+
+                String sku = Product.merchantSKUtoSKU(oid.getSKU());
+                Product product = Product.findById(sku);
+                Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
+                if(product != null) oi.product = product;
+                else {
+                    // TODO 发送邮件提醒自己有产品不存在!
+                    Logger.error("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
+                    continue; // 发生了这个错误, 这跳过这个 orderitem
+                }
+                if(selling != null) oi.selling = selling;
+                else {
+                    // TODO 发送邮件提醒自己有产品不存在!
+                    Logger.error("Selling[%s_%s] is not in SELLING, it can not be happed!", oid.getASIN().toUpperCase(), orderr.market.toString());
+                    continue;
+                }
+                oi.id = String.format("%s_%s", orderr.orderId, product.sku);
+
+                // price calculate
+                oi.price = oi.discountPrice = oi.feesAmaount = oi.shippingPrice = 0f; // 初始化值
+                if(orderr.state == S.CANCEL) { //基本信息完成后, 如果订单是取消的, 那么价格等都设置为 0 , 不计入计算并
+                    addIntoOrderItemList(orderitems, oi);
+                    continue;
+                }
+
+                ItemPriceType ipt = oid.getItemPrice();
+                if(ipt == null) { //如果价格还没有出来, 表示在 Amazon 上数据还没有及时到位, 暂时不记录价格数据
+                    Logger.warn("Order[%s] orderitem don`t have price yet.", orderr.orderId);
+                } else {
+                    List<ComponentType> costs = oid.getItemPrice().getComponent();
+                    for(ComponentType ct : costs) { // 价格在这个都要统一成为 GBP (英镑), 注意不是 EUR 欧元
+                        AmountType at = ct.getAmount();
+                        String compType = ct.getType().toLowerCase();
+                        Currency currency = Currency.valueOf(at.getCurrency());
+                        if("principal".equals(compType)) {
+                            oi.price = currency.toGBP(at.getValue());
+                            totalAmount += oi.price;
+                        } else if("shipping".equals(compType)) {
+                            oi.shippingPrice = currency.toGBP(at.getValue());
+                            shippingAmount += oi.shippingPrice;
+                        } else if("giftwrap".equals(compType)) {
+                            oi.memo += "\nGiftWrap: " + currency.toGBP(at.getValue()) + " GBP."; //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
+                        }
+                    }
+
+                    // 计算折扣了多少钱
+                    PromotionType promotionType = oid.getPromotion();
+                    if(promotionType != null) {
+                        if(promotionType.getShipPromotionDiscount() != null) {
+                            oi.shippingPrice = oi.shippingPrice - promotionType.getShipPromotionDiscount();
+                        }
+                        if(promotionType.getItemPromotionDiscount() != null) {
+                            oi.discountPrice = promotionType.getItemPromotionDiscount();
+                        }
+                    }
+                }
+
+                addIntoOrderItemList(orderitems, oi);
+            }
+
+            orderr.totalAmount = totalAmount;
+            orderr.shippingAmount = shippingAmount;
+            orderr.items = orderitems;
+            orders.add(orderr);
+        }
+        return orders;
+    }
+
+
+    /**
+     * 查看某一天订单的饼图数据
+     *
+     * @param msku
+     * @param date
+     * @return
+     */
+    public static Map<String, AtomicInteger> orderPieChart(String msku, Date date) {
+        DateTime day = Instant.parse(new DateTime(date.getTime()).toString("yyyy-MM-dd")).toDateTime();
+        Date dayBegin = day.toDate();
+        Date dayEnd = day.plusDays(1).toDate();
+
+        List<Orderr> orderrs = Orderr.find("createDate>=? AND createDate<=?", dayBegin, dayEnd).fetch();
+
+        Map<String, AtomicInteger> rtMap = new LinkedHashMap<String, AtomicInteger>();
+        for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime(); begin += TimeUnit.HOURS.toMillis(1)) {
+            rtMap.put(begin.toString(), new AtomicInteger(0));
+            for(Orderr or : orderrs) {
+                for(OrderItem oi : or.items) {
+                    if(oi.selling.merchantSKU.equals(msku) ||
+                            "all".equalsIgnoreCase(msku)) {//如果搜索的 MerchantSKU 为 all 也进行计算
+                        if(or.createDate.getTime() < begin || or.createDate.getTime() > begin + TimeUnit.HOURS.toMillis(1))
+                            continue;
+
+                        if(rtMap.containsKey(begin.toString())) {
+                            rtMap.get(begin.toString()).incrementAndGet(); //因为是统计的订单, 所以数量都是以 1 递增
+                        }
+                    }
+                }
+            }
+        }
+
+        return rtMap;
+    }
+
+
+    /**
+     * 判断将 OrderItem 是否能够添加如已经存在的 List[OrderItem]
+     *
+     * @param list
+     * @param oi
+     * @return
+     */
+    private static boolean addIntoOrderItemList(List<OrderItem> list, OrderItem oi) {
+        if(list.contains(oi)) {
+            for(OrderItem item : list) {
+                if(!item.equals(oi)) continue;
+                item.quantity = item.quantity + oi.quantity;
+                Logger.info("merge one orderItem[%s] belong to order %s, see the details goto %s",
+                        oi.product.sku,
+                        oi.order.orderId,
+                        "https://sellercentral.amazon.co.uk/gp/orders-v2/details?ie=UTF8&orderID=" + oi.order.orderId
+                );
+            }
+            return false;
+        } else {
+            list.add(oi);
+            return true;
+        }
+    }
+
+    private static S parseOrderState(String orderState) {
+        // {"Pending"=>226233, "Shipped"=>1284685, "Cancelled"=>28538, "Shipping"=>1342}, 半年的更新文件
+        String orderSt = orderState.toLowerCase();
+        if("pending".equals(orderSt)) {
+            return S.PENDING;
+        } else if("shipped".equals(orderSt)) {
+            return S.SHIPPED;
+        } else if("shipping".equals(orderSt)) {
+            return S.PAYMENT;
+        } else if("cancelled".equals(orderSt)) {
+            return S.CANCEL;
+        } else {
+            return S.PENDING;
+        }
+    }
+
+    /**
+     * 此订单所关联的所有 OrderItem 的 SKU
+     *
+     * @return
+     */
+    public static String itemSkus(Orderr ord) {
+        StringBuilder sbd = new StringBuilder();
+        if(ord == null) return sbd.toString();
+        for(OrderItem itm : ord.items) {
+            sbd.append(itm.product.sku).append(" ");
+        }
+        return sbd.toString();
+    }
+
+    /**
+     * 查找到此 userid 对应的所有订单
+     *
+     * @param userId
+     * @return
+     */
+    public static List<Orderr> findByUserId(String userId) {
+        return Orderr.find("userid=?", userId).fetch();
     }
 }

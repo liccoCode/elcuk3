@@ -1,0 +1,16 @@
+AmazonReview:
+User: ${review.username}; Rating: ${review.rating} ; Purchased: ${review.purchased} ; Date: ${review.reviewDate.format("yyyy-MM-dd")} ; Click: ${review.helpUp} / ${review.helpClick} ;
+${review.userReviewLink()}
+${review.listing.asinLink()}
+
+Title: ${review.title}
+
+
+Review:
+
+${review.review}
+
+
+${'--------------------------------------' * 3}
+
+

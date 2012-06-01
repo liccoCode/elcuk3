@@ -1,15 +1,10 @@
 package models.market;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import helper.GTs;
-import helper.HTTP;
 import helper.Webs;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -155,40 +150,21 @@ public class Feedback extends GenericModel {
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
     public void openOsTicket(String title) {
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        if(StringUtils.isNotBlank(this.osTicketId)) {
+            Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
+            return;
+        }
         String name = this.orderId;
+        String email = this.email;
+        String subject = title;
+        String content = GTs.render("OsTicketFeedbackWarn", GTs.newMap("f", this).build());
+
         if(this.orderr != null)
             name = String.format("%s - %s", this.orderr.buyer, this.market.toString());
-
-        String subject = title;
         if(StringUtils.isBlank(subject))
             subject = "You left a negative feedback, Please give us a chance to make up!";
 
-        params.add(new BasicNameValuePair("name", name));
-        params.add(new BasicNameValuePair("email", this.email));
-        params.add(new BasicNameValuePair("phone", ""));
-        params.add(new BasicNameValuePair("phone_ext", ""));
-        params.add(new BasicNameValuePair("topicId", "1")); // 固定这个 TopicId 为 1; OsTicket 系统里面为 Support
-        params.add(new BasicNameValuePair("submit_x", "Submit Ticket"));
-        params.add(new BasicNameValuePair("subject", subject));
-        params.add(new BasicNameValuePair("message", GTs.render("OsTicketWarn", GTs.newMap("f", this).build())));
-
-        try {
-            JsonElement jsonel = HTTP.postJson("http://t.easyacceu.com/open_api.php", params);
-            JsonObject obj = jsonel.getAsJsonObject();
-            if(obj == null) {
-                Logger.error("Feedback.openOsTicket fetch content Error!");
-                return;
-            }
-            if(obj.get("flag").getAsBoolean()) { // 成功创建
-                this.osTicketId = obj.get("tid").getAsString();
-            } else {
-                Logger.warn("Order[%s] Feedback post to OsTicket failed because of [%s]",
-                        this.orderId, obj.get("message").getAsString());
-            }
-        } catch(Exception e) {
-            Logger.error("Feedback.openOsTicket fetch IO Error!");
-        }
+        this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.FEEDBACK, "Feedback " + this.orderId);
     }
 
     /**
