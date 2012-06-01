@@ -1,3 +1,4 @@
+// 先使用 coffee script 替代 JavaScript 的  application 部分的代码
 $(function(){
     $('a[rel=tooltip]').tooltip({placement:'right'});
     $('a[rel=popover]').popover({placement:'bottom'});

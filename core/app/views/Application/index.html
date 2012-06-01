@@ -1,8 +1,9 @@
 #{extends 'main.html' /}
 #{set title:'Home' /}
 #{set 'moreScripts'}
-    #{script 'Application/application.js'/}
+<script type="text/javascript" src="@{'/public/javascripts/Application/app.coffee'}"></script>
 #{/set}
+
 <div class="row">
     <div class="span11">
         <h2 class="label label-info" style="font-size:12px">订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>

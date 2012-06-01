@@ -74,28 +74,28 @@ $(function(){
 
     /* 查看 Sellings 的销售量的 HightChart Options 对象 */
     var sellOp = lineOp('a_units', 'Units').click(
-            function(){
-                var msku = localStorage.getItem('msku');
-                window.open('/analyzes/pie?msku=' + msku + "&date=" + $.DateUtil.fmt1(new Date(this.x)),
-                        msku,
-                        'width=520,height=620,location=yes,status=yes');
-            }).formatter(function(){
-                var cur = new Date(this.x);
-                return '<strong>' + this.series.name + '</strong><br/>' +
-                        'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
-                        'Sales: ' + this.y;
-            });
+        function(){
+            var msku = localStorage.getItem('msku');
+            window.open('/analyzes/pie?msku=' + msku + "&date=" + $.DateUtil.fmt1(new Date(this.x)),
+                msku,
+                'width=520,height=620,location=yes,status=yes');
+        }).formatter(function(){
+            var cur = new Date(this.x);
+            return '<strong>' + this.series.name + '</strong><br/>' +
+                'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
+                'Sales: ' + this.y;
+        });
 
     /* 查看 Sellings 的销售额的 HightChart Options 对象 */
     var saleOp = lineOp('a_sales', 'Sales').click(
-            function(){
-                alert(this.series.name + ":::::" + this.x + ":::" + this.y);
-            }).formatter(function(){
-                var cur = new Date(this.x);
-                return '<strong>' + this.series.name + '</strong><br/>' +
-                        'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
-                        'Sales: ' + this.y;
-            });
+        function(){
+            alert(this.series.name + ":::::" + this.x + ":::" + this.y);
+        }).formatter(function(){
+            var cur = new Date(this.x);
+            return '<strong>' + this.series.name + '</strong><br/>' +
+                'Date:' + ($.DateUtil.fmt1(cur)) + '<br/>' +
+                'Sales: ' + this.y;
+        });
 
     var pvOp = lineOp('a_pv', 'PageView').click(function(){
         alert("点击了这个按钮");
