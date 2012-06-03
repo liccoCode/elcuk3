@@ -169,8 +169,8 @@ $ ->
       ->
         try
         # Selling 的 Ajax line 双击事件
-          $('.msku,.sku').unbind().dblclick((e)
-            ->
+          $('.msku,.sku').unbind().dblclick(
+            (e) ->
               o = $(e.target)
               $.varClosure.params = {type: o.attr('class')}
               # sku 类型不参加 sid 与 msku 的选择
@@ -198,19 +198,15 @@ $ ->
     )
 
   # 给 搜索 按钮添加事件
-  $('#a_search').click(
-    ->
-      tab_type = $('#tab li.active a').attr('href').substring(1)
-      page = $('#pagefooter_sku').val() - 1
-      sellRankLoad(tab_type, if page <= 0 then 1 else page)
-      false
-  )
+  $('#a_search').click ->
+    tab_type = $('#tab li.active a').attr('href').substring(1)
+    page = $('#pagefooter_sku').val() - 1
+    sellRankLoad(tab_type, if page <= 0 then 1 else page)
+    false
 
-  $('#a_param').keyup(
-    (e) =>
-      $('#a_search').click() if e.keyCode is 13
-      false
-  )
+  $('#a_param').keyup (e) ->
+    $('#a_search').click() if e.keyCode is 13
+    false
 
   pageViewDefaultContent = () ->
     template = '<div class="alert alert-success"><h3 style="text-align:center">请双击需要查看的 Selling 查看 PageView & Session</h3></div>'
