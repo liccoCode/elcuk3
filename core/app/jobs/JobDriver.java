@@ -3,8 +3,6 @@ package jobs;
 import helper.Webs;
 import models.Jobex;
 import play.Logger;
-import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.Time;
 
@@ -17,14 +15,14 @@ import java.util.concurrent.TimeUnit;
  * Date: 12/29/11
  * Time: 1:04 AM
  */
-@Every("3s")
+//@Every("3s")
 public class JobDriver extends Job {
     @Override
     public void doJob() throws Exception {
-        if(Play.mode.isDev()) {
-            Logger.debug(String.format("In Dev mode JobDriver is not running..."));
-            return;
-        }
+//        if(Play.mode.isDev()) {
+//            Logger.debug(String.format("In Dev mode JobDriver is not running..."));
+//            return;
+//        }
         Logger.debug("JobDriver Start...");
         int all = 0;
         int success = 0;
@@ -56,7 +54,7 @@ public class JobDriver extends Job {
                     run = TimeUnit.MILLISECONDS.toSeconds(now - job.lastUpdateTime) >= Time.parseDuration(job.duration);
                 } catch(IllegalArgumentException e) {
                     try {
-                        run = now >= Time.parseCRONExpression(job.duration).getTime();
+                        run = Math.abs(now - Time.parseCRONExpression(job.duration).getTime()) < 10000; // 相差的时间误差在 10s 内的话
                     } catch(IllegalArgumentException pe) {
                         Logger.error("JobDriver: %s", Webs.E(e));
                         run = false;
