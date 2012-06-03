@@ -119,8 +119,8 @@ $ ->
   sales_line = (params) ->
     maskDiv = $('#myTabContent')
     maskDiv.mask('加载中...')
-    $.getJSON('/analyzes/ajaxSells', params, (data)
-      ->
+    $.getJSON('/analyzes/ajaxSells', params,
+      (data) ->
         display_sku = params['msku']
         prefix = "Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "]"
         sellOp.head(prefix + ' Sales')
