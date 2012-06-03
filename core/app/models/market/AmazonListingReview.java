@@ -215,6 +215,7 @@ public class AmazonListingReview extends GenericModel {
             Logger.warn("Review (%s) relate order have no email.", this.alrId);
             email = "support@easyacceu.com";
             subject += " - No Order found...";
+            content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
 
             this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
         } else {
