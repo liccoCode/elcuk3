@@ -58,33 +58,33 @@ $ ->
 
   # TODO 需要处理传入的函数中的 this 关键字的问题, 解决格式化输出 !
   sellOp = lineOp('a_units', 'Units').click(
-    =>
+    ->
       msku = localStorage.getItem('msku')
-      window.open('/analyzes/pie?msku=' + msku + '&date=' + $.DateUtil.fmt1(new Date(saleOp.x)),
+      window.open('/analyzes/pie?msku=' + msku + '&date=' + $.DateUtil.fmt1(new Date(@x)),
         msku,
         'width=520,height=620,location=yes,status=yes'
       )
   ).formatter(
-    =>
-      cur = new Date(saleOp.x)
-      '<strong>' + saleOp.series.name + '</strong><br/>' +
+    ->
+      cur = new Date(@x)
+      '<strong>' + @series.name + '</strong><br/>' +
       'Date: ' + ($.DateUtil.fmt1(cur)) + '<br/>' +
-      'Sales: ' + saleOp.y
+      'Sales: ' + @y
   )
 
   saleOp = lineOp('a_sales', 'Sales').click(
-    =>
-      alert(saleOp.series.name + ":::::" + saleOp.x + ":::" + saleOp.y)
+    ->
+      alert(@series.name + ":::::" + @x + ":::" + @y)
   ).formatter(
-    =>
-      cur = new Date(saleOp.x)
-      '<strong>' + saleOp.series.name + '</strong><br/>' +
+    ->
+      cur = new Date(@x)
+      '<strong>' + @series.name + '</strong><br/>' +
       'Date: ' + ($.DateUtil.fmt1(cur)) + '<br/>' +
-      'Sales: ' + saleOp.y
+      'Sales: ' + @y
   )
 
   pvOp = lineOp('a_pv', 'PageView').click(
-    =>
+    ->
       alert('点击了这按钮')
   )
 
@@ -92,7 +92,7 @@ $ ->
 
 
   pvSS_line = (params) ->
-    $.getJSON('/analyzes/ajaxSellingRecord', params, (r) =>
+    $.getJSON('/analyzes/ajaxSellingRecord', params, (r) ->
         if r.flag is false
           alert(r.message)
         else
@@ -119,7 +119,8 @@ $ ->
   sales_line = (params) ->
     maskDiv = $('#myTabContent')
     maskDiv.mask('加载中...')
-    $.getJSON('/analyzes/ajaxSells', params, (data) =>
+    $.getJSON('/analyzes/ajaxSells', params, (data)
+      ->
         display_sku = params['msku']
         prefix = "Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "]"
         sellOp.head(prefix + ' Sales')
@@ -164,10 +165,12 @@ $ ->
 
     tgt = $('#' + type)
     tgt.mask('加载中...')
-    tgt.load('/analyzes/index_' + type, {'p.page': page, 'p.size': 10, "p.param": $('#a_param').val()}, =>
+    tgt.load('/analyzes/index_' + type, {'p.page': page, 'p.size': 10, "p.param": $('#a_param').val()},
+      ->
         try
         # Selling 的 Ajax line 双击事件
-          $('.msku,.sku').unbind().dblclick((e) =>
+          $('.msku,.sku').unbind().dblclick((e)
+            ->
               o = $(e.target)
               $.varClosure.params = {type: o.attr('class')}
               # sku 类型不参加 sid 与 msku 的选择
@@ -195,11 +198,13 @@ $ ->
     )
 
   # 给 搜索 按钮添加事件
-  $('#a_search').click =>
-    tab_type = $('#tab li.active a').attr('href').substring(1)
-    page = $('#pagefooter_sku').val() - 1
-    sellRankLoad(tab_type, if page <= 0 then 1 else page)
-    false
+  $('#a_search').click(
+    ->
+      tab_type = $('#tab li.active a').attr('href').substring(1)
+      page = $('#pagefooter_sku').val() - 1
+      sellRankLoad(tab_type, if page <= 0 then 1 else page)
+      false
+  )
 
   $('#a_param').keyup(
     (e) =>
@@ -214,5 +219,6 @@ $ ->
 
 
   # 在最上面定义 init 方法,只能在最后调用 init 方法, 否则会报告方法未定义
+  # 因为使用 Coffee Script 定义的 function 都是以定义变量的形式赋值 function, 与直接定义 function 不一样
   init()
 
