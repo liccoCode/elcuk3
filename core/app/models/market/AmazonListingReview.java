@@ -197,12 +197,9 @@ public class AmazonListingReview extends GenericModel {
         }
 
         String name = String.format("%s - %s", this.username, this.listingId);
-        String email = "Not Found Email...";
+        String email = "";
         String subject = title;
         String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
-
-        List<Orderr> orders = Orderr.findByUserId(this.userid);
-        if(orders.size() > 0) email = orders.get(0).email;
 
         if(StringUtils.isBlank(subject)) {
             if(this.listing.market == Account.M.AMAZON_DE) {
@@ -211,7 +208,18 @@ public class AmazonListingReview extends GenericModel {
                 subject = "You left a negative product review, may we have a chance to make up?";
             }
         }
-        this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
+
+        List<Orderr> orders = Orderr.findByUserId(this.userid);
+        if(orders.size() > 0) email = orders.get(0).email;
+        if(StringUtils.isBlank(email)) {
+            Logger.warn("Review (%s) relate order have no email.", this.alrId);
+            email = "support@easyacceu.com";
+            subject += " - No Order found...";
+
+            this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
+        } else {
+            this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
+        }
     }
 
     @Override

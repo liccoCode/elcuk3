@@ -15,11 +15,11 @@ import play.test.UnitTest;
 public class ListingReviewMailTest extends UnitTest {
     @Test
     public void test() {
-        AmazonListingReview review = AmazonListingReview.findById("8ec405dff807142c7960c2c6d0df2270");
+        AmazonListingReview review = AmazonListingReview.findById("B00237QJZI_AMAZON.CO.UK_A2XQP8V4C9E0Q4");
         review.listingReviewCheck();
     }
 
-    @Test
+    //    @Test
     public void testMailReviewMail() {
         Orderr ord = Orderr.findById("302-1888247-6527562");
 
