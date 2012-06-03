@@ -126,7 +126,7 @@ public class AmazonListingReview extends GenericModel {
     @Lob
     public String comment = "";
 
-    @Column(columnDefinition = "varchar(32) NOT NULL DEFAULT ''")
+    @Column(columnDefinition = "varchar(32) DEFAULT ''")
     public String osTicketId;
 
     /**
