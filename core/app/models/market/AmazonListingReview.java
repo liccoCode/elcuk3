@@ -177,6 +177,7 @@ public class AmazonListingReview extends GenericModel {
 
     /**
      * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
+     * 在 Check 方法执行完成以后将数据同步回数据库
      */
     public void listingReviewCheck() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
