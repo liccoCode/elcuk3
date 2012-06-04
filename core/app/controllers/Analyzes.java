@@ -80,6 +80,20 @@ public class Analyzes extends Controller {
     }
 
     /**
+     * 查看某一个 Selling 在一段时间内的转换率
+     */
+    public static void ajaxSellingTurn(String msku,
+                                       Account acc,
+                                       @As("MM/dd/yyyy") Date from,
+                                       @As("MM/dd/yyyy") Date to) {
+        try {
+            renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartTurnRatio(msku, acc, from, to)));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    /**
      * 给出某一天订单销量的时间区间饼图
      *
      * @param msku

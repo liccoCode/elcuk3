@@ -55,7 +55,7 @@ $ ->
       @series = []
     }
 
-  # TODO 需要处理传入的函数中的 this 关键字的问题, 解决格式化输出 !
+  # 销售订单曲线
   sellOp = lineOp('a_units', 'Units').click(
     ->
       msku = localStorage.getItem('msku')
@@ -71,6 +71,7 @@ $ ->
       'Sales: ' + @y
   )
 
+  # 销售销量曲线
   saleOp = lineOp('a_sales', 'Sales').click(
     ->
       alert(@series.name + ":::::" + @x + ":::" + @y)
@@ -82,15 +83,16 @@ $ ->
       'Sales: ' + @y
   )
 
-  pvOp = lineOp('a_pv', 'PageView').click(
-    ->
-      alert('点击了这按钮')
-  )
-
-  ssOp = lineOp('a_ss', 'Session')
+  # 转换率的曲线
 
 
-  pvSS_line = (params) ->
+  turnOp = lineOp('a_turn', '转化率')
+
+  # Session 数量曲线
+  ssOp = lineOp('a_ss', 'Session && PV')
+
+  # 绘制 Session 的曲线
+  ss_line = (params) ->
     $.getJSON('/analyzes/ajaxSellingRecord', params, (r) ->
         if r.flag is false
           alert(r.message)
@@ -102,19 +104,34 @@ $ ->
             ss_uk: {name: 'Session(uk)', data: []}
             ss_de: {name: 'Session(de)', data: []}
             ss_fr: {name: 'Session(fr)', data: []}
-          pvOp.head('Selling[' + params['msku'] + '] PV')
           ssOp.head('Selling[' + params['msku'] + '] SS')
-          pvOp.clearLines()
           ssOp.clearLines()
           for k,v of r
             lines[k].data.push([o['_1'], o['_2']]) for o in v
-            pvOp.series.push(lines[k]) if k.indexOf('pv') >= 0
-            ssOp.series.push(lines[k]) if k.indexOf('ss') >= 0
-          new Highcharts.Chart(pvOp)
+            ssOp.series.push(lines[k])
           new Highcharts.Chart(ssOp)
     )
 
+  # 绘制转换率曲线
+  turn_line = (params) ->
+    $.getJSON('/analyzes/ajaxSellingTurn', params, (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          lines =
+            tn_uk: {name: 'TurnRatio(uk)', data: []}
+            tn_de: {name: 'TurnRatio(de)', data: []}
+            tn_fr: {name: 'TurnRatio(fr)', data: []}
+          turnOp.head('Selling[' + params['msku'] + '] 转化率')
+          turnOp.clearLines()
+          for k, v of r
+            lines[k].data.push([o['_1'], o['_2']]) for o in v # 填充完曲线数据
+            turnOp.series.push(lines[k]) # 添加曲线
+          new Highcharts.Chart(turnOp) # 绘制曲线
+    )
 
+
+  # 绘制销售曲线与销量曲线
   sales_line = (params) ->
     maskDiv = $('#myTabContent')
     maskDiv.mask('加载中...')
@@ -182,14 +199,15 @@ $ ->
               sales_line($.varClosure.params)
               # PV & SS 线
               if $.varClosure.params['type'] is 'msku'
-                pvSS_line($.varClosure.params)
+                ss_line($.varClosure.params)
+                turn_line($.varClosure.params)
               else
                 pageViewDefaultContent()
 
               display =
                 0: 'EasyAcc'
-                1: 'EasyAcc.EU'
-                2: 'EasyAcc.DE'
+                1: 'EasyAcc.U'
+                2: 'EasyAcc.D'
               $('#a_acc_id_label').html(display[accId])
               false
           )
@@ -218,9 +236,9 @@ $ ->
     false
 
   pageViewDefaultContent = () ->
-    template = '<div class="alert alert-success"><h3 style="text-align:center">请双击需要查看的 Selling 查看 PageView & Session</h3></div>'
-    for id in ['a_pv', 'a_ss']
-      $('#' + id).html(template)
+    template = '<div class="alert alert-success"><h3 style="text-align:center"></h3></div>'
+    for id,v of {a_ss: '双击查看 Selling 的 PageView & Session', a_turn: '请双击需要查看的 Selling 查看转化率'}
+      $(template).appendTo('#' + id).find('h3').html(v)
 
 
   # 在最上面定义 init 方法,只能在最后调用 init 方法, 否则会报告方法未定义

@@ -236,7 +236,7 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.Tuple<Long, Float>>> ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
         /**
          * 格式 map[lineName, datas]
          * datas -> [
@@ -244,26 +244,64 @@ public class SellingRecord extends GenericModel {
          * [1282304000000, 99.9]
          * ]
          */
-        Map<String, ArrayList<F.Tuple<Long, Float>>> highCharLines = GTs.MapBuilder
-                .map("pv_uk", new ArrayList<F.Tuple<Long, Float>>())
-                .put("ss_uk", new ArrayList<F.Tuple<Long, Float>>())
-                .put("pv_de", new ArrayList<F.Tuple<Long, Float>>())
-                .put("ss_de", new ArrayList<F.Tuple<Long, Float>>())
-                .put("pv_fr", new ArrayList<F.Tuple<Long, Float>>())
-                .put("ss_fr", new ArrayList<F.Tuple<Long, Float>>())
+        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
+                .map("pv_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("ss_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("pv_de", new ArrayList<F.T2<Long, Float>>())
+                .put("ss_de", new ArrayList<F.T2<Long, Float>>())
+                .put("pv_fr", new ArrayList<F.T2<Long, Float>>())
+                .put("ss_fr", new ArrayList<F.T2<Long, Float>>())
                 .build();
 
         List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
         for(SellingRecord rcd : records) {
-            if(rcd.market == Account.M.AMAZON_UK) {
-                highCharLines.get("pv_uk").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_uk").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
-            } else if(rcd.market == Account.M.AMAZON_DE) {
-                highCharLines.get("pv_de").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_de").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
-            } else if(rcd.market == Account.M.AMAZON_FR) {
-                highCharLines.get("pv_fr").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_fr").add(new F.Tuple<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            switch(rcd.market) {
+                case AMAZON_UK:
+                    highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                    highCharLines.get("ss_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                    break;
+                case AMAZON_DE:
+                    highCharLines.get("pv_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                    highCharLines.get("ss_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                    break;
+                case AMAZON_FR:
+                    highCharLines.get("pv_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                    highCharLines.get("ss_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                    break;
+                default:
+                    // ignore
+            }
+        }
+        return highCharLines;
+    }
+
+    /**
+     * 加载一段时间内指定 Selling 的转换率曲线数据, 给前台的 HighChar 使用
+     *
+     * @return
+     */
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
+        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
+                .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("tn_de", new ArrayList<F.T2<Long, Float>>())
+                .put("tn_fr", new ArrayList<F.T2<Long, Float>>())
+                .build();
+        List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+        for(SellingRecord rcd : records) {
+            float turnRatio = (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions);
+            if(rcd.sessions <= 0) turnRatio = 0f;
+            switch(rcd.market) {
+                case AMAZON_UK:
+                    highCharLines.get("tn_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                    break;
+                case AMAZON_DE:
+                    highCharLines.get("tn_de").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                    break;
+                case AMAZON_FR:
+                    highCharLines.get("tn_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                    break;
+                default:
+                    //ignore
             }
         }
         return highCharLines;
