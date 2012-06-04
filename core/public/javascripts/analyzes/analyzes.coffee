@@ -170,8 +170,8 @@ $ ->
         try
         # Selling 的 Ajax line 双击事件
           $('.msku,.sku').unbind().dblclick(
-            (e) ->
-              o = $(e.target)
+            ->
+              o = $(@)
               $.varClosure.params = {type: o.attr('class')}
               # sku 类型不参加 sid 与 msku 的选择
               accId = o.attr('aid')
@@ -180,7 +180,7 @@ $ ->
               $('#dbcick_param :input').map($.varClosure)
 
               #绘制销量线
-              #-----
+              sales_line($.varClosure.params)
               # PV & SS 线
               if $.varClosure.params['type'] is 'msku'
                 pvSS_line($.varClosure.params)
