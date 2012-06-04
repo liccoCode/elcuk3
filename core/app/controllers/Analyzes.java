@@ -7,7 +7,6 @@ import models.Ret;
 import models.market.*;
 import org.joda.time.DateTime;
 import play.data.binding.As;
-import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -52,25 +51,34 @@ public class Analyzes extends Controller {
      * @param to
      */
     @Check("manager")
-    public static void ajaxSells(String msku,
+    public static void ajaxUnit(String msku,
+                                String type,
+                                Account acc,
+                                @As("MM/dd/yyyy") Date from,
+                                @As("MM/dd/yyyy") Date to) {
+        if(!acc.isPersistent()) acc = null;
+        try {
+            renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartUnitOrder(msku, acc, type, from, to)));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void ajaxSales(String msku,
                                  String type,
                                  Account acc,
                                  @As("MM/dd/yyyy") Date from,
                                  @As("MM/dd/yyyy") Date to) {
-        validation.required(msku);
-        validation.required(from);
-        validation.required(to);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         if(!acc.isPersistent()) acc = null;
         try {
-            renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartSelling(msku, acc, type, from, to)));
+            renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartSales(msku, acc, type, from, to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
 
     /**
-     * 查看某一个 Selling 在一段时间内的 PageView, Session 数量
+     * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
     public static void ajaxSellingRecord(String msku,
                                          Account acc,

@@ -1,5 +1,6 @@
 package models.market;
 
+import helper.Cached;
 import helper.Caches;
 import helper.Dates;
 import helper.GTs;
@@ -82,117 +83,6 @@ public class OrderItem extends GenericModel {
      */
     public String memo = "";
 
-    /**
-     * 在 OrderItem 根据保存的时候, 会减少其相对应的 SKU 的库存[成功保存了 OrderItem 以后处理库存]
-     *
-     * @see Orderr updateAttrs 更新 OrderItem + 库存部分
-     */
-
-    /**
-     * <pre>
-     * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
-     * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
-     * </pre>
-     *
-     * @param skuOrMsku 需要查询的 SKU 或者对应 Selling 的 sid
-     * @param acc
-     * @param from
-     * @param to        @return {series_size, days, series_n}
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSelling(String skuOrMsku, Account acc, String type, Date from, Date to) {
-        // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.data2Date(from));
-        DateTime inTo = new DateTime(Dates.data2Date(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
-        String cacheKey = Caches.Q.cacheKey(skuOrMsku, acc, type, inFrom, inTo);
-        Map<String, ArrayList<F.T2<Long, Float>>> cached = Cache.get(cacheKey, Map.class);
-        if(cached != null && cached.size() > 0) return cached;
-
-        /**
-         * 加载出限定时间内的指定 Msku 的 OrderItem
-         * 按照天过滤成销量数据
-         * 组装成 HightChart 的格式
-         */
-        List<OrderItem> orderItems;
-        if("all".equalsIgnoreCase(skuOrMsku)) {
-            orderItems = OrderItem.find("createDate>=? AND createDate<=?", inFrom.toDate(), inTo.toDate()).fetch();
-        } else {
-            if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(skuOrMsku), inFrom.toDate(), inTo.toDate()).fetch();
-            else {
-                if(acc == null)
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", skuOrMsku, inFrom.toDate(), inTo.toDate()).fetch();
-                else
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrMsku, acc, inFrom.toDate(), inTo.toDate()).fetch();
-            }
-        }
-
-        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
-                /*销量*/
-                .map("unit_all", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_de", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_fr", new ArrayList<F.T2<Long, Float>>())
-                        /*销售额*/
-                .put("sale_all", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_de", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_fr", new ArrayList<F.T2<Long, Float>>())
-                .build();
-
-
-        DateTime travel = inFrom.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
-            // 销量
-            float unit_all = 0;
-            float unit_uk = 0;
-            float unit_de = 0;
-            float unit_fr = 0;
-
-            // 销售额
-            float sale_all = 0;
-            float sale_uk = 0;
-            float sale_de = 0;
-            float sale_fr = 0;
-
-            for(OrderItem oi : orderItems) {
-                if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
-                    continue;
-                if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
-                    unit_all += oi.quantity;
-                    sale_all += oi.price;
-                    if(oi.selling.market == Account.M.AMAZON_UK) {
-                        unit_uk += oi.quantity;
-                        sale_uk += oi.price;
-                    } else if(oi.selling.market == Account.M.AMAZON_DE) {
-                        unit_de += oi.quantity;
-                        sale_de += oi.price;
-                    } else if(oi.selling.market == Account.M.AMAZON_FR) {
-                        unit_fr += oi.quantity;
-                        sale_fr += oi.price;
-                    } else {
-                        // 其他市场暂时先不统计
-                    }
-                }
-            }
-            // 当天所有市场的销售订单数据
-            hightChartLines.get("unit_all").add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
-            hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
-            hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
-            hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
-
-            // 当天所有市场的销售额数据
-            hightChartLines.get("sale_all").add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
-            hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
-            hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
-            hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
-
-            travel = travel.plusDays(1);
-        }
-
-        if(hightChartLines.size() > 0) Cache.add(cacheKey, hightChartLines, "30mn");
-        return hightChartLines;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -212,6 +102,138 @@ public class OrderItem extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + id.hashCode();
         return result;
+    }
+
+    /**
+     * 根据 sku 或者 msku 从 OrderItem 中查询对应 Account 的 OrderItem
+     * ps: 结果缓存 1 小时
+     *
+     * @param skuOrMsku sku 或者 merchantSKU(msku)
+     * @param type      sku/all/msku
+     * @param acc
+     * @param from
+     * @param to
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @Cached("1h")
+    public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type, Account acc, Date from, Date to) {
+        String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
+        List<OrderItem> orderItems = Cache.get(cacheKey, List.class);
+        if(orderItems != null) return orderItems;
+        if("all".equalsIgnoreCase(skuOrMsku)) {
+            orderItems = OrderItem.find("createDate>=? AND createDate<=?", from, to).fetch();
+        } else {
+            if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
+                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(skuOrMsku), from, to).fetch();
+            else {
+                if(acc == null)
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", skuOrMsku, from, to).fetch();
+                else
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrMsku, acc, from, to).fetch();
+            }
+        }
+        Cache.add(cacheKey, orderItems, "1h");
+        return orderItems;
+    }
+
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku, Account acc, String type, Date from, Date to) {
+        // 做内部参数的容错
+        DateTime inFrom = new DateTime(Dates.data2Date(from));
+        DateTime inTo = new DateTime(Dates.data2Date(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc, inFrom.toDate(), inTo.toDate());
+        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
+                /*销售额*/
+                .map("sale_all", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_de", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_fr", new ArrayList<F.T2<Long, Float>>())
+                .build();
+        DateTime travel = inFrom.plusDays(0); // copy 一个新的
+        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
+            // 销售额
+            float sale_all = 0;
+            float sale_uk = 0;
+            float sale_de = 0;
+            float sale_fr = 0;
+
+            for(OrderItem oi : orderItems) {
+                if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
+                    continue;
+                if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
+                    sale_all += oi.price;
+                    if(oi.selling.market == Account.M.AMAZON_UK) sale_uk += oi.price;
+                    else if(oi.selling.market == Account.M.AMAZON_DE) sale_de += oi.price;
+                    else if(oi.selling.market == Account.M.AMAZON_FR) sale_fr += oi.price;
+                    // 其他市场暂时先不统计
+                }
+            }
+            // 当天所有市场的销售额数据
+            hightChartLines.get("sale_all").add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
+            hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
+            hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
+            hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
+            travel = travel.plusDays(1);
+        }
+
+        return hightChartLines;
+    }
+
+    /**
+     * <pre>
+     * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
+     * </pre>
+     *
+     * @param skuOrMsku 需要查询的 SKU 或者对应 Selling 的 sid
+     * @param acc
+     * @param from
+     * @param to        @return {series_size, days, series_n}
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartUnitOrder(String skuOrMsku, Account acc, String type, Date from, Date to) {
+        // 做内部参数的容错
+        DateTime inFrom = new DateTime(Dates.data2Date(from));
+        DateTime inTo = new DateTime(Dates.data2Date(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        /**
+         * 加载出限定时间内的指定 Msku 的 OrderItem
+         * 按照天过滤成销量数据
+         * 组装成 HightChart 的格式
+         */
+        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc, inFrom.toDate(), inTo.toDate());
+        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
+                /*销量*/
+                .map("unit_all", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_de", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_fr", new ArrayList<F.T2<Long, Float>>())
+                .build();
+        DateTime travel = inFrom.plusDays(0); // copy 一个新的
+        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
+            // 销量
+            float unit_all = 0;
+            float unit_uk = 0;
+            float unit_de = 0;
+            float unit_fr = 0;
+            for(OrderItem oi : orderItems) {
+                if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
+                    continue;
+                if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
+                    unit_all += oi.quantity;
+                    if(oi.selling.market == Account.M.AMAZON_UK) unit_uk += oi.quantity;
+                    else if(oi.selling.market == Account.M.AMAZON_DE) unit_de += oi.quantity;
+                    else if(oi.selling.market == Account.M.AMAZON_FR) unit_fr += oi.quantity;
+                    // 其他市场暂时先不统计
+                }
+            }
+            // 当天所有市场的销售订单数据
+            hightChartLines.get("unit_all").add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
+            hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
+            hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
+            hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
+            travel = travel.plusDays(1);
+        }
+        return hightChartLines;
     }
 
     public static List<OrderItem> orderRelateItems(String orderId) {

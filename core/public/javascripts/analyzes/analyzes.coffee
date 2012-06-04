@@ -14,26 +14,22 @@ $ ->
     sellRankLoad(MSKU, 1)
     sellRankLoad(SKU, 1)
     # 销量线
-    sales_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    unit_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    sale_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
     # 默认 PageView 线
     pageViewDefaultContent()
 
 
   # 用来构造给 HighChart 使用的默认 options 的方法
   lineOp = (container, yName) ->
-    {
     chart: {renderTo: container}
     title: {text: 'Chart Title'}
     xAxis: {type: 'datetime', dateTimeLabelFormats: {day: '%y.%m.%d'}}
     yAxis: {title: {text: yName}, min: 0}
     plotOptions:
-      {
       series:
-        {
         cursor: 'pointer',
-        point: {events: {}}
-        }
-      }
+        point: events: {}
     tooltip: {}
     series: []
     # 设置这条线的'标题'
@@ -53,10 +49,9 @@ $ ->
       @
     clearLines: () ->
       @series = []
-    }
 
   # 销售订单曲线
-  sellOp = lineOp('a_units', 'Units').click(
+  unitOp = lineOp('a_units', 'Units').click(
     ->
       msku = localStorage.getItem('msku')
       window.open('/analyzes/pie?msku=' + msku + '&date=' + $.DateUtil.fmt1(new Date(@x)),
@@ -72,13 +67,12 @@ $ ->
   )
 
   # 转换率的曲线
-
-
   turnOp = lineOp('a_turn', '转化率')
 
   # Session 数量曲线
   ssOp = lineOp('a_ss', 'Session && PV')
 
+  # ------------------- 曲线绘制 ---------------------
   # 绘制 Session 的曲线
   ss_line = (params) ->
     $.getJSON('/analyzes/ajaxSellingRecord', params, (r) ->
@@ -118,44 +112,57 @@ $ ->
           new Highcharts.Chart(turnOp) # 绘制曲线
     )
 
-
-  # 绘制销售曲线与销量曲线
-  sales_line = (params) ->
+  # 绘制销量曲线
+  unit_line = (params) ->
     maskDiv = $('#myTabContent')
     maskDiv.mask('加载中...')
-    $.getJSON('/analyzes/ajaxSells', params,
+    $.getJSON('/analyzes/ajaxUnit', params,
       (r) ->
         if r.flag is false
           alert(r.message)
         else
           display_sku = params['msku']
-          prefix = "Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "]"
-          sellOp.head(prefix + ' Unit Order')
-          saleOp.head(prefix + ' Sales')
-          sellOp.clearLines()
-          saleOp.clearLines()
-
+          unitOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "] Unit Order")
+          unitOp.clearLines()
           lines =
             unit_all: {name: 'Unit Order(all)', data: []}
             unit_uk: {name: 'Unit Order(uk)', data: []}
             unit_de: {name: 'Unit Order(de)', data: []}
             unit_fr: {name: 'Unit Order(fr)', data: []}
+          for k, v of r
+            lines[k].data.push([o['_1'], o['_2']]) for o in v
+            unitOp.series.push(lines[k])
+          localStorage.setItem('msku', params['msku'])
+          new Highcharts.Chart(unitOp)
+        maskDiv.unmask()
+    )
+
+  # 绘制销售额曲线
+  sale_line = (params) ->
+    maskDiv = $('#myTabContent')
+    maskDiv.mask('加载中...')
+    $.getJSON('/analyzes/ajaxSales', params,
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          display_sku = params['msku']
+          saleOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "] Sales")
+          saleOp.clearLines()
+          lines =
             sale_all: {name: 'Sales(all)', data: []}
             sale_uk: {name: 'Sales(uk)', data: []}
             sale_de: {name: 'Sales(de)', data: []}
             sale_fr: {name: 'Sales(fr)', data: []}
-
           for k, v of r
             lines[k].data.push([o['_1'], o['_2']]) for o in v
-            sellOp.series.push(lines[k]) if k.indexOf('unit') >= 0
-            saleOp.series.push(lines[k]) if k.indexOf('sale') >= 0
-
+            saleOp.series.push(lines[k])
           localStorage.setItem('msku', params['msku'])
-          new Highcharts.Chart(sellOp)
           new Highcharts.Chart(saleOp)
         maskDiv.unmask()
     )
 
+  # -------------------------------------------------------------------
 
   # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
   sellRankLoad = (type, page) ->
@@ -180,7 +187,8 @@ $ ->
               $('#dbcick_param :input').map($.varClosure)
 
               #绘制销量线
-              sales_line($.varClosure.params)
+              unit_line($.varClosure.params)
+              sale_line($.varClosure.params)
               # PV & SS 线
               if $.varClosure.params['type'] is 'msku'
                 ss_line($.varClosure.params)
@@ -212,7 +220,8 @@ $ ->
 
   # 重新加载全部的销售线
   $('#all_search').click ->
-    sales_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    unit_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    sale_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
     false
 
   $('#a_param').keyup (e) ->
