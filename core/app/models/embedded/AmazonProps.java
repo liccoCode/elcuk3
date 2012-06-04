@@ -24,13 +24,13 @@ import java.util.Date;
 public class AmazonProps {
     public AmazonProps() {
         // 初始化这些 Lob 字段, 避免 Hibernate 3.6 [Start position [1] cannot cannot exceed overall CLOB length [0]]
-        this.title = "";
-        this.keyFetures = "";
-        this.legalDisclaimerDesc = "";
-        this.sellerWarrantyDesc = "";
-        this.productDesc = "";
-        this.searchTerms = "";
-        this.platinumKeywords = "";
+        this.title = " ";
+        this.keyFetures = " ";
+        this.legalDisclaimerDesc = " ";
+        this.sellerWarrantyDesc = " ";
+        this.productDesc = " ";
+        this.searchTerms = " ";
+        this.platinumKeywords = " ";
     }
 
     @Lob
@@ -156,6 +156,19 @@ public class AmazonProps {
      * @param flag 如果 flag &gt; 0 表示从 [] -> str; 如果 flag &lt;=0 表示从 [] <- str
      */
     public void arryParamSetUP(int flag) {
+        /**
+         * Hibernate 的 bug 填写了 Lob 的字段, 为 "" 则会报告错误
+         * - Start position [1] cannot exceed overall CLOB length [0] -
+         * 就算是 Hibernate 3.6.10 也是如此, 所以在此进行兼容
+         */
+        if(StringUtils.isBlank(this.title)) this.title = " ";
+        if(StringUtils.isBlank(this.keyFetures)) this.keyFetures = " ";
+        if(StringUtils.isBlank(this.legalDisclaimerDesc)) this.legalDisclaimerDesc = " ";
+        if(StringUtils.isBlank(this.sellerWarrantyDesc)) this.sellerWarrantyDesc = " ";
+        if(StringUtils.isBlank(this.productDesc)) this.productDesc = " ";
+        if(StringUtils.isBlank(this.searchTerms)) this.searchTerms = " ";
+        if(StringUtils.isBlank(this.platinumKeywords)) this.platinumKeywords = " ";
+
         if(flag > 0) {
             this.keyFetures = StringUtils.join(this.keyFeturess, Webs.SPLIT);
             this.searchTerms = StringUtils.join(this.searchTermss, Webs.SPLIT);

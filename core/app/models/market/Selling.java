@@ -291,9 +291,9 @@ public class Selling extends GenericModel {
             else if("model".equals(name))
                 this.aps.modelNumber = val;
             else if("our_price".equals(name))
-                this.aps.standerPrice = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*同 deploy->our_price*/, val);
+                this.aps.standerPrice = Webs.amazonPriceNumber(this.market/*同 deploy->our_price*/, val);
             else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
-                this.aps.salePrice = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*同 depploy->our_price*/, val);
+                this.aps.salePrice = Webs.amazonPriceNumber(this.market/*同 depploy->our_price*/, val);
             else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.startDate = Dates.listingFromFmt(this.market, val);
             else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
@@ -395,8 +395,10 @@ public class Selling extends GenericModel {
                     for(Element el : inputs) {
                         String name = el.attr("name").toLowerCase().trim();
                         if("our_price".equals(name) && this.aps.standerPrice != null && this.aps.standerPrice > 0)
-                            /*原本是按照 selling 的市场去填写价格格式, 但 Amazon 在尽可能按照选择的语言进行更换, 语言都更换成英语的同时, 所以价格格式也都是 UK 格式 */
-                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, this.aps.standerPrice)));
+                        /**
+                         * Amazon 在使用 , 与 . 之间老是改变, 挺麻烦. 看是否可以从哪个地方自动切换
+                         */
+                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.aps.standerPrice)));
                         else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms))
                             this.aps.searchTermsCheck(params);
                         else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures))
@@ -414,7 +416,7 @@ public class Selling extends GenericModel {
                             if(this.aps.startDate != null && this.aps.endDate != null &&
                                     this.aps.salePrice != null && this.aps.salePrice > 0 &&
                                     this.aps.endDate.getTime() > this.aps.startDate.getTime()) {
-                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(Account.M.AMAZON_UK/*同 out_price*/, this.aps.salePrice)));
+                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market/*our_price*/, this.aps.salePrice)));
                                 /*TODO 日期格式暂时还是按照 Selling 市场来判断的, 看是否会被 Amazon 改成按照语言的格式来*/
                                 params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
                                 params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
@@ -623,6 +625,9 @@ public class Selling extends GenericModel {
             try {
                 if(Product.unUsedSKU(item.product.sku)) continue;
                 if(t > 0) {
+                    if(item.selling.merchantSKU.contains("80-QW1A56-BE")) {
+                        System.out.println("FInd!");
+                    }
                     sellKey = String.format("%s_%s", item.selling.merchantSKU, item.selling.account.id);
                 } else if(t < 0) {
                     sellKey = item.product.sku;
