@@ -3,7 +3,6 @@ package helper;
 import models.market.Account;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -38,6 +37,18 @@ public class Dates {
         }
     }
 
+    /**
+     * 舍弃掉 Date 后面的 时,分,秒
+     *
+     * @param date
+     * @return
+     */
+    public static Date data2Date(Date date) {
+        Date tmp = date;
+        if(tmp == null) tmp = new Date();
+        return DateTime.parse(new DateTime(tmp).toString("yyyy-MM-dd")).toDate();
+    }
+
     public static String date2Date(Date date) {
         if(date == null) return DateTime.now().toString("yyyy-MM-dd");
         else return new DateTime(date).toString("yyyy-MM-dd");
@@ -61,7 +72,7 @@ public class Dates {
                 return new DateTime(date).toString("dd/MM/yyyy");
         }
     }
-    
+
     public static Date listingFromFmt(Account.M m, String dateStr) {
         switch(m) {
             case AMAZON_UK:

@@ -1,5 +1,7 @@
 package helper;
 
+import play.cache.Cache;
+
 /**
  * 固定的缓存的 Key
  * User: wyattpan
@@ -40,5 +42,46 @@ public class Caches {
      * 根据 market, cat 来进行缓存不同 Market 与 Category 的 Selling, 给"缺货预警"页面使用
      */
     public static final String WARN_ITEM_SELLING = "warn_item_%s_%s";
+
+
+    /**
+     * Query Cache
+     */
+    public static class Q {
+        /**
+         * 根据 Params 来获取 Query Cache 的 Key
+         *
+         * @param params
+         * @return
+         */
+        public static String cacheKey(Object... params) {
+            StringBuilder sbd = new StringBuilder();
+            for(Object obj : params)
+                sbd.append((obj == null) ? "null" : obj.toString()).append("|");
+            sbd.deleteCharAt(sbd.length() - 1);
+            return sbd.toString();
+        }
+
+        /**
+         * Default Cache for 1h
+         *
+         * @param element
+         * @param params
+         */
+        public static void put(Object element, Object... params) {
+            Cache.add(Q.cacheKey(params), element, "1h");
+        }
+
+        /**
+         * 指定缓存多长时间
+         *
+         * @param element
+         * @param exprestion
+         * @param params
+         */
+        public static void put(Object element, String exprestion, Object... params) {
+            Cache.add(Q.cacheKey(params), element, exprestion);
+        }
+    }
 
 }

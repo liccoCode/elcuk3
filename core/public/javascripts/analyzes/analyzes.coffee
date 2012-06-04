@@ -63,24 +63,12 @@ $ ->
         msku,
         'width=520,height=620,location=yes,status=yes'
       )
-  ).formatter(
-    ->
-      cur = new Date(@x)
-      '<strong>' + @series.name + '</strong><br/>' +
-      'Date: ' + ($.DateUtil.fmt1(cur)) + '<br/>' +
-      'Sales: ' + @y
   )
 
   # 销售销量曲线
   saleOp = lineOp('a_sales', 'Sales').click(
     ->
       alert(@series.name + ":::::" + @x + ":::" + @y)
-  ).formatter(
-    ->
-      cur = new Date(@x)
-      '<strong>' + @series.name + '</strong><br/>' +
-      'Date: ' + ($.DateUtil.fmt1(cur)) + '<br/>' +
-      'Sales: ' + @y
   )
 
   # 转换率的曲线
@@ -136,39 +124,35 @@ $ ->
     maskDiv = $('#myTabContent')
     maskDiv.mask('加载中...')
     $.getJSON('/analyzes/ajaxSells', params,
-      (data) ->
-        display_sku = params['msku']
-        prefix = "Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "]"
-        sellOp.head(prefix + ' Sales')
-        saleOp.head(prefix + ' Prices')
-        sellOp.clearLines()
-        saleOp.clearLines()
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          display_sku = params['msku']
+          prefix = "Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "]"
+          sellOp.head(prefix + ' Unit Order')
+          saleOp.head(prefix + ' Sales')
+          sellOp.clearLines()
+          saleOp.clearLines()
 
-        # 处理一条一条的曲线
-        dealLine = (lineName, defOp) ->
-          return false if !data['series_' + lineName]
-          line = name: lineName.toUpperCase(), data: []
-          for d in [data['days']..1]
-            line.data.push([
-              $.DateUtil.addDay(-d + 1, $('#a_to').data('dateinput').getValue()).getTime(),
-              data['series_' + lineName].shift()
-            ])
-          defOp.series.push(line)
-          false
+          lines =
+            unit_all: {name: 'Unit Order(all)', data: []}
+            unit_uk: {name: 'Unit Order(uk)', data: []}
+            unit_de: {name: 'Unit Order(de)', data: []}
+            unit_fr: {name: 'Unit Order(fr)', data: []}
+            sale_all: {name: 'Sales(all)', data: []}
+            sale_uk: {name: 'Sales(uk)', data: []}
+            sale_de: {name: 'Sales(de)', data: []}
+            sale_fr: {name: 'Sales(fr)', data: []}
 
-        dealLine('all', sellOp)
-        dealLine('auk', sellOp)
-        dealLine('ade', sellOp)
-        dealLine('afr', sellOp)
+          for k, v of r
+            lines[k].data.push([o['_1'], o['_2']]) for o in v
+            sellOp.series.push(lines[k]) if k.indexOf('unit') >= 0
+            saleOp.series.push(lines[k]) if k.indexOf('sale') >= 0
 
-        dealLine('allM', saleOp)
-        dealLine('aukM', saleOp)
-        dealLine('adeM', saleOp)
-        dealLine('afrM', saleOp)
-
-        localStorage.setItem('msku', params['msku'])
-        new Highcharts.Chart(sellOp)
-        new Highcharts.Chart(saleOp)
+          localStorage.setItem('msku', params['msku'])
+          new Highcharts.Chart(sellOp)
+          new Highcharts.Chart(saleOp)
         maskDiv.unmask()
     )
 

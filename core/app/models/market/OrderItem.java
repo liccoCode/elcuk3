@@ -1,14 +1,20 @@
 package models.market;
 
 import helper.Caches;
+import helper.Dates;
+import helper.GTs;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 订单的具体订单项
@@ -84,133 +90,108 @@ public class OrderItem extends GenericModel {
 
     /**
      * <pre>
-     * 通过 OrderItem 计算指定的 skuOrmSku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
+     * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
      * </pre>
      *
-     * @param skuOrmSku 需要查询的 SKU 或者对应 Selling 的 sid
+     * @param skuOrMsku 需要查询的 SKU 或者对应 Selling 的 sid
      * @param acc
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> ajaxHighChartSelling(String skuOrmSku, Account acc, String type, Date from, Date to) {
-        String cached_key = String.format(Caches.AJAX_SALE_LINE,
-                skuOrmSku + (StringUtils.isNotBlank(type) ? type : "") + "_" + (acc == null ? "0" : acc.id),
-                from.getTime(),
-                to.getTime());
-        Map<String, Object> cached = Cache.get(cached_key, Map.class);
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSelling(String skuOrMsku, Account acc, String type, Date from, Date to) {
+        // 做内部参数的容错
+        DateTime inFrom = new DateTime(Dates.data2Date(from));
+        DateTime inTo = new DateTime(Dates.data2Date(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        String cacheKey = Caches.Q.cacheKey(skuOrMsku, acc, type, inFrom, inTo);
+        Map<String, ArrayList<F.T2<Long, Float>>> cached = Cache.get(cacheKey, Map.class);
         if(cached != null && cached.size() > 0) return cached;
-        /**
-         * 举例: 2011-12-29 00:00:00 ~ 2012-1-28 00:00:00 ; 总共时间间隔为 30 天, 但实际上是需要
-         * 2011-12-29 00:00:00 ~ 2012-1-28 23:59:59; 总共时间间隔应该为 31 天.
-         */
-        to.setTime(to.getTime() + (TimeUnit.DAYS.toMillis(1))); // 修正为 2012-1-30 00:00:00 , 不修改为 1-29 23:59:59 是后面进行时间分割需要
-        int days = (int) Math.ceil((to.getTime() - from.getTime()) / (24 * 3600 * 1000.0));
+
         /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
         List<OrderItem> orderItems;
-        if("all".equalsIgnoreCase(skuOrmSku)) {
-            orderItems = OrderItem.find("createDate>=? AND createDate<=?", from, to).fetch();
+        if("all".equalsIgnoreCase(skuOrMsku)) {
+            orderItems = OrderItem.find("createDate>=? AND createDate<=?", inFrom.toDate(), inTo.toDate()).fetch();
         } else {
             if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(skuOrmSku), from, to).fetch();
+                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(skuOrMsku), inFrom.toDate(), inTo.toDate()).fetch();
             else {
                 if(acc == null)
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", skuOrmSku, from, to).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", skuOrMsku, inFrom.toDate(), inTo.toDate()).fetch();
                 else
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrmSku, acc, from, to).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrMsku, acc, inFrom.toDate(), inTo.toDate()).fetch();
             }
         }
 
-        // 按照每天进行分割 --- 销量
-        List<Integer> allSales = new ArrayList<Integer>();
-        List<Integer> amazonUk = new ArrayList<Integer>();
-        List<Integer> amazonDe = new ArrayList<Integer>();
-        List<Integer> amazonFr = new ArrayList<Integer>();
+        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
+                /*销量*/
+                .map("unit_all", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_de", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_fr", new ArrayList<F.T2<Long, Float>>())
+                        /*销售额*/
+                .put("sale_all", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_uk", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_de", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_fr", new ArrayList<F.T2<Long, Float>>())
+                .build();
 
-        // 按照每天进行分割 --- 销售额
-        List<Float> allSalesM = new ArrayList<Float>();
-        List<Float> amazonUkM = new ArrayList<Float>();
-        List<Float> amazonDeM = new ArrayList<Float>();
-        List<Float> amazonFrM = new ArrayList<Float>();
 
-
-        // 从 from 时间开始, 按照每 24 小时进行一个时区进行划分, 将 OrderItem 划分到每个时间区间中去
-        for(long begin = from.getTime(); begin <= to.getTime(); begin += TimeUnit.DAYS.toMillis(1)) {
+        DateTime travel = inFrom.plusDays(0); // copy 一个新的
+        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
             // 销量
-            int all = 0;
-            int auk = 0;
-            int ade = 0;
-            int afr = 0;
+            float unit_all = 0;
+            float unit_uk = 0;
+            float unit_de = 0;
+            float unit_fr = 0;
 
             // 销售额
-            float allM = 0;
-            float aukM = 0;
-            float adeM = 0;
-            float afrM = 0;
+            float sale_all = 0;
+            float sale_uk = 0;
+            float sale_de = 0;
+            float sale_fr = 0;
 
-            for(OrderItem itm : orderItems) {
-                // 由于使用 JPQL 查询的时候,添加了 State 的 where 限制不能够生效, 所以直接使用程序控制了
-                if(itm.order.state == Orderr.S.CANCEL || itm.order.state == Orderr.S.REFUNDED || itm.order.state == Orderr.S.RETURNNEW)
+            for(OrderItem oi : orderItems) {
+                if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
                     continue;
-                if(itm.createDate.getTime() > begin && itm.createDate.getTime() <= (begin + TimeUnit.DAYS.toMillis(1))) {
-                    all += itm.quantity;
-                    allM += itm.price;
-                    switch(itm.selling.market) {
-                        case AMAZON_UK:
-                            auk += itm.quantity;
-                            aukM += itm.price;
-                            break;
-                        case AMAZON_DE:
-                            ade += itm.quantity;
-                            adeM += itm.price;
-                            break;
-                        case AMAZON_FR:
-                            afr += itm.quantity;
-                            afrM += itm.price;
-                            break;
-                        case AMAZON_US:
-                        case AMAZON_IT:
-                        case AMAZON_ES:
-                        case EBAY_UK:
-                            break;
+                if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
+                    unit_all += oi.quantity;
+                    sale_all += oi.price;
+                    if(oi.selling.market == Account.M.AMAZON_UK) {
+                        unit_uk += oi.quantity;
+                        sale_uk += oi.price;
+                    } else if(oi.selling.market == Account.M.AMAZON_DE) {
+                        unit_de += oi.quantity;
+                        sale_de += oi.price;
+                    } else if(oi.selling.market == Account.M.AMAZON_FR) {
+                        unit_fr += oi.quantity;
+                        sale_fr += oi.price;
+                    } else {
+                        // 其他市场暂时先不统计
                     }
                 }
             }
-            // 每一个时间区间需要一组销量数据
-            allSales.add(all);
-            amazonUk.add(auk);
-            amazonDe.add(ade);
-            amazonFr.add(afr);
+            // 当天所有市场的销售订单数据
+            hightChartLines.get("unit_all").add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
+            hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
+            hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
+            hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
 
-            // 每一个时间区间需要一组销售额数据
-            allSalesM.add(allM);
-            amazonUkM.add(aukM);
-            amazonDeM.add(adeM);
-            amazonFrM.add(afrM);
+            // 当天所有市场的销售额数据
+            hightChartLines.get("sale_all").add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
+            hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
+            hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
+            hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
+
+            travel = travel.plusDays(1);
         }
 
-
-        Map<String, Object> hightChartMap = new HashMap<String, Object>();
-        hightChartMap.put("days", days);
-        hightChartMap.put("series_all", allSales);
-        hightChartMap.put("series_auk", amazonUk);
-        hightChartMap.put("series_ade", amazonDe);
-        hightChartMap.put("series_afr", amazonFr);
-
-        hightChartMap.put("series_allM", allSalesM);
-        hightChartMap.put("series_aukM", amazonUkM);
-        hightChartMap.put("series_adeM", amazonDeM);
-        hightChartMap.put("series_afrM", amazonFrM);
-
-        hightChartMap.put("type", type);
-
-        if(hightChartMap.size() > 0) Cache.add(cached_key, hightChartMap, "30mn");
-        return hightChartMap;
+        if(hightChartLines.size() > 0) Cache.add(cacheKey, hightChartLines, "30mn");
+        return hightChartLines;
     }
 
     @Override

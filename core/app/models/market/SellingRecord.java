@@ -5,13 +5,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
-import helper.Currency;
 import helper.*;
+import helper.Currency;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -229,6 +230,25 @@ public class SellingRecord extends GenericModel {
     }
 
     /**
+     * 按照 Account, Msku 与时间来查询 SellingRecord
+     *
+     * @param acc
+     * @param msku
+     * @param from
+     * @param to
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
+        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
+        List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
+        if(cacheElement != null) return cacheElement;
+        cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+        Cache.add(cacheKey, cacheElement, "1h");
+        return cacheElement;
+    }
+
+    /**
      * 加载出一段时间内指定 Selling 的 PageView 与 Session 数据, 给前台的 HighChar 使用
      *
      * @param msku
@@ -253,7 +273,7 @@ public class SellingRecord extends GenericModel {
                 .put("ss_fr", new ArrayList<F.T2<Long, Float>>())
                 .build();
 
-        List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+        List<SellingRecord> records = accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             switch(rcd.market) {
                 case AMAZON_UK:
@@ -275,6 +295,7 @@ public class SellingRecord extends GenericModel {
         return highCharLines;
     }
 
+
     /**
      * 加载一段时间内指定 Selling 的转换率曲线数据, 给前台的 HighChar 使用
      *
@@ -286,7 +307,7 @@ public class SellingRecord extends GenericModel {
                 .put("tn_de", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_fr", new ArrayList<F.T2<Long, Float>>())
                 .build();
-        List<SellingRecord> records = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+        List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             float turnRatio = (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions);
             if(rcd.sessions <= 0) turnRatio = 0f;
