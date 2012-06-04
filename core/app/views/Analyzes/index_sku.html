@@ -46,7 +46,8 @@
                     </ul>
                 </div>
                 <span class="add-on">
-                当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count} 条记录,  ${p.page}
+                当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count}
+                    条记录,  <span id="curent_page">${p.page}</span>
                     / ${p.totalPage} 页
                 </span>
             </div>

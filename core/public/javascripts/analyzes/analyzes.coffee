@@ -192,7 +192,12 @@ $ ->
                 1: 'EasyAcc.EU'
                 2: 'EasyAcc.DE'
               $('#a_acc_id_label').html(display[accId])
+              false
           )
+          #页脚的翻页事件
+          $('div.pagination a').click ->
+            sellRankLoad(type, $(@).attr('page'))
+            false
         finally
           tgt.unmask()
     )
@@ -200,7 +205,7 @@ $ ->
   # 给 搜索 按钮添加事件
   $('#a_search').click ->
     tab_type = $('#tab li.active a').attr('href').substring(1)
-    page = $('#pagefooter_sku').val() - 1
+    page = new Number($('#curent_page').html())
     sellRankLoad(tab_type, if page <= 0 then 1 else page)
     false
 
