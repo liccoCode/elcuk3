@@ -1,21 +1,20 @@
 $ ->
   MSKU = 'msku'
   SKU = 'sku'
+  defaultDate = $.DateUtil.addDay(-30)
+  now = new Date()
 
   init = () ->
     $('#a_toolbar :input[type=date]').dateinput({format: 'mm/dd/yyyy'})
     $('a[rel=popover]').popover()
-
-    preMonth = $.DateUtil.addDay(-30)
-    now = new Date()
-    $('#a_from').data('dateinput').setValue(preMonth)
+    $('#a_from').data('dateinput').setValue(defaultDate)
     $('#a_to').data('dateinput').setValue(now)
 
     # 最下方的 Selling[MerchantSKU, SKU] 列表信息
     sellRankLoad(MSKU, 1)
     sellRankLoad(SKU, 1)
     # 销量线
-    sales_line(from: $.DateUtil.fmt1(preMonth), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    sales_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
     # 默认 PageView 线
     pageViewDefaultContent()
 
@@ -207,6 +206,11 @@ $ ->
     tab_type = $('#tab li.active a').attr('href').substring(1)
     page = new Number($('#curent_page').html())
     sellRankLoad(tab_type, if page <= 0 then 1 else page)
+    false
+
+  # 重新加载全部的销售线
+  $('#all_search').click ->
+    sales_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
     false
 
   $('#a_param').keyup (e) ->
