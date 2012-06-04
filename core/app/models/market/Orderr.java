@@ -729,6 +729,7 @@ public class Orderr extends GenericModel {
 
             Float totalAmount = 0f;
             Float shippingAmount = 0f;
+            Map<String, Boolean> mailed = new HashMap<String, Boolean>();
             for(OrderItemType oid : oits) {
                 /**
                  * 0. 检查这个 order 是否需要进行补充 orderitem
@@ -752,14 +753,23 @@ public class Orderr extends GenericModel {
                 Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
                 if(product != null) oi.product = product;
                 else {
-                    // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
+                    String title = String.format("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
+                    Logger.error(title);
+                    if(!mailed.containsKey(sku)) {
+                        Webs.systemMail(title, title);
+                        mailed.put(sku, true);
+                    }
                     continue; // 发生了这个错误, 这跳过这个 orderitem
                 }
                 if(selling != null) oi.selling = selling;
                 else {
-                    // TODO 发送邮件提醒自己有产品不存在!
-                    Logger.error("Selling[%s_%s] is not in SELLING, it can not be happed!", oid.getASIN().toUpperCase(), orderr.market.toString());
+                    String sid = Selling.sid(oid.getSKU().toUpperCase(), orderr.market, acc);
+                    String title = String.format("Selling[%s] is not in SELLING, it can not be happed!", sid);
+                    Logger.warn(title);
+                    if(mailed.containsKey(sid)) {
+                        Webs.systemMail(title, title);
+                        mailed.put(sid, true);
+                    }
                     continue;
                 }
                 oi.id = String.format("%s_%s", orderr.orderId, product.sku);

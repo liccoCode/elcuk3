@@ -625,9 +625,6 @@ public class Selling extends GenericModel {
             try {
                 if(Product.unUsedSKU(item.product.sku)) continue;
                 if(t > 0) {
-                    if(item.selling.merchantSKU.contains("80-QW1A56-BE")) {
-                        System.out.println("FInd!");
-                    }
                     sellKey = String.format("%s_%s", item.selling.merchantSKU, item.selling.account.id);
                 } else if(t < 0) {
                     sellKey = item.product.sku;
