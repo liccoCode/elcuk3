@@ -3,10 +3,7 @@ package models.market;
 import org.hibernate.annotations.GenericGenerator;
 import play.db.jpa.GenericModel;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 /**
  * Listing 说关联的卖家, 对于 Listing 来说, ListingOffer 是冗余的, 每一个 Listing 都会记录自己
@@ -17,6 +14,24 @@ import javax.persistence.ManyToOne;
  */
 @Entity
 public class ListingOffer extends GenericModel {
+    public enum C {
+        NEW,
+        USED,
+        REFURBISHED;
+
+        public static C val(String c) {
+            c = c.toLowerCase();
+            if("new".equals(c))
+                return NEW;
+            else if("used".equals(c))
+                return USED;
+            else if("refurbished".equals(c))
+                return REFURBISHED;
+            else
+                return NEW;
+        }
+    }
+
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
@@ -41,6 +56,9 @@ public class ListingOffer extends GenericModel {
     public boolean fba;
 
     public boolean buybox;
+
+    @Enumerated(EnumType.STRING)
+    public C condition;
 
     @Override
     public String toString() {

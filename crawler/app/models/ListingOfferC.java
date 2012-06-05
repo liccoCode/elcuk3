@@ -41,6 +41,8 @@ public class ListingOfferC {
 
     public boolean buybox;
 
+    public String condition;
+
 
     /**
      * 通过 MT.offers 返回的链接解析所有的 Offers (卖家)
@@ -54,6 +56,7 @@ public class ListingOfferC {
         for(Element offer : offersEl) {
             ListingOfferC off = new ListingOfferC();
             Element priceEl = offer.select("td:eq(0)").first();
+            Element confitionEl = offer.select("td:eq(1)").first();
             Element nameEl = offer.select("td:eq(2) ul.sellerInformation").first();
 
 
@@ -67,6 +70,17 @@ public class ListingOfferC {
                 off.shipprice = ListingC.amazonPrice(this.market, shipPriceStr.substring(index + 1)); /*排除那个空格*/
             }
             off.price = ListingC.amazonPrice(this.market, priceEl.select(".price").text());
+
+            // 第二栏
+            String conditionText = (confitionEl.text() == null ? "" : confitionEl.text()).toLowerCase();
+            if(StringUtils.contains(conditionText, "used"))
+                this.condition = "used";
+            else if(StringUtils.contains(conditionText, " refurbish"))
+                this.condition = "refurbished";
+            else if(StringUtils.contains(conditionText, "new"))
+                this.condition = "new";
+            else
+                this.condition = "new";
 
 
             /*

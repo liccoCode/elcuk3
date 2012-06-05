@@ -285,6 +285,8 @@ public class Listing extends GenericModel {
             if(Listing.isSelfBuildListing(this.title)) {
                 if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
                     Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+                } else if(off.condition != ListingOffer.C.NEW) {
+                    Logger.info("Offer %s is sale %s condition.", off.offerId, off.condition);
                 } else if(!Account.merchant_id().containsKey(off.offerId)) {
                     // Mail 警告
                     if(this.warnningTimes == null) this.warnningTimes = 0;
@@ -381,6 +383,7 @@ public class Listing extends GenericModel {
         }
         if(fullOffer) {
             try {
+                // 通过这个方法抓取的 Offer , 获取完整的 Condition 信息
                 new ListingWorkers.O(tobeChangeed).now().get(15, TimeUnit.SECONDS);
             } catch(Exception e) {
                 Logger.warn("Listing(%s) fetch full offers have something wrong.", tobeChangeed.listingId);
@@ -397,6 +400,7 @@ public class Listing extends GenericModel {
                 off.shipprice = offer.get("shipprice").getAsFloat();
                 off.fba = offer.get("fba").getAsBoolean();
                 off.buybox = offer.get("buybox").getAsBoolean();
+                off.condition = ListingOffer.C.NEW; // 默认为 NEW
                 off.listing = tobeChangeed;
                 newOffers.add(off);
                 // set display price

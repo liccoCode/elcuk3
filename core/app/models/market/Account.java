@@ -46,6 +46,8 @@ public class Account extends Model {
      */
     public static Map<String, String> merchant_id() {
         if(MERCHANT_ID == null) MERCHANT_ID = new HashMap<String, String>();
+        MERCHANT_ID.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
+        //TODO 其实市场的以后看到再添加进来
         return MERCHANT_ID;
     }
 
