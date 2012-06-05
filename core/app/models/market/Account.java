@@ -387,6 +387,14 @@ public class Account extends Model {
             }
         }
 
+        /**
+         * 这个是根据 Account 所在地来确定, 不同的市场需要先进行 region 切换
+         *
+         * @param from
+         * @param to
+         * @param currentPage
+         * @return
+         */
         public String salesAndTrafficByAsinLink(Date from, Date to, int currentPage) {
             /**
              * https://sellercentral.amazon.co.uk/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?
@@ -402,8 +410,8 @@ public class Account extends Model {
                 case AMAZON_FR:
                 case AMAZON_IT:
                 case AMAZON_US:
-                    return String.format("https://sellercentral.amazon.co.uk/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
-                            "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s",
+                    return String.format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
+                            "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s", this.toString(),
                             Dates.listingUpdateFmt(AMAZON_UK, from), Dates.listingUpdateFmt(AMAZON_UK, to), currentPage);
                 case EBAY_UK:
                 default:
@@ -577,8 +585,8 @@ public class Account extends Model {
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body);
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
-                    if(navBar != null) Logger.info("Login Successful!");
-                    else Logger.warn("Login Failed!");
+                    if(navBar != null) Logger.info("%s Login Successful!", this.prettyName());
+                    else Logger.warn("%s Login Failed!", this.prettyName());
 
                     HTTP.client().getCookieStore().clearExpired(new Date());
                 } catch(Exception e) {

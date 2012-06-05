@@ -165,57 +165,72 @@ public class SellingRecord extends GenericModel {
         int curentPage = 0;
         synchronized(acc.cookieStore()) {
             acc.changeRegion(market); // 在循环外面, 只改变一次, 并将 Cookie 同步住
+            boolean hasNext = true;
             do {
-                String url = market.salesAndTrafficByAsinLink(oneDay, oneDay, curentPage++);
+                String url = acc.type.salesAndTrafficByAsinLink(oneDay, oneDay, curentPage++);/*需要根据 Account 的所在国家进行访问*/
                 Logger.info("Fetch SellingRecord [%s]", url);
                 String rtJson = HTTP.get(acc.cookieStore(), url);
-                JsonObject data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
+                JsonObject data = null;
+                try {
+                    data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
+                    hasNext = data.get("hasNextPage").getAsInt() > 0;
+                } catch(Exception e) {
+                    Devs.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, Devs.T.SELLINGRECORD);
+                }
                 rows = data.get("rows").getAsJsonArray();
                 for(JsonElement row : rows) {
                     try {
                         JsonArray rowArr = row.getAsJsonArray();
-                        SellingRecord record = new SellingRecord();
-                        record.account = acc;
-                        record.market = market;
-
                         String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
                         msku = msku.substring(0, msku.length() - 4).toUpperCase(); /*前面截取了 "> 后最后的 </a> 过滤掉*/
                         String sid = Selling.sid(msku, market, acc);
-                        record.selling = Selling.findById(sid);
+                        String srid = SellingRecord.id(sid, oneDay);
+
+                        SellingRecord record = SellingRecord.findById(srid);
+                        if(record == null) { // 数据库中不存在的时候, 进行如下数据更新
+                            record = new SellingRecord();
+                            record.account = acc;
+                            record.market = market;
+                            record.selling = Selling.findById(sid);
+                            if(record.selling == null) {
+                                Logger.error("SellingRecord has no selling (%s) !", sid);
+                                continue;
+                            }
+
+                            // Amazon 的订单数据也抓取回来, 但还是会重新计算
+                            record.units = rowArr.get(9).getAsInt();
+                            /**
+                             * 1. de: €2,699.37
+                             * 2. uk: £2,121.30
+                             * 3. fr: €44.99
+                             * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
+                             */
+                            record.sales = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
+                            switch(market) {
+                                case AMAZON_UK:
+                                    record.currency = Currency.GBP;
+                                    break;
+                                case AMAZON_DE:
+                                case AMAZON_FR:
+                                case AMAZON_IT:
+                                case AMAZON_ES:
+                                    record.currency = Currency.EUR;
+                                    break;
+                                case AMAZON_US:
+                                    record.currency = Currency.USD;
+                                    break;
+                                default:
+                                    record.currency = Currency.GBP;
+                            }
+                            record.usdSales = record.currency.toUSD(record.sales);
+                            record.orders = rowArr.get(12).getAsInt();
+                            record.date = oneDay;
+                            record.id = srid;
+                        }
+                        // 无论数据库中存在不存在都需要更新下面数据
                         record.sessions = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
                         record.pageViews = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
 
-                        // Amazon 的订单数据也抓取回来, 但还是会重新计算
-                        record.units = rowArr.get(9).getAsInt();
-                        /**
-                         * 1. de: €2,699.37
-                         * 2. uk: £2,121.30
-                         * 3. fr: €44.99
-                         * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
-                         */
-                        record.sales = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
-                        switch(market) {
-                            case AMAZON_UK:
-                                record.currency = Currency.GBP;
-                                break;
-                            case AMAZON_DE:
-                            case AMAZON_FR:
-                            case AMAZON_IT:
-                            case AMAZON_ES:
-                                record.currency = Currency.EUR;
-                                break;
-                            case AMAZON_US:
-                                record.currency = Currency.USD;
-                                break;
-                            default:
-                                record.currency = Currency.GBP;
-                        }
-                        record.usdSales = record.currency.toUSD(record.sales);
-                        record.orders = rowArr.get(12).getAsInt();
-                        record.date = oneDay;
-
-
-                        record.id = SellingRecord.id(sid, oneDay);
                         records.add(record);
                     } catch(Exception e) {
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)", Webs.E(e));
@@ -223,7 +238,7 @@ public class SellingRecord extends GenericModel {
                 }
 
 
-            } while(rows.size() > 0);
+            } while(hasNext);
         }
 
         return records;

@@ -65,16 +65,16 @@ public class SellingRecordTest extends UnitTest {
 
     @Before
     public void login() {
-        Account acc = Account.findById(1l);
+        Account acc = Account.findById(2l);
         acc.loginWebSite();
     }
 
     @Test
     public void testNewRecordFromAmazonBusinessReports() {
-        Account acc = Account.findById(1l);
-        DateTime dt = DateTime.parse("2012-05-04");
-        for(int i = 1; i < 15; i++) {
-            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_UK, dt.plusDays(i).toDate());
+        Account acc = Account.findById(2l);
+        DateTime dt = DateTime.parse("2012-06-03");
+        for(int i = 0; i < 1; i++) {
+            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, dt.plusDays(i).toDate());
             for(SellingRecord rcd : records)
                 rcd.save();
         }

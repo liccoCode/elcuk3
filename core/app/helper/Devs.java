@@ -22,7 +22,11 @@ public class Devs {
         /**
          * 上传图片错误的信息
          */
-        IMGUPLOAD
+        IMGUPLOAD,
+        /**
+         * 获取 SellingRecord 的相关的错误信息
+         */
+        SELLINGRECORD
     }
 
     /**
@@ -40,6 +44,9 @@ public class Devs {
                 break;
             case IMGUPLOAD:
                 baseUrl = Constant.L_IMAGEUPLOAD;
+                break;
+            case SELLINGRECORD:
+                baseUrl = Constant.S_RECORDS;
                 break;
             default:
                 baseUrl = "";

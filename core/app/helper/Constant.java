@@ -42,6 +42,11 @@ public class Constant {
      */
     public static final String L_IMAGEUPLOAD = String.format("%s/image_upload", E_LOGS);
 
+    /**
+     * 存在系统的 "日志" 文件夹中 Selling 读取 SellingRecord 销量数据的异常 json 值
+     */
+    public static final String S_RECORDS = String.format("%s/selling_records", E_LOGS);
+
 
     public static final String UPLOAD_PATH = String.format("%s/uploads", Constant.E_DATE);
 
