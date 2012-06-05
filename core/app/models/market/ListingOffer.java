@@ -57,8 +57,12 @@ public class ListingOffer extends GenericModel {
 
     public boolean buybox;
 
+    /**
+     * ListingOffer 的状态(Condition), 是 NEW 还是 Used
+     */
     @Enumerated(EnumType.STRING)
-    public C condition;
+    @Column(length = 20)
+    public C cond;
 
     @Override
     public String toString() {
