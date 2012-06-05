@@ -231,7 +231,7 @@ $ ->
   pageViewDefaultContent = () ->
     template = '<div class="alert alert-success"><h3 style="text-align:center"></h3></div>'
     for id,v of {a_ss: '双击查看 Selling 的 PageView & Session', a_turn: '请双击需要查看的 Selling 查看转化率'}
-      $(template).appendTo('#' + id).find('h3').html(v)
+      $('#' + id).empty().append(template).find('h3').html(v)
 
 
   # 在最上面定义 init 方法,只能在最后调用 init 方法, 否则会报告方法未定义

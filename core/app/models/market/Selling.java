@@ -659,6 +659,7 @@ public class Selling extends GenericModel {
             Integer quantity = 0;
 
             /**
+             * TODO 按照 merchantSKU + Account 寻找
              * 1. 按照 MerchantSKU 则计算每一个 Product 的库存即可
              * 2. 按照 SKU 则需要找到此 SKU 的所有 Selling 然后找到所有的库存进行计算
              */
