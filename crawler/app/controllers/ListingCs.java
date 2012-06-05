@@ -59,7 +59,7 @@ public class ListingCs extends Controller {
         if(Play.mode.isDev())
             FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/offers/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
         try {
-            renderJSON(new ListingOfferC(m).parseOffers(html));
+            renderJSON(ListingOfferC.parseOffers(m, html));
         } catch(Exception e) {
             render(new ListingOfferC());
         }

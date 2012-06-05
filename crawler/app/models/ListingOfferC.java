@@ -50,7 +50,7 @@ public class ListingOfferC {
      *
      * @return
      */
-    public List<ListingOfferC> parseOffers(String html) {
+    public static List<ListingOfferC> parseOffers(MT market, String html) {
         List<ListingOfferC> offers = new ArrayList<ListingOfferC>();
         Document doc = Jsoup.parse(html);
         Elements offersEl = doc.select("#bucketnew tbody[class=result]");
@@ -68,20 +68,20 @@ public class ListingOfferC {
             } else {
                 String shipPriceStr = priceEl.select(".price_shipping").text();
                 int index = shipPriceStr.indexOf(" ");
-                off.shipprice = ListingC.amazonPrice(this.market, shipPriceStr.substring(index + 1)); /*排除那个空格*/
+                off.shipprice = ListingC.amazonPrice(market, shipPriceStr.substring(index + 1)); /*排除那个空格*/
             }
-            off.price = ListingC.amazonPrice(this.market, priceEl.select(".price").text());
+            off.price = ListingC.amazonPrice(market, priceEl.select(".price").text());
 
             // 第二栏
             String conditionText = (confitionEl.text() == null ? "" : confitionEl.text()).toLowerCase();
             if(StringUtils.contains(conditionText, "used"))
-                this.cond = "used";
+                off.cond = "used";
             else if(StringUtils.contains(conditionText, " refurbish"))
-                this.cond = "refurbished";
+                off.cond = "refurbished";
             else if(StringUtils.contains(conditionText, "new"))
-                this.cond = "new";
+                off.cond = "new";
             else
-                this.cond = "new";
+                off.cond = "new";
 
 
             /*
@@ -110,7 +110,7 @@ public class ListingOfferC {
             }
 
 
-            Logger.info("ListingOffer(%s).condition: %s", this.offerId, this.cond);
+            Logger.info("ListingOffer(%s).condition: %s", off.offerId, off.cond);
             offers.add(off);
         }
         return offers;
