@@ -5,6 +5,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,7 @@ public class ListingOfferC {
             }
 
 
+            Logger.info("ListingOffer(%s).condition: %s", this.offerId, this.condition);
             offers.add(off);
         }
         return offers;
