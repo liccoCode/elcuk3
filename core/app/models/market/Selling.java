@@ -601,6 +601,7 @@ public class Selling extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
+    @Cached("1h")
     public static List<Selling> salesRankWithTime(int t) {
         String cacke_key = String.format(Caches.SALE_SELLING, t);
         List<Selling> cached = Cache.get(cacke_key, List.class);
@@ -680,7 +681,7 @@ public class Selling extends GenericModel {
                 return (int) (s2.d7 - s1.d7);
             }
         });
-        if(sellings.size() > 0) Cache.add(cacke_key, sellings, "30mn"); // 缓存 30 分钟
+        if(sellings.size() > 0) Cache.add(cacke_key, sellings, "1h"); // 缓存 1 小时
         return sellings;
     }
 
