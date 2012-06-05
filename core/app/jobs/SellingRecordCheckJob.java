@@ -107,8 +107,8 @@ public class SellingRecordCheckJob extends Job {
          * PS: 只能抓取到两天前的 PageView 数据
          */
         List<Account> accs = Account.all().fetch();
-        Set<SellingRecord> records = new HashSet<SellingRecord>();
-        Map<String, SellingRecord> sellingRecordCache = new HashMap<String, SellingRecord>();
+        Set<SellingRecord> records;
+        Map<String, SellingRecord> sellingRecordCache;
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
         for(Account acc : accs) {
             SellingRecord tmp = null;
@@ -116,42 +116,45 @@ public class SellingRecordCheckJob extends Job {
                 records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_UK, fixTime.plusDays(-2).toDate());
                 records.addAll(SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate()));
                 Logger.info("Account(%s) Fetch UK & DE  %s records.", acc.prettyName(), records.size());
-
-                Set<String> rcdIds = new HashSet<String>();
-                for(SellingRecord rcd : records) rcdIds.add(rcd.id);
-
-                List<SellingRecord> managedRecords = SellingRecord.find("id IN ('" + StringUtils.join(rcdIds, "','") + "')").fetch();
-                for(SellingRecord msrc : managedRecords) sellingRecordCache.put(msrc.id, msrc);
-
-                for(SellingRecord rcd : records) { // 寻找已经在系统中的 SellingRecord 进行更新, 否在再创建
-                    try {
-                        if(sellingRecordCache.containsKey(rcd.id)) {
-                            tmp = sellingRecordCache.get(rcd.id);
-                            tmp.pageViews = rcd.pageViews;
-                            tmp.sessions = rcd.sessions;
-                            tmp.save();
-                        } else {
-                            sellingRecordCache.put(rcd.id, rcd.<SellingRecord>save());
-                        }
-                    } catch(Exception e) {
-                        Logger.warn(Webs.E(e));
-                    }
-                }
-                /* 暂时不开放这个账户
-            } else if(acc.type == Account.M.AMAZON_DE) {
-                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, dt.plusDays(-2).toDate());
-                for(SellingRecord rcd : records) {
-                    if(recordCaches.containsKey(rcd.id)) {
-                        tmp = recordCaches.get(rcd.id);
-                        tmp.pageViews = rcd.pageViews;
-                        tmp.sessions = rcd.sessions;
-                        tmp.save();
-                    } else
-                        Logger.error("SellingRecord(%s)(%s)(%s) is not exist, Check it!", rcd.id, rcd.selling.sellingId, rcd.account.prettyName());
-                }
-                */
+                loadManagedSellingRecord(records);
+            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
+                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate());
+                Logger.info("Account(%s) Fetch DE %s records", acc.prettyName(), records.size());
+                loadManagedSellingRecord(records);
             }
         }
+    }
 
+    /**
+     * 根据已经拥有的 SellingRecord 从数据库中加载出已经被持久化的 SellingRecord, 并进行保存或者更新
+     *
+     * @param records
+     * @return
+     */
+
+    private void loadManagedSellingRecord(Collection<SellingRecord> records) {
+        Map<String, SellingRecord> recordsCache = new HashMap<String, SellingRecord>();
+        Set<String> rcIds = new HashSet<String>();
+        for(SellingRecord rcd : records) rcIds.add(rcd.id);
+
+        List<SellingRecord> managedRecords = SellingRecord.find("id IN ('" + StringUtils.join(rcIds, "','") + "')").fetch();
+        for(SellingRecord msrc : managedRecords) recordsCache.put(msrc.id, msrc);
+
+        SellingRecord tmp;
+        for(SellingRecord rcd : records) { // 寻找已经在系统中的 SellingRecord 进行更新, 否在再创建
+            try {
+                if(recordsCache.containsKey(rcd.id)) {
+                    tmp = recordsCache.get(rcd.id);
+                    tmp.pageViews = rcd.pageViews;
+                    tmp.sessions = rcd.sessions;
+                    tmp.save();
+                } else {
+                    recordsCache.put(rcd.id, rcd.<SellingRecord>save());
+                }
+            } catch(Exception e) {
+                Logger.warn(Webs.E(e));
+            }
+
+        }
     }
 }
