@@ -133,7 +133,7 @@ public class ListingWorkers extends Job {
                 off.shipprice = of.get("shipprice").getAsFloat();
                 off.fba = of.get("fba").getAsBoolean();
                 off.buybox = of.get("buybox").getAsBoolean();
-                off.cond = ListingOffer.C.val(of.get("condition").getAsString());
+                off.cond = ListingOffer.C.val(of.get("cond").getAsString());
                 off.listing = this.listing;
                 this.listing.offers.add(off);
             }

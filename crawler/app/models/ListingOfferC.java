@@ -42,7 +42,7 @@ public class ListingOfferC {
 
     public boolean buybox;
 
-    public String condition;
+    public String cond;
 
 
     /**
@@ -75,13 +75,13 @@ public class ListingOfferC {
             // 第二栏
             String conditionText = (confitionEl.text() == null ? "" : confitionEl.text()).toLowerCase();
             if(StringUtils.contains(conditionText, "used"))
-                this.condition = "used";
+                this.cond = "used";
             else if(StringUtils.contains(conditionText, " refurbish"))
-                this.condition = "refurbished";
+                this.cond = "refurbished";
             else if(StringUtils.contains(conditionText, "new"))
-                this.condition = "new";
+                this.cond = "new";
             else
-                this.condition = "new";
+                this.cond = "new";
 
 
             /*
@@ -110,7 +110,7 @@ public class ListingOfferC {
             }
 
 
-            Logger.info("ListingOffer(%s).condition: %s", this.offerId, this.condition);
+            Logger.info("ListingOffer(%s).condition: %s", this.offerId, this.cond);
             offers.add(off);
         }
         return offers;
