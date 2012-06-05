@@ -1,47 +1,48 @@
 #{extends 'main.html' /}
 #{set title:'Product' /}
 #{set 'moreScripts'}
-    #{script 'products/product.js'/}
+    #{script 'products/product.coffee'/}
 #{/set}
 
-<div class="row" style="margin:10px 0;">
-    <div class="span12">
-        <a href="@{Products.pNew()}" class="btn btn-primary" target="_blank">添加新产品</a>
+<div style="margin:5px 0 0;" class="row">
+    <a href="@{Products.pNew()}" class="btn btn-primary" target="_blank">添加新产品</a>
+
+    <div class="span3 pull-right input-prepend">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" data-provide="typeahead" data-items="5" data-source="${fmys}" style="width:172px;" placeHolder="搜索 SKU">
     </div>
 </div>
 
 
-<div class="row">
-    <div class="span12">
-    #{if prods.size() == 0}
-        等待添加新产品
-    #{/if}
-    #{else }
-        <table class="table table-striped">
-            <tr>
-                <th>SKU</th>
-                <th>Name</th>
-                <th>L</th>
-                <th>H</th>
-                <th>W</th>
-                <th>Wt</th>
+<div id="prod_list">
+#{if prods.size() == 0}
+    等待添加新产品
+#{/if}
+#{else }
+    <table class="table table-striped">
+        <tr>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>L</th>
+            <th>H</th>
+            <th>W</th>
+            <th>Wt</th>
+        </tr>
+        #{list items:prods, as:'prod'}
+            <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
+                <td class="span2"><a target="_blank" href="@{Products.p_detail(prod.sku)}">${prod.sku}</a></td>
+                <td class="span6">${prod.productName}</td>
+                <td>${prod.lengths == null ? 0 : prod.lengths}</td>
+                <td>${prod.heigh == null ? 0 : prod.heigh}</td>
+                <td>${prod.width == null ? 0 : prod.width}</td>
+                <td>${prod.weight == null ? 0 : prod.weight}</td>
             </tr>
-            #{list items:prods, as:'prod'}
-                <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
-                    <td class="span2"><a target="_blank" href="@{Products.p_detail(prod.sku)}">${prod.sku}</a></td>
-                    <td class="span6">${prod.productName}</td>
-                    <td>${prod.lengths == null ? 0 : prod.lengths}</td>
-                    <td>${prod.heigh == null ? 0 : prod.heigh}</td>
-                    <td>${prod.width == null ? 0 : prod.width}</td>
-                    <td>${prod.weight == null ? 0 : prod.weight}</td>
-                </tr>
-            #{/list}
-            <tr>
-                <td colspan="7">
-                    #{bootstrap_pager c:pi.count, p:pi.page, s:pi.size, u:'/products/p_index'/}
-                </td>
-            </tr>
-        </table>
-    #{/else}
-    </div>
+        #{/list}
+        <tr>
+            <td colspan="7">
+                #{bootstrap_pager c:pi.count, p:pi.page, s:pi.size, u:'/products/p_index'/}
+            </td>
+        </tr>
+    </table>
+#{/else}
 </div>

@@ -1,5 +1,6 @@
 package controllers;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.Gson;
 import helper.Constant;
 import helper.Webs;
@@ -10,6 +11,7 @@ import models.market.Selling;
 import models.market.SellingQTY;
 import models.product.*;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.cache.CacheFor;
 import play.data.validation.Error;
@@ -43,11 +45,25 @@ public class Products extends Controller {
         Integer[] fixs = Webs.fixPage(p, s);
         p = fixs[0];
         s = fixs[1];
-        List<Category> cates = Category.all().fetch();
         List<Product> prods = Product.all().fetch(p, s);
+
         Long count = Product.count();
         PageInfo<Product> pi = new PageInfo<Product>(s, count, p, prods);
-        render(prods, cates, pi);
+
+        List<String> skus = Family.familys(false);
+        renderArgs.put("fmys", JSON.toJSONString(skus));
+
+        render(prods, pi);
+    }
+
+    public static void p_search(String sku) {
+        List<Product> prods = new ArrayList<Product>();
+        if(StringUtils.isBlank(sku))
+            render(prods);
+        else {
+            prods = Product.find("family.family like ?", sku + "%").fetch();
+            render(prods);
+        }
     }
 
     public static void p_detail(String sku) {

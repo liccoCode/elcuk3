@@ -36,65 +36,69 @@ public class SellingRecordCheckJob extends Job {
         Logger.info("Date (%s), check %s selling...", Dates.date2Date(checkDate), sellings.size());
 
         for(Selling sell : sellings) {
-            String srid = SellingRecord.id(sell.sellingId, checkDate);
-            SellingRecord record = SellingRecord.findById(srid);
-            if(record == null) record = new SellingRecord(srid, sell, checkDate);
-            Map<String, AtomicInteger> currentSellOrderCache = new HashMap<String, AtomicInteger>();
-            /**
-             * 1. 计算昨天的订单数量 units, orders, orderCanceled, sales(currency), usdSales
-             * 2. 记录昨天的数据 rating, salePrice,
-             * 3. 抓取 Amazon 的数据 (由于抓取 Amazon 的数据是一个整体, 所以最后处理)
-             */
-
-            // ------- 1 ----------
-            /*
-            switch(sell.market) {
-                case AMAZON_UK:
-                    record.currency = Currency.GBP;
-                    break;
-                case AMAZON_DE:
-                case AMAZON_ES:
-                case AMAZON_FR:
-                case AMAZON_IT:
-                    record.currency = Currency.EUR;
-                    break;
-                case AMAZON_US:
-                    record.currency = Currency.USD;
-                    break;
-                default:
-                    record.currency = Currency.GBP;
-
-            }
-            */
-            // TODO 由于现在 OrderItem 全部统计成了 GBP 计算所以现在全部使用 GBP 计算
-            record.currency = Currency.GBP;
             try {
+                String srid = SellingRecord.id(sell.sellingId, checkDate);
+                SellingRecord record = SellingRecord.findById(srid);
+                if(record == null) record = new SellingRecord(srid, sell, checkDate);
+                Map<String, AtomicInteger> currentSellOrderCache = new HashMap<String, AtomicInteger>();
+                /**
+                 * 1. 计算昨天的订单数量 units, orders, orderCanceled, sales(currency), usdSales
+                 * 2. 记录昨天的数据 rating, salePrice,
+                 * 3. 抓取 Amazon 的数据 (由于抓取 Amazon 的数据是一个整体, 所以最后处理)
+                 */
 
-                for(OrderItem oi : orderitems) {
-                    if(!StringUtils.equals(oi.selling.sellingId, sell.sellingId)) continue;
-                    if(currentSellOrderCache.containsKey(oi.order.orderId))
-                        currentSellOrderCache.get(oi.order.orderId).incrementAndGet();
-                    else {
-                        currentSellOrderCache.put(oi.order.orderId, new AtomicInteger(1));
-                        record.orders += 1; //每一个 Selling 每碰到一个新订单 ID 则增加 1
-                    }
-                    record.units += 1;
-                    if(oi.order.state == Orderr.S.CANCEL) record.orderCanceld += 1;
-                    // TODO sales 需要在修改了 OrderItem 记录的价格以后再重新计算
-                    record.sales += oi.price;
+                // ------- 1 ----------
+                /*
+                switch(sell.market) {
+                    case AMAZON_UK:
+                        record.currency = Currency.GBP;
+                        break;
+                    case AMAZON_DE:
+                    case AMAZON_ES:
+                    case AMAZON_FR:
+                    case AMAZON_IT:
+                        record.currency = Currency.EUR;
+                        break;
+                    case AMAZON_US:
+                        record.currency = Currency.USD;
+                        break;
+                    default:
+                        record.currency = Currency.GBP;
+
                 }
-            } catch(Exception e) {
-                Logger.warn(Webs.E(e));
-            }
-            record.usdSales = record.currency.toUSD(record.sales);
+                */
+                // TODO 由于现在 OrderItem 全部统计成了 GBP 计算所以现在全部使用 GBP 计算
+                record.currency = Currency.GBP;
+                try {
 
-            // ---------- 2 ----------
-            record.salePrice = sell.aps.salePrice != null && sell.aps.salePrice > 0 ? sell.aps.salePrice : sell.aps.standerPrice;
-            record.reviewSize = sell.listing.listingReviews.size();
-            float ratingAll = 0f;
-            for(AmazonListingReview review : sell.listing.listingReviews) ratingAll += review.rating;
-            record.rating = record.reviewSize > 0 ? Webs.scalePointUp(1, ratingAll / record.reviewSize) : 0;
-            record.save();
+                    for(OrderItem oi : orderitems) {
+                        if(!StringUtils.equals(oi.selling.sellingId, sell.sellingId)) continue;
+                        if(currentSellOrderCache.containsKey(oi.order.orderId))
+                            currentSellOrderCache.get(oi.order.orderId).incrementAndGet();
+                        else {
+                            currentSellOrderCache.put(oi.order.orderId, new AtomicInteger(1));
+                            record.orders += 1; //每一个 Selling 每碰到一个新订单 ID 则增加 1
+                        }
+                        record.units += 1;
+                        if(oi.order.state == Orderr.S.CANCEL) record.orderCanceld += 1;
+                        // TODO sales 需要在修改了 OrderItem 记录的价格以后再重新计算
+                        record.sales += oi.price;
+                    }
+                } catch(Exception e) {
+                    Logger.warn(Webs.E(e));
+                }
+                record.usdSales = record.currency.toUSD(record.sales);
+
+                // ---------- 2 ----------
+                record.salePrice = sell.aps.salePrice != null && sell.aps.salePrice > 0 ? sell.aps.salePrice : sell.aps.standerPrice;
+                record.reviewSize = sell.listing.listingReviews.size();
+                float ratingAll = 0f;
+                for(AmazonListingReview review : sell.listing.listingReviews) ratingAll += review.rating;
+                record.rating = record.reviewSize > 0 ? Webs.scalePointUp(1, ratingAll / record.reviewSize) : 0;
+                record.save();
+            } catch(Exception e) {
+                Logger.warn("SellingRecordCheckJob %s", Webs.E(e));
+            }
         }
 
         // ---------- 3 -------------

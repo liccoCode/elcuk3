@@ -15,6 +15,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Play;
+import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
@@ -424,5 +425,28 @@ public class Product extends GenericModel {
      */
     public static boolean unUsedSKU(String merchantSKU) {
         return UN_USE_SKU.containsKey(Product.merchantSKUtoSKU(merchantSKU));
+    }
+
+    /**
+     * 返回所有的 SKU
+     *
+     * @param clearCache 是否清除缓存
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @Cached("lifetime")
+    public static List<String> skus(boolean clearCache) {
+        List<String> skus = null;
+        if(!clearCache) {
+            skus = Cache.get(Caches.SKUS, List.class);
+            if(skus != null) return skus;
+        }
+
+        List<Product> prods = Product.all().fetch();
+        skus = new ArrayList<String>();
+        for(Product prod : prods) skus.add(prod.sku);
+        Cache.delete(Caches.SKUS);
+        Cache.add(Caches.SKUS, skus);
+        return skus;
     }
 }
