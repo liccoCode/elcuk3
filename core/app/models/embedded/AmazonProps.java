@@ -1,18 +1,36 @@
 package models.embedded;
 
 import com.google.gson.annotations.Expose;
+import helper.Constant;
+import helper.Dates;
 import helper.Webs;
+import models.market.Account;
+import models.market.Selling;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import play.Logger;
+import play.Play;
 import play.data.validation.Required;
+import play.libs.F;
+import play.libs.IO;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 整合的 Amazon 上架使用的字段, 需要添加修改都在这个类中(Component 类)
@@ -229,5 +247,154 @@ public class AmazonProps {
                 params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
             }
         }
+    }
+
+    /**
+     * 从修改 Listing 页面中获取数据, 并同步到此 Aps 中
+     *
+     * @param html
+     * @param sell
+     */
+    public void syncPropFromAmazonPostPage(String html, Selling sell) {
+        Document doc = Jsoup.parse(html);
+        // ----- Input 框框
+        Elements inputs = doc.select("form[name=productForm] input");
+        if(inputs.size() == 0) {
+            Logger.warn("Listing Update Page Error! Log to ....?");
+            try {
+                FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, sell.merchantSKU, sell.asin)), html);
+            } catch(IOException e) {
+                //ignore..
+            }
+            throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+        }
+        // 检查 merchant 参数
+        String msku = doc.select("#offering_sku_display").text().trim();
+        if(!StringUtils.equals(sell.merchantSKU, msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
+            throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
+
+        String[] bulletPoints = new String[5];
+        String[] searchTerms = new String[5];
+        String[] rbns = new String[2];
+
+        this.upc = doc.select("#external_id_display").text().trim();
+        this.productDesc = doc.select("#product_description").text().trim();
+//        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
+//        this.aps.condition_ = doc.select("#offering_condition_display").text(); // 默认为 NEW
+        F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
+        for(Element input : inputs) {
+            String name = input.attr("name");
+            String val = input.val();
+            if("item_name".equals(name)) this.title = val;
+            else if("manufacturer".equals(name)) this.manufacturer = val;
+            else if("brand_name".equals(name)) this.brand = val;
+            else if("part_number".equals(name)) this.manufacturerPartNumber = val;
+            else if("model".equals(name)) this.modelNumber = val;
+            else if("Offer_Inventory_Quantity".equals(name)) this.quantity = NumberUtils.toInt(val, 0);
+            else if("offering_start_date".equals(name)) this.launchDate = Dates.listingFromFmt(sell.market, val);
+            else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
+            else if("bullet_point[0]".equals(name)) bulletPoints[0] = val;
+            else if("bullet_point[1]".equals(name)) bulletPoints[1] = val;
+            else if("bullet_point[2]".equals(name)) bulletPoints[2] = val;
+            else if("bullet_point[3]".equals(name)) bulletPoints[3] = val;
+            else if("bullet_point[4]".equals(name)) bulletPoints[4] = val;
+            else if("generic_keywords[0]".equals(name)) searchTerms[0] = val;
+            else if("generic_keywords[1]".equals(name)) searchTerms[1] = val;
+            else if("generic_keywords[2]".equals(name)) searchTerms[2] = val;
+            else if("generic_keywords[3]".equals(name)) searchTerms[3] = val;
+            else if("generic_keywords[4]".equals(name)) searchTerms[4] = val;
+            else if("recommended_browse_nodes[0]".equals(name)) rbns[0] = val;
+            else if("recommended_browse_nodes[1]".equals(name)) rbns[1] = val;
+            else if("our_price".equals(name))
+                this.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
+            else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
+                this.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
+            else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
+                this.startDate = Dates.listingFromFmt(sell.market, val);
+            else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
+                this.endDate = Dates.listingFromFmt(sell.market, val);
+//            else ignore
+        }
+        this.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
+        this.searchTerms = StringUtils.join(searchTerms, Webs.SPLIT);
+        this.RBN = StringUtils.join(rbns, ",");
+    }
+
+    /**
+     * 根据 Amazon Post Listing 的页面解析出参数, 并生成根据 aps 生成好的参数集合, 同时将解析的 document 原始文档也返回
+     *
+     * @param html
+     * @param sell
+     * @return
+     */
+    public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(String html, Selling sell) {
+        if(Play.mode.isDev())
+            IO.writeContent(html, new File(String.format("%s/%s_%s.html", Constant.E_DATE, sell.merchantSKU, sell.asin)));
+        Document doc = Jsoup.parse(html);
+        // ----- Input 框框
+        Elements inputs = doc.select("form[name=productForm] input");
+        if(inputs.size() == 0) {
+            Logger.warn("Listing Update Page Error! Log to ....?");
+            try {
+                FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, sell.merchantSKU, sell.asin)), html);
+            } catch(IOException e) {
+                //ignore..
+            }
+            throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+        }
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
+        for(Element el : inputs) {
+            String name = el.attr("name").toLowerCase().trim();
+            if("our_price".equals(name) && this.standerPrice != null && this.standerPrice > 0)
+                params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(our_price._1, this.standerPrice)));
+            else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.searchTerms))
+                this.searchTermsCheck(params);
+            else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.keyFetures))
+                this.bulletPointsCheck(params);
+            else if("manufacturer".equals(name))
+                params.add(new BasicNameValuePair(name, this.manufacturer));
+            else if("item_name".equals(name))
+                params.add(new BasicNameValuePair(name, this.title));
+            else if("part_number".equals(name))
+                params.add(new BasicNameValuePair(name, this.manufacturerPartNumber));
+            else if("quantity".equals(name))
+                params.add(new BasicNameValuePair(name, (this.quantity == null ? 0 : this.quantity) + ""));
+            else if("discounted_price".equals(name) || "discounted_price_start_date".equals(name) ||
+                    "discounted_price_end_date".equals(name)) {
+                if(this.startDate != null && this.endDate != null &&
+                        this.salePrice != null && this.salePrice > 0 &&
+                        this.endDate.getTime() > this.startDate.getTime()) {
+                    params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(our_price._1/*our_price*/, this.salePrice)));
+                    params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(sell.market, this.startDate)));
+                    params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(sell.market, this.endDate)));
+                }
+            } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
+                if(this.rbns != null && this.rbns.length >= 1) {
+                    for(int i = 0; i < this.rbns.length; i++)
+                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns[i]));
+                }
+            } else {
+                params.add(new BasicNameValuePair(name, el.val()));
+            }
+        }
+        // ------------ TextArea 框框
+        Elements textareas = doc.select("form[name=productForm] textarea");
+        for(Element text : textareas) {
+            String name = text.attr("name");
+            if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
+                if(this.productDesc.length() > 2000)
+                    throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+                params.add(new BasicNameValuePair(name, this.productDesc));
+            } else {
+                params.add(new BasicNameValuePair(name, text.val()));
+            }
+        }
+        // ------------ Select 框框
+        Elements selects = doc.select("form[name=productForm] select");
+        for(Element select : selects) {
+            params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
+        }
+        return new F.T2<Collection<NameValuePair>, Document>(params, doc);
     }
 }

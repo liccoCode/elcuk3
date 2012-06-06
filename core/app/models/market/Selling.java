@@ -18,7 +18,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
@@ -242,81 +241,22 @@ public class Selling extends GenericModel {
         this.save();
     }
 
+    /**
+     * 从 amazon 将数据同步回来
+     */
     public void syncFromAmazon() {
-        Document doc = null;
-        Elements inputs = null;
+        String html = "";
         synchronized(this.account.cookieStore()) {
             // 1. 切换 Selling 所在区域
             this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
-
             // 2. 获取修改 Selling 的页面, 获取参数
-            String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+            html = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
             if(Play.mode.isDev())
-                IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-            doc = Jsoup.parse(body);
-            // ----- Input 框框
-            inputs = doc.select("form[name=productForm] input");
-            if(inputs.size() == 0) {
-                Logger.warn("Listing Update Page Error! Log to ....?");
-                try {
-                    FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, this.merchantSKU, this.asin)), body);
-                } catch(IOException e) {
-                    //ignore..
-                }
-                throw new FastRuntimeException("Display Post page visit Error. Please try again.");
-            }
+                IO.writeContent(html, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
         }
-
-        // 3. 将需要的参数同步重来
-        String msku = doc.select("#offering_sku_display").text().trim();
-        if(!StringUtils.equals(this.merchantSKU, msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
-            throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
-        String[] bulletPoints = new String[5];
-        String[] searchTerms = new String[5];
-        String[] rbns = new String[2];
-
-        this.aps.upc = doc.select("#external_id_display").text().trim();
-        this.aps.productDesc = doc.select("#product_description").text().trim();
-//        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
-//        this.aps.condition_ = doc.select("#offering_condition_display").text(); // 默认为 NEW
-        F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), this.account.type);
-        for(Element input : inputs) {
-            String name = input.attr("name");
-            String val = input.val();
-            if("item_name".equals(name)) this.aps.title = val;
-            else if("manufacturer".equals(name)) this.aps.manufacturer = val;
-            else if("brand_name".equals(name)) this.aps.brand = val;
-            else if("part_number".equals(name)) this.aps.manufacturerPartNumber = val;
-            else if("model".equals(name)) this.aps.modelNumber = val;
-            else if("Offer_Inventory_Quantity".equals(name)) this.aps.quantity = NumberUtils.toInt(val, 0);
-            else if("offering_start_date".equals(name)) this.aps.launchDate = Dates.listingFromFmt(this.market, val);
-            else if("legal_disclaimer_description".equals(name)) this.aps.legalDisclaimerDesc = val;
-            else if("bullet_point[0]".equals(name)) bulletPoints[0] = val;
-            else if("bullet_point[1]".equals(name)) bulletPoints[1] = val;
-            else if("bullet_point[2]".equals(name)) bulletPoints[2] = val;
-            else if("bullet_point[3]".equals(name)) bulletPoints[3] = val;
-            else if("bullet_point[4]".equals(name)) bulletPoints[4] = val;
-            else if("generic_keywords[0]".equals(name)) searchTerms[0] = val;
-            else if("generic_keywords[1]".equals(name)) searchTerms[1] = val;
-            else if("generic_keywords[2]".equals(name)) searchTerms[2] = val;
-            else if("generic_keywords[3]".equals(name)) searchTerms[3] = val;
-            else if("generic_keywords[4]".equals(name)) searchTerms[4] = val;
-            else if("recommended_browse_nodes[0]".equals(name)) rbns[0] = val;
-            else if("recommended_browse_nodes[1]".equals(name)) rbns[1] = val;
-            else if("our_price".equals(name))
-                this.aps.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
-            else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
-                this.aps.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
-            else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
-                this.aps.startDate = Dates.listingFromFmt(this.market, val);
-            else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
-                this.aps.endDate = Dates.listingFromFmt(this.market, val);
-//            else ignore
-        }
-        this.aps.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
-        this.aps.searchTerms = StringUtils.join(searchTerms, Webs.SPLIT);
-        this.aps.RBN = StringUtils.join(rbns, ",");
+        // 3. 将需要的参数同步进来
+        this.aps.syncPropFromAmazonPostPage(html, this);
         this.save();
     }
 
@@ -358,88 +298,20 @@ public class Selling extends GenericModel {
                     // 1. 切换 Selling 所在区域
                     this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
-
                     // 2. 设置需要提交的值
-                    String body = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
-                    if(Play.mode.isDev())
-                        IO.writeContent(body, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-                    Document doc = Jsoup.parse(body);
-                    // ----- Input 框框
-                    Elements inputs = doc.select("form[name=productForm] input");
-                    if(inputs.size() == 0) {
-                        Logger.warn("Listing Update Page Error! Log to ....?");
-                        try {
-                            FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, this.merchantSKU, this.asin)), body);
-                        } catch(IOException e) {
-                            //ignore..
-                        }
-                        throw new FastRuntimeException("Display Post page visit Error. Please try again.");
-                    }
-                    Set<NameValuePair> params = new HashSet<NameValuePair>();
-                    F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), this.account.type);
-                    for(Element el : inputs) {
-                        String name = el.attr("name").toLowerCase().trim();
-                        if("our_price".equals(name) && this.aps.standerPrice != null && this.aps.standerPrice > 0)
-                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(our_price._1, this.aps.standerPrice)));
-                        else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms))
-                            this.aps.searchTermsCheck(params);
-                        else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures))
-                            this.aps.bulletPointsCheck(params);
-                        else if("manufacturer".equals(name))
-                            params.add(new BasicNameValuePair(name, this.aps.manufacturer));
-                        else if("item_name".equals(name))
-                            params.add(new BasicNameValuePair(name, this.aps.title));
-                        else if("part_number".equals(name))
-                            params.add(new BasicNameValuePair(name, this.aps.manufacturerPartNumber));
-                        else if("quantity".equals(name))
-                            params.add(new BasicNameValuePair(name, (this.aps.quantity == null ? 0 : this.aps.quantity) + ""));
-                        else if("discounted_price".equals(name) || "discounted_price_start_date".equals(name) ||
-                                "discounted_price_end_date".equals(name)) {
-                            if(this.aps.startDate != null && this.aps.endDate != null &&
-                                    this.aps.salePrice != null && this.aps.salePrice > 0 &&
-                                    this.aps.endDate.getTime() > this.aps.startDate.getTime()) {
-                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(our_price._1/*our_price*/, this.aps.salePrice)));
-                                params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
-                                params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
-                            }
-                        } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
-                            if(this.aps.rbns != null && this.aps.rbns.length >= 1) {
-                                for(int i = 0; i < this.aps.rbns.length; i++)
-                                    params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.aps.rbns[i]));
-                            }
-                        } else {
-                            params.add(new BasicNameValuePair(name, el.val()));
-                        }
-                    }
-                    // ------------ TextArea 框框
-                    Elements textareas = doc.select("form[name=productForm] textarea");
-                    for(Element text : textareas) {
-                        String name = text.attr("name");
-                        if("product_description".equals(name) && StringUtils.isNotBlank(this.aps.productDesc)) {
-                            if(this.aps.productDesc.length() > 2000)
-                                throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
-                            params.add(new BasicNameValuePair(name, this.aps.productDesc));
-                        } else {
-                            params.add(new BasicNameValuePair(name, text.val()));
-                        }
-                    }
-                    // ------------ Select 框框
-                    Elements selects = doc.select("form[name=productForm] select");
-                    for(Element select : selects) {
-                        params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
-                    }
-
+                    String html = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+                    F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
 
                     // 3. 提交
-                    String[] args = StringUtils.split(doc.select("form[name=productForm]").first().attr("action"), ";");
-                    body = HTTP.post(this.account.cookieStore(),
+                    String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
+                    html = HTTP.post(this.account.cookieStore(),
                             Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
-                            params);
-                    if(StringUtils.isBlank(body)) // 这个最先检查
+                            paramAndDocTuple._1);
+                    if(StringUtils.isBlank(html)) // 这个最先检查
                         throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
                     if(Play.mode.isDev())
-                        IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
-                    doc = Jsoup.parse(body);
+                        IO.writeContent(html, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+                    Document doc = Jsoup.parse(html);
                     Elements error = doc.select(".messageboxerror li");
                     if(error.size() > 0)
                         throw new FastRuntimeException("Error:" + error.text());
