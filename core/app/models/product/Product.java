@@ -2,6 +2,7 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.embedded.AmazonProps;
 import models.market.Account;
 import models.market.Listing;
 import models.market.PriceStrategy;
@@ -190,7 +191,7 @@ public class Product extends GenericModel {
         selling.priceStrategy = new PriceStrategy(selling);
         selling.state = Selling.S.NEW;
 
-        selling.aps.arryParamSetUP(1);
+        selling.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
 
         synchronized(selling.account.cookieStore()) {
             selling.account.changeRegion(selling.market);

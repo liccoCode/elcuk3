@@ -40,6 +40,11 @@ import java.util.Set;
  */
 @Embeddable
 public class AmazonProps {
+    public enum T {
+        ARRAY_TO_STR,
+        STR_TO_ARRAY
+    }
+
     public AmazonProps() {
         // 初始化这些 Lob 字段, 避免 Hibernate 3.6 [Start position [1] cannot cannot exceed overall CLOB length [0]]
         this.title = " ";
@@ -173,7 +178,7 @@ public class AmazonProps {
      *
      * @param flag 如果 flag &gt; 0 表示从 [] -> str; 如果 flag &lt;=0 表示从 [] <- str
      */
-    public void arryParamSetUP(int flag) {
+    public void arryParamSetUP(T flag) {
         /**
          * Hibernate 的 bug 填写了 Lob 的字段, 为 "" 则会报告错误
          * - Start position [1] cannot exceed overall CLOB length [0] -
@@ -187,11 +192,11 @@ public class AmazonProps {
         if(StringUtils.isBlank(this.searchTerms)) this.searchTerms = " ";
         if(StringUtils.isBlank(this.platinumKeywords)) this.platinumKeywords = " ";
 
-        if(flag > 0) {
+        if(flag == T.ARRAY_TO_STR) {
             this.keyFetures = StringUtils.join(this.keyFeturess, Webs.SPLIT);
             this.searchTerms = StringUtils.join(this.searchTermss, Webs.SPLIT);
             this.RBN = StringUtils.join(this.rbns, ",");
-        } else {
+        } else if(flag == T.STR_TO_ARRAY) {
             this.keyFeturess = new String[5];
             this.searchTermss = new String[5];
             this.rbns = new String[2];
@@ -260,13 +265,25 @@ public class AmazonProps {
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
         if(inputs.size() == 0) {
-            Logger.warn("Listing Update Page Error! Log to ....?");
-            try {
-                FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, sell.merchantSKU, sell.asin)), html);
-            } catch(IOException e) {
-                //ignore..
+            /**
+             * 1. 尝试检查是否为 Listing Not Found 的异常
+             * 2. 抛出未知异常
+             */
+            Element noListingFound = doc.select("input[name=noListingFound]").first();
+            if(noListingFound != null && "true".equals(noListingFound.val().toLowerCase())) {
+                sell.state = Selling.S.DOWN;
+                sell.save();
+                throw new FastRuntimeException(String.format("Selling %s is not exist in Amazon, can be delete.", sell.sellingId));
+            } else {
+                String fileName = String.format("%s/%s_%s.html", Constant.L_SELLING, sell.sellingId, sell.asin);
+                Logger.warn("Listing Update Page Error! Log to %s ?", fileName);
+                try {
+                    FileUtils.writeStringToFile(new File(fileName), html);
+                } catch(IOException e) {
+                    //ignore..
+                }
+                throw new FastRuntimeException("Display Post page visit Error. Please try again.");
             }
-            throw new FastRuntimeException("Display Post page visit Error. Please try again.");
         }
         // 检查 merchant 参数
         String msku = doc.select("#offering_sku_display").text().trim();

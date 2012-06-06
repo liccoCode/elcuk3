@@ -6,25 +6,32 @@
 #{/set}
 #{if s.market.isAmazon()}
 <div class="row">
-<div class="span12">
-    <div class="btn-group" style="margin:5px 0;">
-        <button class="btn btn-warning"
-                data-content="直接更新到数据库"
-                placement='bottom' rel="popover" data-original-title="Local Update Button">
-            Update
-        </button>
-        <button class="btn btn-warning"
-                data-content="更新到 Amazon 同时更新到数据库"
-                placement='bottom' rel="popover" data-original-title="Sync To Amazon Button">
-            Deploy
-        </button>
-        <button class="btn btn-warning"
-                data-content="从 Amazon 同步回来更新到数据库"
-                placement='bottom' rel="popover" data-original-title="Sync From Amazon Button">
-            Sync
-        </button>
+    #{if s.state == models.market.Selling.S.DOWN}
+    <div class="alert alert-error">
+        <p style="text-align:center;">Selling ${s.sellingId} 已经不在 Amazon 中存在了, 系统中已经标记为 DOWN, 不再允许向 Amazon 发送请求</p>
     </div>
-</div>
+    #{/if}
+    #{else }
+    <div class="span12">
+        <div class="btn-group" style="margin:5px 0;">
+            <button class="btn btn-warning"
+                    data-content="直接更新到数据库"
+                    placement='bottom' rel="popover" data-original-title="Local Update Button">
+                Update
+            </button>
+            <button class="btn btn-warning"
+                    data-content="更新到 Amazon 同时更新到数据库"
+                    placement='bottom' rel="popover" data-original-title="Sync To Amazon Button">
+                Deploy
+            </button>
+            <button class="btn btn-warning"
+                    data-content="从 Amazon 同步回来更新到数据库"
+                    placement='bottom' rel="popover" data-original-title="Sync From Amazon Button">
+                Sync
+            </button>
+        </div>
+    </div>
+    #{/else}
 <div class="span12">
 <table class="table table-condensed">
 <tr id="image_tr">

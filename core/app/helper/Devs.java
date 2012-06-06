@@ -26,7 +26,11 @@ public class Devs {
         /**
          * 获取 SellingRecord 的相关的错误信息
          */
-        SELLINGRECORD
+        SELLINGRECORD,
+        /**
+         * Jobs 任务出现错误的文件日志
+         */
+        JOBS_ERROR
     }
 
     /**
@@ -47,6 +51,9 @@ public class Devs {
                 break;
             case SELLINGRECORD:
                 baseUrl = Constant.S_RECORDS;
+                break;
+            case JOBS_ERROR:
+                baseUrl = Constant.J_LOGS;
                 break;
             default:
                 baseUrl = "";

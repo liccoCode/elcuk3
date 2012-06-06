@@ -24,7 +24,6 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
 
@@ -252,6 +251,8 @@ public class Selling extends GenericModel {
 
             // 2. 获取修改 Selling 的页面, 获取参数
             html = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+            if(StringUtils.isBlank(html))
+                throw new FastRuntimeException(String.format("Visit %s page is empty.", Account.M.listingEditPage(this)));
             if(Play.mode.isDev())
                 IO.writeContent(html, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
         }
@@ -286,7 +287,7 @@ public class Selling extends GenericModel {
      *          deploy 方法失败会抛出异常
      */
     public void deploy() {
-        this.aps.arryParamSetUP(1);//将数组参数转换成字符串再进行处理
+        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);//将数组参数转换成字符串再进行处理
         synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
             switch(this.market) {
                 case AMAZON_DE:
@@ -300,7 +301,7 @@ public class Selling extends GenericModel {
 
                     // 2. 设置需要提交的值
                     String html = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
-                    F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
+                    play.libs.F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
 
                     // 3. 提交
                     String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");

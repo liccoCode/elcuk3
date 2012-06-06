@@ -47,6 +47,11 @@ public class Constant {
      */
     public static final String S_RECORDS = String.format("%s/selling_records", E_LOGS);
 
+    /**
+     * 存在系统的 "日志" 文件夹中 Jobs 各项任务的日志文件
+     */
+    public static final String J_LOGS = String.format("%s/jobs_log", E_LOGS);
+
 
     public static final String UPLOAD_PATH = String.format("%s/uploads", Constant.E_DATE);
 

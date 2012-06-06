@@ -68,6 +68,7 @@
         <table class="table table-condensed">
             <caption class="label label-info">Jobs</caption>
             <tr>
+                <th>&nbsp;</th>
                 <th>Id</th>
                 <th>ClassName</th>
                 <th>Duration</th>
@@ -76,10 +77,20 @@
                     <a href="#" rel="tooltip" data-original-title="Now: ${new java.util.Date().format('yyyy-MM-dd HH:mm:ss')}">LastUpdateTime</a>
                 </th>
                 <th>Closed</th>
-                <th>Func</th>
             </tr>
             #{list items:jobs, as:'job'}
                 <tr class="job_itm" id='job_itm_${job.id}'>
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-wrench"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a class='runOnce' jid='${job.id}' title="立即执行一次"><i class="icon-play"></i> 执行</a>
+                                </li>
+                                <li><a class='j_update' jid='${job.id}' title="更新修改了的参数"><i class="icon-edit"></i>
+                                    更新</a></li>
+                            </ul>
+                        </div>
+                    </td>
                     <td>
                     ${job.id}
                         <input type="hidden" name="j.id" value="${job.id}">
@@ -90,17 +101,6 @@
                     <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
                     <td>
                         <input type="checkbox" name="j.close" ${job.close ? 'checked' : ''}>
-                    </td>
-                    <td>
-                        <div class="btn-group">
-                            <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-wrench"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a class='runOnce' jid='${job.id}' title="立即执行一次"><i class="icon-play"></i> 执行</a>
-                                </li>
-                                <li><a class='j_update' jid='${job.id}' title="更新修改了的参数"><i class="icon-edit"></i>
-                                    更新</a></li>
-                            </ul>
-                        </div>
                     </td>
                 </tr>
             #{/list}

@@ -10,16 +10,15 @@
         <tr>
             <td>Memo:</td>
             <td colspan="3">
-                <textarea name="c.memo" rows="3" cols="30">${cat.memo}</textarea>
+                <textarea name="c.memo" class="span12" rows="3">${cat.memo}</textarea>
                 <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
             </td>
         </tr>
         <tr>
             <td>AmazonNode:</td>
-            <td>
-                <input type="text" name="c.settings.amazonNode" value="${cat.settings.amazonNode}" placeHolder="此类别需要检查的 Node 值[,]分割">
+            <td colspan="3">
+                <input type="text" class="span12" name="c.settings.amazonNode" value="${cat.settings.amazonNode}" placeHolder="此类别需要检查的 Node 值[,]分割">
             </td>
-            <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
             <td colspan="4">

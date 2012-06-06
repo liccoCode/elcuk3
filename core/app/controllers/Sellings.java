@@ -4,6 +4,7 @@ import ext.LinkExtensions;
 import helper.Webs;
 import jobs.SellingRecordCheckJob;
 import models.Ret;
+import models.embedded.AmazonProps;
 import models.market.Listing;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
@@ -46,7 +47,7 @@ public class Sellings extends Controller {
 
     public static void selling(String sid) {
         Selling s = Selling.findById(sid);
-        s.aps.arryParamSetUP(-1);
+        s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
         render(s);
     }
 
@@ -65,7 +66,7 @@ public class Sellings extends Controller {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {
             if(!remote) { // 非远程, 本地更新
-                s.aps.arryParamSetUP(1);
+                s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
                 s.save();
             } else { // 远程更新
                 s.deploy();

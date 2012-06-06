@@ -1,0 +1,22 @@
+点击链接进行修复.
+#{list items:invalidMap.keySet(), as:'catId'}
+<table>
+    <caption>${catId}</caption>
+    <tr>
+        <th>SellingId</th>
+        <th>ASIN</th>
+        <th>RBN</th>
+    </tr>
+    #{list items:invalidMap.get(catId), as:'sell'}
+        <tr>
+            <td>
+                <a target="_blank" href="http://e.easyacceu.com/sellings/selling?sid=${sell.sellingId}">${sell.sellingId}</a>
+            </td>
+            <td><a target="_blank" href="${sell.asinLink()}">${sell.asin}</a></td>
+            <td>${sell.aps.RBN}</td>
+        </tr>
+    #{/list}
+</table>
+<hr/>
+#{/list}
+
