@@ -12,6 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
 import play.Play;
+import play.libs.F;
 import play.libs.Mail;
 
 import java.io.PrintWriter;
@@ -200,6 +201,27 @@ public class Webs {
             Logger.warn("AmazonPrice parse error.(" + market + ") [" + e.getMessage() + "]");
         }
         return -0.1f;
+    }
+
+    /**
+     * 仅仅支持在 Amazon 上更新 Listing 的时候价格的解析
+     * 主要是因为 Amazon 总变更上传的价格的格式, 所以程序需要对其进行解析判断再设值
+     *
+     * @param priceStr
+     * @return
+     */
+    public static F.T2<Account.M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr, Account.M defaultMarket) {
+        if(StringUtils.isBlank(priceStr)) return new F.T2<Account.M, Float>(defaultMarket, 999f);
+        StringBuilder sbd = new StringBuilder(priceStr);
+        String dot = Character.toString(sbd.charAt(sbd.length() - 3));
+        if(dot.equals(".")) { // uk 格式
+            return new F.T2<Account.M, Float>(Account.M.AMAZON_UK, Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr));
+        } else if(dot.equals(",")) { // de 格式
+            return new F.T2<Account.M, Float>(Account.M.AMAZON_DE, Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr));
+        } else {
+            Logger.error("Not support price format.");
+            return new F.T2<Account.M, Float>(defaultMarket, 999f);
+        }
     }
 
     /**
