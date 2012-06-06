@@ -2,7 +2,8 @@ $(function(){
     $('input[bullet_point]').keyup(function(e){
         if(e.keyCode == 13) return false;
         var o = $(this);
-        var length = encodeURI(o.val().trim()).length;
+        //unescape(encodeURI(theField.value)).length
+        var length = unescape(encodeURI(o.val().trim())).length;
         o.find('~ span').html((2000 - length) + " bytes left");
         if(length > 2000) o.css('color', 'red');
         else o.css('color', '');
@@ -12,7 +13,7 @@ $(function(){
     $('input[searchterms]').keyup(function(e){
         if(e.keyCode == 13) return false;
         var o = $(this);
-        var length = o.val().trim().length;
+        var length = unescape(encodeURI(o.val().trim())).length;
         o.find('~ span').html((50 - length) + " bytes left");
         if(length > 50) o.css('color', 'red');
         else o.css('color', '');

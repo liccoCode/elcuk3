@@ -4,10 +4,15 @@ import helper.Currency;
 import helper.Webs;
 import models.market.Account;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.protocol.HTTP;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.junit.Assert;
 import org.junit.Test;
+import play.Logger;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -102,6 +107,54 @@ public class CurrencyTest {
         System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr2.substring(3).trim()));
         System.out.println("------------------------");
         System.out.println(Webs.amazonPriceCurrency(Account.M.AMAZON_UK, priceStr2));
+    }
+
+    @Test
+    public void testUKDEThoundsNumberFormat() {
+        Assert.assertEquals("100,000.898", Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, 100000.9f));
+        Assert.assertEquals("100.000,195", Webs.priceLocalNumberFormat(Account.M.AMAZON_DE, 100000.193f));
+        String ukThoundStr = "100,000.898";
+    }
+
+    @Test
+    public void testAmazonFormat() {
+        String ten = "20.50"; //  几十
+        String hunder = "100.20"; // 几百
+        String thounds = "2,134.92"; // 几千
+
+        String ten2 = "20,50";
+        String hunder2 = "100,20";
+        String thounds2 = "2.134,92";
+
+        //Uk
+        Assert.assertEquals(20.5f, ukDePriceFormatFlat(ten), 2);
+        Assert.assertEquals(100.2f, ukDePriceFormatFlat(hunder), 2);
+        Assert.assertEquals(2134.92f, ukDePriceFormatFlat(thounds), 2);
+        //De
+        Assert.assertEquals(20.5f, ukDePriceFormatFlat(ten2), 2);
+        Assert.assertEquals(100.2f, ukDePriceFormatFlat(hunder2), 2);
+        Assert.assertEquals(2134.92f, ukDePriceFormatFlat(thounds2), 2);
+    }
+
+    private Float ukDePriceFormatFlat(String pricestr) {
+        StringBuilder sbd = new StringBuilder(pricestr);
+        String dot = Character.toString(sbd.charAt(sbd.length() - 3));
+        if(dot.equals(".")) { // uk 格式
+            return Webs.amazonPriceNumber(Account.M.AMAZON_UK, pricestr);
+        } else if(dot.equals(",")) { // de 格式
+            return Webs.amazonPriceNumber(Account.M.AMAZON_DE, pricestr);
+        } else {
+            Logger.error("Not support price format.");
+            return 999f;
+        }
+    }
+
+    @Test
+    public void testURLEncode() throws UnsupportedEncodingException {
+        String st = "hülle tasche zubehör beats schutzfolie schutzfolie";
+//        st = "Vodafone AT&T O2 T-Mobile Orange Hutchison 3 case";
+        System.out.println(URLEncoder.encode(st, HTTP.ISO_8859_1).length());
+        System.out.println(URLEncoder.encode(st, HTTP.UTF_8).length());
     }
 
     @Test

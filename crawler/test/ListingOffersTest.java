@@ -16,7 +16,7 @@ import java.util.List;
 public class ListingOffersTest extends UnitTest {
     @Test
     public void testListingOffers() {
-        List<ListingOfferC> offers = new ListingOfferC(MT.AUK).parseOffers(IO.readContentAsString(
+        List<ListingOfferC> offers = new ListingOfferC(MT.AUK).parseOffers(MT.ADE, IO.readContentAsString(
                 new File("/Users/wyattpan/elcuk2-data/listings/offers/AUK/B004Z4SJ78.html"), "UTF-8"));
         for(ListingOfferC of : offers)
             System.out.println(of);

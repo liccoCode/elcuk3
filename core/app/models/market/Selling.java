@@ -25,6 +25,7 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
 
@@ -235,6 +236,8 @@ public class Selling extends GenericModel {
             } else {
                 Logger.info("Upload Picture to Amazon Success.(%s)", imgRsp.get("imageUrl").getAsString());
             }
+            //TODO 上传成功后, 还需要将 9 - n(上传成功的图片数) 的后续图片给删除
+            //https://catalog-sc.amazon.de/abis/image/RemoveImage.ajax?asin=B0083QX8AW&variant=MAIN/PT01/...
         }
         this.save();
     }
@@ -277,58 +280,39 @@ public class Selling extends GenericModel {
         this.aps.productDesc = doc.select("#product_description").text().trim();
 //        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
 //        this.aps.condition_ = doc.select("#offering_condition_display").text(); // 默认为 NEW
+        F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), this.account.type);
         for(Element input : inputs) {
             String name = input.attr("name");
             String val = input.val();
-            if("item_name".equals(name))
-                this.aps.title = val;
-            else if("manufacturer".equals(name))
-                this.aps.manufacturer = val;
-            else if("brand_name".equals(name))
-                this.aps.brand = val;
-            else if("part_number".equals(name))
-                this.aps.manufacturerPartNumber = val;
-            else if("model".equals(name))
-                this.aps.modelNumber = val;
+            if("item_name".equals(name)) this.aps.title = val;
+            else if("manufacturer".equals(name)) this.aps.manufacturer = val;
+            else if("brand_name".equals(name)) this.aps.brand = val;
+            else if("part_number".equals(name)) this.aps.manufacturerPartNumber = val;
+            else if("model".equals(name)) this.aps.modelNumber = val;
+            else if("Offer_Inventory_Quantity".equals(name)) this.aps.quantity = NumberUtils.toInt(val, 0);
+            else if("offering_start_date".equals(name)) this.aps.launchDate = Dates.listingFromFmt(this.market, val);
+            else if("legal_disclaimer_description".equals(name)) this.aps.legalDisclaimerDesc = val;
+            else if("bullet_point[0]".equals(name)) bulletPoints[0] = val;
+            else if("bullet_point[1]".equals(name)) bulletPoints[1] = val;
+            else if("bullet_point[2]".equals(name)) bulletPoints[2] = val;
+            else if("bullet_point[3]".equals(name)) bulletPoints[3] = val;
+            else if("bullet_point[4]".equals(name)) bulletPoints[4] = val;
+            else if("generic_keywords[0]".equals(name)) searchTerms[0] = val;
+            else if("generic_keywords[1]".equals(name)) searchTerms[1] = val;
+            else if("generic_keywords[2]".equals(name)) searchTerms[2] = val;
+            else if("generic_keywords[3]".equals(name)) searchTerms[3] = val;
+            else if("generic_keywords[4]".equals(name)) searchTerms[4] = val;
+            else if("recommended_browse_nodes[0]".equals(name)) rbns[0] = val;
+            else if("recommended_browse_nodes[1]".equals(name)) rbns[1] = val;
             else if("our_price".equals(name))
-                this.aps.standerPrice = Webs.amazonPriceNumber(this.market/*同 deploy->our_price*/, val);
+                this.aps.standerPrice = Webs.amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
             else if("discounted_price".equals(name) && StringUtils.isNotBlank(val))
-                this.aps.salePrice = Webs.amazonPriceNumber(this.market/*同 depploy->our_price*/, val);
+                this.aps.salePrice = Webs.amazonPriceNumber(our_price._1/*同 depploy->our_price*/, val);
             else if("discounted_price_start_date".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.startDate = Dates.listingFromFmt(this.market, val);
             else if("discounted_price_end_date".equals(name) && StringUtils.isNotBlank(val))
                 this.aps.endDate = Dates.listingFromFmt(this.market, val);
-            else if("Offer_Inventory_Quantity".equals(name))
-                this.aps.quantity = NumberUtils.toInt(val, 0);
-            else if("offering_start_date".equals(name))
-                this.aps.launchDate = Dates.listingFromFmt(this.market, val);
-            else if("legal_disclaimer_description".equals(name))
-                this.aps.legalDisclaimerDesc = val;
-            else if("bullet_point[0]".equals(name))
-                bulletPoints[0] = val;
-            else if("bullet_point[1]".equals(name))
-                bulletPoints[1] = val;
-            else if("bullet_point[2]".equals(name))
-                bulletPoints[2] = val;
-            else if("bullet_point[3]".equals(name))
-                bulletPoints[3] = val;
-            else if("bullet_point[4]".equals(name))
-                bulletPoints[4] = val;
-            else if("generic_keywords[0]".equals(name))
-                searchTerms[0] = val;
-            else if("generic_keywords[1]".equals(name))
-                searchTerms[1] = val;
-            else if("generic_keywords[2]".equals(name))
-                searchTerms[2] = val;
-            else if("generic_keywords[3]".equals(name))
-                searchTerms[3] = val;
-            else if("generic_keywords[4]".equals(name))
-                searchTerms[4] = val;
-            else if("recommended_browse_nodes[0]".equals(name))
-                rbns[0] = val;
-            else if("recommended_browse_nodes[1]".equals(name))
-                rbns[1] = val;
-//                else ignore
+//            else ignore
         }
         this.aps.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
         this.aps.searchTerms = StringUtils.join(searchTerms, Webs.SPLIT);
@@ -392,13 +376,11 @@ public class Selling extends GenericModel {
                         throw new FastRuntimeException("Display Post page visit Error. Please try again.");
                     }
                     Set<NameValuePair> params = new HashSet<NameValuePair>();
+                    F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), this.account.type);
                     for(Element el : inputs) {
                         String name = el.attr("name").toLowerCase().trim();
                         if("our_price".equals(name) && this.aps.standerPrice != null && this.aps.standerPrice > 0)
-                        /**
-                         * Amazon 在使用 , 与 . 之间老是改变, 挺麻烦. 看是否可以从哪个地方自动切换
-                         */
-                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(this.market, this.aps.standerPrice)));
+                            params.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(our_price._1, this.aps.standerPrice)));
                         else if(StringUtils.startsWith(name, "generic_keywords") && StringUtils.isNotBlank(this.aps.searchTerms))
                             this.aps.searchTermsCheck(params);
                         else if(StringUtils.startsWith(name, "bullet_point") && StringUtils.isNotBlank(this.aps.keyFetures))
@@ -416,8 +398,7 @@ public class Selling extends GenericModel {
                             if(this.aps.startDate != null && this.aps.endDate != null &&
                                     this.aps.salePrice != null && this.aps.salePrice > 0 &&
                                     this.aps.endDate.getTime() > this.aps.startDate.getTime()) {
-                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(this.market/*our_price*/, this.aps.salePrice)));
-                                /*TODO 日期格式暂时还是按照 Selling 市场来判断的, 看是否会被 Amazon 改成按照语言的格式来*/
+                                params.add(new BasicNameValuePair("discounted_price", Webs.priceLocalNumberFormat(our_price._1/*our_price*/, this.aps.salePrice)));
                                 params.add(new BasicNameValuePair("discounted_price_start_date", Dates.listingUpdateFmt(this.market, this.aps.startDate)));
                                 params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(this.market, this.aps.endDate)));
                             }
