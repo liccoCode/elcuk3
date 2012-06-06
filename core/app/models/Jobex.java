@@ -2,6 +2,7 @@ package models;
 
 import play.db.jpa.Model;
 import play.jobs.Job;
+import play.libs.Time;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,6 +31,9 @@ public class Jobex extends Model {
      * 是否关闭了, 关闭了则不运行
      */
     public boolean close = false;
+
+    @Column(columnDefinition = "varchar(255) DEFAULT ''")
+    public String memo;
 
     /**
      * 实例化 Job
@@ -60,8 +64,11 @@ public class Jobex extends Model {
         this.close = njob.close;
         if(njob.className != null && !njob.className.trim().isEmpty())
             this.className = njob.className;
-        if(njob.duration != null && !njob.duration.trim().isEmpty())
+        if(njob.duration != null && !njob.duration.trim().isEmpty()) {
+            if(!Time.CronExpression.isValidExpression(njob.duration))
+                Time.parseDuration(njob.duration);
             this.duration = njob.duration;
+        }
         this.lastUpdateTime = System.currentTimeMillis();
         this.save();
     }

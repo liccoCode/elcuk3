@@ -1,5 +1,6 @@
 package helper;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -299,6 +300,15 @@ public class Webs {
 
     public static String exposeGson(Object o) {
         return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(o);
+    }
+
+    /**
+     * 利用 FastJSON 进行的解决了循环依赖的 toJson 的方法
+     *
+     * @return
+     */
+    public static String json(Object o) {
+        return JSON.toJSONString(o);
     }
 
     /**

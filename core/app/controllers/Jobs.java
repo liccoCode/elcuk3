@@ -33,7 +33,7 @@ public class Jobs extends Controller {
     public static void c(Jobex j) {
         validation.required(j.className);
         validation.required(j.duration);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        if(Validation.hasErrors()) renderJSON(new Ret(validation.errorsMap()));
         try {
             // 先解析 Cron, 如果 Cron 表达式错误再解析 Duration 如果还错误,则报错
             if(!Time.CronExpression.isValidExpression(j.duration))
@@ -47,9 +47,13 @@ public class Jobs extends Controller {
 
     public static void u(Jobex j) {
         validation.required(j.id);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
+        if(Validation.hasErrors()) renderJSON(new Ret(validation.errorsMap()));
         Jobex job = Jobex.findById(j.id);
-        job.updateJobAttrs(j);
+        try {
+            job.updateJobAttrs(j);
+        } catch(Exception e) {
+            render(new Ret(Webs.E(e)));
+        }
         renderJSON(job);
     }
 

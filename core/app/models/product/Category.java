@@ -1,6 +1,7 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import models.embedded.CategorySettings;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -40,6 +41,10 @@ public class Category extends GenericModel {
     @Expose
     public String memo;
 
+    @Embedded
+    @Expose
+    public CategorySettings settings;
+
     @Override
     public String toString() {
         return String.format("%s:%s", this.categoryId, this.name);
@@ -53,7 +58,8 @@ public class Category extends GenericModel {
          */
         // 把 Category 所有的清理掉, 然后再重新绑定
         this.attrNames.clear();
-        for(AttrName at : attrNames) this.attrNames.add(at);
+        if(attrNames != null)
+            for(AttrName at : attrNames) this.attrNames.add(at);
         this.save();
     }
 

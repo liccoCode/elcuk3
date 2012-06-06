@@ -1,7 +1,7 @@
 #{extends 'main.html'/}
 #{set title:'Asynchronous Jobs'/}
 #{set 'moreScripts'}
-    #{script 'jobs/jobs.js'/}
+    #{script 'jobs/jobs.coffee'/}
 #{/set}
 
 <div class="row" style="margin:10px 0">
@@ -33,7 +33,7 @@
                             <div class="controls">
                                 <input type="text" id="j_duration" name="j.duration">
 
-                                <p class="help-block">Job 的执行周期, 可以使用 1s, 1mn, 1h 三个单位时间</p>
+                                <p class="help-block">Job 的执行周期, 可以使用 1s, 1mn, 1h(不可以填写1.5h) 三个单位时间</p>
 
                                 <p class="help-block">可使用 Cron 表达式: 0 40 3,23 * * ? (秒 分 时 天 月 ?)</p>
                             </div>
@@ -65,12 +65,13 @@
         无任务
     #{/if}
     #{else }
-        <table class="table table-striped">
+        <table class="table table-condensed">
             <caption class="label label-info">Jobs</caption>
             <tr>
                 <th>Id</th>
                 <th>ClassName</th>
                 <th>Duration</th>
+                <th>Memo</th>
                 <th>
                     <a href="#" rel="tooltip" data-original-title="Now: ${new java.util.Date().format('yyyy-MM-dd HH:mm:ss')}">LastUpdateTime</a>
                 </th>
@@ -83,19 +84,21 @@
                     ${job.id}
                         <input type="hidden" name="j.id" value="${job.id}">
                     </td>
-                    <td><input type="text" name="j.className" value="${job.className}"></td>
-                    <td><input type="text" name="j.duration" value="${job.duration}"></td>
+                    <td><input type="text" style="width:180px;" name="j.className" value="${job.className}"></td>
+                    <td><input type="text" style="width:90px;" name="j.duration" value="${job.duration}"></td>
+                    <td><input type="text" name="j.memo" value="${job.memo}"></td>
                     <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
                     <td>
                         <input type="checkbox" name="j.close" ${job.close ? 'checked' : ''}>
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Action
-                                <span class="caret"></span></a>
+                            <a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-wrench"></i></a>
                             <ul class="dropdown-menu">
-                                <li><a class='runOnce' href="#" jid='${job.id}' title="立即执行一次">执行</a></li>
-                                <li><a class='j_update' href="#" jid='${job.id}' title="更新修改了的参数">更新</a></li>
+                                <li><a class='runOnce' jid='${job.id}' title="立即执行一次"><i class="icon-play"></i> 执行</a>
+                                </li>
+                                <li><a class='j_update' jid='${job.id}' title="更新修改了的参数"><i class="icon-edit"></i>
+                                    更新</a></li>
                             </ul>
                         </div>
                     </td>

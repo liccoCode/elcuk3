@@ -7,7 +7,6 @@ import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -56,10 +55,9 @@ public class Categorys extends Controller {
      */
     public static void cc(@Valid Category c) {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        if(c.isPersistent()) renderJSON(new Error("Product", "Product is peristent can not be save.", new String[]{}));
+        if(c.isPersistent()) renderJSON(new Ret("Category has exist!"));
         c.save();
-        c.products = null;
-        renderJSON(c);
+        renderJSON(Webs.exposeGson(c));
     }
 
     public static void cu(Category c) {

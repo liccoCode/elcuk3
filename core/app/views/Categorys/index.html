@@ -1,7 +1,7 @@
 #{extends 'main.html'/}
 #{set title:'Category' /}
 #{set 'moreScripts'}
-    #{script 'products/category.js'/}
+    #{script 'products/category.coffee'/}
 #{/set}
 <div class="row">
     <!-- BTN-1-BEGIN -->
@@ -63,14 +63,14 @@
 #{else }
     <div class="container-fluid">
         <div class="row-fluid">
-            <div class="span3 well well-small" id="cat_slider" style="height:650px;overflow:auto;">
-                <table class="table table-striped table-bordered table-condensed">
+            <div class="span3" id="cat_slider" style="height:650px;overflow:auto;">
+                <table class="table table-bordered table-condensed">
                     <tr>
                         <th class="span1">CategoryId</th>
                         <th>Name</th>
                     </tr>
                     #{list items:cates, as:'cat'}
-                        <tr cid='${cat.categoryId}'>
+                        <tr cid='${cat.categoryId}' style="cursor:pointer">
                             <td>${cat.categoryId}</td>
                             <td>${cat.name}</td>
                         </tr>
