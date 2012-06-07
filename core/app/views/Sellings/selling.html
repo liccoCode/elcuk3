@@ -1,7 +1,7 @@
 #{extends 'main.html'/}
 #{set title:s.sellingId/}
 #{set 'moreScripts'}
-    #{script 'sellings/selling.js'/}
+    #{script 'sellings/selling.coffee'/}
     #{script 'component/amazon.coffee'/}
 #{/set}
 #{if s.market.isAmazon()}
@@ -15,18 +15,18 @@
     <div class="span12">
         <div class="btn-group" style="margin:5px 0;">
             <button class="btn btn-warning"
-                    data-content="直接更新到数据库"
-                    placement='bottom' rel="popover" data-original-title="Local Update Button">
+                    content="直接更新到数据库"
+                    placement='bottom' rel="popover" title="Local Update Button">
                 Update
             </button>
             <button class="btn btn-warning"
-                    data-content="更新到 Amazon 同时更新到数据库"
-                    placement='bottom' rel="popover" data-original-title="Sync To Amazon Button">
+                    content="更新到 Amazon 同时更新到数据库"
+                    placement='bottom' rel="popover" title="Sync To Amazon Button">
                 Deploy
             </button>
             <button class="btn btn-warning"
-                    data-content="从 Amazon 同步回来更新到数据库"
-                    placement='bottom' rel="popover" data-original-title="Sync From Amazon Button">
+                    content="从 Amazon 同步回来更新到数据库"
+                    placement='bottom' rel="popover" title="Sync From Amazon Button">
                 Sync
             </button>
         </div>
@@ -43,11 +43,11 @@
 <tr>
     <td colspan="3">
         <div class="input-prepend">
-            <button id="img_cal" placement='left' class="btn btn-small" rel="popover" data-original-title="Image Preview Button"
-                    data-content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值."
+            <button id="img_cal" placement='left' class="btn btn-small" rel="popover" title="Image Preview Button"
+                    content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值."
                     ><i class="icon-eye-open"></i></button>
-            <button class="btn btn-small" placement='left' rel="popover" data-original-title="Image Upload Button"
-                    data-content="图片按照 0~8 设置好编号以后,点击此按钮会直接更新到 Selling 并保存, 与其他信息的更新分开."
+            <button class="btn btn-small" placement='left' rel="popover" title="Image Upload Button"
+                    content="图片按照 0~8 设置好编号以后,点击此按钮会直接更新到 Selling 并保存, 与其他信息的更新分开."
                     ><i class="icon-picture"></i></button>
             <input type="text" style="width:80%" name="s.aps.imageName" readonly value="${s.aps.imageName}">
         </div>
@@ -134,6 +134,18 @@
     <td><input type="text" name="s.aps.startDate" value="${s.aps.startDate.format("yyyy-MM-dd")}"></td>
     <th>EndtDate</th>
     <td><input type="text" name="s.aps.endDate" value="${s.aps.endDate.format("yyyy-MM-dd")}"></td>
+</tr>
+
+<!-- 功能条 -->
+<tr>
+    <td colspan="4">
+        <div class="input-prepend offset1">
+            <button id="sid_preview_popover" class="btn btn-small" rel="popover" placement='bottom' trigger='toggle' width="800px" data-content="kk" title="Detail Preview">
+                <i class="icon-search"></i></button>
+            <input type="text" id="sid_helper" style="width:160px;" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
+            <button class="btn btn-small" rel="popover"><i class="icon-edit"></i></button>
+        </div>
+    </td>
 </tr>
 
 <tr>

@@ -1,6 +1,8 @@
 package controllers;
 
+import com.alibaba.fastjson.JSON;
 import ext.LinkExtensions;
+import helper.GTs;
 import helper.Webs;
 import jobs.SellingRecordCheckJob;
 import models.Ret;
@@ -11,10 +13,12 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
 import play.data.binding.As;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,7 +52,22 @@ public class Sellings extends Controller {
     public static void selling(String sid) {
         Selling s = Selling.findById(sid);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = s.sameFamilySellings();
+        renderArgs.put("sids", JSON.toJSONString(sellingAndSellingIds._2));
         render(s);
+    }
+
+    /**
+     * 加载 Techical, SearchTerms, ProductDesc 三块信息的 JSON 格式给前台
+     */
+    public static void tsp(String sid) {
+        Selling s = Selling.findById(sid);// 利用 hibernate 二级缓存, Play 的 JavaBean 填充的查询语句含有 limit 语句
+        s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
+        renderJSON(JSON.toJSONString(GTs.MapBuilder
+                .map("t", s.aps.keyFeturess)
+                .put("s", s.aps.searchTermss)
+                .put("p", new String[]{s.aps.productDesc})
+                .build()));
     }
 
     public static void imageUpload(Selling s, String imgs) {

@@ -24,6 +24,7 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
 
@@ -368,6 +369,13 @@ public class Selling extends GenericModel {
             this.aps.platinumKeywords = newSelling.aps.platinumKeywords;
 
         return this.save();
+    }
+
+    public F.T2<List<Selling>, List<String>> sameFamilySellings() {
+        List<Selling> sellings = Selling.find("listing.product.family=?", Product.findByMerchantSKU(this.merchantSKU).family).fetch();
+        List<String> sids = new ArrayList<String>();
+        for(Selling s : sellings) sids.add(s.sellingId);
+        return new F.T2<List<Selling>, List<String>>(sellings, sids);
     }
 
     /**
