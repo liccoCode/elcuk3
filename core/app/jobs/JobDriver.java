@@ -56,7 +56,7 @@ public class JobDriver extends Job {
                     run = TimeUnit.MILLISECONDS.toSeconds(now - job.lastUpdateTime) >= Time.parseDuration(job.duration);
                 } catch(IllegalArgumentException e) {
                     try {
-                        run = Math.abs(now - Time.parseCRONExpression(job.duration).getTime()) < 10000; // 相差的时间误差在 10s 内的话
+                        run = Math.abs(now - Time.parseCRONExpression(job.duration).getTime()) < 5000; // 相差的时间误差在 5 s 内的话
                     } catch(IllegalArgumentException pe) {
                         Logger.error("JobDriver: %s", Webs.E(e));
                         run = false;

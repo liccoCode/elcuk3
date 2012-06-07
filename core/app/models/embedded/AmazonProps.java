@@ -335,6 +335,7 @@ public class AmazonProps {
         this.keyFetures = StringUtils.join(bulletPoints, Webs.SPLIT);
         this.searchTerms = StringUtils.join(searchTerms, Webs.SPLIT);
         this.RBN = StringUtils.join(rbns, ",");
+        this.arryParamSetUP(T.STR_TO_ARRAY); // 对 hibernate 3.6 的 Lob bug 兼容
     }
 
     /**

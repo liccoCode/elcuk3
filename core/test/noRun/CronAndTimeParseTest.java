@@ -1,5 +1,6 @@
 package noRun;
 
+import helper.Dates;
 import org.junit.Test;
 import play.libs.Time;
 
@@ -18,5 +19,11 @@ public class CronAndTimeParseTest {
         System.out.println(Time.parseDuration(duration));
 //        Time.CronExpression
         System.out.println(Time.parseCRONExpression(cron));
+    }
+
+    @Test
+    public void testCronEveryWeekOne() {
+        String cron = "0 40 1 1,8,15,22,29 * ?";
+        System.out.println(Dates.date2DateTime(Time.parseCRONExpression(cron)));
     }
 }
