@@ -1,6 +1,5 @@
 $ ->
   $('a[rel=tooltip]').tooltip({placement: 'right'})
-  $('a[rel=popover]').popover({placement: 'left'})
 
   $('#cci').click ->
     $.post('/application/clearCache', {},

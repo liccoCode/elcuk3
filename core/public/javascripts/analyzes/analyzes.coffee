@@ -6,7 +6,6 @@ $ ->
 
   init = () ->
     $('#a_toolbar :input[type=date]').dateinput({format: 'mm/dd/yyyy'})
-    $('a[rel=popover]').popover()
     $('#a_from').data('dateinput').setValue(defaultDate)
     $('#a_to').data('dateinput').setValue(now)
 

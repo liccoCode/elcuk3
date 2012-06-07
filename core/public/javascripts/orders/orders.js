@@ -1,8 +1,6 @@
 $(function(){
     $('#search_form :input[type=date]').dateinput({format:'mm/dd/yyyy'});
     $('a[rel=tooltip]').tooltip({placement:'top'});
-    $('a[rel=popover]').popover({placement:'bottom'});
-
 
     function do_search(o, page){
         $.varClosure.params = {};
@@ -41,18 +39,12 @@ $(function(){
             }
         }, 'html');
 
-        /*
-         $("#order_list").load('/Orders/o_search', $.varClosure.params, function(r){
-         $('a[rel=tooltip]').tooltip({placement:'top'});
-         $('.pagination a[page]').click(function(){
-         do_search(o, $(this).attr('page'));
-         return false;
-         })
-         });
-         */
         return false;
     }
 
+    $('#o_search').keyup(function(e){
+        if(e.keyCode === 13) do_search($('a[day=30]'), 1);
+    });
     // 搜索按钮组
     $('#search_btns a[class]').click(function(){
         do_search($(this), 1);

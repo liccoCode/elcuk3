@@ -1,8 +1,4 @@
 $(function(){
-    $("a[rel=popover]").popover({trigger:'manual', placement:'left'}).click(function(){
-        $(this).popover('toggle');
-        return false;
-    });
     /**
      * ========================  Product Details Page ============================
      */
@@ -107,10 +103,10 @@ $(function(){
 
     // Drag & Drop Pic
     var template = '<li class="span2">' +
-            '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
-            '<div class="progress"><div class="bar"></div></div>' +
-            '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
-            '</li>';
+        '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
+        '<div class="progress"><div class="bar"></div></div>' +
+        '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
+        '</li>';
     var dropbox = $('#dropbox');
     var uploaded = $('#uploaded');
     var message = $(".message");
@@ -242,9 +238,9 @@ $(function(){
             if(r.flag === false) alert(r.message);
             else{
                 var upcAlertTemplate = "<div class='alert alert-info fade in'>" +
-                        "<button class='close' data-dismiss='alert'>×</button>" +
-                        "<strong>UPC 检查信息:</strong>" +
-                        "</div>";
+                    "<button class='close' data-dismiss='alert'>×</button>" +
+                    "<strong>UPC 检查信息:</strong>" +
+                    "</div>";
                 var alertEl = $(upcAlertTemplate);
                 if(r.length == 0)
                     alertEl.find('strong').after('<div>此 UPC 在系统中还没有 Selling</div>')

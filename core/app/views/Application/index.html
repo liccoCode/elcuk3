@@ -24,7 +24,7 @@
             <tr>
                 <td>${key}</td>
                 #{list items:models.market.Orderr.S.values(), as:'s'}
-                    <td><a href="#" rel="popover" data-original-title="${s.name()} 细节" data-content="
+                    <td><a href="#" rel="popover" placement='left' title="${s.name()} 细节" content="
                     UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>
                     DE: ${row.get(s.name() + "_" + "AMAZON_DE")}<br/>
                     FR: ${row.get(s.name() + "_" + "AMAZON_FR")}<br/><hr/>
@@ -32,7 +32,7 @@
                     EasyAcc.DE: ${row.get(s.name() + "_" + "amazon.de_wyatt")}<br/>
                     ">${row.get(s.name())}</a></td>
                 #{/list}
-                <td><a href="#" rel="popover" data-original-title="订单数细节" data-content="
+                <td><a href="#" rel="popover" placement='left' title="订单数细节" content="
                     UK: ${row.get("all_" + "AMAZON_UK")}<br/>
                     DE: ${row.get("all_" + "AMAZON_DE")}<br/>
                     FR: ${row.get("all_" + "AMAZON_FR")}<br/><hr/>
