@@ -114,7 +114,13 @@ $ ->
   #  自动补全的 sid 的功能条
   SID_PREVIEW_TEMPLATE = "<div><h3>Technical</h3><p id='t'></p><hr><h3>SearchTerms</h3><p id='s'></p><hr><h3>ProductDesc</h3><p id='p'></p></div>"
   $('#sid_helper').change ->
-    toolBar = $(@).parent()
+    o = $(@)
+    if o.data('sids') is undefined
+      o.data('sids', JSON.parse(o.attr('data-source')))
+
+    return false if !(@value in o.data('sids'))
+
+    toolBar = o.parent()
     toolBar.mask('加载数据中...')
     $.getJSON('/sellings/tsp', sid: @value,
       (json) ->
