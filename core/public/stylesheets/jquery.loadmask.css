@@ -43,3 +43,7 @@
 .masked-hidden{
     visibility:hidden !important;
 }
+
+.table .active{
+    background:#EEE;
+}

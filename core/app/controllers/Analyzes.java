@@ -6,6 +6,7 @@ import models.PageInfo;
 import models.Ret;
 import models.market.*;
 import org.joda.time.DateTime;
+import play.cache.CacheFor;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -51,6 +52,7 @@ public class Analyzes extends Controller {
      * @param to
      */
     @Check("manager")
+    @CacheFor("15mn")
     public static void ajaxUnit(String msku,
                                 String type,
                                 Account acc,
@@ -64,6 +66,7 @@ public class Analyzes extends Controller {
         }
     }
 
+    @CacheFor("15mn")
     public static void ajaxSales(String msku,
                                  String type,
                                  Account acc,

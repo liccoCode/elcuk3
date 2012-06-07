@@ -175,33 +175,37 @@ $ ->
       ->
         try
         # Selling 的 Ajax line 双击事件
-          $('.msku,.sku').unbind().dblclick(
-            ->
-              o = $(@)
-              $.varClosure.params = {type: o.attr('class')}
-              # sku 类型不参加 sid 与 msku 的选择
-              accId = o.attr('aid')
-              $('#a_acc_id').val(accId)
-              $('#a_msku').val(o.attr('title'))
-              $('#dbcick_param :input').map($.varClosure)
+          $('.msku,.sku').unbind().click ->
+            o = $(@)
+            # 处理样式
+            o.parents('table').find('tr').removeClass('active')
+            o.parent().addClass('active')
 
-              #绘制销量线
-              unit_line($.varClosure.params)
-              sale_line($.varClosure.params)
-              # PV & SS 线
-              if $.varClosure.params['type'] is 'msku'
-                ss_line($.varClosure.params)
-                turn_line($.varClosure.params)
-              else
-                pageViewDefaultContent()
+            # 收集参数
+            $.varClosure.params = {type: o.attr('class')}
+            ## sku 类型不参加 sid 与 msku 的选择
+            accId = o.attr('aid')
+            $('#a_acc_id').val(accId)
+            $('#a_msku').val(o.attr('title'))
+            $('#dbcick_param :input').map($.varClosure)
 
-              display =
-                0: 'EasyAcc'
-                1: 'EasyAcc.U'
-                2: 'EasyAcc.D'
-              $('#a_acc_id_label').html(display[accId])
-              false
-          )
+            # 绘制销量线
+            unit_line($.varClosure.params)
+            sale_line($.varClosure.params)
+            # PV & SS 线
+            if $.varClosure.params['type'] is 'msku'
+              ss_line($.varClosure.params)
+              turn_line($.varClosure.params)
+            else
+              pageViewDefaultContent()
+
+            display =
+              0: 'EasyAcc'
+              1: 'EasyAcc.U'
+              2: 'EasyAcc.D'
+            $('#a_acc_id_label').html(display[accId])
+            false
+
           #页脚的翻页事件
           $('div.pagination a').click ->
             sellRankLoad(type, $(@).attr('page'))

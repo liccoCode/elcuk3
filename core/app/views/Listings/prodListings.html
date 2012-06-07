@@ -1,11 +1,13 @@
 <table class="table table-bordered table-condensed">
     <tr>
+        <th>Sells</th>
         <th>ListingId</th>
         <th>Title (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)</th>
         <th>Review</th>
     </tr>
 #{list items:lsts, as:'l'}
-    <tr lid="${l.listingId}" style="cursor:pointer;">
+    <tr>
+        <td><a lid="${l.listingId}" href="#"><span class="badge badge-info">${l.sellings.size()}</span></a></td>
         <td><a href="@{Listings.listing(l.listingId)}" target="_blank">${l.listingId}</a></td>
         <td title="${l.title}">
             <a href="${l.asinLink()}" target="_blank">${l.title.length() <= 100 ? l.title : (l.title.subSequence(0, 100) + "...")}</a>
