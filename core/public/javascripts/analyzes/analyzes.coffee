@@ -121,7 +121,7 @@ $ ->
           alert(r.message)
         else
           display_sku = params['msku']
-          unitOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "] Unit Order")
+          unitOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type']?.toUpperCase() + "] Unit Order")
           unitOp.clearLines()
           lines =
             unit_all: {name: 'Unit Order(all)', data: []}
@@ -146,7 +146,7 @@ $ ->
           alert(r.message)
         else
           display_sku = params['msku']
-          saleOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type'].toUpperCase() + "] Sales")
+          saleOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type']?.toUpperCase() + "] Sales")
           saleOp.clearLines()
           lines =
             sale_all: {name: 'Sales(all)', data: []}
@@ -223,8 +223,9 @@ $ ->
 
   # 重新加载全部的销售线
   $('#all_search').click ->
-    unit_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
-    sale_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    [from, to] = [$('#a_from').val(), $('#a_to').val()]
+    unit_line(from: from, to: to, msku: 'All')
+    sale_line(from: from, to: to, msku: 'All')
     false
 
   $('#a_param').keyup (e) ->
