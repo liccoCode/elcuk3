@@ -281,7 +281,7 @@ $(function(){
         $("#amazon :input").map($.varClosure);
         $.post('/products/saleAmazonListing', $.varClosure.params, function(r){
             if(r.flag === false) alert(r.message);
-            else alert('更新成功.');
+            else alert('添加成功.');
             btnDiv.unmask();
         });
     });
