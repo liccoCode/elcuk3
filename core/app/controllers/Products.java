@@ -1,7 +1,6 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
-import com.google.gson.Gson;
 import helper.Constant;
 import helper.Webs;
 import models.PageInfo;
@@ -18,6 +17,7 @@ import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -73,10 +73,8 @@ public class Products extends Controller {
         List<AttrName> attnames = AttrName.productUnuseAttrName(p);
         List<Account> accs = Account.all().fetch();
 
-        List<String> sellingIds = new ArrayList<String>();
-        List<Selling> cateSellings = Selling.find("listing.product.category=?", p.category).fetch();
-        for(Selling s : cateSellings) sellingIds.add(s.sellingId);
-        renderArgs.put("sellingDataSource", new Gson().toJson(sellingIds));
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(p.sku);
+        renderArgs.put("sids", JSON.toJSONString(sellingAndSellingIds._2));
         render(p, cats, qtys, attnames, accs);
     }
 

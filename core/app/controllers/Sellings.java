@@ -52,7 +52,7 @@ public class Sellings extends Controller {
     public static void selling(String sid) {
         Selling s = Selling.findById(sid);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = s.sameFamilySellings();
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", JSON.toJSONString(sellingAndSellingIds._2));
         render(s);
     }

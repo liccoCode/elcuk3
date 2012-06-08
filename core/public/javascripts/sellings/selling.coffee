@@ -111,39 +111,3 @@ $ ->
         imgDiv.unmask()
     )
 
-  #  自动补全的 sid 的功能条
-  SID_PREVIEW_TEMPLATE = "<div><h3>Technical</h3><p id='t'></p><hr><h3>SearchTerms</h3><p id='s'></p><hr><h3>ProductDesc</h3><p id='p'></p></div>"
-  $('#sid_helper').change ->
-    o = $(@)
-    if o.data('sids') is undefined
-      o.data('sids', JSON.parse(o.attr('data-source')))
-
-    return false if !(@value in o.data('sids'))
-
-    toolBar = o.parent()
-    toolBar.mask('加载数据中...')
-    $.getJSON('/sellings/tsp', sid: @value,
-      (json) ->
-        html = $(SID_PREVIEW_TEMPLATE)
-        html.find('#t').html(json['t'].join('<br/><br/>'))
-        html.find('#s').html(json['s'].join('<br/><br/>'))
-        html.find('#p').html(json['p'][0])
-        $('#sid_preview_popover').attr('data-content', html.html()).data('tsp', json).click()
-        toolBar.unmask()
-    )
-
-  # 加载 tsp 数据的按钮
-  $('#sid_helper + button').click ->
-    json = $('#sid_preview_popover').data('tsp')
-    if json is undefined
-      alert('还没有数据, 请先预览!')
-      return false
-    # product Desc
-    $('[name=s\\.aps\\.productDesc]').val(json['p'][0]).blur()
-    # technical
-    for t, i in json['t']
-      $('[name=s\\.aps\\.keyFeturess\\[' + i + '\\]]').val(t).blur()
-    # searchTerms
-    for s, i in json['s']
-      $('[name=s\\.aps\\.searchTermss\\[' + i + '\\]]').val(s).blur()
-

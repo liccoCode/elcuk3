@@ -105,18 +105,12 @@
     </tr>
 
     <tr>
-        <td colspan="1"><label class="label label-info">功能条</label></td>
-        <td colspan="6">
-            <div class="input-prepend">
-                <label style="display:inline;">From: </label>
-                <a class="btn btn-small"
-                   rel="popover" trigger='toggle' placement='left' title="Selling Helper" data-content="输入参考的 SellingId (属于 Category <span style='color:blue;'>${pro.category}</span>) 加载 Technical, SearchTerms, Desc 供参考">
-                    <i class="icon-info-sign"></i>
-                </a>
-                <input type="text" class="span2" data-provide="typeahead" style="margin:auto;" data-items="8" data-source="${sellingDataSource}">
-                <button class="btn btn-primary">
-                    <i class="icon-refresh icon-white"></i>
-                </button>
+        <td colspan="4">
+            <div class="input-prepend offset1">
+                <button id="sid_preview_popover" class="btn btn-small" rel="popover" placement='bottom' trigger='toggle' width="800px" data-content="请先预览" title="Detail Preview">
+                    <i class="icon-search"></i></button>
+                <input type="text" id="sid_helper" style="width:160px;" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
+                <button class="btn btn-small" rel="popover"><i class="icon-edit"></i></button>
             </div>
         </td>
     </tr>

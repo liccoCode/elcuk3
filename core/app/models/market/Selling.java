@@ -371,8 +371,14 @@ public class Selling extends GenericModel {
         return this.save();
     }
 
-    public F.T2<List<Selling>, List<String>> sameFamilySellings() {
-        List<Selling> sellings = Selling.find("listing.product.family=?", Product.findByMerchantSKU(this.merchantSKU).family).fetch();
+    /**
+     * 加载指定 Product 所属的 Family 下的所有 Selling 与 SellingId
+     *
+     * @param msku
+     * @return
+     */
+    public static F.T2<List<Selling>, List<String>> sameFamilySellings(String msku) {
+        List<Selling> sellings = Selling.find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
         List<String> sids = new ArrayList<String>();
         for(Selling s : sellings) sids.add(s.sellingId);
         return new F.T2<List<Selling>, List<String>>(sellings, sids);
