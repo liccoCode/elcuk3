@@ -24,7 +24,7 @@ $ ->
   bindBasicInfoUpdate = (cid) ->
     $('#btn_' + cid).click ->
       $.varClosure.params = {}
-      $('#detail_' + cid + ' :input').map($.varClosure)
+      $('#detail_' + cid + ' :input').map($.varClosure2)
       basic = $('#detail_' + cid)
       basic.mask('更新中...')
       $.post('/categorys/cu', $.varClosure.params,
