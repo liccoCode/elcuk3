@@ -280,8 +280,8 @@ $(function(){
         btnDiv.mask("创建中...");
         $("#amazon :input").map($.varClosure);
         $.post('/products/saleAmazonListing', $.varClosure.params, function(r){
-            if(r.flag) alert('更新成功.');
-            else alert(r.message);
+            if(r.flag === false) alert(r.message);
+            else alert('更新成功.');
             btnDiv.unmask();
         });
     });

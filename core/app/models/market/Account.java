@@ -1,7 +1,6 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import exception.NotLoginFastException;
 import exception.NotSupportChangeRegionFastException;
 import helper.*;
 import org.apache.commons.io.FileUtils;
@@ -22,6 +21,7 @@ import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -609,42 +609,12 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
+        String url = "Account.changeRegion.";
         try {
-            String body = HTTP.get(this.cookieStore(), this.type.homePage());
-            Document doc = Jsoup.parse(body);
-            Element countries = doc.select("#merchant-website").first();
-            if(countries == null) throw new NotLoginFastException();
-            String value = null;
-            for(Element ct : countries.select("option")) {
-                switch(m) {
-                    case AMAZON_UK:
-                        if("www.amazon.co.uk".equalsIgnoreCase(ct.text().trim())) value = ct.attr("value");
-                        break;
-                    case AMAZON_DE:
-                        if("www.amazon.de".equalsIgnoreCase(ct.text().trim())) value = ct.attr("value");
-                        break;
-                    case AMAZON_FR:
-                        if("www.amazon.fr".equalsIgnoreCase(ct.text().trim())) value = ct.attr("value");
-                        break;
-                    case AMAZON_ES:
-                        if("www.amazon.es".equalsIgnoreCase(ct.text().trim())) value = ct.attr("value");
-                        break;
-                    case AMAZON_IT:
-                        if("www.amazon.it".equalsIgnoreCase(ct.text().trim())) value = ct.attr("value");
-                        break;
-                    default:
-                        Logger.info("Not Support The Market out of Europe.");
-                        return;
-                    //ignore
-                }
-            }
-            if(value == null) {
-                Logger.warn("Value parse Error!");
-                return;
-            }
-            HTTP.get(this.cookieStore(), this.type.changeRegion(value));
+            url = this.type.changeRegion(m.amid());
+            HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
-            e.printStackTrace();
+            throw new FastRuntimeException(String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
         }
     }
 
