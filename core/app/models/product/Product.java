@@ -212,8 +212,9 @@ public class Product extends GenericModel {
             Set<NameValuePair> classifyHiddenParams = new HashSet<NameValuePair>();
             for(Element input : inputs) {
                 String name = input.attr("name");
-                if("newCategory".equals(name)) { //TODO 这里的类别先写死, 需要将这个类别与系统内的类别挂钩(类别上拥有 name, 具体的值最终全部沉淀到 Product 身上)
-                    classifyHiddenParams.add(new BasicNameValuePair(name, "consumer_electronics/consumer_electronics"));
+                if("newCategory".equals(name)) {
+                    classifyHiddenParams.add(new BasicNameValuePair(name, // 首先会选择 Category 身上的值, 如果都没有, 则使用默认值
+                            StringUtils.isBlank(this.category.settings.amazonCategory) ? "consumer_electronics/consumer_electronics" : this.category.settings.amazonCategory));
                 } else classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
             }
 

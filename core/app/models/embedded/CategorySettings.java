@@ -21,6 +21,12 @@ public class CategorySettings {
     @Column(columnDefinition = "varchar(255) DEFAULT ''")
     public String amazonNode;
 
+    /**
+     * 上架时候选择 CLASSIFY 的值
+     */
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonCategory;
+
     public Map<String, String> amazonNodeMap() {
         String[] nodes = StringUtils.split(amazonNode, ",");
         Map<String, String> nodeMap = new HashMap<String, String>();
