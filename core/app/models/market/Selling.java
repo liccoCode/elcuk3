@@ -379,6 +379,22 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * Selling 实例对象, 自行初始化 sid
+     *
+     * @return
+     */
+    public String sid() {
+        if(StringUtils.isBlank(this.merchantSKU))
+            throw new FastRuntimeException("Selling.sid merchantSKU can not be empty.");
+        if(this.market == null)
+            throw new FastRuntimeException("Selling.sid market can not be null.");
+        if(this.account == null)
+            throw new FastRuntimeException("Selling.sid account can not be null.");
+        this.sellingId = Selling.sid(this.merchantSKU, this.market, this.account);
+        return this.sellingId;
+    }
+
+    /**
      * 返回这个 Listing 所对应的分析页面的 PItem 对象
      *
      * @return

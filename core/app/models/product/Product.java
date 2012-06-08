@@ -344,9 +344,11 @@ public class Product extends GenericModel {
             }
         }
 
-        selling.listing = new Listing(selling, this).save();
+        selling.listing = Listing.findById(Listing.lid(selling.asin, selling.market));
+        if(selling.listing == null) selling.listing = new Listing(selling, this).save();
 
         //测试使用的 UPC 614444720150
+        selling.sid();
         return selling.save();
     }
 
