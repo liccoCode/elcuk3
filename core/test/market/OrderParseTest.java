@@ -1,6 +1,7 @@
 package market;
 
 import models.market.Account;
+import models.market.JobRequest;
 import models.market.Orderr;
 import models.market.Selling;
 import models.product.Product;
@@ -32,7 +33,7 @@ public class OrderParseTest extends UnitTest {
 
     private String home = System.getProperty("user.home");
 
-    @Test
+    //    @Test
     public void testParse() {
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/10/11/8141580584.xml"), Account.M.AMAZON_UK);
 //        List<Orderr> orders = Orderr.parseAllOrderXML(new File("/Users/wyattpan/elcuk-data/2011/12/32/9566254144.xml"), Account.M.AMAZON_UK);
@@ -45,6 +46,12 @@ public class OrderParseTest extends UnitTest {
             or.account = acc;
             or.merge();
         }
+    }
+
+    @Test
+    public void testParseOrderFromJobRequest() {
+        JobRequest job = JobRequest.findById(5752l);
+        job.dealWith();
     }
 
     //    @Test

@@ -3,7 +3,6 @@ package models.market;
 import helper.AWS;
 import helper.Webs;
 import models.product.Whouse;
-import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
@@ -264,55 +263,34 @@ public class JobRequest extends Model {
             case ALL_FBA_ORDER_FETCH:
                 /**
                  * 1. 解析出文件中的所有 Orders.
-                 * 2. 手动从数据库中加载出需要更新的 Order (managed),  然后再将这些处于被管理状态的 Order 进行更新;
-                 * 3. 将数据库中没有加载到的 Order 给新保存
+                 * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
                  */
                 orders = Orderr.parseAllOrderXML(new File(this.path), this.account); // 1. 解析出订单
-                orderIds.clear();
-                orderrMap.clear();
-                oldOrderrMap.clear();
-                for(Orderr or : orders) {
-                    orderrMap.put(or.orderId, or);
-                    orderIds.add(or.orderId);
-                }
-                List<Orderr> managedOrderrs = Orderr.find("orderId IN ('" + StringUtils.join(orderIds, "','") + "')").fetch();
-                for(Orderr or : managedOrderrs) { // 2. 手动从数据库中加载出需要更新的 Order (managed),  然后再将这些处于被管理状态的 Order 进行更新;
-                    Orderr newOrder = orderrMap.get(or.orderId);
-                    or.updateAttrs(newOrder);
-                    oldOrderrMap.put(or.orderId, or);
-                }
-                for(Orderr newOrd : orders) { // 3. 将数据库中没有加载到的 Order 给新保存
-                    if(oldOrderrMap.containsKey(newOrd.orderId)) continue;
-                    // 由于 Account 在 XML 文件中解析不出来, 所以在创建的时候需要讲讲这个 Order 的 Account 与对应申请 JobRequest 的关联上
-                    newOrd.account = this.account;
-                    newOrd.save();
-                    Logger.info("Save Order: " + newOrd.orderId);
+
+                for(Orderr order : orders) {
+                    Orderr managed = Orderr.findById(order.orderId);
+                    if(managed == null) { //保存
+                        order.save();
+                        Logger.info("Save Order: " + order.orderId);
+                    } else { //更新
+                        if(managed.state == Orderr.S.CANCEL) continue;
+                        managed.updateAttrs(order);
+                    }
                 }
                 break;
             case ALL_FBA_ORDER_SHIPPED:
                 /**
                  * 1. 将需要更新的数据从 csv 文件中提取出来
-                 * 2. 加载出需要进行更新的 Order(managed), 然后将这些处于被管理的 Order 对象进行更新;
-                 * 3. 如果在更新过程中出现系统中没有出现的订单, 那么则输出日志
+                 * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
                  */
                 orders = Orderr.parseUpdateOrderXML(new File(this.path), this.account.type);
-                orderIds.clear();
-                orderrMap.clear();
-                oldOrderrMap.clear();
-                for(Orderr or : orders) {
-                    orderrMap.put(or.orderId, or);
-                    orderIds.add(or.orderId);
-                }
-
-                List<Orderr> managedOrderrs_2 = Orderr.find("orderId IN ('" + StringUtils.join(orderIds, "','") + "')").fetch();
-                for(Orderr or : managedOrderrs_2) {
-                    Orderr newOrder = orderrMap.get(or.orderId);
-                    or.updateAttrs(newOrder);
-                    oldOrderrMap.put(or.orderId, or);
-                }
-                for(Orderr newOrd : orders) {
-                    if(oldOrderrMap.containsKey(newOrd.orderId)) continue;
-                    Logger.warn("Update Order [" + newOrd.orderId + "] is not exist.");
+                for(Orderr order : orders) {
+                    Orderr managed = Orderr.findById(order.orderId);
+                    if(managed == null) {
+                        Logger.error("Update Order [%s] is not exist.", order.orderId);
+                    } else {
+                        managed.updateAttrs(order);
+                    }
                 }
                 break;
             case MANAGE_FBA_INVENTORY_ARCHIVED:

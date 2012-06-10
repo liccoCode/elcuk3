@@ -9,6 +9,7 @@ import helper.Webs;
 import models.finance.SaleFee;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.jsoup.nodes.Document;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 10:18 AM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Orderr extends GenericModel {
     /**
      * 订单的状态 State
@@ -70,7 +72,7 @@ public class Orderr extends GenericModel {
     }
 
     //-------------- Object ----------------
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     public List<OrderItem> items;
 
     /**
@@ -284,6 +286,8 @@ public class Orderr extends GenericModel {
                             if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
                             if(noi.product != null) oi.product = noi.product;
                             if(noi.selling != null) oi.selling = noi.selling;
+                            if(noi.currency != null && oi.currency != noi.currency) oi.currency = noi.currency;
+                            if(noi.usdCost != null) oi.usdCost = noi.usdCost;
                         } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
                             newlyOi.add(noi);
                         }
@@ -685,7 +689,7 @@ public class Orderr extends GenericModel {
     }
 
     /**
-     * 解析产生的订单, 这一部分主要提供的是 Amazon 的
+     * 解析 XML 文件中记录的订单(注意:这里是如实反应 XML 中的信息,不要更新数据库), 这一部分主要提供的是 Amazon 的
      *
      * @param file
      * @return
@@ -703,6 +707,7 @@ public class Orderr extends GenericModel {
             }
 
             Orderr orderr = new Orderr();
+            orderr.account = acc;
             orderr.orderId = amazonOrderId;
             orderr.market = Account.M.val(odt.getSalesChannel());
             orderr.createDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
@@ -789,15 +794,16 @@ public class Orderr extends GenericModel {
                     for(ComponentType ct : costs) { // 价格在这个都要统一成为 GBP (英镑), 注意不是 EUR 欧元
                         AmountType at = ct.getAmount();
                         String compType = ct.getType().toLowerCase();
-                        Currency currency = Currency.valueOf(at.getCurrency());
+                        oi.currency = Currency.valueOf(at.getCurrency());
                         if("principal".equals(compType)) {
-                            oi.price = currency.toGBP(at.getValue());
+                            oi.price = at.getValue();
                             totalAmount += oi.price;
+                            oi.usdCost = oi.currency.toUSD(oi.price);
                         } else if("shipping".equals(compType)) {
-                            oi.shippingPrice = currency.toGBP(at.getValue());
+                            oi.shippingPrice = at.getValue();
                             shippingAmount += oi.shippingPrice;
                         } else if("giftwrap".equals(compType)) {
-                            oi.memo += "\nGiftWrap: " + currency.toGBP(at.getValue()) + " GBP."; //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
+                            oi.memo += String.format("\nGiftWrap: %s %s.", at.getValue(), oi.currency); //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
                         }
                     }
 

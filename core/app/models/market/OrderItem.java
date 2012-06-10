@@ -1,9 +1,6 @@
 package models.market;
 
-import helper.Cached;
-import helper.Caches;
-import helper.Dates;
-import helper.GTs;
+import helper.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -55,6 +52,19 @@ public class OrderItem extends GenericModel {
      * 这个商品的销售
      */
     public Float price;
+
+    /**
+     * 记录这个 OrderItem 记录的货币单位[price/discountPrice/..]
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(10) DEFAULT ''")
+    public Currency currency;
+
+    /**
+     * 统一为 USD 的金额
+     */
+    @Column(columnDefinition = "float DEFAULT 0")
+    public Float usdCost;
 
     /**
      * 如果做促销的话, 具体折扣的价格
