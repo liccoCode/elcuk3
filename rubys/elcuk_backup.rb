@@ -80,7 +80,7 @@ def back_files(from, to, serv)
 	# rsync 
 	puts ''
 	puts "Backup #{from} to #{to}..."
-	system("rsync -azx --progress #{serv}:#{from} #{to}")
+	system("rsync -azx --delete --progress #{serv}:#{from} #{to}")
 end
 
 
