@@ -62,7 +62,7 @@ public class Analyzes extends Controller {
         try {
             renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartUnitOrder(msku, acc, type, from, to)));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.S(e)));
         }
     }
 
