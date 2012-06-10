@@ -83,6 +83,7 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
+    @CacheFor("30mn")
     public static void ajaxSellingRecord(String msku,
                                          Account acc,
                                          @As("MM/dd/yyyy") Date from,
@@ -97,6 +98,7 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的转换率
      */
+    @CacheFor("30mn")
     public static void ajaxSellingTurn(String msku,
                                        Account acc,
                                        @As("MM/dd/yyyy") Date from,

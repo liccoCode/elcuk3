@@ -254,7 +254,7 @@ public class SellingRecord extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("1h")
+    @Cached("5mn") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
     public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
