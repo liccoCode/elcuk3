@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 10:18 AM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Orderr extends GenericModel {
     /**
      * 订单的状态 State

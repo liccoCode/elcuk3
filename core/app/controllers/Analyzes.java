@@ -52,7 +52,7 @@ public class Analyzes extends Controller {
      * @param to
      */
     @Check("manager")
-    @CacheFor("15mn")
+    @CacheFor("30mn")
     public static void ajaxUnit(String msku,
                                 String type,
                                 Account acc,
@@ -66,7 +66,7 @@ public class Analyzes extends Controller {
         }
     }
 
-    @CacheFor("15mn")
+    @CacheFor("30mn")
     public static void ajaxSales(String msku,
                                  String type,
                                  Account acc,

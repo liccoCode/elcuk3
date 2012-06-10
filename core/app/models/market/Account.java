@@ -38,7 +38,7 @@ import java.util.*;
  * Time: 4:39 PM
  */
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Account extends Model {
     private static Map<String, String> MERCHANT_ID;
 

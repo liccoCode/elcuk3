@@ -26,7 +26,7 @@ import java.io.File;
  * Time: 10:34 AM
  */
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Attach extends Model {
 
     /**

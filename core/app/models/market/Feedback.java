@@ -29,7 +29,7 @@ import java.util.List;
  * Time: 5:15 PM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Feedback extends GenericModel {
 
     public enum S {

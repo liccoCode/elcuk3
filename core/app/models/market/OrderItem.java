@@ -126,7 +126,7 @@ public class OrderItem extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("1h")
+    @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
     public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type, Account acc, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
         List<OrderItem> orderItems = Cache.get(cacheKey, List.class);
@@ -143,7 +143,7 @@ public class OrderItem extends GenericModel {
                     orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrMsku, acc, from, to).fetch();
             }
         }
-        Cache.add(cacheKey, orderItems, "1h");
+        Cache.add(cacheKey, orderItems, "5mn");
         return orderItems;
     }
 

@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 10:48 AM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Selling extends GenericModel {
 
     public Selling() {
