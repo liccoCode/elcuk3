@@ -29,7 +29,9 @@ $ ->
       series:
         cursor: 'pointer',
         point: events: {}
-    tooltip: {}
+    tooltip:
+      shared: true
+      crosshairs: true
     series: []
     # 设置这条线的'标题'
     head: (title) ->
@@ -60,7 +62,7 @@ $ ->
   )
 
   # 销售销量曲线
-  saleOp = lineOp('a_sales', 'Sales').click(
+  saleOp = lineOp('a_sales', 'Sales(USD)').click(
     ->
       alert(@series.name + ":::::" + @x + ":::" + @y)
   )
@@ -146,7 +148,7 @@ $ ->
           alert(r.message)
         else
           display_sku = params['msku']
-          saleOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type']?.toUpperCase() + "] Sales")
+          saleOp.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['type']?.toUpperCase() + "] Sales(USD)")
           saleOp.clearLines()
           lines =
             sale_all: {name: 'Sales(all)', data: []}

@@ -4,7 +4,7 @@
     #{stylesheet 'dateinput.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'orders/orders.js'/}
+    #{script 'orders/orders.coffee'/}
     #{script 'jquery.tools.date.min.js'/}
 #{/set}
 
@@ -50,7 +50,7 @@
                     Day</a>
                 <a href="#" day="30" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 30 天内的订单(结果缓存5mn)">30
                     Day</a>
-                <a href="#" day="-1" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索自定义(<b>From</b>, <b>TO</b>)天数内的订单(结果缓存5mn)">Search</a>
+                <a href="#" day="-1" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索自定义(<b>From</b>, <b>TO</b>)天数内的订单(结果缓存5mn)">LifeTime?</a>
             </fieldset>
         </div>
     </div>
@@ -77,7 +77,7 @@
             </tr>
             #{list items:orders, as:'ord'}
                 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-                    <td><a target="_blank" href=@{Orders.o_detail(ord.orderId, "")}>${ord.orderId}</a></td>
+                    <td><a target="_blank" href=@{Orders.o_detail(ord.orderId)}>${ord.orderId}</a></td>
                     <td>${ord.market.toString()}</td>
                     <td>${(ord.address == null ? '' : ord.address) + "  " + (ord.address1 == null ? '' : ord.address1)}</td>
                     <td>${(ord.country == null ? '' : ord.country) + " " + (ord.city == null ? '' : ord.city) + " " + (ord.province == null ? '' : ord.province)}</td>

@@ -4,6 +4,7 @@ import helper.Webs;
 import models.OrderPOST;
 import models.PageInfo;
 import models.market.Account;
+import models.market.Feedback;
 import models.market.Orderr;
 import play.cache.CacheFor;
 import play.mvc.Controller;
@@ -33,9 +34,10 @@ public class Orders extends Controller {
         render(orders, count, p, s, pi, accs);
     }
 
-    public static void o_detail(String oid, String m) {
+    public static void o_detail(String oid) {
         Orderr ord = Orderr.findById(oid);
-        render(ord, m);
+        Feedback f = Feedback.findById(ord.orderId);
+        render(ord, f);
     }
 
     /**

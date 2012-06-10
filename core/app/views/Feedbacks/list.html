@@ -22,7 +22,7 @@
             #{set st:f.state == models.market.Feedback.S.HANDLING/}
             #{set sc:f.score <= 3/}
             <tr style="background: ${(st && sc) == true ? '#FFEACD' : '#F4F4F4'}">
-                <td><a target="_blank" href="@{Orders.o_detail(f.orderId,f.comment)}">${f.orderId}</a></td>
+                <td><a target="_blank" href="@{Orders.o_detail(f.orderId)}">${f.orderId}</a></td>
                 <td>${f.createDate.format('yyyy-MM-dd')}</td>
                 <td>${f.market}</td>
                 <td><a href="#" rel="tooltip" data-original-title="${f.account.uniqueName}">${f.account.username}</a>

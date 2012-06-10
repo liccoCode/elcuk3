@@ -29,7 +29,7 @@ public class OrderItem extends GenericModel {
     @Id
     public String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Orderr order;
 
     @OneToOne(fetch = FetchType.LAZY)
