@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Constant;
 import helper.Webs;
+import models.Ret;
 import models.finance.SaleFee;
 import models.market.Account;
 import org.apache.commons.io.FileUtils;
@@ -32,6 +33,7 @@ public class Finances extends Controller {
      *
      * @param n
      */
+    @Check("root")
     public static void fix(String n, String m, Account a) {
         try {
             if(!a.isPersistent()) renderText("Account is not Persistent!");
@@ -68,5 +70,25 @@ public class Finances extends Controller {
         rt.put("path", path);
         rt.put("size", f.getTotalSpace() + "");
         renderJSON(rt);
+    }
+
+    /**
+     * @param rid
+     * @param acc
+     * @param m
+     */
+    @Check("root")
+    public static void flatV2(String rid, Account acc, String m) {
+        if(!acc.isPersistent()) renderJSON(new Ret("Account 不存在, 错误!"));
+        Account.M market = Account.M.val(m);
+        if(market == null) renderJSON(new Ret("Account is invalid!"));
+        try {
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(acc.briefFlatV2Finance(market, rid), acc, market);
+            SaleFee.clearOldSaleFee(fees);
+            SaleFee.batchSaveWithJDBC(fees);
+            renderJSON(new Ret(true, "Saved: " + fees.size() + " fees"));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.S(e)));
+        }
     }
 }

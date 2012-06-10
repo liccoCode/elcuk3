@@ -56,7 +56,8 @@ public class HTTP {
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
+            // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
+            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(40));
             HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
 
             ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();

@@ -7,6 +7,7 @@ import models.market.Account;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.junit.Before;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -30,7 +31,7 @@ public class SaleFeeParseTest extends UnitTest {
         }
     }
 
-    @Test
+    //    @Test
     public void testParseThrough() {
         new KeepSessionJob().doJob();
         new FinanceCheckJob().doJob();
@@ -53,5 +54,17 @@ public class SaleFeeParseTest extends UnitTest {
                 f.save();
             }
         }
+    }
+
+    @Before
+    public void login() {
+        Account acc = Account.findById(1l);
+        acc.loginWebSite();
+    }
+
+    @Test
+    public void testAccountBriefFlatFinance() {
+        Account acc = Account.findById(1l);
+        acc.briefFlatFinance(Account.M.AMAZON_UK);
     }
 }

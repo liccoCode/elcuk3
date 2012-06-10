@@ -43,4 +43,14 @@ public class Accounts extends Controller {
         renderJSON(new Ret(true));
     }
 
+    public static void login(Account a) {
+        if(!a.isPersistent()) renderJSON(new Ret("Account 不存在!"));
+        try {
+            a.loginWebSite();
+            renderJSON(new Ret(true, String.format("%s login success.", a.prettyName())));
+        } catch(Exception e) {
+            renderJSON(new Ret(true, String.format("%s login faield. [%s]", a.prettyName(), Webs.E(e))));
+        }
+    }
+
 }

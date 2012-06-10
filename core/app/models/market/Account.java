@@ -282,6 +282,7 @@ public class Account extends Model {
          */
         public String flatFinance() {
             //https://sellercentral.amazon.co.uk/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
+            //https://sellercentral.amazon.co.uk/gp/payments-account//export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
             switch(this) {
                 case AMAZON_UK:
                 case AMAZON_DE:
@@ -289,7 +290,29 @@ public class Account extends Model {
                 case AMAZON_FR:
                 case AMAZON_IT:
                 case AMAZON_US:
-                    return "https://sellercentral." + this.toString() + "/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=";
+                    return "https://sellercentral." + this.toString() + "/gp/payments-account//export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=";
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+        /**
+         * 从 Past Settlements 页面下载 Flat File V2 文件进行 Finance 数据的补充
+         *
+         * @param reportId
+         * @return
+         */
+        public String flatV2Finance(String reportId) {
+            //https://sellercentral.amazon.co.uk/gp/reports/documents/_GET_ALT_FLAT_FILE_PAYMENT_SETTLEMENT_DATA__11567294004.txt?ie=UTF8&contentType=text%2Fxls
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return "https://sellercentral." + this.toString() + "/gp/reports/documents/_GET_ALT_FLAT_FILE_PAYMENT_SETTLEMENT_DATA__" + reportId + ".txt?ie=UTF8&contentType=text%2Fxls";
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();
@@ -678,24 +701,56 @@ public class Account extends Model {
      * @return
      */
     public File briefFlatFinance(M market) {
+        String body = Account.downFileFromAmazon(this.type.flatFinance(), market, this);
+        DateTime dt = DateTime.now();
+        File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
+                Constant.D_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
+        Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
         try {
-            String body = "";
-            synchronized(this.cookieStore()) { // 在与 Amazon 交互下载文件的时候需要锁住 CookieStore
-                this.loginWebSite();
-                this.changeRegion(market);
-                Logger.info("Downloading [%s] File...", this.username);
-                body = HTTP.get(this.cookieStore(), this.type.flatFinance());
-            }
-            DateTime dt = DateTime.now();
-            File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
-                    Constant.D_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
-            Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
             FileUtils.writeStringToFile(f, body);
-            return f;
         } catch(IOException e) {
-            Logger.warn(Webs.E(e));
+            //ignore
         }
-        return null;
+        return f;
+    }
+
+    /**
+     * 下载 Past Settlements 页面的 Flat V2 文件
+     *
+     * @param market
+     * @param reportId
+     * @return
+     */
+    public File briefFlatV2Finance(M market, String reportId) {
+        String body = Account.downFileFromAmazon(this.type.flatV2Finance(reportId), market, this);
+        File f = new File(String.format("%s/%s/%s.txt", Constant.D_FINANCE, market, reportId));
+        Logger.info("FlatV2 File Save to :[%s]", f.getAbsolutePath());
+        try {
+            FileUtils.writeStringToFile(f, body);
+        } catch(IOException e) {
+            //ignore
+        }
+        return f;
+    }
+
+    /**
+     * 在 Amazon 上通过 URL 下载文件
+     *
+     * @param url
+     * @param market
+     * @return
+     */
+    public static String downFileFromAmazon(String url, M market, Account acc) {
+        String body = "";
+        synchronized(acc.cookieStore()) {
+            acc.changeRegion(market);
+            body = HTTP.get(acc.cookieStore(), url);
+        }
+        if(StringUtils.isBlank(body)) {
+            Logger.warn("URL [%s] Download file error.", url);
+            throw new FastRuntimeException(String.format("Download [%s] error.", url));
+        }
+        return body;
     }
 
     /**
