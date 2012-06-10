@@ -48,7 +48,6 @@ public class SellingRecordCheckJob extends Job {
                  */
 
                 // ------- 1 ----------
-                /*
                 switch(sell.market) {
                     case AMAZON_UK:
                         record.currency = Currency.GBP;
@@ -66,9 +65,6 @@ public class SellingRecordCheckJob extends Job {
                         record.currency = Currency.GBP;
 
                 }
-                */
-                // TODO 由于现在 OrderItem 全部统计成了 GBP 计算所以现在全部使用 GBP 计算
-                record.currency = Currency.GBP;
                 try {
 
                     for(OrderItem oi : orderitems) {
@@ -81,13 +77,12 @@ public class SellingRecordCheckJob extends Job {
                         }
                         record.units += 1;
                         if(oi.order.state == Orderr.S.CANCEL) record.orderCanceld += 1;
-                        // TODO sales 需要在修改了 OrderItem 记录的价格以后再重新计算
                         record.sales += oi.price;
+                        record.usdSales += oi.usdCost;
                     }
                 } catch(Exception e) {
                     Logger.warn(Webs.E(e));
                 }
-                record.usdSales = record.currency.toUSD(record.sales);
 
                 // ---------- 2 ----------
                 record.salePrice = sell.aps.salePrice != null && sell.aps.salePrice > 0 ? sell.aps.salePrice : sell.aps.standerPrice;
