@@ -354,6 +354,12 @@ public class Listing extends GenericModel {
          * 否则返回一个瞬时状态的 Listing 对象
          */
         JsonObject lst = listingJson.getAsJsonObject();
+        if("CLOSE".equalsIgnoreCase(lst.get("state").getAsString())) {
+            Logger.info("Listing %s is not exist.(404 page)", lst.get("asin").getAsString());
+            return null;
+        }
+
+
         String listingId = lst.get("listingId").getAsString();
         if(listingId == null || listingId.trim().isEmpty()) return null; // 排除 404 没有的 Listing
         Listing oldListing = Listing.find("listingId=?", listingId).first();

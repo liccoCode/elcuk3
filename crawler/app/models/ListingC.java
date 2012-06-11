@@ -27,6 +27,11 @@ public class ListingC {
         EBAY
     }
 
+    public enum S {
+        NORMAL,
+        CLOSE
+    }
+
     public MT market;
 
     public ListingC(MT market, String html) {
@@ -70,6 +75,8 @@ public class ListingC {
 
     public List<ListingOfferC> offers;
 
+    public S state;
+
     /**
      * 根据指定的抓取的 ListingC 类型进行解析
      *
@@ -92,6 +99,11 @@ public class ListingC {
     private ListingC parseAmazon() {
         // html
         Element root = Jsoup.parse(html);
+
+        if(StringUtils.contains(root.select("title").text(), "404")) {
+            this.state = S.CLOSE;
+            return this;
+        }
 
         this.asin = root.select("#ASIN").val().toUpperCase();
         String site = root.select("#navLogoPrimary > span").first().text();

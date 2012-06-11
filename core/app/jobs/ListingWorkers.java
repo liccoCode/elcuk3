@@ -90,6 +90,7 @@ public class ListingWorkers extends Job {
             try {
                 JsonElement lst = Crawl.crawlListing(listing.market.name(), listing.asin);
                 Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst, false);
+                if(needCheckListing == null) return;
                 try {
                     if(needCheckListing.offers == null || needCheckListing.offers.size() == 0) {
                         Logger.info("Listing (%s) fetch offers...", needCheckListing.listingId);
