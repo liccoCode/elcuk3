@@ -1,6 +1,6 @@
 package market;
 
-import jobs.OrderFetchJob;
+import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import org.junit.Test;
 import play.test.FunctionalTest;
@@ -35,7 +35,7 @@ public class AWSFuncTest extends FunctionalTest {
          * 3. 创建 Job
          * 4. 下载 Job
          */
-        new OrderFetchJob().now();
+        new AmazonOrderFetchJob().now();
         /*
         try {
             Thread.sleep(15000);
@@ -43,21 +43,21 @@ public class AWSFuncTest extends FunctionalTest {
         } catch(InterruptedException e) {
             e.printStackTrace();
         }
-        new OrderFetchJob().now();
+        new AmazonOrderFetchJob().now();
 
         try {
             Thread.sleep(15000);
         } catch(InterruptedException e) {
             e.printStackTrace();
         }
-        new OrderFetchJob().now();
+        new AmazonOrderFetchJob().now();
 
         try {
             Thread.sleep(15000);
         } catch(InterruptedException e) {
             e.printStackTrace();
         }
-        new OrderFetchJob().now();
+        new AmazonOrderFetchJob().now();
         */
     }
 

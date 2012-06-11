@@ -1,8 +1,6 @@
 package models.market;
 
 import helper.AWS;
-import helper.Webs;
-import models.product.Whouse;
 import play.Logger;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
@@ -11,8 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
-import java.io.File;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,6 +21,28 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 public class JobRequest extends Model {
+    public interface AmazonJob {
+        /**
+         * 回掉的处理函数
+         *
+         * @param jobRequest
+         */
+        public void callBack(JobRequest jobRequest);
+
+        /**
+         * 表明是哪一种 JobRequest
+         *
+         * @return
+         */
+        public T type();
+
+        /**
+         * 返回创建这个 Job 的间隔时间
+         *
+         * @return
+         */
+        public int intervalHours();
+    }
 
 
     public enum T {
@@ -129,26 +149,12 @@ public class JobRequest extends Model {
      * 根据 Account 检查是否需要有不同类型的 Job 创建;
      *
      * @param acc
-     * @param type
+     * @param ajob
      * @param mid  需要使用哪一个市场的数据;
      * @return
      */
-    public static JobRequest checkJob(Account acc, T type, AWS.MID mid) {
-        switch(type) {
-            // 每一个小时抓取一次新订单
-            case ALL_FBA_ORDER_FETCH:
-                return newJob(1, T.ALL_FBA_ORDER_FETCH, acc, mid);
-            // 每 8 小时更新一次发货的订单
-            case ALL_FBA_ORDER_SHIPPED:
-                return newJob(8, T.ALL_FBA_ORDER_SHIPPED, acc, mid);
-            // 每 8 小时进行一次 FBA 仓库同步
-            case MANAGE_FBA_INVENTORY_ARCHIVED:
-                return newJob(8, T.MANAGE_FBA_INVENTORY_ARCHIVED, acc, mid);
-            case ACTIVE_LISTINGS:
-                //一般情况下, 这个 Job 应该是关闭状态, 手动运行. 数据库中记录的这些数据也可以删除, 因为其需要最新的数据.
-                return newJob(1, T.ACTIVE_LISTINGS, acc, mid);
-        }
-        return null;
+    public static JobRequest checkJob(Account acc, AmazonJob ajob, AWS.MID mid) {
+        return newJob(ajob.intervalHours(), ajob.type(), acc, mid);
     }
 
     /**
@@ -211,13 +217,17 @@ public class JobRequest extends Model {
     /**
      * 更新 Job 状态
      */
-    public void updateState() {
-        if(checkAvailableType()) {
-            Logger.debug("(step2)JobRequest request " + this.type + " UPDATE_STATE Job.");
-            try {
-                AWS.requestState_step2(this);
-            } catch(Exception e) {
-                Logger.warn("JobRequest Update State Error. " + e.getMessage());
+    public static void updateState(T type) {
+        List<JobRequest> tobeUpdateState = JobRequest.find("state IN (?,?) AND procressState!='_CANCELLED_' AND type=?",
+                JobRequest.S.REQUEST, JobRequest.S.PROCRESS, type).fetch();
+        for(JobRequest job : tobeUpdateState) {
+            if(job.checkAvailableType()) {
+                Logger.debug("(step2)JobRequest request " + job.type + " UPDATE_STATE Job.");
+                try {
+                    AWS.requestState_step2(job);
+                } catch(Exception e) {
+                    Logger.warn("JobRequest Update State Error. " + e.getMessage());
+                }
             }
         }
     }
@@ -225,13 +235,17 @@ public class JobRequest extends Model {
     /**
      * 获取 ReportId
      */
-    public void updateReportId() {
-        if(checkAvailableType()) {
-            Logger.debug("JobRequest request " + this.type + " UPDATE_REPORTID Job.");
-            try {
-                AWS.requestReportId_step3(this);
-            } catch(Exception e) {
-                Logger.warn("JobRequest Update Report Error. " + e.getMessage());
+    public static void updateReportId(T type) {
+        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_' AND type=?",
+                JobRequest.S.DONE, type).fetch();
+        for(JobRequest job : tobeFetchReportId) {
+            if(job.checkAvailableType()) {
+                Logger.debug("JobRequest request " + job.type + " UPDATE_REPORTID Job.");
+                try {
+                    AWS.requestReportId_step3(job);
+                } catch(Exception e) {
+                    Logger.warn("JobRequest Update Report Error. " + e.getMessage());
+                }
             }
         }
     }
@@ -239,14 +253,17 @@ public class JobRequest extends Model {
     /**
      * 修在文件
      */
-    public void downLoad() {
-        if(this.state != S.DOWN) return;
-        if(checkAvailableType()) {
-            Logger.debug("JobRequest request " + this.type + " DOWNLOAD Job.");
-            try {
-                AWS.requestReportDown_step4(this);
-            } catch(Exception e) {
-                Logger.warn("JobRequest DownLoad Error. " + e.getMessage());
+    public static void downLoad(T type) {
+        List<JobRequest> tobeDownload = JobRequest.find("state=? AND type=?", JobRequest.S.DOWN, type).fetch();
+        for(JobRequest job : tobeDownload) {
+            if(job.state != S.DOWN) return;
+            if(job.checkAvailableType()) {
+                Logger.debug("JobRequest request " + job.type + " DOWNLOAD Job.");
+                try {
+                    AWS.requestReportDown_step4(job);
+                } catch(Exception e) {
+                    Logger.warn("JobRequest DownLoad Error. " + e.getMessage());
+                }
             }
         }
     }
@@ -254,72 +271,12 @@ public class JobRequest extends Model {
     /**
      * 处理下载好的文件
      */
-    public void dealWith() {
-        Collection<Orderr> orders = null;
-        List<String> orderIds = new ArrayList<String>();
-        Map<String, Orderr> orderrMap = new HashMap<String, Orderr>();
-        Map<String, Orderr> oldOrderrMap = new HashMap<String, Orderr>();
-        switch(this.type) {
-            case ALL_FBA_ORDER_FETCH:
-                /**
-                 * 1. 解析出文件中的所有 Orders.
-                 * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
-                 */
-                orders = Orderr.parseAllOrderXML(new File(this.path), this.account); // 1. 解析出订单
-
-                for(Orderr order : orders) {
-                    Orderr managed = Orderr.findById(order.orderId);
-                    if(managed == null) { //保存
-                        order.save();
-                        Logger.info("Save Order: " + order.orderId);
-                    } else { //更新
-                        if(managed.state == Orderr.S.CANCEL) continue;
-                        managed.updateAttrs(order);
-                    }
-                }
-                break;
-            case ALL_FBA_ORDER_SHIPPED:
-                /**
-                 * 1. 将需要更新的数据从 csv 文件中提取出来
-                 * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
-                 */
-                orders = Orderr.parseUpdateOrderXML(new File(this.path), this.account.type);
-                for(Orderr order : orders) {
-                    Orderr managed = Orderr.findById(order.orderId);
-                    if(managed == null) {
-                        Logger.error("Update Order [%s] is not exist.", order.orderId);
-                    } else {
-                        managed.updateAttrs(order);
-                    }
-                }
-                break;
-            case MANAGE_FBA_INVENTORY_ARCHIVED:
-                Whouse wh = Whouse.find("account=?", this.account).first();
-                List<SellingQTY> sqtys = wh.fbaCSVParseSQTY(new File(this.path));
-                for(SellingQTY sqty : sqtys) {
-                    // 解析出来的 SellingQTY, 如果系统中拥有则进行更新, 否则绑定到 Selling 身上
-                    if(!sqty.isPersistent()) {
-                        String sid = Selling.sid(sqty.msku(), this.account.type, this.account);
-                        try {
-                            sqty.attach2Selling(sqty.msku(), wh);
-                        } catch(Exception e) {
-                            String warmsg = "FBA CSV Report hava Selling[" + sid + "] that system can not be found!";
-                            Logger.warn(warmsg);
-                            Webs.systemMail(warmsg, warmsg + "<br/>\r\n" + Webs.E(e) +
-                                    ";<br/>\r\n需要通过 Amazon 与系统内的 Selling 进行同步, 处理掉丢失的 Product 与 Selling, 然后再重新进行 FBA 库存的解析.");
-                        }
-                    } else {
-                        sqty.save();
-                    }
-                }
-
-
-                break;
-            case ACTIVE_LISTINGS:
-                Selling.dealSellingFromActiveListingsReport(new File(this.path), this.account, this.marketplaceId.market());
-                break;
+    public static void dealWith(T type, AmazonJob amazon) {
+        List<JobRequest> tobeDeal = JobRequest.find("state=? AND type=?", JobRequest.S.END, type).fetch();
+        for(JobRequest job : tobeDeal) {
+            amazon.callBack(job);
+            job.state = S.CLOSE;
+            job.save();
         }
-        this.state = S.CLOSE;
-        this.save();
     }
 }

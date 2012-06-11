@@ -122,6 +122,7 @@ public class Webs {
     public static Future<Boolean> systemMail(String subject, String content) {
         HtmlEmail email = new HtmlEmail();
         try {
+            email.setCharset("UTF-8");
             email.setSubject(subject);
             email.addTo("wppurking@gmail.com");
             if(Play.mode.isProd())

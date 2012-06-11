@@ -146,6 +146,7 @@ public class Mails extends Mailer {
 
     // ----------------------------------------------
     private static void mailBase() {
+        setCharset("UTF-8");
         if(Play.mode.isProd()) {
             setFrom("EasyAcc <wyatt@easyacceu.com>");
         } else {

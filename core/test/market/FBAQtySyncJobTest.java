@@ -1,6 +1,6 @@
 package market;
 
-import jobs.FBAQtySyncJob;
+import jobs.AmazonFBAQtySyncJob;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -13,6 +13,6 @@ import play.test.UnitTest;
 public class FBAQtySyncJobTest extends UnitTest {
     @Test
     public void downloadJob() {
-        new FBAQtySyncJob().now();
+        new AmazonFBAQtySyncJob().now();
     }
 }

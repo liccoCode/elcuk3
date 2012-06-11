@@ -411,6 +411,8 @@ public class SaleFee extends GenericModel {
                 if(f.order.state == Orderr.S.REFUNDED) {
                     Logger.info("Order[%s] state is already %s", f.orderId, f.order.state);
                 } else {
+                    // 由于 SaleFee 更新使用的是 JDBC 所以这里不会有印象, 主要是为了能够让 IDE 能够找到 order.state write 的方法
+                    f.order.state = Orderr.S.REFUNDED;
                     DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
                     Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
                 }
