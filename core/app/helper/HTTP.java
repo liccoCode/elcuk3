@@ -156,7 +156,7 @@ public class HTTP {
      * @param params
      * @return
      */
-    public static String post(String url, Collection<NameValuePair> params) {
+    public static String post(String url, Collection<? extends NameValuePair> params) {
         return post(null, url, params);
     }
 
@@ -169,7 +169,7 @@ public class HTTP {
      * @param params
      * @return
      */
-    public static String post(CookieStore cookieStore, String url, Collection<NameValuePair> params) {
+    public static String post(CookieStore cookieStore, String url, Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
             HTTP.clearExpiredCookie();
@@ -190,7 +190,7 @@ public class HTTP {
      * @param uploadFiles 上传多个文件的集合(key: fileParamName, Val: File)
      * @return 返回上传的结果
      */
-    public static String upload(CookieStore cookieStore, String url, Collection<NameValuePair> params, Map<String, File> uploadFiles) {
+    public static String upload(CookieStore cookieStore, String url, Collection<? extends NameValuePair> params, Map<String, File> uploadFiles) {
         HttpPost post = new HttpPost(url);
         MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
@@ -209,7 +209,7 @@ public class HTTP {
         }
     }
 
-    public static JsonElement postJson(String url, Collection<NameValuePair> params) {
+    public static JsonElement postJson(String url, Collection<? extends NameValuePair> params) {
         Logger.debug("HTTP.post Json [%s]", url);
         String json = post(url, params);
         try {

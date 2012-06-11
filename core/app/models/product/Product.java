@@ -288,8 +288,14 @@ public class Product extends GenericModel {
                     } else if(StringUtils.startsWith(name, "generic_keywords")) {
                         selling.aps.searchTermsCheck(addSellingPrams);
                     } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
-                        addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns[0]));
-                        addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[1]", selling.aps.rbns[1]));
+                        if(selling.aps.rbns != null) {
+                            if(selling.aps.rbns.size() == 1)
+                                addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns.get(0)));
+                            else if(selling.aps.rbns.size() == 2) {
+                                addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns.get(0)));
+                                addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[1]", selling.aps.rbns.get(1)));
+                            }
+                        }
                     } else {
                         addSellingPrams.add(new BasicNameValuePair(name, input.val()));
                     }

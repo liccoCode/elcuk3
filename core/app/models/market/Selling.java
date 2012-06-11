@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 已经正在进行销售的对象抽象
@@ -40,7 +41,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 1/6/12
  * Time: 10:48 AM
  */
-@Entity
+@javax.persistence.Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Selling extends GenericModel {
 
@@ -193,6 +194,19 @@ public class Selling extends GenericModel {
      * 将所有图片都上传一遍;
      */
     public void uploadAmazonImg(String imageName, boolean waterMark) {
+        // 用来处理最后删除图片时使用的名称
+        Map<String, AtomicBoolean> usedAmazonFileName = GTs.MapBuilder
+                .map("MAIN", new AtomicBoolean(false))
+                .put("PT01", new AtomicBoolean(false))
+                .put("PT02", new AtomicBoolean(false))
+                .put("PT03", new AtomicBoolean(false))
+                .put("PT04", new AtomicBoolean(false))
+                .put("PT05", new AtomicBoolean(false))
+                .put("PT06", new AtomicBoolean(false))
+                .put("PT07", new AtomicBoolean(false))
+                .put("PT08", new AtomicBoolean(false))
+                .build();
+
         String dealImageNames = imageName;
         if(StringUtils.isBlank(imageName)) dealImageNames = this.aps.imageName;
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
@@ -219,6 +233,7 @@ public class Selling extends GenericModel {
             } else {
                 uploadImages.put(fileParamName, new File(attch.location));
             }
+            usedAmazonFileName.get(fileParamName).set(true);
         }
         synchronized(this.account.cookieStore()) {
             this.account.changeRegion(this.market); // 切换到这个 Selling 的市场
@@ -235,8 +250,14 @@ public class Selling extends GenericModel {
             } else {
                 Logger.info("Upload Picture to Amazon Success.(%s)", imgRsp.get("imageUrl").getAsString());
             }
-            //TODO 上传成功后, 还需要将 9 - n(上传成功的图片数) 的后续图片给删除
             //https://catalog-sc.amazon.de/abis/image/RemoveImage.ajax?asin=B0083QX8AW&variant=MAIN/PT01/...
+            for(String fileName : usedAmazonFileName.keySet()) {
+                if(usedAmazonFileName.get(fileName).get()) continue; // 使用过了就不处理
+                HTTP.post(this.account.cookieStore(), this.account.type.removeImageLink(), Arrays.asList(
+                        new BasicNameValuePair("asin", this.asin),
+                        new BasicNameValuePair("variant", fileName)
+                ));
+            }
         }
         this.save();
     }

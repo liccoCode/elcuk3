@@ -17,6 +17,7 @@ import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +67,7 @@ public class Sellings extends Controller {
         renderJSON(JSON.toJSONString(GTs.MapBuilder
                 .map("t", s.aps.keyFeturess)
                 .put("s", s.aps.searchTermss)
-                .put("p", new String[]{s.aps.productDesc})
+                .put("p", Arrays.asList(s.aps.productDesc))
                 .build()));
     }
 
@@ -81,6 +82,7 @@ public class Sellings extends Controller {
         renderJSON(new Ret(true, LinkExtensions.asinLink(s)));
     }
 
+    /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
     public static void update(Selling s, boolean remote) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
         try {

@@ -411,6 +411,22 @@ public class Account extends Model {
             }
         }
 
+        public String removeImageLink() {
+            //https://catalog-sc.amazon.co.uk/abis/image/RemoveImage.ajax
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://catalog-sc.%s/abis/image/RemoveImage.ajax", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
         /**
          * 这个是根据 Account 所在地来确定, 不同的市场需要先进行 region 切换
          *

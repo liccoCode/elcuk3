@@ -43,7 +43,7 @@ public class SellingCategoryCheckerJob extends Job {
                 for(Selling sell : sellings) {
                     if(sell.state == Selling.S.DOWN) continue;
                     sell.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
-                    if(sell.aps.rbns == null || sell.aps.rbns.length == 0) {
+                    if(sell.aps.rbns == null || sell.aps.rbns.size() == 0) {
                         invalidSelling.get(key).add(sell);
                     } else {
                         for(String node : sell.aps.rbns) {

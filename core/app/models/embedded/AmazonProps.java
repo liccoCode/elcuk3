@@ -27,10 +27,7 @@ import javax.persistence.Lob;
 import javax.persistence.Transient;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 整合的 Amazon 上架使用的字段, 需要添加修改都在这个类中(Component 类)
@@ -73,7 +70,7 @@ public class AmazonProps {
     @Lob
     public String keyFetures;
     @Transient
-    public String[] keyFeturess;
+    public List<String> keyFeturess;
     /**
      * Recommended Browse Nodes;
      * 使用 [,] 进行分割, 一般为 2 个
@@ -82,7 +79,7 @@ public class AmazonProps {
     public String RBN;
 
     @Transient
-    public String[] rbns;
+    public List<String> rbns;
     /**
      * For most products, this will be identical to the model number;
      * however, some manufacturers distinguish part number from model number
@@ -145,7 +142,7 @@ public class AmazonProps {
     public String searchTerms;
 
     @Transient
-    public String[] searchTermss;
+    public List<String> searchTermss;
 
     /**
      * 使用 Webs.SPLIT 进行分割, 5 行
@@ -179,6 +176,25 @@ public class AmazonProps {
      * @param flag 如果 flag &gt; 0 表示从 [] -> str; 如果 flag &lt;=0 表示从 [] <- str
      */
     public void arryParamSetUP(T flag) {
+        if(flag == T.ARRAY_TO_STR) {
+            this.keyFetures = StringUtils.join(this.keyFeturess, Webs.SPLIT);
+            this.searchTerms = StringUtils.join(this.searchTermss, Webs.SPLIT);
+            this.RBN = StringUtils.join(this.rbns, ",");
+        } else if(flag == T.STR_TO_ARRAY) {
+            this.keyFeturess = new ArrayList<String>();
+            this.searchTermss = new ArrayList<String>();
+            this.rbns = new ArrayList<String>();
+
+            String[] tmp = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
+            if(tmp != null) Collections.addAll(this.keyFeturess, tmp);
+
+            tmp = StringUtils.splitByWholeSeparator(this.searchTerms, Webs.SPLIT);
+            if(tmp != null) Collections.addAll(this.searchTermss, tmp);
+
+            tmp = StringUtils.split(this.RBN, ",");
+            if(tmp != null) Collections.addAll(this.rbns, tmp);
+        }
+
         /**
          * Hibernate 的 bug 填写了 Lob 的字段, 为 "" 则会报告错误
          * - Start position [1] cannot exceed overall CLOB length [0] -
@@ -191,25 +207,6 @@ public class AmazonProps {
         if(StringUtils.isBlank(this.productDesc)) this.productDesc = " ";
         if(StringUtils.isBlank(this.searchTerms)) this.searchTerms = " ";
         if(StringUtils.isBlank(this.platinumKeywords)) this.platinumKeywords = " ";
-
-        if(flag == T.ARRAY_TO_STR) {
-            this.keyFetures = StringUtils.join(this.keyFeturess, Webs.SPLIT);
-            this.searchTerms = StringUtils.join(this.searchTermss, Webs.SPLIT);
-            this.RBN = StringUtils.join(this.rbns, ",");
-        } else if(flag == T.STR_TO_ARRAY) {
-            this.keyFeturess = new String[5];
-            this.searchTermss = new String[5];
-            this.rbns = new String[2];
-
-            String[] tmp = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
-            if(tmp != null) System.arraycopy(tmp, 0, this.keyFeturess, 0, tmp.length);
-
-            tmp = StringUtils.splitByWholeSeparator(this.searchTerms, Webs.SPLIT);
-            if(tmp != null) System.arraycopy(tmp, 0, this.searchTermss, 0, tmp.length);
-
-            tmp = StringUtils.split(this.RBN, ",");
-            if(tmp != null) System.arraycopy(tmp, 0, this.rbns, 0, tmp.length);
-        }
     }
 
     /**
@@ -227,7 +224,7 @@ public class AmazonProps {
         }
         int missingIndex = 5 - keyFeturesArr.length;
         if(missingIndex > 0) {
-            for(int i = 1; i < missingIndex; i++) {
+            for(int i = 1; i <= missingIndex; i++) {
                 params.add(new BasicNameValuePair("bullet_point[" + (keyFeturesArr.length + i) + "]", ""));
             }
         }
@@ -388,9 +385,9 @@ public class AmazonProps {
                     params.add(new BasicNameValuePair("discounted_price_end_date", Dates.listingUpdateFmt(sell.market, this.endDate)));
                 }
             } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
-                if(this.rbns != null && this.rbns.length >= 1) {
-                    for(int i = 0; i < this.rbns.length; i++)
-                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns[i]));
+                if(this.rbns != null && this.rbns.size() >= 1) {
+                    for(int i = 0; i < this.rbns.size(); i++)
+                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns.get(i)));
                 }
             } else {
                 params.add(new BasicNameValuePair(name, el.val()));

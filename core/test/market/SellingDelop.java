@@ -68,7 +68,7 @@ public class SellingDelop extends UnitTest {
         System.out.println(sel.attr("name") + ":::" + sel.select("option[selecte]").val());
     }
 
-    @Test
+    //    @Test
     public void testErrorMessage() throws IOException {
         Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/80-QW1A56-BE_B005JSG7GE_posted_2.html"), "UTF-8");
         Elements error = doc.select(".messageboxerror li");
@@ -126,5 +126,13 @@ public class SellingDelop extends UnitTest {
                 params);
 
         IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, sell.merchantSKU, sell.asin)));
+    }
+
+
+    @Test
+    public void tesSyncBullet() {
+        Selling sell = Selling.findById("80QW84-2AECUPB|A_UK|1");
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        sell.aps.bulletPointsCheck(params);
     }
 }
