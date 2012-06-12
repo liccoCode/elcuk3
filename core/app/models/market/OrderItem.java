@@ -28,7 +28,7 @@ public class OrderItem extends GenericModel {
     @Id
     public String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Orderr order;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -92,6 +92,10 @@ public class OrderItem extends GenericModel {
      */
     public String memo = "";
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
+    public Account.M market;
+
 
     @Override
     public boolean equals(Object o) {
@@ -131,15 +135,18 @@ public class OrderItem extends GenericModel {
         List<OrderItem> orderItems = Caches.blockingGet(cacheKey, List.class);
         if(orderItems != null) return orderItems;
         if("all".equalsIgnoreCase(skuOrMsku)) {
-            orderItems = OrderItem.find("createDate>=? AND createDate<=?", from, to).fetch();
+            orderItems = OrderItem.find("createDate>=? AND createDate<=? AND order.state IN (?,?)", from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
         } else {
             if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?", Product.merchantSKUtoSKU(skuOrMsku), from, to).fetch();
+                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=? AND order.state IN (?,?)",
+                        Product.merchantSKUtoSKU(skuOrMsku), from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
             else {
                 if(acc == null)
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=?", skuOrMsku, from, to).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=? AND order.state IN (?,?)",
+                            skuOrMsku, from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
                 else
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrMsku, acc, from, to).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=? AND order.state IN (?,?)",
+                            skuOrMsku, acc, from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
             }
         }
         Caches.blockingAdd(cacheKey, orderItems, "5mn");
@@ -167,15 +174,13 @@ public class OrderItem extends GenericModel {
             float sale_fr = 0;
 
             for(OrderItem oi : orderItems) {
-                if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
-                    continue;
-                if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
+                if(Dates.data2Date(oi.createDate).getTime() == travel.getMillis()) {
                     try {
                         float usdCost = oi.usdCost == null ? 0 : oi.usdCost;
                         sale_all += usdCost;
-                        if(oi.selling.market == Account.M.AMAZON_UK) sale_uk += usdCost;
-                        else if(oi.selling.market == Account.M.AMAZON_DE) sale_de += usdCost;
-                        else if(oi.selling.market == Account.M.AMAZON_FR) sale_fr += usdCost;
+                        if(oi.market == Account.M.AMAZON_UK) sale_uk += usdCost;
+                        else if(oi.market == Account.M.AMAZON_DE) sale_de += usdCost;
+                        else if(oi.market == Account.M.AMAZON_FR) sale_fr += usdCost;
                     } catch(Exception e) {
                         e.printStackTrace();
                     }

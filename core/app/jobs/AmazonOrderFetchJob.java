@@ -152,6 +152,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
 
                 OrderItem oi = new OrderItem();
+                oi.market = orderr.market;
                 oi.order = orderr;
                 oi.productName = oid.getProductName();
                 oi.quantity = oid.getQuantity();

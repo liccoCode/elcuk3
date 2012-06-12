@@ -71,6 +71,7 @@ public class Orderr extends GenericModel {
      * 订单所属的市场
      */
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
     public Account.M market;
 
     /**
