@@ -40,6 +40,9 @@ used with JMX monitors.
          dynamicConfig="true">
 
   <!--
+
+   http://ehcache.org/ehcache.xml
+
   DiskStore configuration
   =======================
 

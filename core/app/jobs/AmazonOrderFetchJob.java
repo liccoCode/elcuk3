@@ -84,7 +84,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 Logger.info("Save Order: " + order.orderId);
             } else { //更新
                 if(managed.state == Orderr.S.CANCEL) continue; // 如果订单已经为 CANCEL 了, 则不更新了
-                if(order.state == Orderr.S.CANCEL) // 新订单为 CANCEL 的则更新
+                if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING) // 新订单为 CANCEL 的则更新
                     managed.updateAttrs(order);
             }
         }
@@ -152,6 +152,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
 
                 OrderItem oi = new OrderItem();
+                oi.market = orderr.market;
                 oi.order = orderr;
                 oi.productName = oid.getProductName();
                 oi.quantity = oid.getQuantity();

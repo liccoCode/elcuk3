@@ -199,7 +199,14 @@ public class Product extends GenericModel {
              * !. 前提,在确定了账户的 Region 的情况下!
              * 1. 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 的 classify 页面, 有一个隐藏 token
              * 2. 拿着隐藏 Token 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 进入 identify 页面
-             * 3. 提交创建 Selling 的参数
+             * 3. 访问 Match.ajax 查看是否拥有 matchingAsinList?, 设置 matchASIN
+             * 4. 填充参数
+             * <pre>
+             * 		<div id="matchingAsinList" class="hide">
+             * <div>QjAwOEFSN1g2WQ==</div>
+             * </div>
+             * </pre>
+             * 5. 提交创建 Selling 的参数
              */
 
             // --------------   1   -------------------
@@ -218,15 +225,48 @@ public class Product extends GenericModel {
                 } else classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
             }
 
+            //  ------------------ 2 -----------------
             body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/, classifyHiddenParams);
             if(Play.mode.isDev())
                 Devs.fileLog(String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
             doc = Jsoup.parse(body);
 
-            //  ------------------ 2 -----------------
             Set<NameValuePair> addSellingPrams = new HashSet<NameValuePair>();
             inputs = doc.select("form[name=productForm] input");
             if(inputs == null || inputs.size() <= 7) throw new FastRuntimeException("没有进入第二步 Identify 页面!");
+            /**
+             * encoded_session_hidden_map:222222222........
+             sessionMapPresent:true
+             our_price-uom:GBP
+             discounted_price-uom:GBP
+             item_name:SANER® 1900mAh rechargeable Li-ion Battery for HTC Sensation - Extra Long Life, Compatible with HTC Sensation/G14/Z710E, HTC Sensation XE/ Z715E
+             manufacturer:EasyAcc
+             external_id:660444833512
+             */
+            // ------------------ 3 -----------------------
+            String ajaxBody = HTTP.post(selling.account.cookieStore(), selling.account.type.matchAsinAjaxLink(), Arrays.asList(
+                    new BasicNameValuePair("encoded_session_hidden_map", doc.select("input[name=encoded_session_hidden_map]").val()),
+                    new BasicNameValuePair("sessionMapPresent", "true"),
+                    new BasicNameValuePair("our_price-uom", doc.select("input[name=our_price-uom]").val()),
+                    new BasicNameValuePair("discounted_price-uom", doc.select("input[name=discounted_price-uom]").val()),
+                    new BasicNameValuePair("manufacturer", selling.aps.manufacturer),
+                    new BasicNameValuePair("item_name", selling.aps.title),
+                    new BasicNameValuePair("external_id", selling.aps.upc)
+            ));
+            Document ajaxDoc = Jsoup.parse(ajaxBody);
+            Element matchAsinEl = ajaxDoc.select("#newAsin").first();
+            if(matchAsinEl != null) {
+                selling.aps.matchAsin = "";
+            } else {
+                matchAsinEl = ajaxDoc.select("#matchingAsinList").first();
+                if(matchAsinEl != null)
+                    selling.aps.matchAsin = matchAsinEl.select("div:eq(0)").text();
+                else
+                    selling.aps.matchAsin = "";
+            }
+
+
+            //  ---------------- 4 -----------------------
             for(Element input : inputs) {
                 String name = input.attr("name");
                 String tagType = input.attr("type");
@@ -278,7 +318,9 @@ public class Product extends GenericModel {
                     else if("activeClientTimeOnTask".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
                     else if("matchAsin".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, "QjAwODNRWDhBVw==")); // 在 JS 方法 preProcessMatch 执行时, 已经将 matchAsin 计算出来了,固定值
+                        //QjAwOEFSN1g2WQ==  | 660444833512
+                        //QjAwODNRWDhBVw==  | 614444720150
+                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.matchAsin));
                     else if("encoded_session_hidden_map".equals(name)) {
                         addSellingPrams.add(new BasicNameValuePair(name, input.val()));
                         // 在发现了 encoded_session_hidden_map 以后需要添加这样一个属性(JS 动态添加的)
@@ -325,7 +367,7 @@ public class Product extends GenericModel {
                 else
                     addSellingPrams.add(new BasicNameValuePair(name, select.select("option[selected]").val()));
             }
-            // -------------  3 -----------------
+            // -------------  5 -----------------
             /**
              * 上架时候的错误信息全部返回给前台.
              */
@@ -333,6 +375,7 @@ public class Product extends GenericModel {
             if(Play.mode.isDev())
                 Devs.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
 
+            // TODO 如果 selling.aps.matchAsin 为空, 表示为新 UPC 上架, 需要如何拿到 ASIN ?
             doc = Jsoup.parse(body);
             Element form = doc.select("form").first();
             if(form == null) throw new FastRuntimeException(
@@ -343,7 +386,6 @@ public class Product extends GenericModel {
                 String name = hidden.attr("name");
                 if("newItemAsin".equals(name)) selling.asin = hidden.val();
             }
-            // 最后再检查是否添加成功?
             if(StringUtils.isBlank(selling.asin)) {
                 String msg = doc.select(".messageboxerror").first().text();
                 if(StringUtils.isBlank(msg)) msg = "未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!";
@@ -354,7 +396,8 @@ public class Product extends GenericModel {
         selling.listing = Listing.findById(Listing.lid(selling.asin, selling.market));
         if(selling.listing == null) selling.listing = new Listing(selling, this).save();
 
-        //测试使用的 UPC 614444720150
+        //      测试使用的 UPC 614444720150
+        // 测试 MatchASIN UPC 660444833512
         selling.sid();
         return selling.save();
     }
@@ -448,7 +491,7 @@ public class Product extends GenericModel {
     public static List<String> skus(boolean clearCache) {
         List<String> skus = null;
         if(!clearCache) {
-            skus = Cache.get(Caches.SKUS, List.class);
+            skus = Caches.blockingGet(Caches.SKUS, List.class);
             if(skus != null) return skus;
         }
 
@@ -456,7 +499,7 @@ public class Product extends GenericModel {
         skus = new ArrayList<String>();
         for(Product prod : prods) skus.add(prod.sku);
         Cache.delete(Caches.SKUS);
-        Cache.add(Caches.SKUS, skus);
-        return skus;
+        Caches.blockingAdd(Caches.SKUS, skus, null);
+        return Caches.blockingGet(Caches.SKUS, List.class);
     }
 }

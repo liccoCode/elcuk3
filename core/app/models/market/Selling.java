@@ -18,7 +18,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -457,6 +456,8 @@ public class Selling extends GenericModel {
      * 加载指定时间段内的 Selling 的销量排名数据(以 MerchantSKU 来进行判断);
      * 其中涉及到计算: day(1-N), turnover
      * PS: 这份数据肯定是需要进行缓存的..
+     * <p/>
+     * TODO 这种大批量的计算方法需要使用 JDBC 进行重构
      *
      * @param t >0 :按照 MerchantSKU 排序; <0 :按照 SKU 排序
      * @return
@@ -465,7 +466,7 @@ public class Selling extends GenericModel {
     @Cached("1h")
     public static List<Selling> salesRankWithTime(int t) {
         String cacke_key = String.format(Caches.SALE_SELLING, t);
-        List<Selling> cached = Cache.get(cacke_key, List.class);
+        List<Selling> cached = Caches.blockingGet(cacke_key, List.class);
         if(cached != null && cached.size() > 0) return cached;
         Map<String, Selling> sellingMap = new HashMap<String, Selling>();
 
@@ -542,8 +543,8 @@ public class Selling extends GenericModel {
                 return (int) (s2.d7 - s1.d7);
             }
         });
-        if(sellings.size() > 0) Cache.add(cacke_key, sellings, "1h"); // 缓存 1 小时
-        return sellings;
+        Caches.blockingAdd(cacke_key, sellings, "1h"); // 缓存 1 小时
+        return Caches.blockingGet(cacke_key, List.class);
     }
 
 

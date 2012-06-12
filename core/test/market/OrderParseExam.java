@@ -1,5 +1,7 @@
 package market;
 
+import jobs.AmazonOrderFetchJob;
+import models.market.JobRequest;
 import models.market.OrderItem;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
@@ -18,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 3:52 PM
  */
 public class OrderParseExam extends UnitTest {
-    @Test
+    //    @Test
     public void findNoOrderItemOrderr() {
         List<String> lines = new ArrayList<String>();
         List<Orderr> orders = Orderr.findAll();
@@ -29,7 +31,7 @@ public class OrderParseExam extends UnitTest {
         IO.writeContent(StringUtils.join(lines, "\r\n"), new File("/tmp/noOrderItemOrder.txt"));
     }
 
-    @Test
+    //    @Test
     public void testCalcuQTY() {
         Calendar cal = Calendar.getInstance();
         cal.set(2011, 9, 6);
@@ -51,5 +53,11 @@ public class OrderParseExam extends UnitTest {
             sb.append(String.format("%s : %s\r\n", sku, qtyMap.get(sku).get()));
         }
         IO.writeContent(sb.toString(), new File("/tmp/sku_quantity.txt"));
+    }
+
+    @Test
+    public void testParseOrderItemUpdate() {
+        JobRequest job = JobRequest.findById(5996l);
+        new AmazonOrderFetchJob().callBack(job);
     }
 }

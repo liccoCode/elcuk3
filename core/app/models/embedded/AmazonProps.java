@@ -22,6 +22,7 @@ import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
@@ -162,6 +163,10 @@ public class AmazonProps {
      */
     @Expose
     public String imageName;
+
+    @Expose
+    @Column(columnDefinition = "varchar(20) DEFAULT ''")
+    public String matchAsin;
 
     /**
      * <pre>

@@ -64,13 +64,14 @@ public class Orderr extends GenericModel {
     }
 
     //-------------- Object ----------------
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     public List<OrderItem> items;
 
     /**
      * 订单所属的市场
      */
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
     public Account.M market;
 
     /**

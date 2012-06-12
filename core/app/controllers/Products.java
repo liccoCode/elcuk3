@@ -235,7 +235,7 @@ public class Products extends Controller {
         Validation.required(Messages.get("s.title"), s.aps.title);
         Validation.required(Messages.get("s.upc"), s.aps.upc);
         Validation.required(Messages.get("s.manufac"), s.aps.manufacturer);
-        Validation.required(Messages.get("s.rbn"), s.aps.rbns);
+        Validation.required(Messages.get("s.rbn"), s.aps.rbns.toArray());
         Validation.required(Messages.get("s.price"), s.aps.standerPrice);
         Validation.required(Messages.get("s.tech"), s.aps.keyFeturess);
         Validation.required(Messages.get("s.keys"), s.aps.searchTermss);
