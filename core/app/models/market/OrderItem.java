@@ -170,10 +170,15 @@ public class OrderItem extends GenericModel {
                 if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
                     continue;
                 if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
-                    sale_all += oi.usdCost;
-                    if(oi.selling.market == Account.M.AMAZON_UK) sale_uk += oi.usdCost;
-                    else if(oi.selling.market == Account.M.AMAZON_DE) sale_de += oi.usdCost;
-                    else if(oi.selling.market == Account.M.AMAZON_FR) sale_fr += oi.usdCost;
+                    try {
+                        float usdCost = oi.usdCost == null ? 0 : oi.usdCost;
+                        sale_all += usdCost;
+                        if(oi.selling.market == Account.M.AMAZON_UK) sale_uk += usdCost;
+                        else if(oi.selling.market == Account.M.AMAZON_DE) sale_de += usdCost;
+                        else if(oi.selling.market == Account.M.AMAZON_FR) sale_fr += usdCost;
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                    }
                     // 其他市场暂时先不统计
                 }
             }
