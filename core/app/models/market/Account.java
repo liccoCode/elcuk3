@@ -379,6 +379,21 @@ public class Account extends Model {
             }
         }
 
+        public String matchAsinAjaxLink() {
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://catalog-sc.%s/abis/product/ajax/Match.ajax", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
         public String saleSellingStateLink() {
             //https://sellercentral.amazon.de/gp/ezdpc-gui/inventory-status/status.html
             switch(this) {
