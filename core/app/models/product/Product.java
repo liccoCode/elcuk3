@@ -448,7 +448,7 @@ public class Product extends GenericModel {
     public static List<String> skus(boolean clearCache) {
         List<String> skus = null;
         if(!clearCache) {
-            skus = Cache.get(Caches.SKUS, List.class);
+            skus = Caches.blockingGet(Caches.SKUS, List.class);
             if(skus != null) return skus;
         }
 
@@ -456,7 +456,7 @@ public class Product extends GenericModel {
         skus = new ArrayList<String>();
         for(Product prod : prods) skus.add(prod.sku);
         Cache.delete(Caches.SKUS);
-        Cache.add(Caches.SKUS, skus);
-        return skus;
+        Caches.blockingAdd(Caches.SKUS, skus, null);
+        return Caches.blockingGet(Caches.SKUS, List.class);
     }
 }

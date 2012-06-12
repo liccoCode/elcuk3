@@ -4,7 +4,6 @@ import helper.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 
@@ -129,7 +128,7 @@ public class OrderItem extends GenericModel {
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
     public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type, Account acc, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
-        List<OrderItem> orderItems = Cache.get(cacheKey, List.class);
+        List<OrderItem> orderItems = Caches.blockingGet(cacheKey, List.class);
         if(orderItems != null) return orderItems;
         if("all".equalsIgnoreCase(skuOrMsku)) {
             orderItems = OrderItem.find("createDate>=? AND createDate<=?", from, to).fetch();
@@ -143,8 +142,8 @@ public class OrderItem extends GenericModel {
                     orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=?", skuOrMsku, acc, from, to).fetch();
             }
         }
-        Cache.add(cacheKey, orderItems, "5mn");
-        return orderItems;
+        Caches.blockingAdd(cacheKey, orderItems, "5mn");
+        return Caches.blockingGet(cacheKey, List.class);
     }
 
     public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku, Account acc, String type, Date from, Date to) {

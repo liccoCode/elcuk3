@@ -64,7 +64,7 @@ public class Orderr extends GenericModel {
     }
 
     //-------------- Object ----------------
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     public List<OrderItem> items;
 
     /**
