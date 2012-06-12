@@ -135,18 +135,19 @@ public class OrderItem extends GenericModel {
         List<OrderItem> orderItems = Caches.blockingGet(cacheKey, List.class);
         if(orderItems != null) return orderItems;
         if("all".equalsIgnoreCase(skuOrMsku)) {
-            orderItems = OrderItem.find("createDate>=? AND createDate<=? AND order.state IN (?,?)", from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
+            orderItems = OrderItem.find("createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
+                    from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
         } else {
             if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=? AND order.state IN (?,?)",
-                        Product.merchantSKUtoSKU(skuOrMsku), from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
+                orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
+                        Product.merchantSKUtoSKU(skuOrMsku), from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
             else {
                 if(acc == null)
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=? AND order.state IN (?,?)",
-                            skuOrMsku, from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
+                            skuOrMsku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
                 else
-                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=? AND order.state IN (?,?)",
-                            skuOrMsku, acc, from, to, Orderr.S.PAYMENT, Orderr.S.SHIPPED).fetch();
+                    orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
+                            skuOrMsku, acc, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
             }
         }
         Caches.blockingAdd(cacheKey, orderItems, "5mn");
@@ -235,13 +236,11 @@ public class OrderItem extends GenericModel {
             float unit_de = 0;
             float unit_fr = 0;
             for(OrderItem oi : orderItems) {
-                if(oi.order.state == Orderr.S.CANCEL || oi.order.state == Orderr.S.REFUNDED || oi.order.state == Orderr.S.RETURNNEW)
-                    continue;
-                if(Dates.data2Date(oi.order.createDate).getTime() == travel.getMillis()) {
+                if(Dates.data2Date(oi.createDate).getTime() == travel.getMillis()) {
                     unit_all += oi.quantity;
-                    if(oi.selling.market == Account.M.AMAZON_UK) unit_uk += oi.quantity;
-                    else if(oi.selling.market == Account.M.AMAZON_DE) unit_de += oi.quantity;
-                    else if(oi.selling.market == Account.M.AMAZON_FR) unit_fr += oi.quantity;
+                    if(oi.market == Account.M.AMAZON_UK) unit_uk += oi.quantity;
+                    else if(oi.market == Account.M.AMAZON_DE) unit_de += oi.quantity;
+                    else if(oi.market == Account.M.AMAZON_FR) unit_fr += oi.quantity;
                     // 其他市场暂时先不统计
                 }
             }
