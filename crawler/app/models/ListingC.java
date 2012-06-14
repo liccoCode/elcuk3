@@ -104,6 +104,7 @@ public class ListingC {
             this.state = S.CLOSE;
             return this;
         }
+        this.state = S.NORMAL;
 
         this.asin = root.select("#ASIN").val().toUpperCase();
         String site = root.select("#navLogoPrimary > span").first().text();
