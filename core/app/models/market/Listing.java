@@ -361,7 +361,10 @@ public class Listing extends GenericModel {
 
 
         String listingId = lst.get("listingId").getAsString();
-        if(listingId == null || listingId.trim().isEmpty()) return null; // 排除 404 没有的 Listing
+        if(listingId == null || listingId.trim().isEmpty()) {
+            Logger.info("Listing no ListingId. %s", listingJson.toString());
+            return null; // 排除 404 没有的 Listing
+        }
         Listing oldListing = Listing.find("listingId=?", listingId).first();
         Listing tobeChangeed;
         if(oldListing != null) {

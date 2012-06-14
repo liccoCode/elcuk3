@@ -54,7 +54,6 @@ $ ->
 
   # Listing 页面重新抓取这个 Listing
   $('button[lid]').click ->
-    alert(999)
     o = $(@)
     lid = o.attr('lid')
     o.button('loading').addClass('disabled')

@@ -100,9 +100,10 @@ public class Listings extends Controller {
         if(!l.isPersistent()) renderJSON(new Ret("此 Listing 不存在,不允许 ReCrawl!"));
         JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
         Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst, true);
-        nLst.check();
-        if(nLst.isPersistent()) renderJSON(new Ret());
-        else renderJSON(new Ret("更新失败."));
+        if(nLst != null) {
+            nLst.check();
+            if(nLst.isPersistent()) renderJSON(new Ret());
+        } else renderJSON(new Ret("更新失败."));
     }
 
 }
