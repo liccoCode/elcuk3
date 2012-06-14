@@ -274,12 +274,11 @@ public class Listing extends GenericModel {
             return;
         }
 
-        int selfSale = 0;
-        boolean mailed = false;
+        int needWarnningOffers = 0;
 
         for(ListingOffer off : this.offers) {
             // -------- 1
-            if(Account.merchant_id().containsKey(off.offerId)) selfSale++;
+            if(Account.merchant_id().containsKey(off.offerId)) continue;
 
             // ------- 1
             if(Listing.isSelfBuildListing(this.title)) {
@@ -293,17 +292,13 @@ public class Listing extends GenericModel {
                     this.warnningTimes++; // 查询也记录一次
                     if(this.warnningTimes > 4) {
                         Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
-                    } else {
-                        if(mailed) continue;
-                        Mails.listingOffersWarning(off);
-                        mailed = true;
-                    }
+                    } else needWarnningOffers++;
                 } else {
                     this.warnningTimes = 0; // 其余的归零
                 }
             }
         }
-        if(selfSale >= 2) Mails.moreOfferOneListing(offers, this);
+        if(needWarnningOffers >= 2) Mails.moreOfferOneListing(offers, this);
     }
 
     @Override
@@ -361,7 +356,10 @@ public class Listing extends GenericModel {
 
 
         String listingId = lst.get("listingId").getAsString();
-        if(listingId == null || listingId.trim().isEmpty()) return null; // 排除 404 没有的 Listing
+        if(listingId == null || listingId.trim().isEmpty()) {
+            Logger.info("Listing no ListingId. %s", listingJson.toString());
+            return null; // 排除 404 没有的 Listing
+        }
         Listing oldListing = Listing.find("listingId=?", listingId).first();
         Listing tobeChangeed;
         if(oldListing != null) {

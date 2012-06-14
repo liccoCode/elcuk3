@@ -125,10 +125,7 @@ public class Webs {
             email.setCharset("UTF-8");
             email.setSubject(subject);
             email.addTo("wppurking@gmail.com");
-            if(Play.mode.isProd())
-                email.setFrom("support@easyacceu.com", "EasyAcc");
-            else
-                email.setFrom("1733913823@qq.com", "EasyAcc"); // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
+            email.setFrom("support@easyacceu.com", "EasyAcc");
             email.setHtmlMsg(content);
         } catch(EmailException e) {
             Logger.warn("Email error: " + e.getMessage());

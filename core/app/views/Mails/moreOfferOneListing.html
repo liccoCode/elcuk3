@@ -1,4 +1,4 @@
-<h3>More Than One Offer in Listing <a target="_blank" href="${lis.asinLink()}">${lis.asin}</a></h3>
+<h3>More Than One Offer in Listing <a target="_blank" href="${lst.asinLink()}">${lst.asin}</a></h3>
 <br/>
 <table>
     <tr>
@@ -14,7 +14,7 @@
         <td>${off.name}</td>
         <td>${off.offerId}</td>
         <td>${off.price.format("#.###")}</td>
-        <td>${off.shipprice("#.##")}</td>
+        <td>${off.shipprice.format("#.##")}</td>
         <td>${off.fba}</td>
         <td>${off.buybox}</td>
     </tr>

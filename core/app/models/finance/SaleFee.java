@@ -19,8 +19,6 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -96,36 +94,14 @@ public class SaleFee extends GenericModel {
          * 2. 以订单为判断, 收集需要删除的 Fee 的订单. 标准为 newFees 的数量 >= 数据库中加载出的 Fees 的数量
          * 3. 
          */
-        List<SaleFee> filterFees = new ArrayList<SaleFee>(); // 过滤后需要替换更新的 SaleFee
         Set<String> orderIds = new HashSet<String>(); // newFees 所涉及的 Order
-        Set<String> filterOrderIds = new HashSet<String>(); // 过滤后需要进行替换更新的 Order
-        Map<String, List<SaleFee>> feeTimes = new HashMap<String, List<SaleFee>>(); // 将 SaleFee 根据 OrderId 区分开
 
         for(SaleFee fe : newFees) {
             orderIds.add(fe.orderId);
-            if(feeTimes.containsKey(fe.orderId)) feeTimes.get(fe.orderId).add(fe);
-            else feeTimes.put(fe.orderId, new ArrayList<SaleFee>(Arrays.asList(fe)));
         }
         // 清理原来的 SaleFees, 确保每个 Order 的 SaleFee 只有一份不会重复
-
-        try {
-            ResultSet rs = DB.executeQuery("select orderId, count(*) as qty from SaleFee where orderId IN ('" + StringUtils.join(orderIds, "','") + "') group by orderId");
-            while(rs.next()) {
-                String orderId = rs.getString("orderId");
-                Integer times = rs.getInt("qty");
-                List<SaleFee> fees = feeTimes.get(orderId);
-                if(times >= fees.size()) { //  如果 newFees 的数量 >= 数据库中的 Fees 的数量, 那么则进行替换更新
-                    filterFees.addAll(fees);
-                    filterOrderIds.add(orderId);
-                }
-            }
-        } catch(SQLException e) {
-            Logger.warn(Webs.E(e));
-        }
-        SaleFee.delete("orderId IN ('" + StringUtils.join(filterOrderIds, "','") + "')");
-        Logger.info("New SaleFee effect Orders[%s], after filter effect Orders[%s], skip %s Orders.",
-                orderIds.size(), filterFees.size(), orderIds.size() - filterOrderIds.size());
-        return filterFees;
+        SaleFee.delete("orderId IN ('" + StringUtils.join(orderIds, "','") + "')");
+        return newFees;
     }
 
     private static FeeType cachedFeeType(String key, Map<String, FeeType> cached) {
@@ -137,17 +113,6 @@ public class SaleFee extends GenericModel {
             cached.put(key, type);
         }
         return type;
-    }
-
-    private static Orderr cachedOrder(String key, Map<String, Orderr> cached) {
-        Orderr ord = null;
-        if(cached.containsKey(key)) {
-            ord = cached.get(key);
-        } else {
-            ord = Orderr.findById(key);
-            cached.put(key, ord);
-        }
-        return ord;
     }
 
     /**
@@ -204,7 +169,7 @@ public class SaleFee extends GenericModel {
                         fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
                     } else {
                         fee.orderId = orderId;
-                        Orderr ord = cachedOrder(orderId, cachedOrder);
+                        Orderr ord = Orderr.findById(fee.orderId);
                         if(ord == null && !StringUtils.startsWith(orderId, "S"))
                             Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
                         else fee.order = ord;
@@ -311,7 +276,7 @@ public class SaleFee extends GenericModel {
                         fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
                     } else {
                         fee.orderId = orderId;
-                        Orderr ord = cachedOrder(orderId, cachedOrder);
+                        Orderr ord = Orderr.findById(fee.orderId);
                         if(ord == null && !StringUtils.startsWith(orderId, "S"))
                             Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
                         else fee.order = ord;

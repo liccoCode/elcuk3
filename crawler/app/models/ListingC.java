@@ -104,9 +104,10 @@ public class ListingC {
             this.state = S.CLOSE;
             return this;
         }
+        this.state = S.NORMAL;
 
         this.asin = root.select("#ASIN").val().toUpperCase();
-        String site = root.select("#navLogoPrimary > span").first().text();
+        String site = root.select("#navLogoPrimary > span").first().text().toLowerCase();
         this.listingId = String.format("%s_%s", this.asin, site);
 //        Elements images = root.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
         Element img = root.select("#prodImage").first();

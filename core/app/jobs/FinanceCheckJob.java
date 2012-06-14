@@ -23,21 +23,26 @@ public class FinanceCheckJob extends Job {
     public void doJob() {
         List<Account> accs = Account.openedAcc();
         for(Account acc : accs) {
-            for(Account.M m : Account.M.values()) {
-                if(m == Account.M.EBAY_UK || m == Account.M.AMAZON_US ||
-                        m == Account.M.AMAZON_ES || m == Account.M.AMAZON_IT)
-                    continue;
-                Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.uniqueName, m.name());
-                try {
-                    File file = acc.briefFlatFinance(m);
-                    List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc, m);
-                    List<SaleFee> filtereFees = SaleFee.clearOldSaleFee(fees);
-                    SaleFee.batchSaveWithJDBC(filtereFees);
-                    Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Done", acc.uniqueName, m.name());
-                } catch(Exception e) {
-                    Logger.warn("FinanceCheckJob %s", Webs.E(e));
-                }
+            if("AJUR3R8UN71M4".equals(acc.merchantId)) {
+                doFetch(acc, Account.M.AMAZON_UK);
+                doFetch(acc, Account.M.AMAZON_DE);
+            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
+                doFetch(acc, Account.M.AMAZON_DE);
             }
         }
     }
+
+    private void doFetch(Account acc, Account.M m) {
+        Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.uniqueName, m.name());
+        try {
+            File file = acc.briefFlatFinance(m);
+            List<SaleFee> fees = SaleFee.flagFinanceParse(file, acc, m);
+            SaleFee.clearOldSaleFee(fees);
+            SaleFee.batchSaveWithJDBC(fees);
+            Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Done", acc.uniqueName, m.name());
+        } catch(Exception e) {
+            Logger.warn("FinanceCheckJob %s", Webs.E(e));
+        }
+    }
+
 }
