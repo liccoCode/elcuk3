@@ -151,4 +151,11 @@ public class TimeParseTest {
         System.out.println("Java Date: " + Dates.date2DateTime(new DateTime(1262275200000l).toDate()));
         System.out.println(Dates.date2DateTime(new Date(1338348242273l)));
     }
+
+    @Test
+    public void testDateMorningAndNight() {
+        Date now = new Date();
+        System.out.println(Dates.morning(now));
+        System.out.println(Dates.night(now));
+    }
 }

@@ -1,6 +1,7 @@
 package jobs;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
+import helper.Currency;
 import helper.Patterns;
 import helper.Webs;
 import models.market.*;
@@ -204,6 +205,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                         AmountType at = ct.getAmount();
                         String compType = ct.getType().toLowerCase();
                         oi.currency = helper.Currency.valueOf(at.getCurrency());
+                        if(oi.currency == null) oi.currency = Currency.USD;// 如果 Currency 为 null,则修补为 USD
                         if("principal".equals(compType)) {
                             oi.price = at.getValue();
                             totalAmount += oi.price;
