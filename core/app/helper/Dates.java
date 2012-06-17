@@ -38,6 +38,26 @@ public class Dates {
     }
 
     /**
+     * 返回一个 Date 日期这一天的开始
+     *
+     * @param date
+     * @return
+     */
+    public static Date morning(Date date) {
+        return data2Date(date);
+    }
+
+    /**
+     * 返回一个 Date 日期这一天的最后
+     *
+     * @param date
+     * @return
+     */
+    public static Date night(Date date) {
+        return new Date(data2Date(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
+    }
+
+    /**
      * 舍弃掉 Date 后面的 时,分,秒
      *
      * @param date

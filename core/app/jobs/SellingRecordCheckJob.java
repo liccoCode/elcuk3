@@ -7,6 +7,7 @@ import models.market.*;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.db.jpa.JPA;
 import play.jobs.Job;
 
 import java.util.*;
@@ -25,15 +26,61 @@ public class SellingRecordCheckJob extends Job {
 
     @Override
     public void doJob() {
+        /**
+         * 0. 一 fixTime 为基准时间
+         * 1. 检查 7 天内的 SellingRecord, 没有的创建, 有的进行更新
+         * 2. 下载 2 天前的 SellingRecord 数据.
+         */
+
         List<Selling> sellings = Selling.all().fetch();
 
         if(fixTime == null) fixTime = DateTime.now();
-        Date checkDate = DateTime.parse(fixTime.toString("yyyy-MM-dd")).plusDays(-1).toDate();
-        List<OrderItem> orderitems = OrderItem.find("createDate>=? AND createDate<=?",
-                checkDate,/*记录昨天 00:00*/
-                fixTime.toDate()/*当前时间*/).fetch();
+        for(int i = -7; i < 0; i++)
+            checkOneDaySellingRecord(sellings, fixTime.plusDays(i).toDate());
 
-        Logger.info("Date (%s), check %s selling...", Dates.date2Date(checkDate), sellings.size());
+        //------- 抓取 Amazon 的数据 (由于抓取 Amazon 的数据是一个整体, 所以最后处理) --------
+        /**
+         * 找到所有 Amazon 市场的 SellingRecord 数据
+         * PS: 只能抓取到两天前的 PageView 数据
+         */
+        amazonNewestRecords();
+    }
+
+    private void amazonNewestRecords() {
+        List<Account> accs = Account.all().fetch();
+        Set<SellingRecord> records = null;
+        // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
+        for(Account acc : accs) {
+            if("AJUR3R8UN71M4".equals(acc.merchantId)) { // UK 账号, uk,de 两个市场的数据都需要
+                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_UK, fixTime.plusDays(-2).toDate());
+                records.addAll(SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate()));
+                Logger.info("Account(%s) Fetch UK & DE  %s records.", acc.prettyName(), records.size());
+            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
+                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate());
+                Logger.info("Account(%s) Fetch DE %s records", acc.prettyName(), records.size());
+            }
+            if(records == null || records.size() <= 0) continue;
+            // 直接这样处理,因为通过 SellingRecord.newRecordFromAmazonBusinessReports 出来的方法已经存在与 Session 缓存中了.
+            for(SellingRecord record : records) {
+                if(JPA.em().contains(record)) // 防止异常情况, 只有存在与一级缓存(Transation)中的才可以保存
+                    record.save();
+                else
+                    Logger.warn("SellingRecord (%s) is not in Hibernate Session Cache!", record.id);
+            }
+        }
+    }
+
+    /**
+     * 检查并且计算某一天的 SellingRecord. 重新计算指定 Selling 在某一个天的 SellingRecord 记录, 存在则更新否则新创建.
+     *
+     * @param sellings
+     * @param checkDate
+     */
+    private void checkOneDaySellingRecord(List<Selling> sellings, Date checkDate) {
+        List<OrderItem> orderitems = OrderItem.find("createDate>=? AND createDate<=?",
+                Dates.morning(checkDate), Dates.night(checkDate)).fetch();
+
+        Logger.info("Check Date (%s) %s selling...", Dates.date2Date(checkDate), sellings.size());
 
         for(Selling sell : sellings) {
             try {
@@ -44,7 +91,6 @@ public class SellingRecordCheckJob extends Job {
                 /**
                  * 1. 计算昨天的订单数量 units, orders, orderCanceled, sales(currency), usdSales
                  * 2. 记录昨天的数据 rating, salePrice,
-                 * 3. 抓取 Amazon 的数据 (由于抓取 Amazon 的数据是一个整体, 所以最后处理)
                  */
 
                 // ------- 1 ----------
@@ -78,10 +124,10 @@ public class SellingRecordCheckJob extends Job {
                         record.units += 1;
                         if(oi.order.state == Orderr.S.CANCEL) record.orderCanceld += 1;
                         record.sales += oi.price;
-                        record.usdSales += oi.usdCost;
+                        record.usdSales += oi.usdCost == null ? 0 : oi.usdCost;
                     }
                 } catch(Exception e) {
-                    Logger.warn(Webs.E(e));
+                    Logger.warn(Webs.S(e) + "---- %s", record.id);
                 }
 
                 // ---------- 2 ----------
@@ -94,62 +140,6 @@ public class SellingRecordCheckJob extends Job {
             } catch(Exception e) {
                 Logger.warn("SellingRecordCheckJob %s", Webs.E(e));
             }
-        }
-
-        // ---------- 3 -------------
-        /**
-         * 找到所有 Amazon 市场的 SellingRecord 数据
-         * PS: 只能抓取到两天前的 PageView 数据
-         */
-        List<Account> accs = Account.all().fetch();
-        Set<SellingRecord> records;
-        Map<String, SellingRecord> sellingRecordCache;
-        // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
-        for(Account acc : accs) {
-            SellingRecord tmp = null;
-            if("AJUR3R8UN71M4".equals(acc.merchantId)) { // UK 账号, uk,de 两个市场的数据都需要
-                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_UK, fixTime.plusDays(-2).toDate());
-                records.addAll(SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate()));
-                Logger.info("Account(%s) Fetch UK & DE  %s records.", acc.prettyName(), records.size());
-                loadManagedSellingRecord(records);
-            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
-                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, fixTime.plusDays(-2).toDate());
-                Logger.info("Account(%s) Fetch DE %s records", acc.prettyName(), records.size());
-                loadManagedSellingRecord(records);
-            }
-        }
-    }
-
-    /**
-     * 根据已经拥有的 SellingRecord 从数据库中加载出已经被持久化的 SellingRecord, 并进行保存或者更新
-     *
-     * @param records
-     * @return
-     */
-
-    private void loadManagedSellingRecord(Collection<SellingRecord> records) {
-        Map<String, SellingRecord> recordsCache = new HashMap<String, SellingRecord>();
-        Set<String> rcIds = new HashSet<String>();
-        for(SellingRecord rcd : records) rcIds.add(rcd.id);
-
-        List<SellingRecord> managedRecords = SellingRecord.find("id IN ('" + StringUtils.join(rcIds, "','") + "')").fetch();
-        for(SellingRecord msrc : managedRecords) recordsCache.put(msrc.id, msrc);
-
-        SellingRecord tmp;
-        for(SellingRecord rcd : records) { // 寻找已经在系统中的 SellingRecord 进行更新, 否在再创建
-            try {
-                if(recordsCache.containsKey(rcd.id)) {
-                    tmp = recordsCache.get(rcd.id);
-                    tmp.pageViews = rcd.pageViews;
-                    tmp.sessions = rcd.sessions;
-                    tmp.save();
-                } else {
-                    recordsCache.put(rcd.id, rcd.<SellingRecord>save());
-                }
-            } catch(Exception e) {
-                Logger.warn(Webs.E(e));
-            }
-
         }
     }
 }

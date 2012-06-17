@@ -42,6 +42,7 @@ public class SellingRecord extends GenericModel {
         this.rating = 0f;
         this.reviewSize = 0;
         this.salePrice = 0f;
+        this.usdSales = 0f;
         this.date = new Date();
     }
 
@@ -222,6 +223,7 @@ public class SellingRecord extends GenericModel {
                                     record.currency = Currency.GBP;
                             }
                             record.usdSales = record.currency.toUSD(record.sales);
+                            if(record.usdSales == null) record.usdSales = 0f;
                             record.orders = rowArr.get(12).getAsInt();
                             record.date = oneDay;
                             record.id = srid;
