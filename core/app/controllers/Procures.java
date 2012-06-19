@@ -73,7 +73,8 @@ public class Procures extends Controller {
     }
 
     public static void createDeliveryMent() {
-        renderJSON(Webs.exposeGson(Deliveryment.checkAndCreate()));
+        User user = User.findByUserName(Secure.Security.connected());
+        renderJSON(Webs.exposeGson(Deliveryment.checkAndCreate(user)));
     }
 
     public static void procureUnitToDeliveryMent(ProcureUnit p) {

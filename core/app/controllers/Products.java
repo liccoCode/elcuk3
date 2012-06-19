@@ -1,7 +1,6 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
-import helper.Constant;
 import helper.Webs;
 import models.PageInfo;
 import models.Ret;
@@ -9,10 +8,7 @@ import models.market.Account;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.product.*;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
-import play.cache.CacheFor;
 import play.data.validation.Error;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
@@ -22,7 +18,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -137,42 +132,10 @@ public class Products extends Controller {
         renderJSON(fmys);
     }
 
-    /**
-     * 给 Product 关联图片
-     *
-     * @param a
-     */
-    public static void upload(Attach a) {
-        long subfix = Attach.count("fid=?", a.fid.toUpperCase());
-        a.p = Attach.P.SKU;
-        a.fileSize = a.file.length();
-        a.fileName = String.format("%s_%s%s", a.fid, subfix, a.file.getPath().substring(a.file.getPath().lastIndexOf("."))).trim();
-        a.location = String.format("%s/%s", Constant.UPLOAD_PATH, a.fileName);
-        Logger.info("%s File save to %s.[%s kb]", a.fid, a.location, a.fileSize / 1024);
-        try {
-            FileUtils.copyFile(a.file, new File(a.location));
-            a.save();
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-        renderJSON(Webs.exposeGson(a));
-    }
 
-    @CacheFor("15mn")
     public static void images(String sku) {
         List<Attach> imgs = Attach.find("fid=?", sku).fetch();
         renderJSON(Webs.exposeGson(imgs));
-    }
-
-    public static void rmimage(Attach a) {
-        Attach attach = Attach.findAttach(a);
-        if(attach == null) renderJSON(new Ret("系统中不存在."));
-        try {
-            attach.rm();
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-        renderJSON(new Ret());
     }
 
     public static void pCreate(@Valid Product p) {

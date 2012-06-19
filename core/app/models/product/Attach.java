@@ -1,9 +1,11 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.Constant;
 import helper.Webs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
@@ -130,6 +132,19 @@ public class Attach extends Model {
             Logger.warn("Attach[%s] is Not found.", Webs.exposeGson(a));
 
         return rtAttach;
+    }
+
+    /**
+     * 从 Controller 上传上了的附件, 进行初始化 Attach 的一些参数
+     *
+     * @return
+     */
+    public Attach setUpAttachName() {
+        long subfix = RandomUtils.nextInt();
+        this.fileSize = this.file.length();
+        this.fileName = String.format("%s_%s%s", this.fid, subfix, this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
+        this.location = String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
+        return this;
     }
 
     public static Attach findByFileName(String fileName) {

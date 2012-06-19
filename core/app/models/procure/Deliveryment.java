@@ -1,8 +1,10 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.User;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -45,6 +47,9 @@ public class Deliveryment extends GenericModel {
     @OneToMany(mappedBy = "deliveryment")
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
+    @OneToOne
+    public User handler;
+
     @Expose
     public Date createDate = new Date();
 
@@ -55,6 +60,7 @@ public class Deliveryment extends GenericModel {
     @Expose
     @Column(nullable = false)
     public S state;
+
 
     @Id
     @Column(length = 30)
@@ -73,7 +79,8 @@ public class Deliveryment extends GenericModel {
         return Deliveryment.find("state=?", S.PENDING).fetch();
     }
 
-    public static Deliveryment checkAndCreate() {
+    public static Deliveryment checkAndCreate(User user) {
+        if(user == null) throw new FastRuntimeException("必须拥有创建者.");
         Deliveryment deliveryment = new Deliveryment();
         deliveryment.id = Deliveryment.id();
         deliveryment.state = S.PENDING;

@@ -1,8 +1,9 @@
 #{extends 'main.html' /}
 #{set title:'Product' /}
 #{set 'moreScripts'}
-    #{script 'products/product_detail.js'/}
     #{script 'jquery.filedrop.js' /}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'products/product_detail.js'/}
 #{/set}
 
 #{if p == null}

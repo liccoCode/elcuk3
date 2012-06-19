@@ -101,127 +101,34 @@ $(function(){
 
     });
 
-    // Drag & Drop Pic
-    var template = '<li class="span2">' +
-        '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
-        '<div class="progress"><div class="bar"></div></div>' +
-        '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
-        '</li>';
     var dropbox = $('#dropbox');
     var uploaded = $('#uploaded');
-    var message = $(".message");
+    var message = $("#dropbox .message");
 
     // 初始化页面的时候加载此 Product 对应的图片
     $.getJSON('/products/images', {sku:$('#p_sku').val()}, function(imgs){
         if(imgs.length > 0) message.remove();
         $.each(imgs, function(i, img){
-            var imgEL = $(template);
+            var imgEL = $(window.dropUpload.template);
             var imgUrl = "/attachs/image?a.fileName=" + img['fileName'];
             imgEL.find("img").attr('src', imgUrl + "&w=140&h=100");
-            imgEL.find('a.thumbnail').attr("href", imgUrl);
-            imgEL.find('a[style]').attr('outName', img['outName']).click(rmImage);
+            imgEL.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName']);
+            imgEL.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage);
             imgEL.find('div.progress').remove();
             imgEL.appendTo(uploaded);
         });
     });
 
-    /**
-     * 利用 Html 的 File API(FileReader) 创建图片的缩略图
-     * @param file
-     */
-    function createImage(file){
-        var preview = $(template);
-        var img = $('img', preview);
-        var reader = new FileReader();
-        reader.onload = function(e){
-            img.attr('src', e.target.result);
-        };
-        reader.readAsDataURL(file); // 直接将数据读成二进制字符串以便放在 URL 上显示
-        preview.appendTo(uploaded);
-        $.data(file, preview);
-    }
-
-    /**
-     * 删除服务器端的 Image, 同时删除页面中的 Image 元素
-     * @r Ajax 的返回 JSON 对象
-     */
-    function rmImage(e){
-        var o = $(this);
-        $.post('/products/rmimage', {'a.outName':o.attr('outName')}, function(r){
-            if(r.flag) alert("删除成功.");
-            else alert(r.message);
-            $('a[outName=' + o.attr('outName') + ']').parents('li').remove();
+    function fidCallBack(){
+        var sku = $('#p_sku').val();
+        if(sku == undefined || sku === ''){
+            alert("没有 SKU, 错误页面!");
             return false;
-        });
-        return false;
+        }
+        return {fid:sku, p:'SKU'};
     }
 
-    // 图片的 Drag&Drop DIV 初始化
-    dropbox.filedrop({
-        paramname:'a.file',
-        maxfiles:20,
-        maxfilesize:4, // in mb
-        url:'/products/upload',
-
-        beforeEach:function(file){
-            // file is a file object
-            // return false to cancel upload
-            if(file.type.split("/")[0].trim().toLowerCase() !== 'image'){
-                alert("只可以上传图片.");
-                return false;
-            }
-
-            // 'a.fid':'90-kd'
-            var sku = $('#p_sku').val();
-            if(sku == undefined || sku === ''){
-                alert("没有 SKU, 错误页面!");
-                return false;
-            }
-            this.data['a.fid'] = sku;
-        },
-        uploadStarted:function(i, file, len){
-            createImage(file);
-        },
-        dragOver:function(){
-            dropbox.css('background', '#eff');
-        },
-        dragLeave:function(){
-            dropbox.css('background', '#eee');
-        },
-        drop:function(){
-            dropbox.css('background', '#eee');
-        },
-        progressUpdated:function(i, file, progress){
-            $.data(file).find('.bar').width(progress + '%');
-        },
-        uploadFinished:function(i, file, r, time){
-            $.data(file).find('.progress').remove();
-            if(message)message.remove();
-            if(r['flag'] === false) alert(r.message);
-            else{
-                $.data(file).find('a.thumbnail').attr("href", "/attachs/image?a.outName=" + r['outName']);
-                $.data(file).find('a.btn').attr('outName', r['outName']).click(rmImage);
-            }
-        },
-        error:function(err, file){
-            switch(err){
-                case 'BrowserNotSupported':
-                    alert('browser does not support html5 drag and drop');
-                    break;
-                case 'TooManyFiles':
-                    // user uploaded more than 'maxfiles'
-                    break;
-                case 'FileTooLarge':
-                    // program encountered a file whose size is greater than 'maxfilesize'
-                    // FileTooLarge also has access to the file which was too large
-                    // use file.name to reference the filename of the culprit file
-                    alert("File is too Large!");
-                    break;
-                default:
-                    break;
-            }
-        }
-    });
+    window.dropUpload.iniDropbox(fidCallBack, dropbox, message, dropbox);
 
     // -------------- 上架 Amazon 的相关功能
 

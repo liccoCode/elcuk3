@@ -1,0 +1,79 @@
+#{extends 'main.html' /}
+#{set title:dlmt.id /}
+#{set 'moreStyles'}
+    #{stylesheet 'dateinput.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'jquery.tools.date.min.js'/}
+    #{script 'jquery.filedrop.js' /}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'procures/detail.coffee'/}
+#{/set}
+
+<div><span class="label label-info">基础信息</span></div>
+<div>
+    <table class="table table-condensed table-bordered">
+        <tr>
+            <td>Id:</td>
+            <td id="deliveryId">${dlmt.id}</td>
+            <td>State:</td>
+            <td>${dlmt.state}</td>
+            <td>创建日期</td>
+            <td>${dlmt.createDate.format("yyyy-MM-dd hh:mm:ss")}</td>
+            <td>User:</td>
+            <td>${dlmt.handler.username}</td>
+        </tr>
+    </table>
+</div>
+
+<div><span class="label label-info">ProcureUnits</span></div>
+<div>
+    <table class="table table-condensed table-bordered">
+        <tr>
+            <td>#</td>
+            <td>计划到库日期</td>
+            <td>实际交货日期</td>
+            <td>计划数量</td>
+            <td>实际交货数量</td>
+            <td>供应商</td>
+            <td>Selling</td>
+            <td>Msku</td>
+            <td>Product</td>
+            <td>阶段</td>
+        </tr>
+    #{list items:dlmt.units, as:'unit'}
+        <tr>
+            <td>${unit.id}</td>
+            <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')}</td>
+            <td>
+                #{if unit.delivery.deliveryDate == null}
+                    <span class="label label-warning">还未交货</span>
+                #{/if}
+                #{else }
+                ${unit.delivery.deliveryDate.format('yyyy-MM-dd')}
+                #{/else}
+            </td>
+            <td>${unit.plan.planQty}</td>
+            <td>
+                #{if unit.delivery.deliveryQty == null}
+                    <span class="label label-warning">还未交货</span>
+                #{/if}
+                #{else }
+                ${unit.delivery.deliveryQty}
+                #{/else}
+            </td>
+            <td>${unit.plan.supplier}</td>
+            <td>${unit.selling.sellingId}</td>
+            <td>${unit.selling.merchantSKU}</td>
+            <td>${unit.product.sku}</td>
+            <td>${unit.stage}</td>
+        </tr>
+    #{/list}
+    </table>
+</div>
+
+<div><span style="line-break:strict;" class="label label-info">附件</span></div>
+<div style="min-height:300px;background:#eee;" id="dropbox">
+    <ul class="thumbnails" id="uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+</div>
