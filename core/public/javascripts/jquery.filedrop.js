@@ -57,10 +57,10 @@
         progressUpdated:empty,
         speedUpdated:empty
     },
-            errors = ["BrowserNotSupported", "TooManyFiles", "FileTooLarge"],
-            doc_leave_timer, stop_loop = false,
-            files_count = 0,
-            files;
+        errors = ["BrowserNotSupported", "TooManyFiles", "FileTooLarge"],
+        doc_leave_timer, stop_loop = false,
+        files_count = 0,
+        files;
 
     $.fn.filedrop = function(options){
         var opts = $.extend({}, default_opts, options);
@@ -90,8 +90,8 @@
 
         function getBuilder(filename, filedata, mime, boundary){
             var dashdash = '--',
-                    crlf = '\r\n',
-                    builder = '';
+                crlf = '\r\n',
+                builder = '';
 
             if(opts.data){
                 var params = $.param(opts.data).split(/&/);
@@ -116,7 +116,7 @@
             builder += boundary;
             builder += crlf;
             builder += 'Content-Disposition: form-data; name="' + opts.paramname + '"';
-            builder += '; filename="' + filename + '"';
+            builder += '; filename="' + encodeURI(filename)/*对上传中文自负进行编码, 到后端再进行解码*/ + '"';
             builder += crlf;
 
             builder += 'Content-Type: ' + mime;
@@ -165,7 +165,7 @@
             }
 
             var filesDone = 0,
-                    filesRejected = 0;
+                filesRejected = 0;
 
             if(files_count > opts.maxfiles && opts.queuefiles === 0){
                 opts.error(errors[1]);
@@ -216,7 +216,7 @@
                     if(beforeEach(files[fileIndex]) != false){
                         if(fileIndex === files_count) return;
                         var reader = new FileReader(),
-                                max_file_size = 1048576 * opts.maxfilesize;
+                            max_file_size = 1048576 * opts.maxfilesize;
 
                         reader.index = fileIndex;
                         if(files[fileIndex].size > max_file_size){
@@ -261,12 +261,12 @@
                 }
 
                 var xhr = new XMLHttpRequest(),
-                        upload = xhr.upload,
-                        file = files[e.target.index],
-                        index = e.target.index,
-                        start_time = new Date().getTime(),
-                        boundary = '------multipartformboundary' + (new Date).getTime(),
-                        builder;
+                    upload = xhr.upload,
+                    file = files[e.target.index],
+                    index = e.target.index,
+                    start_time = new Date().getTime(),
+                    boundary = '------multipartformboundary' + (new Date).getTime(),
+                    builder;
 
                 newName = rename(file.name);
                 mime = file.type
@@ -299,8 +299,8 @@
                 xhr.onload = function(){
                     if(xhr.responseText){
                         var now = new Date().getTime(),
-                                timeDiff = now - start_time,
-                                result = opts.uploadFinished(index, file, jQuery.parseJSON(xhr.responseText), timeDiff, xhr);
+                            timeDiff = now - start_time,
+                            result = opts.uploadFinished(index, file, jQuery.parseJSON(xhr.responseText), timeDiff, xhr);
                         filesDone++;
 
                         // Remove from processing queue

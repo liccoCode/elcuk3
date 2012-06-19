@@ -18,6 +18,7 @@ import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 import java.io.File;
+import java.net.URLDecoder;
 
 /**
  * 系统中, 可以附加的附件; 这个 Model 存在这里, 其自己不知道自己附属与谁, 但其拥有者知道(单项关系), 但并非使用 DB 的
@@ -86,6 +87,13 @@ public class Attach extends Model {
     public String fileName;
 
     /**
+     * 文件的原始文件名
+     */
+    @Column(nullable = false, columnDefinition = "varchar(255) DEFAULT ''")
+    @Expose
+    public String originName;
+
+    /**
      * 以 bytes 为单位
      */
     @Expose
@@ -142,6 +150,7 @@ public class Attach extends Model {
     public Attach setUpAttachName() {
         long subfix = RandomUtils.nextInt();
         this.fileSize = this.file.length();
+        this.originName = URLDecoder.decode(this.file.getName());
         this.fileName = String.format("%s_%s%s", this.fid, subfix, this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
         this.location = String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
         return this;
