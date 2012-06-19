@@ -105,19 +105,7 @@ $(function(){
     var uploaded = $('#uploaded');
     var message = $("#dropbox .message");
 
-    // 初始化页面的时候加载此 Product 对应的图片
-    $.getJSON('/products/images', {sku:$('#p_sku').val()}, function(imgs){
-        if(imgs.length > 0) message.remove();
-        $.each(imgs, function(i, img){
-            var imgEL = $(window.dropUpload.template);
-            var imgUrl = "/attachs/image?a.fileName=" + img['fileName'];
-            imgEL.find("img").attr('src', imgUrl + "&w=140&h=100");
-            imgEL.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName']);
-            imgEL.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage);
-            imgEL.find('div.progress').remove();
-            imgEL.appendTo(uploaded);
-        });
-    });
+    window.dropUpload.loadImages($('#p_sku').val(), message, uploaded);
 
     function fidCallBack(){
         var sku = $('#p_sku').val();

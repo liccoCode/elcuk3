@@ -28,27 +28,30 @@ $ ->
     )
     false
 
+  window.dropUpload.imgSrc = (fileName, img, imgUrl) ->
+    args = fileName.split('.')
+    fileSuffix = args[args.length - 1]
+    switch fileSuffix
+      when 'xls', 'xlsx', 'csv'
+        img.attr('src', window.dropUpload.xlsImg)
+      when 'doc', 'docx'
+        img.attr('src', window.dropUpload.docImg)
+      when 'ppt', 'pptx'
+        img.attr('src', window.dropUpload.pptImg)
+      when 'pdf'
+        img.attr('src', window.dropUpload.pdfImg)
+      when 'zip', 'rar', '7z'
+        img.attr('src', window.dropUpload.zipImg)
+      else
+        img.attr('src', imgUrl)
+
   # 利用 Html 的 File API(FileReader) 创建图片的缩略图
   window.dropUpload.createImage = (file, uploaded) ->
     preview = $(window.dropUpload.template)
     img = $('img', preview)
     reader = new FileReader()
     reader.onload = (e) ->
-      args = file.name.split('.')
-      fileSuffix = args[args.length - 1]
-      switch fileSuffix
-        when 'xls', 'xlsx', 'csv'
-          img.attr('src', window.dropUpload.xlsImg)
-        when 'doc', 'docx'
-          img.attr('src', window.dropUpload.docImg)
-        when 'ppt', 'pptx'
-          img.attr('src', window.dropUpload.pptImg)
-        when 'pdf'
-          img.attr('src', window.dropUpload.pdfImg)
-        when 'zip', 'rar', '7z'
-          img.attr('src', window.dropUpload.zipImg)
-        else
-          img.attr('src', e.target.result)
+      window.dropUpload.imgSrc(file.name, img, e.target.result)
       img.attr('title', file.name)
     # 直接将数据读成二进制字符串以便放在 URL 上显示,结果在 FileReader 的 result 中
     reader.readAsDataURL(file)
@@ -112,3 +115,21 @@ $ ->
           # use file.name to reference the filename of the culprit file
             alert("File is too Large!")
     )
+
+  # 初始化页面的时候加载此 Product 对应的图片; uploaded 图片展示的 div
+  window.dropUpload.loadImages = (fid, message, uploaded) ->
+    $.getJSON('/attachs/images', fid: fid,
+      (imgs) ->
+        message.remove() if(imgs.length > 0)
+        for img, i in imgs
+          imgEl = $(window.dropUpload.template)
+          imgUrl = "/attachs/image?a.fileName=" + img['fileName']
+          window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl + "&w=140&h=100")
+          imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
+          imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
+          imgEl.find('div.progress').remove()
+          imgEl.appendTo(uploaded)
+    )
+
+  window.dropUpload
+

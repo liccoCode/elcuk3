@@ -11,6 +11,7 @@ import play.mvc.Controller;
 import play.utils.FastRuntimeException;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * 没有限制
@@ -60,5 +61,10 @@ public class Attachs extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
         renderJSON(new Ret());
+    }
+
+    public static void images(String fid) {
+        List<Attach> imgs = Attach.find("fid=?", fid).fetch();
+        renderJSON(Webs.exposeGson(imgs));
     }
 }

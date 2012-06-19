@@ -132,12 +132,6 @@ public class Products extends Controller {
         renderJSON(fmys);
     }
 
-
-    public static void images(String sku) {
-        List<Attach> imgs = Attach.find("fid=?", sku).fetch();
-        renderJSON(Webs.exposeGson(imgs));
-    }
-
     public static void pCreate(@Valid Product p) {
         if(p.isPersistent()) renderJSON(new Ret("SKU(" + p.sku + ")已经存在了!"));
         try {
