@@ -1,5 +1,7 @@
 <div style="min-height:26px;margin-bottom:20px;">
-    <button class="btn btn-primary btn-mini">关闭</button>
+    <a class="btn btn-primary btn-small" target="_blank" id="procureUnit_update_btn">更新</a>
+    <button class="btn btn-danger btn-small" rel="popover" data-content="关闭这个 ProcureUnit" placement="bottom">关闭
+    </button>
 </div>
 <div>
     <table class="table table-condensed table-bordered">
@@ -13,12 +15,13 @@
                     <span class="add-on"><a target="_blank" href="${unit.selling.asinLink()}">${unit.selling.asin}</a></span>
                     <span class="add-on"><a target="_blank" href="/products/p_detail?sku=${unit.product.sku}">${unit.product.sku}</a></span>
                 </div>
+                <input type="hidden" id="procureUnit_id" value="${unit.id}">
             </td>
         </tr>
 
         <tr>
             <td>预计到库时间</td>
-            <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')}</td>
+            <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')} | ${unit.plan.planLeftDays()} days left</td>
         </tr>
 
         <tr>
@@ -52,8 +55,8 @@
         </tr>
 
         <tr>
-            <td>状态</td>
-            <td>${unit.state} | ${unit.stage()}</td>
+            <td>阶段</td>
+            <td>${unit.stage}</td>
         </tr>
     </table>
 </div>
@@ -68,7 +71,7 @@
                 <tr>
                     <td>预计交货日期</td>
                     <td>
-                        <input name="p.delivery.planDeliveryDate" type="date">
+                        <input name="p.delivery.planDeliveryDate" type="date" placeHolder="预期交货日期">
                         <input type="hidden" name="p.id" value="${unit.id}">
                     </td>
                 </tr>
@@ -81,13 +84,12 @@
                     #{else }
                         <select name="p.deliveryment.id" size="1">
                             #{list items:dlms, as:'dlm'}
-                                <option value="${dlm.id}">${dlm.id}</option>
+                                <option value="${dlm.id}">${dlm.id} @ ${dlm.state}</option>
                             #{/list}
                         </select>
                     #{/else}
                     </td>
                 </tr>
-
 
                 <tr>
                     <td colspan="2">

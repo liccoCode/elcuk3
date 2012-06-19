@@ -31,6 +31,10 @@ public class Shipment extends GenericModel {
 
     public enum S {
         /**
+         * 计划中
+         */
+        PEDING,
+        /**
          * 运输中
          */
         SHIPPING,
@@ -73,6 +77,10 @@ public class Shipment extends GenericModel {
      * 此货运单人工创建的时间
      */
     public Date createDate = new Date();
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 12)
+    public S state;
 
     /**
      * 货运开始日期
@@ -135,6 +143,16 @@ public class Shipment extends GenericModel {
      * 目的地址
      */
     public String target;
+
+    /**
+     * 打开的正在计划中的 Shipment
+     *
+     * @return
+     */
+    public static List<Shipment> openShipments() {
+        return Shipment.find("state=?", S.PEDING).fetch();
+    }
+
 
     /**
      * 计算 Shipment 的 ID

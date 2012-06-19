@@ -32,6 +32,10 @@ public class Deliveryment extends GenericModel {
          */
         FULPAY,
         /**
+         * 部分交货
+         */
+        PART_DELIVERY,
+        /**
          * 完成, 交货
          */
         DELIVERY

@@ -301,9 +301,9 @@ public class Webs {
      *
      * @return
      */
-    public static String E(Exception e) {
+    public static <E extends Throwable> String E(E e) {
         if(Play.mode.isDev()) e.printStackTrace();
-        return e.getClass().getSimpleName() + "|" + e.getMessage();
+        return e.getMessage() + "|" + e.getClass().getSimpleName();
     }
 
     /**
@@ -312,7 +312,7 @@ public class Webs {
      * @param e
      * @return
      */
-    public static String S(Exception e) {
+    public static <E extends Throwable> String S(E e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();

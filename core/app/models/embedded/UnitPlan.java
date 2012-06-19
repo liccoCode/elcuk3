@@ -2,8 +2,12 @@ package models.embedded;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.Webs;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.util.Date;
 
 /**
@@ -31,6 +35,8 @@ public class UnitPlan {
     public String supplier;
 
     @Expose
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
     public Currency currency;
 
     /**
@@ -38,4 +44,14 @@ public class UnitPlan {
      */
     @Expose
     public Float unitPrice;
+
+    /**
+     * 根据计划到库时间计算的还剩余天数
+     *
+     * @return
+     */
+    public float planLeftDays() {
+        long millions = this.planArrivDate.getTime() - System.currentTimeMillis();
+        return Webs.scalePointUp(0, millions / (24f * 60 * 60 * 1000));
+    }
 }

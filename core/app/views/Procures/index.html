@@ -15,21 +15,21 @@
     <div class="span6">
         <ul id="procureUnitsTab" class="nav nav-tabs">
             <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">Plan</a></li>
-            <li><a href="#procure" data-toggle="tab" style="padding:3px 8px;">Procure</a></li>
-            <li><a href="#shipped" data-toggle="tab" style="padding:3px 8px;">Shipped</a></li>
+            <li><a href="#procure" data-toggle="tab" style="padding:3px 8px;">Delivery</a></li>
+            <li><a href="#shipped" data-toggle="tab" style="padding:3px 8px;">Ship</a></li>
         </ul>
 
         <div id="procureUnitsContent" class="tab-content">
             <div id="plan" class="tab-pane fade in active">
-            #{procureUnitTable items:plan /}
+            #{planProcureUnitTable items:plan /}
             </div>
 
             <div id="procure" class="tab-pane fade">
-            #{procureUnitTable items:procure /}
+            #{deliveryProcureUnitTable items:procure /}
             </div>
 
             <div id="shipped" class="tab-pane fade">
-            #{procureUnitTable items:shipped /}
+            #{planProcureUnitTable items:shipped /}
             </div>
         </div>
 

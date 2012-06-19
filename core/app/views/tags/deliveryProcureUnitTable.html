@@ -1,0 +1,29 @@
+*{
+items: procureList
+}*
+<table class="table table-condensed table-bordered">
+    <tr>
+        <td>Id</td>
+        <td><a rel="popover" data-content="采购单 Deliveryment Id" width="auto">DLId</a></td>
+        <td><a rel="popover" data-content="供应商" width="auto">Sup</a></td>
+        <td><a rel="popover" data-content="实际交货数量" width='auto'>JHQty</a></td>
+        <td>User</td>
+        <td><a rel="popover" data-content="预计交货时间" width="auto">JHDate</a></td>
+    </tr>
+#{list items:_items, as:'unit'}
+    <tr row>
+        <td>${unit.id}</td>
+        <td>${unit.deliveryment.id}</td>
+        <td>${unit.plan.supplier}</td>
+        <td>
+            #{if unit.delivery.deliveryQty == null}
+                <span class="label label-warning">还未交货</span>
+            #{/if}
+            #{else }
+            ${unit.delivery.deliveryQty}
+            #{/else}
+        <td>${unit.handler?.username}</td>
+        <td>${unit.delivery.planDeliveryDate.format('yyyy-MM-dd')}</td>
+    </tr>
+#{/list}
+</table>

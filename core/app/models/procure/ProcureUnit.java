@@ -14,7 +14,6 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,49 +47,6 @@ public class ProcureUnit extends Model {
         DONE,
         /**
          * 关闭阶段, 不处理了
-         */
-        CLOSE
-    }
-
-    public enum S {
-        /**
-         * 计划
-         */
-        PLAN,
-        /**
-         * 已经下单
-         */
-        ORDERED,
-        /**
-         * 部分付款
-         */
-        PARTPAY,
-        /**
-         * 全部付款
-         */
-        FULPAY,
-        /**
-         * 已交货
-         */
-        DELIVERIED,
-        /**
-         * 运输中
-         */
-        SHIPPING,
-        /**
-         * 清关
-         */
-        CLEARGATE,
-        /**
-         * 入库中
-         */
-        RECIVING,
-        /**
-         * 采购完成
-         */
-        DONE,
-        /**
-         * 没有经过正常流程,进行关闭了的
          */
         CLOSE
     }
@@ -148,43 +104,31 @@ public class ProcureUnit extends Model {
     @Expose
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    public S state;
+    public STAGE stage;
 
 
     @Lob
     @Expose
     public String comment = " ";
 
-    public STAGE stage() {
-        switch(this.state) {
-            case PLAN:
-                return STAGE.PLAN;
-            case ORDERED:
-            case PARTPAY:
-            case FULPAY:
-            case DELIVERIED:
-                return STAGE.DELIVERY;
-            case SHIPPING:
-            case CLEARGATE:
-            case RECIVING:
-                return STAGE.SHIP;
-            default:
-                return null;
-        }
-    }
 
     /**
      * 检查参数并且创建新 ProcureUnit
      */
     public ProcureUnit checkAndCreate() {
-        /**
-         *
-         *
-         *
-         *
-         *
-         * 6. whouse 必须存在
-         */
+        // 0. 检查是否已经存在
+        if(this.id != null)
+            if(ProcureUnit.findById(this.id) != null) throw new FastRuntimeException("ProcureUnit 已经存在了, 不允许重复创建.");
+        this.check();
+        return this.save();
+    }
+
+    public void checkAndUpdate() {
+        this.check();
+        this.save();
+    }
+
+    private void check() {
         // 1. 预期日期不允许为空
         if(this.plan.planArrivDate == null) throw new FastRuntimeException("预期日期不允许为空");
         // 2. 检查预计日期不允许比当前日期小
@@ -208,15 +152,31 @@ public class ProcureUnit extends Model {
         if(this.handler == null) throw new FastRuntimeException("必须拥有一个处理人.");
         this.product = Product.findById(this.sku);
         if(this.product == null) throw new FastRuntimeException("没有关联 Product.");
-
-        return this.save();
     }
 
-    public ProcureUnit fromPlanToDelivery() {
+    /**
+     * ProcureUnit 从 Plan stage 升级成为 Delivery Stage
+     *
+     * @return
+     */
+    public ProcureUnit stageFromPlanToDelivery() {
         /**
          * 1. 检查是否合法
          * 2. 进行转换
          */
+        if(this.delivery.planDeliveryDate == null) throw new FastRuntimeException("预计交货时间不允许为空!");
+        if(this.delivery.planDeliveryDate.getTime() > this.plan.planArrivDate.getTime())
+            throw new FastRuntimeException("预计交货时间不可能晚于预计到库时间!");
+        if(this.deliveryment == null || !this.deliveryment.isPersistent())
+            throw new FastRuntimeException("成为 Delivery Stage 采购单必须先存在.");
+        this.stage = STAGE.DELIVERY;
+        return this.save();
+    }
+
+    public ProcureUnit deliveryInfoUpdate() {
+        if(this.delivery.deliveryDate == null) throw new FastRuntimeException("不允许更新实际交货日期为空");
+        if(this.delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
+        if(this.delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");
         return this.save();
     }
 
@@ -226,16 +186,7 @@ public class ProcureUnit extends Model {
         return query.getResultList();
     }
 
-    public static List<ProcureUnit> findByState(STAGE stage, int page, int size) {
-        switch(stage) {
-            case PLAN:
-                return ProcureUnit.find("state IN (?) ORDER BY plan.planArrivDate", S.PLAN).fetch(page, size);
-            case DELIVERY:
-                return ProcureUnit.find("state IN (?,?,?,?)", S.ORDERED, S.PARTPAY, S.FULPAY, S.DELIVERIED).fetch(page, size);
-            case SHIP:
-                return ProcureUnit.find("state IN (?,?,?)", S.SHIPPING, S.CLEARGATE, S.RECIVING).fetch(page, size);
-            default:
-                return new ArrayList<ProcureUnit>();
-        }
+    public static List<ProcureUnit> findByStage(STAGE stage, int page, int size) {
+        return ProcureUnit.find("stage=?", stage).fetch(page, size);
     }
 }
