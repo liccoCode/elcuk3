@@ -1,0 +1,78 @@
+#{extends 'main.html' /}
+#{set title:'Procure Create' /}
+#{set 'moreStyles'}
+    #{stylesheet 'dateinput.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'jquery.tools.date.min.js'/}
+    #{script 'procures/create.coffee'/}
+#{/set}
+<div>
+    <table id="post_form" class="table table-condensed table-bordered" style="margin-top:10px;">
+        <caption><span style="font-size:3ex;">创建采购单元</span></caption>
+        <tr>
+            <td>Selling:</td>
+            <td>
+                <div class="input-prepend">
+                    <input name="p.sid" style="width:130px;" type="text" data-provide="typeahead" data-source="${sids}" placeHolder="为哪一个Selling补货">
+                    <span class="add-on" id='asin'><a target="_blank">ASIN</a></span>
+                    <span class="add-on" id='sid'><a target="_blank">SID</a></span>
+                </div>
+            </td>
+            <td>Whouse:</td>
+            <td>
+                <select name="p.whouse.id" size="1">
+                    <option value="">请选择</option>
+                #{list items:models.product.Whouse.all().fetch(), as:'wh'}
+                    <option value="${wh.id}">${wh.name}</option>
+                #{/list}
+                </select>
+            </td>
+            <td>Product:</td>
+            <td><input disabled="" name="p.sku" type="text" placeHolder="采购的哪一个SKU"></td>
+        </tr>
+
+        <tr>
+            <td>预计到库时间:</td>
+            <td><input name="p.plan.planArrivDate" type="date" placeHolder="预计到库时间"></td>
+            <td>采购数量</td>
+            <td>
+                <div class="input-prepend">
+                    <input name="p.plan.planQty" style="width:50px;" type="text" placeHolder="计划采购数量" value="0">
+                    <span class="add-on" style="cursor:pointer" val="+50">+50</span>
+                    <span class="add-on" style="cursor:pointer" val="-50">-50</span>
+                    <span class="add-on" style="cursor:pointer" val="+100">+100</span>
+                    <span class="add-on" style="cursor:pointer" val="-100">-100</span>
+                </div>
+            </td>
+            <td>状态</td>
+            <td><input disabled="" name="p.state" type="text" placeHolder="状态" value="PLAN"></td>
+        </tr>
+
+        <tr>
+            <td>采购商</td>
+            <td>
+                <input name="p.plan.supplier" type="text" data-provide="typeahead" data-source="${suppliers}" placeHolder="采购商">
+            </td>
+            <td>采购单价</td>
+            <td><input name="p.plan.unitPrice" type="text" placeHolder="价格"></td>
+            <td>货币</td>
+            <td>
+                <select name="p.plan.currency" size="1">
+                #{list items:helper.Currency.values(), as:'c'}
+                    <option ${c == helper.Currency.CNY ? 'selected' : ''} value="${c}">${c}</option>
+                #{/list}
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="6">
+                <button id='create_procure' class="btn btn-small btn-primary">创建</button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="alert">
+</div>

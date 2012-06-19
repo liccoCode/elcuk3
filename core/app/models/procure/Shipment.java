@@ -4,11 +4,10 @@ import helper.Currency;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 一张运输单
@@ -30,6 +29,25 @@ public class Shipment extends GenericModel {
         AIR
     }
 
+    public enum S {
+        /**
+         * 运输中
+         */
+        SHIPPING,
+        /**
+         * 清关
+         */
+        CLEARGATE,
+        /**
+         * 入库中
+         */
+        RECIVING,
+        /**
+         * 完成
+         */
+        DONE
+    }
+
     public enum P {
         /**
          * 重量计价
@@ -41,8 +59,20 @@ public class Shipment extends GenericModel {
         VOLUMN
     }
 
+    /**
+     * 此 Shipment 所运输的 ProcureUnits
+     */
+    @OneToMany(mappedBy = "shipment")
+    public List<ProcureUnit> shipunits = new ArrayList<ProcureUnit>();
+
     @Id
+    @Column(length = 30)
     public String id;
+
+    /**
+     * 此货运单人工创建的时间
+     */
+    public Date createDate = new Date();
 
     /**
      * 货运开始日期
@@ -113,7 +143,9 @@ public class Shipment extends GenericModel {
      */
     public static String id() {
         DateTime dt = DateTime.now();
-        String count = Shipment.count() + "";
+        String count = Shipment.count("createDate>=? AND createDate<=?",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-30", dt.getYear(), dt.getMonthOfYear())).toDate()) + "";
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 

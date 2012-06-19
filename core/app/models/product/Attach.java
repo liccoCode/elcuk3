@@ -40,7 +40,16 @@ public class Attach extends Model {
         /**
          * Listing
          */
-        LISTING
+        LISTING,
+
+        /**
+         * Deliveryment
+         */
+        DELIVERYMENT,
+        /**
+         * SHIPMENT
+         */
+        SHIPMENT
     }
 
     @PrePersist

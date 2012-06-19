@@ -1,0 +1,42 @@
+#{extends 'main.html' /}
+#{set title:'Procures' /}
+#{set 'moreStyles'}
+    #{stylesheet 'dateinput.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'jquery.tools.date.min.js'/}
+    #{script 'procures/procure.coffee'/}
+#{/set}
+<div style="margin:5px 0">
+    <a href="@{Procures.create()}" target="_blank" class="btn btn-small btn-primary">创建</a>
+</div>
+<div class="row">
+
+    <div class="span6">
+        <ul id="procureUnitsTab" class="nav nav-tabs">
+            <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">Plan</a></li>
+            <li><a href="#procure" data-toggle="tab" style="padding:3px 8px;">Procure</a></li>
+            <li><a href="#shipped" data-toggle="tab" style="padding:3px 8px;">Shipped</a></li>
+        </ul>
+
+        <div id="procureUnitsContent" class="tab-content">
+            <div id="plan" class="tab-pane fade in active">
+            #{procureUnitTable items:plan /}
+            </div>
+
+            <div id="procure" class="tab-pane fade">
+            #{procureUnitTable items:procure /}
+            </div>
+
+            <div id="shipped" class="tab-pane fade">
+            #{procureUnitTable items:shipped /}
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- ProcureUnit 详细内容 -->
+    <div class="span6" id="unit_details">
+    </div>
+</div>

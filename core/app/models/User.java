@@ -92,6 +92,10 @@ public class User extends Model {
         return User.find("username=? AND password=?", username, Crypto.encryptAES(password)).first();
     }
 
+    public static User findByUserName(String username) {
+        return User.find("username=?", username).first();
+    }
+
     /**
      * 修改密码
      *

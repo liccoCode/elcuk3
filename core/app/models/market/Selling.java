@@ -401,6 +401,24 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 返回所有 Selling 的 sid
+     *
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static List<String> allSID() {
+        String cacheKey = "selling.allsid";
+        List<String> sids = Caches.blockingGet(cacheKey, List.class);
+        if(sids == null) {
+            sids = new ArrayList<String>();
+            List<Selling> sellings = Selling.all().fetch();
+            for(Selling s : sellings) sids.add(s.sellingId);
+            Caches.blockingAdd(cacheKey, sids, "2h");
+        }
+        return Caches.blockingGet(cacheKey, List.class);
+    }
+
+    /**
      * Selling 实例对象, 自行初始化 sid
      *
      * @return
