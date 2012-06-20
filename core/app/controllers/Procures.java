@@ -68,7 +68,7 @@ public class Procures extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(unit.stage != ProcureUnit.STAGE.DELIVERY)
             throw new FastRuntimeException("此采购单元的不是 DELIVERY 阶段");
-        List<Shipment> shipments = Shipment.openShipments();
+        List<Shipment> shipments = Shipment.shipmentsByState(Shipment.S.PEDING);
         render(unit, shipments);
     }
 

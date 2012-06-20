@@ -14,31 +14,25 @@ public class UserCheck extends Secure.Security {
     public static final String U = "user.name[%s][%s]";
 
     static boolean authenticate(String username, String password) {
-        User user;
+        User user = null;
         if(username.equals("wyatt_pan")) {
             user = new User("wyatt_pan", "empty");
             user.power = User.P.ROOT;
-        } else {
-            user = User.connect(username, password);
-        }
-        if(user != null) {
             Cache.add(ukey(username), user);
         }
+        if(user == null)
+            user = loadAndCacheUser(username);
         return user != null;
     }
 
     static boolean check(String profile) {
+        /**
+         * 由于登陆是从 Cookie 中添加的, 所以 Cookie 的有效期需要设置为内存中有效, 不能太长.
+         */
         String username = Secure.Security.connected();
         User user = Cache.get(ukey(username), User.class);
-        if(user == null) {
-            if(Secure.Security.isConnected()) {
-                user = User.find("username=?", username).first();
-                if(user != null) Cache.add(ukey(username), user);
-                else return false;
-            } else {
-                return false;
-            }
-        }
+        if(user == null) user = loadAndCacheUser(username);
+        if(user == null) return false;
         if("guest".equals(profile)) {
             return user.power.ordinal() >= User.P.GUEST.ordinal();
         } else if("normal".equals(profile)) {
@@ -60,6 +54,12 @@ public class UserCheck extends Secure.Security {
      */
     public static String ukey(String username) {
         return String.format(U, username, Scope.Session.current().getId());
+    }
+
+    private static User loadAndCacheUser(String username) {
+        User user = User.findByUserName(username);
+        if(user != null) Cache.add(ukey(username), user);
+        return user;
     }
 
 }

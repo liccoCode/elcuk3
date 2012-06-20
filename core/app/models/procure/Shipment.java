@@ -148,16 +148,6 @@ public class Shipment extends GenericModel {
     public String target;
 
     /**
-     * 打开的正在计划中的 Shipment
-     *
-     * @return
-     */
-    public static List<Shipment> openShipments() {
-        return Shipment.find("state=?", S.PEDING).fetch();
-    }
-
-
-    /**
      * 计算 Shipment 的 ID
      *
      * @return
@@ -168,6 +158,10 @@ public class Shipment extends GenericModel {
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
                 DateTime.parse(String.format("%s-%s-30", dt.getYear(), dt.getMonthOfYear())).toDate()) + "";
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+    }
+
+    public static List<Shipment> shipmentsByState(S state) {
+        return Shipment.find("state=?", state).fetch();
     }
 
 }

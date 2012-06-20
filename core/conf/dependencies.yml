@@ -4,6 +4,7 @@ require:
     - play
     # modules
     - play -> secure
+    - play -> crud
     - play -> fastergt 1.7
     - play -> coffee 1.0
     # jars...
