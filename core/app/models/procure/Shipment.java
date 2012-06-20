@@ -18,6 +18,24 @@ import java.util.List;
 @Entity
 public class Shipment extends GenericModel {
 
+    public Shipment() {
+        this.createDate = new Date();
+
+        // 计价方式
+        this.pQty = 1;
+        this.price = 1f;
+        this.currency = Currency.CNY;
+        this.pype = P.VOLUMN;
+        this.state = S.PEDING;
+
+        // 暂时这么写
+        this.source = "深圳";
+        this.shipper = "周伟";
+        this.type = T.AIR;
+
+        this.id = Shipment.id();
+    }
+
     public enum T {
         /**
          * 海运

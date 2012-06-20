@@ -24,10 +24,11 @@ public class Shipments extends Controller {
         render(pendings, shippings, clearAndReciving, dones);
     }
 
-    public static void create() {
-        render();
+    public static void blank() {
+        Shipment s = new Shipment();
+        render(s);
     }
 
-    public static void save() {
+    public static void save(Shipment s) {
     }
 }

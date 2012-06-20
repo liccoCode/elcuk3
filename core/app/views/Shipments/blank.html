@@ -1,0 +1,99 @@
+#{extends 'main.html' /}
+#{set title:'Shipments' /}
+#{set 'moreScripts'}
+    #{script 'shipments/create.coffee'/}
+#{/set}
+<div class="alert alert-success" style="text-align:center">
+    <h2>创建新 Shipment</h2>
+</div>
+
+<div class="offset2">
+    <form action="@{Shipments.save()}" method="POST" enctype="application/x-www-form-urlencoded" class="form-horizontal">
+        <fieldset>
+            <div class="control-group">
+                <label class="control-label" for="id">运输单号</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input disabled="" id="id" type="text" name="s.id" value="${s.id}">
+                    </div>
+                    <span class="help-inline">运输单号是自动生成的</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="createDate">创建时间</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input disabled="" id="createDate" type="text" name="s.createDate" value="${s.createDate.datetime()}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="state">状态</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input disabled="" id="state" type="text" name="s.state" value="${s.state}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="beginDate">开始时间</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input id="beginDate" type="date" name="s.beginDate" value="${s.beginDate?.date()}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="planArrivDate">预计到库时间</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input id="planArrivDate" type="date" name="s.planArrivDate" value="${s.planArrivDate?.datetime()}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="type">运输方式</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <select name="s.type" size="1" id="type">
+                        #{list items:models.procure.Shipment.P.values()}
+                            <option ${s.type == _ ? 'selected' : ''} value="${_}">${_}</option>
+                        #{/list}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="price">单位价格</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input disabled="" id="price" type="text" name="s.price" value="${s.price}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="price">单位价格</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input disabled="" id="price" type="text" name="s.price" value="${s.price}">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>

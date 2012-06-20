@@ -34,4 +34,26 @@ public class FTags extends FastTags {
         }
     }
 
+    public static void _text(Map<?, ?> args, Closure body, PrintWriter out, GroovyTemplate.ExecutableTemplate template, int fromLine) {
+        try {
+            /*
+                        <div class="control-group">
+                <label class="control-label" for="id">运输单号</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <input disabled="" id="id" type="text" name="s.id" value="${s.id}">
+                    </div>
+                    <span class="help-inline">运输单号是自动生成的</span>
+                </div>
+            </div>
+             */
+            String id = (String) args.get("id");
+            StringBuilder sbd = new StringBuilder("<div class='control-group'>")
+                    .append("<label class='control-label' for='").append(id).append("'>").append("</label>");
+            out.print(sbd.toString());
+        } catch(TemplateNotFoundException e) {
+            throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
+        }
+    }
 }

@@ -6,6 +6,9 @@ import models.market.Listing;
 import models.market.Selling;
 import play.templates.JavaExtensions;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -92,5 +95,13 @@ public class LinkExtensions extends JavaExtensions {
                 return String.format(baseEbay, listing.market.toString(), listing.asin);
         }
         return "#";
+    }
+
+    public static String datetime(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    }
+
+    public static String date(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 }
