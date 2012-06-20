@@ -63,11 +63,17 @@ $(function(){
          * @param date
          */
         fmt2:function(date){
-            return date.getFullYear() + "-" + (date.getMonth() + 1) + '-' + date.getDate();
+            var month = date.getMonth() + 1;
+            var ddate = date.getDate();
+            return date.getFullYear() + "-" + (month < 10 ? '0' + month :month) + '-' + (ddate < 10 ? '0' + ddate :ddate)
         },
 
+        /**
+         * yyyy-MM-dd HH:mm:ss 格式
+         * @param date
+         */
         fmt3:function(date){
-            return date.getFullYear() + "-" + (date.getMonth() + 1) + '-' + date.getDate() + " " + date.getHours() + ':' + date.getMinutes() + ":" + date.getSeconds();
+            return this.fmt2(date) + " " + date.getHours() + ':' + date.getMinutes() + ":" + date.getSeconds();
         }
 
     };

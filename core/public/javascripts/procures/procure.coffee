@@ -38,15 +38,14 @@ $ ->
 
   # 加载 Plan Tab 以后的页面初始化
   afterLoadPlanTab = ->
-    $('input[type=date]').dateinput(format: 'yyyy-mm-dd')
+    window.htmlIni()
     #绑定创建新采购单按钮
     bindNewDeliveryBtn()
     #绑定纳入采购单按钮
     bindToDeliveryBtn()
     # 绑定跳转 ProcureUnit 更新按钮
     bindProcureUnitEditBtn()
-    # 重新初始化所有 popover
-    window.popover()
+  # 重新初始化所有 popover
 
 
   # 更新 ProcureUnit 按钮事件
@@ -81,11 +80,10 @@ $ ->
 
   # 加载 Delivery Tab 以后的初始化
   afterLoadDeliveryTab = ->
-    $('input[type=date]').dateinput(format: 'yyyy-mm-dd')
-    # 实际交货数量全部转移
+  # 实际交货数量全部转移
     bindPlanQtyBtn()
     bindUpdateDeliveryBtn()
-    window.popover()
+    window.htmlIni()
 
 
   # -------------- 通用功能 ------------------

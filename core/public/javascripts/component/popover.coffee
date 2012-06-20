@@ -37,5 +37,8 @@ $ ->
       else
         $input.dateinput(format: $input.attr('format'))
 
-  window.dateinput()
-  window.popover()
+  window.htmlIni = ->
+    window.dateinput()
+    window.popover()
+
+  window.htmlIni()

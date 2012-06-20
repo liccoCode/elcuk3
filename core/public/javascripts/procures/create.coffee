@@ -1,5 +1,4 @@
 $ ->
-  $('#post_form :input[type=date]').dateinput({format: 'yyyy-mm-dd'})
   SUCCESS_TEMPLATE = '''<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">×</button><span></span></div>'''
 
   # 创建 ProcureUnit

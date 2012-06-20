@@ -7,7 +7,6 @@ import models.Ret;
 import models.market.*;
 import org.joda.time.DateTime;
 import play.cache.CacheFor;
-import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -56,8 +55,8 @@ public class Analyzes extends Controller {
     public static void ajaxUnit(String msku,
                                 String type,
                                 Account acc,
-                                @As("MM/dd/yyyy") Date from,
-                                @As("MM/dd/yyyy") Date to) {
+                                Date from,
+                                Date to) {
         if(!acc.isPersistent()) acc = null;
         try {
             renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartUnitOrder(msku, acc, type, from, to)));
@@ -70,8 +69,8 @@ public class Analyzes extends Controller {
     public static void ajaxSales(String msku,
                                  String type,
                                  Account acc,
-                                 @As("MM/dd/yyyy") Date from,
-                                 @As("MM/dd/yyyy") Date to) {
+                                 Date from,
+                                 Date to) {
         if(!acc.isPersistent()) acc = null;
         try {
             renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartSales(msku, acc, type, from, to)));
@@ -86,8 +85,8 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingRecord(String msku,
                                          Account acc,
-                                         @As("MM/dd/yyyy") Date from,
-                                         @As("MM/dd/yyyy") Date to) {
+                                         Date from,
+                                         Date to) {
         try {
             renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartPVAndSS(msku, acc, from, to)));
         } catch(Exception e) {
@@ -101,8 +100,8 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingTurn(String msku,
                                        Account acc,
-                                       @As("MM/dd/yyyy") Date from,
-                                       @As("MM/dd/yyyy") Date to) {
+                                       Date from,
+                                       Date to) {
         try {
             renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartTurnRatio(msku, acc, from, to)));
         } catch(Exception e) {
@@ -116,7 +115,7 @@ public class Analyzes extends Controller {
      * @param msku
      */
     public static void pie(String msku,
-                           @As("MM/dd/yyyy") Date date) {
+                           Date date) {
         Map<String, AtomicInteger> dataMap = Orderr.orderPieChart(msku, date);
         List<String> datax = new ArrayList<String>();
         for(String key : dataMap.keySet()) {

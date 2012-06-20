@@ -5,7 +5,6 @@ $ ->
   now = new Date()
 
   init = () ->
-    $('#a_toolbar :input[type=date]').dateinput({format: 'mm/dd/yyyy'})
     $('#a_from').data('dateinput').setValue(defaultDate)
     $('#a_to').data('dateinput').setValue(now)
 
@@ -13,8 +12,8 @@ $ ->
     sellRankLoad(MSKU, 1)
     sellRankLoad(SKU, 1)
     # 销量线
-    unit_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
-    sale_line(from: $.DateUtil.fmt1(defaultDate), to: $.DateUtil.fmt1(now), msku: 'All', type: 'msku')
+    unit_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
+    sale_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
     # 默认 PageView 线
     pageViewDefaultContent()
 
@@ -55,7 +54,7 @@ $ ->
   unitOp = lineOp('a_units', 'Units').click(
     ->
       msku = localStorage.getItem('msku')
-      window.open('/analyzes/pie?msku=' + msku + '&date=' + $.DateUtil.fmt1(new Date(@x)),
+      window.open('/analyzes/pie?msku=' + msku + '&date=' + $.DateUtil.fmt2(new Date(@x)),
         msku,
         'width=520,height=620,location=yes,status=yes'
       )
