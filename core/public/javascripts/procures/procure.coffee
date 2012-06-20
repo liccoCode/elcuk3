@@ -109,9 +109,9 @@ $ ->
 
   #初始化 Delivery 点击事件
   deliveryRowClick = ->
-    $('#procure tr[row]').css('cursor', 'pointer').click ->
+    $('#delivery tr[row]').css('cursor', 'pointer').click ->
       o = $(@)
-      threeTabClickActive('plan', o)
+      threeTabClickActive('delivery', o)
       details = $('#unit_details')
       details.mask('加载中...')
       details.load('/procures/deliveryDetail', id: o.find('td:eq(0)').html(),

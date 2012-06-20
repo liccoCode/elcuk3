@@ -95,6 +95,36 @@
     </table>
 </div>
 
+#{if unit.delivery.deliveryQty > 0}
+<div class="accordion-group">
+    <div class="accordion-heading">
+        <a class="accordion-toggle" data-toggle="collapse" href="#collapseTwo">采购完成, 安排运输单</a>
+    </div>
+
+    <div id="collapseTwo" class="accordion-body collapse" style="height:0">
+        <div class="accordion-inner">
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <td>运输单</td>
+                    <td>
+                        #{if shipments.size() == 0}
+                            <span class="label label-warning">请先创建 Shipment</span>
+                        #{/if}
+                        #{else }
+                            <select name="p.shipment.id" size="1">
+                                #{list items:shipments, as:'shipment'}
+                                    <option value="${shipment.id}">${shipment.id} @ ${shipment.state}</option>
+                                #{/list}
+                            </select>
+                        #{/else}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+#{/if}
+
 <div class="accordion-group">
     <div class="accordion-heading">
         <a class="accordion-toggle" data-toggle="collapse" href="#deliveryInfo">交货阶段处理</a>
@@ -129,34 +159,3 @@
         </div>
     </div>
 </div>
-
-#{if unit.delivery.deliveryQty > 0}
-<div class="accordion-group">
-    <div class="accordion-heading">
-        <a class="accordion-toggle" data-toggle="collapse" href="#collapseTwo">采购完成, 安排运输单</a>
-    </div>
-
-    <div id="collapseTwo" class="accordion-body collapse" style="height:0">
-        <div class="accordion-inner">
-            <table class="table table-condensed table-bordered">
-                <tr>
-                    <td>运输单</td>
-                    <td>
-                        #{if shipments.size() == 0}
-                            <span class="label label-warning">请先创建 Shipment</span>
-                        #{/if}
-                        #{else }
-                            <select name="p.shipment.id" size="1">
-                                #{list items:shipments, as:'shipment'}
-                                    <option value="${shipment.id}">${shipment.id} @ ${shipment.state}</option>
-                                #{/list}
-                            </select>
-                        #{/else}
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
-#{/if}
-

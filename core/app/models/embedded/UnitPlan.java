@@ -32,6 +32,7 @@ public class UnitPlan {
     // ------------------------
     //TODO 供应商会重构成 modal
     @Expose
+    @Column(nullable = false)
     public String supplier;
 
     @Expose

@@ -69,6 +69,9 @@ public class Shipment extends GenericModel {
     @OneToMany(mappedBy = "shipment")
     public List<ProcureUnit> shipunits = new ArrayList<ProcureUnit>();
 
+    @OneToMany(mappedBy = "shipment")
+    public List<Payment> payments = new ArrayList<Payment>();
+
     @Id
     @Column(length = 30)
     public String id;

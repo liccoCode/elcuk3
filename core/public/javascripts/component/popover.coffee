@@ -29,4 +29,13 @@ $ ->
           popParam[k] = value
       $pop.popover(popParam)
 
+  window.dateinput = ->
+    for input in $('input[type=date]')
+      $input = $(input)
+      if $input.attr('format') is undefined
+        $input.dateinput(format: 'yyyy-mm-dd')
+      else
+        $input.dateinput(format: $input.attr('format'))
+
+  window.dateinput()
   window.popover()
