@@ -38,11 +38,7 @@ public class ProcureUnit extends Model {
          */
         DELIVERY,
         /**
-         * 运输阶段
-         */
-        SHIP,
-        /**
-         * 完成了
+         * 完成了, 全部交货了
          */
         DONE,
         /**
@@ -50,12 +46,6 @@ public class ProcureUnit extends Model {
          */
         CLOSE
     }
-
-    /**
-     * 运输单
-     */
-    @ManyToOne
-    public Shipment shipment;
 
     /**
      * 采购单
@@ -155,20 +145,23 @@ public class ProcureUnit extends Model {
     }
 
     /**
-     * ProcureUnit 从 Plan stage 升级成为 Delivery Stage
-     *
      * @return
+     * @4 将创建好的 ProcureUnit 指派给存在的采购单.
+     * ProcureUnit 从 Plan stage 升级成为 Delivery Stage
      */
-    public ProcureUnit stageFromPlanToDelivery() {
+    public ProcureUnit assignToDeliveryment(Deliveryment deliveryment) {
         /**
          * 1. 检查是否合法
          * 2. 进行转换
          */
+        if(this.delivery.ensureQty == null || this.delivery.ensureQty < 0)
+            throw new FastRuntimeException("最终确认数量不能为空!");
         if(this.delivery.planDeliveryDate == null) throw new FastRuntimeException("预计交货时间不允许为空!");
         if(this.delivery.planDeliveryDate.getTime() > this.plan.planArrivDate.getTime())
             throw new FastRuntimeException("预计交货时间不可能晚于预计到库时间!");
-        if(this.deliveryment == null || !this.deliveryment.isPersistent())
+        if(deliveryment == null || !deliveryment.isPersistent())
             throw new FastRuntimeException("成为 Delivery Stage 采购单必须先存在.");
+        this.deliveryment = deliveryment;
         this.stage = STAGE.DELIVERY;
         return this.save();
     }
@@ -186,7 +179,7 @@ public class ProcureUnit extends Model {
         return query.getResultList();
     }
 
-    public static List<ProcureUnit> findByStage(STAGE stage, int page, int size) {
-        return ProcureUnit.find("stage=?", stage).fetch(page, size);
+    public static List<ProcureUnit> findByStage(STAGE stage) {
+        return ProcureUnit.find("stage=?", stage).fetch();
     }
 }

@@ -1,6 +1,7 @@
 $ ->
-# ------------ Plan Tab 功能 -----------------------
-#procureUnit details 的事件绑定方法
+  UNIT_DETAIL = $('#unit_details')
+  # ------------ Plan Tab 功能 -----------------------
+  #procureUnit details 的事件绑定方法
   bindNewDeliveryBtn = () ->
     $('#delivery_btn').click ->
       $.post('/procures/createDeliveryMent', {},
@@ -19,7 +20,7 @@ $ ->
       if !$.varClosure.params['p.delivery.planDeliveryDate']
         alert("预计交货日期不能为空!")
         return false
-      if !$.varClosure.params['p.deliveryment.id']
+      if !$.varClosure.params['dlmt.id']
         alert('没有指定采购单!')
         return false
       if !$.varClosure.params['p.id']
@@ -75,11 +76,34 @@ $ ->
           activeDelivery.click()
       )
 
+  # 指派 Shipment
+  bindAssignShipment = ->
+    $("#assainToShipment").click ->
+      $.varClosure.params = {}
+      $("#toShipment :input").map($.varClosure)
+      toShipment = $("#toShipment")
+      toShipment.mask("指派中...")
+      $.post('/procures/assignToShipment', $.varClosure.params,
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          else
+            $(@).addClass('invisible').unbind('click')
+            alert('3 s 后刷新')
+            setTimeout(
+              () ->
+                window.location.reload()
+              , 3000
+            )
+          toShipment.unmask()
+      )
+
   # 加载 Delivery Tab 以后的初始化
   afterLoadDeliveryTab = ->
   # 实际交货数量全部转移
     bindPlanQtyBtn()
     bindUpdateDeliveryBtn()
+    bindAssignShipment()
     window.htmlIni()
 
 
@@ -93,26 +117,26 @@ $ ->
     $('#plan tr[row]').click ->
       o = $(@)
       threeTabClickActive('plan', o)
-      details = $('#unit_details')
-      details.mask("加载中...")
-      details.load('/procures/planDetail', id: o.find('td:eq(0)').html(),
+      UNIT_DETAIL.mask("加载中...")
+      UNIT_DETAIL.load('/procures/planDetail', id: o.find('td:eq(0)').html(),
         ->
-          details.unmask()
+          UNIT_DETAIL.unmask()
           afterLoadPlanTab()
       )
+      false
 
   #初始化 Delivery 点击事件
   deliveryRowClick = ->
     $('#delivery tr[row]').click ->
       o = $(@)
       threeTabClickActive('delivery', o)
-      details = $('#unit_details')
-      details.mask('加载中...')
-      details.load('/procures/deliveryDetail', id: o.find('td:eq(0)').html(),
+      UNIT_DETAIL.mask('加载中...')
+      UNIT_DETAIL.load('/procures/deliveryDetail', id: o.find('td:eq(0)').html(),
         (r) ->
-          details.unmask()
+          UNIT_DETAIL.unmask()
           afterLoadDeliveryTab()
       )
+      false
 
   planRowClick()
   deliveryRowClick()

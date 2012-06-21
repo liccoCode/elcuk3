@@ -84,12 +84,6 @@ public class Shipment extends GenericModel {
         VOLUMN
     }
 
-    /**
-     * 此 Shipment 所运输的 ProcureUnits
-     */
-    @OneToMany(mappedBy = "shipment")
-    public List<ProcureUnit> shipunits = new ArrayList<ProcureUnit>();
-
     @OneToMany(mappedBy = "shipment")
     public List<Payment> payments = new ArrayList<Payment>();
 

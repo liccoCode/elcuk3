@@ -26,6 +26,11 @@ public class UnitDelivery {
     public Date deliveryDate;
 
     /**
+     * 实际确认采购数量
+     */
+    public Integer ensureQty;
+
+    /**
      * 实际交货数量
      */
     @Expose

@@ -82,7 +82,7 @@ public class Deliveryment extends GenericModel {
 
     public static List<Deliveryment> openDeliveryments() {
         //TODO 需要将 Deliveryment 添加 supplier
-        return Deliveryment.find("state=?", S.PENDING).fetch();
+        return Deliveryment.find("state!=?", S.DELIVERY).fetch();
     }
 
     public static Deliveryment checkAndCreate(User user) {

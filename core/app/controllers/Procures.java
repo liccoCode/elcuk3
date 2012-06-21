@@ -23,10 +23,10 @@ import java.util.List;
 @With({FastRunTimeExceptionCatch.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
     public static void index() {
-        List<ProcureUnit> plan = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN, 1, 20);
-        List<ProcureUnit> procure = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY, 1, 20);
-        List<ProcureUnit> shipped = ProcureUnit.findByStage(ProcureUnit.STAGE.SHIP, 1, 20);
-        render(plan, procure, shipped);
+        List<ProcureUnit> plan = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN);
+        List<ProcureUnit> procure = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY);
+        List<Deliveryment> dlmts = Deliveryment.openDeliveryments();
+        render(plan, procure, dlmts);
     }
 
     public static void create() {
@@ -56,6 +56,7 @@ public class Procures extends Controller {
         renderJSON(Webs.exposeGson(p.checkAndCreate()));
     }
 
+    // ------------- Plan Tab ---------------------
     public static void planDetail(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(unit.stage != ProcureUnit.STAGE.PLAN)
@@ -64,24 +65,25 @@ public class Procures extends Controller {
         render(unit, dlms);
     }
 
+    public static void createDeliveryMent() {
+        User user = User.findByUserName(Secure.Security.connected());
+        renderJSON(Webs.exposeGson(Deliveryment.checkAndCreate(user)));
+    }
+
+    public static void procureUnitToDeliveryMent(ProcureUnit p, Deliveryment dlmt) {
+        renderJSON(Webs.exposeGson(p.assignToDeliveryment(dlmt)));
+    }
+
+    public static void procureUnitDeliveryInfoUpdate(ProcureUnit p) {
+        renderJSON(Webs.exposeGson(p.deliveryInfoUpdate()));
+    }
+
+    // ---------------- Delivery Tab ------------------
     public static void deliveryDetail(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(unit.stage != ProcureUnit.STAGE.DELIVERY)
             throw new FastRuntimeException("此采购单元的不是 DELIVERY 阶段");
         List<Shipment> shipments = Shipment.shipmentsByState(Shipment.S.PEDING);
         render(unit, shipments);
-    }
-
-    public static void createDeliveryMent() {
-        User user = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.exposeGson(Deliveryment.checkAndCreate(user)));
-    }
-
-    public static void procureUnitToDeliveryMent(ProcureUnit p) {
-        renderJSON(Webs.exposeGson(p.stageFromPlanToDelivery()));
-    }
-
-    public static void procureUnitDeliveryInfoUpdate(ProcureUnit p) {
-        renderJSON(Webs.exposeGson(p.deliveryInfoUpdate()));
     }
 }

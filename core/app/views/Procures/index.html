@@ -1,4 +1,4 @@
-#{extends 'main.html' /}
+#{extends 'main_fluid.html' /}
 #{set title:'Procures' /}
 #{set 'moreScripts'}
     #{script 'procures/index.coffee'/}
@@ -6,26 +6,21 @@
 <div style="margin:5px 0">
     <a href="@{Procures.create()}" target="_blank" class="btn btn-small btn-primary">创建</a>
 </div>
-<div class="row">
+<div class="row-fluid">
 
-    <div class="span6">
+    <div class="span3">
         <ul id="procureUnitsTab" class="nav nav-tabs">
             <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">Plan</a></li>
             <li><a href="#delivery" data-toggle="tab" style="padding:3px 8px;">Delivery</a></li>
-            <li><a href="#shipped" data-toggle="tab" style="padding:3px 8px;">Ship</a></li>
         </ul>
 
         <div id="procureUnitsContent" class="tab-content">
             <div id="plan" class="tab-pane fade in active">
-            #{planProcureUnitTable items:plan /}
+            #{procure_planProcureUnitTable items:plan /}
             </div>
 
             <div id="delivery" class="tab-pane fade">
-            #{deliveryProcureUnitTable items:procure /}
-            </div>
-
-            <div id="shipped" class="tab-pane fade">
-            #{planProcureUnitTable items:shipped /}
+            #{procure_deliveryProcureUnitTable items:procure /}
             </div>
         </div>
 
@@ -33,6 +28,15 @@
     </div>
 
     <!-- ProcureUnit 详细内容 -->
-    <div class="span6" id="unit_details">
+    <div class="span8" id="unit_details">
+    </div>
+
+    <div class="span1">
+        未处理完采购单列表
+        <ul>
+        #{list items:dlmts, as:'dlmt'}
+            <li><a target="_blank" href="@{Deliveryments.detail(dlmt.id)}">${dlmt.id}</a> | ${dlmt.state}</li>
+        #{/list}
+        </ul>
     </div>
 </div>

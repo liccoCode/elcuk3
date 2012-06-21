@@ -3,103 +3,56 @@
     <button class="btn btn-danger btn-small" rel="popover" data-content="关闭这个 ProcureUnit" placement="bottom">关闭
     </button>
 </div>
-<div>
-    <table class="table table-condensed table-bordered">
-        <tr>
-            <td>Links</td>
-            <td>
-                <div class="input-prepend">
-                    <span class="add-on"><a target="_blank" href="/sellings/selling?sid=${unit.selling.sellingId}">${unit.selling.sellingId}</a></span>
-                    <span class="add-on"><a target="_blank" href="/listings/listing?lid=${unit.selling.listing.listingId}">ASIN</a></span>
-                    <br/>
-                    <span class="add-on"><a target="_blank" href="${unit.selling.asinLink()}">${unit.selling.asin}</a></span>
-                    <span class="add-on"><a target="_blank" href="/products/p_detail?sku=${unit.product.sku}">${unit.product.sku}</a></span>
-                </div>
-                <input type="hidden" id="procureUnit_id" value="${unit.id}">
-            </td>
-        </tr>
-
-        <tr>
-            <td>预计到库时间</td>
-            <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')} | ${unit.plan.planLeftDays()} days left</td>
-        </tr>
-
-        <tr>
-            <td>欲购数量</td>
-            <td>${unit.plan.planQty}</td>
-        </tr>
-
-        <tr>
-            <td>供货商</td>
-            <td>${unit.plan.supplier}</td>
-        </tr>
-
-        <tr>
-            <td>采购单价</td>
-            <td>${unit.plan.unitPrice}</td>
-        </tr>
-
-        <tr>
-            <td>单价单位</td>
-            <td>${unit.plan.currency}</td>
-        </tr>
-
-        <tr>
-            <td>目的仓库</td>
-            <td>${unit.whouse.name}</td>
-        </tr>
-
-        <tr>
-            <td>采购人</td>
-            <td>${unit.handler.username}</td>
-        </tr>
-
-        <tr>
-            <td>阶段</td>
-            <td>${unit.stage}</td>
-        </tr>
-    </table>
-</div>
 
 <div class="accordion-group" id="todelivery_info">
     <div class="accordion-heading">
-        <a class="accordion-toggle" data-toggle="collapse" href="#collapseOne">确定采购计划,成为采购单</a>
+        <a class="accordion-toggle" data-toggle="collapse" href="#collapseOne">确定采购计划,派给采购单</a>
     </div>
-    <div id="collapseOne" class="accordion-body collapse" style="height: 0px; ">
-        <div class="accordion-inner">
-            <table class="table table-condensed table-bordered">
-                <tr>
-                    <td>预计交货日期</td>
-                    <td>
-                        <input name="p.delivery.planDeliveryDate" type="date" placeHolder="预期交货日期">
-                        <input type="hidden" name="p.id" value="${unit.id}">
-                    </td>
-                </tr>
-                <tr>
-                    <td>采购单</td>
-                    <td>
-                    #{if dlms.size() == 0}
-                        请单击创建采购单
-                    #{/if}
-                    #{else }
-                        <select name="p.deliveryment.id" size="1">
-                            #{list items:dlms, as:'dlm'}
-                                <option value="${dlm.id}">${dlm.id} @ ${dlm.state}</option>
-                            #{/list}
-                        </select>
-                    #{/else}
-                    </td>
-                </tr>
+    <div id="collapseOne" class="accordion-body collapse" style="height:0">
+        <table class="table table-condensed">
+            <tr>
+                <td>预计交货日期</td>
+                <td>
+                    <input name="p.delivery.planDeliveryDate" type="date" placeHolder="预期交货日期">
+                    <input type="hidden" name="p.id" value="${unit.id}">
+                </td>
+            </tr>
+            <tr>
+                <td>确认采购数量</td>
+                <td>
+                    <input type="text" name="p.delivery.ensureQty" placeHolder="最后确认的采购数量">
+                </td>
+            </tr>
+            <tr>
+                <td>采购单</td>
+                <td>
+                #{if dlms.size() == 0}
+                    请单击创建采购单
+                #{/if}
+                #{else }
+                    <select name="dlmt.id" size="1">
+                        #{list items:dlms, as:'dlm'}
+                            <option value="${dlm.id}">${dlm.id} @ ${dlm.state}</option>
+                        #{/list}
+                    </select>
+                #{/else}
+                </td>
+            </tr>
 
-                <tr>
-                    <td colspan="2">
-                        <button id="todelivery_btn" class="btn btn-mini btn-primary">纳入采购单</button>
-                        <button id="delivery_btn" rel="popover" data-content="新建立一个采购单,用来收容 ProcureUnit" class="btn btn-mini btn-danger right">
-                            创建采购单
-                        </button>
-                    </td>
-                </tr>
-            </table>
-        </div>
+            <tr>
+                <td colspan="2">
+                    <button id="todelivery_btn" class="btn btn-mini btn-primary">纳入采购单</button>
+                    <button id="delivery_btn" rel="popover" data-content="新建立一个采购单,用来收容,跟踪许多 ProcureUnit" class="btn btn-mini btn-danger right">
+                        创建采购单
+                    </button>
+                </td>
+            </tr>
+        </table>
     </div>
+</div>
+
+<div>
+    <table class="table table-condensed table-bordered">
+    #{procure_planTableInfo unit:unit /}
+    </table>
 </div>

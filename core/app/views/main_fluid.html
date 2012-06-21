@@ -7,9 +7,11 @@
     <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
 #{stylesheet 'bootstrap.min.css'/}
 #{stylesheet 'jquery.loadmask.css'/}
+#{stylesheet 'dateinput.css'/}
 #{get 'moreStyles' /}
 #{script 'jquery.1.7.2.min.js'/}
 #{script 'jquery.loadmask.min.js'/}
+#{script 'jquery.tools.date.min.js'/}
 #{script 'keymaster.min.js'/}
 #{script 'main.js'/}
 #{script 'component/popover.coffee'/}
@@ -60,8 +62,8 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Procures.index()}">Procure Unit</a></li>
-                            <li><a href="@{Shipments.index()}">Shipments</a></li>
+                            <li><a href="@{Procures.index()}">采购</a></li>
+                            <li><a href="@{Shipments.index()}">运输</a></li>
                         </ul>
                     </li>
 

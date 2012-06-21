@@ -1,0 +1,55 @@
+*{
+_unit :ProcureUnit
+}*
+<tr>
+    <td>预计到库时间</td>
+    <td>${_unit.plan.planArrivDate.format('yyyy-MM-dd')} | ${_unit.plan.planLeftDays()} days left</td>
+</tr>
+
+<tr>
+    <td>计划数量</td>
+    <td>${_unit.plan.planQty}</td>
+</tr>
+
+<tr>
+    <td>供货商</td>
+    <td>${_unit.plan.supplier}</td>
+</tr>
+
+<tr>
+    <td>采购单价</td>
+    <td>${_unit.plan.unitPrice}</td>
+</tr>
+
+<tr>
+    <td>单价单位</td>
+    <td>${_unit.plan.currency}</td>
+</tr>
+
+<tr>
+    <td>目的仓库</td>
+    <td>${_unit.whouse.name}</td>
+</tr>
+
+<tr>
+    <td>采购人</td>
+    <td>${_unit.handler.username}</td>
+</tr>
+
+<tr>
+    <td>阶段</td>
+    <td>${_unit.stage}</td>
+</tr>
+<tr>
+    <td>Links</td>
+    <td>
+        <div class="input-prepend">
+            <span class="add-on"><a target="_blank" href="/sellings/selling?sid=${_unit.selling.sellingId}">${_unit.selling.sellingId}</a></span>
+            <span class="add-on"><a target="_blank" href="/listings/listing?lid=${_unit.selling.listing.listingId}">ASIN</a></span>
+            <br/>
+            <span class="add-on"><a target="_blank" href="${_unit.selling.asinLink()}">${_unit.selling.asin}</a></span>
+            <span class="add-on"><a target="_blank" href="/products/p_detail?sku=${_unit.product.sku}">${_unit.product.sku}</a></span>
+        </div>
+        <input type="hidden" id="procureUnit_id" value="${_unit.id}">
+    </td>
+</tr>
