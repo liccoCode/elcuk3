@@ -4,17 +4,39 @@
     #{script 'shipments/index.coffee'/}
 #{/set}
 
-<div style="height:450px;overflow:auto;">
+<div>
     <ul id="shipments_tab" class="nav nav-tabs">
-        <li><a href="#peding" data-toggle="tab">PEDING</a></li>
+        <li class="active"><a href="#pending" data-toggle="tab">PEDING</a></li>
         <li><a href="#shipping" data-toggle="tab">SHIPPING</a></li>
         <li><a href="#clearAndReciving" data-toggle="tab">CLEAR&RECIVING</a></li>
         <li><a href="#done" data-toggle="tab">DONE</a></li>
-        <li class="active"><a href="#create" data-toggle="tab">功能 Tab</a></li>
+        <li><a href="#create" data-toggle="tab">功能 Tab</a></li>
     </ul>
 
-    <div id="shipments_content" class="tab-content">
-        <div class="tab-pane fade" id="peding">
+    <div id="shipments_content" class="tab-content" style="height:300px;overflow:auto;">
+        <div class="tab-pane fade in active" id="pending">
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <td>#</td>
+                    <td>货运方式</td>
+                    <td>计价类型</td>
+                    <td>计价数量</td>
+                    <td>计价单价</td>
+                    <td>运输商</td>
+                    <td>创建时间</td>
+                </tr>
+            #{list items:pendings, as:'p'}
+                <tr row style="cursor:pointer;${p.overDue() ? 'color:red' : ''}">
+                    <td>${p.id}</td>
+                    <td>${p.type}</td>
+                    <td>${p.pype}</td>
+                    <td>${p.pQty}</td>
+                    <td>${p.price}</td>
+                    <td>${p.shipper}</td>
+                    <td>${p.createDate.datetime()}</td>
+                </tr>
+            #{/list}
+            </table>
         </div>
         <div class="tab-pane fade" id="shipping">
             <p>Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1
@@ -41,7 +63,7 @@
                 keffiyeh craft beer marfa ethical. Wolf salvia freegan, sartorial keffiyeh echo park vegan.</p>
         </div>
 
-        <div class="tab-pane fade in active" id="create">
+        <div class="tab-pane fade" id="create">
             <a href="@{Shipments.blank()}" target="_blank" class="btn btn-primary">创建新运输单</a>
         </div>
     </div>
@@ -49,6 +71,5 @@
 
 <hr/>
 
-<div>
-    sdkfjskdfj
+<div id="shipment_detail">
 </div>

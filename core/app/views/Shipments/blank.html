@@ -3,97 +3,78 @@
 #{set 'moreScripts'}
     #{script 'shipments/create.coffee'/}
 #{/set}
-<div class="alert alert-success" style="text-align:center">
+
+#{if errors}
+<div class="alert alert-error">
+    <ul>
+        #{errors }
+            <li>${error.key} -> ${error}</li>
+        #{/errors}
+    </ul>
+</div>
+#{/if}
+#{else }
+<div class="alert alert-info" style="text-align:center">
     <h2>创建新 Shipment</h2>
 </div>
+#{/else}
 
 <div class="offset2">
     <form action="@{Shipments.save()}" method="POST" enctype="application/x-www-form-urlencoded" class="form-horizontal">
+    #{authenticityToken /}
         <fieldset>
-            <div class="control-group">
-                <label class="control-label" for="id">运输单号</label>
-
-                <div class="controls">
-                    <div class="input-append">
-                        <input disabled="" id="id" type="text" name="s.id" value="${s.id}">
-                    </div>
-                    <span class="help-inline">运输单号是自动生成的</span>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="createDate">创建时间</label>
-
-                <div class="controls">
-                    <div class="input-append">
-                        <input disabled="" id="createDate" type="text" name="s.createDate" value="${s.createDate.datetime()}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="state">状态</label>
-
-                <div class="controls">
-                    <div class="input-append">
-                        <input disabled="" id="state" type="text" name="s.state" value="${s.state}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="beginDate">开始时间</label>
-
-                <div class="controls">
-                    <div class="input-append">
-                        <input id="beginDate" type="date" name="s.beginDate" value="${s.beginDate?.date()}">
-                    </div>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <label class="control-label" for="planArrivDate">预计到库时间</label>
-
-                <div class="controls">
-                    <div class="input-append">
-                        <input id="planArrivDate" type="date" name="s.planArrivDate" value="${s.planArrivDate?.datetime()}">
-                    </div>
-                </div>
-            </div>
-
+        #{text id:'id', name:'s.id', value:s.id, label:'运输单号', help:'自动生成的系统运输单号', edit:false /}
+        #{text id:'createDate', name:'s.createDate', label:'创建时间', value:s.createDate.datetime(), edit:false /}
+        #{text id:'state', name:'s.state', label:'状态', value:s.state, edit:false /}
+        #{text id:'beginDate', name:'s.beginDate', label:'开始时间', type:'date', value:s.beginDate?.date() /}
+        #{text id:'planArriveDate', name:'s.planArriveDate', type:'date', label:'预计到库时间', value:s.planArrivDate?.datetime() /}
             <div class="control-group">
                 <label class="control-label" for="type">运输方式</label>
 
                 <div class="controls">
                     <div class="input-append">
                         <select name="s.type" size="1" id="type">
-                        #{list items:models.procure.Shipment.P.values()}
+                        #{list items:models.procure.Shipment.T.values()}
                             <option ${s.type == _ ? 'selected' : ''} value="${_}">${_}</option>
                         #{/list}
                         </select>
                     </div>
                 </div>
             </div>
-
             <div class="control-group">
-                <label class="control-label" for="price">单位价格</label>
+                <label class="control-label" for="pype">计价类型</label>
 
                 <div class="controls">
                     <div class="input-append">
-                        <input disabled="" id="price" type="text" name="s.price" value="${s.price}">
+                        <select name="s.pype" size="1" id="pype">
+                        #{list items:models.procure.Shipment.P.values()}
+                            <option ${s.pype == _ ? 'selected' : ''} value="${_}">${_}</option>
+                        #{/list}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        #{text id:'pQty', name:'s.pQty', label:'单位数量', value:s.pQty, help:'按重量计算 KG, 按体积计算 M3' /}
+        #{text id:'price', name:'s.price', label:'单位价格', value:s.price /}
+            <div class="control-group">
+                <label class="control-label" for="currency">币种</label>
+
+                <div class="controls">
+                    <div class="input-append">
+                        <select name="s.currency" size="1" id="currency">
+                        #{list items:helper.Currency.values()}
+                            <option ${s.currency == _ ? 'selected' : ''} value="${_}">${_}</option>
+                        #{/list}
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <div class="control-group">
-                <label class="control-label" for="price">单位价格</label>
-
-                <div class="controls">
-                    <div class="input-append">
-                        <input disabled="" id="price" type="text" name="s.price" value="${s.price}">
-                    </div>
-                </div>
-            </div>
+        #{text id:'trackNo', name:'s.trackNo', label:'快递跟踪编号', value:s.trackNo /}
+        #{text id:'shipper', name:'s.shipper', label:'货代', value:s.shipper /}
+        #{text id:'source', name:'s.source', label:'起始地点', value:s.source /}
+        #{text id:'target', name:'s.target', label:'目的地', value:s.target /}
         </fieldset>
+        <button type="submit" class="btn btn-primary">创建</button>
     </form>
 </div>

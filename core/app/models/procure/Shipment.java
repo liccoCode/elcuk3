@@ -1,13 +1,16 @@
 package models.procure;
 
+import com.google.gson.annotations.Expose;
 import helper.Currency;
 import org.joda.time.DateTime;
+import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 一张运输单
@@ -22,7 +25,7 @@ public class Shipment extends GenericModel {
         this.createDate = new Date();
 
         // 计价方式
-        this.pQty = 1;
+        this.pQty = 1f;
         this.price = 1f;
         this.currency = Currency.CNY;
         this.pype = P.VOLUMN;
@@ -92,77 +95,98 @@ public class Shipment extends GenericModel {
 
     @Id
     @Column(length = 30)
+    @Expose
+    @Required
     public String id;
 
     /**
      * 此货运单人工创建的时间
      */
+    @Expose
+    @Required
     public Date createDate = new Date();
 
     @Enumerated(EnumType.STRING)
     @Column(length = 12)
+    @Expose
+    @Required
     public S state;
 
     /**
      * 货运开始日期
      */
+    @Expose
     public Date beginDate;
 
     /**
      * 预计货运到达时间
      */
+    @Expose
     public Date planArrivDate;
 
     /**
      * 实际到达时间
      */
+    @Expose
     public Date arriveDate;
 
     /**
      * 货运类型
      */
     @Enumerated(EnumType.STRING)
+    @Expose
+    @Required
     public T type;
 
     /**
      * 计价类型
      */
     @Enumerated(EnumType.STRING)
+    @Expose
     public P pype;
 
     /**
      * 计价单价
      */
+    @Expose
+    @Required
     public Float price;
     /**
      * 单价单位
      */
     @Enumerated(EnumType.STRING)
+    @Expose
+    @Required
     public Currency currency;
 
     /**
      * 计价数量
      */
-    public Integer pQty;
+    @Expose
+    public Float pQty;
 
     /**
      * 类似顺风发货单号的类似跟踪单号
      */
+    @Expose
     public String trackNo;
 
     /**
      * 货运商
      */
+    @Expose
     public String shipper;
 
     /**
      * 起始地址
      */
+    @Expose
     public String source;
 
     /**
      * 目的地址
      */
+    @Expose
     public String target;
 
     /**
@@ -179,7 +203,21 @@ public class Shipment extends GenericModel {
     }
 
     public static List<Shipment> shipmentsByState(S state) {
-        return Shipment.find("state=?", state).fetch();
+        return Shipment.find("state=? ORDER BY createDate", state).fetch();
+    }
+
+    public Shipment checkAndCreate() {
+        return this.save();
+    }
+
+    /**
+     * 创建的计划运输单超过 7 天则表示超时
+     *
+     * @return
+     */
+    public boolean overDue() {
+        long t = System.currentTimeMillis() - this.createDate.getTime();
+        return t - TimeUnit.DAYS.toMillis(7) > 0;
     }
 
 }

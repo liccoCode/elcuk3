@@ -1,9 +1,6 @@
 $ ->
-#df
-  abc = ""
-
-  # ------------ Plan Tab 功能 -----------------------
-  #procureUnit details 的事件绑定方法
+# ------------ Plan Tab 功能 -----------------------
+#procureUnit details 的事件绑定方法
   bindNewDeliveryBtn = () ->
     $('#delivery_btn').click ->
       $.post('/procures/createDeliveryMent', {},
@@ -89,12 +86,11 @@ $ ->
   # -------------- 通用功能 ------------------
   #三个 Tab 中的点击选中事件
   threeTabClickActive = (tab, o) ->
-    $('#' + tab + ' tr[row]').removeClass('active')
-    o.addClass('active')
+    $.tableRowClickActive('#' + tab + ' tr[row]', o)
 
   #初始化 Plan 点击事件
   planRowClick = ->
-    $('#plan tr[row]').css('cursor', 'pointer').click ->
+    $('#plan tr[row]').click ->
       o = $(@)
       threeTabClickActive('plan', o)
       details = $('#unit_details')
@@ -107,7 +103,7 @@ $ ->
 
   #初始化 Delivery 点击事件
   deliveryRowClick = ->
-    $('#delivery tr[row]').css('cursor', 'pointer').click ->
+    $('#delivery tr[row]').click ->
       o = $(@)
       threeTabClickActive('delivery', o)
       details = $('#unit_details')

@@ -1,0 +1,17 @@
+<div>
+    <!-- 将此 Shipment 所关联的 ProcureUnit 加载出来 -->
+    <table class="table table-condensed table-bordered">
+        <tr>
+            <td>#</td>
+            <td>计划数量</td>
+            <td>实际数量</td>
+        </tr>
+    #{list items:s.shipunits, as:'sunit'}
+        <tr>
+            <td>${sunit.id}</td>
+            <td>${sunit.delivery.deliveryQty}</td>
+            <td>${sunit.plan.planQty}</td>
+        </tr>
+    #{/list}
+    </table>
+</div>

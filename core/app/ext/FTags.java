@@ -2,10 +2,12 @@ package ext;
 
 import controllers.Secure;
 import groovy.lang.Closure;
+import org.apache.commons.lang.StringUtils;
 import play.exceptions.TemplateNotFoundException;
 import play.templates.FastTags;
 import play.templates.GroovyTemplate;
 import play.templates.JavaExtensions;
+import play.utils.FastRuntimeException;
 import play.utils.Java;
 
 import java.io.PrintWriter;
@@ -34,26 +36,63 @@ public class FTags extends FastTags {
         }
     }
 
+    /**
+     * 必须的参数:
+     * id, name
+     * 可使用的参数:
+     * value, help, label, edit
+     */
     public static void _text(Map<?, ?> args, Closure body, PrintWriter out, GroovyTemplate.ExecutableTemplate template, int fromLine) {
-        try {
-            /*
-                        <div class="control-group">
-                <label class="control-label" for="id">运输单号</label>
+        /*
+                   <div class="control-group">
+           <label class="control-label" for="id">运输单号</label>
 
-                <div class="controls">
-                    <div class="input-append">
-                        <input disabled="" id="id" type="text" name="s.id" value="${s.id}">
-                    </div>
-                    <span class="help-inline">运输单号是自动生成的</span>
-                </div>
-            </div>
-             */
-            String id = (String) args.get("id");
-            StringBuilder sbd = new StringBuilder("<div class='control-group'>")
-                    .append("<label class='control-label' for='").append(id).append("'>").append("</label>");
-            out.print(sbd.toString());
-        } catch(TemplateNotFoundException e) {
-            throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
-        }
+           <div class="controls">
+               <div class="input-append">
+                   <input disabled="" id="id" type="text" name="s.id" value="${s.id}">
+               </div>
+               <span class="help-inline">运输单号是自动生成的</span>
+           </div>
+       </div>
+        */
+        String id = Str(args, "id");
+        String name = Str(args, "name");
+        String value = Str(args, "value");
+        String label = Str(args, "label");
+        String help = Str(args, "help");
+        String type = Str(args, "type");
+        Boolean edit = True(args, "edit");
+        if(StringUtils.isBlank(name)) throw new FastRuntimeException("[name] attr is blank.");
+        if(StringUtils.isBlank(id)) throw new FastRuntimeException("[id] attr is blank");
+        if(StringUtils.isBlank(type)) type = "text";
+
+        StringBuilder sbd = new StringBuilder("<div class='control-group'>")
+                .append("<label class='control-label' for='").append(id).append("'>").append(StringUtils.isBlank(label) ? "" : label).append("</label>")
+                .append("<div class='controls'>")
+                .append("<div class='input-append'>")
+                .append("<input ").append(edit ? "" : "disabled").append(" id='").append(id).append("' type='").append(type).append("' name='").append(name).append("' value='").append(value).append("'>")
+                .append("</div>");
+        if(StringUtils.isNotBlank(help))
+            sbd.append("<span class='help-inline'>").append(help).append("</span>");
+        out.print(sbd.append("</div>"/*controlls div*/).append("</div>"/*control-group div*/).toString());
+    }
+
+    public static String Str(Map<?, ?> args, String key) {
+        Object val = args.get(key);
+        if(val == null)
+            return "";
+        else
+            return val.toString();
+    }
+
+    /**
+     * default true
+     */
+    public static Boolean True(Map<?, ?> args, String key) {
+        Boolean val = (Boolean) args.get(key);
+        if(val == null)
+            return true;
+        else
+            return val;
     }
 }

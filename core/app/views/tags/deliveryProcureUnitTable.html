@@ -11,7 +11,7 @@ items: procureList
         <td><a rel="popover" data-content="预计交货时间" width="auto">JHDate</a></td>
     </tr>
 #{list items:_items, as:'unit'}
-    <tr row>
+    <tr row style="cursor:pointer;">
         <td>${unit.id}</td>
         <td>${unit.deliveryment.id}</td>
         <td>${unit.plan.supplier}</td>

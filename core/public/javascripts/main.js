@@ -32,6 +32,14 @@ $(function(){
         }
     };
 
+    /**
+     *
+     */
+    $.tableRowClickActive = function(rowsSelector, activeObj){
+        $(rowsSelector).removeClass('active');
+        activeObj.addClass('active');
+    };
+
     $.DateUtil = {
         /**
          * 按照给与的 date 基准时间, 然后进行 day 天数的添加减少
@@ -83,8 +91,7 @@ $(function(){
         ['g+h', '/'],
         ['g+s', '/analyzes/index'],
         ['g+o', '/orders/o_index?s=35&p=1'],
-        ['g+l', '/listings/l_index'],
-        ['g+p+w', '/procures/warn']
+        ['g+l', '/listings/index']
     ];
 
     var bindkey = function(k, url){

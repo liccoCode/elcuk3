@@ -1,6 +1,7 @@
 package controllers;
 
 import models.procure.Shipment;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -30,5 +31,20 @@ public class Shipments extends Controller {
     }
 
     public static void save(Shipment s) {
+        checkAuthenticity();
+        validation.valid(s);
+        if(Validation.hasErrors()) {
+            render("Shipments/blank.html", s);
+        }
+        s.checkAndCreate();
+        index();
+    }
+
+    /**
+     * 查看一个 Pending 状态的 Shipment
+     */
+    public static void pending(String id) {
+        Shipment s = Shipment.findById(id);
+        render(s);
     }
 }
