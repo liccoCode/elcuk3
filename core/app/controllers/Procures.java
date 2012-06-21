@@ -20,7 +20,7 @@ import java.util.List;
  * Date: 3/5/12
  * Time: 9:53 AM
  */
-@With({FastRunTimeExceptionCatch.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
     public static void index() {
         List<ProcureUnit> plan = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN);

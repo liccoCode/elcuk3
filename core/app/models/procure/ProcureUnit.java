@@ -154,6 +154,7 @@ public class ProcureUnit extends Model {
          * 1. 检查是否合法
          * 2. 进行转换
          */
+        // 1
         if(this.delivery.ensureQty == null || this.delivery.ensureQty < 0)
             throw new FastRuntimeException("最终确认数量不能为空!");
         if(this.delivery.planDeliveryDate == null) throw new FastRuntimeException("预计交货时间不允许为空!");
@@ -161,6 +162,13 @@ public class ProcureUnit extends Model {
             throw new FastRuntimeException("预计交货时间不可能晚于预计到库时间!");
         if(deliveryment == null || !deliveryment.isPersistent())
             throw new FastRuntimeException("成为 Delivery Stage 采购单必须先存在.");
+        for(ProcureUnit pu : deliveryment.units) {
+            if(!pu.plan.supplier.equals(this.plan.supplier))
+                //TODO supplier 改变, 这里也需要改变
+                throw new FastRuntimeException("只允许相同工厂的 ProcureUnit 添加在同一个采购单中!");
+        }
+
+        // 2
         this.deliveryment = deliveryment;
         this.stage = STAGE.DELIVERY;
         return this.save();
@@ -173,6 +181,13 @@ public class ProcureUnit extends Model {
         return this.save();
     }
 
+    public void close() {
+        /**
+         * 关闭这个 ProcureUnit, 需要找到所有起影响的元素, 然后将她们接触绑定. 并且记录 memo
+         */
+        throw new UnsupportedOperationException("还未实现此功能.");
+    }
+
     @SuppressWarnings("unchecked")
     public static List<String> suppliers() {
         Query query = JPAs.createQuery(new JpqlSelect().select("plan.supplier").from("ProcureUnit").groupBy("plan.supplier"));
@@ -182,4 +197,5 @@ public class ProcureUnit extends Model {
     public static List<ProcureUnit> findByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
     }
+
 }

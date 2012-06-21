@@ -3,6 +3,8 @@ package models.embedded;
 import com.google.gson.annotations.Expose;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.util.Date;
 
 /**
@@ -17,12 +19,14 @@ public class UnitDelivery {
      * 预计交货日期
      */
     @Expose
+    @Temporal(TemporalType.DATE)
     public Date planDeliveryDate;
 
     /**
      * 实际交货日期
      */
     @Expose
+    @Temporal(TemporalType.DATE)
     public Date deliveryDate;
 
     /**

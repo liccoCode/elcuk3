@@ -4,10 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.Webs;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -22,6 +19,7 @@ public class UnitPlan {
      * 预计到库时间
      */
     @Expose
+    @Temporal(TemporalType.DATE)
     public Date planArrivDate;
 
     /**

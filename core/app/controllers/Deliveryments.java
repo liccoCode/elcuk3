@@ -14,7 +14,7 @@ import play.utils.FastRuntimeException;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({FastRunTimeExceptionCatch.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Deliveryments extends Controller {
     public static void detail(String id) {
         Deliveryment dlmt = Deliveryment.findById(id);

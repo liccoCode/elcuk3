@@ -9,7 +9,7 @@ $ ->
           if r.flag is false
             alert(r.message)
           else
-            $('#plan tr[row][class=active]').click()
+            window.location.reload()
       )
 
   # 将某一个 ProcureUnit 纳入到指定采购单

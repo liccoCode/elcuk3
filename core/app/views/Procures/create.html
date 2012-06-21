@@ -54,11 +54,7 @@
             <td><input name="p.plan.unitPrice" type="text" placeHolder="价格"></td>
             <td>货币</td>
             <td>
-                <select name="p.plan.currency" size="1">
-                #{list items:helper.Currency.values(), as:'c'}
-                    <option ${c == helper.Currency.CNY ? 'selected' : ''} value="${c}">${c}</option>
-                #{/list}
-                </select>
+            #{pickCurrency c:helper.Currency.CNY, name:'p.plan.currency'/}
             </td>
         </tr>
 

@@ -13,7 +13,7 @@ import java.util.List;
  * Date: 6/20/12
  * Time: 3:09 PM
  */
-@With({FastRunTimeExceptionCatch.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Shipments extends Controller {
     public static void index() {
         List<Shipment> pendings = Shipment.shipmentsByState(Shipment.S.PEDING);

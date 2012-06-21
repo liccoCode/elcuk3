@@ -13,14 +13,41 @@
             <tr>
                 <td>预计交货日期</td>
                 <td>
-                    <input name="p.delivery.planDeliveryDate" type="date" placeHolder="预期交货日期">
+                    <div class="input-append">
+                        <input name="p.delivery.planDeliveryDate" type="date" placeHolder="预期交货日期">
+                        <span class="add-on">
+                        ${unit.plan.planArrivDate.format('yyyy-MM-dd')} | ${unit.plan.planLeftDays()} days left
+                        </span>
+                    </div>
                     <input type="hidden" name="p.id" value="${unit.id}">
                 </td>
             </tr>
             <tr>
                 <td>确认采购数量</td>
                 <td>
-                    <input type="text" name="p.delivery.ensureQty" placeHolder="最后确认的采购数量">
+                    <div class="input-append">
+                        <input type="text" name="p.delivery.ensureQty" placeHolder="最后确认的采购数量">
+                        <span class="add-on">${unit.plan.planQty}</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>确认采购价格</td>
+                <td>
+                    <div class="input-append">
+                        <input type="text" name="p.plan.unitPrice" value="${unit.plan.unitPrice}">
+                        <span class="add-on">${unit.plan.supplier}</span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>确认价格单位</td>
+                <td>
+                #{pickCurrency c:unit.plan.currency, name:'p.plan.currency'/}
+                    <!-- other plan value-->
+                    <input type="hidden" name="p.plan.planQty" value="${unit.plan.planQty}">
+                    <input type="hidden" name="p.plan.supplier" value="${unit.plan.supplier}">
+                    <input type="hidden" name="p.plan.planArrivDate" value="${unit.plan.planArrivDate.date()}">
                 </td>
             </tr>
             <tr>
