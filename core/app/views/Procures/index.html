@@ -36,7 +36,7 @@
         <ul>
         #{list items:dlmts, as:'dlmt'}
             <li>
-                <a target="_blank" href="@{Deliveryments.detail(dlmt.id)}">${dlmt.id}</a>
+                <a rel="popover" data-content="${dlmt.supplier()}" placement="left" width="auto" target="_blank" href="@{Deliveryments.detail(dlmt.id)}">${dlmt.id}</a>
                 | <span class="badge badge-info">${dlmt.units.size()} | ${dlmt.state}</span>
             </li>
         #{/list}

@@ -174,7 +174,12 @@ public class ProcureUnit extends Model {
         return this.save();
     }
 
-    public ProcureUnit deliveryInfoUpdate() {
+    /**
+     * 此 ProcureUnit 工厂制作完成, 交货.
+     *
+     * @return
+     */
+    public ProcureUnit deliveryComplete() {
         if(this.delivery.deliveryDate == null) throw new FastRuntimeException("不允许更新实际交货日期为空");
         if(this.delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
         if(this.delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");

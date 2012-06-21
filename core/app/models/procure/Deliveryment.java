@@ -90,6 +90,7 @@ public class Deliveryment extends GenericModel {
         Deliveryment deliveryment = new Deliveryment();
         deliveryment.id = Deliveryment.id();
         deliveryment.state = S.PENDING;
+        deliveryment.handler = user;
         return deliveryment.save();
     }
 
@@ -180,5 +181,9 @@ public class Deliveryment extends GenericModel {
                     .append("EUR: ").append(String.format("%s(%s) / %s ", totalPayedEUR, totalPayedEUR - totalNeedPayEUR, totalNeedPayEUR)).append("\r\n");
             throw new FastRuntimeException(sbd.toString());
         }
+    }
+
+    public String supplier() {
+        return this.units.get(0).plan.supplier;
     }
 }

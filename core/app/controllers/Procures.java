@@ -75,7 +75,7 @@ public class Procures extends Controller {
     }
 
     public static void procureUnitDeliveryInfoUpdate(ProcureUnit p) {
-        renderJSON(Webs.exposeGson(p.deliveryInfoUpdate()));
+        renderJSON(Webs.exposeGson(p.deliveryComplete()));
     }
 
     // ---------------- Delivery Tab ------------------
