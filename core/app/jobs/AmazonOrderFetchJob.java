@@ -274,6 +274,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             return Orderr.S.PENDING;
         } else if("shipped".equals(orderSt)) {
             return Orderr.S.SHIPPED;
+        } else if("unshipped".equals(orderSt)) {
+            return Orderr.S.PAYMENT;
         } else if("shipping".equals(orderSt)) {
             return Orderr.S.PAYMENT;
         } else if("cancelled".equals(orderSt)) {
