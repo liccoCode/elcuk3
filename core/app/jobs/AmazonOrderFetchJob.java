@@ -85,7 +85,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 Logger.info("Save Order: " + order.orderId);
             } else { //更新
                 if(managed.state == Orderr.S.CANCEL) continue; // 如果订单已经为 CANCEL 了, 则不更新了
-                if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING) // 新订单为 CANCEL 的则更新
+                if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING || order.state == Orderr.S.SHIPPED) // 新订单为 CANCEL 的则更新
                     managed.updateAttrs(order);
             }
         }
@@ -274,6 +274,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             return Orderr.S.PENDING;
         } else if("shipped".equals(orderSt)) {
             return Orderr.S.SHIPPED;
+        } else if("unshipped".equals(orderSt)) {
+            return Orderr.S.PAYMENT;
         } else if("shipping".equals(orderSt)) {
             return Orderr.S.PAYMENT;
         } else if("cancelled".equals(orderSt)) {

@@ -26,7 +26,7 @@ public class OrderInfoFetchJob extends Job {
          */
         int size = 10;
         if(Play.mode.isProd()) size = 30; //调整成 30 个订单一次, 每 10 分钟一次;
-        List<Orderr> orders = Orderr.find("(state=? OR state=?) AND (userid is null OR userid='') order by createDate",
+        List<Orderr> orders = Orderr.find("crawlUpdateTimes<4 AND (state=? OR state=?) AND (userid is null OR userid='') order by createDate",
                 Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
         for(Orderr ord : orders) {
             try {
