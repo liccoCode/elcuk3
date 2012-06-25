@@ -8,7 +8,7 @@
 <div class="alert alert-error">
     <ul>
         #{errors }
-            <li>${error.key} -> ${error}</li>
+            <li>${error}</li>
         #{/errors}
     </ul>
 </div>
@@ -73,7 +73,7 @@
         #{text id:'trackNo', name:'s.trackNo', label:'快递跟踪编号', value:s.trackNo /}
         #{text id:'shipper', name:'s.shipper', label:'货代', value:s.shipper /}
         #{text id:'source', name:'s.source', label:'起始地点', value:s.source /}
-        #{text id:'target', name:'s.target', label:'目的地', value:s.target /}
+        #{text id:'target', name:'s.target', label:'目的地', placeHolder:'请输入详细目的地址', value:s.target /}
         </fieldset>
         <button type="submit" class="btn btn-primary">创建</button>
     </form>

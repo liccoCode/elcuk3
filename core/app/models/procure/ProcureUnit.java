@@ -2,6 +2,7 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.JPAs;
+import helper.Webs;
 import models.User;
 import models.embedded.UnitDelivery;
 import models.embedded.UnitPlan;
@@ -11,10 +12,13 @@ import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 每一个采购单元
@@ -52,6 +56,12 @@ public class ProcureUnit extends Model {
      */
     @ManyToOne
     public Deliveryment deliveryment;
+
+    /**
+     * 所关联的运输出去的 ShipItem.
+     */
+    @OneToMany(mappedBy = "unit")
+    public List<ShipItem> relateItems;
 
     @OneToOne(fetch = FetchType.LAZY)
     public Selling selling;
@@ -193,6 +203,55 @@ public class ProcureUnit extends Model {
          * 关闭这个 ProcureUnit, 需要找到所有起影响的元素, 然后将她们接触绑定. 并且记录 memo
          */
         throw new UnsupportedOperationException("还未实现此功能.");
+    }
+
+    /**
+     * 将当前 ProcureUnit 的数量转移到某一个 Shipment 的 ShipItem 中
+     *
+     * @param shipment
+     * @param qty
+     * @return
+     */
+    public ShipItem transformToShipment(Shipment shipment, Integer qty) {
+        /**
+         * 检查
+         * 1. 首先找出 Shipment 中与此 ProcureUnit 一样的 ShipItem, 如果没有则创建
+         * 2. 计算此 ProcureUnit 的剩余库存量
+         * 3. ShipItem 转移的数量不能大于 ProcureUnit 的剩余库存量
+         * 3. 保存
+         */
+        if(qty < 0) throw new FastRuntimeException("不允许填写负数!");
+        if(shipment.state != Shipment.S.PLAN) throw new FastRuntimeException("此运输单已经发出, 不允许再修改!");
+        if(qty > this.delivery.deliveryQty)
+            throw new FastRuntimeException("转移的数量大于此 ProcureUnit 实际具有的数量!(" + qty + ">" + this.delivery.deliveryQty + ")");
+        List<ShipItem> shipItems = ShipItem.find("shipment=? AND unit=?", shipment, this).fetch();
+        if(shipItems.size() > 1) {
+            Webs.systemMail("More then one ShipItem with the same SHIPMENT AND PROCUREUNIT",
+                    String.format("More then one ShipItem with the same SHIPMENT AND PROCUREUNIT\r\n%s\r\n%s",
+                            Webs.exposeGson(shipItems),
+                            Webs.exposeGson(this)));
+            throw new FastRuntimeException(String.format("同 Shipment(%s), ProcureUnit(%s) 的 ShipItem 拥有多与一个!", shipment.id, this.id));
+        }
+        F.T2<Integer, Set<String>> leftQtyTuple = leftTransferQty();
+        if(qty > leftQtyTuple._1) throw new FastRuntimeException("库存不足够转移. 剩余: " + leftQtyTuple._1);
+
+        ShipItem shipItem = null;
+        if(shipItems.size() == 0) shipItem = new ShipItem(shipment, this);
+        else shipItem = shipItems.get(0);
+
+
+        shipItem.qty += qty;
+        return shipItem.save();
+    }
+
+    public F.T2<Integer, Set<String>> leftTransferQty() {
+        int shippedQty = 0;
+        Set<String> shipmentIds = new HashSet<String>();
+        for(ShipItem item : this.relateItems) {
+            shippedQty += item.qty;
+            shipmentIds.add(item.shipment.id);
+        }
+        return new F.T2<Integer, Set<String>>(this.delivery.deliveryQty - shippedQty, shipmentIds);
     }
 
     @SuppressWarnings("unchecked")

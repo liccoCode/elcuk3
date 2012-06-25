@@ -1,17 +1,119 @@
+#{script 'shipments/pending.coffee'/}
+<!-- 处理需要货运的 ProcureUnit -->
+<div class="row" style="min-height:300px;">
+    <div class="span6" id="procureUnit">
+        <table class="table table-condensed">
+            <tr>
+                <td>Deliveryment</td>
+                <td>剩余量</td>
+                <td>SID</td>
+                <td>转移数量</td>
+                <td>&nbsp;</td>
+            </tr>
+        #{list items:units, as:'unit'}
+            #{set leftQtyTuple:unit.leftTransferQty() /}
+            #{set isZero:leftQtyTuple._1 == 0/}
+            <tr uid="${unit.id}" style="background:${isZero ? '#eee' : '#fff'}">
+                <td>
+                    <a href="@{Deliveryments.detail(unit.deliveryment.id)}" target="_blank">${unit.deliveryment.id}</a>
+                </td>
+                <td>
+                    <a rel="popover" trigger='toggle' class="btn btn-mini ${isZero ? 'btn-danger' : 'btn-info'}" data-content="Relate ShipmentId:<br> ${leftQtyTuple._2}">${leftQtyTuple._1}</a>
+                </td>
+                #{set t3:models.market.Selling.sidT3(unit.sid)/}
+                <td>
+                    <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(unit.sid)}" target="_blank">${t3._2}
+                    |${t3._3}</a></td>
+                <td><input class="input-mini" style="padding:0"></td>
+                <td>
+                    <button uid="${unit.id}" class="btn btn-mini btn-success"><i class="icon-arrow-right"></i></button>
+                </td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+    <div class="span6" id="shipitem">
+        <table class="table table-condensed">
+            <tr>
+                <td>SID</td>
+                <td>运输数量</td>
+            </tr>
+        #{list items:s.items, as:'itm'}
+            <tr shipitem='${itm.id}'>
+                #{set t3:models.market.Selling.sidT3(itm.unit.sid)/}
+                <td>
+                    <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(itm.unit.sid)}" target="_blank">${t3._2}
+                    |${t3._3}</a></td>
+                <td>${itm.qty}</td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+</div>
+
+<hr>
+
 <div>
-    <!-- 将此 Shipment 所关联的 ProcureUnit 加载出来 -->
     <table class="table table-condensed table-bordered">
         <tr>
-            <td>#</td>
-            <td>计划数量</td>
-            <td>实际数量</td>
+            <td>Id</td>
+            <td shipmentId='${s.id}'>${s.id}</td>
+
+            <td>运输方式</td>
+            <td>${s.type}</td>
+
+            <td>起始地址</td>
+            <td>${s.source}</td>
+
+            <td>目标地址</td>
+            <td>${s.target}</td>
         </tr>
-    #{list items:s.shipunits, as:'sunit'}
+
         <tr>
-            <td>${sunit.id}</td>
-            <td>${sunit.delivery.deliveryQty}</td>
-            <td>${sunit.plan.planQty}</td>
+            <td>发货时间</td>
+            <td>${s.beginDate.date()}</td>
+            <td>预计到达时间</td>
+            <td>${s.planArrivDate.date()}</td>
+            <td>实际到达时间</td>
+            <td>${s.arriveDate.date()}</td>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+
+        <tr>
+            <td>计价方式</td>
+            <td>${s.pype}</td>
+            <td>计价单价</td>
+            <td>${s.price}</td>
+            <td>计价数量</td>
+            <td>${s.pQty}</td>
+            <td colspan="2">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+
+<!-- 付款信息 -->
+<div>
+    <table class="table table-condensed">
+        <tr>
+            <td>#</td>
+            <td>Price</td>
+            <td>Currency</td>
+            <td>Date</td>
+            <td>State</td>
+            <td>Memo</td>
+            <td>Payer</td>
+        </tr>
+    #{list items:s.payments, as:'pay'}
+        <tr>
+            <td>${pay.id}</td>
+            <td>${pay.price}</td>
+            <td>${pay.currency}</td>
+            <td>${pay.payDate.datetime()}</td>
+            <td>${pay.state}</td>
+            <td>${pay.memo}</td>
+            <td>${pay.payer.username}</td>
         </tr>
     #{/list}
     </table>
 </div>
+

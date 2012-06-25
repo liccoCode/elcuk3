@@ -4,13 +4,16 @@
     #{script 'shipments/index.coffee'/}
 #{/set}
 
+<div style="margin:10px;">
+    <a href="@{Shipments.blank()}" target="_blank" class="btn btn-small btn-primary">创建新运输单</a>
+</div>
+
 <div>
     <ul id="shipments_tab" class="nav nav-tabs">
-        <li class="active"><a href="#pending" data-toggle="tab">PEDING</a></li>
+        <li class="active"><a href="#pending" data-toggle="tab">PLAN</a></li>
         <li><a href="#shipping" data-toggle="tab">SHIPPING</a></li>
         <li><a href="#clearAndReciving" data-toggle="tab">CLEAR&RECIVING</a></li>
         <li><a href="#done" data-toggle="tab">DONE</a></li>
-        <li><a href="#create" data-toggle="tab">功能 Tab</a></li>
     </ul>
 
     <div id="shipments_content" class="tab-content" style="height:300px;overflow:auto;">
@@ -61,10 +64,6 @@
                 locavore wolf cliche high life echo park Austin. Cred vinyl keffiyeh DIY salvia PBR, banh mi before they
                 sold out farm-to-table VHS viral locavore cosby sweater. Lomo wolf viral, mustache readymade thundercats
                 keffiyeh craft beer marfa ethical. Wolf salvia freegan, sartorial keffiyeh echo park vegan.</p>
-        </div>
-
-        <div class="tab-pane fade" id="create">
-            <a href="@{Shipments.blank()}" target="_blank" class="btn btn-primary">创建新运输单</a>
         </div>
     </div>
 </div>

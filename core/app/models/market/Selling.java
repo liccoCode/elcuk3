@@ -466,6 +466,18 @@ public class Selling extends GenericModel {
         return String.format("%s|%s|%s", msku, market.nickName(), acc.id).toUpperCase();
     }
 
+    /**
+     * 将 sid 重新分割成 3 部分
+     *
+     * @return
+     */
+    public static F.T3<String, String, String> sidT3(String sid) {
+        List<String> args = new ArrayList<String>(Arrays.asList(StringUtils.split(sid, "|")));
+        int differSize = 3 - args.size();
+        for(int i = 0; i < differSize; i++) args.add("");
+        return new F.T3<String, String, String>(args.get(0), args.get(1), args.get(2));
+    }
+
     public static boolean exist(String merchantSKU) {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
     }

@@ -32,6 +32,7 @@
             <td>Date</td>
             <td>State</td>
             <td>Memo</td>
+            <td>Payer</td>
             <td>&nbsp;</td>
         </tr>
     #{list items:dlmt.payments, as:'pay'}
@@ -42,6 +43,7 @@
             <td>${pay.payDate.format('yyyy-MM-dd HH:mm:ss')}</td>
             <td>${pay.state}</td>
             <td>${pay.memo}</td>
+            <td>${pay.payer.username}</td>
             <td>
                 #{if pay.state == models.procure.Payment.S.CLOSE}
                     <i class="icon-ban-circle"></i>
@@ -149,7 +151,11 @@
             <td>${unit.selling.merchantSKU}</td>
             <td>${unit.product.sku}</td>
             <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>
-            <td>${unit.plan.planQty * unit.plan.unitPrice} | ${unit.delivery.deliveryQty * unit.plan.unitPrice}</td>
+        <td>
+        ${unit.delivery.ensureQty * unit.plan.unitPrice}
+            #{ifnot unit.delivery.deliveryQty == null}|
+            ${unit.delivery.deliveryQty * unit.plan.unitPrice}</td>
+            #{/ifnot}
             <td>${unit.stage}</td>
         </tr>
     #{/list}

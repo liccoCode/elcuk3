@@ -29,7 +29,7 @@ public class Shipment extends GenericModel {
         this.price = 1f;
         this.currency = Currency.CNY;
         this.pype = P.VOLUMN;
-        this.state = S.PEDING;
+        this.state = S.PLAN;
 
         // 暂时这么写
         this.source = "深圳";
@@ -54,7 +54,7 @@ public class Shipment extends GenericModel {
         /**
          * 计划中
          */
-        PEDING,
+        PLAN,
         /**
          * 运输中
          */
@@ -63,10 +63,6 @@ public class Shipment extends GenericModel {
          * 清关
          */
         CLEARGATE,
-        /**
-         * 入库中
-         */
-        RECIVING,
         /**
          * 完成
          */
@@ -84,26 +80,35 @@ public class Shipment extends GenericModel {
         VOLUMN
     }
 
+    /**
+     * 此 Shipment 的付款信息
+     */
     @OneToMany(mappedBy = "shipment")
     public List<Payment> payments = new ArrayList<Payment>();
+
+    /**
+     * 此 Shipment 的运输项
+     */
+    @OneToMany(mappedBy = "shipment")
+    public List<ShipItem> items = new ArrayList<ShipItem>();
 
     @Id
     @Column(length = 30)
     @Expose
-    @Required
+    @Required(message = "v.require.shipment.id")
     public String id;
 
     /**
      * 此货运单人工创建的时间
      */
     @Expose
-    @Required
+    @Required(message = "v.require.shipment.createDate")
     public Date createDate = new Date();
 
     @Enumerated(EnumType.STRING)
     @Column(length = 12)
     @Expose
-    @Required
+    @Required(message = "v.require.shipment.state")
     public S state;
 
     /**
@@ -129,7 +134,7 @@ public class Shipment extends GenericModel {
      */
     @Enumerated(EnumType.STRING)
     @Expose
-    @Required
+    @Required(message = "v.require.shipment.type")
     public T type;
 
     /**
@@ -143,14 +148,14 @@ public class Shipment extends GenericModel {
      * 计价单价
      */
     @Expose
-    @Required
+    @Required(message = "v.require.shipment.price")
     public Float price;
     /**
      * 单价单位
      */
     @Enumerated(EnumType.STRING)
     @Expose
-    @Required
+    @Required(message = "v.require.shipment.currency")
     public Currency currency;
 
     /**
@@ -175,12 +180,14 @@ public class Shipment extends GenericModel {
      * 起始地址
      */
     @Expose
+    @Required(message = "v.require.shipment.source")
     public String source;
 
     /**
      * 目的地址
      */
     @Expose
+    @Required(message = "v.require.shipment.target")
     public String target;
 
     /**

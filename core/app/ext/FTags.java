@@ -62,6 +62,7 @@ public class FTags extends FastTags {
         String help = Str(args, "help");
         String type = Str(args, "type");
         Boolean edit = True(args, "edit");
+        String placeHolder = Str(args, "placeHolder");
         if(StringUtils.isBlank(name)) throw new FastRuntimeException("[name] attr is blank.");
         if(StringUtils.isBlank(id)) throw new FastRuntimeException("[id] attr is blank");
         if(StringUtils.isBlank(type)) type = "text";
@@ -70,7 +71,11 @@ public class FTags extends FastTags {
                 .append("<label class='control-label' for='").append(id).append("'>").append(StringUtils.isBlank(label) ? "" : label).append("</label>")
                 .append("<div class='controls'>")
                 .append("<div class='input-append'>")
-                .append("<input ").append(edit ? "" : "disabled").append(" id='").append(id).append("' type='").append(type).append("' name='").append(name).append("' value='").append(value).append("'>")
+                .append("<input ").append(edit ? "" : "disabled").append(" id='").append(id).append("' ")
+                .append("type='").append(type).append("' ")
+                .append("name='").append(name).append("' ")
+                .append(StringUtils.isNotBlank(placeHolder) ? "placeHolder='" + placeHolder + "' " : "")
+                .append("value='").append(value).append("'>")
                 .append("</div>");
         if(StringUtils.isNotBlank(help))
             sbd.append("<span class='help-inline'>").append(help).append("</span>");

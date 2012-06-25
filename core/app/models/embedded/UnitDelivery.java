@@ -30,7 +30,7 @@ public class UnitDelivery {
     public Date deliveryDate;
 
     /**
-     * 实际确认采购数量
+     * 实际确认采购数量, 设置了以后, 舍弃 Plan 数量
      */
     public Integer ensureQty;
 
