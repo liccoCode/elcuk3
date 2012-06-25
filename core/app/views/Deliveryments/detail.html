@@ -64,7 +64,7 @@
         <div id="payment" class="accordion-body collapse" style="height:0;">
             <table class="table table-condensed">
                 <tr>
-                    <td>类型</td>
+                    <td><a rel="popover" data-content="此项付款的用途| DELIVERY(采购)">用途</a></td>
                     <td><input disabled="" type="text" name="pay.type" value="DELIVERY"></td>
                     <td>采购单</td>
                     <td><input disabled="" type="text" name="dlmt.id" value="${dlmt.id}"></td>
@@ -120,6 +120,7 @@
             <td>Msku</td>
             <td>Product</td>
             <td>Price</td>
+            <td>金额</td>
             <td>阶段</td>
         </tr>
     #{list items:dlmt.units, as:'unit'}
@@ -148,6 +149,7 @@
             <td>${unit.selling.merchantSKU}</td>
             <td>${unit.product.sku}</td>
             <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>
+            <td>${unit.plan.planQty * unit.plan.unitPrice} | ${unit.delivery.deliveryQty * unit.plan.unitPrice}</td>
             <td>${unit.stage}</td>
         </tr>
     #{/list}

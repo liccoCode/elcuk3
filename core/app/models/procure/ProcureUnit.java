@@ -180,9 +180,11 @@ public class ProcureUnit extends Model {
      * @return
      */
     public ProcureUnit deliveryComplete() {
+        if(this.stage != STAGE.DELIVERY) throw new FastRuntimeException("此采购计划的状态错误! 请找 IT 核实.[" + this.id + "]");
         if(this.delivery.deliveryDate == null) throw new FastRuntimeException("不允许更新实际交货日期为空");
         if(this.delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
         if(this.delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");
+        this.stage = STAGE.DONE;
         return this.save();
     }
 

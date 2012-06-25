@@ -12,6 +12,7 @@
         <ul id="procureUnitsTab" class="nav nav-tabs">
             <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">Plan</a></li>
             <li><a href="#delivery" data-toggle="tab" style="padding:3px 8px;">Delivery</a></li>
+            <li><a href="#done" data-toggle="tab" style="padding:3px 8px;">Wating For Ship</a></li>
         </ul>
 
         <div id="procureUnitsContent" class="tab-content">
@@ -21,6 +22,10 @@
 
             <div id="delivery" class="tab-pane fade">
             #{procure_deliveryProcureUnitTable items:procure /}
+            </div>
+
+            <div id="done" class="tab-pane fade">
+            #{procure_deliveryProcureUnitTable items:done /}
             </div>
         </div>
 

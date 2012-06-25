@@ -25,8 +25,9 @@ public class Procures extends Controller {
     public static void index() {
         List<ProcureUnit> plan = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN);
         List<ProcureUnit> procure = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY);
+        List<ProcureUnit> done = ProcureUnit.findByStage(ProcureUnit.STAGE.DONE);
         List<Deliveryment> dlmts = Deliveryment.openDeliveryments();
-        render(plan, procure, dlmts);
+        render(plan, procure, done, dlmts);
     }
 
     public static void create() {

@@ -82,7 +82,7 @@ public class Deliveryment extends GenericModel {
 
     public static List<Deliveryment> openDeliveryments() {
         //TODO 需要将 Deliveryment 添加 supplier
-        return Deliveryment.find("state!=?", S.DELIVERY).fetch();
+        return Deliveryment.find("state=?", S.PENDING).fetch();
     }
 
     public static Deliveryment checkAndCreate(User user) {
@@ -157,13 +157,13 @@ public class Deliveryment extends GenericModel {
         float totalNeedPayEUR = 0;
         for(ProcureUnit unit : this.units) {
             if(unit.plan.currency == Currency.CNY)
-                totalNeedPayCNY += unit.plan.unitPrice;
+                totalNeedPayCNY += unit.plan.unitPrice * unit.delivery.deliveryQty;
             else if(unit.plan.currency == Currency.USD)
-                totalNeedPayUSD += unit.plan.unitPrice;
+                totalNeedPayUSD += unit.plan.unitPrice * unit.delivery.deliveryQty;
             else if(unit.plan.currency == Currency.GBP)
-                totalNeedPayGBP += unit.plan.unitPrice;
+                totalNeedPayGBP += unit.plan.unitPrice * unit.delivery.deliveryQty;
             else if(unit.plan.currency == Currency.EUR)
-                totalNeedPayEUR += unit.plan.unitPrice;
+                totalNeedPayEUR += unit.plan.unitPrice * unit.delivery.deliveryQty;
         }
 
         boolean fullPayCNY = totalNeedPayCNY == totalPayedCNY;
@@ -184,6 +184,9 @@ public class Deliveryment extends GenericModel {
     }
 
     public String supplier() {
-        return this.units.get(0).plan.supplier;
+        if(this.units != null && this.units.size() > 0)
+            return this.units.get(0).plan.supplier;
+        else
+            return "Empty";
     }
 }
