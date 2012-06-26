@@ -1,0 +1,43 @@
+*{
+items: Payments
+}*
+<div class="accordion-group">
+    <div class="accordion-heading">
+        <a class="accordion-toggle" data-toggle="collapse" href="#paymentInfo">付款信息</a>
+    </div>
+
+    <div id="paymentInfo" class="accordion-body collapse" style="height:0">
+        <table class="table table-condensed">
+            <tr>
+                <td>#</td>
+                <td>Price</td>
+                <td>Currency</td>
+                <td>Date</td>
+                <td>State</td>
+                <td>Memo</td>
+                <td>&nbsp;</td>
+            </tr>
+        #{list items:_items, as:'pay'}
+            #{set isClose:pay.state == models.procure.Payment.S.CLOSE /}
+            <tr style="color:${isClose ? '#ddd' : '#000'}">
+                <td>${pay.id}</td>
+                <td>${pay.price}</td>
+                <td>${pay.currency}</td>
+                <td>${pay.payDate.datetime()}</td>
+                <td>${pay.state}</td>
+                <td>${pay.memo}</td>
+                <td>
+                    #{if isClose}
+                        <i class="icon-ban-circle"></i>
+                    #{/if}
+                    #{else }
+                        <button payId="${pay.id}" class="btn btn-mini"><i class="icon-remove"></i></button>
+                    #{/else}
+                </td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+</div>
+#{script 'payments/payment.coffee'/}
+

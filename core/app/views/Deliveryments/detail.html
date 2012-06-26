@@ -24,87 +24,9 @@
 
 <div><span class="label label-info">付款信息</span></div>
 <div>
-    <table class="table table-condensed table-bordered" id="paymentInfo">
-        <tr>
-            <td>#</td>
-            <td>Price</td>
-            <td>Currency</td>
-            <td>Date</td>
-            <td>State</td>
-            <td>Memo</td>
-            <td>Payer</td>
-            <td>&nbsp;</td>
-        </tr>
-    #{list items:dlmt.payments, as:'pay'}
-        <tr ${pay.state == models.procure.Payment.S.CLOSE ? 'style=color:#DDD' : 'black'}>
-            <td>${pay.id}</td>
-            <td>${pay.price}</td>
-            <td>${pay.currency}</td>
-            <td>${pay.payDate.format('yyyy-MM-dd HH:mm:ss')}</td>
-            <td>${pay.state}</td>
-            <td>${pay.memo}</td>
-            <td>${pay.payer.username}</td>
-            <td>
-                #{if pay.state == models.procure.Payment.S.CLOSE}
-                    <i class="icon-ban-circle"></i>
-                #{/if}
-                #{else }
-                    <button payId="${pay.id}" class="btn btn-mini"><i class="icon-remove"></i></button>
-                #{/else}
-            </td>
-        </tr>
-    #{/list}
-    </table>
-
+#{payment_listPayment items:dlmt.payments /}
 #{if !dlmt.isPaymentComplete()}
-    <div class="accordion-group" style="margin-bottom:20px;">
-        <div class="accordion-heading">
-            <a class="accordion-toggle" data-toggle="collapse" href="#payment">
-                新增付款
-            </a>
-        </div>
-        <div id="payment" class="accordion-body collapse" style="height:0;">
-            <table class="table table-condensed">
-                <tr>
-                    <td><a rel="popover" data-content="此项付款的用途| DELIVERY(采购)">用途</a></td>
-                    <td><input disabled="" type="text" name="pay.type" value="DELIVERY"></td>
-                    <td>采购单</td>
-                    <td><input disabled="" type="text" name="dlmt.id" value="${dlmt.id}"></td>
-                </tr>
-                <tr>
-                    <td>付款</td>
-                    <td>
-                        <div class="input-prepend">
-                            <input type="text" style="width:100px" name="pay.price">
-                            <select name="pay.currency" size="1" style="width:80px;">
-                                #{list helper.Currency.values()}
-                                    <option ${_ == helper.Currency.CNY ? 'selected' : ''} value="${_}">${_}</option>
-                                #{/list}
-                            </select>
-                        </div>
-                    </td>
-                    <td>付款时间</td>
-                    <td>
-                        <input type="date" name="pay.payDate" placeHolder="留空则为当前时间">
-                    </td>
-                </tr>
-                <tr>
-                    <td>Memo</td>
-                    <td colspan="3">
-                        <textarea class="span8" name="pay.memo"></textarea>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4">
-                        <button id="pay_for_the_deliveryment" class="btn btn-small btn-primary">部分付款</button>
-                        <button id="payment_clear" rel="popover" data-content="将此采购单标记为款项全清" class="btn btn-small btn-warning">
-                            清款检查
-                        </button>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
+    #{payment_addPayment type:'DELIVERY', payObjId:dlmt.id /}
 #{/if}
 </div>
 

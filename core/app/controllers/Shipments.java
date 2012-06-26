@@ -1,6 +1,8 @@
 package controllers;
 
 import helper.Webs;
+import models.User;
+import models.procure.Payment;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
@@ -69,5 +71,10 @@ public class Shipments extends Controller {
         if(shipment == null || !shipment.isPersistent())
             throw new FastRuntimeException("Shipment(" + shipmentId + ") 不存在!");
         renderJSON(Webs.G(shipment.fromPlanToShip(trckNo, iExpress)));
+    }
+
+    public static void payment(Payment pay, Shipment payObj) {
+        pay.payer = User.findByUserName(Secure.Security.connected());
+        renderJSON(Webs.G(payObj.payForShipment(pay)));
     }
 }

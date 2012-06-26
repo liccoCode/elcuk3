@@ -19,7 +19,7 @@ import java.util.List;
  * Time: 4:50 PM
  */
 @Entity
-public class Deliveryment extends GenericModel {
+public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     public enum S {
         /**
@@ -97,12 +97,7 @@ public class Deliveryment extends GenericModel {
     public Payment payForDeliveryment(Payment payment) {
         if(payment == null) throw new FastRuntimeException("没有付款数据, 无法付款.");
         if(this.isPaymentComplete()) throw new FastRuntimeException("款项已经全部付清, 无需再付款.");
-        if(payment.price < 0) throw new FastRuntimeException("付款价格小于 0");
-        if(payment.type == null) throw new FastRuntimeException("没有指定付款类型.");
-        if(payment.payer == null) throw new FastRuntimeException("系统无法确认是谁进行的付款.");
-        if(payment.payDate == null) payment.payDate = new Date();
-        if(payment.payDate.getTime() > System.currentTimeMillis()) throw new FastRuntimeException("你付款时间穿越了吗?");
-        if(payment.state == null) payment.state = Payment.S.NORMAL;
+        payment.paymentCheckItSelf();
 
         payment.deliveryment = this; //由 Payment 添加关联
         payment.deliveryment.state = S.PARTPAY;
@@ -188,5 +183,15 @@ public class Deliveryment extends GenericModel {
             return this.units.get(0).plan.supplier;
         else
             return "Empty";
+    }
+
+    @Override
+    public void close(Payment thisPayment) {
+        try {
+            thisPayment.deliveryment.complatePayment();
+        } catch(FastRuntimeException e) {
+            thisPayment.deliveryment.state = Deliveryment.S.PARTPAY;
+            thisPayment.deliveryment.save();
+        }
     }
 }

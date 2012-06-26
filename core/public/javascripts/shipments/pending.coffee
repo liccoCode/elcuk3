@@ -3,7 +3,8 @@ $ ->
   trClick = ->
     $("#pending tr[row][class=active]").click()
 
-  shipItemDeleBtn = ->
+  # 删除某一个 ShipItem
+  bindShipItemDeleBtn = ->
     $("#shipitem button").unbind().click ->
       tr = $(@).parents('tr')
       $.post('/shipments/removeItemFromShipment', {shipmentId: tr.attr("shipitem")},
@@ -14,7 +15,26 @@ $ ->
             trClick()
       )
 
-  confirmShipmentBtn = ->
+  # 付款按钮
+  bindPaymentBtn = ->
+    $('#payment_clear').remove()
+    $('#pay_for_the_Obj').click ->
+      payment = $('#payment')
+      $.varClosure.params = {}
+      payment.find(':input').map($.varClosure)
+      payment.mask('更新中...')
+      $.post('/shipments/payment', $.varClosure.params,
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          else
+            window.payment.renderToTable(r)
+          payment.unmask()
+      )
+
+
+  # 确认此 Shipment 到 Shipping 状态
+  bindConfirmShipmentBtn = ->
     $("#confirmShipment button").click ->
       $.varClosure.params = {}
       $('#confirmShipment :input').map($.varClosure2)
@@ -63,8 +83,9 @@ $ ->
     )
 
   do ->
-    shipItemDeleBtn()
-    confirmShipmentBtn()
+    bindShipItemDeleBtn()
+    bindConfirmShipmentBtn()
+    bindPaymentBtn()
     for tr in $('#procureUnit tr[uid]')
       o = $(tr)
       total = Number(o.find('td:eq(1) a').text().trim())

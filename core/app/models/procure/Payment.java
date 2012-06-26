@@ -18,6 +18,9 @@ import java.util.Date;
  */
 @Entity
 public class Payment extends GenericModel {
+    public static interface ClosePayment {
+        public void close(Payment thisPayment);
+    }
 
     public enum T {
         DELIVERY,
@@ -94,12 +97,25 @@ public class Payment extends GenericModel {
         if(StringUtils.isBlank(msg)) throw new FastRuntimeException("关闭 Payment 必须留有理由!");
         this.state = Payment.S.CLOSE;
         this.memo += String.format("\r\n(CLOSE|%s)", msg);
-        try {
-            this.deliveryment.complatePayment();
-        } catch(FastRuntimeException e) {
-            this.deliveryment.state = Deliveryment.S.PARTPAY;
-            this.deliveryment.save();
-        }
+        ClosePayment closePayment = null;
+        if(this.type == T.DELIVERY)
+            closePayment = new Deliveryment();
+        else if(this.type == T.SHIP)
+            closePayment = new Shipment();
+        if(closePayment == null) throw new FastRuntimeException("正在关闭位置的 Payment 类型!");
+        closePayment.close(this);
         return this.save();
+    }
+
+    /**
+     * Payment 自己的检查, 付款金额, 类型, 付款时间,类型
+     */
+    public void paymentCheckItSelf() {
+        if(this.price < 0) throw new FastRuntimeException("付款价格小于 0");
+        if(this.type == null) throw new FastRuntimeException("没有指定付款类型.");
+        if(this.payer == null) throw new FastRuntimeException("系统无法确认是谁进行的付款.");
+        if(this.payDate == null) this.payDate = new Date();
+        if(this.payDate.getTime() > System.currentTimeMillis()) throw new FastRuntimeException("你付款时间穿越了吗?");
+        if(this.state == null) this.state = Payment.S.NORMAL;
     }
 }

@@ -133,28 +133,6 @@
 </div>
 
 <!-- 付款信息 -->
-<div style="min-height:200px;">
-    <table class="table table-condensed">
-        <tr>
-            <td>#</td>
-            <td>Price</td>
-            <td>Currency</td>
-            <td>Date</td>
-            <td>State</td>
-            <td>Memo</td>
-            <td>Payer</td>
-        </tr>
-    #{list items:s.payments, as:'pay'}
-        <tr>
-            <td>${pay.id}</td>
-            <td>${pay.price}</td>
-            <td>${pay.currency}</td>
-            <td>${pay.payDate.datetime()}</td>
-            <td>${pay.state}</td>
-            <td>${pay.memo}</td>
-            <td>${pay.payer.username}</td>
-        </tr>
-    #{/list}
-    </table>
-</div>
-
+#{payment_listPayment items:s.payments /}
+<!-- 付款 -->
+#{payment_addPayment type:'SHIP', payObjId:s.id /}

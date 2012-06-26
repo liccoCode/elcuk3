@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 5:32 PM
  */
 @Entity
-public class Shipment extends GenericModel {
+public class Shipment extends GenericModel implements Payment.ClosePayment {
 
     public Shipment() {
         this.createDate = new Date();
@@ -94,6 +94,7 @@ public class Shipment extends GenericModel {
      * 此 Shipment 的付款信息
      */
     @OneToMany(mappedBy = "shipment")
+    @OrderBy("state DESC")
     public List<Payment> payments = new ArrayList<Payment>();
 
     /**
@@ -253,4 +254,17 @@ public class Shipment extends GenericModel {
         return this.save();
     }
 
+    public Payment payForShipment(Payment payment) {
+        if(payment == null) throw new FastRuntimeException("付款信息为空!");
+        payment.paymentCheckItSelf();
+
+        payment.shipment = this; //由 Payment 添加关联
+        payment.shipment.save();
+        return payment.save();
+    }
+
+    @Override
+    public void close(Payment thisPayment) {
+        // empty check close in shipment.
+    }
 }
