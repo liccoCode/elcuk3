@@ -1,16 +1,15 @@
 package controllers;
 
 import helper.Webs;
+import models.Ret;
 import models.User;
-import models.procure.Payment;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -66,15 +65,30 @@ public class Shipments extends Controller {
         renderJSON(Webs.G(item.removeFromShipment()));
     }
 
-    public static void confirmShipment(String shipmentId, String trckNo, Shipment.I iExpress) {
+    public static void confirmShipment(String shipmentId, String trckNo, iExpress iExpress, Date bTime, Date planTime) {
         Shipment shipment = Shipment.findById(shipmentId);
         if(shipment == null || !shipment.isPersistent())
             throw new FastRuntimeException("Shipment(" + shipmentId + ") 不存在!");
-        renderJSON(Webs.G(shipment.fromPlanToShip(trckNo, iExpress)));
+        renderJSON(Webs.G(shipment.fromPlanToShip(trckNo, iExpress, bTime, planTime)));
     }
 
     public static void payment(Payment pay, Shipment payObj) {
         pay.payer = User.findByUserName(Secure.Security.connected());
         renderJSON(Webs.G(payObj.payForShipment(pay)));
+    }
+
+
+    /**
+     * 查看一个 Shipping 状态的 Shipment
+     */
+    public static void shipping(String id) {
+        Shipment s = Shipment.findById(id);
+        render(s);
+    }
+
+    public static void refreshIExpress(String id) {
+        Shipment shipment = Shipment.findById(id);
+        if(shipment == null || !shipment.isPersistent()) throw new FastRuntimeException("Shipment 不存在!");
+        renderJSON(new Ret(true, shipment.refreshIExpressHTML()));
     }
 }

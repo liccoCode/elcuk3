@@ -1,0 +1,66 @@
+#{script 'shipments/shipping.coffee'/}
+
+<div>
+    <table class="table table-condensed table-bordered">
+    #{shipment_basicTRs shipment:s /}
+        <tr>
+            <td>总费用</td>
+            <td>${s.totalPayedCNY()} CNY</td>
+
+            <td>TracNo</td>
+            <td>${s.trackNo}</td>
+
+            <td>国际快递商</td>
+            <td>${s.internationExpress}</td>
+
+            <td>9</td>
+            <td>99</td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    <table class="table table-condensed">
+        <tr>
+            <td>#</td>
+            <td>SID</td>
+            <td>运输数量</td>
+            <td>Unit(实际采购/剩余)</td>
+        </tr>
+    #{list items:s.items, as:'itm'}
+        <tr>
+            <td>${itm.id}</td>
+            <td>
+                #{shipment_sid sid:itm.unit.sid/}
+            </td>
+            <td>
+            ${itm.qty}
+            </td>
+            <td>
+            ${itm.unit.delivery.deliveryQty}/${itm.unit.leftTransferQty()._1}
+            </td>
+        </tr>
+    #{/list}
+    </table>
+</div>
+
+
+<hr>
+<div class="accordion-group">
+    <div class="accordion-heading">
+        <a class="accordion-toggle" data-toggle="collapse" href="#confirmShipment">国际快递商的运输信息</a>
+    </div>
+
+    <div id="confirmShipment" class="accordion-body collapse" style="height:0">
+        <div class="alert alert-info" id="alter">
+            <div class="input-prepend">
+                <span class="add-on">更新 ${s.internationExpress} 上的信息</span>
+                <button shipmentId="${s.id}" class="btn btn-small"><i class="icon-refresh"></i></button>
+            </div>
+            <div id="expressHtml">
+            ${s.iExpressHTML.raw()}
+            </div>
+        </div>
+    </div>
+</div>
+

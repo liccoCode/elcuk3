@@ -1,0 +1,37 @@
+*{
+shipment: 需要展示的 Shipment
+}*
+<tr>
+    <td>Id</td>
+    <td shipmentId='${_shipment.id}'>${_shipment.id}</td>
+
+    <td>运输方式</td>
+    <td>${_shipment.type}</td>
+
+    <td>起始地址</td>
+    <td>${_shipment.source}</td>
+
+    <td>目标地址</td>
+    <td>${_shipment.target}</td>
+</tr>
+
+<tr>
+    <td>发货时间</td>
+    <td>${_shipment.beginDate.date()}</td>
+    <td>预计到达时间</td>
+    <td>${_shipment.planArrivDate.date()}</td>
+    <td>剩余在途时间</td>
+    <td>${_shipment.planArrivDate?.left()}</td>
+    <td>实际到达时间</td>
+    <td>${_shipment.arriveDate.date()}</td>
+</tr>
+
+<tr>
+    <td>计价方式</td>
+    <td>${_shipment.pype}</td>
+    <td>计价单价</td>
+    <td>${_shipment.price}</td>
+    <td>计价数量</td>
+    <td>${_shipment.pQty}</td>
+    <td colspan="2">&nbsp;</td>
+</tr>

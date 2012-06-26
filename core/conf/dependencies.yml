@@ -8,7 +8,7 @@ require:
     - play -> fastergt 1.7
     - play -> coffee 1.0
     # jars...
-    - org.jsoup -> jsoup 1.6.2
+    - org.jsoup -> jsoup 1.6.3
     - elcuk -> mws 1.0
     - org.apache.httpcomponents -> httpclient 4.1.2
     - org.apache.httpcomponents -> httpmime 4.1.2

@@ -1,6 +1,6 @@
 #{script 'shipments/pending.coffee'/}
 <!-- 处理需要货运的 ProcureUnit -->
-<div class="row" style="min-height:300px;">
+<div class="row" style="min-height:300px">
     <div class="span6" id="procureUnit">
         <table class="table table-condensed">
             <tr>
@@ -20,10 +20,8 @@
                 <td>
                     <a rel="popover" trigger='toggle' class="btn btn-mini ${isZero ? 'btn-danger' : 'btn-info'}" data-content="Relate ShipmentId:<br> ${leftQtyTuple._2}">${leftQtyTuple._1}</a>
                 </td>
-                #{set t3:models.market.Selling.sidT3(unit.sid)/}
                 <td>
-                    <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(unit.sid)}" target="_blank">${t3._2}
-                    |${t3._3}</a></td>
+                    #{shipment_sid sid:unit.sid/}
                 <td><input class="input-mini" style="padding:0"></td>
                 <td>
                     #{if isZero}
@@ -65,39 +63,7 @@
 
 <div>
     <table class="table table-condensed table-bordered">
-        <tr>
-            <td>Id</td>
-            <td shipmentId='${s.id}'>${s.id}</td>
-
-            <td>运输方式</td>
-            <td>${s.type}</td>
-
-            <td>起始地址</td>
-            <td>${s.source}</td>
-
-            <td>目标地址</td>
-            <td>${s.target}</td>
-        </tr>
-
-        <tr>
-            <td>发货时间</td>
-            <td>${s.beginDate.date()}</td>
-            <td>预计到达时间</td>
-            <td>${s.planArrivDate.date()}</td>
-            <td>实际到达时间</td>
-            <td>${s.arriveDate.date()}</td>
-            <td colspan="2">&nbsp;</td>
-        </tr>
-
-        <tr>
-            <td>计价方式</td>
-            <td>${s.pype}</td>
-            <td>计价单价</td>
-            <td>${s.price}</td>
-            <td>计价数量</td>
-            <td>${s.pQty}</td>
-            <td colspan="2">&nbsp;</td>
-        </tr>
+    #{shipment_basicTRs shipment:s /}
     </table>
 </div>
 
@@ -116,12 +82,18 @@
                 <td>国际快递商</td>
                 <td>
                     <select name="iExpress" size="1">
-                    #{list items:models.procure.Shipment.I.values(), as:'i'}
-                        <option value="${i}">${i}</option>
-                    #{/list}
+                        <option value="DHL">DHL</option>
+                        <option value="FEDEX">FEDEX</option>
                     </select>
                     <input type="hidden" name="shipmentId" value="${s.id}">
                 </td>
+            </tr>
+            <tr>
+                <td>起运时间</td>
+                <td><input type="date" name="bTime" placeHolder="开始运输的时间"></td>
+
+                <td>预计到达时间</td>
+                <td><input type="date" name="planTime" placeHolder="预计运输到达的时间"></td>
             </tr>
             <tr>
                 <td colspan="4">

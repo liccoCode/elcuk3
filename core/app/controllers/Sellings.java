@@ -1,7 +1,7 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
-import ext.LinkExtensions;
+import ext.vExtensions;
 import helper.GTs;
 import helper.Webs;
 import jobs.SellingRecordCheckJob;
@@ -79,7 +79,7 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(new Ret(true, LinkExtensions.asinLink(s)));
+        renderJSON(new Ret(true, vExtensions.asinLink(s)));
     }
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/

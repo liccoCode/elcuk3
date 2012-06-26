@@ -1,0 +1,27 @@
+*{
+item: shipping 的 Shipment
+}*
+<table class="table table-condensed table-bordered">
+    <tr>
+        <td>#</td>
+        <td>货运方式</td>
+        <td>计价类型</td>
+        <td>总运费(CNY)</td>
+        <td>TrankNo</td>
+        <td>国际运输商</td>
+        <td>开始运输时间</td>
+        <td>预计运输时间</td>
+    </tr>
+#{list items:_item, as:'p'}
+    <tr row style="cursor:pointer;${p.overDue() ? 'color:red' : ''}">
+        <td>${p.id}</td>
+        <td>${p.type}</td>
+        <td>${p.pype}</td>
+        <td>${p.totalPayedCNY()}</td>
+        <td>${p.trackNo}</td>
+        <td>${p.internationExpress}</td>
+        <td>${p.beginDate.date()}</td>
+        <td>${p.planArrivDate.left()}</td>
+    </tr>
+#{/list}
+</table>

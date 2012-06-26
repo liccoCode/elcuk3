@@ -83,14 +83,6 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     }
 
     /**
-     * 国际运输商
-     */
-    public enum I {
-        DHL,
-        FEDEX
-    }
-
-    /**
      * 此 Shipment 的付款信息
      */
     @OneToMany(mappedBy = "shipment")
@@ -192,7 +184,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      */
     @Enumerated(EnumType.STRING)
     @Column(length = 12)
-    public I internationExpress;
+    public iExpress internationExpress;
 
     /**
      * 起始地址
@@ -207,6 +199,12 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     @Expose
     @Required(message = "v.require.shipment.target")
     public String target;
+
+    /**
+     * 国际运输的运输信息的记录
+     */
+    @Lob
+    public String iExpressHTML = " ";
 
     /**
      * 计算 Shipment 的 ID
@@ -244,13 +242,17 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      *
      * @return
      */
-    public Shipment fromPlanToShip(String trankNo, I iExpress) {
+    public Shipment fromPlanToShip(String trankNo, iExpress iExpress, Date beginDate, Date planArriveTime) {
         if(this.state != S.PLAN) throw new FastRuntimeException("Shipment (" + this.id + ") 状态应该为 PLAN!");
         if(StringUtils.isBlank(trankNo)) throw new FastRuntimeException("Trac No 不允许为空!");
         if(iExpress == null) throw new FastRuntimeException("国际快递商不允许为空!");
+        if(beginDate == null) throw new FastRuntimeException("进行 Shipping 状态, 开始时间不能为空!");
+        if(planArriveTime == null) throw new FastRuntimeException("必须指定预计到达时间!");
         this.trackNo = trankNo.trim();
         this.internationExpress = iExpress;
         this.state = S.SHIPPING;
+        this.beginDate = beginDate;
+        this.planArrivDate = planArriveTime;
         return this.save();
     }
 
@@ -266,5 +268,24 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     @Override
     public void close(Payment thisPayment) {
         // empty check close in shipment.
+    }
+
+    /**
+     * 返回总共付款的 RMB 的金额
+     *
+     * @return
+     */
+    public Float totalPayedCNY() {
+        float totalPayed = 0;
+        for(Payment pay : this.payments)
+            if(pay.state == Payment.S.NORMAL) totalPayed += pay.currency.toCNY(pay.price);
+        return totalPayed;
+    }
+
+    public String refreshIExpressHTML() {
+        String html = this.internationExpress.fetchStateHTML(this.trackNo);
+        this.iExpressHTML = this.internationExpress.parseState(html);
+        this.save();
+        return this.iExpressHTML;
     }
 }

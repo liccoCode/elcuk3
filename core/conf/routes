@@ -18,6 +18,7 @@ GET     /favicon.ico                                        404
 GET     /public/                                            staticDir:public
 GET     /resources/                                         staticDir:public/resources
 GET     /images/                                            staticDir:public/images
+GET     /img/                                               staticDir:public/images
 
 # REST CRUD
 GET     /{controller}/page/{page}                           {controller}.p

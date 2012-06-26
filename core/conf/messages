@@ -23,3 +23,11 @@ v.require.shipment.price=\u4EF7\u683C\u4E0D\u5141\u8BB8\u4E3A\u7A7A
 v.require.shipment.currency=\u5E01\u79CD\u4E0D\u5141\u8BB8\u4E3A\u7A7A
 v.require.shipment.source=\u8FD0\u8F93\u8D77\u59CB\u5730\u5740\u4E0D\u80FD\u4E3A\u7A7A
 v.require.shipment.target=\u8FD0\u8F93\u76EE\u6807\u5730\u5740\u4E0D\u80FD\u4E3A\u7A7A
+
+left.seconds=%s seconds left
+left.minutes=%s minutes left
+left.hours=%s hours left
+left.days=%s days left
+left.months=%s months left
+left.years=%s years left
+
