@@ -26,7 +26,13 @@
                     |${t3._3}</a></td>
                 <td><input class="input-mini" style="padding:0"></td>
                 <td>
-                    <button uid="${unit.id}" class="btn btn-mini btn-success"><i class="icon-arrow-right"></i></button>
+                    #{if isZero}
+                        <i class="icon-lock"></i>
+                    #{/if}
+                    #{else }
+                        <button uid="${unit.id}" class="btn btn-mini btn-success"><i class="icon-arrow-right"></i>
+                        </button>
+                    #{/else}
                 </td>
             </tr>
         #{/list}
@@ -37,6 +43,7 @@
             <tr>
                 <td>SID</td>
                 <td>运输数量</td>
+                <td>&nbsp;</td>
             </tr>
         #{list items:s.items, as:'itm'}
             <tr shipitem='${itm.id}'>
@@ -45,6 +52,9 @@
                     <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(itm.unit.sid)}" target="_blank">${t3._2}
                     |${t3._3}</a></td>
                 <td>${itm.qty}</td>
+                <td>
+                    <button class="btn btn-mini"><i class="icon-remove-sign"></i></button>
+                </td>
             </tr>
         #{/list}
         </table>
@@ -91,8 +101,39 @@
     </table>
 </div>
 
+
+<div class="accordion-group">
+    <div class="accordion-heading">
+        <a class="accordion-toggle" data-toggle="collapse" href="#confirmShipment">快递单确认运输</a>
+    </div>
+
+    <div id="confirmShipment" class="accordion-body collapse" style="height:0">
+        <table class="table table-condensed">
+            <tr>
+                <td>快递单号</td>
+                <td><input style="padding:0" type="text" name="trckNo" value="${s.trackNo}"></td>
+
+                <td>国际快递商</td>
+                <td>
+                    <select name="iExpress" size="1">
+                    #{list items:models.procure.Shipment.I.values(), as:'i'}
+                        <option value="${i}">${i}</option>
+                    #{/list}
+                    </select>
+                    <input type="hidden" name="shipmentId" value="${s.id}">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <button class="btn btn-small btn-primary">Confirm Ship</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
 <!-- 付款信息 -->
-<div>
+<div style="min-height:200px;">
     <table class="table table-condensed">
         <tr>
             <td>#</td>

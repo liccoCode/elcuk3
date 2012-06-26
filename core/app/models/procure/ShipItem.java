@@ -42,4 +42,11 @@ public class ShipItem extends GenericModel {
      */
     @Expose
     public Integer qty = 0;
+
+    public ShipItem removeFromShipment() {
+        /**
+         *  TODO 需要检查什么?
+         */
+        return this.delete();
+    }
 }

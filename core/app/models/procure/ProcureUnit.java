@@ -16,9 +16,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 每一个采购单元
@@ -228,8 +226,8 @@ public class ProcureUnit extends Model {
         if(shipItems.size() > 1) {
             Webs.systemMail("More then one ShipItem with the same SHIPMENT AND PROCUREUNIT",
                     String.format("More then one ShipItem with the same SHIPMENT AND PROCUREUNIT\r\n%s\r\n%s",
-                            Webs.exposeGson(shipItems),
-                            Webs.exposeGson(this)));
+                            Webs.G(shipItems),
+                            Webs.G(this)));
             throw new FastRuntimeException(String.format("同 Shipment(%s), ProcureUnit(%s) 的 ShipItem 拥有多与一个!", shipment.id, this.id));
         }
         F.T2<Integer, Set<String>> leftQtyTuple = leftTransferQty();
@@ -262,6 +260,17 @@ public class ProcureUnit extends Model {
 
     public static List<ProcureUnit> findByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
+    }
+
+    public static List<ProcureUnit> findWaitingForShip() {
+        List<ProcureUnit> procureUnits = findByStage(STAGE.DONE);
+        Collections.sort(procureUnits, new Comparator<ProcureUnit>() {
+            @Override
+            public int compare(ProcureUnit p1, ProcureUnit p2) {
+                return p2.leftTransferQty()._1 - p1.leftTransferQty()._1;
+            }
+        });
+        return procureUnits;
     }
 
 }

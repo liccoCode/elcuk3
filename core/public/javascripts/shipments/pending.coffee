@@ -1,11 +1,38 @@
 $ ->
-  initDate = do ->
-    for tr in $('#procureUnit tr[uid]')
-      o = $(tr)
-      total = Number(o.find('td:eq(1)').html())
-      o.data('ttQty', total)
+# 点击 Plan tab 中选中的 tr
+  trClick = ->
+    $("#pending tr[row][class=active]").click()
 
-  window.popover()
+  shipItemDeleBtn = ->
+    $("#shipitem button").unbind().click ->
+      tr = $(@).parents('tr')
+      $.post('/shipments/removeItemFromShipment', {shipmentId: tr.attr("shipitem")},
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          else
+            trClick()
+      )
+
+  confirmShipmentBtn = ->
+    $("#confirmShipment button").click ->
+      $.varClosure.params = {}
+      $('#confirmShipment :input').map($.varClosure2)
+      if $.varClosure.params['trckNo'] in ['', undefined]
+        alert('请填写 trckNo')
+        return false
+      $.post('/shipments/confirmShipment', $.varClosure.params,
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          else
+            alert('运输单' + r['id'] + '确认成功. 2s 后刷新页面')
+            setTimeout(
+              () ->
+                window.location.reload()
+              , 1500
+            )
+      )
 
   # 获取转移数量的时候需要的值
   transformVals = (unitId) ->
@@ -16,31 +43,6 @@ $ ->
     tr: trObj
     uid: unitId
     shipmentId: $('td[shipmentId]').attr('shipmentId')
-
-  # 转移成功后页面的改变动作
-  transformSucc = (r, vals) ->
-  # 1. ProcureUnit Table 的数量改变. 如果等于最大值则变灰色
-  # 2. Shipment 的列表增加. 如果页面上有相同 shipitem.id 的, 删除原来的
-    if r['qty'] is vals['ttQty']
-    #删除
-      vals['tr'].css('background', '#eee')
-    else
-      vals['tr'].find('td:eq(1)').html(vals['ttQty'] + '(' + (Number(vals['ttQty']) - r['qty']) + ')')
-    #                <tr>
-    #                    <td>
-    #                        <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(itm.unit.sid)}" target="_blank">${t3._2}
-    #                        |${t3._3}</a></td>
-    #                    <td>${itm.qty}</td>
-    #                </tr>
-    for item in $('#shipitem tr[shipitem]')
-      $(item).remove() if item.getAttribute('shipitem') is r['id'] + ""
-
-    sku = r['unit']['sku']
-    sid_p2 = r['unit']['sid'].split('|')[1..2]
-    trHtml = "<tr shipitem='" + r['id'] + "'><td><a href='/products/p_detail?sku=" + sku + "' target='_blank'>" + sku + "</a>|<a href='/sellings/selling?sid=" + r['unit']['sid'] + "' target='_blank'>" + sid_p2 + "</a></td>"
-    trHtml += "<td>" + r['qty'] + "</td></tr>"
-    $(trHtml).appendTo('#shipitem table')
-
 
   $('#procureUnit tr[uid] button').click ->
     vals = transformVals(@getAttribute("uid"))
@@ -57,5 +59,16 @@ $ ->
         if r.flag is false
           alert(r.message)
         else
-          transformSucc(r, vals)
+          trClick()
     )
+
+  do ->
+    shipItemDeleBtn()
+    confirmShipmentBtn()
+    for tr in $('#procureUnit tr[uid]')
+      o = $(tr)
+      total = Number(o.find('td:eq(1) a').text().trim())
+      o.data('ttQty', total)
+
+  window.popover()
+

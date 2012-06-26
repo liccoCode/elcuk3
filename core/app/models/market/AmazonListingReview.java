@@ -153,7 +153,7 @@ public class AmazonListingReview extends GenericModel {
         this.listingId = newReview.listingId;
 //        if(StringUtils.isNotBlank(newReview.listingId)) this.listingId = newReview.listingId; //这个不修改
         if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
-            this.comment += String.format("\r\n%s:%s", Dates.date2Date(null), Webs.exposeGson(this));
+            this.comment += String.format("\r\n%s:%s", Dates.date2Date(null), Webs.G(this));
             this.lastRating = this.rating;
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }

@@ -23,17 +23,17 @@ public class Deliveryments extends Controller {
 
     public static void payment(Payment pay, Deliveryment dlmt) {
         pay.payer = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.exposeGson(dlmt.payForDeliveryment(pay)));
+        renderJSON(Webs.G(dlmt.payForDeliveryment(pay)));
     }
 
     public static void paymentClose(Payment pay, String msg) {
         if(pay == null || !pay.isPersistent()) throw new FastRuntimeException("你指定需要关闭的 Payment 不合法.");
-        renderJSON(Webs.exposeGson(pay.close(msg)));
+        renderJSON(Webs.G(pay.close(msg)));
     }
 
     public static void paymentComplate(Deliveryment dlmt) {
         if(!dlmt.isPersistent()) throw new FastRuntimeException("你指定需要清款的采购单不合法.");
         dlmt.complatePayment();
-        renderJSON(Webs.exposeGson(dlmt));
+        renderJSON(Webs.G(dlmt));
     }
 }

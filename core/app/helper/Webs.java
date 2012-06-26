@@ -318,7 +318,13 @@ public class Webs {
         return sw.toString();
     }
 
-    public static String exposeGson(Object o) {
+    /**
+     * 按照(Gson) @Expose 输出 JSON 格式
+     *
+     * @param o
+     * @return
+     */
+    public static String G(Object o) {
         return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(o);
     }
 

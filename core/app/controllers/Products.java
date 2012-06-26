@@ -119,7 +119,7 @@ public class Products extends Controller {
         json.put("attrs", attrs);
         json.put("cAttrs", cAttrs);
 
-        renderJSON(Webs.exposeGson(json));
+        renderJSON(Webs.G(json));
     }
 
     public static void brand_family(Brand b, Category c) {
@@ -203,7 +203,7 @@ public class Products extends Controller {
         // 在 Controller 里面将值处理好
         try {
             Selling se = p.saleAmazon(s);
-            renderJSON(Webs.exposeGson(se));
+            renderJSON(Webs.G(se));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -217,7 +217,7 @@ public class Products extends Controller {
          */
         try {
             List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
-            renderJSON(Webs.exposeGson(upcSellings));
+            renderJSON(Webs.G(upcSellings));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

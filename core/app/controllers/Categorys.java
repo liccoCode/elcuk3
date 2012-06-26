@@ -57,7 +57,7 @@ public class Categorys extends Controller {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         if(c.isPersistent()) renderJSON(new Ret("Category has exist!"));
         c.save();
-        renderJSON(Webs.exposeGson(c));
+        renderJSON(Webs.G(c));
     }
 
     public static void cu(Category c) {

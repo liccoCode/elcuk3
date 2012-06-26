@@ -137,7 +137,7 @@ public class Attach extends Model {
         else if(StringUtils.isNotBlank(a.outName))
             rtAttach = Attach.findByOutName(a.outName);
         else
-            Logger.warn("Attach[%s] is Not found.", Webs.exposeGson(a));
+            Logger.warn("Attach[%s] is Not found.", Webs.G(a));
 
         return rtAttach;
     }

@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -47,13 +48,26 @@ public class Shipments extends Controller {
      */
     public static void pending(String id) {
         Shipment s = Shipment.findById(id);
-        List<ProcureUnit> units = ProcureUnit.findByStage(ProcureUnit.STAGE.DONE);
+        List<ProcureUnit> units = ProcureUnit.findWaitingForShip();
         render(s, units);
     }
 
     public static void shipProcureUnit(ProcureUnit unit, Integer qty, String shipmentId) {
         Shipment shipment = Shipment.findById(shipmentId);
         if(shipment == null || !shipment.isPersistent()) throw new FastRuntimeException("Shipment 不存在!");
-        renderJSON(Webs.exposeGson(unit.transformToShipment(shipment, qty)));
+        renderJSON(Webs.G(unit.transformToShipment(shipment, qty)));
+    }
+
+    public static void removeItemFromShipment(Long shipmentId) {
+        ShipItem item = ShipItem.findById(shipmentId);
+        if(item == null || !item.isPersistent()) throw new FastRuntimeException("ShipItem 不存在!");
+        renderJSON(Webs.G(item.removeFromShipment()));
+    }
+
+    public static void confirmShipment(String shipmentId, String trckNo, Shipment.I iExpress) {
+        Shipment shipment = Shipment.findById(shipmentId);
+        if(shipment == null || !shipment.isPersistent())
+            throw new FastRuntimeException("Shipment(" + shipmentId + ") 不存在!");
+        renderJSON(Webs.G(shipment.fromPlanToShip(trckNo, iExpress)));
     }
 }

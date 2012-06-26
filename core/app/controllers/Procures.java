@@ -44,7 +44,7 @@ public class Procures extends Controller {
     public static void update(ProcureUnit p) {
         if(!p.isPersistent()) throw new FastRuntimeException("此 ProcureUnti 不存在.");
         p.checkAndUpdate();
-        renderJSON(Webs.exposeGson(p));
+        renderJSON(Webs.G(p));
     }
 
     public static void sidSetUp(String sid) {
@@ -54,7 +54,7 @@ public class Procures extends Controller {
 
     public static void save(ProcureUnit p) {
         p.handler = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.exposeGson(p.checkAndCreate()));
+        renderJSON(Webs.G(p.checkAndCreate()));
     }
 
     // ------------- Plan Tab ---------------------
@@ -68,15 +68,15 @@ public class Procures extends Controller {
 
     public static void createDeliveryMent() {
         User user = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.exposeGson(Deliveryment.checkAndCreate(user)));
+        renderJSON(Webs.G(Deliveryment.checkAndCreate(user)));
     }
 
     public static void procureUnitToDeliveryMent(ProcureUnit p, Deliveryment dlmt) {
-        renderJSON(Webs.exposeGson(p.assignToDeliveryment(dlmt)));
+        renderJSON(Webs.G(p.assignToDeliveryment(dlmt)));
     }
 
     public static void procureUnitDeliveryInfoUpdate(ProcureUnit p) {
-        renderJSON(Webs.exposeGson(p.deliveryComplete()));
+        renderJSON(Webs.G(p.deliveryComplete()));
     }
 
     // ---------------- Delivery Tab ------------------

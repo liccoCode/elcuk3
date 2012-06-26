@@ -2,9 +2,11 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -78,6 +80,14 @@ public class Shipment extends GenericModel {
          * 体积计价
          */
         VOLUMN
+    }
+
+    /**
+     * 国际运输商
+     */
+    public enum I {
+        DHL,
+        FEDEX
     }
 
     /**
@@ -177,6 +187,13 @@ public class Shipment extends GenericModel {
     public String shipper;
 
     /**
+     * 国际快递商人
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 12)
+    public I internationExpress;
+
+    /**
      * 起始地址
      */
     @Expose
@@ -219,6 +236,21 @@ public class Shipment extends GenericModel {
     public boolean overDue() {
         long t = System.currentTimeMillis() - this.createDate.getTime();
         return t - TimeUnit.DAYS.toMillis(7) > 0;
+    }
+
+    /**
+     * 从 Plan 状态到 Ship 状态
+     *
+     * @return
+     */
+    public Shipment fromPlanToShip(String trankNo, I iExpress) {
+        if(this.state != S.PLAN) throw new FastRuntimeException("Shipment (" + this.id + ") 状态应该为 PLAN!");
+        if(StringUtils.isBlank(trankNo)) throw new FastRuntimeException("Trac No 不允许为空!");
+        if(iExpress == null) throw new FastRuntimeException("国际快递商不允许为空!");
+        this.trackNo = trankNo.trim();
+        this.internationExpress = iExpress;
+        this.state = S.SHIPPING;
+        return this.save();
     }
 
 }

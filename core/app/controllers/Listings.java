@@ -93,7 +93,7 @@ public class Listings extends Controller {
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
 
-        renderJSON(Webs.exposeGson(tobeSave));
+        renderJSON(Webs.G(tobeSave));
     }
 
     public static void reCrawl(Listing l) {

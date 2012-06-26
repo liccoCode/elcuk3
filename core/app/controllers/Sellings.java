@@ -95,7 +95,7 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(Webs.exposeGson(s));
+        renderJSON(Webs.G(s));
     }
 
     /**

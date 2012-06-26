@@ -49,7 +49,7 @@ public class Attachs extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(Webs.exposeGson(a));
+        renderJSON(Webs.G(a));
     }
 
     public static void rm(Attach a) {
@@ -65,6 +65,6 @@ public class Attachs extends Controller {
 
     public static void images(String fid) {
         List<Attach> imgs = Attach.find("fid=?", fid).fetch();
-        renderJSON(Webs.exposeGson(imgs));
+        renderJSON(Webs.G(imgs));
     }
 }
