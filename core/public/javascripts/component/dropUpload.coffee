@@ -16,6 +16,7 @@ $ ->
 
   # 删除服务器端的 Image, 同时删除页面中的 Image 元素
   window.dropUpload.rmImage = (e) ->
+    return false if !confirm('确定要删除此附件?')
     o = $(this)
     $.post('/attachs/rm', {'a.outName': o.attr('outName')},
       (r) ->
@@ -62,12 +63,14 @@ $ ->
   # dropbox, message, uploaded 参考下面的 HTML 代码
   #
   #<div style="min-height:300px;background:#eee;" id="dropbox">
-  #    <ul class="thumbnails" id="uploaded"></ul>
+  #    <ul class="thumbnails uploaded"></ul>
   #    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
   #</div>
   # ----
-  # fidFunc: 返回 a.fid 的回掉方法(详情查看 javascripts/component/dropupload.coffee)
-  window.dropUpload.iniDropbox = (fidAndAttachPFunc, dropbox, message, uploaded, url = '/attachs/upload', fileparam = 'a.file') ->
+  # fidFunc: 返回 a.fid(fid) 与 a.p(p) 的回掉方法(详情查看 javascripts/component/dropupload.coffee);
+  window.dropUpload.iniDropbox = (fidAndAttachPFunc, dropbox, url = '/attachs/upload', fileparam = 'a.file') ->
+    message = dropbox.find('.message')
+    uploaded = dropbox.find('.uploaded')
     dropbox.filedrop(
       paramname: fileparam
       maxfiles: 20
@@ -116,8 +119,10 @@ $ ->
             alert("File is too Large!")
     )
 
-  # 初始化页面的时候加载此 Product 对应的图片; uploaded 图片展示的 div
-  window.dropUpload.loadImages = (fid, message, uploaded) ->
+  # 初始化页面的时候加载此 Product 对应的图片; dropbox 图片展示的 div
+  window.dropUpload.loadImages = (fid, dropbox) ->
+    uploaded = dropbox.find('.uploaded')
+    message = dropbox.find('.message')
     $.getJSON('/attachs/images', fid: fid,
       (imgs) ->
         message.remove() if(imgs.length > 0)

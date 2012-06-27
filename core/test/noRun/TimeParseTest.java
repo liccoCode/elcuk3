@@ -9,15 +9,14 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Test;
 import play.libs.IO;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -157,5 +156,14 @@ public class TimeParseTest {
         Date now = new Date();
         System.out.println(Dates.morning(now));
         System.out.println(Dates.night(now));
+    }
+
+    @Test
+    public void testParseChineseTime() {
+        String time = "星期二, 五月 29, 2012";
+        System.out.println(DateTime.now().toString("E, MMM dd, yyyy", Locale.CHINESE));
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, MMM dd, yyyy");
+        System.out.println(DateTime.now().toString(fmt.withLocale(Locale.CHINESE)));
+        System.out.println(DateTime.parse(time, fmt.withLocale(Locale.CHINESE)));
     }
 }

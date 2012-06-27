@@ -1,8 +1,10 @@
+#{script 'jquery.filedrop.js' /}
+#{script 'component/dropUpload.coffee'/}
 #{script 'shipments/shipping.coffee'/}
 
 <div>
     <table class="table table-condensed table-bordered">
-    #{shipment_basicTRs shipment:s /}
+    #{shipment_basictrs shipment:s /}
         <tr>
             <td>总费用</td>
             <td>${s.totalPayedCNY()} CNY</td>
@@ -13,9 +15,20 @@
             <td>国际快递商</td>
             <td>${s.internationExpress}</td>
 
-            <td>9</td>
-            <td>99</td>
+            <td colspan="2"></td>
         </tr>
+
+        <tr>
+            <td>
+                <button id="add_memo" rel="popover" width="auto" data-content="保存 Memo" class="btn btn-small btn-primary">
+                    Memo
+                </button>
+            </td>
+            <td colspan="7">
+                <textarea rows="5" class="span11">${s.memo}</textarea>
+            </td>
+        </tr>
+
     </table>
 </div>
 
@@ -42,6 +55,11 @@
         </tr>
     #{/list}
     </table>
+</div>
+
+<div style="min-height:300px;background:#eee;" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
 </div>
 
 

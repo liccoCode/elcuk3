@@ -1,12 +1,10 @@
 $ ->
   dropbox = $('#dropbox')
-  message = $('#dropbox .message')
-  uploaded = $('#uploaded')
 
   fidCallBack = () ->
     {fid: $('#deliveryId').html(), p: 'DELIVERYMENT'}
-  window.dropUpload.loadImages(fidCallBack()['fid'], message, uploaded)
-  window.dropUpload.iniDropbox(fidCallBack, dropbox, message, uploaded)
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox)
+  window.dropUpload.iniDropbox(fidCallBack, dropbox)
 
   # 付款按钮
   $('#pay_for_the_Obj').click ->

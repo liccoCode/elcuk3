@@ -102,10 +102,8 @@ $(function(){
     });
 
     var dropbox = $('#dropbox');
-    var uploaded = $('#uploaded');
-    var message = $("#dropbox .message");
 
-    window.dropUpload.loadImages($('#p_sku').val(), message, uploaded);
+    window.dropUpload.loadImages($('#p_sku').val(), dropbox);
 
     function fidCallBack(){
         var sku = $('#p_sku').val();
@@ -116,7 +114,7 @@ $(function(){
         return {fid:sku, p:'SKU'};
     }
 
-    window.dropUpload.iniDropbox(fidCallBack, dropbox, message, dropbox);
+    window.dropUpload.iniDropbox(fidCallBack, dropbox);
 
     // -------------- 上架 Amazon 的相关功能
 

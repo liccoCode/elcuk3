@@ -206,6 +206,9 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     @Lob
     public String iExpressHTML = " ";
 
+    @Lob
+    public String memo = " ";
+
     /**
      * 计算 Shipment 的 ID
      *
@@ -285,6 +288,10 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     public String refreshIExpressHTML() {
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
         this.iExpressHTML = this.internationExpress.parseState(html);
+        if(this.state == S.SHIPPING) { // 检测是否在清关
+            if(this.internationExpress.isContainsClearance(this.iExpressHTML))
+                this.state = S.CLEARGATE;
+        }
         this.save();
         return this.iExpressHTML;
     }

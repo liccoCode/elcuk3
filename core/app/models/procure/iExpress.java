@@ -20,6 +20,11 @@ import org.jsoup.select.Elements;
 public enum iExpress {
     DHL {
         @Override
+        public boolean isContainsClearance(String content) {
+            return StringUtils.contains(content, "快件正在等待清关");
+        }
+
+        @Override
         public String parseState(String html) {
             Document doc = Jsoup.parse(html);
             Element table = doc.select("#table" + this.getTrackNo()).first();
@@ -44,6 +49,11 @@ public enum iExpress {
         }
     },
     FEDEX {
+        @Override
+        public boolean isContainsClearance(String content) {
+            return StringUtils.contains(content, "可以向有关国家机构申报本货件");
+        }
+
         @Override
         public String parseState(String html) {
             String jsonObj = StringUtils.substringBetween(html, "detailInfoObject =", "var associatedShipmentsTab =").trim();
@@ -128,4 +138,6 @@ public enum iExpress {
      * @return
      */
     public abstract String parseState(String html);
+
+    public abstract boolean isContainsClearance(String content);
 }

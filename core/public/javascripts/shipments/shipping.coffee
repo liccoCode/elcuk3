@@ -17,4 +17,15 @@ $ ->
   do ->
     bindIExpressHTMLRefreshBtn()
 
+  dropBox = $('#dropbox')
+
+  fidCallBack = () ->
+    fid: $('#shipment_detail td[shipmentid]').html().trim()
+    p: 'SHIPMENT'
+
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropBox)
+  window.dropUpload.iniDropbox(fidCallBack, dropBox)
+
+  window.popover()
+
 
