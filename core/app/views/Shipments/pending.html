@@ -40,6 +40,7 @@
         <table class="table table-condensed">
             <tr>
                 <td>SID</td>
+                <td>采购单</td>
                 <td>运输数量</td>
                 <td>&nbsp;</td>
             </tr>
@@ -49,6 +50,7 @@
                 <td>
                     <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(itm.unit.sid)}" target="_blank">${t3._2}
                     |${t3._3}</a></td>
+                <td>${itm.unit.deliveryment.id}</td>
                 <td>${itm.qty}</td>
                 <td>
                     <button class="btn btn-mini"><i class="icon-remove-sign"></i></button>

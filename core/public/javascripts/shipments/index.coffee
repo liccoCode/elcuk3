@@ -7,7 +7,7 @@ $ ->
     $.tableRowClickActive('#' + tab + ' tr[row]', o)
 
 
-  ['pending', 'shipping', 'clearAndReciving'].forEach(#'done']
+  ['pending', 'shipping', 'clearAndReciving', 'done'].forEach(
     (tab, i)->
       $("#" + tab + " tr[row]").click ->
         o = $(@)

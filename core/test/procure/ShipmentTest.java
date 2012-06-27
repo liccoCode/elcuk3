@@ -1,6 +1,7 @@
 package procure;
 
 import models.procure.Shipment;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -14,5 +15,7 @@ public class ShipmentTest extends UnitTest {
     @Test
     public void testUnits() {
         System.out.println(Shipment.id());
+        DateTime dt = DateTime.now();
+        System.out.println(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()));
     }
 }

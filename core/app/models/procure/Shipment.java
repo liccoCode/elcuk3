@@ -322,4 +322,20 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         return this.save();
     }
 
+    /**
+     * 此运输单总共的运输时长
+     * 1. 如果运输单完成了, 则为 (实际到达时间 - 开始时间)
+     * 2. 如果没有完成, 则为 (当前时间 - 开始时间)
+     *
+     * @return
+     */
+    public float shippingDays() {
+        if(this.state == S.DONE) {
+            if(this.arriveDate == null) throw new FastRuntimeException("运输单已经 Done, 但没有 [实际到达时间], 请联系 IT");
+            return TimeUnit.MILLISECONDS.toDays(this.arriveDate.getTime() - this.beginDate.getTime());
+        } else {
+            return TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - this.beginDate.getTime());
+        }
+    }
+
 }

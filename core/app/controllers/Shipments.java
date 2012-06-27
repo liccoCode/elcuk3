@@ -99,6 +99,13 @@ public class Shipments extends Controller {
         shipping(id);
     }
 
+    /**
+     * 查看一个 Done 状态的 Shipment
+     */
+    public static void done(String id) {
+        shipping(id);
+    }
+
     public static void editMemo(String id, String memo) {
         Shipment shipment = Shipment.findById(id);
         modelExist(shipment);
@@ -106,7 +113,12 @@ public class Shipments extends Controller {
         renderJSON(Webs.G(shipment.save()));
     }
 
-    public static void done(String id) {
+    /**
+     * 将 Shipment 的状态标记为 DONE
+     *
+     * @param id
+     */
+    public static void makeDone(String id) {
         Shipment shipment = Shipment.findById(id);
         modelExist(shipment);
         renderJSON(Webs.G(shipment.done()));

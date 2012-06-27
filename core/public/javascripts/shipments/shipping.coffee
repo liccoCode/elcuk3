@@ -35,7 +35,21 @@ $ ->
 
   # 运输完成
   $('#shipping_done').click ->
-    alert('done')
+    tableE = $(@).parents('table')
+    tableE.mask('更新中...')
+    $.post('/shipments/makeDone', id: fidCallBack()['fid'],
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('更新成功 2s 内刷新')
+          setTimeout(
+            () ->
+              window.location.reload()
+            , 1500
+          )
+        tableE.unmask()
+    )
 
   dropBox = $('#dropbox')
   window.dropUpload.loadImages(fidCallBack()['fid'], dropBox)
