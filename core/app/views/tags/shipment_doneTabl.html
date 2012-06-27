@@ -1,0 +1,25 @@
+*{
+item: pending 的 Items
+}*
+<table class="table table-condensed table-bordered">
+    <tr>
+        <td>#</td>
+        <td>货运方式</td>
+        <td>运输 SID 数量</td>
+        <td>计价数量</td>
+        <td>计价单价</td>
+        <td>运输商</td>
+        <td>创建时间</td>
+    </tr>
+#{list items:_item, as:'p'}
+    <tr row style="cursor:pointer;${p.overDue() ? 'color:red' : ''}">
+        <td>${p.id}</td>
+        <td>${p.items.size()}</td>
+        <td>${p.pype}</td>
+        <td>${p.pQty}</td>
+        <td>${p.price}</td>
+        <td>${p.shipper}</td>
+        <td>${p.createDate.datetime()}</td>
+    </tr>
+#{/list}
+</table>

@@ -5,6 +5,7 @@ import models.Ret;
 import models.User;
 import models.procure.*;
 import play.data.validation.Validation;
+import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -23,7 +24,7 @@ public class Shipments extends Controller {
     public static void index() {
         List<Shipment> pendings = Shipment.shipmentsByState(Shipment.S.PLAN);
         List<Shipment> shippings = Shipment.shipmentsByState(Shipment.S.SHIPPING);
-        List<Shipment> clear = Shipment.shipmentsByState(Shipment.S.CLEARGATE);
+        List<Shipment> clear = Shipment.shipmentsByState(Shipment.S.CLEARANCE);
         List<Shipment> dones = Shipment.find("state=?", Shipment.S.DONE).fetch(1, 20); // 由更多再 Ajax 加载
 
         render(pendings, shippings, clear, dones);
@@ -55,20 +56,19 @@ public class Shipments extends Controller {
 
     public static void shipProcureUnit(ProcureUnit unit, Integer qty, String shipmentId) {
         Shipment shipment = Shipment.findById(shipmentId);
-        if(shipment == null || !shipment.isPersistent()) throw new FastRuntimeException("Shipment 不存在!");
+        modelExist(shipment);
         renderJSON(Webs.G(unit.transformToShipment(shipment, qty)));
     }
 
     public static void removeItemFromShipment(Long shipmentId) {
         ShipItem item = ShipItem.findById(shipmentId);
-        if(item == null || !item.isPersistent()) throw new FastRuntimeException("ShipItem 不存在!");
+        modelExist(item);
         renderJSON(Webs.G(item.removeFromShipment()));
     }
 
     public static void confirmShipment(String shipmentId, String trckNo, iExpress iExpress, Date bTime, Date planTime) {
         Shipment shipment = Shipment.findById(shipmentId);
-        if(shipment == null || !shipment.isPersistent())
-            throw new FastRuntimeException("Shipment(" + shipmentId + ") 不存在!");
+        modelExist(shipment);
         renderJSON(Webs.G(shipment.fromPlanToShip(trckNo, iExpress, bTime, planTime)));
     }
 
@@ -88,7 +88,31 @@ public class Shipments extends Controller {
 
     public static void refreshIExpress(String id) {
         Shipment shipment = Shipment.findById(id);
-        if(shipment == null || !shipment.isPersistent()) throw new FastRuntimeException("Shipment 不存在!");
+        modelExist(shipment);
         renderJSON(new Ret(true, shipment.refreshIExpressHTML()));
+    }
+
+    /**
+     * 查看一个 clearAndReciving 状态的 Shipment
+     */
+    public static void clearAndReciving(String id) {
+        shipping(id);
+    }
+
+    public static void editMemo(String id, String memo) {
+        Shipment shipment = Shipment.findById(id);
+        modelExist(shipment);
+        shipment.memo = memo;
+        renderJSON(Webs.G(shipment.save()));
+    }
+
+    public static void done(String id) {
+        Shipment shipment = Shipment.findById(id);
+        modelExist(shipment);
+        renderJSON(Webs.G(shipment.done()));
+    }
+
+    private static <T extends GenericModel> void modelExist(T model) {
+        if(model == null || !model.isPersistent()) throw new FastRuntimeException("Model 不存在!");
     }
 }

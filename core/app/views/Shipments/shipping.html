@@ -15,7 +15,13 @@
             <td>国际快递商</td>
             <td>${s.internationExpress}</td>
 
-            <td colspan="2"></td>
+            <td colspan="2">
+            #{if s.arriveDate != null}
+                <button id="shipping_done" rel="popover" data-content="运输单更新已经标记为送达, 请确认运输完成" width="auto" class="btn btn-small btn-success pull-right">
+                    DONE
+                </button>
+            #{/if}
+            </td>
         </tr>
 
         <tr>

@@ -1,6 +1,7 @@
 package notifiers;
 
 import models.market.*;
+import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
@@ -17,6 +18,23 @@ import java.util.concurrent.Future;
  * Time: 11:24 AM
  */
 public class Mails extends Mailer {
+    // ------------------------------ Shipment 邮件  -----------------------
+
+    public static void shipment_clearance(Shipment shipment) {
+        setSubject("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
+        mailBase();
+        addRecipient("p@easyacceu.com");
+        send(shipment);
+    }
+
+    public static void shipment_isdone(Shipment shipment) {
+        setSubject("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,需确认.", shipment.id);
+        mailBase();
+        addRecipient("p@easyacceu.com");
+        send(shipment);
+    }
+
+
     /**
      * Listing 被人上架了的警告邮件
      *

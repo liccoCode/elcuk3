@@ -1,5 +1,6 @@
 package http;
 
+import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -22,10 +23,18 @@ public class iExpressTest extends UnitTest {
         FileUtils.writeStringToFile(new File("/tmp/dhl." + tNo + ".html"), iExpress.DHL.parseState(html));
     }
 
-    @Test
+    //    @Test
     public void testFedexHTML() throws IOException {
         String tNo = "533252312364";
         String html = iExpress.FEDEX.fetchStateHTML(tNo);
         FileUtils.writeStringToFile(new File("/tmp/fedex." + tNo + ".html"), iExpress.FEDEX.parseState(html));
+    }
+
+    @Test
+    public void testIsDelivered() {
+        Shipment ship = Shipment.findById("SP|201206|01");
+        System.out.println(ship.internationExpress.isDelivered(ship.iExpressHTML));
+        ship = Shipment.findById("SP|201206|00");
+        System.out.println(ship.internationExpress.isDelivered(ship.iExpressHTML));
     }
 }

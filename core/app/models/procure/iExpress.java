@@ -5,10 +5,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.HTTP;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.libs.F;
+
+import java.util.Locale;
 
 /**
  * 国际快递商
@@ -19,6 +24,23 @@ import org.jsoup.select.Elements;
  */
 public enum iExpress {
     DHL {
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            if(StringUtils.isBlank(iExpressHTML)) return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            Document doc = Jsoup.parse(iExpressHTML);
+            Element thead = doc.select("thead:eq(1)").first();
+            Element tbody = doc.select("tbody").first();
+
+            // parse date
+            DateTime dt = DateTime.parse(thead.select("th:eq(0)").text(), DateTimeFormat.forPattern("E, MMM dd, yyyy").withLocale(Locale.CHINESE));
+
+            // is delivered
+            String text = tbody.select("td:eq(1)").text();
+            boolean isDelivered = StringUtils.contains(text, "已派送并签收");
+
+            return new F.T2<Boolean, DateTime>(isDelivered, dt);
+        }
+
         @Override
         public boolean isContainsClearance(String content) {
             return StringUtils.contains(content, "快件正在等待清关");
@@ -49,6 +71,19 @@ public enum iExpress {
         }
     },
     FEDEX {
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            if(StringUtils.isBlank(iExpressHTML)) return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            Document doc = Jsoup.parse(iExpressHTML);
+            Element newestTr = doc.select("tr:eq(1)").first();
+
+            DateTime dt = DateTime.parse(newestTr.select("td:eq(0)").text(), DateTimeFormat.forPattern("MMM dd, yyyy hh:mm a"));
+            String text = newestTr.select("td:eq(1)").text();
+            boolean isDelivered = StringUtils.contains(text, "已送达");
+
+            return new F.T2<Boolean, DateTime>(isDelivered, dt);
+        }
+
         @Override
         public boolean isContainsClearance(String content) {
             return StringUtils.contains(content, "可以向有关国家机构申报本货件");
@@ -140,4 +175,6 @@ public enum iExpress {
     public abstract String parseState(String html);
 
     public abstract boolean isContainsClearance(String content);
+
+    public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
 }

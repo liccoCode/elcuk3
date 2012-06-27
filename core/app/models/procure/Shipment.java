@@ -2,10 +2,12 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -64,7 +66,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         /**
          * 清关
          */
-        CLEARGATE,
+        CLEARANCE,
         /**
          * 完成
          */
@@ -285,14 +287,39 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         return totalPayed;
     }
 
+    /**
+     * 抓取 DHL, FEDEX 网站的运输信息, 更新系统中 SHIPMENT 的状态
+     *
+     * @return
+     */
     public String refreshIExpressHTML() {
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
         this.iExpressHTML = this.internationExpress.parseState(html);
-        if(this.state == S.SHIPPING) { // 检测是否在清关
-            if(this.internationExpress.isContainsClearance(this.iExpressHTML))
-                this.state = S.CLEARGATE;
+        if(this.state == S.SHIPPING) { // 如果在 SHIPPING 状态则检查是否处于清关
+            if(this.internationExpress.isContainsClearance(this.iExpressHTML)) {
+                this.state = S.CLEARANCE;
+                Mails.shipment_clearance(this);
+            }
+        } else if(this.state == S.CLEARANCE) { // 如果在 CLERANCE 检查是否有 Delivery 日期
+            F.T2<Boolean, DateTime> isDeliveredAndTime = this.internationExpress.isDelivered(this.iExpressHTML);
+            if(isDeliveredAndTime._1) {
+                this.arriveDate = isDeliveredAndTime._2.toDate();
+                Mails.shipment_isdone(this);
+            }
         }
         this.save();
         return this.iExpressHTML;
     }
+
+    /**
+     * 此运输单完成
+     */
+    public Shipment done() {
+        if(this.state == S.PLAN) throw new FastRuntimeException("不允许从 PLAN 状态直接到 DONE");
+        if(this.arriveDate == null) throw new FastRuntimeException("完成运输单, 必须拥有具体到达时间");
+        if(this.arriveDate.getTime() < this.beginDate.getTime()) throw new FastRuntimeException("实际到达时间小于开始时间?");
+        this.state = S.DONE;
+        return this.save();
+    }
+
 }

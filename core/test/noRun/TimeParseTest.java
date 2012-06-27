@@ -166,4 +166,10 @@ public class TimeParseTest {
         System.out.println(DateTime.now().toString(fmt.withLocale(Locale.CHINESE)));
         System.out.println(DateTime.parse(time, fmt.withLocale(Locale.CHINESE)));
     }
+
+    @Test
+    public void testAmDatetime() {
+        String time = "Jun 25, 2012 8:11 AM";
+        System.out.println(DateTime.parse(time, DateTimeFormat.forPattern("MMM dd, yyyy hh:mm a")));
+    }
 }

@@ -2,6 +2,8 @@ package mails;
 
 import jobs.OrderMailCheck;
 import models.market.Listing;
+import models.procure.Shipment;
+import notifiers.Mails;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -23,8 +25,15 @@ public class MailTest extends UnitTest {
         }
     }
 
-    @Test
+    //    @Test
     public void testAmazonUK_SHIPPED_MAIL_JOB() throws Exception {
         new OrderMailCheck().doJob();
+    }
+
+    @Test
+    public void testShipmentClearance() {
+        Shipment ship = Shipment.findById("SP|201206|00");
+        Mails.shipment_clearance(ship);
+        Mails.shipment_isdone(ship);
     }
 }
