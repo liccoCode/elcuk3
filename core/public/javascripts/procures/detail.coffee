@@ -49,3 +49,14 @@ $ ->
             , 4000)
     )
 
+  # 添加 memo
+  $('#add_memo').click ->
+    trE = $(@).parents('tr')
+    memo = trE.find('textarea').val()
+    trE.mask('更新中...')
+    $.post('/deliveryments/comment', id: fidCallBack()['fid'], msg: memo,
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        trE.unmask()
+    )

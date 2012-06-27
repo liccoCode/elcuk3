@@ -31,4 +31,11 @@ public class Deliveryments extends Controller {
         dlmt.complatePayment();
         renderJSON(Webs.G(dlmt));
     }
+
+    public static void comment(String id, String msg) {
+        Deliveryment deliveryment = Deliveryment.findById(id);
+        if(deliveryment == null || !deliveryment.isPersistent()) throw new FastRuntimeException("Deliveryment 不存在.");
+        deliveryment.memo = msg;
+        renderJSON(Webs.G(deliveryment.save()));
+    }
 }

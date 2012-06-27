@@ -35,10 +35,6 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
          */
         FULPAY,
         /**
-         * 部分交货
-         */
-        PART_DELIVERY,
-        /**
          * 完成, 交货
          */
         DELIVERY
@@ -71,6 +67,9 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
     @Column(length = 30)
     @Expose
     public String id;
+
+    @Lob
+    public String memo = " ";
 
     public static String id() {
         DateTime dt = DateTime.now();
@@ -116,7 +115,6 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
             case PARTPAY:
                 return false;
             case FULPAY:
-            case PART_DELIVERY:
             case DELIVERY:
             default:
                 return true;
@@ -187,11 +185,24 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     @Override
     public void close(Payment thisPayment) {
+        if(this.state == S.DELIVERY) throw new FastRuntimeException("采购单已经全部交货, 不允许删除付款信息.");
         try {
             thisPayment.deliveryment.complatePayment();
         } catch(FastRuntimeException e) {
             thisPayment.deliveryment.state = Deliveryment.S.PARTPAY;
             thisPayment.deliveryment.save();
         }
+    }
+
+    /**
+     * 检查此 Deliveryment 是否可以标记为 DELIVERY;
+     * (其所有的 ProcureUnit 全部交货, DONE)
+     */
+    public boolean canBeDelivery() {
+        if(this.state == S.PENDING) return false;
+        for(ProcureUnit pu : this.units) {
+            if(pu.stage != ProcureUnit.STAGE.DONE) return false;
+        }
+        return true;
     }
 }

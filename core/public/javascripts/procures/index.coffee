@@ -71,9 +71,7 @@ $ ->
           else
             alert('更新成功')
           info.unmask()
-          activeDelivery = $('#procure tr[row][class=active]')
-          activeDelivery.find('td:eq(3)').html(r['delivery']['deliveryQty'])
-          activeDelivery.click()
+          $('#delivery tr[row][class=active]').remove()
       )
 
   # 指派 Shipment
