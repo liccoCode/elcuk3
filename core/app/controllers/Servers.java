@@ -18,6 +18,7 @@ import java.util.List;
  * Time: 上午1:58
  */
 @With({Secure.class, GzipFilter.class})
+@Check("root")
 public class Servers extends Controller {
 
     public static void index() {

@@ -8,6 +8,7 @@ items: procureList
         <td><a rel="popover" data-content="供应商" width="auto">Sup</a></td>
         <td><a rel="popover" data-content="实际交货数量" width='auto'>JHQty</a></td>
         <td>确认采购数量</td>
+        <td>状态</td>
         <td>User</td>
         <td><a rel="popover" data-content="预计交货时间" width="auto">JHDate</a></td>
     </tr>
@@ -24,8 +25,9 @@ items: procureList
             ${unit.delivery.deliveryQty}
             #{/else}
         <td>${unit.delivery.ensureQty}</td>
+        <td>${unit.stage}</td>
         <td>${unit.handler?.username}</td>
-        <td>${unit.delivery.planDeliveryDate.format('yyyy-MM-dd')}</td>
+        <td>${unit.delivery.planDeliveryDate.date()}</td>
     </tr>
 #{/list}
 </table>

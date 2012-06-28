@@ -1,4 +1,4 @@
-#{extends 'main.html' /}
+#{extends 'main_full.html' /}
 #{set title:dlmt.id /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js' /}
@@ -47,6 +47,7 @@
         <tr>
             <td>#</td>
             <td>计划到库日期</td>
+            <td>计划交货日期</td>
             <td>实际交货日期</td>
             <td>确认采购数量</td>
             <td>实际交货数量</td>
@@ -61,13 +62,14 @@
     #{list items:dlmt.units, as:'unit'}
         <tr>
             <td>${unit.id}</td>
-            <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')}</td>
+            <td>${unit.plan.planArrivDate.date()}</td>
+            <td>${unit.delivery.planDeliveryDate.date()}</td>
             <td>
                 #{if unit.delivery.deliveryDate == null}
                     <span class="label label-warning">还未交货</span>
                 #{/if}
                 #{else }
-                ${unit.delivery.deliveryDate.format('yyyy-MM-dd')}
+                ${unit.delivery.deliveryDate.date()}
                 #{/else}
             </td>
             <td>${unit.delivery.ensureQty}</td>

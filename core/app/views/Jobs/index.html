@@ -1,10 +1,10 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'Asynchronous Jobs'/}
 #{set 'moreScripts'}
     #{script 'jobs/jobs.coffee'/}
 #{/set}
 
-<div class="row" style="margin:10px 0">
+<div class="row-fluid" style="margin:10px 0">
     <div class="span12">
         <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_wh">添加</a>
 
@@ -59,7 +59,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row-fluid">
     <div class="span12">
     #{if jobs.size() == 0}
         无任务
@@ -109,7 +109,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row-fluid">
     <div class="span12">
     #{if jobReqs.size() == 0}
         没有 JobRequest

@@ -8,11 +8,11 @@ $ ->
   '<div class="title"><span style="position:relative;top:-50px"></span></div>' +
   '</li>'
 
-  window.dropUpload.xlsImg = "/images/uploads/xls.png"
-  window.dropUpload.docImg = "/images/uploads/doc.png"
-  window.dropUpload.pptImg = "/images/uploads/ppt.png"
-  window.dropUpload.pdfImg = "/images/uploads/pdf.png"
-  window.dropUpload.zipImg = "/images/uploads/zip.png"
+  window.dropUpload.xlsImg = "/images/uploads/xls.jpg"
+  window.dropUpload.docImg = "/images/uploads/doc.jpg"
+  window.dropUpload.pptImg = "/images/uploads/ppt.jpg"
+  window.dropUpload.pdfImg = "/images/uploads/pdf.jpg"
+  window.dropUpload.zipImg = "/images/uploads/zip.jpg"
 
   # 删除服务器端的 Image, 同时删除页面中的 Image 元素
   window.dropUpload.rmImage = (e) ->
@@ -43,8 +43,10 @@ $ ->
         img.attr('src', window.dropUpload.pdfImg)
       when 'zip', 'rar', '7z'
         img.attr('src', window.dropUpload.zipImg)
-      else
+      when 'jpg', 'jpeg', 'png', 'gif', 'bmp'
         img.attr('src', imgUrl)
+      else
+        img.attr('src', window.dropUpload.docImg)
 
   # 利用 Html 的 File API(FileReader) 创建图片的缩略图
   window.dropUpload.createImage = (file, uploaded) ->

@@ -15,6 +15,7 @@ import java.util.List;
  * Time: 上午6:20
  */
 @With({Secure.class, GzipFilter.class})
+@Check("root")
 public class Accounts extends Controller {
     public static void index() {
         List<Account> accs = Account.all().fetch();
