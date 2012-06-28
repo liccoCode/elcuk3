@@ -23,7 +23,7 @@ public class UnitPlan {
     public Date planArrivDate;
 
     /**
-     * 计划采购数量(也就是采购数量)
+     * 计划采购数量(在确认了 delivery 的 ensureQty 后,这个数据仅仅作为保存参考)
      */
     @Expose
     public Integer planQty;

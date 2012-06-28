@@ -15,6 +15,7 @@ $ ->
   # 将某一个 ProcureUnit 纳入到指定采购单
   bindToDeliveryBtn = () ->
     $('#todelivery_btn').click ->
+      return false if !confirm("确认绑定到: " + $('[name=dlmt\\.id] option:checked').html())
       $.varClosure.params = {}
       $('#todelivery_info :input').map($.varClosure)
       if !$.varClosure.params['p.delivery.planDeliveryDate']
@@ -34,22 +35,28 @@ $ ->
             window.location.reload()
       )
 
-  # 加载 Plan Tab 以后的页面初始化
-  afterLoadPlanTab = ->
-    window.htmlIni()
-    #绑定创建新采购单按钮
-    bindNewDeliveryBtn()
-    #绑定纳入采购单按钮
-    bindToDeliveryBtn()
-    # 绑定跳转 ProcureUnit 更新按钮
-    bindProcureUnitEditBtn()
-  # 重新初始化所有 popover
-
+  procureUnitId = ->
+    id: $('#procureUnit_id').val()
 
   # 更新 ProcureUnit 按钮事件
   bindProcureUnitEditBtn = ->
-    $('#procureUnit_update_btn').attr('href', '/procures/edit?id=' + $('#procureUnit_id').val())
+    $('#procureUnit_update_btn').attr('href', '/procures/edit?id=' + procureUnitId()['id'])
 
+  # 关闭 ProcureUnit 按钮事件
+  bindProcureCloseBtn = ->
+    $('#procureUnit_close_btn').click ->
+      msg = prompt('却输入关闭的原因:')
+      return false if msg is undefined or msg.trim() == ''
+      UNIT_DETAIL.mask('关闭中...')
+      $.post('/procures/close', {id: procureUnitId()['id'], msg: msg},
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          else
+            $('#plan tr[row][class=active]').remove()
+            UNIT_DETAIL.html(r.message)
+          UNIT_DETAIL.unmask()
+      )
 
   # -------------- Delivery Tab 功能 --------------------------
   # planQty -> deliveryQty
@@ -95,6 +102,20 @@ $ ->
             )
           toShipment.unmask()
       )
+
+
+  # 加载 Plan Tab 以后的页面初始化
+  afterLoadPlanTab = ->
+  # 重新初始化所有 popover
+    window.htmlIni()
+    #绑定创建新采购单按钮
+    bindNewDeliveryBtn()
+    #绑定纳入采购单按钮
+    bindToDeliveryBtn()
+    # 绑定跳转 ProcureUnit 更新按钮
+    bindProcureUnitEditBtn()
+    bindProcureCloseBtn()
+
 
   # 加载 Delivery Tab 以后的初始化
   afterLoadDeliveryTab = ->

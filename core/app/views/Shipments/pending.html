@@ -79,11 +79,11 @@
         <table class="table table-condensed">
             <tr>
                 <td>快递单号</td>
-                <td><input style="padding:0" type="text" name="trckNo" value="${s.trackNo}"></td>
+                <td><input style="padding:0" type="text" name="sTmp.trackNo" value="${s.trackNo}"></td>
 
                 <td>国际快递商</td>
                 <td>
-                    <select name="iExpress" size="1">
+                    <select name="sTmp.internationExpress" size="1">
                         <option value="DHL">DHL</option>
                         <option value="FEDEX">FEDEX</option>
                     </select>
@@ -91,11 +91,35 @@
                 </td>
             </tr>
             <tr>
+                <td>计价方式</td>
+                <td>
+                    <select name="sTmp.pype" size="1">
+                    #{list items:models.procure.Shipment.P.values(), as:'p'}
+                        <option ${s.pype == p ? 'selected' : ''} value="${p}">${p}</option>
+                    #{/list}
+                    </select>
+                </td>
+                <td>计价数量</td>
+                <td>
+                    <input type="text" name="sTmp.pQty" value="${s.pQty}">
+                </td>
+            </tr>
+            <tr>
+                <td>计价单价</td>
+                <td>
+                    <input type="text" name="sTmp.price" value="${s.price}">
+                </td>
+                <td>计价货币</td>
+                <td>
+                #{pickCurrency name:'sTmp.currency', c:s.currency /}
+                </td>
+            </tr>
+            <tr>
                 <td>起运时间</td>
-                <td><input type="date" name="bTime" placeHolder="开始运输的时间"></td>
+                <td><input type="date" name="sTmp.beginDate" placeHolder="开始运输的时间"></td>
 
                 <td>预计到达时间</td>
-                <td><input type="date" name="planTime" placeHolder="预计运输到达的时间"></td>
+                <td><input type="date" name="sTmp.planArrivDate" placeHolder="预计运输到达的时间"></td>
             </tr>
             <tr>
                 <td colspan="4">

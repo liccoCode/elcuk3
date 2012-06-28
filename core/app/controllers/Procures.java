@@ -2,6 +2,7 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Webs;
+import models.Ret;
 import models.User;
 import models.market.Selling;
 import models.procure.Deliveryment;
@@ -27,7 +28,8 @@ public class Procures extends Controller {
         List<ProcureUnit> procure = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY);
         List<ProcureUnit> done = ProcureUnit.findByStage(ProcureUnit.STAGE.DONE);
         List<Deliveryment> dlmts = Deliveryment.openDeliveryments();
-        render(plan, procure, done, dlmts);
+        List<Deliveryment> doneDlmts = Deliveryment.find("state=?", Deliveryment.S.DELIVERY).fetch();
+        render(plan, procure, done, dlmts, doneDlmts);
     }
 
     public static void create() {
@@ -57,12 +59,19 @@ public class Procures extends Controller {
         renderJSON(Webs.G(p.checkAndCreate()));
     }
 
+    public static void close(Long id, String msg) {
+        ProcureUnit p = ProcureUnit.findById(id);
+        if(p == null || !p.isPersistent()) throw new FastRuntimeException("不存在!");
+        p.close(msg);
+        renderJSON(new Ret(true, "ProcureUnit(" + id + ") 因 (" + msg + ") 关闭成功"));
+    }
+
     // ------------- Plan Tab ---------------------
     public static void planDetail(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(unit.stage != ProcureUnit.STAGE.PLAN)
             throw new FastRuntimeException("此采购单元已经不是 PLAN 阶段");
-        List<Deliveryment> dlms = Deliveryment.openDeliveryments();
+        List<Deliveryment> dlms = Deliveryment.find("state=?", Deliveryment.S.PENDING).fetch();
         render(unit, dlms);
     }
 

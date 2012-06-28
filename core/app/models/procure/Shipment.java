@@ -245,24 +245,26 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     /**
      * 从 Plan 状态到 Ship 状态
      *
+     * @param s 用来传递值的临时对象
      * @return
      */
-    public Shipment fromPlanToShip(String trankNo, iExpress iExpress, Date beginDate, Date planArriveTime) {
+    public Shipment fromPlanToShip(Shipment s) {
         if(this.state != S.PLAN) throw new FastRuntimeException("Shipment (" + this.id + ") 状态应该为 PLAN!");
-        if(StringUtils.isBlank(trankNo)) throw new FastRuntimeException("Trac No 不允许为空!");
-        if(iExpress == null) throw new FastRuntimeException("国际快递商不允许为空!");
-        if(beginDate == null) throw new FastRuntimeException("进行 Shipping 状态, 开始时间不能为空!");
-        if(planArriveTime == null) throw new FastRuntimeException("必须指定预计到达时间!");
-        this.trackNo = trankNo.trim();
-        this.internationExpress = iExpress;
+        if(StringUtils.isBlank(s.trackNo)) throw new FastRuntimeException("Trac No 不允许为空!");
+        if(s.internationExpress == null) throw new FastRuntimeException("国际快递商不允许为空!");
+        if(s.beginDate == null) throw new FastRuntimeException("进行 Shipping 状态, 开始时间不能为空!");
+        if(s.planArrivDate == null) throw new FastRuntimeException("必须指定预计到达时间!");
+        this.trackNo = s.trackNo.trim();
+        this.internationExpress = s.internationExpress;
         this.state = S.SHIPPING;
-        this.beginDate = beginDate;
-        this.planArrivDate = planArriveTime;
+        this.beginDate = s.beginDate;
+        this.planArrivDate = s.planArrivDate;
         return this.save();
     }
 
     public Payment payForShipment(Payment payment) {
         if(payment == null) throw new FastRuntimeException("付款信息为空!");
+        if(StringUtils.isBlank(payment.memo)) throw new FastRuntimeException("必须填写付款原因.");
         payment.paymentCheckItSelf();
 
         payment.shipment = this; //由 Payment 添加关联

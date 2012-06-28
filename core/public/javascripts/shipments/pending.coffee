@@ -15,30 +15,13 @@ $ ->
             trClick()
       )
 
-  # 付款按钮
-  bindPaymentBtn = ->
-    $('#payment_clear').remove()
-    $('#pay_for_the_Obj').click ->
-      payment = $('#payment')
-      $.varClosure.params = {}
-      payment.find(':input').map($.varClosure)
-      payment.mask('更新中...')
-      $.post('/shipments/payment', $.varClosure.params,
-        (r) ->
-          if r.flag is false
-            alert(r.message)
-          else
-            window.payment.renderToTable(r)
-          payment.unmask()
-      )
-
 
   # 确认此 Shipment 到 Shipping 状态
   bindConfirmShipmentBtn = ->
     $("#confirmShipment button").click ->
       $.varClosure.params = {}
       $('#confirmShipment :input').map($.varClosure2)
-      if $.varClosure.params['trckNo'] in ['', undefined]
+      if $.varClosure.params['sTmp.trackNo'] in ['', undefined]
         alert('请填写 trckNo')
         return false
       $.post('/shipments/confirmShipment', $.varClosure.params,

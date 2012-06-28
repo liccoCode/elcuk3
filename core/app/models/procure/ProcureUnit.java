@@ -134,9 +134,9 @@ public class ProcureUnit extends Model {
         if(this.plan.planArrivDate.getTime() - System.currentTimeMillis() < 0)
             throw new FastRuntimeException("预期日期已经过期!");
         // 3. 采购单价不允许 < 0
-        if(this.plan.unitPrice < 0) throw new FastRuntimeException("采购单价不允许小于 0");
+        if(this.plan.unitPrice <= 0) throw new FastRuntimeException("采购单价不允许小于等于 0");
         // 4. 采购量不允许 < 0
-        if(this.plan.planQty < 0) throw new FastRuntimeException("采购量不允许小于 0");
+        if(this.plan.planQty <= 0) throw new FastRuntimeException("采购量不允许小于等于 0");
         // 5. 采购价格单位不允许为空
         if(this.plan.currency == null) throw new FastRuntimeException("采购的货币单位不允许为空.");
         // 6. 采购商不允许为空
@@ -203,11 +203,22 @@ public class ProcureUnit extends Model {
         return this.save();
     }
 
-    public void close() {
+    public void close(String reason) {
         /**
          * 关闭这个 ProcureUnit, 需要找到所有起影响的元素, 然后将她们接触绑定. 并且记录 memo
          */
-        throw new UnsupportedOperationException("还未实现此功能.");
+        if(this.stage == STAGE.DONE) throw new FastRuntimeException("已经完成的 ProcureUnit 不需要删除!");
+        if(this.stage == STAGE.CLOSE) throw new FastRuntimeException("已经关闭了.");
+        if(this.stage == STAGE.PLAN) {
+            this.comment = reason;
+        } else if(this.stage == STAGE.DELIVERY) {
+            this.delivery.deliveryQty = 0;
+            this.deliveryment.memo = "CLOSED ProcureUnit[" + this.id + "]\r\b" + this.deliveryment.memo;
+            this.deliveryment.save();
+        }
+
+        this.stage = STAGE.CLOSE;
+        this.save();
     }
 
     /**

@@ -11,8 +11,18 @@
     <div class="span4">
         <ul id="procureUnitsTab" class="nav nav-tabs">
             <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">Plan</a></li>
-            <li><a href="#delivery" data-toggle="tab" style="padding:3px 8px;">Delivery</a></li>
-            <li><a href="#done" data-toggle="tab" style="padding:3px 8px;">Wating For Ship</a></li>
+            <li><a href="#delivery" data-toggle="tab" style="padding:3px 8px;">Delivering</a></li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" style="padding:3px 8px;" href="#">
+                    Wating For Ship <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="#deliveryment" data-toggle="tab">采购单</a></li>
+                    <li><a href="#done" data-toggle="tab">采购单元</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#doneDeliveryment" data-toggle="tab">完成了的采购单</a></li>
+                </ul>
+            </li>
         </ul>
 
         <div id="procureUnitsContent" class="tab-content">
@@ -26,6 +36,13 @@
 
             <div id="done" class="tab-pane fade">
             #{procure_deliveryProcureUnitTable items:done /}
+            </div>
+
+            <div id="deliveryment" class="tab-pane fade">
+            #{procure_deliveryment items:dlmts/}
+            </div>
+            <div id="doneDeliveryment" class="tab-pane fade">
+            #{procure_deliveryment items:doneDlmts/}
             </div>
         </div>
 
@@ -42,7 +59,7 @@
         #{list items:dlmts, as:'dlmt'}
             <li>
                 <a rel="popover" data-content="${dlmt.supplier()}" placement="left" width="auto" target="_blank" href="@{Deliveryments.detail(dlmt.id)}">${dlmt.id}</a>
-                | <span class="badge badge-info">${dlmt.units.size()} | ${dlmt.state}</span>
+                | <span class="badge badge-info">${dlmt.units.size()}</span>| ${dlmt.state.to_h().raw()}
             </li>
         #{/list}
         </ul>

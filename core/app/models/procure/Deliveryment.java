@@ -5,6 +5,7 @@ import helper.Currency;
 import models.User;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -25,19 +26,46 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         /**
          * 预定
          */
-        PENDING,
+        PENDING {
+            @Override
+            public String to_h() {
+                return String.format("<span style='color:#5CB85C'>%s</span>", this);
+            }
+        },
         /**
          * 部分付款
          */
-        PARTPAY,
+        PARTPAY {
+            @Override
+            public String to_h() {
+                return String.format("<span style='color:#FAA52C'>%s</span>", this);
+            }
+        },
         /**
          * 全部付款
          */
-        FULPAY,
+        FULPAY {
+            @Override
+            public String to_h() {
+                return String.format("<span style='color:#007BCC'>%s</span>", this);
+            }
+        },
         /**
          * 完成, 交货
          */
-        DELIVERY
+        DELIVERY {
+            @Override
+            public String to_h() {
+                return String.format("<span style='color:#4DB2D0'>%s</span>", this);
+            }
+        };
+
+        /**
+         * 转换为 html
+         *
+         * @return
+         */
+        public abstract String to_h();
     }
 
     @OneToMany(mappedBy = "deliveryment")
@@ -81,7 +109,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     public static List<Deliveryment> openDeliveryments() {
         //TODO 需要将 Deliveryment 添加 supplier
-        return Deliveryment.find("state=?", S.PENDING).fetch();
+        return Deliveryment.find("state!=?", S.DELIVERY).fetch();
     }
 
     public static Deliveryment checkAndCreate(User user) {
@@ -204,5 +232,21 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
             if(pu.stage != ProcureUnit.STAGE.DONE) return false;
         }
         return true;
+    }
+
+    /**
+     * 交货的进度
+     *
+     * @return
+     */
+    public F.T2<Integer, Integer> deliveryProgress() {
+        int ensureQty = 0;
+        int deliveriedQty = 0;
+        for(ProcureUnit unit : this.units) {
+            ensureQty += unit.delivery.ensureQty;
+            if(unit.stage == ProcureUnit.STAGE.DONE)
+                deliveriedQty += unit.delivery.deliveryQty;
+        }
+        return new F.T2<Integer, Integer>(deliveriedQty, ensureQty);
     }
 }

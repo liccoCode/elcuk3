@@ -3,14 +3,16 @@ package controllers;
 import helper.Webs;
 import models.Ret;
 import models.User;
-import models.procure.*;
+import models.procure.Payment;
+import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -66,12 +68,13 @@ public class Shipments extends Controller {
         renderJSON(Webs.G(item.removeFromShipment()));
     }
 
-    public static void confirmShipment(String shipmentId, String trckNo, iExpress iExpress, Date bTime, Date planTime) {
+    public static void confirmShipment(String shipmentId, Shipment sTmp) {
         Shipment shipment = Shipment.findById(shipmentId);
         modelExist(shipment);
-        renderJSON(Webs.G(shipment.fromPlanToShip(trckNo, iExpress, bTime, planTime)));
+        renderJSON(Webs.G(shipment.fromPlanToShip(sTmp)));
     }
 
+    @Check("root")
     public static void payment(Payment pay, Shipment payObj) {
         pay.payer = User.findByUserName(Secure.Security.connected());
         renderJSON(Webs.G(payObj.payForShipment(pay)));

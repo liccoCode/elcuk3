@@ -48,7 +48,7 @@
             <td>#</td>
             <td>计划到库日期</td>
             <td>实际交货日期</td>
-            <td>计划数量</td>
+            <td>确认采购数量</td>
             <td>实际交货数量</td>
             <td>供应商</td>
             <td>Selling</td>
@@ -70,7 +70,7 @@
                 ${unit.delivery.deliveryDate.format('yyyy-MM-dd')}
                 #{/else}
             </td>
-            <td>${unit.plan.planQty}</td>
+            <td>${unit.delivery.ensureQty}</td>
             <td>
                 #{if unit.delivery.deliveryQty == null}
                     <span class="label label-warning">还未交货</span>

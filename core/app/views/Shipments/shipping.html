@@ -70,6 +70,10 @@
 
 
 <hr>
+<!-- 付款信息 -->
+#{payment_listPayment items:s.payments /}
+<!-- 付款 -->
+#{payment_addPayment type:'SHIP', payObjId:s.id /}
 <div class="accordion-group">
     <div class="accordion-heading">
         <a class="accordion-toggle" data-toggle="collapse" href="#confirmShipment">国际快递商的运输信息</a>

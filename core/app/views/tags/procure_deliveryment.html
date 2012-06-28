@@ -1,0 +1,26 @@
+*{
+items: 需要 Deliveryment List
+}*
+<table class="table table-condensed table-bordered">
+    <tr>
+        <td>#</td>
+        <td>状态</td>
+        <td>供货商</td>
+        <td>交货进度</td>
+        <td>Units</td>
+        <td>创建日期</td>
+        <td>操作人</td>
+    </tr>
+#{list items:_items, as:'d'}
+    <tr>
+        <td><a href="@{Deliveryments.detail(d.id)}" target="_blank">${d.id}</a></td>
+        <td>${d.state.to_h().raw()}</td>
+        <td>${d.supplier()}</td>
+        #{set progress:d.deliveryProgress()/}
+        <td>${progress._1}/${progress._2}</td>
+        <td>${d.units.size()}</td>
+        <td>${d.createDate.datetime()}</td>
+        <td>${d.handler.username}</td>
+    </tr>
+#{/list}
+</table>

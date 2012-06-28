@@ -33,7 +33,8 @@ $(function(){
     };
 
     /**
-     *
+     * rowsSelector: 需要绑定删除 active 的元素
+     * activeObj: 需要选中 jQuery 元素
      */
     $.tableRowClickActive = function(rowsSelector, activeObj){
         $(rowsSelector).removeClass('active');
