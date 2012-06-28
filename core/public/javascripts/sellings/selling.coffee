@@ -8,7 +8,7 @@ $ ->
     imageNameObj = {}
     for imageName, i in $('input[name=s\\.aps\\.imageName]').val().split('|-|')
       imageNameObj[imageName] = i
-    $.getJSON('/products/images', sku: imagesUL.attr('sku'),
+    $.getJSON('/attachs/images', fid: imagesUL.attr('sku'),
       (imgs) ->
         for img in imgs
           fName = img['fileName']
