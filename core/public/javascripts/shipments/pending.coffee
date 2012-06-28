@@ -68,11 +68,10 @@ $ ->
   do ->
     bindShipItemDeleBtn()
     bindConfirmShipmentBtn()
-    bindPaymentBtn()
     for tr in $('#procureUnit tr[uid]')
       o = $(tr)
       total = Number(o.find('td:eq(1) a').text().trim())
       o.data('ttQty', total)
 
-  window.htmlIni()
+  window.$ui.htmlIni()
 

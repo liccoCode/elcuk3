@@ -18,6 +18,14 @@
             <td>${dlmt.createDate.format("yyyy-MM-dd hh:mm:ss")}</td>
             <td>User:</td>
             <td>${dlmt.handler.username}</td>
+            <td>&nbsp;</td>
+            <td class="pull-right">
+            #{ck 'root'}
+                <button rel="popover" data-content="取消这个 Delivery, 其关联的 ProcureUnit 与 ShipItem 的数量全部变为 0;" placement='left' class="btn btn-small btn-danger">
+                    CANCEL
+                </button>
+            #{/ck}
+            </td>
         </tr>
 
         <tr>
@@ -26,7 +34,7 @@
                     Memo
                 </button>
             </td>
-            <td colspan="7">
+            <td colspan="9">
                 <textarea rows="5" class="span11">${dlmt.memo}</textarea>
             </td>
         </tr>

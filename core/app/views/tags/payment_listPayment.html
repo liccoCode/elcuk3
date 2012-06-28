@@ -27,12 +27,14 @@ items: Payments
                 <td>${pay.state}</td>
                 <td>${pay.memo}</td>
                 <td>
-                    #{if isClose}
-                        <i class="icon-ban-circle"></i>
-                    #{/if}
-                    #{else }
-                        <button payId="${pay.id}" class="btn btn-mini"><i class="icon-remove"></i></button>
-                    #{/else}
+                    #{ck 'root'}
+                        #{if isClose}
+                            <i class="icon-ban-circle"></i>
+                        #{/if}
+                        #{else }
+                            <button payId="${pay.id}" class="btn btn-mini"><i class="icon-remove"></i></button>
+                        #{/else}
+                    #{/ck}
                 </td>
             </tr>
         #{/list}

@@ -55,6 +55,6 @@ $ ->
   window.dropUpload.loadImages(fidCallBack()['fid'], dropBox)
   window.dropUpload.iniDropbox(fidCallBack, dropBox)
 
-  window.htmlIni()
+  window.$ui.htmlIni()
 
 

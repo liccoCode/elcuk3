@@ -19,11 +19,11 @@ shipment: 需要展示的 Shipment
     <td>发货时间</td>
     <td>${_shipment.beginDate.date()}</td>
     <td>预计到达时间</td>
-    <td>${_shipment.planArrivDate.date()}</td>
+    <td>${_shipment.planArrivDate?.date()}</td>
     <td>剩余在途时间</td>
     <td>${_shipment.planArrivDate?.left()}</td>
     <td>实际到达时间</td>
-    <td>${_shipment.arriveDate.date()}</td>
+    <td>${_shipment.arriveDate?.date()}</td>
 </tr>
 
 <tr>

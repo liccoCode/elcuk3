@@ -2,6 +2,7 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.Dates;
 import models.User;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
@@ -57,6 +58,12 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
             @Override
             public String to_h() {
                 return String.format("<span style='color:#4DB2D0'>%s</span>", this);
+            }
+        },
+        CANCEL {
+            @Override
+            public String to_h() {
+                return String.format("<span style='color:red'>%s</span>", this);
             }
         };
 
@@ -121,6 +128,12 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         return deliveryment.save();
     }
 
+    /**
+     * 对此 Deliveryment 进行付款操作
+     *
+     * @param payment
+     * @return
+     */
     public Payment payForDeliveryment(Payment payment) {
         if(payment == null) throw new FastRuntimeException("没有付款数据, 无法付款.");
         if(this.isPaymentComplete()) throw new FastRuntimeException("款项已经全部付清, 无需再付款.");
@@ -141,16 +154,16 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         switch(this.state) {
             case PENDING:
             case PARTPAY:
+            case DELIVERY:
                 return false;
             case FULPAY:
-            case DELIVERY:
             default:
                 return true;
         }
     }
 
     /**
-     * 将采购单付清全款
+     * 将采购单付清全款; 需要检查是否可以将 Deliveryment 变成 Delivery 状态
      */
     public void complatePayment() {
         /**
@@ -193,6 +206,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         boolean fullPayEUR = totalNeedPayEUR == totalPayedEUR;
         if(fullPayCNY && fullPayGBP && fullPayUSD && fullPayEUR) {
             this.state = S.FULPAY;
+            this.beDelivery();
             this.save();
         } else {
             StringBuilder sbd = new StringBuilder("款项还没有付清,请检查!\r\n");
@@ -232,6 +246,35 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
             if(pu.stage != ProcureUnit.STAGE.DONE) return false;
         }
         return true;
+    }
+
+    /**
+     * 将 Deliveryment 状态变更为交货.
+     */
+    public void beDelivery() {
+        if(!canBeDelivery()) return;
+        this.state = Deliveryment.S.DELIVERY;
+        this.memo = "所有产品交货完成." + Dates.date2DateTime(new Date()) + "\r\n" + this.memo;
+        this.save();
+    }
+
+    /**
+     * 取消这一个 Deliveryment;
+     * 1. 把这一个 Delivery 所影响的所有 ProcureUnit 的数量全部设置为 0
+     * 2. 把所有 ProcureUnit 关联的 ShipItem 的运输库存也调整为 0;
+     * ps: 也就是当这些不存在了.
+     */
+    public void cancel() {
+        for(ProcureUnit unit : this.units) {
+            unit.delivery.deliveryQty = 0;
+            for(ShipItem itm : unit.relateItems) {
+                itm.qty = 0;
+                itm.save();
+            }
+            unit.save();
+        }
+        this.state = S.CANCEL;
+        this.save();
     }
 
     /**

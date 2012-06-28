@@ -26,7 +26,7 @@ $ ->
           "<td><button payId=" + r['id'] + " class='btn btn-mini'><i class='icon-remove'></i></button></td>" +
           "</tr>"
           $(tr).appendTo('#paymentInfo table')
-          window.payment.bindClosePaymentBtn()
+          window.$payment.bindClosePaymentBtn()
         payment.unmask()
     )
 
@@ -60,3 +60,5 @@ $ ->
           alert(r.message)
         trE.unmask()
     )
+
+  window.$ui.htmlIni()

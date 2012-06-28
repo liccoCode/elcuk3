@@ -1,7 +1,6 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.Dates;
 import helper.JPAs;
 import helper.Webs;
 import models.User;
@@ -194,11 +193,7 @@ public class ProcureUnit extends Model {
         if(this.delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
         if(this.delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");
         this.stage = STAGE.DONE;
-        if(this.deliveryment.canBeDelivery()) {
-            this.deliveryment.state = Deliveryment.S.DELIVERY;
-            this.deliveryment.memo = "所有产品交货完成." + Dates.date2DateTime(new Date()) + "\r\n" + this.deliveryment.memo;
-            this.deliveryment.save();
-        }
+        this.deliveryment.beDelivery();
 
         return this.save();
     }
@@ -281,7 +276,7 @@ public class ProcureUnit extends Model {
     }
 
     public static List<ProcureUnit> findWaitingForShip() {
-        List<ProcureUnit> procureUnits = ProcureUnit.find("stage=? AND deliveryment.state=?", STAGE.DONE, Deliveryment.S.DELIVERY).fetch();
+        List<ProcureUnit> procureUnits = ProcureUnit.find("stage=? AND deliveryment.state!=?", STAGE.DONE, Deliveryment.S.PENDING).fetch();
         Collections.sort(procureUnits, new Comparator<ProcureUnit>() {
             @Override
             public int compare(ProcureUnit p1, ProcureUnit p2) {

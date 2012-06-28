@@ -24,6 +24,7 @@ window.$payment.bindClosePaymentBtn = () ->
         mask.unmask()
     )
 
+
 window.$payment.renderToTable = (r) ->
   tr = "<tr>" +
   "<td>" + r['id'] + "</td><td>" + r['price'] + "</td><td>" + r['currency'] + "</td><td>" + $.DateUtil.fmt3(new Date(r['payDate'])) + "</td><td>" + r['state'] + "</td><td>" + r['memo'] + "</td>" +
