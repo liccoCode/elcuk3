@@ -326,7 +326,7 @@ public class SellingRecord extends GenericModel {
                 .build();
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
-            float turnRatio = (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions);
+            float turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
             switch(rcd.market) {
                 case AMAZON_UK:
