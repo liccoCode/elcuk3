@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.Ret;
+import play.exceptions.TemplateExecutionException;
 import play.mvc.Catch;
 import play.mvc.Controller;
 import play.utils.FastRuntimeException;
@@ -24,7 +25,12 @@ public class GlobalExceptionHandler extends Controller {
         renderJSON(new Ret(Webs.E(e)));
     }
 
-    @Catch(value = Exception.class, priority = 2)
+    @Catch(value = TemplateExecutionException.class, priority = 2)
+    public static void templateExecutionException(TemplateExecutionException e) {
+        throw e;
+    }
+
+    @Catch(value = Exception.class, priority = 3)
     public static void exceptionCatch(Exception e) {
         renderJSON(new Ret(Webs.S(e)));
     }

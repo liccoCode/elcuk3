@@ -112,20 +112,27 @@ public class SellingRecordCheckJob extends Job {
 
                 }
                 try {
-
+                    int orders = 0;
+                    float sales = 0;
+                    int units = 0;
+                    float usdSales = 0;
                     for(OrderItem oi : orderitems) {
                         if(!StringUtils.equals(oi.selling.sellingId, sell.sellingId)) continue;
                         if(currentSellOrderCache.containsKey(oi.order.orderId))
                             currentSellOrderCache.get(oi.order.orderId).incrementAndGet();
                         else {
                             currentSellOrderCache.put(oi.order.orderId, new AtomicInteger(1));
-                            record.orders += 1; //每一个 Selling 每碰到一个新订单 ID 则增加 1
+                            orders += 1; //每一个 Selling 每碰到一个新订单 ID 则增加 1
                         }
-                        record.units += 1;
+                        units += 1;
                         if(oi.order.state == Orderr.S.CANCEL) record.orderCanceld += 1;
-                        record.sales += oi.price;
-                        record.usdSales += oi.usdCost == null ? 0 : oi.usdCost;
+                        sales += oi.price;
+                        usdSales += oi.usdCost == null ? 0 : oi.usdCost;
                     }
+                    record.orders = orders;
+                    record.units = units;
+                    record.sales = sales;
+                    record.usdSales = usdSales;
                 } catch(Exception e) {
                     Logger.warn(Webs.S(e) + "---- %s", record.id);
                 }
