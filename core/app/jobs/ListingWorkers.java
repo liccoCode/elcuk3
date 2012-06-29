@@ -46,12 +46,11 @@ public class ListingWorkers extends Job {
     public static void goOrNot(T t, String lid) {
         switch(t) {
             case L:
-                new L(lid).doJob(); // 不需要结果, 但需要为每个结果等待 10s
+                new L(lid).now(); // 不需要结果, 但需要为每个结果等待 10s
                 break;
             case R:
                 if(Play.mode.isProd()) {
-                    DateTime now = DateTime.now();
-                    int hourOfDay = now.getHourOfDay();
+                    int hourOfDay = DateTime.now().getHourOfDay();
                     if(hourOfDay >= 3 && hourOfDay <= 5) {
                         new R(lid).doJob();
                     } else {
@@ -90,9 +89,15 @@ public class ListingWorkers extends Job {
             try {
                 JsonElement lst = Crawl.crawlListing(listing.market.name(), listing.asin);
                 Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst, false);
-                if(needCheckListing == null) return;
+                if(needCheckListing == null) {
+                    // 如果为 null , 则 7 天内不在检查
+                    listing.lastUpdateTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7);
+                    listing.saleRank = -2;// 使用 saleRank 为 -2 来标记此 Listing 已经 CLOSE 了
+                    listing.save();
+                    return;
+                }
                 try {
-                    if(needCheckListing.offers == null || needCheckListing.offers.size() == 0) {
+                    if(needCheckListing.totalOffers > 1) {
                         Logger.info("Listing (%s) fetch offers...", needCheckListing.listingId);
                         new O(needCheckListing).now().get(10, TimeUnit.SECONDS); // 等待 10 s
                     }
@@ -141,6 +146,9 @@ public class ListingWorkers extends Job {
         }
     }
 
+    /**
+     * 抓取 Review 的任务
+     */
     public static class R extends Job<AmazonListingReview> {
         private String listingId;
 

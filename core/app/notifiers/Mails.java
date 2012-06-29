@@ -37,21 +37,11 @@ public class Mails extends Mailer {
 
     /**
      * Listing 被人上架了的警告邮件
-     *
-     * @param offer 上了我们货架的那个卖家!
      */
-    public static void listingOffersWarning(ListingOffer offer) {
-        Listing lis = offer.listing;
-        setSubject("{WARN}[Listing] %s find another seller! [%s|%s]", lis.asin, offer.name, offer.offerId);
-        mailBase();
-        addRecipient("c@easyacceu.com");
-        send(lis, offer);
-    }
-
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
         setSubject("{WARN}[Offer] More than one offer in one Listing.");
         mailBase();
-        addRecipient("c@easyacceu.com");
+        addRecipient("alerts@easyacceu.com");
         send(offers, lst);
     }
 
