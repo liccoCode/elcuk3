@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
  * Time: 12:24 PM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ShipItem extends GenericModel {
     public ShipItem() {
     }

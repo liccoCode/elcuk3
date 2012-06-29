@@ -61,4 +61,15 @@ $ ->
         trE.unmask()
     )
 
+  # 取消 Delivery 的按钮
+  $('#cancel_btn').click ->
+    return false if !confirm("确认要取消这个采购单吗? 取消后所有 ProcureUnit 的数量都变为0!")
+    $.post('/deliveryments/cancel', id: fidCallBack()['fid'],
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert("删除成功.")
+    )
+
   window.$ui.htmlIni()

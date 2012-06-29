@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import models.Ret;
 import models.User;
 import models.procure.Deliveryment;
 import models.procure.Payment;
@@ -37,5 +38,13 @@ public class Deliveryments extends Controller {
         if(deliveryment == null || !deliveryment.isPersistent()) throw new FastRuntimeException("Deliveryment 不存在.");
         deliveryment.memo = msg;
         renderJSON(Webs.G(deliveryment.save()));
+    }
+
+    @Check("root")
+    public static void cancel(String id) {
+        Deliveryment dlmt = Deliveryment.findById(id);
+        if(dlmt == null || !dlmt.isPersistent()) throw new FastRuntimeException("Deliveryment 不存在.");
+        dlmt.cancel(Secure.Security.connected());
+        renderJSON(new Ret());
     }
 }

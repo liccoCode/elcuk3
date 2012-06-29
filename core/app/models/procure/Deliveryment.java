@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.Dates;
 import models.User;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -21,6 +22,7 @@ import java.util.List;
  * Time: 4:50 PM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     public enum S {
@@ -264,15 +266,18 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
      * 2. 把所有 ProcureUnit 关联的 ShipItem 的运输库存也调整为 0;
      * ps: 也就是当这些不存在了.
      */
-    public void cancel() {
+    public void cancel(String user) {
         for(ProcureUnit unit : this.units) {
             unit.delivery.deliveryQty = 0;
             for(ShipItem itm : unit.relateItems) {
+                if(itm.shipment.state == Shipment.S.DONE)
+                    throw new FastRuntimeException("请查看 Shipment " + itm.shipment.id + ",起已经运输完成, 关闭此采购单不合法.");
                 itm.qty = 0;
                 itm.save();
             }
             unit.save();
         }
+        this.memo = String.format("Cancel At %s by %s.\r\n%s", Dates.date2DateTime(new Date()), user, this.memo);
         this.state = S.CANCEL;
         this.save();
     }

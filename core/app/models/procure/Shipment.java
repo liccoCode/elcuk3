@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
@@ -23,9 +24,13 @@ import java.util.concurrent.TimeUnit;
  * Time: 5:32 PM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Shipment extends GenericModel implements Payment.ClosePayment {
 
     public Shipment() {
+    }
+
+    public Shipment(String id) {
         this.createDate = new Date();
 
         // 计价方式
@@ -40,7 +45,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         this.shipper = "周伟";
         this.type = T.AIR;
 
-        this.id = Shipment.id();
+        this.id = id;
     }
 
     public enum T {
@@ -314,12 +319,14 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     }
 
     /**
-     * 此运输单完成
+     * 此运输单完成; 每一个 Shipment 关闭的时候, 都需要检查其中所有 ShipItem 所关联的 ProcureUnit 是否可以进行 SHIP_OVER 状态了.
      */
     public Shipment done() {
         if(this.state == S.PLAN) throw new FastRuntimeException("不允许从 PLAN 状态直接到 DONE");
         if(this.arriveDate == null) throw new FastRuntimeException("完成运输单, 必须拥有具体到达时间");
         if(this.arriveDate.getTime() < this.beginDate.getTime()) throw new FastRuntimeException("实际到达时间小于开始时间?");
+        //TODO 运输单完成, 添加判断运输单项关联的 ProcureUnit 是否可以标记完成.
+        for(ShipItem item : this.items) item.unit.beShipOver();
         this.state = S.DONE;
         return this.save();
     }

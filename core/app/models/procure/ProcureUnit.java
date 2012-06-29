@@ -10,6 +10,7 @@ import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -25,6 +26,7 @@ import java.util.*;
  * Time: 5:23 PM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProcureUnit extends Model {
 
     /**
@@ -44,6 +46,10 @@ public class ProcureUnit extends Model {
          */
         DONE,
         /**
+         * 运输完成
+         */
+        SHIP_OVER,
+        /**
          * 关闭阶段, 不处理了
          */
         CLOSE
@@ -52,7 +58,7 @@ public class ProcureUnit extends Model {
     /**
      * 采购单
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Deliveryment deliveryment;
 
     /**
@@ -255,6 +261,27 @@ public class ProcureUnit extends Model {
         return shipItem.save();
     }
 
+    /**
+     * 判断这个 ProcureUnit 所关联的 ShipItem 是否全部运输完成.
+     *
+     * @return
+     */
+    public boolean canBeShipOver() {
+        for(ShipItem item : this.relateItems) {
+            if(item.shipment.state != Shipment.S.DONE) return false;
+        }
+        return true;
+    }
+
+    /**
+     * 将当前的 ProcureUnit 变成 SHIP_OVER 状态, 会首先进行检查是否可以进行 SHIP_OVER 状态.
+     */
+    public void beShipOver() {
+        if(!canBeShipOver()) return;
+        this.stage = ProcureUnit.STAGE.SHIP_OVER;
+        this.save();
+    }
+
     public F.T2<Integer, Set<String>> leftTransferQty() {
         int shippedQty = 0;
         Set<String> shipmentIds = new HashSet<String>();
@@ -276,7 +303,8 @@ public class ProcureUnit extends Model {
     }
 
     public static List<ProcureUnit> findWaitingForShip() {
-        List<ProcureUnit> procureUnits = ProcureUnit.find("stage=? AND deliveryment.state!=?", STAGE.DONE, Deliveryment.S.PENDING).fetch();
+        List<ProcureUnit> procureUnits = ProcureUnit.find("stage=? AND deliveryment.state!=? AND deliveryment.state!=?",
+                STAGE.DONE, Deliveryment.S.PENDING, Deliveryment.S.CANCEL).fetch();
         Collections.sort(procureUnits, new Comparator<ProcureUnit>() {
             @Override
             public int compare(ProcureUnit p1, ProcureUnit p2) {

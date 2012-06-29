@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
@@ -17,8 +18,14 @@ import java.util.Date;
  * Time: 9:46 AM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Payment extends GenericModel {
     public static interface ClosePayment {
+        /**
+         * 在 Payment 进行 Close 的时候回掉的进行不同 Model 自行检查的方法
+         *
+         * @param thisPayment
+         */
         public void close(Payment thisPayment);
     }
 

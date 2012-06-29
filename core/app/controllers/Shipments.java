@@ -33,7 +33,7 @@ public class Shipments extends Controller {
     }
 
     public static void blank() {
-        Shipment s = new Shipment();
+        Shipment s = new Shipment(Shipment.id());
         render(s);
     }
 
