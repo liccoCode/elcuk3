@@ -1,15 +1,19 @@
 package controllers;
 
 import helper.Webs;
+import jobs.SellingRecordCheckJob;
 import models.Jobex;
 import models.Ret;
 import models.market.JobRequest;
+import models.market.Selling;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.libs.Time;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -75,5 +79,14 @@ public class Jobs extends Controller {
         job.close = true;
         job.save();
         renderJSON(job);
+    }
+
+    public static void sellingRecordFix(Date begin, int days) {
+        List<Selling> sellings = Selling.all().fetch();
+        DateTime dt = new DateTime(begin);
+        SellingRecordCheckJob srcj = new SellingRecordCheckJob();
+        for(int i = 0; i < days; i++)
+            srcj.checkOneDaySellingRecord(sellings, dt.plusDays(i).toDate());
+        renderJSON(new Ret());
     }
 }

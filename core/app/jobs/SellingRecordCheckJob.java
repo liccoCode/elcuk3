@@ -76,7 +76,7 @@ public class SellingRecordCheckJob extends Job {
      * @param sellings
      * @param checkDate
      */
-    private void checkOneDaySellingRecord(List<Selling> sellings, Date checkDate) {
+    public void checkOneDaySellingRecord(List<Selling> sellings, Date checkDate) {
         List<OrderItem> orderitems = OrderItem.find("createDate>=? AND createDate<=?",
                 Dates.morning(checkDate), Dates.night(checkDate)).fetch();
 
