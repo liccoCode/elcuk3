@@ -20,8 +20,10 @@ public class UserCheck extends Secure.Security {
             user.power = User.P.ROOT;
             Cache.add(ukey(username), user);
         }
-        if(user == null)
-            user = loadAndCacheUser(username);
+        if(user == null) {
+            user = User.connect(username, password);
+            if(user != null) Cache.add(ukey(username), user);
+        }
         return user != null;
     }
 
