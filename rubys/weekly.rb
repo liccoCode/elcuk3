@@ -1,7 +1,7 @@
 # encoding: UTF-8
 require "rubygems"
 require "gmail"
-Gmail.connect('Weekly <support@easyacceu.com>', 'Fi0#GR4C^Y') do |gmail|
+Gmail.connect('support@easyacceu.com', 'Fi0#GR4C^Y') do |gmail|
 	gmail.deliver do
 		to "c@easyacceu.com"
 		#to "wppurking@gmail.com"
