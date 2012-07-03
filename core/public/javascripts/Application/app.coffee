@@ -56,7 +56,7 @@ $ ->
   loadCategoryPercent = (pieOp, date = $.DateUtil.fmt2(new Date())) ->
     mask = $('#orders')
     mask.mask('加载中...')
-    $.post('/application/categoryPercent', {date: date, aid: pieOp.aid},
+    $.get('/application/categoryPercent', {date: date, aid: pieOp.aid},
       (r) ->
         if r.flag is false
           alert(r.message)

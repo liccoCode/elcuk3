@@ -25,6 +25,7 @@ public class Application extends Controller {
         render(odmaps);
     }
 
+    @CacheFor(value = "20mn")
     public static void categoryPercent(Date date, long aid) {
         renderJSON(JSON.toJSON(
                 OrderItem.itemGroupByCategory(Dates.morning(date),

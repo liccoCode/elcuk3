@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 数据分析页面的控制器
+ * TODO 备忘: 采购计划的 timeline 库 -> http://www.simile-widgets.org/timeline/
  * User: wyattpan
  * Date: 1/19/12
  * Time: 2:14 PM
@@ -27,6 +28,18 @@ public class Analyzes extends Controller {
     public static void index() {
         render();
     }
+
+    // 开发用
+//    @Before
+//    public static void countTime() {
+//        request.args.put("begin", System.currentTimeMillis() + "");
+//    }
+//
+//    @After
+//    public static void countAfter() {
+//        Object begin = request.args.get("begin");
+//        Logger.info("%s past %s", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
+//    }
 
     /**
      * Analyze 页面下部分的 Selling 信息
@@ -65,6 +78,7 @@ public class Analyzes extends Controller {
         }
     }
 
+    @Check("root")
     @CacheFor("30mn")
     public static void ajaxSales(String msku,
                                  String type,

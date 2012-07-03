@@ -1,26 +1,21 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'Analyze'/}
 #{set 'moreScripts'}
     #{script 'analyzes/analyzes.coffee'/}
     #{script 'highcharts.js'/}
 #{/set}
 
-<div class="tabbable tabs-below">
-    <div class="tab-content">
-        <div class="tab-pane fade active in" id="sales_charts">
-            <div id="a_units" style="min-height:250px"></div>
-            <div class="row">
-                <div id="a_turn" style="min-height:280px;" class="span6"></div>
-                <div id="a_ss" style="min-height:280px;" class="span6"></div>
-            </div>
-            <div id="a_sales" style="min-height:250px"></div>
-        </div>
-    </div>
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#sales_charts" data-toggle="tab">Sale Charts</a></li>
-    </ul>
-
+<div class="row-fluid">
+    <div id="a_units" class="span6" style="height:280px"></div>
+    <div id="a_turn" style="min-height:280px;" class="span3"></div>
+    <div id="a_ss" style="min-height:280px;" class="span3"></div>
 </div>
+#{ck 'root'}
+<div class="row-fluid">
+    <div id="a_sales" class="span6" style="height:280px"></div>
+    <div class="span6">这个里面的为需要权限控制查看的曲线</div>
+</div>
+#{/ck}
 
 
 <div id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
