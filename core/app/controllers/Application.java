@@ -3,6 +3,7 @@ package controllers;
 import com.alibaba.fastjson.JSON;
 import helper.Dates;
 import models.Ret;
+import models.market.Account;
 import models.market.OrderItem;
 import models.market.Orderr;
 import play.cache.Cache;
@@ -24,8 +25,12 @@ public class Application extends Controller {
         render(odmaps);
     }
 
-    public static void categoryPercent(Date date) {
-        renderJSON(JSON.toJSON(OrderItem.itemGroupByCategory(Dates.morning(date), Dates.night(date))));
+    public static void categoryPercent(Date date, long aid) {
+        renderJSON(JSON.toJSON(
+                OrderItem.itemGroupByCategory(Dates.morning(date),
+                        Dates.night(date),
+                        Account.<Account>findById(aid)))
+        );
     }
 
     public static void clearCache() {

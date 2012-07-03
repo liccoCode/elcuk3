@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 
@@ -256,13 +257,14 @@ public class OrderItem extends GenericModel {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<F.T2<String, Integer>> itemGroupByCategory(Date from, Date to) {
-        List<Map> rows = JPAs.createQueryMap(new JpqlSelect()
+    public static List<F.T2<String, Integer>> itemGroupByCategory(Date from, Date to, Account acc) {
+        SqlSelect select = new JpqlSelect()
                 .select("oi.product.sku as sku, oi.quantity as qty")
                 .from("OrderItem oi")
                 .where("oi.createDate>=?").param(from)
-                .andWhere("oi.createDate<=?").param(to)
-        ).getResultList();
+                .where("oi.createDate<=?").param(to);
+        if(acc != null) select.where("oi.order.account=?").param(acc);
+        List<Map> rows = JPAs.createQueryMap(select).getResultList();
 
         Map<String, AtomicInteger> categoryAndCounts = new HashMap<String, AtomicInteger>();
         for(Map rowMap : rows) {

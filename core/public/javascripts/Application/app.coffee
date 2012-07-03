@@ -27,11 +27,11 @@ $ ->
     false
 
 
-  pieOp =
+  pieOpBuilder = (id, title, aid) ->
     chart:
-      renderTo: 'cat_percent'
+      renderTo: id
       type: 'pie'
-    title: {text: '类别销量百分比'}
+    title: {text: title}
     tooltip:
       formatter: ->
         "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>OrderItems: #{@y} / #{@total}"
@@ -44,30 +44,39 @@ $ ->
           formatter: ->
             "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
     series: []
+    aid: aid
     clearLines: () ->
       @series = []
 
+  pieAll = pieOpBuilder('cat_percent', '类别销售百分比', 0)
+  pieUK = pieOpBuilder('cat_percent_uk', 'EasyAcc.U 类别销量百分比', 1)
+  pieDE = pieOpBuilder('cat_percent_de', 'EasyAcc.D 类别销量百分比', 2)
+
   # category 百分比
-  loadCategoryPercent = (date = $.DateUtil.fmt2(new Date())) ->
+  loadCategoryPercent = (pieOp, date = $.DateUtil.fmt2(new Date())) ->
     mask = $('#orders')
     mask.mask('加载中...')
-    $.post('/application/categoryPercent', date: date,
+    $.post('/application/categoryPercent', {date: date, aid: pieOp.aid},
       (r) ->
         if r.flag is false
           alert(r.message)
         else
-          line = name: '类别销量百分比', data: []
+          line = data: []
           line.data.push([o['_1'], o['_2']]) for o in r
           pieOp.clearLines()
           pieOp.series.push(line)
           new Highcharts.Chart(pieOp)
         mask.unmask()
     )
-  loadCategoryPercent()
+  loadCategoryPercent(pieAll)
+  loadCategoryPercent(pieUK)
+  loadCategoryPercent(pieDE)
 
   #为table 中的日期添加查看指定天的 类别百分比数据
   $('#orders td[date]').css('cursor', 'pointer').click ->
-    loadCategoryPercent(@getAttribute('date'))
+    loadCategoryPercent(pieAll, @getAttribute('date'))
+    loadCategoryPercent(pieUK, @getAttribute('date'))
+    loadCategoryPercent(pieDE, @getAttribute('date'))
 
 
 
