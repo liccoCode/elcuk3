@@ -1,17 +1,18 @@
 package models.market;
 
 import helper.*;
+import helper.Currency;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 订单的具体订单项
@@ -119,7 +120,7 @@ public class OrderItem extends GenericModel {
 
     /**
      * 根据 sku 或者 msku 从 OrderItem 中查询对应 Account 的 OrderItem
-     * ps: 结果缓存 1 小时
+     * ps: 结果缓存 5mn (缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存)
      *
      * @param skuOrMsku sku 或者 merchantSKU(msku)
      * @param type      sku/all/msku
@@ -253,6 +254,34 @@ public class OrderItem extends GenericModel {
         }
         return hightChartLines;
     }
+
+    @SuppressWarnings("unchecked")
+    public static List<F.T2<String, Integer>> itemGroupByCategory(Date from, Date to) {
+        List<Map> rows = JPAs.createQueryMap(new JpqlSelect()
+                .select("oi.product.sku as sku, oi.quantity as qty")
+                .from("OrderItem oi")
+                .where("oi.createDate>=?").param(from)
+                .andWhere("oi.createDate<=?").param(to)
+        ).getResultList();
+
+        Map<String, AtomicInteger> categoryAndCounts = new HashMap<String, AtomicInteger>();
+        for(Map rowMap : rows) {
+            F.T2<String, Integer> row = itemGroupByCategoryRowParse(rowMap);
+            if(categoryAndCounts.containsKey(row._1)) categoryAndCounts.get(row._1).addAndGet(row._2);
+            else categoryAndCounts.put(row._1, new AtomicInteger(row._2));
+        }
+
+        List<F.T2<String, Integer>> categoryAndQty = new ArrayList<F.T2<String, Integer>>();
+        for(String key : categoryAndCounts.keySet())
+            categoryAndQty.add(new F.T2<String, Integer>(key, categoryAndCounts.get(key).get()));
+
+        return categoryAndQty;
+    }
+
+    private static F.T2<String, Integer> itemGroupByCategoryRowParse(Map row) {
+        return new F.T2<String, Integer>(row.get("sku").toString().substring(0, 2), NumberUtils.toInt(row.get("qty").toString()));
+    }
+
 
     public static List<OrderItem> orderRelateItems(String orderId) {
         return OrderItem.find("order.orderId=?", orderId).fetch();

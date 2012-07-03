@@ -498,7 +498,7 @@ public class Orderr extends GenericModel {
         DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         if(days > 0) days = -days;
         Date pre7Day = now.plusDays(days).toDate();
-        List<Orderr> orders = Orderr.find("createDate>=? AND createDate<=?", pre7Day, now.plusDays(1).toDate()).fetch();
+        List<Orderr> orders = Orderr.ordersInRange(pre7Day, now.plusDays(1).toDate());
 
         List<Account> accs = Account.all().fetch();
         Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
@@ -599,7 +599,7 @@ public class Orderr extends GenericModel {
         Date dayBegin = day.toDate();
         Date dayEnd = day.plusDays(1).toDate();
 
-        List<Orderr> orderrs = Orderr.find("createDate>=? AND createDate<=?", dayBegin, dayEnd).fetch();
+        List<Orderr> orderrs = Orderr.ordersInRange(dayBegin, dayEnd);
 
         Map<String, AtomicInteger> rtMap = new LinkedHashMap<String, AtomicInteger>();
         for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime(); begin += TimeUnit.HOURS.toMillis(1)) {
@@ -646,4 +646,24 @@ public class Orderr extends GenericModel {
     public static List<Orderr> findByUserId(String userId) {
         return Orderr.find("userid=?", userId).fetch();
     }
+
+    /**
+     * 简单抽取常用的根据时间加载订单的方法
+     *
+     * @param from
+     * @param to
+     * @return
+     */
+    public static List<Orderr> ordersInRange(Date from, Date to) {
+        return Orderr.find("createDate>=? AND createDate<=?", from, to).fetch();
+    }
 }
+
+/*
+这几条 SQL 语句是用来查询指定时间系统中订单中数量的分布的
+select GROUP_CONCAT(io.orderId), count(io.orderId), io.qty from (
+select o.orderId, sum(i.quantity) as qty from Orderr o left outer join OrderItem i on o.orderId=i.order_orderId where o.state!='CANCEL' and o.createDate>='2012-05-01 00:00:00' and o.createDate<='2012-06-01 00:00:00' group by o.orderId) io where io.qty>=0 group by io.qty;
+
+select * from Orderr where orderId='203-9998841-7832366';
+select * from OrderItem where order_orderId='203-9998841-7832366';
+ */

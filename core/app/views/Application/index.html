@@ -1,14 +1,15 @@
-#{extends 'main.html' /}
+#{extends 'main_full.html' /}
 #{set title:'Home' /}
 #{set 'moreScripts'}
+    #{script 'highcharts.js'/}
     #{script 'Application/app.coffee'/}
 #{/set}
 
-<div class="row">
-    <div class="span11">
+<div class="row-fluid" id="orders">
+    <div class="span12">
         <h2 class="label label-info" style="font-size:12px">订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>
         </h2>
-        <table class="table">
+        <table class="table table-bordered">
             <tr>
                 <th>日期</th>
                 <th>PENDING</th>
@@ -22,7 +23,7 @@
         #{list items:odmaps.keySet(), as:'key'}
             #{set row:odmaps.get(key)/}
             <tr>
-                <td>${key}</td>
+                <td date="${key}">${key}</td>
                 #{list items:models.market.Orderr.S.values(), as:'s'}
                     <td><a href="#" rel="popover" placement='left' title="${s.name()} 细节" content="
                     UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>
@@ -43,4 +44,8 @@
         #{/list}
         </table>
     </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span4" style="height:400px;" id='cat_percent'></div>
 </div>

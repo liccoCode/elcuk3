@@ -1,6 +1,9 @@
 package controllers;
 
+import com.alibaba.fastjson.JSON;
+import helper.Dates;
 import models.Ret;
+import models.market.OrderItem;
 import models.market.Orderr;
 import play.cache.Cache;
 import play.cache.CacheFor;
@@ -8,6 +11,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +22,10 @@ public class Application extends Controller {
     public static void index() {
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
         render(odmaps);
+    }
+
+    public static void categoryPercent(Date date) {
+        renderJSON(JSON.toJSON(OrderItem.itemGroupByCategory(Dates.morning(date), Dates.night(date))));
     }
 
     public static void clearCache() {
