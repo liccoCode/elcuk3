@@ -25,7 +25,7 @@
             <tr>
                 <td date="${key}">${key}</td>
                 #{list items:models.market.Orderr.S.values(), as:'s'}
-                    <td><a href="#" rel="popover" placement='left' title="${s.name()} 细节" content="
+                    <td><a href="#" rel="popover" placement='bottom' title="${s.name()} 细节" content="
                     UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>
                     DE: ${row.get(s.name() + "_" + "AMAZON_DE")}<br/>
                     FR: ${row.get(s.name() + "_" + "AMAZON_FR")}<br/><hr/>
