@@ -4,12 +4,10 @@ import helper.*;
 import helper.Currency;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
-import play.db.helper.JpqlSelect;
-import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import query.OrderItemQuery;
 
 import javax.persistence.*;
 import java.util.*;
@@ -256,19 +254,11 @@ public class OrderItem extends GenericModel {
         return hightChartLines;
     }
 
-    @SuppressWarnings("unchecked")
     public static List<F.T2<String, Integer>> itemGroupByCategory(Date from, Date to, Account acc) {
-        SqlSelect select = new JpqlSelect()
-                .select("oi.product.sku as sku, oi.quantity as qty")
-                .from("OrderItem oi")
-                .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to);
-        if(acc != null) select.where("oi.order.account=?").param(acc);
-        List<Map> rows = JPAs.createQueryMap(select).getResultList();
+        List<F.T2<String, Integer>> rows = OrderItemQuery.sku_qty(from, to, acc);
 
         Map<String, AtomicInteger> categoryAndCounts = new HashMap<String, AtomicInteger>();
-        for(Map rowMap : rows) {
-            F.T2<String, Integer> row = itemGroupByCategoryRowParse(rowMap);
+        for(F.T2<String, Integer> row : rows) {
             if(categoryAndCounts.containsKey(row._1)) categoryAndCounts.get(row._1).addAndGet(row._2);
             else categoryAndCounts.put(row._1, new AtomicInteger(row._2));
         }
@@ -278,10 +268,6 @@ public class OrderItem extends GenericModel {
             categoryAndQty.add(new F.T2<String, Integer>(key, categoryAndCounts.get(key).get()));
 
         return categoryAndQty;
-    }
-
-    private static F.T2<String, Integer> itemGroupByCategoryRowParse(Map row) {
-        return new F.T2<String, Integer>(row.get("sku").toString().substring(0, 2), NumberUtils.toInt(row.get("qty").toString()));
     }
 
 

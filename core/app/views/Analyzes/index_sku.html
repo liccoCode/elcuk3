@@ -8,7 +8,6 @@
         <th title="计算的是昨天的数据, 不包含今天; Day7, Day30, Day180 相同" style="color:grey;">Day1</th>
         <th>Day7</th>
         <th>Day30</th>
-        <th>Day180</th>
     </tr>
 #{list items:p.items, as:'sell'}
     #{if sell_index <= 10}
@@ -29,7 +28,6 @@
             <td>${sell.d1}</td>
             <td>${sell.d7.format('#.##')}/${(sell.d7 / 7).format("#.##")}</td>
             <td>${sell.d30.format('#.##')}/${(sell.d30 / 30).format("#.##")}</td>
-            <td>${sell.d180.format('#.##')}/${(sell.d180 / 180).format("#.##")}</td>
 
         </tr>
     #{/if}

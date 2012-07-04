@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
+import models.procure.ProcureUnit;
 import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
@@ -13,6 +14,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -23,6 +25,7 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
+import query.OrderItemQuery;
 
 import javax.persistence.*;
 import java.io.File;
@@ -157,9 +160,7 @@ public class Selling extends GenericModel {
     @Transient
     public Float d30 = 0f;
     @Transient
-    public Float d180 = 0f;
-    @Transient
-    public Float dAll = 0f;
+    public Float _ps = 0f;
     @Transient
     public Integer qty = 0;
 
@@ -168,6 +169,8 @@ public class Selling extends GenericModel {
      */
     @Transient
     public Float turnOver = 0f;
+    @Transient
+    public Float _turnOver = 0f;
 
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Embedded
@@ -482,6 +485,62 @@ public class Selling extends GenericModel {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
     }
 
+    public static List<Selling> analyzesSKUAndMSKU(String type) {
+        if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type))
+            throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
+        // 如果不是 sku 那么一定为 msku
+        boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
+
+        /**
+         * 1. 加载所有的 Selling, 用来做基础数据;[没有做过滤]
+         * 2. 根据抓取数据的类型方式, 来对这些 Selling 进行分类;
+         * 3. 加载需要计算的 OrderItem 数据
+         */
+        Map<String, Selling> analyzeMap = new HashMap<String, Selling>();
+
+        // msku, asin, acc, market, price,
+        List<Selling> sellings = Selling.findAll();
+        for(Selling s : sellings)
+            analyzeMap.put(isSku ? Product.merchantSKUtoSKU(s.merchantSKU) : s.merchantSKU, s);
+
+
+        // d1, d7, d30, _ps
+        DateTime now = DateTime.now();
+        List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_orderId(now.minusDays(30).toDate(), now.toDate(), 0);
+        for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
+            String key = isSku ? t5._1 : t5._2;
+            Selling currentSelling = analyzeMap.get(key);
+            if(currentSelling == null) {
+                Logger.warn("T4: %s, Selling is not exist.", t5);
+                continue;
+            }
+            long differTime = now.getMillis() - t5._4.getTime();
+            if(differTime <= Period.days(1).getMillis() && differTime >= 0)
+                currentSelling.d1 += t5._3;
+            if(differTime <= Period.days(7).getMillis())
+                currentSelling.d7 += t5._3;
+            if(differTime <= Period.days(30).getMillis())
+                currentSelling.d30 += t5._3;
+        }
+
+        // plan, delivering [ProcureUnit.PLAN|DELIVERY]
+        for(String sellKey : analyzeMap.keySet()) {
+            List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(sellKey, isSku);
+        }
+
+
+        // onway [Shipment.shipItem]
+
+        // qty [SellingQTY]
+
+
+        // ps
+        for(Selling sell : analyzeMap.values()) {
+            sell._ps = sell.d7 / 7.0f;
+        }
+        return sellings;
+    }
+
     /**
      * 加载指定时间段内的 Selling 的销量排名数据(以 MerchantSKU 来进行判断);
      * 其中涉及到计算: day(1-N), turnover
@@ -541,9 +600,6 @@ public class Selling extends GenericModel {
             // 三十天的
             if(differTime <= TimeUnit.DAYS.toMillis(30))
                 current.d30 += item.quantity;
-            // 180 天的
-            if(differTime <= TimeUnit.DAYS.toMillis(180))
-                current.d180 += item.quantity;
         }
 
 
