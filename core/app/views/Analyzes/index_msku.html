@@ -5,37 +5,45 @@
         <th>ASIN</th>
         <th>Account</th>
         <th>Price</th>
-        <th>Qty</th>
+        <th>OPN</th>
+        <th>OWK</th>
+        <th>OWY</th>
+        <th>QTY</th>
         <th>PS</th>
         <th title="计算的是昨天的数据, 不包含今天; Day7, Day30, Day180 相同" style="color:grey;">Day1</th>
         <th>Day7</th>
         <th>Day30</th>
-        <th>TurnOver</th>
+        <th>TOR</th>
+        <th>_TOR</th>
         <th>Type</th>
     </tr>
 #{list items:p.items, as:'sell'}
     #{if sell_index <= 10}
         <tr>
             <td class="msku" style="cursor:pointer;" aid="${sell.account.id}" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
-            <td class="sid" title="${sell.sellingId}">
-                <a target="_blank" href="${sell.asinLink()}">${sell.asin}</a>
+            <td class="sid" title="${sell.sellingId}" style="width:150px;">
+                <div class="input-append">
+                    <span class="add-on"><a target="_blank" href="${sell.asinLink()}">${sell.asin}</a></span>
+                    <span class="add-on">${sell.market.nickName()}</span>
+                </div>
             </td>
-            <td>${sell.account.toString()}</td>
-            <td>${sell.price}</td>
+            <td>${sell.account.prettyName()}</td>
+            <td>${sell.aps.salePrice}</td>
+            <td>${sell.onplan}</td>
+            <td>${sell.onwork}</td>
+            <td>${sell.onway}</td>
             <td>${sell.qty}</td>
-            <td>${sell.ps}</td>
+            <td style="width:110px;">
+                <div class="input-append">
+                    <input type="text" value="${sell.ps}" class="input" style="width:30px;">
+                    <span class="add-on">${sell._ps}</span>
+                </div>
+            </td>
             <td>${sell.d1}</td>
             <td>${sell.d7.format('#.##')}/${(sell.d7 / 7).format("#.##")}</td>
             <td>${sell.d30.format('#.##')}/${(sell.d30 / 30).format("#.##")}</td>
-            #{if sell.turnOver < 8 && sell.turnOver >= 0}
-                <td style="color:red;">${sell.turnOver.format("#.##")}</td>
-            #{/if}
-            #{elseif sell.turnOver < 0}
-                <td style="color:purple;">7天内无销量!</td>
-            #{/elseif}
-            #{else }
-                <td>${sell.turnOver.format("#.##")}</td>
-            #{/else}
+            #{turnOver turnOver:sell.turnOver/}
+            #{turnOver turnOver:sell._turnOver/}
             <td>${sell.type}</td>
         </tr>
     #{/if}

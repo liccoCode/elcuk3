@@ -800,7 +800,7 @@ public class Account extends Model {
     }
 
     public String prettyName() {
-        return String.format("%s.%s", this.type.name(), this.username.split("@")[0]);
+        return String.format("%s.%s", this.type.nickName(), this.username.split("@")[0]);
     }
 
     /**

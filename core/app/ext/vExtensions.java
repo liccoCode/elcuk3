@@ -4,6 +4,7 @@ import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.Selling;
+import org.joda.time.DateTime;
 import play.i18n.Messages;
 import play.templates.JavaExtensions;
 
@@ -104,6 +105,10 @@ public class vExtensions extends JavaExtensions {
 
     public static String date(Date date) {
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+
+    public static String dayAfter(int day) {
+        return DateTime.now().plusDays(day).toString("yyyy-MM-dd");
     }
 
     public static String left(Date date) {

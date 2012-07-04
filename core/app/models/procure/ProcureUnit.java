@@ -317,13 +317,15 @@ public class ProcureUnit extends Model {
     /**
      * 根据 sku 或者 msku 加载 PLAN, DELIVERY Stage 的 ProcureUnit.
      *
-     * @param skuOrMsku
+     * @param selling
      * @param isSku
      * @return
      */
-    public static List<ProcureUnit> skuOrMskuRelate(String skuOrMsku, boolean isSku) {
-        return find(String.format("%s AND stage IN (?,?)", isSku ? "sku=?" : "sid=?"),
-                skuOrMsku, STAGE.PLAN, STAGE.DELIVERY).fetch();
+    public static List<ProcureUnit> skuOrMskuRelate(Selling selling, boolean isSku) {
+        if(isSku)
+            return find("sku=? AND stage IN (?,?)", Product.merchantSKUtoSKU(selling.merchantSKU), STAGE.PLAN, STAGE.DELIVERY).fetch();
+        else
+            return find("selling=? AND stage IN (?,?)", selling, STAGE.PLAN, STAGE.DELIVERY).fetch();
     }
 
 }

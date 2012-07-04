@@ -94,7 +94,13 @@ public class SellingQTY extends GenericModel {
         return SellingQTY.find("product=?", prod).fetch();
     }
 
+    public static List<SellingQTY> qtysAccodingMSKU(Selling selling) {
+        Whouse wh = Whouse.find("account=?", selling.account).first();
+        return find("id=?", String.format("%s_%s", selling.merchantSKU, wh.id)).fetch();
+    }
+
     public String msku() {
         return this.id.split("_")[0].toUpperCase();
     }
+
 }

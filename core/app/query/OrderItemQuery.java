@@ -48,9 +48,9 @@ public class OrderItemQuery {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_orderId(Date from, Date to, int filterQuantity) {
+    public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_aId(Date from, Date to, int filterQuantity) {
         List<Map> rows = JPAs.createQueryMap(new JpqlSelect()
-                .select("oi.product.sku as sku, oi.selling.sellingId as sid, oi.quantity as qty, oi.createDate date, oi.order.orderId as orderId")
+                .select("oi.product.sku as sku, oi.selling.sellingId as sid, oi.quantity as qty, oi.createDate as _date, oi.order.account.id as aid")
                 .from("OrderItem oi")
                 .where("oi.createDate>=?").param(from)
                 .where("oi.createDate<=?").param(to)
@@ -63,8 +63,8 @@ public class OrderItemQuery {
                     row.get("sku").toString(),
                     row.get("sid").toString(),
                     NumberUtils.toInt(row.get("qty").toString()),
-                    (Date) row.get("date"),
-                    row.get("orderId").toString()));
+                    (Date) row.get("_date"),
+                    row.get("aid").toString()));
         }
         return t4Rows;
     }

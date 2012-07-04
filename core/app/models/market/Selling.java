@@ -6,6 +6,8 @@ import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
@@ -14,7 +16,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
-import org.joda.time.Period;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -163,6 +164,22 @@ public class Selling extends GenericModel {
     public Float _ps = 0f;
     @Transient
     public Integer qty = 0;
+    /**
+     * 在计划中的库存
+     */
+    @Transient
+    public Integer onplan = 0;
+
+    /**
+     * 在产的库存
+     */
+    @Transient
+    public Integer onwork = 0;
+    /**
+     * 在途的数量
+     */
+    @Transient
+    public Integer onway = 0;
 
     /**
      * 这个产品现在存有的货物还能够周转多少天
@@ -485,9 +502,14 @@ public class Selling extends GenericModel {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
     }
 
-    public static List<Selling> analyzesSKUAndMSKU(String type) {
+
+    @SuppressWarnings("unchecked")
+    public static List<Selling> analyzesSKUAndSID(String type) {
         if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type))
             throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
+        String cacke_key = String.format(Caches.SALE_SELLING, type);
+        List<Selling> cached = Caches.blockingGet(cacke_key, List.class);
+        if(cached != null && cached.size() > 0) return cached;
         // 如果不是 sku 那么一定为 msku
         boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
 
@@ -501,128 +523,64 @@ public class Selling extends GenericModel {
         // msku, asin, acc, market, price,
         List<Selling> sellings = Selling.findAll();
         for(Selling s : sellings)
-            analyzeMap.put(isSku ? Product.merchantSKUtoSKU(s.merchantSKU) : s.merchantSKU, s);
+            analyzeMap.put(isSku ? Product.merchantSKUtoSKU(s.merchantSKU) : s.sellingId, s);
 
 
         // d1, d7, d30, _ps
         DateTime now = DateTime.now();
-        List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_orderId(now.minusDays(30).toDate(), now.toDate(), 0);
+        List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_aId(now.minusDays(30).toDate(), now.toDate(), 0);
         for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
             String key = isSku ? t5._1 : t5._2;
             Selling currentSelling = analyzeMap.get(key);
             if(currentSelling == null) {
-                Logger.warn("T4: %s, Selling is not exist.", t5);
+                Logger.warn("T4: %s, Selling is not exist. Key[%s]", t5, key);
                 continue;
             }
-            long differTime = now.getMillis() - t5._4.getTime();
-            if(differTime <= Period.days(1).getMillis() && differTime >= 0)
+            long differTime = Dates.morning(now.toDate()).getTime() - t5._4.getTime();
+            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
                 currentSelling.d1 += t5._3;
-            if(differTime <= Period.days(7).getMillis())
+            if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
                 currentSelling.d7 += t5._3;
-            if(differTime <= Period.days(30).getMillis())
+            if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
                 currentSelling.d30 += t5._3;
         }
 
-        // plan, delivering [ProcureUnit.PLAN|DELIVERY]
         for(String sellKey : analyzeMap.keySet()) {
-            List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(sellKey, isSku);
+
+            // plan, delivering [ProcureUnit.PLAN|DELIVERY]
+            List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(analyzeMap.get(sellKey), isSku);
+            for(ProcureUnit unit : units) {
+                if(unit.stage == ProcureUnit.STAGE.PLAN)
+                    analyzeMap.get(sellKey).onplan += unit.plan.planQty;
+                else if(unit.stage == ProcureUnit.STAGE.DELIVERY)
+                    analyzeMap.get(sellKey).onwork += unit.delivery.ensureQty;
+            }
+
+            // onway [Shipment.shipItem]
+            List<ShipItem> shipItems = ShipItem.find(String.format("%s AND shipment.state!=?", isSku ? "unit.sku=?" : "unit.sid=?"),
+                    analyzeMap.get(sellKey).sellingId, Shipment.S.DONE).fetch();
+            for(ShipItem itm : shipItems) {
+                analyzeMap.get(sellKey).onway += itm.qty;
+            }
+
+            // qty [SellingQTY]
+            List<SellingQTY> qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
+            for(SellingQTY qty : qtys)
+                analyzeMap.get(sellKey).qty += qty.qty + qty.inbound;
         }
-
-
-        // onway [Shipment.shipItem]
-
-        // qty [SellingQTY]
 
 
         // ps
         for(Selling sell : analyzeMap.values()) {
             sell._ps = sell.d7 / 7.0f;
-        }
-        return sellings;
-    }
+            if(sell._ps == 0) sell._ps = 0.1f;
+            else sell._ps = Webs.scale2PointUp(sell._ps);
 
-    /**
-     * 加载指定时间段内的 Selling 的销量排名数据(以 MerchantSKU 来进行判断);
-     * 其中涉及到计算: day(1-N), turnover
-     * PS: 这份数据肯定是需要进行缓存的..
-     * <p/>
-     * TODO 这种大批量的计算方法需要使用 JDBC 进行重构
-     *
-     * @param t >0 :按照 MerchantSKU 排序; <0 :按照 SKU 排序
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    @Cached("1h")
-    public static List<Selling> salesRankWithTime(int t) {
-        String cacke_key = String.format(Caches.SALE_SELLING, t);
-        List<Selling> cached = Caches.blockingGet(cacke_key, List.class);
-        if(cached != null && cached.size() > 0) return cached;
-        Map<String, Selling> sellingMap = new HashMap<String, Selling>();
-
-        /**
-         * 1. 将一年内的 OrderItem 加载出来, 作为基础数据进行统计
-         * 2. 根据 MerchantSKU(Selling) 来区分来进行排名区分
-         * 3. 计算 d1, d7, d30, d180 天的销量数据
-         */
-
-        DateTime nowDate = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-        List<OrderItem> items = OrderItem.find("createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
-                nowDate.plusDays(-180).toDate(), nowDate.toDate(), Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
-
-        Long now = nowDate.getMillis();
-
-        // 通过 OrderItem 计算每一个产品的销量.
-        for(OrderItem item : items) {
-            String sellKey = null;
-            try {
-                if(Product.unUsedSKU(item.product.sku)) continue;
-                if(t > 0) {
-                    sellKey = String.format("%s_%s", item.selling.merchantSKU, item.selling.account.id);
-                } else if(t < 0) {
-                    sellKey = item.product.sku;
-                }
-                if(!sellingMap.containsKey(sellKey)) {
-                    sellingMap.put(sellKey, item.selling);
-                }
-            } catch(EntityNotFoundException e) {
-                Logger.warn(Webs.E(e));
-                continue; // 没有这个 Selling 则跳过
-            }
-            Selling current = sellingMap.get(sellKey);
-            Long differTime = now - item.createDate.getTime();
-
-            // 一天内的
-            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                current.d1 += item.quantity;
-            // 七天内的
-            if(differTime <= TimeUnit.DAYS.toMillis(7))
-                current.d7 += item.quantity;
-            // 三十天的
-            if(differTime <= TimeUnit.DAYS.toMillis(30))
-                current.d30 += item.quantity;
+            sell._turnOver = Webs.scale2PointUp((sell.qty + sell.onway + sell.onwork) / sell._ps);
+            sell.turnOver = Webs.scale2PointUp((sell.qty + sell.onway + sell.onwork) / (sell.ps == 0 ? sell._ps : sell.ps));
         }
 
-
-        List<SellingQTY> turnOverQty = new ArrayList<SellingQTY>();
-        for(Selling sell : sellingMap.values()) {
-            Integer quantity = 0;
-
-            /**
-             * TODO 按照 merchantSKU + Account 寻找
-             * 1. 按照 MerchantSKU 则计算每一个 Product 的库存即可
-             * 2. 按照 SKU 则需要找到此 SKU 的所有 Selling 然后找到所有的库存进行计算
-             */
-            if(t > 0) turnOverQty = sell.qtys;// 按照 MerchantSKU 则计算每一个 Product 的库存即可
-            else if(t < 0) turnOverQty = SellingQTY.qtysAccodingSKU(Product.findByMerchantSKU(sell.merchantSKU));
-
-            for(SellingQTY qty : turnOverQty) quantity += qty.qty;
-            sell.qty = quantity;
-            if(sell.d7 <= 0) sell.turnOver = -1f;
-            else sell.turnOver = (quantity < 0 ? 0 : quantity) / (sell.d7 / 7f);
-        }
-
-        // 最后对 Selling 进行排序
-        List<Selling> sellings = new ArrayList<Selling>(sellingMap.values());
+        sellings = new ArrayList<Selling>(analyzeMap.values());
         Collections.sort(sellings, new Comparator<Selling>() {
             @Override
             public int compare(Selling s1, Selling s2) {
@@ -632,6 +590,5 @@ public class Selling extends GenericModel {
         Caches.blockingAdd(cacke_key, sellings, "1h"); // 缓存 1 小时
         return Caches.blockingGet(cacke_key, List.class);
     }
-
 
 }
