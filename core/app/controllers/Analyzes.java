@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 2:14 PM
  */
 @With({Secure.class, GzipFilter.class})
+@Check("manager")
 public class Analyzes extends Controller {
     public static void index() {
         render();
@@ -63,7 +64,6 @@ public class Analyzes extends Controller {
      * @param from
      * @param to
      */
-    @Check("manager")
     @CacheFor("30mn")
     public static void ajaxUnit(String msku,
                                 String type,

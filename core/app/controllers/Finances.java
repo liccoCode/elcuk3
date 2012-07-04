@@ -26,6 +26,7 @@ import java.util.Map;
  * Time: 10:11 AM
  */
 @With({Secure.class, GzipFilter.class})
+@Check("root")
 public class Finances extends Controller {
 
     /**
@@ -33,7 +34,6 @@ public class Finances extends Controller {
      *
      * @param n
      */
-    @Check("root")
     public static void fix(String n, String m, Account a) {
         try {
             if(!a.isPersistent()) renderText("Account is not Persistent!");
@@ -77,7 +77,6 @@ public class Finances extends Controller {
      * @param acc
      * @param m
      */
-    @Check("root")
     public static void flatV2(String rid, Account acc, String m) {
         if(!acc.isPersistent()) renderJSON(new Ret("Account 不存在, 错误!"));
         Account.M market = Account.M.val(m);
