@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @With({Secure.class, GzipFilter.class})
 public class Application extends Controller {
 
-    @CacheFor(value = "2h", id = "home.page")
     public static void index() {
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
         render(odmaps);
