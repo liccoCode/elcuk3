@@ -374,6 +374,30 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 更新数据库, 同时还需要更新缓存
+     *
+     * @param ps
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public Selling ps(Float ps) {
+        if(ps == null || ps < 0) throw new FastRuntimeException("PS 格式错误或者 PS 不允许小于 0");
+        this.ps = ps;
+        // 如果缓存不为空则更新缓存
+        List<Selling> sellings = Caches.blockingGet(String.format(Caches.SALE_SELLING, "msku"), List.class);
+        if(sellings != null) {
+            boolean find = false;
+            for(Selling sell : sellings) {
+                if(!sell.sellingId.equals(this.sellingId)) continue;
+                sell.ps = ps;
+                find = true;
+            }
+            if(!find) throw new FastRuntimeException(String.format("更新失败, %s 不再缓存中..", this.sellingId));
+        }
+        return this.save();
+    }
+
+    /**
      * 将当前对象的值复制到老的 Selling 对象中去
      *
      * @param newSelling

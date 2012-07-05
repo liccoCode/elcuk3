@@ -5,7 +5,6 @@
     #{script 'Application/app.coffee'/}
 #{/set}
 
-#{cache 'home.page', for:'2h'}
 <div class="row-fluid" id="orders">
     <div class="span12">
         <h2 class="label label-info" style="font-size:12px">订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>
@@ -21,32 +20,31 @@
                 <th>CANCEL</th>
                 <th><a href="#" rel="tooltip" data-original-title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
             </tr>
-            #{list items:odmaps.keySet(), as:'key'}
-                #{set row:odmaps.get(key)/}
-                <tr>
-                    <td date="${key}">${key}</td>
-                    #{list items:models.market.Orderr.S.values(), as:'s'}
-                        <td><a href="#" rel="popover" placement='bottom' title="${s.name()} 细节" content="
+        #{list items:odmaps.keySet(), as:'key'}
+            #{set row:odmaps.get(key)/}
+            <tr>
+                <td date="${key}">${key}</td>
+                #{list items:models.market.Orderr.S.values(), as:'s'}
+                    <td><a href="#" rel="popover" placement='bottom' title="${s.name()} 细节" content="
                     UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>
                     DE: ${row.get(s.name() + "_" + "AMAZON_DE")}<br/>
                     FR: ${row.get(s.name() + "_" + "AMAZON_FR")}<br/><hr/>
                     EasyAcc.EU: ${row.get(s.name() + "_" + "amazon.co.uk_wyatt")}<br/>
                     EasyAcc.DE: ${row.get(s.name() + "_" + "amazon.de_wyatt")}<br/>
                     ">${row.get(s.name())}</a></td>
-                    #{/list}
-                    <td><a href="#" rel="popover" placement='left' title="订单数细节" content="
+                #{/list}
+                <td><a href="#" rel="popover" placement='left' title="订单数细节" content="
                     UK: ${row.get("all_" + "AMAZON_UK")}<br/>
                     DE: ${row.get("all_" + "AMAZON_DE")}<br/>
                     FR: ${row.get("all_" + "AMAZON_FR")}<br/><hr/>
                     EasyAcc.EU: ${row.get("all_" + "amazon.co.uk_wyatt")}<br/>
                     EasyAcc.DE: ${row.get("all_" + "amazon.de_wyatt")}<br/>
                 ">${row.get('all')}</a></td>
-                </tr>
-            #{/list}
+            </tr>
+        #{/list}
         </table>
     </div>
 </div>
-#{/cache}
 
 <div class="row-fluid">
     <div class="span4" style="height:400px;" id='cat_percent'></div>

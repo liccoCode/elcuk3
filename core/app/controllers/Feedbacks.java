@@ -2,7 +2,7 @@ package controllers;
 
 import exception.NotLoginFastException;
 import helper.Webs;
-import models.PageInfo;
+import models.Pager;
 import models.Ret;
 import models.market.Account;
 import models.market.Feedback;
@@ -44,7 +44,7 @@ public class Feedbacks extends Controller {
             }
         }
 
-        PageInfo<Feedback> pi = new PageInfo<Feedback>(s, count, p, feds);
+        Pager<Feedback> pi = new Pager<Feedback>(s, count, p, feds);
         render(feds, pi, accs, accFeds);
     }
 

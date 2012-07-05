@@ -18,29 +18,40 @@
 #{/ck}
 
 
-<div id="a_toolbar" style="background:#498CE2;padding-top:5px;margin-left:1px">
-    <div class="row" id="dbcick_param"> <!-- 双击产品的时候使用 -->
-        <div class="input-prepend offset1 span3">
-            <span class="label label-success">From:</span>
-            <input type="date" class="span2" id="a_from" name="from">
+<div id="a_toolbar" style="background:#498CE2;padding:5px 10px;">
+    <div class="row-fluid" id="dbcick_param"> <!-- 双击产品的时候使用 -->
+        <div class="input-prepend span2">
+            <span class="add-on">From:</span>
+            <input type="date" id="a_from" name="from">
         </div>
-        <div class="input-prepend span3">
-            <span class="label label-success">TO:</span>
-            <input type="date" class="span2" id="a_to" name="to">
+        <div class="input-prepend span2">
+            <span class="add-on">TO:</span>
+            <input type="date" id="a_to" name="to">
+        </div>
+
+        <div class="span1">
+            <a href="#" class="btn btn-small" id="all_search">ALL</a>
         </div>
 
         <div class="span3 input-prepend">
-            <span class="label label-warning" id="a_acc_id_label">EasyAcc</span>
+            <span class="add-on" style="color:#FAA732" id="a_acc_id_label">EasyAcc</span>
             <input type="hidden" name="acc.id" id="a_acc_id">
             <input type="hidden" name="msku" id="a_msku">
         </div>
     </div>
 
-    <div class="row" style="margin-bottom:5px;"> <!-- 点击 Search Selling 的时候使用 -->
-        <div class="input-prepend offset1 span4">
-            <a href="#" class="btn btn-small" id="all_search">ALL</a>
+    <div class="row-fluid" style="margin-bottom:5px;"> <!-- 点击 Search Selling 的时候使用 -->
+        <div class="input-prepend span4">
             <i class="icon-search"></i>
-            <input type="text" class="search-query span2" name="p.param" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN">
+            <input type="text" class="search-query" name="p.param" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN">
+            <select id="p_aid" name="p.aid" style="width:120px;" disabled="">
+                <option value="0">ALL</option>
+            #{list items:accs, as:'acc'}
+                <option value="${acc.id}">${acc.prettyName()}</option>
+            #{/list}
+            </select>
+
+
             <a href="#" class="btn btn-small" id="a_search">搜索</a>
         </div>
     </div>

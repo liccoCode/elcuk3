@@ -2,18 +2,20 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Webs;
-import models.PageInfo;
+import models.AnalyzesPager;
 import models.Ret;
 import models.market.*;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.Play;
 import play.cache.CacheFor;
 import play.db.jpa.Transactional;
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,36 +34,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Check("manager")
 public class Analyzes extends Controller {
     public static void index() {
-        render();
+        List<Account> accs = Account.findAll();
+        render(accs);
     }
 
     // 开发用
     @Before
     public static void countTime() {
-        request.args.put("begin", System.currentTimeMillis() + "");
+        if(Play.mode.isDev())
+            request.args.put("begin", System.currentTimeMillis() + "");
     }
 
     //
     @After
     public static void countAfter() {
-        Object begin = request.args.get("begin");
-        Logger.info("%s past %s", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
+        if(Play.mode.isDev()) {
+            Object begin = request.args.get("begin");
+            Logger.info("%s past %s", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
+        }
     }
 
     /**
      * Analyze 页面下部分的 Selling 信息
      */
     @Transactional(readOnly = true)
-    public static void index_msku(PageInfo<Selling> p) {
+    public static void index_msku(AnalyzesPager<Selling> p) {
         List<Selling> sells = Selling.analyzesSKUAndSID("msku");
-        p.items = PageInfo.fixItemSize(sells, p);
+        p.items = AnalyzesPager.filterSellings(sells, p);
         render(p);
     }
 
     @Transactional(readOnly = true)
-    public static void index_sku(PageInfo<Selling> p) {
+    public static void index_sku(AnalyzesPager<Selling> p) {
         List<Selling> sells = Selling.analyzesSKUAndSID("sku");
-        p.items = PageInfo.fixItemSize(sells, p);
+        p.items = AnalyzesPager.filterSellings(sells, p);
         render(p);
     }
 
@@ -150,5 +156,11 @@ public class Analyzes extends Controller {
         }
         List<AtomicInteger> datay = new ArrayList<AtomicInteger>(dataMap.values());
         render(datax, datay, date);
+    }
+
+    public static void ps(String sid, Float ps) {
+        Selling sell = Selling.findById(sid);
+        if(sell == null || !sell.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
+        renderJSON(Webs.G(sell.ps(ps)));
     }
 }

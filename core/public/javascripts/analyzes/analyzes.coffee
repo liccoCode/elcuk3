@@ -4,19 +4,6 @@ $ ->
   defaultDate = $.DateUtil.addDay(-30)
   now = new Date()
 
-  init = () ->
-    $('#a_from').data('dateinput').setValue(defaultDate)
-    $('#a_to').data('dateinput').setValue(now)
-
-    # 最下方的 Selling[MerchantSKU, SKU] 列表信息
-    sellRankLoad(MSKU, 1)
-    sellRankLoad(SKU, 1)
-    # 销量线
-    unit_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
-    sale_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
-    # 默认 PageView 线
-    pageViewDefaultContent()
-
 
   # 用来构造给 HighChart 使用的默认 options 的方法
   lineOp = (container, yName) ->
@@ -164,15 +151,32 @@ $ ->
 
   # -------------------------------------------------------------------
 
+  bindSIDPsBtn = ->
+    $('#msku input[ps]').unbind().change ->
+      tableE = $(@).parents('table')
+      tableE.mask('更新 PS 中...')
+      $.post('/analyzes/ps', {sid: $(@).attr('sid'), ps: $(@).val()},
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          tableE.unmask()
+      )
+
   # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
   sellRankLoad = (type, page) ->
     if type isnt MSKU and type isnt SKU
-      alert("只允许 msku 与 sku 两种类型!")
+      alert("只允许 sid 与 sku 两种类型!")
       return false
 
     tgt = $('#' + type)
     tgt.mask('加载中...')
-    tgt.load('/analyzes/index_' + type, {'p.page': page, 'p.size': 10, "p.param": $('#a_param').val()},
+    params =
+      'p.page': page
+      'p.size': 15
+      'p.param': $('#a_param').val()
+    params['p.aid'] = $('#p_aid :checked').val() if type is 'msku'
+
+    tgt.load('/analyzes/index_' + type, params,
       ->
         try
         # Selling 的 Ajax line 双击事件
@@ -193,7 +197,7 @@ $ ->
             # 绘制销量线
             unit_line($.varClosure.params)
             sale_line($.varClosure.params)
-            # PV & SS 线
+            # PV & SS 线, 绑定 ps 更新按钮
             if $.varClosure.params['type'] is 'msku'
               ss_line($.varClosure.params)
               turn_line($.varClosure.params)
@@ -206,6 +210,9 @@ $ ->
               2: 'EasyAcc.D'
             $('#a_acc_id_label').html(display[accId])
             false
+
+          # sid 中的 ps 修改事件
+          bindSIDPsBtn()
 
           #页脚的翻页事件
           $('div.pagination a').click ->
@@ -240,7 +247,30 @@ $ ->
       $('#' + id).empty().append(template).find('h3').html(v)
 
 
-  # 在最上面定义 init 方法,只能在最后调用 init 方法, 否则会报告方法未定义
+  # 为 Tab 切换添加事件
+  bindTabSwitchBtn = ->
+    $('#tab [data-toggle=tab]').on('shown',
+      (e) ->
+        tabId = $(e.target).attr('href').substr(1)
+        if tabId is 'msku'
+          $('#p_aid').removeAttr("disabled")
+        else if tabId is 'sku'
+          $('#p_aid').attr("disabled", '')
+    )
+    $("#p_aid")
+
   # 因为使用 Coffee Script 定义的 function 都是以定义变量的形式赋值 function, 与直接定义 function 不一样
-  init()
+  do ->
+    $('#a_from').data('dateinput').setValue(defaultDate)
+    $('#a_to').data('dateinput').setValue(now)
+
+    # 最下方的 Selling[MerchantSKU, SKU] 列表信息
+    sellRankLoad(MSKU, 1)
+    sellRankLoad(SKU, 1)
+    # 销量线
+    unit_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
+    sale_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
+    # 默认 PageView 线
+    pageViewDefaultContent()
+    bindTabSwitchBtn()
 

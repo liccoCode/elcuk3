@@ -2,7 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.OrderPOST;
-import models.PageInfo;
+import models.Pager;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
@@ -27,7 +27,7 @@ public class Orders extends Controller {
         s = fixs[1];
         List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, s);
         Long count = Orderr.count();
-        PageInfo<Orderr> pi = new PageInfo<Orderr>(s, count, p, orders);
+        Pager<Orderr> pi = new Pager<Orderr>(s, count, p, orders);
         List<Account> accs = Account.all().fetch();
 
 
@@ -49,7 +49,7 @@ public class Orders extends Controller {
     public static void o_search(OrderPOST p) {
         List<Orderr> orders = p.query();
         Long count = p.count();
-        PageInfo<Orderr> pi = new PageInfo<Orderr>(p.size, count, p.page, orders);
+        Pager<Orderr> pi = new Pager<Orderr>(p.size, count, p.page, orders);
 
         render(pi);
     }

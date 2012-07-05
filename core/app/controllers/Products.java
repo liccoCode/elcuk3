@@ -2,7 +2,8 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Webs;
-import models.PageInfo;
+import models.AnalyzesPager;
+import models.Pager;
 import models.Ret;
 import models.market.Account;
 import models.market.Selling;
@@ -43,7 +44,7 @@ public class Products extends Controller {
         List<Product> prods = Product.all().fetch(p, s);
 
         Long count = Product.count();
-        PageInfo<Product> pi = new PageInfo<Product>(s, count, p, prods);
+        AnalyzesPager<Product> pi = new AnalyzesPager<Product>(s, count, p, prods);
 
         List<String> skus = Family.familys(false);
         renderArgs.put("fmys", JSON.toJSONString(skus));
@@ -80,7 +81,7 @@ public class Products extends Controller {
         List<Category> cates = Category.all().fetch(p, s);
         Long count = Category.count();
 
-        PageInfo<Category> pi = new PageInfo<Category>(s, count, p, cates);
+        Pager<Category> pi = new Pager<Category>(s, count, p, cates);
         render(cates, count, p, s, pi);
     }
 
@@ -92,7 +93,7 @@ public class Products extends Controller {
         Long count = Whouse.count();
         List<Account> accs = Account.all().fetch();
 
-        PageInfo<Whouse> pi = new PageInfo<Whouse>(s, count, p, whs);
+        Pager<Whouse> pi = new Pager<Whouse>(s, count, p, whs);
         render(whs, accs, count, p, s, pi);
     }
 

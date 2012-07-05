@@ -1,6 +1,8 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
+import helper.Cached;
+import helper.Caches;
 import helper.Webs;
 import models.finance.SaleFee;
 import org.apache.commons.lang.StringUtils;
@@ -494,7 +496,13 @@ public class Orderr extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
+    @Cached("1h")
     public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
+        String cacheKey = "home.page";
+        Map<String, Map<String, AtomicInteger>> ordmaps = Caches.blockingGet(cacheKey, Map.class);
+        if(ordmaps != null) return ordmaps;
+
+
         DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         if(days > 0) days = -days;
         Date pre7Day = now.plusDays(days).toDate();
@@ -581,9 +589,10 @@ public class Orderr extends GenericModel {
             }
         });
 
-        Map<String, Map<String, AtomicInteger>> afSort = new LinkedHashMap<String, Map<String, AtomicInteger>>();
-        for(String key : dateKey) afSort.put(key, odmaps.get(key));
-        return afSort;
+        ordmaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
+        for(String key : dateKey) ordmaps.put(key, odmaps.get(key));
+        Caches.blockingAdd(cacheKey, odmaps, "1h");
+        return Caches.blockingGet(cacheKey, Map.class);
     }
 
 

@@ -1,5 +1,5 @@
 <!-- 生成 Analyzes 页面下方的 selling 信息 -->
-<table class="table table-bordered">
+<table class="table table-condensed table-bordered">
     <tr>
         <th title="可双击下面 SKU">SKU</th>
         <th>OPN</th>
@@ -7,30 +7,26 @@
         <th>OWY</th>
         <th>Qty</th>
         <th>PS</th>
-        <th>TOV</th>
         <th>_TOV</th>
         <th title="计算的是昨天的数据, 不包含今天; Day7, Day30, Day180 相同" style="color:grey;">Day1</th>
         <th>Day7</th>
         <th>Day30</th>
     </tr>
 #{list items:p.items, as:'sell'}
-    #{if sell_index <= 10}
-        <tr>
-            #{set sku:models.product.Product.merchantSKUtoSKU(sell.merchantSKU)/}
-            <td class="sku" style="cursor:pointer;" aid="0" title="${sku}">${sku}</td>
-            <td>${sell.onplan}</td>
-            <td>${sell.onwork}</td>
-            <td>${sell.onway}</td>
-            <td>${sell.qty}</td>
-            <td>${(sell.d7 / 7).format("#.##")}</td>
-            #{turnOver turnOver:sell.turnOver/}
-            #{turnOver turnOver:sell._turnOver/}
-            <td>${sell.d1}</td>
-            <td>${sell.d7}/${(sell.d7 / 7).format("#.##")}</td>
-            <td>${sell.d30}/${(sell.d30 / 30).format("#.##")}</td>
+    <tr>
+        #{set sku:models.product.Product.merchantSKUtoSKU(sell.merchantSKU)/}
+        <td class="sku" style="cursor:pointer;" aid="0" title="${sku}">${sku}</td>
+        <td>${sell.onplan}</td>
+        <td>${sell.onwork}</td>
+        <td>${sell.onway}</td>
+        <td>${sell.qty}</td>
+        <td>${(sell.d7 / 7).format("#.##")}</td>
+        #{turnOver turnOver:sell._turnOver/}
+        <td>${sell.d1}</td>
+        <td>${sell.d7}/${(sell.d7 / 7).format("#.##")}</td>
+        <td>${sell.d30}/${(sell.d30 / 30).format("#.##")}</td>
 
-        </tr>
-    #{/if}
+    </tr>
 #{/list}
     <tr>
         <td colspan="13">
