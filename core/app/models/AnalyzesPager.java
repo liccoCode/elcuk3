@@ -85,6 +85,7 @@ public class AnalyzesPager<T> extends Pager<T> {
             if(index >= p.count) break;
             ar.add(innerList.get(index++));
         }
+
         return ar;
     }
 }
