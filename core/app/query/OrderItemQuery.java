@@ -28,18 +28,23 @@ public class OrderItemQuery {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<F.T2<String, Integer>> sku_qty(Date from, Date to, Account acc) {
+    public static List<F.T3<String, Integer, Float>> sku_qty_usdCost(Date from, Date to, Account acc) {
         SqlSelect select = new JpqlSelect()
-                .select("oi.product.sku as sku, oi.quantity as qty")
+                .select("oi.product.sku as sku, oi.quantity as qty, oi.usdCost as usdCost")
                 .from("OrderItem oi")
                 .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to);
+                .where("oi.createDate<=?").param(to)
+                .where("oi.quantity>0");
         if(acc != null) select.where("oi.order.account=?").param(acc);
         List<Map> rows = JPAs.createQueryMap(select).getResultList();
-        List<F.T2<String, Integer>> tuples = new ArrayList<F.T2<String, Integer>>();
-        for(Map row : rows)
-            tuples.add(new F.T2<String, Integer>(row.get("sku").toString().substring(0, 2), NumberUtils.toInt(row.get("qty").toString())));
-        return tuples;
+        List<F.T3<String, Integer, Float>> triplus = new ArrayList<F.T3<String, Integer, Float>>();
+        for(Map row : rows) {
+            triplus.add(new F.T3<String, Integer, Float>(
+                    row.get("sku").toString().substring(0, 2),
+                    NumberUtils.toInt((row.get("qty") == null ? "0" : row.get("qty").toString()), 0),
+                    NumberUtils.toFloat((row.get("usdCost") == null ? "0" : row.get("usdCost").toString()), 0)));
+        }
+        return triplus;
     }
 
     /**

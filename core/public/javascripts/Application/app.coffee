@@ -48,35 +48,51 @@ $ ->
     clearLines: () ->
       @series = []
 
-  pieAll = pieOpBuilder('cat_percent', '类别销售百分比', 0)
-  pieUK = pieOpBuilder('cat_percent_uk', 'EasyAcc.U 类别销量百分比', 1)
-  pieDE = pieOpBuilder('cat_percent_de', 'EasyAcc.D 类别销量百分比', 2)
+  cat = '<span style="color:#F67300">销量</span>'
+  sales = '<span style="color:#F67300">销售额</span>'
+  pieAll = pieOpBuilder('cat_percent', "类别#{cat}百分比", 0)
+  pieUK = pieOpBuilder('cat_percent_uk', "EasyAcc.U 类别#{cat}百分比", 1)
+  pieDE = pieOpBuilder('cat_percent_de', "EasyAcc.D 类别#{cat}百分比", 2)
+
+  salesALL = pieOpBuilder('sales_percent', "类别#{sales}百分比", 0)
+  salesUK = pieOpBuilder('sales_percent_uk', "EasyAcc.U 类别#{sales}百分比", 0)
+  salesDE = pieOpBuilder('sales_percent_de', "EasyAcc.D 类别#{sales}百分比", 0)
 
   # category 百分比
-  loadCategoryPercent = (pieOp, date = $.DateUtil.fmt2(new Date())) ->
+  loadCategoryAndSalePercent = (pieTuple, date = $.DateUtil.fmt2(new Date())) ->
     mask = $('#orders')
     mask.mask('加载中...')
-    $.get('/application/categoryPercent', {date: date, aid: pieOp.aid},
+    # aid 的值随便使用一个 pieTuple 即可, 因为 category 与 sales 这种计算是统一的
+    $.get('/application/categoryPercent', {date: date, aid: pieTuple['o'].aid},
       (r) ->
         if r.flag is false
           alert(r.message)
         else
-          line = data: []
-          line.data.push([o['_1'], o['_2']]) for o in r
-          pieOp.clearLines()
-          pieOp.series.push(line)
-          new Highcharts.Chart(pieOp)
+          tupleKey = o: '_2', s: '_3'
+          for k, v of pieTuple
+            line = data: []
+            line.data.push([o['_1'], o[tupleKey[k]]]) for o in r
+            v.clearLines()
+            v.series.push(line)
+            try
+              new Highcharts.Chart(v)
+            catch e #权限控制
+              console.log(e)
         mask.unmask()
     )
-  loadCategoryPercent(pieAll)
-  loadCategoryPercent(pieUK)
-  loadCategoryPercent(pieDE)
+
+  # 重新绘制所有的 Pie 图
+  drawPies = (date) ->
+    loadCategoryAndSalePercent({o: pieAll, s: salesALL}, date)
+    loadCategoryAndSalePercent({o: pieUK, s: salesUK}, date)
+    loadCategoryAndSalePercent({o: pieDE, s: salesDE}, date)
+
+  lastDate = $("#orders tr:last td:eq(0)").attr('date')
+  drawPies(lastDate)
 
   #为table 中的日期添加查看指定天的 类别百分比数据
   $('#orders td[date]').css('cursor', 'pointer').click ->
-    loadCategoryPercent(pieAll, @getAttribute('date'))
-    loadCategoryPercent(pieUK, @getAttribute('date'))
-    loadCategoryPercent(pieDE, @getAttribute('date'))
+    drawPies(@getAttribute('date'))
 
 
 

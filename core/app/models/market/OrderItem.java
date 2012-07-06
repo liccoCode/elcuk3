@@ -12,6 +12,7 @@ import query.OrderItemQuery;
 import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 订单的具体订单项
@@ -254,18 +255,24 @@ public class OrderItem extends GenericModel {
         return hightChartLines;
     }
 
-    public static List<F.T2<String, Integer>> itemGroupByCategory(Date from, Date to, Account acc) {
-        List<F.T2<String, Integer>> rows = OrderItemQuery.sku_qty(from, to, acc);
+    public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to, Account acc) {
+        List<F.T3<String, Integer, Float>> rows = OrderItemQuery.sku_qty_usdCost(from, to, acc);
 
-        Map<String, AtomicInteger> categoryAndCounts = new HashMap<String, AtomicInteger>();
-        for(F.T2<String, Integer> row : rows) {
-            if(categoryAndCounts.containsKey(row._1)) categoryAndCounts.get(row._1).addAndGet(row._2);
-            else categoryAndCounts.put(row._1, new AtomicInteger(row._2));
+        Map<String, F.T2<AtomicInteger, AtomicReference<Float>>> categoryAndCounts = new HashMap<String, F.T2<AtomicInteger, AtomicReference<Float>>>();
+        for(F.T3<String, Integer, Float> row : rows) {
+            if(categoryAndCounts.containsKey(row._1)) {
+                categoryAndCounts.get(row._1)._1.addAndGet(row._2);
+                categoryAndCounts.get(row._1)._2.set(categoryAndCounts.get(row._1)._2.get() + row._3);
+            } else
+                categoryAndCounts.put(row._1, new F.T2<AtomicInteger, AtomicReference<Float>>(new AtomicInteger(row._2), new AtomicReference<Float>(row._3)));
         }
 
-        List<F.T2<String, Integer>> categoryAndQty = new ArrayList<F.T2<String, Integer>>();
+        List<F.T3<String, Integer, Float>> categoryAndQty = new ArrayList<F.T3<String, Integer, Float>>();
         for(String key : categoryAndCounts.keySet())
-            categoryAndQty.add(new F.T2<String, Integer>(key, categoryAndCounts.get(key).get()));
+            categoryAndQty.add(new F.T3<String, Integer, Float>(key,
+                    categoryAndCounts.get(key)._1.get(),
+                    categoryAndCounts.get(key)._2.get()
+            ));
 
         return categoryAndQty;
     }

