@@ -245,8 +245,9 @@ public class ProcureUnit extends Model {
         this.delivery.deliveryQty = delivery.deliveryQty;
         if(StringUtils.isNotBlank(comment))
             this.comment = comment;
+        if(this.stage != STAGE.DONE) // 如果是 DONE stage 重新更新, 则不需要再记录这信息
+            this.deliveryment.memo = String.format("%s 在 %s 交货.\r\n%s", this.nickName(), Dates.date2DateTime(), this.deliveryment.memo);
         this.stage = STAGE.DONE;
-        this.deliveryment.memo = String.format("%s 在 %s 交货.\r\n%s", this.nickName(), Dates.date2DateTime(), this.deliveryment.memo);
         this.deliveryment.beDelivery();
 
         return this.save();
