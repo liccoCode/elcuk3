@@ -2,25 +2,25 @@
 #{set title:'Procures' /}
 #{set 'moreScripts'}
     #{script 'procures/index.coffee'/}
+    #{script 'jquery.validate.min.js'/}
 #{/set}
 <div style="margin:5px 0">
     <a href="@{Procures.create()}" target="_blank" class="btn btn-small btn-primary">创建</a>
 </div>
 <div class="row-fluid">
 
-    <div class="span4">
+    <div class="span5">
         <ul id="procureUnitsTab" class="nav nav-tabs">
-            <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">Plan</a></li>
-            <li><a href="#delivery" data-toggle="tab" style="padding:3px 8px;">Delivering</a></li>
+            <li class="active"><a href="#plan" data-toggle="tab" style="padding:3px 8px;">计划中的采购单元</a></li>
+            <li><a href="#deliveryment" data-toggle="tab" style="padding:3px 8px;">待交货的采购单</a></li>
             <li class="dropdown">
-                <a class="dropdown-toggle" data-toggle="dropdown" style="padding:3px 8px;" href="#">
-                    Wating For Ship <b class="caret"></b>
+                <a class="dropdown-toggle" data-toggle="dropdown" style="padding:3px 8px;" href="#">等待运输<b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                    <li><a href="#deliveryment" data-toggle="tab">采购单</a></li>
                     <li><a href="#done" data-toggle="tab">采购单元</a></li>
+                    <li><a href="#doneDeliveryment" data-toggle="tab">采购单</a></li>
                     <li class="divider"></li>
-                    <li><a href="#doneDeliveryment" data-toggle="tab">完成了的采购单</a></li>
+                    <li><a href="#delivery" data-toggle="tab">交货中</a></li>
                 </ul>
             </li>
         </ul>
@@ -30,19 +30,20 @@
             #{procure_planProcureUnitTable items:plan /}
             </div>
 
-            <div id="delivery" class="tab-pane fade">
-            #{procure_deliveryProcureUnitTable items:procure /}
+            <div id="deliveryment" class="tab-pane fade">
+            #{procure_deliveryment items:dlmts/}
             </div>
 
             <div id="done" class="tab-pane fade">
             #{procure_deliveryProcureUnitTable items:done /}
             </div>
 
-            <div id="deliveryment" class="tab-pane fade">
-            #{procure_deliveryment items:dlmts/}
-            </div>
             <div id="doneDeliveryment" class="tab-pane fade">
             #{procure_deliveryment items:doneDlmts/}
+            </div>
+
+            <div id="delivery" class="tab-pane fade">
+            #{procure_deliveryProcureUnitTable items:procure /}
             </div>
         </div>
 
@@ -51,17 +52,5 @@
 
     <!-- ProcureUnit 详细内容 -->
     <div class="span7" id="unit_details">
-    </div>
-
-    <div class="span1">
-        <button class="btn btn-small btn-danger">未处理完采购单列表</button>
-        <ul>
-        #{list items:dlmts, as:'dlmt'}
-            <li>
-                <a rel="popover" data-content="${dlmt.supplier()}" placement="left" width="auto" target="_blank" href="@{Deliveryments.detail(dlmt.id)}">${dlmt.id}</a>
-                | <span class="badge badge-info">${dlmt.units.size()}</span>| ${dlmt.state.to_h().raw()}
-            </li>
-        #{/list}
-        </ul>
     </div>
 </div>

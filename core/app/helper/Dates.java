@@ -29,14 +29,6 @@ public class Dates {
         return df.newXMLGregorianCalendar(expression).toGregorianCalendar().getTime();
     }
 
-    public static String date2DateTime(Date date) {
-        if(date == null) {
-            return DateTime.now().toString("yyyy-MM-dd HH:mm:ss");
-        } else {
-            return new DateTime(date).toString("yyyy-MM-dd HH:mm:ss");
-        }
-    }
-
     /**
      * 返回一个 Date 日期这一天的开始
      *
@@ -44,7 +36,7 @@ public class Dates {
      * @return
      */
     public static Date morning(Date date) {
-        return data2Date(date);
+        return date2JDate(date);
     }
 
     /**
@@ -54,7 +46,7 @@ public class Dates {
      * @return
      */
     public static Date night(Date date) {
-        return new Date(data2Date(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
+        return new Date(date2JDate(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
     }
 
     /**
@@ -63,16 +55,33 @@ public class Dates {
      * @param date
      * @return
      */
-    public static Date data2Date(Date date) {
+    public static Date date2JDate(Date date) {
         Date tmp = date;
         if(tmp == null) tmp = new Date();
         return DateTime.parse(new DateTime(tmp).toString("yyyy-MM-dd")).toDate();
+    }
+
+    public static String date2Date() {
+        return date2Date(null);
     }
 
     public static String date2Date(Date date) {
         if(date == null) return DateTime.now().toString("yyyy-MM-dd");
         else return new DateTime(date).toString("yyyy-MM-dd");
     }
+
+    public static String date2DateTime() {
+        return date2DateTime(null);
+    }
+
+    public static String date2DateTime(Date date) {
+        if(date == null) {
+            return DateTime.now().toString("yyyy-MM-dd HH:mm:ss");
+        } else {
+            return new DateTime(date).toString("yyyy-MM-dd HH:mm:ss");
+        }
+    }
+
 
     /**
      * 在进行 Listing 更新的时候, 日期的格式在不同的市场上不同, 这个方法来进行修正格式

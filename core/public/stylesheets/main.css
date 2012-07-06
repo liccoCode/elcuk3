@@ -1,0 +1,8 @@
+.table .active{
+    background:#EEE;
+}
+
+form.cmxform label.error, label.error{
+    color:red;
+    font-style:italic;
+}

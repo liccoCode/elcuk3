@@ -9,39 +9,37 @@
     </div>
 
     <div id="deliveryInfo" class="accordion-body collapse" style="height:0">
-        <table class="table table-condensed">
-            <tr>
-                <td>实际交货日期</td>
-                <td>
-                    <input name="p.delivery.deliveryDate" type="date" value="${new java.util.Date().date()}" placeHolder="实际交货日期">
-                </td>
-            </tr>
-            <tr>
-                <td>实际交货数量</td>
-                <td>
-                    <div class="input-prepend">
-                        <input type="text" class="input-small" name="p.delivery.deliveryQty" value="${unit.delivery.deliveryQty}">
-                        <span class="add-on" style="cursor:pointer" id="planQty_btn">${unit.plan.planQty}</span>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    留言
-                    <textarea class="span12" rows="5" name="p.comment">${unit.comment}</textarea>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <button id="update_delivery_info" class="btn btn-mini btn-primary">更新采购信息</button>
-                </td>
-            </tr>
-
-            <!-- 其他 delivery 的信息 -->
-            <input type="hidden" name="p.delivery.planDeliveryDate" value="${unit.delivery.planDeliveryDate.date()}">
-            <input type="hidden" name="p.delivery.ensureQty" value="${unit.delivery.ensureQty}">
-            <input type="hidden" name="p.id" value="${unit.id}">
-        </table>
+        <form>
+            <table class="table table-condensed">
+                <tr>
+                    <td>实际交货日期</td>
+                    <td>
+                        <input name="d.deliveryDate" class="required" type="date" value="${new java.util.Date().date()}" placeHolder="实际交货日期">
+                    </td>
+                </tr>
+                <tr>
+                    <td>实际交货数量</td>
+                    <td>
+                        <div class="input-prepend">
+                            <input type="text" class="input-small required" name="d.deliveryQty" value="${unit.delivery.deliveryQty}">
+                            <span class="add-on" style="cursor:pointer" id="planQty_btn">${unit.plan.planQty}</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        留言
+                        <textarea class="span12" rows="5" name="cmt">${unit.comment}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button id="update_delivery_info" class="btn btn-mini btn-primary">更新采购信息</button>
+                    </td>
+                </tr>
+                <input type="hidden" name="id" value="${unit.id}">
+            </table>
+        </form>
     </div>
 </div>
 

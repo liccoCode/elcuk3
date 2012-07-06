@@ -156,8 +156,8 @@ public class OrderItem extends GenericModel {
 
     public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku, Account acc, String type, Date from, Date to) {
         // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.data2Date(from));
-        DateTime inTo = new DateTime(Dates.data2Date(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        DateTime inFrom = new DateTime(Dates.date2JDate(from));
+        DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc, inFrom.toDate(), inTo.toDate());
         Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
                 /*销售额*/
@@ -175,7 +175,7 @@ public class OrderItem extends GenericModel {
             float sale_fr = 0;
 
             for(OrderItem oi : orderItems) {
-                if(Dates.data2Date(oi.createDate).getTime() == travel.getMillis()) {
+                if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
                     try {
                         float usdCost = oi.usdCost == null ? 0 : oi.usdCost;
                         sale_all += usdCost;
@@ -213,8 +213,8 @@ public class OrderItem extends GenericModel {
     @SuppressWarnings("unchecked")
     public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartUnitOrder(String skuOrMsku, Account acc, String type, Date from, Date to) {
         // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.data2Date(from));
-        DateTime inTo = new DateTime(Dates.data2Date(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        DateTime inFrom = new DateTime(Dates.date2JDate(from));
+        DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
          * 按照天过滤成销量数据
@@ -236,7 +236,7 @@ public class OrderItem extends GenericModel {
             float unit_de = 0;
             float unit_fr = 0;
             for(OrderItem oi : orderItems) {
-                if(Dates.data2Date(oi.createDate).getTime() == travel.getMillis()) {
+                if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
                     unit_all += oi.quantity;
                     if(oi.market == Account.M.AMAZON_UK) unit_uk += oi.quantity;
                     else if(oi.market == Account.M.AMAZON_DE) unit_de += oi.quantity;

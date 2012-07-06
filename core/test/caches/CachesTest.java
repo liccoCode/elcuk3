@@ -20,6 +20,6 @@ public class CachesTest extends UnitTest {
         String msku = "MSKU";
         Date from = new DateTime().plusDays(-7).toDate();
         Date to = new DateTime().plusDays(-1).toDate();
-        System.out.println(Caches.Q.cacheKey(msku, Dates.data2Date(from), Dates.data2Date(to)));
+        System.out.println(Caches.Q.cacheKey(msku, Dates.date2JDate(from), Dates.date2JDate(to)));
     }
 }

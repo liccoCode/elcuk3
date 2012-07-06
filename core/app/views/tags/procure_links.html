@@ -1,0 +1,8 @@
+*{_unit: ProcureUnit, _br: 是否需要换行}*
+<div class="input-prepend">
+    <span class="add-on"><a target="_blank" href="/sellings/selling?sid=${_unit.selling.sellingId}">${_unit.selling.sellingId}</a></span>
+    <span class="add-on"><a target="_blank" href="/listings/listing?lid=${_unit.selling.listing.listingId}">ASIN</a></span>
+#{if _br}<br/>#{/if}
+    <span class="add-on"><a target="_blank" href="${_unit.selling.asinLink()}">${_unit.selling.asin}</a></span>
+    <span class="add-on"><a target="_blank" href="/products/p_detail?sku=${_unit.product.sku}">${_unit.product.sku}</a></span>
+</div>

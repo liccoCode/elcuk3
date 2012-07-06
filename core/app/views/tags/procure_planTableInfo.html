@@ -48,13 +48,7 @@ _unit :ProcureUnit
 <tr>
     <td>Links</td>
     <td>
-        <div class="input-prepend">
-            <span class="add-on"><a target="_blank" href="/sellings/selling?sid=${_unit.selling.sellingId}">${_unit.selling.sellingId}</a></span>
-            <span class="add-on"><a target="_blank" href="/listings/listing?lid=${_unit.selling.listing.listingId}">ASIN</a></span>
-            <br/>
-            <span class="add-on"><a target="_blank" href="${_unit.selling.asinLink()}">${_unit.selling.asin}</a></span>
-            <span class="add-on"><a target="_blank" href="/products/p_detail?sku=${_unit.product.sku}">${_unit.product.sku}</a></span>
-        </div>
+    #{procure_links unit:_unit, br:true/}
         <input type="hidden" id="procureUnit_id" value="${_unit.id}">
     </td>
 </tr>

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import helper.Webs;
 import models.Ret;
 import models.User;
+import models.embedded.UnitDelivery;
 import models.market.Selling;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -84,8 +85,10 @@ public class Procures extends Controller {
         renderJSON(Webs.G(p.assignToDeliveryment(dlmt)));
     }
 
-    public static void procureUnitDeliveryInfoUpdate(ProcureUnit p) {
-        renderJSON(Webs.G(p.deliveryComplete()));
+    public static void procureUnitDone(Long id, UnitDelivery d, String cmt) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        if(unit == null || !unit.isPersistent()) throw new FastRuntimeException("ProcureUnit 不存在!");
+        renderJSON(Webs.G(unit.deliveryComplete(d, cmt)));
     }
 
     // ---------------- Delivery Tab ------------------

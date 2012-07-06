@@ -27,30 +27,21 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     public enum S {
         /**
-         * 预定
+         * 预定, 已经下单
          */
         PENDING {
             @Override
-            public String to_h() {
-                return String.format("<span style='color:#5CB85C'>%s</span>", this);
+            public String color() {
+                return "#5CB85C";
             }
         },
         /**
-         * 部分付款
+         * 部分交货
          */
-        PARTPAY {
+        DELIVERING {
             @Override
-            public String to_h() {
-                return String.format("<span style='color:#FAA52C'>%s</span>", this);
-            }
-        },
-        /**
-         * 全部付款
-         */
-        FULPAY {
-            @Override
-            public String to_h() {
-                return String.format("<span style='color:#007BCC'>%s</span>", this);
+            public String color() {
+                return "#FAA52C";
             }
         },
         /**
@@ -58,14 +49,32 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
          */
         DELIVERY {
             @Override
-            public String to_h() {
-                return String.format("<span style='color:#4DB2D0'>%s</span>", this);
+            public String color() {
+                return "#F67300";
+            }
+        },
+        /**
+         * 需要付款, 表示货物已经全部完成.
+         */
+        NEEDPAY {
+            @Override
+            public String color() {
+                return "#4DB2D0";
+            }
+        },
+        /**
+         * 全部付款
+         */
+        FULPAY {
+            @Override
+            public String color() {
+                return "#007BCC";
             }
         },
         CANCEL {
             @Override
-            public String to_h() {
-                return String.format("<span style='color:red'>%s</span>", this);
+            public String color() {
+                return "red";
             }
         };
 
@@ -74,7 +83,11 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
          *
          * @return
          */
-        public abstract String to_h();
+        public String to_h() {
+            return String.format("<span style='color:%s'>%s</span>", this.color(), this);
+        }
+
+        public abstract String color();
     }
 
     @OneToMany(mappedBy = "deliveryment")
@@ -118,7 +131,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     public static List<Deliveryment> openDeliveryments() {
         //TODO 需要将 Deliveryment 添加 supplier
-        return Deliveryment.find("state!=?", S.DELIVERY).fetch();
+        return Deliveryment.find("state NOT IN (?,?)", S.DELIVERY, S.CANCEL).fetch();
     }
 
     public static Deliveryment checkAndCreate(User user) {
@@ -132,6 +145,8 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     /**
      * 对此 Deliveryment 进行付款操作
+     * <p/>
+     * Procure#: #3/4 对已经交货或者部分交货的 采购单 进行付款; 会不断进行 采购单 NEEDPAY 状态检查
      *
      * @param payment
      * @return
@@ -142,7 +157,8 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         payment.paymentCheckItSelf();
 
         payment.deliveryment = this; //由 Payment 添加关联
-        payment.deliveryment.state = S.PARTPAY;
+        if(this.state == S.DELIVERY) // 装有当全局交货以后, 才能改变 NEEDPAY 状态
+            payment.deliveryment.state = S.NEEDPAY;
         payment.deliveryment.save();
         return payment.save();
     }
@@ -153,19 +169,13 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
      * @return
      */
     public boolean isPaymentComplete() {
-        switch(this.state) {
-            case PENDING:
-            case PARTPAY:
-            case DELIVERY:
-                return false;
-            case FULPAY:
-            default:
-                return true;
-        }
+        return this.state == S.FULPAY;
     }
 
     /**
      * 将采购单付清全款; 需要检查是否可以将 Deliveryment 变成 Delivery 状态
+     * <p/>
+     * Procure#: #4/4 最后人工手动来进行清款检查. 会对 采购单 FULPAY 状态检查
      */
     public void complatePayment() {
         /**
@@ -208,7 +218,6 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         boolean fullPayEUR = totalNeedPayEUR == totalPayedEUR;
         if(fullPayCNY && fullPayGBP && fullPayUSD && fullPayEUR) {
             this.state = S.FULPAY;
-            this.beDelivery();
             this.save();
         } else {
             StringBuilder sbd = new StringBuilder("款项还没有付清,请检查!\r\n");
@@ -233,7 +242,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         try {
             thisPayment.deliveryment.complatePayment();
         } catch(FastRuntimeException e) {
-            thisPayment.deliveryment.state = Deliveryment.S.PARTPAY;
+            thisPayment.deliveryment.state = Deliveryment.S.NEEDPAY;
             thisPayment.deliveryment.save();
         }
     }
@@ -243,6 +252,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
      * (其所有的 ProcureUnit 全部交货, DONE)
      */
     public boolean canBeDelivery() {
+        // 如果连 PENDING 状态都没过, 就不要考虑 DELIVERY 了
         if(this.state == S.PENDING) return false;
         for(ProcureUnit pu : this.units) {
             if(pu.stage != ProcureUnit.STAGE.DONE) return false;
@@ -254,9 +264,12 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
      * 将 Deliveryment 状态变更为交货.
      */
     public void beDelivery() {
-        if(!canBeDelivery()) return;
-        this.state = Deliveryment.S.DELIVERY;
-        this.memo = "所有产品交货完成." + Dates.date2DateTime(new Date()) + "\r\n" + this.memo;
+        if(!canBeDelivery()) {
+            this.state = S.DELIVERING;
+        } else {
+            this.state = Deliveryment.S.DELIVERY;
+            this.memo = "所有产品交货完成." + Dates.date2DateTime() + "\r\n" + this.memo;
+        }
         this.save();
     }
 
@@ -277,7 +290,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
             }
             unit.save();
         }
-        this.memo = String.format("Cancel At %s by %s.\r\n%s", Dates.date2DateTime(new Date()), user, this.memo);
+        this.memo = String.format("Cancel At %s by %s.\r\n%s", Dates.date2DateTime(), user, this.memo);
         this.state = S.CANCEL;
         this.save();
     }
@@ -296,5 +309,13 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
                 deliveriedQty += unit.delivery.deliveryQty;
         }
         return new F.T2<Integer, Integer>(deliveriedQty, ensureQty);
+    }
+
+    public F.T2<Integer, Integer> deliveryUnitProgress() {
+        int done = 0;
+        for(ProcureUnit unit : this.units) {
+            if(unit.stage == ProcureUnit.STAGE.DONE) done++;
+        }
+        return new F.T2<Integer, Integer>(done, units.size() - done);
     }
 }

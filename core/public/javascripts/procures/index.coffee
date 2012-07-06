@@ -67,11 +67,13 @@ $ ->
   # 更新采购信息
   bindUpdateDeliveryBtn = ->
     $('#update_delivery_info').click ->
+      if $('#deliveryInfo form').valid() is false
+        return false
       $.varClosure.params = {}
       $('#deliveryInfo :input').map($.varClosure)
       info = $('#deliveryInfo')
       info.mask("更新中...")
-      $.post('/procures/procureUnitDeliveryInfoUpdate', $.varClosure.params,
+      $.post('/procures/procureUnitDone', $.varClosure.params,
         (r) ->
           if r.flag is false
             alert(r.message)
@@ -80,6 +82,7 @@ $ ->
           info.unmask()
           $('#delivery tr[row][class=active]').remove()
       )
+      false
 
   # 指派 Shipment
   bindAssignShipment = ->

@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.JPAs;
 import helper.Webs;
 import models.User;
@@ -36,23 +37,60 @@ public class ProcureUnit extends Model {
         /**
          * 计划阶段
          */
-        PLAN,
+        PLAN {
+            @Override
+            public String color() {
+                return "#3da4c2";
+            }
+        },
         /**
          * 采购阶段
          */
-        DELIVERY,
+        DELIVERY {
+            @Override
+            public String color() {
+                return "#006acc";
+            }
+        },
         /**
          * 完成了, 全部交货了
          */
-        DONE,
+        DONE {
+            @Override
+            public String color() {
+                return "#5bb75b";
+            }
+        },
         /**
          * 运输完成
          */
-        SHIP_OVER,
+        SHIP_OVER {
+            @Override
+            public String color() {
+                return "#108080";
+            }
+        },
         /**
          * 关闭阶段, 不处理了
          */
-        CLOSE
+        CLOSE {
+            @Override
+            public String color() {
+                return "#f9a021";
+            }
+
+        };
+
+        /**
+         * 前台使用的 html 代码
+         *
+         * @return
+         */
+        public String to_h() {
+            return String.format("<span style='color:%s'>%s</span>", this.color(), this);
+        }
+
+        public abstract String color();
     }
 
     /**
@@ -159,9 +197,10 @@ public class ProcureUnit extends Model {
     }
 
     /**
-     * @return
      * @4 将创建好的 ProcureUnit 指派给存在的采购单.
      * ProcureUnit 从 Plan stage 升级成为 Delivery Stage
+     *
+     * Procure#: #1/4 采购单元分派给采购单
      */
     public ProcureUnit assignToDeliveryment(Deliveryment deliveryment) {
         /**
@@ -191,14 +230,22 @@ public class ProcureUnit extends Model {
     /**
      * 此 ProcureUnit 工厂制作完成, 交货.
      *
+     * Procure#: #2/4 采购单元在采购单中进行完成交货操作; 会不断的进行 采购单 DELIVERING / DELIVERY 状态检查
+     *
      * @return
      */
-    public ProcureUnit deliveryComplete() {
+    public ProcureUnit deliveryComplete(UnitDelivery delivery, String comment) {
         if(this.stage != STAGE.DELIVERY) throw new FastRuntimeException("此采购计划的状态错误! 请找 IT 核实.[" + this.id + "]");
-        if(this.delivery.deliveryDate == null) throw new FastRuntimeException("不允许更新实际交货日期为空");
-        if(this.delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
-        if(this.delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");
+        if(delivery.deliveryDate == null) throw new FastRuntimeException("不允许更新实际交货日期为空");
+        if(delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
+        if(delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");
+        if(delivery.deliveryQty > this.delivery.ensureQty) throw new FastRuntimeException("交货数量大于实际采购数量?! 不现实!");
+        this.delivery.deliveryDate = delivery.deliveryDate;
+        this.delivery.deliveryQty = delivery.deliveryQty;
+        if(StringUtils.isNotBlank(comment))
+            this.comment = comment;
         this.stage = STAGE.DONE;
+        this.deliveryment.memo = String.format("%s 在 %s 交货.\r\n%s", this.nickName(), Dates.date2DateTime(), this.deliveryment.memo);
         this.deliveryment.beDelivery();
 
         return this.save();
@@ -290,6 +337,10 @@ public class ProcureUnit extends Model {
             shipmentIds.add(item.shipment.id);
         }
         return new F.T2<Integer, Set<String>>(this.delivery.deliveryQty - shippedQty, shipmentIds);
+    }
+
+    public String nickName() {
+        return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
 
     @SuppressWarnings("unchecked")

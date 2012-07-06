@@ -72,4 +72,29 @@ $ ->
           alert("删除成功.")
     )
 
+
+  # 为 tr 添加 slideToggle 事件
+  $('#procure_units tr[data-toggle=collapse]').css('cursor', 'pointer').click ->
+    $.tableRowClickActive('#procure_units tr[data-toggle]', $(@))
+    $($(@).attr('href')).toggle('200', 'linear')
+
+  # 增加在 Deliveryment 页面的 ProcureUnit 完成交货事件
+  $('button[rel=update_delivery_info_btn]').click ->
+    key = "#unit_#{@getAttribute('uid')}"
+    $.varClosure.params = {}
+    if $("#{key} form").valid() is false
+      return false
+    $("#{key} :input").map($.varClosure)
+    maskE = $("#{key} table")
+    maskE.mask('更新中...')
+    $.post('/procures/procureUnitDone', $.varClosure.params,
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('更新成功.')
+        maskE.unmask()
+    )
+    false
+
   window.$ui.htmlIni()

@@ -14,11 +14,12 @@ items: 需要 Deliveryment List
 #{list items:_items, as:'d'}
     <tr>
         <td><a href="@{Deliveryments.detail(d.id)}" target="_blank">${d.id}</a></td>
-        <td>${d.state.to_h().raw()}</td>
+        <td style="background:${d.state.color()}">${d.state}</td>
         <td>${d.supplier()}</td>
         #{set progress:d.deliveryProgress()/}
         <td>${progress._1}/${progress._2}</td>
-        <td>${d.units.size()}</td>
+        #{set unitProgress:d.deliveryUnitProgress()/}
+        <td>${unitProgress._1} / ${unitProgress._2}</td>
         <td>${d.createDate.datetime()}</td>
         <td>${d.handler.username}</td>
     </tr>
