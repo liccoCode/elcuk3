@@ -57,14 +57,12 @@ public class Analyzes extends Controller {
     /**
      * Analyze 页面下部分的 Selling 信息
      */
-    @Transactional(readOnly = true)
     public static void index_msku(AnalyzesPager<Selling> p) {
         List<Selling> sells = Selling.analyzesSKUAndSID("msku");
         p.items = AnalyzesPager.filterSellings(sells, p);
         render(p);
     }
 
-    @Transactional(readOnly = true)
     public static void index_sku(AnalyzesPager<Selling> p) {
         List<Selling> sells = Selling.analyzesSKUAndSID("sku");
         p.items = AnalyzesPager.filterSellings(sells, p);
@@ -79,7 +77,6 @@ public class Analyzes extends Controller {
      * @param to
      */
     @CacheFor("30mn")
-    @Transactional(readOnly = true)
     public static void ajaxUnit(String msku,
                                 String type,
                                 Account acc,
@@ -95,7 +92,6 @@ public class Analyzes extends Controller {
 
     @Check("root")
     @CacheFor("30mn")
-    @Transactional(readOnly = true)
     public static void ajaxSales(String msku,
                                  String type,
                                  Account acc,
@@ -113,7 +109,6 @@ public class Analyzes extends Controller {
      * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
     @CacheFor("30mn")
-    @Transactional(readOnly = true)
     public static void ajaxSellingRecord(String msku,
                                          Account acc,
                                          Date from,
@@ -129,7 +124,6 @@ public class Analyzes extends Controller {
      * 查看某一个 Selling 在一段时间内的转换率
      */
     @CacheFor("30mn")
-    @Transactional(readOnly = true)
     public static void ajaxSellingTurn(String msku,
                                        Account acc,
                                        Date from,
@@ -146,7 +140,6 @@ public class Analyzes extends Controller {
      *
      * @param msku
      */
-    @Transactional(readOnly = true)
     public static void pie(String msku,
                            Date date) {
         Map<String, AtomicInteger> dataMap = Orderr.orderPieChart(msku, date);
