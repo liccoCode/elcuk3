@@ -199,7 +199,7 @@ public class ProcureUnit extends Model {
     /**
      * @4 将创建好的 ProcureUnit 指派给存在的采购单.
      * ProcureUnit 从 Plan stage 升级成为 Delivery Stage
-     *
+     * <p/>
      * Procure#: #1/4 采购单元分派给采购单
      */
     public ProcureUnit assignToDeliveryment(Deliveryment deliveryment) {
@@ -229,13 +229,14 @@ public class ProcureUnit extends Model {
 
     /**
      * 此 ProcureUnit 工厂制作完成, 交货.
-     *
+     * <p/>
      * Procure#: #2/4 采购单元在采购单中进行完成交货操作; 会不断的进行 采购单 DELIVERING / DELIVERY 状态检查
      *
      * @return
      */
     public ProcureUnit deliveryComplete(UnitDelivery delivery, String comment) {
-        if(this.stage != STAGE.DELIVERY) throw new FastRuntimeException("此采购计划的状态错误! 请找 IT 核实.[" + this.id + "]");
+        if(this.stage != STAGE.DELIVERY && this.stage != STAGE.DONE)
+            throw new FastRuntimeException("此采购计划的状态错误! 请找 IT 核实.[" + this.id + "]");
         if(delivery.deliveryDate == null) throw new FastRuntimeException("不允许更新实际交货日期为空");
         if(delivery.deliveryQty == null) throw new FastRuntimeException("不允许实际交货数量为空");
         if(delivery.deliveryQty < 0) throw new FastRuntimeException("不允许实际交货数量小于 0");
