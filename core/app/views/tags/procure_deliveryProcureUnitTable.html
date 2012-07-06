@@ -7,6 +7,7 @@ items: procureList
         <td><a rel="popover" data-content="采购单 Deliveryment Id" width="auto">DLId</a></td>
         <td><a rel="popover" data-content="供应商" width="auto">Sup</a></td>
         <td><a rel="popover" data-content="实际交货数量" width='auto'>JHQty</a></td>
+        <td>SKU</td>
         <td>确认采购数量</td>
         <td>状态</td>
         <td>User</td>
@@ -15,8 +16,9 @@ items: procureList
 #{list items:_items, as:'unit'}
     <tr row style="cursor:pointer;">
         <td>${unit.id}</td>
-        <td>${unit.deliveryment.id}</td>
+        <td><a href="@{Deliveryments.detail(unit.deliveryment.id)}">${unit.deliveryment.id}</a></td>
         <td>${unit.plan.supplier}</td>
+        <td>${unit.sku}</td>
         <td>
             #{if unit.delivery.deliveryQty == null}
                 <span class="label label-warning">还未交货</span>
@@ -25,7 +27,7 @@ items: procureList
             ${unit.delivery.deliveryQty}
             #{/else}
         <td>${unit.delivery.ensureQty}</td>
-        <td>${unit.stage}</td>
+        <td style="background:${unit.stage.color()}">${unit.stage}</td>
         <td>${unit.handler?.username}</td>
         <td>${unit.delivery.planDeliveryDate.date()}</td>
     </tr>
