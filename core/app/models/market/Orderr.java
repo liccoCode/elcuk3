@@ -589,9 +589,9 @@ public class Orderr extends GenericModel {
             }
         });
 
-        ordmaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
-        for(String key : dateKey) ordmaps.put(key, odmaps.get(key));
-        Caches.blockingAdd(cacheKey, odmaps, "1h");
+        Map<String, Map<String, AtomicInteger>> sortOdMaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
+        for(String key : dateKey) sortOdMaps.put(key, odmaps.get(key));
+        Caches.blockingAdd(cacheKey, sortOdMaps, "1h");
         return Caches.blockingGet(cacheKey, Map.class);
     }
 
