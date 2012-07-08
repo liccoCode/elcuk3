@@ -8,6 +8,9 @@ items: procureList
         <td>SKU</td>
         <td>Msku</td>
         <td>Qty</td>
+        <td>单价</td>
+        <td>总价</td>
+        <td>供应商</td>
         <td>User</td>
         <td><a rel="popover" data-content="预计到库时间" width="auto">DKDate</a></td>
     </tr>
@@ -18,6 +21,9 @@ items: procureList
         <td><a href="@{Products.p_detail(unit.sku)}" target="_blank">${unit.sku}</a></td>
         <td><a href="@{Sellings.selling(unit.sid)}">${unit.sid}</a></td>
         <td>${unit.plan.planQty}</td>
+        <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>
+        <td>${unit.plan.unitPrice * unit.plan.planQty}</td>
+        <td>${unit.plan.supplier}</td>
         <td>${unit.handler?.username}</td>
         <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')}</td>
     </tr>

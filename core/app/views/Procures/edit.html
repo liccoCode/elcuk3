@@ -10,9 +10,9 @@
             <td>Selling:</td>
             <td>
                 <div class="input-prepend">
-                    <span class="add-on">${unit.selling.sellingId}</span>
                     <span class="add-on"><a href="/listings/listing?lid=${unit.selling.listing.listingId}" target="_blank">ASIN</a></span>
                     <span class="add-on"><a href="/sellings/selling?sid=${unit.selling.sellingId}" target="_blank">SID</a></span>
+                    <span class="add-on">${unit.selling.sellingId}</span>
                 </div>
                 <input type="hidden" name="p.id" value="${unit.id}">
             </td>
@@ -20,7 +20,7 @@
             <td>
                 <select name="p.whouse.id" size="1">
                 #{list items:models.product.Whouse.all().fetch(), as:'wh'}
-                    <option ${unit.whouse.id == wh.id ? 'checked' : ''} value="${wh.id}">${wh.name}</option>
+                    <option ${unit.whouse.id == wh.id ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
                 #{/list}
                 </select>
             </td>
