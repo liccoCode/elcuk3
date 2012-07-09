@@ -363,6 +363,11 @@ public class Account extends Model {
             }
         }
 
+        /**
+         * 模拟人工上架使用的链接.
+         * - Amazon: 创建 Listing 的提交地址
+         * @return
+         */
         public String saleSellingPostLink() {
             //https://catalog-sc.amazon.co.uk/abis/product/ProcessCreateProduct
             switch(this) {
@@ -373,6 +378,28 @@ public class Account extends Model {
                 case AMAZON_IT:
                 case AMAZON_US:
                     return String.format("https://catalog-sc.%s/abis/product/ProcessCreateProduct", this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+
+        /**
+         * 模拟人工上架使用的链接.
+         * - Amazon: 创建全新的 Listing 的时候, 最后需要回掉方法寻找 New UPC 对应的 ASIN
+         * @return
+         */
+        public String productCreateStatusLink() {
+            // https://sellercentral.amazon.de/myi/search/ajax/ProductCreateStatus
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://sellercentral.%s/myi/search/ajax/ProductCreateStatus", this.toString());
                 case EBAY_UK:
                 default:
                     throw new NotSupportChangeRegionFastException();

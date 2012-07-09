@@ -173,8 +173,13 @@ $(function(){
         btnDiv.mask("创建中...");
         $("#amazon :input").map($.varClosure);
         $.post('/products/saleAmazonListing', $.varClosure.params, function(r){
-            if(r.flag === false) alert(r.message);
-            else alert('添加成功.');
+            if(r.flag === false)
+                alert(r.message);
+            else  {
+                // 检查 UPC
+                $('[name=s\\.aps\\.upc] ~ button').click();
+                alert('添加成功(请误重新创建!)');
+            }
             btnDiv.unmask();
         });
     });

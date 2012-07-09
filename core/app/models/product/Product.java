@@ -1,5 +1,9 @@
 package models.product;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
@@ -178,7 +182,7 @@ public class Product extends GenericModel {
         selling.merchantSKU = selling.merchantSKU.toUpperCase();
         try {
             if(!StringUtils.equals(StringUtils.split(selling.merchantSKU, ",")[1], selling.aps.upc))
-                throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc]");
+                throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc],[other]");
         } catch(FastRuntimeException e) {
             throw e;
         } catch(Exception e) {
@@ -376,21 +380,38 @@ public class Product extends GenericModel {
              * 上架时候的错误信息全部返回给前台.
              */
             body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/, addSellingPrams);
-            if(Play.mode.isDev())
-                FLog.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
+            // 任何上架操作都记录日志. 大不了自己删除...
+            FLog.fileLog(String.format("%s.%s.%s.step3.html", selling.merchantSKU, selling.account.id, System.currentTimeMillis()), body, FLog.T.SALES);
 
-            // TODO 如果 selling.aps.matchAsin 为空, 表示为新 UPC 上架, 需要如何拿到 ASIN ?
+            // 最后获取成功成见 Listing 以后的 ASIN
             doc = Jsoup.parse(body);
             Element form = doc.select("form").first();
             if(form == null) throw new FastRuntimeException(
                     String.format("提交的参数错误.(详细错误信息咨询 IT 查看 E_LOG/listing_sale/%s.%s.step3.html)",
                             selling.merchantSKU, selling.account.id));
 
+            List<NameValuePair> fetchNewAsinParam = new ArrayList<NameValuePair>();
             for(Element hidden : doc.select("input")) {
                 String name = hidden.attr("name");
                 if("newItemAsin".equals(name)) selling.asin = hidden.val();
+                else if("itemCreateWtqRequestId".equalsIgnoreCase(name))
+                    fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
+                else if("newItemSku".equalsIgnoreCase(name))
+                    fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
             }
-            if(StringUtils.isBlank(selling.asin)) {
+            // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
+            if(StringUtils.isBlank(selling.asin) && StringUtils.isBlank(selling.aps.matchAsin)) {
+                String jsonStr = HTTP.post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
+                JsonElement jsonEl = new JsonParser().parse(jsonStr);
+                JsonObject jsonObj = jsonEl.getAsJsonObject();
+                if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
+                    selling.asin = jsonObj.get("asin").getAsString();
+                else {
+                    FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
+                    throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
+                }
+            }
+            if(StringUtils.isBlank(selling.asin)) { // 最后的 asin 检查
                 String msg = doc.select(".messageboxerror").first().text();
                 if(StringUtils.isBlank(msg)) msg = "未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!";
                 throw new FastRuntimeException(msg);
