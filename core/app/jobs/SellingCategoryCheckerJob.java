@@ -1,6 +1,6 @@
 package jobs;
 
-import helper.Devs;
+import helper.FLog;
 import helper.GTs;
 import helper.Webs;
 import models.embedded.AmazonProps;
@@ -57,7 +57,7 @@ public class SellingCategoryCheckerJob extends Job {
         Webs.systemMail("SellingCategoryCheckerJob invalid Selling Amazon Node.",
                 GTs.render("SellingCategoryCheckerJob", GTs.newMap("invalidMap", invalidSelling).build()));
         if(Play.mode.isDev())
-            Devs.fileLog(String.format("SellingCategoryCheckerJob.%s.html", DateTime.now().toString("yyyy-MM-dd.HH.mm.ss")),
-                    GTs.render("SellingCategoryCheckerJob", GTs.newMap("invalidMap", invalidSelling).build()), Devs.T.JOBS_ERROR);
+            FLog.fileLog(String.format("SellingCategoryCheckerJob.%s.html", DateTime.now().toString("yyyy-MM-dd.HH.mm.ss")),
+                    GTs.render("SellingCategoryCheckerJob", GTs.newMap("invalidMap", invalidSelling).build()), FLog.T.JOBS_ERROR);
     }
 }

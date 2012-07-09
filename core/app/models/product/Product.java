@@ -212,7 +212,7 @@ public class Product extends GenericModel {
             // --------------   1   -------------------
             String body = HTTP.get(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/);
             if(Play.mode.isDev())
-                Devs.fileLog(String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
+                FLog.fileLog(String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
 
             Document doc = Jsoup.parse(body);
             Elements inputs = doc.select("form[name=selectProductTypeForm] input");
@@ -228,7 +228,7 @@ public class Product extends GenericModel {
             //  ------------------ 2 -----------------
             body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/, classifyHiddenParams);
             if(Play.mode.isDev())
-                Devs.fileLog(String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
+                FLog.fileLog(String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
             doc = Jsoup.parse(body);
 
             Set<NameValuePair> addSellingPrams = new HashSet<NameValuePair>();
@@ -253,6 +253,10 @@ public class Product extends GenericModel {
                     new BasicNameValuePair("item_name", selling.aps.title),
                     new BasicNameValuePair("external_id", selling.aps.upc)
             ));
+
+            /**
+             * 对有已经上架的 Listing 做关联选择.
+             */
             Document ajaxDoc = Jsoup.parse(ajaxBody);
             Element matchAsinEl = ajaxDoc.select("#newAsin").first();
             if(matchAsinEl != null) {
@@ -373,7 +377,7 @@ public class Product extends GenericModel {
              */
             body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/, addSellingPrams);
             if(Play.mode.isDev())
-                Devs.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, Devs.T.SALES);
+                FLog.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
 
             // TODO 如果 selling.aps.matchAsin 为空, 表示为新 UPC 上架, 需要如何拿到 ASIN ?
             doc = Jsoup.parse(body);

@@ -255,7 +255,7 @@ public class Selling extends GenericModel {
             Logger.info("Upload Picture to Amazon AND Synchronized[%s].", this.account.prettyName());
             String body = HTTP.upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params, uploadImages);
             if(Play.mode.isDev())
-                Devs.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, Devs.T.IMGUPLOAD);
+                FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, FLog.T.IMGUPLOAD);
             JsonObject imgRsp = new JsonParser().parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
             //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
             //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>

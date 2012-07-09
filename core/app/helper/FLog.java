@@ -13,12 +13,16 @@ import java.io.IOException;
  * Date: 5/20/12
  * Time: 3:13 PM
  */
-public class Devs {
+public class FLog {
     public enum T {
         /**
          * 上架 Listing 相关的错误
          */
         SALES,
+        /**
+         * 更新 Lisitng
+         */
+        DEPLOY,
         /**
          * 上传图片错误的信息
          */
@@ -46,6 +50,9 @@ public class Devs {
             case SALES:
                 baseUrl = Constant.L_LISTING;
                 break;
+            case DEPLOY:
+                baseUrl = Constant.L_SELLING;
+                break;
             case IMGUPLOAD:
                 baseUrl = Constant.L_IMAGEUPLOAD;
                 break;
@@ -59,9 +66,11 @@ public class Devs {
                 baseUrl = "";
         }
         try {
-            FileUtils.writeStringToFile(new File(String.format("%s/%s", baseUrl, fileName)), content, "UTF-8");
+            String path = String.format("%s/%s", baseUrl, fileName);
+            Logger.info("FLog.fileLog to %s", path);
+            FileUtils.writeStringToFile(new File(path), content, "UTF-8");
         } catch(IOException e) {
-            Logger.warn("Devs.fileLog write file error.", Webs.E(e));
+            Logger.warn("FLog.fileLog write file error.", Webs.E(e));
         }
     }
 }

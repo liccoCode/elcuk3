@@ -175,7 +175,7 @@ public class SellingRecord extends GenericModel {
                     data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
-                    Devs.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, Devs.T.SELLINGRECORD);
+                    FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                 }
                 rows = data.get("rows").getAsJsonArray();
                 for(JsonElement row : rows) {

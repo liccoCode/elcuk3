@@ -3,6 +3,7 @@ package models.embedded;
 import com.google.gson.annotations.Expose;
 import helper.Constant;
 import helper.Dates;
+import helper.FLog;
 import helper.Webs;
 import models.market.Account;
 import models.market.Selling;
@@ -277,13 +278,7 @@ public class AmazonProps {
                 sell.save();
                 throw new FastRuntimeException(String.format("Selling %s is not exist in Amazon, can be delete.", sell.sellingId));
             } else {
-                String fileName = String.format("%s/%s_%s.html", Constant.L_SELLING, sell.sellingId, sell.asin);
-                Logger.warn("Listing Update Page Error! Log to %s ?", fileName);
-                try {
-                    FileUtils.writeStringToFile(new File(fileName), html);
-                } catch(IOException e) {
-                    //ignore..
-                }
+                FLog.fileLog(String.format("%s_%s.html", sell.sellingId, sell.asin), html, FLog.T.DEPLOY);
                 String msg = doc.select("div").text();
                 if(StringUtils.isBlank(msg)) msg = "Visit amazon page failed, Please try again.";
                 throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
@@ -356,13 +351,10 @@ public class AmazonProps {
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
         if(inputs.size() == 0) {
-            Logger.warn("Listing Update Page Error! Log to ....?");
-            try {
-                FileUtils.writeStringToFile(new File(String.format("%s/%s_%s.html", Constant.L_SELLING, sell.merchantSKU, sell.asin)), html);
-            } catch(IOException e) {
-                //ignore..
-            }
-            throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+            FLog.fileLog(String.format("%s_%s.html", sell.merchantSKU, sell.asin), html, FLog.T.DEPLOY);
+            String msg = doc.select("div").text();
+            if(StringUtils.isBlank(msg)) msg = "Display Post page visit Error. Please try again.";
+            throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
         }
         Set<NameValuePair> params = new HashSet<NameValuePair>();
         F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
