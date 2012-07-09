@@ -380,9 +380,9 @@ public class ProcureUnit extends Model {
      */
     public static List<ProcureUnit> skuOrMskuRelate(Selling selling, boolean isSku) {
         if(isSku)
-            return find("sku=? AND stage IN (?,?)", Product.merchantSKUtoSKU(selling.merchantSKU), STAGE.PLAN, STAGE.DELIVERY).fetch();
+            return find("sku=? AND stage IN (?,?,?)", Product.merchantSKUtoSKU(selling.merchantSKU), STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
         else
-            return find("selling=? AND stage IN (?,?)", selling, STAGE.PLAN, STAGE.DELIVERY).fetch();
+            return find("selling=? AND stage IN (?,?,?)", selling, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
     }
 
 }
