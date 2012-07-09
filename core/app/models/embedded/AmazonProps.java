@@ -284,7 +284,9 @@ public class AmazonProps {
                 } catch(IOException e) {
                     //ignore..
                 }
-                throw new FastRuntimeException("Display Post page visit Error. Please try again.");
+                String msg = doc.select("div").text();
+                if(StringUtils.isBlank(msg)) msg = "Visit amazon page failed, Please try again.";
+                throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
             }
         }
         // 检查 merchant 参数
