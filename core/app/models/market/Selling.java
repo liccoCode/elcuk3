@@ -612,7 +612,7 @@ public class Selling extends GenericModel {
             for(ProcureUnit unit : units) {
                 if(unit.stage == ProcureUnit.STAGE.PLAN)
                     analyzeMap.get(sellKey).onplan += unit.plan.planQty;
-                else if(unit.stage == ProcureUnit.STAGE.DELIVERY)
+                else if(unit.stage == ProcureUnit.STAGE.DELIVERY || unit.stage == ProcureUnit.STAGE.DONE)
                     analyzeMap.get(sellKey).onwork += unit.delivery.ensureQty;
             }
 
