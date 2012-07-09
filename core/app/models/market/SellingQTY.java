@@ -5,6 +5,7 @@ import models.product.Product;
 import models.product.Whouse;
 import org.apache.commons.lang.Validate;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.List;
@@ -92,6 +93,11 @@ public class SellingQTY extends GenericModel {
 
     public static List<SellingQTY> qtysAccodingSKU(Product prod) {
         return SellingQTY.find("product=?", prod).fetch();
+    }
+    
+    public static List<SellingQTY> qtysAccodingSKU(String sku) {
+        if(!Product.validSKU(sku)) throw new FastRuntimeException(sku + " 不是合法的 SKU");
+        return SellingQTY.find("product.sku=?", sku).fetch();
     }
 
     public static List<SellingQTY> qtysAccodingMSKU(Selling selling) {

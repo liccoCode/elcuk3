@@ -624,7 +624,11 @@ public class Selling extends GenericModel {
             }
 
             // qty [SellingQTY]
-            List<SellingQTY> qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
+            List<SellingQTY> qtys = null;
+            if(isSku)
+                qtys = SellingQTY.qtysAccodingSKU(sellKey);
+            else
+                qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
             for(SellingQTY qty : qtys)
                 analyzeMap.get(sellKey).qty += qty.qty + qty.inbound;
         }
