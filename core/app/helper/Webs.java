@@ -34,6 +34,10 @@ import java.util.concurrent.Future;
 public class Webs {
 
     public static final String SPLIT = "|-|";
+    /**
+     * 分隔符号: '|'
+     */
+    public static final String S = "|";
     //这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)
     public static final NumberFormat NN_DE = NumberFormat.getNumberInstance(Locale.GERMANY);
     public static final NumberFormat NN_UK = NumberFormat.getNumberInstance(Locale.UK);

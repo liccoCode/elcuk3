@@ -11,6 +11,8 @@ import models.procure.Shipment;
 import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -449,16 +451,50 @@ public class Selling extends GenericModel {
      *
      * @return
      */
-    @SuppressWarnings("unchecked")
     public static List<String> allSID() {
+        return allSid(false);
+    }
+
+    /**
+     * 返回所有 Selling 的 SID 提供是否过滤掉一些市场提出的不合法元素的选择
+     *
+     * @param filter 是否过滤
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static List<String> allSid(boolean filter) {
         String cacheKey = "selling.allsid";
         List<String> sids = Caches.blockingGet(cacheKey, List.class);
         if(sids == null) {
             sids = new ArrayList<String>();
             List<Selling> sellings = Selling.all().fetch();
             for(Selling s : sellings) sids.add(s.sellingId);
+
+            // 是否需要过滤掉一些不合法元素
+            if(filter) {
+                CollectionUtils.filter(sids, new Predicate() {
+                    @Override
+                    public boolean evaluate(Object o) {
+                        String msg = o.toString();
+                        String[] args = StringUtils.split(msg, Webs.S);
+                        String[] mskuArr = StringUtils.split(args[0], ",");
+                        if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
+                            return false;
+                        else if(StringUtils.contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
+                            return false;
+                        else if(StringUtils.contains(msg, "A_FR"))
+                            return false;
+                        else if(mskuArr.length >= 2 && mskuArr[1].length() < 3)
+                            return false;
+                        else
+                            return true;
+                    }
+                });
+            }
+
             Caches.blockingAdd(cacheKey, sids, "2h");
         }
+
         return Caches.blockingGet(cacheKey, List.class);
     }
 

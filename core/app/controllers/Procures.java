@@ -35,7 +35,7 @@ public class Procures extends Controller {
 
     public static void create() {
         renderArgs.put("suppliers", JSON.toJSONString(ProcureUnit.suppliers()));
-        renderArgs.put("sids", JSON.toJSONString(Selling.allSID()));
+        renderArgs.put("sids", JSON.toJSONString(Selling.allSid(true)));
         render();
     }
 
@@ -52,7 +52,12 @@ public class Procures extends Controller {
 
     public static void sidSetUp(String sid) {
         Selling selling = Selling.findById(sid);
-        renderJSON(JSON.toJSONString(new F.T3<String, String, String>(selling.listing.listingId, selling.sellingId, selling.listing.product.sku)));
+        renderJSON(JSON.toJSONString(new F.T4<String, String, String, String>(
+                selling.listing.listingId,
+                selling.sellingId,
+                selling.listing.product.sku,
+                selling.market.nickName()
+        )));
     }
 
     public static void save(ProcureUnit p) {

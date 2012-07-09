@@ -194,6 +194,10 @@ public class ProcureUnit extends Model {
         if(this.handler == null) throw new FastRuntimeException("必须拥有一个处理人.");
         this.product = Product.findById(this.sku);
         if(this.product == null) throw new FastRuntimeException("没有关联 Product.");
+        // 10. msku 与 sku 需要符合要求
+        String[] args = StringUtils.split(this.sid, Webs.S);
+        if(args.length < 3) throw new FastRuntimeException("SellingID 不符合 [msku]|[Market]|[AccountId] 的格式");
+        if(!StringUtils.contains(args[0], this.sku)) throw new FastRuntimeException("SellingId 与 SKU 不一致, 请联系 IT.");
     }
 
     /**
