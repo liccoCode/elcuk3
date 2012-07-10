@@ -1203,10 +1203,8 @@
 
       $tip.find('.popover-title')[this.isHTML(title) ? 'html' : 'text'](title)
       $tip.find('.popover-content > *')[this.isHTML(content) ? 'html' : 'text'](content)
+      // 这一行处理自己添加的 width
       if('width' in this.options) $tip.find('.popover-inner').css('width', this.options.width);
-      // 为 popover 添加自动获取在 html 元素上的 placement 位置参数
-      if($.trim(this.$element.attr('placement')) in {'top':1, 'bottom':1,'left':1,'right':1})
-          this.options.placement = $.trim(this.$element.attr('placement'));
 
       $tip.removeClass('fade top bottom left right in')
     }
