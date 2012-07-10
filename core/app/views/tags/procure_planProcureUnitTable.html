@@ -23,7 +23,7 @@ items: procureList
         <td>${unit.plan.planQty}</td>
         <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>
         <td>${unit.plan.unitPrice * unit.plan.planQty}</td>
-        <td>${unit.plan.supplier}</td>
+        <td rel="popover" title="Comment" content="${unit.comment}" placement="right">${unit.plan.supplier}</td>
         <td>${unit.handler?.username}</td>
         <td>${unit.plan.planArrivDate.format('yyyy-MM-dd')}</td>
     </tr>

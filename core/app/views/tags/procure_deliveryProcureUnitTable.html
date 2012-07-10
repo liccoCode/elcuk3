@@ -17,7 +17,7 @@ items: procureList
     <tr row style="cursor:pointer;">
         <td>${unit.id}</td>
         <td><a href="@{Deliveryments.detail(unit.deliveryment.id)}">${unit.deliveryment.id}</a></td>
-        <td>${unit.plan.supplier}</td>
+        <td rel="popover" content="${unit.comment}" placement="right" title="comment">${unit.plan.supplier}</td>
         <td>${unit.sku}</td>
         <td>
             #{if unit.delivery.deliveryQty == null}
