@@ -62,8 +62,8 @@ public class Shipments extends Controller {
         renderJSON(Webs.G(unit.transformToShipment(shipment, qty)));
     }
 
-    public static void removeItemFromShipment(Long shipmentId) {
-        ShipItem item = ShipItem.findById(shipmentId);
+    public static void removeItemFromShipment(Long shipItemId) {
+        ShipItem item = ShipItem.findById(shipItemId);
         modelExist(item);
         renderJSON(Webs.G(item.removeFromShipment()));
     }
@@ -107,6 +107,13 @@ public class Shipments extends Controller {
      */
     public static void done(String id) {
         shipping(id);
+    }
+
+    public static void cancel(String id) {
+        Shipment shipment = Shipment.findById(id);
+        modelExist(shipment);
+        shipment.cancel();
+        renderJSON(new Ret(true, "共影响 " + shipment.items.size() + " 个 ShipItem."));
     }
 
     public static void editMemo(String id, String memo) {

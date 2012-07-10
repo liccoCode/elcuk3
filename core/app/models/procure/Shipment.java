@@ -2,6 +2,7 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.Dates;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -75,7 +76,12 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         /**
          * 完成
          */
-        DONE
+        DONE,
+
+        /**
+         * 取消状态
+         */
+        CANCEL
     }
 
     public enum P {
@@ -329,6 +335,19 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         for(ShipItem item : this.items) item.unit.beShipOver();
         this.state = S.DONE;
         return this.save();
+    }
+
+    /**
+     * 取消一个 Shipment.
+     */
+    public void cancel() {
+        if(this.state == S.CANCEL) throw new FastRuntimeException("Shipment " + this.id + " 已经为 CANCEL 状态");
+        if(this.state != S.PLAN) throw new FastRuntimeException("已经在路上的 Shipment " + this.id + " 无法取消.");
+        for(ShipItem item : this.items)
+            item.cancel();
+        this.state = S.CANCEL;
+        this.memo = String.format("Shipment 于 %s 关闭, 共影响 %s 个 ShipItem.\r\n", Dates.date2DateTime(), this.items.size()) + this.memo;
+        this.save();
     }
 
     /**

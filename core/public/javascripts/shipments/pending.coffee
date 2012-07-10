@@ -7,7 +7,7 @@ $ ->
   bindShipItemDeleBtn = ->
     $("#shipitem button").unbind().click ->
       tr = $(@).parents('tr')
-      $.post('/shipments/removeItemFromShipment', {shipmentId: tr.attr("shipitem")},
+      $.post('/shipments/removeItemFromShipment', {shipItemId: tr.attr("shipitem")},
         (r) ->
           if r.flag is false
             alert(r.message)
@@ -37,6 +37,9 @@ $ ->
             )
       )
 
+  # 获取页面上的 shipmentId
+  shipmentId = -> $('td[shipmentId]').attr('shipmentId')
+
   # 获取转移数量的时候需要的值
   transformVals = (unitId) ->
     trObj = $('tr[uid=' + unitId + ']')
@@ -45,8 +48,9 @@ $ ->
     ttQty: trObj.data('ttQty')
     tr: trObj
     uid: unitId
-    shipmentId: $('td[shipmentId]').attr('shipmentId')
+    shipmentId: shipmentId()
 
+  # ProcureUnit 转移为 ShipItem 的按钮
   $('#procureUnit tr[uid] button').click ->
     vals = transformVals(@getAttribute("uid"))
     if !$.isNumeric(vals['ttQty'])
@@ -63,6 +67,17 @@ $ ->
           alert(r.message)
         else
           trClick()
+    )
+
+  # 取消此 Shipment
+  $('#shipment_cancel').click ->
+    return false if !confirm("确认要取消此 Shipment?")
+    maskEl = $(@).parents('table')
+    maskEl.mask('取消中...')
+    $.post('/shipments/cancel', {id: shipmentId()},
+      (r) ->
+        alert(r.message)
+        maskEl.unmask()
     )
 
   do ->

@@ -291,6 +291,7 @@ public class ProcureUnit extends Model {
          * 3. 保存
          */
         if(qty < 0) throw new FastRuntimeException("不允许填写负数!");
+        if(shipment.state == Shipment.S.CANCEL) throw new FastRuntimeException("不允许修改已经取消的 Shipment.");
         if(shipment.state != Shipment.S.PLAN) throw new FastRuntimeException("此运输单已经发出, 不允许再修改!");
         if(qty > this.delivery.deliveryQty)
             throw new FastRuntimeException("转移的数量大于此 ProcureUnit 实际具有的数量!(" + qty + ">" + this.delivery.deliveryQty + ")");
@@ -302,7 +303,7 @@ public class ProcureUnit extends Model {
                             Webs.G(this)));
             throw new FastRuntimeException(String.format("同 Shipment(%s), ProcureUnit(%s) 的 ShipItem 拥有多与一个!", shipment.id, this.id));
         }
-        F.T2<Integer, Set<String>> leftQtyTuple = leftTransferQty();
+        F.T2<Integer, Set<String>> leftQtyTuple = this.leftTransferQty();
         if(qty > leftQtyTuple._1) throw new FastRuntimeException("库存不足够转移. 剩余: " + leftQtyTuple._1);
 
         ShipItem shipItem = null;

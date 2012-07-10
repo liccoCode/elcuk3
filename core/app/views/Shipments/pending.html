@@ -65,7 +65,14 @@
 
 <div>
     <table class="table table-condensed table-bordered">
-    #{shipment_trinfo shipment:s /}
+    #{ck 'root'}
+        #{shipment_trinfo shipment:s /}
+        <tr>
+            <td colspan="8">
+                <button id="shipment_cancel" class="btn btn-danger btn-small">CANCEL</button>
+            </td>
+        </tr>
+    #{/ck}
     </table>
 </div>
 
