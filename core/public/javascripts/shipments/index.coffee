@@ -23,7 +23,7 @@ $ ->
       )
     $('#payment_clear').remove() if remove is true
 
-  ['pending', 'shipping', 'clearAndReciving', 'done'].forEach(
+  ['pending', 'shipping', 'clearing', 'done'].forEach(
     (tab, i)->
       $("#" + tab + " tr[row]").click ->
         o = $(@)

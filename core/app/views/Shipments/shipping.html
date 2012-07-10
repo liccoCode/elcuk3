@@ -4,13 +4,13 @@
 
 <div>
     <table class="table table-condensed table-bordered">
-    #{shipment_basictrs shipment:s /}
+    #{shipment_trinfo shipment:s /}
         <tr>
             <td>总费用</td>
             <td>${s.totalPayedCNY()} CNY</td>
 
             <td>TracNo</td>
-            <td>${s.trackNo}</td>
+            <td><a href="${s.internationExpress.trackUrl(s.trackNo)}" target="_blank">${s.trackNo}</a></td>
 
             <td>国际快递商</td>
             <td>${s.internationExpress}</td>

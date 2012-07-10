@@ -98,7 +98,7 @@ public class Shipments extends Controller {
     /**
      * 查看一个 clearAndReciving 状态的 Shipment
      */
-    public static void clearAndReciving(String id) {
+    public static void clearing(String id) {
         shipping(id);
     }
 

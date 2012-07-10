@@ -71,7 +71,7 @@ public class FTags extends FastTags {
                 .append("<label class='control-label' for='").append(id).append("'>").append(StringUtils.isBlank(label) ? "" : label).append("</label>")
                 .append("<div class='controls'>")
                 .append("<div class='input-append'>")
-                .append("<input ").append(edit ? "" : "disabled").append(" id='").append(id).append("' ")
+                .append("<input ").append(edit ? "" : "readonly").append(" id='").append(id).append("' ")
                 .append("type='").append(type).append("' ")
                 .append("name='").append(name).append("' ")
                 .append(StringUtils.isNotBlank(placeHolder) ? "placeHolder='" + placeHolder + "' " : "")

@@ -43,7 +43,7 @@ public enum iExpress {
 
         @Override
         public boolean isContainsClearance(String content) {
-            return StringUtils.contains(content, "快件正在等待清关");
+            return StringUtils.contains(content, "快件正在等待清关") || StringUtils.contains(content, "已完成清关");
         }
 
         @Override
