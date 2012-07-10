@@ -4,8 +4,18 @@
     #{script 'timeline/timeline_js/timeline-api.js' /}
 #{/set}
 <script type="text/javascript">
-    var tl;
-    function onLoad(){
+    var resizeTimerID = null;
+    function onResize(){
+        if(resizeTimerID == null){
+            resizeTimerID = window.setTimeout(function(){
+                resizeTimerID = null;
+                tl.layout();
+            }, 500);
+        }
+    }
+
+    $(function(){
+
         var bandInfos = [
             Timeline.createBandInfo({
                 width:"70%",
@@ -18,19 +28,10 @@
                 intervalPixels:200
             })
         ];
-        tl = Timeline.create(document.getElementById("my-timeline"), bandInfos);
-    }
+        var tl = Timeline.create(document.getElementById("tl"), bandInfos);
 
-    var resizeTimerID = null;
-    function onResize(){
-        if(resizeTimerID == null){
-            resizeTimerID = window.setTimeout(function(){
-                resizeTimerID = null;
-                tl.layout();
-            }, 500);
-        }
-    }
-
+        $('body').onResize = onResize
+    });
 </script>
-<div id="tl"></div>
+<div id="tl" style="height:150px;"></div>
 
