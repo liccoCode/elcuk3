@@ -7,7 +7,7 @@
         <th>OWY</th>
         <th>Qty</th>
         <th>PS</th>
-        <th>_TOV</th>
+        <th colspan="2"><a rel="tooltip" title="系统计算的 ps 计算的 TurnOver(在途+在库 | 在途+在库+<b>在产</b>)">_TOV</a></th>
         <th title="计算的是昨天的数据, 不包含今天; Day7, Day30, Day180 相同" style="color:grey;">Day1</th>
         <th>Day7</th>
         <th>Day30</th>
@@ -20,8 +20,9 @@
         <td>${sell.onwork}</td>
         <td>${sell.onway}</td>
         <td>${sell.qty}</td>
-        <td>${(sell.d7 / 7).format("#.##")}</td>
-        #{turnOver turnOver:sell._turnOver/}
+        <td>${sell._ps}</td>
+        #{turnOver turnOver:sell.turnOverT4._1/}
+        #{turnOver turnOver:sell.turnOverT4._3/}
         <td>${sell.d1}</td>
         <td>${sell.d7}/${(sell.d7 / 7).format("#.##")}</td>
         <td>${sell.d30}/${(sell.d30 / 30).format("#.##")}</td>

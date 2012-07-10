@@ -97,4 +97,4 @@ $ ->
     )
     false
 
-  window.$ui.htmlIni()
+  window.$ui.init()

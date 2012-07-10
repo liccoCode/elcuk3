@@ -73,5 +73,5 @@ $ ->
       total = Number(o.find('td:eq(1) a').text().trim())
       o.data('ttQty', total)
 
-  window.$ui.htmlIni()
+  window.$ui.init()
 

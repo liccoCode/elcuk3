@@ -2,7 +2,7 @@
 #{if _turnOver < 8 && _turnOver >= 0}
 <td rel="popover" title="估计卖完的时间" data-content="${_turnOver.intValue().dayAfter()}" placement="left" width="auto" style="color:red;">${_turnOver.format("#.##")}</td>
 #{/if}
-#{elseif _turnOver < 0}
+#{elseif _turnOver <= 0}
 <td style="color:purple;">7天内无销量!</td>
 #{/elseif}
 #{else }

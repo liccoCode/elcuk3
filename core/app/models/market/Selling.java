@@ -184,12 +184,14 @@ public class Selling extends GenericModel {
     public Integer onway = 0;
 
     /**
-     * 这个产品现在存有的货物还能够周转多少天
+     * Selling 的 TurnOver<br/>
+     * ._1: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
+     * ._2: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
+     * ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
+     * ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
      */
     @Transient
-    public Float turnOver = 0f;
-    @Transient
-    public Float _turnOver = 0f;
+    public F.T4<Float, Float, Float, Float> turnOverT4 = new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
 
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Embedded
@@ -392,9 +394,10 @@ public class Selling extends GenericModel {
             for(Selling sell : sellings) {
                 if(!sell.sellingId.equals(this.sellingId)) continue;
                 sell.ps = ps;
+                sell.turnOverT4 = sell.turnOverT4Cal();
                 find = true;
             }
-            if(!find) throw new FastRuntimeException(String.format("更新失败, %s 不再缓存中..", this.sellingId));
+            if(!find) throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
         }
         return this.save();
     }
@@ -636,12 +639,8 @@ public class Selling extends GenericModel {
 
         // ps
         for(Selling sell : analyzeMap.values()) {
-            sell._ps = sell.d7 / 7.0f;
-            if(sell._ps == 0) sell._ps = 0.1f;
-            else sell._ps = Webs.scale2PointUp(sell._ps);
-
-            sell._turnOver = Webs.scale2PointUp((sell.qty + sell.onway + sell.onwork) / sell._ps);
-            sell.turnOver = Webs.scale2PointUp((sell.qty + sell.onway + sell.onwork) / (sell.ps == 0 ? sell._ps : sell.ps));
+            sell._ps = sell._ps();
+            sell.turnOverT4 = sell.turnOverT4Cal();
         }
 
         sellings = new ArrayList<Selling>(analyzeMap.values());
@@ -653,6 +652,64 @@ public class Selling extends GenericModel {
         });
         Caches.blockingAdd(cacke_key, sellings, "1h"); // 缓存 1 小时
         return Caches.blockingGet(cacke_key, List.class);
+    }
+
+    /**
+     * 计算系数内的两个 Turnover 值<br/>
+     * 前提:
+     * - ps
+     * - d7
+     * - qty
+     * - onway
+     * - onwork
+     *
+     * @return ._1: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
+     *         ._2: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
+     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
+     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
+     */
+    public F.T4<Float, Float, Float, Float> turnOverT4Cal() {
+        float _ps = this._ps();
+        float ps = this.ps;
+        return new F.T4<Float, Float, Float, Float>(
+                Webs.scale2PointUp((this.qty + this.onway) / _ps),
+                Webs.scale2PointUp((this.qty + this.onway) / (ps == 0 ? _ps : ps)),
+                Webs.scale2PointUp((this.qty + this.onway + this.onwork) / _ps),
+                Webs.scale2PointUp((this.qty + this.onway + this.onwork) / (ps == 0 ? _ps : ps))
+        );
+    }
+
+    /**
+     * 计算并且返回 _ps, 给与参考的 7 天内
+     *
+     * @return
+     */
+    public Float _ps() {
+        float _ps = this.d7 / 7.0f;
+        if(_ps == 0) _ps = 0.1f;
+        else _ps = Webs.scale2PointUp(_ps);
+        return _ps;
+    }
+
+    /**
+     * 比较此 Selling 中自行设计的 ps 与计算出来的 _ps 之间的差值
+     *
+     * @return .1: 差据的大小
+     *         .2: 前台使用的颜色代码
+     */
+    public F.T2<Float, String> psAnd_psDiffer() {
+        float _ps = this._ps();
+        if(_ps() >= 5) {
+            float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
+            String color = "";
+            if(diff >= 0.4)
+                color = "#E45652";
+            else if(diff >= 0.2 && diff < 0.4)
+                color = "#FAAB3B";
+            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
+        } else {
+            return new F.T2<Float, String>(0f, "#fff");
+        }
     }
 
 }

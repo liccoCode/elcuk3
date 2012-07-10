@@ -110,7 +110,7 @@ $ ->
   # 加载 Plan Tab 以后的页面初始化
   afterLoadPlanTab = ->
   # 重新初始化所有 popover
-    window.$ui.htmlIni()
+    window.$ui.init()
     #绑定创建新采购单按钮
     bindNewDeliveryBtn()
     #绑定纳入采购单按钮
@@ -126,7 +126,7 @@ $ ->
     bindPlanQtyBtn()
     bindUpdateDeliveryBtn()
     bindAssignShipment()
-    window.$ui.htmlIni()
+    window.$ui.init()
 
 
   # -------------- 通用功能 ------------------

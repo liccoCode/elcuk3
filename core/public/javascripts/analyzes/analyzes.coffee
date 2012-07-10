@@ -220,7 +220,7 @@ $ ->
             false
         finally
           tgt.unmask()
-          window.$ui.popover()
+          window.$ui.init()
     )
 
   # 给 搜索 按钮添加事件
