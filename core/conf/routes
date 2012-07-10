@@ -16,7 +16,7 @@ GET     /favicon.ico                                        404
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                            staticDir:public
-GET     /resources/                                         staticDir:public/resources
+GET     /js/                                                staticDir:public/javascripts
 GET     /images/                                            staticDir:public/images
 GET     /img/                                               staticDir:public/images
 

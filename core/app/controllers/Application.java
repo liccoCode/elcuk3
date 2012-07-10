@@ -53,4 +53,8 @@ public class Application extends Controller {
         renderJSON(new Ret());
     }
 
+    public static void timeline() {
+        render();
+    }
+
 }
