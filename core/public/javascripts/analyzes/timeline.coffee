@@ -41,10 +41,6 @@ $ ->
 
   # 构造 Timeline
   tl = Timeline.create($('#tl')[0], bandInfos)
-  Timeline.loadJSON('/js/data.json',
-    (json, url) ->
-      eventSource.loadJSON(json, url)
-  )
   $('#tl')
   # 把 timeline 的对象缓存到 #tl 身上, 让其他 js 元素可以获取到
   .data('timeline', tl)
