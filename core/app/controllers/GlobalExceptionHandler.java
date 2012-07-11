@@ -1,7 +1,7 @@
 package controllers;
 
 import helper.Webs;
-import models.Ret;
+import models.view.Ret;
 import play.exceptions.TemplateExecutionException;
 import play.mvc.Catch;
 import play.mvc.Controller;

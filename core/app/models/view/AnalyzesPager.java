@@ -1,4 +1,4 @@
-package models;
+package models.view;
 
 import models.market.Selling;
 import org.apache.commons.collections.CollectionUtils;

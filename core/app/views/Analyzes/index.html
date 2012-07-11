@@ -1,10 +1,11 @@
 #{extends 'main_full.html'/}
 #{set title:'Analyze'/}
 #{set 'moreScripts'}
-    #{script 'analyzes/analyzes.coffee'/}
     #{script 'highcharts.js'/}
+    #{script 'timeline/timeline_js/timeline-api.js'/}
+    #{script 'analyzes/timeline.coffee'/}
+    #{script 'analyzes/analyzes.coffee'/}
 #{/set}
-
 <div class="row-fluid">
     <div id="a_units" class="span6" style="height:280px"></div>
     <div id="a_turn" style="min-height:280px;" class="span3"></div>
@@ -16,6 +17,9 @@
     <div class="span6">这个里面的为需要权限控制查看的曲线</div>
 </div>
 #{/ck}
+<div class="row-fluid">
+    <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
+</div>
 
 
 <div id="a_toolbar" style="background:#498CE2;padding:5px 10px;">

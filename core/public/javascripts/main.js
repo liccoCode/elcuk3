@@ -1,3 +1,6 @@
+/**
+ * 对 simile Timeline 参数设置的初始化
+ */
 Timeline_ajax_url = "/js/timeline/timeline_ajax/simile-ajax-api.js";
 Timeline_urlPrefix = '/js/timeline/timeline_js/';
 Timeline_parameters = 'bundle=true';

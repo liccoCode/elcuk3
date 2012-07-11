@@ -1,8 +1,8 @@
 package controllers;
 
-import models.Ret;
 import models.product.Brand;
 import models.product.Category;
+import models.view.Ret;
 import play.mvc.Controller;
 import play.mvc.With;
 

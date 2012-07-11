@@ -2,8 +2,8 @@ package controllers;
 
 import helper.Caches;
 import helper.Webs;
-import models.Ret;
 import models.Server;
+import models.view.Ret;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.mvc.Controller;

@@ -2,10 +2,10 @@ package controllers;
 
 import exception.NotLoginFastException;
 import helper.Webs;
-import models.Pager;
-import models.Ret;
 import models.market.Account;
 import models.market.Feedback;
+import models.view.Pager;
+import models.view.Ret;
 import org.joda.time.DateTime;
 import play.mvc.Controller;
 import play.mvc.With;

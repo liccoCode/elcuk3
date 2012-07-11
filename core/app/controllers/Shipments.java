@@ -1,12 +1,12 @@
 package controllers;
 
 import helper.Webs;
-import models.Ret;
 import models.User;
 import models.procure.Payment;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.view.Ret;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;

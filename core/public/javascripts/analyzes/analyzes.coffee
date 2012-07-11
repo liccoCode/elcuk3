@@ -151,6 +151,7 @@ $ ->
 
   # -------------------------------------------------------------------
 
+  # 绑定 sid tab 中修改 ps 的事件
   bindSIDPsBtn = ->
     $('#msku input[ps]').unbind().change ->
       tableE = $(@).parents('table')
@@ -161,6 +162,23 @@ $ ->
             alert(r.message)
           tableE.unmask()
       )
+
+  # 绘制 ProcureUnit 的 timeline 中的数据
+  paintProcureUnitInTimeline = (type, skuOrSid)->
+    maskEl = $('#myTabContent')
+    maskEl.mask('加载中...')
+    $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: skuOrSid},
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+        #eventSource.loadJSON(json, url)
+          eventSource = $('#tl').data('source')
+          eventSource.clear()
+          eventSource.loadJSON(r, '/')
+        maskEl.unmask()
+      #$('#tl').data('timeline').paint()
+    )
 
   # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
   sellRankLoad = (type, page) ->
@@ -179,7 +197,7 @@ $ ->
     tgt.load('/analyzes/index_' + type, params,
       ->
         try
-        # Selling 的 Ajax line 双击事件
+        # Selling 的 Ajax line 加载事件
           $('.msku,.sku').unbind().click ->
             o = $(@)
             # 处理样式
@@ -197,12 +215,15 @@ $ ->
             # 绘制销量线
             unit_line($.varClosure.params)
             sale_line($.varClosure.params)
-            # PV & SS 线, 绑定 ps 更新按钮
+            #  绘制 Timeline 数据
+            # 绘制 PV & SS 线
             if $.varClosure.params['type'] is 'msku'
               ss_line($.varClosure.params)
               turn_line($.varClosure.params)
+              paintProcureUnitInTimeline($.varClosure.params['type'], o.find('~ .sid').attr('title'))
             else
               pageViewDefaultContent()
+              paintProcureUnitInTimeline($.varClosure.params['type'], o.attr('title'))
 
             display =
               0: 'EasyAcc'
@@ -273,4 +294,3 @@ $ ->
     # 默认 PageView 线
     pageViewDefaultContent()
     bindTabSwitchBtn()
-

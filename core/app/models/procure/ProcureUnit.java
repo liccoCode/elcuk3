@@ -10,8 +10,10 @@ import models.embedded.UnitPlan;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
+import models.view.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.joda.time.DateTime;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -384,6 +386,37 @@ public class ProcureUnit extends Model {
             return find("sku=? AND stage IN (?,?,?)", Product.merchantSKUtoSKU(selling.merchantSKU), STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
         else
             return find("selling=? AND stage IN (?,?,?)", selling, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
+    }
+
+    /**
+     * 加载并且返回 Simile Timeline 的 Events
+     * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid
+     */
+    public static TimelineEventSource timelineEvents(String type, String val) {
+        if(StringUtils.isBlank(type)) type = "sid";
+        if("msku".equals(type)) type = "sid"; // 兼容
+        if(!"sku".equals(type) && !"sid".equals(type))
+            throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
+
+        DateTime dt = DateTime.now();
+        List<ProcureUnit> units = ProcureUnit.find("stage not in (?,?) AND planArrivDate>=? AND planArrivDate<=? AND " + type/*sid/sku*/ + "=?",
+                STAGE.SHIP_OVER, STAGE.CLOSE, dt.minusMonths(9).toDate(), dt.plusMonths(3).toDate(), val).fetch();
+
+
+        TimelineEventSource eventSource = new TimelineEventSource();
+        for(ProcureUnit unit : units) {
+            Selling selling = Selling.findSellingOrSKUFromAnalyzesCachedSellingsOrSKUs(type, val);
+
+            boolean ensureQty = unit.delivery != null && unit.delivery.ensureQty != null;
+            TimelineEventSource.Event event = new TimelineEventSource.Event(selling, unit);
+            event.startAndEndDate(type)
+                    .titleAndDesc()
+                    .color();
+
+            eventSource.events.add(event);
+        }
+
+        return eventSource;
     }
 
 }

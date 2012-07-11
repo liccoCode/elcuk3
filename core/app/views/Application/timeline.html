@@ -1,37 +1,58 @@
 #{extends 'main_full.html' /}
 #{set title:'Home' /}
 #{set 'moreScripts'}
-    #{script 'timeline/timeline_js/timeline-api.js' /}
+    #{script 'timeline/timeline_js/timeline-api.js'/}
 #{/set}
 <script type="text/javascript">
-    var resizeTimerID = null;
-    function onResize(){
-        if(resizeTimerID == null){
-            resizeTimerID = window.setTimeout(function(){
-                resizeTimerID = null;
-                tl.layout();
-            }, 500);
-        }
-    }
 
     $(function(){
 
+        // 这个是放在面板上的事件源
+        var eventSource = new Timeline.DefaultEventSource();
+
+        // 这个是放在 Timeline 上的面板
         var bandInfos = [
             Timeline.createBandInfo({
+                eventSource:eventSource,
+                date:new Date(Date.UTC(2001, 4, 1)),
                 width:"70%",
-                intervalUnit:Timeline.DateTime.MONTH,
-                intervalPixels:100
+                intervalUnit:Timeline.DateTime.DAY,
+                intervalPixels:80
             }),
             Timeline.createBandInfo({
+                showEventText:false,
+                date:new Date(Date.UTC(2001, 4, 1)),
+                trackHeight:0.5,
+                eventSource:eventSource,
                 width:"30%",
-                intervalUnit:Timeline.DateTime.YEAR,
-                intervalPixels:200
+                intervalUnit:SimileAjax.DateTime.MONTH,
+                intervalPixels:400,
+                overview:true
             })
         ];
-        var tl = Timeline.create(document.getElementById("tl"), bandInfos);
+        bandInfos[1].syncWith = 0;
+        bandInfos[1].highlight = true;
 
-        $('body').onResize = onResize
+        // 这个是最终的 Timeline
+        var tl = Timeline.create(document.getElementById("tl"), bandInfos);
+        Timeline.loadJSON('/js/data.json', function(json, url){
+            eventSource.loadJSON(json, url);
+        });
+
+        var resizeTimerID = null;
+
+        function onResize(){
+            if(resizeTimerID == null){
+                resizeTimerID = window.setTimeout(function(){
+                    alert('repaint.');
+                    resizeTimerID = null;
+                    tl.layout();
+                }, 500);
+            }
+        }
+
+        $(window).resize(onResize)
     });
 </script>
-<div id="tl" style="height:150px;"></div>
+<div id="tl" style="height:300px;"></div>
 

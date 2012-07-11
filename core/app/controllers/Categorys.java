@@ -1,11 +1,11 @@
 package controllers;
 
 import helper.Webs;
-import models.Ret;
 import models.product.AttrName;
 import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Valid;
 import play.data.validation.Validation;

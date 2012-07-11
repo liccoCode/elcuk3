@@ -565,12 +565,31 @@ public class Selling extends GenericModel {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
     }
 
+    /**
+     * 从已经在 Analyzes 页面中显示的计算好了的 Selling 缓存中寻找需要的 Selling
+     *
+     * @param val SKU 或者为 SellingId
+     * @return
+     */
+    public static Selling findSellingOrSKUFromAnalyzesCachedSellingsOrSKUs(String type, String val) {
+        if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
+            throw new FastRuntimeException("只允许按照 sku 与 msku|sid 进行分析.");
+        List<Selling> cachedSellings = Selling.analyzesSKUAndSID(type);
+        for(Selling sell : cachedSellings) {
+            if("sku".equals(type)) {
+                if(StringUtils.contains(sell.merchantSKU, val)) return sell;
+            } else if("sid".equals(type)) {
+                if(sell.sellingId.equals(val)) return sell;
+            }
+        }
+        return null;
+    }
 
     @SuppressWarnings("unchecked")
     public static List<Selling> analyzesSKUAndSID(String type) {
-        if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type))
+        if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
             throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
-        String cacke_key = String.format(Caches.SALE_SELLING, type);
+        String cacke_key = String.format(Caches.SALE_SELLING, "msku".equals(type) ? "sid" : type);
         List<Selling> cached = Caches.blockingGet(cacke_key, List.class);
         if(cached != null && cached.size() > 0) return cached;
         // 如果不是 sku 那么一定为 msku

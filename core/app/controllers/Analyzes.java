@@ -2,15 +2,15 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Webs;
-import models.AnalyzesPager;
-import models.Ret;
 import models.market.*;
+import models.procure.ProcureUnit;
+import models.view.AnalyzesPager;
+import models.view.Ret;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
-import play.db.jpa.Transactional;
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -133,6 +133,17 @@ public class Analyzes extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
+
+    /**
+     * type 只允许为 sku 与 sid 两种类型
+     *
+     * @param type
+     * @param val
+     */
+    @CacheFor("30mn")
+    public static void ajaxProcureUnitTimeline(String type, String val) {
+        renderJSON(Webs.G(ProcureUnit.timelineEvents(type, val)));
     }
 
     /**

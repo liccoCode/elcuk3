@@ -2,13 +2,13 @@ package controllers;
 
 import com.alibaba.fastjson.JSON;
 import helper.Webs;
-import models.AnalyzesPager;
-import models.Pager;
-import models.Ret;
 import models.market.Account;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.product.*;
+import models.view.AnalyzesPager;
+import models.view.Pager;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
 import play.data.validation.Valid;
