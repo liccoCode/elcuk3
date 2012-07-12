@@ -18,6 +18,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
@@ -407,17 +408,11 @@ public class Product extends GenericModel {
 
             // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
             if(StringUtils.isBlank(selling.asin) && StringUtils.isBlank(selling.aps.matchAsin)) {
-                String jsonStr = HTTP.post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
-                JsonElement jsonEl = new JsonParser().parse(jsonStr);
-                JsonObject jsonObj = jsonEl.getAsJsonObject();
-                if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
-                    selling.asin = jsonObj.get("asin").getAsString();
-                else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
-                    FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
-                    throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
-                } else {
-                    FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
-                    throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
+                try {
+                    selling.asin = ajaxNewAsin(selling, fetchNewAsinParam, 0);
+                } catch(InterruptedException e) {
+                    Logger.warn(Webs.E(e));
+                    throw new FastRuntimeException(e.getMessage());
                 }
             }
             if(StringUtils.isBlank(selling.asin)) { // 最后的 asin 检查
@@ -434,6 +429,32 @@ public class Product extends GenericModel {
         // 测试 MatchASIN UPC 660444833512
         selling.sid();
         return selling.save();
+    }
+
+    /**
+     * 远程访问 New Asin
+     *
+     * @param selling
+     * @param fetchNewAsinParam
+     * @param times             循环的次数, 依次传递下去
+     * @return
+     */
+    private String ajaxNewAsin(Selling selling, List<NameValuePair> fetchNewAsinParam, int times) throws InterruptedException {
+        String jsonStr = HTTP.post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
+        JsonElement jsonEl = new JsonParser().parse(jsonStr);
+        JsonObject jsonObj = jsonEl.getAsJsonObject();
+        if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
+            return jsonObj.get("asin").getAsString();
+        else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
+            FLog.fileLog(String.format("%s.%s.times_%s.js", selling.sellingId, selling.account.id, times), jsonStr, FLog.T.SALES);
+            if(times > 3)
+                throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
+            Thread.sleep(2500);
+            return ajaxNewAsin(selling, fetchNewAsinParam, ++times);
+        } else {
+            FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
+            throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
+        }
     }
 
     /**
