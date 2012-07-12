@@ -1,6 +1,5 @@
 package models.product;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -391,14 +390,21 @@ public class Product extends GenericModel {
                             selling.merchantSKU, selling.account.id));
 
             List<NameValuePair> fetchNewAsinParam = new ArrayList<NameValuePair>();
-            for(Element hidden : doc.select("input")) {
+            // 用于最后一个 inventory-status/status.html 页面跳转
+            List<NameValuePair> finalFormParam = new ArrayList<NameValuePair>();
+            for(Element hidden : form.select("input")) {
                 String name = hidden.attr("name");
+                finalFormParam.add(new BasicNameValuePair(name, hidden.val()));
                 if("newItemAsin".equals(name)) selling.asin = hidden.val();
                 else if("itemCreateWtqRequestId".equalsIgnoreCase(name))
                     fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
                 else if("newItemSku".equalsIgnoreCase(name))
                     fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
             }
+            // inventory-status/status.html 页面的访问, 会自行进行 302 转向访问
+            body = HTTP.post(selling.account.cookieStore(), form.attr("action"), finalFormParam);
+            FLog.fileLog(String.format("%s.%s.%s.step4.html", selling.merchantSKU, selling.account.id, System.currentTimeMillis()), body, FLog.T.SALES);
+
             // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
             if(StringUtils.isBlank(selling.asin) && StringUtils.isBlank(selling.aps.matchAsin)) {
                 String jsonStr = HTTP.post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
@@ -406,7 +412,10 @@ public class Product extends GenericModel {
                 JsonObject jsonObj = jsonEl.getAsJsonObject();
                 if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
                     selling.asin = jsonObj.get("asin").getAsString();
-                else {
+                else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
+                    FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
+                    throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
+                } else {
                     FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
                     throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
                 }
