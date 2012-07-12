@@ -1,11 +1,21 @@
 $ ->
-  $('button[rel=tooltip]').tooltip()
-
   ALL_SKU_LINKS = $('#slider a[level=sku]')
   SELLINGS = $("#s_list")
   LISTINGS = $('#l_list')
   ACCOUNT = $('#account')
   MARKET = $('#market')
+
+
+  # 添加重新加载 Tree
+  $('#reload_tree').click ->
+    return false if !confirm("确认需要重新加载 Listing 树, 可能会很慢? 成功后会自动刷新页面.")
+    $.get('/listings/reload',
+      (r) ->
+        if r.flag is true
+          window.location.reload()
+        else
+          alert("刷新缓存失败... 请联系 IT -> #{r.message}")
+    )
 
 
   # 根据 listingId, accountId 加载 Selling 页面
