@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Play 中利用 AsyncHttpClient 的 HTTP 请求
+ * 对 HttpClient 4 的封装 HTTP 请求
  * User: wyattpan
  * Date: 3/14/12
  * Time: 12:02 PM

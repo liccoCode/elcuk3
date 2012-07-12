@@ -4,9 +4,11 @@ $ ->
 
 
   # 这个是放在 Timeline 上的面板
+  date = $.DateUtil.addDay(15, new Date())
   bandInfos = [
     Timeline.createBandInfo(
       eventSource: eventSource
+      date: date
       width: "85%"
       #      trackHeight: 0.5,
       intervalUnit: Timeline.DateTime.DAY
@@ -16,6 +18,7 @@ $ ->
       #      showEventText: false,
       trackHeight: 0.5
       trackGap: 0.2
+      date: date
       eventSource: eventSource
       width: "15%"
       intervalUnit: Timeline.DateTime.MONTH

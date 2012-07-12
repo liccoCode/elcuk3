@@ -403,11 +403,10 @@ public class ProcureUnit extends Model {
                 STAGE.SHIP_OVER, STAGE.CLOSE, dt.minusMonths(9).toDate(), dt.plusMonths(3).toDate(), val).fetch();
 
 
+        // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
         TimelineEventSource eventSource = new TimelineEventSource();
+        Selling selling = Selling.findSellingOrSKUFromAnalyzesCachedSellingsOrSKUs(type, val);
         for(ProcureUnit unit : units) {
-            Selling selling = Selling.findSellingOrSKUFromAnalyzesCachedSellingsOrSKUs(type, val);
-
-            boolean ensureQty = unit.delivery != null && unit.delivery.ensureQty != null;
             TimelineEventSource.Event event = new TimelineEventSource.Event(selling, unit);
             event.startAndEndDate(type)
                     .titleAndDesc()
@@ -415,6 +414,10 @@ public class ProcureUnit extends Model {
 
             eventSource.events.add(event);
         }
+
+
+        // 将当前 Selling 的销售情况展现出来
+        eventSource.events.add(TimelineEventSource.currentQtyEvent(selling, type));
 
         return eventSource;
     }

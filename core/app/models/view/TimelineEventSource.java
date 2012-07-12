@@ -3,6 +3,7 @@ package models.view;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import helper.Dates;
+import helper.Webs;
 import models.market.Selling;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +45,9 @@ public class TimelineEventSource {
      * 内部的一个一个的 event, 也就是 Timeline 图表上的一个一个的节点
      */
     public static class Event {
+
+        public Event() {
+        }
 
         public Event(Selling selling, ProcureUnit unit) {
             this.selling = selling;
@@ -153,7 +157,7 @@ public class TimelineEventSource {
         @Transient
         public volatile ProcureUnit unit;
 
-        public Integer lastDays;
+        public Float lastDays;
 
         /**
          * 计算并设置 Start, End Date 与持续天数
@@ -162,9 +166,9 @@ public class TimelineEventSource {
          */
         public Event startAndEndDate(String type) {
             DateTime planDt = new DateTime(this.unit.plan.planArrivDate.getTime());
-            this.lastDays = (int) ((isEnsureQty() ? this.unit.delivery.ensureQty : this.unit.plan.planQty) / ("sku".equals(type) ? this.selling._ps() : this.selling.ps));
+            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.delivery.ensureQty : this.unit.plan.planQty) / ("sku".equals(type) ? this.selling._ps() : this.selling.ps));
             this.start = Dates.date2Date(planDt.toDate());
-            this.end = Dates.date2Date(planDt.plusDays(this.lastDays).toDate());
+            this.end = Dates.date2Date(planDt.plusHours((int) (this.lastDays * 24)).toDate());
             this.durationEvent = true;
             return this;
         }
@@ -221,6 +225,24 @@ public class TimelineEventSource {
             sb.append(codeSequence[random.nextInt(16)]);
         }
         return sb.toString();
+    }
+
+    /**
+     * 根据 Selling 与指定的 type 类型, 创建当前 Selling 可卖长度的 Event
+     *
+     * @param selling
+     * @param type
+     * @return
+     */
+    public static Event currentQtyEvent(Selling selling, String type) {
+        Event currenEvent = new Event();
+        currenEvent.start = Dates.date2Date();
+        float days = Webs.scale2PointUp(selling.qty / ("sku".equals(type) ? selling._ps : selling.ps));
+        currenEvent.end = Dates.date2Date(DateTime.now().plusHours((int) (days * 24)).toDate());
+        currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", selling.qty, selling.ps, days);
+        currenEvent.description = "No Desc.";
+        currenEvent.color("267B2F");
+        return currenEvent;
     }
 
 }

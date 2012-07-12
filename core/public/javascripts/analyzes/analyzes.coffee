@@ -4,6 +4,15 @@ $ ->
   defaultDate = $.DateUtil.addDay(-30)
   now = new Date()
 
+  # 获取下面的 Tab 元素组合
+  belowTab = ->
+    tab: $('#below_tab')
+    content: $('#below_tabContent')
+
+  # 获取上面的 Tab 元素组合
+  topTab = ->
+    tab: $('#top_tab')
+    content: $('#top_tabContent')
 
   # 用来构造给 HighChart 使用的默认 options 的方法
   lineOp = (container, yName) ->
@@ -36,6 +45,7 @@ $ ->
       @
     clearLines: () ->
       @series = []
+    id: -> container
 
   # 销售订单曲线
   unitOp = lineOp('a_units', 'Units').click(
@@ -78,7 +88,7 @@ $ ->
           for k,v of r
             lines[k].data.push([o['_1'], o['_2']]) for o in v
             ssOp.series.push(lines[k])
-          new Highcharts.Chart(ssOp)
+          $('#' + ssOp.id()).data('char', new Highcharts.Chart(ssOp))
     )
 
   # 绘制转换率曲线
@@ -96,12 +106,12 @@ $ ->
           for k, v of r
             lines[k].data.push([o['_1'], o['_2']]) for o in v # 填充完曲线数据
             turnOp.series.push(lines[k]) # 添加曲线
-          new Highcharts.Chart(turnOp) # 绘制曲线
+          $('#' + turnOp.id()).data('char', new Highcharts.Chart(turnOp))
     )
 
   # 绘制销量曲线
   unit_line = (params) ->
-    maskDiv = $('#myTabContent')
+    maskDiv = belowTab().content
     maskDiv.mask('加载中...')
     $.getJSON('/analyzes/ajaxUnit', params,
       (r) ->
@@ -120,13 +130,13 @@ $ ->
             lines[k].data.push([o['_1'], o['_2']]) for o in v
             unitOp.series.push(lines[k])
           localStorage.setItem('msku', params['msku'])
-          new Highcharts.Chart(unitOp)
+          $('#' + unitOp.id()).data('char', new Highcharts.Chart(unitOp))
         maskDiv.unmask()
     )
 
   # 绘制销售额曲线
   sale_line = (params) ->
-    maskDiv = $('#myTabContent')
+    maskDiv = belowTab().content
     maskDiv.mask('加载中...')
     $.getJSON('/analyzes/ajaxSales', params,
       (r) ->
@@ -145,7 +155,7 @@ $ ->
             lines[k].data.push([o['_1'], o['_2']]) for o in v
             saleOp.series.push(lines[k])
           localStorage.setItem('msku', params['msku'])
-          new Highcharts.Chart(saleOp)
+          $('#' + saleOp.id()).data('char', new Highcharts.Chart(saleOp))
         maskDiv.unmask()
     )
 
@@ -165,7 +175,7 @@ $ ->
 
   # 绘制 ProcureUnit 的 timeline 中的数据
   paintProcureUnitInTimeline = (type, skuOrSid)->
-    maskEl = $('#myTabContent')
+    maskEl = belowTab().content
     maskEl.mask('加载中...')
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: skuOrSid},
       (r) ->
@@ -246,7 +256,7 @@ $ ->
 
   # 给 搜索 按钮添加事件
   $('#a_search').click ->
-    tab_type = $('#tab li.active a').attr('href').substring(1)
+    tab_type = belowTab().tab.find('li.active a').attr('href').substring(1)
     page = new Number($('#curent_page').html())
     sellRankLoad(tab_type, if page <= 0 then 1 else page)
     false
@@ -268,9 +278,9 @@ $ ->
       $('#' + id).empty().append(template).find('h3').html(v)
 
 
-  # 为 Tab 切换添加事件
-  bindTabSwitchBtn = ->
-    $('#tab [data-toggle=tab]').on('shown',
+  # 为页面下方的 Tab 切换添加事件
+  bindBelowTabSwitchBtn = ->
+    belowTab().tab.find('[data-toggle=tab]').on('shown',
       (e) ->
         tabId = $(e.target).attr('href').substr(1)
         if tabId is 'msku'
@@ -279,6 +289,28 @@ $ ->
           $('#p_aid').attr("disabled", '')
     )
     $("#p_aid")
+
+  # 为页面上方的曲线的 Tab 切换添加事件
+  bindTopTabSwitchBtn = ->
+    topTab().tab.find('[data-toggle=tab]').on('shown',
+      (e) ->
+        tabId = $(e.target).attr('href').substr(1)
+        if tabId is 'basic'
+        # tab[basic] 中所存在的需要重新绘制的 div 元素 id
+          for id in ['a_units', 'a_turn', 'a_ss', 'tl']
+            div = $("##{id}")
+            # timeline 的重新绘制
+            if id is 'tl'
+              div.data('timeline')?.layout()
+            else
+              div.data('char')?.setSize(div.width(), div.height())
+        else if tabId is 'root'
+        # tab[root] 中所存在的需要重新绘制的 div 元素 id
+          for id in ['a_sales']
+            div = $("##{id}")
+            div.data('char')?.setSize(div.width(), div.height())
+
+    )
 
   # 因为使用 Coffee Script 定义的 function 都是以定义变量的形式赋值 function, 与直接定义 function 不一样
   do ->
@@ -293,4 +325,5 @@ $ ->
     sale_line(from: $.DateUtil.fmt2(defaultDate), to: $.DateUtil.fmt2(now), msku: 'All', type: 'msku')
     # 默认 PageView 线
     pageViewDefaultContent()
-    bindTabSwitchBtn()
+    bindBelowTabSwitchBtn()
+    bindTopTabSwitchBtn()

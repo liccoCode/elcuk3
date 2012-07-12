@@ -141,7 +141,7 @@ public class Analyzes extends Controller {
      * @param type
      * @param val
      */
-    @CacheFor("30mn")
+    @CacheFor("30mn")// 这个方法提供缓存, 但是前台使用 POST 计算, 不用缓存, 因为此方法在 Hibernate 的二级缓存与系统缓存的支持下, 执行在 0~20 ms 左右
     public static void ajaxProcureUnitTimeline(String type, String val) {
         renderJSON(Webs.G(ProcureUnit.timelineEvents(type, val)));
     }

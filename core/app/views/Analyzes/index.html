@@ -6,19 +6,39 @@
     #{script 'analyzes/timeline.coffee'/}
     #{script 'analyzes/analyzes.coffee'/}
 #{/set}
-<div class="row-fluid">
-    <div id="a_units" class="span6" style="height:280px"></div>
-    <div id="a_turn" style="min-height:280px;" class="span3"></div>
-    <div id="a_ss" style="min-height:280px;" class="span3"></div>
-</div>
-#{ck 'root'}
-<div class="row-fluid">
-    <div id="a_sales" class="span6" style="height:280px"></div>
-    <div class="span6">这个里面的为需要权限控制查看的曲线</div>
-</div>
-#{/ck}
-<div class="row-fluid">
-    <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
+
+<div class="tabbable tabs-left">
+    <ul id="top_tab" class="nav nav-tabs">
+        <li class="active"><a href="#basic" data-toggle="tab">基础</a></li>
+    #{ck 'root'}
+        <li><a href="#root" data-toggle="tab">Root</a></li>
+    #{/ck}
+    </ul>
+
+
+    <div id="top_tabContent" class="tab-content">
+        <div class="tab-pane in active" id="basic">
+            <div class="row-fluid">
+                <div id="a_units" class="span6" style="height:280px"></div>
+                <div id="a_turn" style="min-height:280px;" class="span3"></div>
+                <div id="a_ss" style="min-height:280px;" class="span3"></div>
+            </div>
+
+            <div class="row-fluid">
+                <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
+            </div>
+        </div>
+
+    #{ck 'root'}
+        <div class="tab-pane" id="root">
+            <div class="row-fluid">
+                <div id="a_sales" class="span6" style="height:280px"></div>
+                <div class="span6">这个里面的为需要权限控制查看的曲线</div>
+            </div>
+        </div>
+    #{/ck}
+
+    </div>
 </div>
 
 
@@ -63,11 +83,11 @@
 </div>
 
 <div class="row-fluid">
-    <ul id="tab" class="nav nav-tabs">
+    <ul id="below_tab" class="nav nav-tabs">
         <li class="active"><a href="#sku" data-toggle="tab">SKU</a></li>
         <li class=""><a href="#msku" data-toggle="tab">SID</a></li>
     </ul>
-    <div id="myTabContent" class="tab-content">
+    <div id="below_tabContent" class="tab-content">
         <div class="tab-pane fade active in" id="sku">Waiting...</div>
         <div class="tab-pane fade" id="msku"></div>
     </div>
