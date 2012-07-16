@@ -652,7 +652,7 @@ public class Selling extends GenericModel {
             else
                 qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
             for(SellingQTY qty : qtys)
-                analyzeMap.get(sellKey).qty += qty.qty + qty.inbound;
+                analyzeMap.get(sellKey).qty += qty.qty;
         }
 
 
