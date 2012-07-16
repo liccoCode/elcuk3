@@ -185,8 +185,9 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-            this.title = String.format("%s Days, %s %s(%s)",
+            this.title = String.format("%s Days, %s(%s) %s(%s)",
                     this.lastDays, this.unit.plan.supplier,
+                    this.unit.sid,
                     (isEnsureQty() ? this.unit.delivery.ensureQty : this.unit.plan.planQty),
                     (isEnsureQty() ? "EnsureQty" : "PlanQty"));
             this.description = "<h2>这里想看到什么数据??</h2>";
