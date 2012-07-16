@@ -7,8 +7,10 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,7 +55,7 @@ public class Cooperator extends Model {
      * 只有 SUPPLIER 会使用到此字段, 表示这个 SUPPLIER 可以生产的 Item.
      */
     @OneToMany(mappedBy = "cooperator")
-    public List<CooperItem> cooperItems;
+    public List<CooperItem> cooperItems = new ArrayList<CooperItem>();
 
     /**
      * 全称
@@ -123,6 +125,12 @@ public class Cooperator extends Model {
     @PostUpdate
     public void postUpdate() {
         ElcukRecord.postUpdate(this, "Cooperator.update");
+    }
+
+    public Cooperator checkAndUpdate() {
+        if(this.type == T.SHIPPER && this.cooperItems.size() > 0)
+            throw new FastRuntimeException("货物运输商不允许拥有[可生产的商品项目]");
+        return this.save();
     }
 
 

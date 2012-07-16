@@ -34,12 +34,17 @@ public class Cooperators extends Controller {
      */
     public static void edit(Cooperator cop) {
         validation.valid(cop);
-        if(Validation.hasErrors()) {
+        if(Validation.hasErrors())
             renderJSON(new Ret(validation.errorsMap()));
-        }
+        cop.checkAndUpdate();
         renderJSON(new Ret());
     }
 
-    public static void itmEdit(CooperItem cpitm) {
+    public static void itemEdit(CooperItem copItem) {
+        validation.valid(copItem);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(validation.errorsMap()));
+        copItem.checkAndUpdate();
+        renderJSON(new Ret());
     }
 }

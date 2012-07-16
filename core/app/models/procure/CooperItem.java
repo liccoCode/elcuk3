@@ -8,6 +8,7 @@ import models.product.Product;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.List;
@@ -80,4 +81,10 @@ public class CooperItem extends Model {
         record.s();
     }
 
+    public CooperItem checkAndUpdate() {
+        if(!this.product.sku.equals(this.sku)) throw new FastRuntimeException("不允许如此修改 SKU!");
+        if(this.lowestOrderNum < 0) throw new FastRuntimeException("最低采货量不允许小于 0 ");
+        if(this.period < 0) throw new FastRuntimeException("生产周期不允许小于  0");
+        return this.save();
+    }
 }
