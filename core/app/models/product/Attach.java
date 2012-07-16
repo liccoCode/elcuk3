@@ -2,7 +2,7 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import helper.Constant;
-import helper.Webs;
+import helper.J;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -134,7 +134,7 @@ public class Attach extends Model {
         else if(StringUtils.isNotBlank(a.outName))
             rtAttach = Attach.findByOutName(a.outName);
         else
-            Logger.warn("Attach[%s] is Not found.", Webs.G(a));
+            Logger.warn("Attach[%s] is Not found.", J.G(a));
 
         return rtAttach;
     }

@@ -1,7 +1,7 @@
 package market;
 
 import helper.GTs;
-import helper.Webs;
+import helper.J;
 import models.market.Account;
 import models.market.OrderItem;
 import models.market.Selling;
@@ -23,11 +23,11 @@ public class SellingsTest extends FunctionalTest {
     //    @Test
     public void testLoad() {
         Selling sel = Selling.findById("10HTCG14-1900S_amazon.co.uk");
-        System.out.println(Webs.G(sel));
+        System.out.println(J.G(sel));
 
         Selling sel2 = Selling.findById("10HTCG14-1900S,2_amazon.de");
         Assert.assertNotNull(sel2.aps);
-        System.out.println(Webs.G(sel2));
+        System.out.println(J.G(sel2));
     }
 
     //    @Test

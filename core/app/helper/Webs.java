@@ -1,7 +1,5 @@
 package helper;
 
-import com.alibaba.fastjson.JSON;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import models.market.Account;
@@ -320,25 +318,6 @@ public class Webs {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         return sw.toString();
-    }
-
-    /**
-     * 按照(Gson) @Expose 输出 JSON 格式
-     *
-     * @param o
-     * @return
-     */
-    public static String G(Object o) {
-        return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(o);
-    }
-
-    /**
-     * 利用 FastJSON 进行的解决了循环依赖的 toJson 的方法
-     *
-     * @return
-     */
-    public static String json(Object o) {
-        return JSON.toJSONString(o);
     }
 
     /**

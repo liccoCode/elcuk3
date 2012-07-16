@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Constant;
+import helper.J;
 import helper.Webs;
 import models.product.Attach;
 import models.view.Ret;
@@ -49,7 +50,7 @@ public class Attachs extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(Webs.G(a));
+        renderJSON(J.G(a));
     }
 
     public static void rm(Attach a) {
@@ -65,6 +66,6 @@ public class Attachs extends Controller {
 
     public static void images(String fid) {
         List<Attach> imgs = Attach.find("fid=?", fid).fetch();
-        renderJSON(Webs.G(imgs));
+        renderJSON(J.G(imgs));
     }
 }

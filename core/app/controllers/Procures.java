@@ -1,7 +1,6 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
-import helper.Webs;
+import helper.J;
 import models.User;
 import models.embedded.UnitDelivery;
 import models.market.Selling;
@@ -34,8 +33,8 @@ public class Procures extends Controller {
     }
 
     public static void create() {
-        renderArgs.put("suppliers", JSON.toJSONString(ProcureUnit.suppliers()));
-        renderArgs.put("sids", JSON.toJSONString(Selling.allSid(true)));
+        renderArgs.put("suppliers", J.json(ProcureUnit.suppliers()));
+        renderArgs.put("sids", J.json(Selling.allSid(true)));
         render();
     }
 
@@ -47,12 +46,12 @@ public class Procures extends Controller {
     public static void update(ProcureUnit p) {
         if(!p.isPersistent()) throw new FastRuntimeException("此 ProcureUnti 不存在.");
         p.checkAndUpdate();
-        renderJSON(Webs.G(p));
+        renderJSON(J.G(p));
     }
 
     public static void sidSetUp(String sid) {
         Selling selling = Selling.findById(sid);
-        renderJSON(JSON.toJSONString(new F.T4<String, String, String, String>(
+        renderJSON(J.json(new F.T4<String, String, String, String>(
                 selling.listing.listingId,
                 selling.sellingId,
                 selling.listing.product.sku,
@@ -62,7 +61,7 @@ public class Procures extends Controller {
 
     public static void save(ProcureUnit p) {
         p.handler = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.G(p.checkAndCreate()));
+        renderJSON(J.G(p.checkAndCreate()));
     }
 
     public static void close(Long id, String msg) {
@@ -83,17 +82,17 @@ public class Procures extends Controller {
 
     public static void createDeliveryMent() {
         User user = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.G(Deliveryment.checkAndCreate(user)));
+        renderJSON(J.G(Deliveryment.checkAndCreate(user)));
     }
 
     public static void procureUnitToDeliveryMent(ProcureUnit p, Deliveryment dlmt) {
-        renderJSON(Webs.G(p.assignToDeliveryment(dlmt)));
+        renderJSON(J.G(p.assignToDeliveryment(dlmt)));
     }
 
     public static void procureUnitDone(Long id, UnitDelivery d, String cmt) {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(unit == null || !unit.isPersistent()) throw new FastRuntimeException("ProcureUnit 不存在!");
-        renderJSON(Webs.G(unit.deliveryComplete(d, cmt)));
+        renderJSON(J.G(unit.deliveryComplete(d, cmt)));
     }
 
     // ---------------- Delivery Tab ------------------

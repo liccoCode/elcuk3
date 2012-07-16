@@ -1,6 +1,6 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
+import helper.J;
 import helper.Webs;
 import models.market.*;
 import models.procure.ProcureUnit;
@@ -84,7 +84,7 @@ public class Analyzes extends Controller {
                                 Date to) {
         if(!acc.isPersistent()) acc = null;
         try {
-            renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartUnitOrder(msku, acc, type, from, to)));
+            renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(msku, acc, type, from, to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -99,7 +99,7 @@ public class Analyzes extends Controller {
                                  Date to) {
         if(!acc.isPersistent()) acc = null;
         try {
-            renderJSON(JSON.toJSONString(OrderItem.ajaxHighChartSales(msku, acc, type, from, to)));
+            renderJSON(J.json(OrderItem.ajaxHighChartSales(msku, acc, type, from, to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -114,7 +114,7 @@ public class Analyzes extends Controller {
                                          Date from,
                                          Date to) {
         try {
-            renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartPVAndSS(msku, acc, from, to)));
+            renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(msku, acc, from, to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -129,7 +129,7 @@ public class Analyzes extends Controller {
                                        Date from,
                                        Date to) {
         try {
-            renderJSON(JSON.toJSONString(SellingRecord.ajaxHighChartTurnRatio(msku, acc, from, to)));
+            renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(msku, acc, from, to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -143,7 +143,7 @@ public class Analyzes extends Controller {
      */
     @CacheFor("30mn")// 这个方法提供缓存, 但是前台使用 POST 计算, 不用缓存, 因为此方法在 Hibernate 的二级缓存与系统缓存的支持下, 执行在 0~20 ms 左右
     public static void ajaxProcureUnitTimeline(String type, String val) {
-        renderJSON(Webs.G(ProcureUnit.timelineEvents(type, val)));
+        renderJSON(J.G(ProcureUnit.timelineEvents(type, val)));
     }
 
     /**
@@ -165,6 +165,6 @@ public class Analyzes extends Controller {
     public static void ps(String sid, Float ps) {
         Selling sell = Selling.findById(sid);
         if(sell == null || !sell.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
-        renderJSON(Webs.G(sell.ps(ps)));
+        renderJSON(J.G(sell.ps(ps)));
     }
 }

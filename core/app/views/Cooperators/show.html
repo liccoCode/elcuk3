@@ -1,0 +1,74 @@
+#{if full}
+    #{extends 'main_full.html'/}
+    #{set title:coper.fullName /}
+#{/if}
+
+#{script 'cooperators/show.coffee'/}
+
+<!-- Cooperator 自己的信息 -->
+<form id="cooperator" cid="${coper.id}">
+    <table class="table table-condensed table-bordered">
+        <caption><label class="label label-info">合作者信息</label></caption>
+        <tr>
+            <td>FullName:</td>
+            <td><input type="text" name="cop.fullName" class="required" value="${coper.fullName}"></td>
+            <td>Name:</td>
+            <td><input type="text" name="cop.name" class="required" value="${coper.name}"></td>
+        </tr>
+        <tr>
+            <td>Contacter:</td>
+            <td><input type="text" name="cop.contacter" class="required" value="${coper.contacter}"></td>
+            <td>Phone:</td>
+            <td><input type="text" name="cop.phone" class="required" value="${coper.phone}"></td>
+        </tr>
+
+        <tr>
+            <td>Type:</td>
+            <td><input type="text" readonly="" class="required" value="${coper.type.to_s()}"></td>
+            <td>Id:</td>
+            <td><input type="text" readonly="" name="cop.id" value="${coper.id}"></td>
+        </tr>
+
+        <tr>
+            <td>Address:</td>
+            <td colspan="3">
+                <input type="text" name="cop.address" class="span10" value="${coper.address}">
+            </td>
+        </tr>
+
+
+        <tr>
+            <td colspan="4">
+                Memo:
+                <textarea rows="8" class="span12" name="cop.memo">${coper.memo}</textarea>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="4">
+                <a id="cop_update" class="btn btn-primary">更新</a>
+            </td>
+        </tr>
+    </table>
+</form>
+
+
+<!-- 其关联的产品的信息 -->
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>#</th>
+        <th>SKU</th>
+        <th>价格</th>
+        <th>生产周期</th>
+        <th>最低采购量</th>
+    </tr>
+#{list items:coper.cooperItems, as:'itm'}
+    <tr>
+        <td>${itm.id}</td>
+        <td>${itm.sku}</td>
+        <td>${itm.price.format('#.##')}</td>
+        <td>${itm.period}</td>
+        <td>${itm.lowestOrderNum}</td>
+    </tr>
+#{/list}
+</table>

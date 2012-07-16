@@ -2,6 +2,7 @@ package controllers;
 
 import com.google.gson.JsonElement;
 import helper.Crawl;
+import helper.J;
 import helper.Webs;
 import models.Server;
 import models.market.Account;
@@ -93,7 +94,7 @@ public class Listings extends Controller {
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
 
-        renderJSON(Webs.G(tobeSave));
+        renderJSON(J.G(tobeSave));
     }
 
     public static void reCrawl(Listing l) {

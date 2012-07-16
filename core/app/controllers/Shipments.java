@@ -1,6 +1,6 @@
 package controllers;
 
-import helper.Webs;
+import helper.J;
 import models.User;
 import models.procure.Payment;
 import models.procure.ProcureUnit;
@@ -59,25 +59,25 @@ public class Shipments extends Controller {
     public static void shipProcureUnit(ProcureUnit unit, Integer qty, String shipmentId) {
         Shipment shipment = Shipment.findById(shipmentId);
         modelExist(shipment);
-        renderJSON(Webs.G(unit.transformToShipment(shipment, qty)));
+        renderJSON(J.G(unit.transformToShipment(shipment, qty)));
     }
 
     public static void removeItemFromShipment(Long shipItemId) {
         ShipItem item = ShipItem.findById(shipItemId);
         modelExist(item);
-        renderJSON(Webs.G(item.removeFromShipment()));
+        renderJSON(J.G(item.removeFromShipment()));
     }
 
     public static void confirmShipment(String shipmentId, Shipment sTmp) {
         Shipment shipment = Shipment.findById(shipmentId);
         modelExist(shipment);
-        renderJSON(Webs.G(shipment.fromPlanToShip(sTmp)));
+        renderJSON(J.G(shipment.fromPlanToShip(sTmp)));
     }
 
     @Check("root")
     public static void payment(Payment pay, Shipment payObj) {
         pay.payer = User.findByUserName(Secure.Security.connected());
-        renderJSON(Webs.G(payObj.payForShipment(pay)));
+        renderJSON(J.G(payObj.payForShipment(pay)));
     }
 
 
@@ -120,7 +120,7 @@ public class Shipments extends Controller {
         Shipment shipment = Shipment.findById(id);
         modelExist(shipment);
         shipment.memo = memo;
-        renderJSON(Webs.G(shipment.save()));
+        renderJSON(J.G(shipment.save()));
     }
 
     /**
@@ -131,7 +131,7 @@ public class Shipments extends Controller {
     public static void makeDone(String id) {
         Shipment shipment = Shipment.findById(id);
         modelExist(shipment);
-        renderJSON(Webs.G(shipment.done()));
+        renderJSON(J.G(shipment.done()));
     }
 
     private static <T extends GenericModel> void modelExist(T model) {

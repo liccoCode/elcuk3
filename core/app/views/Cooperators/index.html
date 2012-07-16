@@ -1,0 +1,27 @@
+#{extends 'main_full.html'/}
+#{set title:"Cooperators(${coopers.size()})" /}
+#{set 'moreScripts'}
+    #{script 'cooperators/index.coffee'/}
+    #{script 'jquery.form.js'/}
+    #{script 'jquery.validate.min.js'/}
+#{/set}
+
+<div class="row-fluid">
+    <div id='nav_bar' class="span2 well">
+        <ul class="nav nav-tabs nav-stacked">
+            <li><label class="label label-success">合作伙伴</label></li>
+        #{list items:coopers, as:'cop'}
+            #{if cop_index == 1}
+                <li class="active"><a href="#" id="${cop.id}">${cop.fullName}</a></li>
+            #{/if}
+            #{else}
+                <li><a href="#">${cop.fullName}</a></li>
+            #{/else}
+        #{/list}
+        </ul>
+    </div>
+
+    <div id='show_cooperator' class="span10 well">
+        Loading...
+    </div>
+</div>

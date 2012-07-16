@@ -1,6 +1,6 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
+import helper.J;
 import helper.Webs;
 import models.market.Account;
 import models.market.Selling;
@@ -47,7 +47,7 @@ public class Products extends Controller {
         AnalyzesPager<Product> pi = new AnalyzesPager<Product>(s, count, p, prods);
 
         List<String> skus = Family.familys(false);
-        renderArgs.put("fmys", JSON.toJSONString(skus));
+        renderArgs.put("fmys", J.json(skus));
 
         render(prods, pi);
     }
@@ -70,7 +70,7 @@ public class Products extends Controller {
         List<Account> accs = Account.all().fetch();
 
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(p.sku);
-        renderArgs.put("sids", JSON.toJSONString(sellingAndSellingIds._2));
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         render(p, cats, qtys, attnames, accs);
     }
 
@@ -120,7 +120,7 @@ public class Products extends Controller {
         json.put("attrs", attrs);
         json.put("cAttrs", cAttrs);
 
-        renderJSON(Webs.G(json));
+        renderJSON(J.G(json));
     }
 
     public static void brand_family(Brand b, Category c) {
@@ -204,7 +204,7 @@ public class Products extends Controller {
         // 在 Controller 里面将值处理好
         try {
             Selling se = p.saleAmazon(s);
-            renderJSON(Webs.G(se));
+            renderJSON(J.G(se));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -218,7 +218,7 @@ public class Products extends Controller {
          */
         try {
             List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
-            renderJSON(Webs.G(upcSellings));
+            renderJSON(J.G(upcSellings));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

@@ -1,8 +1,8 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import ext.vExtensions;
 import helper.GTs;
+import helper.J;
 import helper.Webs;
 import jobs.SellingRecordCheckJob;
 import models.embedded.AmazonProps;
@@ -54,7 +54,7 @@ public class Sellings extends Controller {
         Selling s = Selling.findById(sid);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
-        renderArgs.put("sids", JSON.toJSONString(sellingAndSellingIds._2));
+        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         render(s);
     }
 
@@ -64,7 +64,7 @@ public class Sellings extends Controller {
     public static void tsp(String sid) {
         Selling s = Selling.findById(sid);// 利用 hibernate 二级缓存, Play 的 JavaBean 填充的查询语句含有 limit 语句
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
-        renderJSON(JSON.toJSONString(GTs.MapBuilder
+        renderJSON(J.json(GTs.MapBuilder
                 .map("t", s.aps.keyFeturess)
                 .put("s", s.aps.searchTermss)
                 .put("p", Arrays.asList(s.aps.productDesc))
@@ -95,7 +95,7 @@ public class Sellings extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(Webs.G(s));
+        renderJSON(J.G(s));
     }
 
     /**

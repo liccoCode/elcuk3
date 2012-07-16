@@ -2,6 +2,7 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.J;
 import helper.JPAs;
 import helper.Webs;
 import models.User;
@@ -301,8 +302,8 @@ public class ProcureUnit extends Model {
         if(shipItems.size() > 1) {
             Webs.systemMail("More then one ShipItem with the same SHIPMENT AND PROCUREUNIT",
                     String.format("More then one ShipItem with the same SHIPMENT AND PROCUREUNIT\r\n%s\r\n%s",
-                            Webs.G(shipItems),
-                            Webs.G(this)));
+                            J.G(shipItems),
+                            J.G(this)));
             throw new FastRuntimeException(String.format("同 Shipment(%s), ProcureUnit(%s) 的 ShipItem 拥有多与一个!", shipment.id, this.id));
         }
         F.T2<Integer, Set<String>> leftQtyTuple = this.leftTransferQty();

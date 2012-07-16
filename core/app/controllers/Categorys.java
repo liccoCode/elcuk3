@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.J;
 import helper.Webs;
 import models.product.AttrName;
 import models.product.Brand;
@@ -57,7 +58,7 @@ public class Categorys extends Controller {
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         if(c.isPersistent()) renderJSON(new Ret("Category has exist!"));
         c.save();
-        renderJSON(Webs.G(c));
+        renderJSON(J.G(c));
     }
 
     public static void cu(Category c) {
