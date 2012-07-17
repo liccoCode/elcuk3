@@ -1,9 +1,18 @@
 #{if full}
-    #{extends 'main_full.html'/}
+    #{extends 'main.html'/}
     #{set title:coper.fullName /}
+    #{set 'moreScripts'}
+        #{script 'jquery.validate.min.js'/}
+    #{/set}
 #{/if}
 
 #{script 'cooperators/show.coffee'/}
+
+#{if flash.success}
+<div class="row">
+    <div class="alert alert-success">${flash.success}</div>
+</div>
+#{/if}
 
 <!-- Cooperator 自己的信息 -->
 <div class="row">
@@ -56,41 +65,39 @@
 
 
 <!-- 其关联的产品的信息 -->
+#{if coper.type == models.procure.Cooperator.T.SUPPLIER}
 <div class="row" style="min-height:200px">
     <label class="label label-info">${coper.fullName} 生产的产品</label>
-    <table class="table table-condensed table-bordered">
+    <table id="cooperItemList" class="table table-condensed table-bordered">
         <tr>
             <th>#</th>
             <th>SKU</th>
             <th>价格</th>
-            <th>生产周期</th>
+            <th>生产周期(day)</th>
             <th>最低采购量</th>
+            <th width="70"></th>
         </tr>
-    #{list items:coper.cooperItems, as:'itm'}
+        #{list items:coper.cooperItems, as:'itm'}
+            <tr>
+                <td>${itm.id}</td>
+                <td rel="popover" content="${itm.memo}">${itm.sku}</td>
+                <td>${itm.price.format('#.##')} ${itm.currency}</td>
+                <td>${itm.period}</td>
+                <td>${itm.lowestOrderNum}</td>
+                <td>
+                    <a href="@{Cooperators.editCooperItem()}?copItem.id=${itm.id}" class="btn btn-mini"><i class="icon-edit"></i></a>
+                    <button copItemId='${itm.id}' class="btn btn-mini delelte"><i class="icon-remove"></i></button>
+                </td>
+            </tr>
+        #{/list}
+        <!-- 为此供应商关联新的产品 -->
         <tr>
-            <td>${itm.id}</td>
-            <td>${itm.sku}</td>
-            <td>${itm.price.format('#.##')}</td>
-            <td>${itm.period}</td>
-            <td>${itm.lowestOrderNum}</td>
-        </tr>
-        <tr id="itm_${itm.id}" style="display:none;">
-            <td colspan="5">
-                <form>
-                    <table class="table table-condensed table-bordered">
-                    </table>
-                </form>
+            <td colspan="6">
+                <a href="@{Cooperators.newCooperItem(null, coper.id)}" class="btn btn-primary">
+                    为[${coper.fullName}]添加新的生产的产品</a>
             </td>
         </tr>
-    #{/list}
     </table>
-</div>
-
-
-#{if coper.type == models.procure.Cooperator.T.SUPPLIER}
-<!-- 为此供应商关联新的产品 -->
-<div class="row">
-    <label class="label label-info">为供应商添加新的其所生产的产品</label>
 </div>
 #{/if}
 

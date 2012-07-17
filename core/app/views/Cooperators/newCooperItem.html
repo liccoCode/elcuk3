@@ -1,0 +1,75 @@
+#{extends 'main.html'/}
+#{set title:"创建新的 CooperItem" /}
+#{set 'moreScripts'}
+    #{script 'cooperators/newCooperItem.coffee'/}
+    #{script 'jquery.validate.min.js'/}
+#{/set}
+<style type="text/css">
+    span.add-on select{
+        width:80px;
+    }
+
+    div.row div.alert span{
+        font-weight:bold;
+        color:#E17800;
+    }
+</style>
+
+#{ifErrors }
+<div class="row">
+    <div class="alert alert-error">
+        #{errors }
+            <p>${errors.key} ${error}</p>
+        #{/errors}
+    </div>
+</div>
+#{/ifErrors}
+
+<div class="row">
+    <div class="alert alert-info" style="text-align:center">为供应商 <span>${cop.fullName}</span> 添加其生产的商品</div>
+#{set isNew:copItem.id == null || copItem.id <= 0/}
+#{set action:isNew? '/Cooperators/saveCooperItem' : '/Cooperators/updateCooperItem'/}
+    <form action="${action}" method="post">
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <td>SKU</td>
+                <td>
+                    <input type="text" id='copItem_sku' name="copItem.product.sku" data-provide="typeahead" data-source="${skus}" placeHolder="填写 SKU" value="${copItem.sku}">
+                    <input type="hidden" name="copItem.sku" value="${copItem.sku}">
+                    <input type="hidden" name="cooperId" value="${cop.id}">
+                    <input type="hidden" name="copItem.id" value="${copItem.id}">
+                #{authenticityToken /}
+                </td>
+
+                <td>价格</td>
+                <td>
+                    <div class="input-prepend">
+                        <input class="input input-small" type="text" name="copItem.price" value="${copItem.price}">
+                        <span class="add-on">#{pickCurrency name:'copItem.currency', c:copItem.currency/}</span>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>生产周期(day)</td>
+                <td><input type="text" name="copItem.period" value="${copItem.period}"></td>
+
+                <td>最低采购量</td>
+                <td><input type="text" name="copItem.lowestOrderNum" value="${copItem.lowestOrderNum}"></td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    Memo:
+                    <textarea rows="8" name="copItem.memo" class="span12">${copItem.memo}</textarea>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <button type="submit" class="btn btn-primary">${isNew ? '创建' : '更新'}</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
