@@ -215,25 +215,25 @@ $ ->
             o.parent().addClass('active')
 
             # 收集参数
-            $.varClosure.params = {type: o.attr('class')}
             ## sku 类型不参加 sid 与 msku 的选择
             accId = o.attr('aid')
             $('#a_acc_id').val(accId)
             $('#a_msku').val(o.attr('title'))
-            $('#dbcick_param :input').map($.varClosure)
+            params = $.formArrayToObj($('#click_param').formToArray())
+            params['type'] = o.attr('class')
 
             # 绘制销量线
-            unit_line($.varClosure.params)
-            sale_line($.varClosure.params)
+            unit_line(params)
+            sale_line(params)
             #  绘制 Timeline 数据
             # 绘制 PV & SS 线
-            if $.varClosure.params['type'] is 'msku'
-              ss_line($.varClosure.params)
-              turn_line($.varClosure.params)
-              paintProcureUnitInTimeline($.varClosure.params['type'], o.find('~ .sid').attr('title'))
+            if params['type'] is 'msku'
+              ss_line(params)
+              turn_line(params)
+              paintProcureUnitInTimeline(params['type'], o.find('~ .sid').attr('title'))
             else
               pageViewDefaultContent()
-              paintProcureUnitInTimeline($.varClosure.params['type'], o.attr('title'))
+              paintProcureUnitInTimeline(params['type'], o.attr('title'))
 
             display =
               0: 'EasyAcc'

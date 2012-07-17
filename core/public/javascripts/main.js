@@ -40,6 +40,19 @@ $(function(){
     };
 
     /**
+     * 利用 jquery.form 简化的获取参数的方法, 将 ArrayObj 转换成为 param[obj]
+     * @param formArr
+     */
+    $.formArrayToObj = function(formArr){
+        var param = {};
+        for(var i = 0; i < formArr.length; i++){
+            var el = formArr[i];
+            param[el['name']] = el['value'];
+        }
+        return param;
+    };
+
+    /**
      * rowsSelector: 需要绑定删除 active 的元素
      * activeObj: 需要选中 jQuery 元素
      */

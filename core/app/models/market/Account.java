@@ -3,6 +3,7 @@ package models.market;
 import com.google.gson.annotations.Expose;
 import exception.NotSupportChangeRegionFastException;
 import helper.*;
+import models.ElcukRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -19,14 +20,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
+import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -366,6 +365,7 @@ public class Account extends Model {
         /**
          * 模拟人工上架使用的链接.
          * - Amazon: 创建 Listing 的提交地址
+         *
          * @return
          */
         public String saleSellingPostLink() {
@@ -388,6 +388,7 @@ public class Account extends Model {
         /**
          * 模拟人工上架使用的链接.
          * - Amazon: 创建全新的 Listing 的时候, 最后需要回掉方法寻找 New UPC 对应的 ASIN
+         *
          * @return
          */
         public String productCreateStatusLink() {
@@ -584,6 +585,10 @@ public class Account extends Model {
     @Expose
     public String password;
 
+    @Transient
+    @Equals(value = "password", message = "account.eq")
+    public String confirm;
+
     /**
      * 不同市场所拥有的钥匙;
      * Secret Key; [Amazon]
@@ -606,6 +611,19 @@ public class Account extends Model {
     @Expose
     public boolean closeable = false;
 
+    @Transient
+    public Account mirror;
+
+
+    @PostLoad
+    public void postLoad() {
+        this.mirror = J.from(J.json(this), Account.class);
+    }
+
+    @PostUpdate
+    public void records() {
+        ElcukRecord.postUpdate(this, "Account.update");
+    }
 
     /**
      * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆, 他们的 Cookie 各不影响

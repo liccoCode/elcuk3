@@ -1,0 +1,12 @@
+*{
+确认选择货币种类
+_name: form 表单提交的 name 属性
+_id: id
+_m : 选中的 Market
+_class: className
+}*
+<select ${_id ? 'id="' + _id + '"' : ''} name="${_name}" size="1" ${_class ? 'class="' + _class + '"' : ''}>
+#{list items:models.market.Account.M.values(), as:'market'}
+    <option ${market == _m ? 'selected' : ''} value="${market.name()}">${market}</option>
+#{/list}
+</select>

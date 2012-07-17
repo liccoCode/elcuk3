@@ -44,6 +44,7 @@ public class Procures extends Controller {
     }
 
     public static void update(ProcureUnit p) {
+        checkAuthenticity();
         if(!p.isPersistent()) throw new FastRuntimeException("此 ProcureUnti 不存在.");
         p.checkAndUpdate();
         renderJSON(J.G(p));

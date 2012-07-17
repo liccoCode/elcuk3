@@ -1,120 +1,137 @@
-#{extends 'main_full.html'/}
+#{extends 'main.html'/}
 #{set title:'用户管理'/}
 #{set 'moreScripts'}
-    #{script 'accounts/index.js'/}
+    #{script 'accounts/index.coffee'/}
 #{/set}
-<div class="row-fluid">
-    <!-- 添加用户的 Btn -->
-    <div id="addUser" class="modal hide fade" style="display: none; ">
-        <div class="modal-header">
-            <a class="close" data-dismiss="modal">×</a>
 
-            <h3>添加用户</h3>
-        </div>
-        <div class="modal-body">
-            <form class="form-horizontal">
-                <fieldset>
-                    <div class="control-group">
-                        <label class="control-label" for="username">Username</label>
 
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" name="a.username" id="username">
-                        </div>
-                    </div>
+<div class="row">
+    <table class="table table-bordered table-striped" id="account_list">
+        <tr>
+            <th>#</th>
+            <th>UniqueName</th>
+            <th>Type</th>
+            <th>MerchantId</th>
+            <th>AccessKey</th>
+            <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+        </tr>
+    #{list items:accs, as:'acc'}
+        <tr aid=${acc.id}>
+            <td>${acc.id}</td>
+            <td>${acc.uniqueName}</td>
+            <td>${acc.type}</td>
+            <td>${acc.merchantId}</td>
+            <td>${acc.accessKey}</td>
+            <td>${acc.closeable}</td>
+        </tr>
+        <tr id="acc_${acc.id}" style="display:none;">
+            <td colspan="6">
+                <form>
+                    <table class="table table-condensed table-bordered">
+                        <tr>
+                            <td>UserName:</td>
+                            <td><input type="text" name="a.username" value="${acc.username}"></td>
+                            <td>UniqueName:</td>
+                            <td><input type="text" name="a.uniqueName" readonly="" value="${acc.uniqueName}"></td>
+                        </tr>
 
-                    <div class="control-group">
-                        <label class="control-label" for="password">Password</label>
+                        <tr>
+                            <td>Password:</td>
+                            <td><input type="password" name="a.password" value="${acc.password}"></td>
+                            <td>Confirm:</td>
+                            <td><input type="password" name="a.confirm" value="${acc.confirm}"></td>
+                        </tr>
 
-                        <div class="controls">
-                            <input type="password" class="input-xlarge" name="a.password" id="password">
-                        </div>
-                    </div>
+                        <tr>
+                            <td>Type:</td>
+                            <td><input type="text" readonly="" value="${acc.type}"></td>
 
-                    <div class="control-group">
-                        <label class="control-label" for="type">Type</label>
+                            <td>Closeable:</td>
+                            <td>
+                                <input type="checkbox" name="a.closeable" ${acc.closeable ? 'checked' : ''} value="${acc.closeable}">
+                            </td>
+                        </tr>
 
-                        <div class="controls">
-                        #{select id:'type', name:'a.type', items:models.market.Account.M.values(), valueProperty:'name'}#{/select}
-                        </div>
-                    </div>
+                        <tr>
+                            <td>MerchantID:</td>
+                            <td><input type="text" name="a.merchantId" value="${acc.merchantId}"></td>
+                            <td>AccessKey:</td>
+                            <td><input type="text" name="a.accessKey" value="${acc.accessKey}"></td>
+                        </tr>
 
-                    <div class="control-group">
-                        <label class="control-label" for="merchantId">MerchantId</label>
+                        <tr>
+                            <td colspan="4">
+                                Token:
+                                <textarea rows="8" class="span11" name="a.token">${acc.token}</textarea>
+                            </td>
+                        </tr>
 
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" name="a.merchantId" id="merchantId">
-                        </div>
-                    </div>
+                        <tr>
+                            <td colspan="4">
+                                <input type="hidden" name="a.id" value="${acc.id}">
+                                <button aid="${acc.id}" class="btn btn-primary">更新</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+    #{/list}
+        <tr>
+            <td colspan="6">
+                <button class="btn btn-success" data-toggle="collapse" data-target="#newUser">添加用户</button>
+                <div class="span12 collapse" id="newUser">
+                    <form id="newUser_form">
+                        <table class="table table-condensed table-bordered">
+                            <tr>
+                                <td>UserName:</td>
+                                <td><input type="text" name="a.username"></td>
+                                <td>UniqueName:</td>
+                                <td><input type="text" readonly="" placeHolder="会自动创建"></td>
+                            </tr>
 
-                    <div class="control-group">
-                        <label class="control-label" for="accessKey">AccessKey</label>
+                            <tr>
+                                <td>Password:</td>
+                                <td><input type="password" name="a.password"></td>
+                                <td>Confirm:</td>
+                                <td><input type="password" name="a.confirm"></td>
+                            </tr>
 
-                        <div class="controls">
-                            <input type="text" class="input-xlarge" name="a.accessKey" id="accessKey">
-                        </div>
-                    </div>
+                            <tr>
+                                <td>Type:</td>
+                                <td>
+                                #{pickMarkets name:'a.type' /}
+                                </td>
 
-                    <div class="control-group">
-                        <label class="control-label" for="closeable">Closeable</label>
+                                <td>Closeable:</td>
+                                <td>
+                                    <input type="checkbox" name="a.closeable" value="false">
+                                </td>
+                            </tr>
 
-                        <div class="controls">
-                            <input type="checkbox" class="input-xlarge" name="a.closeable" id="closeable">
+                            <tr>
+                                <td>MerchantID:</td>
+                                <td><input type="text" name="a.merchantId"></td>
+                                <td>AccessKey:</td>
+                                <td><input type="text" name="a.accessKey"></td>
+                            </tr>
 
-                            <p class="help-block">是否关闭使用</p>
-                        </div>
-                    </div>
+                            <tr>
+                                <td colspan="4">
+                                    Token:
+                                    <textarea rows="8" class="span11" name="a.token"></textarea>
+                                </td>
+                            </tr>
 
-                    <div class="control-group">
-                        <label class="control-label" for="token">Token</label>
-
-                        <div class="controls">
-                            <textarea name="a.token" id="token"></textarea>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-
-        </div>
-        <div class="modal-footer">
-            <a href="#" class="btn btn-primary" id='addUser_btn'>添加用户</a>
-            <a href="#" class="btn" data-dismiss="modal">Close</a>
-        </div>
-    </div>
-    <a data-toggle="modal" href="#addUser" class="btn btn-primar">添加用户</a>
+                            <tr>
+                                <td colspan="4">
+                                    <button nid class="btn btn-primary">创建</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
-<table class="table table-bordered table-striped" id="account_table">
-    <tr>
-        <th>Id</th>
-        <th>Username</th>
-        <th>UniqueName</th>
-        <th>Password</th>
-        <th>Type</th>
-        <th>MerchantId</th>
-        <th>AccessKey</th>
-        <th><a href="#" rel="tooltip" data-original-title="关闭使用此账户">Closeable</a></th>
-        <th>Token</th>
-        <th>&nbsp;</th>
-    </tr>
-#{list items:accs, as:'a'}
-    <tr id="account_${a.id}">
-        <td>
-            <input type="hidden" name="a.id" value="${a.id}">${a.id}
-        </td>
-        <td><input class="span3" type="text" name="a.username" value="${a.username}"></td>
-        <td><input class="span3" type="text" name="a.uniqueName" value="${a.uniqueName}"></td>
-        <td><input class="span3" type="password" name="a.password" value="${a.password}"></td>
-        <td>
-            #{select class:'span3', name:'a.type', items:models.market.Account.M.values(), value:a.type}#{/select}
-        </td>
-        <td><input class="span3" type="text" name="a.merchantId" value="${a.merchantId}"></td>
-        <td><input class="span3" type="text" name="a.accessKey" value="${a.accessKey}"></td>
-        <td>
-            <input class="span1" type="checkbox" name="a.closeable" ${a.closeable ? 'checked' : ''} value="${a.closeable}">
-        </td>
-        <td><textarea class="span3" type="text" name="a.token">${a.token}</textarea></td>
-        <td>
-            <a href="#" class="btn" aid='${a.id}'>更新</a>
-        </td>
-    </tr>
-#{/list}
-</table>

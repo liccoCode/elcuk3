@@ -1,8 +1,10 @@
 package controllers;
 
+import helper.J;
 import helper.Webs;
 import models.market.Account;
 import models.view.Ret;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -14,33 +16,29 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午6:20
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 @Check("root")
 public class Accounts extends Controller {
     public static void index() {
         List<Account> accs = Account.all().fetch();
-
         render(accs);
     }
 
     public static void update(Account a) {
+        validation.valid(a);
         if(!a.isPersistent()) renderJSON(new Ret("Account is not persistent!"));
-        try {
-            a.save();
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-        renderJSON(new Ret(true));
+        if(Validation.hasErrors())
+            renderJSON(new Ret(J.json(Validation.errors())));
+        a.save();
+        renderJSON(new Ret());
     }
 
-    public static void create(Account a, String type) {
+    public static void create(Account a) {
         if(a.isPersistent()) renderJSON(new Ret("Account is exist, can not be CREATE!"));
-        try {
-            a.type = Account.M.val(type);
-            a.save();
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
+        validation.valid(a);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(J.json(Validation.errors())));
+        a.save();
         renderJSON(new Ret(true));
     }
 

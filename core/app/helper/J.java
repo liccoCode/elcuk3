@@ -15,10 +15,14 @@ import play.Play;
 public class J {
 
     public static String json(Object obj) {
-        if(Play.mode.isDev()) {
-            return new Gson().toJson(obj);
-        } else {
+        try {
             return JSON.toJSONString(obj);
+        } catch(Exception e) {
+            if(Play.mode.isDev()) {
+                return new Gson().toJson(obj);
+            } else {
+                return JSON.toJSONString(obj);
+            }
         }
     }
 
