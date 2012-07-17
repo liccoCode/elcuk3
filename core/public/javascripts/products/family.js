@@ -43,7 +43,6 @@ $(function(){
         });
     }
 
-
     $('#myModal').on('show', function(e){
         var cid = $('#cid_val').attr('cid');
         var bid = $('#bid_val').attr('bid');
@@ -56,12 +55,12 @@ $(function(){
     brand_div('');
 
     $('#cFamily').click(function(){
-        $.varClosure.params = {};
+        $.params = {};
         $('#myModal form :input').map($.varClosure);
         var myModal = $('#myModal');
 
         myModal.mask("添加中...");
-        $.post('/familys/create', $.varClosure.params, function(r){
+        $.post('/familys/create', $.params, function(r){
             try{
                 if(r.flag){
                     alert("添加成功.");

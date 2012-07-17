@@ -1,7 +1,9 @@
 package models;
 
 import play.data.validation.Email;
+import play.data.validation.Equals;
 import play.data.validation.Password;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.Crypto;
 
@@ -23,16 +25,24 @@ public class User extends Model {
     }
 
     @Column(nullable = false, unique = true)
+    @Required
     public String username;
 
     @Column(nullable = false)
     @Password
+    @Required
     public String password;
 
+    @Transient
+    @Equals("password")
+    public String confirm;
+
     @Email
+    @Required
     public String email;
 
     @Column(nullable = false)
+    @Required
     public P power;
 
 
@@ -103,10 +113,8 @@ public class User extends Model {
      */
     public void changePasswd(String passwd) {
         //  由于 User 会被保存在 Cache 中, 那么 User 则处于游离状态, 为了保持缓存中游离对象, 所以需要将缓存中的游离对象进行一次更新
-        User managedU = this.merge();
-        managedU.password = passwd;
         this.password = passwd;
-        managedU.save();
+        this.save();
     }
 
 

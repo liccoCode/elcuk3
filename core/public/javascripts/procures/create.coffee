@@ -3,10 +3,8 @@ $ ->
   SID_INPUT = $('[name=p\\.sid]')
 
   # 创建 ProcureUnit
-  $('#create_procure').click ->
-    $.varClosure.params = {}
-    $('#post_form :input').map($.varClosure)
-    $.post('/procures/save', $.varClosure.params,
+  $('#create_procure').click (e) ->
+    $.post('/procures/save', $('#post_form').formSerialize(),
       (data) ->
         if data['flag'] is false
           alert(data['message'])
@@ -16,6 +14,7 @@ $ ->
           alterEl.find('span').html("创建成功." + JSON.stringify(data))
           alterEl.appendTo('#alert')
     )
+    e.preventDefault()
 
   # Selling ID 修改, 同时初始化 Product, 自动调整 Whouse
   SID_INPUT.change ->

@@ -5,9 +5,9 @@ $(function(){
         // Product 更新
     $('#prod_basic a[sku]').click(function(){
         $('#prod_basic').mask('更新中...');
-        $.varClosure.params = {};
+        $.params = {};
         $('#prod_basic :input').map($.varClosure);
-        $.post('/products/p_u', $.varClosure.params, function(r){
+        $.post('/products/p_u', $.params, function(r){
             if(r.flag) alert("更新成功.");
             else alert(JSON.stringify(r));
             $('#prod_basic').unmask();
@@ -18,9 +18,9 @@ $(function(){
     $('#prod_sqty a[qid]').click(function(){
         var qid = $(this).attr('qid');
         $('#prod_sqty').mask("更新中...");
-        $.varClosure.params = {};
+        $.params = {};
         $('#prod_qty_' + qid + " :input").map($.varClosure);
-        $.post('/products/p_sqty_u', $.varClosure.params, function(r){
+        $.post('/products/p_sqty_u', $.params, function(r){
             if(r.flag) alert('更新成功.');
             else alert(JSON.stringify(r));
             $('#prod_sqty').unmask();
@@ -30,11 +30,11 @@ $(function(){
 
     // Attrbutes
     $('#attr_btn').click(function(){
-        $.varClosure.params = {'p.sku':$('#p_sku').val()};
+        $.params = {'p.sku':$('#p_sku').val()};
         var maskObj = $('#attrs');
         $('#attrs :input').map($.varClosure);
         maskObj.mask("更新中...");
-        $.post('/products/p_attr', $.varClosure.params, function(r){
+        $.post('/products/p_attr', $.params, function(r){
             try{
                 if(r.flag) alert("更新成功!<br/>" + r.message);
                 else alert(r.message);
@@ -169,13 +169,13 @@ $(function(){
     // Amazon 上架
     $('#s_sale').click(function(){
         var btnDiv = $('#btn_div');
-        $.varClosure.params = {'s.listing.listingId':$('#lid').text()};
+        $.params = {'s.listing.listingId':$('#lid').text()};
         btnDiv.mask("创建中...");
         $("#amazon :input").map($.varClosure);
-        $.post('/products/saleAmazonListing', $.varClosure.params, function(r){
+        $.post('/products/saleAmazonListing', $.params, function(r){
             if(r.flag === false)
                 alert(r.message);
-            else  {
+            else{
                 // 检查 UPC
                 $('[name=s\\.aps\\.upc] ~ button').click();
                 alert('添加成功(请误重新创建!)');

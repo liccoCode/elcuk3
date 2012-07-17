@@ -12,13 +12,13 @@ $(function(){
         if(o.val()){
             switch(o.attr('type')){
                 case 'checkbox':
-                    $.varClosure.params[o.attr("name")] = o.is(':checked');
+                    $.params[o.attr("name")] = o.is(':checked');
                     break;
                 case 'radio':
-                    if(o.is(':checked')) $.varClosure.params[o.attr("name")] = o.val().trim();
+                    if(o.is(':checked')) $.params[o.attr("name")] = o.val().trim();
                     break;
                 default:
-                    $.varClosure.params[o.attr("name")] = o.val().trim();
+                    $.params[o.attr("name")] = o.val().trim();
             }
         }
     };
@@ -28,13 +28,13 @@ $(function(){
         if(o.val() != undefined){
             switch(o.attr('type')){
                 case 'checkbox':
-                    $.varClosure.params[o.attr("name")] = o.is(':checked');
+                    $.params[o.attr("name")] = o.is(':checked');
                     break;
                 case 'radio':
-                    if(o.is(':checked')) $.varClosure.params[o.attr("name")] = o.val().trim();
+                    if(o.is(':checked')) $.params[o.attr("name")] = o.val().trim();
                     break;
                 default:
-                    $.varClosure.params[o.attr("name")] = o.val().trim();
+                    $.params[o.attr("name")] = o.val().trim();
             }
         }
     };
@@ -50,6 +50,18 @@ $(function(){
             param[el['name']] = el['value'];
         }
         return param;
+    };
+
+    /**
+     * 对页面上的所有 Checbox 添加 check 事件
+     */
+    $.checkBox = function(){
+        $(':checkbox').change(function(e){
+            var o = $(this);
+            o.val(o.is(":checked"));
+            console.log(o.attr('name') + " TO " + o.val());
+            e.preventDefault();
+        })
     };
 
     /**

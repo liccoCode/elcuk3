@@ -25,10 +25,10 @@ $ ->
   # update/deploy 按钮的基础方法
   updateAndDeployBaseBtn = (btn, remote) ->
     btnGroup = $(btn).parent()
-    $.varClosure.params = remote: remote
+    $.params = remote: remote
     $('#container :input').map($.varClosure)
     btnGroup.mask('更新中...')
-    $.post('/sellings/update', $.varClosure.params,
+    $.post('/sellings/update', $.params,
       (r) ->
         if r.flag is false
           alert(r.message)

@@ -16,18 +16,18 @@ $ ->
   bindToDeliveryBtn = () ->
     $('#todelivery_btn').click ->
       return false if !confirm("确认绑定到: " + $('[name=dlmt\\.id] option:checked').html())
-      $.varClosure.params = {}
+      $.params = {}
       $('#todelivery_info :input').map($.varClosure)
-      if !$.varClosure.params['p.delivery.planDeliveryDate']
+      if !$.params['p.delivery.planDeliveryDate']
         alert("预计交货日期不能为空!")
         return false
-      if !$.varClosure.params['dlmt.id']
+      if !$.params['dlmt.id']
         alert('没有指定采购单!')
         return false
-      if !$.varClosure.params['p.id']
+      if !$.params['p.id']
         alert('未知 ProcureUnit!')
         return false
-      $.post('/procures/procureUnitToDeliveryMent', $.varClosure.params,
+      $.post('/procures/procureUnitToDeliveryMent', $.params,
         (r) ->
           if r.flag is false
             alert('绑定失败: ' + r.message)
@@ -69,11 +69,11 @@ $ ->
     $('#update_delivery_info').click ->
       if $('#deliveryInfo form').valid() is false
         return false
-      $.varClosure.params = {}
+      $.params = {}
       $('#deliveryInfo :input').map($.varClosure)
       info = $('#deliveryInfo')
       info.mask("更新中...")
-      $.post('/procures/procureUnitDone', $.varClosure.params,
+      $.post('/procures/procureUnitDone', $.params,
         (r) ->
           if r.flag is false
             alert(r.message)
@@ -83,28 +83,6 @@ $ ->
           $('#delivery tr[row][class=active]').remove()
       )
       false
-
-  # 指派 Shipment
-  bindAssignShipment = ->
-    $("#assainToShipment").click ->
-      $.varClosure.params = {}
-      $("#toShipment :input").map($.varClosure)
-      toShipment = $("#toShipment")
-      toShipment.mask("指派中...")
-      $.post('/procures/assignToShipment', $.varClosure.params,
-        (r) ->
-          if r.flag is false
-            alert(r.message)
-          else
-            $(@).addClass('invisible').unbind('click')
-            alert('3 s 后刷新')
-            setTimeout(
-              () ->
-                window.location.reload()
-              , 3000
-            )
-          toShipment.unmask()
-      )
 
 
   # 加载 Plan Tab 以后的页面初始化
@@ -125,7 +103,6 @@ $ ->
   # 实际交货数量全部转移
     bindPlanQtyBtn()
     bindUpdateDeliveryBtn()
-    bindAssignShipment()
     window.$ui.init()
 
 

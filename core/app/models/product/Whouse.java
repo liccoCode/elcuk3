@@ -1,5 +1,6 @@
 package models.product;
 
+import com.google.gson.annotations.Expose;
 import models.market.Account;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -37,27 +38,35 @@ public class Whouse extends Model {
 
     @Required
     @Column(nullable = false, unique = true)
+    @Expose
     public String name;
 
     @Column(nullable = false)
+    @Expose
     public String address;
 
     @Column(nullable = false)
+    @Expose
     public String city;
 
     @Column(nullable = false)
+    @Expose
     public String province;
 
     @Column(nullable = false)
+    @Expose
     public String postalCode;
 
     @Column(nullable = false)
+    @Expose
     public String country;
 
     @Column(nullable = false)
+    @Expose
     public T type;
 
     @Lob
+    @Expose
     public String memo;
 
 

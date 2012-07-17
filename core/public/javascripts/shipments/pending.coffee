@@ -19,12 +19,12 @@ $ ->
   # 确认此 Shipment 到 Shipping 状态
   bindConfirmShipmentBtn = ->
     $("#confirmShipment button").click ->
-      $.varClosure.params = {}
+      $.params = {}
       $('#confirmShipment :input').map($.varClosure2)
-      if $.varClosure.params['sTmp.trackNo'] in ['', undefined]
+      if $.params['sTmp.trackNo'] in ['', undefined]
         alert('请填写 trckNo')
         return false
-      $.post('/shipments/confirmShipment', $.varClosure.params,
+      $.post('/shipments/confirmShipment', $.params,
         (r) ->
           if r.flag is false
             alert(r.message)

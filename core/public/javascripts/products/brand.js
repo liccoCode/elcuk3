@@ -1,11 +1,11 @@
 $(function(){
 
     $('#addBrandBtn').click(function(){
-        $.varClosure.params = {};
+        $.params = {};
         var form = $('#add_brand_form');
         $('#add_brand_form :input').map($.varClosure);
         form.mask('创建中...');
-        $.post('/brands/bc', $.varClosure.params, function(r){
+        $.post('/brands/bc', $.params, function(r){
             try{
                 if(r.flag) alert("创建成功.");
                 else alert(r.message);
@@ -18,10 +18,10 @@ $(function(){
     function bindCategoryBindBtn(){
         $('button[bind]').click(function(){
             var o = $(this);
-            $.varClosure.params = {};
+            $.params = {};
             o.parent().parent().find(':input').map($.varClosure);
             $('#category_' + o.attr('bid')).mask('绑定中...');
-            $.post('/categorys/bBrand', $.varClosure.params, function(r){
+            $.post('/categorys/bBrand', $.params, function(r){
                 try{
                     if(r.flag){
                         alert('绑定成功!');
@@ -52,7 +52,6 @@ $(function(){
             });
         });
     }
-
 
     // 双击加载详细信息
     $('#brand_slider tr[bid]').dblclick(function(){

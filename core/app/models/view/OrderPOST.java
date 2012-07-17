@@ -3,7 +3,7 @@ package models.view;
 import models.market.Account;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
-import play.data.binding.As;
+import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,10 +23,8 @@ public class OrderPOST {
 
     public Orderr.S state;
 
-    @As("MM/dd/yyyy")
     public Date from;
 
-    @As("MM/dd/yyyy")
     public Date to;
 
     public P orderBy;
@@ -55,30 +53,28 @@ public class OrderPOST {
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
-        Object[] paramArr = basicParamParse();
-        Object[] jpaParams = (Object[]) paramArr[1];
+        F.T2<String, Object[]> params = basicParamParse();
 
-        if(jpaParams.length == 0)
-            return Orderr.find(paramArr[0] + "").fetch(this.page, this.size);
+        if(params._2.length == 0)
+            return Orderr.find(params._1 + "").fetch(this.page, this.size);
         else
-            return Orderr.find(paramArr[0] + "", jpaParams).fetch(this.page, this.size);
+            return Orderr.find(params._1 + "", params._2).fetch(this.page, this.size);
     }
 
     public Long count() {
-        Object[] paramArr = basicParamParse();
-        Object[] jpaParams = (Object[]) paramArr[1];
+        F.T2<String, Object[]> params = basicParamParse();
 
-        if(jpaParams.length == 0)
-            return Orderr.count(paramArr[0] + "");
+        if(params._2.length == 0)
+            return Orderr.count(params._1 + "");
         else
-            return Orderr.count(paramArr[0] + "", jpaParams);
+            return Orderr.count(params._1 + "", params._2);
     }
 
     @SuppressWarnings("unchecked")
-    private Object[] basicParamParse() {
+    private F.T2<String, Object[]> basicParamParse() {
         StringBuilder sbd = new StringBuilder("1=1 ");
         List params = new ArrayList();
-        if(this.account != null) {
+        if(this.account != null && this.account.id != null && this.account.id > 0) {
             sbd.append("AND account=? ");
             params.add(this.account);
         }
@@ -121,6 +117,6 @@ public class OrderPOST {
         if(this.orderBy != null) {
             sbd.append("ORDER BY ").append(this.orderBy).append(" ").append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
         }
-        return new Object[]{sbd.toString(), params.toArray()};
+        return new F.T2<String, Object[]>(sbd.toString(), params.toArray());
     }
 }

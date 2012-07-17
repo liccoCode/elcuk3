@@ -43,7 +43,7 @@
                             <label for="j_close">Close</label>
 
                             <div class="controls">
-                                <input type="checkbox" id="j_close" name="j.close" value="">
+                                <input type="checkbox" name="j.close" value="false">
 
                                 <p class="help-block">Job 是否能够关闭, 如果关闭则不会执行</p>
                             </div>
@@ -100,7 +100,7 @@
                     <td><input type="text" name="j.memo" value="${job.memo}"></td>
                     <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
                     <td>
-                        <input type="checkbox" name="j.close" ${job.close ? 'checked' : ''}>
+                        <input type="checkbox" name="j.close" ${job.close ? 'checked' : ''} value="${job.close}">
                     </td>
                 </tr>
             #{/list}

@@ -229,12 +229,13 @@ public class Products extends Controller {
      */
 
 
-    public static void w_create(@Valid Whouse w) {
+    public static void w_create(Whouse w) {
+        validation.valid(w);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         if(w.account == null && !w.account.isPersistent() && w.type != Whouse.T.FBA)
             renderJSON(new Error("account", "Account is not Persistent!", new String[]{}));
         w.save();
-        renderJSON(w);
+        renderJSON(J.G(w));
     }
 
 
@@ -251,6 +252,6 @@ public class Products extends Controller {
         if(!w.isPersistent() || !w.account.isPersistent())
             renderJSON(new Error("whouse", "Whouse or Accoutn is not persistent!", new String[]{}));
         if(w.type == Whouse.T.FBA) w.save();
-        renderJSON(w);
+        renderJSON(J.G(w));
     }
 }

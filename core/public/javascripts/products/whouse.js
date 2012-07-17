@@ -45,11 +45,11 @@ $(function(){
     }
 
     $('#wh_list_table a[update]').click(function(){
-        $.varClosure.params = {};
+        $.params = {};
         var whid = $(this).attr('whid');
         $('#wh_' + whid + ' :input').map($.varClosure);
         $('#wh_memo_' + whid + " :input").map($.varClosure);
-        ajax_whs('edit', $.varClosure.params);
+        ajax_whs('edit', $.params);
     });
 
     $('#wh_list_table a[remove]').click(function(){
@@ -59,22 +59,22 @@ $(function(){
     });
 
     $('#addWhBtn').click(function(){
-        $.varClosure.params = {};
+        $.params = {};
         whsForm.find(':input').map($.varClosure);
-        ajax_whs('save', $.varClosure.params);
+        ajax_whs('save', $.params);
     });
 
     $('.modal-footer a[accbind]').click(function(){
         var o = $(this);
         var wid = o.attr('wid');
-        $.varClosure.params = {};
+        $.params = {};
         $('#add_whouse_' + wid + " :input").map($.varClosure);
-        $.varClosure.params['w.id'] = wid;
+        $.params['w.id'] = wid;
         if(o.attr('wtype') != 'FBA'){
             alert('只有 FBA 的仓库才需要绑定一个 Account!');
             return false;
         }
-        $.post('/products/w_bind_a', $.varClosure.params, function(data){
+        $.post('/products/w_bind_a', $.params, function(data){
             try{
                 alert('绑定成功!\r\n' + JSON.stringify(data));
             }catch(e){

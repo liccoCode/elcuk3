@@ -10,10 +10,10 @@ $ ->
   # 付款按钮
     $('#pay_for_the_Obj').click ->
       payment = $('#payment')
-      $.varClosure.params = {}
+      $.params = {}
       payment.find(':input').map($.varClosure)
       payment.mask('更新中...')
-      $.post('/shipments/payment', $.varClosure.params,
+      $.post('/shipments/payment', $.params,
         (r) ->
           if r.flag is false
             alert(r.message)

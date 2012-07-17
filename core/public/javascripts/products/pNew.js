@@ -10,25 +10,25 @@ $(function(){
                 brands.push("<option value='" + brand['name'] + "'>" + brand['fullName'] + "</option>");
             });
             $('#cat_brand').html(
-                    $("<select class='span2' size='1'/>").html(brands.join('')).change(function(){ // Brand 的级联事件
-                        var brd = $(this);
-                        if(brd.val() == 0 || brd.val() == '' || brd.val() == undefined) return false;
-                        $.getJSON('/products/brand_family', {'b.name':brd.val(), 'c.categoryId':o.val()}, function(f){
-                            var familys = ['<option value="0">请选择</option>'];
+                $("<select class='span2' size='1'/>").html(brands.join('')).change(function(){ // Brand 的级联事件
+                    var brd = $(this);
+                    if(brd.val() == 0 || brd.val() == '' || brd.val() == undefined) return false;
+                    $.getJSON('/products/brand_family', {'b.name':brd.val(), 'c.categoryId':o.val()}, function(f){
+                        var familys = ['<option value="0">请选择</option>'];
 
-                            $.each(f, function(i, fam){
-                                familys.push("<option value='" + fam['family'] + "'>" + fam['family'] + "</option>")
-                            });
-
-                            $('#brand_family')
-                                    .html($("<select class='span2' name='p.family.family' size='1'/>")
-                                    .html(familys.join('')))
-                                    .find('select').change(function(){
-                                        $("#p_sku").val($(this).val());
-                                    });
+                        $.each(f, function(i, fam){
+                            familys.push("<option value='" + fam['family'] + "'>" + fam['family'] + "</option>")
                         });
-                        return false;
-                    })
+
+                        $('#brand_family')
+                            .html($("<select class='span2' name='p.family.family' size='1'/>")
+                            .html(familys.join('')))
+                            .find('select').change(function(){
+                                $("#p_sku").val($(this).val());
+                            });
+                    });
+                    return false;
+                })
             );
 
             // 2. 初始化一定需要填写的 Category 继承下来的字段
@@ -68,7 +68,6 @@ $(function(){
                 $('#attr_div').html(checkedAttEl.join(''));
             });
 
-
             // 3. 上一次的 html 代码清理
             $("#brand_family").html('');
             $("#attr_div").html('')
@@ -78,11 +77,11 @@ $(function(){
     });
 
     $('#addProduct').click(function(){
-        $.varClosure.params = {};
+        $.params = {};
         $('#container :input').map($.varClosure);
         var success_link = $("#success_link");
         success_link.css('visibility', 'hidden').css('height', '20px').find('a').attr('href', '#');
-        $.post('/products/pCreate', $.varClosure.params, function(r){
+        $.post('/products/pCreate', $.params, function(r){
             if(r.flag){
                 success_link.css('visibility', '').css('height', '50px').find('a').attr('href', r.message);
             }else{

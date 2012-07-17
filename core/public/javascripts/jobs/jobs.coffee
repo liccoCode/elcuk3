@@ -1,17 +1,11 @@
 $ ->
   $('a[rel=tooltip]').tooltip()
 
-  # 设置 params 的 j_close 值
-  setJobClosedVal = (params, selector) ->
-    params['j.close'] = $(selector).is(':checked')
+  $.checkBox()
 
   # 添加 Job 按钮
   $('#add_job_btn').click ->
-    $.varClosure.params = {}
-    $('#job_add_form :input').map($.varClosure)
-    # 自行修正 Checkbox 的值
-    setJobClosedVal($.varClosure.params, '#j_close')
-    $.post('/jobs/c', $.varClosure.params,
+    $.post('/jobs/c', $('#job_add_form :input').fieldSerialize(false),
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -32,11 +26,7 @@ $ ->
 
   # 更新 job
   $('.j_update').click ->
-    jid = $(@).attr('jid')
-    $.varClosure.params = {}
-    $('#job_itm_' + jid + ' :input').map($.varClosure)
-    setJobClosedVal($.varClosure.params, "#job_itm_" + jid + " :input[name='j.close']")
-    $.post('/jobs/u', $.varClosure.params,
+    $.post('/jobs/u', $("#job_itm_#{@getAttribute('jid')} :input").fieldSerialize(false),
       (r) ->
         if r.flag is false
           alert('更新失败! ' + r.message)

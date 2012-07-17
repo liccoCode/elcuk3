@@ -7,15 +7,14 @@ $ ->
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
 
   # 付款按钮
-  $('#pay_for_the_Obj').click ->
-    $.varClosure.params = {}
-    $('#payment :input').map($.varClosure)
-    if !$.isNumeric($.varClosure.params['pay.price'])
+  $('#pay_for_the_Obj').click (e) ->
+    params = $.formArrayToObj($('#payment_form').formToArray())
+    if !$.isNumeric(params['pay.price'])
       alert("付款价格只能为数字")
       return false
     payment = $('#payment')
     payment.mask('更新中...')
-    $.post('/deliveryments/payment', $.varClosure.params,
+    $.post('/deliveryments/payment', params,
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -29,6 +28,7 @@ $ ->
           window.$payment.bindClosePaymentBtn()
         payment.unmask()
     )
+    e.preventDefault()
 
 
   # 此采购单清理付清全款按钮
@@ -81,13 +81,11 @@ $ ->
   # 增加在 Deliveryment 页面的 ProcureUnit 完成交货事件
   $('button[rel=update_delivery_info_btn]').click ->
     key = "#unit_#{@getAttribute('uid')}"
-    $.varClosure.params = {}
     if $("#{key} form").valid() is false
       return false
-    $("#{key} :input").map($.varClosure)
     maskE = $("#{key} table")
     maskE.mask('更新中...')
-    $.post('/procures/procureUnitDone', $.varClosure.params,
+    $.post('/procures/procureUnitDone', $("#{key} form").formSerialize(),
       (r) ->
         if r.flag is false
           alert(r.message)

@@ -16,18 +16,18 @@ $ ->
 
   # 添加 Category BTN
   $('#addCategoryBtn').click ->
-    $.varClosure.params = {}
+    $.params = {}
     addCatForm.find(':input').map($.varClosure)
-    catCreate($.varClosure.params)
+    catCreate($.params)
 
   # 绑定详细页面中的 更新 按钮
   bindBasicInfoUpdate = (cid) ->
     $('#btn_' + cid).click ->
-      $.varClosure.params = {}
+      $.params = {}
       $('#detail_' + cid + ' :input').map($.varClosure2)
       basic = $('#detail_' + cid)
       basic.mask('更新中...')
-      $.post('/categorys/cu', $.varClosure.params,
+      $.post('/categorys/cu', $.params,
         (r) ->
           alert((if r.flag is true then '更新成功' else '更新失败') + '[' + r.message + ']')
           basic.unmask()
@@ -37,14 +37,14 @@ $ ->
   bindBrandBindBtn = ->
     $('button[bind]').click ->
       o = $(@)
-      $.varClosure.params = {}
+      $.params = {}
       o.parent().parent().find(':input').map($.varClosure)
-      if not('b.name' of $.varClosure.params)
+      if not('b.name' of $.params)
         alert('请选择正确的 Brand.')
         return false
       bindMask = $('#brands_' + o.attr('cid'))
       bindMask.mask('绑定中...')
-      $.post('/categorys/bBrand', $.varClosure.params,
+      $.post('/categorys/bBrand', $.params,
         (r) ->
           if r.flag is true
             alert('绑定成功!')

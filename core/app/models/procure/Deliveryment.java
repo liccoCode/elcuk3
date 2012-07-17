@@ -202,6 +202,7 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         float totalNeedPayUSD = 0;
         float totalNeedPayEUR = 0;
         for(ProcureUnit unit : this.units) {
+            if(unit.delivery.deliveryQty == null) throw new FastRuntimeException("产品还未交齐, 无法付款完全.");
             if(unit.plan.currency == Currency.CNY)
                 totalNeedPayCNY += unit.plan.unitPrice * unit.delivery.deliveryQty;
             else if(unit.plan.currency == Currency.USD)

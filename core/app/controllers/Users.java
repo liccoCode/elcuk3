@@ -1,8 +1,9 @@
 package controllers;
 
+import helper.J;
 import models.User;
+import models.view.Ret;
 import play.cache.Cache;
-import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -13,24 +14,25 @@ import play.mvc.With;
  * Date: 2/9/12
  * Time: 3:43 PM
  */
-@With({Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Users extends Controller {
 
     public static void passwd(User u) {
-        validation.required(u.username);
-        validation.required(u.password);
+        validation.valid(u.username);
+        if(!validation.equals(u.password, u.confirm).ok)
+            renderJSON(new Ret("Two time password is not the same."));
         if(!u.username.equalsIgnoreCase(Secure.Security.connected()))
-            renderJSON(new Error("username", "you can not change others password.", new String[]{}));
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        User oldUser = Cache.get(UserCheck.ukey(Secure.Security.connected()), User.class);
-        if(oldUser == null) {
-            if(Secure.Security.isConnected())
-                oldUser = User.find("username=?", u.username).first();
-            else
-                renderJSON(new Error("user", "User is not valid. Username or password is wrong! Or try to relogin.", new String[]{}));
+            renderJSON(new Ret("You can only change " + Secure.Security.connected() + "`s password."));
+        if(Validation.hasErrors())
+            renderJSON(new Ret(J.json(Validation.errors())));
+        User managedUser = User.findByUserName(Secure.Security.connected());
+        if(managedUser == null)
+            renderJSON(new Ret("User is not valid. Username or password is wrong!"));
+        else {
+            managedUser.changePasswd(u.password);
+            renderJSON(J.json(managedUser));
+            Cache.delete(UserCheck.ukey(Secure.Security.connected()));
+            Cache.add(UserCheck.ukey(Secure.Security.connected()), managedUser);
         }
-
-        oldUser.changePasswd(u.password);
-        renderJSON(oldUser);
     }
 }

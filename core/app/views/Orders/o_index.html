@@ -16,7 +16,7 @@
             <select id="o_acc" name="p.account.id" class="span2" size="1">
                 <option value="">Account</option>
             #{list items:accs}
-                <option value="${_.id}">${_.uniqueName}</option>
+                <option value="${_.id}">${_.prettyName()}</option>
             #{/list}
             </select>
             <select id="o_state" name="p.state" class="span2" size="1">
