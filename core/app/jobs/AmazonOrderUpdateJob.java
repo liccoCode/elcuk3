@@ -31,24 +31,24 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
             JobRequest job = JobRequest.checkJob(acc, this, acc.marketplaceId());
             if(job != null) job.request();
         }
-        Logger.info("AmazonOrderFetchJob step1 done!");
+        Logger.info("AmazonOrderUpdateJob step1 done!");
 
         // 3. 更新状态的 Job
         JobRequest.updateState(type());
-        Logger.info("AmazonOrderFetchJob step2 done!");
+        Logger.info("AmazonOrderUpdateJob step2 done!");
 
         // 4. 获取 ReportId
         JobRequest.updateReportId(type());
 
-        Logger.info("AmazonOrderFetchJob step3 done!");
+        Logger.info("AmazonOrderUpdateJob step3 done!");
 
         // 5. 下载 report 文件
         JobRequest.downLoad(type());
-        Logger.info("AmazonOrderFetchJob step4 done!");
+        Logger.info("AmazonOrderUpdateJob step4 done!");
 
         // 6. 处理下载好的文件
         JobRequest.dealWith(type(), this);
-        Logger.info("AmazonOrderFetchJob step5 done!");
+        Logger.info("AmazonOrderUpdateJob step5 done!");
     }
 
 
