@@ -29,7 +29,7 @@
             TO: <input type="date" id="o_to" name="p.to" class="span2">
             <br/>
             OrderBy:
-        #{select id="p.orderBy", items:models.OrderPOST.P.values(), value:'createDate', class:'span1'}#{/select}
+        #{select id="p.orderBy", items:models.view.OrderPOST.P.values(), value:'createDate', class:'span1'}#{/select}
             <select name="p.desc" class="span1" size="1">
                 <option value="DESC">DESC</option>
                 <option value="ASC">ASC</option>
