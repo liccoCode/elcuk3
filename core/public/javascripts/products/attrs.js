@@ -15,7 +15,6 @@ $(function(){
         });
     });
 
-
     // 更新 Att 按钮
     $('table a[aid]').click(function(){
         var o = $(this);

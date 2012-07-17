@@ -5,20 +5,25 @@
     #{script 'jquery.validate.min.js'/}
 #{/set}
 
+#{if flash.success}
+<div class="alert alert-success">
+    <button class="close" data-dismiss="alert">×</button>
+    <p>${flash.success}</p>
+</div>
+#{/if}
+
 <div class="row-fluid">
     <div id='nav_bar' class="span2 well">
         <ul class="nav nav-tabs nav-stacked">
             <li><label class="label label-success">合作伙伴</label></li>
         #{list items:coopers, as:'cop'}
-            #{if cop_index == 1}
-                <li class="active"><a href="#" id="${cop.id}">${cop.fullName}</a></li>
-            #{/if}
-            #{else}
-                <li><a href="#">${cop.fullName}</a></li>
-            #{/else}
+            <li>
+                <a href="#" id="${cop.id}"><span class="badge badge-info">${cop.cooperItems?.size()}</span>${cop.fullName}
+                </a>
+            </li>
         #{/list}
         </ul>
-        <a href="#" class="btn btn-primary">添加新合作伙伴</a>
+        <a href="@{Cooperators.newCooper()}" class="btn btn-primary">添加新合作伙伴</a>
     </div>
 
     <div id='show_cooperator' class="span10 well">

@@ -57,11 +57,17 @@ public class Cooperators extends Controller {
      * @param cop
      */
     public static void newCooper(Cooperator cop) {
-
+        if(cop == null) cop = new Cooperator();
+        render(cop);
     }
 
     public static void saveCooper(Cooperator cop) {
-
+        validation.valid(cop);
+        if(Validation.hasErrors())
+            render("Cooperators/newCooper.html", cop);
+        cop.checkAndUpdate();
+        // 这样编写, 是因为前台这个页面有自动处理 hash 值
+        redirect("/Cooperators/index#" + cop.id);
     }
 
     @Before(only = {"newCooperItem", "saveCooperItem"})
@@ -103,8 +109,8 @@ public class Cooperators extends Controller {
         if(Validation.hasErrors())
             render("Cooperators/editCooperItem.html", copItem);
         copItem.checkAndUpdate();
-        flash.success("修改成功");
-        show(copItem.cooperator.id, true);
+        flash.success("CooperItem %s, %s 修改成功", copItem.id, copItem.sku);
+        redirect("/Cooperators/index#" + copItem.cooperator.id);
     }
 
     public static void removeCooperItem(CooperItem copItem) {

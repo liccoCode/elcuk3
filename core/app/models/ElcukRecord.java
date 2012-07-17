@@ -111,7 +111,7 @@ public class ElcukRecord extends Model {
         if(changes.size() <= 0) return;
         ElcukRecord record = new ElcukRecord(action);
         record.jsonRecord = J.json(changes);
-        record.s();
+        record.record();
     }
 
     private static F.T2<Field, Object> field(Field[] fields, String name, Object currentObj) throws IllegalAccessException {
@@ -152,18 +152,14 @@ public class ElcukRecord extends Model {
             return String.format("%s from %s to %s", this.name, this.from, this.to);
         }
 
-        /**
-         * 由于在使用 Model.save() 的时候会导致死循环(未找到 @Preupdate 等是如何触发的, 所以只能直接使用 JPA 进行 persist)
-         *
-         * @return
-         */
-        public FromTo s() {
-            JPA.em().persist(this);
-            return this;
-        }
     }
 
-    public ElcukRecord s() {
+    /**
+     * 记录这条 Elcuk2 系统日志
+     *
+     * @return
+     */
+    public ElcukRecord record() {
         JPA.em().persist(this);
         return this;
     }

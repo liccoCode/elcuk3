@@ -13,7 +13,6 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -87,15 +86,11 @@ public class CooperItem extends Model {
      */
     @PostUpdate
     public void postUpdate() {
-        List<ElcukRecord.FromTo> changes = ElcukRecord.changes(this);
-        if(changes.size() <= 0) return;
-        ElcukRecord record = new ElcukRecord("CooperItem.update");
-        record.jsonRecord = J.json(changes);
-        record.s();
+        ElcukRecord.postUpdate(this, "CooperItem.update");
     }
 
     public CooperItem checkAndUpdate() {
-        this.commonCheck();
+        this.check();
         if(!this.product.sku.equals(this.sku)) throw new FastRuntimeException("不允许如此修改 SKU!");
         return this.save();
     }
@@ -106,7 +101,7 @@ public class CooperItem extends Model {
      * @return
      */
     public CooperItem checkAndSave(Cooperator cooperator) {
-        this.commonCheck();
+        this.check();
         if(cooperator == null || !cooperator.isPersistent())
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
         this.sku = this.product.sku;
@@ -117,7 +112,7 @@ public class CooperItem extends Model {
     /**
      * 基础的检查
      */
-    private void commonCheck() {
+    private void check() {
         if(this.product == null) throw new FastRuntimeException("没有关联产品, 不允许.");
         if(this.price <= 0) throw new FastRuntimeException("采购价格能小于 0 ?");
         if(this.lowestOrderNum < 0) throw new FastRuntimeException("最低采货量不允许小于 0 ");

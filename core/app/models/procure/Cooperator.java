@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.J;
 import models.ElcukRecord;
 import play.data.validation.Min;
+import play.data.validation.Phone;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
@@ -94,6 +95,7 @@ public class Cooperator extends Model {
     @Required
     @Min(7)
     @Expose
+    @Phone
     public String phone;
 
     /**
@@ -115,7 +117,7 @@ public class Cooperator extends Model {
     public Cooperator mirror;
 
     @PostLoad
-    public void preLoad() {
+    public void postLoad() {
         this.mirror = J.from(J.G(this), Cooperator.class);
     }
 
@@ -128,9 +130,21 @@ public class Cooperator extends Model {
     }
 
     public Cooperator checkAndUpdate() {
+        this.check();
+        return this.save();
+    }
+
+    public Cooperator checkAndSave() {
+        this.check();
+        return this.save();
+    }
+
+    private void check() {
+        // 基础的字段验证利用 Play 的验证方法处理了.
         if(this.type == T.SHIPPER && this.cooperItems.size() > 0)
             throw new FastRuntimeException("货物运输商不允许拥有[可生产的商品项目]");
-        return this.save();
+
+        this.name = this.name.toUpperCase();
     }
 
 
