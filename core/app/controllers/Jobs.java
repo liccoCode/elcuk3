@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import jobs.AmazonOrderUpdateJob;
 import jobs.SellingRecordCheckJob;
 import models.Jobex;
 import models.market.JobRequest;
@@ -81,6 +82,12 @@ public class Jobs extends Controller {
         renderJSON(job);
     }
 
+    /**
+     * 对 SellingRecord 进行修补处理, 从 begin 开始, 抓取 days 天的 Amazon SellingReord 数据
+     *
+     * @param begin
+     * @param days
+     */
     public static void sellingRecordFix(Date begin, int days) {
         List<Selling> sellings = Selling.all().fetch();
         DateTime dt = new DateTime(begin);
@@ -88,5 +95,18 @@ public class Jobs extends Controller {
         for(int i = 0; i < days; i++)
             srcj.checkOneDaySellingRecord(sellings, dt.plusDays(i).toDate());
         renderJSON(new Ret());
+    }
+
+    /**
+     * 修复 Amazon Shipped Order 修复方法
+     *
+     * @param path 指定修复文件所在的绝对地址
+     */
+    public static void shippedOrderFix(String path) {
+        long begin = System.currentTimeMillis();
+        JobRequest job = new JobRequest();
+        job.path = path;
+        new AmazonOrderUpdateJob().callBack(job);
+        renderJSON(new Ret(true, "耗时 " + (System.currentTimeMillis() - begin) + "ms 更新成功."));
     }
 }
