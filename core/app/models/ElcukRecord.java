@@ -147,8 +147,8 @@ public class ElcukRecord extends Model {
         }
         oneFieldChagnes.add(new FromTo(
                 String.format("%s.%s", fieldAndValue._1.getDeclaringClass().getSimpleName(), fieldAndValue._1.getName()),
-                mirrorVal.toString(),
-                fieldVal.toString()
+                mirrorVal == null ? "" : mirrorVal.toString(),
+                fieldVal == null ? "" : fieldVal.toString()
         ));
         return oneFieldChagnes;
     }
@@ -163,6 +163,9 @@ public class ElcukRecord extends Model {
      * @return
      */
     private static boolean isFieldAndMirrorEqual(Object field, Object mirror) {
+        if(field == null && mirror != null) return false;
+        if(field != null && mirror == null) return false;
+        if(field == null && mirror == null) return false;
         if(field.getClass() == Date.class || field.getClass() == java.sql.Date.class) {
             return ((Date) field).getTime() == ((Date) mirror).getTime();
         } else {
