@@ -27,23 +27,23 @@
 
         <div id="procureUnitsContent" class="tab-content">
             <div id="plan" class="tab-pane fade in active">
-            #{procure_planProcureUnitTable items:plan /}
+            #{render 'Procures/planProcureUnit.html', plans:plans /}
             </div>
 
             <div id="deliveryment" class="tab-pane fade">
-            #{procure_deliveryment items:dlmts/}
+            #{render 'Procures/workingDeliveryment.html', dlmts:dlmts /}
             </div>
 
             <div id="done" class="tab-pane fade">
-            #{procure_deliveryProcureUnitTable items:done /}
+            #{render 'Procures/procureUnits.html', units:dones/}
             </div>
 
             <div id="doneDeliveryment" class="tab-pane fade">
-            #{procure_deliveryment items:doneDlmts/}
+            #{render 'Procures/workingDeliveryment.html', dlmts:doneDlmts /}
             </div>
 
             <div id="delivery" class="tab-pane fade">
-            #{procure_deliveryProcureUnitTable items:procure /}
+            #{render 'Procures/procureUnits.html', units:procures/}
             </div>
         </div>
 

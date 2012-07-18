@@ -24,12 +24,12 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
     public static void index() {
-        List<ProcureUnit> plan = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN);
-        List<ProcureUnit> procure = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY);
-        List<ProcureUnit> done = ProcureUnit.findByStage(ProcureUnit.STAGE.DONE);
+        List<ProcureUnit> plans = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN);
+        List<ProcureUnit> procures = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY);
+        List<ProcureUnit> dones = ProcureUnit.findByStage(ProcureUnit.STAGE.DONE);
         List<Deliveryment> dlmts = Deliveryment.openDeliveryments();
         List<Deliveryment> doneDlmts = Deliveryment.find("state=?", Deliveryment.S.DELIVERY).fetch();
-        render(plan, procure, done, dlmts, doneDlmts);
+        render(plans, procures, dones, dlmts, doneDlmts);
     }
 
     public static void create() {

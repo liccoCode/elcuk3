@@ -1,6 +1,3 @@
-*{
-items: 需要 Deliveryment List
-}*
 <table class="table table-condensed table-bordered">
     <tr>
         <td>#</td>
@@ -11,7 +8,7 @@ items: 需要 Deliveryment List
         <td>创建日期</td>
         <td>操作人</td>
     </tr>
-#{list items:_items, as:'d'}
+#{list items:dlmts, as:'d'}
     <tr>
         <td><a href="@{Deliveryments.detail(d.id)}" target="_blank">${d.id}</a></td>
         <td style="background:${d.state.color()}">${d.state}</td>

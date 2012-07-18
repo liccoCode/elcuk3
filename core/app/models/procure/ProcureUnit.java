@@ -360,7 +360,7 @@ public class ProcureUnit extends Model {
     }
 
     public static List<ProcureUnit> findByStage(STAGE stage) {
-        return ProcureUnit.find("stage=?", stage).fetch();
+        return ProcureUnit.find("stage=? ORDER BY planArrivDate", stage).fetch();
     }
 
     public static List<ProcureUnit> findWaitingForShip() {

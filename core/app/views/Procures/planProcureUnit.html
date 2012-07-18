@@ -1,6 +1,3 @@
-*{
-items: procureList
-}*
 <table class="table table-condensed table-bordered">
     <tr>
         <td>Id</td>
@@ -14,7 +11,7 @@ items: procureList
         <td>User</td>
         <td><a rel="popover" data-content="预计到库时间" width="auto">DKDate</a></td>
     </tr>
-#{list items:_items, as:'unit'}
+#{list items:plans, as:'unit'}
     <tr row style="cursor:pointer">
         <td>${unit.id}</td>
         <td>${unit.whouse.name}</td>
