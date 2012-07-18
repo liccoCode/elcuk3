@@ -5,6 +5,7 @@ import helper.Dates;
 import helper.J;
 import helper.JPAs;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.embedded.UnitDelivery;
 import models.embedded.UnitPlan;
@@ -13,7 +14,6 @@ import models.product.Product;
 import models.product.Whouse;
 import models.view.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
@@ -30,8 +30,10 @@ import java.util.*;
  * Time: 5:23 PM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ProcureUnit extends Model {
+
+    public ProcureUnit() {
+    }
 
     /**
      * 阶段
@@ -156,6 +158,18 @@ public class ProcureUnit extends Model {
     @Expose
     public String comment = " ";
 
+    @Transient
+    public ProcureUnit mirror;
+
+    @PostLoad
+    public void postLoad() {
+        this.mirror = ProcureUnit.mirror(this);
+    }
+
+    @PostUpdate
+    public void recordChanges() {
+        ElcukRecord.postUpdate(this, "ProcureUnit.update");
+    }
 
     /**
      * 检查参数并且创建新 ProcureUnit
@@ -421,6 +435,24 @@ public class ProcureUnit extends Model {
         eventSource.events.add(TimelineEventSource.currentQtyEvent(selling, type));
 
         return eventSource;
+    }
+
+    /**
+     * 序列化使用的 mirror 对象
+     */
+    public static ProcureUnit mirror(ProcureUnit origin) {
+        ProcureUnit unit = new ProcureUnit();
+        unit.comment = origin.comment;
+        unit.stage = origin.stage;
+        unit.delivery = origin.delivery;
+        unit.plan = origin.plan;
+        unit.sku = origin.sku;
+        unit.sid = origin.sid;
+        if(origin.delivery == null) unit.delivery = new UnitDelivery();
+        if(origin.plan == null) unit.plan = new UnitPlan();
+        unit.plan.mirror = J.from(J.json(unit.plan), UnitPlan.class);
+        unit.delivery.mirror = J.from(J.json((unit.delivery)), UnitDelivery.class);
+        return unit;
     }
 
 }

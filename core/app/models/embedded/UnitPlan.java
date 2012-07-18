@@ -2,6 +2,7 @@ package models.embedded;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.J;
 import helper.Webs;
 
 import javax.persistence.*;
@@ -44,6 +45,9 @@ public class UnitPlan {
     @Expose
     public Float unitPrice;
 
+    @Transient
+    public UnitPlan mirror;
+
     /**
      * 根据计划到库时间计算的还剩余天数
      *
@@ -52,5 +56,11 @@ public class UnitPlan {
     public float planLeftDays() {
         long millions = this.planArrivDate.getTime() - System.currentTimeMillis();
         return Webs.scalePointUp(0, millions / (24f * 60 * 60 * 1000));
+    }
+
+
+    @Override
+    public String toString() {
+        return J.json(this);
     }
 }
