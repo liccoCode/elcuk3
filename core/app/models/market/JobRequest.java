@@ -158,6 +158,17 @@ public class JobRequest extends Model {
     }
 
     /**
+     * 找到最新的指定类型的 JobRequest
+     *
+     * @param type
+     * @param acc
+     * @return
+     */
+    public static JobRequest newEstJobRequest(T type, Account acc, S state) {
+        return JobRequest.find("account=? AND type=? AND state=? ORDER BY id DESC", acc, type, state).first();
+    }
+
+    /**
      * 具体的检查某个类型的 JobRequest 是否需要进行创建.
      *
      * @param interval 创建下一个 JobRequest 的时间间隔.

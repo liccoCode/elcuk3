@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
+import play.libs.F;
 import play.mvc.Mailer;
 
 import java.util.List;
@@ -149,6 +150,13 @@ public class Mails extends Mailer {
         send(r, title, sbr);
         // send 方法没有抛出异常则表示邮件发送成功
         r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
+    }
+
+    public static void fnSkuCheckWarn(List<F.T4<String, String, String, String>> unfindSelling) {
+        setSubject("{WARN}[FBA] 如下 Selling 在更新 Selling.fnSku 时无法在系统中找到.");
+        mailBase();
+        addRecipient("alerts@easyacceu.com");
+        send(unfindSelling);
     }
 
 

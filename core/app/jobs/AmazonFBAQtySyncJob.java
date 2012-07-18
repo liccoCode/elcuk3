@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.jobs.Job;
+import play.libs.F;
 import play.libs.IO;
 
 import java.io.File;
@@ -148,5 +149,23 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
         }
 
         return qtys;
+    }
+
+    /**
+     * 从 Amazon 给与的文件中解析出 msku, fnsku, asin
+     *
+     * @param file
+     * @return
+     */
+    public static List<F.T3<String, String, String>> fbaCSVParseFnSku(File file) {
+        List<String> lines = IO.readLines(file);
+        lines.remove(0);
+
+        List<F.T3<String, String, String>> t3List = new ArrayList<F.T3<String, String, String>>();
+        for(String line : lines) {
+            String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
+            t3List.add(new F.T3<String, String, String>(vals[0], vals[1], vals[2]));
+        }
+        return t3List;
     }
 }

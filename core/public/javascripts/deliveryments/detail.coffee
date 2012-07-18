@@ -72,27 +72,40 @@ $ ->
           alert("删除成功.")
     )
 
-
+  procureUnitTablInit = ->
   # 为 tr 添加 slideToggle 事件
-  $('#procure_units tr[data-toggle=collapse]').css('cursor', 'pointer').click ->
-    $.tableRowClickActive('#procure_units tr[data-toggle]', $(@))
-    $($(@).attr('href')).toggle('200', 'linear')
+    $('#procure_units tr[data-toggle=collapse]').css('cursor', 'pointer').click ->
+      $.tableRowClickActive('#procure_units tr[data-toggle]', $(@))
+      $($(@).attr('href')).toggle('200', 'linear')
 
-  # 增加在 Deliveryment 页面的 ProcureUnit 完成交货事件
-  $('button[rel=update_delivery_info_btn]').click ->
-    key = "#unit_#{@getAttribute('uid')}"
-    if $("#{key} form").valid() is false
-      return false
-    maskE = $("#{key} table")
-    maskE.mask('更新中...')
-    $.post('/procures/procureUnitDone', $("#{key} form").formSerialize(),
+    # 增加在 Deliveryment 页面的 ProcureUnit 完成交货事件
+    $('button[rel=update_delivery_info_btn]').click (e) ->
+      key = "#unit_#{@getAttribute('uid')}"
+      if $("#{key} form").valid() is false
+        return false
+      maskE = $("#{key} table")
+      maskE.mask('更新中...')
+      $.post('/procures/procureUnitDone', $("#{key} form").formSerialize(),
+        (r) ->
+          if r.flag is false
+            alert(r.message)
+          else
+            alert('更新成功.')
+          maskE.unmask()
+      )
+      e.preventDefault()
+
+    window.$ui.init()
+  procureUnitTablInit()
+
+  $("button[dlmtId]").click (e) ->
+    mask = $('#procure_units')
+    mask.mask('刷新中...')
+    mask.load('/Deliveryments/ajaxProcureUnitTable', id: @getAttribute('dlmtId'),
       (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          alert('更新成功.')
-        maskE.unmask()
+        procureUnitTablInit()
+        mask.unmask()
     )
-    false
+    e.preventDefault()
 
   window.$ui.init()

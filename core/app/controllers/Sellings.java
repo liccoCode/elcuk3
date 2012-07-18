@@ -1,26 +1,25 @@
 package controllers;
 
 import ext.vExtensions;
+import helper.Constant;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
-import jobs.SellingRecordCheckJob;
 import models.embedded.AmazonProps;
 import models.market.Listing;
 import models.market.Selling;
 import models.view.Ret;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
-import play.data.binding.As;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 控制 Selling
@@ -103,24 +102,22 @@ public class Sellings extends Controller {
      */
     public static void syncAmazon(String sid) {
         Selling selling = Selling.findById(sid);
-        try {
-            selling.syncFromAmazon();
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
+        selling.syncFromAmazon();
         renderJSON(new Ret());
     }
 
-    public static void record(@As("yyyy-MM-dd") Date date, int t) {
-        SellingRecordCheckJob job = new SellingRecordCheckJob();
-        DateTime dt = new DateTime(date);
-        for(int i = 0; i < t; i++) {
-            job.fixTime = dt.plusDays(i);
-            try {
-                job.now().get(60, TimeUnit.SECONDS);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
+    public static void sellingLabel(String sid) {
+        Selling selling = Selling.findById(sid);
+        byte[] bytes = selling.downloadFnSkuLabel();
+        String fileName = String.format("%s.pdf", sid);
+        File file = new File(Constant.LABEL_PATH, fileName);
+        file.delete(); // 删除原来的, 再写新的
+        try {
+            FileUtils.writeByteArrayToFile(file, bytes);
+        } catch(IOException e) {
+            // ignore
         }
+        renderBinary(file, sid + ".pdf");
     }
+
 }

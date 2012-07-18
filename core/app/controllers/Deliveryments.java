@@ -22,6 +22,11 @@ public class Deliveryments extends Controller {
         render(dlmt);
     }
 
+    public static void ajaxProcureUnitTable(String id) {
+        Deliveryment dlmt = Deliveryment.findById(id);
+        render(dlmt);
+    }
+
     public static void payment(Payment pay, Deliveryment payObj) {
         pay.payer = User.findByUserName(Secure.Security.connected());
         renderJSON(J.G(payObj.payForDeliveryment(pay)));

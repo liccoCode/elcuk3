@@ -1,0 +1,16 @@
+<table>
+    <tr>
+        <th>Msku</th>
+        <th>FnSku</th>
+        <th>Asin</th>
+        <th>Account</th>
+    </tr>
+#{list items:unfindSelling, as:'t4'}
+    <tr>
+        <td>${t4._1}</td>
+        <td>${t4._2}</td>
+        <td>${t4._3}</td>
+        <td>${t4._4}</td>
+    </tr>
+#{/list}
+</table>

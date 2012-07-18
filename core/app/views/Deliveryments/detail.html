@@ -50,107 +50,13 @@
 #{/if}
 </div>
 
-<div><span class="label label-info">ProcureUnits</span></div>
+<div>
+    <span class="label label-info">ProcureUnits</span>
+    <button dlmtId='${dlmt.id}' rel="popover" content="重新刷新 Table" placement="right" class="btn btn-warning btn-mini">
+        <i class="icon-refresh"></i></button>
+</div>
 <div id="procure_units">
-    <table class="table table-condensed table-bordered">
-        <tr>
-            <td>#</td>
-            <td>计划到库日期</td>
-            <td>计划交货日期</td>
-            <td>实际交货日期</td>
-            <td>确认采购数量</td>
-            <td>实际交货数量</td>
-            <td>供应商</td>
-            <td>Selling</td>
-            <td>Msku</td>
-            <td>Product</td>
-            <td>Price</td>
-            <td>金额</td>
-            <td>阶段</td>
-        </tr>
-    #{list items:dlmt.units, as:'unit'}
-        <tr data-toggle="collapse" href="#unit_${unit.id}">
-            <td>${unit.id}</td>
-            <td>${unit.plan.planArrivDate.date()}</td>
-            <td>${unit.delivery.planDeliveryDate.date()}</td>
-            <td>
-                #{if unit.delivery.deliveryDate == null}
-                    <span class="label label-warning">还未交货</span>
-                #{/if}
-                #{else }
-                ${unit.delivery.deliveryDate.date()}
-                #{/else}
-            </td>
-            <td>${unit.delivery.ensureQty}</td>
-            <td rel="popover" data-content="${unit.comment}" title="Comment">
-                #{if unit.delivery.deliveryQty == null}
-                    <span class="label label-warning">还未交货</span>
-                #{/if}
-                #{else }
-                ${unit.delivery.deliveryQty}
-                #{/else}
-            </td>
-            <td>${unit.plan.supplier}</td>
-            <td>${unit.selling.sellingId}</td>
-            <td>${unit.selling.merchantSKU}</td>
-            <td>${unit.product.sku}</td>
-            <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>
-        <td>
-        ${unit.delivery.ensureQty * unit.plan.unitPrice}
-            #{ifnot unit.delivery.deliveryQty == null}|
-            ${unit.delivery.deliveryQty * unit.plan.unitPrice}</td>
-            #{/ifnot}
-            <td style="background:${unit.stage.color()}">${unit.stage}</td>
-        </tr>
-        <tr id="unit_${unit.id}" style="display:none;">
-            <td colspan="13">
-                <form><!-- 用于 jquery.validate 插件的 -->
-                    <table class="table table-condensed table-bordered">
-                        <tr>
-                            <td>Links:</td>
-                            <td>
-                                #{procure_links unit:unit/}
-                            </td>
-                            <td>
-                                确认采购量 / 预计采购量
-                            </td>
-                            <td>
-                                <span style="color:green;">${unit.delivery.ensureQty}</span> /
-                                <span style="color:#24748c;">${unit.plan.planQty}</span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>实际交货日期</td>
-                            <td>
-                                <input name="d.deliveryDate" type="date" class="required" placeHolder="实际交货日期" value="${unit.delivery.deliveryDate.date()}">
-                            </td>
-                            <td>实际交货数量</td>
-                            <td>
-                                <input type="text" name="d.deliveryQty" class="required" value="${unit.delivery.deliveryQty}">
-                                <input type="hidden" name="id" value="${unit.id}">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="4">
-                                留言
-                                <textarea rows="4" style="width:99%" name="cmt">${unit.comment}</textarea>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <button rel="update_delivery_info_btn" uid="${unit.id}" class="btn btn-small btn-primary">
-                                    更新交货信息
-                                </button>
-                            </td>
-                            <td colspan="3"></td>
-                        </tr>
-                    </table>
-                </form>
-            </td>
-        </tr>
-    #{/list}
-    </table>
+#{render 'Deliveryments/ajaxProcureUnitTable.html', dlmt:dlmt/}
 </div>
 
 <div><span style="line-break:strict;" class="label label-info">附件</span></div>

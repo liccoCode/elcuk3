@@ -503,6 +503,35 @@ public class Account extends Model {
         }
 
         /**
+         * 下载 FBA 最新的 Label 的链接
+         *
+         * @return
+         */
+        public String fnSkuDownloadLink() {
+            /**
+             * https://sellercentral.amazon.de/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU
+             * 是 0(零) 不是 O(字母)
+             * qty.0:27
+             * fnSku.0:X0003U9PEH
+             * mSku.0:10HTCG14-1900S
+             * labelType:ItemLabel_A4_27
+             */
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_fbaprntlab?ie=UTF8&ascending=1&sortAttribute=MerchantSKU",
+                            this.toString());
+                case EBAY_UK:
+                default:
+                    throw new NotSupportChangeRegionFastException();
+            }
+        }
+
+        /**
          * 模拟人工方式修改 Listing 信息的地址
          *
          * @return

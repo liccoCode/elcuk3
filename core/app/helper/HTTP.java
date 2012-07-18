@@ -182,7 +182,43 @@ public class HTTP {
     }
 
     /**
-     * 上传文件的 API
+     * 最简单的下载
+     *
+     * @param url
+     * @return
+     */
+    public static byte[] getDown(String url) {
+        HttpGet get = new HttpGet(url);
+        try {
+            return EntityUtils.toByteArray(client().execute(get).getEntity());
+        } catch(Exception e) {
+            Logger.warn("HTTP.getDown[%s] [%s]", url, Webs.E(e));
+            return new byte[]{};
+        }
+    }
+
+    /**
+     * 通过 Post 进行下载
+     *
+     * @param cookieStore
+     * @param url
+     * @param params
+     * @return
+     */
+    public static byte[] postDown(CookieStore cookieStore, String url, Collection<? extends NameValuePair> params) {
+        HttpPost post = new HttpPost(url);
+        try {
+            HTTP.clearExpiredCookie();
+            post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
+            return EntityUtils.toByteArray(cookieStore(cookieStore).execute(post).getEntity());
+        } catch(Exception e) {
+            Logger.warn("HTTP.postDown[%s] [%s]", url, Webs.E(e));
+            return new byte[]{};
+        }
+    }
+
+    /**
+     * 上传文件的 AkPI
      *
      * @param cookieStore 使用的 Cookie
      * @param url         访问的地址

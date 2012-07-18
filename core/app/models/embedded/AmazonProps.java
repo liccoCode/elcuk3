@@ -7,7 +7,6 @@ import helper.FLog;
 import helper.Webs;
 import models.market.Account;
 import models.market.Selling;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
@@ -16,7 +15,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.libs.F;
@@ -28,7 +26,6 @@ import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -165,6 +162,9 @@ public class AmazonProps {
     @Expose
     public String imageName;
 
+    /**
+     * 这个是在 Amazon 上架的时候, 会去进行 matchAsin 判断, 确实这个 Listing 是否被上架过.
+     */
     @Expose
     @Column(columnDefinition = "varchar(20) DEFAULT ''")
     public String matchAsin;

@@ -55,6 +55,11 @@ public class Constant {
 
     public static final String UPLOAD_PATH = String.format("%s/uploads", Constant.E_DATE);
 
+    /**
+     * Amazon FBA Label 的地址
+     */
+    public static final String LABEL_PATH = String.format("%s/label_path", Constant.E_DATE);
+
     public static final String TMP = System.getProperty("java.io.tmpdir");
 
     public static final String OS_TICKET_NEW_TICKET = "http://t.easyacceu.com/open_api.php";

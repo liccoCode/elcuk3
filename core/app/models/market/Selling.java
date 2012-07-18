@@ -154,6 +154,13 @@ public class Selling extends GenericModel {
     public String priceMatchAsin;
 
     /**
+     * 此 Listing 在 FBA 仓库中所使用的外键 sku
+     */
+    @Expose
+    @Column(length = 32)
+    public String fnSku;
+
+    /**
      * 动态计算使用的 N 天销量
      */
     @Transient
@@ -300,6 +307,19 @@ public class Selling extends GenericModel {
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
         this.save();
+    }
+
+    public byte[] downloadFnSkuLabel() {
+        if(StringUtils.isBlank(this.fnSku))
+            throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
+        synchronized(this.account.cookieStore()) {
+            return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(), Arrays.asList(
+                    new BasicNameValuePair("qty.0", "44"), // 一页打 44 个
+                    new BasicNameValuePair("fnSku.0", this.fnSku),
+                    new BasicNameValuePair("mSku.0", this.merchantSKU),
+                    new BasicNameValuePair("labelType", "ItemLabel_A4_44_48x25")
+            ));
+        }
     }
 
     /**
