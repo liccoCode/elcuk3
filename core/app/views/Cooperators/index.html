@@ -18,7 +18,8 @@
             <li><label class="label label-success">合作伙伴</label></li>
         #{list items:coopers, as:'cop'}
             <li>
-                <a href="#" id="${cop.id}"><span class="badge badge-info">${cop.cooperItems?.size()}</span>${cop.fullName}
+                <a href="#" id="${cop.id}"><span class="badge badge-info">${cop.cooperItems?.size()}</span>
+                ${cop.fullName}
                 </a>
             </li>
         #{/list}
