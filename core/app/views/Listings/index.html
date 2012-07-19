@@ -1,11 +1,11 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'Listing'/}
 #{set 'moreScripts'}
     #{script 'listings/listings.coffee'/}
 #{/set}
 
 <div class="row-fluid">
-    <div class="span3" style="min-height:700px;border-right:1px dashed;margin-right:-1px;background:#F5F5F5;overflow-x:auto;">
+    <div class="span3 well" style="min-height:700px;">
         <button class="btn btn-mini" id="reload_tree">Reload Tree</button>
         <ul id="slider" class="nav nav-list nav-collapse" style="font-size:1em;cursor:pointer;">
             <!-- Category; cursor 继承下去了 -->
@@ -48,8 +48,8 @@
         </ul>
     </div>
 
-    <div class="span9" style="margin-left:1px;">
-        <div class="span12" id="listings" style="min-height:350px;max-height:700px;overflow-y:auto;border-right:1px dashed;margin-right:-1px;">
+    <div class="span9">
+        <div class="row well" style="height:300px;overflow:auto;">
             <div class="input-prepend">
                 <select id="marker" class="span2" size="1">
                     <option value="0">All Market</option>
@@ -58,13 +58,12 @@
                 #{/list}
                 </select>
             </div>
-
-            <div class="span12" id="l_list" style="margin:0 0;">
+            <div id="l_list" style="height:30%;">
                 listings
             </div>
         </div>
 
-        <div class="span12" id="sellings" style="border-top:1px dashed;margin: -1px -1px -1px 0;min-height:350px;max-height:700px;overflow-y:auto;border-right:1px dashed;">
+        <div id="sellings" class="row well" style="min-height:300px;">
             <div class="span12">
                 <select id="account" class="span2" size="1">
                     <option value="0">All Account</option>

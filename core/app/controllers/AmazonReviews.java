@@ -12,6 +12,6 @@ import play.mvc.With;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class AmazonReviews extends Controller {
     public static void index() {
-
+        render();
     }
 }
