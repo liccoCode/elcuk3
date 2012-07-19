@@ -317,7 +317,8 @@ public class Webs {
     public static <E extends Throwable> String S(E e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
-        return sw.toString();
+        // 便与前台查看异常
+        return StringUtils.replace(sw.toString(), "\\n", "<br/>");
     }
 
     /**
