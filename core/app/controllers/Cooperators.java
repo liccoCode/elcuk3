@@ -8,6 +8,7 @@ import models.view.Ret;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * Date: 7/16/12
  * Time: 12:12 PM
  */
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Cooperators extends Controller {
 
     public static void index() {

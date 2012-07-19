@@ -16,7 +16,7 @@ import java.util.List;
  * Date: 4/27/12
  * Time: 11:36 AM
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Familys extends Controller {
     public static void index() {
         render();

@@ -30,7 +30,7 @@ import java.util.Map;
  * Date: 12-1-7
  * Time: 上午11:57
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 @Check("normal")
 public class Products extends Controller {
 

@@ -17,7 +17,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午1:58
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 @Check("root")
 public class Servers extends Controller {
 

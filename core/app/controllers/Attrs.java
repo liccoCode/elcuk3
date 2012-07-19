@@ -13,7 +13,7 @@ import java.util.List;
  * Date: 4/28/12
  * Time: 2:59 PM
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Attrs extends Controller {
 
     public static void index() {

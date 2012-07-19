@@ -29,7 +29,7 @@ import java.util.List;
  * Date: 12/28/11
  * Time: 12:49 AM
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Listings extends Controller {
 
     @CacheFor(value = "6h", id = "listings#index")

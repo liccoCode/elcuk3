@@ -18,7 +18,7 @@ import java.util.List;
  * Date: 12-1-6
  * Time: 下午4:02
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Orders extends Controller {
 
     public static void o_index(Integer p, Integer s) {

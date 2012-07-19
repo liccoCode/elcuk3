@@ -29,7 +29,7 @@ import java.util.List;
  * Date: 12/29/11
  * Time: 12:43 AM
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 @Check("root")
 public class Jobs extends Controller {
 
