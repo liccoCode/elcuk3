@@ -3,6 +3,7 @@ package models.market;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
+import helper.Dates;
 import helper.Webs;
 import models.finance.SaleFee;
 import org.apache.commons.lang.StringUtils;
@@ -504,15 +505,13 @@ public class Orderr extends GenericModel {
 
 
         DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-        if(days > 0) days = -days;
-        Date pre7Day = now.plusDays(days).toDate();
+        Date pre7Day = now.minusDays(Math.abs(days)).toDate();
         List<Orderr> orders = Orderr.ordersInRange(pre7Day, now.plusDays(1).toDate());
 
         List<Account> accs = Account.openedSaleAcc();
         Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
         for(Orderr or : orders) {
-            DateTime ct = new DateTime(or.createDate);
-            String key = ct.toString("yyyy-MM-dd");
+            String key = Dates.date2Date(or.createDate);
 
             if(odmaps.containsKey(key)) {
                 Map<String, AtomicInteger> dateRow = odmaps.get(key);
@@ -520,6 +519,7 @@ public class Orderr extends GenericModel {
                 dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
                 dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
                 dateRow.get(String.format("all")).incrementAndGet();
+                //TODO 记得在更新代码的时候需要将 Account 的 isSaleAcc 修改成为 1
                 dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
                 dateRow.get(String.format("all_%s", or.account.toString())).incrementAndGet();
             } else {
