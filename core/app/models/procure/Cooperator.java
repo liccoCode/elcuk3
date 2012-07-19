@@ -3,6 +3,9 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.J;
 import models.ElcukRecord;
+import models.product.Product;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import play.data.validation.Min;
 import play.data.validation.Phone;
 import play.data.validation.Required;
@@ -145,6 +148,30 @@ public class Cooperator extends Model {
             throw new FastRuntimeException("货物运输商不允许拥有[可生产的商品项目]");
 
         this.name = this.name.toUpperCase();
+    }
+
+    /**
+     * 前台使用的 Sku 自动提示, 需要过滤掉已经成为此供应商的 Sku
+     *
+     * @return
+     */
+    public List<String> frontSkuHelper() {
+        // 需要一份 Clone, 不能修改缓存中的值
+        List<String> allSkus = new ArrayList<String>(Product.skus(false));
+        final List<String> existSkus = new ArrayList<String>();
+        for(CooperItem itm : this.cooperItems)
+            existSkus.add(itm.sku);
+
+        CollectionUtils.filter(allSkus, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                for(String existSku : existSkus) {
+                    if(existSku.equals(o.toString())) return false;
+                }
+                return true;
+            }
+        });
+        return allSkus;
     }
 
 

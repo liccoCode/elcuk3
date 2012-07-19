@@ -3,10 +3,8 @@ package controllers;
 import helper.J;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
-import models.product.Product;
 import models.view.Ret;
 import play.data.validation.Validation;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -72,11 +70,6 @@ public class Cooperators extends Controller {
         redirect("/Cooperators/index#" + cop.id);
     }
 
-    @Before(only = {"newCooperItem", "saveCooperItem"})
-    public static void setUpCooperItemSavePage() {
-        renderArgs.put("skus", J.json(Product.skus(false)));
-    }
-
     /**
      * 添加新的 CooperItem
      *
@@ -86,11 +79,13 @@ public class Cooperators extends Controller {
         if(copItem == null) copItem = new CooperItem();
         Cooperator cop = Cooperator.findById(cooperId);
         if(cop == null || !cop.isPersistent()) error("不正确的合作者参数");
+        renderArgs.put("skus", J.json(cop.frontSkuHelper()));
         render(copItem, cop);
     }
 
     public static void editCooperItem(CooperItem copItem) {
         renderArgs.put("cop", copItem.cooperator);
+        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuHelper()));
         render("Cooperators/newCooperItem.html", copItem);
     }
 
@@ -98,6 +93,7 @@ public class Cooperators extends Controller {
         checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
+        renderArgs.put("skus", J.json(cop.frontSkuHelper()));
         if(Validation.hasErrors())
             render("Cooperators/newCooperItem.html", copItem, cop);
         copItem.checkAndSave(cop);
@@ -108,8 +104,11 @@ public class Cooperators extends Controller {
     public static void updateCooperItem(CooperItem copItem) {
         checkAuthenticity();
         validation.valid(copItem);
-        if(Validation.hasErrors())
-            render("Cooperators/editCooperItem.html", copItem);
+        if(Validation.hasErrors()) {
+            renderArgs.put("cop", copItem.cooperator);
+            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuHelper()));
+            render("Cooperators/newCooperItem.html", copItem);
+        }
         copItem.checkAndUpdate();
         flash.success("CooperItem %s, %s 修改成功", copItem.id, copItem.sku);
         redirect("/Cooperators/index#" + copItem.cooperator.id);
