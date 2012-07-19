@@ -29,7 +29,7 @@
     <div class="alert alert-info" style="text-align:center">为供应商 <span>${cop.fullName}</span> 添加其生产的商品</div>
 #{set isNew:copItem.id == null || copItem.id <= 0/}
 #{set action:isNew? '/Cooperators/saveCooperItem' : '/Cooperators/updateCooperItem'/}
-    <form action="${action}" method="post">
+    <form action="${action}" method="post" autocomplete="off">
         <table class="table table-condensed table-bordered">
             <tr>
                 <td>SKU</td>

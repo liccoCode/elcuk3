@@ -100,6 +100,7 @@ public class CooperItem extends Model {
      * @return
      */
     public CooperItem checkAndSave(Cooperator cooperator) {
+        this.sku = this.sku.trim();
         this.product = Product.findById(this.sku);
         this.check();
         if(cooperator == null || !cooperator.isPersistent())
