@@ -51,7 +51,12 @@
     <div class="span9" style="margin-left:1px;">
         <div class="span12" id="listings" style="min-height:350px;max-height:700px;overflow-y:auto;border-right:1px dashed;margin-right:-1px;">
             <div class="input-prepend">
-            #{pickMarkets id:'market', class:'span2'/}
+                <select id="marker" class="span2" size="1">
+                    <option value="0">All Market</option>
+                #{list items:models.market.Account.M.values(), as:'m'}
+                    <option value="${m.name()}">${m}</option>
+                #{/list}
+                </select>
             </div>
 
             <div class="span12" id="l_list" style="margin:0 0;">
