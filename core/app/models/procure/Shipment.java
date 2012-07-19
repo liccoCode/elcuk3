@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.Dates;
+import helper.FLog;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -307,20 +308,25 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      */
     public String refreshIExpressHTML() {
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
-        this.iExpressHTML = this.internationExpress.parseState(html);
-        if(this.state == S.SHIPPING) { // 如果在 SHIPPING 状态则检查是否处于清关
-            if(this.internationExpress.isContainsClearance(this.iExpressHTML)) {
-                this.state = S.CLEARANCE;
-                Mails.shipment_clearance(this);
+        try {
+            this.iExpressHTML = this.internationExpress.parseExpress(html);
+            if(this.state == S.SHIPPING) { // 如果在 SHIPPING 状态则检查是否处于清关
+                if(this.internationExpress.isContainsClearance(this.iExpressHTML)) {
+                    this.state = S.CLEARANCE;
+                    Mails.shipment_clearance(this);
+                }
+            } else if(this.state == S.CLEARANCE) { // 如果在 CLERANCE 检查是否有 Delivery 日期
+                F.T2<Boolean, DateTime> isDeliveredAndTime = this.internationExpress.isDelivered(this.iExpressHTML);
+                if(isDeliveredAndTime._1) {
+                    this.arriveDate = isDeliveredAndTime._2.toDate();
+                    Mails.shipment_isdone(this);
+                }
             }
-        } else if(this.state == S.CLEARANCE) { // 如果在 CLERANCE 检查是否有 Delivery 日期
-            F.T2<Boolean, DateTime> isDeliveredAndTime = this.internationExpress.isDelivered(this.iExpressHTML);
-            if(isDeliveredAndTime._1) {
-                this.arriveDate = isDeliveredAndTime._2.toDate();
-                Mails.shipment_isdone(this);
-            }
+            this.save();
+        } catch(Exception e) {
+            FLog.fileLog(String.format("%s.%s.html", this.id, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
+            throw new FastRuntimeException(e);
         }
-        this.save();
         return this.iExpressHTML;
     }
 

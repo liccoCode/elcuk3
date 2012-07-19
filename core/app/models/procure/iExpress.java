@@ -47,7 +47,7 @@ public enum iExpress {
         }
 
         @Override
-        public String parseState(String html) {
+        public String parseExpress(String html) {
             Document doc = Jsoup.parse(html);
             Element table = doc.select("#table" + this.getTrackNo()).first();
             Elements articles = table.select(".article_list");
@@ -90,7 +90,7 @@ public enum iExpress {
         }
 
         @Override
-        public String parseState(String html) {
+        public String parseExpress(String html) {
             String jsonObj = StringUtils.substringBetween(html, "detailInfoObject =", "var associatedShipmentsTab =").trim();
             JSONObject infos = JSON.parseObject(jsonObj.substring(0, jsonObj.length() - 1));
             JSONArray scans = infos.getJSONArray("scans");
@@ -172,7 +172,7 @@ public enum iExpress {
      * @param html
      * @return
      */
-    public abstract String parseState(String html);
+    public abstract String parseExpress(String html);
 
     public abstract boolean isContainsClearance(String content);
 

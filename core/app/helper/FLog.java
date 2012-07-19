@@ -34,7 +34,11 @@ public class FLog {
         /**
          * Jobs 任务出现错误的文件日志
          */
-        JOBS_ERROR
+        JOBS_ERROR,
+        /**
+         * 与 HTTP 相关的错误
+         */
+        HTTP_ERROR
     }
 
     /**
@@ -61,6 +65,9 @@ public class FLog {
                 break;
             case JOBS_ERROR:
                 baseUrl = Constant.J_LOGS;
+                break;
+            case HTTP_ERROR:
+                baseUrl = Constant.HTTP_PATH;
                 break;
             default:
                 baseUrl = "";

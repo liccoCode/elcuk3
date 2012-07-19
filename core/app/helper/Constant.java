@@ -52,8 +52,12 @@ public class Constant {
      */
     public static final String J_LOGS = String.format("%s/jobs_log", E_LOGS);
 
-
+    /**
+     * 上传的文件的地址
+     */
     public static final String UPLOAD_PATH = String.format("%s/uploads", Constant.E_DATE);
+
+    public static final String HTTP_PATH = String.format("%s/http", Constant.E_DATE);
 
     /**
      * Amazon FBA Label 的地址
