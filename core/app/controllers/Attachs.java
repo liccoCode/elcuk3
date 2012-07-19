@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import play.Logger;
 import play.libs.Images;
 import play.mvc.Controller;
+import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.util.List;
  * Date: 5/4/12
  * Time: 2:53 PM
  */
+@With({GlobalExceptionHandler.class})
 public class Attachs extends Controller {
 
     public static void image(Attach a, Integer w, Integer h) {

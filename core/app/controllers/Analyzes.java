@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 @Check("manager")
 public class Analyzes extends Controller {
     public static void index() {

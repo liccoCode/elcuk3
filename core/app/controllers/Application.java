@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Application extends Controller {
 
     public static void index() {

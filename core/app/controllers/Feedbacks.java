@@ -21,7 +21,7 @@ import java.util.Map;
  * Date: 3/15/12
  * Time: 1:41 PM
  */
-@With({Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Feedbacks extends Controller {
     public static void index(Integer p, Integer s) {
         Integer[] fixs = Webs.fixPage(p, s);
