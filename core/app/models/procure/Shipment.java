@@ -310,7 +310,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     public String refreshIExpressHTML() {
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
         try {
-            this.iExpressHTML = this.internationExpress.parseExpress(html);
+            this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
             if(this.state == S.SHIPPING) { // 如果在 SHIPPING 状态则检查是否处于清关
                 if(this.internationExpress.isContainsClearance(this.iExpressHTML)) {
                     this.state = S.CLEARANCE;
