@@ -47,9 +47,9 @@ public enum iExpress {
         }
 
         @Override
-        public String parseState(String html) {
+        public String parseExpress(String html, String trackNo) {
             Document doc = Jsoup.parse(html);
-            Element table = doc.select("#table" + this.getTrackNo()).first();
+            Element table = doc.select(String.format("#table%s", trackNo)).first();
             Elements articles = table.select(".article_list");
             for(Element article : articles) {
                 int boxSize = article.select(".ArticleTitleContent > div").size();
@@ -60,13 +60,11 @@ public enum iExpress {
 
         @Override
         public String fetchStateHTML(String tracNo) {
-            this.setTrackNo(tracNo);
             return HTTP.get(this.trackUrl(tracNo));
         }
 
         @Override
         public String trackUrl(String tracNo) {
-            this.setTrackNo(tracNo);
             return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo);
         }
     },
@@ -90,7 +88,7 @@ public enum iExpress {
         }
 
         @Override
-        public String parseState(String html) {
+        public String parseExpress(String html, String trackNo) {
             String jsonObj = StringUtils.substringBetween(html, "detailInfoObject =", "var associatedShipmentsTab =").trim();
             JSONObject infos = JSON.parseObject(jsonObj.substring(0, jsonObj.length() - 1));
             JSONArray scans = infos.getJSONArray("scans");
@@ -128,27 +126,14 @@ public enum iExpress {
 
         @Override
         public String fetchStateHTML(String tracNo) {
-            this.setTrackNo(tracNo);
             return HTTP.get(this.trackUrl(tracNo));
         }
 
         @Override
         public String trackUrl(String tracNo) {
-            this.setTrackNo(tracNo);
             return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo);
         }
     };
-
-    private String trackNo;
-
-    public String getTrackNo() {
-        return this.trackNo;
-    }
-
-    protected void setTrackNo(String trackNo) {
-        if(StringUtils.isBlank(this.trackNo))
-            this.trackNo = trackNo;
-    }
 
     /**
      * 抓取快递单的地址
@@ -172,7 +157,7 @@ public enum iExpress {
      * @param html
      * @return
      */
-    public abstract String parseState(String html);
+    public abstract String parseExpress(String html, String trackNo);
 
     public abstract boolean isContainsClearance(String content);
 
