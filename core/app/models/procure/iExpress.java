@@ -50,7 +50,7 @@ public enum iExpress {
         @Override
         public String parseExpress(String html) {
             Document doc = Jsoup.parse(html);
-            String tid = String.format("#table%s", this.trackNo);
+            String tid = String.format("#table%s", this.getTrackNo());
             Element table = doc.select(tid).first();
             Logger.info("iExpress table id: " + tid);
             Elements articles = table.select(".article_list");
