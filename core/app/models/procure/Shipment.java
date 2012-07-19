@@ -324,8 +324,8 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
             }
             this.save();
         } catch(Exception e) {
-            FLog.fileLog(String.format("%s.%s.html", this.id, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
-            throw new FastRuntimeException(e);
+            FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
+            throw new IllegalArgumentException(e);
         }
         return this.iExpressHTML;
     }
