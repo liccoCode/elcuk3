@@ -71,17 +71,17 @@ public class ListingCs extends Controller {
      * @param market
      * @param asin
      */
-    public static void crawlReview(String market, String asin) throws IOException {
+    public static void crawlReview(String market, final String asin) throws IOException {
         /**
          * 持续抓取, 直到抓取回来的次数 > 5 或者次数与最大页面一样则不再进行抓取;
          * 抓取过程中解析出得 Review 全部返回.
          */
         int maxPage = 11;
         Set<AmazonListingReview> reviews = new HashSet<AmazonListingReview>();
+        final MT m = MT.val(market);
+        if(m == null) throw new FastRuntimeException("Market is inValid!");
         for(int p = 1; p <= 10; p++) { // 最多 10 页
             if(p > maxPage) continue;
-            MT m = MT.val(market);
-            if(m == null) throw new FastRuntimeException("Market is inValid!");
             String url = m.review(asin, p);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
@@ -96,7 +96,6 @@ public class ListingCs extends Controller {
             reviews.addAll(AmazonListingReview.parseReviewFromHTML(doc));
             Logger.info("Total Page: %s, Total Reviews: %s", maxPage, reviews.size());
         }
-
-        renderJSON(reviews);
+        renderJSON(AmazonListingReview.filterReviewWithAsinAndMarket(asin, m, reviews));
     }
 }
