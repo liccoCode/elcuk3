@@ -13,6 +13,7 @@
             <th>Type</th>
             <th>MerchantId</th>
             <th>AccessKey</th>
+            <th>IsSaleAcc</th>
             <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
         </tr>
     #{list items:accs, as:'acc'}
@@ -22,6 +23,7 @@
             <td>${acc.type}</td>
             <td>${acc.merchantId}</td>
             <td>${acc.accessKey}</td>
+            <td ${acc.isSaleAcc ? 'style=background:#009E1A' : ''}>${acc.isSaleAcc}</td>
             <td>${acc.closeable}</td>
         </tr>
         <tr id="acc_${acc.id}" style="display:none;">
@@ -37,9 +39,12 @@
 
                         <tr>
                             <td>Password:</td>
-                            <td><input type="password" name="a.password" value="${acc.password}"></td>
+                            <!-- 如果是非销售账号, 则给出密码 -->
+                            <td>
+                                <input type="${acc.isSaleAcc ? 'password' : 'text'}" name="a.password" value="${acc.isSaleAcc ? '' : acc.password}">
+                            </td>
                             <td>Confirm:</td>
-                            <td><input type="password" name="a.confirm" value="${acc.confirm}"></td>
+                            <td><input type="${acc.isSaleAcc ? 'password' : 'text'}" name="a.confirm"></td>
                         </tr>
 
                         <tr>
@@ -78,7 +83,7 @@
         </tr>
     #{/list}
         <tr>
-            <td colspan="6">
+            <td colspan="7">
                 <button class="btn btn-success" data-toggle="collapse" data-target="#newUser">添加用户</button>
                 <div class="span12 collapse" id="newUser">
                     <form id="newUser_form">
@@ -103,9 +108,16 @@
                                 #{pickMarkets name:'a.type' /}
                                 </td>
 
-                                <td>Closeable:</td>
+                                <td>Checks:</td>
                                 <td>
-                                    <input type="checkbox" name="a.closeable" value="false">
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" name="a.closeable" value="false">
+                                        Closeable
+                                    </label>
+                                    <label class="checkbox inline">
+                                        <input type="checkbox" name="a.isSaleAcc" value="false">
+                                        IsSaleAcc
+                                    </label>
                                 </td>
                             </tr>
 

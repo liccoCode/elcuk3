@@ -30,7 +30,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
          * 1. 找到所有的 Account 并根据所有支持的 MarketPlace 申请同步的文件
          * 2. 下载回列表后进行系统内更新
          */
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
         // 只需要两个账号 3 个市场的 Active Listing
         for(Account acc : accs) {
             if("AJUR3R8UN71M4".equals(acc.merchantId)) {

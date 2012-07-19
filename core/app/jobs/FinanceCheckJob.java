@@ -21,7 +21,7 @@ public class FinanceCheckJob extends Job {
 
     @Override
     public void doJob() {
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
             if("AJUR3R8UN71M4".equals(acc.merchantId)) {
                 doFetch(acc, Account.M.AMAZON_UK);

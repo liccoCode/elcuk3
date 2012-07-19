@@ -35,7 +35,7 @@ public class Listings extends Controller {
     @CacheFor(value = "6h", id = "listings#index")
     public static void index() {
         List<Category> cats = Category.find("ORDER BY categoryId").fetch();
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedSaleAcc();
         render(cats, accs);
     }
 

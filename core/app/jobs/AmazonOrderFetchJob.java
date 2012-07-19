@@ -24,7 +24,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() throws Exception {
         // 对每一个用户都是如此
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
         /**
          * 1. 检查对应的市场是否需要进行创建新的 Job, 需要则创建, 否则返回 null
          * 2. 处理需要进行发送请求的 Job;

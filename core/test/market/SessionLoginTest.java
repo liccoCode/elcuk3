@@ -25,7 +25,7 @@ public class SessionLoginTest extends UnitTest {
 
     @Test
     public void testFeedbackFetch() {
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
             acc.loginWebSite();
         }

@@ -28,7 +28,7 @@ public class Orders extends Controller {
         List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, s);
         Long count = Orderr.count();
         Pager<Orderr> pi = new Pager<Orderr>(s, count, p, orders);
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedSaleAcc();
 
 
         render(orders, count, p, s, pi, accs);

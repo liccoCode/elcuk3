@@ -640,6 +640,12 @@ public class Account extends Model {
     @Expose
     public boolean closeable = false;
 
+    /**
+     * 记录这个 Account 是否为登陆操作使用的账号.
+     */
+    @Expose
+    public boolean isSaleAcc = false;
+
     @Transient
     public Account mirror;
 
@@ -839,6 +845,15 @@ public class Account extends Model {
         return f;
     }
 
+    @Override
+    public String toString() {
+        return StringUtils.split(this.uniqueName, "@")[0];
+    }
+
+    public String prettyName() {
+        return String.format("%s.%s", this.type.nickName(), this.username.split("@")[0]);
+    }
+
     /**
      * 在 Amazon 上通过 URL 下载文件
      *
@@ -860,22 +875,14 @@ public class Account extends Model {
     }
 
     /**
-     * 搜索开发的所有账户
+     * 所有打开的销售账号
      *
      * @return
      */
-    public static List<Account> openedAcc() {
-        return Account.find("closeable=?", false).fetch();
+    public static List<Account> openedSaleAcc() {
+        return Account.find("closeable=? AND isSaleAcc=?", false, true).fetch();
     }
 
-    @Override
-    public String toString() {
-        return StringUtils.split(this.uniqueName, "@")[0];
-    }
-
-    public String prettyName() {
-        return String.format("%s.%s", this.type.nickName(), this.username.split("@")[0]);
-    }
 
     /**
      * 初始化 Account 相关的业务;
@@ -884,9 +891,9 @@ public class Account extends Model {
      */
     public static void init() {
         synchronized(Account.class) {
-            List<Account> accs = Account.all().fetch();
+            List<Account> accs = Account.openedSaleAcc();
             for(Account ac : accs) {
-                merchant_id().put(ac.merchantId, ac.uniqueName);
+                if(ac.isSaleAcc) merchant_id().put(ac.merchantId, ac.uniqueName);
                 Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
                 ac.loginWebSite();
             }

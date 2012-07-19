@@ -67,7 +67,7 @@ public class Products extends Controller {
         List<Category> cats = Category.all().fetch();
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(p);
         List<AttrName> attnames = AttrName.productUnuseAttrName(p);
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedSaleAcc();
 
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(p.sku);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
@@ -91,7 +91,7 @@ public class Products extends Controller {
         s = fixs[1];
         List<Whouse> whs = Whouse.all().fetch(p, s);
         Long count = Whouse.count();
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedSaleAcc();
 
         Pager<Whouse> pi = new Pager<Whouse>(s, count, p, whs);
         render(whs, accs, count, p, s, pi);

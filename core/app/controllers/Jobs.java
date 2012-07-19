@@ -122,7 +122,7 @@ public class Jobs extends Controller {
      * 根据最新从 Amazon 同步回来的 MANAGE_FBA_INVENTORY_ARCHIVED .csv 文件对 fnSku 进行同步更新
      */
     public static void fbaFnSkuFix() {
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
 
         List<F.T4<String, String, String, String>> unfindSelling = new ArrayList<F.T4<String, String, String, String>>();
         for(Account acc : accs) {

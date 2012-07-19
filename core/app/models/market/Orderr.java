@@ -508,7 +508,7 @@ public class Orderr extends GenericModel {
         Date pre7Day = now.plusDays(days).toDate();
         List<Orderr> orders = Orderr.ordersInRange(pre7Day, now.plusDays(1).toDate());
 
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedSaleAcc();
         Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
         for(Orderr or : orders) {
             DateTime ct = new DateTime(or.createDate);

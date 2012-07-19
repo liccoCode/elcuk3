@@ -28,7 +28,7 @@ public class Feedbacks extends Controller {
         p = fixs[0];
         s = fixs[1];
         List<Feedback> feds = Feedback.find("ORDER BY state ASC, score ASC, createDate DESC").fetch(p, s);
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.openedSaleAcc();
         Map<String, Long> accFeds = new HashMap<String, Long>();
 
 

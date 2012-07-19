@@ -29,7 +29,7 @@ public class FeedbackCrawlJob extends Job {
     public void doJob() {
         Currency.updateCRY();// 附带在 FeedbackCrawlJob 的周期更新一次 Currency.
 
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
             switch(acc.type) {
                 case AMAZON_DE:

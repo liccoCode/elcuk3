@@ -24,7 +24,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() {
         // 对每一个用户都是如此
-        List<Account> accs = Account.openedAcc();
+        List<Account> accs = Account.openedSaleAcc();
 
         // 1,2. 需要创建新的 Job
         for(Account acc : accs) {

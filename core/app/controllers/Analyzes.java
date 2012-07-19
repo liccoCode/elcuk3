@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Check("manager")
 public class Analyzes extends Controller {
     public static void index() {
-        List<Account> accs = Account.findAll();
+        List<Account> accs = Account.openedSaleAcc();
         render(accs);
     }
 

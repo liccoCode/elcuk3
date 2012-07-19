@@ -20,7 +20,7 @@ import java.util.List;
 @Check("root")
 public class Accounts extends Controller {
     public static void index() {
-        List<Account> accs = Account.all().fetch();
+        List<Account> accs = Account.findAll();
         render(accs);
     }
 
