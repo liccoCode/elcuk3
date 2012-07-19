@@ -37,7 +37,7 @@ $ ->
 
   # 给现在页面上的所有 Listing 列表中的链接绑定加载 Selling 的事件
   bindListingAnchorClick = ->
-    LISTINGS.find('a[lid]').click ->
+    LISTINGS.find('td[lid]').css('cursor', 'pointer').css('background', '#72A7C1').css('text-align', 'center').click ->
       o = $(@)
       o.parents('table').find('tr').removeClass('active')
       o.parent().parent().addClass('active')

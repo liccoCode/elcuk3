@@ -7,7 +7,7 @@
     </tr>
 #{list items:lsts, as:'l'}
     <tr>
-        <td><a lid="${l.listingId}" href="#"><span class="badge badge-info">${l.sellings.size()}</span></a></td>
+        <td lid="${l.listingId}">${l.sellings.size()}</td>
         <td><a href="@{Listings.listing(l.listingId)}" target="_blank">${l.listingId}</a></td>
         <td title="${l.title}">
             <a href="${l.asinLink()}" target="_blank">${l.title.length() <= 100 ? l.title : (l.title.subSequence(0, 100) + "...")}</a>
