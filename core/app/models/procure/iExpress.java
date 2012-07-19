@@ -11,6 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 import play.libs.F;
 
 import java.util.Locale;
@@ -49,7 +50,9 @@ public enum iExpress {
         @Override
         public String parseExpress(String html) {
             Document doc = Jsoup.parse(html);
-            Element table = doc.select("#table" + this.getTrackNo()).first();
+            String tid = String.format("#table%s", this.trackNo);
+            Element table = doc.select(tid).first();
+            Logger.info("iExpress table id: " + tid);
             Elements articles = table.select(".article_list");
             for(Element article : articles) {
                 int boxSize = article.select(".ArticleTitleContent > div").size();
