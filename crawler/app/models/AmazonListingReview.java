@@ -98,7 +98,7 @@ public class AmazonListingReview {
     /**
      * 视频的预览图片链接
      */
-    public String vedioPicUrl;
+    public String vedioPicUrl = "";
 
     /**
      * 给程序自己使用的, 非人为使用的 Comment; 用来记录变化的
