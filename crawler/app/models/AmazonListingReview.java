@@ -112,7 +112,7 @@ public class AmazonListingReview {
 
         Elements reviews = rtr.select("td > div[style]");
         if(reviews == null) return reviewList;
-        Logger.info("Fetched Review Size is %s", reviews.size());
+        Logger.debug("Fetched Review Size is %s", reviews.size());
 
         String asin = doc.select(".asinReviewsSummary").attr("name");
         String market = doc.select("#navLogoPrimary").text();
@@ -127,7 +127,7 @@ public class AmazonListingReview {
                 } else {
                     review.listingId = String.format("%s_%s", asin, market);
                 }
-                Logger.info("Actually listingId is %s", review.listingId);
+                Logger.debug("Actually listingId is %s", review.listingId);
 
                 String ratingStr = r.select("> div span.swSprite").first().text();
                 review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
