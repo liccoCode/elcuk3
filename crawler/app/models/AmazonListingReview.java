@@ -112,6 +112,7 @@ public class AmazonListingReview {
 
         Elements reviews = rtr.select("td > div[style]");
         if(reviews == null) return reviewList;
+        Logger.info("Fetched Review Size is %s", reviews.size());
 
         String asin = doc.select(".asinReviewsSummary").attr("name");
         String market = doc.select("#navLogoPrimary").text();
