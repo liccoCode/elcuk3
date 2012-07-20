@@ -2,6 +2,7 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import exception.NotSupportChangeRegionFastException;
+import ext.vExtensions;
 import helper.*;
 import models.ElcukRecord;
 import org.apache.commons.io.FileUtils;
@@ -23,6 +24,7 @@ import play.Play;
 import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -666,9 +668,10 @@ public class Account extends Model {
      * @return
      */
     public CookieStore cookieStore() {
-        if(!COOKIE_STORE_MAP.containsKey(this.uniqueName))
-            COOKIE_STORE_MAP.put(this.uniqueName, new BasicCookieStore());
-        return COOKIE_STORE_MAP.get(this.uniqueName);
+        String key = String.format("ACC_COOKIE_%s", this.id);
+        if(!COOKIE_STORE_MAP.containsKey(key))
+            COOKIE_STORE_MAP.put(key, new BasicCookieStore());
+        return COOKIE_STORE_MAP.get(key);
     }
 
     public void setType(M type) {
@@ -845,6 +848,54 @@ public class Account extends Model {
         return f;
     }
 
+
+    /**
+     * 此账号点击这个 Review, 点击 Up 或者 Down;
+     * 由于 Amazon 不会给与是否点击成功的返回, 所以无法确认是否点击成功, 但仅能知道已经点击了, 具体的信息需要更新 Review 来查看
+     *
+     * @param isUp   是否点击 Up? 否则点击 Down
+     * @param review
+     */
+    public F.T2<AmazonReviewRecord, String> clickReview(AmazonListingReview review, boolean isUp) {
+        /**
+         * 1. 访问 Review 页面, 检查是否需要登陆.
+         * 2. 解析出登陆后的点击链接.
+         * 3. Click 这个链接 ^_^
+         */
+        F.T3<Boolean, String, String> loginAndClicks = loginAndClickLink(review);
+        if(!loginAndClicks._1) { // 没有登陆则登陆, 只尝试一次登陆!
+            synchronized(this.cookieStore()) {
+                this.loginWebSite();
+            }
+        }
+        F.T3<Boolean, String, String> afterLoginT3 = loginAndClickLink(review);
+        String content;
+        if(isUp) {
+            content = HTTP.get(this.cookieStore(), afterLoginT3._2);
+        } else {
+            content = HTTP.get(this.cookieStore(), afterLoginT3._3);
+        }
+        AmazonReviewRecord record = new AmazonReviewRecord(review, this, isUp);
+        // 只有后面登陆成功了, 才允许记录 Record
+        if(afterLoginT3._1) record.save();
+        return new F.T2<AmazonReviewRecord, String>(record, content);
+    }
+
+    private F.T3<Boolean, String, String> loginAndClickLink(AmazonListingReview review) {
+        String html = HTTP.get(this.cookieStore(), vExtensions.reviewLink(review));
+        Document doc = Jsoup.parse(html);
+        // 账号登陆以后, 链接中才会有 sign-out 字符串
+        boolean isLogin = StringUtils.contains(doc.select("#navidWelcomeMsg a").attr("href"), "sign-out");
+        Elements els = doc.select(".votingButtonReviews");
+        String[] upAndDownLink = new String[2];
+        for(Element el : els) {
+            String link = el.attr("href");
+            if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm"))) upAndDownLink[0] = link;
+            else upAndDownLink[1] = link;
+        }
+        return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
+    }
+
     @Override
     public String toString() {
         return StringUtils.split(this.uniqueName, "@")[0];
@@ -875,12 +926,21 @@ public class Account extends Model {
     }
 
     /**
+     * 所有打开的 Review 账号
+     *
+     * @return
+     */
+    public static List<Account> openedReviewAccount() {
+        return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false).fetch();
+    }
+
+    /**
      * 所有打开的销售账号
      *
      * @return
      */
     public static List<Account> openedSaleAcc() {
-        return Account.find("closeable=? AND isSaleAcc=?", false, true).fetch();
+        return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, true).fetch();
     }
 
 

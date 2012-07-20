@@ -44,7 +44,7 @@ public class ElcukRecord extends Model {
     public ElcukRecord(String action) {
         this();
         this.action = action;
-        this.username = this.username();
+        this.username = ElcukRecord.username();
     }
 
     /**
@@ -259,7 +259,7 @@ public class ElcukRecord extends Model {
      *
      * @return
      */
-    public String username() {
+    public static String username() {
         String username = Scope.Session.current().get("username");
         if(StringUtils.isBlank(username)) return "System";
         else return username;

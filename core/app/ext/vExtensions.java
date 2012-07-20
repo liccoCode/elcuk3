@@ -43,7 +43,7 @@ public class vExtensions extends JavaExtensions {
      * @param selling
      * @return
      */
-    public static String reviewLink(Selling selling) {
+    public static String makeReviewLink(Selling selling) {
         //http://www.amazon.co.uk/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=B003TQ3NCY
         String baseAmazon = "http://www.%s/review/create-review/ref=cm_cr_pr_wr_but_top?ie=UTF8&nodeID=&asin=%s";
         switch(selling.market) {

@@ -10,6 +10,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -431,5 +432,16 @@ public class Listing extends GenericModel {
 
     public static String lid(String asin, Account.M market) {
         return String.format("%s_%s", asin.toUpperCase(), market.toString());
+    }
+
+    /**
+     * 反过来通过从 lid 解析出 ASIN 与 Market
+     *
+     * @param lid
+     * @return
+     */
+    public static F.T2<String, Account.M> unLid(String lid) {
+        String[] args = StringUtils.split(lid, "_");
+        return new F.T2<String, Account.M>(args[0], Account.M.val(args[1]));
     }
 }

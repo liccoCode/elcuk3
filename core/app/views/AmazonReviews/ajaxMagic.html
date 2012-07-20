@@ -12,21 +12,38 @@
     </tr>
 #{list items:savedReviews, as:'r'}
     <tr drop="${r.reviewId}">
-        <td>${r.rating}</td>
+        <td style="background:${"#" + r.color()}">${r.rating}</td>
         <td><a href="${r.userReviewLink()}" target="_blank">${r.userid}</a></td>
         <td><a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a></td>
         <td>${r.username}</td>
         <td>${r.helpUp}/${r.helpClick}</td>
-        <td>${r.purchased}</td>
-        <td>${r.isVedio}</td>
+        <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
+        <td ${r.isVedio ? 'style=background:#0091F4' : ''}>${r.isVedio}</td>
         <td>${r.reviewDate.date()}</td>
         <td>${r.alrId}</td>
     </tr>
     <tr id="review_${r.reviewId}" style="display:none;">
         <td colspan="9">
             <div class="row-fluid">
-                <div class="span6">${r.review}</div>
-                <div class="span6">99999</div>
+                <div class="span6">
+                    <h3>${r.title}</h3>
+
+                    #{if r.isVedio}
+                        <p><img src="${r.vedioPicUrl}"></p>
+                    #{/if}
+
+                    <p class="review">${r.review}</p>
+                </div>
+                <div class="span6">
+                    <p>
+                        <button class="btn btn-primary trans"><i class="icon-external-link">E</i></button>
+                        <button class="btn btn-success makeUp"><i class="icon-thumbs-up"></i></button>
+                        <button class="btn btn-danger makeDown"><i class="icon-thumbs-down"></i></button>
+                    </p>
+                    <div id="after_${r.reviewId}">
+                        After Click
+                    </div>
+                </div>
             </div>
         </td>
     </tr>

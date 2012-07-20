@@ -281,11 +281,50 @@ public class AmazonListingReview extends GenericModel {
         return true;
     }
 
+    /**
+     * 选择出一个能够点击此 Review 的 Account
+     *
+     * @return
+     */
+    public Account pickUpOneAccountToClick() {
+        /**
+         * 一步一步的过滤掉 Account, 然后返回一个 Account
+         * 1. 找出所有的 Comment Account, 过滤掉 SaleAcc
+         * 2. 从 AmazonReviewRecord 中检查此 Review 的点击日志, 首先找出点击过此 Review 的 Account
+         */
+        List<Account> acc = Account.openedReviewAccount();
+        if(acc.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
+        List<Account> accs = AmazonReviewRecord.checkNonClickAccounts(acc, this);
+        if(accs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        return accs.get(0);
+    }
+
     @Override
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (alrId != null ? alrId.hashCode() : 0);
         return result;
+    }
+
+    /**
+     * 输出与此 Review 合适的警告颜色
+     *
+     * @return
+     */
+    public String color() {
+        if(this.rating >= 5) {
+            return "3ED76A";
+        } else if(this.rating >= 4) {
+            return "ADFF1F";
+        } else if(this.rating >= 3) {
+            return "FFE107";
+        } else if(this.rating >= 2) {
+            return "D54C00";
+        } else if(this.rating >= 1) {
+            return "E03F00";
+        } else {
+            return "FF1101";
+        }
     }
 
     /**
@@ -317,4 +356,7 @@ public class AmazonListingReview extends GenericModel {
         return review;
     }
 
+    public static AmazonListingReview findByReviewId(String reviewId) {
+        return AmazonListingReview.find("reviewId=?", reviewId).first();
+    }
 }

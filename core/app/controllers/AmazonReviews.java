@@ -1,8 +1,11 @@
 package controllers;
 
+import helper.J;
 import models.market.Account;
 import models.market.AmazonListingReview;
+import models.market.AmazonReviewRecord;
 import models.market.Listing;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -27,7 +30,27 @@ public class AmazonReviews extends Controller {
      * @param m
      */
     public static void ajaxMagic(String asin, String m) {
-        List<AmazonListingReview> savedReviews = AmazonListingReview.find("listingId=?", Listing.lid(asin, Account.M.val(m))).fetch();
+        List<AmazonListingReview> savedReviews = AmazonListingReview.find("listingId=? ORDER BY reviewDate DESC, rating", Listing.lid(asin, Account.M.val(m))).fetch();
         render(savedReviews);
+    }
+
+    /**
+     * 点击[有]用
+     */
+    public static void makeUp(String reviewId) {
+        AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
+        Account acc = review.pickUpOneAccountToClick();
+        F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, true);
+        renderJSON(J.json(t2));
+    }
+
+    /**
+     * 点击[无]用
+     */
+    public static void makeDown(String reviewId) {
+        AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
+        Account acc = review.pickUpOneAccountToClick();
+        F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, true);
+        renderJSON(J.json(t2));
     }
 }

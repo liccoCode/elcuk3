@@ -1,11 +1,15 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
+import models.ElcukRecord;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 记录账号点击的数据
@@ -16,6 +20,33 @@ import java.util.Date;
  */
 @Entity
 public class AmazonReviewRecord extends GenericModel {
+
+    public AmazonReviewRecord() {
+    }
+
+    /**
+     * 根据点击的 AmazonListingReivew 转换成为 Click Record
+     *
+     * @param review
+     * @param acc
+     * @param isUp
+     */
+    public AmazonReviewRecord(AmazonListingReview review, Account acc, boolean isUp) {
+        this.account = acc;
+        this.username = ElcukRecord.username();
+        this.createAt = new Date();
+        this.isUp = isUp;
+        F.T2<String, Account.M> unLid = Listing.unLid(review.listingId);
+        this.asin = unLid._1;
+        this.market = unLid._2;
+        this.userId = review.userid;
+        this.reviewId = review.reviewId;
+        this.review = review.review;
+        this.ups = review.helpUp;
+        this.downs = review.helpClick - review.helpUp;
+        this.rating = review.rating;
+    }
+
     @Id
     @GeneratedValue
     @Required
@@ -100,4 +131,19 @@ public class AmazonReviewRecord extends GenericModel {
     @Required
     public float rating;
 
+    /**
+     * 检查传入的 Account 哪一些是没有点击过指定 AmazonListingReview 的.
+     *
+     * @param accs
+     * @param amazonListingReview
+     * @return 返回没有点击过的 Account
+     */
+    public static List<Account> checkNonClickAccounts(List<Account> accs, AmazonListingReview amazonListingReview) {
+        List<Account> nonClickAccounts = new ArrayList<Account>();
+        for(Account acc : accs) {
+            if(AmazonReviewRecord.count("account=? AND reviewId=?", acc, amazonListingReview.reviewId) == 0)
+                nonClickAccounts.add(acc);
+        }
+        return nonClickAccounts;
+    }
 }
