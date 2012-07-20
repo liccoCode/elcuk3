@@ -121,10 +121,11 @@ public class AmazonListingReview {
                 AmazonListingReview review = new AmazonListingReview();
                 Element fromListing = r.select("> div.tiny b a").first();
                 if(fromListing != null) {
-                    String asinUrl = StringUtils.splitByWholeSeparator(fromListing.attr("href"), "dp/")[1];
-                    asin = StringUtils.splitByWholeSeparator(asinUrl, "/ref")[0];
+                    String fixAsin = StringUtils.substringBetween(fromListing.attr("href"), "dp/", "/ref");
+                    review.listingId = String.format("%s_%s", fixAsin, market);
+                } else {
+                    review.listingId = String.format("%s_%s", asin, market);
                 }
-                review.listingId = String.format("%s_%s", asin, market);
                 Logger.info("Actually listingId is %s", review.listingId);
 
                 String ratingStr = r.select("> div span.swSprite").first().text();
