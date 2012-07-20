@@ -1,6 +1,5 @@
 package models.procure;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.J;
@@ -77,7 +76,7 @@ public class CooperItem extends Model {
      */
     @PostLoad
     public void preLoad() {
-        this.mirror = new Gson().fromJson(J.G(this), CooperItem.class);
+        this.mirror = J.from(J.G(this), CooperItem.class);
     }
 
 

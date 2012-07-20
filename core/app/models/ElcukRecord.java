@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.J;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
 import play.db.jpa.Model;
@@ -101,8 +102,10 @@ public class ElcukRecord extends Model {
                 F.T2<Field, Object> fieldAndValue = new F.T2<Field, Object>(field, field.get(obj));
 
                 // 如果不是 Primitive 则递归进去重新执行
-                if(isNeedGoDeep(field))
-                    changes.addAll(changes(fieldAndValue._2));
+                if(isNeedGoDeep(field)) {
+                    Logger.warn("%s.%s 内部对象的记录暂时没有支持.", obj.getClass().getName(), field.getName());
+                    continue;
+                }
 
                 F.T2<Field, Object> mirrorFieldAndValue = field(mirrorFields, field.getName(), mirrorAndValue._2);
                 changes.addAll(oneFieldChange(fieldAndValue, mirrorFieldAndValue));

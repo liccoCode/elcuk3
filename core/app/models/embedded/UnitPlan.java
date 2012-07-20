@@ -45,9 +45,6 @@ public class UnitPlan {
     @Expose
     public Float unitPrice;
 
-    @Transient
-    public UnitPlan mirror;
-
     /**
      * 根据计划到库时间计算的还剩余天数
      *

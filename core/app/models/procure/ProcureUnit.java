@@ -163,7 +163,7 @@ public class ProcureUnit extends Model {
 
     @PostLoad
     public void postLoad() {
-        this.mirror = ProcureUnit.mirror(this);
+        this.mirror = J.from(J.G(this), ProcureUnit.class);
     }
 
     @PostUpdate
@@ -435,24 +435,6 @@ public class ProcureUnit extends Model {
         eventSource.events.add(TimelineEventSource.currentQtyEvent(selling, type));
 
         return eventSource;
-    }
-
-    /**
-     * 序列化使用的 mirror 对象
-     */
-    public static ProcureUnit mirror(ProcureUnit origin) {
-        ProcureUnit unit = new ProcureUnit();
-        unit.comment = origin.comment;
-        unit.stage = origin.stage;
-        unit.delivery = origin.delivery;
-        unit.plan = origin.plan;
-        unit.sku = origin.sku;
-        unit.sid = origin.sid;
-        if(origin.delivery == null) unit.delivery = new UnitDelivery();
-        if(origin.plan == null) unit.plan = new UnitPlan();
-        unit.plan.mirror = J.from(J.json(unit.plan), UnitPlan.class);
-        unit.delivery.mirror = J.from(J.json((unit.delivery)), UnitDelivery.class);
-        return unit;
     }
 
 }
