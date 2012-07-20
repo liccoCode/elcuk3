@@ -6,7 +6,6 @@ import helper.J;
 import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -42,9 +41,6 @@ public class UnitDelivery {
      */
     @Expose
     public Integer deliveryQty;
-
-    @Transient
-    public UnitDelivery mirror;
 
     @Override
     public String toString() {
