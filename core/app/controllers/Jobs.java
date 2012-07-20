@@ -3,10 +3,12 @@ package controllers;
 import helper.Webs;
 import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
+import jobs.ListingWorkers;
 import jobs.SellingRecordCheckJob;
 import models.Jobex;
 import models.market.Account;
 import models.market.JobRequest;
+import models.market.Listing;
 import models.market.Selling;
 import models.view.Ret;
 import notifiers.Mails;
@@ -22,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -140,5 +143,15 @@ public class Jobs extends Controller {
         }
         if(unfindSelling.size() > 0) Mails.fnSkuCheckWarn(unfindSelling);
         renderJSON(new Ret(true, "处理完毕"));
+    }
+
+    public static void reviewFix(String asin, String m) {
+        Account.M market = Account.M.val(m);
+        try {
+            new ListingWorkers.R(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
+        } catch(Exception e) {
+            throw new FastRuntimeException(Webs.S(e));
+        }
+        renderJSON(new Ret("成功运行."));
     }
 }

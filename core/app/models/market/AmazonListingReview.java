@@ -7,7 +7,6 @@ import helper.Dates;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
-import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -127,6 +126,21 @@ public class AmazonListingReview extends GenericModel {
     @Lob
     public String comment = "";
 
+    /**
+     * 是否为视频 Review
+     */
+    public Boolean isVedio;
+
+    /**
+     * Amazon 给与的每个 Review 的 ID
+     */
+    public String reviewId;
+
+    /**
+     * 视频的预览图片链接
+     */
+    public String vedioPicUrl;
+
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
     public String osTicketId;
 
@@ -167,6 +181,9 @@ public class AmazonListingReview extends GenericModel {
         if(StringUtils.isNotBlank(newReview.username)) this.username = newReview.username;
         //reviewDate 不修改了
         if(newReview.purchased != null) this.purchased = newReview.purchased;
+        if(newReview.isVedio != null) this.isVedio = newReview.isVedio;
+        if(StringUtils.isNotBlank(newReview.reviewId)) this.reviewId = newReview.reviewId;
+        if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
         // resolved 不做处理
         return this.save();
     }
@@ -184,10 +201,13 @@ public class AmazonListingReview extends GenericModel {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0) return;// 判断这个 Listing 是我们自己有上架的
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) return;// 超过 70 天的不处理
-        // Rating < 4 的开 OsTicket
-        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
-        // Rating <= 4 的发送邮件提醒
-        if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
+
+
+        //TODO 做数据修复, 不进行警告
+//        Rating < 4 的开 OsTicket
+//        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
+//        Rating <= 4 的发送邮件提醒
+//        if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
         this.save();
     }
 
@@ -290,6 +310,9 @@ public class AmazonListingReview extends GenericModel {
         review.reviewDate = DateTime.parse(rwObj.get("reviewDate").getAsString()).toDate();
         review.purchased = rwObj.get("purchased").getAsBoolean();
         review.resolved = rwObj.get("resolved").getAsBoolean();
+        review.isVedio = rwObj.get("isVedio").getAsBoolean();
+        review.reviewId = rwObj.get("reviewId").getAsString();
+        review.vedioPicUrl = rwObj.get("vedioPicUrl").getAsString();
 
         return review;
     }
