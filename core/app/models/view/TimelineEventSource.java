@@ -238,7 +238,8 @@ public class TimelineEventSource {
     public static Event currentQtyEvent(Selling selling, String type) {
         Event currenEvent = new Event();
         currenEvent.start = Dates.date2Date();
-        float days = Webs.scale2PointUp(selling.qty / ("sku".equals(type) ? selling._ps : selling.ps));
+        float validPs = ("sku".equals(type) ? selling._ps : selling.ps);
+        float days = Webs.scale2PointUp(selling.qty / validPs == 0 ? Integer.MAX_VALUE : validPs);
         currenEvent.end = Dates.date2Date(DateTime.now().plusHours((int) (days * 24)).toDate());
         currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", selling.qty, selling.ps, days);
         currenEvent.description = "No Desc.";

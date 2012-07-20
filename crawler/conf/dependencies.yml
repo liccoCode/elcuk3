@@ -1,6 +1,7 @@
 # Application dependencies
 
 require:
-    - play 1.2.4
-    - org.jsoup -> jsoup 1.6.1
+    - play
+    - org.jsoup -> jsoup 1.6.3
     - org.apache.httpcomponents -> httpclient 4.1.2
+    - org.apache.httpcomponents -> httpmime 4.1.2

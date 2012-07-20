@@ -1,5 +1,7 @@
 package models;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -9,8 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 某一个 ListingC 所拥有的 Review 消息
@@ -85,6 +86,21 @@ public class AmazonListingReview {
     public Float lastRating;
 
     /**
+     * Amazon 给与的每个 Review 的 ID
+     */
+    public String reviewId;
+
+    /**
+     * 是否为 Vedio 的 Review
+     */
+    public boolean isVedio;
+
+    /**
+     * 视频的预览图片链接
+     */
+    public String vedioPicUrl;
+
+    /**
      * 给程序自己使用的, 非人为使用的 Comment; 用来记录变化的
      */
     public String comment = "";
@@ -143,6 +159,12 @@ public class AmazonListingReview {
                 review.review = r.ownText();
 
                 review.alrId = String.format("%s_%s", review.listingId, review.userid).toUpperCase();
+
+                review.reviewId = StringUtils.split(r.select(".crVotingButtons").first().previousElementSibling().attr("name"), ".")[0];
+                review.isVedio = r.select(".flashPlayer").first() != null;
+                if(review.isVedio) {
+                    review.vedioPicUrl = r.select(".flashPlayer").first().select("img").first().attr("src");
+                }
 
                 reviewList.add(review);
             } catch(Exception e) {
@@ -223,26 +245,20 @@ public class AmazonListingReview {
         return 1;
     }
 
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("AmazonListingReview");
-        sb.append("{alrId='").append(alrId).append('\'');
-        sb.append(", listingId='").append(listingId).append('\'');
-        sb.append(", rating=").append(rating);
-        sb.append(", title='").append(title).append('\'');
-        sb.append(", review='").append(review).append('\'');
-        sb.append(", helpUp=").append(helpUp);
-        sb.append(", helpClick=").append(helpClick);
-        sb.append(", username='").append(username).append('\'');
-        sb.append(", userid='").append(userid).append('\'');
-        sb.append(", reviewDate=").append(reviewDate);
-        sb.append(", purchased=").append(purchased);
-        sb.append(", resolved=").append(resolved);
-        sb.append(", lastRating=").append(lastRating);
-        sb.append(", comment='").append(comment).append('\'');
-        sb.append('}');
-        return sb.toString();
+    /**
+     * 根据 Market 与 Asin 对抓取到的 ASIN 进行 variation 的过滤
+     *
+     * @return
+     */
+    public static <T extends Collection<AmazonListingReview>> Set<AmazonListingReview> filterReviewWithAsinAndMarket(final String asin, final MT m, T reviews) {
+        Set<AmazonListingReview> filterVariationReview = new HashSet<AmazonListingReview>(reviews);
+        CollectionUtils.filter(filterVariationReview, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                AmazonListingReview review = (AmazonListingReview) o;
+                return StringUtils.equals(review.listingId, String.format("%s_%s", asin, m.toString()));
+            }
+        });
+        return filterVariationReview;
     }
 }
