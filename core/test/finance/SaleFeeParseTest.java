@@ -59,7 +59,7 @@ public class SaleFeeParseTest extends UnitTest {
     @Before
     public void login() {
         Account acc = Account.findById(1l);
-        acc.loginWebSite();
+        acc.loginAmazonSellerCenter();
     }
 
     @Test

@@ -27,7 +27,7 @@ public class SessionLoginTest extends UnitTest {
     public void testFeedbackFetch() {
         List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
-            acc.loginWebSite();
+            acc.loginAmazonSellerCenter();
         }
         for(Account acc : accs) {
             System.out.println(acc.cookieStore().hashCode() + "::::::" + acc.cookieStore());

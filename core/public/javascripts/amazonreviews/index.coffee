@@ -1,5 +1,5 @@
 $ ->
-# 绑定翻译按钮
+  # 绑定翻译按钮
   bindTransBtn = ->
     $('button.trans').click (e) ->
       review = $(@).parents('tr').find('.review').text()
@@ -11,19 +11,27 @@ $ ->
     $('button.makeUp').click (e) ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
       $.post('/amazonReviews/makeUp', reviewId: reviewId,
-        (r) ->
-          if r.flag is false
-            alert("点击失败. #{r.message}")
-          else
-            alert("点击成功. #{JSON.stringify(r._1)}")
-            $("#after_#{reviewId}").html(r._2)
+      (r) ->
+        if r.flag is false
+          alert("点击失败. #{r.message}")
+        else
+          alert("点击成功. #{JSON.stringify(r._1)}")
+          $("#after_#{reviewId}").html(r._2)
       )
       e.preventDefault()
 
   # 绑定 Down 按钮
   bindDownBtn = ->
     $('button.makeDown').click (e) ->
-      alert('makeDown')
+      reviewId = $(@).parents('tr').attr('id').split('_')[1]
+      $.post('/amazonReviews/makeDown', reviewId: reviewId,
+      (r) ->
+        if r.flag is false
+          alert("点击失败. #{r.message}")
+        else
+          alert("点击成功. #{JSON.stringify(r._1)}")
+          $("#after_#{reviewId}").html(r._2)
+      )
       e.preventDefault()
 
 
@@ -45,15 +53,15 @@ $ ->
     reviews = $('#reviews')
     reviews.mask('加载中...')
     reviews.load('/amazonReviews/ajaxMagic', $('#search_form :input').fieldSerialize(),
-      () ->
+    () ->
       # 如果没有一个元素, 那么则需要重新抓取.
-        if $('#reviews tr').size() is 1
-          alert('需要重新抓取.')
-        else
-          bindTableToggleClick()
-          bindTransBtn()
-          bindUpBtn()
-          bindDownBtn()
-        reviews.unmask()
+      if $('#reviews tr').size() is 1
+        alert('需要重新抓取.')
+      else
+        bindTableToggleClick()
+        bindTransBtn()
+        bindUpBtn()
+        bindDownBtn()
+      reviews.unmask()
     )
     e.preventDefault()
