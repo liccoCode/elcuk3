@@ -4,10 +4,12 @@ import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.Selling;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.i18n.Messages;
 import play.templates.JavaExtensions;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -99,11 +101,26 @@ public class vExtensions extends JavaExtensions {
         return "#";
     }
 
+    public static String reviewLink(AmazonListingReview review) {
+        String site = StringUtils.split(review.listingId, "_")[1];
+        return String.format("http://www.%s/review/%s", site, review.reviewId);
+    }
+
+    /*util.Date*/
     public static String datetime(Date date) {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
     }
 
     public static String date(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+
+    /*sql.Timestamp*/
+    public static String datetime(Timestamp date) {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    }
+
+    public static String date(Timestamp date) {
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 

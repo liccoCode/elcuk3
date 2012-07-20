@@ -8,15 +8,16 @@
 
     <div class="span3 well">
         <div style="min-height:70px;">
-            <form>
-                <input name="asin" type="text" placeHolder="输入 ASIN">
-                <select name="aount" style="width:80px;">
-                    <option>UK</option>
-                    <option>DE</option>
+            <div id='search_form'>
+                <select name="m" style="width:80px;">
+                    <option value="auk">UK</option>
+                    <option value="ade">DE</option>
+                    <option value="afr">FR</option>
                 </select>
+                <input name="asin" type="text" placeHolder="输入 ASIN">
 
                 <p class="help-block">一个神奇的搜索框框</p>
-            </form>
+            </div>
         </div>
 
         <hr>
@@ -27,7 +28,7 @@
     </div>
 
 
-    <div class="span9 well" style="min-height:750px;">
+    <div id="reviews" class="span9 well" style="min-height:750px;">
         Waiting for you  ^.^ 
     </div>
 </div>

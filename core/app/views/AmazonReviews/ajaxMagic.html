@@ -1,0 +1,34 @@
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>Rating</th>
+        <th>UserId</th>
+        <th>ReviewId</th>
+        <th>Reviewer</th>
+        <th>Up/Click</th>
+        <th>isPurchased</th>
+        <th>isVedio</th>
+        <th>ReviewDate</th>
+        <th>#</th>
+    </tr>
+#{list items:savedReviews, as:'r'}
+    <tr drop="${r.reviewId}">
+        <td>${r.rating}</td>
+        <td><a href="${r.userReviewLink()}" target="_blank">${r.userid}</a></td>
+        <td><a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a></td>
+        <td>${r.username}</td>
+        <td>${r.helpUp}/${r.helpClick}</td>
+        <td>${r.purchased}</td>
+        <td>${r.isVedio}</td>
+        <td>${r.reviewDate.date()}</td>
+        <td>${r.alrId}</td>
+    </tr>
+    <tr id="review_${r.reviewId}" style="display:none;">
+        <td colspan="9">
+            <div class="row-fluid">
+                <div class="span6">${r.review}</div>
+                <div class="span6">99999</div>
+            </div>
+        </td>
+    </tr>
+#{/list}
+</table>
