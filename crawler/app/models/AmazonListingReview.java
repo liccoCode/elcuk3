@@ -130,7 +130,7 @@ public class AmazonListingReview {
                 review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
                 review.lastRating = review.rating; // 对 LastRating 的初始化
 
-                review.title = r.select("> div span b").text().trim();
+                review.title = r.select("> div span b").first().text().trim();
 
                 String helpfulStr = r.select("> div").first().text();
                 int[] two = {0, 0};
