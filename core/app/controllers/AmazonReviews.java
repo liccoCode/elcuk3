@@ -1,15 +1,20 @@
 package controllers;
 
 import helper.J;
+import helper.Webs;
+import jobs.ListingWorkers;
 import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.AmazonReviewRecord;
 import models.market.Listing;
+import models.view.Ret;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -35,22 +40,26 @@ public class AmazonReviews extends Controller {
     }
 
     /**
-     * 点击[有]用
+     * 点击[有/无]用
      */
-    public static void makeUp(String reviewId) {
+    public static void click(String reviewId, boolean isUp) {
         AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
         Account acc = review.pickUpOneAccountToClick();
-        F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, true);
-        renderJSON(J.json(t2));
+        F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, isUp);
+        renderJSON(J.G(t2));
     }
 
-    /**
-     * 点击[无]用
-     */
-    public static void makeDown(String reviewId) {
-        AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
-        Account acc = review.pickUpOneAccountToClick();
-        F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, true);
-        renderJSON(J.json(t2));
+    public static void reCrawl(String asin, String m) {
+        Account.M market = Account.M.val(m);
+        String lid = Listing.lid(asin, market);
+        try {
+            if(!Listing.exist(lid))  // 如果不存在, 先去抓取 Listing 然后再抓取 Review
+                new ListingWorkers.L(lid).now().get(30, TimeUnit.SECONDS);
+            new ListingWorkers.R(lid).now().get(30, TimeUnit.SECONDS);
+        } catch(Exception e) {
+            throw new FastRuntimeException(Webs.S(e));
+        }
+        renderJSON(new Ret());
     }
+
 }

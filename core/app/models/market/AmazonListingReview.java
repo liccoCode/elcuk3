@@ -7,10 +7,13 @@ import helper.Dates;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -295,6 +298,15 @@ public class AmazonListingReview extends GenericModel {
         List<Account> acc = Account.openedReviewAccount();
         if(acc.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
         List<Account> accs = AmazonReviewRecord.checkNonClickAccounts(acc, this);
+        //TODO 因为欧洲的账户可以通用点击, 所以考虑是否需要过滤掉不同市场的账号?
+        final AmazonListingReview outer = this; // What kind of Closue?
+        CollectionUtils.filter(accs, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                Account acc = (Account) o;
+                return acc.type == Listing.unLid(outer.listingId)._2;
+            }
+        });
         if(accs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
         return accs.get(0);
     }
@@ -324,6 +336,27 @@ public class AmazonListingReview extends GenericModel {
             return "E03F00";
         } else {
             return "FF1101";
+        }
+    }
+
+    /**
+     * 根据 Review 的长度进行不同颜色的区分
+     *
+     * @return
+     */
+    public F.T2<Integer, String> reviewLengthColor() {
+        if(this.review.length() <= 100) {
+            return new F.T2<Integer, String>(this.review.length(), "29FFF1");
+        } else if(this.review.length() <= 240) {
+            return new F.T2<Integer, String>(this.review.length(), "29D2FF");
+        } else if(this.review.length() <= 500) {
+            return new F.T2<Integer, String>(this.review.length(), "2997FF");
+        } else if(this.review.length() <= 1000) {
+            return new F.T2<Integer, String>(this.review.length(), "2962FF");
+        } else if(this.review.length() <= 2000) {
+            return new F.T2<Integer, String>(this.review.length(), "292AFF");
+        } else {
+            return new F.T2<Integer, String>(this.review.length(), "6229FF");
         }
     }
 

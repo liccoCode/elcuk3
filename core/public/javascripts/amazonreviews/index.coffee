@@ -10,13 +10,16 @@ $ ->
   bindUpBtn = ->
     $('button.makeUp').click (e) ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
-      $.post('/amazonReviews/makeUp', reviewId: reviewId,
+      mask = $("#review_#{reviewId}")
+      mask.mask('点击中...')
+      $.post('/amazonReviews/click', {reviewId: reviewId, isUp: true}
       (r) ->
         if r.flag is false
           alert("点击失败. #{r.message}")
         else
-          alert("点击成功. #{JSON.stringify(r._1)}")
-          $("#after_#{reviewId}").html(r._2)
+          alert("点击成功.")
+          $("#after_#{reviewId}").html(JSON.stringify(r._1))
+        mask.unmask()
       )
       e.preventDefault()
 
@@ -24,13 +27,16 @@ $ ->
   bindDownBtn = ->
     $('button.makeDown').click (e) ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
-      $.post('/amazonReviews/makeDown', reviewId: reviewId,
+      mask = $("#review_#{reviewId}")
+      mask.mask('点击中...')
+      $.post('/amazonReviews/click', {reviewId: reviewId, isUp: false}
       (r) ->
         if r.flag is false
           alert("点击失败. #{r.message}")
         else
-          alert("点击成功. #{JSON.stringify(r._1)}")
-          $("#after_#{reviewId}").html(r._2)
+          alert("点击成功.")
+          $("#after_#{reviewId}").html(JSON.stringify(r._1))
+        mask.unmask()
       )
       e.preventDefault()
 
@@ -42,14 +48,8 @@ $ ->
       $("#review_#{o.attr('drop')}").toggle('fast')
       e.preventDefault()
 
-
-  $('#search_form [name=asin]').keyup (e) ->
-    o = $(@)
-    if e.keyCode isnt 13
-      o.val(o.val().toUpperCase())
-      return false
-    #B007LE0UT4
-    return false if o.val().length isnt 10
+  # Ajax 加载 Review 页面
+  reviewLoadFun = ->
     reviews = $('#reviews')
     reviews.mask('加载中...')
     reviews.load('/amazonReviews/ajaxMagic', $('#search_form :input').fieldSerialize(),
@@ -64,4 +64,26 @@ $ ->
         bindDownBtn()
       reviews.unmask()
     )
+
+  # 绑定重新抓取事件
+  $('#recrawl_review').click (e) ->
+    mask = $('#reviews').parents('div')
+    mask.mask("向 Amazon 重新抓取中...")
+    $.get('/amazonReviews/reCrawl', $('#search_form :input').fieldSerialize(), (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        reviewLoadFun()
+      mask.unmask()
+    )
+    e.preventDefault()
+
+  $('#search_form [name=asin]').keyup (e) ->
+    o = $(@)
+    if e.keyCode isnt 13
+      o.val(o.val().toUpperCase())
+      return false
+    #B007LE0UT4
+    return false if o.val().length isnt 10
+    reviewLoadFun()
     e.preventDefault()
