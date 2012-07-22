@@ -66,7 +66,7 @@ public class SellingRecordTest extends UnitTest {
     @Before
     public void login() {
         Account acc = Account.findById(2l);
-        acc.loginWebSite();
+        acc.loginAmazonSellerCenter();
     }
 
     @Test

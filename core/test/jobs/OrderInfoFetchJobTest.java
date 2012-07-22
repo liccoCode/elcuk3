@@ -61,7 +61,7 @@ public class OrderInfoFetchJobTest extends UnitTest {
 
     @Test
     public void testOrderInfoRefunded() throws IOException {
-//        Account.<Account>findById(1l).loginWebSite();
+//        Account.<Account>findById(1l).loginAmazonSellerCenter();
         Orderr ord = Orderr.findById("203-5553740-1399515");
 
 //        String html = HTTP.get(ord.account.cookieStore(), ord.account.type.orderDetail(ord.orderId));

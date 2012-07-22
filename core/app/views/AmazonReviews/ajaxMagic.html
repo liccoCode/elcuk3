@@ -12,6 +12,7 @@
     </tr>
 #{list items:savedReviews, as:'r'}
     <tr drop="${r.reviewId}">
+        #{set lengthAndColor: r.reviewLengthColor()/}
         <td style="background:${"#" + r.color()}">${r.rating}</td>
         <td><a href="${r.userReviewLink()}" target="_blank">${r.userid}</a></td>
         <td><a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a></td>
@@ -20,7 +21,7 @@
         <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
         <td ${r.isVedio ? 'style=background:#0091F4' : ''}>${r.isVedio}</td>
         <td>${r.reviewDate.date()}</td>
-        <td>${r.alrId}</td>
+        <td style="background:${'#' + lengthAndColor._2}">${lengthAndColor._1} | ${r.alrId}</td>
     </tr>
     <tr id="review_${r.reviewId}" style="display:none;">
         <td colspan="9">

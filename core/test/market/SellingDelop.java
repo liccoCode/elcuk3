@@ -34,7 +34,7 @@ public class SellingDelop extends UnitTest {
     //    @Test
     public void testDelop() {
         // UK 账户与 UK 的 Selling
-        Account.<Account>findById(1l).loginWebSite();
+        Account.<Account>findById(1l).loginAmazonSellerCenter();
 
         Selling sell = Selling.findById("68-MAGGLASS-3X75BG,B001OQOK5U_amazon.co.uk");
         sell.deploy();
@@ -43,7 +43,7 @@ public class SellingDelop extends UnitTest {
     //    @Test
     public void testDelop2() {
         // UK 的账户与 DE 的 Selling
-        Account.<Account>findById(1l).loginWebSite();
+        Account.<Account>findById(1l).loginAmazonSellerCenter();
         Selling sell = Selling.findById("15SSI9100-MR2SP_amazon.de");
         sell.deploy();
     }
@@ -51,7 +51,7 @@ public class SellingDelop extends UnitTest {
     //    @Test
     public void testDelop3() {
         // DE 的账户与 DE 的 Selling
-        Account.<Account>findById(2l).loginWebSite();
+        Account.<Account>findById(2l).loginAmazonSellerCenter();
         Selling sell = Selling.findById("72LNA1-C2P_amazon.de");
         sell.deploy();
     }

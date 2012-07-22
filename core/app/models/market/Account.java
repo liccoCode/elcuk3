@@ -195,7 +195,7 @@ public class Account extends Model {
          *
          * @return
          */
-        public String homePage() {
+        public String sellerCentralHomePage() {
             switch(this) {
                 case AMAZON_UK:
                 case AMAZON_DE:
@@ -216,7 +216,7 @@ public class Account extends Model {
          *
          * @return
          */
-        public String loginPage() {
+        public String sellerCentralLogIn() {
             switch(this) {
                 case AMAZON_UK:
                 case AMAZON_DE:
@@ -225,6 +225,53 @@ public class Account extends Model {
                 case AMAZON_IT:
                 case AMAZON_US:
                     return "https://sellercentral." + this.toString() + "/gp/sign-in/sign-in.html/ref=xx_login_lgin_home";
+                case EBAY_UK:
+                    return "unknow..";
+                default:
+                    return "Not Support.";
+            }
+        }
+
+        /**
+         * 访问 Amazon 的普通账户的登陆页面(需要使用 openId)
+         * PS: 普通账户的登陆地址 Amazon 会自动生成, 需要通过抓取获得
+         *
+         * @return
+         */
+        public String amazonSiteHomePage() {
+            /**
+             * https://www.amazon.co.uk/ap/signin?_encoding=UTF8
+             *
+             * &openid.assoc_handle=***gb***flex
+             *
+             * &openid.mode=checkid_setup
+             * &openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select
+             * &openid.ns=http://specs.openid.net/auth/2.0
+             * &openid.pape.max_auth_age=0
+             * &openid.ns.pape=http://specs.openid.net/extensions/pape/1.0
+             * &openid.identity=http://specs.openid.net/auth/2.0/identifier_select
+             */
+            String baseUrl = "https://www.%s/ap/signin?_encoding=UTF8" +//一个是域名
+                    "&openid.assoc_handle=%sflex" + //一个是区域
+                    "&openid.mode=checkid_setup" +
+                    "&openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select" +
+                    "&openid.ns=http://specs.openid.net/auth/2.0" +
+                    "&openid.pape.max_auth_age=0" +
+                    "&openid.ns.pape=http://specs.openid.net/extensions/pape/1.0" +
+                    "&openid.identity=http://specs.openid.net/auth/2.0/identifier_select";
+            switch(this) {
+                case AMAZON_UK:
+                    return String.format(baseUrl, this.toString(), "gb");
+                case AMAZON_DE:
+                    return String.format(baseUrl, this.toString(), "de");
+                case AMAZON_ES:
+                    return String.format(baseUrl, this.toString(), "es");
+                case AMAZON_FR:
+                    return String.format(baseUrl, this.toString(), "fr");
+                case AMAZON_IT:
+                    return String.format(baseUrl, this.toString(), "it");
+                case AMAZON_US:
+                    return String.format(baseUrl, this.toString(), "us");
                 case EBAY_UK:
                     return "unknow..";
                 default:
@@ -687,19 +734,20 @@ public class Account extends Model {
     }
 
     /**
-     * 登陆对应的网站
+     * 销售账号需要登陆的后台系统
      */
-    public void loginWebSite() {
+    public void loginAmazonSellerCenter() {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
+            case AMAZON_FR:
                 String body = "";
                 try {
                     /**
                      * 1. Visit the website, fetch the new Cookie.
                      * 2. With the website params and user/password to login.
                      */
-                    body = HTTP.get(this.cookieStore(), this.type.homePage());
+                    body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
 
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".homepage.html"), body);
@@ -719,12 +767,12 @@ public class Account extends Model {
                         else if("password".equals(att)) params.add(new BasicNameValuePair(att, this.password));
                         else params.add(new BasicNameValuePair(att, el.val()));
                     }
-                    body = HTTP.post(this.cookieStore(), this.type.loginPage(), params);
+                    body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
                     if(Play.mode.isDev())
                         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body);
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
-                    if(navBar != null) Logger.info("%s Login Successful!", this.prettyName());
-                    else Logger.warn("%s Login Failed!", this.prettyName());
+                    if(navBar != null) Logger.info("%s Seller Central Login Successful!", this.prettyName());
+                    else Logger.warn("%s Seller Central Login Failed!", this.prettyName());
 
                     HTTP.client().getCookieStore().clearExpired(new Date());
                 } catch(Exception e) {
@@ -737,7 +785,51 @@ public class Account extends Model {
                 }
                 break;
             default:
-                Logger.warn("Right now, can only login Amazon.co.uk. " + this.type + " is not support!");
+                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type + " is not support!");
+        }
+    }
+
+    /**
+     * 非销售账号在 Amazon 的前台登陆
+     */
+    public void loginAmazonSize() {
+        switch(this.type) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+                /**
+                 * 1. Visit the website, fetch the new Cookie.
+                 * 2. With the website params and user/password to login.
+                 */
+                String body = HTTP.get(this.cookieStore(), this.type.amazonSiteHomePage());
+                Document doc = Jsoup.parse(body);
+                Elements inputs = doc.select("#ap_signin_form input");
+
+                if(inputs.size() == 0) {
+                    Logger.info("WebSite [" + this.type.toString() + "] Still have the Session with User [" + this.username + "].");
+                    FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
+                    return;
+                }
+
+                Set<NameValuePair> params = new HashSet<NameValuePair>();
+                for(Element el : inputs) {
+                    String att = el.attr("name");
+                    if("email".equals(att)) params.add(new BasicNameValuePair(att, this.username));
+                    else if("password".equals(att)) params.add(new BasicNameValuePair(att, this.password));
+                    else if("create".equals(att)) params.add(new BasicNameValuePair(att, "0"));//登陆
+                    else params.add(new BasicNameValuePair(att, el.val()));
+                }
+                body = HTTP.post(this.cookieStore(), doc.select("#ap_signin_form").first().attr("action"), params);
+                boolean isLogin = isLogin(Jsoup.parse(body));
+                if(Play.mode.isDev())
+                    FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
+                if(isLogin) Logger.info("%s Amazon Site Login Successful!", this.prettyName());
+                else Logger.warn("%s Amazon Site Login Failed!", this.prettyName());
+
+                HTTP.client().getCookieStore().clearExpired(new Date());
+                break;
+            default:
+                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + this.type + " is not support!");
         }
     }
 
@@ -862,13 +954,13 @@ public class Account extends Model {
          * 2. 解析出登陆后的点击链接.
          * 3. Click 这个链接 ^_^
          */
-        F.T3<Boolean, String, String> loginAndClicks = loginAndClickLink(review);
+        F.T3<Boolean, String, String> loginAndClicks = checkLoginAndFetchClickLinks(review);
         if(!loginAndClicks._1) { // 没有登陆则登陆, 只尝试一次登陆!
             synchronized(this.cookieStore()) {
-                this.loginWebSite();
+                this.loginAmazonSize();
             }
         }
-        F.T3<Boolean, String, String> afterLoginT3 = loginAndClickLink(review);
+        F.T3<Boolean, String, String> afterLoginT3 = checkLoginAndFetchClickLinks(review);
         String content;
         if(isUp) {
             content = HTTP.get(this.cookieStore(), afterLoginT3._2);
@@ -881,11 +973,10 @@ public class Account extends Model {
         return new F.T2<AmazonReviewRecord, String>(record, content);
     }
 
-    private F.T3<Boolean, String, String> loginAndClickLink(AmazonListingReview review) {
+    private F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
         String html = HTTP.get(this.cookieStore(), vExtensions.reviewLink(review));
         Document doc = Jsoup.parse(html);
         // 账号登陆以后, 链接中才会有 sign-out 字符串
-        boolean isLogin = StringUtils.contains(doc.select("#navidWelcomeMsg a").attr("href"), "sign-out");
         Elements els = doc.select(".votingButtonReviews");
         String[] upAndDownLink = new String[2];
         for(Element el : els) {
@@ -893,7 +984,17 @@ public class Account extends Model {
             if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm"))) upAndDownLink[0] = link;
             else upAndDownLink[1] = link;
         }
-        return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
+        return new F.T3<Boolean, String, String>(isLogin(doc), upAndDownLink[0], upAndDownLink[1]);
+    }
+
+    /**
+     * 判断此 Doc 页面是否登陆成功
+     *
+     * @param doc
+     * @return
+     */
+    private boolean isLogin(Document doc) {
+        return StringUtils.contains(doc.select("#navidWelcomeMsg a").outerHtml(), "sign-out");
     }
 
     @Override
@@ -955,7 +1056,7 @@ public class Account extends Model {
             for(Account ac : accs) {
                 if(ac.isSaleAcc) merchant_id().put(ac.merchantId, ac.uniqueName);
                 Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
-                ac.loginWebSite();
+                ac.loginAmazonSellerCenter();
             }
         }
     }

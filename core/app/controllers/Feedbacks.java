@@ -78,7 +78,7 @@ public class Feedbacks extends Controller {
         try {
             acc.changeRegion(Account.M.val(market));
         } catch(NotLoginFastException e) {
-            acc.loginWebSite(); // 没有登陆, 那么则登陆一次.
+            acc.loginAmazonSellerCenter(); // 没有登陆, 那么则登陆一次.
             acc.changeRegion(Account.M.val(market));
         }
         List<Feedback> feedbacks = acc.fetchFeedback(page);

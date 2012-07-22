@@ -50,6 +50,7 @@ public class AmazonReviewRecord extends GenericModel {
     @Id
     @GeneratedValue
     @Required
+    @Expose
     public Long id;
 
     /**
@@ -61,6 +62,7 @@ public class AmazonReviewRecord extends GenericModel {
     /**
      * 要知道是什么时候点击的
      */
+    @Expose
     public Date createAt;
 
     /**
@@ -68,12 +70,14 @@ public class AmazonReviewRecord extends GenericModel {
      */
     @Required
     @Column(length = 60)
+    @Expose
     public String username;
 
     /**
      * 要知道点击的是 up 还是 down
      */
     @Required
+    @Expose
     public boolean isUp;
 
     /**
@@ -81,6 +85,7 @@ public class AmazonReviewRecord extends GenericModel {
      */
     @Required
     @Column(length = 32)
+    @Expose
     public String asin;
 
     /**
@@ -89,6 +94,7 @@ public class AmazonReviewRecord extends GenericModel {
     @Required
     @Enumerated(EnumType.STRING)
     @Column(length = 32)
+    @Expose
     public Account.M market;
 
     /**
@@ -96,6 +102,7 @@ public class AmazonReviewRecord extends GenericModel {
      */
     @Required
     @Column(length = 60)
+    @Expose
     public String userId;
 
     /**
@@ -103,6 +110,7 @@ public class AmazonReviewRecord extends GenericModel {
      */
     @Required
     @Column(length = 60)
+    @Expose
     public String reviewId;
 
     /**
@@ -129,6 +137,7 @@ public class AmazonReviewRecord extends GenericModel {
      * 点击的时候 Rating 是多少?
      */
     @Required
+    @Expose
     public float rating;
 
     /**

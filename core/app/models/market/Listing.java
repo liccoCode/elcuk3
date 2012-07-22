@@ -444,4 +444,8 @@ public class Listing extends GenericModel {
         String[] args = StringUtils.split(lid, "_");
         return new F.T2<String, Account.M>(args[0], Account.M.val(args[1]));
     }
+
+    public static boolean exist(String lid) {
+        return Listing.count("listingId=?", lid) >= 1;
+    }
 }

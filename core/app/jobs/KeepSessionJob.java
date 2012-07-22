@@ -21,7 +21,7 @@ public class KeepSessionJob extends Job {
         List<Account> accs = Account.openedSaleAcc();
         for(Account ac : accs) {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
-            ac.loginWebSite();
+            ac.loginAmazonSellerCenter();
         }
     }
 }
