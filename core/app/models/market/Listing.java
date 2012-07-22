@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import helper.Crawl;
 import jobs.ListingWorkers;
 import models.product.Product;
 import notifiers.Mails;
@@ -338,10 +339,23 @@ public class Listing extends GenericModel {
     }
 
     /**
+     * 从市场上抓取一个全新的 Listing, 保存进入系统, 但是不会绑定 Product, 这个操作需要额外进行.
+     *
+     * @param asin
+     * @param market
+     * @return
+     */
+    public static Listing crawl(String asin, Account.M market) {
+        JsonElement listing = Crawl.crawlListing(market.toString(), asin);
+        return Listing.parseAndUpdateListingFromCrawl(listing, true);
+    }
+
+    /**
      * 根据从 Crawler 抓取回来的 ListingJSON数据转换成系统内使用的 Listing + LisitngOffer 对象,
      * 并更新返回已经存在的 Listing 的持久对象或者返回未保存的 Listing 瞬时对象
      *
      * @param listingJson
+     * @param fullOffer   是否需要抓取全部的 Listing Offers
      * @return
      */
     public static Listing parseAndUpdateListingFromCrawl(JsonElement listingJson, boolean fullOffer) {

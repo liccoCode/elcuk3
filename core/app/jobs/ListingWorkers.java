@@ -8,11 +8,15 @@ import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.ListingOffer;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
+import play.libs.F;
+import play.utils.FastRuntimeException;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -129,7 +133,8 @@ public class ListingWorkers extends Job {
         public void doJob() {
             JsonElement offersJson = Crawl.crawlOffers(this.listing.market.name(), this.listing.asin);
             JsonArray offers = offersJson.getAsJsonArray();
-            this.listing.offers.clear();
+            if(this.listing.offers == null) this.listing.offers = new ArrayList<ListingOffer>();
+            else this.listing.offers.clear();
             for(JsonElement offer : offers) {
                 ListingOffer off = new ListingOffer();
                 JsonObject of = offer.getAsJsonObject();
@@ -150,19 +155,47 @@ public class ListingWorkers extends Job {
      * 抓取 Review 的任务
      */
     public static class R extends Job<AmazonListingReview> {
+        /**
+         * 以 LisitngId 的形式加载
+         */
         private String listingId;
+
+        /**
+         * 直接搜索指定 Listing 对象的 Review
+         */
+        private Listing listing;
+
 
         public R(String listingId) {
             this.listingId = listingId;
         }
 
+        public R(Listing listing) {
+            this.listing = listing;
+        }
+
+        /**
+         * 从 ListingId 与 Listing 中选择出与进行搜索的 Listing, 并且会返回是否需要进行更新的标识
+         * (如果是 Listing 的话不需要更新.)
+         *
+         * @return
+         */
+        private F.T2<Listing, Boolean> choseListing() {
+            if(StringUtils.isBlank(this.listingId)) {
+                if(this.listing == null) throw new FastRuntimeException("ListingId 与 Listing 必须拥有一个!");
+                else return new F.T2<Listing, Boolean>(this.listing, false);
+            } else {
+                return new F.T2<Listing, Boolean>(Listing.<Listing>findById(this.listingId), true);
+            }
+        }
+
         @Override
         public void doJob() {
-            Listing listing = Listing.findById(listingId);
+            F.T2<Listing, Boolean> action = choseListing();
             // host/reviews/{market}/{asin}
             JsonElement reviews = null;
             try {
-                reviews = Crawl.crawlReview(listing.market.name(), listing.asin);
+                reviews = Crawl.crawlReview(action._1.market.name(), action._1.asin);
                 /**
                  * 解析出所有的 Reviews, 然后从数据库中加载出此 Listing 对应的所有 Reviews 然后进行判断这些 Reviews 是更新还是新添加?
                  *
@@ -173,13 +206,13 @@ public class ListingWorkers extends Job {
                  * TODO 这里单独加载每一个 Review 而不是使用批量加载, 尽管会有性能影响, 但现在这个不是问题的时候不考虑
                  */
                 JsonArray array = reviews.getAsJsonArray();
-                listing.lastUpdateTime = System.currentTimeMillis();
+                action._1.lastUpdateTime = System.currentTimeMillis();
                 for(JsonElement e : array) {
                     AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                     AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
                     if(fromDB == null) {
-                        if(listing.listingId.equals(review.listingId))
-                            review.listing = listing;
+                        if(action._1.listingId.equals(review.listingId))
+                            review.listing = action._1;
                         else
                             review.listing = Listing.findById(review.listingId);
                         review.createDate = review.reviewDate;
@@ -190,7 +223,7 @@ public class ListingWorkers extends Job {
                         fromDB.listingReviewCheck();
                     }
                 }
-                listing.save();
+                if(action._2) action._1.save();
             } catch(Exception e) {
                 Logger.warn("Listing Review have [%s].", Webs.E(e));
             }

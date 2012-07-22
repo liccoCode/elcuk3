@@ -84,8 +84,7 @@ public class Listings extends Controller {
         Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
         Listing tobeSave = null;
         try {
-            JsonElement listing = Crawl.crawlListing(market, asin);
-            tobeSave = Listing.parseAndUpdateListingFromCrawl(listing, true);
+            tobeSave = Listing.crawl(asin, Account.M.val(market));
         } catch(Exception e) {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
         }

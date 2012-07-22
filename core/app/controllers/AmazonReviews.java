@@ -53,9 +53,12 @@ public class AmazonReviews extends Controller {
         Account.M market = Account.M.val(m);
         String lid = Listing.lid(asin, market);
         try {
-            if(!Listing.exist(lid))  // 如果不存在, 先去抓取 Listing 然后再抓取 Review
-                new ListingWorkers.L(lid).now().get(30, TimeUnit.SECONDS);
-            new ListingWorkers.R(lid).now().get(30, TimeUnit.SECONDS);
+            if(!Listing.exist(lid)) {
+                // 如果不存在, 先去抓取 Listing 然后再抓取 Review
+                Listing.crawl(asin, market).<Listing>save();
+            } else {
+                new ListingWorkers.R(lid).now().get(30, TimeUnit.SECONDS);
+            }
         } catch(Exception e) {
             throw new FastRuntimeException(Webs.S(e));
         }
