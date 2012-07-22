@@ -964,10 +964,10 @@ public class Account extends Model {
         String content;
         if(isUp) {
             content = HTTP.get(this.cookieStore(), afterLoginT3._2);
-            Logger.info("Click link: %s", afterLoginT3._2);
+            Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), afterLoginT3._2);
         } else {
             content = HTTP.get(this.cookieStore(), afterLoginT3._3);
-            Logger.info("Click link: %s", afterLoginT3._3);
+            Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), afterLoginT3._3);
         }
         AmazonReviewRecord record = new AmazonReviewRecord(review, this, isUp);
         // 只有后面登陆成功了, 才允许记录 Record

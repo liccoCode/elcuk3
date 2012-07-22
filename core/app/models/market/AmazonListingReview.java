@@ -295,24 +295,24 @@ public class AmazonListingReview extends GenericModel {
          * 1. 找出所有的 Comment Account, 过滤掉 SaleAcc
          * 2. 从 AmazonReviewRecord 中检查此 Review 的点击日志, 首先找出点击过此 Review 的 Account
          */
-        List<Account> acc = Account.openedReviewAccount();
-        if(acc.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
-        List<Account> accs = AmazonReviewRecord.checkNonClickAccounts(acc, this);
+        List<Account> opendAccs = Account.openedReviewAccount();
+        if(opendAccs.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
+        List<Account> validAccs = AmazonReviewRecord.checkNonClickAccounts(opendAccs, this);
         //TODO 因为欧洲的账户可以通用点击, 所以考虑是否需要过滤掉不同市场的账号?
         final AmazonListingReview outer = this; // What kind of Closue?
-        CollectionUtils.filter(accs, new Predicate() {
+        CollectionUtils.filter(validAccs, new Predicate() {
             @Override
             public boolean evaluate(Object o) {
                 Account acc = (Account) o;
                 return acc.type == Listing.unLid(outer.listingId)._2;
             }
         });
-        if(accs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("Click Review %s, hava %s valid accounts.", this.reviewId, acc.size());
+        if(validAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("Click Review %s, hava %s valid accounts.", this.reviewId, validAccs.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : accs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        for(Account a : validAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
-        return accs.get(0);
+        return validAccs.get(0);
     }
 
     @Override
