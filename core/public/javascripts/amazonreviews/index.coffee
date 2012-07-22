@@ -10,7 +10,7 @@ $ ->
   bindUpBtn = ->
     $('button.makeUp').click (e) ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
-      mask = $("#review_#{reviewId}")
+      mask = $('#container')
       mask.mask('点击中...')
       $.post('/amazonReviews/click', {reviewId: reviewId, isUp: true}
         (r) ->
@@ -27,7 +27,7 @@ $ ->
   bindDownBtn = ->
     $('button.makeDown').click (e) ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
-      mask = $("#review_#{reviewId}")
+      mask = $('#container')
       mask.mask('点击中...')
       $.post('/amazonReviews/click', {reviewId: reviewId, isUp: false}
         (r) ->
