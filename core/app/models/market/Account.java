@@ -792,7 +792,7 @@ public class Account extends Model {
     /**
      * 非销售账号在 Amazon 的前台登陆
      */
-    public void loginAmazonSize() {
+    public boolean loginAmazonSize() {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -808,7 +808,7 @@ public class Account extends Model {
                 if(inputs.size() == 0) {
                     Logger.info("WebSite [" + this.type.toString() + "] Still have the Session with User [" + this.username + "].");
                     FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
-                    return;
+                    return false;
                 }
 
                 Set<NameValuePair> params = new HashSet<NameValuePair>();
@@ -823,14 +823,21 @@ public class Account extends Model {
                 boolean isLogin = isLogin(Jsoup.parse(body));
                 if(Play.mode.isDev())
                     FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
-                if(isLogin) Logger.info("%s Amazon Site Login Successful!", this.prettyName());
-                else Logger.warn("%s Amazon Site Login Failed!", this.prettyName());
-
+                boolean loginSucc = false;
+                if(isLogin) {
+                    Logger.info("%s Amazon Site Login Successful!", this.prettyName());
+                    loginSucc = true;
+                } else {
+                    Logger.warn("%s Amazon Site Login Failed!", this.prettyName());
+                    FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
+                    loginSucc = false;
+                }
                 HTTP.client().getCookieStore().clearExpired(new Date());
-                break;
+                return loginSucc;
             default:
                 Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + this.type + " is not support!");
         }
+        return false;
     }
 
     /**
@@ -959,19 +966,19 @@ public class Account extends Model {
             synchronized(this.cookieStore()) {
                 this.loginAmazonSize();
             }
+            loginAndClicks = checkLoginAndFetchClickLinks(review);
         }
-        F.T3<Boolean, String, String> afterLoginT3 = checkLoginAndFetchClickLinks(review);
         String content;
         if(isUp) {
-            content = HTTP.get(this.cookieStore(), afterLoginT3._2);
-            Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), afterLoginT3._2);
+            content = HTTP.get(this.cookieStore(), loginAndClicks._2);
+            Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), loginAndClicks._2);
         } else {
-            content = HTTP.get(this.cookieStore(), afterLoginT3._3);
-            Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), afterLoginT3._3);
+            content = HTTP.get(this.cookieStore(), loginAndClicks._3);
+            Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), loginAndClicks._3);
         }
         AmazonReviewRecord record = new AmazonReviewRecord(review, this, isUp);
         // 只有后面登陆成功了, 才允许记录 Record
-        if(afterLoginT3._1) record.save();
+        if(loginAndClicks._1) record.save();
         else Logger.warn("Not Login? %s, %s", this.prettyName(), this.password);
         return new F.T2<AmazonReviewRecord, String>(record, content);
     }
