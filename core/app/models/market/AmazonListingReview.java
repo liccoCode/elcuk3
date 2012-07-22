@@ -310,7 +310,7 @@ public class AmazonListingReview extends GenericModel {
         if(accs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
         Logger.info("Click Review %s, hava %s valid accounts.", this.reviewId, acc.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : accs) sb.append(a.prettyName()).append(",");
+        for(Account a : accs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
         return accs.get(0);
     }
