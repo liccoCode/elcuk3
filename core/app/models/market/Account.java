@@ -964,15 +964,24 @@ public class Account extends Model {
         String content;
         if(isUp) {
             content = HTTP.get(this.cookieStore(), afterLoginT3._2);
+            Logger.info("Click link: %s", afterLoginT3._2);
         } else {
             content = HTTP.get(this.cookieStore(), afterLoginT3._3);
+            Logger.info("Click link: %s", afterLoginT3._3);
         }
         AmazonReviewRecord record = new AmazonReviewRecord(review, this, isUp);
         // 只有后面登陆成功了, 才允许记录 Record
         if(afterLoginT3._1) record.save();
+        else Logger.warn("Not Login? %s, %s", this.prettyName(), this.password);
         return new F.T2<AmazonReviewRecord, String>(record, content);
     }
 
+    /**
+     * 访问 Review 的页面, 检查是否登陆, 并且解析出点击 Up 与 Down 的两个链接.
+     *
+     * @param review
+     * @return
+     */
     private F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
         String html = HTTP.get(this.cookieStore(), vExtensions.reviewLink(review));
         Document doc = Jsoup.parse(html);
