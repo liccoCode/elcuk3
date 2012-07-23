@@ -239,7 +239,7 @@ public class Account extends Model {
          *
          * @return
          */
-        public String amazonSiteHomePage() {
+        public String amazonSiteLogin() {
             /**
              * https://www.amazon.co.uk/ap/signin?_encoding=UTF8
              *
@@ -273,6 +273,23 @@ public class Account extends Model {
                     return String.format(baseUrl, this.toString(), "it");
                 case AMAZON_US:
                     return String.format(baseUrl, this.toString(), "us");
+                case EBAY_UK:
+                    return "unknow..";
+                default:
+                    return "Not Support.";
+            }
+        }
+
+        public String amazonSiteHome() {
+            //https://www.amazon.de/gp/yourstore/home
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    return String.format("https://www.%s/gp/yourstore/home", this.toString());
                 case EBAY_UK:
                     return "unknow..";
                 default:
@@ -740,6 +757,14 @@ public class Account extends Model {
         return COOKIE_STORE_MAP.get(key);
     }
 
+    public String cookie(String name) {
+        for(Cookie cookie : this.cookieStore().getCookies()) {
+            if(name.equalsIgnoreCase(cookie.getName()))
+                return cookie.getValue();
+        }
+        return null;
+    }
+
     public void setType(M type) {
         this.type = type;
         if(this.type != null && this.username != null)
@@ -820,7 +845,7 @@ public class Account extends Model {
                  * 1. Visit the website, fetch the new Cookie.
                  * 2. With the website params and user/password to login.
                  */
-                String body = HTTP.get(this.cookieStore(), this.type.amazonSiteHomePage());
+                String body = HTTP.get(this.cookieStore(), this.type.amazonSiteLogin());
                 Document doc = Jsoup.parse(body);
                 Elements inputs = doc.select("#ap_signin_form input");
 
@@ -972,12 +997,10 @@ public class Account extends Model {
      * @param listing
      */
     public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
-        String sessionId = "";
-        for(Cookie cookie : this.cookieStore().getCookies()) {
-            if("session-id".equalsIgnoreCase(cookie.getName())) {
-                sessionId = cookie.getValue();
-                break;
-            }
+        String sessionId = this.cookie("session-id");
+        if(sessionId == null) {// 没有 session-id, 即没有登陆, 则尝试登陆一次..
+            this.loginAmazonSize();
+            sessionId = this.cookie("session-id");
         }
         String body = HTTP.post(this.cookieStore(), this.type.amazonLikeLink(), Arrays.asList(
                 new BasicNameValuePair("action", "like"),

@@ -90,6 +90,23 @@ $ ->
     )
     e.preventDefault()
 
+  # 绑定点击 Like 按钮
+  $('#click_like').click (e) ->
+    if $('#search_form [name=asin]').val().length isnt 10
+      alert('请先输入正确的 ASIN')
+      return false
+    mask = $('#container')
+    mask.mask('点击 Like 中...')
+    $.post('/amazonreviews/like', $('#search_form :input').fieldSerialize(),
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert(r._2)
+        mask.unmask()
+    )
+    e.preventDefault()
+
   $('#search_form button:eq(0)').click (e) ->
     o = $(@).prev()
     o.val(o.val().toUpperCase())

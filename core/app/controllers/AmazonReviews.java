@@ -32,8 +32,10 @@ public class AmazonReviews extends Controller {
      * @param m
      */
     public static void ajaxMagic(String asin, String m) {
-        List<AmazonListingReview> savedReviews = AmazonListingReview.find("listingId=? ORDER BY reviewDate DESC, rating", Listing.lid(asin, Account.M.val(m))).fetch();
-        render(savedReviews);
+        Account.M market = Account.M.val(m);
+        List<AmazonListingReview> savedReviews = AmazonListingReview.find("listingId=? ORDER BY reviewDate DESC, rating", Listing.lid(asin, market)).fetch();
+        Listing lst = Listing.findById(Listing.lid(asin, market));
+        render(savedReviews, lst);
     }
 
     /**

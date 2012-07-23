@@ -6,9 +6,7 @@ import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +52,7 @@ public class AmazonLikeRecord extends GenericModel {
 
     public String asin;
 
+    @Enumerated(EnumType.STRING)
     public Account.M market;
 
     /**
@@ -64,6 +63,7 @@ public class AmazonLikeRecord extends GenericModel {
     /**
      * 知道是哪一个账户点击的
      */
+    @OneToOne
     public Account account;
     /**
      * 知道是谁点击的
