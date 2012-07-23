@@ -396,4 +396,14 @@ public class AmazonListingReview extends GenericModel {
     public static AmazonListingReview findByReviewId(String reviewId) {
         return AmazonListingReview.find("reviewId=?", reviewId).first();
     }
+
+    /**
+     * 计算出指定 Listing 的 Review 个数
+     *
+     * @param lid
+     * @return
+     */
+    public static long countListingReview(String lid) {
+        return AmazonListingReview.count("listingId=?", lid);
+    }
 }

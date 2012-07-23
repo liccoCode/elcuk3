@@ -62,7 +62,7 @@ public class AmazonReviews extends Controller {
         } catch(Exception e) {
             throw new FastRuntimeException(Webs.S(e));
         }
-        renderJSON(new Ret());
+        renderJSON(new Ret(true, AmazonListingReview.countListingReview(Listing.lid(asin, market)) + ""));
     }
 
 }

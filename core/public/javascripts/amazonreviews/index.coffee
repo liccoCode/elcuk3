@@ -82,7 +82,10 @@ $ ->
         if r.flag is false
           alert(r.message)
         else
-          reviewLoadFun()
+          if r.message is '0'
+            alert('此 Listing 暂时无 Review.')
+          else
+            reviewLoadFun()
         mask.unmask()
     )
     e.preventDefault()
