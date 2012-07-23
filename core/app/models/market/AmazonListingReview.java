@@ -7,6 +7,7 @@ import helper.Dates;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -204,11 +205,10 @@ public class AmazonListingReview extends GenericModel {
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) return;// 超过 70 天的不处理
 
 
-        //TODO 做数据修复, 不进行警告
 //        Rating < 4 的开 OsTicket
-//        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
+        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
 //        Rating <= 4 的发送邮件提醒
-//        if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
+        if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
         this.save();
     }
 
