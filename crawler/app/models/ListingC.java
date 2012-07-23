@@ -3,6 +3,7 @@ package models;
 import helper.Extra;
 import helper.Webs;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -73,6 +74,11 @@ public class ListingC {
 
     public String picUrls;
 
+    /**
+     * like 的数量
+     */
+    public int likes;
+
     public List<ListingOfferC> offers;
 
     public S state;
@@ -133,6 +139,8 @@ public class ListingC {
             this.reviews = Extra.flt(reviewSumery.nextElementSibling().text()).intValue();
             this.rating = Extra.flt(reviewSumery.select(".swSprite").first().text());
         }
+
+        this.likes = NumberUtils.toInt(root.select(String.format("#amznLike_%s .amazonLikeCount", this.asin)).text());
 
         Element totalOffersEl = root.select("#secondaryUsedAndNew a").first();
         if(totalOffersEl == null) this.totalOffers = 1;

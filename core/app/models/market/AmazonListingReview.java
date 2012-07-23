@@ -7,8 +7,6 @@ import helper.Dates;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -299,21 +297,15 @@ public class AmazonListingReview extends GenericModel {
         if(opendAccs.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
         List<Account> validAccs = AmazonReviewRecord.checkNonClickAccounts(opendAccs, this);
         //TODO 因为欧洲的账户可以通用点击, 所以考虑是否需要过滤掉不同市场的账号?
-        final AmazonListingReview outer = this; // What kind of Closue?
-        CollectionUtils.filter(validAccs, new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                Account acc = (Account) o;
-                return acc.type == Listing.unLid(outer.listingId)._2;
-            }
-        });
-        if(validAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("Click Review %s, hava %s valid accounts.", this.reviewId, validAccs.size());
+        List<Account> sameMarketAccs = Account.accountMarketFilter(validAccs, this.listingId);
+        if(sameMarketAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("Click Review %s, hava %s valid accounts.", this.reviewId, sameMarketAccs.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : validAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        for(Account a : sameMarketAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
-        return validAccs.get(0);
+        return sameMarketAccs.get(0);
     }
+
 
     @Override
     public int hashCode() {

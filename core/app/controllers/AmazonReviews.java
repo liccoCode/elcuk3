@@ -3,10 +3,7 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import jobs.ListingWorkers;
-import models.market.Account;
-import models.market.AmazonListingReview;
-import models.market.AmazonReviewRecord;
-import models.market.Listing;
+import models.market.*;
 import models.view.Ret;
 import play.libs.F;
 import play.mvc.Controller;
@@ -46,7 +43,7 @@ public class AmazonReviews extends Controller {
         AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
         Account acc = review.pickUpOneAccountToClick();
         F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, isUp);
-        renderJSON(J.G(t2));
+        renderJSON(J.json(t2));
     }
 
     public static void reCrawl(String asin, String m) {
@@ -63,6 +60,20 @@ public class AmazonReviews extends Controller {
             throw new FastRuntimeException(Webs.S(e));
         }
         renderJSON(new Ret(true, AmazonListingReview.countListingReview(Listing.lid(asin, market)) + ""));
+    }
+
+    /**
+     * 点击 Amazon Listing 的 Like 按钮
+     */
+    public static void like(String asin, String m) {
+        Account.M market = Account.M.val(m);
+        String lid = Listing.lid(asin, market);
+        Listing listing = Listing.findById(lid);
+        if(listing == null)
+            throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
+        Account acc = listing.pickUpOneAccountToClikeLike();
+        F.T2<AmazonLikeRecord, String> t2 = acc.clickLike(listing);
+        renderJSON(J.json(t2));
     }
 
 }

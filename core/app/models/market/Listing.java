@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -100,6 +101,9 @@ public class Listing extends GenericModel {
 
     @Expose
     public Float rating;
+
+    @Expose
+    public Integer likes;
 
     @Lob
     @Expose
@@ -303,6 +307,23 @@ public class Listing extends GenericModel {
         if(needWarnningOffers >= 2) Mails.moreOfferOneListing(offers, this);
     }
 
+    /**
+     * 挑选一个 Account, 来点击此 Listing 的 like 按钮
+     *
+     * @return
+     */
+    public Account pickUpOneAccountToClikeLike() {
+        List<Account> opendAccs = Account.openedReviewAccount();
+        List<Account> validAccs = AmazonLikeRecord.nonClickLikeAccs(opendAccs, this.listingId);
+        List<Account> sameMarketAccs = Account.accountMarketFilter(validAccs, this.listingId);
+        if(sameMarketAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("Listing Like Click %s, hava %s valid accounts.", this.listingId, sameMarketAccs.size());
+        StringBuilder sb = new StringBuilder();
+        for(Account a : sameMarketAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        Logger.info("Account List: %s", sb.toString());
+        return sameMarketAccs.get(0);
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -391,6 +412,7 @@ public class Listing extends GenericModel {
         tobeChangeed.saleRank = lst.get("saleRank").getAsInt();
         tobeChangeed.totalOffers = lst.get("totalOffers").getAsInt();
         tobeChangeed.picUrls = lst.get("picUrls").getAsString();
+        tobeChangeed.likes = lst.get("likes").getAsInt();
 
         if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
             for(ListingOffer of : tobeChangeed.offers) of.delete();
@@ -452,7 +474,7 @@ public class Listing extends GenericModel {
      * 反过来通过从 lid 解析出 ASIN 与 Market
      *
      * @param lid
-     * @return
+     * @return T2: ._1=Asin, ._2=Market
      */
     public static F.T2<String, Account.M> unLid(String lid) {
         String[] args = StringUtils.split(lid, "_");

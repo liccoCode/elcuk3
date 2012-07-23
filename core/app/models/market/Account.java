@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.Cache;
@@ -272,6 +273,24 @@ public class Account extends Model {
                     return String.format(baseUrl, this.toString(), "it");
                 case AMAZON_US:
                     return String.format(baseUrl, this.toString(), "us");
+                case EBAY_UK:
+                    return "unknow..";
+                default:
+                    return "Not Support.";
+            }
+        }
+
+        public String amazonLikeLink() {
+            //http://www.amazon.de/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513
+            switch(this) {
+                case AMAZON_UK:
+                case AMAZON_DE:
+                case AMAZON_ES:
+                case AMAZON_FR:
+                case AMAZON_IT:
+                case AMAZON_US:
+                    /*最后的 _cachebust 为随即生成的值*/
+                    return String.format("http://www.%s/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513", this.toString());
                 case EBAY_UK:
                     return "unknow..";
                 default:
@@ -947,6 +966,33 @@ public class Account extends Model {
         return f;
     }
 
+    /**
+     * 此 Account 点击此 Listing 的 like 按钮
+     *
+     * @param listing
+     */
+    public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
+        String sessionId = "";
+        for(Cookie cookie : this.cookieStore().getCookies()) {
+            if("session-id".equalsIgnoreCase(cookie.getName())) {
+                sessionId = cookie.getValue();
+                break;
+            }
+        }
+        String body = HTTP.post(this.cookieStore(), this.type.amazonLikeLink(), Arrays.asList(
+                new BasicNameValuePair("action", "like"),
+                new BasicNameValuePair("itemId", listing.asin),
+                new BasicNameValuePair("context", "dp"),
+                new BasicNameValuePair("itemType", "asin"),
+                new BasicNameValuePair("sessionId", sessionId)
+
+        ));
+        boolean success = StringUtils.contains(body, "\"success\":true");
+        AmazonLikeRecord likeRecord = new AmazonLikeRecord(listing, this);
+        if(success) likeRecord.save();
+        else Logger.warn("%s Click %s %s Like Failed.", this.prettyName(), listing.market, listing.asin);
+        return new F.T2<AmazonLikeRecord, String>(likeRecord, body);
+    }
 
     /**
      * 此账号点击这个 Review, 点击 Up 或者 Down;
@@ -1058,6 +1104,22 @@ public class Account extends Model {
      */
     public static List<Account> openedSaleAcc() {
         return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, true).fetch();
+    }
+
+    /**
+     * 根据 ListingId, 过滤 Account 与 ListingId 所在 Market 相同的 Account
+     *
+     * @param validAccs
+     * @param lid
+     * @return
+     */
+    public static List<Account> accountMarketFilter(List<Account> validAccs, String lid) {
+        List<Account> sameMarketAccs = new ArrayList<Account>();
+        for(Account acc : validAccs) {
+            if(acc.type == Listing.unLid(lid)._2)
+                sameMarketAccs.add(acc);
+        }
+        return sameMarketAccs;
     }
 
 
