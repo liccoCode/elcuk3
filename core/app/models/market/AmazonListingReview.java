@@ -16,6 +16,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class AmazonListingReview extends GenericModel {
 
     /**
      * Amazon Listing Review 的 Id:
-     * [listingId]_[username]_[title] 的 md5Hex 值
+     * [listingId]_[username]_[userId] .toUpperCase()
      */
     @Id
     @Expose
@@ -160,6 +161,12 @@ public class AmazonListingReview extends GenericModel {
 
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
     public String osTicketId;
+
+    /**
+     * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
+     */
+    @OneToMany(mappedBy = "ownerReview")
+    public List<AmazonReviewRecord> reviewRecords = new ArrayList<AmazonReviewRecord>();
 
     /**
      * 主要是为了记录 createDate 日期
