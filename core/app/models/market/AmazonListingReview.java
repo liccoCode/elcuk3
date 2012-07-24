@@ -132,6 +132,21 @@ public class AmazonListingReview extends GenericModel {
      * 是否为视频 Review
      */
     public Boolean isVedio;
+    /**
+     * 是不是 VineVoice
+     */
+    public boolean isVineVoice;
+
+    /**
+     * 是不是真名
+     */
+    public boolean isRealName;
+
+    /**
+     * 是 Top 多少?
+     */
+    public int topN;
+
 
     /**
      * Amazon 给与的每个 Review 的 ID
@@ -381,6 +396,9 @@ public class AmazonListingReview extends GenericModel {
         review.isVedio = rwObj.get("isVedio").getAsBoolean();
         review.reviewId = rwObj.get("reviewId").getAsString();
         review.vedioPicUrl = rwObj.get("vedioPicUrl").getAsString();
+        review.isRealName = rwObj.get("isRealName").getAsBoolean();
+        review.isVineVoice = rwObj.get("isVineVoice").getAsBoolean();
+        review.topN = rwObj.get("topN").getAsInt();
 
         return review;
     }
