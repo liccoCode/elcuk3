@@ -135,17 +135,17 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 是不是 VineVoice
      */
-    public boolean isVineVoice;
+    public Boolean isVineVoice;
 
     /**
      * 是不是真名
      */
-    public boolean isRealName;
+    public Boolean isRealName;
 
     /**
      * 是 Top 多少?
      */
-    public int topN;
+    public Integer topN;
 
 
     /**
@@ -199,6 +199,9 @@ public class AmazonListingReview extends GenericModel {
         //reviewDate 不修改了
         if(newReview.purchased != null) this.purchased = newReview.purchased;
         if(newReview.isVedio != null) this.isVedio = newReview.isVedio;
+        if(newReview.isRealName != null) this.isRealName = newReview.isRealName;
+        if(newReview.isVineVoice != null) this.isVineVoice = newReview.isVineVoice;
+        if(newReview.topN != null && newReview.topN >= 0) this.topN = newReview.topN;
         if(StringUtils.isNotBlank(newReview.reviewId)) this.reviewId = newReview.reviewId;
         if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
         // resolved 不做处理
@@ -348,6 +351,15 @@ public class AmazonListingReview extends GenericModel {
         } else {
             return "FF1101";
         }
+    }
+
+    /**
+     * 检查此 Review 是否在 Top1000 内
+     *
+     * @return
+     */
+    public Boolean isWithinTop1000() {
+        return this.topN != null && this.topN > 0 && this.topN <= 1000;
     }
 
     /**

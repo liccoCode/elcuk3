@@ -1,34 +1,51 @@
-<div>
-    <a target="_blank" href="${lst.asinLink()}">${lst.asin}</a>| Rating (${lst.rating})| Like
-    (${lst.likes == null ? 0 : lst.likes})
+<div class="row-fluid">
+#{if lst != null}
+    <div class="span12">
+        <a target="_blank" href="${lst.asinLink()}">${lst.asin}</a>|
+        <a target="_blank" href="@{Listings.listing(lst.listingId)}">${lst.listingId}</a>
+        <span class="badge badge-info">Rating (${lst.rating})</span>|
+        <span class="badge badge-info">Like (${lst.likes == null ? 0 : lst.likes})</span>
+        <span class="badge badge-info">Offer (${lst.offers.size()})</span>
+    </div>
+#{/if}
 </div>
 <table class="table table-condensed table-bordered">
     <tr>
-        <th>Rating</th>
+        <th>Up/Click</th>
+        <th>Ve</th>
+        <th width="auto" rel="popover" placement="right" content="<img src='/helper/vineVoice.png'>">Vi</th>
+        <th width="auto" rel="popover" placement="right" content="<img src='/helper/purchase.png'>">P</th>
+        <th width="auto" rel="popover" placement="right" content="<img src='/helper/realName.png'>">N</th>
+        <th width="auto" rel="popover" placement="right" content="<img src='/helper/rating.png'>">Rating</th>
+        <th width="500" rel="popover" placement='bottom' content="<img src='/helper/topN.png'>"># Title</th>
         <th>UserId</th>
         <th>ReviewId</th>
         <th>Reviewer</th>
-        <th>Up/Click</th>
-        <th>isPurchased</th>
-        <th>isVedio</th>
         <th>ReviewDate</th>
-        <th>#</th>
     </tr>
 #{list items:savedReviews, as:'r'}
     <tr drop="${r.reviewId}">
         #{set lengthAndColor: r.reviewLengthColor()/}
+        <td>${r.helpUp}/${r.helpClick}</td>
+        <td ${r.isVedio ? 'style=background:#0091F4' : ''}>${r.isVedio}</td>
+        <td ${r.isVineVoice ? 'style=background:#0091F4' : ''}>${r.isVineVoice}</td>
+        <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
+        <td ${r.isRealName ? 'style=background:#0091F4' : ''}>${r.isRealName}</td>
         <td style="background:${"#" + r.color()}">${r.rating}</td>
+        <td style="background:${'#' + lengthAndColor._2}">
+            <span class="badge badge-important">${lengthAndColor._1}</span>
+            #{if r.isWithinTop1000()}
+                <span class="badge badge-success">Top ${r.topN}</span>
+            #{/if}
+            | ${r.title}
+        </td>
         <td><a href="${r.userReviewLink()}" target="_blank">${r.userid}</a></td>
         <td><a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a></td>
         <td>${r.username}</td>
-        <td>${r.helpUp}/${r.helpClick}</td>
-        <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
-        <td ${r.isVedio ? 'style=background:#0091F4' : ''}>${r.isVedio}</td>
         <td>${r.reviewDate.date()}</td>
-        <td style="background:${'#' + lengthAndColor._2}">${lengthAndColor._1} | ${r.alrId}</td>
     </tr>
     <tr id="review_${r.reviewId}" style="display:none;">
-        <td colspan="9">
+        <td colspan="12">
             <div class="row-fluid">
                 <div class="span6">
                     <h3>${r.title}</h3>

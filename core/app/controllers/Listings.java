@@ -96,7 +96,8 @@ public class Listings extends Controller {
         renderJSON(J.G(tobeSave));
     }
 
-    public static void reCrawl(Listing l) {
+    public static void reCrawl(String asin, String m) {
+        Listing l = Listing.findById(Listing.lid(asin, Account.M.val(m)));
         if(!l.isPersistent()) renderJSON(new Ret("此 Listing 不存在,不允许 ReCrawl!"));
         JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
         Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst, true);

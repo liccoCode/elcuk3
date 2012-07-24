@@ -65,9 +65,9 @@ $ ->
   # Listing 页面重新抓取这个 Listing
   $('button[lid]').click ->
     o = $(@)
-    lid = o.attr('lid')
+    lid = o.attr('lid').split('_')
     o.button('loading').addClass('disabled')
-    $.post('/listings/reCrawl', 'l.listingId': lid,
+    $.post('/listings/reCrawl', {asin: lid[0], m: lid[1]},
       (r) ->
         if r.flag is true
           o.after("<span><a style='background-color:#DFF0D8;margin-left:10px;padding:8px;' href='/listings/listing?lid=" + lid + "'>更新成功</a></span>")

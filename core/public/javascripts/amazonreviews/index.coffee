@@ -72,12 +72,13 @@ $ ->
           bindTransBtn()
           bindUpBtn()
           bindDownBtn()
+          window.$ui.init()
     )
 
   # 绑定重新抓取事件
   $('#recrawl_review').click (e) ->
     mask = $('#container')
-    mask.mask("向 Amazon 重新抓取中...")
+    mask.mask("重新抓取 Review 信息中...")
     $.get('/amazonReviews/reCrawl', $('#search_form :input').fieldSerialize(), (r) ->
         if r.flag is false
           alert(r.message)
@@ -89,6 +90,19 @@ $ ->
         mask.unmask()
     )
     e.preventDefault()
+
+  # Listing 重新抓取
+  $('#recrawl_listing').click (e) ->
+    mask = $('#container')
+    mask.mask('重新抓取 Listing 信息中...')
+    $.get('/listings/reCrawl', $('#search_form :input'),
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          $('#search_form button:eq(0)').click()
+        mask.unmask()
+    )
 
   # 绑定点击 Like 按钮
   $('#click_like').click (e) ->
