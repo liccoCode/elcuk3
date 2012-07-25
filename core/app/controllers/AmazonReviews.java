@@ -11,6 +11,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class AmazonReviews extends Controller {
     public static void index() {
-        List<String> allAsin = Listing.allASIN();
+        Set<String> allAsin = Listing.allASIN();
         renderArgs.put("asins", J.json(allAsin));
         render();
     }
