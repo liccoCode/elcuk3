@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class AmazonReviews extends Controller {
     public static void index() {
+        List<String> allAsin = Listing.allASIN();
+        renderArgs.put("asins", J.json(allAsin));
         render();
     }
 
@@ -43,9 +45,9 @@ public class AmazonReviews extends Controller {
      */
     public static void click(String reviewId, boolean isUp) {
         AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
-        Account acc = review.pickUpOneAccountToClick();
-        F.T2<AmazonReviewRecord, String> t2 = acc.clickReview(review, isUp);
-        renderJSON(J.json(t2));
+        F.T2<Account, Integer> accT2 = review.pickUpOneAccountToClick();
+        F.T2<AmazonReviewRecord, String> t2 = accT2._1.clickReview(review, isUp);
+        renderJSON(J.json(new F.T2<Integer, String>(accT2._2, J.G(t2._1))));
     }
 
     public static void reCrawl(String asin, String m) {
@@ -73,9 +75,17 @@ public class AmazonReviews extends Controller {
         Listing listing = Listing.findById(lid);
         if(listing == null)
             throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
-        Account acc = listing.pickUpOneAccountToClikeLike();
-        F.T2<AmazonLikeRecord, String> t2 = acc.clickLike(listing);
-        renderJSON(J.json(t2));
+        F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToClikeLike();
+        F.T2<AmazonLikeRecord, String> t2 = accT2._1.clickLike(listing);
+        renderJSON(J.json(new F.T2<Integer, String>(accT2._2, J.G(t2._1))));
+    }
+
+    /**
+     * 检查还剩下多少次可点击
+     */
+    public static void checkLeftClicks(List<String> rvIds) {
+        List<F.T2<String, Integer>> reviewLeftClicks = AmazonListingReview.reviewLeftClickTimes(rvIds);
+        renderJSON(J.json(reviewLeftClicks));
     }
 
 }

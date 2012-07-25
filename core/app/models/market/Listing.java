@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
+import helper.Caches;
 import helper.Crawl;
 import jobs.ListingWorkers;
 import models.product.Product;
@@ -312,7 +313,7 @@ public class Listing extends GenericModel {
      *
      * @return
      */
-    public Account pickUpOneAccountToClikeLike() {
+    public F.T2<Account, Integer> pickUpOneAccountToClikeLike() {
         List<Account> opendAccs = Account.openedReviewAccount();
         List<Account> validAccs = AmazonLikeRecord.nonClickLikeAccs(opendAccs, this.listingId);
         List<Account> sameMarketAccs = Account.accountMarketFilter(validAccs, this.listingId);
@@ -321,7 +322,7 @@ public class Listing extends GenericModel {
         StringBuilder sb = new StringBuilder();
         for(Account a : sameMarketAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
-        return sameMarketAccs.get(0);
+        return new F.T2<Account, Integer>(sameMarketAccs.get(0), sameMarketAccs.size());
     }
 
     @Override
@@ -467,7 +468,7 @@ public class Listing extends GenericModel {
     }
 
     public static String lid(String asin, Account.M market) {
-        return String.format("%s_%s", asin.toUpperCase(), market.toString());
+        return String.format("%s_%s", asin.trim().toUpperCase(), market.toString());
     }
 
     /**
@@ -483,5 +484,22 @@ public class Listing extends GenericModel {
 
     public static boolean exist(String lid) {
         return Listing.count("listingId=?", lid) >= 1;
+    }
+
+    /**
+     * 返回系统中所有的 ASIN
+     */
+    @SuppressWarnings("unchecked")
+    public static List<String> allASIN() {
+        String cacheKey = "listing.allasin";
+        List<String> asins = Caches.blockingGet(cacheKey, List.class);
+        if(asins == null) {
+            asins = new ArrayList<String>();
+            List<Listing> listings = Listing.findAll();
+            for(Listing li : listings) asins.add(li.asin);
+
+            Caches.blockingAdd(cacheKey, asins, "2h");
+        }
+        return Caches.blockingGet(cacheKey, List.class);
     }
 }

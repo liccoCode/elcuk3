@@ -11,6 +11,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -312,7 +313,7 @@ public class AmazonListingReview extends GenericModel {
      *
      * @return
      */
-    public Account pickUpOneAccountToClick() {
+    public F.T2<Account, Integer> pickUpOneAccountToClick() {
         /**
          * 一步一步的过滤掉 Account, 然后返回一个 Account
          * 1. 找出所有的 Comment Account, 过滤掉 SaleAcc
@@ -324,11 +325,11 @@ public class AmazonListingReview extends GenericModel {
         //TODO 因为欧洲的账户可以通用点击, 所以考虑是否需要过滤掉不同市场的账号?
         List<Account> sameMarketAccs = Account.accountMarketFilter(validAccs, this.listingId);
         if(sameMarketAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("Click Review %s, hava %s valid accounts.", this.reviewId, sameMarketAccs.size());
+        Logger.info("To Click Review %s, hava %s valid accounts.", this.reviewId, sameMarketAccs.size());
         StringBuilder sb = new StringBuilder();
         for(Account a : sameMarketAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
-        return sameMarketAccs.get(0);
+        return new F.T2<Account, Integer>(sameMarketAccs.get(0), sameMarketAccs.size());
     }
 
 
@@ -434,5 +435,20 @@ public class AmazonListingReview extends GenericModel {
      */
     public static long countListingReview(String lid) {
         return AmazonListingReview.count("listingId=?", lid);
+    }
+
+    public static List<F.T2<String, Integer>> reviewLeftClickTimes(List<String> reviewIds) {
+        List<AmazonListingReview> reviews = AmazonListingReview.find("reviewId IN " + JpqlSelect.inlineParam(reviewIds)).fetch();
+        List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<F.T2<String, Integer>>();
+        for(AmazonListingReview review : reviews) {
+            int leftClick = 0;
+            try {
+                leftClick = review.pickUpOneAccountToClick()._2;
+            } catch(FastRuntimeException e) {
+                leftClick = 0;
+            }
+            reviewLeftClicks.add(new F.T2<String, Integer>(review.reviewId, leftClick));
+        }
+        return reviewLeftClicks;
     }
 }

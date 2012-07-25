@@ -18,7 +18,8 @@ $ ->
             alert("点击失败. #{r.message}")
           else
             alert("点击成功.")
-            $("#after_#{reviewId}").html(JSON.stringify(r._1))
+            $("#after_#{reviewId}").html(JSON.stringify(r._2))
+            $("#accleft_#{reviewId}").html(r._1)
           mask.unmask()
       )
       e.preventDefault()
@@ -35,7 +36,8 @@ $ ->
             alert("点击失败. #{r.message}")
           else
             alert("点击成功.")
-            $("#after_#{reviewId}").html(JSON.stringify(r._1))
+            $("#after_#{reviewId}").html(JSON.stringify(r._2))
+            $("#accleft_#{reviewId}").html(r._1)
           mask.unmask()
       )
       e.preventDefault()
@@ -117,6 +119,27 @@ $ ->
           alert(r.message)
         else
           alert(r._2)
+        mask.unmask()
+    )
+    e.preventDefault()
+
+  # 检查每个 Review 的可点击数
+  $("#check_left_clicks").click (e) ->
+    o = $(@)
+    mask = $('#container')
+    params = {}
+    for tr, i in $("tr[drop]")
+      params["rvIds[#{i}]"] = tr.getAttribute('drop')
+    mask.mask('计算中...')
+    $.post('/AmazonReviews/checkLeftClicks', params,
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+          o.button('reset')
+        else
+          o.button('loading')
+          for t2 in r
+            $("#accleft_#{t2._1}").html(t2._2)
         mask.unmask()
     )
     e.preventDefault()

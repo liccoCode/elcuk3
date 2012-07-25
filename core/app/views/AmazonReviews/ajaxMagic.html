@@ -18,8 +18,8 @@
         <th width="auto" rel="popover" placement="right" content="<img src='/helper/realName.png'>">N</th>
         <th width="auto" rel="popover" placement="right" content="<img src='/helper/rating.png'>">Rating</th>
         <th width="500" rel="popover" placement='bottom' content="<img src='/helper/topN.png'>"># Title</th>
-        <th width="155">UserId</th>
-        <th>ReviewId</th>
+        <th width="160">UserId</th>
+        <th width="160">ReviewId</th>
         <th>Reviewer</th>
         <th>ReviewDate</th>
     </tr>
@@ -45,7 +45,10 @@
             #{/if}
             <a href="${r.userReviewLink()}" target="_blank">${r.userid}</a>
         </td>
-        <td><a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a></td>
+        <td>
+            <span class="badge badge-inverse" id='accleft_${r.reviewId}'>?</span>
+            <a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a>
+        </td>
         <td>${r.username}</td>
         <td>${r.reviewDate.date()}</td>
     </tr>
