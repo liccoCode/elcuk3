@@ -16,6 +16,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class AmazonListingReview extends GenericModel {
 
     /**
      * Amazon Listing Review 的 Id:
-     * [listingId]_[username]_[title] 的 md5Hex 值
+     * [listingId]_[username]_[userId] .toUpperCase()
      */
     @Id
     @Expose
@@ -132,6 +133,21 @@ public class AmazonListingReview extends GenericModel {
      * 是否为视频 Review
      */
     public Boolean isVedio;
+    /**
+     * 是不是 VineVoice
+     */
+    public Boolean isVineVoice;
+
+    /**
+     * 是不是真名
+     */
+    public Boolean isRealName;
+
+    /**
+     * 是 Top 多少?
+     */
+    public Integer topN;
+
 
     /**
      * Amazon 给与的每个 Review 的 ID
@@ -145,6 +161,12 @@ public class AmazonListingReview extends GenericModel {
 
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
     public String osTicketId;
+
+    /**
+     * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
+     */
+    @OneToMany(mappedBy = "ownerReview")
+    public List<AmazonReviewRecord> reviewRecords = new ArrayList<AmazonReviewRecord>();
 
     /**
      * 主要是为了记录 createDate 日期
@@ -184,6 +206,9 @@ public class AmazonListingReview extends GenericModel {
         //reviewDate 不修改了
         if(newReview.purchased != null) this.purchased = newReview.purchased;
         if(newReview.isVedio != null) this.isVedio = newReview.isVedio;
+        if(newReview.isRealName != null) this.isRealName = newReview.isRealName;
+        if(newReview.isVineVoice != null) this.isVineVoice = newReview.isVineVoice;
+        if(newReview.topN != null && newReview.topN >= 0) this.topN = newReview.topN;
         if(StringUtils.isNotBlank(newReview.reviewId)) this.reviewId = newReview.reviewId;
         if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
         // resolved 不做处理
@@ -336,6 +361,15 @@ public class AmazonListingReview extends GenericModel {
     }
 
     /**
+     * 检查此 Review 是否在 Top1000 内
+     *
+     * @return
+     */
+    public Boolean isWithinTop1000() {
+        return this.topN != null && this.topN > 0 && this.topN <= 1000;
+    }
+
+    /**
      * 根据 Review 的长度进行不同颜色的区分
      *
      * @return
@@ -381,6 +415,9 @@ public class AmazonListingReview extends GenericModel {
         review.isVedio = rwObj.get("isVedio").getAsBoolean();
         review.reviewId = rwObj.get("reviewId").getAsString();
         review.vedioPicUrl = rwObj.get("vedioPicUrl").getAsString();
+        review.isRealName = rwObj.get("isRealName").getAsBoolean();
+        review.isVineVoice = rwObj.get("isVineVoice").getAsBoolean();
+        review.topN = rwObj.get("topN").getAsInt();
 
         return review;
     }

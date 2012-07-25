@@ -96,6 +96,21 @@ public class AmazonListingReview {
     public boolean isVedio;
 
     /**
+     * 是不是 VineVoice
+     */
+    public boolean isVineVoice;
+
+    /**
+     * 是不是真名
+     */
+    public boolean isRealName;
+
+    /**
+     * 是 Top 多少?
+     */
+    public int topN;
+
+    /**
      * 视频的预览图片链接
      */
     public String vedioPicUrl = "";
@@ -132,6 +147,13 @@ public class AmazonListingReview {
                 String ratingStr = r.select("> div span.swSprite").first().text();
                 review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
                 review.lastRating = review.rating; // 对 LastRating 的初始化
+
+                review.isRealName = r.select(".s_BadgeRealName").first() != null;
+                review.isVineVoice = r.select(".s_BadgeVineVoice").first() != null;
+                if(r.select(".s_BadgeTop50").first() != null) review.topN = 50;
+                if(r.select(".s_BadgeTop100").first() != null) review.topN = 100;
+                if(r.select(".s_BadgeTop500").first() != null) review.topN = 500;
+                if(r.select(".s_BadgeTop1000").first() != null) review.topN = 1000;
 
                 review.title = r.select("> div span b").first().text().trim();
 

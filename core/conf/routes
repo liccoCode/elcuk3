@@ -19,6 +19,7 @@ GET     /public/                                            staticDir:public
 GET     /js/                                                staticDir:public/javascripts
 GET     /images/                                            staticDir:public/images
 GET     /img/                                               staticDir:public/images
+GET     /helper/                                            staticDir:public/images/helper
 
 # REST CRUD
 GET     /{controller}/page/{page}                           {controller}.p

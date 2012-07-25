@@ -45,7 +45,14 @@ public class AmazonReviewRecord extends GenericModel {
         this.ups = review.helpUp;
         this.downs = review.helpClick - review.helpUp;
         this.rating = review.rating;
+        this.ownerReview = review;
     }
+
+    /**
+     * 起附属的 Review
+     */
+    @ManyToOne
+    public AmazonListingReview ownerReview;
 
     @Id
     @GeneratedValue

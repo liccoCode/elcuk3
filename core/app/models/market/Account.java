@@ -1039,11 +1039,11 @@ public class Account extends Model {
         }
         String content;
         if(isUp) {
-            content = HTTP.get(this.cookieStore(), loginAndClicks._2);
             Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), loginAndClicks._2);
+            content = HTTP.get(this.cookieStore(), loginAndClicks._2);
         } else {
-            content = HTTP.get(this.cookieStore(), loginAndClicks._3);
             Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), loginAndClicks._3);
+            content = HTTP.get(this.cookieStore(), loginAndClicks._3);
         }
         AmazonReviewRecord record = new AmazonReviewRecord(review, this, isUp);
         // 只有后面登陆成功了, 才允许记录 Record
