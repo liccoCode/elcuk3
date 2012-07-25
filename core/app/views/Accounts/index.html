@@ -6,144 +6,155 @@
 
 
 <div class="row">
-    <table class="table table-bordered table-striped" id="account_list">
-        <tr>
-            <th>#</th>
-            <th>UniqueName</th>
-            <th>Type</th>
-            <th>MerchantId</th>
-            <th>AccessKey</th>
-            <th>IsSaleAcc</th>
-            <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
-        </tr>
-    #{list items:accs, as:'acc'}
-        <tr aid=${acc.id}>
-            <td>${acc.id}</td>
-            <td>${acc.uniqueName}</td>
-            <td>${acc.type}</td>
-            <td>${acc.merchantId}</td>
-            <td>${acc.accessKey}</td>
-            <td ${acc.isSaleAcc ? 'style=background:#009E1A' : ''}>${acc.isSaleAcc}</td>
-            <td>${acc.closeable}</td>
-        </tr>
-        <tr id="acc_${acc.id}" style="display:none;">
-            <td colspan="7">
-                <form>
-                    <table class="table table-condensed table-bordered">
-                        <tr>
-                            <td>UserName:</td>
-                            <td><input type="text" name="a.username" value="${acc.username}"></td>
-                            <td>UniqueName:</td>
-                            <td><input type="text" name="a.uniqueName" readonly="" value="${acc.uniqueName}"></td>
-                        </tr>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#sales" data-toggle="tab">Sales</a></li>
+        <li><a href="#unsale_uk" data-toggle="tab">UnSale UK</a></li>
+        <li><a href="#unsale_de" data-toggle="tab">UnSale DE</a></li>
+        <li><a href="#unsale_us" data-toggle="tab">UnSale US</a></li>
+    </ul>
 
-                        <tr>
-                            <td>Password:</td>
-                            <!-- 如果是非销售账号, 则给出密码 -->
-                            <td>
-                                <input type="${acc.isSaleAcc ? 'password' : 'text'}" name="a.password" value="${acc.isSaleAcc ? '' : acc.password}">
-                            </td>
-                            <td>Confirm:</td>
-                            <td><input type="${acc.isSaleAcc ? 'password' : 'text'}" name="a.confirm"></td>
-                        </tr>
+    <div class="tab-content">
+        <!-- 销售账号 -->
+        <div id="sales" class="tab-pane fade in active">
+            <table class="table table-bordered table-striped account_list">
+                <tr>
+                    <th>#</th>
+                    <th>UniqueName</th>
+                    <th>Type</th>
+                    <th>MerchantId</th>
+                    <th>AccessKey</th>
+                    <th>IsSaleAcc</th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                </tr>
+            #{list items:accs, as:'acc'}
+                #{if acc.isSaleAcc}
+                    #{render 'Accounts/acctr.html', acc:acc/}
+                #{/if}
+            #{/list}
+                <tr>
+                    <td colspan="7">
+                        <button class="btn btn-success" data-toggle="collapse" data-target="#newUser">添加用户</button>
+                        <div class="span12 collapse" id="newUser">
+                            <form id="newUser_form">
+                                <table class="table table-condensed table-bordered">
+                                    <tr>
+                                        <td>UserName:</td>
+                                        <td><input type="text" name="a.username"></td>
+                                        <td>UniqueName:</td>
+                                        <td><input type="text" readonly="" placeHolder="会自动创建"></td>
+                                    </tr>
 
-                        <tr>
-                            <td>Type:</td>
-                            <td><input type="text" readonly="" value="${acc.type}"></td>
+                                    <tr>
+                                        <td>Password:</td>
+                                        <td><input type="password" name="a.password"></td>
+                                        <td>Confirm:</td>
+                                        <td><input type="password" name="a.confirm"></td>
+                                    </tr>
 
-                            <td>Closeable:</td>
-                            <td>
-                                <input type="checkbox" name="a.closeable" ${acc.closeable ? 'checked' : ''} value="${acc.closeable}">
-                            </td>
-                        </tr>
+                                    <tr>
+                                        <td>Type:</td>
+                                        <td>
+                                        #{pickMarkets name:'a.type' /}
+                                        </td>
 
-                        <tr>
-                            <td>MerchantID:</td>
-                            <td><input type="text" name="a.merchantId" value="${acc.merchantId}"></td>
-                            <td>AccessKey:</td>
-                            <td><input type="text" name="a.accessKey" value="${acc.accessKey}"></td>
-                        </tr>
+                                        <td>Checks:</td>
+                                        <td>
+                                            <label class="checkbox inline">
+                                                <input type="checkbox" name="a.closeable" value="false">
+                                                Closeable
+                                            </label>
+                                            <label class="checkbox inline">
+                                                <input type="checkbox" name="a.isSaleAcc" value="false">
+                                                IsSaleAcc
+                                            </label>
+                                        </td>
+                                    </tr>
 
-                        <tr>
-                            <td colspan="4">
-                                Token:
-                                <textarea rows="8" class="span11" name="a.token">${acc.token}</textarea>
-                            </td>
-                        </tr>
+                                    <tr>
+                                        <td>MerchantID:</td>
+                                        <td><input type="text" name="a.merchantId"></td>
+                                        <td>AccessKey:</td>
+                                        <td><input type="text" name="a.accessKey"></td>
+                                    </tr>
 
-                        <tr>
-                            <td colspan="4">
-                                <input type="hidden" name="a.id" value="${acc.id}">
-                                <button aid="${acc.id}" class="btn btn-primary">更新</button>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-            </td>
-        </tr>
-    #{/list}
-        <tr>
-            <td colspan="7">
-                <button class="btn btn-success" data-toggle="collapse" data-target="#newUser">添加用户</button>
-                <div class="span12 collapse" id="newUser">
-                    <form id="newUser_form">
-                        <table class="table table-condensed table-bordered">
-                            <tr>
-                                <td>UserName:</td>
-                                <td><input type="text" name="a.username"></td>
-                                <td>UniqueName:</td>
-                                <td><input type="text" readonly="" placeHolder="会自动创建"></td>
-                            </tr>
+                                    <tr>
+                                        <td colspan="4">
+                                            Token:
+                                            <textarea rows="8" class="span11" name="a.token"></textarea>
+                                        </td>
+                                    </tr>
 
-                            <tr>
-                                <td>Password:</td>
-                                <td><input type="password" name="a.password"></td>
-                                <td>Confirm:</td>
-                                <td><input type="password" name="a.confirm"></td>
-                            </tr>
+                                    <tr>
+                                        <td colspan="4">
+                                            <button nid class="btn btn-primary">创建</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-                            <tr>
-                                <td>Type:</td>
-                                <td>
-                                #{pickMarkets name:'a.type' /}
-                                </td>
+        <!-- 非销售账号, UK -->
+        <div id="unsale_uk" class="tab-pane fade in">
+            <table class="table table-bordered table-striped account_list">
+                <tr>
+                    <th>#</th>
+                    <th>UniqueName</th>
+                    <th>Type</th>
+                    <th>MerchantId</th>
+                    <th>AccessKey</th>
+                    <th>IsSaleAcc</th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                </tr>
+            #{list items:accs, as:'acc'}
+                #{if !acc.isSaleAcc && acc.type == models.market.Account.M.AMAZON_UK}
+                    #{render 'Accounts/acctr.html', acc:acc/}
+                #{/if}
+            #{/list}
+            </table>
+        </div>
 
-                                <td>Checks:</td>
-                                <td>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" name="a.closeable" value="false">
-                                        Closeable
-                                    </label>
-                                    <label class="checkbox inline">
-                                        <input type="checkbox" name="a.isSaleAcc" value="false">
-                                        IsSaleAcc
-                                    </label>
-                                </td>
-                            </tr>
+        <!-- 非销售账号, DE -->
+        <div id="unsale_de" class="tab-pane fade in">
+            <table class="table table-bordered table-striped account_list">
+                <tr>
+                    <th>#</th>
+                    <th>UniqueName</th>
+                    <th>Type</th>
+                    <th>MerchantId</th>
+                    <th>AccessKey</th>
+                    <th>IsSaleAcc</th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                </tr>
+            #{list items:accs, as:'acc'}
+                #{if !acc.isSaleAcc && acc.type == models.market.Account.M.AMAZON_DE}
+                    #{render 'Accounts/acctr.html', acc:acc/}
+                #{/if}
+            #{/list}
+            </table>
+        </div>
 
-                            <tr>
-                                <td>MerchantID:</td>
-                                <td><input type="text" name="a.merchantId"></td>
-                                <td>AccessKey:</td>
-                                <td><input type="text" name="a.accessKey"></td>
-                            </tr>
-
-                            <tr>
-                                <td colspan="4">
-                                    Token:
-                                    <textarea rows="8" class="span11" name="a.token"></textarea>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td colspan="4">
-                                    <button nid class="btn btn-primary">创建</button>
-                                </td>
-                            </tr>
-                        </table>
-                    </form>
-                </div>
-            </td>
-        </tr>
-    </table>
+        <!-- 非销售账号, US -->
+        <div id="unsale_us" class="tab-pane fade in">
+            <table class="table table-bordered table-striped account_list">
+                <tr>
+                    <th>#</th>
+                    <th>UniqueName</th>
+                    <th>Type</th>
+                    <th>MerchantId</th>
+                    <th>AccessKey</th>
+                    <th>IsSaleAcc</th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                </tr>
+            #{list items:accs, as:'acc'}
+                #{if !acc.isSaleAcc && acc.type == models.market.Account.M.AMAZON_US}
+                    #{render 'Accounts/acctr.html', acc:acc/}
+                #{/if}
+            #{/list}
+            </table>
+        </div>
+    </div>
 </div>

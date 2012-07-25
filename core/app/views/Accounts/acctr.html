@@ -1,0 +1,64 @@
+<tr aid=${acc.id}>
+    <td>${acc.id}</td>
+    <td>${acc.uniqueName}</td>
+    <td>${acc.type}</td>
+    <td>${acc.merchantId}</td>
+    <td>${acc.accessKey}</td>
+    <td ${acc.isSaleAcc ? 'style=background:#009E1A' : ''}>${acc.isSaleAcc}</td>
+    <td>${acc.closeable}</td>
+</tr>
+<tr id="acc_${acc.id}" style="display:none;">
+    <td colspan="7">
+        <form>
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <td>UserName:</td>
+                    <td><input type="text" name="a.username" value="${acc.username}"></td>
+                    <td>UniqueName:</td>
+                    <td><input type="text" name="a.uniqueName" readonly="" value="${acc.uniqueName}"></td>
+                </tr>
+
+                <tr>
+                    <td>Password:</td>
+                    <!-- 如果是非销售账号, 则给出密码 -->
+                    <td>
+                        <input type="${acc.isSaleAcc ? 'password' : 'text'}" name="a.password" value="${acc.isSaleAcc ? '' : acc.password}">
+                    </td>
+                    <td>Confirm:</td>
+                    <td><input type="${acc.isSaleAcc ? 'password' : 'text'}" name="a.confirm"></td>
+                </tr>
+
+                <tr>
+                    <td>Type:</td>
+                    <td><input type="text" readonly="" value="${acc.type}"></td>
+
+                    <td>Closeable:</td>
+                    <td>
+                        <input type="checkbox" name="a.closeable" ${acc.closeable ? 'checked' : ''} value="${acc.closeable}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>MerchantID:</td>
+                    <td><input type="text" name="a.merchantId" value="${acc.merchantId}"></td>
+                    <td>AccessKey:</td>
+                    <td><input type="text" name="a.accessKey" value="${acc.accessKey}"></td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        Token:
+                        <textarea rows="8" class="span11" name="a.token">${acc.token}</textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        <input type="hidden" name="a.id" value="${acc.id}">
+                        <button aid="${acc.id}" class="btn btn-primary">更新</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </td>
+</tr>

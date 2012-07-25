@@ -1,12 +1,12 @@
 $ ->
 
 # 添加 table 下拉列表
-  $("#account_list tr[aid]").css('cursor', 'pointer').click (e) ->
+  $(".account_list tr[aid]").css('cursor', 'pointer').click (e) ->
     $("#acc_#{@getAttribute('aid')}").toggle('fast')
     e.preventDefault()
 
   # 为 account table 添加更新事件
-  $("#account_list button[aid]").click (e) ->
+  $(".account_list button[aid]").click (e) ->
     form = $(@).parents('form')
     form.mask('更新中...')
     $.post('/accounts/update', form.find(":input").fieldSerialize(false),
