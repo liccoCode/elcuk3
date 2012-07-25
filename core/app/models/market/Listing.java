@@ -17,7 +17,9 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -490,16 +492,16 @@ public class Listing extends GenericModel {
      * 返回系统中所有的 ASIN
      */
     @SuppressWarnings("unchecked")
-    public static List<String> allASIN() {
+    public static Set<String> allASIN() {
         String cacheKey = "listing.allasin";
-        List<String> asins = Caches.blockingGet(cacheKey, List.class);
+        Set<String> asins = Caches.blockingGet(cacheKey, Set.class);
         if(asins == null) {
-            asins = new ArrayList<String>();
+            asins = new HashSet<String>();
             List<Listing> listings = Listing.findAll();
             for(Listing li : listings) asins.add(li.asin);
 
             Caches.blockingAdd(cacheKey, asins, "2h");
         }
-        return Caches.blockingGet(cacheKey, List.class);
+        return Caches.blockingGet(cacheKey, Set.class);
     }
 }
