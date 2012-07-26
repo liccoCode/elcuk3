@@ -38,7 +38,7 @@ $ ->
       )
 
   # 获取页面上的 shipmentId
-  shipmentId = -> $('td[shipmentId]').attr('shipmentId')
+  shipmentId = -> $('#procureUnit').attr('sid')
 
   # 获取转移数量的时候需要的值
   transformVals = (unitId) ->
