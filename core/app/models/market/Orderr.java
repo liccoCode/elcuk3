@@ -2,7 +2,6 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import helper.Cached;
-import helper.Caches;
 import helper.Dates;
 import helper.Webs;
 import models.finance.SaleFee;
@@ -13,6 +12,7 @@ import org.joda.time.Instant;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import play.Logger;
+import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
@@ -500,99 +500,104 @@ public class Orderr extends GenericModel {
     @Cached("1h")
     public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
         String cacheKey = "home.page";
-        Map<String, Map<String, AtomicInteger>> ordmaps = Caches.blockingGet(cacheKey, Map.class);
+        Map<String, Map<String, AtomicInteger>> ordmaps = Cache.get(cacheKey, Map.class);
         if(ordmaps != null) return ordmaps;
 
+        synchronized(Orderr.class) {
+            ordmaps = Cache.get(cacheKey, Map.class);
+            if(ordmaps != null) return ordmaps;
 
-        DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-        Date pre7Day = now.minusDays(Math.abs(days)).toDate();
-        List<Orderr> orders = Orderr.ordersInRange(pre7Day, now.plusDays(1).toDate());
 
-        List<Account> accs = Account.openedSaleAcc();
-        Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
-        for(Orderr or : orders) {
-            String key = Dates.date2Date(or.createDate);
+            DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
+            Date pre7Day = now.minusDays(Math.abs(days)).toDate();
+            List<Orderr> orders = Orderr.ordersInRange(pre7Day, now.plusDays(1).toDate());
 
-            if(odmaps.containsKey(key)) {
-                Map<String, AtomicInteger> dateRow = odmaps.get(key);
-                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
-                dateRow.get(String.format("all")).incrementAndGet();
-                //TODO 记得在更新代码的时候需要将 Account 的 isSaleAcc 修改成为 1
-                dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
-                dateRow.get(String.format("all_%s", or.account.toString())).incrementAndGet();
-            } else {
-                //row key: [state]_[market.name/account.toString]
-                Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
+            List<Account> accs = Account.openedSaleAcc();
+            Map<String, Map<String, AtomicInteger>> odmaps = new HashMap<String, Map<String, AtomicInteger>>();
+            for(Orderr or : orders) {
+                String key = Dates.date2Date(or.createDate);
+
+                if(odmaps.containsKey(key)) {
+                    Map<String, AtomicInteger> dateRow = odmaps.get(key);
+                    dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                    dateRow.get(String.format("all")).incrementAndGet();
+                    //TODO 记得在更新代码的时候需要将 Account 的 isSaleAcc 修改成为 1
+                    dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
+                    dateRow.get(String.format("all_%s", or.account.toString())).incrementAndGet();
+                } else {
+                    //row key: [state]_[market.name/account.toString]
+                    Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
+                    for(S s : S.values()) {
+                        dateRow.put(s.name(), new AtomicInteger(0)); // ALL
+                        for(Account.M m : Account.M.values()) {
+                            dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
+                            dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
+                        }
+                        for(Account a : accs) {
+                            dateRow.put(String.format("%s_%s", s.name(), a.toString()), new AtomicInteger(0)); // Account
+                            dateRow.put(String.format("all_%s", a.toString()), new AtomicInteger(0));
+                        }
+                    }
+                    dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                    dateRow.put(String.format("all"), new AtomicInteger(1));
+                    dateRow.put(String.format("all_%s", or.market.name()), new AtomicInteger(1));
+                    dateRow.put(String.format("all_%s", or.account.toString()), new AtomicInteger(1));
+                    odmaps.put(key, dateRow);
+                }
+            }
+
+            // 统计总订单数
+            for(String dateKey : odmaps.keySet()) {
+                // 2012-04-19 ->
                 for(S s : S.values()) {
-                    dateRow.put(s.name(), new AtomicInteger(0)); // ALL
-                    for(Account.M m : Account.M.values()) {
-                        dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
-                        dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
-                    }
-                    for(Account a : accs) {
-                        dateRow.put(String.format("%s_%s", s.name(), a.toString()), new AtomicInteger(0)); // Account
-                        dateRow.put(String.format("all_%s", a.toString()), new AtomicInteger(0));
-                    }
-                }
-                dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
-                dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
-                dateRow.put(String.format("all"), new AtomicInteger(1));
-                dateRow.put(String.format("all_%s", or.market.name()), new AtomicInteger(1));
-                dateRow.put(String.format("all_%s", or.account.toString()), new AtomicInteger(1));
-                odmaps.put(key, dateRow);
-            }
-        }
+                    /* -> pending
+                    * -> pending_uk
+                    * -> pending_easyacc.eu
+                    */
+                    Map<String, AtomicInteger> rowMap = odmaps.get(dateKey);
+                    AtomicInteger rowSum = new AtomicInteger(0); // ALL 统计
+                    AtomicInteger rowMarketSum = new AtomicInteger(0); // Market 统计
+                    AtomicInteger rowAccountSUm = new AtomicInteger(0); // Account 统计
 
-        // 统计总订单数
-        for(String dateKey : odmaps.keySet()) {
-            // 2012-04-19 ->
-            for(S s : S.values()) {
-                /* -> pending
-                 * -> pending_uk
-                 * -> pending_easyacc.eu
-                 */
-                Map<String, AtomicInteger> rowMap = odmaps.get(dateKey);
-                AtomicInteger rowSum = new AtomicInteger(0); // ALL 统计
-                AtomicInteger rowMarketSum = new AtomicInteger(0); // Market 统计
-                AtomicInteger rowAccountSUm = new AtomicInteger(0); // Account 统计
+                    for(String dataRowKey : rowMap.keySet()) {
+                        // each Row Data, 在已经限制了 Date 的日期下的每一行的数据将 state 相同的进行统计计算
+                        if(dataRowKey.equals(s.name())) {
+                            rowSum.addAndGet(rowMap.get(dataRowKey).get());
+                        }
 
-                for(String dataRowKey : rowMap.keySet()) {
-                    // each Row Data, 在已经限制了 Date 的日期下的每一行的数据将 state 相同的进行统计计算
-                    if(dataRowKey.equals(s.name())) {
-                        rowSum.addAndGet(rowMap.get(dataRowKey).get());
-                    }
+                        for(Account.M m : Account.M.values()) {
+                            if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
+                                rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
+                        }
 
-                    for(Account.M m : Account.M.values()) {
-                        if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
-                            rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
-                    }
-
-                    for(Account acc : accs) {
-                        if(dataRowKey.equals(String.format("%s_%s", s.name(), acc.toString())))
-                            rowAccountSUm.addAndGet(rowMap.get(dataRowKey).get());
+                        for(Account acc : accs) {
+                            if(dataRowKey.equals(String.format("%s_%s", s.name(), acc.toString())))
+                                rowAccountSUm.addAndGet(rowMap.get(dataRowKey).get());
+                        }
                     }
                 }
             }
+
+            // 将 key 排序, 按照日期倒序
+            List<String> dateKey = new ArrayList<String>(odmaps.keySet());
+            Collections.sort(dateKey, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    DateTime dt1 = DateTime.parse(o1);
+                    DateTime dt2 = DateTime.parse(o2);
+                    return (int) (dt1.getMillis() - dt2.getMillis());
+                }
+            });
+
+            Map<String, Map<String, AtomicInteger>> sortOdMaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
+            for(String key : dateKey) sortOdMaps.put(key, odmaps.get(key));
+            Cache.add(cacheKey, sortOdMaps, "1h");
         }
-
-        // 将 key 排序, 按照日期倒序
-        List<String> dateKey = new ArrayList<String>(odmaps.keySet());
-        Collections.sort(dateKey, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                DateTime dt1 = DateTime.parse(o1);
-                DateTime dt2 = DateTime.parse(o2);
-                return (int) (dt1.getMillis() - dt2.getMillis());
-            }
-        });
-
-        Map<String, Map<String, AtomicInteger>> sortOdMaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
-        for(String key : dateKey) sortOdMaps.put(key, odmaps.get(key));
-        Caches.blockingAdd(cacheKey, sortOdMaps, "1h");
-        return Caches.blockingGet(cacheKey, Map.class);
+        return Cache.get(cacheKey, Map.class);
     }
 
 

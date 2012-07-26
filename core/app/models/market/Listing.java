@@ -4,13 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-import helper.Caches;
 import helper.Crawl;
 import jobs.ListingWorkers;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
+import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -494,14 +494,21 @@ public class Listing extends GenericModel {
     @SuppressWarnings("unchecked")
     public static Set<String> allASIN() {
         String cacheKey = "listing.allasin";
-        Set<String> asins = Caches.blockingGet(cacheKey, Set.class);
+        Set<String> asins = Cache.get(cacheKey, Set.class);
         if(asins == null) {
-            asins = new HashSet<String>();
-            List<Listing> listings = Listing.findAll();
-            for(Listing li : listings) asins.add(li.asin);
+            // 加载缓存的时候控制并发
+            synchronized(Listing.class) {
+                // 并发控制后再读取一次, 防止并发重复加载缓存
+                asins = Cache.get(cacheKey, Set.class);
+                if(asins != null) return asins;
 
-            Caches.blockingAdd(cacheKey, asins, "2h");
+                asins = new HashSet<String>();
+                List<Listing> listings = Listing.findAll();
+                for(Listing li : listings) asins.add(li.asin);
+
+                Cache.add(cacheKey, asins, "2h");
+            }
         }
-        return Caches.blockingGet(cacheKey, Set.class);
+        return Cache.get(cacheKey, Set.class);
     }
 }

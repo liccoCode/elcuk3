@@ -12,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -258,11 +259,15 @@ public class SellingRecord extends GenericModel {
     @Cached("5mn") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
     public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
-        List<SellingRecord> cacheElement = Caches.blockingGet(cacheKey, List.class);
-        if(cacheElement != null) return cacheElement;
-        cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
-        Caches.blockingAdd(cacheKey, cacheElement, "1h");
-        return Caches.blockingGet(cacheKey, List.class);
+        List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
+        synchronized(SellingRecord.class) {
+            cacheElement = Cache.get(cacheKey, List.class);
+            if(cacheElement != null) return cacheElement;
+
+            cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+            Cache.add(cacheKey, cacheElement, "1h");
+        }
+        return Cache.get(cacheKey, List.class);
     }
 
     /**

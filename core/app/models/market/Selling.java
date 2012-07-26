@@ -23,6 +23,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -408,7 +409,7 @@ public class Selling extends GenericModel {
         if(ps == null || ps < 0) throw new FastRuntimeException("PS 格式错误或者 PS 不允许小于 0");
         this.ps = ps;
         // 如果缓存不为空则更新缓存
-        List<Selling> sellings = Caches.blockingGet(String.format(Caches.SALE_SELLING, "msku"), List.class);
+        List<Selling> sellings = Cache.get(String.format(Caches.SALE_SELLING, "msku"), List.class);
         if(sellings != null) {
             boolean find = false;
             for(Selling sell : sellings) {
@@ -487,38 +488,42 @@ public class Selling extends GenericModel {
     @SuppressWarnings("unchecked")
     public static List<String> allSid(boolean filter) {
         String cacheKey = "selling.allsid";
-        List<String> sids = Caches.blockingGet(cacheKey, List.class);
+        List<String> sids = Cache.get(cacheKey, List.class);
         if(sids == null) {
-            sids = new ArrayList<String>();
-            List<Selling> sellings = Selling.all().fetch();
-            for(Selling s : sellings) sids.add(s.sellingId);
+            synchronized(Selling.class) {
+                sids = Cache.get(cacheKey, List.class);
+                if(sids != null) return sids;
 
-            // 是否需要过滤掉一些不合法元素
-            if(filter) {
-                CollectionUtils.filter(sids, new Predicate() {
-                    @Override
-                    public boolean evaluate(Object o) {
-                        String msg = o.toString();
-                        String[] args = StringUtils.split(msg, Webs.S);
-                        String[] mskuArr = StringUtils.split(args[0], ",");
-                        if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
-                            return false;
-                        else if(StringUtils.contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
-                            return false;
-                        else if(StringUtils.contains(msg, "A_FR"))
-                            return false;
-                        else if(mskuArr.length >= 2 && mskuArr[1].length() < 3)
-                            return false;
-                        else
-                            return true;
-                    }
-                });
+                sids = new ArrayList<String>();
+                List<Selling> sellings = Selling.all().fetch();
+                for(Selling s : sellings) sids.add(s.sellingId);
+
+                // 是否需要过滤掉一些不合法元素
+                if(filter) {
+                    CollectionUtils.filter(sids, new Predicate() {
+                        @Override
+                        public boolean evaluate(Object o) {
+                            String msg = o.toString();
+                            String[] args = StringUtils.split(msg, Webs.S);
+                            String[] mskuArr = StringUtils.split(args[0], ",");
+                            if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
+                                return false;
+                            else if(StringUtils.contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
+                                return false;
+                            else if(StringUtils.contains(msg, "A_FR"))
+                                return false;
+                            else if(mskuArr.length >= 2 && mskuArr[1].length() < 3)
+                                return false;
+                            else
+                                return true;
+                        }
+                    });
+                }
+                Cache.add(cacheKey, sids, "2h");
             }
-
-            Caches.blockingAdd(cacheKey, sids, "2h");
         }
 
-        return Caches.blockingGet(cacheKey, List.class);
+        return Cache.get(cacheKey, List.class);
     }
 
     /**
@@ -610,87 +615,93 @@ public class Selling extends GenericModel {
         if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
             throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
         String cacke_key = String.format(Caches.SALE_SELLING, "msku".equals(type) ? "sid" : type);
-        List<Selling> cached = Caches.blockingGet(cacke_key, List.class);
+        List<Selling> cached = Cache.get(cacke_key, List.class);
         if(cached != null && cached.size() > 0) return cached;
-        // 如果不是 sku 那么一定为 msku
-        boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
 
-        /**
-         * 1. 加载所有的 Selling, 用来做基础数据;[没有做过滤]
-         * 2. 根据抓取数据的类型方式, 来对这些 Selling 进行分类;
-         * 3. 加载需要计算的 OrderItem 数据
-         */
-        Map<String, Selling> analyzeMap = new HashMap<String, Selling>();
+        synchronized(Selling.class) {
+            cached = Cache.get(cacke_key, List.class);
+            if(cached != null) return cached;
 
-        // msku, asin, acc, market, price,
-        List<Selling> sellings = Selling.findAll();
-        for(Selling s : sellings)
-            analyzeMap.put(isSku ? Product.merchantSKUtoSKU(s.merchantSKU) : s.sellingId, s);
+            // 如果不是 sku 那么一定为 msku
+            boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
+
+            /**
+             * 1. 加载所有的 Selling, 用来做基础数据;[没有做过滤]
+             * 2. 根据抓取数据的类型方式, 来对这些 Selling 进行分类;
+             * 3. 加载需要计算的 OrderItem 数据
+             */
+            Map<String, Selling> analyzeMap = new HashMap<String, Selling>();
+
+            // msku, asin, acc, market, price,
+            List<Selling> sellings = Selling.findAll();
+            for(Selling s : sellings)
+                analyzeMap.put(isSku ? Product.merchantSKUtoSKU(s.merchantSKU) : s.sellingId, s);
 
 
-        // d1, d7, d30, _ps
-        DateTime now = DateTime.now();
-        List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_aId(now.minusDays(30).toDate(), now.toDate(), 0);
-        for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
-            String key = isSku ? t5._1 : t5._2;
-            Selling currentSelling = analyzeMap.get(key);
-            if(currentSelling == null) {
-                Logger.warn("T4: %s, Selling is not exist. Key[%s]", t5, key);
-                continue;
+            // d1, d7, d30, _ps
+            DateTime now = DateTime.now();
+            List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_aId(now.minusDays(30).toDate(), now.toDate(), 0);
+            for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
+                String key = isSku ? t5._1 : t5._2;
+                Selling currentSelling = analyzeMap.get(key);
+                if(currentSelling == null) {
+                    Logger.warn("T4: %s, Selling is not exist. Key[%s]", t5, key);
+                    continue;
+                }
+                long differTime = Dates.morning(now.toDate()).getTime() - t5._4.getTime();
+                if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
+                    currentSelling.d1 += t5._3;
+                if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
+                    currentSelling.d7 += t5._3;
+                if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
+                    currentSelling.d30 += t5._3;
             }
-            long differTime = Dates.morning(now.toDate()).getTime() - t5._4.getTime();
-            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                currentSelling.d1 += t5._3;
-            if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
-                currentSelling.d7 += t5._3;
-            if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
-                currentSelling.d30 += t5._3;
+
+            for(String sellKey : analyzeMap.keySet()) {
+
+                // plan, delivering [ProcureUnit.PLAN|DELIVERY]
+                List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(analyzeMap.get(sellKey), isSku);
+                for(ProcureUnit unit : units) {
+                    if(unit.stage == ProcureUnit.STAGE.PLAN)
+                        analyzeMap.get(sellKey).onplan += unit.plan.planQty;
+                    else if(unit.stage == ProcureUnit.STAGE.DELIVERY || unit.stage == ProcureUnit.STAGE.DONE)
+                        analyzeMap.get(sellKey).onwork += unit.delivery.ensureQty;
+                }
+
+                // onway [Shipment.shipItem]
+                List<ShipItem> shipItems = ShipItem.find(String.format("%s AND shipment.state!=?", isSku ? "unit.sku=?" : "unit.sid=?"),
+                        analyzeMap.get(sellKey).sellingId, Shipment.S.DONE).fetch();
+                for(ShipItem itm : shipItems) {
+                    analyzeMap.get(sellKey).onway += itm.qty;
+                }
+
+                // qty [SellingQTY]
+                List<SellingQTY> qtys = null;
+                if(isSku)
+                    qtys = SellingQTY.qtysAccodingSKU(sellKey);
+                else
+                    qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
+                for(SellingQTY qty : qtys)
+                    analyzeMap.get(sellKey).qty += qty.qty;
+            }
+
+
+            // ps
+            for(Selling sell : analyzeMap.values()) {
+                sell._ps = sell._ps();
+                sell.turnOverT4 = sell.turnOverT4Cal();
+            }
+
+            sellings = new ArrayList<Selling>(analyzeMap.values());
+            Collections.sort(sellings, new Comparator<Selling>() {
+                @Override
+                public int compare(Selling s1, Selling s2) {
+                    return (int) (s2.d7 - s1.d7);
+                }
+            });
+            Cache.add(cacke_key, sellings, "1h"); // 缓存 1 小时
         }
-
-        for(String sellKey : analyzeMap.keySet()) {
-
-            // plan, delivering [ProcureUnit.PLAN|DELIVERY]
-            List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(analyzeMap.get(sellKey), isSku);
-            for(ProcureUnit unit : units) {
-                if(unit.stage == ProcureUnit.STAGE.PLAN)
-                    analyzeMap.get(sellKey).onplan += unit.plan.planQty;
-                else if(unit.stage == ProcureUnit.STAGE.DELIVERY || unit.stage == ProcureUnit.STAGE.DONE)
-                    analyzeMap.get(sellKey).onwork += unit.delivery.ensureQty;
-            }
-
-            // onway [Shipment.shipItem]
-            List<ShipItem> shipItems = ShipItem.find(String.format("%s AND shipment.state!=?", isSku ? "unit.sku=?" : "unit.sid=?"),
-                    analyzeMap.get(sellKey).sellingId, Shipment.S.DONE).fetch();
-            for(ShipItem itm : shipItems) {
-                analyzeMap.get(sellKey).onway += itm.qty;
-            }
-
-            // qty [SellingQTY]
-            List<SellingQTY> qtys = null;
-            if(isSku)
-                qtys = SellingQTY.qtysAccodingSKU(sellKey);
-            else
-                qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
-            for(SellingQTY qty : qtys)
-                analyzeMap.get(sellKey).qty += qty.qty;
-        }
-
-
-        // ps
-        for(Selling sell : analyzeMap.values()) {
-            sell._ps = sell._ps();
-            sell.turnOverT4 = sell.turnOverT4Cal();
-        }
-
-        sellings = new ArrayList<Selling>(analyzeMap.values());
-        Collections.sort(sellings, new Comparator<Selling>() {
-            @Override
-            public int compare(Selling s1, Selling s2) {
-                return (int) (s2.d7 - s1.d7);
-            }
-        });
-        Caches.blockingAdd(cacke_key, sellings, "1h"); // 缓存 1 小时
-        return Caches.blockingGet(cacke_key, List.class);
+        return Cache.get(cacke_key, List.class);
     }
 
     /**
