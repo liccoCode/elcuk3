@@ -4,7 +4,6 @@ import com.google.gson.annotations.Expose;
 import exception.NotSupportChangeRegionFastException;
 import ext.vExtensions;
 import helper.*;
-import models.ElcukRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -730,20 +729,6 @@ public class Account extends Model {
      */
     @Expose
     public boolean isSaleAcc = false;
-
-    @Transient
-    public Account mirror;
-
-
-    @PostLoad
-    public void postLoad() {
-        this.mirror = J.from(J.json(this), Account.class);
-    }
-
-    @PostUpdate
-    public void records() {
-        ElcukRecord.postUpdate(this, "Account.update");
-    }
 
     /**
      * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆, 他们的 Cookie 各不影响

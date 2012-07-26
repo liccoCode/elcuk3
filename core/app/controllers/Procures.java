@@ -4,6 +4,7 @@ import helper.J;
 import models.User;
 import models.embedded.UnitDelivery;
 import models.market.Selling;
+import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -35,7 +36,8 @@ public class Procures extends Controller {
     public static void create() {
         renderArgs.put("suppliers", J.json(ProcureUnit.suppliers()));
         renderArgs.put("sids", J.json(Selling.allSid(true)));
-        render();
+        List<Cooperator> cops = Cooperator.suppliers();
+        render(cops);
     }
 
     public static void edit(long id) {

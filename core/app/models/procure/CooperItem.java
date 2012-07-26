@@ -2,8 +2,6 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
-import helper.J;
-import models.ElcukRecord;
 import models.product.Product;
 import play.data.validation.Min;
 import play.data.validation.MinSize;
@@ -67,26 +65,6 @@ public class CooperItem extends Model {
 
     @Lob
     public String memo;
-
-    @Transient
-    public CooperItem mirror;
-
-    /**
-     * 由于需要就 CooperItem 的更新记录, 所以需要一个加载出来的时候的镜像对象
-     */
-    @PostLoad
-    public void preLoad() {
-        this.mirror = J.from(J.G(this), CooperItem.class);
-    }
-
-
-    /**
-     * 为了将 CooperItem 的值的记录全部记录下来, 当成功保存以后再进行记录
-     */
-    @PostUpdate
-    public void postUpdate() {
-        ElcukRecord.postUpdate(this, "CooperItem.update");
-    }
 
     public CooperItem checkAndUpdate() {
         this.check();

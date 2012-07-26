@@ -1,8 +1,6 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.J;
-import models.ElcukRecord;
 import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -116,22 +114,6 @@ public class Cooperator extends Model {
     public T type;
 
 
-    @Transient
-    public Cooperator mirror;
-
-    @PostLoad
-    public void postLoad() {
-        this.mirror = J.from(J.G(this), Cooperator.class);
-    }
-
-    /**
-     * 为了将 CooperItem 的值的记录全部记录下来, 当成功保存以后再进行记录
-     */
-    @PostUpdate
-    public void postUpdate() {
-        ElcukRecord.postUpdate(this, "Cooperator.update");
-    }
-
     public Cooperator checkAndUpdate() {
         this.check();
         return this.save();
@@ -174,5 +156,11 @@ public class Cooperator extends Model {
         return allSkus;
     }
 
+    /**
+     * 返回所有供应商
+     */
+    public static List<Cooperator> suppliers() {
+        return Cooperator.find("type=?", T.SUPPLIER).fetch();
+    }
 
 }

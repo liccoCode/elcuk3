@@ -5,7 +5,6 @@ import helper.Dates;
 import helper.J;
 import helper.JPAs;
 import helper.Webs;
-import models.ElcukRecord;
 import models.User;
 import models.embedded.UnitDelivery;
 import models.embedded.UnitPlan;
@@ -140,6 +139,13 @@ public class ProcureUnit extends Model {
     public UnitPlan plan;
 
     /**
+     * 此采购计划的供应商信息.
+     * TODO 完成后需要把 plan.supplier 删除
+     */
+    @OneToOne
+    public Cooperator cooperator;
+
+    /**
      * 采购|交付阶段
      */
     @Expose
@@ -157,19 +163,6 @@ public class ProcureUnit extends Model {
     @Lob
     @Expose
     public String comment = " ";
-
-    @Transient
-    public ProcureUnit mirror;
-
-    @PostLoad
-    public void postLoad() {
-        this.mirror = J.from(J.G(this), ProcureUnit.class);
-    }
-
-    @PostUpdate
-    public void recordChanges() {
-        ElcukRecord.postUpdate(this, "ProcureUnit.update");
-    }
 
     /**
      * 检查参数并且创建新 ProcureUnit

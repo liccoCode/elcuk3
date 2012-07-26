@@ -50,6 +50,12 @@
                 <td>采购商</td>
                 <td>
                     <input name="p.plan.supplier" type="text" data-provide="typeahead" data-source="${suppliers}" placeHolder="采购商">
+                *{<select>}*
+                *{<option value="0">请选择</option>}*
+                *{#{list items:cops, as:'cop'}}*
+                *{<option value="${cop.id}">${cop.name}</option>}*
+                *{#{/list}}*
+                *{</select>}*
                 </td>
                 <td>采购单价</td>
                 <td><input name="p.plan.unitPrice" type="text" placeHolder="价格"></td>
