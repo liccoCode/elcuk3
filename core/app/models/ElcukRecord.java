@@ -59,7 +59,7 @@ public class ElcukRecord extends Model {
     /**
      * 关联的 id
      */
-    public String id;
+    public String fid;
 
     /**
      * 如果有的话,则记录是谁操作的.
