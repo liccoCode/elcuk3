@@ -1,0 +1,26 @@
+<table class="table table-bordered" id="reason_table">
+    <tr>
+        <th>Reason</th>
+        <td><input type="text" name="lr.reason" value="${lr.reason}"></td>
+    </tr>
+
+    <tr>
+        <th>Category</th>
+        <td>
+        ${lr.category.categoryId} | ${lr.category.name}
+            <input type="hidden" name="lr.category.categoryId" value="${lr.category.categoryId}">
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <h3>Memo</h3>
+            <textarea name="lr.memo" rows="8" class="span12">${lr.memo}</textarea>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <button class="btn btn-primary">${lr.id > 0 ? '更新' : '创建'}</button>
+        </td>
+    </tr>
+</table>

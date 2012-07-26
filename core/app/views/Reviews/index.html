@@ -1,0 +1,62 @@
+#{extends 'main_full.html'/}
+#{set title:'Incomeing Reviews & Feedbacks' /}
+#{set 'moreScripts'}
+    #{script 'reviews/index.coffee'/}
+#{/set}
+
+<div class="row-fluid">
+    <div class="span6">
+        <ul class="nav nav-tabs" style="margin-bottom:5px;">
+            <li class="active"><a href="#news" data-toggle='tab'>热乎乎的 Review</a></li>
+            <li><a href="#rp1" data-toggle='tab'>回复了一次的</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="news" class="tab-pane active">
+                <table class="table table-condensed table-bordered">
+                    <tr>
+                        <th>Title</th>
+                        <th>ReviewId</th>
+                        <th>UserName</th>
+                        <th>Score</th>
+                    </tr>
+                #{list items:news, as:'r'}
+                    #{set reviewC_L:r.reviewLengthColor()/}
+                    <tr class="twoTr">
+                        <td style="background:${'#' + reviewC_L._2}">
+                            <span class="badge badge-important">${reviewC_L._1}</span> | ${r.title}
+                        </td>
+                        <td><a href="@{Reviews.show(r.reviewId)}" target="_blank">${r.reviewId}</a></td>
+                        <td><a href="${r.reviewLink()}" target="_blank"><i class="icon-external-link"></i> ${r.username}
+                        </a></td>
+                        <td style="background:${'#' + r.color()}">${r.rating}</td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td colspan="3">
+                            <div class="row-fluid">
+                                <div class="span6">
+                                    <h3>Review</h3>
+                                ${r.review}
+                                </div>
+                                <div class="span6">
+                                    <h3>Comment</h3>
+                                ${r.comment}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                #{/list}
+                </table>
+            </div>
+
+            <div id="rp1" class="tab-pane">
+                回复了一次的
+            </div>
+        </div>
+
+    </div>
+
+    <div class="span6">
+        Feedbacks...
+    </div>
+</div>

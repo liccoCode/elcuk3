@@ -18,6 +18,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -30,7 +31,22 @@ import java.util.List;
 @Entity
 public class AmazonListingReview extends GenericModel {
 
-    @ManyToOne
+    /**
+     * 查找关联的订单, 找到了则关联上
+     */
+    @OneToOne
+    public Orderr orderr;
+
+    /**
+     * 如果这个 Review 是负的, 原因是什么?
+     */
+    @OneToOne
+    public ListingReason reason;
+
+    @Enumerated(EnumType.STRING)
+    public ReviewState state;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
     /**
@@ -103,7 +119,7 @@ public class AmazonListingReview extends GenericModel {
      * Amazon 会判断这个 Review 是不是为购买了这个商品的客户发出.
      */
     @Expose
-    public Boolean purchased;
+    public Boolean purchased = false;
 
     /**
      * 标记为是否解决了这个 Review; 当然只有当 Review <= 3 的时候才需要进行处理!
@@ -133,35 +149,58 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 是否为视频 Review
      */
-    public Boolean isVedio;
+    @Expose
+    public Boolean isVedio = false;
     /**
      * 是不是 VineVoice
      */
-    public Boolean isVineVoice;
+    @Expose
+    public Boolean isVineVoice = false;
 
     /**
      * 是不是真名
      */
-    public Boolean isRealName;
+    @Expose
+    public Boolean isRealName = false;
 
     /**
      * 是 Top 多少?
      */
+    @Expose
     public Integer topN;
 
 
     /**
      * Amazon 给与的每个 Review 的 ID
      */
+    @Expose
     public String reviewId;
 
     /**
      * 视频的预览图片链接
      */
+    @Expose
     public String vedioPicUrl;
 
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
     public String osTicketId;
+
+
+    /**
+     * 是否打电话处理了?
+     */
+    public boolean isPhoned;
+
+    /**
+     * 每一个 Review 创建的时候都记录一次 originJson 字符串, 记录初始状态
+     */
+    @Lob
+    public String originJson = " ";
+
+    /**
+     * 判断这个 Review 是否为自己的 Listing 产生的
+     */
+    public boolean isOwner = true;
 
     /**
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
@@ -176,6 +215,8 @@ public class AmazonListingReview extends GenericModel {
      */
     public AmazonListingReview createReview() {
         this.createDate = new Date();
+        // 将初始的 Review 数据全部记录下来
+        this.originJson = J.G(this);
         return this.save();
     }
 
@@ -341,6 +382,30 @@ public class AmazonListingReview extends GenericModel {
     }
 
     /**
+     * 根据这个 Review 的 userId, 与 ReviewDate 去尝试 Order 并且关联上
+     *
+     * @return
+     */
+    public Orderr tryToRelateOrderByUserId() {
+        if(this.orderr != null) throw new FastRuntimeException("已经找到 Review 对应的 Order");
+        if(StringUtils.isBlank(this.userid)) return null;
+        return Orderr.find("createDate<=? AND userid=? ORDER BY createDate DESC", this.reviewDate, this.userid).first();
+    }
+
+    /**
+     * 通过状态来查看检查此 Review 联系的 OsTicket 是否有回复, 有回复了就是另外一些状态了.
+     *
+     * @return
+     */
+    public boolean isHaveResponse() {
+        List<ReviewState> states = Arrays.asList(ReviewState.NEW, ReviewState.RP1, ReviewState.RP2, ReviewState.PHONE);
+        for(ReviewState s : states) {
+            if(s == this.state) return true;
+        }
+        return false;
+    }
+
+    /**
      * 输出与此 Review 合适的警告颜色
      *
      * @return
@@ -450,5 +515,9 @@ public class AmazonListingReview extends GenericModel {
             reviewLeftClicks.add(new F.T2<String, Integer>(review.reviewId, leftClick));
         }
         return reviewLeftClicks;
+    }
+
+    public static List<AmazonListingReview> negtiveReviewsFilterByState(ReviewState state) {
+        return AmazonListingReview.find("rating<=? AND state=?", 4f/*小于 4 分为负的*/, state).fetch();
     }
 }

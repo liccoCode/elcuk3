@@ -118,24 +118,4 @@ $(function(){
         }
 
     };
-
-    // ---- Key board shor
-    $.keys = [
-        ['g+h', '/'],
-        ['g+s', '/analyzes/index'],
-        ['g+o', '/orders/o_index?s=35&p=1'],
-        ['g+l', '/listings/index']
-    ];
-
-    var bindkey = function(k, url){
-        key(k, function(){
-            location.href = url;
-            return false;
-        })
-    };
-
-    for(var i = 0; i < $.keys.length; i++){
-        var pair = $.keys[i];
-        bindkey(pair[0], pair[1]);
-    }
 });

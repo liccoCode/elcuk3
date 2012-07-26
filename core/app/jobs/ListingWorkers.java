@@ -8,6 +8,7 @@ import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.ListingOffer;
+import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -216,6 +217,9 @@ public class ListingWorkers extends Job {
                         else
                             review.listing = Listing.findById(review.listingId);
                         review.createDate = review.reviewDate;
+                        review.isOwner = review.listing.product != null;
+                        Orderr ord = review.tryToRelateOrderByUserId();
+                        if(ord != null) review.orderr = ord;
                         review.createReview();// 创建新的
                         review.listingReviewCheck();
                     } else {

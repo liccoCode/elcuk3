@@ -1,11 +1,12 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'Category' /}
 #{set 'moreScripts'}
     #{script 'products/category.coffee'/}
 #{/set}
-<div class="row">
-    <!-- BTN-1-BEGIN -->
+
+<div class="row-fluid" style="margin-bottom:5px;">
     <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_category">添加</a>
+    <!-- BTN-1-BEGIN -->
 
     <div id="add_modal" class="modal hide fade">
         <div class="modal-header">
@@ -54,32 +55,31 @@
     <!-- BTN-1-END -->
 </div>
 
+
+<div class="row-fluid">
 #{if cates.size() == 0}
-<div class="row">
     <div>
         等待添加新类别
     </div>
 #{/if}
 #{else }
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div class="span3" id="cat_slider" style="height:650px;overflow:auto;">
-                <table class="table table-bordered table-condensed">
-                    <tr>
-                        <th class="span1">CategoryId</th>
-                        <th>Name</th>
+    <div class="row-fluid">
+        <div class="span3 well" id="cat_slider">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <th class="span1">CategoryId</th>
+                    <th>Name</th>
+                </tr>
+                #{list items:cates, as:'cat'}
+                    <tr cid='${cat.categoryId}' style="cursor:pointer">
+                        <td>${cat.categoryId}</td>
+                        <td>${cat.name}</td>
                     </tr>
-                    #{list items:cates, as:'cat'}
-                        <tr cid='${cat.categoryId}' style="cursor:pointer">
-                            <td>${cat.categoryId}</td>
-                            <td>${cat.name}</td>
-                        </tr>
-                    #{/list}
-                </table>
-            </div>
-
-            <div class="span8" id="cat_detail">请选择左侧的 Category.</div>
+                #{/list}
+            </table>
         </div>
+
+        <div class="span8 well" id="cat_detail">请选择左侧的 Category.</div>
     </div>
 #{/else}
 </div>

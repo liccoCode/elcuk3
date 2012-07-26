@@ -19,7 +19,7 @@ $ ->
 
     order_list = $('#order_list')
     order_list.mask('查询中...')
-    order_list.load('/Orders/o_search', params,
+    order_list.load('/Orders/search', params,
       ->
         $('a[rel=tooltip]').tooltip({placement: 'top'})
         $('.pagination a[page]').click ->

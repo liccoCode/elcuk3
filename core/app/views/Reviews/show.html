@@ -1,0 +1,98 @@
+#{extends 'main.html'/}
+#{set title:'Review #' + review.reviewId /}
+#{set 'moreScripts'}
+    #{script 'reviews/show.coffee'/}
+#{/set}
+
+<!-- Review -->
+<div class="label label-info">Review</div>
+<div>
+    <table class="table table-bordered">
+        <tr>
+            <th>Title</th>
+            <td>${review.title}</td>
+            <th>UserId</th>
+            <td id="userId">${review.userid}</td>
+            <th>UserName</th>
+            <td>${review.username}</td>
+            <th>ReviewDate</th>
+            <td>${review.reviewDate.date()}</td>
+        </tr>
+
+        <tr>
+            <th>isVedio</th>
+            <td>${review.isVedio}</td>
+            <th>isVineVoise</th>
+            <td>${review.isVineVoice}</td>
+            <th>isPurchase</th>
+            <td>${review.purchased}</td>
+            <th>isRealName</th>
+            <td>${review.isRealName}</td>
+        </tr>
+
+        <tr>
+            <th>ReviewId</th>
+            <td><a href="${review.reviewLink()}" target="_blank"><span id="reviewId">${review.reviewId}</span></a></td>
+            <th>Rating</th>
+            <td>${review.rating}</td>
+            <th>Listing</th>
+            <td>${review.listingId}</td>
+            <th>OsTicketId</th>
+            <td>${review.osTicketId}</td>
+        </tr>
+
+        <tr>
+            <th rel="popover" content="${review.state.explan()}"><i class="icon-question-sign"> State</i></th>
+            <td>${review.state}</td>
+            <th>isPhone</th>
+            <td>${review.isPhoned}</td>
+            <th>TopN</th>
+            <td>${review.topN}</td>
+            <th>Click</th>
+            <td>${review.helpUp} / ${review.helpClick}</td>
+        </tr>
+    #{if review.isVedio}
+        <tr>
+            <td colspan="8">
+                <img src="${review.vedioPicUrl}" alt="${review.reviewId}">
+            </td>
+        </tr>
+    #{/if}
+
+        <tr>
+            <td colspan="8">
+                <h3>Review</h3>
+            ${review.review}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
+                <h3>System Comment</h3>
+            ${review.comment}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="label label-important">Funcs</div>
+<div style="margin:5px 0 10px 0;">
+#{if review.orderr == null}
+    <button id="try_order" class="btn btn-primary">Try Order</button>
+#{/if}
+#{if review.isHaveResponse()}
+    <button id="begin_deal" class="btn btn-primary">RP1</button>
+    <button id="begin_deal" class="btn btn-primary">RP2</button>
+    <button id="begin_deal" class="btn btn-primary">Need Call</button>
+#{/if}
+#{else }
+    <button id="begin_deal" class="btn btn-primary">NORMAL</button>
+    <button id="begin_deal" class="btn btn-primary">ACCEPT</button>
+    <button id="begin_deal" class="btn btn-primary">REFUSE</button>
+    <button id="begin_deal" class="btn btn-primary">CLOSE</button>
+#{/else}
+</div>
+
+#{if review.orderr != null}
+    #{render 'Orders/show.html', ord: review.orderr/}
+#{/if}

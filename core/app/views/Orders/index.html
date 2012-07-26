@@ -73,7 +73,7 @@
             </tr>
             #{list items:orders, as:'ord'}
                 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-                    <td><a target="_blank" href=@{Orders.o_detail(ord.orderId)}>${ord.orderId}</a></td>
+                    <td><a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId}</a></td>
                     <td>${ord.market.toString()}</td>
                     <td>${(ord.address == null ? '' : ord.address) + "  " + (ord.address1 == null ? '' : ord.address1)}</td>
                     <td>${(ord.country == null ? '' : ord.country) + " " + (ord.city == null ? '' : ord.city) + " " + (ord.province == null ? '' : ord.province)}</td>
@@ -104,7 +104,7 @@
             #{/list}
             <tr class="tb_footer">
                 <td colspan="9">
-                    #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/orders/o_index'/}
+                    #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/orders/index'/}
                 </td>
             </tr>
         </table>
