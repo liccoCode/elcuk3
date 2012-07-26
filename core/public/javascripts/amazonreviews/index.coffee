@@ -74,6 +74,7 @@ $ ->
           bindTransBtn()
           bindUpBtn()
           bindDownBtn()
+          $('#check_left_clicks').button('reset')
           window.$ui.init()
     )
 
