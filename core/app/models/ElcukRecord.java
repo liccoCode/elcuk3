@@ -1,7 +1,6 @@
 package models;
 
 import com.google.gson.annotations.Expose;
-import helper.J;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -53,6 +52,16 @@ public class ElcukRecord extends Model {
     public String action;
 
     /**
+     * 记录哪个 table
+     */
+    public String talbe;
+
+    /**
+     * 关联的 id
+     */
+    public String id;
+
+    /**
      * 如果有的话,则记录是谁操作的.
      */
     public String username;
@@ -68,7 +77,6 @@ public class ElcukRecord extends Model {
 
     /**
      * 利用反射来获取当前对象与 Mirror 对象之间的差别值(FromTo[List])
-     * PS: 1/2 ElcukRecord
      *
      * @param obj
      * @return
@@ -176,21 +184,6 @@ public class ElcukRecord extends Model {
         }
     }
 
-    /**
-     * 不同 Model 在 postUpdate 以后的操作;(基本上相同, 所以抽取出来了)
-     * PS: 2/2 ElcukRecord
-     *
-     * @param obj
-     * @param action
-     * @param <T>
-     */
-    public static <T extends GenericModel> void postUpdate(T obj, String action) {
-        List<ElcukRecord.FromTo> changes = ElcukRecord.changes(obj);
-        if(changes.size() <= 0) return;
-        ElcukRecord record = new ElcukRecord(action);
-        record.jsonRecord = J.json(changes);
-        record.record();
-    }
 
     /**
      * 在 Fields 中寻找 name 的字段, 并接获取值
