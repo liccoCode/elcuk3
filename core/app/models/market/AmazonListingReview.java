@@ -19,7 +19,6 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -415,19 +414,6 @@ public class AmazonListingReview extends GenericModel {
         if(this.orderr != null) throw new FastRuntimeException("已经找到 Review 对应的 Order");
         if(StringUtils.isBlank(this.userid)) return null;
         return Orderr.find("createDate<=? AND userid=? ORDER BY createDate DESC", this.reviewDate, this.userid).first();
-    }
-
-    /**
-     * 通过状态来查看检查此 Review 联系的 OsTicket 是否有回复, 有回复了就是另外一些状态了.
-     *
-     * @return
-     */
-    public boolean isHaveResponse() {
-        List<ReviewState> states = Arrays.asList(ReviewState.NEW, ReviewState.RP1, ReviewState.RP2, ReviewState.PHONE);
-        for(ReviewState s : states) {
-            if(s == this.state) return true;
-        }
-        return false;
     }
 
     /**
