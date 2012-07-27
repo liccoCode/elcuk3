@@ -11,6 +11,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.data.validation.Unique;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -40,8 +41,8 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 如果这个 Review 是负的, 原因是什么?
      */
-    @OneToOne
-    public ListingReason reason;
+    @ManyToMany
+    public List<ListingReason> reasons = new ArrayList<ListingReason>();
 
     @Enumerated(EnumType.STRING)
     public ReviewState state;
@@ -174,6 +175,8 @@ public class AmazonListingReview extends GenericModel {
      * Amazon 给与的每个 Review 的 ID
      */
     @Expose
+    @Unique
+    @Column(unique = true)
     public String reviewId;
 
     /**
@@ -183,12 +186,14 @@ public class AmazonListingReview extends GenericModel {
     public String vedioPicUrl;
 
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
+    @Expose
     public String osTicketId;
 
 
     /**
      * 是否打电话处理了?
      */
+    @Expose
     public boolean isPhoned;
 
     /**
@@ -200,7 +205,8 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 判断这个 Review 是否为自己的 Listing 产生的
      */
-    public boolean isOwner = true;
+    @Expose
+    public boolean isOwner = false;
 
     /**
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
@@ -336,6 +342,25 @@ public class AmazonListingReview extends GenericModel {
         return sb.toString();
     }
 
+    /**
+     * 为此 Review 添加为什么是负评
+     *
+     * @param lr
+     */
+    public AmazonListingReview addWhyNegtive(ListingReason lr) {
+        /**
+         * 0. 此原因是否存在?
+         * 1. 检查这个 lr 是否与这个 Review 所属在与 Category 下?
+         * 2. 检查这个原因是否已经在此 Review 中存在了?
+         */
+        if(!lr.isPersistent()) throw new FastRuntimeException("此原因不存在!");
+        if(!this.listing.product.category.categoryId.equals(lr.category.categoryId))
+            throw new FastRuntimeException("此原因与这个 Listing 不属于一个类别");
+        if(lr.reviews.contains(this)) throw new FastRuntimeException("此原因已经存在, 不需要重复添加");
+        this.reasons.add(lr);
+        return this.save();
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -344,9 +369,16 @@ public class AmazonListingReview extends GenericModel {
 
         AmazonListingReview that = (AmazonListingReview) o;
 
-        if(alrId != null ? !alrId.equals(that.alrId) : that.alrId != null) return false;
+        if(reviewId != null ? !reviewId.equals(that.reviewId) : that.reviewId != null) return false;
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (reviewId != null ? reviewId.hashCode() : 0);
+        return result;
     }
 
     /**
@@ -373,13 +405,6 @@ public class AmazonListingReview extends GenericModel {
         return new F.T2<Account, Integer>(sameMarketAccs.get(0), sameMarketAccs.size());
     }
 
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (alrId != null ? alrId.hashCode() : 0);
-        return result;
-    }
 
     /**
      * 根据这个 Review 的 userId, 与 ReviewDate 去尝试 Order 并且关联上
@@ -519,5 +544,25 @@ public class AmazonListingReview extends GenericModel {
 
     public static List<AmazonListingReview> negtiveReviewsFilterByState(ReviewState state) {
         return AmazonListingReview.find("rating<=? AND state=?", 4f/*小于 4 分为负的*/, state).fetch();
+    }
+
+
+    /**
+     * @return
+     */
+    public F.T2<List<ListingReason>, List<String>> unTagedReasons() {
+        List<ListingReason> unTaged = new ArrayList<ListingReason>();
+        if(this.reasons == null || this.reasons.size() == 0) {
+            unTaged.addAll(this.listing.product.category.reasons);
+        } else {
+            for(ListingReason rea : this.listing.product.category.reasons) {
+                for(ListingReason lrea : this.reasons) {
+                    if(!lrea.equals(rea)) unTaged.add(rea);
+                }
+            }
+        }
+        List<String> reasonNames = new ArrayList<String>();
+        for(ListingReason ra : unTaged) reasonNames.add(ra.reason);
+        return new F.T2<List<ListingReason>, List<String>>(unTaged, reasonNames);
     }
 }

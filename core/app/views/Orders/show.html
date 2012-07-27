@@ -1,7 +1,9 @@
-#{extends 'main.html'/}
-#{set title:'Orders'/}
-#{set 'moreScripts'}
-#{/set}
+#{ifnot part}
+    #{extends 'main.html'/}
+    #{set title:'Orders'/}
+    #{set 'moreScripts'}
+    #{/set}
+#{/ifnot}
 
 #{if ord == null}
 读取的 Order 不存在!

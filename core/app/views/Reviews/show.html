@@ -61,6 +61,26 @@
 
         <tr>
             <td colspan="8">
+                <div class="row-fluid" id="reason_div">
+                    <div class="span5">
+                    #{if review.reasons.size() != 0}
+                        #{list items:review.reasons, as:'ra'}
+                            <span class="reason badge badge-important">${ra.reason}</span>
+                        #{/list}
+                    #{/if}
+                    </div>
+                    <div class="span7 input-append">
+                        <span class="add-on">${cat.categoryId} | ${cat.name}</span>
+                    #{list items:unTagReasons, as:'ura'}
+                        <span class="unTagReason badge badge-info">${ura.reason}</span>
+                    #{/list}
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
                 <h3>Review</h3>
             ${review.review}
             </td>
@@ -80,19 +100,8 @@
 #{if review.orderr == null}
     <button id="try_order" class="btn btn-primary">Try Order</button>
 #{/if}
-#{if review.isHaveResponse()}
-    <button id="begin_deal" class="btn btn-primary">RP1</button>
-    <button id="begin_deal" class="btn btn-primary">RP2</button>
-    <button id="begin_deal" class="btn btn-primary">Need Call</button>
-#{/if}
-#{else }
-    <button id="begin_deal" class="btn btn-primary">NORMAL</button>
-    <button id="begin_deal" class="btn btn-primary">ACCEPT</button>
-    <button id="begin_deal" class="btn btn-primary">REFUSE</button>
-    <button id="begin_deal" class="btn btn-primary">CLOSE</button>
-#{/else}
 </div>
 
 #{if review.orderr != null}
-    #{render 'Orders/show.html', ord: review.orderr/}
+    #{render 'Orders/show.html', ord: review.orderr, part: true/}
 #{/if}

@@ -5,10 +5,11 @@
 #{/set}
 
 <div class="row-fluid">
-    <div class="span6">
+    <div class="span12">
         <ul class="nav nav-tabs" style="margin-bottom:5px;">
-            <li class="active"><a href="#news" data-toggle='tab'>热乎乎的 Review</a></li>
-            <li><a href="#rp1" data-toggle='tab'>回复了一次的</a></li>
+            <li class="active"><a href="#news" data-toggle='tab'>新来的负 Review</a></li>
+            <li><a href="#overtime" data-toggle='tab'>超时的新负 Review</a></li>
+            <li><a href="#rp2" data-toggle='tab'>二次跟进的负 Review</a></li>
         </ul>
 
         <div class="tab-content">
@@ -25,8 +26,17 @@
                     <tr class="twoTr">
                         <td style="background:${'#' + reviewC_L._2}">
                             <span class="badge badge-important">${reviewC_L._1}</span> | ${r.title}
+                            #{list items:r.reasons, as:'ra'}
+                                <span class="badge badge-important">${ra.reason}</span>
+                            #{/list}
                         </td>
-                        <td><a href="@{Reviews.show(r.reviewId)}" target="_blank">${r.reviewId}</a></td>
+                        <td>
+                            <a href="@{Reviews.show(r.reviewId)}" target="_blank">
+                            ${r.reviewId}
+                            </a>
+                            #{if r.orderr != null}
+                                <span class="pull-right"><i class="icon-shopping-cart"></i></span>#{/if}
+                        </td>
                         <td><a href="${r.reviewLink()}" target="_blank"><i class="icon-external-link"></i> ${r.username}
                         </a></td>
                         <td style="background:${'#' + r.color()}">${r.rating}</td>
@@ -49,14 +59,15 @@
                 </table>
             </div>
 
-            <div id="rp1" class="tab-pane">
-                回复了一次的
+            <div id="overtime" class="tab-pane">
+                超时的新 Review
+            </div>
+
+            <div id="rp2" class="tab-pane">
+                二次跟进的负 Review
             </div>
         </div>
 
     </div>
 
-    <div class="span6">
-        Feedbacks...
-    </div>
 </div>
