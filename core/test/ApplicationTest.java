@@ -17,6 +17,7 @@ public class ApplicationTest extends FunctionalTest {
     @Test
     public void testDateTime() {
         System.out.println(DateTimeZone.getDefault().getID());
+        System.out.println(DateTimeZone.getAvailableIDs());
         // Asia/Shanghai
         // US/Central
         System.out.println(DateTime.now(DateTimeZone.forID("Asia/Shanghai")).toString("yyyy-MM-dd HH:mm:ss"));

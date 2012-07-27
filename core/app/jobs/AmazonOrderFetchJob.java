@@ -2,10 +2,12 @@ package jobs;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
+import helper.Dates;
 import helper.Patterns;
 import helper.Webs;
 import models.market.*;
 import models.product.Product;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
 
@@ -119,11 +121,11 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             orderr.account = acc;
             orderr.orderId = amazonOrderId;
             orderr.market = Account.M.val(odt.getSalesChannel());
-            orderr.createDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
+            orderr.createDate = new DateTime(odt.getPurchaseDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
             orderr.state = parseOrderState(odt.getOrderStatus());
 
             if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
-                Date lastUpdateTime = odt.getLastUpdatedDate().toGregorianCalendar().getTime();
+                Date lastUpdateTime = new DateTime(odt.getLastUpdatedDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
                 orderr.paymentDate = lastUpdateTime;
                 orderr.shipDate = lastUpdateTime;
 

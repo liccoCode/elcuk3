@@ -5,6 +5,7 @@ import models.market.Account;
 import models.market.JobRequest;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
 import play.libs.IO;
@@ -105,8 +106,8 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 }
                 Orderr order = new Orderr();
                 order.orderId = vals[0];
-                order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
-                order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
+                order.paymentDate = new DateTime(Dates.parseXMLGregorianDate(vals[7]), Dates.timeZone(order.market)).toDate();
+                order.shipDate = new DateTime(Dates.parseXMLGregorianDate(vals[8]), Dates.timeZone(order.market)).toDate();
                 order.shippingService = vals[42];
                 if(StringUtils.isNotBlank(vals[43])) {
                     order.trackNo = vals[43];
