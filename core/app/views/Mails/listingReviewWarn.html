@@ -16,9 +16,7 @@
             <table class="table table-bordered table-striped">
                 <tr>
                     <td>Title:</td>
-                    <td colspan="3">${r.title.raw()}</td>
-                    <td>Purchased:</td>
-                    <td>${r.purchased}</td>
+                    <td colspan="5">${r.title.raw()}</td>
                 </tr>
                 <tr>
                     <td>Listing:</td>
@@ -27,6 +25,22 @@
                     <td><a href="${r.userReviewLink()}" target="_blank">${r.userid}</a></td>
                     <td>Username:</td>
                     <td>${r.username}</td>
+                </tr>
+                <tr>
+                    <td>Purchased:</td>
+                    <td>${r.purchased}</td>
+                    <td>RealName</td>
+                    <td>${r.isRealName}</td>
+                    <td>TopN</td>
+                    <td>${r.topN}</td>
+                </tr>
+                <tr>
+                    <td>isVineVoice</td>
+                    <td>${r.isVineVoice}</td>
+                    <td>isVedio</td>
+                    <td>${r.isVedio}</td>
+                    <td>ReviewId</td>
+                    <td><a href="${r.reviewLink()}" target="_blank">${r.reviewId}</a></td>
                 </tr>
                 <tr>
                     <td>Rating</td>
