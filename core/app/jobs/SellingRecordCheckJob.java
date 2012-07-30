@@ -145,7 +145,7 @@ public class SellingRecordCheckJob extends Job {
                 record.rating = record.reviewSize > 0 ? Webs.scalePointUp(1, ratingAll / record.reviewSize) : 0;
                 record.save();
             } catch(Exception e) {
-                Logger.warn("SellingRecordCheckJob %s", Webs.E(e));
+                Logger.warn("SellingRecordCheckJob %s, %s", sell.sellingId, Webs.E(e));
             }
         }
     }
