@@ -1066,9 +1066,14 @@ public class Account extends Model {
     private boolean isLogin(Document doc) {
         Element oldAmazon = doc.select("#navidWelcomeMsg").first();
         if(oldAmazon != null) {
-            return StringUtils.contains(doc.select("#navidWelcomeMsg a").outerHtml(), "sign-out");
+            String navidWelcomeMsgStr = doc.select("#navidWelcomeMsg").outerHtml();
+            return StringUtils.contains(navidWelcomeMsgStr, "sign-out") ||
+                    StringUtils.contains(navidWelcomeMsgStr, "signout");
         } else {
-            return StringUtils.contains(doc.select("#nav_your_account_flyout nav_last_li").outerHtml(), "sign-out");
+            String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
+            return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
+                    StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
+                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
         }
     }
 
