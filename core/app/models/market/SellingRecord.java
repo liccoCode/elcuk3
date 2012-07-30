@@ -179,6 +179,8 @@ public class SellingRecord extends GenericModel {
                     FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                 }
                 rows = data.get("rows").getAsJsonArray();
+                if(rows.size() == 0)
+                    FLog.fileLog(String.format("%s.%s.%s.noresult.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                 for(JsonElement row : rows) {
                     try {
                         JsonArray rowArr = row.getAsJsonArray();

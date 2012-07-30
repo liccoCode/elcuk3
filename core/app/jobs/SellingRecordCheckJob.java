@@ -46,7 +46,7 @@ public class SellingRecordCheckJob extends Job {
         amazonNewestRecords();
     }
 
-    private void amazonNewestRecords() {
+    public void amazonNewestRecords() {
         List<Account> accs = Account.openedSaleAcc();
         Set<SellingRecord> records = null;
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
