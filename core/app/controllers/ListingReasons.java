@@ -1,7 +1,7 @@
 package controllers;
 
-import models.market.ListingReason;
 import models.product.Category;
+import models.support.TicketReason;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -17,18 +17,18 @@ import play.mvc.With;
 public class ListingReasons extends Controller {
 
     /**
-     * 创建 ListingReason 需要指定原因
+     * 创建 TicketReason 需要指定原因
      *
      * @param catId
      */
-    public static void blank(ListingReason lr, String catId) {
-        if(lr == null) lr = new ListingReason();
+    public static void blank(TicketReason lr, String catId) {
+        if(lr == null) lr = new TicketReason();
         lr.category = Category.findById(catId);
 
         render(lr);
     }
 
-    public static void save(ListingReason lr) {
+    public static void save(TicketReason lr) {
         validation.valid(lr);
         if(Validation.hasErrors()) {
             render("ListingReasons/blank.html", lr, lr.category.categoryId);
@@ -37,7 +37,7 @@ public class ListingReasons extends Controller {
         redirect("/Categorys/index#" + lr.category.categoryId);
     }
 
-    public static void update(ListingReason lr) {
+    public static void update(TicketReason lr) {
         validation.valid(lr);
         if(Validation.hasErrors()) {
             render("ListingReasons/edit.html", lr);
@@ -47,12 +47,12 @@ public class ListingReasons extends Controller {
     }
 
     public static void edit(long lrid) {
-        ListingReason lr = ListingReason.findById(lrid);
+        TicketReason lr = TicketReason.findById(lrid);
         render(lr);
     }
 
     public static void remove(long lrid) {
-        ListingReason lr = ListingReason.findById(lrid);
+        TicketReason lr = TicketReason.findById(lrid);
         lr.delete();
         redirect("/Categorys/index#" + lr.category.categoryId);
     }

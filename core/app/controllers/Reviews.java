@@ -1,7 +1,12 @@
 package controllers;
 
 import helper.J;
-import models.market.*;
+import models.market.AmazonListingReview;
+import models.market.Feedback;
+import models.market.Orderr;
+import models.support.Ticket;
+import models.support.TicketReason;
+import models.support.TicketState;
 import models.view.Ret;
 import play.libs.F;
 import play.mvc.Controller;
@@ -18,9 +23,8 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Reviews extends Controller {
     public static void index() {
-        List<AmazonListingReview> news = AmazonListingReview.negtiveReviewsFilterByState(ReviewState.NEW);
-
-        render(news);
+        List<Ticket> tickets = Ticket.reviews(TicketState.NEW);
+        render(tickets);
     }
 
     public static void show(String rid) {
@@ -28,7 +32,7 @@ public class Reviews extends Controller {
         if(review.orderr != null)
             renderArgs.put("f", Feedback.findById(review.orderr.orderId));
 
-        F.T2<List<ListingReason>, List<String>> reasons = review.unTagedReasons();
+        F.T2<List<TicketReason>, List<String>> reasons = review.unTagedReasons();
         renderArgs.put("reasons_json", J.json(reasons._2));
         renderArgs.put("cat", review.listing.product.category);
         renderArgs.put("unTagReasons", reasons._1);
@@ -50,15 +54,20 @@ public class Reviews extends Controller {
      */
     public static void tagReason(String reason, String reviewId) {
         AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
-        ListingReason lr = ListingReason.findByReason(reason);
+        TicketReason lr = TicketReason.findByReason(reason);
         renderJSON(J.G(review.addWhyNegtive(lr)));
     }
 
     public static void unTagReason(String reason, String reviewId) {
         AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
-        ListingReason lr = ListingReason.findByReason(reason);
-        review.reasons.remove(lr);
+        TicketReason lr = TicketReason.findByReason(reason);
+        review.ticket.reasons.remove(lr);
         review.save();
         renderJSON(J.G(lr));
+    }
+
+    public static void iReview() {
+        Ticket.initReviewFix();
+        renderJSON(new Ret());
     }
 }

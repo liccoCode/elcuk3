@@ -2,6 +2,7 @@ package models.market;
 
 import helper.GTs;
 import helper.Webs;
+import models.support.Ticket;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -47,6 +48,9 @@ public class Feedback extends GenericModel {
 
     @OneToOne
     public Account account;
+
+    @OneToOne(mappedBy = "feedback", fetch = FetchType.LAZY)
+    public Ticket ticket;
 
     /**
      * Feedback 每一个订单只有一个, 所以直接使用 OrderId 作为 feedback Id

@@ -2,7 +2,7 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import models.embedded.CategorySettings;
-import models.market.ListingReason;
+import models.support.TicketReason;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -32,7 +32,7 @@ public class Category extends GenericModel {
     public List<AttrName> attrNames;
 
     @OneToMany(mappedBy = "category")
-    public List<ListingReason> reasons = new ArrayList<ListingReason>();
+    public List<TicketReason> reasons = new ArrayList<TicketReason>();
 
     @Id
     @Expose

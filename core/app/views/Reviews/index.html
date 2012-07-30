@@ -17,19 +17,22 @@
                 <table class="table table-condensed table-bordered">
                     <tr>
                         <th>Title</th>
+                        <th>Sku</th>
                         <th>ReviewId</th>
                         <th>UserName</th>
                         <th>Score</th>
                     </tr>
-                #{list items:news, as:'r'}
+                #{list items:tickets, as:'t'}
+                    #{set r:t.review/}
                     #{set reviewC_L:r.reviewLengthColor()/}
                     <tr class="twoTr">
                         <td style="background:${'#' + reviewC_L._2}">
                             <span class="badge badge-important">${reviewC_L._1}</span> | ${r.title}
-                            #{list items:r.reasons, as:'ra'}
+                            #{list items:t.reasons, as:'ra'}
                                 <span class="badge badge-important">${ra.reason}</span>
                             #{/list}
                         </td>
+                        <td><a href="@{Products.p_detail(t.sku)}" target="_blank">${t.sku}</a></td>
                         <td>
                             <a href="@{Reviews.show(r.reviewId)}" target="_blank">
                             ${r.reviewId}
@@ -42,7 +45,7 @@
                         <td style="background:${'#' + r.color()}">${r.rating}</td>
                     </tr>
                     <tr style="display:none;">
-                        <td colspan="3">
+                        <td colspan="4">
                             <div class="row-fluid">
                                 <div class="span6">
                                     <h3>Review</h3>

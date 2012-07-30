@@ -7,6 +7,8 @@ import helper.Dates;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import models.support.Ticket;
+import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -37,14 +39,8 @@ public class AmazonListingReview extends GenericModel {
     @OneToOne
     public Orderr orderr;
 
-    /**
-     * 如果这个 Review 是负的, 原因是什么?
-     */
-    @ManyToMany
-    public List<ListingReason> reasons = new ArrayList<ListingReason>();
-
-    @Enumerated(EnumType.STRING)
-    public ReviewState state;
+    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY)
+    public Ticket ticket;
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
@@ -187,13 +183,6 @@ public class AmazonListingReview extends GenericModel {
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
     @Expose
     public String osTicketId;
-
-
-    /**
-     * 是否打电话处理了?
-     */
-    @Expose
-    public boolean isPhoned;
 
     /**
      * 每一个 Review 创建的时候都记录一次 originJson 字符串, 记录初始状态
@@ -346,7 +335,7 @@ public class AmazonListingReview extends GenericModel {
      *
      * @param lr
      */
-    public AmazonListingReview addWhyNegtive(ListingReason lr) {
+    public AmazonListingReview addWhyNegtive(TicketReason lr) {
         /**
          * 0. 此原因是否存在?
          * 1. 检查这个 lr 是否与这个 Review 所属在与 Category 下?
@@ -355,8 +344,8 @@ public class AmazonListingReview extends GenericModel {
         if(!lr.isPersistent()) throw new FastRuntimeException("此原因不存在!");
         if(!this.listing.product.category.categoryId.equals(lr.category.categoryId))
             throw new FastRuntimeException("此原因与这个 Listing 不属于一个类别");
-        if(lr.reviews.contains(this)) throw new FastRuntimeException("此原因已经存在, 不需要重复添加");
-        this.reasons.add(lr);
+        if(lr.tickets.contains(this.ticket)) throw new FastRuntimeException("此原因已经存在, 不需要重复添加");
+        this.ticket.reasons.add(lr);
         return this.save();
     }
 
@@ -528,27 +517,22 @@ public class AmazonListingReview extends GenericModel {
         return reviewLeftClicks;
     }
 
-    public static List<AmazonListingReview> negtiveReviewsFilterByState(ReviewState state) {
-        return AmazonListingReview.find("rating<=? AND state=?", 4f/*小于 4 分为负的*/, state).fetch();
-    }
-
-
     /**
      * @return
      */
-    public F.T2<List<ListingReason>, List<String>> unTagedReasons() {
-        List<ListingReason> unTaged = new ArrayList<ListingReason>();
-        if(this.reasons == null || this.reasons.size() == 0) {
+    public F.T2<List<TicketReason>, List<String>> unTagedReasons() {
+        List<TicketReason> unTaged = new ArrayList<TicketReason>();
+        if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
             unTaged.addAll(this.listing.product.category.reasons);
         } else {
-            for(ListingReason rea : this.listing.product.category.reasons) {
-                for(ListingReason lrea : this.reasons) {
+            for(TicketReason rea : this.listing.product.category.reasons) {
+                for(TicketReason lrea : this.ticket.reasons) {
                     if(!lrea.equals(rea)) unTaged.add(rea);
                 }
             }
         }
         List<String> reasonNames = new ArrayList<String>();
-        for(ListingReason ra : unTaged) reasonNames.add(ra.reason);
-        return new F.T2<List<ListingReason>, List<String>>(unTaged, reasonNames);
+        for(TicketReason ra : unTaged) reasonNames.add(ra.reason);
+        return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
     }
 }

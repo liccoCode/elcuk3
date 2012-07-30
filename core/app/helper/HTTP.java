@@ -267,4 +267,15 @@ public class HTTP {
         }
     }
 
+    public static JsonElement json(String url, Collection<? extends NameValuePair> params) {
+        Logger.debug("HTTP.post Json [%s]", url);
+        String json = post(url, params);
+        try {
+            return new JsonParser().parse(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
 }

@@ -42,10 +42,10 @@
         </tr>
 
         <tr>
-            <th rel="popover" content="${review.state.explan()}"><i class="icon-question-sign"> State</i></th>
-            <td>${review.state}</td>
-            <th>isPhone</th>
-            <td>${review.isPhoned}</td>
+            <th rel="popover" content="稍后补充..."><i class="icon-question-sign"> State</i></th>
+            <td>${review.ticket.state}</td>
+            <th>isSuccess</th>
+            <td>${review.ticket.isSuccess}</td>
             <th>TopN</th>
             <td>${review.topN}</td>
             <th>Click</th>
@@ -63,8 +63,8 @@
             <td colspan="8">
                 <div class="row-fluid" id="reason_div">
                     <div class="span5">
-                    #{if review.reasons.size() != 0}
-                        #{list items:review.reasons, as:'ra'}
+                    #{if review.ticket.reasons.size() != 0}
+                        #{list items:review.ticket.reasons, as:'ra'}
                             <span class="reason badge badge-important">${ra.reason}</span>
                         #{/list}
                     #{/if}
