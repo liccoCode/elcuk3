@@ -29,7 +29,7 @@ public class AmazonReviews extends Controller {
     }
 
     /**
-     * 搜索框框中, 进行加载系统内的 Reviews 的数据
+     * 搜索框框中, 进行加载系统内的 Tickets 的数据
      *
      * @param asin
      * @param m

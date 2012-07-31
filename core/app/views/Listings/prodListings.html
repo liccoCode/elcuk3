@@ -2,7 +2,7 @@
     <tr>
         <th>Sells</th>
         <th>ListingId</th>
-        <th>Title (<a href="@{Products.p_detail(p.sku)}" target="_blank">${p.sku}</a>)</th>
+        <th>Title (<a href="@{Products.show(p.sku)}" target="_blank">${p.sku}</a>)</th>
         <th>Review</th>
     </tr>
 #{list items:lsts, as:'l'}

@@ -85,4 +85,8 @@ public class TicketReason extends Model {
         result = 31 * result + (reason != null ? reason.hashCode() : 0);
         return result;
     }
+
+    public String name() {
+        return String.format("%s:%s", this.category.categoryId, this.reason);
+    }
 }

@@ -4,9 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.GTs;
 import helper.J;
-import helper.Webs;
 import models.support.Ticket;
 import models.support.TicketReason;
 import notifiers.Mails;
@@ -39,7 +37,7 @@ public class AmazonListingReview extends GenericModel {
     @OneToOne
     public Orderr orderr;
 
-    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Ticket ticket;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -258,7 +256,8 @@ public class AmazonListingReview extends GenericModel {
 
     /**
      * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
-     * 在 Check 方法执行完成以后将数据同步回数据库
+     * 在 Check 方法执行完成以后将数据同步回数据库;
+     * 如果此 Review 需要开 Ticket 进行处理, 也在此判断了
      */
     public void listingReviewCheck() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
@@ -267,44 +266,15 @@ public class AmazonListingReview extends GenericModel {
 
 
 //        Rating < 4 的开 OsTicket
-        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
+        if((this.rating != null && this.rating < 4)) {
+            this.ticket = new Ticket(this);
+            this.ticket.openOsTicket(null);
+        }
 //        Rating <= 4 的发送邮件提醒
         if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
         this.save();
     }
 
-    public void openOsTicket(String title) {
-        if(StringUtils.isNotBlank(this.osTicketId)) {
-            Logger.info("Review OsTicket is exist! %s", this.osTicketId);
-            return;
-        }
-
-        String name = String.format("%s - %s", this.username, this.listingId);
-        String email = "";
-        String subject = title;
-        String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
-
-        if(StringUtils.isBlank(subject)) {
-            if(this.listing.market == Account.M.AMAZON_DE) {
-                subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
-            } else { // 除了 DE 使用德语其他的默认使用'英语'
-                subject = "You left a negative product review, may we have a chance to make up?";
-            }
-        }
-
-        List<Orderr> orders = Orderr.findByUserId(this.userid);
-        if(orders.size() > 0) email = orders.get(0).email;
-        if(StringUtils.isBlank(email)) {
-            Logger.warn("Review (%s) relate order have no email.", this.alrId);
-            email = "support@easyacceu.com";
-            subject += " - No Order found...";
-            content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
-
-            this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
-        } else {
-            this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
-        }
-    }
 
     @Override
     public String toString() {
@@ -442,17 +412,17 @@ public class AmazonListingReview extends GenericModel {
      */
     public F.T2<Integer, String> reviewLengthColor() {
         if(this.review.length() <= 100) {
-            return new F.T2<Integer, String>(this.review.length(), "29FFF1");
+            return new F.T2<Integer, String>(this.review.length(), "2FCCEF");
         } else if(this.review.length() <= 240) {
-            return new F.T2<Integer, String>(this.review.length(), "29D2FF");
+            return new F.T2<Integer, String>(this.review.length(), "6CB4E6");
         } else if(this.review.length() <= 500) {
-            return new F.T2<Integer, String>(this.review.length(), "2997FF");
+            return new F.T2<Integer, String>(this.review.length(), "8CA7DE");
         } else if(this.review.length() <= 1000) {
-            return new F.T2<Integer, String>(this.review.length(), "2962FF");
+            return new F.T2<Integer, String>(this.review.length(), "9BA0D8");
         } else if(this.review.length() <= 2000) {
-            return new F.T2<Integer, String>(this.review.length(), "292AFF");
+            return new F.T2<Integer, String>(this.review.length(), "AC96D4");
         } else {
-            return new F.T2<Integer, String>(this.review.length(), "6229FF");
+            return new F.T2<Integer, String>(this.review.length(), "B38ACE");
         }
     }
 
