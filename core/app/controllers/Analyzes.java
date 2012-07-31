@@ -1,11 +1,14 @@
 package controllers;
 
+import helper.Constant;
 import helper.J;
 import helper.Webs;
 import models.market.*;
 import models.procure.ProcureUnit;
+import models.product.Product;
 import models.view.AnalyzesPager;
 import models.view.Ret;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -17,6 +20,8 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +72,19 @@ public class Analyzes extends Controller {
         List<Selling> sells = Selling.analyzesSKUAndSID("sku");
         p.items = AnalyzesPager.filterSellings(sells, p);
         render(p);
+    }
+
+    public static void allSkuCsv(Date from, Date to) {
+        String fileName = "SKU_Sales.csv";
+        File file = new File(Constant.TMP, fileName);
+        file.delete();
+        try {
+            FileUtils.writeStringToFile(file, Product.skuSales(from, to));
+        } catch(IOException e) {
+            // ignore
+        }
+        renderBinary(file, fileName);
+
     }
 
     /**
