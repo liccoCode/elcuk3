@@ -103,8 +103,11 @@ public class Jobs extends Controller {
         List<Selling> sellings = Selling.all().fetch();
         DateTime dt = new DateTime(begin);
         SellingRecordCheckJob srcj = new SellingRecordCheckJob();
-        for(int i = 0; i < days; i++)
+        for(int i = 0; i < days; i++) {
             srcj.checkOneDaySellingRecord(sellings, dt.plusDays(i).toDate());
+            srcj.fixTime = dt.plusDays(i);
+            srcj.amazonNewestRecords();
+        }
         renderJSON(new Ret());
     }
 
