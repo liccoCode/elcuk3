@@ -1,15 +1,13 @@
 package models.product;
 
+import au.com.bytecode.opencsv.CSVWriter;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
-import models.market.Account;
-import models.market.Listing;
-import models.market.PriceStrategy;
-import models.market.Selling;
+import models.market.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.NameValuePair;
@@ -23,9 +21,11 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -556,5 +556,72 @@ public class Product extends GenericModel {
         Cache.delete(Caches.SKUS);
         Cache.add(Caches.SKUS, skus, null);
         return Cache.get(Caches.SKUS, List.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static String skuSales(Date from, Date to) {
+        List<String> skus = Product.skus(false);
+        StringWriter stringWriter = new StringWriter();
+        CSVWriter csvWriter = new CSVWriter(stringWriter);
+
+        // 时间 -> [_.sku, _.销量]. 需要有序
+        Map<Long, List<F.T2<String, Float>>> deSales = new LinkedHashMap<Long, List<F.T2<String, Float>>>();
+        Map<Long, List<F.T2<String, Float>>> ukSales = new LinkedHashMap<Long, List<F.T2<String, Float>>>();
+        Map<Long, List<F.T2<String, Float>>> allSales = new LinkedHashMap<Long, List<F.T2<String, Float>>>();
+        List<String> csvHeader = new ArrayList<String>();
+        csvHeader.add("Time DE");
+
+        for(String sku : skus) {
+            csvHeader.add(sku);
+            Map<String, ArrayList<F.T2<Long, Float>>> oneSku = OrderItem.ajaxHighChartUnitOrder(sku, null, "sku", from, to);
+            List<F.T2<Long, Float>> oneSkuTimeSalesDe = oneSku.get("unit_de");
+            List<F.T2<Long, Float>> oneSkuTimeSalesUk = oneSku.get("unit_uk");
+            List<F.T2<Long, Float>> oneSkuTimeSalesAll = oneSku.get("unit_all");
+            for(F.T2<Long, Float> oneSkuSale : oneSkuTimeSalesDe) {
+                if(deSales.containsKey(oneSkuSale._1))
+                    deSales.get(oneSkuSale._1).add(new F.T2<String, Float>(sku, oneSkuSale._2));
+                else
+                    deSales.put(oneSkuSale._1, new ArrayList<F.T2<String, Float>>(Arrays.asList(new F.T2<String, Float>(sku, oneSkuSale._2))));
+            }
+
+            for(F.T2<Long, Float> oneSkuSale : oneSkuTimeSalesUk) {
+                if(ukSales.containsKey(oneSkuSale._1))
+                    ukSales.get(oneSkuSale._1).add(new F.T2<String, Float>(sku, oneSkuSale._2));
+                else
+                    ukSales.put(oneSkuSale._1, new ArrayList<F.T2<String, Float>>(Arrays.asList(new F.T2<String, Float>(sku, oneSkuSale._2))));
+            }
+
+            for(F.T2<Long, Float> oneSkuSale : oneSkuTimeSalesAll) {
+                if(allSales.containsKey(oneSkuSale._1))
+                    allSales.get(oneSkuSale._1).add(new F.T2<String, Float>(sku, oneSkuSale._2));
+                else
+                    allSales.put(oneSkuSale._1, new ArrayList<F.T2<String, Float>>(Arrays.asList(new F.T2<String, Float>(sku, oneSkuSale._2))));
+            }
+
+        }
+
+        onMarketSkuSalesCsv(csvWriter, deSales, csvHeader, "DE");
+        onMarketSkuSalesCsv(csvWriter, ukSales, csvHeader, "UK");
+        onMarketSkuSalesCsv(csvWriter, allSales, csvHeader, "ALL");
+
+        return stringWriter.toString();
+    }
+
+    /**
+     * 将数据写到 CSV 文件中.
+     */
+    private static void onMarketSkuSalesCsv(CSVWriter csvWriter, Map<Long, List<F.T2<String, Float>>> allSkuSales, List<String> csvHeader, String market) {
+        csvWriter.writeNext(new String[]{"--", "--", "--", "--", "--", "--"}); // 分割一栏
+        csvHeader.set(0, "Time " + market);
+        csvWriter.writeNext(csvHeader.toArray(new String[csvHeader.size()]));
+        for(Long date : allSkuSales.keySet()) {
+            List<F.T2<String, Float>> skusSales = allSkuSales.get(date);
+            List<String> csvRow = new ArrayList<String>();
+            csvRow.add(Dates.date2Date(new Date(date)));
+            for(F.T2<String, Float> sku_sales : skusSales) {
+                csvRow.add(sku_sales._2.toString());
+            }
+            csvWriter.writeNext(csvRow.toArray(new String[csvRow.size()]));
+        }
     }
 }

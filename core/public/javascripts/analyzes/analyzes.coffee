@@ -317,6 +317,12 @@ $ ->
     $('#a_from').data('dateinput').setValue(defaultDate)
     $('#a_to').data('dateinput').setValue(now)
 
+    # 下载一段时间内的 sku 销量数据
+    $("#skus_csv").click (e) ->
+      return false if !confirm("数据比较多, 需要点时间, 是否继续?")
+      window.open("/analyzes/allSkuCsv?#{$('#click_param :input').fieldSerialize()}")
+      e.preventDefault()
+
     # 最下方的 Selling[MerchantSKU, SKU] 列表信息
     sellRankLoad(MSKU, 1)
     sellRankLoad(SKU, 1)
