@@ -639,7 +639,7 @@ public class Selling extends GenericModel {
 
 
             // d1, d7, d30, _ps
-            DateTime now = DateTime.now();
+            DateTime now = new DateTime(Dates.morning(new Date()));
             List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_aId(now.minusDays(30).toDate(), now.toDate(), 0);
             for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
                 String key = isSku ? t5._1 : t5._2;
