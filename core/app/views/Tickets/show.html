@@ -32,13 +32,28 @@
 
         <tr>
             <th>ReviewId</th>
-            <td><a href="${review.reviewLink()}" target="_blank"><span id="reviewId">${review.reviewId}</span></a></td>
+            <td>
+                <a href="${review.reviewLink()}" target="_blank">
+                    <i class="icon-external-link"></i>
+                    <span id="reviewId">${review.reviewId}</span>
+                </a>
+            </td>
             <th>Rating</th>
             <td>${review.rating}</td>
             <th>Listing</th>
-            <td>${review.listingId}</td>
+            <td>
+                <a href="${review.listing.asinLink()}" target="_blank">
+                    <i class="icon-external-link"></i> ${review.listingId}
+                </a>
+            </td>
             <th>OsTicketId</th>
-            <td>${review.osTicketId}</td>
+            <td>
+            #{if review.ticket != null}
+                <a href="http://t.easyacceu.com/scp/tickets.php?id=${review.osTicketId}" target="_blank">
+                    <i class="icon-external-link"></i> ${review.ticket.osTicketId}
+                </a>
+            #{/if}
+            </td>
         </tr>
 
         <tr>
