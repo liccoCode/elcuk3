@@ -49,8 +49,8 @@
             <th>OsTicketId</th>
             <td>
             #{if review.ticket != null}
-                <a href="http://t.easyacceu.com/scp/tickets.php?id=${review.osTicketId}" target="_blank">
-                    <i class="icon-external-link"></i> ${review.ticket.osTicketId}
+                <a href="http://t.easyacceu.com/scp/tickets.php?id=${review.ticket.osTicketId()}" target="_blank">
+                    <i class="icon-external-link"></i> ${review.ticket.osTicketId()}
                 </a>
             #{/if}
             </td>

@@ -2,6 +2,7 @@ package models.support;
 
 import helper.GTs;
 import helper.Webs;
+import jobs.TicketStateSyncJob;
 import models.User;
 import models.market.Account;
 import models.market.AmazonListingReview;
@@ -10,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -38,9 +40,11 @@ public class Ticket extends Model {
         this.sku = review.listing.product.sku;
         this.state = TicketState.NEW;
         this.review = review;
+        this.createAt = new Date();
     }
 
     public Ticket(Feedback feedback) {
+        this.createAt = new Date();
     }
 
     public enum T {
@@ -91,6 +95,11 @@ public class Ticket extends Model {
     public boolean isSuccess = false;
 
     /**
+     * 什么时候创建的?
+     */
+    public Date createAt;
+
+    /**
      * 此 Ticket 指定被谁来进行处理
      */
     @OneToOne
@@ -135,6 +144,20 @@ public class Ticket extends Model {
         }
     }
 
+    public boolean isOverdue() {
+        //  不同状态有不同的 overdue 判断, 所以将方法填写到 TicketState 中去
+        return true;
+    }
+
+    /**
+     * 主要是过滤掉类似 98202-noemail 这种格式
+     *
+     * @return
+     */
+    public String osTicketId() {
+        return this.osTicketId.split("-")[0];
+    }
+
     /**
      * 作为第一次修复使用的代码, 后续需要删除.
      */
@@ -150,5 +173,48 @@ public class Ticket extends Model {
 
     public static List<Ticket> reviews(TicketState state) {
         return Ticket.find("type=? AND state=?", T.REVIEW, TicketState.NEW).fetch();
+    }
+
+    /**
+     * 加载所有需要更新 State 状态的 Ticket
+     *
+     * @return
+     */
+    public static List<Ticket> checkStateTickets(int size) {
+        return Ticket.find("state!=? ORDER BY lastSyncTime", TicketState.CLOSE).fetch(size);
+    }
+
+    /**
+     * 检查这个 Ticket 是否有客户的新回复
+     *
+     * @param resps
+     * @param msgs
+     * @return
+     */
+    public static F.T2<Boolean, TicketStateSyncJob.OsMsg> ishaveNewCustomerEmail(List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
+        TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+        TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
+        if(newMsg != null && newResp != null) {
+            if(newMsg.created.getTime() > newResp.created.getTime())
+                return new F.T2<Boolean, TicketStateSyncJob.OsMsg>(true, newMsg);
+        }
+        return new F.T2<Boolean, TicketStateSyncJob.OsMsg>(false, null);
+    }
+
+    /**
+     * 检查这个 Ticket 是否有新的操作人员的回复
+     *
+     * @param resps
+     * @param msgs
+     * @return
+     */
+    public static F.T2<Boolean, TicketStateSyncJob.OsResp> ishaveNewOperatorResponse(List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
+        TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+        TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
+        if(newMsg != null && newResp != null) {
+            if(newResp.created.getTime() > newMsg.created.getTime() && resps.size() > 1/*需要排除自己在创建 OsTicket 的那一个 Responose*/)
+                return new F.T2<Boolean, TicketStateSyncJob.OsResp>(true, newResp);
+        }
+        return new F.T2<Boolean, TicketStateSyncJob.OsResp>(false, null);
     }
 }
