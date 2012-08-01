@@ -1,7 +1,7 @@
 #{extends 'main.html'/}
 #{set title:'Review #' + review.reviewId /}
 #{set 'moreScripts'}
-    #{script 'reviews/show.coffee'/}
+    #{script 'tickets/show.coffee'/}
 #{/set}
 
 <!-- Review -->
@@ -81,6 +81,36 @@
 
         <tr>
             <td colspan="8">
+                <div class="row-fluid">
+                    <div class="span6">
+
+                        <!-- 寻找用户的相关订单 -->
+                    #{if review.orderr == null}
+                        <button id="try_order" class="btn btn-primary">Try Order</button>
+                    #{/if}
+
+                        <!-- 此 Ticket 的处理者 -->
+                    #{if review.ticket.resolver == null}
+                        <button id="take_it" tid="${review.ticket.id}" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
+                            Take It
+                        </button>
+                    #{/if}
+                    #{else }
+                        <span class="badge badge-success">此订单由 ${review.ticket.resolver.username} 处理</span>
+                    #{/else}
+
+                        <a class="btn btn-success" href="@{Products.show(review.ticket.sku)}" target="_blank">${review.ticket.sku}</a><br/>
+                    </div>
+
+                    <div class="span6">
+                        <img src="${review.listing.picUrls}" alt="${review.ticket.sku}">
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
                 <h3>Review</h3>
             ${review.review}
             </td>
@@ -93,13 +123,6 @@
             </td>
         </tr>
     </table>
-</div>
-
-<div class="label label-important">Funcs</div>
-<div style="margin:5px 0 10px 0;">
-#{if review.orderr == null}
-    <button id="try_order" class="btn btn-primary">Try Order</button>
-#{/if}
 </div>
 
 #{if review.orderr != null}

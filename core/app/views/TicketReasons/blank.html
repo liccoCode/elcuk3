@@ -1,5 +1,5 @@
 #{extends 'main.html'/}
-#{set title:'更新' + lr.reason/}
+#{set title:'新建立原因'/}
 #{set 'moreScripts'}
 #{/set}
 
@@ -14,8 +14,7 @@
     </div>
 #{/ifErrors}
 
-    <form action="@{ListingReasons.update()}" method="post">
-    #{render 'ListingReasons/_table.html', lr:lr/}
-        <input type="hidden" name="lr.id" value="${lr.id}">
+    <form action="@{TicketReasons.save()}" method="post">
+    #{render 'TicketReasons/_table.html', lr:lr/}
     </form>
 </div>

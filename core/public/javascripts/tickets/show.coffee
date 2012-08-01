@@ -5,7 +5,7 @@ $ ->
   $('#try_order').click (e) ->
     mask = $('#container')
     mask.mask('尝试计算中, 如果计算成功, 刷新后则有 OrderId...')
-    $.post('/reviews/tryOrder', rid: reviewId(),
+    $.post('/tickets/tryOrder', rid: reviewId(),
       (r) ->
         if r.flag is false
           alert('没有找到 Order...')
@@ -19,12 +19,12 @@ $ ->
         mask.unmask()
     )
 
-  # 取消某一个 Review 的原因
+  # 取消某一个 Ticket 的原因
   reasonToUnTagReason = (span) ->
     o = $(span)
     mask = $('#reason_div')
     mask.mask('取消原因中...')
-    $.post('/reviews/unTagReason', {reason: o.html(), reviewId: reviewId()},
+    $.post('/tickets/unTagReason', {reason: o.html(), reviewId: reviewId()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -38,11 +38,12 @@ $ ->
         mask.unmask()
     )
 
+  # 为某一个 Ticket 添加原因
   unTagReasonToReason = (span) ->
     o = $(span)
     mask = $('#reason_div')
     mask.mask('添加原因中...')
-    $.post('/reviews/tagReason', {reason: o.html(), reviewId: reviewId()},
+    $.post('/tickets/tagReason', {reason: o.html(), reviewId: reviewId()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -61,5 +62,17 @@ $ ->
   $('span.reason').css('cursor', 'pointer').click -> reasonToUnTagReason(@)
   $('span.unTagReason').css('cursor', 'pointer').click -> unTagReasonToReason(@)
 
+  $('#take_it').click (e) ->
+    mask = $('#container')
+    mask.mask('处理中...')
+    $.post('/tickets/iTakeIt', tid: @getAttribute('tid'),
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+          mask.unmask()
+        else
+          window.location.reload()
+    )
+    e.preventDefault()
 
   window.$ui.init()

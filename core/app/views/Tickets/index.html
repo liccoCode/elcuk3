@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'Incomeing Reviews & Feedbacks' /}
 #{set 'moreScripts'}
-    #{script 'reviews/index.coffee'/}
+    #{script 'tickets/index.coffee'/}
 #{/set}
 
 <div class="row-fluid">
@@ -16,8 +16,8 @@
             <div id="news" class="tab-pane active">
                 <table class="table table-condensed table-bordered">
                     <tr>
-                        <th>Title</th>
                         <th>Sku</th>
+                        <th>Title</th>
                         <th>ReviewId</th>
                         <th>UserName</th>
                         <th>Score</th>
@@ -26,15 +26,16 @@
                     #{set r:t.review/}
                     #{set reviewC_L:r.reviewLengthColor()/}
                     <tr class="twoTr">
+                        <td><a href="@{Products.show(t.sku)}" target="_blank">${t.sku}</a></td>
                         <td style="background:${'#' + reviewC_L._2}">
-                            <span class="badge badge-important">${reviewC_L._1}</span> | ${r.title}
+                            <span class="badge badge-important">${reviewC_L._1}</span> |
+                            <span>${r.title}</span>
                             #{list items:t.reasons, as:'ra'}
-                                <span class="badge badge-important">${ra.reason}</span>
+                                <span class="badge badge-important">${ra.name()}</span>
                             #{/list}
                         </td>
-                        <td><a href="@{Products.p_detail(t.sku)}" target="_blank">${t.sku}</a></td>
                         <td>
-                            <a href="@{Reviews.show(r.reviewId)}" target="_blank">
+                            <a href="@{Tickets.show(r.reviewId)}" target="_blank">
                             ${r.reviewId}
                             </a>
                             #{if r.orderr != null}
@@ -45,7 +46,7 @@
                         <td style="background:${'#' + r.color()}">${r.rating}</td>
                     </tr>
                     <tr style="display:none;">
-                        <td colspan="4">
+                        <td colspan="5">
                             <div class="row-fluid">
                                 <div class="span6">
                                     <h3>Review</h3>

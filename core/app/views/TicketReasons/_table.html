@@ -1,7 +1,12 @@
 <table class="table table-bordered" id="reason_table">
     <tr>
         <th>Reason</th>
-        <td><input type="text" name="lr.reason" value="${lr.reason}"></td>
+        <td>
+            <div class="input-prepend">
+                <input type="text" name="lr.reason" value="${lr.reason}">
+                <span class="help-inline">这个名字请简写, 不要太长</span>
+            </div>
+        </td>
     </tr>
 
     <tr>
@@ -22,5 +27,6 @@
         <td colspan="2">
             <button class="btn btn-primary">${lr.id > 0 ? '更新' : '创建'}</button>
         </td>
+
     </tr>
 </table>

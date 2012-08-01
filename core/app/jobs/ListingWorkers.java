@@ -198,7 +198,7 @@ public class ListingWorkers extends Job {
             try {
                 reviews = Crawl.crawlReview(action._1.market.name(), action._1.asin);
                 /**
-                 * 解析出所有的 Reviews, 然后从数据库中加载出此 Listing 对应的所有 Reviews 然后进行判断这些 Reviews 是更新还是新添加?
+                 * 解析出所有的 Tickets, 然后从数据库中加载出此 Listing 对应的所有 Tickets 然后进行判断这些 Tickets 是更新还是新添加?
                  *
                  * 新添加, 直接 Save
                  *
