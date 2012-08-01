@@ -417,8 +417,9 @@ public class ProcureUnit extends Model {
         for(ProcureUnit unit : units) {
             TimelineEventSource.Event event = new TimelineEventSource.Event(selling, unit);
             event.startAndEndDate(type)
-                    .titleAndDesc()
-                    .color();
+                    .titleAndDesc(unit.stage);
+            if(unit.stage == STAGE.DONE) event.color("9C9C9C"); // 默认颜色
+            else event.color();
 
             eventSource.events.add(event);
         }

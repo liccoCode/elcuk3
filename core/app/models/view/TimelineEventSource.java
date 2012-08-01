@@ -183,9 +183,10 @@ public class TimelineEventSource {
          *
          * @return
          */
-        public Event titleAndDesc() {
+        public Event titleAndDesc(ProcureUnit.STAGE state) {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-            this.title = String.format("%s Days, %s(%s) %s(%s)",
+            this.title = String.format("%s | %s Days, %s(%s) %s(%s)",
+                    state,
                     this.lastDays, this.unit.plan.supplier,
                     this.unit.sid,
                     (isEnsureQty() ? this.unit.delivery.ensureQty : this.unit.plan.planQty),
@@ -239,9 +240,9 @@ public class TimelineEventSource {
         Event currenEvent = new Event();
         currenEvent.start = Dates.date2Date();
         float validPs = ("sku".equals(type) ? selling._ps : selling.ps);
-        float days = Webs.scale2PointUp(selling.qty / validPs == 0 ? Integer.MAX_VALUE : validPs);
+        float days = Webs.scale2PointUp(selling.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
         currenEvent.end = Dates.date2Date(DateTime.now().plusHours((int) (days * 24)).toDate());
-        currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", selling.qty, selling.ps, days);
+        currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", selling.qty, validPs, days);
         currenEvent.description = "No Desc.";
         currenEvent.color("267B2F");
         return currenEvent;
