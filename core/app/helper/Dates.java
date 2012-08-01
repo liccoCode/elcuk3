@@ -2,6 +2,7 @@ package helper;
 
 import models.market.Account;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -82,6 +83,25 @@ public class Dates {
         }
     }
 
+    public static DateTimeZone timeZone(Account.M market) {
+        switch(market) {
+            case AMAZON_UK:
+            case EBAY_UK:
+                return DateTimeZone.forID("Europe/London");
+            case AMAZON_DE:
+                return DateTimeZone.forID("Europe/Berlin");
+            case AMAZON_IT:
+                return DateTimeZone.forID("Europe/Rome");
+            case AMAZON_FR:
+                return DateTimeZone.forID("Europe/Paris");
+            case AMAZON_ES:
+                return DateTimeZone.forID("Europe/Madrid");
+            case AMAZON_US:
+                return DateTimeZone.forID("America/Los_Angeles");
+            default:
+                return DateTimeZone.getDefault();
+        }
+    }
 
     /**
      * 在进行 Listing 更新的时候, 日期的格式在不同的市场上不同, 这个方法来进行修正格式

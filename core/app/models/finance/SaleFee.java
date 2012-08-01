@@ -2,6 +2,7 @@ package models.finance;
 
 import exception.DBException;
 import helper.Currency;
+import helper.Dates;
 import helper.Webs;
 import models.market.Account;
 import models.market.Orderr;
@@ -180,7 +181,7 @@ public class SaleFee extends GenericModel {
                     String priceStr = params[6];
 
                     // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的;
-                    fee.date = DateTime.parse(Webs.dateMap(params[0]), DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
+                    fee.date = DateTime.parse(Webs.dateMap(params[0]), DateTimeFormat.forPattern("dd MMM yyyy")).withZone(Dates.timeZone(fee.market)).toDate();
                     switch(market) {
                         case AMAZON_UK:
                             cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());

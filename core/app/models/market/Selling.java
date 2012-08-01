@@ -639,7 +639,7 @@ public class Selling extends GenericModel {
 
 
             // d1, d7, d30, _ps
-            DateTime now = DateTime.now();
+            DateTime now = new DateTime(Dates.morning(new Date()));
             List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_aId(now.minusDays(30).toDate(), now.toDate(), 0);
             for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
                 String key = isSku ? t5._1 : t5._2;
@@ -722,8 +722,8 @@ public class Selling extends GenericModel {
         float _ps = this._ps();
         float ps = this.ps;
         return new F.T4<Float, Float, Float, Float>(
-                Webs.scale2PointUp((this.qty + this.onway) / _ps),
-                Webs.scale2PointUp((this.qty + this.onway) / (ps == 0 ? _ps : ps)),
+                Webs.scale2PointUp(this.qty / _ps),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.onway + this.onwork) / _ps),
                 Webs.scale2PointUp((this.qty + this.onway + this.onwork) / (ps == 0 ? _ps : ps))
         );
