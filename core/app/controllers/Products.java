@@ -37,7 +37,7 @@ public class Products extends Controller {
     /**
      * 展示所有的 Product
      */
-    public static void p_index(Integer p, Integer s) {
+    public static void index(Integer p, Integer s) {
         Integer[] fixs = Webs.fixPage(p, s);
         p = fixs[0];
         s = fixs[1];
@@ -52,7 +52,7 @@ public class Products extends Controller {
         render(prods, pi);
     }
 
-    public static void p_search(String sku) {
+    public static void search(String sku) {
         List<Product> prods = new ArrayList<Product>();
         if(StringUtils.isBlank(sku))
             render(prods);
@@ -62,7 +62,7 @@ public class Products extends Controller {
         }
     }
 
-    public static void p_detail(String sku) {
+    public static void show(String sku) {
         Product p = Product.findByMerchantSKU(sku);
         List<Category> cats = Category.all().fetch();
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(p);
@@ -140,7 +140,7 @@ public class Products extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(new Ret(true, "/products/p_detail?sku=71LNTPAD-BPU361"));
+        renderJSON(new Ret(true, "/products/show?sku=71LNTPAD-BPU361"));
     }
 
     public static void pRemove(Product p) {

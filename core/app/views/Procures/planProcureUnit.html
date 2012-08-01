@@ -15,7 +15,7 @@
     <tr row style="cursor:pointer">
         <td>${unit.id}</td>
         <td>${unit.whouse.name}</td>
-        <td><a href="@{Products.p_detail(unit.sku)}" target="_blank">${unit.sku}</a></td>
+        <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
         <td><a href="@{Sellings.selling(unit.sid)}">${unit.sid}</a></td>
         <td>${unit.plan.planQty}</td>
         <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>

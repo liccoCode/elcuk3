@@ -48,7 +48,7 @@
             <tr shipitem='${itm.id}'>
                 #{set t3:models.market.Selling.sidT3(itm.unit.sid)/}
                 <td>
-                    <a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(itm.unit.sid)}" target="_blank">${t3._2}
+                    <a href="@{Products.show(t3._1)}" target="_blank">${t3._1}</a>|<a href="@{Sellings.selling(itm.unit.sid)}" target="_blank">${t3._2}
                     |${t3._3}</a></td>
                 <td>${itm.unit.deliveryment.id}</td>
                 <td>${itm.qty}</td>

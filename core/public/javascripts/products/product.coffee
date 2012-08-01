@@ -6,7 +6,7 @@ $ ->
     sku = $(@).val()
     return false if sku.trim().length is 0
     target.mask("搜索中...")
-    target.load('/products/p_search', sku: sku,
+    target.load('/products/search', sku: sku,
       ->
         target.unmask()
     )
