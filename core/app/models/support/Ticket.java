@@ -142,7 +142,9 @@ public class Ticket extends Model {
         List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL").fetch();
         for(AmazonListingReview review : reviews) {
             Ticket ticket = new Ticket(review);
-            ticket.save();
+            review.orderr = review.tryToRelateOrderByUserId();
+            review.ticket = ticket;
+            review.save();
         }
     }
 
