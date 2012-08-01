@@ -722,8 +722,8 @@ public class Selling extends GenericModel {
         float _ps = this._ps();
         float ps = this.ps;
         return new F.T4<Float, Float, Float, Float>(
-                Webs.scale2PointUp((this.qty + this.onway) / _ps),
-                Webs.scale2PointUp((this.qty + this.onway) / (ps == 0 ? _ps : ps)),
+                Webs.scale2PointUp(this.qty / _ps),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.onway + this.onwork) / _ps),
                 Webs.scale2PointUp((this.qty + this.onway + this.onwork) / (ps == 0 ? _ps : ps))
         );
