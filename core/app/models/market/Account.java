@@ -730,6 +730,18 @@ public class Account extends Model {
     @Expose
     public boolean isSaleAcc = false;
 
+
+    // 判断账户是否可以点击这几个地区的 Review
+    @Expose
+    public boolean isAUK = false;
+
+    @Expose
+    public boolean isADE = false;
+
+    @Expose
+    public boolean isAUS = false;
+
+
     /**
      * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆, 他们的 Cookie 各不影响
      *
@@ -1109,10 +1121,20 @@ public class Account extends Model {
     /**
      * 所有打开的 Review 账号
      *
+     * @param market 需要哪一个市场的可点击 Review Account, 如果设置为 null, 则返回全部
      * @return
      */
-    public static List<Account> openedReviewAccount() {
-        return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false).fetch();
+    public static List<Account> openedReviewAccount(M market) {
+        switch(market) {
+            case AMAZON_UK:
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false, true).fetch();
+            case AMAZON_DE:
+                return Account.find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false, false, true).fetch();
+            case AMAZON_US:
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false, false, true).fetch();
+            default:
+                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false).fetch();
+        }
     }
 
     /**

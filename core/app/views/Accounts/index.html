@@ -4,6 +4,9 @@
     #{script 'accounts/index.coffee'/}
 #{/set}
 
+<div class="row" style="margin-bottom:10px;">
+    <a href="@{Accounts.blank()}" class="btn btn-success">添加用户</a>
+</div>
 
 <div class="row">
     <ul class="nav nav-tabs">
@@ -24,6 +27,9 @@
                     <th>MerchantId</th>
                     <th>AccessKey</th>
                     <th>IsSaleAcc</th>
+                    <th>IsAUK</th>
+                    <th>IsADE</th>
+                    <th>IsAUS</th>
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             #{list items:accs, as:'acc'}
@@ -31,69 +37,6 @@
                     #{render 'Accounts/acctr.html', acc:acc/}
                 #{/if}
             #{/list}
-                <tr>
-                    <td colspan="7">
-                        <button class="btn btn-success" data-toggle="collapse" data-target="#newUser">添加用户</button>
-                        <div class="span12 collapse" id="newUser">
-                            <form id="newUser_form">
-                                <table class="table table-condensed table-bordered">
-                                    <tr>
-                                        <td>UserName:</td>
-                                        <td><input type="text" name="a.username"></td>
-                                        <td>UniqueName:</td>
-                                        <td><input type="text" readonly="" placeHolder="会自动创建"></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>Password:</td>
-                                        <td><input type="password" name="a.password"></td>
-                                        <td>Confirm:</td>
-                                        <td><input type="password" name="a.confirm"></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>Type:</td>
-                                        <td>
-                                        #{pickMarkets name:'a.type' /}
-                                        </td>
-
-                                        <td>Checks:</td>
-                                        <td>
-                                            <label class="checkbox inline">
-                                                <input type="checkbox" name="a.closeable" value="false">
-                                                Closeable
-                                            </label>
-                                            <label class="checkbox inline">
-                                                <input type="checkbox" name="a.isSaleAcc" value="false">
-                                                IsSaleAcc
-                                            </label>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>MerchantID:</td>
-                                        <td><input type="text" name="a.merchantId"></td>
-                                        <td>AccessKey:</td>
-                                        <td><input type="text" name="a.accessKey"></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td colspan="4">
-                                            Token:
-                                            <textarea rows="8" class="span11" name="a.token"></textarea>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td colspan="4">
-                                            <button nid class="btn btn-primary">创建</button>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
             </table>
         </div>
 
@@ -107,6 +50,9 @@
                     <th>MerchantId</th>
                     <th>AccessKey</th>
                     <th>IsSaleAcc</th>
+                    <th>IsAUK</th>
+                    <th>IsADE</th>
+                    <th>IsAUS</th>
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             #{list items:accs, as:'acc'}
@@ -127,6 +73,9 @@
                     <th>MerchantId</th>
                     <th>AccessKey</th>
                     <th>IsSaleAcc</th>
+                    <th>IsAUK</th>
+                    <th>IsADE</th>
+                    <th>IsAUS</th>
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             #{list items:accs, as:'acc'}
@@ -147,6 +96,9 @@
                     <th>MerchantId</th>
                     <th>AccessKey</th>
                     <th>IsSaleAcc</th>
+                    <th>IsAUK</th>
+                    <th>IsADE</th>
+                    <th>IsAUS</th>
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             *{#{list items:accs, as:'acc'}}*

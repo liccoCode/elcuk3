@@ -3,5 +3,5 @@
 SID: SellingId
 }*
 #{set t3:models.market.Selling.sidT3(_sid)/}
-<a href="@{Products.p_detail(t3._1)}" target="_blank">${t3._1}|</a>
+<a href="@{Products.show(t3._1)}" target="_blank">${t3._1}|</a>
 <a href="@{Sellings.selling(_sid)}" target="_blank">${t3._2} |${t3._3}</a>
