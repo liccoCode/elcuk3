@@ -316,15 +316,14 @@ public class Listing extends GenericModel {
      * @return
      */
     public F.T2<Account, Integer> pickUpOneAccountToClikeLike() {
-        List<Account> opendAccs = Account.openedReviewAccount();
-        List<Account> validAccs = AmazonLikeRecord.nonClickLikeAccs(opendAccs, this.listingId);
-        List<Account> sameMarketAccs = Account.accountMarketFilter(validAccs, this.listingId);
-        if(sameMarketAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("Listing Like Click %s, hava %s valid accounts.", this.listingId, sameMarketAccs.size());
+        List<Account> opendAccs = Account.openedReviewAccount(this.market);
+        List<Account> nonClickAccs = AmazonLikeRecord.nonClickLikeAccs(opendAccs, this.listingId);
+        if(nonClickAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("Listing Like Click %s, hava %s valid accounts.", this.listingId, nonClickAccs.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : sameMarketAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        for(Account a : nonClickAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
-        return new F.T2<Account, Integer>(sameMarketAccs.get(0), sameMarketAccs.size());
+        return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
     }
 
     @Override
