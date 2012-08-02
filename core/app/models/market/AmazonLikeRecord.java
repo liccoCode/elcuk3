@@ -43,13 +43,16 @@ public class AmazonLikeRecord extends GenericModel {
     /**
      * 点击的时候其 Like 是多少?
      */
+    @Expose
     public int likes;
 
     /**
      * 此 Listing 的平均得分是多少?
      */
+    @Expose
     public float aveRating;
 
+    @Expose
     public String asin;
 
     @Enumerated(EnumType.STRING)
@@ -68,6 +71,7 @@ public class AmazonLikeRecord extends GenericModel {
     /**
      * 知道是谁点击的
      */
+    @Expose
     public String username;
 
     /**
