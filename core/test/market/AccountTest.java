@@ -46,6 +46,6 @@ public class AccountTest extends FunctionalTest {
     @Test
     public void readAccount() {
         Account acc = Account.findById(3l);
-        acc.loginAmazonSize();
+        acc.loginAmazonSize(null);
     }
 }
