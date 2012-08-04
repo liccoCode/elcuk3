@@ -1066,7 +1066,12 @@ public class Account extends Model {
             if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm"))) upAndDownLink[0] = link;
             else upAndDownLink[1] = link;
         }
-        return new F.T3<Boolean, String, String>(isLogin(doc), upAndDownLink[0], upAndDownLink[1]);
+        boolean isLogin = isLogin(doc);
+        // 这里检查点击不成功的原因
+        if(!isLogin) FLog.fileLog(
+                String.format("%s.clickReiew.Failed.html", review.reviewId),
+                html, FLog.T.HTTP_ERROR);
+        return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
     }
 
     /**
