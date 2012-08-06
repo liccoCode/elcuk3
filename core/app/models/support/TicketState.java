@@ -1,5 +1,6 @@
 package models.support;
 
+import helper.Dates;
 import jobs.TicketStateSyncJob;
 import org.joda.time.Duration;
 import play.libs.F;
@@ -39,6 +40,7 @@ public enum TicketState {
             // TO TWO_MAIL
 
             TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+            if(msgs.size() == 1) newMsg = null; // 系统自动创建的那个 Ticket msg 需要处理
             TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
 
             if(newMsg == null) {
@@ -50,11 +52,16 @@ public enum TicketState {
                 // 在有最新邮件与最新回复的情况下, 客户的最新邮件时间大于最新回复时间则表示有真正的客户新回复来了, 进入 "有新邮件状态"
                 if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
                     return NEW_MSG;
-                else if(Ticket.ishaveNewOperatorResponse(resps, msgs)._1) // 需要排除自己开的第一个回复
+                else if(Ticket.ishaveNewOperatorResponse(resps, msgs)._1)
                     return MAILED;
             }
             // 一般不会没有最新回复的, 因为系统向 OsTicket 开 Ticket 的时候就有一个回复了
             return this;
+        }
+
+        @Override
+        public String explan() {
+            return "新进来的 Review, 没有回复过.";
         }
     },
     /**
@@ -68,6 +75,11 @@ public enum TicketState {
             if(isHaveNewResp._1) return MAILED;
 
             return this;
+        }
+
+        @Override
+        public String explan() {
+            return "此 Review 由于买家没有回信, 需要进行第二次邮件联系.";
         }
     },
 
@@ -83,7 +95,27 @@ public enum TicketState {
             if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
 
+            /**
+             * 同时满足下面的条件:
+             * 1. 必须是 MAILED/NEW_MSG 状态的 Ticket
+             * 2. 当前日期与我们自己最近回复日期之间的有 15 天以上 或者 客户没有一次回复
+             * 3. 我们自己回复的数量必须在两次以上(需要排除系统自己的那一次)
+             */
+            if((ticket.state == this || ticket.state == NEW_MSG) && msgs.size() > 2) {
+                TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+                Duration duration = new Duration(newMsg.created.getTime(), System.currentTimeMillis());
+                if(duration.getStandardDays() >= 15)
+                    return NO_RESP;
+                else if(resps.size() == 0)
+                    return NO_RESP;
+            }
+
             return this;
+        }
+
+        @Override
+        public String explan() {
+            return "我方已经发送邮件进行了联系.";
         }
     },
 
@@ -93,7 +125,18 @@ public enum TicketState {
     NEW_MSG {
         @Override
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
-            return null;
+            // TO MAILED
+            // TO CLOSE(手动)
+
+            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket.ishaveNewOperatorResponse(resps, msgs);
+            if(isHaveNewResp._1) return MAILED;
+
+            return this;
+        }
+
+        @Override
+        public String explan() {
+            return "客户有新邮件回复";
         }
     },
 
@@ -103,7 +146,17 @@ public enum TicketState {
     NO_RESP {
         @Override
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
-            return null;
+            // TO NEW_MSG
+            // TO CLOSE(手动)
+            if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+                return NEW_MSG;
+
+            return this;
+        }
+
+        @Override
+        public String explan() {
+            return "客户在 20 天内没有回复, 保留在此状态可以自动触发到 NEW_MSG 状态.";
         }
     },
 
@@ -113,7 +166,20 @@ public enum TicketState {
     PRE_CLOSE {
         @Override
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
-            return null;
+            if(ticket.isSuccess) {
+                ticket.memo = String.format("Success Change Review at %s from %s to %s\r\n%s",
+                        Dates.date2DateTime(),
+                        ticket.review.lastRating == null ? 0 : ticket.review.lastRating,
+                        ticket.review.rating == null ? 0 : ticket.review.rating,
+                        ticket.memo);
+                return CLOSE;
+            }
+            return this;
+        }
+
+        @Override
+        public String explan() {
+            return "等待关闭前的一个状态, 一般用来等待客户更新 Review/Feedback 的评分.";
         }
     },
 
@@ -123,7 +189,14 @@ public enum TicketState {
     CLOSE {
         @Override
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
-            return null;
+            // CLOSE 不能自动变更状态.
+            // 只能手动处理
+            return this;
+        }
+
+        @Override
+        public String explan() {
+            return "关闭状态, 此 Ticket 彻底不予理睬.";
         }
     };
 
@@ -132,4 +205,5 @@ public enum TicketState {
      */
     public abstract TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps);
 
+    public abstract String explan();
 }

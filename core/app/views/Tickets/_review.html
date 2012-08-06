@@ -1,0 +1,56 @@
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>Sku</th>
+        <th>Title</th>
+        <th>ReviewId</th>
+        <th>UserName</th>
+        <th>Score</th>
+    </tr>
+#{list items:tickets, as:'t'}
+    #{set r:t.review/}
+    #{set reviewC_L:r.reviewLengthColor()/}
+    <tr class="twoTr">
+        <td>
+            <a href="@{Products.show(t.sku)}" target="_blank">${t.sku}</a>
+        </td>
+        <td style="background:${'#' + reviewC_L._2}">
+            <span class="badge badge-important">${reviewC_L._1}</span> |
+            <span>${r.title}</span>
+            #{list items:t.reasons, as:'ra'}
+                <span class="badge badge-important">${ra.name()}</span>
+            #{/list}
+
+            #{if t.resolver}
+                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
+            #{/if}
+        </td>
+        <td>
+            <a href="@{Tickets.show(r.reviewId)}" target="_blank">
+            ${r.reviewId}
+            </a>
+            #{if r.orderr != null}
+                <span class="pull-right"><i class="icon-shopping-cart"></i></span>#{/if}
+        </td>
+        <td>
+            <a href="${r.reviewLink()}" target="_blank">
+                <i class="icon-external-link"></i> ${r.username}
+            </a>
+        </td>
+        <td style="background:${'#' + r.color()}">${r.rating}</td>
+    </tr>
+    <tr style="display:none;">
+        <td colspan="5">
+            <div class="row-fluid">
+                <div class="span6">
+                    <h3>Review</h3>
+                ${r.review}
+                </div>
+                <div class="span6">
+                    <h3>Comment</h3>
+                ${r.comment}
+                </div>
+            </div>
+        </td>
+    </tr>
+#{/list}
+</table>

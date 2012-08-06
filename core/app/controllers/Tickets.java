@@ -10,6 +10,7 @@ import models.support.Ticket;
 import models.support.TicketReason;
 import models.support.TicketState;
 import models.view.Ret;
+import play.cache.CacheFor;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -24,9 +25,20 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Tickets extends Controller {
+
+    @CacheFor(id = "review.index", value = "20mn")
     public static void index() {
-        List<Ticket> tickets = Ticket.reviews(TicketState.NEW);
-        render(tickets);
+        F.T2<List<Ticket>, List<Ticket>> newT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW, true);
+        F.T2<List<Ticket>, List<Ticket>> needTwoT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.TWO_MAIL, true);
+        List<Ticket> noRespTickets = Ticket.tickets(Ticket.T.REVIEW, TicketState.NO_RESP, false)._1;
+        List<Ticket> newMsgTickts = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW_MSG, false)._1;
+
+
+        renderArgs.put("newTickets", newT2._1);
+        renderArgs.put("newOverdueTickets", newT2._2);
+        renderArgs.put("twoMailTickets", needTwoT2._1);
+        renderArgs.put("twoMailOverdueTickets", needTwoT2._2);
+        render(noRespTickets, newMsgTickts);
     }
 
     public static void show(String rid) {

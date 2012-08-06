@@ -57,7 +57,7 @@
         </tr>
 
         <tr>
-            <th rel="popover" content="稍后补充..."><i class="icon-question-sign"> State</i></th>
+            <th rel="popover" content="${review.ticket.state.explan()}"><i class="icon-question-sign"> State</i></th>
             <td>${review.ticket.state}</td>
             <th>isSuccess</th>
             <td>${review.ticket.isSuccess}</td>
@@ -99,22 +99,31 @@
                 <div class="row-fluid">
                     <div class="span6">
 
-                        <!-- 寻找用户的相关订单 -->
-                    #{if review.orderr == null}
-                        <button id="try_order" class="btn btn-primary">Try Order</button>
-                    #{/if}
+                        <div style="margin:5px 0;">
+                            <!-- 寻找用户的相关订单 -->
+                        #{if review.orderr == null}
+                            <button id="try_order" class="btn btn-primary">Try Order</button>
+                        #{/if}
 
-                        <!-- 此 Ticket 的处理者 -->
-                    #{if review.ticket.resolver == null}
-                        <button id="take_it" tid="${review.ticket.id}" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
-                            Take It
-                        </button>
-                    #{/if}
-                    #{else }
-                        <span class="badge badge-success">此订单由 ${review.ticket.resolver.username} 处理</span>
-                    #{/else}
+                            <!-- 此 Ticket 的处理者 -->
+                        #{if review.ticket.resolver == null}
+                            <button id="take_it" tid="${review.ticket.id}" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
+                                Take It
+                            </button>
+                        #{/if}
+                        #{else }
+                            <span class="badge badge-info">由 <i class="icon-user"></i> ${review.ticket.resolver.username.capAll()}
+                                处理</span>
+                        #{/else}
+                        </div>
 
-                        <a class="btn btn-success" href="@{Products.show(review.ticket.sku)}" target="_blank">${review.ticket.sku}</a><br/>
+                        <div style="margin:5px 0">
+                            <a class="btn btn-success" href="@{Products.show(review.ticket.sku)}" target="_blank">${review.ticket.sku}</a><br/>
+                        </div>
+
+                        <div style="margin:5px 0">
+                            <a class="btn btn-danger">Close</a>
+                        </div>
                     </div>
 
                     <div class="span6">

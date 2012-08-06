@@ -7,77 +7,47 @@
 <div class="row-fluid">
     <div class="span12">
         <ul class="nav nav-tabs" style="margin-bottom:5px;">
-            <li class="active"><a href="#news" data-toggle='tab'>新来的负 Review</a></li>
-            <li><a href="#overtime" data-toggle='tab'>超时的新负 Review</a></li>
-            <li><a href="#rp2" data-toggle='tab'>二次跟进的负 Review</a></li>
+            <li class="active">
+                <a href="#news" data-toggle='tab'>首次跟进<span class="badge badge-inverse">${newTickets.size()}</span></a>
+            </li>
+            <li>
+                <a href="#overtime" data-toggle='tab'>首次跟进-超时<span class="badge badge-inverse">${newOverdueTickets.size()}</span></a>
+            </li>
+            <li><a href="#rp2" data-toggle='tab'>需二次跟进<span class="badge badge-inverse">${twoMailTickets.size()}</span></a>
+            </li>
+            <li>
+                <a href="#overtime_rp2" data-toggle='tab'>需二次跟进-超时<span class="badge badge-inverse">${twoMailOverdueTickets.size()}</span></a>
+            </li>
+            <li>
+                <a href="#noresp" data-toggle='tab'>跟进无响应<span class="badge badge-inverse">${noRespTickets.size()}</span></a>
+            </li>
+            <li><a href="#newcome" data-toggle='tab'>有新回复<span class="badge badge-inverse">${newMsgTickts.size()}</span></a>
+            </li>
         </ul>
 
         <div class="tab-content">
             <div id="news" class="tab-pane active">
-                <table class="table table-condensed table-bordered">
-                    <tr>
-                        <th>Sku</th>
-                        <th>Title</th>
-                        <th>ReviewId</th>
-                        <th>UserName</th>
-                        <th>Score</th>
-                    </tr>
-                #{list items:tickets, as:'t'}
-                    #{set r:t.review/}
-                    #{set reviewC_L:r.reviewLengthColor()/}
-                    <tr class="twoTr">
-                        <td>
-                            <a href="@{Products.show(t.sku)}" target="_blank">${t.sku}</a>
-                        </td>
-                        <td style="background:${'#' + reviewC_L._2}">
-                            <span class="badge badge-important">${reviewC_L._1}</span> |
-                            <span>${r.title}</span>
-                            #{list items:t.reasons, as:'ra'}
-                                <span class="badge badge-important">${ra.name()}</span>
-                            #{/list}
-
-                            #{if t.resolver}
-                                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
-                            #{/if}
-                        </td>
-                        <td>
-                            <a href="@{Tickets.show(r.reviewId)}" target="_blank">
-                            ${r.reviewId}
-                            </a>
-                            #{if r.orderr != null}
-                                <span class="pull-right"><i class="icon-shopping-cart"></i></span>#{/if}
-                        </td>
-                        <td>
-                            <a href="${r.reviewLink()}" target="_blank">
-                                <i class="icon-external-link"></i> ${r.username}
-                            </a>
-                        </td>
-                        <td style="background:${'#' + r.color()}">${r.rating}</td>
-                    </tr>
-                    <tr style="display:none;">
-                        <td colspan="5">
-                            <div class="row-fluid">
-                                <div class="span6">
-                                    <h3>Review</h3>
-                                ${r.review}
-                                </div>
-                                <div class="span6">
-                                    <h3>Comment</h3>
-                                ${r.comment}
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                #{/list}
-                </table>
+            #{render 'Tickets/_review.html', tickets:newTickets/}
             </div>
 
             <div id="overtime" class="tab-pane">
-                超时的新 Review
+            #{render 'Tickets/_review.html', tickets:newOverdueTickets/}
             </div>
 
             <div id="rp2" class="tab-pane">
-                二次跟进的负 Review
+            #{render 'Tickets/_review.html', tickets:twoMailTickets/}
+            </div>
+
+            <div id="overtime_rp2" class="tab-pane">
+            #{render 'Tickets/_review.html', tickets:twoMailOverdueTickets/}
+            </div>
+
+            <div id="noresp" class="tab-pane">
+            #{render 'Tickets/_review.html', tickets:noRespTickets/}
+            </div>
+
+            <div id="newcome" class="tab-pane">
+            #{render 'Tickets/_review.html', tickets:newMsgTickts/}
             </div>
         </div>
 

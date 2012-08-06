@@ -8,6 +8,7 @@ import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.Duration;
 import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -40,7 +41,7 @@ public class Ticket extends Model {
         this.sku = review.listing.product.sku;
         this.state = TicketState.NEW;
         this.review = review;
-        this.createAt = new Date();
+        this.createAt = review.reviewDate;
     }
 
     public Ticket(Feedback feedback) {
@@ -75,14 +76,14 @@ public class Ticket extends Model {
     public String sku;
 
     /**
-     * 最后一个收到回复的时间
+     * 最后一次发送邮件联系客户的时间
      */
     public Date lastResponseTime;
 
     /**
-     * 最后一次发送邮件联系客户的时间
+     * 最后一个收到回复的时间
      */
-    public Date lastMailTime;
+    public Date lastMessageTime;
 
     /**
      * 此 Ticket 最后一次向 OsTicket 更新的时间
@@ -144,9 +145,21 @@ public class Ticket extends Model {
         }
     }
 
+    /**
+     * 判断 Ticket 是否超时.
+     * 1. 如果有 Ticket 有客户最后回复时间, 那么回复 24 小后过, 表示邮件超时!
+     * 2. 如果没有客户最后回复时间, 那么从 Ticket 创建时间开始计算 24 小时后超时.
+     *
+     * @return
+     */
     public boolean isOverdue() {
-        //  不同状态有不同的 overdue 判断, 所以将方法填写到 TicketState 中去
-        return true;
+        if(this.lastResponseTime != null) {
+            Duration duration = new Duration(this.lastResponseTime.getTime(), System.currentTimeMillis());
+            return duration.getStandardHours() > 24;
+        } else {
+            Duration duration = new Duration(this.createAt.getTime(), System.currentTimeMillis());
+            return duration.getStandardHours() > 24;
+        }
     }
 
     /**
@@ -165,14 +178,32 @@ public class Ticket extends Model {
         List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL").fetch();
         for(AmazonListingReview review : reviews) {
             Ticket ticket = new Ticket(review);
-            review.orderr = review.tryToRelateOrderByUserId();
+            if(review.orderr == null) review.orderr = review.tryToRelateOrderByUserId();
             review.ticket = ticket;
             review.save();
         }
     }
 
-    public static List<Ticket> reviews(TicketState state) {
-        return Ticket.find("type=? AND state=?", T.REVIEW, TicketState.NEW).fetch();
+    /**
+     * 处理加载状态的 Ticket 同时将超时的过滤成另外一个 List
+     *
+     * @param state
+     * @param filterOverdue
+     * @return
+     */
+    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state, boolean filterOverdue) {
+        List<Ticket> tickets = Ticket.find("type=? AND state=?", type, state).fetch();
+        if(filterOverdue) {
+            List<Ticket> noOverdueTicket = new ArrayList<Ticket>();
+            List<Ticket> overdueTicket = new ArrayList<Ticket>();
+            for(Ticket ticket : tickets) {
+                if(ticket.isOverdue()) overdueTicket.add(ticket);
+                else noOverdueTicket.add(ticket);
+            }
+            return new F.T2<List<Ticket>, List<Ticket>>(noOverdueTicket, overdueTicket);
+        } else {
+            return new F.T2<List<Ticket>, List<Ticket>>(tickets, new ArrayList<Ticket>());
+        }
     }
 
     /**
@@ -193,6 +224,7 @@ public class Ticket extends Model {
      */
     public static F.T2<Boolean, TicketStateSyncJob.OsMsg> ishaveNewCustomerEmail(List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
         TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+        if(msgs.size() == 1) newMsg = null; // 需要排除自行在 OsTicket 中创建 Ticket 的时候的那一个客户 Message
         TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
         if(newMsg != null && newResp != null) {
             if(newMsg.created.getTime() > newResp.created.getTime())
@@ -212,7 +244,7 @@ public class Ticket extends Model {
         TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
         TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
         if(newMsg != null && newResp != null) {
-            if(newResp.created.getTime() > newMsg.created.getTime() && resps.size() > 1/*需要排除自己在创建 OsTicket 的那一个 Responose*/)
+            if(newResp.created.getTime() > newMsg.created.getTime())
                 return new F.T2<Boolean, TicketStateSyncJob.OsResp>(true, newResp);
         }
         return new F.T2<Boolean, TicketStateSyncJob.OsResp>(false, null);
