@@ -1011,12 +1011,12 @@ public class Account extends Model {
      * @param listing
      */
     public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
-        String sessionId = this.cookie("session-id");
+        String sessionId = this.cookie("session-id", listing.market);
         if(sessionId == null) {// 没有 session-id, 即没有登陆, 则尝试登陆一次..
             this.loginAmazonSize(listing.market);
-            sessionId = this.cookie("session-id");
+            sessionId = this.cookie("session-id", listing.market);
         }
-        String body = HTTP.post(this.cookieStore(), this.type.amazonLikeLink(), Arrays.asList(
+        String body = HTTP.post(this.cookieStore(listing.market), this.type.amazonLikeLink(), Arrays.asList(
                 new BasicNameValuePair("action", "like"),
                 new BasicNameValuePair("itemId", listing.asin),
                 new BasicNameValuePair("context", "dp"),
@@ -1146,7 +1146,7 @@ public class Account extends Model {
      * @param market 需要哪一个市场的可点击 Review Account, 如果设置为 null, 则返回全部
      * @return
      */
-    public static List<Account> openedReviewAccount(M market) {
+    public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
         switch(market) {
             case AMAZON_UK:
                 return Account.find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false, true).fetch();

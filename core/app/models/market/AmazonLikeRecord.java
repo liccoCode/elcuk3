@@ -56,6 +56,7 @@ public class AmazonLikeRecord extends GenericModel {
     public String asin;
 
     @Enumerated(EnumType.STRING)
+    @Expose
     public Account.M market;
 
     /**
@@ -77,6 +78,7 @@ public class AmazonLikeRecord extends GenericModel {
     /**
      * 什么时间点击的
      */
+    @Expose
     public Date createAt;
 
     /**
