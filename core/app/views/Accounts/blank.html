@@ -1,0 +1,89 @@
+#{extends 'main.html'/}
+#{set title:'添加新用户'/}
+#{set 'moreScripts'}
+    #{script 'accounts/index.coffee'/}
+#{/set}
+
+<div class="row">
+#{ifErrors }
+    <div class="alert alert-error">
+        #{errors }
+            <p>${error.key} -> ${error.message}</p>
+        #{/errors}
+    </div>
+#{/ifErrors}
+
+
+    <h2 style="text-align:center" class="alert alert-info">添加新用户</h2>
+
+    <form action="@{Accounts.create()}">
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <td>UserName:</td>
+                <td><input type="text" name="a.username"></td>
+                <td>UniqueName:</td>
+                <td><input type="text" readonly="" placeHolder="会自动创建"></td>
+            </tr>
+
+            <tr>
+                <td>Password:</td>
+                <td><input type="password" name="a.password"></td>
+                <td>Confirm:</td>
+                <td><input type="password" name="a.confirm"></td>
+            </tr>
+
+            <tr>
+                <td>Type:</td>
+                <td>
+                #{pickMarkets name:'a.type' /}
+                </td>
+
+                <td>Checks:</td>
+                <td>
+                    <label class="checkbox inline">
+                        <input type="checkbox" name="a.closeable" value="${a.closeable}">
+                        Closeable
+                    </label>
+                    <label class="checkbox inline">
+                        <input type="checkbox" name="a.isSaleAcc" value="${a.isSaleAcc}">
+                        IsSaleAcc
+                    </label>
+                    <br>
+                    <label class="checkbox inline">
+                        <input type="checkbox" name="a.isAUK" value="${a.isAUK}">
+                        isAUK
+                    </label>
+                    <label class="checkbox inline">
+                        <input type="checkbox" name="a.isADE" value="${a.isADE}">
+                        isADE
+                    </label>
+                    <label class="checkbox inline">
+                        <input type="checkbox" name="a.isAUS" value="${a.isAUS}">
+                        isAUS
+                    </label>
+                </td>
+            </tr>
+
+            <tr>
+                <td>MerchantID:</td>
+                <td><input type="text" name="a.merchantId" value="${a.merchantId}"></td>
+                <td>AccessKey:</td>
+                <td><input type="text" name="a.accessKey" value="${a.accessKey}"></td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    Token:
+                    <textarea rows="8" class="span11" name="a.token">${a.token}</textarea>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <button class="btn btn-primary">创建</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+

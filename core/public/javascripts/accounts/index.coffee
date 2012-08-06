@@ -37,3 +37,13 @@ $ ->
         form.unmask()
     )
     e.preventDefault()
+
+
+  # 高亮新添加的 Account
+  activeAccount = ->
+    args = location.hash.substr(1).split('/')
+    $("tr[aid=#{args[0]}]").css('background', '#FF6A78')
+
+  activeAccount()
+
+  window.$ui.popover()

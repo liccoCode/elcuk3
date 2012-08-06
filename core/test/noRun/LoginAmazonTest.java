@@ -2,8 +2,10 @@ package noRun;
 
 import models.market.Feedback;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.Test;
 
 import java.io.File;
@@ -43,5 +45,23 @@ public class LoginAmazonTest {
         System.out.println(URLEncoder.encode(ss));
         System.out.println("==================");
         System.out.println(URLEncoder.encode(ss, "UTF-8"));
+    }
+
+    @Test
+    public void testParseClickLink() throws IOException {
+        Document doc = Jsoup.parse(new File("/Users/wyatt/Programer/repo/elcuk2/core/cc.no.html"), "UTF-8");
+        Element oldAmazon = doc.select("#navidWelcomeMsg").first();
+        boolean isLogin = false;
+        if(oldAmazon != null) {
+            String navidWelcomeMsgStr = doc.select("#navidWelcomeMsg").outerHtml();
+            isLogin = StringUtils.contains(navidWelcomeMsgStr, "sign-out") ||
+                    StringUtils.contains(navidWelcomeMsgStr, "signout");
+        } else {
+            String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
+            isLogin = StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
+                    StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
+                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
+        }
+        System.out.println(isLogin);
     }
 }

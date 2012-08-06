@@ -1,11 +1,14 @@
 <tr aid=${acc.id}>
     <td>${acc.id}</td>
-    <td>${acc.uniqueName}</td>
+    <td rel="popover" content="${acc.token}" title="Token" width="auto">${acc.uniqueName}</td>
     <td>${acc.type}</td>
     <td>${acc.merchantId}</td>
     <td>${acc.accessKey}</td>
-    <td ${acc.isSaleAcc ? 'style=background:#009E1A' : ''}>${acc.isSaleAcc}</td>
-    <td>${acc.closeable}</td>
+    <td>#{yesOrNo f:acc.isSaleAcc /}</td>
+    <td>#{yesOrNo f:acc.isAUK/}</td>
+    <td>#{yesOrNo f:acc.isADE/}</td>
+    <td>#{yesOrNo f:acc.isAUS/}</td>
+    <td>#{yesOrNo f:acc.closeable/}</td>
 </tr>
 <tr id="acc_${acc.id}" style="display:none;">
     <td colspan="7">
@@ -32,9 +35,24 @@
                     <td>Type:</td>
                     <td><input type="text" readonly="" value="${acc.type}"></td>
 
-                    <td>Closeable:</td>
+                    <td>Checks:</td>
                     <td>
-                        <input type="checkbox" name="a.closeable" ${acc.closeable ? 'checked' : ''} value="${acc.closeable}">
+                        <label class="checkbox inline">
+                            <input type="checkbox" name="a.closeable" ${acc.closeable ? 'checked' : ''} value="${acc.closeable}">
+                            Closeable
+                        </label>
+                        <label class="checkbox inline">
+                            <input type="checkbox" name="a.isAUK" ${acc.isAUK ? 'checked' : ''} value="${acc.isAUK}">
+                            isAUK
+                        </label>
+                        <label class="checkbox inline">
+                            <input type="checkbox" name="a.isADE" ${acc.isADE ? 'checked' : ''} value="${acc.isADE}">
+                            isADE
+                        </label>
+                        <label class="checkbox inline">
+                            <input type="checkbox" name="a.isAUS" ${acc.isAUS ? 'checked' : ''} value="${acc.isAUS}">
+                            isAUS
+                        </label>
                     </td>
                 </tr>
 

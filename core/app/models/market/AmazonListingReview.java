@@ -350,17 +350,15 @@ public class AmazonListingReview extends GenericModel {
          * 1. 找出所有的 Comment Account, 过滤掉 SaleAcc
          * 2. 从 AmazonReviewRecord 中检查此 Review 的点击日志, 首先找出点击过此 Review 的 Account
          */
-        List<Account> opendAccs = Account.openedReviewAccount();
+        List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.listing.market);
         if(opendAccs.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
-        List<Account> validAccs = AmazonReviewRecord.checkNonClickAccounts(opendAccs, this);
-        //TODO 因为欧洲的账户可以通用点击, 所以考虑是否需要过滤掉不同市场的账号?
-        List<Account> sameMarketAccs = Account.accountMarketFilter(validAccs, this.listingId);
-        if(sameMarketAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("To Click Review %s, hava %s valid accounts.", this.reviewId, sameMarketAccs.size());
+        List<Account> nonClickAccs = AmazonReviewRecord.checkNonClickAccounts(opendAccs, this);
+        if(nonClickAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("To Click Review %s, hava %s valid accounts.", this.reviewId, nonClickAccs.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : sameMarketAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        for(Account a : nonClickAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
-        return new F.T2<Account, Integer>(sameMarketAccs.get(0), sameMarketAccs.size());
+        return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
     }
 
 

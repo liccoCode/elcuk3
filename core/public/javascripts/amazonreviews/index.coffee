@@ -37,7 +37,8 @@ $ ->
           else
             alert("点击成功.")
             $("#after_#{reviewId}").html(JSON.stringify(r._2))
-            $("#accleft_#{reviewId}").html(r._1)
+            #这个 - 1 是因为需要除开已经点击的这一次
+            $("#accleft_#{reviewId}").html(r._1 - 1)
           mask.unmask()
       )
       e.preventDefault()

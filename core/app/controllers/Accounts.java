@@ -33,13 +33,19 @@ public class Accounts extends Controller {
         renderJSON(new Ret());
     }
 
+    public static void blank(Account a) {
+        if(a == null) a = new Account();
+        render(a);
+    }
+
     public static void create(Account a) {
         if(a.isPersistent()) renderJSON(new Ret("Account is exist, can not be CREATE!"));
         validation.valid(a);
-        if(Validation.hasErrors())
-            renderJSON(new Ret(J.json(Validation.errors())));
+        if(Validation.hasErrors()) {
+            render("Accounts/blank.html", a);
+        }
         a.save();
-        renderJSON(new Ret(true));
+        redirect("/Accounts/index#" + a.id);
     }
 
     public static void login(Account a) {

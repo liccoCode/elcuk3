@@ -18,7 +18,7 @@ public class AccountClickTest extends UnitTest {
     @Before
     public void login() {
         Account acc = Account.findById(3l);
-        acc.loginAmazonSize();
+        acc.loginAmazonSize(null);
     }
 
     @Test
