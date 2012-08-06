@@ -741,21 +741,36 @@ public class Account extends Model {
     @Expose
     public boolean isAUS = false;
 
-
     /**
-     * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆, 他们的 Cookie 各不影响
+     * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆 , 他们的 Cookie 各不影响
+     * 添加 Market 参数, 同一个账号可以再不同市场登陆
      *
      * @return
      */
     public CookieStore cookieStore() {
-        String key = String.format("ACC_COOKIE_%s", this.id);
+        return cookieStore(null);
+    }
+
+    /**
+     * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆 , 他们的 Cookie 各不影响
+     * 添加 Market 参数, 同一个账号可以再不同市场登陆
+     *
+     * @return
+     */
+    public CookieStore cookieStore(M market) {
+        if(market == null) market = this.type;
+        String key = String.format("ACC_COOKIE_%s_%s", this.id, market);
         if(!COOKIE_STORE_MAP.containsKey(key))
             COOKIE_STORE_MAP.put(key, new BasicCookieStore());
         return COOKIE_STORE_MAP.get(key);
     }
 
     public String cookie(String name) {
-        for(Cookie cookie : this.cookieStore().getCookies()) {
+        return cookie(name, null);
+    }
+
+    public String cookie(String name, M market) {
+        for(Cookie cookie : this.cookieStore(market).getCookies()) {
             if(name.equalsIgnoreCase(cookie.getName()))
                 return cookie.getValue();
         }
@@ -831,9 +846,10 @@ public class Account extends Model {
     }
 
     /**
-     * 非销售账号在 Amazon 的前台登陆
+     * 非销售账号在 Amazon 的前台登陆,<br>
+     * 支持同账户登陆多个市场, 例如: 一个账户登陆 Uk/DE
      */
-    public boolean loginAmazonSize() {
+    public boolean loginAmazonSize(M market) {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -842,12 +858,13 @@ public class Account extends Model {
                  * 1. Visit the website, fetch the new Cookie.
                  * 2. With the website params and user/password to login.
                  */
-                String body = HTTP.get(this.cookieStore(), this.type.amazonSiteLogin());
+                if(market == null) market = this.type;
+                String body = HTTP.get(this.cookieStore(market), market.amazonSiteLogin());
                 Document doc = Jsoup.parse(body);
                 Elements inputs = doc.select("#ap_signin_form input");
 
                 if(inputs.size() == 0) {
-                    Logger.info("WebSite [" + this.type.toString() + "] Still have the Session with User [" + this.username + "].");
+                    Logger.info("WebSite [" + market.toString() + "] Still have the Session with User [" + this.username + "].");
                     FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
                     return false;
                 }
@@ -860,7 +877,7 @@ public class Account extends Model {
                     else if("create".equals(att)) params.add(new BasicNameValuePair(att, "0"));//登陆
                     else params.add(new BasicNameValuePair(att, el.val()));
                 }
-                body = HTTP.post(this.cookieStore(), doc.select("#ap_signin_form").first().attr("action"), params);
+                body = HTTP.post(this.cookieStore(market), doc.select("#ap_signin_form").first().attr("action"), params);
                 boolean isLogin = isLogin(Jsoup.parse(body));
                 if(Play.mode.isDev())
                     FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
@@ -876,7 +893,7 @@ public class Account extends Model {
                 HTTP.client().getCookieStore().clearExpired(new Date());
                 return loginSucc;
             default:
-                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + this.type + " is not support!");
+                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market + " is not support!");
         }
         return false;
     }
@@ -996,7 +1013,7 @@ public class Account extends Model {
     public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
         String sessionId = this.cookie("session-id");
         if(sessionId == null) {// 没有 session-id, 即没有登陆, 则尝试登陆一次..
-            this.loginAmazonSize();
+            this.loginAmazonSize(listing.market);
             sessionId = this.cookie("session-id");
         }
         String body = HTTP.post(this.cookieStore(), this.type.amazonLikeLink(), Arrays.asList(
@@ -1029,18 +1046,18 @@ public class Account extends Model {
          */
         F.T3<Boolean, String, String> loginAndClicks = checkLoginAndFetchClickLinks(review);
         if(!loginAndClicks._1) { // 没有登陆则登陆, 只尝试一次登陆!
-            synchronized(this.cookieStore()) {
-                this.loginAmazonSize();
+            synchronized(this.cookieStore(review.listing.market)) {
+                this.loginAmazonSize(review.listing.market);
             }
             loginAndClicks = checkLoginAndFetchClickLinks(review);
         }
         String content;
         if(isUp) {
             Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), loginAndClicks._2);
-            content = HTTP.get(this.cookieStore(), loginAndClicks._2);
+            content = HTTP.get(this.cookieStore(review.listing.market), loginAndClicks._2);
         } else {
             Logger.info("%s|%s Click link: %s", this.id, this.prettyName(), loginAndClicks._3);
-            content = HTTP.get(this.cookieStore(), loginAndClicks._3);
+            content = HTTP.get(this.cookieStore(review.listing.market), loginAndClicks._3);
         }
         AmazonReviewRecord record = new AmazonReviewRecord(review, this, isUp);
         // 只有后面登陆成功了, 才允许记录 Record
@@ -1056,7 +1073,7 @@ public class Account extends Model {
      * @return
      */
     private F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
-        String html = HTTP.get(this.cookieStore(), vExtensions.reviewLink(review));
+        String html = HTTP.get(this.cookieStore(review.listing.market), vExtensions.reviewLink(review));
         Document doc = Jsoup.parse(html);
         // 账号登陆以后, 链接中才会有 sign-out 字符串
         Elements els = doc.select(".votingButtonReviews");
@@ -1069,7 +1086,7 @@ public class Account extends Model {
         boolean isLogin = isLogin(doc);
         // 这里检查点击不成功的原因
         if(!isLogin) FLog.fileLog(
-                String.format("%s.clickReiew.Failed.html", review.reviewId),
+                String.format("%s.%s.clickReiew.Failed.html", review.reviewId, review.listing.market),
                 html, FLog.T.HTTP_ERROR);
         return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
     }
