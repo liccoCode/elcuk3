@@ -6,6 +6,7 @@
         <td>实际交货日期</td>
         <td>确认采购数量</td>
         <td>实际交货数量</td>
+        <td>剩余可运输数量</td>
         <td>供应商</td>
         <td rel="popover" content="<img src='/img/helper/fnsku.png'>" width="auto" placement="right">FnSku</td>
         <td>Selling</td>
@@ -36,6 +37,8 @@
             ${unit.delivery.deliveryQty}
             #{/else}
         </td>
+        #{set leftTransfer: unit.leftTransferQty()/}
+        <td>${leftTransfer._1}</td>
         <td>${unit.plan.supplier}</td>
         <td>${unit.selling.fnSku}</td>
         <td><a href="@{Sellings.selling(unit.sid)}" target="_blank">${unit.sid}</a></td>
@@ -71,9 +74,14 @@
                         <td>
                             <input name="d.deliveryDate" type="date" class="required" placeHolder="实际交货日期" value="${unit.delivery.deliveryDate.date()}">
                         </td>
-                        <td>实际交货数量</td>
+                        <td>实际交货数量 / 剩余运输数量</td>
                         <td>
-                            <input type="text" name="d.deliveryQty" class="required" value="${unit.delivery.deliveryQty}">
+                            <div class="input-append">
+                                <input type="text" name="d.deliveryQty" class="required input-mini" value="${unit.delivery.deliveryQty}">
+                                <a class="btn btn-info" rel="popover" title="运输单号" content="${leftTransfer._2}">
+                                    / ${leftTransfer._1}
+                                </a>
+                            </div>
                             <input type="hidden" name="id" value="${unit.id}">
                         </td>
                     </tr>
