@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Caches;
 import helper.Constant;
 import helper.J;
 import helper.Webs;
@@ -13,6 +14,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
+import play.cache.Cache;
 import play.cache.CacheFor;
 import play.mvc.After;
 import play.mvc.Before;
@@ -72,6 +74,12 @@ public class Analyzes extends Controller {
         List<Selling> sells = Selling.analyzesSKUAndSID("sku");
         p.items = AnalyzesPager.filterSellings(sells, p);
         render(p);
+    }
+
+    public static void clear() {
+        Cache.delete(String.format(Caches.SALE_SELLING, "msku"));
+        Cache.delete(String.format(Caches.SALE_SELLING, "sid"));
+        renderJSON(new Ret());
     }
 
     public static void allSkuCsv(Date from, Date to) {

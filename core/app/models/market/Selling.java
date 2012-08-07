@@ -610,11 +610,18 @@ public class Selling extends GenericModel {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public static List<Selling> analyzesSKUAndSID(String type) {
+        return analyzesSKUAndSID(type, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Selling> analyzesSKUAndSID(String type, Boolean useCache) {
         if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
             throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
         String cacke_key = String.format(Caches.SALE_SELLING, "msku".equals(type) ? "sid" : type);
+        // 判断是否使用 Cache, 如果不使用 Cache, 则清楚缓存, 否则进入原始使用 Cache 的流程
+        if(!useCache) Cache.delete(cacke_key);
+
         List<Selling> cached = Cache.get(cacke_key, List.class);
         if(cached != null && cached.size() > 0) return cached;
 
