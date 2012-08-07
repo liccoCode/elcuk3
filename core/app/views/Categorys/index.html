@@ -4,6 +4,12 @@
     #{script 'products/category.coffee'/}
 #{/set}
 
+#{if flash.error}
+<div class="alert alert-danger">
+    <p>${flash.error}</p>
+</div>
+#{/if}
+
 <div class="row-fluid" style="margin-bottom:5px;">
     <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_category">添加</a>
     <!-- BTN-1-BEGIN -->

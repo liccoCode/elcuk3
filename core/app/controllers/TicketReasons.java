@@ -5,6 +5,7 @@ import models.support.TicketReason;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 
 /**
@@ -53,7 +54,11 @@ public class TicketReasons extends Controller {
 
     public static void remove(long lrid) {
         TicketReason lr = TicketReason.findById(lrid);
-        lr.delete();
+        try {
+            lr.checkAndRemove();
+        } catch(FastRuntimeException e) {
+            flash.error(e.getMessage());
+        }
         redirect("/Categorys/index#" + lr.category.categoryId);
     }
 }
