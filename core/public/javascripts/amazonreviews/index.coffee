@@ -44,13 +44,6 @@ $ ->
       e.preventDefault()
 
 
-  # 绑定 Table 的事件
-  bindTableToggleClick = ->
-    $('tr[drop]').css('cursor', 'pointer').click (e) ->
-      o = $(@)
-      $("#review_#{o.attr('drop')}").toggle('fast')
-      e.preventDefault()
-
   # Ajax 加载 Review 页面
   reviewLoadFun = ->
     mask = $('#container')
@@ -71,7 +64,7 @@ $ ->
                 $('#recrawl_review').click()
           )
         else
-          bindTableToggleClick()
+          toggle_init()
           bindTransBtn()
           bindUpBtn()
           bindDownBtn()

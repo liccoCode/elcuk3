@@ -67,6 +67,8 @@ public class TicketStateSyncJob extends Job {
                 t.lastResponseTime = lastXXXDateTime._1;
                 t.lastMessageTime = lastXXXDateTime._2;
                 t.lastSyncTime = lastXXXDateTime._3;
+                t.messageTimes = msgMap.get(t.osTicketId()).size();
+                t.responseTimes = respMap.get(t.osTicketId()).size();
 
                 rtTickets._1.add(t.<Ticket>save());
             } catch(Exception e) {

@@ -43,17 +43,17 @@ public enum TicketState {
             if(msgs != null && msgs.size() == 1) newMsg = null; // 系统自动创建的那个 Ticket msg 需要处理
             TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
 
-            if(newMsg == null) {
-                //没有客户回复的情况下, 如果此 Ticket 的创建时间到现在已经超过 5 天了, 那么则进入 "二次邮件"
-                Duration duration = new Duration(ticket.createAt.getTime(), System.currentTimeMillis());
-                if(duration.getStandardDays() >= 5)
-                    return TWO_MAIL;
-            } else if(newResp != null) {
+            if(newResp != null) {
                 // 在有最新邮件与最新回复的情况下, 客户的最新邮件时间大于最新回复时间则表示有真正的客户新回复来了, 进入 "有新邮件状态"
                 if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
                     return NEW_MSG;
                 else if(Ticket.ishaveNewOperatorResponse(resps, msgs)._1)
                     return MAILED;
+            } else if(newMsg == null) {
+                //没有客户回复的情况下, 如果此 Ticket 的创建时间到现在已经超过 5 天了, 那么则进入 "二次邮件"
+                Duration duration = new Duration(ticket.createAt.getTime(), System.currentTimeMillis());
+                if(duration.getStandardDays() >= 5)
+                    return TWO_MAIL;
             }
             // 一般不会没有最新回复的, 因为系统向 OsTicket 开 Ticket 的时候就有一个回复了
             return this;
@@ -102,7 +102,7 @@ public enum TicketState {
              * 2. 当前日期与我们自己最近回复日期之间的有 15 天以上 或者 客户没有一次回复
              * 3. 我们自己回复的数量必须在两次以上(需要排除系统自己的那一次)
              */
-            if((ticket.state == this || ticket.state == NEW_MSG) && msgs.size() > 2) {
+            if((ticket.state == this || ticket.state == NEW_MSG) && resps.size() >= 2) {
                 TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
                 Duration duration = new Duration(newMsg.created.getTime(), System.currentTimeMillis());
                 if(duration.getStandardDays() >= 15)

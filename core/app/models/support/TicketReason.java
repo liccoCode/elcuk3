@@ -7,6 +7,7 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -88,5 +89,14 @@ public class TicketReason extends Model {
 
     public String name() {
         return String.format("%s:%s", this.category.categoryId, this.reason);
+    }
+
+    /**
+     * 检查并且删除
+     */
+    public TicketReason checkAndRemove() {
+        int relateTicketSize = this.tickets.size();
+        if(relateTicketSize > 0) throw new FastRuntimeException("有 Ticket 关联了 TicketReason " + this.name() + ", 无法删除.");
+        return this.delete();
     }
 }
