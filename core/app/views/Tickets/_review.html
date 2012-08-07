@@ -2,10 +2,12 @@
     <tr>
         <th>Sku</th>
         <th>Asin</th>
-        <th>Title</th>
+        <th rel="popover" placement="bottom" content="黑色数字为 Review 字数<br><br>橙色数字为客户回复数<br><br>蓝色数字为我方回复数;">
+            <i class="icon-question-sign"></i> Title
+        </th>
         <th>ReviewId</th>
-        <th>UserName</th>
         <th>OsTicket</th>
+        <th>UserName</th>
         <th>Score</th>
     </tr>
 #{list items:tickets, as:'t'}
@@ -26,9 +28,11 @@
                 <span class="badge badge-important">${ra.name()}</span>
             #{/list}
 
-            #{if t.resolver}
+                #{if t.resolver}<!-- 这个是此 Ticket 的处理者 -->
                 <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
             #{/if}
+            <span class="pull-right badge badge-info">${t.responseTimes}</span>
+            <span class="pull-right badge badge-warning">${t.messageTimes}</span>
         </td>
         <td>
             <a href="@{Tickets.show(r.reviewId)}" target="_blank">
@@ -37,11 +41,7 @@
             #{if r.orderr != null}
                 <span class="pull-right"><i class="icon-shopping-cart"></i></span>#{/if}
         </td>
-        <td>
-            <a href="${r.reviewLink()}" target="_blank">
-                <i class="icon-external-link"></i> ${r.username}
-            </a>
-        </td>
+
         <td>
             #{if t.osTicketId()}
                 <a href="${t.osTicketLink()}" target="_blank">
@@ -51,6 +51,11 @@
             #{else }
                 <i class="icon-warning-sign"></i>
             #{/else}
+        </td>
+        <td>
+            <a href="${r.reviewLink()}" target="_blank">
+                <i class="icon-external-link"></i> ${r.username}
+            </a>
         </td>
         <td style="background:${'#' + r.color()}">${r.rating}</td>
     </tr>

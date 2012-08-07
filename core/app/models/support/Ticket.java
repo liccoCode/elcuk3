@@ -102,6 +102,16 @@ public class Ticket extends Model {
     public Date lastSyncTime;
 
     /**
+     * 客户邮件的次数
+     */
+    public int messageTimes;
+
+    /**
+     * 我们联系客户的次数
+     */
+    public int responseTimes;
+
+    /**
      * 是否成功的除了这个 Ticket
      */
     @Expose

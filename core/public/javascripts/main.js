@@ -118,12 +118,16 @@ $.DateUtil = {
 
 };
 
-$(function(){
+function toggle_init(){
     // 为页面添加 data-toggle=toggle 元素事件(类似 bootstrap 的 collapse)
-    $('body').on('click', '[data-toggle=toggle]', function(e){
+    $('body').off('click', '[data-toggle=toggle]').on('click', '[data-toggle=toggle]', function(e){
         var target = $(this).attr('data-target');
         $(target).fadeToggle('fast');
         e.preventDefault();
     });
+}
+
+$(function(){
+    toggle_init();
 });
 

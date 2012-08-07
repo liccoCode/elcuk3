@@ -33,7 +33,7 @@
         <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
         <td ${r.isRealName ? 'style=background:#0091F4' : ''}>${r.isRealName}</td>
         <td style="background:${"#" + r.color()}">${r.rating}</td>
-        <td style="background:${'#' + lengthAndColor._2}">
+        <td style="cursor:pointer;background:${'#' + lengthAndColor._2}" data-toggle="toggle" data-target="#review_${r.reviewId}">
             <span class="badge badge-inverse">${lengthAndColor._1}</span>
             #{if r.isWithinTop1000()}
                 <span class="badge badge-success">Top ${r.topN}</span>
