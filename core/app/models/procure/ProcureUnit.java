@@ -12,6 +12,8 @@ import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.TimelineEventSource;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.helper.JpqlSelect;
@@ -346,6 +348,12 @@ public class ProcureUnit extends Model {
         this.save();
     }
 
+    /**
+     * 计算剩余可运输的数量;
+     * 优先使用 "实际交货库存(deliveryQty)"计算, 如果这个值为空则使用"确认采购数量(ensureQty)"计算
+     *
+     * @return
+     */
     public F.T2<Integer, Set<String>> leftTransferQty() {
         int shippedQty = 0;
         Set<String> shipmentIds = new HashSet<String>();
@@ -353,7 +361,8 @@ public class ProcureUnit extends Model {
             shippedQty += item.qty;
             shipmentIds.add(item.shipment.id);
         }
-        return new F.T2<Integer, Set<String>>(this.delivery.deliveryQty - shippedQty, shipmentIds);
+        int totalQty = this.delivery.deliveryQty == null ? this.delivery.ensureQty : this.delivery.deliveryQty;
+        return new F.T2<Integer, Set<String>>(totalQty - shippedQty, shipmentIds);
     }
 
     public String nickName() {
@@ -371,12 +380,19 @@ public class ProcureUnit extends Model {
     }
 
     public static List<ProcureUnit> findWaitingForShip() {
-        List<ProcureUnit> procureUnits = ProcureUnit.find("stage=? AND deliveryment.state!=? AND deliveryment.state!=?",
+        List<ProcureUnit> procureUnits = ProcureUnit.find("stage=? AND deliveryment.state NOT IN (?,?)",
                 STAGE.DONE, Deliveryment.S.PENDING, Deliveryment.S.CANCEL).fetch();
         Collections.sort(procureUnits, new Comparator<ProcureUnit>() {
             @Override
             public int compare(ProcureUnit p1, ProcureUnit p2) {
                 return p2.leftTransferQty()._1 - p1.leftTransferQty()._1;
+            }
+        });
+        CollectionUtils.filter(procureUnits, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                ProcureUnit p = (ProcureUnit) o;
+                return p.leftTransferQty()._1 > 0;
             }
         });
         return procureUnits;
