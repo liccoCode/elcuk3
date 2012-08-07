@@ -92,6 +92,7 @@ public enum TicketState {
             //TO NEW_MSG
             //TO NO_RESP
 
+            // 必须要先检查 NEW_MSG, 要进入 NO_RESP 状态, 必须是在我们自己回了卖家的信才可以
             if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
 

@@ -43,6 +43,16 @@ public class Application extends Controller {
         renderJSON(new Ret());
     }
 
+    /**
+     * 清除指定 key 的缓存
+     *
+     * @param key
+     */
+    public static void c(String key) {
+        Cache.delete(key);
+        renderJSON(new Ret());
+    }
+
     public static void upload(File file) {
 
         System.out.println(file.length() / 1024 + " KB");

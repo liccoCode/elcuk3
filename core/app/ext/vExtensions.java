@@ -4,6 +4,7 @@ import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.Selling;
+import models.support.Ticket;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.i18n.Messages;
@@ -104,6 +105,10 @@ public class vExtensions extends JavaExtensions {
     public static String reviewLink(AmazonListingReview review) {
         String site = StringUtils.split(review.listingId, "_")[1];
         return String.format("http://www.%s/review/%s", site, review.reviewId);
+    }
+
+    public static String osTicketLink(Ticket ticket) {
+        return String.format("http://t.easyacceu.com/scp/tickets.php?id=%s", ticket.osTicketId());
     }
 
     /*util.Date*/

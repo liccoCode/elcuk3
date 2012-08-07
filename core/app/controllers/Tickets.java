@@ -1,6 +1,8 @@
 package controllers;
 
+import com.google.gson.JsonObject;
 import helper.J;
+import jobs.TicketStateSyncJob;
 import models.ElcukRecord;
 import models.User;
 import models.market.AmazonListingReview;
@@ -15,6 +17,7 @@ import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -87,6 +90,21 @@ public class Tickets extends Controller {
         renderJSON(new Ret());
     }
 
+    /**
+     * 通过 ReviewId 向 OsTicket 进行更新
+     *
+     * @param rid
+     */
+    public static void sync(String rid) {
+        AmazonListingReview review = AmazonListingReview.findByReviewId(rid);
+        JsonObject syncsJsonDetails = TicketStateSyncJob.communicationWithOsTicket(Arrays.asList(review.ticket.osTicketId()));
+        F.T2<List<Ticket>, List<Ticket>> ticketT2 = TicketStateSyncJob.syncOsTicketDetailsIntoSystem(syncsJsonDetails, Arrays.asList(review.ticket));
+        if(ticketT2._1.size() != 0) {
+            renderJSON(new Ret(true, ticketT2._1.get(0).osTicketId()));
+        } else {
+            renderJSON(new Ret(ticketT2._2.get(0).osTicketId()));
+        }
+    }
 
     /**
      * 初始化代码, 需要删除的

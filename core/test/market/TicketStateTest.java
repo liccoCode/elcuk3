@@ -1,7 +1,5 @@
 package market;
 
-import models.market.AmazonListingReview;
-import org.junit.Before;
 import play.test.UnitTest;
 
 /**
@@ -11,9 +9,4 @@ import play.test.UnitTest;
  * Time: 11:14 AM
  */
 public class TicketStateTest extends UnitTest {
-    @Before
-    public void setup() {
-        AmazonListingReview review = new AmazonListingReview();
-        review.createReview();
-    }
 }

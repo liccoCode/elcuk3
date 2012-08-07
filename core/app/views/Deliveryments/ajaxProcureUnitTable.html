@@ -16,7 +16,7 @@
         <td>阶段</td>
     </tr>
 #{list items:dlmt.units, as:'unit'}
-    <tr data-toggle="collapse" href="#unit_${unit.id}">
+    <tr data-toggle="toggle" data-target="#unit_${unit.id}" style="cursor:pointer">
         <td>${unit.id}</td>
         <td>${unit.plan.planArrivDate.date()}</td>
         <td>${unit.delivery.planDeliveryDate.date()}</td>
@@ -52,7 +52,7 @@
         <td style="background:${unit.stage.color()}">${unit.stage}</td>
     </tr>
     <tr id="unit_${unit.id}" style="display:none;">
-        <td colspan="13">
+        <td colspan="14">
             <form><!-- 用于 jquery.validate 插件的 -->
                 <table class="table table-condensed table-bordered">
                     <tr>

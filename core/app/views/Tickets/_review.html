@@ -4,12 +4,13 @@
         <th>Title</th>
         <th>ReviewId</th>
         <th>UserName</th>
+        <th>OsTicket</th>
         <th>Score</th>
     </tr>
 #{list items:tickets, as:'t'}
     #{set r:t.review/}
     #{set reviewC_L:r.reviewLengthColor()/}
-    <tr class="twoTr">
+    <tr data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;">
         <td>
             <a href="@{Products.show(t.sku)}" target="_blank">${t.sku}</a>
         </td>
@@ -36,10 +37,20 @@
                 <i class="icon-external-link"></i> ${r.username}
             </a>
         </td>
+        <td>
+            #{if t.osTicketId()}
+                <a href="${t.osTicketLink()}" target="_blank">
+                    <i class="icon-external-link"></i> ${t.osTicketId()}
+                </a>
+            #{/if}
+            #{else }
+                <i class="icon-warning-sign"></i>
+            #{/else}
+        </td>
         <td style="background:${'#' + r.color()}">${r.rating}</td>
     </tr>
-    <tr style="display:none;">
-        <td colspan="5">
+    <tr id="toggle_${r.reviewId}" style="display:none;">
+        <td colspan="6">
             <div class="row-fluid">
                 <div class="span6">
                     <h3>Review</h3>

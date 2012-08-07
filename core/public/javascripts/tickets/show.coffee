@@ -1,7 +1,6 @@
 $ ->
   reviewId = -> $('#reviewId').html().trim()
 
-
   $('#try_order').click (e) ->
     mask = $('#container')
     mask.mask('尝试计算中, 如果计算成功, 刷新后则有 OrderId...')

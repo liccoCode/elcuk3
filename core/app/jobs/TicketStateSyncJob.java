@@ -32,27 +32,9 @@ public class TicketStateSyncJob extends Job {
         List<String> ticketIds = new ArrayList<String>();
         for(Ticket t : tickets) ticketIds.add(t.osTicketId());
 
-        Logger.info("Update Tickets: %s", StringUtils.join(ticketIds, ","));
-        JsonElement rs = HTTP.json("http://t.easyacceu.com/api/tickt_sync.php?",
-                Arrays.asList(new BasicNameValuePair("ticketIds", StringUtils.join(ticketIds, ",")))
-        );
         try {
-            JsonObject rsObj = rs.getAsJsonObject();
-
-            Map<String, List<OsMsg>> msgMap = OsMsg.msgsMap(rsObj.getAsJsonArray("msgs"));
-            Map<String, List<OsResp>> respMap = OsResp.respsMap(rsObj.getAsJsonArray("resps"));
-
-            // 处理一个一个的 Ticket 的状态改变
-            for(Ticket t : tickets) {
-                if(t.state == null) t.state = TicketState.NEW;
-                t.state = t.state.nextState(t, msgMap.get(t.osTicketId()), respMap.get(t.osTicketId()));
-                F.T3<Date, Date, Date> lastXXXDateTime = this.lastXXXDatetime(msgMap.get(t.osTicketId()), respMap.get(t.osTicketId()));
-                t.lastResponseTime = lastXXXDateTime._1;
-                t.lastMessageTime = lastXXXDateTime._2;
-                t.lastSyncTime = lastXXXDateTime._3;
-
-                t.save();
-            }
+            JsonObject rsObj = TicketStateSyncJob.communicationWithOsTicket(ticketIds);
+            TicketStateSyncJob.syncOsTicketDetailsIntoSystem(rsObj, tickets);
         } catch(IllegalStateException e) {
             if(StringUtils.contains(e.getMessage(), "77"))
                 Logger.warn("The Request IP is not valid.");
@@ -65,9 +47,47 @@ public class TicketStateSyncJob extends Job {
     }
 
     /**
+     * 将 OsTicket 的信息与系统内的 Tickets 信息进行同步处理
+     *
+     * @param rsObj
+     * @param tickets
+     * @return 成功与失败的 Ticket, Tuple._1:success, Tuple._2:faled
+     */
+    public static F.T2<List<Ticket>, List<Ticket>> syncOsTicketDetailsIntoSystem(JsonObject rsObj, List<Ticket> tickets) {
+        Map<String, List<OsMsg>> msgMap = OsMsg.msgsMap(rsObj.getAsJsonArray("msgs"));
+        Map<String, List<OsResp>> respMap = OsResp.respsMap(rsObj.getAsJsonArray("resps"));
+
+        F.T2<List<Ticket>, List<Ticket>> rtTickets = new F.T2<List<Ticket>, List<Ticket>>(new ArrayList<Ticket>(), new ArrayList<Ticket>());
+        // 处理一个一个的 Ticket 的状态改变
+        for(Ticket t : tickets) {
+            try {
+                if(t.state == null) t.state = TicketState.NEW;
+                t.state = t.state.nextState(t, msgMap.get(t.osTicketId()), respMap.get(t.osTicketId()));
+                F.T3<Date, Date, Date> lastXXXDateTime = TicketStateSyncJob.lastXXXDatetime(msgMap.get(t.osTicketId()), respMap.get(t.osTicketId()));
+                t.lastResponseTime = lastXXXDateTime._1;
+                t.lastMessageTime = lastXXXDateTime._2;
+                t.lastSyncTime = lastXXXDateTime._3;
+
+                rtTickets._1.add(t.<Ticket>save());
+            } catch(Exception e) {
+                rtTickets._2.add(t);
+            }
+        }
+        return rtTickets;
+    }
+
+    public static JsonObject communicationWithOsTicket(List<String> ticketIds) {
+        Logger.info("Update Tickets: %s", StringUtils.join(ticketIds, ","));
+        JsonElement rs = HTTP.json("http://t.easyacceu.com/api/tickt_sync.php?",
+                Arrays.asList(new BasicNameValuePair("ticketIds", StringUtils.join(ticketIds, ",")))
+        );
+        return rs.getAsJsonObject();
+    }
+
+    /**
      * 联系客户的最后时间, 客户回复的最后时间, 最后进行同步的时间
      */
-    private F.T3<Date, Date, Date> lastXXXDatetime(List<OsMsg> msgs, List<OsResp> resps) {
+    private static F.T3<Date, Date, Date> lastXXXDatetime(List<OsMsg> msgs, List<OsResp> resps) {
         OsResp resp = OsResp.lastestResp(resps);
         OsMsg msg = OsMsg.lastestMsg(msgs);
         return new F.T3<Date, Date, Date>(resp == null ? null : resp.created, msg == null ? null : msg.created, new Date());
@@ -183,4 +203,5 @@ public class TicketStateSyncJob extends Job {
             return tmp;
         }
     }
+
 }

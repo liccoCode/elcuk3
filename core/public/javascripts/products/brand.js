@@ -7,8 +7,7 @@ $(function(){
         form.mask('创建中...');
         $.post('/brands/bc', $.params, function(r){
             try{
-                if(r.flag) alert("创建成功.");
-                else alert(r.message);
+                if(r.flag) alert("创建成功.");else alert(r.message);
             }finally{
                 form.unmask();
             }
@@ -25,9 +24,8 @@ $(function(){
                 try{
                     if(r.flag){
                         alert('绑定成功!');
-                        $('tr[bid=' + o.attr('bid') + ']').dblclick();
-                    }
-                    else alert(r.message);
+                        $('tr[bid=' + o.attr('bid') + ']').click();
+                    }else alert(r.message);
                 }finally{
                     $('#category_' + o.attr('bid')).unmask();
                 }
@@ -44,7 +42,7 @@ $(function(){
                 try{
                     if(r.flag){
                         alert("解除绑定成功!");
-                        $('tr[bid=' + bid + ']').dblclick();
+                        $('tr[bid=' + bid + ']').click();
                     }else alert(r.message);
                 }finally{
                     $('#category_' + bid).unmask();
@@ -54,7 +52,7 @@ $(function(){
     }
 
     // 双击加载详细信息
-    $('#brand_slider tr[bid]').dblclick(function(){
+    $('#brand_slider tr[bid]').click(function(){
         var slider = $('#brand_slider');
         var bid = $(this).attr('bid');
         slider.mask("加载中...");
