@@ -153,3 +153,23 @@ $ ->
     return false if o.val().length isnt 10
     reviewLoadFun()
     e.preventDefault()
+
+
+  # 解析 hash
+  activeAmazonReview = ->
+    args = location.hash.substr(1).split('/')
+    return false if args.length < 2
+    market = args[1].split('.')[1..-1].join('.')
+    if(market.indexOf('de') > -1)
+      $('#search_form [name=m] [value=ade]').prop('selected', true)
+    else if(market.indexOf('uk') > -1)
+      $('#search_form [name=m] [value=auk]').prop('selected', true)
+    else if(market.indexOf('fr') > -1)
+      $('#search_form [name=m] [value=afr]').prop('selected', true)
+    else if(market.indexOf('com') > -1)
+      $('#search_form [name=m] [value=aus]').prop('selected', true)
+
+    $('#search_form [name=asin]').val(args[0])
+    $('#search_form button').click()
+  activeAmazonReview()
+

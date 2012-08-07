@@ -39,7 +39,8 @@ public class Tickets extends Controller {
         renderArgs.put("newOverdueTickets", newT2._2);
         renderArgs.put("twoMailTickets", needTwoT2._1);
         renderArgs.put("twoMailOverdueTickets", needTwoT2._2);
-        render(noRespTickets, newMsgTickts);
+        int totalNeedDealReview = newT2._1.size() + newT2._2.size() + needTwoT2._1.size() + needTwoT2._2.size() + noRespTickets.size() + newMsgTickts.size();
+        render(noRespTickets, newMsgTickts, totalNeedDealReview);
     }
 
     public static void show(String rid) {

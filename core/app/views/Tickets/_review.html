@@ -1,6 +1,7 @@
 <table class="table table-condensed table-bordered">
     <tr>
         <th>Sku</th>
+        <th>Asin</th>
         <th>Title</th>
         <th>ReviewId</th>
         <th>UserName</th>
@@ -10,11 +11,15 @@
 #{list items:tickets, as:'t'}
     #{set r:t.review/}
     #{set reviewC_L:r.reviewLengthColor()/}
-    <tr data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;">
+    <tr>
         <td>
             <a href="@{Products.show(t.sku)}" target="_blank">${t.sku}</a>
         </td>
-        <td style="background:${'#' + reviewC_L._2}">
+        <td>
+            #{set lid:models.market.Listing.unLid(r.listingId)/}
+            <a href="@{AmazonReviews.index()}#${lid._1}/${lid._2}" target="_blank">${lid._1}</a>
+        </td>
+        <td data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;background:${'#' + reviewC_L._2}">
             <span class="badge badge-inverse">${reviewC_L._1}</span> |
             <span>${r.title}</span>
             #{list items:t.reasons, as:'ra'}
