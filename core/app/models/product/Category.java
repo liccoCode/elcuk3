@@ -2,9 +2,11 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import models.embedded.CategorySettings;
+import models.support.TicketReason;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,6 +30,9 @@ public class Category extends GenericModel {
      */
     @ManyToMany
     public List<AttrName> attrNames;
+
+    @OneToMany(mappedBy = "category")
+    public List<TicketReason> reasons = new ArrayList<TicketReason>();
 
     @Id
     @Expose

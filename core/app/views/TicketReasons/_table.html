@@ -1,0 +1,32 @@
+<table class="table table-bordered" id="reason_table">
+    <tr>
+        <th>Reason</th>
+        <td>
+            <div class="input-prepend">
+                <input type="text" name="lr.reason" value="${lr.reason}">
+                <span class="help-inline">这个名字请简写, 不要太长</span>
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <th>Category</th>
+        <td>
+        ${lr.category.categoryId} | ${lr.category.name}
+            <input type="hidden" name="lr.category.categoryId" value="${lr.category.categoryId}">
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <h3>Memo</h3>
+            <textarea name="lr.memo" rows="8" class="span12">${lr.memo}</textarea>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <button class="btn btn-primary">${lr.id > 0 ? '更新' : '创建'}</button>
+        </td>
+
+    </tr>
+</table>

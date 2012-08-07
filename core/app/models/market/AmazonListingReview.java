@@ -4,13 +4,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.GTs;
 import helper.J;
-import helper.Webs;
+import models.support.Ticket;
+import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.data.validation.Required;
+import play.data.validation.Unique;
+import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -30,7 +33,16 @@ import java.util.List;
 @Entity
 public class AmazonListingReview extends GenericModel {
 
-    @ManyToOne
+    /**
+     * 查找关联的订单, 找到了则关联上
+     */
+    @OneToOne
+    public Orderr orderr;
+
+    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    public Ticket ticket;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
     /**
@@ -39,12 +51,14 @@ public class AmazonListingReview extends GenericModel {
      */
     @Id
     @Expose
+    @Required
     public String alrId;
 
     /**
      * 一个冗余字段
      */
     @Expose
+    @Required
     public String listingId;
 
 
@@ -52,9 +66,11 @@ public class AmazonListingReview extends GenericModel {
      * Review 的得分
      */
     @Expose
+    @Required
     public Float rating;
 
     @Expose
+    @Required
     public String title;
 
     /**
@@ -88,6 +104,7 @@ public class AmazonListingReview extends GenericModel {
      * 关联的用户 Id
      */
     @Expose
+    @Required
     public String userid;
 
     @Expose
@@ -103,7 +120,7 @@ public class AmazonListingReview extends GenericModel {
      * Amazon 会判断这个 Review 是不是为购买了这个商品的客户发出.
      */
     @Expose
-    public Boolean purchased;
+    public Boolean purchased = false;
 
     /**
      * 标记为是否解决了这个 Review; 当然只有当 Review <= 3 的时候才需要进行处理!
@@ -133,35 +150,57 @@ public class AmazonListingReview extends GenericModel {
     /**
      * 是否为视频 Review
      */
-    public Boolean isVedio;
+    @Expose
+    public Boolean isVedio = false;
     /**
      * 是不是 VineVoice
      */
-    public Boolean isVineVoice;
+    @Expose
+    public Boolean isVineVoice = false;
 
     /**
      * 是不是真名
      */
-    public Boolean isRealName;
+    @Expose
+    public Boolean isRealName = false;
 
     /**
      * 是 Top 多少?
      */
+    @Expose
     public Integer topN;
 
 
     /**
      * Amazon 给与的每个 Review 的 ID
      */
+    @Expose
+    @Unique
+    @Column(unique = true)
+    @Required
     public String reviewId;
 
     /**
      * 视频的预览图片链接
      */
+    @Expose
     public String vedioPicUrl;
 
     @Column(columnDefinition = "varchar(32) DEFAULT ''")
+    @Expose
     public String osTicketId;
+
+    /**
+     * 每一个 Review 创建的时候都记录一次 originJson 字符串, 记录初始状态
+     */
+    @Lob
+    public String originJson = " ";
+
+    /**
+     * 判断这个 Review 是否为自己的 Listing 产生的
+     */
+    @Expose
+    public boolean isOwner = false;
 
     /**
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
@@ -175,7 +214,11 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     public AmazonListingReview createReview() {
+        if(!Validation.current().valid(this).ok)
+            throw new FastRuntimeException("Not Valid, more details see Validation.errors()");
         this.createDate = new Date();
+        // 将初始的 Review 数据全部记录下来
+        this.originJson = J.G(this);
         return this.save();
     }
 
@@ -191,10 +234,10 @@ public class AmazonListingReview extends GenericModel {
             throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
 
         this.listingId = newReview.listingId;
-//        if(StringUtils.isNotBlank(newReview.listingId)) this.listingId = newReview.listingId; //这个不修改
         if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
-            this.comment += String.format("\r\n%s:%s", Dates.date2Date(null), J.G(this));
             this.lastRating = this.rating;
+            this.comment = String.format("Rating from %s to %s At %s\r\n", this.lastRating, newReview.rating, Dates.date2DateTime()) + this.comment;
+            this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
@@ -223,7 +266,8 @@ public class AmazonListingReview extends GenericModel {
 
     /**
      * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
-     * 在 Check 方法执行完成以后将数据同步回数据库
+     * 在 Check 方法执行完成以后将数据同步回数据库;
+     * 如果此 Review 需要开 Ticket 进行处理, 也在此判断了
      */
     public void listingReviewCheck() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
@@ -232,44 +276,15 @@ public class AmazonListingReview extends GenericModel {
 
 
 //        Rating < 4 的开 OsTicket
-        if((this.rating != null && this.rating < 4)) this.openOsTicket(null);
+        if((this.rating != null && this.rating < 4)) {
+            if(this.ticket == null) this.ticket = new Ticket(this);
+            this.ticket.openOsTicket(null);
+        }
 //        Rating <= 4 的发送邮件提醒
         if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
         this.save();
     }
 
-    public void openOsTicket(String title) {
-        if(StringUtils.isNotBlank(this.osTicketId)) {
-            Logger.info("Review OsTicket is exist! %s", this.osTicketId);
-            return;
-        }
-
-        String name = String.format("%s - %s", this.username, this.listingId);
-        String email = "";
-        String subject = title;
-        String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
-
-        if(StringUtils.isBlank(subject)) {
-            if(this.listing.market == Account.M.AMAZON_DE) {
-                subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
-            } else { // 除了 DE 使用德语其他的默认使用'英语'
-                subject = "You left a negative product review, may we have a chance to make up?";
-            }
-        }
-
-        List<Orderr> orders = Orderr.findByUserId(this.userid);
-        if(orders.size() > 0) email = orders.get(0).email;
-        if(StringUtils.isBlank(email)) {
-            Logger.warn("Review (%s) relate order have no email.", this.alrId);
-            email = "support@easyacceu.com";
-            subject += " - No Order found...";
-            content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
-
-            this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
-        } else {
-            this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
-        }
-    }
 
     @Override
     public String toString() {
@@ -295,6 +310,25 @@ public class AmazonListingReview extends GenericModel {
         return sb.toString();
     }
 
+    /**
+     * 为此 Review 添加为什么是负评
+     *
+     * @param lr
+     */
+    public AmazonListingReview addWhyNegtive(TicketReason lr) {
+        /**
+         * 0. 此原因是否存在?
+         * 1. 检查这个 lr 是否与这个 Review 所属在与 Category 下?
+         * 2. 检查这个原因是否已经在此 Review 中存在了?
+         */
+        if(!lr.isPersistent()) throw new FastRuntimeException("此原因不存在!");
+        if(!this.listing.product.category.categoryId.equals(lr.category.categoryId))
+            throw new FastRuntimeException("此原因与这个 Listing 不属于一个类别");
+        if(lr.tickets.contains(this.ticket)) throw new FastRuntimeException("此原因已经存在, 不需要重复添加");
+        this.ticket.reasons.add(lr);
+        return this.save();
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -303,9 +337,16 @@ public class AmazonListingReview extends GenericModel {
 
         AmazonListingReview that = (AmazonListingReview) o;
 
-        if(alrId != null ? !alrId.equals(that.alrId) : that.alrId != null) return false;
+        if(reviewId != null ? !reviewId.equals(that.reviewId) : that.reviewId != null) return false;
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (reviewId != null ? reviewId.hashCode() : 0);
+        return result;
     }
 
     /**
@@ -331,11 +372,15 @@ public class AmazonListingReview extends GenericModel {
     }
 
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (alrId != null ? alrId.hashCode() : 0);
-        return result;
+    /**
+     * 根据这个 Review 的 userId, 与 ReviewDate 去尝试 Order 并且关联上
+     *
+     * @return
+     */
+    public Orderr tryToRelateOrderByUserId() {
+        if(this.orderr != null) throw new FastRuntimeException("已经找到 Review 对应的 Order");
+        if(StringUtils.isBlank(this.userid)) return null;
+        return Orderr.find("createDate<=? AND userid=? ORDER BY createDate DESC", this.reviewDate, this.userid).first();
     }
 
     /**
@@ -375,17 +420,17 @@ public class AmazonListingReview extends GenericModel {
      */
     public F.T2<Integer, String> reviewLengthColor() {
         if(this.review.length() <= 100) {
-            return new F.T2<Integer, String>(this.review.length(), "29FFF1");
+            return new F.T2<Integer, String>(this.review.length(), "2FCCEF");
         } else if(this.review.length() <= 240) {
-            return new F.T2<Integer, String>(this.review.length(), "29D2FF");
+            return new F.T2<Integer, String>(this.review.length(), "6CB4E6");
         } else if(this.review.length() <= 500) {
-            return new F.T2<Integer, String>(this.review.length(), "2997FF");
+            return new F.T2<Integer, String>(this.review.length(), "8CA7DE");
         } else if(this.review.length() <= 1000) {
-            return new F.T2<Integer, String>(this.review.length(), "2962FF");
+            return new F.T2<Integer, String>(this.review.length(), "9BA0D8");
         } else if(this.review.length() <= 2000) {
-            return new F.T2<Integer, String>(this.review.length(), "292AFF");
+            return new F.T2<Integer, String>(this.review.length(), "AC96D4");
         } else {
-            return new F.T2<Integer, String>(this.review.length(), "6229FF");
+            return new F.T2<Integer, String>(this.review.length(), "B38ACE");
         }
     }
 
@@ -448,5 +493,28 @@ public class AmazonListingReview extends GenericModel {
             reviewLeftClicks.add(new F.T2<String, Integer>(review.reviewId, leftClick));
         }
         return reviewLeftClicks;
+    }
+
+    /**
+     * @return
+     */
+    public F.T2<List<TicketReason>, List<String>> unTagedReasons() {
+        List<TicketReason> unTaged = new ArrayList<TicketReason>();
+        List<String> reasonNames = new ArrayList<String>();
+
+        if(this.ticket == null)
+            return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
+
+        if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
+            unTaged.addAll(this.listing.product.category.reasons);
+        } else {
+            for(TicketReason rea : this.listing.product.category.reasons) {
+                for(TicketReason lrea : this.ticket.reasons) {
+                    if(!lrea.equals(rea)) unTaged.add(rea);
+                }
+            }
+        }
+        for(TicketReason ra : unTaged) reasonNames.add(ra.reason);
+        return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
     }
 }

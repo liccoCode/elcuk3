@@ -1,0 +1,104 @@
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="@{Application.index()}">Elcuk2</a>
+
+            <div class="nav-collapse">
+                <ul class="nav">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@{Application.index()}">Home</a></li>
+                            <li><a href="#change_passwd" data-toggle="modal">Password</a></li>
+                            <li><a href="@{Secure.logout()}">Logout</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@{Listings.index()}">(L)isting</a></li>
+                        #{ck 'manager'}
+                            <li><a href="@{Orders.index(1, 35)}">(O)rder</a></li>
+                            <li><a href="@{Analyzes.index()}">(S)elling Analyze</a></li>
+                        #{/ck}
+                            <li><a href="@{Feedbacks.index(1, 20)}">Feedbacks</a></li>
+                            <li><a href="@{AmazonReviews.index()}">Review Click Page</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@{Tickets.index()}">Tickets</a></li>
+                        </ul>
+                    </li>
+
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@{Products.index(1, 20)}">Product</a></li>
+                            <li><a href="@{Products.w_index(1, 20)}">Whouse</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@{Categorys.index()}">Category</a></li>
+                            <li><a href="@{Brands.index()}">Brand</a></li>
+                            <li><a href="@{Familys.index()}">Family</a></li>
+                            <li><a href="@{Attrs.index()}">Attrs</a></li>
+                        </ul>
+                    </li>
+
+
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@{Procures.index()}">采购</a></li>
+                            <li><a href="@{Shipments.index()}">运输</a></li>
+                            <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+                        </ul>
+                    </li>
+
+                #{ck 'root'}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="@{Jobs.index()}">系统任务管理</a></li>
+                            <li><a href="@{Servers.index()}">服务器管理</a></li>
+                            <li><a href="@{Accounts.index()}">用户管理</a></li>
+                        </ul>
+                    </li>
+                #{/ck}
+                </ul>
+
+                <ul class="nav pull-right">
+                    <li class="divider-vertical"></li>
+                    <li><a href="#">Hello, ${controllers.Secure.Security.connected()}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="change_passwd" class="modal hide fade">
+    <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+
+        <h3>修改用户名密码</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form" style="text-align:center">
+            <label class="label label-info large span2">Username:</label>
+            <input name="u.username" type="text" class="input-large span3" readonly placeholder="Username" value="${controllers.Secure.Security.connected()}">
+            <label class="label label-info large span2">New Password:</label>
+            <input name="u.password" type="password" class="input-large span3" placeholder="NewPassword">
+            <label class="label label-info large span2">Confirm:</label>
+            <input name="u.confirm" type="password" class="input-large span3" placeholder="Confirm New Password">
+
+            <div class="label label-warning" style="font-size:12px">修改密码前最好重新登陆一次后再进行修改!</div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <a href="#" id="change_passwd_btn" class="btn btn-primary">Save</a>
+        <a href="#" class="btn" data-dismiss="modal">Close</a>
+    </div>
+</div>

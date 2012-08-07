@@ -4,14 +4,17 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import helper.Crawl;
+import helper.J;
 import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.ListingOffer;
+import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
+import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -197,7 +200,7 @@ public class ListingWorkers extends Job {
             try {
                 reviews = Crawl.crawlReview(action._1.market.name(), action._1.asin);
                 /**
-                 * 解析出所有的 Reviews, 然后从数据库中加载出此 Listing 对应的所有 Reviews 然后进行判断这些 Reviews 是更新还是新添加?
+                 * 解析出所有的 Tickets, 然后从数据库中加载出此 Listing 对应的所有 Tickets 然后进行判断这些 Tickets 是更新还是新添加?
                  *
                  * 新添加, 直接 Save
                  *
@@ -216,8 +219,15 @@ public class ListingWorkers extends Job {
                         else
                             review.listing = Listing.findById(review.listingId);
                         review.createDate = review.reviewDate;
-                        review.createReview();// 创建新的
-                        review.listingReviewCheck();
+                        review.isOwner = review.listing.product != null;
+                        Orderr ord = review.tryToRelateOrderByUserId();
+                        if(ord != null) review.orderr = ord;
+                        try {
+                            review.createReview();// 创建新的
+                            review.listingReviewCheck();
+                        } catch(Exception fe) {
+                            Logger.warn(Webs.E(fe) + "|" + J.json(Validation.errors()));
+                        }
                     } else {
                         fromDB.updateAttr(review); // 更新
                         fromDB.listingReviewCheck();

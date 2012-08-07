@@ -1,4 +1,4 @@
-<tr aid=${acc.id}>
+<tr data-toggle="toggle" data-target="#toogle_${acc.id}" style="cursor:pointer">
     <td>${acc.id}</td>
     <td rel="popover" content="${acc.token}" title="Token" width="auto">${acc.uniqueName}</td>
     <td>${acc.type}</td>
@@ -10,7 +10,7 @@
     <td>#{yesOrNo f:acc.isAUS/}</td>
     <td>#{yesOrNo f:acc.closeable/}</td>
 </tr>
-<tr id="acc_${acc.id}" style="display:none;">
+<tr id="toogle_${acc.id}" style="display:none;">
     <td colspan="10">
         <form>
             <table class="table table-condensed table-bordered">

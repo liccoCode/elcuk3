@@ -33,6 +33,11 @@ $ ->
           basic.unmask()
       )
 
+  bindReasonRemoveBtn = () ->
+    $('a.remove').click (e) ->
+      console.log('remove click')
+      e.preventDefault() if !confirm("确认删除?")
+
   # 绑定详细页面中的 Bind 按钮
   bindBrandBindBtn = ->
     $('button[bind]').click ->
@@ -96,8 +101,13 @@ $ ->
     slider.mask('加载中...')
     $('#cat_detail').load('/categorys/detail', cid: $(@).attr('cid'), =>
         bindBasicInfoUpdate($(@).attr('cid'))
+        bindReasonRemoveBtn()
         bindBrandBindBtn()
         bindBrandUnBindBtn()
         bindAttrSaveBtn()
         slider.unmask()
     )
+
+  # 利用 hash 在访问到这一页的时候 click 这下
+  $("tr[cid=#{window.location.hash[1..-1]}]").click() if window.location.hash
+

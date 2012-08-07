@@ -19,7 +19,7 @@ public class OsTicketTest extends UnitTest {
     //    @Test
     public void testCreateReviewTicket() {
         AmazonListingReview review = AmazonListingReview.findById("B007TR9VRU_AMAZON.CO.UK_A14TVA83T35IG1");
-        review.openOsTicket(null);
+        review.ticket.openOsTicket(null);
         review.save();
         System.out.println(review.osTicketId);
     }

@@ -21,7 +21,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Orders extends Controller {
 
-    public static void o_index(Integer p, Integer s) {
+    public static void index(Integer p, Integer s) {
         Integer[] fixs = Webs.fixPage(p, s);
         p = fixs[0];
         s = fixs[1];
@@ -34,7 +34,7 @@ public class Orders extends Controller {
         render(orders, count, p, s, pi, accs);
     }
 
-    public static void o_detail(String oid) {
+    public static void show(String oid) {
         Orderr ord = Orderr.findById(oid);
         Feedback f = Feedback.findById(ord.orderId);
         render(ord, f);
@@ -46,7 +46,7 @@ public class Orders extends Controller {
      * @param p
      */
     @CacheFor("5mn")
-    public static void o_search(OrderPOST p) {
+    public static void search(OrderPOST p) {
         List<Orderr> orders = p.query();
         Long count = p.count();
         Pager<Orderr> pi = new Pager<Orderr>(p.size, count, p.page, orders);

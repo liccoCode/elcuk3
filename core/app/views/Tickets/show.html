@@ -1,0 +1,173 @@
+#{extends 'main.html'/}
+#{set title:'Review #' + review.reviewId /}
+#{set 'moreScripts'}
+    #{script 'tickets/show.coffee'/}
+#{/set}
+
+<!-- Review -->
+<div class="label label-info">Review</div>
+<div>
+    <table class="table table-bordered">
+        <tr>
+            <th>Title</th>
+            <td>${review.title}</td>
+            <th>UserId</th>
+            <td id="userId">${review.userid}</td>
+            <th>UserName</th>
+            <td>${review.username}</td>
+            <th>ReviewDate</th>
+            <td>${review.reviewDate.date()}</td>
+        </tr>
+
+        <tr>
+            <th>isVedio</th>
+            <td>${review.isVedio}</td>
+            <th>isVineVoise</th>
+            <td>${review.isVineVoice}</td>
+            <th>isPurchase</th>
+            <td>${review.purchased}</td>
+            <th>isRealName</th>
+            <td>${review.isRealName}</td>
+        </tr>
+
+        <tr>
+            <th>ReviewId</th>
+            <td>
+                <a href="${review.reviewLink()}" target="_blank">
+                    <i class="icon-external-link"></i>
+                    <span id="reviewId">${review.reviewId}</span>
+                </a>
+            </td>
+            <th>Rating</th>
+            <td>${review.rating}</td>
+            <th>Listing</th>
+            <td>
+                <a href="${review.listing.asinLink()}" target="_blank">
+                    <i class="icon-external-link"></i> ${review.listingId}
+                </a>
+            </td>
+            <th>OsTicketId</th>
+            <td>
+            #{if review.ticket != null}
+                <a href="http://t.easyacceu.com/scp/tickets.php?id=${review.ticket.osTicketId()}" target="_blank">
+                    <i class="icon-external-link"></i> ${review.ticket.osTicketId()}
+                </a>
+            #{/if}
+            </td>
+        </tr>
+
+        <tr>
+            <th rel="popover" content="${review.ticket.state.explan()}"><i class="icon-question-sign"> State</i></th>
+            <td>${review.ticket.state}</td>
+            <th>isSuccess</th>
+            <td>${review.ticket.isSuccess}</td>
+            <th>TopN</th>
+            <td>${review.topN}</td>
+            <th>Click</th>
+            <td>${review.helpUp} / ${review.helpClick}</td>
+        </tr>
+    #{if review.isVedio}
+        <tr>
+            <td colspan="8">
+                <img src="${review.vedioPicUrl}" alt="${review.reviewId}">
+            </td>
+        </tr>
+    #{/if}
+
+        <tr>
+            <td colspan="8">
+                <div class="row-fluid" id="reason_div">
+                    <div class="span5">
+                    #{if review.ticket.reasons.size() != 0}
+                        #{list items:review.ticket.reasons, as:'ra'}
+                            <span class="reason badge badge-important">${ra.reason}</span>
+                        #{/list}
+                    #{/if}
+                    </div>
+                    <div class="span7 input-append">
+                        <span class="add-on">${cat.categoryId} | ${cat.name}</span>
+                    #{list items:unTagReasons, as:'ura'}
+                        <span class="unTagReason badge badge-info">${ura.reason}</span>
+                    #{/list}
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
+                <div class="row-fluid">
+                    <div class="span6">
+
+                        <div style="margin:5px 0;">
+                            <!-- 寻找用户的相关订单 -->
+                        #{if review.orderr == null}
+                            <button id="try_order" class="btn btn-primary">Try Order</button>
+                        #{/if}
+
+                            <!-- 此 Ticket 的处理者 -->
+                        #{if review.ticket.resolver == null}
+                            <button id="take_it" tid="${review.ticket.id}" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
+                                Take It
+                            </button>
+                        #{/if}
+                        #{else }
+                            <span class="badge badge-info">由 <i class="icon-user"></i> ${review.ticket.resolver.username.capAll()}
+                                处理</span>
+                        #{/else}
+                        </div>
+
+                        <div style="margin:5px 0">
+                            <a class="btn btn-success" href="@{Products.show(review.ticket.sku)}" target="_blank">${review.ticket.sku}</a><br/>
+                        </div>
+
+                        <div style="margin:5px 0">
+                            <a data-toggle="toggle" data-target="#close_div" class="btn btn-danger">
+                                <i class="icon-edit"></i> Close
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="span6">
+                    *{<img src="${review.listing.picUrls}" alt="${review.ticket.sku}">}*
+                        ${review.listing.picUrls}
+                    </div>
+                </div>
+
+                <div class="row-fluid">
+                    <div id="close_div" class="span12" style="display:none;margin-top:10px;">
+                        <textarea rows="4" id="close_reason" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
+
+                        <a id="close_btn" tid="${review.ticket.id}" class="btn btn-danger">Close</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
+                <h3>Review</h3>
+            ${review.review}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
+                <h3>System Comment</h3>
+            ${review.comment}
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="8">
+                <h3>Ticket Comment</h3>
+            ${review.ticket.memo}
+            </td>
+        </tr>
+
+    </table>
+</div>
+
+#{if review.orderr != null}
+    #{render 'Orders/show.html', ord: review.orderr, part: true/}
+#{/if}

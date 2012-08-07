@@ -73,12 +73,7 @@ $ ->
     )
 
   procureUnitTablInit = ->
-  # 为 tr 添加 slideToggle 事件
-    $('#procure_units tr[data-toggle=collapse]').css('cursor', 'pointer').click ->
-      $.tableRowClickActive('#procure_units tr[data-toggle]', $(@))
-      $($(@).attr('href')).toggle('200', 'linear')
-
-    # 增加在 Deliveryment 页面的 ProcureUnit 完成交货事件
+  # 增加在 Deliveryment 页面的 ProcureUnit 完成交货事件
     $('button[rel=update_delivery_info_btn]').click (e) ->
       key = "#unit_#{@getAttribute('uid')}"
       if $("#{key} form").valid() is false

@@ -3,6 +3,7 @@
 # ~~~~
 
 # Import Secure routes
+# 这个其实可有可无, 只有 Controller 添加了 @With(secure) 就行, 这样是为了修改路径, 将原来的 secure/login -> /login
 *      /                                                    module:secure
 
 
@@ -10,6 +11,7 @@
 GET     /                                                   Application.index
 GET     /pass                                               Application.pwd
 GET     /cc                                                 Application.cc
+GET     /c                                                  Application.c
 
 # Ignore favicon requests
 GET     /favicon.ico                                        404

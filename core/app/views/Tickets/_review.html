@@ -1,0 +1,92 @@
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>Sku</th>
+        <th>Asin</th>
+        <th>Title</th>
+        <th>ReviewId</th>
+        <th>UserName</th>
+        <th>OsTicket</th>
+        <th>Score</th>
+    </tr>
+#{list items:tickets, as:'t'}
+    #{set r:t.review/}
+    #{set reviewC_L:r.reviewLengthColor()/}
+    <tr>
+        <td>
+            <a href="@{Products.show(t.sku)}" target="_blank">${t.sku}</a>
+        </td>
+        <td>
+            #{set lid:models.market.Listing.unLid(r.listingId)/}
+            <a href="@{AmazonReviews.index()}#${lid._1}/${lid._2}" target="_blank">${lid._1}</a>
+        </td>
+        <td data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;background:${'#' + reviewC_L._2}">
+            <span class="badge badge-inverse">${reviewC_L._1}</span> |
+            <span>${r.title}</span>
+            #{list items:t.reasons, as:'ra'}
+                <span class="badge badge-important">${ra.name()}</span>
+            #{/list}
+
+            #{if t.resolver}
+                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
+            #{/if}
+        </td>
+        <td>
+            <a href="@{Tickets.show(r.reviewId)}" target="_blank">
+            ${r.reviewId}
+            </a>
+            #{if r.orderr != null}
+                <span class="pull-right"><i class="icon-shopping-cart"></i></span>#{/if}
+        </td>
+        <td>
+            <a href="${r.reviewLink()}" target="_blank">
+                <i class="icon-external-link"></i> ${r.username}
+            </a>
+        </td>
+        <td>
+            #{if t.osTicketId()}
+                <a href="${t.osTicketLink()}" target="_blank">
+                    <i class="icon-external-link"></i> ${t.osTicketId()}
+                </a>
+            #{/if}
+            #{else }
+                <i class="icon-warning-sign"></i>
+            #{/else}
+        </td>
+        <td style="background:${'#' + r.color()}">${r.rating}</td>
+    </tr>
+    <tr id="toggle_${r.reviewId}" style="display:none;">
+        <td colspan="6">
+            <ul class="nav nav-tabs" style="margin-bottom:3px;">
+                <li class="active"><a href="#review_${r.reviewId}" data-toggle="tab">Review</a></li>
+                <li><a href="#close_${r.reviewId}" data-toggle="tab">Close</a></li>
+            </ul>
+
+            <div class="tab-content" id="tab_content_${r.reviewId}">
+                <div id="review_${r.reviewId}" class="tab-pane fade active in">
+                    <div class="row-fluid" style="background:#fff;">
+                        <div class="span6">
+                            <h3>Review</h3>
+                        ${r.review}
+                        </div>
+                        <div class="span6">
+                            <h3>Comment</h3>
+                        ${r.comment}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="close_${r.reviewId}" class="tab-pane fade" style="background:#fff;">
+                    <div class="row-fluid">
+                        <div class="span12" style="margin-top:10px;">
+                            <textarea rows="4" id="close_reason_${r.reviewId}" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
+
+                            <a rid="${r.reviewId}" tid="${r.ticket.id}" class="close_btn btn btn-danger">Close</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </td>
+    </tr>
+#{/list}
+</table>

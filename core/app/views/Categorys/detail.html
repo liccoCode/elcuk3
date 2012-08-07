@@ -1,4 +1,4 @@
-<div><span class="label label-success">Basic Info</span></div>
+<div class="label label-info">Basic Info</div>
 <div id="detail_${cat.categoryId}">
     <table class="table table-bordered table-condensed">
         <tr>
@@ -28,15 +28,43 @@
         </tr>
         <tr>
             <td colspan="4">
-                <a href="#" id="btn_${cat.categoryId}" class="btn btn-small btn-primary">Save</a>
+                <a href="#" id="btn_${cat.categoryId}" class="btn btn-primary">保存</a>
             </td>
         </tr>
     </table>
 </div>
 
 
-<div><span class="label label-success">Relate Brand</span></div>
-<div class="input-prepend">
+<div class="label label-info">Reason</div>
+<div>
+    <table class="table table-condensed table-bordered">
+        <tr>
+            <th>#</th>
+            <th>Reason</th>
+            <th>Memo</th>
+            <th width="70"></th>
+        </tr>
+    #{list items:cat.reasons, as:'ra'}
+        <tr>
+            <td>${ra.id}</td>
+            <td>${ra.reason}</td>
+            <td>${ra.memo}</td>
+            <td>
+                <a href="@{TicketReasons.edit(ra.id)}" class="btn btn-small btn-primary"><i class="icon-edit"></i></a>
+                <a href="@{TicketReasons.remove}?lrid=${ra.id}" class="remove btn btn-small btn-danger"><i class="icon-trash"></i></a>
+            </td>
+        </tr>
+    #{/list}
+        <tr>
+            <td colspan="4">
+                <a href="@{TicketReasons.blank()}?catId=${cat.categoryId}" class="btn btn-primary">添加原因</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="label label-info">Relate Brand</div>
+<div class="input-prepend" style="margin-top:3px;">
 #{select name:'b.name', items:brands, valueProperty:'name'}#{/select}
     <input type="hidden" name="c.categoryId" value="${cat.categoryId}">
     <button class="btn btn-mini btn-primary" cid="${cat.categoryId}" bind>Bind</button>
@@ -62,7 +90,8 @@
     </table>
 </div>
 
-<div><span class="label label-success">Attrs</span></div>
+
+<div class="label label-info">Attrs</div>
 <div class="input-prepend">
     <span>从下面选择此 Category 所拥有的 Attrs 然后点击</span>
     <a href="#" id="cat_atts_btn" cid="${cat.categoryId}" class="btn btn-mini btn-primary">保存</a>
