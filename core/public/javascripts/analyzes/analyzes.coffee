@@ -323,6 +323,15 @@ $ ->
       window.open("/analyzes/allSkuCsv?#{$('#click_param :input').fieldSerialize()}")
       e.preventDefault()
 
+    # 清理缓存
+    $('#clear_cache').click (e) ->
+      return false if !confirm('确认需要清楚缓存?')
+      $.post('/analyzes/clear', (r) ->
+          if r.flag is true
+            window.location.reload()
+      )
+      e.preventDefault()
+
     # 最下方的 Selling[MerchantSKU, SKU] 列表信息
     sellRankLoad(MSKU, 1)
     sellRankLoad(SKU, 1)
