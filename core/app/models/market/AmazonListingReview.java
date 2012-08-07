@@ -234,10 +234,10 @@ public class AmazonListingReview extends GenericModel {
             throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
 
         this.listingId = newReview.listingId;
-//        if(StringUtils.isNotBlank(newReview.listingId)) this.listingId = newReview.listingId; //这个不修改
         if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
-            this.comment += String.format("\r\n%s:%s", Dates.date2Date(null), J.G(this));
             this.lastRating = this.rating;
+            this.comment = String.format("Rating from %s to %s At %s\r\n", this.lastRating, newReview.rating, Dates.date2DateTime()) + this.comment;
+            this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
@@ -277,7 +277,7 @@ public class AmazonListingReview extends GenericModel {
 
 //        Rating < 4 的开 OsTicket
         if((this.rating != null && this.rating < 4)) {
-            this.ticket = new Ticket(this);
+            if(this.ticket == null) this.ticket = new Ticket(this);
             this.ticket.openOsTicket(null);
         }
 //        Rating <= 4 的发送邮件提醒
@@ -500,6 +500,11 @@ public class AmazonListingReview extends GenericModel {
      */
     public F.T2<List<TicketReason>, List<String>> unTagedReasons() {
         List<TicketReason> unTaged = new ArrayList<TicketReason>();
+        List<String> reasonNames = new ArrayList<String>();
+
+        if(this.ticket == null)
+            return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
+
         if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
             unTaged.addAll(this.listing.product.category.reasons);
         } else {
@@ -509,7 +514,6 @@ public class AmazonListingReview extends GenericModel {
                 }
             }
         }
-        List<String> reasonNames = new ArrayList<String>();
         for(TicketReason ra : unTaged) reasonNames.add(ra.reason);
         return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
     }

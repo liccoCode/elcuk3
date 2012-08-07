@@ -25,9 +25,11 @@
             <li>
                 <a href="#newcome" data-toggle='tab'>有新回复<span class="badge badge-inverse">${newMsgTickts.size()}</span></a>
             </li>
+        #{ck 'manager'}
             <li>
                 <a href="#funcs" data-toggle='tab'>功能 Tab</a>
             </li>
+        #{/ck}
         </ul>
 
         <div class="tab-content">
@@ -55,9 +57,11 @@
             #{render 'Tickets/_review.html', tickets:newMsgTickts/}
             </div>
 
+        #{ck 'manager'}
             <div id="funcs" class="tab-pane fade">
-
+                <button id="ostickt_sync" class="btn btn-primary">手动同步 OsTicket</button>
             </div>
+        #{/ck}
         </div>
 
     </div>

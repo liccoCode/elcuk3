@@ -12,7 +12,6 @@ import models.support.Ticket;
 import models.support.TicketReason;
 import models.support.TicketState;
 import models.view.Ret;
-import play.cache.CacheFor;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -29,7 +28,6 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Tickets extends Controller {
 
-    @CacheFor(id = "review.index", value = "20mn")
     public static void index() {
         F.T2<List<Ticket>, List<Ticket>> newT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW, true);
         F.T2<List<Ticket>, List<Ticket>> needTwoT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.TWO_MAIL, true);
@@ -91,6 +89,17 @@ public class Tickets extends Controller {
     }
 
     /**
+     * 关闭这个 Ticket 的原因.
+     *
+     * @param tid
+     * @param reason
+     */
+    public static void close(long tid, String reason) {
+        Ticket ticket = Ticket.findById(tid);
+        renderJSON(J.G(ticket.close(reason)));
+    }
+
+    /**
      * 通过 ReviewId 向 OsTicket 进行更新
      *
      * @param rid
@@ -104,6 +113,13 @@ public class Tickets extends Controller {
         } else {
             renderJSON(new Ret(ticketT2._2.get(0).osTicketId()));
         }
+    }
+
+    @Check("manager")
+    public static void syncAll() {
+        TicketStateSyncJob job = new TicketStateSyncJob();
+        job.now();
+        renderJSON(new Ret(true, "已经提交, 正常情况下, 1 分钟后即可刷新生效."));
     }
 
     /**

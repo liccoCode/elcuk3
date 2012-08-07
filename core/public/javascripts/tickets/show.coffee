@@ -74,4 +74,18 @@ $ ->
     )
     e.preventDefault()
 
+  $('#close_btn').click (e) ->
+    return false if !confirm('确认要关闭这个 Ticket?')
+    mask = $('#close_div')
+    mask.mask("关闭中...")
+    $.post('/tickets/close', {tid: @getAttribute('tid'), reason: $('#close_reason').val()},
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert(99)
+        mask.unmask()
+    )
+    e.preventDefault()
+
   window.$ui.init()

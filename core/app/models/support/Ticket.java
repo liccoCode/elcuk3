@@ -1,8 +1,11 @@
 package models.support;
 
+import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.GTs;
 import helper.Webs;
 import jobs.TicketStateSyncJob;
+import models.ElcukRecord;
 import models.User;
 import models.market.Account;
 import models.market.AmazonListingReview;
@@ -13,6 +16,7 @@ import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -59,13 +63,16 @@ public class Ticket extends Model {
     @ManyToMany
     public List<TicketReason> reasons = new ArrayList<TicketReason>();
 
+    @Expose
     public String osTicketId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Expose
     public T type;
 
     @Enumerated(EnumType.STRING)
+    @Expose
     public TicketState state;
 
     /**
@@ -73,43 +80,49 @@ public class Ticket extends Model {
      */
     @Required
     @Column(nullable = false)
+    @Expose
     public String sku;
 
     /**
      * 最后一次发送邮件联系客户的时间
      */
+    @Expose
     public Date lastResponseTime;
 
     /**
      * 最后一个收到回复的时间
      */
+    @Expose
     public Date lastMessageTime;
 
     /**
      * 此 Ticket 最后一次向 OsTicket 更新的时间
      */
+    @Expose
     public Date lastSyncTime;
 
     /**
      * 是否成功的除了这个 Ticket
      */
+    @Expose
     public boolean isSuccess = false;
 
     /**
      * 什么时候创建的?
      */
+    @Expose
     public Date createAt;
 
     /**
      * 此 Ticket 指定被谁来进行处理
      */
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public User resolver;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public AmazonListingReview review;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public Feedback feedback;
 
     @Lob
@@ -172,11 +185,33 @@ public class Ticket extends Model {
     }
 
     /**
+     * 关闭这个 Ticket
+     *
+     * @param reason
+     */
+    public Ticket close(String reason) {
+        /**
+         * 1. 检查是否给这个 Ticket 归类
+         * 2. 检查是否有填写原因
+         */
+        if(this.state == TicketState.CLOSE) throw new FastRuntimeException("已经关闭了, 不需要重新关闭.");
+        if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
+        if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
+        this.state = TicketState.CLOSE;
+        this.memo = String.format("Closed By %s At [%s] for %s\r\n",
+                ElcukRecord.username(),
+                Dates.date2DateTime(),
+                reason) + this.memo;
+        return this.save();
+    }
+
+    /**
      * 作为第一次修复使用的代码, 后续需要删除.
      */
     public static void initReviewFix() {
         List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL").fetch();
         for(AmazonListingReview review : reviews) {
+            if(review.ticket != null) continue;
             Ticket ticket = new Ticket(review);
             if(review.orderr == null) review.orderr = review.tryToRelateOrderByUserId();
             review.ticket = ticket;
@@ -212,7 +247,7 @@ public class Ticket extends Model {
      * @return
      */
     public static List<Ticket> checkStateTickets(int size) {
-        return Ticket.find("state!=? ORDER BY lastSyncTime", TicketState.CLOSE).fetch(size);
+        return Ticket.find("state!=? AND osTicketId!=null AND osTicketId NOT LIKE ? ORDER BY lastSyncTime", TicketState.CLOSE, "%-noemail").fetch(size);
     }
 
     /**
