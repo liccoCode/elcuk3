@@ -40,7 +40,7 @@ public enum TicketState {
             // TO TWO_MAIL
 
             TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
-            if(msgs.size() == 1) newMsg = null; // 系统自动创建的那个 Ticket msg 需要处理
+            if(msgs != null && msgs.size() == 1) newMsg = null; // 系统自动创建的那个 Ticket msg 需要处理
             TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
 
             if(newMsg == null) {

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import helper.Crawl;
+import helper.J;
 import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Listing;
@@ -13,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
+import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -220,8 +222,12 @@ public class ListingWorkers extends Job {
                         review.isOwner = review.listing.product != null;
                         Orderr ord = review.tryToRelateOrderByUserId();
                         if(ord != null) review.orderr = ord;
-                        review.createReview();// 创建新的
-                        review.listingReviewCheck();
+                        try {
+                            review.createReview();// 创建新的
+                            review.listingReviewCheck();
+                        } catch(Exception fe) {
+                            Logger.warn(Webs.E(fe) + "|" + J.json(Validation.errors()));
+                        }
                     } else {
                         fromDB.updateAttr(review); // 更新
                         fromDB.listingReviewCheck();

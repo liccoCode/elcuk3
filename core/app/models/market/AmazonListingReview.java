@@ -11,7 +11,9 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.data.validation.Required;
 import play.data.validation.Unique;
+import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -49,12 +51,14 @@ public class AmazonListingReview extends GenericModel {
      */
     @Id
     @Expose
+    @Required
     public String alrId;
 
     /**
      * 一个冗余字段
      */
     @Expose
+    @Required
     public String listingId;
 
 
@@ -62,9 +66,11 @@ public class AmazonListingReview extends GenericModel {
      * Review 的得分
      */
     @Expose
+    @Required
     public Float rating;
 
     @Expose
+    @Required
     public String title;
 
     /**
@@ -98,6 +104,7 @@ public class AmazonListingReview extends GenericModel {
      * 关联的用户 Id
      */
     @Expose
+    @Required
     public String userid;
 
     @Expose
@@ -170,6 +177,7 @@ public class AmazonListingReview extends GenericModel {
     @Expose
     @Unique
     @Column(unique = true)
+    @Required
     public String reviewId;
 
     /**
@@ -206,6 +214,8 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     public AmazonListingReview createReview() {
+        if(!Validation.current().valid(this).ok)
+            throw new FastRuntimeException("Not Valid, more details see Validation.errors()");
         this.createDate = new Date();
         // 将初始的 Review 数据全部记录下来
         this.originJson = J.G(this);
