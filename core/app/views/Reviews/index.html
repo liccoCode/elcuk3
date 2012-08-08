@@ -1,29 +1,29 @@
 #{extends 'main_full.html'/}
 #{set title:"Reviews(" + totalNeedDealReview + ")" /}
 #{set 'moreScripts'}
-    #{script 'tickets/index.coffee'/}
+    #{script 'reviews/index.coffee'/}
 #{/set}
 
 <div class="row-fluid">
     <div class="span12">
         <ul class="nav nav-tabs" style="margin-bottom:5px;">
             <li class="active">
-                <a href="#news" data-toggle='tab'>首次跟进<span class="badge badge-inverse">${newTickets.size()}</span></a>
+                <a href="#news" data-toggle='tab'>首次跟进<span class="badge badge-inverse">${newReviews.size()}</span></a>
             </li>
             <li>
-                <a href="#overtime" data-toggle='tab'>首次跟进-超时<span class="badge badge-inverse">${newOverdueTickets.size()}</span></a>
+                <a href="#overtime" data-toggle='tab'>首次跟进-超时<span class="badge badge-inverse">${newOverdueReviews.size()}</span></a>
             </li>
             <li>
-                <a href="#rp2" data-toggle='tab'>需二次跟进<span class="badge badge-inverse">${twoMailTickets.size()}</span></a>
+                <a href="#rp2" data-toggle='tab'>需二次跟进<span class="badge badge-inverse">${twoMailReviews.size()}</span></a>
             </li>
             <li>
-                <a href="#overtime_rp2" data-toggle='tab'>需二次跟进-超时<span class="badge badge-inverse">${twoMailOverdueTickets.size()}</span></a>
+                <a href="#overtime_rp2" data-toggle='tab'>需二次跟进-超时<span class="badge badge-inverse">${twoMailOverdueReviews.size()}</span></a>
             </li>
             <li>
-                <a href="#noresp" data-toggle='tab'>跟进无响应<span class="badge badge-inverse">${noRespTickets.size()}</span></a>
+                <a href="#noresp" data-toggle='tab'>跟进无响应<span class="badge badge-inverse">${noRespReviews.size()}</span></a>
             </li>
             <li>
-                <a href="#newcome" data-toggle='tab'>有新回复<span class="badge badge-inverse">${newMsgTickts.size()}</span></a>
+                <a href="#newcome" data-toggle='tab'>有新回复<span class="badge badge-inverse">${newMsgReviews.size()}</span></a>
             </li>
         #{ck 'manager'}
             <li>
@@ -34,27 +34,27 @@
 
         <div class="tab-content">
             <div id="news" class="tab-pane active fade in">
-            #{render 'Reviews/_review.html', tickets:newTickets/}
+            #{render 'Reviews/_review.html', tickets:newReviews/}
             </div>
 
             <div id="overtime" class="tab-pane fade">
-            #{render 'Reviews/_review.html', tickets:newOverdueTickets/}
+            #{render 'Reviews/_review.html', tickets:newOverdueReviews/}
             </div>
 
             <div id="rp2" class="tab-pane fade">
-            #{render 'Reviews/_review.html', tickets:twoMailTickets/}
+            #{render 'Reviews/_review.html', tickets:twoMailReviews/}
             </div>
 
             <div id="overtime_rp2" class="tab-pane fade">
-            #{render 'Reviews/_review.html', tickets:twoMailOverdueTickets/}
+            #{render 'Reviews/_review.html', tickets:twoMailOverdueReviews/}
             </div>
 
             <div id="noresp" class="tab-pane fade">
-            #{render 'Reviews/_review.html', tickets:noRespTickets/}
+            #{render 'Reviews/_review.html', tickets:noRespReviews/}
             </div>
 
             <div id="newcome" class="tab-pane fade">
-            #{render 'Reviews/_review.html', tickets:newMsgTickts/}
+            #{render 'Reviews/_review.html', tickets:newMsgReviews/}
             </div>
 
         #{ck 'manager'}

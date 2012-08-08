@@ -1,9 +1,10 @@
 #{extends 'main.html'/}
 #{set title:'Review #' + review.reviewId /}
 #{set 'moreScripts'}
-    #{script 'tickets/show.coffee'/}
+    #{script 'reviews/show.coffee'/}
 #{/set}
 
+#{set haveTicket:review.ticket != null/}
 <!-- Review -->
 <div class="label label-info">Review</div>
 <div>
@@ -53,9 +54,13 @@
                     <i class="icon-external-link"></i> ${review.ticket.osTicketId()}
                 </a>
             #{/if}
+            #{else }
+                <span><i class="icon-thumbs-up"></i> No Need</span>
+            #{/else}
             </td>
         </tr>
 
+        #{if haveTicket}<!-- 如果有 Ticket 如此, 没有 Ticket 换成另外一种输出 -->
         <tr>
             <th rel="popover" content="${review.ticket.state.explan()}"><i class="icon-question-sign"> State</i></th>
             <td>${review.ticket.state}</td>
@@ -66,7 +71,18 @@
             <th>Click</th>
             <td>${review.helpUp} / ${review.helpClick}</td>
         </tr>
+    #{/if}
+    #{else }
+        <tr>
+            <th>TopN</th>
+            <td>${review.topN}</td>
+            <th>Click</th>
+            <td>${review.helpUp} / ${review.helpClick}</td>
+            <td colspan="4"></td>
+        </tr>
+    #{/else}
 
+        #{if haveTicket}<!-- 此为 Ticket 的信息 -->
         <tr>
             <th>最后同步时间</th>
             <td>${review.ticket.lastSyncTime?.since()}</td>
@@ -77,6 +93,7 @@
             <th>客户回复 / 我方联系</th>
             <td>${review.ticket.messageTimes} / ${review.ticket.responseTimes}</td>
         </tr>
+    #{/if}
 
     #{if review.isVedio}
         <tr>
@@ -86,25 +103,27 @@
         </tr>
     #{/if}
 
+    #{if haveTicket}
         <tr>
             <td colspan="8">
                 <div class="row-fluid" id="reason_div">
                     <div class="span5">
-                    #{if review.ticket.reasons.size() != 0}
-                        #{list items:review.ticket.reasons, as:'ra'}
-                            <span class="reason badge badge-important">${ra.reason}</span>
-                        #{/list}
-                    #{/if}
+                        #{if review.ticket.reasons.size() != 0}
+                            #{list items:review.ticket.reasons, as:'ra'}
+                                <span class="reason badge badge-important">${ra.reason}</span>
+                            #{/list}
+                        #{/if}
                     </div>
                     <div class="span7 input-append">
                         <span class="add-on">${cat.categoryId} | ${cat.name}</span>
-                    #{list items:unTagReasons, as:'ura'}
-                        <span class="unTagReason badge badge-info">${ura.reason}</span>
-                    #{/list}
+                        #{list items:unTagReasons, as:'ura'}
+                            <span class="unTagReason badge badge-info">${ura.reason}</span>
+                        #{/list}
                     </div>
                 </div>
             </td>
         </tr>
+    #{/if}
 
         <tr>
             <td colspan="8">
@@ -118,19 +137,20 @@
                         #{/if}
 
                             <!-- 此 Ticket 的处理者 -->
-                        #{if review.ticket.resolver == null}
+                        #{if haveTicket && (review.ticket.resolver == null)}
                             <button id="take_it" tid="${review.ticket.id}" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
                                 Take It
                             </button>
                         #{/if}
-                        #{else }
+                        #{elseif haveTicket}
                             <span class="badge badge-info">由 <i class="icon-user"></i> ${review.ticket.resolver.username.capAll()}
-                                处理</span>
-                        #{/else}
+                                处理
+                            </span>
+                        #{/elseif}
                         </div>
 
                         <div style="margin:5px 0">
-                            <a class="btn btn-success" href="@{Products.show(review.ticket.sku)}" target="_blank">${review.ticket.sku}</a><br/>
+                            <a class="btn btn-success" href="@{Products.show(review.listing.product.sku)}" target="_blank">${review.listing.product.sku}</a><br/>
                         </div>
 
                         <div style="margin:5px 0">
@@ -141,10 +161,11 @@
                     </div>
 
                     <div class="span6">
-                        <img src="${review.listing.picUrls}" alt="${review.ticket.sku}">
+                        <img src="${review.listing.picUrls}" alt="${review.listingId}">
                     </div>
                 </div>
 
+            #{if haveTicket}
                 <div class="row-fluid">
                     <div id="close_div" class="span12" style="display:none;margin-top:10px;">
                         <textarea rows="4" id="close_reason" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
@@ -152,6 +173,7 @@
                         <a id="close_btn" tid="${review.ticket.id}" class="btn btn-danger">Close</a>
                     </div>
                 </div>
+            #{/if}
             </td>
         </tr>
 
@@ -169,12 +191,14 @@
             </td>
         </tr>
 
+    #{if haveTicket}
         <tr>
             <td colspan="8">
                 <h3>Ticket Comment</h3>
             ${review.ticket.memo}
             </td>
         </tr>
+    #{/if}
 
     </table>
 </div>

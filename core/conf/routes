@@ -30,6 +30,9 @@ GET     /product/{controller}/page/{page}                   product.{controller}
 
 *       /procures/invisible                                 procures.ps
 
+# Ticket Close
+POST    /tickets/close                                      Reviews.close
+
 # Catch all
 *       /{controller}/{action}                              {controller}.{action}
 *       /market/{controller}/{action}                       market.{controller}.{action}

@@ -12,6 +12,7 @@ import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -180,6 +181,22 @@ public class Feedback extends GenericModel {
         }
     }
 
+    public F.T2<Integer, String> feedbacklengthColor() {
+        if(this.comment.length() <= 15) {
+            return new F.T2<Integer, String>(this.comment.length(), "2FCCEF");
+        } else if(this.comment.length() <= 50) {
+            return new F.T2<Integer, String>(this.comment.length(), "6CB4E6");
+        } else if(this.comment.length() <= 100) {
+            return new F.T2<Integer, String>(this.comment.length(), "8CA7DE");
+        } else if(this.comment.length() <= 200) {
+            return new F.T2<Integer, String>(this.comment.length(), "9BA0D8");
+        } else if(this.comment.length() <= 300) {
+            return new F.T2<Integer, String>(this.comment.length(), "AC96D4");
+        } else {
+            return new F.T2<Integer, String>(this.comment.length(), "B38ACE");
+        }
+    }
+
 
     @Override
     public String toString() {
@@ -215,4 +232,5 @@ public class Feedback extends GenericModel {
         result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         return result;
     }
+
 }

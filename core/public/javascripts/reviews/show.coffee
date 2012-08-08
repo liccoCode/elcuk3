@@ -4,7 +4,7 @@ $ ->
   $('#try_order').click (e) ->
     mask = $('#container')
     mask.mask('尝试计算中, 如果计算成功, 刷新后则有 OrderId...')
-    $.post('/tickets/tryOrder', rid: reviewId(),
+    $.post('/reviews/tryOrder', rid: reviewId(),
       (r) ->
         if r.flag is false
           alert('没有找到 Order...')
@@ -23,7 +23,7 @@ $ ->
     o = $(span)
     mask = $('#reason_div')
     mask.mask('取消原因中...')
-    $.post('/tickets/unTagReason', {reason: o.html(), reviewId: reviewId()},
+    $.post('/reviews/unTagReason', {reason: o.html(), reviewId: reviewId()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -42,7 +42,7 @@ $ ->
     o = $(span)
     mask = $('#reason_div')
     mask.mask('添加原因中...')
-    $.post('/tickets/tagReason', {reason: o.html(), reviewId: reviewId()},
+    $.post('/reviews/tagReason', {reason: o.html(), reviewId: reviewId()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -64,7 +64,7 @@ $ ->
   $('#take_it').click (e) ->
     mask = $('#container')
     mask.mask('处理中...')
-    $.post('/tickets/iTakeIt', tid: @getAttribute('tid'),
+    $.post('/reviews/iTakeIt', tid: @getAttribute('tid'),
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -78,7 +78,7 @@ $ ->
     return false if !confirm('确认要关闭这个 Ticket?')
     mask = $('#close_div')
     mask.mask("关闭中...")
-    $.post('/tickets/close', {tid: @getAttribute('tid'), reason: $('#close_reason').val()},
+    $.post('/reviews/close', {tid: @getAttribute('tid'), reason: $('#close_reason').val()},
       (r) ->
         if r.flag is false
           alert(r.message)

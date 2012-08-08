@@ -38,14 +38,19 @@ public class Ticket extends Model {
     public Ticket(AmazonListingReview review) {
         this.osTicketId = review.osTicketId;
         this.type = T.REVIEW;
-        this.sku = review.listing.product.sku;
+        this.fid = review.listing.product.sku;
         this.state = TicketState.NEW;
         this.review = review;
         this.createAt = review.reviewDate;
     }
 
     public Ticket(Feedback feedback) {
-        this.createAt = new Date();
+        this.osTicketId = feedback.osTicketId;
+        this.type = T.FEEDBACK;
+        this.fid = feedback.orderId;
+        this.state = TicketState.NEW;
+        this.feedback = feedback;
+        this.createAt = feedback.createDate;
     }
 
     public enum T {
@@ -73,11 +78,13 @@ public class Ticket extends Model {
 
     /**
      * 必须指定到是哪一个产品出现问题!
+     * - 对于 Review 为 SKU,
+     * - 对于 Feedback 为 OrderId
      */
     @Required
     @Column(nullable = false)
     @Expose
-    public String sku;
+    public String fid;
 
     /**
      * 最后一次发送邮件联系客户的时间
@@ -182,20 +189,6 @@ public class Ticket extends Model {
     }
 
     /**
-     * 作为第一次修复使用的代码, 后续需要删除.
-     */
-    public static void initReviewFix() {
-        List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL").fetch();
-        for(AmazonListingReview review : reviews) {
-            if(review.ticket != null) continue;
-            Ticket ticket = new Ticket(review);
-            if(review.orderr == null) review.orderr = review.tryToRelateOrderByUserId();
-            review.ticket = ticket;
-            review.save();
-        }
-    }
-
-    /**
      * 处理加载状态的 Ticket 同时将超时的过滤成另外一个 List
      *
      * @param state
@@ -259,5 +252,29 @@ public class Ticket extends Model {
                 return new F.T2<Boolean, TicketStateSyncJob.OsResp>(true, newResp);
         }
         return new F.T2<Boolean, TicketStateSyncJob.OsResp>(false, null);
+    }
+
+
+    /**
+     * 作为第一次修复使用的代码, 后续需要删除.
+     */
+    public static void initReviewFix() {
+        List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL").fetch();
+        for(AmazonListingReview review : reviews) {
+            if(review.ticket != null) continue;
+            Ticket ticket = new Ticket(review);
+            if(review.orderr == null) review.orderr = review.tryToRelateOrderByUserId();
+            review.ticket = ticket;
+            review.save();
+        }
+    }
+
+    public static void initFeedbackFix() {
+        List<Feedback> feedbacks = Feedback.find("osTicketId IS NOT NULL").fetch();
+        for(Feedback feedback : feedbacks) {
+            if(feedback.ticket != null) continue;
+            Ticket ticket = new Ticket(feedback);
+            ticket.save();
+        }
     }
 }
