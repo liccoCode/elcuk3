@@ -29,16 +29,6 @@ import java.util.List;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Feedback extends GenericModel {
 
-    public enum S {
-        HANDLING,
-        SLOVED,
-        END,
-        /**
-         * 没有办法处理了, 只能留着
-         */
-        LEFT
-    }
-
     @OneToOne
     public Orderr orderr;
 
@@ -85,10 +75,6 @@ public class Feedback extends GenericModel {
      */
     public String osTicketId;
 
-    /**
-     * 是否解决了,等等状态
-     */
-    public S state;
 
     public Feedback() {
     }
@@ -101,7 +87,7 @@ public class Feedback extends GenericModel {
          * 1. 判断是否需要发送警告邮件;
          * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
          */
-        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
+        if(this.score > 3) return;
 
         if(this.score <= 3 && this.isSelfBuildListing())
             this.ticket = this.openTicket(null);
@@ -136,8 +122,6 @@ public class Feedback extends GenericModel {
         if(newFeedback.score != null) this.score = newFeedback.score;
         if(StringUtils.isNotBlank(newFeedback.comment)) this.comment = newFeedback.comment;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
-
-        if(newFeedback.state != null && this.state == S.HANDLING) this.state = newFeedback.state;
 
         return this.save();
     }
@@ -208,7 +192,6 @@ public class Feedback extends GenericModel {
         sb.append(", email='").append(email).append('\'');
         sb.append(", comment='").append(comment).append('\'');
         sb.append(", memo='").append(memo).append('\'');
-        sb.append(", state=").append(state);
         sb.append('}');
         return sb.toString();
     }

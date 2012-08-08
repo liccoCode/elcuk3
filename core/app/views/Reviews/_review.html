@@ -2,6 +2,7 @@
     <tr>
         <th>Sku</th>
         <th>Asin</th>
+        <th>LastMsg</th>
         <th rel="popover" placement="bottom" content="黑色数字为 Review 字数<br><br>橙色数字为客户回复数<br><br>蓝色数字为我方回复数;">
             <i class="icon-question-sign"></i> Title
         </th>
@@ -20,6 +21,14 @@
         <td>
             #{set lid:models.market.Listing.unLid(r.listingId)/}
             <a href="@{AmazonReviews.index()}#${lid._1}/${lid._2}" target="_blank">${lid._1}</a>
+        </td>
+        <td>
+            #{if t.lastMessageTime}
+            ${t.lastMessageTime.since()}
+            #{/if}
+            #{else }
+                <i class="icon-warning-sign"></i>
+            #{/else}
         </td>
         <td data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;background:${'#' + reviewC_L._2}">
             <span class="badge badge-inverse">${reviewC_L._1}</span> |
@@ -61,7 +70,7 @@
         <td style="background:${'#' + r.rating.color()}">${r.rating}</td>
     </tr>
     <tr id="toggle_${r.reviewId}" style="display:none;">
-        <td colspan="6">
+        <td colspan="8">
             <ul class="nav nav-tabs" style="margin-bottom:3px;">
                 <li class="active"><a href="#review_${t.id}" data-toggle="tab">Review</a></li>
                 <li><a href="#close_${t.id}" data-toggle="tab">Close</a></li>

@@ -1,6 +1,7 @@
 <table class="table table-condensed table-bordered">
     <tr>
         <th>UserId</th>
+        <th>Create</th>
         <th>Email</th>
         <th>Order</th>
         <th>OsTicket</th>
@@ -14,6 +15,7 @@
         <td>
             <a href="#" target="_blank"><i class="icon-comment"></i> ${f.orderr.userid}</a>
         </td>
+        <td>${f.createDate.since()}</td>
 
         #{set fdbkL_C:f.feedbacklengthColor()/}
         <td data-toggle='toggle' data-target="#toggle_${t.id}" style="cursor:pointer;background:${'#' + fdbkL_C._2}">
@@ -23,7 +25,7 @@
             <span class="pull-right badge badge-warning">${t.messageTimes}</span>
         </td>
         <td>
-            <a href="#" target="_blank">${t.fid}</a>
+            <a href="@{Feedbacks.show(t.fid)}" target="_blank">${t.fid}</a>
             <i class="pull-right icon-shopping-cart"></i>
         </td>
         <td>
@@ -47,7 +49,7 @@
         <td style="background:${'#' + f.score.color()}">${f.score}</td>
     </tr>
     <tr id="toggle_${t.id}" style="display:none;">
-        <td colspan="6">
+        <td colspan="7">
             <ul class="nav nav-tabs" style="margin-bottom:3px;">
                 <li class="active"><a href="#feedback_${t.id}" data-toggle="tab">Review</a></li>
                 <li><a href="#close_${t.id}" data-toggle="tab">Close</a></li>

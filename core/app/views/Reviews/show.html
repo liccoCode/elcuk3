@@ -82,7 +82,8 @@
         </tr>
     #{/else}
 
-        #{if haveTicket}<!-- 此为 Ticket 的信息 -->
+        <!-- 此为 Ticket 的信息 -->
+    #{if haveTicket}
         <tr>
             <th>最后同步时间</th>
             <td>${review.ticket.lastSyncTime?.since()}</td>
@@ -93,17 +94,7 @@
             <th>客户回复 / 我方联系</th>
             <td>${review.ticket.messageTimes} / ${review.ticket.responseTimes}</td>
         </tr>
-    #{/if}
 
-    #{if review.isVedio}
-        <tr>
-            <td colspan="8">
-                <img src="${review.vedioPicUrl}" alt="${review.reviewId}">
-            </td>
-        </tr>
-    #{/if}
-
-    #{if haveTicket}
         <tr>
             <td colspan="8">
                 <div class="row-fluid" id="reason_div">
@@ -121,6 +112,14 @@
                         #{/list}
                     </div>
                 </div>
+            </td>
+        </tr>
+    #{/if}
+
+    #{if review.isVedio}
+        <tr>
+            <td colspan="8">
+                <img src="${review.vedioPicUrl}" alt="${review.reviewId}">
             </td>
         </tr>
     #{/if}

@@ -1,5 +1,6 @@
 package controllers;
 
+import models.market.Feedback;
 import models.support.Ticket;
 import models.support.TicketState;
 import models.view.Ret;
@@ -28,6 +29,11 @@ public class Feedbacks extends Controller {
         renderArgs.put("twoMailFeedbacks", needTwoFdbk._1);
         renderArgs.put("twoMailOverdueFeedbacks", needTwoFdbk._2);
         render(noRespFeedbacks, newMsgFeedbacks);
+    }
+
+    public static void show(String oid) {
+        Feedback feedback = Feedback.findById(oid);
+        render(feedback);
     }
 
     public static void iFeedback() {

@@ -140,6 +140,7 @@ public class FeedbackCrawlJob extends Job {
         Account.M market = null;
         if(marketEl == null) {
             Webs.systemMail("Feedback Market parse Error!", html);
+            return new ArrayList<Feedback>();
         } else {
             market = Account.M.val(marketEl.text().trim());
         }
@@ -152,16 +153,12 @@ public class FeedbackCrawlJob extends Job {
             //time
             feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
             //score
-            // TODO 处理 feedback 的 state, 需要全部删除
             feedback.score = NumberUtils.toFloat(tds.get(1).text());
-            if(feedback.score <= 3) feedback.state = Feedback.S.HANDLING;
-            else feedback.state = Feedback.S.END;
             //comments
             feedback.comment = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();
             if(b != null) {
                 feedback.memo = b.nextSibling().toString();
-                feedback.state = Feedback.S.SLOVED;
             }
 
             //orderid
