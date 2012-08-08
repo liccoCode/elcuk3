@@ -26,7 +26,7 @@ import java.util.List;
  * Time: 11:46 AM
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
-public class Tickets extends Controller {
+public class Reviews extends Controller {
 
     public static void index() {
         F.T2<List<Ticket>, List<Ticket>> newT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW, true);

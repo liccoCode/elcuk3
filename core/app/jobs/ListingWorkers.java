@@ -224,13 +224,13 @@ public class ListingWorkers extends Job {
                         if(ord != null) review.orderr = ord;
                         try {
                             review.createReview();// 创建新的
-                            review.listingReviewCheck();
+                            review.checkMailAndTicket();
                         } catch(Exception fe) {
                             Logger.warn(Webs.E(fe) + "|" + J.json(Validation.errors()));
                         }
                     } else {
                         fromDB.updateAttr(review); // 更新
-                        fromDB.listingReviewCheck();
+                        fromDB.checkMailAndTicket();
                     }
                 }
                 if(action._2) action._1.save();

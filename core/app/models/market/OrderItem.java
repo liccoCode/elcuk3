@@ -42,7 +42,7 @@ public class OrderItem extends GenericModel {
     /**
      * 冗余字段, 产品名称
      */
-    public String productName;
+    public String listingName;
 
     /**
      * 冗余字段, 订单项产生的时间

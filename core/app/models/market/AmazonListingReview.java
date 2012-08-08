@@ -4,7 +4,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.GTs;
 import helper.J;
+import helper.Webs;
 import models.support.Ticket;
 import models.support.TicketReason;
 import notifiers.Mails;
@@ -274,7 +276,7 @@ public class AmazonListingReview extends GenericModel {
      * 在 Check 方法执行完成以后将数据同步回数据库;
      * 如果此 Review 需要开 Ticket 进行处理, 也在此判断了
      */
-    public void listingReviewCheck() {
+    public void checkMailAndTicket() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
         if(Selling.count("listing.listingId=?", this.listingId) == 0) return;// 判断这个 Listing 是我们自己有上架的
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) return;// 超过 70 天的不处理
@@ -282,8 +284,7 @@ public class AmazonListingReview extends GenericModel {
 
 //        Rating < 4 并且为自建的 Listing 的开 OsTicket
         if((this.rating != null && this.rating < 4 && Listing.isSelfBuildListing(this.listing.title))) {
-            if(this.ticket == null) this.ticket = new Ticket(this);
-            this.ticket.openOsTicket(null);
+            this.ticket = this.openTicket(null);
         }
 //        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒
         if(this.rating != null && this.rating <= 4 && Listing.isSelfBuildListing(this.listing.title))
@@ -437,6 +438,45 @@ public class AmazonListingReview extends GenericModel {
             return new F.T2<Integer, String>(this.review.length(), "AC96D4");
         } else {
             return new F.T2<Integer, String>(this.review.length(), "B38ACE");
+        }
+    }
+
+    /**
+     * AmazonListingReview 开 OsTicket, 在 OsTicket 创建一个 Ticket 的同时,也在系统中创建
+     */
+    public Ticket openTicket(String title) {
+        if(StringUtils.isNotBlank(this.osTicketId)) {
+            Logger.info("Review OsTicket is exist! %s", this.osTicketId);
+            return null;
+        }
+
+        String name = String.format("%s - %s", this.username, this.listingId);
+        String subject = title;
+        String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
+
+        if(StringUtils.isBlank(subject)) {
+            if(this.listing.market == Account.M.AMAZON_DE) {
+                subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
+            } else { // 除了 DE 使用德语其他的默认使用'英语'
+                subject = "You left a negative product review, may we have a chance to make up?";
+            }
+        }
+
+        this.orderr = this.tryToRelateOrderByUserId();
+        if(this.orderr == null) {
+            Logger.warn("Review (%s) relate order have no email.", this.alrId);
+            subject += " - No Order found...";
+            content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
+
+            this.osTicketId = Webs.openOsTicket(name, "support@easyacceu.com", subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
+        } else {
+            this.osTicketId = Webs.openOsTicket(name, this.orderr.email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
+        }
+        if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
+            return null;
+        } else {
+            if(this.ticket == null) return new Ticket(this);
+            else return this.ticket;
         }
     }
 

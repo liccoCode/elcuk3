@@ -144,7 +144,7 @@ public class Webs {
      * @param content  Ticket 的内容
      * @param topicId  Ticket 所处的 Topic, Topic 会有对应的优先级(1:Support, 2:Billing, 3:Review, 4:Feedback)
      * @param errorMsg 系统中需要 log 的错误信息,主要记录 orderid, reviewid 等这样的信息
-     * @return
+     * @return 如果成功, 则返回 TicketId , 否则返回"空"字符串
      */
     public static String openOsTicket(String name, String email, String subject, String content, TopicID topicId, String errorMsg) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();

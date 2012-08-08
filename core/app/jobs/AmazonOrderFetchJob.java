@@ -157,7 +157,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 OrderItem oi = new OrderItem();
                 oi.market = orderr.market;
                 oi.order = orderr;
-                oi.productName = oid.getProductName();
+                oi.listingName = oid.getProductName();
                 oi.quantity = oid.getQuantity();
                 oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
 

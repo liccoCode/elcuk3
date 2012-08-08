@@ -1,5 +1,6 @@
 package noRun;
 
+import jobs.FeedbackCrawlJob;
 import models.market.Feedback;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +32,7 @@ public class LoginAmazonTest {
 
     @Test
     public void parseFeedback() throws IOException {
-        List<Feedback> feds = Feedback.parseFeedBackFromHTML(FileUtils.readFileToString(new File("/Users/wyattpan/elcuk2-logs/feedback.p2.html")));
+        List<Feedback> feds = FeedbackCrawlJob.parseFeedBackFromHTML(FileUtils.readFileToString(new File("/Users/wyattpan/elcuk2-logs/feedback.p2.html")));
         for(Feedback f : feds) {
             if(f.score >= 3) continue;
             System.out.println(f);
