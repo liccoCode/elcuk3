@@ -1,11 +1,23 @@
 package jobs;
 
-import helper.Currency;
+import helper.*;
 import models.market.Account;
 import models.market.Feedback;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import play.Logger;
+import play.Play;
+import play.data.validation.Validation;
 import play.jobs.Job;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,9 +47,9 @@ public class FeedbackCrawlJob extends Job {
                 case AMAZON_DE:
                 case AMAZON_UK:
                 case AMAZON_FR:
-                    fetchAccountFeedback(acc, Account.M.AMAZON_UK);
-                    fetchAccountFeedback(acc, Account.M.AMAZON_DE);
-                    fetchAccountFeedback(acc, Account.M.AMAZON_FR);
+                    fetchAccountFeedback(acc, Account.M.AMAZON_UK, 5);
+                    fetchAccountFeedback(acc, Account.M.AMAZON_DE, 5);
+                    fetchAccountFeedback(acc, Account.M.AMAZON_FR, 5);
                     break;
                 case AMAZON_ES:
                 case AMAZON_IT:
@@ -52,16 +64,16 @@ public class FeedbackCrawlJob extends Job {
      *
      * @param acc
      * @param market
+     * @param pages
      */
-    private void fetchAccountFeedback(Account acc, Account.M market) {
+    private void fetchAccountFeedback(Account acc, Account.M market, int pages) {
+        if(pages <= 0) pages = 5;
         try {
-            if(market != Account.M.AMAZON_UK &&
-                    market != Account.M.AMAZON_FR &&
-                    market != Account.M.AMAZON_DE) return;
+            if(market != Account.M.AMAZON_UK && market != Account.M.AMAZON_FR && market != Account.M.AMAZON_DE) return;
             synchronized(acc.cookieStore()) { // 将 CookieStore 锁住, 防止更改了 Region 以后有其他的地方进行操作.
                 acc.changeRegion(market);
-                for(int i = 1; i <= 5; i++) {
-                    List<Feedback> feedbacks = acc.fetchFeedback(i);
+                for(int i = 1; i <= pages; i++) {
+                    List<Feedback> feedbacks = FeedbackCrawlJob.fetchFeedback(acc, i);
                     if(feedbacks.size() == 0) {
                         Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
                         break;
@@ -69,10 +81,19 @@ public class FeedbackCrawlJob extends Job {
                         Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
                     }
 
-                    //这段代码在 Feedbacks 也使用了, 但不好将其抽取出来
                     for(Feedback f : feedbacks) {
-                        Feedback manager = f.checkSaveOrUpdate();
-                        manager.checkMailAndTicket();
+                        Feedback managed = Feedback.findById(f.orderId);
+                        if(managed == null) {
+                            try {
+                                f.checkAndSave(acc);
+                                f.checkMailAndTicket();
+                            } catch(Exception e) {
+                                Logger.warn(Webs.E(e) + "|" + J.json(Validation.errors()));
+                            }
+                        } else {
+                            managed.updateAttr(f);
+                            managed.checkMailAndTicket();
+                        }
                     }
                 }
             }
@@ -81,4 +102,75 @@ public class FeedbackCrawlJob extends Job {
         }
     }
 
+    /**
+     * 抓取 Account 对应网站的 FeedBack
+     *
+     * @param page amazon 网站上第 N 页的 Feedback
+     * @return
+     */
+    public static List<Feedback> fetchFeedback(Account acc, int page) {
+        switch(acc.type) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+                try {
+                    String body = HTTP.get(acc.cookieStore(), acc.type.feedbackPage(page));
+                    if(Play.mode.isDev())
+                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + acc.type.name() + ".id_" + acc.id + "feedback_p" + page + ".html"), body);
+                    return FeedbackCrawlJob.parseFeedBackFromHTML(body);
+                } catch(Exception e) {
+                    Logger.warn("[" + acc.type + "] Feedback page can not found Or the session is invalid!");
+                }
+                break;
+            default:
+                Logger.warn("Not support fetch [" + acc.type + "] Feedback.");
+        }
+        return new ArrayList<Feedback>();
+    }
+
+    /**
+     * 从 Amazon 的网页上解析出需要的 Feedback 信息
+     *
+     * @param html
+     * @return
+     */
+    public static List<Feedback> parseFeedBackFromHTML(String html) {
+        Document doc = Jsoup.parse(html);
+
+        Element marketEl = doc.select("#marketplaceSelect option[selected]").first();
+        Account.M market = null;
+        if(marketEl == null) {
+            Webs.systemMail("Feedback Market parse Error!", html);
+        } else {
+            market = Account.M.val(marketEl.text().trim());
+        }
+        Elements feedbacks = doc.select("td[valign=center][align=middle] tr[valign=center]");
+        List<Feedback> feedbackList = new ArrayList<Feedback>();
+        for(Element feb : feedbacks) {
+            if("#ffffff".equals(feb.attr("bgcolor"))) continue;
+            Feedback feedback = new Feedback();
+            Elements tds = feb.select("td");
+            //time
+            feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+            //score
+            // TODO 处理 feedback 的 state, 需要全部删除
+            feedback.score = NumberUtils.toFloat(tds.get(1).text());
+            if(feedback.score <= 3) feedback.state = Feedback.S.HANDLING;
+            else feedback.state = Feedback.S.END;
+            //comments
+            feedback.comment = tds.get(2).childNode(0).toString();
+            Element b = tds.get(2).select("b").first();
+            if(b != null) {
+                feedback.memo = b.nextSibling().toString();
+                feedback.state = Feedback.S.SLOVED;
+            }
+
+            //orderid
+            feedback.orderId = tds.get(6).text();
+            //email
+            feedback.email = tds.get(7).text();
+            if(market != null) feedback.market = market;
+            feedbackList.add(feedback);
+        }
+        return feedbackList;
+    }
 }

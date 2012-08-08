@@ -34,27 +34,27 @@
 
         <div class="tab-content">
             <div id="news" class="tab-pane active fade in">
-            #{render 'Tickets/_review.html', tickets:newTickets/}
+            #{render 'Reviews/_review.html', tickets:newTickets/}
             </div>
 
             <div id="overtime" class="tab-pane fade">
-            #{render 'Tickets/_review.html', tickets:newOverdueTickets/}
+            #{render 'Reviews/_review.html', tickets:newOverdueTickets/}
             </div>
 
             <div id="rp2" class="tab-pane fade">
-            #{render 'Tickets/_review.html', tickets:twoMailTickets/}
+            #{render 'Reviews/_review.html', tickets:twoMailTickets/}
             </div>
 
             <div id="overtime_rp2" class="tab-pane fade">
-            #{render 'Tickets/_review.html', tickets:twoMailOverdueTickets/}
+            #{render 'Reviews/_review.html', tickets:twoMailOverdueTickets/}
             </div>
 
             <div id="noresp" class="tab-pane fade">
-            #{render 'Tickets/_review.html', tickets:noRespTickets/}
+            #{render 'Reviews/_review.html', tickets:noRespTickets/}
             </div>
 
             <div id="newcome" class="tab-pane fade">
-            #{render 'Tickets/_review.html', tickets:newMsgTickts/}
+            #{render 'Reviews/_review.html', tickets:newMsgTickts/}
             </div>
 
         #{ck 'manager'}

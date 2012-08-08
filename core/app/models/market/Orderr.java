@@ -277,7 +277,7 @@ public class Orderr extends GenericModel {
                             if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
                             if(noi.memo != null) oi.memo = noi.memo;
                             if(noi.price != null) oi.price = noi.price;
-                            if(noi.productName != null) oi.productName = noi.productName;
+                            if(noi.listingName != null) oi.listingName = noi.listingName;
                             if(noi.quantity != null) oi.quantity = noi.quantity;
                             if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
                             if(noi.product != null) oi.product = noi.product;

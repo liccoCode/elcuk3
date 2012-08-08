@@ -2,17 +2,13 @@ package models.support;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.GTs;
-import helper.Webs;
 import jobs.TicketStateSyncJob;
 import models.ElcukRecord;
 import models.User;
-import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Duration;
-import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -137,36 +133,6 @@ public class Ticket extends Model {
 
     @Lob
     public String memo = " ";
-
-    public void openOsTicket(String title) {
-        if(StringUtils.isNotBlank(this.osTicketId)) {
-            Logger.info("Review OsTicket is exist! %s", this.osTicketId);
-            return;
-        }
-
-        String name = String.format("%s - %s", this.review.username, this.review.listingId);
-        String subject = title;
-        String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
-
-        if(StringUtils.isBlank(subject)) {
-            if(this.review.listing.market == Account.M.AMAZON_DE) {
-                subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
-            } else { // 除了 DE 使用德语其他的默认使用'英语'
-                subject = "You left a negative product review, may we have a chance to make up?";
-            }
-        }
-
-        this.review.orderr = this.review.tryToRelateOrderByUserId();
-        if(this.review.orderr == null) {
-            Logger.warn("Review (%s) relate order have no email.", this.review.alrId);
-            subject += " - No Order found...";
-            content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
-
-            this.osTicketId = Webs.openOsTicket(name, "support@easyacceu.com", subject, content, Webs.TopicID.REVIEW, "Review " + this.review.alrId) + "-noemail";
-        } else {
-            this.osTicketId = Webs.openOsTicket(name, this.review.orderr.email, subject, content, Webs.TopicID.REVIEW, "Review " + this.review.alrId);
-        }
-    }
 
     /**
      * 判断 Ticket 是否超时.

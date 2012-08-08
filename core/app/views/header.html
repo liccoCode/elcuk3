@@ -18,11 +18,10 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="@{Listings.index()}">(L)isting</a></li>
-                        #{ck 'manager'}
+                        #{ck 'root'}
                             <li><a href="@{Orders.index(1, 35)}">(O)rder</a></li>
                             <li><a href="@{Analyzes.index()}">(S)elling Analyze</a></li>
                         #{/ck}
-                            <li><a href="@{Feedbacks.index(1, 20)}">Feedbacks</a></li>
                             <li><a href="@{AmazonReviews.index()}">Review Click Page</a></li>
                         </ul>
                     </li>
@@ -30,7 +29,8 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Tickets.index()}">Tickets</a></li>
+                            <li><a href="@{Reviews.index()}">Reviews</a></li>
+                            <li><a href="@{Feedbacks.index()}">Feedbacks</a></li>
                         </ul>
                     </li>
 

@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.message.BasicNameValuePair;
@@ -855,10 +854,12 @@ public class Account extends Model {
             case AMAZON_DE:
             case AMAZON_FR:
                 /**
+                 * 0. clear old cookies
                  * 1. Visit the website, fetch the new Cookie.
                  * 2. With the website params and user/password to login.
                  */
                 if(market == null) market = this.type;
+                this.cookieStore(market).clear();
                 String body = HTTP.get(this.cookieStore(market), market.amazonSiteLogin());
                 Document doc = Jsoup.parse(body);
                 Elements inputs = doc.select("#ap_signin_form input");
@@ -913,40 +914,6 @@ public class Account extends Model {
         }
     }
 
-    /**
-     * 抓取 Account 对应网站的 FeedBack
-     *
-     * @param page
-     * @return
-     */
-    public List<Feedback> fetchFeedback(int page) {
-        HttpGet feedback = null;
-        switch(this.type) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-                try {
-                    String body = HTTP.get(this.cookieStore(), this.type.feedbackPage(page));
-                    if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + "feedback_p" + page + ".html"), body);
-                    List<Feedback> feedbacks = Feedback.parseFeedBackFromHTML(body);
-                    for(Feedback f : feedbacks) {
-                        try {
-                            f.account = this;
-                            f.orderr = Orderr.findById(f.orderId);
-                        } catch(Exception e) {
-                            Logger.warn(Webs.E(e));
-                        }
-                    }
-                    return feedbacks;
-                } catch(Exception e) {
-                    Logger.warn("[" + this.type + "] Feedback page can not found Or the session is invalid!");
-                }
-                break;
-            default:
-                Logger.warn("Not support fetch [" + this.type + "] Feedback.");
-        }
-        return new ArrayList<Feedback>();
-    }
 
     /**
      * 返回这个市场所对应的 MarketPlaceId, 仅仅支持 UK/DE/FR, 其他市场默认返回 UK 的
@@ -1085,9 +1052,12 @@ public class Account extends Model {
         }
         boolean isLogin = isLogin(doc);
         // 这里检查点击不成功的原因
-        if(!isLogin) FLog.fileLog(
-                String.format("%s.%s.clickReiew.Failed.html", review.reviewId, review.listing.market),
-                html, FLog.T.HTTP_ERROR);
+        if(!isLogin)
+            FLog.fileLog(String.format("%s.clickReiew.%s.%s.Failed.html", this.prettyName(), review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
+        // 将另外一个错误分开记录文件
+        if(upAndDownLink[0] == null || upAndDownLink[1] == null)
+            FLog.fileLog(String.format("%s.URL_NULL.%s.%s.Failed.html", this.prettyName(), review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
+
         return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
     }
 

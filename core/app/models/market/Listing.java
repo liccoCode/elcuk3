@@ -461,10 +461,10 @@ public class Listing extends GenericModel {
      */
     public static boolean isSelfBuildListing(String title) {
         title = title.toLowerCase();
-        if(StringUtils.startsWith(title, "easyacc")) return true;
-        else if(StringUtils.startsWith(title, "nosson")) return true;
-        else if(StringUtils.startsWith(title, "fencer")) return true;
-        else if(StringUtils.startsWith(title, "saner")) return true;
+        if(StringUtils.contains(title, "easyacc")) return true;
+        else if(StringUtils.contains(title, "nosson")) return true;
+        else if(StringUtils.contains(title, "fencer")) return true;
+        else if(StringUtils.contains(title, "saner")) return true;
         else return false;
     }
 

@@ -16,7 +16,7 @@ public class ListingReviewMailTest extends UnitTest {
     @Test
     public void test() {
         AmazonListingReview review = AmazonListingReview.findById("B00237QJZI_AMAZON.CO.UK_A2XQP8V4C9E0Q4");
-        review.listingReviewCheck();
+        review.checkMailAndTicket();
     }
 
     //    @Test

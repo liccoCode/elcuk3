@@ -85,7 +85,7 @@ public class OrderMailCheck extends Job {
             checked++;
             // check: 仅仅发送 EasyAcc 开头的标题的产品的邮件.
             boolean ctn = true;
-            for(OrderItem oi : ord.items) if(!Listing.isSelfBuildListing(oi.productName)) ctn = false;
+            for(OrderItem oi : ord.items) if(!Listing.isSelfBuildListing(oi.listingName)) ctn = false;
             if(!ctn) {
                 Logger.debug(String.format("Skip %s, because of [Not EasyAcc]", ord.orderId));
                 notEasyAcc++;
