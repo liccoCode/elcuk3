@@ -219,6 +219,11 @@ public class AmazonListingReview extends GenericModel {
         this.createDate = new Date();
         // 将初始的 Review 数据全部记录下来
         this.originJson = J.G(this);
+        if(this.listing == null)
+            Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
+        else if(!Listing.isSelfBuildListing(this.listing.title)) {
+            this.comment = String.format("这个 Review 对应的 Listing 非自建.\r\n") + this.comment;
+        }
         return this.save();
     }
 
@@ -275,13 +280,14 @@ public class AmazonListingReview extends GenericModel {
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) return;// 超过 70 天的不处理
 
 
-//        Rating < 4 的开 OsTicket
-        if((this.rating != null && this.rating < 4)) {
+//        Rating < 4 并且为自建的 Listing 的开 OsTicket
+        if((this.rating != null && this.rating < 4 && Listing.isSelfBuildListing(this.listing.title))) {
             if(this.ticket == null) this.ticket = new Ticket(this);
             this.ticket.openOsTicket(null);
         }
-//        Rating <= 4 的发送邮件提醒
-        if((this.rating != null && this.rating <= 4)) Mails.listingReviewWarn(this);
+//        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒
+        if(this.rating != null && this.rating <= 4 && Listing.isSelfBuildListing(this.listing.title))
+            Mails.listingReviewWarn(this);
         this.save();
     }
 
