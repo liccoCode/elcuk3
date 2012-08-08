@@ -103,7 +103,7 @@ public class Feedback extends GenericModel {
         if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
 
         if(this.score <= 3 && this.isSelfBuildListing())
-            this.ticket = this.openOsTicket(null);
+            this.ticket = this.openTicket(null);
 
         if(this.mailedTimes == null)
             Mails.feedbackWarnning(this);
@@ -151,21 +151,12 @@ public class Feedback extends GenericModel {
         return this.save();
     }
 
-    public Feedback checkSaveOrUpdate() {
-        Feedback manager = Feedback.findById(this.orderId);
-        if(manager != null && manager.isPersistent()) { // 系统中存在过的
-            return manager.updateAttr(this);
-        } else {
-            return this.save();
-        }
-    }
-
     /**
      * 向 OsTicket 系统开启一个新的 Ticket
      *
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
-    public Ticket openOsTicket(String title) {
+    public Ticket openTicket(String title) {
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
             return null;
