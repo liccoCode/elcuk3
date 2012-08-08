@@ -12,6 +12,7 @@ import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -27,16 +28,6 @@ import java.util.List;
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Feedback extends GenericModel {
-
-    public enum S {
-        HANDLING,
-        SLOVED,
-        END,
-        /**
-         * 没有办法处理了, 只能留着
-         */
-        LEFT
-    }
 
     @OneToOne
     public Orderr orderr;
@@ -84,10 +75,6 @@ public class Feedback extends GenericModel {
      */
     public String osTicketId;
 
-    /**
-     * 是否解决了,等等状态
-     */
-    public S state;
 
     public Feedback() {
     }
@@ -100,7 +87,7 @@ public class Feedback extends GenericModel {
          * 1. 判断是否需要发送警告邮件;
          * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
          */
-        if(this.score > 3 || this.state == S.SLOVED || this.state == S.END || this.state == S.LEFT) return;
+        if(this.score > 3) return;
 
         if(this.score <= 3 && this.isSelfBuildListing())
             this.ticket = this.openTicket(null);
@@ -135,8 +122,6 @@ public class Feedback extends GenericModel {
         if(newFeedback.score != null) this.score = newFeedback.score;
         if(StringUtils.isNotBlank(newFeedback.comment)) this.comment = newFeedback.comment;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
-
-        if(newFeedback.state != null && this.state == S.HANDLING) this.state = newFeedback.state;
 
         return this.save();
     }
@@ -180,6 +165,22 @@ public class Feedback extends GenericModel {
         }
     }
 
+    public F.T2<Integer, String> feedbacklengthColor() {
+        if(this.comment.length() <= 15) {
+            return new F.T2<Integer, String>(this.comment.length(), "2FCCEF");
+        } else if(this.comment.length() <= 50) {
+            return new F.T2<Integer, String>(this.comment.length(), "6CB4E6");
+        } else if(this.comment.length() <= 100) {
+            return new F.T2<Integer, String>(this.comment.length(), "8CA7DE");
+        } else if(this.comment.length() <= 200) {
+            return new F.T2<Integer, String>(this.comment.length(), "9BA0D8");
+        } else if(this.comment.length() <= 300) {
+            return new F.T2<Integer, String>(this.comment.length(), "AC96D4");
+        } else {
+            return new F.T2<Integer, String>(this.comment.length(), "B38ACE");
+        }
+    }
+
 
     @Override
     public String toString() {
@@ -191,7 +192,6 @@ public class Feedback extends GenericModel {
         sb.append(", email='").append(email).append('\'');
         sb.append(", comment='").append(comment).append('\'');
         sb.append(", memo='").append(memo).append('\'');
-        sb.append(", state=").append(state);
         sb.append('}');
         return sb.toString();
     }
@@ -215,4 +215,5 @@ public class Feedback extends GenericModel {
         result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         return result;
     }
+
 }

@@ -102,6 +102,28 @@ public class vExtensions extends JavaExtensions {
         return "#";
     }
 
+    /**
+     * 根据一个数字, 计算这个数字对应的颜色(5 分评价常用)
+     *
+     * @param rate
+     * @return
+     */
+    public static String color(Number rate) {
+        if(rate.intValue() >= 5) {
+            return "3ED76A";
+        } else if(rate.intValue() >= 4) {
+            return "ADFF1F";
+        } else if(rate.intValue() >= 3) {
+            return "FFE107";
+        } else if(rate.intValue() >= 2) {
+            return "D54C00";
+        } else if(rate.intValue() >= 1) {
+            return "E03F00";
+        } else {
+            return "FF1101";
+        }
+    }
+
     public static String reviewLink(AmazonListingReview review) {
         String site = StringUtils.split(review.listingId, "_")[1];
         return String.format("http://www.%s/review/%s", site, review.reviewId);
@@ -133,10 +155,22 @@ public class vExtensions extends JavaExtensions {
         return DateTime.now().plusDays(day).toString("yyyy-MM-dd");
     }
 
+    /**
+     * 传入的日期与现在的日期之间相差多久?
+     *
+     * @param date
+     * @return
+     */
     public static String left(Date date) {
         return left(date, false);
     }
 
+    /**
+     * 传入的日期与现在的日期之间相差多久?
+     *
+     * @param date
+     * @return
+     */
     public static String left(Date date, Boolean stopAtMonth) {
         Date now = new Date();
         if(now.after(date)) {

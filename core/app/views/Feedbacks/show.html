@@ -1,0 +1,60 @@
+#{extends 'main.html'/}
+#{set title:'Feedback #' + feedback.orderId /}
+#{set 'moreScripts'}
+    #{script 'reviews/show.coffee'/}
+#{/set}
+
+<div class="label label-info">Feedback</div>
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>OrderId</th>
+        <td>${feedback.orderId}</td>
+        <th>UserId</th>
+        <td>${feedback.orderr.userid}</td>
+    </tr>
+
+    <tr>
+        <th>Email</th>
+        <td>${feedback.email}</td>
+        <th>Score</th>
+        <td>${feedback.score}</td>
+    </tr>
+
+    <tr>
+        <th>Market</th>
+        <td>${feedback.market}</td>
+        <th>OsTicketId</th>
+        <td>${feedback.osTicketId}</td>
+    </tr>
+
+    <tr>
+        <td colspan="4">
+            <div class="row-fluid">
+                <div class="span6">
+                    Btns...
+                </div>
+
+                <div class="span6">
+                #{list items:feedback.orderr.items, as:'oitm'}
+                    <img src="${oitm.selling.listing.picUrls}">
+                #{/list}
+                </div>
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="4">
+            <h3>Comment</h3>
+        ${feedback.comment}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="4">
+            <div class="alert alert-danger">
+                此页面的数据只部分完成!
+            </div>
+        </td>
+    </tr>
+</table>
+

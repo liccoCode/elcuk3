@@ -391,27 +391,6 @@ public class AmazonListingReview extends GenericModel {
     }
 
     /**
-     * 输出与此 Review 合适的警告颜色
-     *
-     * @return
-     */
-    public String color() {
-        if(this.rating >= 5) {
-            return "3ED76A";
-        } else if(this.rating >= 4) {
-            return "ADFF1F";
-        } else if(this.rating >= 3) {
-            return "FFE107";
-        } else if(this.rating >= 2) {
-            return "D54C00";
-        } else if(this.rating >= 1) {
-            return "E03F00";
-        } else {
-            return "FF1101";
-        }
-    }
-
-    /**
      * 检查此 Review 是否在 Top1000 内
      *
      * @return

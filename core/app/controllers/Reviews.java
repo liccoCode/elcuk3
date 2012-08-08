@@ -31,16 +31,16 @@ public class Reviews extends Controller {
     public static void index() {
         F.T2<List<Ticket>, List<Ticket>> newT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW, true);
         F.T2<List<Ticket>, List<Ticket>> needTwoT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.TWO_MAIL, true);
-        List<Ticket> noRespTickets = Ticket.tickets(Ticket.T.REVIEW, TicketState.NO_RESP, false)._1;
-        List<Ticket> newMsgTickts = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW_MSG, false)._1;
+        List<Ticket> noRespReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.NO_RESP, false)._1;
+        List<Ticket> newMsgReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW_MSG, false)._1;
 
 
-        renderArgs.put("newTickets", newT2._1);
-        renderArgs.put("newOverdueTickets", newT2._2);
-        renderArgs.put("twoMailTickets", needTwoT2._1);
-        renderArgs.put("twoMailOverdueTickets", needTwoT2._2);
-        int totalNeedDealReview = newT2._1.size() + newT2._2.size() + needTwoT2._1.size() + needTwoT2._2.size() + noRespTickets.size() + newMsgTickts.size();
-        render(noRespTickets, newMsgTickts, totalNeedDealReview);
+        renderArgs.put("newReviews", newT2._1);
+        renderArgs.put("newOverdueReviews", newT2._2);
+        renderArgs.put("twoMailReviews", needTwoT2._1);
+        renderArgs.put("twoMailOverdueReviews", needTwoT2._2);
+        int totalNeedDealReview = newT2._1.size() + newT2._2.size() + needTwoT2._1.size() + needTwoT2._2.size() + noRespReviews.size() + newMsgReviews.size();
+        render(noRespReviews, newMsgReviews, totalNeedDealReview);
     }
 
     public static void show(String rid) {
