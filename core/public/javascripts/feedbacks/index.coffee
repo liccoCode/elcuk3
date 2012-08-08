@@ -16,3 +16,14 @@ $ ->
         mask.unmask()
     )
     e.preventDefault()
+
+  $('#ostickt_sync').click (e) ->
+    mask = $('#container')
+    mask.mask('更新中 5s 后自动刷新...')
+    $.post('/reviews/syncAll',
+      (r) ->
+        setTimeout(->
+            window.location.reload()
+          , 5000)
+    )
+    e.preventDefault()
