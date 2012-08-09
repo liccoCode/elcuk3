@@ -2,6 +2,7 @@ package noRun;
 
 import models.product.Product;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -30,5 +31,20 @@ public class ProductValidTest {
     public void testHash() {
         System.out.println("The best solution until new battery technology available");
         System.out.println(DigestUtils.md5Hex("The best solution until new battery technology available"));
+    }
+
+    @Test
+    public void testStringBetween() {
+        String s = "\n" +
+                "    $(document).ready(function(){\n" +
+                "        MYO.AjaxLink({\n" +
+                "            remoteAction: 'get-buyer-history',\n" +
+                "            buyerEmail:  \"sj19pjqrh1kvm6n@marketplace.amazon.de\",\n" +
+                "            targetID: '_myo_buyerEmail_showRepeatOrders',\n" +
+                "            progressID: '_myo_buyerEmail_progressIndicator'\n" +
+                "        });\n" +
+                "     });\n" +
+                "";
+        System.out.println(StringUtils.substringBetween(s, "buyerEmail:", "targetID:").trim());
     }
 }

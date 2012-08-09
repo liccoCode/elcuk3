@@ -3,8 +3,10 @@ package jobs;
 import helper.HTTP;
 import helper.Webs;
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -37,13 +39,43 @@ public class OrderInfoFetchJob extends Job {
                 String url = ord.account.type.orderDetail(ord.orderId);
                 Logger.info("OrderInfo(UserId) [%s].", url);
                 String html = HTTP.get(ord.account.cookieStore(), url);
-                Document doc = Jsoup.parse(html);
-                ord.orderDetailUserIdAndEmail(doc).save();
+                OrderInfoFetchJob.orderDetailUserIdAndEmail(ord, html).save();
             } catch(Exception e) {
                 ord.crawlUpdateTimes++;
                 ord.save();
                 Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
             }
         }
+    }
+
+    /**
+     * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充:
+     * 1. userId
+     * 2. email
+     */
+    public static Orderr orderDetailUserIdAndEmail(Orderr order, String html) {
+        Document doc = Jsoup.parse(html);
+        order.crawlUpdateTimes++;
+        Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
+        if(lin == null) {
+            // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
+            lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
+            order.state = Orderr.S.CANCEL;
+            order.memo = lin.text();
+        } else {
+            // Email
+            if(StringUtils.isBlank(order.email) || !StringUtils.contains(order.email, "@"))
+                order.email = StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim();
+
+            // buyerId
+            String url = lin.parent().select("a").attr("href");
+            String[] args = StringUtils.split(url, "&");
+            for(String pa : args) {
+                if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
+                order.userid = StringUtils.split(pa, "=")[1].trim();
+                break;
+            }
+        }
+        return order;
     }
 }
