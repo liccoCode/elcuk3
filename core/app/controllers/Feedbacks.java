@@ -31,14 +31,19 @@ public class Feedbacks extends Controller {
         renderArgs.put("newOverdueFeedbacks", newFdbk._2);
         renderArgs.put("twoMailFeedbacks", needTwoFdbk._1);
         renderArgs.put("twoMailOverdueFeedbacks", needTwoFdbk._2);
-        render(noRespFeedbacks, newMsgFeedbacks);
+        int totalNeedDealFeedbacks = newFdbk._1.size() + newFdbk._2.size() + needTwoFdbk._1.size() + needTwoFdbk._2.size() + noRespFeedbacks.size() + newMsgFeedbacks.size();
+        render(noRespFeedbacks, newMsgFeedbacks, totalNeedDealFeedbacks);
     }
 
     public static void show(String oid) {
         Feedback feedback = Feedback.findById(oid);
-        List<Category> cats = feedback.relateCats();
-        F.T2<Set<TicketReason>, Set<TicketReason>> unTagAndAll = feedback.untagAndAllTags();
-        render(feedback, cats, unTagAndAll);
+        if(feedback == null) {
+            redirect("Orders.show", oid);
+        } else {
+            List<Category> cats = feedback.relateCats();
+            F.T2<Set<TicketReason>, Set<TicketReason>> unTagAndAll = feedback.untagAndAllTags();
+            render(feedback, cats, unTagAndAll);
+        }
     }
 
     public static void iFeedback() {

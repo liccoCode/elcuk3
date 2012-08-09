@@ -167,6 +167,11 @@ public class AmazonListingReview extends GenericModel {
     public Boolean isRealName = false;
 
     /**
+     * 此 Review 我们是否在 Amazon 上留了 Comment
+     */
+    public Boolean isCommentOnAmazon = false;
+
+    /**
      * 是 Top 多少?
      */
     @Expose

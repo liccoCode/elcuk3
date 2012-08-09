@@ -77,6 +77,9 @@ public class Orderr extends GenericModel {
     @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
     public Account.M market;
 
+    @OneToOne(mappedBy = "orderr", fetch = FetchType.LAZY)
+    public Feedback feedback;
+
     /**
      * 订单是通过某一个账户下产生的; 这是一个单向的关系, 不需要 Account 知道. 需要的时候直接使用 SQL 语句进行反向查询
      */
@@ -384,6 +387,10 @@ public class Orderr extends GenericModel {
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
                 return "";
         }
+    }
+
+    public boolean isHaveFeedback() {
+        return Feedback.count("orderr=?", this) > 0;
     }
 
     /**

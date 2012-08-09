@@ -2,6 +2,7 @@
     <tr>
         <th>UserId</th>
         <th>Create</th>
+        <th>LastMsg</th>
         <th>Email</th>
         <th>Order</th>
         <th>OsTicket</th>
@@ -16,6 +17,14 @@
             <a href="#" target="_blank"><i class="icon-comment"></i> ${f.orderr.userid}</a>
         </td>
         <td>${f.createDate.since()}</td>
+        <td>
+            #{if t.lastMessageTime}
+            ${t.lastMessageTime.since()}
+            #{/if}
+            #{else }
+                <i class="icon-warning-sign"></i>
+            #{/else}
+        </td>
 
         #{set fdbkL_C:f.feedbacklengthColor()/}
         <td data-toggle='toggle' data-target="#toggle_${t.id}" style="cursor:pointer;background:${'#' + fdbkL_C._2}">
@@ -24,8 +33,14 @@
             #{list items:t.reasons, as:'tag'}
                 <span class="badge badge-important">${tag.name()}</span>
             #{/list}
+
             <span class="pull-right badge badge-info">${t.responseTimes}</span>
             <span class="pull-right badge badge-warning">${t.messageTimes}</span>
+
+            <!-- 这个是此 Ticket 的处理者 -->
+            #{if t.resolver}
+                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
+            #{/if}
         </td>
         <td>
             <a href="@{Feedbacks.show(t.fid)}" target="_blank">${t.fid}</a>
@@ -63,7 +78,7 @@
                     <div class="row-fluid">
                         <div class="span6">
                             <h3>Comment</h3>
-                        ${f.comment}
+                        ${f.feedback}
                         </div>
 
                         <div class="span6">
@@ -78,7 +93,12 @@
                         <div class="span12" style="margin-top:10px;">
                             <textarea rows="4" id="close_reason_${t.id}" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
 
-                            <a tid="${t.id}" class="close_btn btn btn-danger">Close</a>
+                            #{if t.reasons.size() == 0}
+                                <span class="alert alert-danger">需要先指定原因才可以关闭</span>
+                            #{/if}
+                            #{else }
+                                <button tid="${t.id}" class="close_btn btn btn-danger">Close</button>
+                            #{/else}
                         </div>
                     </div>
                 </div>

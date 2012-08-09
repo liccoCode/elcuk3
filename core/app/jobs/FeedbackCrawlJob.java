@@ -155,7 +155,7 @@ public class FeedbackCrawlJob extends Job {
             //score
             feedback.score = NumberUtils.toFloat(tds.get(1).text());
             //comments
-            feedback.comment = tds.get(2).childNode(0).toString();
+            feedback.feedback = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();
             if(b != null) {
                 feedback.memo = b.nextSibling().toString();

@@ -59,7 +59,7 @@ public class Feedback extends GenericModel {
      * 客户留下的 Feedback
      */
     @Lob
-    public String comment;
+    public String feedback;
 
     @Lob
     public String memo = " ";
@@ -122,7 +122,7 @@ public class Feedback extends GenericModel {
             this.memo = String.format("Score from %s to %s At %s\r\n", this.score, newFeedback.score, DateTime.now().toString("yyyy-MM-dd HH:mm:ss")) + this.memo;
 
         if(newFeedback.score != null) this.score = newFeedback.score;
-        if(StringUtils.isNotBlank(newFeedback.comment)) this.comment = newFeedback.comment;
+        if(StringUtils.isNotBlank(newFeedback.feedback)) this.feedback = newFeedback.feedback;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
 
         return this.save();
@@ -168,18 +168,18 @@ public class Feedback extends GenericModel {
     }
 
     public F.T2<Integer, String> feedbacklengthColor() {
-        if(this.comment.length() <= 15) {
-            return new F.T2<Integer, String>(this.comment.length(), "2FCCEF");
-        } else if(this.comment.length() <= 50) {
-            return new F.T2<Integer, String>(this.comment.length(), "6CB4E6");
-        } else if(this.comment.length() <= 100) {
-            return new F.T2<Integer, String>(this.comment.length(), "8CA7DE");
-        } else if(this.comment.length() <= 200) {
-            return new F.T2<Integer, String>(this.comment.length(), "9BA0D8");
-        } else if(this.comment.length() <= 300) {
-            return new F.T2<Integer, String>(this.comment.length(), "AC96D4");
+        if(this.feedback.length() <= 15) {
+            return new F.T2<Integer, String>(this.feedback.length(), "2FCCEF");
+        } else if(this.feedback.length() <= 50) {
+            return new F.T2<Integer, String>(this.feedback.length(), "6CB4E6");
+        } else if(this.feedback.length() <= 100) {
+            return new F.T2<Integer, String>(this.feedback.length(), "8CA7DE");
+        } else if(this.feedback.length() <= 200) {
+            return new F.T2<Integer, String>(this.feedback.length(), "9BA0D8");
+        } else if(this.feedback.length() <= 300) {
+            return new F.T2<Integer, String>(this.feedback.length(), "AC96D4");
         } else {
-            return new F.T2<Integer, String>(this.comment.length(), "B38ACE");
+            return new F.T2<Integer, String>(StringUtils.isBlank(this.feedback) ? 0 : this.feedback.length(), "B38ACE");
         }
     }
 
@@ -192,7 +192,7 @@ public class Feedback extends GenericModel {
         sb.append(", createDate=").append(createDate);
         sb.append(", score=").append(score);
         sb.append(", email='").append(email).append('\'');
-        sb.append(", comment='").append(comment).append('\'');
+        sb.append(", feedback='").append(feedback).append('\'');
         sb.append(", memo='").append(memo).append('\'');
         sb.append('}');
         return sb.toString();
@@ -232,13 +232,15 @@ public class Feedback extends GenericModel {
 
     /**
      * 返回此 Feedback 的所有的没有 tag 的标签与其涉及的 Cat 的所有标签
+     * 如果没有 Ticket 的话, 那么这个方法返回 空 tag T2
      *
      * @return
      */
     public F.T2<Set<TicketReason>, Set<TicketReason>> untagAndAllTags() {
-        List<Category> cats = this.relateCats();
         Set<TicketReason> unTagsReasons = new HashSet<TicketReason>();
         Set<TicketReason> allReasons = new HashSet<TicketReason>();
+        if(this.ticket == null) return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
+        List<Category> cats = this.relateCats();
 
         for(Category cat : cats) allReasons.addAll(cat.reasons);
 

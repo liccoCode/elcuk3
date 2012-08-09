@@ -35,9 +35,13 @@ public class Orders extends Controller {
     }
 
     public static void show(String oid) {
-        Orderr ord = Orderr.findById(oid);
-        Feedback f = Feedback.findById(ord.orderId);
-        render(ord, f);
+        Feedback f = Feedback.findById(oid);
+        if(f != null)
+            redirect("Feedbacks.show", oid);
+        else {
+            Orderr ord = Orderr.findById(oid);
+            render(ord);
+        }
     }
 
     /**
