@@ -1,9 +1,6 @@
 package ext;
 
-import models.market.Account;
-import models.market.AmazonListingReview;
-import models.market.Listing;
-import models.market.Selling;
+import models.market.*;
 import models.support.Ticket;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -100,6 +97,22 @@ public class vExtensions extends JavaExtensions {
                 return String.format(baseEbay, listing.market.toString(), listing.asin);
         }
         return "#";
+    }
+
+    public static String orderLink(Orderr orderr) {
+        //https://sellercentral.amazon.co.uk/gp/orders-v2/details?orderID=203-5364157-2572327
+        switch(orderr.market) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return "https://sellercentral." + orderr.market.toString() + "/gp/orders-v2/details?orderID=" + orderr.orderId;
+            case EBAY_UK:
+            default:
+                return "";
+        }
     }
 
     /**

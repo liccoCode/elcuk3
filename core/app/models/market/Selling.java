@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @javax.persistence.Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Selling extends GenericModel {
 
     public Selling() {

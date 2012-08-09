@@ -22,6 +22,7 @@ import java.util.List;
  * Time: 4:29 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class TicketReason extends Model {
 
     @Column(length = 55)

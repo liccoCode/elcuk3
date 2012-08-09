@@ -10,6 +10,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
 import play.Play;
+import play.data.validation.Error;
 import play.libs.F;
 import play.libs.Mail;
 
@@ -319,6 +320,19 @@ public class Webs {
         e.printStackTrace(new PrintWriter(sw));
         // 便与前台查看异常
         return StringUtils.replace(sw.toString(), "\\n", "<br/>");
+    }
+
+    /**
+     * 将产生的 Play Error 替换成字符串形式
+     *
+     * @param errors
+     * @return
+     */
+    public static String V(List<play.data.validation.Error> errors) {
+        StringBuilder sbd = new StringBuilder();
+        for(Error err : errors)
+            sbd.append(err.getKey()).append("=>").append(err.message()).append("<br>");
+        return sbd.toString();
     }
 
     /**

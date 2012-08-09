@@ -86,12 +86,19 @@
             <div class="tab-content" id="tab_content_${r.reviewId}">
                 <div id="review_${t.id}" class="tab-pane fade active in">
                     <div class="row-fluid" style="background:#fff;">
-                        <div class="span6">
+                        <div class="span4">
                             <h3>Review</h3>
                         ${r.review}
                         </div>
-                        <div class="span6">
-                            <h3>Comment</h3>
+
+                        <div class="span4">
+                            <h3>Ticket Memo</h3>
+                            <textarea rows="5" class="span12">${t.memo}</textarea>
+                            <button tid="${t.id}" class="ticket_comment btn btn-primary">Comment</button>
+                        </div>
+
+                        <div class="span4">
+                            <h3>Review Memo</h3>
                         ${r.comment}
                         </div>
                     </div>

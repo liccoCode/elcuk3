@@ -30,6 +30,7 @@ import java.util.List;
  * Time: 3:29 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Ticket extends Model {
 
     public Ticket() {
@@ -55,7 +56,11 @@ public class Ticket extends Model {
 
     public enum T {
         REVIEW,
-        FEEDBACK
+        FEEDBACK,
+        /**
+         * 默认的咨询邮件
+         */
+        TICKET
     }
 
     /**

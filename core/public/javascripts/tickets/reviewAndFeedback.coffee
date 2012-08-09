@@ -17,7 +17,7 @@ $ ->
     o = $(span)
     mask = $('#reason_div')
     mask.mask('取消原因中...')
-    $.post('/reviews/unTagReason', {reason: o.html(), ticketId: ticketId()},
+    $.post('/tickets/unTagReason', {reason: o.html(), ticketId: ticketId()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -36,7 +36,7 @@ $ ->
     o = $(span)
     mask = $('#reason_div')
     mask.mask('添加原因中...')
-    $.post('/reviews/tagReason', {reason: o.html(), ticketId: ticketId()},
+    $.post('/tickets/tagReason', {reason: o.html(), ticketId: ticketId()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -60,7 +60,7 @@ $ ->
     return false if !confirm('确认要关闭这个 Ticket?')
     mask = $('#close_div')
     mask.mask("关闭中...")
-    $.post('/reviews/close', {tid: @getAttribute('tid'), reason: $('#close_reason').val()},
+    $.post('/reviews/close', {tid: ticketId(), reason: $('#close_reason').val()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -74,12 +74,60 @@ $ ->
   $('#take_it').click (e) ->
     mask = $('#container')
     mask.mask('处理中...')
-    $.post('/reviews/iTakeIt', tid: @getAttribute('tid'),
+    $.post('/tickets/iTakeIt', tid: ticketId(),
       (r) ->
         if r.flag is false
           alert(r.message)
           mask.unmask()
         else
           window.location.reload()
+    )
+    e.preventDefault()
+
+  ## --------------------- Review And Feedback index 页面使用的 js 代码
+  # 添加 comment 功能
+  $('#ticket_comment, .ticket_comment').click (e) ->
+    mask = $('#container')
+    mask.mask('更新中...')
+    try
+      tid = ticketId()
+    catch e
+      tid = @getAttribute('tid')
+    $.post('/tickets/comment', {tid: tid, comment: $(@).prev().val()},
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        mask.unmask()
+    )
+    e.preventDefault()
+
+
+  # 为 index 页面的所有 .close_btn 添加关闭事件
+  $('.close_btn').click (e) ->
+    return false if !confirm('确认要关闭这个 Ticket?')
+    rid = @getAttribute('rid')
+    mask = $("#tab_content_#{rid}")
+    mask.mask("关闭中...")
+    $.post('/tickets/close', {tid: @getAttribute('tid'), reason: $("#close_reason_#{rid}").val()},
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          toggleTr = $("#toggle_#{rid}")
+          toggleTr.prev().remove()
+          toggleTr.remove()
+        mask.unmask()
+    )
+    e.preventDefault()
+
+  # 为 index 页面添加 osticket 同步按钮
+  $('#ostickt_sync').click (e) ->
+    mask = $('#container')
+    mask.mask('更新中 5s 后自动刷新...')
+    $.post('/tickets/syncAll',
+      (r) ->
+        setTimeout(->
+            window.location.reload()
+          , 5000)
     )
     e.preventDefault()

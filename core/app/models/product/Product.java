@@ -35,6 +35,7 @@ import java.util.*;
  * Time: 10:55 AM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Product extends GenericModel {
     /**
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!

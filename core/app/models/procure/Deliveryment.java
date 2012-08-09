@@ -23,6 +23,7 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Deliveryment extends GenericModel implements Payment.ClosePayment {
 
     public enum S {
