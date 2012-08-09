@@ -26,15 +26,14 @@
     </tr>
 #{list items:savedReviews, as:'r'}
     <tr drop="${r.reviewId}">
-        #{set lengthAndColor: r.reviewLengthColor()/}
         <td>${r.helpUp}/${r.helpClick}</td>
         <td ${r.isVedio ? 'style=background:#0091F4' : ''}>${r.isVedio}</td>
         <td ${r.isVineVoice ? 'style=background:#0091F4' : ''}>${r.isVineVoice}</td>
         <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
         <td ${r.isRealName ? 'style=background:#0091F4' : ''}>${r.isRealName}</td>
         <td style="background:${"#" + r.rating.color()}">${r.rating}</td>
-        <td style="cursor:pointer;background:${'#' + lengthAndColor._2}" data-toggle="toggle" data-target="#review_${r.reviewId}">
-            <span class="badge badge-inverse">${lengthAndColor._1}</span>
+        <td style="cursor:pointer;background:${'#' + r.color()}" data-toggle="toggle" data-target="#review_${r.reviewId}">
+            <span class="badge badge-inverse">${r.length()}</span>
             #{if r.isWithinTop1000()}
                 <span class="badge badge-success">Top ${r.topN}</span>
             #{/if}

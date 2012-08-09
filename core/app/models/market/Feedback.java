@@ -167,22 +167,6 @@ public class Feedback extends GenericModel {
         }
     }
 
-    public F.T2<Integer, String> feedbacklengthColor() {
-        if(this.feedback.length() <= 15) {
-            return new F.T2<Integer, String>(this.feedback.length(), "2FCCEF");
-        } else if(this.feedback.length() <= 50) {
-            return new F.T2<Integer, String>(this.feedback.length(), "6CB4E6");
-        } else if(this.feedback.length() <= 100) {
-            return new F.T2<Integer, String>(this.feedback.length(), "8CA7DE");
-        } else if(this.feedback.length() <= 200) {
-            return new F.T2<Integer, String>(this.feedback.length(), "9BA0D8");
-        } else if(this.feedback.length() <= 300) {
-            return new F.T2<Integer, String>(this.feedback.length(), "AC96D4");
-        } else {
-            return new F.T2<Integer, String>(StringUtils.isBlank(this.feedback) ? 0 : this.feedback.length(), "B38ACE");
-        }
-    }
-
 
     @Override
     public String toString() {

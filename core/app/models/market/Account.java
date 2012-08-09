@@ -1,7 +1,7 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import ext.vExtensions;
+import ext.LinkHelper;
 import helper.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -435,7 +435,7 @@ public class Account extends Model {
      * @return
      */
     private F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
-        String html = HTTP.get(this.cookieStore(review.listing.market), vExtensions.reviewLink(review));
+        String html = HTTP.get(this.cookieStore(review.listing.market), LinkHelper.reviewLink(review));
         Document doc = Jsoup.parse(html);
         // 账号登陆以后, 链接中才会有 sign-out 字符串
         Elements els = doc.select(".votingButtonReviews");

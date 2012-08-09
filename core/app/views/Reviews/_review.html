@@ -13,7 +13,6 @@
     </tr>
 #{list items:tickets, as:'t'}
     #{set r:t.review/}
-    #{set reviewC_L:r.reviewLengthColor()/}
     <tr>
         <td>
             <a href="@{Products.show(t.fid)}" target="_blank">${t.fid}</a>
@@ -30,8 +29,8 @@
                 <i class="icon-warning-sign"></i>
             #{/else}
         </td>
-        <td data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;background:${'#' + reviewC_L._2}">
-            <span class="badge badge-inverse">${reviewC_L._1}</span> |
+        <td data-toggle="toggle" data-target="#toggle_${r.reviewId}" style="cursor:pointer;background:${'#' + r.color()}">
+            <span class="badge badge-inverse">${r.length()}</span> |
             <span>${r.title}</span>
             #{list items:t.reasons, as:'ra'}
                 <span class="badge badge-important">${ra.name()}</span>

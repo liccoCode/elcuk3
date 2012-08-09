@@ -26,9 +26,8 @@
             #{/else}
         </td>
 
-        #{set fdbkL_C:f.feedbacklengthColor()/}
-        <td data-toggle='toggle' data-target="#toggle_${t.id}" style="cursor:pointer;background:${'#' + fdbkL_C._2}">
-            <span class="badge badge-inverse">${fdbkL_C._1}</span>
+        <td data-toggle='toggle' data-target="#toggle_${t.id}" style="cursor:pointer;background:${'#' + f.color()}">
+            <span class="badge badge-inverse">${f.length()}</span>
             <span>${f.email}</span>
             #{list items:t.reasons, as:'tag'}
                 <span class="badge badge-important">${tag.name()}</span>
