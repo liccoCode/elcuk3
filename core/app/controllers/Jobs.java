@@ -6,10 +6,7 @@ import jobs.AmazonOrderUpdateJob;
 import jobs.ListingWorkers;
 import jobs.SellingRecordCheckJob;
 import models.Jobex;
-import models.market.Account;
-import models.market.JobRequest;
-import models.market.Listing;
-import models.market.Selling;
+import models.market.*;
 import models.view.Ret;
 import notifiers.Mails;
 import org.joda.time.DateTime;
@@ -149,7 +146,7 @@ public class Jobs extends Controller {
     }
 
     public static void reviewFix(String asin, String m) {
-        Account.M market = Account.M.val(m);
+        M market = M.val(m);
         try {
             new ListingWorkers.R(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
         } catch(Exception e) {

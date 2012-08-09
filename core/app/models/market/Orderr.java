@@ -72,7 +72,7 @@ public class Orderr extends GenericModel {
      */
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
-    public Account.M market;
+    public M market;
 
     @OneToOne(mappedBy = "orderr", fetch = FetchType.LAZY)
     public Feedback feedback;
@@ -496,7 +496,7 @@ public class Orderr extends GenericModel {
                     Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
                     for(S s : S.values()) {
                         dateRow.put(s.name(), new AtomicInteger(0)); // ALL
-                        for(Account.M m : Account.M.values()) {
+                        for(M m : M.values()) {
                             dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
                             dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
                         }
@@ -534,7 +534,7 @@ public class Orderr extends GenericModel {
                             rowSum.addAndGet(rowMap.get(dataRowKey).get());
                         }
 
-                        for(Account.M m : Account.M.values()) {
+                        for(M m : M.values()) {
                             if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
                                 rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
                         }

@@ -5,8 +5,8 @@ import com.amazonaws.mws.MarketplaceWebServiceClient;
 import com.amazonaws.mws.MarketplaceWebServiceConfig;
 import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
-import models.market.Account;
 import models.market.JobRequest;
+import models.market.M;
 import org.apache.commons.io.FileUtils;
 import play.Logger;
 import play.utils.FastRuntimeException;
@@ -40,8 +40,8 @@ public class AWS {
          */
         A1F83G8C2ARO7P {
             @Override
-            public Account.M market() {
-                return Account.M.AMAZON_UK;
+            public M market() {
+                return M.AMAZON_UK;
             }
         },
         /**
@@ -49,8 +49,8 @@ public class AWS {
          */
         A1PA6795UKMFR9 {
             @Override
-            public Account.M market() {
-                return Account.M.AMAZON_DE;
+            public M market() {
+                return M.AMAZON_DE;
             }
         },
         /**
@@ -58,12 +58,12 @@ public class AWS {
          */
         A13V1IB3VIYZZH {
             @Override
-            public Account.M market() {
-                return Account.M.AMAZON_FR;
+            public M market() {
+                return M.AMAZON_FR;
             }
         };
 
-        public abstract Account.M market();
+        public abstract M market();
     }
 
     /**

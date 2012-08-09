@@ -439,7 +439,7 @@ public class AmazonListingReview extends GenericModel {
         String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
 
         if(StringUtils.isBlank(subject)) {
-            if(this.listing.market == Account.M.AMAZON_DE) {
+            if(this.listing.market == M.AMAZON_DE) {
                 subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
                 subject = "You left a negative product review, may we have a chance to make up?";

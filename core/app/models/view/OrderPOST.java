@@ -1,6 +1,7 @@
 package models.view;
 
 import models.market.Account;
+import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
@@ -19,7 +20,7 @@ public class OrderPOST {
 
     public Account account;
 
-    public Account.M market;
+    public M market;
 
     public Orderr.S state;
 

@@ -1,6 +1,6 @@
 package helper;
 
-import models.market.Account;
+import models.market.M;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -83,7 +83,7 @@ public class Dates {
         }
     }
 
-    public static DateTimeZone timeZone(Account.M market) {
+    public static DateTimeZone timeZone(M market) {
         switch(market) {
             case AMAZON_UK:
             case EBAY_UK:
@@ -110,7 +110,7 @@ public class Dates {
      * @param date
      * @return
      */
-    public static String listingUpdateFmt(Account.M m, Date date) {
+    public static String listingUpdateFmt(M m, Date date) {
         switch(m) {
             case AMAZON_UK:
             case AMAZON_FR:
@@ -122,7 +122,7 @@ public class Dates {
         }
     }
 
-    public static Date listingFromFmt(Account.M m, String dateStr) {
+    public static Date listingFromFmt(M m, String dateStr) {
         switch(m) {
             case AMAZON_UK:
             case AMAZON_FR:

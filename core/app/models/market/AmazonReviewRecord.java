@@ -36,7 +36,7 @@ public class AmazonReviewRecord extends GenericModel {
         this.username = ElcukRecord.username();
         this.createAt = new Date();
         this.isUp = isUp;
-        F.T2<String, Account.M> unLid = Listing.unLid(review.listingId);
+        F.T2<String, M> unLid = Listing.unLid(review.listingId);
         this.asin = unLid._1;
         this.market = unLid._2;
         this.userId = review.userid;
@@ -102,7 +102,7 @@ public class AmazonReviewRecord extends GenericModel {
     @Enumerated(EnumType.STRING)
     @Column(length = 32)
     @Expose
-    public Account.M market;
+    public M market;
 
     /**
      * 知道是谁的 Review

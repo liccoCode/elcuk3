@@ -65,7 +65,7 @@ public class Feedback extends GenericModel {
     public String memo = " ";
 
     @Enumerated(EnumType.STRING)
-    public Account.M market;
+    public M market;
 
     /**
      * 发送邮件警告的次数, 最多 3 次;

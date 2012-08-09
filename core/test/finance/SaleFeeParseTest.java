@@ -4,6 +4,7 @@ import jobs.FinanceCheckJob;
 import jobs.KeepSessionJob;
 import models.finance.SaleFee;
 import models.market.Account;
+import models.market.M;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -25,7 +26,7 @@ public class SaleFeeParseTest extends UnitTest {
     //    @Test
     public void testParse() {
         Account acc = Account.findById(1l);
-        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.co.uk/2012.05/easyacc.eu@gmail.com_2012.05.03_21h.txt"), acc, Account.M.AMAZON_DE);
+        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.co.uk/2012.05/easyacc.eu@gmail.com_2012.05.03_21h.txt"), acc, M.AMAZON_DE);
         for(SaleFee f : fees) {
             System.out.println(String.format("OrderId: %s, Cost: %s %s, USD_Cost: %s USD", f.orderId, f.cost, f.currency.name(), f.usdCost));
         }
@@ -49,7 +50,7 @@ public class SaleFeeParseTest extends UnitTest {
             if(NumberUtils.toInt(name.split("\\.")[0].split("f")[1]) < 5) continue;
 
             System.out.println("----------------" + f1.getAbsolutePath() + "/" + name + "-------------------");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(f1, acc, Account.M.AMAZON_UK);
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(f1, acc, M.AMAZON_UK);
             for(SaleFee f : fees) {
                 f.save();
             }
@@ -65,6 +66,6 @@ public class SaleFeeParseTest extends UnitTest {
     @Test
     public void testAccountBriefFlatFinance() {
         Account acc = Account.findById(1l);
-        acc.briefFlatFinance(Account.M.AMAZON_UK);
+        acc.briefFlatFinance(M.AMAZON_UK);
     }
 }

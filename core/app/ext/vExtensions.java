@@ -22,7 +22,7 @@ public class vExtensions extends JavaExtensions {
     public static String userReviewLink(AmazonListingReview r) {
         String baseAmazon = "http://www.%s/gp/pdp/profile/%s";
         String[] args = r.listingId.split("_");
-        Account.M market = Account.M.val(args[1]);
+        M market = M.val(args[1]);
         switch(market) {
             case AMAZON_US:
             case AMAZON_UK:

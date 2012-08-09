@@ -150,11 +150,11 @@ public class Product extends GenericModel {
      * @return
      */
     public List<Listing> listings(String market) {
-        Account.M m = Account.M.val(market);
+        M m = M.val(market);
         if(m == null) {
             return this.listings;
         } else {
-            return Listing.find("product.sku=? AND market=?", this.sku, Account.M.val(market)).fetch();
+            return Listing.find("product.sku=? AND market=?", this.sku, M.val(market)).fetch();
         }
     }
 
@@ -315,9 +315,9 @@ public class Product extends GenericModel {
                     else if("offering_sku".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.merchantSKU));
                     else if("our_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, selling.aps.standerPrice)));
+                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.standerPrice)));
                     else if("discounted_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, selling.aps.salePrice)));
+                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.salePrice)));
                     else if("discounted_price_start_date".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
                     else if("discounted_price_end_date".equals(name))

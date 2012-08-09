@@ -4,6 +4,7 @@ import helper.Constant;
 import helper.Webs;
 import models.finance.SaleFee;
 import models.market.Account;
+import models.market.M;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import play.Logger;
@@ -37,7 +38,7 @@ public class Finances extends Controller {
     public static void fix(String n, String m, Account a) {
         try {
             if(!a.isPersistent()) renderText("Account is not Persistent!");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.D_FINANCE + "/fix/" + n + ".txt"), a, Account.M.val(m));
+            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.D_FINANCE + "/fix/" + n + ".txt"), a, M.val(m));
             SaleFee.clearOldSaleFee(fees);
             SaleFee.batchSaveWithJDBC(fees);
             renderText("Saved: " + fees.size() + " fees");
@@ -79,7 +80,7 @@ public class Finances extends Controller {
      */
     public static void flatV2(String rid, Account acc, String m) {
         if(!acc.isPersistent()) renderJSON(new Ret("Account 不存在, 错误!"));
-        Account.M market = Account.M.val(m);
+        M market = M.val(m);
         if(market == null) renderJSON(new Ret("Account is invalid!"));
         try {
             List<SaleFee> fees = SaleFee.flat2FinanceParse(acc.briefFlatV2Finance(market, rid), acc, market);

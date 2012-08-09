@@ -1,6 +1,7 @@
 package market;
 
 import models.market.Account;
+import models.market.M;
 import org.junit.Test;
 import play.mvc.Http;
 import play.test.Fixtures;
@@ -24,7 +25,7 @@ public class AccountTest extends FunctionalTest {
     //    @Test
     public void createAccount() {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("a.type", Account.M.AMAZON_UK.name());
+        params.put("a.type", M.AMAZON_UK.name());
         params.put("a.username", "easyacc.eu@gmail.com");
         params.put("a.password", "6XC$X5oY!jj");
         Http.Response response = POST("/market/accounts/c", params);

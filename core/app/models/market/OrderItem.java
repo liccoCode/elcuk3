@@ -96,7 +96,7 @@ public class OrderItem extends GenericModel {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
-    public Account.M market;
+    public M market;
 
 
     @Override
@@ -186,9 +186,9 @@ public class OrderItem extends GenericModel {
                     try {
                         float usdCost = oi.usdCost == null ? 0 : oi.usdCost;
                         sale_all += usdCost;
-                        if(oi.market == Account.M.AMAZON_UK) sale_uk += usdCost;
-                        else if(oi.market == Account.M.AMAZON_DE) sale_de += usdCost;
-                        else if(oi.market == Account.M.AMAZON_FR) sale_fr += usdCost;
+                        if(oi.market == M.AMAZON_UK) sale_uk += usdCost;
+                        else if(oi.market == M.AMAZON_DE) sale_de += usdCost;
+                        else if(oi.market == M.AMAZON_FR) sale_fr += usdCost;
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
@@ -245,9 +245,9 @@ public class OrderItem extends GenericModel {
             for(OrderItem oi : orderItems) {
                 if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
                     unit_all += oi.quantity;
-                    if(oi.market == Account.M.AMAZON_UK) unit_uk += oi.quantity;
-                    else if(oi.market == Account.M.AMAZON_DE) unit_de += oi.quantity;
-                    else if(oi.market == Account.M.AMAZON_FR) unit_fr += oi.quantity;
+                    if(oi.market == M.AMAZON_UK) unit_uk += oi.quantity;
+                    else if(oi.market == M.AMAZON_DE) unit_de += oi.quantity;
+                    else if(oi.market == M.AMAZON_FR) unit_fr += oi.quantity;
                     // 其他市场暂时先不统计
                 }
             }

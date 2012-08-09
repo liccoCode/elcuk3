@@ -9,7 +9,7 @@
         <div class="span8">
             <select id="o_market" name="p.market" class="span2" size="1">
                 <option value="">Market(ALL)</option>
-            #{list items:models.market.Account.M.values()}
+            #{list items:models.market.M.values()}
                 <option value="${_.name()}">${_}</option>
             #{/list}
             </select>

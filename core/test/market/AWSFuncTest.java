@@ -1,7 +1,7 @@
 package market;
 
 import jobs.AmazonOrderFetchJob;
-import models.market.Account;
+import models.market.M;
 import org.junit.Test;
 import play.test.FunctionalTest;
 
@@ -18,7 +18,7 @@ public class AWSFuncTest extends FunctionalTest {
     //    @Before
     public void setAcc() {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("a.type", Account.M.AMAZON_UK.name());
+        params.put("a.type", M.AMAZON_UK.name());
         params.put("a.username", "easyacc.eu@gmail.com");
         params.put("a.password", "6XC$X5oY!jj");
         params.put("a.token", "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf");

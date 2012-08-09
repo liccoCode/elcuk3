@@ -35,7 +35,7 @@ public class AmazonReviews extends Controller {
      * @param m
      */
     public static void ajaxMagic(String asin, String m) {
-        Account.M market = Account.M.val(m);
+        M market = M.val(m);
         List<AmazonListingReview> savedReviews = AmazonListingReview.find("listingId=? ORDER BY reviewDate DESC, rating", Listing.lid(asin, market)).fetch();
         Listing lst = Listing.findById(Listing.lid(asin, market));
         render(savedReviews, lst);
@@ -52,7 +52,7 @@ public class AmazonReviews extends Controller {
     }
 
     public static void reCrawl(String asin, String m) {
-        Account.M market = Account.M.val(m);
+        M market = M.val(m);
         String lid = Listing.lid(asin, market);
         try {
             if(!Listing.exist(lid)) {
@@ -71,7 +71,7 @@ public class AmazonReviews extends Controller {
      * 点击 Amazon Listing 的 Like 按钮
      */
     public static void like(String asin, String m) {
-        Account.M market = Account.M.val(m);
+        M market = M.val(m);
         String lid = Listing.lid(asin, market);
         Listing listing = Listing.findById(lid);
         if(listing == null)

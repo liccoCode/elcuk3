@@ -3,6 +3,7 @@ package jobs;
 import helper.Webs;
 import models.finance.SaleFee;
 import models.market.Account;
+import models.market.M;
 import play.Logger;
 import play.jobs.Job;
 
@@ -24,15 +25,15 @@ public class FinanceCheckJob extends Job {
         List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
             if("AJUR3R8UN71M4".equals(acc.merchantId)) {
-                doFetch(acc, Account.M.AMAZON_UK);
-                doFetch(acc, Account.M.AMAZON_DE);
+                doFetch(acc, M.AMAZON_UK);
+                doFetch(acc, M.AMAZON_DE);
             } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
-                doFetch(acc, Account.M.AMAZON_DE);
+                doFetch(acc, M.AMAZON_DE);
             }
         }
     }
 
-    private void doFetch(Account acc, Account.M m) {
+    private void doFetch(Account acc, M m) {
         Logger.info("FinanceCheckJob Check Account[%s] Market[%s] Begin", acc.uniqueName, m.name());
         try {
             File file = acc.briefFlatFinance(m);
