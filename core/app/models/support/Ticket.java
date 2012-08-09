@@ -167,6 +167,29 @@ public class Ticket extends Model {
         return this.osTicketId.split("-")[0];
     }
 
+    public Ticket tagReason(TicketReason tr) {
+        if(this.type == T.FEEDBACK) {
+            if(!this.feedback.relateCats().contains(tr.category))
+                throw new FastRuntimeException("此原因与这个 Listing 不属于一个类别");
+        } else if(this.type == T.REVIEW) {
+            if(!this.review.listing.product.category.equals(tr.category))
+                throw new FastRuntimeException("此原因与这个 Listing 不属于一个类别");
+        }
+        if(this.reasons.contains(tr))
+            throw new FastRuntimeException("此原因已经存在, 不需要重复添加");
+
+        this.reasons.add(tr);
+        return this.save();
+    }
+
+    public Ticket unTagReason(TicketReason tr) {
+        if(!this.reasons.contains(tr))
+            throw new FastRuntimeException("没有这个原因, 不需要接触 Tag.");
+        else
+            this.reasons.remove(tr);
+        return this.save();
+    }
+
     /**
      * 关闭这个 Ticket
      *

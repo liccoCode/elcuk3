@@ -66,20 +66,22 @@ public class Reviews extends Controller {
     }
 
     /**
-     * 给 Listing 添加原因
+     * 给 Ticket 添加原因[Review, Feedback 通用]
      */
-    public static void tagReason(String reason, String reviewId) {
-        AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
-        TicketReason lr = TicketReason.findByReason(reason);
-        renderJSON(J.G(review.addWhyNegtive(lr)));
+    public static void tagReason(String reason, long ticketId) {
+        Ticket ticket = Ticket.findById(ticketId);
+        renderJSON(J.G(ticket.tagReason(TicketReason.findByReason(reason))));
     }
 
-    public static void unTagReason(String reason, String reviewId) {
-        AmazonListingReview review = AmazonListingReview.findByReviewId(reviewId);
-        TicketReason lr = TicketReason.findByReason(reason);
-        review.ticket.reasons.remove(lr);
-        review.ticket.save();
-        renderJSON(J.G(lr));
+    /**
+     * 给 Ticket 接触原因[Review, Feedback 通用]
+     *
+     * @param reason
+     * @param ticketId
+     */
+    public static void unTagReason(String reason, long ticketId) {
+        Ticket ticket = Ticket.findById(ticketId);
+        renderJSON(J.G(ticket.unTagReason(TicketReason.findByReason(reason))));
     }
 
     public static void iTakeIt(long tid) {

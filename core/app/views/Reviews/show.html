@@ -2,6 +2,7 @@
 #{set title:'Review #' + review.reviewId /}
 #{set 'moreScripts'}
     #{script 'reviews/show.coffee'/}
+    #{script 'reviews/reviewAndFeedback.coffee'/}
 #{/set}
 
 #{set haveTicket:review.ticket != null/}
@@ -99,16 +100,17 @@
             <td colspan="8">
                 <div class="row-fluid" id="reason_div">
                     <div class="span5">
+                        <!-- 结合 tag 使用的 -->
+                        <input type="hidden" id="ticketId" value="${review.ticket.id}">
                         #{if review.ticket.reasons.size() != 0}
                             #{list items:review.ticket.reasons, as:'ra'}
-                                <span class="reason badge badge-important">${ra.reason}</span>
+                                <span class="reason badge badge-important">${ra.name()}</span>
                             #{/list}
                         #{/if}
                     </div>
                     <div class="span7 input-append">
-                        <span class="add-on">${cat.categoryId} | ${cat.name}</span>
                         #{list items:unTagReasons, as:'ura'}
-                            <span class="unTagReason badge badge-info">${ura.reason}</span>
+                            <span class="unTagReason badge badge-info">${ura.name()}</span>
                         #{/list}
                     </div>
                 </div>

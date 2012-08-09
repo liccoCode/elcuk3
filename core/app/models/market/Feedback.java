@@ -2,7 +2,10 @@ package models.market;
 
 import helper.GTs;
 import helper.Webs;
+import models.product.Category;
+import models.product.Product;
 import models.support.Ticket;
+import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -16,8 +19,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -216,4 +218,40 @@ public class Feedback extends GenericModel {
         return result;
     }
 
+    /**
+     * 查找出这个 Feedback 所影响的 listings 的 Category
+     *
+     * @return
+     */
+    public List<Category> relateCats() {
+        List<Category> cats = new ArrayList<Category>();
+        for(OrderItem itm : this.orderr.items)
+            cats.add(Product.<Product>findById(Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);
+        return cats;
+    }
+
+    /**
+     * 返回此 Feedback 的所有的没有 tag 的标签与其涉及的 Cat 的所有标签
+     *
+     * @return
+     */
+    public F.T2<Set<TicketReason>, Set<TicketReason>> untagAndAllTags() {
+        List<Category> cats = this.relateCats();
+        Set<TicketReason> unTagsReasons = new HashSet<TicketReason>();
+        Set<TicketReason> allReasons = new HashSet<TicketReason>();
+
+        for(Category cat : cats) allReasons.addAll(cat.reasons);
+
+        if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
+            unTagsReasons.addAll(allReasons);
+        } else {// Feedback 本身拥有 tag 才如此计算
+            for(TicketReason reason : allReasons) {
+                for(TicketReason taged : this.ticket.reasons) {
+                    if(!reason.equals(taged)) unTagsReasons.add(reason);
+                }
+            }
+        }
+
+        return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
+    }
 }

@@ -2,6 +2,7 @@ package models.support;
 
 import com.google.gson.annotations.Expose;
 import models.product.Category;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.MaxSize;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -62,6 +63,7 @@ public class TicketReason extends Model {
     }
 
     public static TicketReason findByReason(String reason) {
+        if(StringUtils.contains(reason, ":")) reason = StringUtils.split(reason, ":")[1];
         return TicketReason.find("reason=?", reason).first();
     }
 

@@ -1,7 +1,7 @@
 #{extends 'main.html'/}
 #{set title:'Feedback #' + feedback.orderId /}
 #{set 'moreScripts'}
-    #{script 'reviews/show.coffee'/}
+    #{script 'reviews/reviewAndFeedback.coffee'/}
 #{/set}
 
 <div class="label label-info">Feedback</div>
@@ -36,7 +36,27 @@
 
                 <div class="span6">
                 #{list items:feedback.orderr.items, as:'oitm'}
-                    <img src="${oitm.selling.listing.picUrls}">
+                    *{<img src="${oitm.selling.listing.picUrls}">}*
+                    ${oitm.selling.listing.picUrls}
+                #{/list}
+                </div>
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="4">
+            <div class="row-fluid" id="reason_div">
+                <div class="span5">
+                #{list items:feedback.ticket.reasons, as:'tag'}
+                    <span class="reason badge badge-important">${tag.name()}</span>
+                #{/list}
+                </div>
+
+                <div class="span7 input-prepend">
+                    <input type="hidden" id="ticketId" value="${feedback.ticket.id}">
+                #{list items:unTagAndAll._1, as:'unTag'}
+                    <span class="unTagReason badge badge-info">${unTag.name()}</span>
                 #{/list}
                 </div>
             </div>
