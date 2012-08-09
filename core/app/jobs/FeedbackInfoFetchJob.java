@@ -1,5 +1,6 @@
 package jobs;
 
+import models.market.M;
 import play.jobs.Job;
 
 /**
@@ -14,5 +15,8 @@ import play.jobs.Job;
 public class FeedbackInfoFetchJob extends Job {
     @Override
     public void doJob() {
+        //TODO 这个稍后再完成.
+        System.out.println(M.AMAZON_DE.feedbackLink());
     }
+
 }

@@ -115,27 +115,6 @@ public enum M {
         }
     }
 
-    public static M val(String str) {
-        String s = str.toLowerCase();
-        if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") || s.equals("www.amazon.co.uk")) {
-            return AMAZON_UK;
-        } else if(s.equals("afr") || s.equals("amazon_fr") || s.equals("amazon.fr") || s.equals("www.amazon.fr")) {
-            return AMAZON_FR;
-        } else if(s.equals("aes") || s.equals("amazon_es") || s.equals("amazon.es") || s.equals("www.amazon.es")) {
-            return AMAZON_ES;
-        } else if(s.equals("ade") || s.equals("amazon_de") || s.equals("amazon.de") || s.equals("www.amazon.de")) {
-            return AMAZON_DE;
-        } else if(s.equals("ait") || s.equals("amazon_it") || s.equals("amazon.it") || s.equals("www.amazon.it")) {
-            return AMAZON_IT;
-        } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") || s.equals("www.amazon.com")) {
-            return AMAZON_US;
-        } else if(s.equals("euk") || s.equals("ebay_uk") || s.equals("ebay.co.uk") || s.equals("www.ebay.co.uk")) {
-            return EBAY_UK;
-        } else {
-            return null;
-        }
-    }
-
     /**
      * 账户对应的网站的后台首页
      *
@@ -365,6 +344,31 @@ public enum M {
             case AMAZON_IT:
             case AMAZON_US:
                 return "https://sellercentral." + this.toString() + "/gp/orders-v2/details?orderID=" + oid;
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    /**
+     * 在详细订单页面会自行通过 Ajax 去获取此订单关联的 Feedback 的链接;
+     * 需要如下参数(POST):
+     * action:show-feedback
+     * orderID:303-8171136-0010717
+     * applicationPath:/gp/orders-v2
+     *
+     * @return
+     */
+    public String feedbackLink() {
+        //https://sellercentral.amazon.de/gp/orders-v2/remote-actions/action.html
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return "https://sellercentral." + this.toString() + "/gp/orders-v2/remote-actions/action.html";
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -607,6 +611,27 @@ public enum M {
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    public static M val(String str) {
+        String s = str.toLowerCase();
+        if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") || s.equals("www.amazon.co.uk")) {
+            return AMAZON_UK;
+        } else if(s.equals("afr") || s.equals("amazon_fr") || s.equals("amazon.fr") || s.equals("www.amazon.fr")) {
+            return AMAZON_FR;
+        } else if(s.equals("aes") || s.equals("amazon_es") || s.equals("amazon.es") || s.equals("www.amazon.es")) {
+            return AMAZON_ES;
+        } else if(s.equals("ade") || s.equals("amazon_de") || s.equals("amazon.de") || s.equals("www.amazon.de")) {
+            return AMAZON_DE;
+        } else if(s.equals("ait") || s.equals("amazon_it") || s.equals("amazon.it") || s.equals("www.amazon.it")) {
+            return AMAZON_IT;
+        } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") || s.equals("www.amazon.com")) {
+            return AMAZON_US;
+        } else if(s.equals("euk") || s.equals("ebay_uk") || s.equals("ebay.co.uk") || s.equals("www.ebay.co.uk")) {
+            return EBAY_UK;
+        } else {
+            return null;
         }
     }
 
