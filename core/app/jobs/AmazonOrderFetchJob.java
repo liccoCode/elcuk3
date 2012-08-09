@@ -120,7 +120,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             Orderr orderr = new Orderr();
             orderr.account = acc;
             orderr.orderId = amazonOrderId;
-            orderr.market = Account.M.val(odt.getSalesChannel());
+            orderr.market = M.val(odt.getSalesChannel());
             orderr.createDate = new DateTime(odt.getPurchaseDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
             orderr.state = parseOrderState(odt.getOrderStatus());
 

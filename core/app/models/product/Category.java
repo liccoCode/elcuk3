@@ -16,6 +16,7 @@ import java.util.List;
  * Time: 上午11:44
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Category extends GenericModel {
 
     @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})

@@ -2,6 +2,7 @@ package noRun;
 
 import helper.Dates;
 import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -39,17 +40,17 @@ public class TimeParseTest {
         System.out.println("68-MAGGLASS-3X75BG,B001OQOK5U_amazon.co.uk".length());
         Account acc = new Account();
         acc.id = 1l;
-        System.out.println(Selling.sid("10HTCEVO3D-1900S,614444720150", Account.M.AMAZON_UK, acc));
+        System.out.println(Selling.sid("10HTCEVO3D-1900S,614444720150", M.AMAZON_UK, acc));
     }
 
     @Test
     public void TestMarket() {
-        System.out.println(Account.M.AMAZON_DE.toString());
+        System.out.println(M.AMAZON_DE.toString());
     }
 
     @Test
     public void testParseMarket() {
-        System.out.println(Account.M.val("amazon_uk"));
+        System.out.println(M.val("amazon_uk"));
     }
 
     @Test

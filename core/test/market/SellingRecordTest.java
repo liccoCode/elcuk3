@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import helper.Webs;
 import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import models.market.SellingRecord;
 import org.apache.commons.lang.StringUtils;
@@ -59,8 +60,8 @@ public class SellingRecordTest extends UnitTest {
          */
         String de = "€2,699.37";
         String uk = "£2,121.30";
-        assertEquals(2699.37, Webs.amazonPriceNumber(Account.M.AMAZON_UK, de.substring(1)).doubleValue(), 2);
-        assertEquals(2121.30, Webs.amazonPriceNumber(Account.M.AMAZON_UK, uk.substring(1)).doubleValue(), 2);
+        assertEquals(2699.37, Webs.amazonPriceNumber(M.AMAZON_UK, de.substring(1)).doubleValue(), 2);
+        assertEquals(2121.30, Webs.amazonPriceNumber(M.AMAZON_UK, uk.substring(1)).doubleValue(), 2);
     }
 
     @Before
@@ -74,7 +75,7 @@ public class SellingRecordTest extends UnitTest {
         Account acc = Account.findById(2l);
         DateTime dt = DateTime.parse("2012-06-03");
         for(int i = 0; i < 1; i++) {
-            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, Account.M.AMAZON_DE, dt.plusDays(i).toDate());
+            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, M.AMAZON_DE, dt.plusDays(i).toDate());
             for(SellingRecord rcd : records)
                 rcd.save();
         }

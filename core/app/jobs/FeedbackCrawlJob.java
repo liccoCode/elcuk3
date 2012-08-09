@@ -3,6 +3,7 @@ package jobs;
 import helper.*;
 import models.market.Account;
 import models.market.Feedback;
+import models.market.M;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -47,9 +48,9 @@ public class FeedbackCrawlJob extends Job {
                 case AMAZON_DE:
                 case AMAZON_UK:
                 case AMAZON_FR:
-                    fetchAccountFeedback(acc, Account.M.AMAZON_UK, 5);
-                    fetchAccountFeedback(acc, Account.M.AMAZON_DE, 5);
-                    fetchAccountFeedback(acc, Account.M.AMAZON_FR, 5);
+                    fetchAccountFeedback(acc, M.AMAZON_UK, 5);
+                    fetchAccountFeedback(acc, M.AMAZON_DE, 5);
+                    fetchAccountFeedback(acc, M.AMAZON_FR, 5);
                     break;
                 case AMAZON_ES:
                 case AMAZON_IT:
@@ -66,10 +67,10 @@ public class FeedbackCrawlJob extends Job {
      * @param market
      * @param pages
      */
-    private void fetchAccountFeedback(Account acc, Account.M market, int pages) {
+    private void fetchAccountFeedback(Account acc, M market, int pages) {
         if(pages <= 0) pages = 5;
         try {
-            if(market != Account.M.AMAZON_UK && market != Account.M.AMAZON_FR && market != Account.M.AMAZON_DE) return;
+            if(market != M.AMAZON_UK && market != M.AMAZON_FR && market != M.AMAZON_DE) return;
             synchronized(acc.cookieStore()) { // 将 CookieStore 锁住, 防止更改了 Region 以后有其他的地方进行操作.
                 acc.changeRegion(market);
                 for(int i = 1; i <= pages; i++) {
@@ -137,12 +138,12 @@ public class FeedbackCrawlJob extends Job {
         Document doc = Jsoup.parse(html);
 
         Element marketEl = doc.select("#marketplaceSelect option[selected]").first();
-        Account.M market = null;
+        M market = null;
         if(marketEl == null) {
             Webs.systemMail("Feedback Market parse Error!", html);
             return new ArrayList<Feedback>();
         } else {
-            market = Account.M.val(marketEl.text().trim());
+            market = M.val(marketEl.text().trim());
         }
         Elements feedbacks = doc.select("td[valign=center][align=middle] tr[valign=center]");
         List<Feedback> feedbackList = new ArrayList<Feedback>();
@@ -155,7 +156,7 @@ public class FeedbackCrawlJob extends Job {
             //score
             feedback.score = NumberUtils.toFloat(tds.get(1).text());
             //comments
-            feedback.comment = tds.get(2).childNode(0).toString();
+            feedback.feedback = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();
             if(b != null) {
                 feedback.memo = b.nextSibling().toString();

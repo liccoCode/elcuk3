@@ -1,0 +1,104 @@
+package ext;
+
+import models.market.AmazonListingReview;
+import models.market.Feedback;
+import org.apache.commons.lang.StringUtils;
+import play.templates.JavaExtensions;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: wyattpan
+ * Date: 8/9/12
+ * Time: 6:04 PM
+ */
+public class ReviewHelper extends JavaExtensions {
+
+
+    /**
+     * 返回 Review 的长度
+     *
+     * @param review
+     * @return
+     */
+    public static String length(AmazonListingReview review) {
+        if(StringUtils.isBlank(review.review))
+            return "0";
+        else
+            return review.review.length() + "";
+    }
+
+    public static String length(Feedback feedback) {
+        if(StringUtils.isBlank(feedback.feedback))
+            return "0";
+        else
+            return feedback.feedback.length() + "";
+    }
+
+    /**
+     * 根据一个数字, 计算这个数字对应的颜色(5 分评价常用)
+     *
+     * @param rate
+     * @return
+     */
+    public static String color(Number rate) {
+        if(rate.intValue() >= 5) {
+            return "3ED76A";
+        } else if(rate.intValue() >= 4) {
+            return "ADFF1F";
+        } else if(rate.intValue() >= 3) {
+            return "FFE107";
+        } else if(rate.intValue() >= 2) {
+            return "D54C00";
+        } else if(rate.intValue() >= 1) {
+            return "E03F00";
+        } else {
+            return "FF1101";
+        }
+    }
+
+    /**
+     * 根据 Review 的长度计算颜色
+     *
+     * @param review
+     * @return
+     */
+    public static String color(AmazonListingReview review) {
+        int length = 0;
+        try {
+            length = review.review.length();
+        } catch(Exception e) {//
+        }
+        if(length <= 100)
+            return "2FCCEF";
+        else if(length <= 240)
+            return "6CB4E6";
+        else if(length <= 500)
+            return "8CA7DE";
+        else if(length <= 1000)
+            return "9BA0D8";
+        else if(length <= 2000)
+            return "AC96D4";
+        else
+            return "B38ACE";
+    }
+
+    public static String color(Feedback feedback) {
+        int length = 0;
+        try {
+            length = feedback.feedback.length();
+        } catch(Exception e) { //
+        }
+        if(length <= 15)
+            return "2FCCEF";
+        else if(length <= 50)
+            return "6CB4E6";
+        else if(length <= 100)
+            return "8CA7DE";
+        else if(length <= 200)
+            return "9BA0D8";
+        else if(length <= 300)
+            return "AC96D4";
+        else
+            return "B38ACE";
+    }
+}

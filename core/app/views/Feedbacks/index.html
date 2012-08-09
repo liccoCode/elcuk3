@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
-#{set title:'Feedbacks'/}
+#{set title:'Feedbacks(' + totalNeedDealFeedbacks + ')'/}
 #{set 'moreScripts'}
-    #{script 'feedbacks/index.coffee'/}
+    #{script 'tickets/reviewAndFeedback.coffee'/}
 #{/set}
 
 <div class="row-fluid">

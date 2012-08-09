@@ -5,7 +5,7 @@ import helper.Constant;
 import helper.Dates;
 import helper.FLog;
 import helper.Webs;
-import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -297,7 +297,7 @@ public class AmazonProps {
         this.productDesc = doc.select("#product_description").text().trim();
 //        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
 //        this.aps.condition_ = doc.select("#offering_condition_display").text(); // 默认为 NEW
-        F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
+        F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
         for(Element input : inputs) {
             String name = input.attr("name");
             String val = input.val();
@@ -357,7 +357,7 @@ public class AmazonProps {
             throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
         }
         Set<NameValuePair> params = new HashSet<NameValuePair>();
-        F.T2<Account.M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
+        F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
         for(Element el : inputs) {
             String name = el.attr("name").toLowerCase().trim();
             if("our_price".equals(name) && this.standerPrice != null && this.standerPrice > 0)

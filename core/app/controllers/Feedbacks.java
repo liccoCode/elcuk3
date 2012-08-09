@@ -1,7 +1,9 @@
 package controllers;
 
 import models.market.Feedback;
+import models.product.Category;
 import models.support.Ticket;
+import models.support.TicketReason;
 import models.support.TicketState;
 import models.view.Ret;
 import play.libs.F;
@@ -9,6 +11,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 管理 Feedbacks 的功能
@@ -28,12 +31,19 @@ public class Feedbacks extends Controller {
         renderArgs.put("newOverdueFeedbacks", newFdbk._2);
         renderArgs.put("twoMailFeedbacks", needTwoFdbk._1);
         renderArgs.put("twoMailOverdueFeedbacks", needTwoFdbk._2);
-        render(noRespFeedbacks, newMsgFeedbacks);
+        int totalNeedDealFeedbacks = newFdbk._1.size() + newFdbk._2.size() + needTwoFdbk._1.size() + needTwoFdbk._2.size() + noRespFeedbacks.size() + newMsgFeedbacks.size();
+        render(noRespFeedbacks, newMsgFeedbacks, totalNeedDealFeedbacks);
     }
 
     public static void show(String oid) {
         Feedback feedback = Feedback.findById(oid);
-        render(feedback);
+        if(feedback == null) {
+            redirect("Orders.show", oid);
+        } else {
+            List<Category> cats = feedback.relateCats();
+            F.T2<Set<TicketReason>, Set<TicketReason>> unTagAndAll = feedback.untagAndAllTags();
+            render(feedback, cats, unTagAndAll);
+        }
     }
 
     public static void iFeedback() {

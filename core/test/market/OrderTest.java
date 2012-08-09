@@ -3,7 +3,7 @@ package market;
 import com.elcuk.jaxb.BaseCurrencyCodeWithDefault;
 import com.elcuk.jaxb.OverrideCurrencyAmount;
 import com.elcuk.jaxb.Price;
-import models.market.Account;
+import models.market.M;
 import models.market.Orderr;
 import org.junit.Test;
 import play.Logger;
@@ -38,7 +38,7 @@ public class OrderTest extends UnitTest {
     public void saveOrder() {
         Orderr order = new Orderr();
         order.paymentDate = new Date();
-        order.market = Account.M.AMAZON_UK;
+        order.market = M.AMAZON_UK;
         order.state = Orderr.S.PENDING;
         order.buyer = "wyatt";
         order.address = "address";
@@ -47,7 +47,7 @@ public class OrderTest extends UnitTest {
         order.save();
     }
 
-//    @Test
+    //    @Test
     public void testEncode() {
 
         Price price = new Price();
@@ -72,7 +72,7 @@ public class OrderTest extends UnitTest {
         System.out.println(sw.toString());
     }
 
-//    @Test
+    //    @Test
     public void testEmailed() {
         Orderr or2 = Orderr.findById("302-0924220-3736363");
         or2.emailed(1, '0');

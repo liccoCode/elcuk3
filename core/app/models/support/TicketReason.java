@@ -2,6 +2,7 @@ package models.support;
 
 import com.google.gson.annotations.Expose;
 import models.product.Category;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.MaxSize;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -21,6 +22,7 @@ import java.util.List;
  * Time: 4:29 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class TicketReason extends Model {
 
     @Column(length = 55)
@@ -62,6 +64,7 @@ public class TicketReason extends Model {
     }
 
     public static TicketReason findByReason(String reason) {
+        if(StringUtils.contains(reason, ":")) reason = StringUtils.split(reason, ":")[1];
         return TicketReason.find("reason=?", reason).first();
     }
 

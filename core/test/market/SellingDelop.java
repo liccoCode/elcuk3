@@ -5,6 +5,7 @@ import helper.Dates;
 import helper.HTTP;
 import helper.Webs;
 import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -122,7 +123,7 @@ public class SellingDelop extends UnitTest {
         ///abis/product/ProcessEditProduct;jsessionid=B8595C92B8A8C968BD2B3A1C6BDD3CAD
         //https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
         body = HTTP.post(sell.account.cookieStore(),
-                Account.M.listingPostPage(sell.market, (args.length >= 2 ? args[1] : "")),
+                M.listingPostPage(sell.market, (args.length >= 2 ? args[1] : "")),
                 params);
 
         IO.writeContent(body, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, sell.merchantSKU, sell.asin)));

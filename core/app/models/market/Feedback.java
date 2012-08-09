@@ -2,7 +2,10 @@ package models.market;
 
 import helper.GTs;
 import helper.Webs;
+import models.product.Category;
+import models.product.Product;
 import models.support.Ticket;
+import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -16,8 +19,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -57,13 +59,13 @@ public class Feedback extends GenericModel {
      * 客户留下的 Feedback
      */
     @Lob
-    public String comment;
+    public String feedback;
 
     @Lob
     public String memo = " ";
 
     @Enumerated(EnumType.STRING)
-    public Account.M market;
+    public M market;
 
     /**
      * 发送邮件警告的次数, 最多 3 次;
@@ -120,7 +122,7 @@ public class Feedback extends GenericModel {
             this.memo = String.format("Score from %s to %s At %s\r\n", this.score, newFeedback.score, DateTime.now().toString("yyyy-MM-dd HH:mm:ss")) + this.memo;
 
         if(newFeedback.score != null) this.score = newFeedback.score;
-        if(StringUtils.isNotBlank(newFeedback.comment)) this.comment = newFeedback.comment;
+        if(StringUtils.isNotBlank(newFeedback.feedback)) this.feedback = newFeedback.feedback;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
 
         return this.save();
@@ -165,22 +167,6 @@ public class Feedback extends GenericModel {
         }
     }
 
-    public F.T2<Integer, String> feedbacklengthColor() {
-        if(this.comment.length() <= 15) {
-            return new F.T2<Integer, String>(this.comment.length(), "2FCCEF");
-        } else if(this.comment.length() <= 50) {
-            return new F.T2<Integer, String>(this.comment.length(), "6CB4E6");
-        } else if(this.comment.length() <= 100) {
-            return new F.T2<Integer, String>(this.comment.length(), "8CA7DE");
-        } else if(this.comment.length() <= 200) {
-            return new F.T2<Integer, String>(this.comment.length(), "9BA0D8");
-        } else if(this.comment.length() <= 300) {
-            return new F.T2<Integer, String>(this.comment.length(), "AC96D4");
-        } else {
-            return new F.T2<Integer, String>(this.comment.length(), "B38ACE");
-        }
-    }
-
 
     @Override
     public String toString() {
@@ -190,7 +176,7 @@ public class Feedback extends GenericModel {
         sb.append(", createDate=").append(createDate);
         sb.append(", score=").append(score);
         sb.append(", email='").append(email).append('\'');
-        sb.append(", comment='").append(comment).append('\'');
+        sb.append(", feedback='").append(feedback).append('\'');
         sb.append(", memo='").append(memo).append('\'');
         sb.append('}');
         return sb.toString();
@@ -216,4 +202,42 @@ public class Feedback extends GenericModel {
         return result;
     }
 
+    /**
+     * 查找出这个 Feedback 所影响的 listings 的 Category
+     *
+     * @return
+     */
+    public List<Category> relateCats() {
+        List<Category> cats = new ArrayList<Category>();
+        for(OrderItem itm : this.orderr.items)
+            cats.add(Product.<Product>findById(Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);
+        return cats;
+    }
+
+    /**
+     * 返回此 Feedback 的所有的没有 tag 的标签与其涉及的 Cat 的所有标签
+     * 如果没有 Ticket 的话, 那么这个方法返回 空 tag T2
+     *
+     * @return
+     */
+    public F.T2<Set<TicketReason>, Set<TicketReason>> untagAndAllTags() {
+        Set<TicketReason> unTagsReasons = new HashSet<TicketReason>();
+        Set<TicketReason> allReasons = new HashSet<TicketReason>();
+        if(this.ticket == null) return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
+        List<Category> cats = this.relateCats();
+
+        for(Category cat : cats) allReasons.addAll(cat.reasons);
+
+        if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
+            unTagsReasons.addAll(allReasons);
+        } else {// Feedback 本身拥有 tag 才如此计算
+            for(TicketReason reason : allReasons) {
+                for(TicketReason taged : this.ticket.reasons) {
+                    if(!reason.equals(taged)) unTagsReasons.add(reason);
+                }
+            }
+        }
+
+        return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
+    }
 }

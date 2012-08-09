@@ -64,7 +64,7 @@ public class SellingRecord extends GenericModel {
 
     @Enumerated(EnumType.STRING)
     @Expose
-    public Account.M market;
+    public M market;
 
     /**
      * hash(sellingId_account.id_market_date) 值, 为 ID
@@ -160,7 +160,7 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, Account.M market, Date oneDay) {
+    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
         Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
         int curentPage = 0;
@@ -208,7 +208,7 @@ public class SellingRecord extends GenericModel {
                              * 3. fr: €44.99
                              * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
                              */
-                            record.sales = Webs.amazonPriceNumber(Account.M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
+                            record.sales = Webs.amazonPriceNumber(M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
                             switch(market) {
                                 case AMAZON_UK:
                                     record.currency = Currency.GBP;
@@ -232,8 +232,8 @@ public class SellingRecord extends GenericModel {
                             record.id = srid;
                         }
                         // 无论数据库中存在不存在都需要更新下面数据
-                        record.sessions = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
-                        record.pageViews = Webs.amazonPriceNumber(Account.M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
+                        record.sessions = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
+                        record.pageViews = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
 
                         records.add(record);
                     } catch(Exception e) {

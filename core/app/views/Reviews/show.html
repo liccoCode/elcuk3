@@ -2,9 +2,14 @@
 #{set title:'Review #' + review.reviewId /}
 #{set 'moreScripts'}
     #{script 'reviews/show.coffee'/}
+    #{script 'tickets/reviewAndFeedback.coffee'/}
 #{/set}
 
 #{set haveTicket:review.ticket != null/}
+#{if haveTicket}
+<!-- Ticket 操作所需要的值 -->
+<input type="hidden" id="ticketId" value="${review.ticket.id}">
+#{/if}
 <!-- Review -->
 <div class="label label-info">Review</div>
 <div>
@@ -101,14 +106,13 @@
                     <div class="span5">
                         #{if review.ticket.reasons.size() != 0}
                             #{list items:review.ticket.reasons, as:'ra'}
-                                <span class="reason badge badge-important">${ra.reason}</span>
+                                <span class="reason badge badge-important">${ra.name()}</span>
                             #{/list}
                         #{/if}
                     </div>
                     <div class="span7 input-append">
-                        <span class="add-on">${cat.categoryId} | ${cat.name}</span>
                         #{list items:unTagReasons, as:'ura'}
-                            <span class="unTagReason badge badge-info">${ura.reason}</span>
+                            <span class="unTagReason badge badge-info">${ura.name()}</span>
                         #{/list}
                     </div>
                 </div>
@@ -137,7 +141,7 @@
 
                             <!-- 此 Ticket 的处理者 -->
                         #{if haveTicket && (review.ticket.resolver == null)}
-                            <button id="take_it" tid="${review.ticket.id}" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
+                            <button id="take_it" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
                                 Take It
                             </button>
                         #{/if}
@@ -152,11 +156,13 @@
                             <a class="btn btn-success" href="@{Products.show(review.listing.product.sku)}" target="_blank">${review.listing.product.sku}</a><br/>
                         </div>
 
+                    #{if haveTicket}
                         <div style="margin:5px 0">
                             <a data-toggle="toggle" data-target="#close_div" class="btn btn-danger">
                                 <i class="icon-edit"></i> Close
                             </a>
                         </div>
+                    #{/if}
                     </div>
 
                     <div class="span6">
@@ -169,7 +175,7 @@
                     <div id="close_div" class="span12" style="display:none;margin-top:10px;">
                         <textarea rows="4" id="close_reason" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
 
-                        <a id="close_btn" tid="${review.ticket.id}" class="btn btn-danger">Close</a>
+                        <button id="close_btn" class="btn btn-danger">Close</button>
                     </div>
                 </div>
             #{/if}
@@ -179,14 +185,14 @@
         <tr>
             <td colspan="8">
                 <h3>Review</h3>
-            ${review.review}
+            ${review.review.raw()}
             </td>
         </tr>
 
         <tr>
             <td colspan="8">
                 <h3>System Comment</h3>
-            ${review.comment}
+            ${review.comment.raw()}
             </td>
         </tr>
 
@@ -194,7 +200,8 @@
         <tr>
             <td colspan="8">
                 <h3>Ticket Comment</h3>
-            ${review.ticket.memo}
+                <textarea rows="5" class="span12">${review.ticket.memo.raw()}</textarea>
+                <button id="ticket_comment" class="btn btn-primary">Comment</button>
             </td>
         </tr>
     #{/if}

@@ -13,6 +13,7 @@ import java.util.List;
  * Time: 3:21 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Brand extends GenericModel {
 
     @OneToMany(mappedBy = "brand", fetch = FetchType.EAGER)

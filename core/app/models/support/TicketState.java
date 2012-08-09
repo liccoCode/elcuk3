@@ -18,6 +18,7 @@ import java.util.List;
  * -------------
  * * MAILED <-> NEW_MSG: 这两个状态的改变就是邮件回复的来回.
  * * MAILED -> NO_RESP: 当发邮件联系对方以后, 一直没有回复, 那么则自动进入 NO_RESP 状态, 可以一直处于这个状态, 在此状态如果有新邮件则自动回到 NEW_MSG.
+ * * MAILED -> TWO_MAIL: 当回复了的 Ticket 只拥有 1 个我方的回复的时候, 超过 5 天没有客户回复也还是需要进入需二次跟进状态.
  * * !MAILED -> PRE_CLOSE/CLOSE 这个需要操作人员手动进行操作!
  * -------------
  * * NO_RESP -> NEW_MSG: 在 NO_RESP 状态允许 Ticket 在收到新邮件之后回到 NEW_MSG 状态重新与客户进行交流.
@@ -91,10 +92,21 @@ public enum TicketState {
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
             //TO NEW_MSG
             //TO NO_RESP
+            //TO TWO_MAIL
+
 
             // 必须要先检查 NEW_MSG, 要进入 NO_RESP 状态, 必须是在我们自己回了卖家的信才可以
             if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
+
+            /**
+             * 1. 我方回复数量没有达到两次
+             * 2. 客户最后回复时间, 超过 5 天
+             */
+            TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
+            if(resps.size() < 2 && new Duration(newResp.created.getTime(), System.currentTimeMillis()).getStandardDays() >= 5) {
+                return TWO_MAIL;
+            }
 
             /**
              * 同时满足下面的条件:

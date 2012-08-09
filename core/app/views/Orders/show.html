@@ -122,25 +122,6 @@
     </table>
 </div>
 
-<div class="label label-info">Order Feedback</div>
-<div>
-    #{if f == null}
-        <div class="alert alert-info">
-            此订单无 Feedback
-        </div>
-    #{/if}
-    #{else }
-        <dl>
-            <dt> ${f.createDate.format("yyyy-MM-dd")} |
-                <span style="color:${f.score <= 3 ? "red" : "green"}">${f.score}</span> Point | ${f.state}
-                | ${f.osTicketId}</dt>
-            <dd>
-            ${f.comment}
-            </dd>
-        </dl>
-    #{/else}
-</div>
-
 <div class="label label-info">Order Fees</div>
 <div>
     <table class="table table-bordered">

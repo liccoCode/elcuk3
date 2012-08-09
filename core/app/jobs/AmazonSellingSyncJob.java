@@ -95,7 +95,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
      *
      * @return Amazon 上拥有, 但系统中没有的 Selling
      */
-    public static F.T2<List<Selling>, List<Listing>> dealSellingFromActiveListingsReport(File file, Account acc, Account.M market) {
+    public static F.T2<List<Selling>, List<Listing>> dealSellingFromActiveListingsReport(File file, Account acc, M market) {
         F.T2<List<Selling>, List<Listing>> sellAndListingTuple = new F.T2<List<Selling>, List<Listing>>(new ArrayList<Selling>(), new ArrayList<Listing>());
         List<String> lines = null;
         try {
@@ -125,7 +125,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                 String t_title = null;
                 String t_price = null;
                 String t_fulfilchannel = null;
-                if(market == Account.M.AMAZON_FR) {
+                if(market == M.AMAZON_FR) {
                     t_asin = args[11].trim();
                     t_msku = args[2].trim().toUpperCase();
                     t_title = args[0].trim();

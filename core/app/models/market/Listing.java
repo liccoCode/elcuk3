@@ -87,7 +87,7 @@ public class Listing extends GenericModel {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Expose
-    public Account.M market;
+    public M market;
 
     @Column(nullable = false)
     @Lob
@@ -157,7 +157,7 @@ public class Listing extends GenericModel {
             this.listingId = Listing.lid(asin, market);
     }
 
-    public void setMarket(Account.M market) {
+    public void setMarket(M market) {
         this.market = market;
         if(this.asin != null && this.market != null)
             this.listingId = Listing.lid(asin, market);
@@ -368,7 +368,7 @@ public class Listing extends GenericModel {
      * @param market
      * @return
      */
-    public static Listing crawl(String asin, Account.M market) {
+    public static Listing crawl(String asin, M market) {
         JsonElement listing = Crawl.crawlListing(market.toString(), asin);
         return Listing.parseAndUpdateListingFromCrawl(listing, true);
     }
@@ -403,7 +403,7 @@ public class Listing extends GenericModel {
             tobeChangeed = new Listing();
         }
 
-        tobeChangeed.market = Account.M.val(listingId.split("_")[1]);
+        tobeChangeed.market = M.val(listingId.split("_")[1]);
         tobeChangeed.asin = lst.get("asin").getAsString();
         tobeChangeed.byWho = lst.get("byWho").getAsString();
         tobeChangeed.title = lst.get("title").getAsString();
@@ -468,7 +468,7 @@ public class Listing extends GenericModel {
         else return false;
     }
 
-    public static String lid(String asin, Account.M market) {
+    public static String lid(String asin, M market) {
         return String.format("%s_%s", asin.trim().toUpperCase(), market.toString());
     }
 
@@ -478,9 +478,9 @@ public class Listing extends GenericModel {
      * @param lid
      * @return T2: ._1=Asin, ._2=Market
      */
-    public static F.T2<String, Account.M> unLid(String lid) {
+    public static F.T2<String, M> unLid(String lid) {
         String[] args = StringUtils.split(lid, "_");
-        return new F.T2<String, Account.M>(args[0], Account.M.val(args[1]));
+        return new F.T2<String, M>(args[0], M.val(args[1]));
     }
 
     public static boolean exist(String lid) {

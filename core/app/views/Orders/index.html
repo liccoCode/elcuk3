@@ -9,7 +9,7 @@
         <div class="span8">
             <select id="o_market" name="p.market" class="span2" size="1">
                 <option value="">Market(ALL)</option>
-            #{list items:models.market.Account.M.values()}
+            #{list items:models.market.M.values()}
                 <option value="${_.name()}">${_}</option>
             #{/list}
             </select>
@@ -59,12 +59,12 @@
         暂时还没有订单
     #{/if}
     #{else }
-        <table class="table table-striped">
+        <table class="table table-condensed table-bordered">
             <tr>
-                <th>OrderId</th>
                 <th>Market</th>
                 <th>Address</th>
                 <th>Country</th>
+                <th>OrderId</th>
                 <th>Buyer</th>
                 <th>Email</th>
                 <th>CreateDate</th>
@@ -73,16 +73,21 @@
             </tr>
             #{list items:orders, as:'ord'}
                 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-                    <td><a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId}</a></td>
                     <td>${ord.market.toString()}</td>
                     <td>${(ord.address == null ? '' : ord.address) + "  " + (ord.address1 == null ? '' : ord.address1)}</td>
                     <td>${(ord.country == null ? '' : ord.country) + " " + (ord.city == null ? '' : ord.city) + " " + (ord.province == null ? '' : ord.province)}</td>
+                    <td>
+                        <a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId}</a>
+                        #{if ord.isHaveFeedback()}
+                            <i class="icon-comment"></i>
+                        #{/if}
+                    </td>
                     <td>${ord.buyer}</td>
                     <td>
                         <a href="#" rel="tooltip" data-original-title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
                     </td>
-                    <td>${ord.createDate.format("yyyy-MM-dd HH:mm:ss")}</td>
-                    <td>${ord.paymentDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
+                    <td title="${ord.createDate?.datetime()}">${ord.createDate?.since()}</td>
+                    <td title="${ord.paymentDate?.datetime()}">${ord.paymentDate?.since()}</td>
                     #{if ord.state == models.market.Orderr.S.PENDING}
                         <td style="color:#0074CC;">${ord.state}</td>
                     #{/if}

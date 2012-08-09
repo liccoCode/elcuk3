@@ -5,6 +5,7 @@ import helper.Currency;
 import helper.Dates;
 import helper.Webs;
 import models.market.Account;
+import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +53,7 @@ public class SaleFee extends GenericModel {
      * 费用的状态
      */
     @Enumerated(EnumType.STRING)
-    public Account.M market;
+    public M market;
 
     /**
      * 这项费用一个寄存临时信息的地方
@@ -123,7 +124,7 @@ public class SaleFee extends GenericModel {
      * @param acc
      * @return
      */
-    public static List<SaleFee> flagFinanceParse(File file, Account acc, Account.M market) {
+    public static List<SaleFee> flagFinanceParse(File file, Account acc, M market) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
         Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
         Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();
@@ -200,7 +201,7 @@ public class SaleFee extends GenericModel {
                             if(StringUtils.contains(priceStr, "EUR")) {// [EUR -1,61] 格式
                                 cost = Webs.amazonPriceNumber(market, priceStr.substring(3).trim());
                             } else { // [€-1.21] 格式
-                                cost = Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(1).trim());
+                                cost = Webs.amazonPriceNumber(M.AMAZON_UK, priceStr.substring(1).trim());
                             }
                             usdCost = Currency.EUR.toUSD(cost);
                             fee.currency = Currency.EUR;
@@ -235,7 +236,7 @@ public class SaleFee extends GenericModel {
      * @param acc
      * @return
      */
-    public static List<SaleFee> flat2FinanceParse(File file, Account acc, Account.M market) {
+    public static List<SaleFee> flat2FinanceParse(File file, Account acc, M market) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
         Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
         Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();

@@ -3,14 +3,11 @@ package models.market;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Dates;
-import helper.Webs;
 import models.finance.SaleFee;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Email;
@@ -75,7 +72,10 @@ public class Orderr extends GenericModel {
      */
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(20) DEFAULT 'AMAZON_UK'")
-    public Account.M market;
+    public M market;
+
+    @OneToOne(mappedBy = "orderr", fetch = FetchType.LAZY)
+    public Feedback feedback;
 
     /**
      * 订单是通过某一个账户下产生的; 这是一个单向的关系, 不需要 Account 知道. 需要的时候直接使用 SQL 语句进行反向查询
@@ -386,43 +386,8 @@ public class Orderr extends GenericModel {
         }
     }
 
-    /**
-     * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充
-     */
-    public Orderr orderDetailUserIdAndEmail(Document doc) {
-        this.crawlUpdateTimes++;
-        Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
-        if(lin == null) {
-            // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
-            lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
-            this.state = S.CANCEL;
-            this.memo = lin.text();
-        }
-        String url = lin.parent().select("a").attr("href");
-        String[] args = StringUtils.split(url, "&");
-        for(String pa : args) {
-            try {
-                // buyerId
-                if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
-                this.userid = StringUtils.split(pa, "=")[1];
-
-
-                // Email
-                if(StringUtils.isBlank(this.email) || !StringUtils.contains(this.email, "@")) {
-                    String html = doc.outerHtml(); // 通过抓取的 HTML 源代码的 js 代码部分进行的提取.
-                    int head = StringUtils.indexOfIgnoreCase(html, "buyerEmail:");
-                    int end = StringUtils.indexOfIgnoreCase(html, "targetID:");
-                    String sub = html.substring(head + 14, end).trim(); // + 14 为排除 buyerEmail: 家冒号的长度
-                    this.email = sub.substring(0, sub.length() - 2); // 尾部 -2 为排除最后面的冒号与逗号的长度
-                }
-
-
-            } catch(Exception e) {
-                Logger.warn("Orderr.orderDetailUserIdAndEmail error, url[%s], E[%s]", url, Webs.E(e));
-            }
-            break;
-        }
-        return this;
+    public boolean isHaveFeedback() {
+        return Feedback.count("orderr=?", this) > 0;
     }
 
     @Override
@@ -531,7 +496,7 @@ public class Orderr extends GenericModel {
                     Map<String, AtomicInteger> dateRow = new HashMap<String, AtomicInteger>();
                     for(S s : S.values()) {
                         dateRow.put(s.name(), new AtomicInteger(0)); // ALL
-                        for(Account.M m : Account.M.values()) {
+                        for(M m : M.values()) {
                             dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
                             dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
                         }
@@ -569,7 +534,7 @@ public class Orderr extends GenericModel {
                             rowSum.addAndGet(rowMap.get(dataRowKey).get());
                         }
 
-                        for(Account.M m : Account.M.values()) {
+                        for(M m : M.values()) {
                             if(dataRowKey.equals(String.format("%s_%s", s.name(), m.toString())))
                                 rowMarketSum.addAndGet(rowMap.get(dataRowKey).get());
                         }

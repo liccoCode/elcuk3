@@ -57,7 +57,7 @@ public class AmazonLikeRecord extends GenericModel {
 
     @Enumerated(EnumType.STRING)
     @Expose
-    public Account.M market;
+    public M market;
 
     /**
      * 一个冗余字段
@@ -88,7 +88,7 @@ public class AmazonLikeRecord extends GenericModel {
      * @return
      */
     public static List<Account> nonClickLikeAccs(List<Account> opendAccs, String lid) {
-        F.T2<String, Account.M> lidT2 = Listing.unLid(lid);
+        F.T2<String, M> lidT2 = Listing.unLid(lid);
         List<Account> nonClickAccs = new ArrayList<Account>();
         for(Account acc : opendAccs) {
             if(AmazonLikeRecord.count("asin=? AND market=? AND account=?", lidT2._1, lidT2._2, acc) == 0)

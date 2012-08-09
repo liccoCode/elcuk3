@@ -7,6 +7,7 @@ import helper.Webs;
 import models.Server;
 import models.market.Account;
 import models.market.Listing;
+import models.market.M;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Product;
@@ -84,7 +85,7 @@ public class Listings extends Controller {
         Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
         Listing tobeSave = null;
         try {
-            tobeSave = Listing.crawl(asin, Account.M.val(market));
+            tobeSave = Listing.crawl(asin, M.val(market));
         } catch(Exception e) {
             renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
         }
@@ -97,7 +98,7 @@ public class Listings extends Controller {
     }
 
     public static void reCrawl(String asin, String m) {
-        Listing l = Listing.findById(Listing.lid(asin, Account.M.val(m)));
+        Listing l = Listing.findById(Listing.lid(asin, M.val(m)));
         if(!l.isPersistent()) renderJSON(new Ret("此 Listing 不存在,不允许 ReCrawl!"));
         JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
         Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst, true);

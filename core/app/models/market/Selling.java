@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @javax.persistence.Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Selling extends GenericModel {
 
     public Selling() {
@@ -125,7 +126,7 @@ public class Selling extends GenericModel {
 
     @Enumerated(EnumType.STRING)
     @Expose
-    public Account.M market;
+    public M market;
 
     @Enumerated(EnumType.STRING)
     @Required
@@ -299,9 +300,9 @@ public class Selling extends GenericModel {
             this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
             // 2. 获取修改 Selling 的页面, 获取参数
-            html = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+            html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
             if(StringUtils.isBlank(html))
-                throw new FastRuntimeException(String.format("Visit %s page is empty.", Account.M.listingEditPage(this)));
+                throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
             if(Play.mode.isDev())
                 IO.writeContent(html, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
         }
@@ -362,13 +363,13 @@ public class Selling extends GenericModel {
                     this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
                     // 2. 设置需要提交的值
-                    String html = HTTP.get(this.account.cookieStore(), Account.M.listingEditPage(this));
+                    String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
                     play.libs.F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
 
                     // 3. 提交
                     String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
                     html = HTTP.post(this.account.cookieStore(),
-                            Account.M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
+                            M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
                             paramAndDocTuple._1);
                     if(StringUtils.isBlank(html)) // 这个最先检查
                         throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
@@ -570,7 +571,7 @@ public class Selling extends GenericModel {
      *
      * @return
      */
-    public static String sid(String msku, Account.M market, Account acc) {
+    public static String sid(String msku, M market, Account acc) {
         return String.format("%s|%s|%s", msku, market.nickName(), acc.id).toUpperCase();
     }
 

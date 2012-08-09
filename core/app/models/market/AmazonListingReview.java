@@ -167,6 +167,11 @@ public class AmazonListingReview extends GenericModel {
     public Boolean isRealName = false;
 
     /**
+     * 此 Review 我们是否在 Amazon 上留了 Comment
+     */
+    public Boolean isCommentOnAmazon = false;
+
+    /**
      * 是 Top 多少?
      */
     @Expose
@@ -400,27 +405,6 @@ public class AmazonListingReview extends GenericModel {
     }
 
     /**
-     * 根据 Review 的长度进行不同颜色的区分
-     *
-     * @return
-     */
-    public F.T2<Integer, String> reviewLengthColor() {
-        if(this.review.length() <= 100) {
-            return new F.T2<Integer, String>(this.review.length(), "2FCCEF");
-        } else if(this.review.length() <= 240) {
-            return new F.T2<Integer, String>(this.review.length(), "6CB4E6");
-        } else if(this.review.length() <= 500) {
-            return new F.T2<Integer, String>(this.review.length(), "8CA7DE");
-        } else if(this.review.length() <= 1000) {
-            return new F.T2<Integer, String>(this.review.length(), "9BA0D8");
-        } else if(this.review.length() <= 2000) {
-            return new F.T2<Integer, String>(this.review.length(), "AC96D4");
-        } else {
-            return new F.T2<Integer, String>(this.review.length(), "B38ACE");
-        }
-    }
-
-    /**
      * AmazonListingReview 开 OsTicket, 在 OsTicket 创建一个 Ticket 的同时,也在系统中创建
      */
     public Ticket openTicket(String title) {
@@ -434,7 +418,7 @@ public class AmazonListingReview extends GenericModel {
         String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
 
         if(StringUtils.isBlank(subject)) {
-            if(this.listing.market == Account.M.AMAZON_DE) {
+            if(this.listing.market == M.AMAZON_DE) {
                 subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
                 subject = "You left a negative product review, may we have a chance to make up?";

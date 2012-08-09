@@ -31,6 +31,7 @@ import java.util.*;
  * Time: 5:23 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class ProcureUnit extends Model {
 
     public ProcureUnit() {

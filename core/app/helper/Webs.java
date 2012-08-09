@@ -2,7 +2,7 @@ package helper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import models.market.Account;
+import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -10,6 +10,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
 import play.Play;
+import play.data.validation.Error;
 import play.libs.F;
 import play.libs.Mail;
 
@@ -110,7 +111,7 @@ public class Webs {
 
     public static String link(String listingId) {
         String[] args = listingId.split("_");
-        Account.M market = Account.M.val(args[1]);
+        M market = M.val(args[1]);
         return String.format("http://www.%s/dp/%s", market.toString(), args[0]);
     }
 
@@ -183,7 +184,7 @@ public class Webs {
      * @param priceStr
      * @return
      */
-    public static Float amazonPriceNumber(Account.M market, String priceStr) {
+    public static Float amazonPriceNumber(M market, String priceStr) {
         try {
             switch(market) {
                 case AMAZON_US:
@@ -210,17 +211,17 @@ public class Webs {
      * @param priceStr
      * @return
      */
-    public static F.T2<Account.M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr, Account.M defaultMarket) {
-        if(StringUtils.isBlank(priceStr)) return new F.T2<Account.M, Float>(defaultMarket, 999f);
+    public static F.T2<M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr, M defaultMarket) {
+        if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
         StringBuilder sbd = new StringBuilder(priceStr);
         String dot = Character.toString(sbd.charAt(sbd.length() - 3));
         if(dot.equals(".")) { // uk 格式
-            return new F.T2<Account.M, Float>(Account.M.AMAZON_UK, Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr));
+            return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
-            return new F.T2<Account.M, Float>(Account.M.AMAZON_DE, Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr));
+            return new F.T2<M, Float>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
         } else {
             Logger.error("Not support price format.");
-            return new F.T2<Account.M, Float>(defaultMarket, 999f);
+            return new F.T2<M, Float>(defaultMarket, 999f);
         }
     }
 
@@ -231,7 +232,7 @@ public class Webs {
      * @param price
      * @return
      */
-    public static String priceLocalNumberFormat(Account.M market, Float price) {
+    public static String priceLocalNumberFormat(M market, Float price) {
         switch(market) {
             case AMAZON_US:
             case AMAZON_UK:
@@ -253,7 +254,7 @@ public class Webs {
      * @param priceStr
      * @return
      */
-    public static Float amazonPriceCurrency(Account.M market, String priceStr) {
+    public static Float amazonPriceCurrency(M market, String priceStr) {
         try {
             switch(market) {
                 case AMAZON_US:
@@ -281,7 +282,7 @@ public class Webs {
      * @param price
      * @return
      */
-    public static String priceLocalCurrencyFormat(Account.M market, Float price) {
+    public static String priceLocalCurrencyFormat(M market, Float price) {
         if(price == null) price = 0f;
         switch(market) {
             case AMAZON_US:
@@ -319,6 +320,19 @@ public class Webs {
         e.printStackTrace(new PrintWriter(sw));
         // 便与前台查看异常
         return StringUtils.replace(sw.toString(), "\\n", "<br/>");
+    }
+
+    /**
+     * 将产生的 Play Error 替换成字符串形式
+     *
+     * @param errors
+     * @return
+     */
+    public static String V(List<play.data.validation.Error> errors) {
+        StringBuilder sbd = new StringBuilder();
+        for(Error err : errors)
+            sbd.append(err.getKey()).append("=>").append(err.message()).append("<br>");
+        return sbd.toString();
     }
 
     /**

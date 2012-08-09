@@ -5,6 +5,7 @@ import helper.GTs;
 import helper.HTTP;
 import models.market.Account;
 import models.market.Listing;
+import models.market.M;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Test;
@@ -35,7 +36,7 @@ public class ListingTest extends UnitTest {
     @Test
     public void testSellingUploadImage() {
         Account acc = Account.findById(1l);
-        acc.changeRegion(Account.M.AMAZON_DE);
+        acc.changeRegion(M.AMAZON_DE);
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("asin", "B0083QX8AW"));
         System.out.println(HTTP.upload(acc.cookieStore(),

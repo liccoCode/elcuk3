@@ -2,7 +2,7 @@ package noRun;
 
 import helper.Currency;
 import helper.Webs;
-import models.market.Account;
+import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.protocol.HTTP;
 import org.joda.time.DateTime;
@@ -100,19 +100,19 @@ public class CurrencyTest {
          */
         String priceStr = "EUR -1,61";
         String priceStr2 = "€-1.21";
-        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr.substring(1).trim()));
-        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr.substring(3).trim()));
+        System.out.println(Webs.amazonPriceNumber(M.AMAZON_UK, priceStr.substring(1).trim()));
+        System.out.println(Webs.amazonPriceNumber(M.AMAZON_DE, priceStr.substring(3).trim()));
         System.out.println("------------------------");
-        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_UK, priceStr2.substring(1).trim()));
-        System.out.println(Webs.amazonPriceNumber(Account.M.AMAZON_DE, priceStr2.substring(3).trim()));
+        System.out.println(Webs.amazonPriceNumber(M.AMAZON_UK, priceStr2.substring(1).trim()));
+        System.out.println(Webs.amazonPriceNumber(M.AMAZON_DE, priceStr2.substring(3).trim()));
         System.out.println("------------------------");
-        System.out.println(Webs.amazonPriceCurrency(Account.M.AMAZON_UK, priceStr2));
+        System.out.println(Webs.amazonPriceCurrency(M.AMAZON_UK, priceStr2));
     }
 
     @Test
     public void testUKDEThoundsNumberFormat() {
-        Assert.assertEquals("100,000.898", Webs.priceLocalNumberFormat(Account.M.AMAZON_UK, 100000.9f));
-        Assert.assertEquals("100.000,195", Webs.priceLocalNumberFormat(Account.M.AMAZON_DE, 100000.193f));
+        Assert.assertEquals("100,000.898", Webs.priceLocalNumberFormat(M.AMAZON_UK, 100000.9f));
+        Assert.assertEquals("100.000,195", Webs.priceLocalNumberFormat(M.AMAZON_DE, 100000.193f));
         String ukThoundStr = "100,000.898";
     }
 
@@ -140,9 +140,9 @@ public class CurrencyTest {
         StringBuilder sbd = new StringBuilder(pricestr);
         String dot = Character.toString(sbd.charAt(sbd.length() - 3));
         if(dot.equals(".")) { // uk 格式
-            return Webs.amazonPriceNumber(Account.M.AMAZON_UK, pricestr);
+            return Webs.amazonPriceNumber(M.AMAZON_UK, pricestr);
         } else if(dot.equals(",")) { // de 格式
-            return Webs.amazonPriceNumber(Account.M.AMAZON_DE, pricestr);
+            return Webs.amazonPriceNumber(M.AMAZON_DE, pricestr);
         } else {
             Logger.error("Not support price format.");
             return 999f;

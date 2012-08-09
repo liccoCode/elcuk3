@@ -56,7 +56,7 @@
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             #{list items:accs, as:'acc'}
-                #{if !acc.isSaleAcc && acc.type == models.market.Account.M.AMAZON_UK}
+                #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_UK}
                     #{render 'Accounts/acctr.html', acc:acc/}
                 #{/if}
             #{/list}
@@ -79,7 +79,7 @@
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             #{list items:accs, as:'acc'}
-                #{if !acc.isSaleAcc && acc.type == models.market.Account.M.AMAZON_DE}
+                #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_DE}
                     #{render 'Accounts/acctr.html', acc:acc/}
                 #{/if}
             #{/list}
@@ -102,7 +102,7 @@
                     <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
                 </tr>
             *{#{list items:accs, as:'acc'}}*
-            *{#{if !acc.isSaleAcc && acc.type == models.market.Account.M.AMAZON_US}}*
+            *{#{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_US}}*
             *{#{render 'Accounts/acctr.html', acc:acc/}}*
             *{#{/if}}*
             *{#{/list}}*
