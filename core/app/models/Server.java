@@ -2,6 +2,8 @@ package models;
 
 import helper.Caches;
 import play.cache.Cache;
+import play.data.validation.IPv4Address;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.Column;
@@ -20,11 +22,16 @@ public class Server extends Model {
      * Server 的类型
      */
     public enum T {
-        CRAWLER
+        CRAWLER,
+        /**
+         * 普通服务器
+         */
+        SERVER
     }
 
 
     @Column(nullable = false)
+    @Required
     public String name;
 
     public String username;
@@ -32,7 +39,12 @@ public class Server extends Model {
     public String password;
 
     @Column(nullable = false, unique = true)
+    @Required
     public String url;
+
+    @IPv4Address
+    @Required
+    public String ipAddress;
 
     public T type = T.CRAWLER;
 
@@ -43,7 +55,7 @@ public class Server extends Model {
         List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
         if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
             servers = Server.find("type=?", type).fetch();
-            Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "30mn");
+            Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
         }
         //TODO 根据 ratio 计算获取哪一个
         return servers.get(0);
