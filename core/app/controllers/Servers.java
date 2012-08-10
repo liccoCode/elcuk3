@@ -48,6 +48,9 @@ public class Servers extends Controller {
             render("Servers/blank.html", s);
         }
         validation.valid(s);
+        if(Validation.hasErrors()) {
+            render("Servers/edit.html", s);
+        }
         s.save();
         flash.success("%s 更新成功.", s.name);
         redirect("/servers/index");

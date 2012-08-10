@@ -6,7 +6,6 @@ import helper.Webs;
 import jobs.TicketStateSyncJob;
 import models.ElcukRecord;
 import models.User;
-import models.market.AmazonListingReview;
 import models.support.Ticket;
 import models.support.TicketReason;
 import models.view.Ret;
@@ -75,14 +74,17 @@ public class Tickets extends Controller {
     }
 
     /**
-     * 通过 ReviewId 向 OsTicket 进行更新
+     * 通过 TicketId 向 osTicket 更新
      *
-     * @param rid
+     * @param tid
      */
-    public static void sync(String rid) {
-        AmazonListingReview review = AmazonListingReview.findByReviewId(rid);
-        JsonObject syncsJsonDetails = TicketStateSyncJob.communicationWithOsTicket(Arrays.asList(review.ticket.osTicketId()));
-        F.T2<List<Ticket>, List<Ticket>> ticketT2 = TicketStateSyncJob.syncOsTicketDetailsIntoSystem(syncsJsonDetails, Arrays.asList(review.ticket));
+    public static void sync(String tid) {
+        Ticket ticket = Ticket.findByOsTicketId(tid);
+        if(ticket == null) {
+            renderJSON(new Ret("Ticket " + tid + " is not exist."));
+        }
+        JsonObject syncsJsonDetails = TicketStateSyncJob.communicationWithOsTicket(Arrays.asList(ticket.osTicketId()));
+        F.T2<List<Ticket>, List<Ticket>> ticketT2 = TicketStateSyncJob.syncOsTicketDetailsIntoSystem(syncsJsonDetails, Arrays.asList(ticket));
         if(ticketT2._1.size() != 0) {
             renderJSON(new Ret(true, ticketT2._1.get(0).osTicketId()));
         } else {
