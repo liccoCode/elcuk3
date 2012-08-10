@@ -25,6 +25,9 @@
             <li>
                 <a href="#newcome" data-toggle='tab'>有新回复<span class="badge badge-inverse">${newMsgReviews.size()}</span></a>
             </li>
+            <li>
+                <a href="#preclose" data-toggle='tab'>等待确认关闭<span class="badge badge-inverse">${preCloseReviews.size()}</span></a>
+            </li>
         #{ck 'manager'}
             <li>
                 <a href="#funcs" data-toggle='tab'>功能 Tab</a>
@@ -55,6 +58,10 @@
 
             <div id="newcome" class="tab-pane fade">
             #{render 'Reviews/_review.html', tickets:newMsgReviews/}
+            </div>
+
+            <div id="preclose" class="tab-pane fade">
+            #{render 'Reviews/_review.html', tickets:preCloseReviews/}
             </div>
 
         #{ck 'manager'}

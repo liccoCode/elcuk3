@@ -6,6 +6,8 @@
 
 #{set haveTicket:feedback.ticket != null/}
 
+#{render 'Tickets/_success.html', success:feedback.ticket.isSuccess/}
+
 <div class="label label-info">Feedback</div>
 <div>
     <table class="table table-condensed table-bordered">
@@ -31,6 +33,12 @@
         </tr>
 
     #{if haveTicket}
+        <tr>
+            <th>是否成功</th>
+            <td class="alert ${feedback.ticket.isSuccess ? 'alert-success' : 'alert-error'}">${feedback.ticket.isSuccess}</td>
+            <th>dkf</th>
+            <td>dkfj</td>
+        </tr>
         <tr>
             <th>最后同步时间</th>
             <td>${feedback.ticket.lastSyncTime?.since()}</td>
@@ -92,9 +100,8 @@
 
                     <div class="span6">
                     #{list items:feedback.orderr.items, as:'oitm'}
-                    *{<img src="${oitm.selling.listing.picUrls}">}*
-                    ${oitm.selling.listing.picUrls}
-                #{/list}
+                        <img src="${oitm.selling.listing.picUrls}">
+                    #{/list}
                     </div>
                 </div>
 

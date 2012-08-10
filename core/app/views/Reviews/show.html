@@ -10,6 +10,10 @@
 <!-- Ticket 操作所需要的值 -->
 <input type="hidden" id="ticketId" value="${review.ticket.id}">
 #{/if}
+
+
+#{render 'Tickets/_success.html', success:review.ticket.isSuccess/}
+
 <!-- Review -->
 <div class="label label-info">Review</div>
 <div>
