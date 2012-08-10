@@ -1,38 +1,50 @@
-#{extends 'main_full.html'/}
+#{extends 'main.html'/}
 #{set title:'服务器管理'/}
 #{set 'moreScripts'}
-    #{script 'servers/index.js'/}
 #{/set}
 
-<table class="table table-bordered table-striped" id="server_table">
-    <tr>
-        <th>Id</th>
-        <th>Name</th>
-        <th>Username</th>
-        <th>Password</th>
-        <th>Raito</th>
-        <th>Type</th>
-        <th>URL</th>
-        <th>&nbsp;</th>
-    </tr>
-#{list items:sers, as:'s'}
-    <tr id="server_${s.id}">
-        <td>
-            <input type="hidden" name="s.id" value="${s.id}">${s.id}
-        </td>
-        <td><input type="text" name="s.name" value="${s.name}"></td>
-        <td><input type="text" name="s.username" value="${s.username}"></td>
-        <td><input type="text" name="s.password" value="${s.password}"></td>
-        <td><input type="text" name="s.ratio" class="span1" value="${s.ratio}"></td>
-        <td>
-            #{select name:'s.type', items:models.Server.T.values(), value:s.type}#{/select}
-        </td>
-        <td>
-            <input type="text" class="span6" name="s.url" value="${s.url}">
-        </td>
-        <td>
-            <a href="#" class="btn" sid='${s.id}'>更新</a>
-        </td>
-    </tr>
-#{/list}
-</table>
+#{if flash.success}
+<div class="alert alert-success">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <p>${flash.success}</p>
+</div>
+#{/if}
+
+<div class="row-fluid" style="margin-bottom:10px;">
+    <a href="@{Servers.blank()}" class="btn btn-primary">新添加</a>
+</div>
+
+<div class="row-fluid">
+
+    <table class="table table-condensed table-bordered" id="server_table">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Raito</th>
+            <th>Type</th>
+            <th>URL</th>
+            <th>IP</th>
+            <th>&nbsp;</th>
+        </tr>
+    #{list items:sers, as:'s'}
+        <tr id="server_${s.id}">
+            <td>
+                <input type="hidden" name="s.id" value="${s.id}">${s.id}
+            </td>
+            <td>${s.name}</td>
+            <td>${s.username}</td>
+            <td>${s.password}</td>
+            <td>${s.ratio}</td>
+            <td>${s.type}</td>
+            <td>${s.url}</td>
+            <td>${s.ipAddress}</td>
+            <td>
+                <a href="@{Servers.edit(s.id)}" class="btn btn-primary">更新</a>
+            </td>
+        </tr>
+    #{/list}
+    </table>
+</div>
+

@@ -1,0 +1,10 @@
+*{
+确认选择货币种类
+_name: form 表单提交的 name 属性
+_t : 选中的 Server Type
+}*
+<select name="${_name}" size="1">
+#{list items:models.Server.T.values(), as:'type'}
+    <option ${type == _t ? 'selected' : ''} value="${type}">${type}</option>
+#{/list}
+</select>

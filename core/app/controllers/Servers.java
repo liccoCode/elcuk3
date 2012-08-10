@@ -1,10 +1,6 @@
 package controllers;
 
-import helper.Caches;
-import helper.Webs;
 import models.Server;
-import models.view.Ret;
-import play.cache.Cache;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -26,17 +22,38 @@ public class Servers extends Controller {
         render(sers);
     }
 
-    public static void update(Server s) {
-        if(!s.isPersistent()) renderJSON(new Ret("The Server is not persistent!"));
-        validation.required(s.type);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        try {
-            s.save();
-            Cache.decr(String.format(Caches.SERVERS, s.type.toString()));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+    public static void blank(Server s) {
+        if(s == null) s = new Server();
+        render(s);
+    }
+
+    public static void create(Server s) {
+        validation.valid(s);
+        if(Validation.hasErrors()) {
+            render("Servers/blank.html", s);
         }
-        renderJSON(new Ret());
+        s.save();
+        flash.success("%s 创建成功.", s.name);
+        redirect("/servers/index");
+    }
+
+    public static void edit(long id) {
+        Server s = Server.findById(id);
+        render(s);
+    }
+
+    public static void update(Server s) {
+        if(!s.isPersistent()) {
+            flash.error("Server %s 不存在与系统中, 请重新添加.", s.name);
+            render("Servers/blank.html", s);
+        }
+        validation.valid(s);
+        if(Validation.hasErrors()) {
+            render("Servers/edit.html", s);
+        }
+        s.save();
+        flash.success("%s 更新成功.", s.name);
+        redirect("/servers/index");
     }
 
 }

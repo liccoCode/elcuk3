@@ -10,6 +10,7 @@ import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Duration;
 import play.data.validation.Required;
+import play.data.validation.Unique;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -34,6 +35,13 @@ import java.util.List;
 public class Ticket extends Model {
 
     public Ticket() {
+    }
+
+    public Ticket(String osTicketId, Date createAt) {
+        this.osTicketId = osTicketId;
+        this.fid = osTicketId;
+        this.createAt = createAt;
+        this.type = T.TICKET;
     }
 
     public Ticket(AmazonListingReview review) {
@@ -70,6 +78,8 @@ public class Ticket extends Model {
     public List<TicketReason> reasons = new ArrayList<TicketReason>();
 
     @Expose
+    @Required
+    @Unique
     public String osTicketId;
 
     @Enumerated(EnumType.STRING)
@@ -280,6 +290,10 @@ public class Ticket extends Model {
                 return new F.T2<Boolean, TicketStateSyncJob.OsResp>(true, newResp);
         }
         return new F.T2<Boolean, TicketStateSyncJob.OsResp>(false, null);
+    }
+
+    public static Ticket findByOsTicketId(String osTicketId) {
+        return Ticket.find("osTicketId=?", osTicketId).first();
     }
 
 
