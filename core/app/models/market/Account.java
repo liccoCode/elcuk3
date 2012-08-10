@@ -378,7 +378,7 @@ public class Account extends Model {
             this.loginAmazonSize(listing.market);
             sessionId = this.cookie("session-id", listing.market);
         }
-        String body = HTTP.post(this.cookieStore(listing.market), this.type.amazonLikeLink(), Arrays.asList(
+        String body = HTTP.post(this.cookieStore(listing.market), listing.market.amazonLikeLink(), Arrays.asList(
                 new BasicNameValuePair("action", "like"),
                 new BasicNameValuePair("itemId", listing.asin),
                 new BasicNameValuePair("context", "dp"),

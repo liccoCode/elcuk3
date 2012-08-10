@@ -78,7 +78,7 @@ public class AmazonReviews extends Controller {
             throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
         F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToClikeLike();
         F.T2<AmazonLikeRecord, String> t2 = accT2._1.clickLike(listing);
-        renderJSON(J.json(new F.T2<Integer, String>(accT2._2, J.G(t2._1))));
+        renderJSON(new Ret(true, t2._2));
     }
 
     /**
