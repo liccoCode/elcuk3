@@ -9,6 +9,7 @@ import models.support.TicketState;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.Play;
 import play.jobs.Job;
 
@@ -35,6 +36,7 @@ public class FeedbackInfoFetchJob extends Job {
         if(Play.mode.isDev()) size = 10;
         List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND createAt>=? AND createAt<=? ORDER BY lastSyncTime",
                 Ticket.T.FEEDBACK, false, Dates.morning(now.minusDays(60).toDate()), Dates.night(now.toDate())).fetch(size);
+        Logger.info("FeedbackInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
             String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
             ticket.isSuccess = FeedbackInfoFetchJob.isFeedbackRemove(html);
@@ -77,7 +79,9 @@ public class FeedbackInfoFetchJob extends Job {
      * 3. Feedback 被删除了
      */
     public static String fetchAmazonFeedbackHtml(Feedback feedback) {
-        String body = HTTP.post(feedback.account.cookieStore(), feedback.market.feedbackLink(), Arrays.asList(
+        String url = feedback.market.feedbackLink();
+        Logger.info("Sync Feedback %s", feedback.orderId);
+        String body = HTTP.post(feedback.account.cookieStore(), url, Arrays.asList(
                 new BasicNameValuePair("action", "show-feedback"),
                 new BasicNameValuePair("orderID", feedback.orderId),
                 new BasicNameValuePair("applicationPath", "/gp/orders-v2")
