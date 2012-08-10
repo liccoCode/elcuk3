@@ -18,8 +18,7 @@ public class APIChecker extends Controller {
         Server server = Server.find("ipAddress=?", request.remoteAddress).first();
         if(Play.mode.isProd()) {
             if(server == null) forbidden();
-        } else {
-            Logger.info("%s requrst API.", request.remoteAddress);
         }
+        Logger.info("%s requrst API.", request.remoteAddress);
     }
 }
