@@ -351,11 +351,13 @@ public enum M {
     }
 
     /**
+     * <pre>
      * 在详细订单页面会自行通过 Ajax 去获取此订单关联的 Feedback 的链接;
      * 需要如下参数(POST):
      * action:show-feedback
      * orderID:303-8171136-0010717
      * applicationPath:/gp/orders-v2
+     * </pre>
      *
      * @return
      */
