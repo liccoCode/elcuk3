@@ -15,10 +15,10 @@ import play.mvc.Controller;
 public class APIChecker extends Controller {
     @Before
     public static void checkServer() {
+        Logger.info("%s requrst API.", request.remoteAddress);
         Server server = Server.find("ipAddress=?", request.remoteAddress).first();
         if(Play.mode.isProd()) {
             if(server == null) forbidden();
         }
-        Logger.info("%s requrst API.", request.remoteAddress);
     }
 }
