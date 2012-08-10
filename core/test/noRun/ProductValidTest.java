@@ -45,6 +45,8 @@ public class ProductValidTest {
                 "        });\n" +
                 "     });\n" +
                 "";
-        System.out.println(StringUtils.substringBetween(s, "buyerEmail:", "targetID:").trim());
+        String tmp = StringUtils.remove(StringUtils.substringBetween(s, "buyerEmail:", "targetID:").trim(), "\"");
+        System.out.println(tmp);
+        System.out.println(StringUtils.remove(tmp, ","));
     }
 }
