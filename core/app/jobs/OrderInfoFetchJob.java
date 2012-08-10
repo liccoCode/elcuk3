@@ -72,8 +72,10 @@ public class OrderInfoFetchJob extends Job {
             order.memo = lin.text();
         } else {
             // Email
-            if(StringUtils.isBlank(order.email) || !StringUtils.contains(order.email, "@"))
-                order.email = StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim();
+            if(StringUtils.isBlank(order.email) || !StringUtils.contains(order.email, "@")) {
+                String tmp = StringUtils.remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(), "\"");
+                order.email = StringUtils.remove(tmp, ",");
+            }
 
             // buyerId
             String url = lin.parent().select("a").attr("href");
