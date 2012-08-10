@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.FLog;
 import helper.HTTP;
 import helper.Webs;
 import models.market.Orderr;
@@ -36,9 +37,7 @@ public class OrderInfoFetchJob extends Job {
                     Logger.warn("Order|%s| crawl more then 4 times.", ord.orderId);
                     continue;
                 }
-                String url = ord.account.type.orderDetail(ord.orderId);
-                Logger.info("OrderInfo(UserId) [%s].", url);
-                String html = HTTP.get(ord.account.cookieStore(), url);
+                String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
                 OrderInfoFetchJob.orderDetailUserIdAndEmail(ord, html).save();
             } catch(Exception e) {
                 ord.crawlUpdateTimes++;
@@ -46,6 +45,15 @@ public class OrderInfoFetchJob extends Job {
                 Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
             }
         }
+    }
+
+    public static String fetchOrderDetailHtml(Orderr ord) {
+        String url = ord.account.type.orderDetail(ord.orderId);
+        Logger.info("OrderInfo(UserId) [%s].", url);
+        String html = HTTP.get(ord.account.cookieStore(), url);
+        if(Play.mode.isDev())
+            FLog.fileLog(String.format("order.detail.%s.html", ord.orderId), html, FLog.T.HTTP_ERROR);
+        return html;
     }
 
     /**

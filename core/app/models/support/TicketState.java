@@ -2,6 +2,7 @@ package models.support;
 
 import helper.Dates;
 import jobs.TicketStateSyncJob;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.Duration;
 import play.libs.F;
 
@@ -25,6 +26,7 @@ import java.util.List;
  * * NO_RESP -> CLOSE: 如果确定这个 Ticket 不再做处理, 那么则直接标记到 CLOSE, 就算有新邮件也不会重新进入邮件回复流程(OsTicket 会有回信,但系统不再理睬).
  * -------------
  * * NEW_MSG/MAILED -> PRE_CLOSE/CLOSE: 在与客户的交流结束以后可以进入 PRE_CLOSE 以等待 Ticket 所关联的信息被客户修改, 或者直接进入 CLOSE 表示无法处理.
+ * * PRE_CLOSE -> 进入 PRE_CLOSE 的 ticket 不会自动进入 CLOSE 状态, 一定需要人工进行确认才可以进入 CLOSE
  * </pre>
  * User: wyattpan
  * Date: 7/26/12
@@ -180,12 +182,19 @@ public enum TicketState {
         @Override
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
             if(ticket.isSuccess) {
-                ticket.memo = String.format("Success Change Review at %s from %s to %s\r\n%s",
-                        Dates.date2DateTime(),
-                        ticket.review.lastRating == null ? 0 : ticket.review.lastRating,
-                        ticket.review.rating == null ? 0 : ticket.review.rating,
-                        ticket.memo);
-                return CLOSE;
+                if(ticket.type == Ticket.T.REVIEW) {
+                    if(!StringUtils.contains(ticket.review.comment, "Success Change Review")) {
+                        ticket.review.comment = String.format("Success Change Review at %s from %s to %s\r\n%s",
+                                Dates.date2DateTime(),
+                                ticket.review.lastRating == null ? 0 : ticket.review.lastRating,
+                                ticket.review.rating == null ? 0 : ticket.review.rating,
+                                ticket.memo);
+                    }
+                } else if(ticket.type == Ticket.T.FEEDBACK) {
+                    if(!StringUtils.contains(ticket.feedback.memo, "Closed At")) {
+                        ticket.feedback.memo = String.format("Closed At %s\r\n", Dates.date2DateTime()) + (StringUtils.isBlank(ticket.feedback.memo) ? "" : ticket.feedback.memo);
+                    }
+                }
             }
             return this;
         }

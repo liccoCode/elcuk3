@@ -1,14 +1,14 @@
 package market;
 
-import helper.HTTP;
 import jobs.FeedbackCrawlJob;
+import jobs.FeedbackInfoFetchJob;
 import jobs.KeepSessionJob;
-import models.market.Account;
-import org.apache.http.client.CookieStore;
+import jobs.OrderInfoFetchJob;
+import models.market.Feedback;
+import models.market.Orderr;
+import org.junit.Before;
 import org.junit.Test;
 import play.test.UnitTest;
-
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,18 +23,33 @@ public class SessionLoginTest extends UnitTest {
         new FeedbackCrawlJob().doJob();
     }
 
+    Feedback feedback = null;
+
+    // 都是 de 的订单
+    @Before
+    public void Login() {
+        feedback = Feedback.findById("303-8171136-0010717");
+        feedback.account.loginAmazonSellerCenter();
+    }
+
     @Test
-    public void testFeedbackFetch() {
-        List<Account> accs = Account.openedSaleAcc();
-        for(Account acc : accs) {
-            acc.loginAmazonSellerCenter();
-        }
-        for(Account acc : accs) {
-            System.out.println(acc.cookieStore().hashCode() + "::::::" + acc.cookieStore());
-            System.out.println("==================================");
-        }
-        System.out.println(HTTP.get("http://www.baidu.com"));
-        CookieStore store = HTTP.client().getCookieStore();
-        System.out.println(store.hashCode() + "::::::" + store);
+    public void testFetchFeedback() {
+        System.out.println("======================================================");
+        // feedback 已经删除了的
+        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(feedback);
+        // 有新 feedback 的
+        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(Feedback.<Feedback>findById("028-8330984-9689160"));
+        // 没有 feedback 的
+        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(Feedback.<Feedback>findById("028-6451688-5682726"));
+    }
+
+    @Test
+    public void orderDetail() {
+        // feedback 已经删除了的
+        OrderInfoFetchJob.fetchOrderDetailHtml(Orderr.<Orderr>findById("303-8171136-0010717"));
+        // 有新 feedback 的
+        OrderInfoFetchJob.fetchOrderDetailHtml(Orderr.<Orderr>findById("028-8330984-9689160"));
+        // 没有 feedback 的
+        OrderInfoFetchJob.fetchOrderDetailHtml(Orderr.<Orderr>findById("028-6451688-5682726"));
     }
 }
