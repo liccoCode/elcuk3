@@ -110,10 +110,7 @@ $ ->
     mask.mask('点击 Like 中...')
     $.post('/amazonreviews/like', $('#search_form :input').fieldSerialize(),
       (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          alert(r._2)
+        alert(r.message)
         mask.unmask()
     )
     e.preventDefault()
