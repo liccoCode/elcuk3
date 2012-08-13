@@ -35,9 +35,11 @@ import java.util.List;
 public class Ticket extends Model {
 
     public Ticket() {
+        this.state = TicketState.NEW;
     }
 
     public Ticket(String osTicketId, Date createAt) {
+        this();
         this.osTicketId = osTicketId;
         this.fid = osTicketId;
         this.createAt = createAt;
@@ -45,19 +47,19 @@ public class Ticket extends Model {
     }
 
     public Ticket(AmazonListingReview review) {
+        this();
         this.osTicketId = review.osTicketId;
         this.type = T.REVIEW;
         this.fid = review.listing.product.sku;
-        this.state = TicketState.NEW;
         this.review = review;
         this.createAt = review.reviewDate;
     }
 
     public Ticket(Feedback feedback) {
+        this();
         this.osTicketId = feedback.osTicketId;
         this.type = T.FEEDBACK;
         this.fid = feedback.orderId;
-        this.state = TicketState.NEW;
         this.feedback = feedback;
         this.createAt = feedback.createDate;
     }
@@ -254,7 +256,7 @@ public class Ticket extends Model {
      * @return
      */
     public static List<Ticket> checkStateTickets(int size) {
-        return Ticket.find("state!=? AND osTicketId!=null AND osTicketId NOT LIKE ? ORDER BY lastSyncTime", TicketState.CLOSE, "%-noemail").fetch(size);
+        return Ticket.find("state!=? AND osTicketId IS NOT NULL AND osTicketId NOT LIKE ? ORDER BY lastSyncTime", TicketState.CLOSE, "%-noemail").fetch(size);
     }
 
     /**
