@@ -2,6 +2,7 @@
     <tr>
         <th>Sku</th>
         <th>Asin</th>
+        <th>Create</th>
         <th>LastMsg</th>
         <th rel="popover" placement="bottom" content="黑色数字为 Review 字数<br><br>橙色数字为客户回复数<br><br>蓝色数字为我方回复数;<br><br>黑色对话框表示在 Amazon 上留了 Comment">
             <i class="icon-question-sign"></i> Title
@@ -20,6 +21,14 @@
         <td>
             #{set lid:models.market.Listing.unLid(r.listingId)/}
             <a href="@{AmazonReviews.index()}#${lid._1}/${lid._2}" target="_blank">${lid._1}</a>
+        </td>
+        <td>
+            #{if t.createAt}
+            ${t.createAt.since()}
+            #{/if}
+            #{else }
+                <i class="icon-warning-sign"></i>
+            #{/else}
         </td>
         <td>
             #{if t.lastMessageTime}
