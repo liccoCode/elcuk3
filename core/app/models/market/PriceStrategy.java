@@ -7,7 +7,7 @@ import javax.persistence.*;
 /**
  * 每一个 Selling 都拥有一个 PriceStrategy, 控制其调价的所有信息;
  * <p/>
- * 所有在系统内的价格都是为 GBP, 在不同的地方需要计算的时候才利用
+ * 所有在系统内的价格都是为 USD, 在不同的地方需要计算的时候才利用
  * Currency 转换为不同的币种值
  * <p/>
  * User: Wyatt

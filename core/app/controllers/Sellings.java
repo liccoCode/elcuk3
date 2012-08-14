@@ -106,6 +106,11 @@ public class Sellings extends Controller {
         renderJSON(new Ret());
     }
 
+    /**
+     * 下载 Selling 的 FBA_LABEL
+     *
+     * @param sid
+     */
     public static void sellingLabel(String sid) {
         Selling selling = Selling.findById(sid);
         byte[] bytes = selling.downloadFnSkuLabel();
