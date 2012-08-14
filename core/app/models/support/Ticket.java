@@ -38,10 +38,11 @@ public class Ticket extends Model {
         this.state = TicketState.NEW;
     }
 
-    public Ticket(String osTicketId, Date createAt) {
+    public Ticket(String osTicketId, Date createAt, String title) {
         this();
         this.osTicketId = osTicketId;
-        this.fid = osTicketId;
+        if(StringUtils.isNotBlank(title))
+            this.fid = title.substring(0, (200 > title.length() ? title.length() : 200));
         this.createAt = createAt;
         this.type = T.TICKET;
     }

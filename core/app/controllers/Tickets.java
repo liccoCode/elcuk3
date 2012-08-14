@@ -8,6 +8,7 @@ import models.ElcukRecord;
 import models.User;
 import models.support.Ticket;
 import models.support.TicketReason;
+import models.support.TicketState;
 import models.view.Ret;
 import play.data.validation.Validation;
 import play.libs.F;
@@ -25,6 +26,23 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Tickets extends Controller {
+
+    public static void index() {
+        F.T2<List<Ticket>, List<Ticket>> newTicketsT2 = Ticket.tickets(Ticket.T.TICKET, TicketState.NEW, true);
+        List<Ticket> needTwoTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.TWO_MAIL, false)._1;
+        List<Ticket> noRespTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.NO_RESP, false)._1;
+        List<Ticket> newMsgTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.NEW_MSG, false)._1;
+        List<Ticket> preCloseTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.PRE_CLOSE, false)._1;
+
+        renderArgs.put("newTickets", newTicketsT2._1);
+        renderArgs.put("newOverdueTickets", newTicketsT2._2);
+
+        int totals = newTicketsT2._1.size() + newTicketsT2._2.size() + needTwoTickets.size()
+                + noRespTickets.size() + newMsgTickets.size() + preCloseTickets.size();
+        render(needTwoTickets, noRespTickets, newMsgTickets, preCloseTickets, totals);
+    }
+
+
     /**
      * 给 Ticket 添加原因[Review, Feedback 通用]
      */

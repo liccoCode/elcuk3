@@ -390,7 +390,7 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     public Orderr tryToRelateOrderByUserId() {
-        if(this.orderr != null) throw new FastRuntimeException("已经找到 Review 对应的 Order");
+        if(this.orderr != null) return this.orderr;
         if(StringUtils.isBlank(this.userid)) return null;
         return Orderr.find("createDate<=? AND userid=? ORDER BY createDate DESC", this.reviewDate, this.userid).first();
     }
