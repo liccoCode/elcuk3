@@ -19,8 +19,8 @@ import java.util.Date;
  */
 @With({APIChecker.class, GzipFilter.class})
 public class Tickets extends Controller {
-    public static void create(String ticketId, @As("yyyy-MM-dd HH:mm:ss") Date createAt) {
-        Ticket t = new Ticket(ticketId, createAt);
+    public static void create(String ticketId, @As("yyyy-MM-dd HH:mm:ss") Date createAt, String title) {
+        Ticket t = new Ticket(ticketId, createAt, title);
         validation.valid(t);
         if(Validation.hasErrors()) {
             renderJSON(new Ret(Webs.V(Validation.errors())));
