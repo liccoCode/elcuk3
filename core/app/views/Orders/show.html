@@ -49,7 +49,8 @@
             <td>${ord.postalCode}</td>
             <td>Province:</td>
             <td>${ord.province}</td>
-            <td colspan="2">&nbsp;</td>
+            <td>Account</td>
+            <td>${ord.account.prettyName()}</td>
         </tr>
         <tr>
             <td>ShipDate:</td>
@@ -73,8 +74,8 @@
                 <td style="color:#5BB75B;">${ord.state}</td>
             #{/elseif}
             #{elseif ord.state == models.market.Orderr.S.REFUNDED ||
-                         ord.state == models.market.Orderr.S.RETURNNEW ||
-                         ord.state == models.market.Orderr.S.CANCEL}
+            ord.state == models.market.Orderr.S.RETURNNEW ||
+            ord.state == models.market.Orderr.S.CANCEL}
                 <td style="color:red;">${ord.state}</td>
             #{/elseif}
             #{else }

@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'Tickets(' + totals + ')'/}
 #{set 'moreScripts'}
+    #{script 'Tickets/reviewAndFeedback.coffee'/}
 #{/set}
 <div class="row-fluid">
     <div class="span12">
@@ -24,54 +25,16 @@
             <li>
                 <a href="#preclose" data-toggle='tab'>等待确认关闭<span class="badge badge-inverse">${preCloseTickets.size()}</span></a>
             </li>
-        #{ck 'manager'}
             <li>
-                <a href="#funcs" data-toggle='tab'>功能 Tab</a>
+                <a href="#closed" data-toggle='tab'>最近关闭的<span class="badge badge-inverse">${closed.size()}</span></a>
             </li>
-        #{/ck}
 
 
         </ul>
 
         <div class="tab-content">
             <div id="news" class="tab-pane active fade in">
-            *{#{render 'Tickets/_ticket.html', tickets:newTickets/}}*
-                <table class="table table-condensed table-bordered">
-                    <tr>
-                        <th>#</th>
-                        <th>OsTicket</th>
-                        <th>LastMsg</th>
-                        <th>Title</th>
-                        <th>Create</th>
-                    </tr>
-                #{list items:newTickets, as:'t'}
-                    <tr>
-                        <td>${t.osTicketId}</td>
-                        <td>${t.lastMessageTime.since()}</td>
-                        <td data-toggle="toggle" data-target="#toggle_${t.id}" style="cursor:pointer">
-                            <span>${t.fid}</span>
-                            #{list items:t.reasons, as:'tag'}
-                                <span class="badge badge-important">${tag.name()}</span>
-                            #{/list}
-
-                            <span class="pull-right badge badge-info">${t.responseTimes}</span>
-                            <span class="pull-right badge badge-warning">${t.messageTimes}</span>
-
-                            <!-- 这个是此 Ticket 的处理者 -->
-                            #{if t.resolver}
-                                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
-                            #{/if}
-                        </td>
-                        <td>${t.createAt.since()}</td>
-                    </tr>
-                    <tr id="toggle_${t.id}" style="display:none;">
-                        <td colspan="4">
-                            <ul class="nav nav-tabs">
-                            </ul>
-                        </td>
-                    </tr>
-                #{/list}
-                </table>
+            #{render 'Tickets/_ticket.html', tickets:newTickets/}
             </div>
 
             <div id="overtime" class="tab-pane fade">
@@ -95,11 +58,9 @@
             #{render 'Tickets/_ticket.html', tickets:preCloseTickets/}
             </div>
 
-        #{ck 'manager'}
-            <div id="funcs" class="tab-pane fade">
-                <button id="ostickt_sync" class="btn btn-primary">手动同步 OsTicket</button>
+            <div id="closed" class="tab-pane fade">
+            #{render 'Tickets/_ticket.html', tickets:closed/}
             </div>
-        #{/ck}
 
 
         </div>

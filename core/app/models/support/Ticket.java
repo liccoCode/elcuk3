@@ -219,10 +219,11 @@ public class Ticket extends Model {
          * 2. 检查是否有填写原因
          */
         if(this.state == TicketState.CLOSE) throw new FastRuntimeException("已经关闭了, 不需要重新关闭.");
-        if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
+        if(this.type != T.TICKET)// Ticket 不需要 reasons, 但需要文件原因
+            if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
         if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
         this.state = TicketState.CLOSE;
-        this.memo = String.format("Closed By %s At [%s] for %s\r\n",
+        this.memo = String.format("Closed By %s At [%s] for [ %s ]\r\n",
                 ElcukRecord.username(),
                 Dates.date2DateTime(),
                 reason) + this.memo;
@@ -237,7 +238,11 @@ public class Ticket extends Model {
      * @return
      */
     public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state, boolean filterOverdue) {
-        List<Ticket> tickets = Ticket.find("type=? AND state=?", type, state).fetch();
+        return tickets(type, state, filterOverdue, -1);
+    }
+
+    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state, boolean filterOverdue, int size) {
+        List<Ticket> tickets = Ticket.find("type=? AND state=?", type, state).fetch((size <= 0 ? Integer.MAX_VALUE : size));
         if(filterOverdue) {
             List<Ticket> noOverdueTicket = new ArrayList<Ticket>();
             List<Ticket> overdueTicket = new ArrayList<Ticket>();

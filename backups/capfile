@@ -15,7 +15,7 @@ end
 
 
 
-namespace :e do
+namespace :bak do
 
   desc "对 Elcuk2 主系统的备份"
   task :e, hosts: h_e  do
@@ -27,7 +27,7 @@ namespace :e do
   end
 
   desc "对 OsTicekt 服务器的备份"
-  task :o, hosts: h_t do
+  task :t, hosts: h_t do
     # 首先执行两台服务器上的 backup 脚本,然后再对 ~/backups/ 目录进行 rsync 同步
     run "backup perform -t osticket"
     system("rsync -axzv --progress #{h_t}:~/backups/osticket #{lobal_backups}/")
