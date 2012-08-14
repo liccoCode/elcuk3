@@ -242,7 +242,7 @@ public class Ticket extends Model {
     }
 
     public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state, boolean filterOverdue, int size) {
-        List<Ticket> tickets = Ticket.find("type=? AND state=?", type, state).fetch((size <= 0 ? Integer.MAX_VALUE : size));
+        List<Ticket> tickets = Ticket.find("type=? AND state=? ORDER BY createAt DESC", type, state).fetch((size <= 0 ? Integer.MAX_VALUE : size));
         if(filterOverdue) {
             List<Ticket> noOverdueTicket = new ArrayList<Ticket>();
             List<Ticket> overdueTicket = new ArrayList<Ticket>();
