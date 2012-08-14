@@ -1,0 +1,44 @@
+# 自己定义的各种 capistrano 命令
+
+h_r="root@r.easyacceu.com"
+h_e="root@e.easyacceu.com"
+h_t="root@t.easyacceu.com"
+
+lobal_backups="/Volumes/wyatt/backups"
+
+role :oAr, h_t, h_e
+
+desc "测试搜索两台远程服务器上的 lib 中是否有 log 文件"
+task :search_libs, roles: :redmine do
+  run "ls -x1 /usr/lib | grep -i log"
+end
+
+
+
+namespace :e do
+
+  desc "对 Elcuk2 主系统的备份"
+  task :e, hosts: h_e  do
+    #run "backup perform -t elcuk"
+    system("rsync -axzv --progress #{h_e}:~/backups/elcuk #{lobal_backups}/")
+    ['elcuk2-logs', 'elcuk2-data'].each do |dir|
+      #system("rsync -axzv --progress #{h_e}:~/#{dir} #{lobal_backups}/elcuk/")
+    end
+  end
+
+  desc "对 OsTicekt 服务器的备份"
+  task :o, hosts: h_t do
+    # 首先执行两台服务器上的 backup 脚本,然后再对 ~/backups/ 目录进行 rsync 同步
+    run "backup perform -t osticket"
+    system("rsync -axzv --progress #{h_t}:~/backups/osticket #{lobal_backups}/")
+  end
+
+  desc "对 Redmine 服务器的备份"
+  task :r, hosts: h_r do
+    # 首先执行两台服务器上的 backup 脚本,然后再对 ~/backups/ 目录进行 rsync 同步
+    run "backup perform -t redmine"
+    system("rsync -axzv --progress #{h_r}:~/backups/redmine #{lobal_backups}/")
+  end
+
+
+end
