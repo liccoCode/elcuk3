@@ -1,15 +1,15 @@
 $ ->
-# 使用 Ticket Tag 的 html 代码例子
-#<div class="row-fluid" id="reason_div">
-#  <div class="span5">
-#  <!-- 结合 tag 使用的 -->
-#    <input type="hidden" id="ticketId" value="${review.ticket.id}">
-#    <span class="reason badge badge-important">${ra.name()}</span>
-#   </div>
-#  <div class="span7 input-append">
-#    <span class="unTagReason badge badge-info">${ura.name()}</span>
-#  </div>
-#</div>
+  # 使用 Ticket Tag 的 html 代码例子
+  #<div class="row-fluid" id="reason_div">
+  #  <div class="span5">
+  #  <!-- 结合 tag 使用的 -->
+  #    <input type="hidden" id="ticketId" value="${review.ticket.id}">
+  #    <span class="reason badge badge-important">${ra.name()}</span>
+  #   </div>
+  #  <div class="span7 input-append">
+  #    <span class="unTagReason badge badge-info">${ura.name()}</span>
+  #  </div>
+  #</div>
   ticketId = -> $('#ticketId').val().trim()
 
   # 取消某一个 Ticket 的原因
@@ -60,7 +60,7 @@ $ ->
     return false if !confirm('确认要关闭这个 Ticket?')
     mask = $('#close_div')
     mask.mask("关闭中...")
-    $.post('/reviews/close', {tid: ticketId(), reason: $('#close_reason').val()},
+    $.post('/tickets/close', {tid: ticketId(), reason: $(@).prev().val()},
       (r) ->
         if r.flag is false
           alert(r.message)
@@ -105,15 +105,15 @@ $ ->
   # 为 index 页面的所有 .close_btn 添加关闭事件
   $('.close_btn').click (e) ->
     return false if !confirm('确认要关闭这个 Ticket?')
-    rid = @getAttribute('rid')
-    mask = $("#tab_content_#{rid}")
+    tid = @getAttribute('tid')
+    mask = $("#tab_content_#{tid}")
     mask.mask("关闭中...")
-    $.post('/tickets/close', {tid: @getAttribute('tid'), reason: $("#close_reason_#{rid}").val()},
+    $.post('/tickets/close', {tid: @getAttribute('tid'), reason: $(@).prev().val()},
       (r) ->
         if r.flag is false
           alert(r.message)
         else
-          toggleTr = $("#toggle_#{rid}")
+          toggleTr = $("#toggle_#{tid}")
           toggleTr.prev().remove()
           toggleTr.remove()
         mask.unmask()
@@ -127,7 +127,7 @@ $ ->
     $.post('/tickets/syncAll',
       (r) ->
         setTimeout(->
-            window.location.reload()
+          window.location.reload()
           , 5000)
     )
     e.preventDefault()

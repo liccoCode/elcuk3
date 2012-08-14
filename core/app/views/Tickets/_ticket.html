@@ -1,8 +1,52 @@
 <table class="table table-condensed table-bordered">
     <tr>
+        <th>#</th>
         <th>OsTicket</th>
+        <th>Title</th>
+        <th>LastMsg</th>
+        <th>Create</th>
     </tr>
 #{list items:tickets, as:'t'}
+    <tr>
+        <td>${t.id}</td>
+        <td>
+            <a href="${t.osTicketLink()}" target="_blank"><i class="icon-external-link"></i> ${t.osTicketId}</a>
+        </td>
+        <td data-toggle="toggle" data-target="#toggle_${t.id}" style="cursor:pointer">
+            <span>${t.fid}</span>
+            #{list items:t.reasons, as:'tag'}
+                <span class="badge badge-important">${tag.name()}</span>
+            #{/list}
 
+            <span class="pull-right badge badge-info">${t.responseTimes}</span>
+            <span class="pull-right badge badge-warning">${t.messageTimes}</span>
+
+            <!-- 这个是此 Ticket 的处理者 -->
+            #{if t.resolver}
+                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
+            #{/if}
+        </td>
+        <td>${t.lastMessageTime.since()}</td>
+        <td>${t.createAt.since()}</td>
+    </tr>
+    <tr id="toggle_${t.id}" style="display:none;">
+        <td colspan="5">
+            <div id="close_${t.id}" style="background:#fff;">
+                <div style="margin-top:10px;">
+                    #{if t.state != models.support.TicketState.CLOSE}
+                        <textarea rows="4" id="close_reason_${t.id}" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
+
+
+                        <button tid="${t.id}" class="close_btn btn btn-danger">
+                            Close
+                        </button>
+                    #{/if}
+                    #{else }
+                        已经关闭了
+                    #{/else}
+                </div>
+            </div>
+        </td>
+    </tr>
 #{/list}
 </table>

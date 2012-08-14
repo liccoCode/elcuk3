@@ -33,13 +33,14 @@ public class Tickets extends Controller {
         List<Ticket> noRespTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.NO_RESP, false)._1;
         List<Ticket> newMsgTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.NEW_MSG, false)._1;
         List<Ticket> preCloseTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.PRE_CLOSE, false)._1;
+        List<Ticket> closed = Ticket.tickets(Ticket.T.TICKET, TicketState.CLOSE, false, 30)._1;
 
         renderArgs.put("newTickets", newTicketsT2._1);
         renderArgs.put("newOverdueTickets", newTicketsT2._2);
 
         int totals = newTicketsT2._1.size() + newTicketsT2._2.size() + needTwoTickets.size()
                 + noRespTickets.size() + newMsgTickets.size() + preCloseTickets.size();
-        render(needTwoTickets, noRespTickets, newMsgTickets, preCloseTickets, totals);
+        render(needTwoTickets, noRespTickets, newMsgTickets, preCloseTickets, totals, closed);
     }
 
 

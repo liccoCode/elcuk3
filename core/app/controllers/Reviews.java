@@ -29,6 +29,7 @@ public class Reviews extends Controller {
         List<Ticket> noRespReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.NO_RESP, false)._1;
         List<Ticket> newMsgReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW_MSG, false)._1;
         List<Ticket> preCloseReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.PRE_CLOSE, false)._1;
+        List<Ticket> closed = Ticket.tickets(Ticket.T.REVIEW, TicketState.CLOSE, false, 30)._1;
 
 
         renderArgs.put("newReviews", newT2._1);
@@ -37,7 +38,7 @@ public class Reviews extends Controller {
         renderArgs.put("twoMailOverdueReviews", needTwoT2._2);
         int totalNeedDealReview = newT2._1.size() + newT2._2.size() + needTwoT2._1.size() + needTwoT2._2.size() +
                 noRespReviews.size() + newMsgReviews.size() + preCloseReviews.size();
-        render(noRespReviews, newMsgReviews, totalNeedDealReview, preCloseReviews);
+        render(noRespReviews, newMsgReviews, totalNeedDealReview, preCloseReviews, closed);
     }
 
     public static void show(String rid) {

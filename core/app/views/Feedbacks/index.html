@@ -29,6 +29,10 @@
             <li>
                 <a href="#preclose" data-toggle='tab'>等待确认关闭<span class="badge badge-inverse">${preCloseFeedbacks.size()}</span></a>
             </li>
+            <li>
+                <a href="#closed" data-toggle='tab'>最近关闭的<span class="badge badge-inverse">${closed.size()}</span></a>
+            </li>
+
         #{ck 'manager'}
             <li>
                 <a href="#funcs" data-toggle='tab'>功能 Tab</a>
@@ -66,6 +70,10 @@
 
             <div id="preclose" class="tab-pane fade">
             #{render 'Feedbacks/_feedback.html', tickets:preCloseFeedbacks/}
+            </div>
+
+            <div id="closed" class="tab-pane fade">
+            #{render 'Feedbacks/_feedback.html', tickets:closed/}
             </div>
 
         #{ck 'manager'}

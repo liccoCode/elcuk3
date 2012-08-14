@@ -27,6 +27,7 @@ public class Feedbacks extends Controller {
         List<Ticket> noRespFeedbacks = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.NO_RESP, false)._1;
         List<Ticket> newMsgFeedbacks = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.NEW_MSG, false)._1;
         List<Ticket> preCloseFeedbacks = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.PRE_CLOSE, false)._1;
+        List<Ticket> closed = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.CLOSE, false, 30)._1;
 
         renderArgs.put("newFeedbacks", newFdbk._1);
         renderArgs.put("newOverdueFeedbacks", newFdbk._2);
@@ -34,7 +35,7 @@ public class Feedbacks extends Controller {
         renderArgs.put("twoMailOverdueFeedbacks", needTwoFdbk._2);
         int totalNeedDealFeedbacks = newFdbk._1.size() + newFdbk._2.size() + needTwoFdbk._1.size() + needTwoFdbk._2.size()
                 + noRespFeedbacks.size() + newMsgFeedbacks.size() + preCloseFeedbacks.size();
-        render(noRespFeedbacks, newMsgFeedbacks, totalNeedDealFeedbacks, preCloseFeedbacks);
+        render(noRespFeedbacks, newMsgFeedbacks, totalNeedDealFeedbacks, preCloseFeedbacks, closed);
     }
 
     public static void show(String oid) {
