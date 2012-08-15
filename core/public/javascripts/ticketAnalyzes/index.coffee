@@ -14,6 +14,7 @@ $ ->
 
 
   bindSortMethod = (tab)->
+    window.$ui.init()
     $("##{tab} table th[id]").css('cursor', 'pointer').click (e) ->
       mask = $('#container')
       mask.mask('计算中...')
