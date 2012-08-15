@@ -1,16 +1,16 @@
 #{extends 'main_full.html'/}
 #{set title:'Ticket 的分析页面'/}
 #{set 'moreScripts'}
+    #{script 'ticketAnalyzes/index.coffee'/}
 #{/set}
 
-
-
 <div class="row-fluid">
-    <div class="input-prepend span5">
+    <div id="param_form" class="input-prepend span5">
         <span class="add-on">From</span>
         <input name="from" type="date" style="width:100px;">
         <span class="add-on">To</span>
         <input name="to" type="date" style="width:100px;">
+        <button id="do_cal" class="btn btn-primary">计算</button>
     </div>
 </div>
 
