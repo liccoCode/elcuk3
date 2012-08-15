@@ -145,7 +145,7 @@ public class Feedback extends GenericModel {
     public Ticket openTicket(String title) {
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
-            return null;
+            return (this.ticket != null ? this.ticket : Ticket.findByOsTicketId(this.osTicketId));
         }
         String name = this.orderId;
         String email = this.email;
