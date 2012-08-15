@@ -288,12 +288,11 @@ public class AmazonListingReview extends GenericModel {
 
 
 //        Rating < 4 并且为自建的 Listing 的开 OsTicket
-        if((this.rating != null && this.rating < 4 && Listing.isSelfBuildListing(this.listing.title))) {
-            this.ticket = this.openTicket(null);
-        }
 //        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒
-        if(this.rating != null && this.rating <= 4 && Listing.isSelfBuildListing(this.listing.title))
+        if(this.rating != null && this.rating < 4 && Listing.isSelfBuildListing(this.listing.title)) {
+            this.ticket = this.openTicket(null);
             Mails.listingReviewWarn(this);
+        }
         this.save();
     }
 

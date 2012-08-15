@@ -91,11 +91,10 @@ public class Feedback extends GenericModel {
          */
         if(this.score > 3) return;
 
-        if(this.score <= 3 && this.isSelfBuildListing())
+        if(this.score <= 3 && this.isSelfBuildListing()) {
             this.ticket = this.openTicket(null);
-
-        if(this.mailedTimes == null)
             Mails.feedbackWarnning(this);
+        }
 
         this.save();
     }

@@ -2,7 +2,7 @@ Order:
 Id: ${f.orderId} ; State: ${f.orderr.state} ; CreateDate: ${f.createDate.format('yyyy-MM-dd')} ; Score: ${f.score}
 
 Comment:
-${f.comment.raw()}
+${f.feedback.raw()}
 
 #{if f.orderr.items == null || f.orderr.items.size() == 0}
 Not Found OrderItem!
