@@ -37,7 +37,7 @@ public class Feedback extends GenericModel {
     @OneToOne
     public Account account;
 
-    @OneToOne(mappedBy = "feedback", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "feedback", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Ticket ticket;
 
     /**
