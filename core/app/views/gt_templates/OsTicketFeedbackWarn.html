@@ -10,7 +10,7 @@ Not Found OrderItem!
 #{else }
     #{list items:f.orderr.items, as:'oi'}
     - ${oi.product.sku}
-    [${oi.productName}]
+    [${oi.listingName}]
     [${oi.selling.asinLink()}]
 
     #{/list}
