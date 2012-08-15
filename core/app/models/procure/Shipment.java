@@ -9,6 +9,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -308,6 +309,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      * @return
      */
     public String refreshIExpressHTML() {
+        Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(this.trackNo));
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
         try {
             this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
