@@ -1,5 +1,6 @@
 package models.view;
 
+import helper.Cached;
 import helper.Caches;
 import helper.Dates;
 import models.market.AmazonListingReview;
@@ -178,6 +179,7 @@ public class RewAndFdbk {
      * @return
      */
     @SuppressWarnings("unchecked")
+    @Cached("30mn")
     public static List<RewAndFdbk> reviews(Date from, Date to) {
         String cackeKey = String.format("RewAndFdbk.review.%s", Caches.Q.cacheKey(from, to));
         List<RewAndFdbk> reviews = Cache.get(cackeKey, List.class);
@@ -223,12 +225,13 @@ public class RewAndFdbk {
                 rvw.successRatio = rvw.historyNegtive > 0 ? (rvw.success / (rvw.historyNegtive * 1f)) : 0;
                 reviews.add(rvw);
             }
-            Cache.add(cackeKey, reviews);
+            Cache.add(cackeKey, reviews, "30mn");
         }
         return reviews;
     }
 
     @SuppressWarnings("unchecked")
+    @Cached("30mn")
     public static List<RewAndFdbk> feedbacks(Date from, Date to) {
         String cacheKey = String.format("RewAndFdbk.feedback.%s", Caches.Q.cacheKey(from, to));
         List<RewAndFdbk> feedbacks = Cache.get(cacheKey, List.class);
@@ -275,7 +278,7 @@ public class RewAndFdbk {
                 rvw.successRatio = rvw.historyNegtive > 0 ? (rvw.success / (rvw.historyNegtive * 1f)) : 0;
                 feedbacks.add(rvw);
             }
-            Cache.add(cacheKey, feedbacks);
+            Cache.add(cacheKey, feedbacks, "30mn");
         }
 
         return feedbacks;

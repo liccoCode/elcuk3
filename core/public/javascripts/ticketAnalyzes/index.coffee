@@ -31,3 +31,12 @@ $ ->
   $('[name=from]').val($.DateUtil.fmt2($.DateUtil.addDay(-30, new Date())))
   $('[name=to]').val($.DateUtil.fmt2($.DateUtil.addDay(-1, new Date())))
 
+  # 清理 Reason 统计的缓存
+  $('#reload_reasons').click (e) ->
+    return false if !confirm("确认重新加载? 计算需要一点时间.")
+    mask = $('#container')
+    mask.mask('计算中...')
+    $.get('/c', key: 'TicketAnalyzes.index',
+      (r) ->
+        window.location.reload()
+    )

@@ -1,6 +1,8 @@
 package controllers;
 
+import models.product.Category;
 import models.view.RewAndFdbk;
+import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -15,8 +17,11 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class TicketAnalyzes extends Controller {
+
+    @CacheFor(id = "TicketAnalyzes.index")
     public static void index() {
-        render();
+        List<Category> cates = Category.all().fetch();
+        render(cates);
     }
 
     public static void reviews(Date from, Date to, String col) {

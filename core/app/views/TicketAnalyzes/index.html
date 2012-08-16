@@ -4,28 +4,119 @@
     #{script 'ticketAnalyzes/index.coffee'/}
 #{/set}
 
-<div class="row-fluid">
-    <div id="param_form" class="input-prepend span5">
-        <span class="add-on">From</span>
-        <input name="from" type="date" style="width:100px;">
-        <span class="add-on">To</span>
-        <input name="to" type="date" style="width:100px;">
-        <button id="do_cal" class="btn btn-primary">计算</button>
-    </div>
+<div style="margin-bottom:10px;">
+    <button id="reload_reasons" class="btn btn-primary"><i class="icon-refresh"></i> Reload</button>
 </div>
 
 <div>
-    <ul class="nav nav-tabs" style="margin-bottom:10px;">
-        <li class="active"><a href="#reviews" data-toggle="tab">Reviews</a></li>
-        <li><a href="#feedbacks" data-toggle="tab">Feedbacks</a></li>
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#reasonsGroup" data-toggle='tab'>Reason 统计</a></li>
+        <li><a href="#reviewAndFeedback" data-toggle='tab'>R&F 统计</a></li>
     </ul>
 
     <div class="tab-content">
-        <div id="reviews" class="tab-pane fade in active">
-            Review 的分析数据
+        <div id="reasonsGroup" class="tab-pane fade active in">
+            <div class="tabbable tabs-left">
+                <!-- 左侧 Tab -->
+                <ul class="nav nav-tabs">
+                #{list items:cates, as:'cat'}
+                    <li class="${cat_isFirst ? 'active' : ''}">
+                        <a style="padding:5px 8px;" href="#cat_${cat.categoryId}" data-toggle='tab'>${cat}</a></li>
+                #{/list}
+                </ul>
+
+                <div class="tab-content">
+                #{list items:cates, as:'cat'}
+                    <div id="cat_${cat.categoryId}" class="tab-pane fade in ${cat_isFirst ? 'active' : ''}">
+                        <table class="table table-condensed table-bordered">
+                            <tr>
+                                <th>原因</th>
+                                <th>负 Review 数量</th>
+                                <th>负 Feedback 数量</th>
+                                <th>总计</th>
+                            </tr>
+                            #{list items:cat.reasons, as:'ra'}
+                                <tr data-toggle='toggle' data-target="#ra_${ra.id}" style="cursor:pointer;">
+                                    <td>${ra.name()}</td>
+                                    #{set t2: ra.divTicketsInToRAndF()/}
+                                    <td>${t2._1.size()}</td>
+                                    <td>${t2._2.size()}</td>
+                                    <td>${t2._1.size() + t2._2.size()}</td>
+                                </tr>
+
+                                <tr id="ra_${ra.id}" style="display:none;">
+                                    <td colspan="4">
+                                        <div class="row-fluid">
+                                            <div class="span4">
+                                                <h3>解释:</h3>
+                                            ${ra.memo}
+                                            </div>
+
+                                            <div class="span4">
+                                                <h3>Reviews:</h3>
+                                                #{list items:t2._1, as:'t'}
+                                                    <a href="@{Reviews.show(t.review.reviewId)}" target="_blank"
+                                                       class="badge ${t.isSuccess ? 'badge-success' : 'badge-warning'} pull-left" style="margin:1px"
+                                                       rel="popover" content="Rating: ${t.review.rating} <br> CreateAt: ${t.createAt.date()} <br> Up/Click: ${t.review.helpUp} / ${t.review.helpClick} <br><br> ${t.review.review.part()}"
+                                                       placement="bottom"
+                                                       title="SKU: ${t.fid}"
+                                                            >
+                                                    ${t.review.reviewId}
+                                                    </a>
+                                                #{/list}
+                                            </div>
+
+                                            <div class="span4">
+                                                <h3>Feedbacks:</h3>
+                                                #{list items:t2._2, as:'t'}
+                                                    <a href="@{Feedbacks.show(t.fid)}" target="_blank"
+                                                       class="badge ${t.isSuccess ? 'badge-success' : 'badge-warning'} pull-left" style="margin:1px"
+                                                       rel="popover" content="Scroe: ${t.feedback.score} <br> CreateAt: ${t.createAt.date()} <br> ${t.feedback.feedback.part()}"
+                                                       placement="bottom"
+                                                       title="Order: ${t.fid}"
+                                                            >
+                                                    ${t.fid}
+                                                    </a>
+                                                #{/list}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            #{/list}
+                        </table>
+                    </div>
+                #{/list}
+                </div>
+            </div>
         </div>
-        <div id="feedbacks" class="tab-pane fade">
-            Feedback 的分析数据
+
+        <div id="reviewAndFeedback" class="tab-pane fade">
+            <div class="row-fluid">
+                <div id="param_form" class="input-prepend span5">
+                    <span class="add-on">From</span>
+                    <input name="from" type="date" style="width:100px;">
+                    <span class="add-on">To</span>
+                    <input name="to" type="date" style="width:100px;">
+                    <button id="do_cal" class="btn btn-primary">计算</button>
+                </div>
+            </div>
+
+            <div>
+                <ul class="nav nav-tabs" style="margin-bottom:10px;">
+                    <li class="active"><a href="#reviews" data-toggle="tab">Reviews</a></li>
+                    <li><a href="#feedbacks" data-toggle="tab">Feedbacks</a></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div id="reviews" class="tab-pane fade in active">
+                        Review 的分析数据
+                    </div>
+                    <div id="feedbacks" class="tab-pane fade">
+                        Feedback 的分析数据
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+

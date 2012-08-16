@@ -8,6 +8,7 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -41,6 +42,7 @@ public class TicketReason extends Model {
      * 这个 Tag 所含有的 Ticket
      */
     @ManyToMany(mappedBy = "reasons")
+    @OrderBy("createAt DESC")
     public List<Ticket> tickets = new ArrayList<Ticket>();
 
     @Lob
@@ -92,6 +94,25 @@ public class TicketReason extends Model {
 
     public String name() {
         return String.format("%s:%s", this.category.categoryId, this.reason);
+    }
+
+    /**
+     * 将此 Reaton 所关联的 Ticket 拆分成 Review 与 Feedback
+     *
+     * @return T2: _.1[Review] , _.2[Feedback]
+     */
+    public F.T2<List<Ticket>, List<Ticket>> divTicketsInToRAndF() {
+        List<Ticket> reviews = new ArrayList<Ticket>();
+        List<Ticket> feedbacks = new ArrayList<Ticket>();
+        if(this.tickets.size() != 0) {
+            for(Ticket t : this.tickets) {
+                if(t.type == Ticket.T.REVIEW)
+                    reviews.add(t);
+                else if(t.type == Ticket.T.FEEDBACK)
+                    feedbacks.add(t);
+            }
+        }
+        return new F.T2<List<Ticket>, List<Ticket>>(reviews, feedbacks);
     }
 
     /**
