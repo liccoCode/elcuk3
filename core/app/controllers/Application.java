@@ -50,7 +50,7 @@ public class Application extends Controller {
      */
     public static void c(String key) {
         Cache.delete(key);
-        renderJSON(new Ret());
+        renderJSON(new Ret(true, String.format("[%s] clear success", key)));
     }
 
     public static void upload(File file) {

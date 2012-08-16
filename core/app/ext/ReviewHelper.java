@@ -101,4 +101,17 @@ public class ReviewHelper extends JavaExtensions {
         else
             return "B38ACE";
     }
+
+    /**
+     * 截取字符串的一部分
+     *
+     * @param str
+     * @return
+     */
+    public static String part(String str) {
+        int len = 100;
+        int real_len = str.length();
+        len = Math.min(len, real_len);
+        return String.format("%s...", str.substring(0, len));
+    }
 }
