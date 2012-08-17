@@ -93,7 +93,7 @@ public class ListingCs extends Controller {
 
             Document doc = Jsoup.parse(html);
             reviews.addAll(AmazonListingReview.parseReviewFromHTML(doc, page));
-            maxPage = AmazonListingReview.maxPage(doc);
+            if(maxPage == 1) maxPage = AmazonListingReview.maxPage(doc);
             Logger.info("Page: %s / %s, Total Reviews: %s", page, maxPage, reviews.size());
             if(page++ == maxPage) break;
         }
