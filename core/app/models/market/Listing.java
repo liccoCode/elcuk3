@@ -66,7 +66,7 @@ public class Listing extends GenericModel {
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
     public List<ListingOffer> offers;
 
-    @OneToMany(mappedBy = "listing")
+    @OneToMany(mappedBy = "listing", fetch = FetchType.LAZY)
     @OrderBy(value = "createDate DESC")
     public List<AmazonListingReview> listingReviews;
 

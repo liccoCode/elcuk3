@@ -65,6 +65,15 @@ public class Ticket extends Model {
         this.createAt = feedback.createDate;
     }
 
+    /**
+     * toggle 加星
+     */
+    public boolean toggleStar() {
+        this.isStart = !this.isStart;
+        this.save();
+        return this.isStart;
+    }
+
     public enum T {
         REVIEW,
         FEEDBACK,
@@ -158,6 +167,11 @@ public class Ticket extends Model {
 
     @Lob
     public String memo = " ";
+
+    /**
+     * 是否加星, 标记为重点产品
+     */
+    public boolean isStart = false;
 
     /**
      * 判断 Ticket 是否超时.

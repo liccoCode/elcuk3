@@ -85,6 +85,25 @@ $ ->
     e.preventDefault()
 
   ## --------------------- Review And Feedback index 页面使用的 js 代码
+  $('.star_it').click (e) ->
+    mask = $('#container')
+    mask.mask("加星中...")
+    o = $(@)
+    $.post('/tickets/toggleStar', tid: @getAttribute('tid'),
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          i = o.find('i')
+          i.removeClass('icon-star').removeClass('icon-star-empty')
+          # 实体星星 与 空心星星
+          if r.message is "1"
+            i.addClass('icon-star')
+          else
+            i.addClass('icon-star-empty')
+        mask.unmask()
+    )
+
   # 添加 comment 功能
   $('#ticket_comment, .ticket_comment').click (e) ->
     mask = $('#container')

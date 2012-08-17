@@ -20,8 +20,13 @@
                     <td><a href="${lst.asinLink()}" target="_blank">${lst.asin}</a></td>
                     <th>Market:</th>
                     <td>${lst.market}</td>
+                #{if lst.product}
                     <th>SKU:</th>
                     <td>${lst.product.sku}</td>
+                #{/if}
+                #{else }
+                    <td colspan="2">非自家 Listing</td>
+                #{/else}
                 </tr>
                 <tr>
                     <th>Title(${lst.title.length()}):</th>
