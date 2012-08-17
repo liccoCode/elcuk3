@@ -102,7 +102,7 @@ public class Products extends Controller {
      * ========== Product ===============
      */
 
-    public static void pNew(Product p) {
+    public static void blank(Product p) {
         if(p == null) p = new Product();
         if(p.isPersistent()) throw new FastRuntimeException("[" + p.sku + "]产品已经存在.");
         List<Category> cats = Category.all().fetch();
@@ -140,7 +140,7 @@ public class Products extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(new Ret(true, "/products/show?sku=71LNTPAD-BPU361"));
+        renderJSON(new Ret(true, "/products/show?sku=" + p.sku));
     }
 
     public static void pRemove(Product p) {
