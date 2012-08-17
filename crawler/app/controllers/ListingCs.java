@@ -92,7 +92,7 @@ public class ListingCs extends Controller {
                 FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/reviews/%s/%s_%s.html", System.getProperty("user.home"), m.name(), asin, page)), html);
 
             Document doc = Jsoup.parse(html);
-            reviews.addAll(AmazonListingReview.parseReviewFromHTML(doc));
+            reviews.addAll(AmazonListingReview.parseReviewFromHTML(doc, page));
             maxPage = AmazonListingReview.maxPage(doc);
             Logger.info("Page: %s / %s, Total Reviews: %s", page, maxPage, reviews.size());
             if(page == maxPage) break;
