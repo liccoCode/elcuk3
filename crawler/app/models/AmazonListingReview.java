@@ -122,7 +122,7 @@ public class AmazonListingReview {
      */
     public String comment = "";
 
-    public static List<AmazonListingReview> parseReviewFromHTML(Document doc) {
+    public static List<AmazonListingReview> parseReviewFromHTML(Document doc, int page) {
         List<AmazonListingReview> reviewList = new ArrayList<AmazonListingReview>();
         Element rtr = doc.select("#productReviews tr").first();
         if(rtr == null) return reviewList;
@@ -138,7 +138,7 @@ public class AmazonListingReview {
         for(Element r : reviews) {
             try {
                 AmazonListingReview review = new AmazonListingReview();
-                review.reviewRank = rank++;
+                review.reviewRank = (page - 1) * 10 + rank++;
                 Element fromListing = r.select("> div.tiny b a").first();
                 if(fromListing != null) {
                     String fixAsin = StringUtils.substringBetween(fromListing.attr("href"), "dp/", "/ref");
