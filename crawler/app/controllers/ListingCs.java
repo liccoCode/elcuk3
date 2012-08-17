@@ -82,7 +82,7 @@ public class ListingCs extends Controller {
         if(m == null) throw new FastRuntimeException("Market is inValid!");
         int page = 1;
         while(true) {
-            String url = m.review(asin, page);
+            String url = m.review(asin, page++);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
             HTTP.clearExpiredCookie();
