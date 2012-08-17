@@ -82,7 +82,7 @@ public class ListingCs extends Controller {
         if(m == null) throw new FastRuntimeException("Market is inValid!");
         int page = 1;
         while(true) {
-            String url = m.review(asin, page++);
+            String url = m.review(asin, page);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
             HTTP.clearExpiredCookie();
@@ -95,7 +95,7 @@ public class ListingCs extends Controller {
             reviews.addAll(AmazonListingReview.parseReviewFromHTML(doc, page));
             maxPage = AmazonListingReview.maxPage(doc);
             Logger.info("Page: %s / %s, Total Reviews: %s", page, maxPage, reviews.size());
-            if(page == maxPage) break;
+            if(page++ == maxPage) break;
         }
         renderJSON(AmazonListingReview.filterReviewWithAsinAndMarket(asin, m, reviews));
     }
