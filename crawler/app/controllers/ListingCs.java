@@ -42,9 +42,9 @@ public class ListingCs extends Controller {
             FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
         // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
         try {
-            renderJSON(new ListingC(m, html).parseFromHTML(ListingC.T.AMAZON));
+            renderJSON(ListingC.parseAmazon(Jsoup.parse(html)));
         } catch(NullPointerException e) {
-            renderJSON(new ListingC(m, e.getMessage()));
+            renderJSON(new ListingC());
         }
     }
 

@@ -130,7 +130,7 @@ public class AmazonListingReview {
         Logger.debug("Fetched Review Size is %s", reviews.size());
 
         String asin = doc.select(".asinReviewsSummary").attr("name");
-        String market = doc.select("#navLogoPrimary").text();
+        String market = doc.select(".navFooterLogoLine img").attr("alt");
 
         for(Element r : reviews) {
             try {
