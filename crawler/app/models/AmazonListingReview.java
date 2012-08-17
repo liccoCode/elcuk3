@@ -115,6 +115,8 @@ public class AmazonListingReview {
      */
     public String vedioPicUrl = "";
 
+    public int reviewRank = 0;
+
     /**
      * 给程序自己使用的, 非人为使用的 Comment; 用来记录变化的
      */
@@ -132,9 +134,11 @@ public class AmazonListingReview {
         String asin = doc.select(".asinReviewsSummary").attr("name");
         String market = doc.select(".navFooterLogoLine img").attr("alt");
 
+        int rank = 1;
         for(Element r : reviews) {
             try {
                 AmazonListingReview review = new AmazonListingReview();
+                review.reviewRank = rank++;
                 Element fromListing = r.select("> div.tiny b a").first();
                 if(fromListing != null) {
                     String fixAsin = StringUtils.substringBetween(fromListing.attr("href"), "dp/", "/ref");

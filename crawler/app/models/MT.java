@@ -58,7 +58,7 @@ public enum MT {
     }
 
     public String review(String asin, int page) {
-        //http://www.amazon.it/product-reviews/{ASIN}?pageNumber={PAGE}&sortBy=bySubmissionDateDescending
+        //http://www.amazon.it/product-reviews/{ASIN}?pageNumber={PAGE}
         switch(this) {
             case AUK:
             case AUS:
@@ -66,7 +66,7 @@ public enum MT {
             case AES:
             case AIT:
             case AFR:
-                return String.format("http://www.%s/product-reviews/%s?pageNumber=%s&sortBy=bySubmissionDateDescending", this.toString(), asin, page);
+                return String.format("http://www.%s/product-reviews/%s?pageNumber=%s", this.toString(), asin, page);
             default:
                 return "";
         }
