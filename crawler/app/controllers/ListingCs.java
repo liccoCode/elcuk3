@@ -76,25 +76,26 @@ public class ListingCs extends Controller {
          * 持续抓取, 直到抓取回来的次数 > 5 或者次数与最大页面一样则不再进行抓取;
          * 抓取过程中解析出得 Review 全部返回.
          */
-        int maxPage = 11;
+        int maxPage = 1;
         Set<AmazonListingReview> reviews = new HashSet<AmazonListingReview>();
         final MT m = MT.val(market);
         if(m == null) throw new FastRuntimeException("Market is inValid!");
-        for(int p = 1; p <= 10; p++) { // 最多 10 页
-            if(p > maxPage) continue;
-            String url = m.review(asin, p);
+        int page = 1;
+        while(true) {
+            String url = m.review(asin, page);
             if(StringUtils.isBlank(url)) continue;
             Logger.info("Fetch [%s]", url);
             HTTP.clearExpiredCookie();
             String html = HTTP.get(url);
 
             if(Play.mode.isDev())
-                FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/reviews/%s/%s_%s.html", System.getProperty("user.home"), m.name(), asin, p)), html);
+                FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/reviews/%s/%s_%s.html", System.getProperty("user.home"), m.name(), asin, page)), html);
 
             Document doc = Jsoup.parse(html);
-            if(maxPage == 11) maxPage = AmazonListingReview.maxPage(doc);
             reviews.addAll(AmazonListingReview.parseReviewFromHTML(doc));
-            Logger.info("Total Page: %s, Total Reviews: %s", maxPage, reviews.size());
+            maxPage = AmazonListingReview.maxPage(doc);
+            Logger.info("Page: %s / %s, Total Reviews: %s", page, maxPage, reviews.size());
+            if(page == maxPage) break;
         }
         renderJSON(AmazonListingReview.filterReviewWithAsinAndMarket(asin, m, reviews));
     }

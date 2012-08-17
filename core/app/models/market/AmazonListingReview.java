@@ -210,6 +210,11 @@ public class AmazonListingReview extends GenericModel {
     public boolean isOwner = false;
 
     /**
+     * Listing 中 Review 自己的排序
+     */
+    public int reviewRank = -1;
+
+    /**
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
      */
     @OneToMany(mappedBy = "ownerReview")
@@ -267,6 +272,7 @@ public class AmazonListingReview extends GenericModel {
         if(newReview.topN != null && newReview.topN >= 0) this.topN = newReview.topN;
         if(StringUtils.isNotBlank(newReview.reviewId)) this.reviewId = newReview.reviewId;
         if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
+        if(newReview.reviewRank > 0) this.reviewRank = newReview.reviewRank;
         // resolved 不做处理
         return this.save();
     }
@@ -470,6 +476,7 @@ public class AmazonListingReview extends GenericModel {
         review.isRealName = rwObj.get("isRealName").getAsBoolean();
         review.isVineVoice = rwObj.get("isVineVoice").getAsBoolean();
         review.topN = rwObj.get("topN").getAsInt();
+        review.reviewRank = rwObj.get("reviewRank").getAsInt();
 
         return review;
     }
