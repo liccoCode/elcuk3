@@ -30,7 +30,7 @@ public class CrawlReviewTest extends UnitTest {
 
     @Test
     public void testNewPage() {
-        List<AmazonListingReview> reviews = AmazonListingReview.parseReviewFromHTML(newPage);
+        List<AmazonListingReview> reviews = AmazonListingReview.parseReviewFromHTML(newPage, 1);
         assertEquals(9, reviews.size());
         System.out.println("NewPage ----------------------------------------");
         System.out.println(new Gson().toJson(reviews.get(0)));
@@ -38,7 +38,7 @@ public class CrawlReviewTest extends UnitTest {
 
     @Test
     public void testOldPage() {
-        List<AmazonListingReview> reviews = AmazonListingReview.parseReviewFromHTML(newPage);
+        List<AmazonListingReview> reviews = AmazonListingReview.parseReviewFromHTML(newPage, 1);
         assertEquals(9, reviews.size());
         System.out.println("OldPage ----------------------------------------");
         System.out.println(new Gson().toJson(reviews.get(0)));

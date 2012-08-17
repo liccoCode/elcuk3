@@ -138,7 +138,6 @@ public class AmazonListingReview {
         for(Element r : reviews) {
             try {
                 AmazonListingReview review = new AmazonListingReview();
-                review.reviewRank = (page - 1) * 10 + rank++;
                 Element fromListing = r.select("> div.tiny b a").first();
                 if(fromListing != null) {
                     String fixAsin = StringUtils.substringBetween(fromListing.attr("href"), "dp/", "/ref");
@@ -195,6 +194,8 @@ public class AmazonListingReview {
                     review.vedioPicUrl = r.select(".flashPlayer").first().select("img").first().attr("src");
                 }
 
+                // 放到最后面添加
+                review.reviewRank = (page - 1) * 10 + rank++;
                 reviewList.add(review);
             } catch(Exception e) {
                 Logger.warn(String.format("%s|%s", e.getClass().getSimpleName(), e.getMessage()));
