@@ -4,7 +4,7 @@ import helper.Extra;
 import helper.Webs;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
@@ -35,18 +35,13 @@ public class ListingC {
 
     public MT market;
 
-    public ListingC(MT market, String html) {
-        this.market = market;
-        this.html = html;
-    }
-
 
     public String listingId;
 
     /**
-     * 解析使用的纯 HTML 代码
+     * 返回用的 html
      */
-    public String html;
+    public String msg;
 
     public String asin;
 
@@ -83,99 +78,86 @@ public class ListingC {
 
     public S state;
 
-    /**
-     * 根据指定的抓取的 ListingC 类型进行解析
-     *
-     * @param type
-     * @return
-     */
-    public ListingC parseFromHTML(T type) {
-        switch(type) {
-            case AMAZON:
-                parseAmazon();
-                break;
-            case EBAY:
-                parseEbay();
-
-        }
-        this.html = null;// 清空 html
-        return this;
+    public ListingC() {
     }
 
-    private ListingC parseAmazon() {
-        // html
-        Element root = Jsoup.parse(html);
+    public ListingC(String msg) {
+        this.msg = msg;
+    }
 
-        if(StringUtils.contains(root.select("title").text(), "404")) {
-            this.state = S.CLOSE;
-            return this;
+    public static ListingC parseAmazon(Document doc) {
+        ListingC lst = new ListingC();
+        if(StringUtils.contains(doc.select("title").text(), "404")) {
+            lst.state = S.CLOSE;
+            return lst;
         }
-        this.state = S.NORMAL;
+        lst.state = S.NORMAL;
 
-        this.asin = root.select("#ASIN").val().toUpperCase();
-        String site = root.select("#navLogoPrimary > span").first().text().toLowerCase();
-        this.listingId = String.format("%s_%s", this.asin, site);
-//        Elements images = root.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
-        Element img = root.select("#prodImage").first();
+        lst.asin = doc.select("#ASIN").val().toUpperCase();
+        String site = doc.select(".navFooterLogoLine img").attr("alt");
+        lst.market = MT.val(site);
+        lst.listingId = String.format("%s_%s", lst.asin, site);
+//        Elements images = doc.select("#PIAltImagesDiv img"); // 这个图片导航 Amazon 是动态生成的...
+        Element img = doc.select("#prodImage").first();
         if(img != null) {
             //http://ecx.images-amazon.com/images/I/41p1LIEYgYL._SL75_AA30_.jpg
             //http://ecx.images-amazon.com/images/I/41p1LIEYgYL._SL500_AA300_.jpg
-            this.picUrls = StringUtils.splitByWholeSeparator(img.attr("src"), "._")[0] + "._SL500_AA300_.jpg";
+            lst.picUrls = StringUtils.splitByWholeSeparator(img.attr("src"), "._")[0] + "._SL500_AA300_.jpg";
         } else {
-            this.picUrls = "";
+            lst.picUrls = "";
         }
 
         // Basic ListingC Infos
-        Element titleEl = root.select("#btAsinTitle").first();
-        this.title = titleEl.text();
-        this.byWho = titleEl.parent().nextElementSibling().text();
+        Element titleEl = doc.select("#btAsinTitle").first();
+        lst.title = titleEl.text();
+        lst.byWho = titleEl.parent().nextElementSibling().text();
 
         // 通过 titleEl 的 id 定位元素后, 再进行 reviewSummary 的定位.
         Element reviewSumery = titleEl.parent().parent().nextElementSibling().select(".asinReviewsSummary").first();
         if(reviewSumery == null) { // 还没有 review 呢
-            this.reviews = 0;
-            this.rating = 0f;
+            lst.reviews = 0;
+            lst.rating = 0f;
         } else {
-            this.reviews = Extra.flt(reviewSumery.nextElementSibling().text()).intValue();
-            this.rating = Extra.flt(reviewSumery.select(".swSprite").first().text());
+            lst.reviews = Extra.flt(reviewSumery.nextElementSibling().text()).intValue();
+            lst.rating = Extra.flt(reviewSumery.select(".swSprite").first().text());
         }
 
-        this.likes = NumberUtils.toInt(root.select(String.format("#amznLike_%s .amazonLikeCount", this.asin)).text());
+        lst.likes = NumberUtils.toInt(doc.select(String.format("#amznLike_%s .amazonLikeCount", lst.asin)).text());
 
-        Element totalOffersEl = root.select("#secondaryUsedAndNew a").first();
-        if(totalOffersEl == null) this.totalOffers = 1;
-        else this.totalOffers = Extra.flt(totalOffersEl.text()).intValue();
+        Element totalOffersEl = doc.select("#secondaryUsedAndNew a").first();
+        if(totalOffersEl == null) lst.totalOffers = 1;
+        else lst.totalOffers = Extra.flt(totalOffersEl.text()).intValue();
 
-        Element middlePd = root.select("#technical_details").first();
-        if(middlePd != null) this.technicalDetails = middlePd.parent().outerHtml();
+        Element middlePd = doc.select("#technical_details").first();
+        if(middlePd != null) lst.technicalDetails = middlePd.parent().outerHtml();
 
-        Element saleRankEl = root.select("#SalesRank").first();
-        if(saleRankEl == null) this.saleRank = 5001;
+        Element saleRankEl = doc.select("#SalesRank").first();
+        if(saleRankEl == null) lst.saleRank = 5001;
         else {
             String comma = StringUtils.replace(saleRankEl.childNode(2).toString(), ",", "");
-            this.saleRank = Extra.flt(StringUtils.replace(comma, ".", "")/*由于排名没有小数点后面, 所以直接去除这个*/).intValue();
+            lst.saleRank = Extra.flt(StringUtils.replace(comma, ".", "")/*由于排名没有小数点后面, 所以直接去除这个*/).intValue();
         }
-        if(this.saleRank <= 0) this.saleRank = 1000; // 如果到达这一步表示其有排名, 但是没有大类别排名, 所以给予一个 1000 的自定义排名
+        if(lst.saleRank <= 0) lst.saleRank = 1000; // 如果到达这一步表示其有排名, 但是没有大类别排名, 所以给予一个 1000 的自定义排名
 
 
-        this.productDescription = root.select("#productDescription").outerHtml();
+        lst.productDescription = doc.select("#productDescription").outerHtml();
 
         // ListingOffers Infos
         List<ListingOfferC> offers = new ArrayList<ListingOfferC>();
 
         // buybox, 并不是一定会有 buybox(异常)
-        Element noFbaPrice = root.select("#pricePlusShippingQty").first();
+        Element noFbaPrice = doc.select("#pricePlusShippingQty").first();
         try {
             ListingOfferC buybox = new ListingOfferC();
             buybox.buybox = true;
             if(noFbaPrice != null) {
-                buybox.price = ListingC.amazonPrice(this.market, noFbaPrice.select(".price").text());
-                buybox.shipprice = ListingC.amazonPrice(this.market, noFbaPrice.select(".plusShippingText").text());
-                buybox.offerId = root.select("#merchantID").val().toUpperCase();
-                buybox.name = root.select("#BBAvailPlusMerchID b").first().text();
+                buybox.price = ListingC.amazonPrice(lst.market, noFbaPrice.select(".price").text());
+                buybox.shipprice = ListingC.amazonPrice(lst.market, noFbaPrice.select(".plusShippingText").text());
+                buybox.offerId = doc.select("#merchantID").val().toUpperCase();
+                buybox.name = doc.select("#BBAvailPlusMerchID b").first().text();
                 buybox.fba = false;
             } else {
-                Element fbaTextLink = root.select("#SSOFpopoverLink").first();
+                Element fbaTextLink = doc.select("#SSOFpopoverLink").first();
                 if(fbaTextLink == null) {
                     /**
                      *  没有 fbalink 还几种情况:
@@ -183,10 +165,10 @@ public class ListingC {
                      *  2. 产品无法销售, Currently unavailable 红色
                      *  3. 产品预期到货, 橙色
                      */
-                    Element tmpEl = root.select(".availGreen").first();
+                    Element tmpEl = doc.select(".availGreen").first();
                     boolean goon = true; // 是否继续处理
                     if(tmpEl == null) {
-                        tmpEl = root.select(".availRed").first();
+                        tmpEl = doc.select(".availRed").first();
                     } else { // availGreen
                         goon = false;
                         buybox.name = tmpEl.parent().select("b").first().text();
@@ -212,8 +194,8 @@ public class ListingC {
                     buybox.fba = true;
                     buybox.name = fbaTextLink.previousElementSibling().text();
                 }
-                buybox.offerId = root.select("#merchantID").val().toUpperCase();
-                buybox.price = ListingC.amazonPrice(this.market, root.select(".priceLarge").text());
+                buybox.offerId = doc.select("#merchantID").val().toUpperCase();
+                buybox.price = ListingC.amazonPrice(lst.market, doc.select(".priceLarge").text());
                 buybox.shipprice = 0;
             }
             offers.add(buybox);
@@ -222,27 +204,27 @@ public class ListingC {
         }
 
         // more sellers
-        Elements moreSellers = root.select("#more-buying-choice-content-div > .mbcOffers tr[id]");
+        Elements moreSellers = doc.select("#more-buying-choice-content-div > .mbcOffers tr[id]");
         for(Element seller : moreSellers) {
             try {
                 ListingOfferC moreSeller = new ListingOfferC();
                 moreSeller.offerId = seller.id().split("_")[2].toUpperCase();
                 moreSeller.name = seller.select(".mbcMerch >td").first().text();
-                moreSeller.price = ListingC.amazonPrice(this.market, seller.select(".mbcPriceCell").text());
+                moreSeller.price = ListingC.amazonPrice(lst.market, seller.select(".mbcPriceCell").text());
                 String shippingText = seller.select(".plusShippingText").text().toUpperCase();
                 if(shippingText.contains("&") || shippingText.contains("FREE")) {
                     moreSeller.fba = true;
                     moreSeller.shipprice = 0f;
                 } else {
-                    moreSeller.shipprice = ListingC.amazonPrice(this.market, shippingText);
+                    moreSeller.shipprice = ListingC.amazonPrice(lst.market, shippingText);
                 }
                 offers.add(moreSeller);
             } catch(Exception e) {
                 Logger.error("Parse More Buyers have some error! [%s]", e.getMessage());
             }
         }
-        this.offers = offers;
-        return this;
+        lst.offers = offers;
+        return lst;
     }
 
     public static Float amazonPrice(MT mt, String priceStr) {
