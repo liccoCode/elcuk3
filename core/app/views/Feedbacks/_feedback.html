@@ -1,5 +1,6 @@
 <table class="table table-condensed table-bordered">
     <tr>
+        <th>#</th>
         <th>UserId</th>
         <th>Create</th>
         <th>LastMsg</th>
@@ -13,6 +14,7 @@
 #{list items:tickets, as:'t'}
     #{set f:t.feedback/}
     <tr>
+        <td>${t.id}</td>
         <td>
             <a href="#" target="_blank"><i class="icon-comment"></i> ${f.orderr.userid}</a>
         </td>
@@ -62,7 +64,7 @@
         <td style="background:${'#' + f.score.color()}">${f.score}</td>
     </tr>
     <tr id="toggle_${t.id}" style="display:none;">
-        <td colspan="7">
+        <td colspan="9">
             <ul class="nav nav-tabs" style="margin-bottom:3px;">
                 <li class="active"><a href="#feedback_${t.id}" data-toggle="tab">Review</a></li>
                 <li><a href="#close_${t.id}" data-toggle="tab">Close</a></li>

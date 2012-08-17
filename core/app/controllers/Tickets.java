@@ -92,6 +92,12 @@ public class Tickets extends Controller {
         renderJSON(J.G(ticket.close(reason)));
     }
 
+    public static void toggleStar(long tid) {
+        Ticket ticket = Ticket.findById(tid);
+        boolean isStart = ticket.toggleStar();
+        renderJSON(new Ret(true, isStart ? "1" : "0"));
+    }
+
     /**
      * 通过 TicketId 向 osTicket 更新
      *
