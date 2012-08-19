@@ -3,6 +3,7 @@ package jobs;
 import helper.Dates;
 import models.market.Account;
 import models.market.JobRequest;
+import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -69,7 +70,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
          * 1. 将需要更新的数据从 csv 文件中提取出来
          * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
          */
-        Set<Orderr> orderSet = AmazonOrderUpdateJob.updateOrderXML(new File(jobRequest.path));
+        Set<Orderr> orderSet = AmazonOrderUpdateJob.updateOrderXML(new File(jobRequest.path), jobRequest.account.type);
         for(Orderr order : orderSet) {
             Orderr managed = Orderr.findById(order.orderId);
             if(managed == null) {
@@ -92,7 +93,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
      * @param file
      * @return
      */
-    public static Set<Orderr> updateOrderXML(File file) {
+    public static Set<Orderr> updateOrderXML(File file, M market) {
         List<String> lines = IO.readLines(file, "UTF-8");
         Set<Orderr> orderrs = new HashSet<Orderr>();
         lines.remove(0); //删除第一行标题
@@ -106,16 +107,19 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 }
                 Orderr order = new Orderr();
                 order.orderId = vals[0];
-                order.paymentDate = new DateTime(Dates.parseXMLGregorianDate(vals[7]), Dates.timeZone(order.market)).toDate();
-                order.shipDate = new DateTime(Dates.parseXMLGregorianDate(vals[8]), Dates.timeZone(order.market)).toDate();
+                order.paymentDate = new DateTime(Dates.parseXMLGregorianDate(vals[7]), Dates.timeZone(market)).toDate();
+                order.shipDate = new DateTime(Dates.parseXMLGregorianDate(vals[8]), Dates.timeZone(market)).toDate();
                 order.shippingService = vals[42];
                 if(StringUtils.isNotBlank(vals[43])) {
                     order.trackNo = vals[43];
                     order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
                 }
+                /**
+                 * 这里 Amazon 给的数据并不完整, 需要额外从 OrderInfoFetch 中补全.
+                 order.phone = vals[12]; 这个在这份文档中始终没有出现过
+                 */
                 order.email = vals[10];
                 order.buyer = vals[11];
-                order.phone = vals[12];
                 order.shipLevel = vals[23];
                 order.reciver = vals[24];
                 order.address = vals[25];

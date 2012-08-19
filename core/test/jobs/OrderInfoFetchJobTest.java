@@ -9,6 +9,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 import play.Logger;
+import play.Play;
+import play.template2.IO;
 import play.test.UnitTest;
 
 import java.io.File;
@@ -34,7 +36,7 @@ public class OrderInfoFetchJobTest extends UnitTest {
         Logger.info("OrderInfo(UserId) [%s].", url);
         String html = HTTP.get(url);
         FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-data/" + ord.orderId + "_email.html"), html);
-        OrderInfoFetchJob.orderDetailUserIdAndEmail(ord, html);
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html);
     }
 
     //    @Test
@@ -51,13 +53,13 @@ public class OrderInfoFetchJobTest extends UnitTest {
         String html = FileUtils.readFileToString(new File("/Users/wyattpan/elcuk2-data/203-6007669-8343509_email.html"));
         Orderr ord = Orderr.findById("203-6007669-8343509");
 
-        OrderInfoFetchJob.orderDetailUserIdAndEmail(ord, html);
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html);
         assertEquals("547hqxp7bxk5tzk@marketplace.amazon.co.uk", ord.email);
         assertEquals("A1BUFNIMGMLXIU", ord.userid);
         ord.save();
     }
 
-    @Test
+    //    @Test
     public void testOrderInfoRefunded() throws IOException {
 //        Account.<Account>findById(1l).loginAmazonSellerCenter();
         Orderr ord = Orderr.findById("203-5553740-1399515");
@@ -67,7 +69,14 @@ public class OrderInfoFetchJobTest extends UnitTest {
 //        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-data/" + ord.orderId + "_refuned.html"), html);
         Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/203-5553740-1399515_refuned.html"), "UTF-8");
 
-        OrderInfoFetchJob.orderDetailUserIdAndEmail(ord, doc.outerHtml());
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, doc.outerHtml());
 
+    }
+
+    @Test
+    public void parseOrderInfoPhoneNumberAndSoOn() {
+        Orderr ord = Orderr.findById("028-1442005-1643527");
+        Document doc = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/028-1442005-1643527.html")));
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, doc.outerHtml());
     }
 }

@@ -38,7 +38,7 @@ public class OrderInfoFetchJob extends Job {
                     continue;
                 }
                 String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
-                OrderInfoFetchJob.orderDetailUserIdAndEmail(ord, html).save();
+                OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html).save();
             } catch(Exception e) {
                 ord.crawlUpdateTimes++;
                 ord.save();
@@ -61,7 +61,7 @@ public class OrderInfoFetchJob extends Job {
      * 1. userId
      * 2. email
      */
-    public static Orderr orderDetailUserIdAndEmail(Orderr order, String html) {
+    public static Orderr orderDetailUserIdAndEmailAndPhone(Orderr order, String html) {
         Document doc = Jsoup.parse(html);
         order.crawlUpdateTimes++;
         Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
@@ -85,6 +85,10 @@ public class OrderInfoFetchJob extends Job {
                 order.userid = StringUtils.split(pa, "=")[1].trim();
                 break;
             }
+
+            // Phone
+            if(StringUtils.isBlank(order.phone))
+                order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
         }
         return order;
     }
