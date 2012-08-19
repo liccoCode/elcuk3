@@ -1,4 +1,4 @@
-<table class="table table-condensed">
+<table class="table table-condensed table-bordered">
     <tr>
         <th>Family</th>
     </tr>
@@ -7,4 +7,18 @@
         <td>${f.family}</td>
     </tr>
 #{/list}
+    <tr>
+        <td>
+            <div class="row-fluid">
+                <div class="span8">
+                    <input type="hidden" name="f.category.categoryId" value="${c.categoryId}">
+                    <input type="hidden" name="f.brand.name" value="${b.name}">
+                    <input type="text" name="f.family" value="${c.categoryId}${b.name}">
+                </div>
+                <div class="span4">
+                    <button id="add_family" class="btn btn-primary">添加 Family</button>
+                </div>
+            </div>
+        </td>
+    </tr>
 </table>

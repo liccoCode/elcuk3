@@ -64,12 +64,24 @@ $.checkBox = function(){
 };
 
 /**
+ * 这个是点 row 元素拥有自己的 click 事件的情况下使用.
  * rowsSelector: 需要绑定删除 active 的元素
  * activeObj: 需要选中 jQuery 元素
  */
 $.tableRowClickActive = function(rowsSelector, activeObj){
     $(rowsSelector).removeClass('active');
     activeObj.addClass('active');
+};
+
+/**
+ * 这个在 row 元素无自己的 click 的情况下使用
+ * @param rowsSelector
+ */
+$.tableRowSelect = function(rowsSelector){
+    $(rowsSelector).click(function(){
+        $(rowsSelector).removeClass('active');
+        $(this).addClass('active');
+    });
 };
 
 $.DateUtil = {

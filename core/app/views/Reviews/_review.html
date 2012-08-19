@@ -104,7 +104,7 @@
 
                             <p>${r.review}</p>
                             <button tid="${t.id}" class="star_it btn btn-primary">
-                                <i class="icon-star-empty"></i>
+                                <i class="${t.isStart ? 'icon-star' : 'icon-star-empty'}"></i>
                             </button>
                         </div>
 

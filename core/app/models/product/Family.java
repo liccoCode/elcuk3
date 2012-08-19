@@ -2,7 +2,9 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import helper.Caches;
+import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -34,6 +36,29 @@ public class Family extends GenericModel {
     @PrePersist
     private void prePersist() {
         this.family = this.family.toUpperCase();
+    }
+
+    /**
+     * 检查并且创建
+     */
+    public Family checkAndCreate() {
+        if(this.brand == null || !this.brand.isPersistent()) throw new FastRuntimeException("没有指定 Brand!");
+        if(this.category == null || !this.category.isPersistent()) throw new FastRuntimeException("没有指定 Category!");
+        this.checkFamilyFormatValid();
+        return this.save();
+    }
+
+    /**
+     * 检查这个 Family 的名称是否合法
+     */
+    public void checkFamilyFormatValid() {
+        if(this.family.equals(String.format("%s%s", this.category.categoryId, this.brand.name)))
+            throw new FastRuntimeException("Family 还需要其他组成部分.");
+        if(StringUtils.indexOf(this.family, this.category.categoryId) != 0)
+            throw new FastRuntimeException("Family 必须以 " + this.category.categoryId + " 开头!");
+        String emptyCategory = StringUtils.replaceOnce(this.family, this.category.categoryId, "");
+        if(StringUtils.indexOf(emptyCategory, this.brand.name) != 0)
+            throw new FastRuntimeException("Family 中的 Brand " + this.brand.name + " 必须紧接着 Category ");
     }
 
     @Override
