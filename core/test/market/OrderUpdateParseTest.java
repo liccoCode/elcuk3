@@ -3,11 +3,12 @@ package market;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
 import models.market.JobRequest;
+import models.market.M;
 import models.market.Orderr;
 import org.junit.Test;
+import play.Play;
 import play.test.UnitTest;
 
-import java.io.File;
 import java.util.Set;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Set;
 public class OrderUpdateParseTest extends UnitTest {
     @Test
     public void testParse() {
-        Set<Orderr> orders = AmazonOrderUpdateJob.updateOrderXML(new File("/Users/wyattpan/elcuk2-logs/23/10495025944.csv"));
+        Set<Orderr> orders = AmazonOrderUpdateJob.updateOrderXML(Play.getFile("test/html/13934056984.csv"), M.AMAZON_DE);
         for(Orderr or : orders) {
             System.out.println(or);
         }
