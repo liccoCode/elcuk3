@@ -4,6 +4,7 @@ import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
 import models.view.Ret;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -24,8 +25,11 @@ public class Familys extends Controller {
 
     public static void create(Family f) {
         //TODO Family 的格式还需要进行验证
-        if(f != null && f.isPersistent()) renderJSON(new Ret("Family 已经存在, 不需要添加."));
-        f.save();
+        validation.valid(f);
+        if(Validation.hasErrors()) {
+            renderJSON(new Ret("Family 已经存在, 不需要添加."));
+        }
+        f.checkAndCreate();
         renderJSON(new Ret());
     }
 
@@ -45,13 +49,13 @@ public class Familys extends Controller {
         if(c != null && c.isPersistent()) brands = c.brands;
         else brands = Brand.all().fetch();
 
-        render(brands);
+        render(brands, c);
     }
 
     public static void fam_div(Brand b, Category c) {
         List<Family> fmys = new ArrayList<Family>();
         if(b != null && b.isPersistent() && c != null && c.isPersistent())
             fmys = Family.bcRelateFamily(b, c);
-        render(fmys);
+        render(fmys, b, c);
     }
 }

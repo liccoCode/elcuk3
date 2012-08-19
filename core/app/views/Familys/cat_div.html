@@ -1,12 +1,15 @@
-<table class="table table-condensed">
+<table class="table table-condensed table-bordered">
     <tr>
         <th>CategoryId</th>
         <th>Name</th>
     </tr>
 #{list items:cats, as:'c'}
-    <tr cid='${c.categoryId}'>
+    <tr cid='${c.categoryId}' style="cursor:pointer;">
         <td>${c.categoryId}</td>
-        <td>${c.name}</td>
+        <td>
+        ${c.name}
+            <span class="pull-right badge badge-info">${c.brands.size()}</span>
+        </td>
     </tr>
 #{/list}
 </table>
