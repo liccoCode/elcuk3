@@ -4,7 +4,8 @@ require "gmail"
 
 #7DEE6AF75CC14D852D7DFF8E3156E20E (2.2.4, ruby 1.9.3 (2012-02-16) [i686-linux])
 clnt = HTTPClient.new(:agent_name => 'E1A28384D00F8AB3E8C3582E33D79204')
-state = clnt.get('http://t.easyacceu.com/api/cron.php').status
+state = clnt.get('http://t.easya.cc/api/cron.php').status
+clnt.receive_timeout = 60000
 
 exit if state == 200
 
