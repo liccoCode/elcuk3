@@ -1,8 +1,9 @@
 # 自己定义的各种 capistrano 命令
 
-h_r="root@r.easyacceu.com"
-h_e="root@e.easyacceu.com"
-h_t="root@t.easyacceu.com"
+base = "easya.cc"
+h_r="root@r.#{base}"
+h_e="root@e.#{base}"
+h_t="root@t.#{base}"
 
 lobal_backups="/Volumes/wyatt/backups"
 

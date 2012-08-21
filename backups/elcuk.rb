@@ -45,4 +45,17 @@ Backup::Model.new(:elcuk, 'Description for elcuk') do
     local.keep       = 10
   end
 
+  sync_with RSync::Push do |rsync|
+    rsync.ip = "bak.easya.cc"
+    #rsync.port = 22
+    rsync.username = "root"
+    rsync.path = "~/backups/"
+    rsync.mirror = true
+    rsync.compress = true
+
+    rsync.directories do |dir|
+      dir.add "~/backups/elcuk"
+    end
+  end
+
 end
