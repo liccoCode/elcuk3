@@ -77,6 +77,22 @@ public class OrderInfoFetchJobTest extends UnitTest {
     public void parseOrderInfoPhoneNumberAndSoOn() {
         Orderr ord = Orderr.findById("028-1442005-1643527");
         Document doc = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/028-1442005-1643527.html")));
+        ord.phone = null;
+        ord.email = null;
+        ord.userid = null;
+
         OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, doc.outerHtml());
+        assertEquals("06509433121", ord.phone);
+        assertEquals("A1MNR3WFYAOICM", ord.userid);
+        assertEquals("zgzn60ngyrqpg9w@marketplace.amazon.de", ord.email);
+        assertEquals("Andrea\r\n" +
+                "Riegler\r\n" +
+                "Binderlache 3\r\n" +
+                "Stockerau\r\n" +
+                "N&Ouml;\r\n" +
+                "2000\r\n" +
+                "Austria", ord.address1);
+        assertEquals(Orderr.S.SHIPPED, ord.state);
+        System.out.println("Phone, UserId, Email, Address1 all are success!");
     }
 }

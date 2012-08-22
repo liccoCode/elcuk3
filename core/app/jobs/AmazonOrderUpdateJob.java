@@ -122,8 +122,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 order.buyer = vals[11];
                 order.shipLevel = vals[23];
                 order.reciver = vals[24];
-                order.address = vals[25];
-                order.address1 = (vals[26] + " " + vals[27]).trim();
+                order.address = vals[25] + "\r\n" + (vals[26] + " " + vals[27]).trim();
                 order.city = vals[28];
                 order.province = vals[29];
                 order.postalCode = vals[30];

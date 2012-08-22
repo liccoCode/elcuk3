@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -29,8 +30,7 @@ public class OrderInfoFetchJob extends Job {
          */
         int size = 10;
         if(Play.mode.isProd()) size = 30; //调整成 30 个订单一次, 每 10 分钟一次;
-        List<Orderr> orders = Orderr.find("crawlUpdateTimes<4 AND (state=? OR state=?) AND (userid is null OR userid='') order by createDate",
-                Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
+        List<Orderr> orders = needCompleteInfoOrders(size);
         for(Orderr ord : orders) {
             try {
                 if(ord.crawlUpdateTimes > 4) {
@@ -47,6 +47,17 @@ public class OrderInfoFetchJob extends Job {
         }
     }
 
+    public static List<Orderr> needCompleteInfoOrders(int size) {
+        /**
+         * 1. userid, email, phone, address1 的检查
+         * 2. crawlUpdateTimes 抓取次数不能太多的检查
+         * 3. 从最老的开始处理.
+         * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
+         */
+        return Orderr.find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null OR address1 is null) order by createDate",
+                Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
+    }
+
     public static String fetchOrderDetailHtml(Orderr ord) {
         String url = ord.account.type.orderDetail(ord.orderId);
         Logger.info("OrderInfo(UserId) [%s].", url);
@@ -58,8 +69,11 @@ public class OrderInfoFetchJob extends Job {
 
     /**
      * 通过 HTTP 方式到 Amazon 后台进行订单信息的补充:
-     * 1. userId
-     * 2. email
+     * 1. check order state
+     * 2. userId
+     * 3. email
+     * 4. phone
+     * 5. address1
      */
     public static Orderr orderDetailUserIdAndEmailAndPhone(Orderr order, String html) {
         Document doc = Jsoup.parse(html);
@@ -71,10 +85,22 @@ public class OrderInfoFetchJob extends Job {
             order.state = Orderr.S.CANCEL;
             order.memo = lin.text();
         } else {
+            Elements smallers = doc.select(".smaller");
+            for(Element smaller : smallers) {
+                String text = smaller.text().toLowerCase();
+                if(StringUtils.contains(text, "erstattung"/*DE*/) || StringUtils.contains(text, "refund"/*uk*/)) {
+                    Logger.info("Found Order %s is from %s to %s", order.orderId, order.state, Orderr.S.REFUNDED);
+                    order.state = Orderr.S.REFUNDED;
+                }
+            }
+        }
+
+        if(order.state == Orderr.S.SHIPPED || order.state == Orderr.S.REFUNDED) {
             // Email
             if(StringUtils.isBlank(order.email) || !StringUtils.contains(order.email, "@")) {
                 String tmp = StringUtils.remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(), "\"");
                 order.email = StringUtils.remove(tmp, ",");
+                if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
             }
 
             // buyerId
@@ -89,6 +115,14 @@ public class OrderInfoFetchJob extends Job {
             // Phone
             if(StringUtils.isBlank(order.phone))
                 order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
+            if(StringUtils.isNotBlank(order.phone)) order.phone = order.phone.trim();
+
+            // Address1 (重复地址, 作为参数)
+            if(StringUtils.isBlank(order.address1))
+                order.address1 = StringUtils.substringBetween(html, "<strong>Shipping Address</strong>", "Phone");
+            if(StringUtils.isNotBlank(order.address1))
+                order.address1 = StringUtils.replace(order.address1, "<br />", "\r\n").trim();
+
         }
         return order;
     }
