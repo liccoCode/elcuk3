@@ -447,13 +447,13 @@ public class Product extends GenericModel {
         if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
             return jsonObj.get("asin").getAsString();
         else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
-            FLog.fileLog(String.format("%s.%s.times_%s.js", selling.sellingId, selling.account.id, times), jsonStr, FLog.T.SALES);
-            if(times > 3)
+            FLog.fileLog(String.format("%s.%s.times_%s.js", selling.merchantSKU, selling.account.id, times), jsonStr, FLog.T.SALES);
+            if(times > 15)
                 throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
-            Thread.sleep(2500);
+            Thread.sleep(5000);
             return ajaxNewAsin(selling, fetchNewAsinParam, ++times);
         } else {
-            FLog.fileLog(String.format("%s.%s.js", selling.sellingId, selling.account.id), jsonStr, FLog.T.SALES);
+            FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id), jsonStr, FLog.T.SALES);
             throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
         }
     }
