@@ -4,11 +4,14 @@ import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 订单页面的搜索 POJO, 不进入数据库, 仅仅作为页面的传值绑定
@@ -17,6 +20,7 @@ import java.util.List;
  * Time: 6:59 PM
  */
 public class OrderPOST {
+    private static Pattern ORDER_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
 
     public Account account;
 
@@ -98,21 +102,28 @@ public class OrderPOST {
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
         if(StringUtils.isNotBlank(this.search)) {
-            this.search = StringUtils.replace(this.search, "'", "''");
-            sbd.append("AND (orderId LIKE '%").append(this.search).append("%' OR ").
-                    append("address LIKE '%").append(this.search).append("%' OR ").
-                    append("address1 LIKE '%").append(this.search).append("%' OR ").
-                    append("buyer LIKE '%").append(this.search).append("%' OR ").
-                    append("city LIKE '%").append(this.search).append("%' OR ").
-                    append("country LIKE '%").append(this.search).append("%' OR ").
-                    append("email LIKE '%").append(this.search).append("%' OR ").
-                    append("postalCode LIKE '%").append(this.search).append("%' OR ").
-                    append("phone LIKE '%").append(this.search).append("%' OR ").
-                    append("province LIKE '%").append(this.search).append("%' OR ").
-                    append("reciver LIKE '%").append(this.search).append("%' OR ").
-                    append("memo LIKE '%").append(this.search).append("%' OR ").
-                    append("userid LIKE '%").append(this.search).append("%' OR ").
-                    append("trackNo LIKE '%").append(this.search).append("%') ");
+            // 支持 +23 这样搜索订单的购买数大于某个值
+            Matcher matcher = ORDER_NUM_PATTERN.matcher(this.search);
+            if(matcher.matches()) {
+                int orderUnbers = NumberUtils.toInt(matcher.group(1), 1);
+                sbd.append("AND (select count(oi.quantity) from OrderItem oi where oi.order.orderId=orderId)>").append(orderUnbers).append(" ");
+            } else {
+                this.search = StringUtils.replace(this.search, "'", "''");
+                sbd.append("AND (orderId LIKE '%").append(this.search).append("%' OR ").
+                        append("address LIKE '%").append(this.search).append("%' OR ").
+                        append("address1 LIKE '%").append(this.search).append("%' OR ").
+                        append("buyer LIKE '%").append(this.search).append("%' OR ").
+                        append("city LIKE '%").append(this.search).append("%' OR ").
+                        append("country LIKE '%").append(this.search).append("%' OR ").
+                        append("email LIKE '%").append(this.search).append("%' OR ").
+                        append("postalCode LIKE '%").append(this.search).append("%' OR ").
+                        append("phone LIKE '%").append(this.search).append("%' OR ").
+                        append("province LIKE '%").append(this.search).append("%' OR ").
+                        append("reciver LIKE '%").append(this.search).append("%' OR ").
+                        append("memo LIKE '%").append(this.search).append("%' OR ").
+                        append("userid LIKE '%").append(this.search).append("%' OR ").
+                        append("trackNo LIKE '%").append(this.search).append("%') ");
+            }
         }
 
         if(this.orderBy != null) {

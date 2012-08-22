@@ -2,7 +2,7 @@
     <th>Market</th>
     <th>Address1</th>
     <th>Country</th>
-    <th>OrderId</th>
+    <th rel="popover" title="数字是什么?" content="(a | b), a: 订单抓取的次数. b: 订单重销售产品的个数."><i class="icon-question-sign"></i> OrderId</th>
     <th>Buyer</th>
     <th>Phone</th>
     <th>Email</th>
@@ -15,7 +15,11 @@
     <td>${ord.market.toString()}</td>
     <td>${ord.address1.raw()}</td>
     <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
-    <td><a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId} (${ord.crawlUpdateTimes})</a></td>
+    <td>
+        <a target="_blank" href=@{Orders.show(ord.orderId)}>
+        ${ord.orderId} (${ord.crawlUpdateTimes} | ${ord.itemCount()})
+        </a>
+    </td>
     <td>${ord.buyer}</td>
     <td>${ord.phone}</td>
     <td>

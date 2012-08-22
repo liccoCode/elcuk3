@@ -1,8 +1,15 @@
 package hibernate;
 
+import helper.DBUtils;
+import models.market.Orderr;
 import org.junit.Test;
+import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.test.UnitTest;
+import play.utils.FastRuntimeException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -15,4 +22,35 @@ public class SQLQueryTest extends UnitTest {
     public void testSQLQuery() {
         System.out.println(new SqlSelect().select("createDate, price, quantity, currency, usdCost").from("OrderItem").limit(20).toString());
     }
+
+    @Test
+    public void testDBUtils() {
+        String orderId = "026-0051051-3786714";
+        Map<String, Object> row = DBUtils.row("select * from Orderr where orderId=?", orderId);
+        assertEquals(orderId, row.get("orderId"));
+        assertEquals("cl64np52w7hk170@marketplace.amazon.co.uk", row.get("email"));
+        assertEquals("AMAZON_UK", row.get("market"));
+        assertEquals("A2CSHTENJAB293", row.get("userid"));
+
+
+        try {
+            DBUtils.row("select * from Orderr");
+        } catch(FastRuntimeException e) {
+            assertEquals("play.utils.FastRuntimeException: Only Deal one Row!", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testDBUtilsRows() {
+        List<Map<String, Object>> rows = DBUtils.rows("select * from Orderr limit 3");
+        assertEquals(3, rows.size());
+        System.out.println(rows);
+    }
+
+    @Test
+    public void testOrderItemCount() {
+        Orderr order = Orderr.findById("026-0210035-5030756");
+        assertEquals(2l, order.itemCount().longValue());
+    }
+
 }

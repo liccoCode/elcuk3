@@ -2,6 +2,7 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import helper.Cached;
+import helper.DBUtils;
 import helper.Dates;
 import models.finance.SaleFee;
 import org.apache.commons.lang.StringUtils;
@@ -301,6 +302,15 @@ public class Orderr extends GenericModel {
 
     public void setPostalCode(String postalCode1) {
         if(postalCode1 != null) this.postalCode = postalCode1.toUpperCase();
+    }
+
+    /**
+     * 此订单总共卖出的产品数量
+     *
+     * @return
+     */
+    public Long itemCount() {
+        return (Long) DBUtils.row("select count(quantity) as qty from OrderItem where order_orderId=?", this.orderId).get("qty");
     }
 
     /**
