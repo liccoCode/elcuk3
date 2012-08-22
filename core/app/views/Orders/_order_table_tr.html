@@ -6,8 +6,8 @@
     <th>Buyer</th>
     <th>Phone</th>
     <th>Email</th>
-    <th>CreateDate</th>
-    <th>PaymentDate</th>
+    <th>Create</th>
+    <th>Payment</th>
     <th>State</th>
 </tr>
 #{list items:pi.items, as:'ord'}
@@ -15,28 +15,18 @@
     <td>${ord.market.toString()}</td>
     <td>${(ord.address == null ? '' : ord.address) + "  " + (ord.address1 == null ? '' : ord.address1)}</td>
     <td>${(ord.country == null ? '' : ord.country) + " " + (ord.city == null ? '' : ord.city) + " " + (ord.province == null ? '' : ord.province)}</td>
-    <td><a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId}</a></td>
+    <td><a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId} (${ord.crawlUpdateTimes})</a></td>
     <td>${ord.buyer}</td>
     <td>${ord.phone}</td>
     <td>
-        <a href="#" rel="tooltip" data-original-title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
+        <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
     </td>
-    <td>${ord.createDate.format("yyyy-MM-dd HH:mm:ss")}</td>
-    <td>${ord.paymentDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
-    #{if ord.state == models.market.Orderr.S.PENDING}
-        <td style="color:#4169e1;">${ord.state}</td>
-    #{/if}
-    #{elseif ord.state == models.market.Orderr.S.PAYMENT}
-        <td style="color:orange;">${ord.state}</td>
-    #{/elseif}
-    #{elseif ord.state == models.market.Orderr.S.CANCEL}
-        <td style="color:red;">${ord.state}</td>
-    #{/elseif}
-    #{elseif ord.state.ordinal() >= models.market.Orderr.S.SHIPPED.ordinal()}
-        <td style="color:green;">${ord.state}</td>
-    #{/elseif}
-    #{else }
-        <td>${ord.state}</td>
-    #{/else}
+    <td>
+        <a href="javascript:void(0)" rel="tooltip" title="${ord.createDate?.datetime()}">${ord.createDate?.since()}</a>
+    </td>
+    <td>
+        <a href="javascript:void(0)" rel="tooltip" title="${ord.paymentDate?.datetime()}">${ord.paymentDate?.since()}</a>
+    </td>
+    <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
 </tr>
 #{/list}

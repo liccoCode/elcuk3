@@ -2,6 +2,7 @@ package ext;
 
 import models.market.AmazonListingReview;
 import models.market.Feedback;
+import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import play.templates.JavaExtensions;
 
@@ -100,6 +101,24 @@ public class ReviewHelper extends JavaExtensions {
             return "AC96D4";
         else
             return "B38ACE";
+    }
+
+    public static String color(Orderr.S orderState) {
+        switch(orderState) {
+            case PENDING:
+                return "4169e1";
+            case PAYMENT:
+                return "FE8322";
+            case CANCEL:
+            case REFUNDED:
+            case RETURNNEW:
+                return "FF0601";
+            case SHIPPED:
+                return "38B800";
+            default:
+                return "000";
+        }
+
     }
 
     /**

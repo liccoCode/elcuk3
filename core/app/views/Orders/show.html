@@ -64,23 +64,7 @@
         </tr>
         <tr>
             <td>State:</td>
-            #{if ord.state == models.market.Orderr.S.PENDING}
-                <td style="color:#0074CC;">${ord.state}</td>
-            #{/if}
-            #{elseif ord.state == models.market.Orderr.S.PAYMENT}
-                <td style="color:#49AFCD;">${ord.state}</td>
-            #{/elseif}
-            #{elseif ord.state == models.market.Orderr.S.SHIPPED}
-                <td style="color:#5BB75B;">${ord.state}</td>
-            #{/elseif}
-            #{elseif ord.state == models.market.Orderr.S.REFUNDED ||
-            ord.state == models.market.Orderr.S.RETURNNEW ||
-            ord.state == models.market.Orderr.S.CANCEL}
-                <td style="color:red;">${ord.state}</td>
-            #{/elseif}
-            #{else }
-                <td>${ord.state}</td>
-            #{/else}
+            <td style="color:${'#' + ord.state.color()}}">${ord.state}</td>
             <td>TotalAmount:</td>
             <td>${ord.totalAmount}</td>
             <td>TrackNo:</td>
@@ -137,7 +121,7 @@
             <tr>
                 <td>${f.cost} ${f.currency.name()}</td>
                 <td>${f.usdCost.format('#.###')} USD</td>
-                <td>${f.date.format('yyyy-MM-dd')}</td>
+                <td>${f.date.date()}</td>
                 <td>${f.type.name}</td>
                 <td>${f.qty}</td>
             </tr>
