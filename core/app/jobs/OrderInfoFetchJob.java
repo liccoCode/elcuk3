@@ -120,8 +120,10 @@ public class OrderInfoFetchJob extends Job {
             // Address1 (重复地址, 作为参数)
             if(StringUtils.isBlank(order.address1))
                 order.address1 = StringUtils.substringBetween(html, "<strong>Shipping Address</strong>", "Phone");
-            if(StringUtils.isNotBlank(order.address1))
+            if(StringUtils.isNotBlank(order.address1)) {
                 order.address1 = StringUtils.replace(order.address1, "<br />", "\r\n").trim();
+                order.address1 = StringUtils.replace(order.address1, "<br>", "\r\n").trim();
+            }
 
         }
         return order;
