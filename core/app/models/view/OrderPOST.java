@@ -1,5 +1,6 @@
 package models.view;
 
+import helper.Dates;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
@@ -94,7 +95,10 @@ public class OrderPOST {
             params.add(this.state);
         }
 
-        if(this.from != null && this.to != null && this.to.getTime() > this.from.getTime()) {
+
+        if(this.from != null && this.to != null) {
+            this.from = Dates.morning(this.from);
+            this.to = Dates.night(this.to);
             sbd.append("AND createDate>=? AND createDate<=? ");
             params.add(this.from);
             params.add(this.to);
@@ -106,7 +110,7 @@ public class OrderPOST {
             Matcher matcher = ORDER_NUM_PATTERN.matcher(this.search);
             if(matcher.matches()) {
                 int orderUnbers = NumberUtils.toInt(matcher.group(1), 1);
-                sbd.append("AND (select count(oi.quantity) from OrderItem oi where oi.order.orderId=orderId)>").append(orderUnbers).append(" ");
+                sbd.append("AND (select sum(oi.quantity) from OrderItem oi where oi.order.orderId=orderId)>").append(orderUnbers).append(" ");
             } else {
                 this.search = StringUtils.replace(this.search, "'", "''");
                 sbd.append("AND (orderId LIKE '%").append(this.search).append("%' OR ").

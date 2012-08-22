@@ -16,6 +16,7 @@ import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -310,7 +311,7 @@ public class Orderr extends GenericModel {
      * @return
      */
     public Long itemCount() {
-        return (Long) DBUtils.row("select count(quantity) as qty from OrderItem where order_orderId=?", this.orderId).get("qty");
+        return ((BigDecimal) DBUtils.row("select sum(quantity) as qty from OrderItem where order_orderId=?", this.orderId).get("qty")).longValue();
     }
 
     /**

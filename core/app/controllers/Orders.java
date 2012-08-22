@@ -45,7 +45,6 @@ public class Orders extends Controller {
      *
      * @param p
      */
-    @CacheFor("5mn")
     public static void search(OrderPOST p) {
         List<Orderr> orders = p.query();
         Long count = p.count();

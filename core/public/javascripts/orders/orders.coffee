@@ -30,7 +30,7 @@ $ ->
 
 
   $('#o_search').keyup (e) ->
-    do_search($('a[day=30]'), 1) if e.keyCode is 13
+    do_search($('a[day]:eq(2)'), 1) if e.keyCode is 13
 
   # 搜索按钮组
   $('#search_btns a[class]').click ->
