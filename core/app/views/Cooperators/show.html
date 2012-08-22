@@ -1,21 +1,13 @@
-#{if full}
-    #{extends 'main.html'/}
-    #{set title:coper.fullName /}
-    #{set 'moreScripts'}
-        #{script 'jquery.validate.min.js'/}
-    #{/set}
-#{/if}
-
 #{script 'cooperators/show.coffee'/}
 
 #{if flash.success}
-<div class="row">
+<div class="row-fluid">
     <div class="alert alert-success">${flash.success}</div>
 </div>
 #{/if}
 
 <!-- Cooperator 自己的信息 -->
-<div class="row">
+<div class="row-fluid">
     <form id="cooperator" cid="${coper.id}">
         <label class="label label-info">合作者信息</label>
         <table class="table table-condensed table-bordered">
@@ -66,7 +58,7 @@
 
 <!-- 其关联的产品的信息 -->
 #{if coper.type == models.procure.Cooperator.T.SUPPLIER}
-<div class="row" style="min-height:200px">
+<div class="row-fluid" style="min-height:200px">
     <label class="label label-info">${coper.fullName} 生产的产品</label>
     <table id="cooperItemList" class="table table-condensed table-bordered">
         <tr>

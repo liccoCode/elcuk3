@@ -35,7 +35,7 @@
         </td>
         <th>Acc:</th>
         <td>
-            <select name="s.account.id" size="1">
+            <select name="s.account.id">
             #{list items:accs, as:'acc'}
                 <option value="${acc.id}">${acc.prettyName()}</option>
             #{/list}
@@ -45,14 +45,14 @@
     <tr>
         <th>UPC:</th>
         <td>
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" class="span2" name="s.aps.upc">
-                <button class="btn btn-small btn-warning">@</button>
+                <button class="btn btn-warning">@</button>
             </div>
         </td>
         <th>Condition/Market:</th>
         <td>
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" readonly="" name="s.aps.condition_" value="NEW" class="span1">
             #{pickMarkets id:'market', class:'span2', name:'s.market'/}
             </div>
@@ -107,10 +107,10 @@
     <tr>
         <td colspan="4">
             <div class="input-prepend offset1">
-                <button id="sid_preview_popover" class="btn btn-small" rel="popover" placement='bottom' trigger='toggle' width="800px" data-content="请先预览" title="Detail Preview">
+                <button id="sid_preview_popover" class="btn" rel="popover" placement='bottom' trigger='toggle' width="800px" data-content="请先预览" title="Detail Preview">
                     <i class="icon-search"></i></button>
                 <input type="text" id="sid_helper" style="width:160px;" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
-                <button class="btn btn-small" rel="popover"><i class="icon-edit"></i></button>
+                <button class="btn" rel="popover"><i class="icon-edit"></i></button>
             </div>
         </td>
     </tr>
@@ -118,7 +118,7 @@
     <tr>
         <th rowspan="5">Technical:</th>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" bullet_point class="span8" name="s.aps.keyFeturess[0]">
                 <span class="add-on"></span>
             </div>
@@ -126,7 +126,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" bullet_point class="span8" name="s.aps.keyFeturess[1]">
                 <span class="add-on"></span>
             </div>
@@ -134,7 +134,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" bullet_point class="span8" name="s.aps.keyFeturess[2]">
                 <span class="add-on"></span>
             </div>
@@ -142,7 +142,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" bullet_point class="span8" name="s.aps.keyFeturess[3]">
                 <span class="add-on"></span>
             </div>
@@ -150,7 +150,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" bullet_point class="span8" name="s.aps.keyFeturess[4]">
                 <span class="add-on"></span>
             </div>
@@ -161,7 +161,7 @@
     <tr>
         <th rowspan="5">SearchTerms:</th>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" searchterms class="span8" name="s.aps.searchTermss[0]">
                 <span class="add-on"></span>
             </div>
@@ -169,7 +169,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" searchterms class="span8" name="s.aps.searchTermss[1]">
                 <span class="add-on"></span>
             </div>
@@ -177,7 +177,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" searchterms class="span8" name="s.aps.searchTermss[2]">
                 <span class="add-on"></span>
             </div>
@@ -185,7 +185,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" searchterms class="span8" name="s.aps.searchTermss[3]">
                 <span class="add-on"></span>
             </div>
@@ -193,7 +193,7 @@
     </tr>
     <tr>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <input type="text" searchterms class="span8" name="s.aps.searchTermss[4]">
                 <span class="add-on"></span>
             </div>
@@ -203,7 +203,7 @@
     <tr>
         <th>ProductDesc:</th>
         <td colspan="3">
-            <div class="input-prepend">
+            <div class="input-append">
                 <textarea rows="10" name="s.aps.productDesc" class="span10"></textarea>
 
                 <div class="clearfix"></div>

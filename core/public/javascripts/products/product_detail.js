@@ -5,11 +5,8 @@ $(function(){
         // Product 更新
     $('#prod_basic a[sku]').click(function(){
         $('#prod_basic').mask('更新中...');
-        $.params = {};
-        $('#prod_basic :input').map($.varClosure);
-        $.post('/products/p_u', $.params, function(r){
-            if(r.flag) alert("更新成功.");
-            else alert(JSON.stringify(r));
+        $.post('/products/p_u', $('#prod_basic :input').fieldSerialize(), function(r){
+            if(r.flag) alert("更新成功.");else alert(JSON.stringify(r));
             $('#prod_basic').unmask();
         });
     });
@@ -21,8 +18,7 @@ $(function(){
         $.params = {};
         $('#prod_qty_' + qid + " :input").map($.varClosure);
         $.post('/products/p_sqty_u', $.params, function(r){
-            if(r.flag) alert('更新成功.');
-            else alert(JSON.stringify(r));
+            if(r.flag) alert('更新成功.');else alert(JSON.stringify(r));
             $('#prod_sqty').unmask();
         });
 
@@ -36,8 +32,7 @@ $(function(){
         maskObj.mask("更新中...");
         $.post('/products/p_attr', $.params, function(r){
             try{
-                if(r.flag) alert("更新成功!<br/>" + r.message);
-                else alert(r.message);
+                if(r.flag) alert("更新成功!<br/>" + r.message);else alert(r.message);
             }finally{
                 maskObj.unmask();
             }
@@ -128,16 +123,11 @@ $(function(){
             return false;
         }
         $.getJSON('/products/upcCheck', {upc:upc}, function(r){
-            if(r.flag === false) alert(r.message);
-            else{
-                var upcAlertTemplate = "<div class='alert alert-info fade in'>" +
-                    "<button class='close' data-dismiss='alert'>×</button>" +
-                    "<strong>UPC 检查信息:</strong>" +
-                    "</div>";
+            if(r.flag === false) alert(r.message);else{
+                var upcAlertTemplate = "<div class='alert alert-info fade in'>" + "<button class='close' data-dismiss='alert'>×</button>" + "<strong>UPC 检查信息:</strong>" + "</div>";
                 var alertEl = $(upcAlertTemplate);
                 if(r.length == 0)
-                    alertEl.find('strong').after('<div>此 UPC 在系统中还没有 Selling</div>')
-                else
+                    alertEl.find('strong').after('<div>此 UPC 在系统中还没有 Selling</div>')else
                     $.each(r, function(i, s){
                         alertEl.find("strong").after('<div>' + s['merchantSKU'] + " | " + s['market'] + '</div>');
                     });
@@ -168,14 +158,14 @@ $(function(){
 
     // Amazon 上架
     $('#s_sale').click(function(){
+        if(!confirm("确认要提交到 Amazon ?")) return false;
         var btnDiv = $('#btn_div');
         $.params = {'s.listing.listingId':$('#lid').text()};
-        btnDiv.mask("创建中...");
+        btnDiv.mask("创建中, 请耐心等待...");
         $("#amazon :input").map($.varClosure);
         $.post('/products/saleAmazonListing', $.params, function(r){
             if(r.flag === false)
-                alert(r.message);
-            else{
+                alert(r.message);else{
                 // 检查 UPC
                 $('[name=s\\.aps\\.upc] ~ button').click();
                 alert('添加成功(请误重新创建!)');

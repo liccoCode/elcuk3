@@ -34,7 +34,7 @@ public class OrderPOST {
 
     public Integer page = 1;
 
-    public Integer size = 35;
+    public Integer size = 100;
 
     /**
      * 查询字符串

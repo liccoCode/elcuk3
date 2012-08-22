@@ -24,10 +24,14 @@ public class Cooperators extends Controller {
         render(coopers);
     }
 
-    public static void show(long id, boolean full) {
+    public static void show(long id, Boolean full) {
         Cooperator coper = Cooperator.findById(id);
         if(coper == null || !coper.isPersistent()) notFound();
-        render(coper, full);
+        if(full == null) {
+            redirect("/cooperators/index#" + id);
+        } else {
+            render(coper, full);
+        }
     }
 
     /**
@@ -67,7 +71,7 @@ public class Cooperators extends Controller {
             render("Cooperators/newCooper.html", cop);
         cop.checkAndUpdate();
         // 这样编写, 是因为前台这个页面有自动处理 hash 值
-        redirect("/Cooperators/index#" + cop.id);
+        redirect("/cooperators/index#" + cop.id);
     }
 
     /**
@@ -111,7 +115,7 @@ public class Cooperators extends Controller {
         }
         copItem.checkAndUpdate();
         flash.success("CooperItem %s, %s 修改成功", copItem.id, copItem.sku);
-        redirect("/Cooperators/index#" + copItem.cooperator.id);
+        redirect("/cooperators/index#" + copItem.cooperator.id);
     }
 
     public static void removeCooperItem(CooperItem copItem) {

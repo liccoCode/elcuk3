@@ -1,6 +1,5 @@
 package controllers;
 
-import helper.Webs;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
@@ -21,17 +20,14 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Orders extends Controller {
 
-    public static void index(Integer p, Integer s) {
-        Integer[] fixs = Webs.fixPage(p, s);
-        p = fixs[0];
-        s = fixs[1];
-        List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, s);
+    public static void index(Integer p) {
+        List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, 100);
         Long count = Orderr.count();
-        Pager<Orderr> pi = new Pager<Orderr>(s, count, p, orders);
+        Pager<Orderr> pi = new Pager<Orderr>(count, p, orders);
         List<Account> accs = Account.openedSaleAcc();
 
 
-        render(orders, count, p, s, pi, accs);
+        render(orders, count, p, pi, accs);
     }
 
     public static void show(String oid) {

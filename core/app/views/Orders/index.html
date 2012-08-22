@@ -1,112 +1,88 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:'Orders'/}
 #{set 'moreScripts'}
     #{script 'orders/orders.coffee'/}
 #{/set}
 
-<form id="search_form">
-    <div class="row" style="margin:10px 0">
-        <div class="span8">
-            <select id="o_market" name="p.market" class="span2" size="1">
-                <option value="">Market(ALL)</option>
-            #{list items:models.market.M.values()}
-                <option value="${_.name()}">${_}</option>
-            #{/list}
-            </select>
-            <select id="o_acc" name="p.account.id" class="span2" size="1">
-                <option value="">Account</option>
-            #{list items:accs}
-                <option value="${_.id}">${_.prettyName()}</option>
-            #{/list}
-            </select>
-            <select id="o_state" name="p.state" class="span2" size="1">
-                <option value="all">State(ALL)</option>
-            #{list items:models.market.Orderr.S.values()}
-                <option value="${_}">${_}</option>
-            #{/list}
-            </select><br/>
-            From: <input type="date" id="o_from" name="p.from" class="span2">
-            TO: <input type="date" id="o_to" name="p.to" class="span2">
-            <br/>
-            OrderBy:
-        #{select id="p.orderBy", items:models.view.OrderPOST.P.values(), value:'createDate', class:'span1'}#{/select}
-            <select name="p.desc" class="span1" size="1">
-                <option value="DESC">DESC</option>
-                <option value="ASC">ASC</option>
-            </select>
-            &nbsp;&nbsp;
-            Search: <input type="text" id="o_search" name="p.search" class="span3" placeholder="可输入关键词查询">
-        </div>
-        <div class="span3" id="search_btns">
-            <fieldset>
-                <legend>Search Button</legend>
-                <a href="#" day="1" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 1 天内的订单(结果缓存5mn)">1
-                    Day</a>
-                <a href="#" day="7" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 7 天内的订单(结果缓存5mn)">7
-                    Day</a>
-                <a href="#" day="30" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 30 天内的订单(结果缓存5mn)">30
-                    Day</a>
-                <a href="#" day="-1" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索自定义(<b>From</b>, <b>TO</b>)天数内的订单(结果缓存5mn)">LifeTime?</a>
-            </fieldset>
-        </div>
+<div class="row-fluid">
+    <div class="span5 offset2">
+        <form id="search_form">
+            <div class="row-fluid">
+                <div class="span12">
+                    <select id="o_market" name="p.market">
+                        <option value="">Market(ALL)</option>
+                    #{list items:models.market.M.values()}
+                        <option value="${_.name()}">${_}</option>
+                    #{/list}
+                    </select>
+                    <select id="o_acc" name="p.account.id">
+                        <option value="">Account</option>
+                    #{list items:accs}
+                        <option value="${_.id}">${_.prettyName()}</option>
+                    #{/list}
+                    </select>
+                    <select id="o_state" name="p.state">
+                        <option value="all">State(ALL)</option>
+                    #{list items:models.market.Orderr.S.values()}
+                        <option value="${_}">${_}</option>
+                    #{/list}
+                    </select>
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="input-prepend span6">
+                    <span class="add-on">From:</span>
+                    <input type="date" id="o_from" name="p.from">
+                </div>
+
+                <div class="input-prepend span6">
+                    <span class="add-on">To:</span>
+                    <input type="date" id="o_to" name="p.to">
+                </div>
+            </div>
+            <div class="row-fluid">
+                <div class="input-prepend span6">
+                    <span class="add-on">OrderBy:</span>
+                    <select name="p.orderBy" class="span4">
+                    #{list items:models.view.OrderPOST.P.values(), as:'p'}
+                        <option value="${p}">${p}</option>
+                    #{/list}
+                    </select>
+                    <select name="p.desc" class="span4">
+                        <option value="DESC">DESC</option>
+                        <option value="ASC">ASC</option>
+                    </select>
+                </div>
+                <div class="input-prepend span6">
+                    <span class="add-on">Search:</span>
+                    <input type="text" id="o_search" name="p.search" placeholder="可输入关键词查询">
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+    <div class="span4" id="search_btns">
+        <div class="btn-group">
+            <a href="#" day="1" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 1 天内的订单(结果缓存5mn)">1
+                Day</a>
+            <a href="#" day="7" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 7 天内的订单(结果缓存5mn)">7
+                Day</a>
+            <a href="#" day="30" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索 30 天内的订单(结果缓存5mn)">30
+                Day</a>
+            <a href="#" day="-1" class="btn btn-info" placement="bottom" rel="popover" data-content="按照设置搜索条件搜索自定义(<b>From</b>, <b>TO</b>)天数内的订单(结果缓存5mn)">LifeTime?</a>
+        </div>
+        <h3>Search Buttons</h3>
+    </div>
+</div>
 <hr>
 
-<div class="row" id="order_list">
+<div class="row-fluid" id="order_list">
     <div class="span12">
     #{if orders.size() == 0}
         暂时还没有订单
     #{/if}
     #{else }
         <table class="table table-condensed table-bordered">
-            <tr>
-                <th>Market</th>
-                <th>Address</th>
-                <th>Country</th>
-                <th>OrderId</th>
-                <th>Buyer</th>
-                <th>Email</th>
-                <th>CreateDate</th>
-                <th>PaymentDate</th>
-                <th>State</th>
-            </tr>
-            #{list items:orders, as:'ord'}
-                <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-                    <td>${ord.market.toString()}</td>
-                    <td>${(ord.address == null ? '' : ord.address) + "  " + (ord.address1 == null ? '' : ord.address1)}</td>
-                    <td>${(ord.country == null ? '' : ord.country) + " " + (ord.city == null ? '' : ord.city) + " " + (ord.province == null ? '' : ord.province)}</td>
-                    <td>
-                        <a target="_blank" href=@{Orders.show(ord.orderId)}>${ord.orderId}</a>
-                        #{if ord.isHaveFeedback()}
-                            <i class="icon-comment"></i>
-                        #{/if}
-                    </td>
-                    <td>${ord.buyer}</td>
-                    <td>
-                        <a href="#" rel="tooltip" data-original-title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
-                    </td>
-                    <td title="${ord.createDate?.datetime()}">${ord.createDate?.since()}</td>
-                    <td title="${ord.paymentDate?.datetime()}">${ord.paymentDate?.since()}</td>
-                    #{if ord.state == models.market.Orderr.S.PENDING}
-                        <td style="color:#0074CC;">${ord.state}</td>
-                    #{/if}
-                    #{elseif ord.state == models.market.Orderr.S.PAYMENT}
-                        <td style="color:#49AFCD;">${ord.state}</td>
-                    #{/elseif}
-                    #{elseif ord.state == models.market.Orderr.S.SHIPPED}
-                        <td style="color:#5BB75B;">${ord.state}</td>
-                    #{/elseif}
-                    #{elseif ord.state == models.market.Orderr.S.REFUNDED ||
-                                             ord.state == models.market.Orderr.S.RETURNNEW ||
-                                             ord.state == models.market.Orderr.S.CANCEL}
-                        <td style="color:red;">${ord.state}</td>
-                    #{/elseif}
-                    #{else }
-                        <td>${ord.state}</td>
-                    #{/else}
-                </tr>
-            #{/list}
+            #{render 'Orders/_order_table_tr.html', pi:pi/}
             <tr class="tb_footer">
                 <td colspan="9">
                     #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/orders/index'/}

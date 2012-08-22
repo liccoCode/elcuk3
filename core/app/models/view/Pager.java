@@ -15,11 +15,16 @@ public class Pager<T> {
     public Pager() {
     }
 
+
     public Pager(int size, Long count, int page, List<T> items) {
         this.size = size;
         this.count = count;
         this.page = page;
         this.items = items;
+    }
+
+    public Pager(Long count, int page, List<T> items) {
+        this(100, count, page, items);
     }
 
     public Pager(int page) {
