@@ -400,8 +400,10 @@ public class Product extends GenericModel {
                 if("newItemAsin".equals(name)) selling.asin = hidden.val();
                 else if("itemCreateWtqRequestId".equalsIgnoreCase(name))
                     fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
-                else if("newItemSku".equalsIgnoreCase(name))
-                    fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
+                else if("newItemSku".equalsIgnoreCase(name)) {
+                    fetchNewAsinParam.add(new BasicNameValuePair(name, selling.merchantSKU));
+                    fetchNewAsinParam.add(new BasicNameValuePair("sku", selling.merchantSKU));
+                }
             }
             // inventory-status/status.html 页面的访问, 会自行进行 302 转向访问
             body = HTTP.post(selling.account.cookieStore(), form.attr("action"), finalFormParam);
@@ -410,7 +412,7 @@ public class Product extends GenericModel {
             // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
             if(StringUtils.isBlank(selling.asin) && StringUtils.isBlank(selling.aps.matchAsin)) {
                 try {
-                    selling.asin = ajaxNewAsin(selling, fetchNewAsinParam, 0);
+                    selling.asin = getNewAsin(selling, fetchNewAsinParam, 0);
                 } catch(InterruptedException e) {
                     Logger.warn(Webs.E(e));
                     throw new FastRuntimeException(e.getMessage());
@@ -440,18 +442,19 @@ public class Product extends GenericModel {
      * @param times             循环的次数, 依次传递下去
      * @return
      */
-    private String ajaxNewAsin(Selling selling, List<NameValuePair> fetchNewAsinParam, int times) throws InterruptedException {
+    private String getNewAsin(Selling selling, List<NameValuePair> fetchNewAsinParam, int times) throws InterruptedException {
         String jsonStr = HTTP.post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
+        Logger.info("Fetch ProductCreateStatus [%s] with [%s]", selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
         JsonElement jsonEl = new JsonParser().parse(jsonStr);
         JsonObject jsonObj = jsonEl.getAsJsonObject();
         if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
             return jsonObj.get("asin").getAsString();
         else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
             FLog.fileLog(String.format("%s.%s.times_%s.js", selling.merchantSKU, selling.account.id, times), jsonStr, FLog.T.SALES);
-            if(times > 15)
+            if(times > 12)
                 throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
-            Thread.sleep(5000);
-            return ajaxNewAsin(selling, fetchNewAsinParam, ++times);
+            Thread.sleep(2500);
+            return getNewAsin(selling, fetchNewAsinParam, ++times);
         } else {
             FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id), jsonStr, FLog.T.SALES);
             throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
