@@ -98,24 +98,23 @@
 
             <div class="tab-content" id="tab_content_${t.id}">
                 <div id="review_${t.id}" class="tab-pane fade active in" style="background:#fff;">
-                    <div>
-                        <h3>Review</h3>
+                    <div class="alert alert-info">
+                        <h4>Review</h4>
 
                         <p>${r.review}</p>
                         <button tid="${t.id}" class="star_it btn btn-primary">
                             <i class="${t.isStart ? 'icon-star' : 'icon-star-empty'}"></i>
                         </button>
                     </div>
-                    <hr>
-                    <div>
-                        <h3>Review Memo</h3>
-                    ${r.comment}
+                    <div class="alert alert-success">
+                        <h4>Review Memo</h4>
+
+                        <p>${r.comment.raw()}</p>
                     </div>
-                    <hr>
-                    <div>
-                        <h3>Ticket Memo</h3>
-                        <textarea rows="5" class="span12">${t.memo}</textarea>
-                        <button tid="${t.id}" class="ticket_comment btn btn-primary">Comment</button>
+                    <div class="alert alert-info">
+                        <h4>Ticket Memo</h4>
+
+                        <p>${t.memo.raw()}</p>
                     </div>
                 </div>
 

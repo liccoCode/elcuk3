@@ -27,6 +27,7 @@ import java.util.List;
  * -------------
  * * NEW_MSG/MAILED -> PRE_CLOSE/CLOSE: 在与客户的交流结束以后可以进入 PRE_CLOSE 以等待 Ticket 所关联的信息被客户修改, 或者直接进入 CLOSE 表示无法处理.
  * * PRE_CLOSE -> 进入 PRE_CLOSE 的 ticket 不会自动进入 CLOSE 状态, 一定需要人工进行确认才可以进入 CLOSE
+ * * PRE_CLOSE -> NEW_MSG , 这个状态下的 Ticket, 如果有新回复, 还是需要进入 NEW_MSG 状态
  * </pre>
  * User: wyattpan
  * Date: 7/26/12
@@ -196,6 +197,9 @@ public enum TicketState {
                     }
                 }
             }
+            // 有新回复还是需要进入 NEW_MSG 状态(自建的产品才进入, 非自建的进行问题标识足够)
+            if(ticket.isSelfSale && Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+                return NEW_MSG;
             return this;
         }
 

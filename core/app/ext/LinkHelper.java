@@ -29,6 +29,20 @@ public class LinkHelper extends JavaExtensions {
         return "#";
     }
 
+    public static String userReviewLink(Feedback f, String userId) {
+        String baseAmazon = "http://www.%s/gp/pdp/profile/%s";
+        switch(f.market) {
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_IT:
+                return String.format(baseAmazon, f.market, userId);
+        }
+        return "#";
+    }
+
     public static String reviewLink(AmazonListingReview review) {
         String site = StringUtils.split(review.listingId, "_")[1];
         return String.format("http://www.%s/review/%s", site, review.reviewId);
@@ -116,6 +130,6 @@ public class LinkHelper extends JavaExtensions {
 
 
     public static String osTicketLink(Ticket ticket) {
-        return String.format("http://t.easyacceu.com/scp/tickets.php?id=%s", ticket.osTicketId());
+        return String.format("http://t.easya.cc/scp/tickets.php?id=%s", ticket.osTicketId());
     }
 }

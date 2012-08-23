@@ -27,10 +27,10 @@
 #{list items:savedReviews, as:'r'}
     <tr drop="${r.reviewId}">
         <td>${r.helpUp}/${r.helpClick}</td>
-        <td ${r.isVedio ? 'style=background:#0091F4' : ''}>${r.isVedio}</td>
-        <td ${r.isVineVoice ? 'style=background:#0091F4' : ''}>${r.isVineVoice}</td>
-        <td ${r.purchased ? '' : 'style=background:#FFA413'}>${r.purchased}</td>
-        <td ${r.isRealName ? 'style=background:#0091F4' : ''}>${r.isRealName}</td>
+        <td>#{yesOrNo f:r.isVedio /}</td>
+        <td>#{yesOrNo f:r.isVineVoice /}</td>
+        <td>#{yesOrNo f:r.purchased /}</td>
+        <td>#{yesOrNo f:r.isRealName /}</td>
         <td style="background:${"#" + r.rating.color()}">${r.rating}</td>
         <td style="cursor:pointer;background:${'#' + r.color()}" data-toggle="toggle" data-target="#review_${r.reviewId}">
             <span class="badge badge-inverse">${r.length()}</span>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="span6">
                             <p>
-                                <button class="btn btn-primary trans"><i class="icon-external-link">E</i></button>
+                                <button class="btn btn-primary trans"><i class="icon-external-link"></i> E</button>
                                 <button class="btn btn-success makeUp"><i class="icon-thumbs-up"></i></button>
                                 <button class="btn btn-danger makeDown"><i class="icon-thumbs-down"></i></button>
                             </p>

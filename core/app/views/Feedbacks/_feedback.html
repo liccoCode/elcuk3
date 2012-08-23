@@ -16,7 +16,7 @@
     <tr>
         <td>${t.id}</td>
         <td>
-            <a href="#" target="_blank"><i class="icon-comment"></i> ${f.orderr.userid}</a>
+            <a href="${f.userReviewLink(f.orderr.userid)}" target="_blank"><i class="icon-external-link"></i> ${f.orderr.userid}</a>
         </td>
         <td>${f.createDate.since()}</td>
         <td>
@@ -72,20 +72,20 @@
 
             <div class="tab-content" id="tab_content_${t.id}">
                 <div id="feedback_${t.id}" class="tab-pane fade in active" style="background:#fff;">
-                    <div>
-                        <h3>Comment</h3>
-                    ${f.feedback}
+                    <div class="alert alert-info">
+                        <h4>Comment</h4>
+
+                        <p>${f.feedback.raw()}</p>
                     </div>
-                    <hr>
-                    <div>
-                        <h3>Feedback Memo</h3>
-                    ${f.memo}
+                    <div class="alert alert-success">
+                        <h4>Feedback Memo</h4>
+
+                        <p>${f.memo.raw()}</p>
                     </div>
-                    <hr>
-                    <div>
-                        <h3>Ticket Memo</h3>
-                        <textarea rows="5" style="width:96%">${t.memo}</textarea>
-                        <button tid="${t.id}" class="ticket_comment btn btn-primary">Comment</button>
+                    <div class="alert alert-info">
+                        <h4>Ticket Memo</h4>
+
+                        <p>${t.memo}</p>
                     </div>
                 </div>
 

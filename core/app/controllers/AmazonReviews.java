@@ -5,6 +5,7 @@ import helper.Webs;
 import jobs.ListingWorkers;
 import models.market.*;
 import models.view.Ret;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -34,9 +35,10 @@ public class AmazonReviews extends Controller {
      * @param asin
      * @param m
      */
-    public static void ajaxMagic(String asin, String m) {
+    public static void ajaxMagic(String asin, String m, String orderby) {
         M market = M.val(m);
-        List<AmazonListingReview> savedReviews = AmazonListingReview.find("listingId=? ORDER BY reviewRank", Listing.lid(asin, market)).fetch();
+        if(StringUtils.isBlank(orderby)) orderby = "createDate";
+        List<AmazonListingReview> savedReviews = AmazonListingReview.listingReviews(Listing.lid(asin, market), orderby);
         Listing lst = Listing.findById(Listing.lid(asin, market));
         render(savedReviews, lst);
     }

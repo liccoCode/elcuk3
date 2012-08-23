@@ -11,10 +11,10 @@
 #{else }
 <div class="label label-info">Order Basic</div>
 <div>
-    <table class="table table-bordered">
+    <table class="table table-condensed table-bordered">
         <tr>
             <td>OrderId:</td>
-            <td>${ord.orderId}</td>
+            <td><a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}</a></td>
             <td>Address:</td>
             <td>${ord.address}</td>
             <td>Address1:</td>
@@ -99,7 +99,7 @@
                 <td>${item.quantity}</td>
                 <td>${item.price} ${item.currency}</td>
                 <td>${item.shippingPrice}</td>
-                <td><a target="_blank" href="${item.selling.asinLink()}">${item.listingName}</a></td>
+                <td><a target="_blank" href="${item.selling.asinLink()}"><i class="icon-external-link"></i> ${item.listingName}</a></td>
                 <td>${item.createDate}</td>
                 <td>${item.memo}</td>
             </tr>

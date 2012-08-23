@@ -174,6 +174,11 @@ public class Ticket extends Model {
     public boolean isStart = false;
 
     /**
+     * 是否为自己自建销售的产品?
+     */
+    public boolean isSelfSale = true;
+
+    /**
      * 判断 Ticket 是否超时.
      * 1. 如果有 Ticket 有客户最后回复时间, 那么回复 24 小后过, 表示邮件超时!
      * 2. 如果没有客户最后回复时间, 那么从 Ticket 创建时间开始计算 24 小时后超时.
@@ -188,6 +193,13 @@ public class Ticket extends Model {
             Duration duration = new Duration(this.createAt.getTime(), System.currentTimeMillis());
             return duration.getStandardHours() > 24;
         }
+    }
+
+    public Ticket isNotSelf() {
+        this.state = TicketState.PRE_CLOSE;
+        this.isSelfSale = false;
+        this.memo = "为非自建, 请归类后关闭.";
+        return this;
     }
 
     /**
@@ -240,7 +252,7 @@ public class Ticket extends Model {
         this.memo = String.format("Closed By %s At [%s] for [ %s ]\r\n",
                 ElcukRecord.username(),
                 Dates.date2DateTime(),
-                reason) + this.memo;
+                reason.trim()) + this.memo;
         return this.save();
     }
 

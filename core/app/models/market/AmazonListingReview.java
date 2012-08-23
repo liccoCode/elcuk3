@@ -295,9 +295,11 @@ public class AmazonListingReview extends GenericModel {
 
 //        Rating < 4 并且为自建的 Listing 的开 OsTicket
 //        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒
-        if(this.rating != null && this.rating < 4 && Listing.isSelfBuildListing(this.listing.title)) {
+        if(this.rating != null && this.rating < 4) {
             this.ticket = this.openTicket(null);
             Mails.listingReviewWarn(this);
+            if(!Listing.isSelfBuildListing(this.listing.title) && this.ticket != null)
+                this.ticket.isNotSelf();
         }
         this.save();
     }
@@ -483,6 +485,10 @@ public class AmazonListingReview extends GenericModel {
 
     public static AmazonListingReview findByReviewId(String reviewId) {
         return AmazonListingReview.find("reviewId=?", reviewId).first();
+    }
+
+    public static List<AmazonListingReview> listingReviews(String listingId, String orderBy) {
+        return AmazonListingReview.find("listingId=? ORDER BY " + orderBy + ("reviewRank".equals(orderBy) ? " ASC" : " DESC"), listingId).fetch();
     }
 
     /**
