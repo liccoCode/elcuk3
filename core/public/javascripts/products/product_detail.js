@@ -126,11 +126,13 @@ $(function(){
             if(r.flag === false) alert(r.message);else{
                 var upcAlertTemplate = "<div class='alert alert-info fade in'>" + "<button class='close' data-dismiss='alert'>×</button>" + "<strong>UPC 检查信息:</strong>" + "</div>";
                 var alertEl = $(upcAlertTemplate);
-                if(r.length == 0)
-                    alertEl.find('strong').after('<div>此 UPC 在系统中还没有 Selling</div>')else
+                if(r.length == 0){
+                    alertEl.find('strong').after('<div>此 UPC 在系统中还没有 Selling</div>');
+                }else{
                     $.each(r, function(i, s){
                         alertEl.find("strong").after('<div>' + s['merchantSKU'] + " | " + s['market'] + '</div>');
                     });
+                }
                 alertEl.insertBefore("#btn_div");
                 var mskuEl = $('input[name=s\\.merchantSKU]');
                 mskuEl.val(mskuEl.val().split(',')[0] + ',' + upc);
