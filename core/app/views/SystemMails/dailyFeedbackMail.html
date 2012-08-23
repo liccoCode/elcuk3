@@ -2,7 +2,7 @@
     <tr>
         <th>Order</th>
         <th>Email</th>
-        <th>Feedback</th>
+        <th>Feedback Length</th>
         <th>Create</th>
         <th>Score</th>
         <th>OsTicketId</th>
@@ -11,7 +11,7 @@
 <tr>
     <td>${fd.orderId}</td>
     <td>${fd.email}</td>
-    <td>${fd.feedback}</td>
+    <td><a href="http://e.easya.cc/feedbacks/show?oid=${fd.orderId}" target="_blank">${fd.feedback.length()}</a></td>
     <td>${fd.createDate?.since()}</td>
     <td>${fd.score}</td>
     <td>${fd.osTicketId}</td>
