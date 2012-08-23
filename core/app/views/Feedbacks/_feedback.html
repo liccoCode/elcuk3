@@ -72,22 +72,20 @@
 
             <div class="tab-content" id="tab_content_${t.id}">
                 <div id="feedback_${t.id}" class="tab-pane fade in active" style="background:#fff;">
-                    <div class="row-fluid">
-                        <div class="span4">
-                            <h3>Comment</h3>
-                        ${f.feedback}
-                        </div>
-
-                        <div class="span4">
-                            <h3>Ticket Memo</h3>
-                            <textarea rows="5" class="span12">${t.memo}</textarea>
-                            <button tid="${t.id}" class="ticket_comment btn btn-primary">Comment</button>
-                        </div>
-
-                        <div class="span4">
-                            <h3>Feedback Memo</h3>
-                        ${f.memo}
-                        </div>
+                    <div>
+                        <h3>Comment</h3>
+                    ${f.feedback}
+                    </div>
+                    <hr>
+                    <div>
+                        <h3>Feedback Memo</h3>
+                    ${f.memo}
+                    </div>
+                    <hr>
+                    <div>
+                        <h3>Ticket Memo</h3>
+                        <textarea rows="5" style="width:96%">${t.memo}</textarea>
+                        <button tid="${t.id}" class="ticket_comment btn btn-primary">Comment</button>
                     </div>
                 </div>
 

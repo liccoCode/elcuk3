@@ -32,7 +32,7 @@ public class Orders extends Controller {
 
     public static void show(String oid) {
         Feedback f = Feedback.findById(oid);
-        if(f != null)
+        if(f != null && f.ticket != null)
             redirect("Feedbacks.show", oid);
         else {
             Orderr ord = Orderr.findById(oid);
