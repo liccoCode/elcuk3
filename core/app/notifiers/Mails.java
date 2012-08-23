@@ -120,7 +120,7 @@ public class Mails extends Mailer {
      * @param f
      */
     public static void feedbackWarnning(Feedback f) {
-        if(f.mailedTimes != null && f.mailedTimes > 3) return;
+        if(f.mailedTimes != null && f.mailedTimes >= 2) return;
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");

@@ -311,7 +311,8 @@ public class Orderr extends GenericModel {
      * @return
      */
     public Long itemCount() {
-        return ((BigDecimal) DBUtils.row("select sum(quantity) as qty from OrderItem where order_orderId=?", this.orderId).get("qty")).longValue();
+        BigDecimal qty = (BigDecimal) DBUtils.row("select sum(quantity) as qty from OrderItem where order_orderId=?", this.orderId).get("qty");
+        return qty == null ? 0l : qty.longValue();
     }
 
     /**

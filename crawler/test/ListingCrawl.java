@@ -37,7 +37,7 @@ public class ListingCrawl extends UnitTest {
     public void testParseReviewFR() throws IOException {
         //FR
         Document doc = Jsoup.parse(new File(ListingCrawl.HOME + "/elcuk2-data/reviews/AFR/B005JSG7GE_1.html"), "UTF-8");
-        List<AmazonListingReview> reviews = AmazonListingReview.parseReviewFromHTML(doc);
+        List<AmazonListingReview> reviews = AmazonListingReview.parseReviewFromHTML(doc, 1);
         Assert.assertEquals(2, reviews.size());
         Assert.assertEquals(1, reviews.get(1).helpClick.longValue());
     }
@@ -46,26 +46,26 @@ public class ListingCrawl extends UnitTest {
     public void testParseReviewDE() throws IOException {
         // DE
         Document doc = Jsoup.parse(new File(ListingCrawl.HOME + "/elcuk2-data/reviews/ADE/B004BTWMEI_1.html"), "UTF-8");
-        Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc).size());
+        Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc, 1).size());
     }
 
     //    @Test
     public void testParseReviewUK() throws IOException {
         //UK
         Document doc = Jsoup.parse(new File(ListingCrawl.HOME + "/elcuk2-data/reviews/AUK/B005JSG7GE_1.html"), "UTF-8");
-        Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc).size());
+        Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc, 1).size());
 
     }
 
     //    @Test
     public void testParseVedioReview() throws IOException {
         Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/reviews/ADE/B004BTWMEI_10.html"), "UTF-8");
-        Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc).size());
+        Assert.assertEquals(10, AmazonListingReview.parseReviewFromHTML(doc, 1).size());
     }
 
     //    @Test
     public void testParseListingFromReview() throws IOException {
         Document doc = Jsoup.parse(new File("/Users/wyattpan/elcuk2-data/reviews/AUK/B005JSG7GE_2.html"), "UTF-8");
-        AmazonListingReview.parseReviewFromHTML(doc);
+        AmazonListingReview.parseReviewFromHTML(doc, 1);
     }
 }

@@ -54,7 +54,7 @@ public class OrderInfoFetchJob extends Job {
          * 3. 从最老的开始处理.
          * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
          */
-        return Orderr.find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null OR address1 is null) order by createDate",
+        return Orderr.find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null OR address1 is null OR address1='') order by createDate",
                 Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
     }
 

@@ -6,14 +6,14 @@
 #{/set}
 
 #{set haveTicket:review.ticket != null/}
-#{set isClosed:review.ticket.state == models.support.TicketState.CLOSE/}
+#{set isClosed:review.ticket != null && (review.ticket.state == models.support.TicketState.CLOSE) /}
 #{if haveTicket}
 <!-- Ticket 操作所需要的值 -->
 <input type="hidden" id="ticketId" value="${review.ticket.id}">
 #{/if}
 
 
-#{render 'Tickets/_success.html', success:review.ticket.isSuccess/}
+#{render 'Tickets/_success.html', success:isClosed /}
 
 <!-- Review -->
 <div class="label label-info">Review</div>

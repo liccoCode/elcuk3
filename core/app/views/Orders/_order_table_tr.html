@@ -13,7 +13,7 @@
 #{list items:pi.items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
     <td>${ord.market.toString()}</td>
-    <td>${ord.address1.raw()}</td>
+    <td>${ord.address1}</td>
     <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
     <td>
         <a target="_blank" href=@{Orders.show(ord.orderId)}>

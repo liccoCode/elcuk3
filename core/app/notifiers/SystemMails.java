@@ -1,0 +1,62 @@
+package notifiers;
+
+import helper.Dates;
+import helper.Webs;
+import models.market.AmazonListingReview;
+import models.market.Feedback;
+import org.joda.time.DateTime;
+import play.Logger;
+import play.Play;
+import play.mvc.Mailer;
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ * 系统内使用的邮件发送
+ * User: wyattpan
+ * Date: 8/23/12
+ * Time: 3:10 PM
+ */
+public class SystemMails extends Mailer {
+
+    /**
+     * 每天发送的 Review 提醒邮件
+     *
+     * @return
+     */
+    public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
+        setSubject(String.format("%s Reviews Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
+        mailBase();
+        addRecipient("alerts@easyacceu.com");
+        try {
+            send(reviews);
+        } catch(Exception e) {
+            Logger.warn(Webs.E(e));
+            return false;
+        }
+        return true;
+    }
+
+    private static void mailBase() {
+        SystemMails.setCharset("UTF-8");
+        if(Play.mode.isProd()) {
+            SystemMails.setFrom("EasyAcc <support@easyacceu.com>");
+        } else {
+            SystemMails.setFrom("EasyAcc <1733913823@qq.com>"); // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
+        }
+    }
+
+    public static boolean dailyFeedbackMail(List<Feedback> feedbacks) {
+        setSubject(String.format("%s Feedback Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
+        mailBase();
+        addRecipient("alerts@easyacceu.com");
+        try {
+            send(feedbacks);
+        } catch(Exception e) {
+            Logger.warn(Webs.E(e));
+            return false;
+        }
+        return true;
+    }
+}
