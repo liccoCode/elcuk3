@@ -1,0 +1,20 @@
+<table>
+    <tr>
+        <th>Order</th>
+        <th>Email</th>
+        <th>Feedback</th>
+        <th>Create</th>
+        <th>Score</th>
+        <th>OsTicketId</th>
+    </tr>
+#{list items:feedbacks, as:'fd'}
+<tr>
+    <td>${fd.orderId}</td>
+    <td>${fd.email}</td>
+    <td>${fd.feedback}</td>
+    <td>${fd.createDate?.since()}</td>
+    <td>${fd.score}</td>
+    <td>${fd.osTicketId}</td>
+</tr>
+#{/list}
+</table>
