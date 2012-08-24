@@ -6,6 +6,7 @@ import models.market.AmazonListingReview;
 import models.market.Feedback;
 import notifiers.SystemMails;
 import org.joda.time.DateTime;
+import play.Play;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -22,7 +23,7 @@ import java.util.List;
 public class FAndRNotificationJob extends Job {
     @Override
     public void doJob() {
-        Date yesterday = DateTime.now().minusDays(10).toDate();
+        Date yesterday = DateTime.now().minusDays(Play.mode.isDev() ? 10 : 1).toDate();
         List<Feedback> feedbacks = Feedback.find("createDate>=? AND createDate<=? ORDER BY score",
                 Dates.morning(yesterday), Dates.night(yesterday)).fetch();
         if(!SystemMails.dailyFeedbackMail(feedbacks)) {
@@ -61,6 +62,7 @@ public class FAndRNotificationJob extends Job {
 
     /**
      * 将 Review 切分成 5 星, 5 份
+     *
      * @param reviews
      * @return
      */
