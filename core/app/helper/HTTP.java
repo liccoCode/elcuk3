@@ -57,8 +57,8 @@ public class HTTP {
             HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
             // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
-            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(40));
-            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(10));
+            HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
+            HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
 
             ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
