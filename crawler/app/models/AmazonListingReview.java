@@ -248,7 +248,7 @@ public class AmazonListingReview {
      * @return
      */
     private static boolean isHelpfulStr(String str) {
-        return StringUtils.containsIgnoreCase(str, "review helpful") || // uk
+        return StringUtils.containsIgnoreCase(str, "reviews helpful") || // uk
                 StringUtils.containsIgnoreCase(str, "Rezension hilfreich") || // de
                 StringUtils.containsIgnoreCase(str, "commentaire utile"); // fr
     }

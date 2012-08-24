@@ -114,7 +114,7 @@ public class ListingC {
 
         // 通过 titleEl 的 id 定位元素后, 再进行 reviewSummary 的定位.
         Element reviewSumery = titleEl.parent().parent().nextElementSibling().select(".asinReviewsSummary").first();
-        if(reviewSumery == null) { // 还没有 review 呢
+        if(reviewSumery == null) { // 还没有 reviews 呢
             lst.reviews = 0;
             lst.rating = 0f;
         } else {

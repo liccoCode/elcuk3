@@ -24,8 +24,8 @@ public class CrawlReviewTest extends UnitTest {
 
     @Before
     public void setUp() {
-        newPage = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/review.B007H4J80K_1.html")));
-        oldPage = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/review.B007H4J80K_1_old.html")));
+        newPage = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/reviews.B007H4J80K_1.html")));
+        oldPage = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/reviews.B007H4J80K_1_old.html")));
     }
 
     @Test

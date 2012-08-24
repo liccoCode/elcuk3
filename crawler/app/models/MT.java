@@ -57,7 +57,14 @@ public enum MT {
         }
     }
 
-    public String review(String asin, int page) {
+    /**
+     * Review 列表页面
+     *
+     * @param asin
+     * @param page
+     * @return
+     */
+    public String reviews(String asin, int page) {
         //http://www.amazon.it/product-reviews/{ASIN}?pageNumber={PAGE}
         switch(this) {
             case AUK:
@@ -67,6 +74,26 @@ public enum MT {
             case AIT:
             case AFR:
                 return String.format("http://www.%s/product-reviews/%s?pageNumber=%s", this.toString(), asin, page);
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * 查询单独的 Review 页面
+     * @param reviewId
+     * @return
+     */
+    public String review(String reviewId) {
+        //http://www.amazon.de/review/R3SPO0EZCN6OY3
+        switch(this) {
+            case AUK:
+            case AUS:
+            case ADE:
+            case AES:
+            case AIT:
+            case AFR:
+                return String.format("http://www.%s/review/%s", this.toString(), reviewId);
             default:
                 return "";
         }

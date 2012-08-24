@@ -82,9 +82,9 @@ public class ListingCs extends Controller {
         if(m == null) throw new FastRuntimeException("Market is inValid!");
         int page = 1;
         while(true) {
-            String url = m.review(asin, page);
+            String url = m.reviews(asin, page);
             if(StringUtils.isBlank(url)) continue;
-            Logger.info("Fetch [%s]", url);
+            Logger.info("Fetch Reviews [%s]", url);
             HTTP.clearExpiredCookie();
             String html = HTTP.get(url);
 
@@ -98,5 +98,19 @@ public class ListingCs extends Controller {
             if(page++ == maxPage) break;
         }
         renderJSON(AmazonListingReview.filterReviewWithAsinAndMarket(asin, m, reviews));
+    }
+
+    public static void review(String market, String reviewId) throws IOException {
+        MT m = MT.val(market);
+        String url = m.review(reviewId);
+        HTTP.clearExpiredCookie();
+        Logger.info("Fetch Single Review [%s]", url);
+        String html = HTTP.get(url);
+
+        if(Play.mode.isDev())
+            FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/review/%s/%s.html", System.getProperty("user.home"), m.name(), reviewId)), html);
+
+
+
     }
 }
