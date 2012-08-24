@@ -31,7 +31,7 @@ $ ->
 
   window.dropUpload.imgSrc = (fileName, img, imgUrl) ->
     args = fileName.split('.')
-    fileSuffix = args[args.length - 1]
+    fileSuffix = args[args.length - 1].toLowerCase()
     switch fileSuffix
       when 'xls', 'xlsx', 'csv'
         img.attr('src', window.dropUpload.xlsImg)

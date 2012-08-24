@@ -461,6 +461,10 @@ public class Product extends GenericModel {
         }
     }
 
+    public long pictureCount() {
+        return Attach.count("fid=?", this.sku);
+    }
+
     /**
      * 验证这个 SKU 是否合法
      *
