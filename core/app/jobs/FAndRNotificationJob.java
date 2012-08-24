@@ -7,7 +7,9 @@ import models.market.Feedback;
 import notifiers.SystemMails;
 import org.joda.time.DateTime;
 import play.jobs.Job;
+import play.libs.F;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +22,7 @@ import java.util.List;
 public class FAndRNotificationJob extends Job {
     @Override
     public void doJob() {
-        Date yesterday = DateTime.now().minusDays(1).toDate();
+        Date yesterday = DateTime.now().minusDays(10).toDate();
         List<Feedback> feedbacks = Feedback.find("createDate>=? AND createDate<=? ORDER BY score",
                 Dates.morning(yesterday), Dates.night(yesterday)).fetch();
         if(!SystemMails.dailyFeedbackMail(feedbacks)) {
@@ -33,5 +35,52 @@ public class FAndRNotificationJob extends Job {
         if(!SystemMails.dailyReviewMail(reviews)) {
             Webs.systemMail("Review Daily Mail send Error.", reviews.size() + " reviews.");
         }
+    }
+
+    /**
+     * 将 Feedback 切分成 5 星, 5 份
+     *
+     * @param feedbacks
+     * @return
+     */
+    public static F.T5<List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>> divFeedbackIntoFive(List<Feedback> feedbacks) {
+        List<Feedback> one = new ArrayList<Feedback>();
+        List<Feedback> two = new ArrayList<Feedback>();
+        List<Feedback> three = new ArrayList<Feedback>();
+        List<Feedback> four = new ArrayList<Feedback>();
+        List<Feedback> five = new ArrayList<Feedback>();
+        for(Feedback fe : feedbacks) {
+            if(fe.score <= 1) one.add(fe);
+            else if(fe.score <= 2) two.add(fe);
+            else if(fe.score <= 3) three.add(fe);
+            else if(fe.score <= 4) four.add(fe);
+            else if(fe.score <= 5) five.add(fe);
+        }
+        return new F.T5<List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>>(one, two, three, four, five);
+    }
+
+    /**
+     * 将 Review 切分成 5 星, 5 份
+     * @param reviews
+     * @return
+     */
+    public static F.T5<List<AmazonListingReview>, List<AmazonListingReview>,
+            List<AmazonListingReview>, List<AmazonListingReview>,
+            List<AmazonListingReview>> divReviewInToFive(List<AmazonListingReview> reviews) {
+        List<AmazonListingReview> one = new ArrayList<AmazonListingReview>();
+        List<AmazonListingReview> two = new ArrayList<AmazonListingReview>();
+        List<AmazonListingReview> three = new ArrayList<AmazonListingReview>();
+        List<AmazonListingReview> four = new ArrayList<AmazonListingReview>();
+        List<AmazonListingReview> five = new ArrayList<AmazonListingReview>();
+        for(AmazonListingReview rv : reviews) {
+            if(rv.rating <= 1) one.add(rv);
+            else if(rv.rating <= 2) two.add(rv);
+            else if(rv.rating <= 3) three.add(rv);
+            else if(rv.rating <= 4) four.add(rv);
+            else if(rv.rating <= 5) five.add(rv);
+        }
+        return new F.T5<List<AmazonListingReview>, List<AmazonListingReview>, List<AmazonListingReview>, List<AmazonListingReview>, List<AmazonListingReview>>(
+                one, two, three, four, five
+        );
     }
 }

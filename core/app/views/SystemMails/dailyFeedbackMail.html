@@ -1,20 +1,31 @@
+#{set f5:jobs.FAndRNotificationJob.divFeedbackIntoFive(feedbacks) /}
+<h2>Totla have ${feedbacks.size()} new feedbacks last day.</h2>
+<div>
+    <p>One Score:  ${f5._1.size()}</p>
+
+    <p>Two Score:  ${f5._2.size()}</p>
+
+    <p>Three Score:  ${f5._3.size()}</p>
+
+    <p>Four Score:  ${f5._4.size()}</p>
+
+    <p>Five Score:  ${f5._5.size()}</p>
+</div>
 <table>
     <tr>
         <th>Order</th>
-        <th>Email</th>
         <th>Feedback Length</th>
         <th>Create</th>
         <th>Score</th>
         <th>OsTicketId</th>
     </tr>
 #{list items:feedbacks, as:'fd'}
-<tr>
-    <td>${fd.orderId}</td>
-    <td>${fd.email}</td>
-    <td><a href="http://e.easya.cc/feedbacks/show?oid=${fd.orderId}" target="_blank">${fd.feedback.length()}</a></td>
-    <td>${fd.createDate?.since()}</td>
-    <td>${fd.score}</td>
-    <td>${fd.osTicketId}</td>
-</tr>
+    <tr>
+        <td><a href="${fd.orderr?.orderLink()}">${fd.orderId}</a></td>
+        <td><a href="http://e.easya.cc/feedbacks/show?oid=${fd.orderId}" target="_blank">${fd.length()}</a></td>
+        <td title="${fd.createDate?.date()}">${fd.createDate?.since()}</td>
+        <td style="color:${'#' + fd.color()}">${fd.score}</td>
+        <td><a href="${fd.osTicketLink()}" target="_blank">${fd.osTicketId}</a></td>
+    </tr>
 #{/list}
 </table>

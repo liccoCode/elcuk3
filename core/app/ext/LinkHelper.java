@@ -137,4 +137,9 @@ public class LinkHelper extends JavaExtensions {
         if(StringUtils.isBlank(review.osTicketId)) review.osTicketId = "";
         return String.format("http://t.easya.cc/scp/tickets.php?id=%s", review.osTicketId.split("-")[0]);
     }
+
+    public static String osTicketLink(Feedback feedback) {
+        if(StringUtils.isBlank(feedback.osTicketId)) feedback.osTicketId = "";
+        return String.format("http://t.easya.cc/scp/tickets.php?id=%s", feedback.osTicketId.split("-")[0]);
+    }
 }

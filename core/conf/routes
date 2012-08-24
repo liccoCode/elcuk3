@@ -11,7 +11,7 @@
 GET     /                                                   Application.index
 GET     /pass                                               Application.pwd
 GET     /cc                                                 Application.cc
-GET     /c                                                  Application.c
+GET     /c/{key}                                            Application.c
 
 # Ignore favicon requests
 GET     /favicon.ico                                        404

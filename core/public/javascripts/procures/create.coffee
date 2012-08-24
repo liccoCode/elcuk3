@@ -16,6 +16,19 @@ $ ->
     )
     e.preventDefault()
 
+  # 清理缓存
+  $('#selling_allsid').click (e) ->
+    mask = $('#container')
+    mask.mask('清理缓存中...')
+    $.post('/c/selling.allsid',
+      (r) ->
+        if r.flag is false
+          alert('清理缓存失败')
+        else
+          alert('清理缓存成功')
+        mask.unmask()
+    )
+
   # Selling ID 修改, 同时初始化 Product, 自动调整 Whouse
   SID_INPUT.change ->
     o = $(@)
