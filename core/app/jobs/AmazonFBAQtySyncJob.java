@@ -132,6 +132,10 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
         List<SellingQTY> qtys = new ArrayList<SellingQTY>();
         for(String line : lines) {
             String[] vals = StringUtils.splitPreserveAllTokens(line, "\t");
+            if(StringUtils.isBlank(vals[4]) && (NumberUtils.toInt(vals[10]) == 0)) {
+                Logger.info("%s[%s] is Archived Item, so skiped it.", vals[0], vals[1]);
+                continue;
+            }
 
             // 如果属于 UnUsedSKU 那么则跳过这个解析
             if(Product.unUsedSKU(vals[0])) continue;
