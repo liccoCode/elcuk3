@@ -197,8 +197,8 @@ public enum TicketState {
                     }
                 }
             }
-            // 有新回复还是需要进入 NEW_MSG 状态(自建的产品才进入, 非自建的进行问题标识足够)
-            if(ticket.isSelfSale && Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+            // 有新回复还是需要进入 NEW_MSG 状态,  无论是否自建的都需要
+            if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
             return this;
         }

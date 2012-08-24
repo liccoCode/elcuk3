@@ -38,14 +38,28 @@ public class FeedbackInfoFetchJob extends Job {
                 Ticket.T.FEEDBACK, false, Dates.morning(now.minusDays(60).toDate()), Dates.night(now.toDate())).fetch(size);
         Logger.info("FeedbackInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
-            String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
-            ticket.isSuccess = FeedbackInfoFetchJob.isFeedbackRemove(html);
-            if(ticket.isSuccess) {
-                ticket.state = TicketState.PRE_CLOSE;
-                TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
-            }
+            FeedbackInfoFetchJob.checkFeedbackDealState(ticket);
             ticket.lastSyncTime = new Date();
             ticket.save();
+        }
+    }
+
+    /**
+     * 检查 Feedback 的处理状态
+     * 1. 向 Amazon 检查这个 Feedback 是否被删除?(无法修改评价)
+     * 2. 检查 Ticket 对应的 Feedback 是否已经超时?
+     */
+    public static void checkFeedbackDealState(Ticket ticket) {
+        String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
+        ticket.isSuccess = FeedbackInfoFetchJob.isFeedbackRemove(html);
+        if(ticket.isSuccess) {
+            ticket.state = TicketState.PRE_CLOSE;
+            TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
+        }
+
+        if(ticket.feedback.isExpired()) {
+            ticket.state = TicketState.PRE_CLOSE;
+            ticket.memo = "Feedback 已经过期, 无法再处理.\r\n" + ticket.memo;
         }
     }
 

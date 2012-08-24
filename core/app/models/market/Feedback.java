@@ -10,6 +10,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
@@ -164,6 +165,14 @@ public class Feedback extends GenericModel {
             if(this.ticket == null) return new Ticket(this);
             else return this.ticket;
         }
+    }
+
+    /**
+     * 判断此 Feedback 是否已经过期了? 过期了表示无法再进行处理了.
+     * @return
+     */
+    public boolean isExpired() {
+        return new Duration(this.createDate.getTime(), System.currentTimeMillis()).getStandardDays() >= 60;
     }
 
 
