@@ -1,5 +1,7 @@
 package models;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.Model;
 import play.jobs.Job;
 import play.libs.Time;
@@ -15,6 +17,7 @@ import javax.persistence.Entity;
  * Time: 1:05 AM
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)//添加缓存, 因为经常加载
 public class Jobex extends Model {
 
     @Column(unique = true, nullable = false)

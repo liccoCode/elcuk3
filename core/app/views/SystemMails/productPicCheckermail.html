@@ -1,0 +1,28 @@
+<h2>系统内 Product 产品图片检查</h2>
+<table>
+    <tr>
+        <th>SKU</th>
+        <th>Day1</th>
+        <th>Day7</th>
+        <th>Day30</th>
+        <th>Pics</th>
+        <th>Sellings</th>
+    </tr>
+    #{list items:productAndSellT2s, as:'t2'}
+    #{set prod:t2._1/}
+    #{set sell:t2._2/}
+    <tr>
+        <td>${prod.sku}</td>
+        <td>${sell.d1}</td>
+        <td>${sell.d7}/${(sell.d7 / 7).format("#.##")}</td>
+        <td>${sell.d30}/${(sell.d30 / 30).format("#.##")}</td>
+        <td>${prod.pictureCount()}</td>
+        #{set sellings:prod.sellingCount() /}
+        <td>
+            #{list items:sellings, as:'s'}
+            <a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a>
+            #{/list}
+        </td>
+    </tr>
+    #{/list}
+</table>

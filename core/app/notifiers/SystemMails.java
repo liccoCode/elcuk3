@@ -4,9 +4,12 @@ import helper.Dates;
 import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
+import models.market.Selling;
+import models.product.Product;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
+import play.libs.F;
 import play.mvc.Mailer;
 
 import java.util.Date;
@@ -26,7 +29,7 @@ public class SystemMails extends Mailer {
      * @return
      */
     public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
-        setSubject(String.format("%s Reviews Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
+        setSubject(String.format("{INFO} %s Reviews Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
         addRecipient("alerts@easyacceu.com");
         try {
@@ -48,12 +51,25 @@ public class SystemMails extends Mailer {
     }
 
     public static boolean dailyFeedbackMail(List<Feedback> feedbacks) {
-        setSubject(String.format("%s Feedback Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
+        setSubject(String.format("{INFO} %s Feedback Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
         addRecipient("alerts@easyacceu.com");
         try {
             send(feedbacks);
         } catch(Exception e) {
+            Logger.warn(Webs.E(e));
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean productPicCheckermail(List<F.T2<Product,Selling>> productAndSellT2s) {
+        setSubject(String.format("{CHECK} Product Picture Information Check"));
+        mailBase();
+        addRecipient("alerts@easyacceu.com");
+        try {
+            send(productAndSellT2s);
+        } catch(Exception e){
             Logger.warn(Webs.E(e));
             return false;
         }

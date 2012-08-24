@@ -461,8 +461,22 @@ public class Product extends GenericModel {
         }
     }
 
+    /**
+     * 此产品拥有的图片的数量
+     *
+     * @return
+     */
     public long pictureCount() {
         return Attach.count("fid=?", this.sku);
+    }
+
+    /**
+     * 此 Product 关联的 Selling 的数量
+     *
+     * @return
+     */
+    public List<Selling> sellingCount() {
+        return Selling.find("sellingId LIKE ?", this.sku + "%").fetch();
     }
 
     /**
