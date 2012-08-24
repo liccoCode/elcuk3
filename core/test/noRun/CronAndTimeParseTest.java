@@ -26,4 +26,16 @@ public class CronAndTimeParseTest {
         String cron = "0 40 1 1,8,15,22,29 * ?";
         System.out.println(Dates.date2DateTime(Time.parseCRONExpression(cron)));
     }
+
+    @Test
+    public void testCronEveryThreeDay() {
+        String cron = "0 10 0 */3 * ?";
+        System.out.println(Dates.date2DateTime(Time.parseCRONExpression(cron)));
+    }
+
+    @Test
+    public void testCronEveryDay() {
+        String cron = "0 20 0 * * ?";
+        System.out.println(Dates.date2DateTime(Time.parseCRONExpression(cron)));
+    }
 }

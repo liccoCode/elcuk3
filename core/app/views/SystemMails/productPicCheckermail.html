@@ -20,7 +20,7 @@
         #{set sellings:prod.sellingCount() /}
         <td>
             #{list items:sellings, as:'s'}
-            <a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a>
+            <a href="@@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a><br/>
             #{/list}
         </td>
     </tr>
