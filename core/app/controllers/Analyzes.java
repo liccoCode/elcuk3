@@ -77,8 +77,8 @@ public class Analyzes extends Controller {
     }
 
     public static void clear() {
-        Cache.delete(String.format(Caches.SALE_SELLING, "msku"));
-        Cache.delete(String.format(Caches.SALE_SELLING, "sid"));
+        Cache.delete(Selling.analyzesSellingKey("msku"));
+        Cache.delete(Selling.analyzesSellingKey("sku"));
         renderJSON(new Ret());
     }
 

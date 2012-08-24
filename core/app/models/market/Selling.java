@@ -410,7 +410,7 @@ public class Selling extends GenericModel {
         if(ps == null || ps < 0) throw new FastRuntimeException("PS 格式错误或者 PS 不允许小于 0");
         this.ps = ps;
         // 如果缓存不为空则更新缓存
-        List<Selling> sellings = Cache.get(String.format(Caches.SALE_SELLING, "msku"), List.class);
+        List<Selling> sellings = Cache.get(Selling.analyzesSellingKey("msku"), List.class);
         if(sellings != null) {
             boolean find = false;
             for(Selling sell : sellings) {
@@ -615,11 +615,21 @@ public class Selling extends GenericModel {
         return analyzesSKUAndSID(type, true);
     }
 
+    /**
+     * 在分析页面计算以后, 缓存起来的 Selling 的缓存 key;
+     * 因为有其他地方有需要使用到这里缓存起来的数据, 所以将 key 进行函数化
+     * @param type  只有 sku, msku 两个值
+     * @return
+     */
+    public static String analyzesSellingKey(String type) {
+        return String.format(Caches.SALE_SELLING, "msku".equals(type) ? "sid" : type);
+    }
+
     @SuppressWarnings("unchecked")
     public static List<Selling> analyzesSKUAndSID(String type, Boolean useCache) {
         if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
             throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
-        String cacke_key = String.format(Caches.SALE_SELLING, "msku".equals(type) ? "sid" : type);
+        String cacke_key = Selling.analyzesSellingKey(type);
         // 判断是否使用 Cache, 如果不使用 Cache, 则清楚缓存, 否则进入原始使用 Cache 的流程
         if(!useCache) Cache.delete(cacke_key);
 
