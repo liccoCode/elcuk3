@@ -26,7 +26,7 @@ public class CheckerProductCheckJob extends Job {
         for(Selling skuSale : skuSales) {
             if(thisTimeWarnningProduct.size() >= 10) break;
             Product prod = Product.findByMerchantSKU(skuSale.merchantSKU);
-            if(prod.pictureCount() > 4) continue;
+            if(prod.pictureCount() >= 4) continue;
             thisTimeWarnningProduct.add(new F.T2<Product, Selling>(prod, skuSale));
         }
 
