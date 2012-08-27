@@ -21,6 +21,13 @@ import java.util.*;
  */
 public class AmazonListingReview {
 
+    public AmazonListingReview() {
+    }
+
+    public AmazonListingReview(boolean remove) {
+        isRemove = remove;
+    }
+
     /**
      * Amazon ListingC Review 的 Id:
      * ([listingId]_[userid])toUppercase()
@@ -122,7 +129,16 @@ public class AmazonListingReview {
      */
     public String comment = "";
 
-    public static List<AmazonListingReview> parseReviewFromHTML(Document doc, int page) {
+    public boolean isRemove = false;
+
+    /**
+     * 从 Amazon 的 Review List Page 解析出多个 Review
+     *
+     * @param doc
+     * @param page
+     * @return
+     */
+    public static List<AmazonListingReview> parseReviewsFromReviewsListPage(Document doc, int page) {
         List<AmazonListingReview> reviewList = new ArrayList<AmazonListingReview>();
         Element rtr = doc.select("#productReviews tr").first();
         if(rtr == null) return reviewList;
@@ -132,67 +148,20 @@ public class AmazonListingReview {
         Logger.debug("Fetched Review Size is %s", reviews.size());
 
         String asin = doc.select(".asinReviewsSummary").attr("name");
-        String market = doc.select(".navFooterLogoLine img").attr("alt");
+        String market = AmazonListingReview.amazon_bottom_market(doc);
 
         int rank = 1;
         for(Element r : reviews) {
             try {
-                AmazonListingReview review = new AmazonListingReview();
                 Element fromListing = r.select("> div.tiny b a").first();
+                String listingId = "";
                 if(fromListing != null) {
                     String fixAsin = StringUtils.substringBetween(fromListing.attr("href"), "dp/", "/ref");
-                    review.listingId = String.format("%s_%s", fixAsin, market);
+                    listingId = String.format("%s_%s", fixAsin, market);
                 } else {
-                    review.listingId = String.format("%s_%s", asin, market);
+                    listingId = String.format("%s_%s", asin, market);
                 }
-                Logger.debug("Actually listingId is %s", review.listingId);
-
-                String ratingStr = r.select("> div span.swSprite").first().text();
-                review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
-                review.lastRating = review.rating; // 对 LastRating 的初始化
-
-                review.isRealName = r.select(".s_BadgeRealName").first() != null;
-                review.isVineVoice = r.select(".s_BadgeVineVoice").first() != null;
-                if(r.select(".s_BadgeTop50").first() != null) review.topN = 50;
-                if(r.select(".s_BadgeTop100").first() != null) review.topN = 100;
-                if(r.select(".s_BadgeTop500").first() != null) review.topN = 500;
-                if(r.select(".s_BadgeTop1000").first() != null) review.topN = 1000;
-
-                review.title = r.select("> div span b").first().text().trim();
-
-                String helpfulStr = r.select("> div").first().text();
-                int[] two = {0, 0};
-                if(isHelpfulStr(helpfulStr)) {
-                    String[] words = StringUtils.split(helpfulStr);
-                    int n = 0; // 存储数字的索引
-                    for(String s : words) {
-                        s = StringUtils.remove(s, "sur "); // 在 FR, [sur 1] 为第二个数字, 但是 sur 与 1 之间那个符号不是空格, 所以做删除处理
-                        int number = NumberUtils.toInt(s, -1);
-                        if(number != -1) two[n++] = number;
-                    }
-                }
-                review.helpUp = two[0];
-                review.helpClick = two[1];
-
-                Element user = r.select("> div div div a").first();
-                review.username = user.text();
-                review.userid = StringUtils.splitPreserveAllTokens(user.attr("href"), "/")[6];
-
-                String[] dates = StringUtils.split(StringUtils.remove(r.select("> div span nobr").first().text(), "."), " ");
-                review.reviewDate = DateTime.parse(String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2]), DateTimeFormat.forPattern("dd MMM yyyy")).toString("yyyy-MM-dd");
-
-                Element purchasedEl = r.select("> div span.crVerifiedStripe").first();
-                review.purchased = purchasedEl != null;
-
-                review.review = r.ownText();
-
-                review.alrId = String.format("%s_%s", review.listingId, review.userid).toUpperCase();
-
-                review.reviewId = StringUtils.split(r.select(".crVotingButtons").first().previousElementSibling().attr("name"), ".")[0];
-                review.isVedio = r.select(".flashPlayer").first() != null;
-                if(review.isVedio) {
-                    review.vedioPicUrl = r.select(".flashPlayer").first().select("img").first().attr("src");
-                }
+                AmazonListingReview review = parseReviewDiv(listingId, r, false);
 
                 // 放到最后面添加
                 review.reviewRank = (page - 1) * 10 + rank++;
@@ -202,6 +171,83 @@ public class AmazonListingReview {
             }
         }
         return reviewList;
+    }
+
+    public static AmazonListingReview parseReviewFromOnePage(Document doc) {
+        Element div = doc.select("div.hReview").first().previousElementSibling();
+        return parseReviewDiv(String.format("%s_%s", doc.select(".asin").first().text(), AmazonListingReview.amazon_bottom_market(doc)), div, true);
+    }
+
+    /**
+     * 解析 Amazon 的 Review Div 中的 Review 信息
+     *
+     * @param listingId
+     * @param r
+     * @param single    是否为单页
+     * @return
+     */
+    public static AmazonListingReview parseReviewDiv(String listingId, Element r, boolean single) {
+        AmazonListingReview review = new AmazonListingReview();
+
+        review.listingId = listingId;
+        Logger.debug("Actually listingId is %s", review.listingId);
+
+        // ---- rating 字符串不一样
+        String ratingStr = "";
+        if(single) ratingStr = r.select("> div span > img").attr("title");
+        else ratingStr = r.select("> div span.swSprite").first().text();
+        review.rating = NumberUtils.toFloat(StringUtils.split(ratingStr)[0]);
+        review.lastRating = review.rating; // 对 LastRating 的初始化
+
+        review.isRealName = r.select(".s_BadgeRealName").first() != null;
+        review.isVineVoice = r.select(".s_BadgeVineVoice").first() != null;
+        if(r.select(".s_BadgeTop50").first() != null) review.topN = 50;
+        if(r.select(".s_BadgeTop100").first() != null) review.topN = 100;
+        if(r.select(".s_BadgeTop500").first() != null) review.topN = 500;
+        if(r.select(".s_BadgeTop1000").first() != null) review.topN = 1000;
+
+        if(single) review.title = r.select("> div b").first().text().trim();
+        else review.title = r.select("> div span b").first().text().trim();
+
+        String helpfulStr = r.select("> div").first().text();
+        int[] two = {0, 0};
+        if(isHelpfulStr(helpfulStr)) {
+            String[] words = StringUtils.split(helpfulStr);
+            int n = 0; // 存储数字的索引
+            for(String s : words) {
+                s = StringUtils.remove(s, "sur "); // 在 FR, [sur 1] 为第二个数字, 但是 sur 与 1 之间那个符号不是空格, 所以做删除处理
+                int number = NumberUtils.toInt(s, -1);
+                if(number != -1) two[n++] = number;
+            }
+        }
+        review.helpUp = two[0];
+        review.helpClick = two[1];
+
+        Element user = r.select("> div div div a").first();
+        review.username = user.text();
+        review.userid = StringUtils.splitPreserveAllTokens(user.attr("href"), "/")[6];
+
+        // ------ date 位置不一样
+        String dateStr = "";
+        if(single) dateStr = r.select("> div nobr").first().text();
+        else dateStr = r.select("> div span nobr").first().text();
+        String[] dates = StringUtils.split(StringUtils.remove(dateStr, "."), " ");
+        review.reviewDate = DateTime.parse(String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2]), DateTimeFormat.forPattern("dd MMM yyyy")).toString("yyyy-MM-dd");
+
+        Element purchasedEl = r.select("> div span.crVerifiedStripe").first();
+        review.purchased = purchasedEl != null;
+
+        review.review = r.ownText();
+
+        review.alrId = String.format("%s_%s", review.listingId, review.userid).toUpperCase();
+
+        review.reviewId = StringUtils.split(r.select(".crVotingButtons").first().previousElementSibling().attr("name"), ".")[0];
+        review.isVedio = r.select(".flashPlayer").first() != null;
+        if(review.isVedio) {
+            review.vedioPicUrl = r.select(".flashPlayer").first().select("img").first().attr("src");
+        }
+        review.reviewRank = -1; // 这个里面将 reviewRank 设置为 -1, 代表没有意义
+        return review;
     }
 
     /**
@@ -248,9 +294,11 @@ public class AmazonListingReview {
      * @return
      */
     private static boolean isHelpfulStr(String str) {
-        return StringUtils.containsIgnoreCase(str, "reviews helpful") || // uk
-                StringUtils.containsIgnoreCase(str, "Rezension hilfreich") || // de
-                StringUtils.containsIgnoreCase(str, "commentaire utile"); // fr
+        String str_lower = str.toLowerCase().trim();
+        return StringUtils.containsIgnoreCase(str_lower, "review helpful") || // uk
+                StringUtils.containsIgnoreCase(str_lower, "reviews helpful") || // de
+                StringUtils.containsIgnoreCase(str_lower, "rezension hilfreich") || // de
+                StringUtils.containsIgnoreCase(str_lower, "commentaire utile"); // fr
     }
 
     /**
@@ -290,5 +338,10 @@ public class AmazonListingReview {
             }
         });
         return filterVariationReview;
+    }
+
+    public static String amazon_bottom_market(Document doc) {
+        return doc.select(".navFooterLogoLine img").attr("alt");
+
     }
 }

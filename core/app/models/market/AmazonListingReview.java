@@ -215,6 +215,11 @@ public class AmazonListingReview extends GenericModel {
     public int reviewRank = -1;
 
     /**
+     * 是否被删除
+     */
+    public boolean isRemove = false;
+
+    /**
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
      */
     @OneToMany(mappedBy = "ownerReview")
@@ -234,7 +239,7 @@ public class AmazonListingReview extends GenericModel {
         if(this.listing == null)
             Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
         else if(!Listing.isSelfBuildListing(this.listing.title)) {
-            this.comment = String.format("这个 Review 对应的 Listing 非自建.\r\n") + this.comment;
+            this.comment(String.format("这个 Review 对应的 Listing 非自建."));
         }
         return this.save();
     }
@@ -253,8 +258,8 @@ public class AmazonListingReview extends GenericModel {
         this.listingId = newReview.listingId;
         if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
             this.lastRating = this.rating;
-            this.comment = String.format("Rating from %s to %s At %s\r\n", this.lastRating, newReview.rating, Dates.date2DateTime()) + this.comment;
-            this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
+            this.comment(String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating, Dates.date2DateTime()));
+            if(this.ticket != null) this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
@@ -409,6 +414,10 @@ public class AmazonListingReview extends GenericModel {
      */
     public Boolean isWithinTop1000() {
         return this.topN != null && this.topN > 0 && this.topN <= 1000;
+    }
+
+    public void comment(String comment) {
+        this.comment = String.format("%s\r\n%s", comment.trim(), this.comment);
     }
 
     /**

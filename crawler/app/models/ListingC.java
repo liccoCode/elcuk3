@@ -78,6 +78,8 @@ public class ListingC {
 
     public S state;
 
+    public boolean isRemove = false;
+
     public ListingC() {
     }
 
@@ -85,9 +87,14 @@ public class ListingC {
         this.msg = msg;
     }
 
+    public ListingC(boolean remove) {
+        isRemove = remove;
+    }
+
     public static ListingC parseAmazon(Document doc) {
         ListingC lst = new ListingC();
         if(StringUtils.contains(doc.select("title").text(), "404")) {
+            lst.isRemove = true;
             lst.state = S.CLOSE;
             return lst;
         }

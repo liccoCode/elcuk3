@@ -3,6 +3,7 @@ package jobs;
 import helper.Dates;
 import helper.FLog;
 import helper.HTTP;
+import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.support.Ticket;
 import models.support.TicketState;
@@ -30,11 +31,10 @@ import java.util.List;
 public class FeedbackInfoFetchJob extends Job {
     @Override
     public void doJob() {
-        DateTime now = DateTime.now();
-        // 处理 2 个月内的所有订单, 每次更新 50
+        // 处理还没有关闭的 Ticket, 每次更新 30
         int size = 30;
         if(Play.mode.isDev()) size = 10;
-        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?)  ORDER BY lastSyncTime",
+        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
                 Ticket.T.FEEDBACK, false, TicketState.PRE_CLOSE, TicketState.CLOSE).fetch(size);
         Logger.info("FeedbackInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
@@ -51,6 +51,10 @@ public class FeedbackInfoFetchJob extends Job {
      * 3. 检查 Ticket 对应的 Feedback 是否已经超时?
      */
     public static void checkFeedbackDealState(Ticket ticket) {
+        if(ticket.feedback == null) {
+            Logger.warn("FeedbackInfoFetchJob deal an no Feedback Ticket(id|fid) [%s|%s]", ticket.id, ticket.fid);
+            return;
+        }
 
         // 1.
         if(!ticket.feedback.market.equals(ticket.feedback.account.type)) {
@@ -59,7 +63,8 @@ public class FeedbackInfoFetchJob extends Job {
         } else {
             // 2.
             String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
-            ticket.isSuccess = FeedbackInfoFetchJob.isFeedbackRemove(html);
+            ticket.feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
+            ticket.isSuccess = ticket.feedback.isRemove;
             if(ticket.isSuccess) {
                 ticket.state = TicketState.PRE_CLOSE;
                 TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());

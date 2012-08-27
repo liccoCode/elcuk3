@@ -18,8 +18,12 @@ public class Crawl {
         return HTTP.json(String.format("%s/offers/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
     }
 
-    public static JsonElement crawlReview(String market, String asin) {
+    public static JsonElement crawlReviews(String market, String asin) {
         return HTTP.json(String.format("%s/reviews/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+    }
+
+    public static JsonElement crawlReview(String market, String reviewId) {
+        return HTTP.json(String.format("%s/review/%s/%s", Server.server(Server.T.CRAWLER).url, market, reviewId));
     }
 
 }

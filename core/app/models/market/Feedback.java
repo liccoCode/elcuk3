@@ -78,6 +78,11 @@ public class Feedback extends GenericModel {
      */
     public String osTicketId;
 
+    /**
+     * 是否被删除
+     */
+    public boolean isRemove = false;
+
 
     public Feedback() {
     }

@@ -2,6 +2,7 @@ package helper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -141,6 +142,10 @@ public class HTTP {
 
     public static String E(Exception e) {
         return e.getClass().getSimpleName() + "|" + e.getMessage();
+    }
+
+    public static boolean is404(String html) {
+        return StringUtils.contains(StringUtils.substringBetween(html, "<title>", "</title>"), "404");
     }
 
 }
