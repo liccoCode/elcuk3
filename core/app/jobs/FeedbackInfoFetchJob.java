@@ -34,8 +34,8 @@ public class FeedbackInfoFetchJob extends Job {
         // 处理 2 个月内的所有订单, 每次更新 50
         int size = 30;
         if(Play.mode.isDev()) size = 10;
-        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND createAt>=? AND createAt<=? ORDER BY lastSyncTime",
-                Ticket.T.FEEDBACK, false, Dates.morning(now.minusDays(60).toDate()), Dates.night(now.toDate())).fetch(size);
+        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?)  ORDER BY lastSyncTime",
+                Ticket.T.FEEDBACK, false, TicketState.PRE_CLOSE, TicketState.CLOSE).fetch(size);
         Logger.info("FeedbackInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
             FeedbackInfoFetchJob.checkFeedbackDealState(ticket);
@@ -46,20 +46,30 @@ public class FeedbackInfoFetchJob extends Job {
 
     /**
      * 检查 Feedback 的处理状态
-     * 1. 向 Amazon 检查这个 Feedback 是否被删除?(无法修改评价)
-     * 2. 检查 Ticket 对应的 Feedback 是否已经超时?
+     * 1. 判断是否未 UK 账号在 DE 市场销售的, 如果是, 则跳过第二个检查
+     * 2. 向 Amazon 检查这个 Feedback 是否被删除?(无法修改评价)
+     * 3. 检查 Ticket 对应的 Feedback 是否已经超时?
      */
     public static void checkFeedbackDealState(Ticket ticket) {
-        String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
-        ticket.isSuccess = FeedbackInfoFetchJob.isFeedbackRemove(html);
-        if(ticket.isSuccess) {
+
+        // 1.
+        if(!ticket.feedback.market.equals(ticket.feedback.account.type)) {
             ticket.state = TicketState.PRE_CLOSE;
-            TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
+            ticket.memo = "UK 账号在 DE 销售产品时的 Feedback 不再处理.\r\n" + ticket.memo;
+        } else {
+            // 2.
+            String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
+            ticket.isSuccess = FeedbackInfoFetchJob.isFeedbackRemove(html);
+            if(ticket.isSuccess) {
+                ticket.state = TicketState.PRE_CLOSE;
+                TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
+            }
         }
 
+        // 3.
         if(ticket.feedback.isExpired()) {
             ticket.state = TicketState.PRE_CLOSE;
-            ticket.memo = "Feedback 已经过期, 无法再处理.\r\n" + ticket.memo;
+            ticket.memo = "Feedback 已经过期, 无法再处理, 请标记原因.\r\n" + ticket.memo;
         }
     }
 

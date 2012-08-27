@@ -57,7 +57,7 @@ public class Account extends Model {
     /**
      * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
      */
-    private static final Map<String, CookieStore> COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
+    public static final Map<String, CookieStore> COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
 
 
     /**
@@ -153,7 +153,7 @@ public class Account extends Model {
      */
     public CookieStore cookieStore(M market) {
         if(market == null) market = this.type;
-        String key = String.format("ACC_COOKIE_%s_%s", this.id, market);
+        String key = cookieKey(this.id, market);
         if(!COOKIE_STORE_MAP.containsKey(key))
             COOKIE_STORE_MAP.put(key, new BasicCookieStore());
         return COOKIE_STORE_MAP.get(key);
@@ -547,6 +547,16 @@ public class Account extends Model {
                 sameMarketAccs.add(acc);
         }
         return sameMarketAccs;
+    }
+
+    /**
+     * 构造放在 Account Cookie_Store_Map 中的 KEY
+     * @param aid
+     * @param market
+     * @return
+     */
+    public static String cookieKey(long aid, M market) {
+        return String.format("ACC_COOKIE_%s_%s", aid, market);
     }
 
 

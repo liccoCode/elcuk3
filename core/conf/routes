@@ -12,6 +12,7 @@ GET     /                                                   Application.index
 GET     /pass                                               Application.pwd
 GET     /cc                                                 Application.cc
 GET     /c/{key}                                            Application.c
+GET     /alogin/{id}                                        Application.amazonLogin
 
 # Ignore favicon requests
 GET     /favicon.ico                                        404

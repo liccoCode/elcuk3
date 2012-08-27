@@ -124,6 +124,7 @@ public class Feedback extends GenericModel {
         if(newFeedback.score != null) this.score = newFeedback.score;
         if(StringUtils.isNotBlank(newFeedback.feedback)) this.feedback = newFeedback.feedback;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
+        if(StringUtils.isNotBlank(newFeedback.memo)) this.memo += newFeedback.memo;
 
         return this.save();
     }
