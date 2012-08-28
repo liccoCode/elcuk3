@@ -84,7 +84,7 @@
             <td>${review.topN}</td>
         </tr>
         <tr>
-            <th>最后同步时间</th>
+            <th>最后同步时间 <button id="sync_ticket" class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
             <td>${review.ticket.lastSyncTime?.since()}</td>
             <th>最后联系客户时间</th>
             <td title="${review.ticket.lastResponseTime?.datetime()}">${review.ticket.lastResponseTime?.since()}</td>
@@ -191,9 +191,7 @@
             #{if haveTicket && !isClosed}
                 <div class="row-fluid">
                     <div id="close_div" class="span12" style="display:none;margin-top:10px;">
-                        <textarea rows="4" id="close_reason" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
-
-                        <button id="close_btn" class="btn btn-danger">Close</button>
+                        #{render 'Tickets/_close_single.html', reasons:review.ticket.reasons/}
                     </div>
                 </div>
             #{/if}

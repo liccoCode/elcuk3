@@ -58,14 +58,14 @@ $ ->
   # 关闭按钮
   $('#close_btn').click (e) ->
     return false if !confirm('确认要关闭这个 Ticket?')
-    mask = $('#close_div')
+    mask = $('#container')
     mask.mask("关闭中...")
     $.post('/tickets/close', {tid: ticketId(), reason: $(@).prev().val()},
       (r) ->
         if r.flag is false
           alert(r.message)
         else
-          alert(99)
+          alert("成功关闭")
         mask.unmask()
     )
     e.preventDefault()
@@ -81,6 +81,22 @@ $ ->
           mask.unmask()
         else
           window.location.reload()
+    )
+    e.preventDefault()
+
+  $('#sync_ticket').click (e) ->
+    mask = $('#container')
+    mask.mask("同步中...")
+    $.post('/tickets/sync', tid: ticketId(),
+      (r) ->
+        alert(r.message + "\r\n" + " 3s 后自动刷新")
+
+        if r.flag is true
+          setTimeout(
+            ->
+              window.location.reload()
+            , 3000
+          )
     )
     e.preventDefault()
 

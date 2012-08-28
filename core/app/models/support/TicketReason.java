@@ -12,6 +12,8 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.OrderBy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,22 +99,25 @@ public class TicketReason extends Model {
     }
 
     /**
-     * 将此 Reaton 所关联的 Ticket 拆分成 Review 与 Feedback
+     * 将此 Reaton 所关联的 Ticket 拆分成 Review 与 Feedback 与 Ticket
      *
-     * @return T2: _.1[Review] , _.2[Feedback]
+     * @return T2: _.1[Review] , _.2[Feedback], _.3[Ticket]
      */
-    public F.T2<List<Ticket>, List<Ticket>> divTicketsInToRAndF() {
+    public F.T3<List<Ticket>, List<Ticket>, List<Ticket>> divTicketsInToRAndF() {
         List<Ticket> reviews = new ArrayList<Ticket>();
         List<Ticket> feedbacks = new ArrayList<Ticket>();
+        List<Ticket> tickets = new ArrayList<Ticket>();
         if(this.tickets.size() != 0) {
             for(Ticket t : this.tickets) {
                 if(t.type == Ticket.T.REVIEW)
                     reviews.add(t);
                 else if(t.type == Ticket.T.FEEDBACK)
                     feedbacks.add(t);
+                else if(t.type == Ticket.T.TICKET)
+                    tickets.add(t);
             }
         }
-        return new F.T2<List<Ticket>, List<Ticket>>(reviews, feedbacks);
+        return new F.T3<List<Ticket>, List<Ticket>, List<Ticket>>(reviews, feedbacks, tickets);
     }
 
     /**

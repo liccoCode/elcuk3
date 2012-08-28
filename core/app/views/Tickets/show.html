@@ -1,0 +1,105 @@
+#{extends 'main.html'/}
+#{set title:'Ticket #' + ticket.osTicketId() /}
+#{set 'moreScripts'}
+    #{script 'tickets/reviewAndFeedback.coffee'/}
+#{/set}
+<div class="row">
+    <table class="table table-condensed table-bordered span12">
+        <tr>
+            <th>Id</th>
+            <td>
+            ${ticket.id}
+                <input type="hidden" id="ticketId" name="ticketId" value="${ticket.id}">
+            </td>
+            <th>CrateAt</th>
+            <td title="${ticket.createAt?.date()}">${ticket.createAt?.since()}</td>
+            <th>OsTicket</th>
+            <td>
+                <a href="${ticket.osTicketLink()}" target="_blank">
+                    <i class="icon-external-link"></i> ${ticket.osTicketId}
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <th>最后同步时间 <button id="sync_ticket" class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
+            <td title="${ticket.lastSyncTime?.datetime()}">${ticket.lastSyncTime?.since()}</td>
+            <th>最后联系客户时间</th>
+            <td title="${ticket.lastResponseTime?.date()}">${ticket.lastResponseTime?.since()}</td>
+            <th>客户最后联系时间</th>
+            <td title="${ticket.lastMessageTime?.date()}">${ticket.lastMessageTime?.since()}</td>
+        </tr>
+        <tr>
+            <th rel="popover" content="${ticket.state.explan()}"><i class="icon-question-sign"></i> State</th>
+            <td>${ticket.state}</td>
+            <th>客户回复/我方联系</th>
+            <td>${ticket.messageTimes} / ${ticket.responseTimes}</td>
+            <td colspan="2"></td>
+        </tr>
+        <tr>
+            <th>Title</th>
+            <td colspan="5">${ticket.fid}</td>
+        </tr>
+
+        <tr>
+            <td colspan="6">
+                <div class="row-fluid" id="reason_div">
+                    <div class="span5">
+                    #{list items:ticket.reasons, as:'ra'}
+                        <span rel="popover" content="${ra.memo}" class="reason badge badge-important">${ra.name()}</span>
+                    #{/list}
+                    </div>
+                    <div class="span7">
+                    #{list items:reasons, as:'ra'}
+                        <span rel="popover" content="${ra.memo}" class="unTagReason badge badge-info">${ra.name()}</span>
+                    #{/list}
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="6">
+                <div class="row-fluid">
+                    <!-- 此 Ticket 的处理者 -->
+                    <div class="pull-left" style="margin:5px;">
+                    #{if ticket.resolver == null}
+                        <button id="take_it" rel="popover" content="由我[${session.get("username")}]来处理这个 Ticket" class="btn btn-primary">
+                            Take It
+                        </button>
+                    #{/if}
+                    #{else}
+                        <span class="badge badge-info">由
+                        <i class="icon-user"></i> ${ticket.resolver.username.capAll()}
+                            处理
+                    </span>
+                    #{/else}
+                    </div>
+
+                #{set isClose: ticket.state== models.support.TicketState.CLOSE/}
+                    <div class="pull-left" style="margin:5px;">
+                    #{ifnot isClose}
+                        <a data-toggle="toggle" data-target="#close_div" class="btn btn-danger">
+                            <i class="icon-edit"></i> Close
+                        </a>
+                    #{/ifnot}
+                    </div>
+                </div>
+            </td>
+        </tr>
+    #{ifnot isClose}
+        <tr id="close_div" style="display:none;">
+            <td colspan="6">
+                #{render 'Tickets/_close_single.html', reasons:ticket.reasons/}
+            </td>
+        </tr>
+    #{/ifnot}
+
+        <tr>
+            <td colspan="6" class="alert alert-info">
+                <h4>Ticket Comment</h4>
+
+                <p>${ticket.memo.raw()}</p>
+            </td>
+        </tr>
+    </table>
+</div>

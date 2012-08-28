@@ -44,6 +44,12 @@ public class Tickets extends Controller {
         render(needTwoTickets, noRespTickets, newMsgTickets, preCloseTickets, totals, closed);
     }
 
+    public static void show(long tid) {
+        Ticket ticket = Ticket.findById(tid);
+        List<TicketReason> reasons = TicketReason.find("ORDER BY category.categoryId").fetch();
+        render(ticket, reasons);
+    }
+
 
     /**
      * 给 Ticket 添加原因[Review, Feedback 通用]
@@ -104,8 +110,10 @@ public class Tickets extends Controller {
      *
      * @param tid
      */
-    public static void sync(String tid) {
-        Ticket ticket = Ticket.findByOsTicketId(tid);
+    public static void sync(long tid) {
+        Ticket ticket = Ticket.findByOsTicketId(tid + "");
+        // 首先对 OsTicketId 加载, 然后再对 TicketId 进行加载尝试
+        if(ticket == null) ticket = Ticket.findById(tid);
         if(ticket == null) {
             renderJSON(new Ret("Ticket " + tid + " is not exist."));
         }

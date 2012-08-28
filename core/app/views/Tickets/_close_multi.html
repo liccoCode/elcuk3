@@ -1,0 +1,9 @@
+<textarea rows="4" id="close_reason_${tid}" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写. 对应 OsTicket 中的 Ticket 也会关闭."></textarea>
+#{if reasons.size() == 0}
+<span class="alert alert-danger">需要先指定原因才可以关闭</span>
+#{/if}
+#{else }
+<button tid="${tid}" class="close_btn btn btn-danger">
+    Close
+</button>
+#{/else}

@@ -247,8 +247,7 @@ public class Ticket extends Model {
          * 3. 检查这个 Ticket 是否有 resolver
          */
         if(this.state == TicketState.CLOSE) throw new FastRuntimeException("已经关闭了, 不需要重新关闭.");
-        if(this.type != T.TICKET)// Ticket 不需要 reasons, 但需要文件原因
-            if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
+        if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
         if(this.resolver == null) throw new FastRuntimeException("请给 Ticket 添加负责人.");
         if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
         this.state = TicketState.CLOSE;

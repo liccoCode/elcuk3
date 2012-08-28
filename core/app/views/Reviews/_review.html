@@ -121,17 +121,7 @@
                 <div id="close_${t.id}" class="tab-pane fade" style="background:#fff;">
                     <div class="row-fluid">
                         #{if t.state != models.support.TicketState.CLOSE}
-                            <textarea rows="4" id="close_reason_${t.id}" class="span12" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
-
-
-                            #{if t.reasons.size() == 0}
-                                <span class="alert alert-danger">需要先指定原因才可以关闭</span>
-                            #{/if}
-                            #{else }
-                                <button tid="${t.id}" class="close_btn btn btn-danger">
-                                    Close
-                                </button>
-                            #{/else}
+                            #{render 'Tickets/_close_multi.html', tid:t.id, reasons:t.reasons/}
                         #{/if}
                         #{else }
                             已经关闭了

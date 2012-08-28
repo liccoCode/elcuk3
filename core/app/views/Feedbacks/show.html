@@ -44,10 +44,10 @@
 
     #{if haveTicket}
         <tr>
+            <th>最后同步时间 <button id="sync_ticket" class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
+            <td>${feedback.ticket.lastSyncTime?.since()}</td>
             <th>最后联系客户时间</th>
             <td title="${feedback.ticket.lastResponseTime?.datetime()}">${feedback.ticket.lastResponseTime?.since()}</td>
-            <th>最后同步时间</th>
-            <td>${feedback.ticket.lastSyncTime?.since()}</td>
             <th>客户最后回复时间</th>
             <td title="${feedback.ticket.lastMessageTime?.datetime()}">${feedback.ticket.lastMessageTime?.since()}</td>
         </tr>
@@ -116,9 +116,7 @@
             #{if haveTicket && !isClosed}
                 <div class="row-fluid">
                     <div id="close_div" class="span12" style="display:none;margin-top:10px;">
-                        <textarea rows="4" id="close_reason" class="span11" placeHolder="输入关闭这个 Ticket 的理由, 必须填写"></textarea>
-
-                        <button id="close_btn" class="btn btn-danger">Close</button>
+                        #{render 'Tickets/_close_single.html', reasons:feedback.ticket.reasons/}
                     </div>
                 </div>
             #{/if}
