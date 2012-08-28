@@ -1,0 +1,17 @@
+#{if t.isStart}
+    <span class="badge badge-important"><i class="icon-star"></i></span>
+#{/if}
+#{list items:t.reasons, as:'ra'}
+    <span class="badge badge-important">${ra.name()}</span>
+#{/list}
+
+<span class="pull-right badge badge-info">${t.responseTimes}</span>
+<span class="pull-right badge badge-warning">${t.messageTimes}</span>
+#{if t.isNoEmail()}
+    <span class="pull-right badge badge-inverse"><i class="icon-ban-circle"></i></span>
+#{/if}
+
+<!-- 这个是此 Ticket 的处理者 -->
+#{if t.resolver}
+    <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
+#{/if}

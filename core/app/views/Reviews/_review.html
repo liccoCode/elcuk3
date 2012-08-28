@@ -5,7 +5,7 @@
         <th>Asin</th>
         <th>Create</th>
         <th>LastMsg</th>
-        <th rel="popover" placement="bottom" content="黑色数字为 Review 字数<br><br>橙色数字为客户回复数<br><br>蓝色数字为我方回复数;<br><br>黑色对话框表示在 Amazon 上留了 Comment">
+        <th rel="popover" placement="bottom" content="黑色数字为 Review 字数<br><br>橙色数字为客户回复数<br><br>蓝色数字为我方回复数;<br><br>黑色对话框表示在 Amazon 上留了 Comment<br><br>黑色禁止标记表示, 无法找到正确客户 Email">
             <i class="icon-question-sign"></i> Title
         </th>
         <th>ReviewId</th>
@@ -42,21 +42,9 @@
         </td>
         <td data-toggle="toggle" data-target="#toggle_${t.id}" style="cursor:pointer;background:${'#' + r.color()}">
             <span class="badge badge-inverse">${r.length()}</span> |
-            #{if t.isStart}
-                <span class="badge badge-important"><i class="icon-star"></i></span>
-            #{/if}
             <span>${r.title}</span>
-            #{list items:t.reasons, as:'ra'}
-                <span class="badge badge-important">${ra.name()}</span>
-            #{/list}
+            #{render 'Tickets/_title_tags.html', t:t/}
 
-            <span class="pull-right badge badge-info">${t.responseTimes}</span>
-            <span class="pull-right badge badge-warning">${t.messageTimes}</span>
-
-            <!-- 这个是此 Ticket 的处理者 -->
-            #{if t.resolver}
-                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
-            #{/if}
 
             <!-- 我们是否在 Amazon 回复了 Comment -->
             #{if r.isCommentOnAmazon}

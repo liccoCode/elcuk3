@@ -10,17 +10,7 @@
     <tr>
         <td data-toggle="toggle" data-target="#toggle_${t.id}" style="cursor:pointer">
             <span>${t.fid}</span>
-            #{list items:t.reasons, as:'tag'}
-                <span class="badge badge-important">${tag.name()}</span>
-            #{/list}
-
-            <span class="pull-right badge badge-warning">${t.responseTimes}</span>
-            <span class="pull-right badge badge-info">${t.messageTimes}</span>
-
-            <!-- 这个是此 Ticket 的处理者 -->
-            #{if t.resolver}
-                <span class="pull-right badge badge-inverse"><i class="icon-user"></i> ${t.resolver.username.capAll()}</span>
-            #{/if}
+            #{render 'Tickets/_title_tags.html', t:t/}
         </td>
         <td><a href="@{Tickets.show(t.id)}" target="_blank">${t.id}</a></td>
         <td>

@@ -212,6 +212,14 @@ public class Ticket extends Model {
         return this.osTicketId.split("-")[0];
     }
 
+    /**
+     * 是否为有正确客户 Email 地址
+     * @return
+     */
+    public boolean isNoEmail() {
+        return StringUtils.contains(this.osTicketId, "noemail");
+    }
+
     public Ticket tagReason(TicketReason tr) {
         if(this.type == T.FEEDBACK) {
             if(!this.feedback.relateCats().contains(tr.category))
