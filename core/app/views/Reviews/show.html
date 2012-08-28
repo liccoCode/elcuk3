@@ -78,8 +78,8 @@
         <tr>
             <th rel="popover" content="${review.ticket.state.explan()}"><i class="icon-question-sign"></i> State</th>
             <td>${review.ticket.state}</td>
-            <th>isSuccess</th>
-            <td>#{yesOrNo f:review.ticket.isSuccess /}</td>
+            <th>Success/Remove</th>
+            <td>#{yesOrNo f:review.ticket.isSuccess /} | #{yesOrNo f:review.isRemove/}</td>
             <th>TopN</th>
             <td>${review.topN}</td>
         </tr>

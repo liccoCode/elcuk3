@@ -52,10 +52,12 @@
             <td title="${feedback.ticket.lastMessageTime?.datetime()}">${feedback.ticket.lastMessageTime?.since()}</td>
         </tr>
         <tr>
-            <th>是否成功</th>
-            <td>#{yesOrNo f:feedback.ticket.isSuccess /}</td>
+            <th rel="popover" content="${feedback.ticket.state.explan()}"><i class="icon-question-sign"></i> State</th>
+            <td>${feedback.ticket.state}</td>
+            <th>是否成功/删除</th>
+            <td>#{yesOrNo f:feedback.ticket.isSuccess /} | #{yesOrNo f:feedback.isRemove/}</td>
             <th>客户回复 / 我方联系</th>
-            <td colspan="3">${feedback.ticket.messageTimes} / ${feedback.ticket.responseTimes}</td>
+            <td>${feedback.ticket.messageTimes} / ${feedback.ticket.responseTimes}</td>
         </tr>
 
         <tr>
