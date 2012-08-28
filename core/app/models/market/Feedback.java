@@ -2,6 +2,7 @@ package models.market;
 
 import helper.Dates;
 import helper.GTs;
+import helper.OsTicket;
 import helper.Webs;
 import models.product.Category;
 import models.product.Product;
@@ -165,7 +166,7 @@ public class Feedback extends GenericModel {
         if(StringUtils.isBlank(subject))
             subject = "You left a negative feedback, Please give us a chance to make up!";
 
-        this.osTicketId = Webs.openOsTicket(name, email, subject, content, Webs.TopicID.FEEDBACK, "Feedback " + this.orderId);
+        this.osTicketId = OsTicket.openOsTicket(name, email, subject, content, OsTicket.TopicID.FEEDBACK, "Feedback " + this.orderId);
         if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
             return null;
         } else {

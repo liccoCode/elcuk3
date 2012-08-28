@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import helper.HTTP;
+import helper.OsTicket;
 import helper.Webs;
 import models.support.Ticket;
 import models.support.TicketState;
@@ -33,7 +34,7 @@ public class TicketStateSyncJob extends Job {
         for(Ticket t : tickets) ticketIds.add(t.osTicketId());
 
         try {
-            JsonObject rsObj = TicketStateSyncJob.communicationWithOsTicket(ticketIds);
+            JsonObject rsObj = OsTicket.communicationWithOsTicket(ticketIds);
             TicketStateSyncJob.syncOsTicketDetailsIntoSystem(rsObj, tickets);
         } catch(IllegalStateException e) {
             if(StringUtils.contains(e.getMessage(), "77"))
@@ -78,13 +79,7 @@ public class TicketStateSyncJob extends Job {
         return rtTickets;
     }
 
-    public static JsonObject communicationWithOsTicket(List<String> ticketIds) {
-        Logger.info("Update Tickets: %s", StringUtils.join(ticketIds, ","));
-        JsonElement rs = HTTP.json("http://t.easyacceu.com/api/tickt_sync.php?",
-                Arrays.asList(new BasicNameValuePair("ticketIds", StringUtils.join(ticketIds, ",")))
-        );
-        return rs.getAsJsonObject();
-    }
+
 
     /**
      * 联系客户的最后时间, 客户回复的最后时间, 最后进行同步的时间

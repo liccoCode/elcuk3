@@ -3,10 +3,7 @@ package models.market;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-import helper.Dates;
-import helper.GTs;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.support.Ticket;
 import models.support.TicketReason;
 import notifiers.Mails;
@@ -447,9 +444,9 @@ public class AmazonListingReview extends GenericModel {
             subject += " - No Order found...";
             content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
 
-            this.osTicketId = Webs.openOsTicket(name, "support@easyacceu.com", subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
+            this.osTicketId = OsTicket.openOsTicket(name, "support@easyacceu.com", subject, content, OsTicket.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
         } else {
-            this.osTicketId = Webs.openOsTicket(name, this.orderr.email, subject, content, Webs.TopicID.REVIEW, "Review " + this.alrId);
+            this.osTicketId = OsTicket.openOsTicket(name, this.orderr.email, subject, content, OsTicket.TopicID.REVIEW, "Review " + this.alrId);
         }
         if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
             return null;

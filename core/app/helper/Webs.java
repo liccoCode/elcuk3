@@ -47,38 +47,6 @@ public class Webs {
     public static final NumberFormat NC_DE = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     /**
-     * 与 OsTicket 系统中的 Topic 对应的
-     */
-    public enum TopicID {
-        BILLING {
-            @Override
-            public int id() {
-                return 2;
-            }
-        },
-        SUPPORT {
-            @Override
-            public int id() {
-                return 1;
-            }
-        },
-        REVIEW {
-            @Override
-            public int id() {
-                return 3;
-            }
-        },
-        FEEDBACK {
-            @Override
-            public int id() {
-                return 4;
-            }
-        };
-
-        public abstract int id();
-    }
-
-    /**
      * <pre>
      * 用来对 Pager 与 pageSize 的值进行修正;
      * page: 1~N
@@ -134,47 +102,6 @@ public class Webs {
             Logger.warn("Email error: " + e.getMessage());
         }
         return Mail.send(email);
-    }
-
-    /**
-     * 向 OsTicket 系统开一个新的 Ticket.
-     *
-     * @param name     Ticket 的用户名称
-     * @param email    Ticket 回复的邮箱
-     * @param subject  Ticket 的标题
-     * @param content  Ticket 的内容
-     * @param topicId  Ticket 所处的 Topic, Topic 会有对应的优先级(1:Support, 2:Billing, 3:Review, 4:Feedback)
-     * @param errorMsg 系统中需要 log 的错误信息,主要记录 orderid, reviewid 等这样的信息
-     * @return 如果成功, 则返回 TicketId , 否则返回"空"字符串
-     */
-    public static String openOsTicket(String name, String email, String subject, String content, TopicID topicId, String errorMsg) {
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("name", name));
-        params.add(new BasicNameValuePair("email", email));
-        params.add(new BasicNameValuePair("phone", ""));
-        params.add(new BasicNameValuePair("phone_ext", ""));
-        // 如果 Topicid 不再 1~4 之间则默认使用 1(Support)
-        params.add(new BasicNameValuePair("topicId", topicId.id() + ""));
-        params.add(new BasicNameValuePair("submit_x", "Submit Ticket"));
-        params.add(new BasicNameValuePair("subject", subject));
-        params.add(new BasicNameValuePair("message", content));
-
-        try {
-            JsonElement jsonel = HTTP.postJson(Constant.OS_TICKET_NEW_TICKET, params);
-            JsonObject obj = jsonel.getAsJsonObject();
-            if(obj == null) {
-                Logger.error("OpenOsTicket fetch content Error!");
-                return "";
-            }
-            if(obj.get("flag").getAsBoolean()) { // 成功创建
-                return obj.get("tid").getAsString();
-            } else {
-                Logger.warn(String.format("%s post to OsTicket failed because of [%s]", errorMsg, obj.get("message").getAsString()));
-            }
-        } catch(Exception e) {
-            Logger.error("OpenOsTicket fetch IO Error!");
-        }
-        return "";
     }
 
     /**

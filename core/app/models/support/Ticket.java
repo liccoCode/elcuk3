@@ -2,6 +2,7 @@ package models.support;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.OsTicket;
 import jobs.TicketStateSyncJob;
 import models.ElcukRecord;
 import models.User;
@@ -243,17 +244,22 @@ public class Ticket extends Model {
         /**
          * 1. 检查是否给这个 Ticket 归类
          * 2. 检查是否有填写原因
+         * 3. 检查这个 Ticket 是否有 resolver
          */
         if(this.state == TicketState.CLOSE) throw new FastRuntimeException("已经关闭了, 不需要重新关闭.");
         if(this.type != T.TICKET)// Ticket 不需要 reasons, 但需要文件原因
             if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
+        if(this.resolver == null) throw new FastRuntimeException("请给 Ticket 添加负责人.");
         if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
         this.state = TicketState.CLOSE;
         this.memo = String.format("Closed By %s At [%s] for [ %s ]\r\n",
                 ElcukRecord.username(),
                 Dates.date2DateTime(),
                 reason.trim()) + this.memo;
-        return this.save();
+        this.save();
+        // 特意在保存之后再进行 Ticket 关闭, 如果保存出错也不用 OsTicket 中的 Ticket 了
+        OsTicket.closeOsTicket(this.osTicketId(), this.resolver.username, reason);
+        return this;
     }
 
     /**
