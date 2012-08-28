@@ -258,7 +258,12 @@ public class Ticket extends Model {
                 reason.trim()) + this.memo;
         this.save();
         // 特意在保存之后再进行 Ticket 关闭, 如果保存出错也不用 OsTicket 中的 Ticket 了
-        OsTicket.closeOsTicket(this.osTicketId(), this.resolver.username, reason);
+        StringBuilder note = new StringBuilder(reason).append("\r\n");
+        if(this.type == T.FEEDBACK)
+            note.append(this.feedback.memo);
+        else if(this.type == T.REVIEW)
+            note.append(this.review.comment);
+        OsTicket.closeOsTicket(this.osTicketId(), this.resolver.username, note.toString());
         return this;
     }
 

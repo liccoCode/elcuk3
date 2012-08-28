@@ -63,7 +63,7 @@ public class ReviewInfoFetchJob extends Job {
         if(reviewObj.get("isRemove").getAsBoolean()) {
             ticket.review.isRemove = true;
             ticket.state = TicketState.PRE_CLOSE;
-            ticket.review.comment(String.format("Ticket 已经被关闭(%s).", Dates.date2Date()));
+            ticket.review.comment(String.format("Review 已经被买家自行删除(%s).", Dates.date2Date()));
             return;
         }
 

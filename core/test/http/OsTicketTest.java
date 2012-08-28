@@ -22,7 +22,7 @@ public class OsTicketTest extends UnitTest {
         assertEquals(2, obj.get("msgs").getAsJsonArray().size());
     }
 
-//    @Test
+    @Test
     public void testCloseTicket() {
         boolean flag = OsTicket.closeOsTicket("678763", "Wyatt", "This is the reason why me close the ticket.(test)");
         assertEquals(true, flag);
