@@ -31,7 +31,7 @@ public class ReviewInfoFetchJob extends Job {
     public void doJob() {
         int size = 30;
         if(Play.mode.isDev()) size = 10;
-        List<Ticket> tickets = Ticket.find("type=? isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
+        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
                 Ticket.T.REVIEW, false, TicketState.PRE_CLOSE, TicketState.CLOSE).fetch(size);
         Logger.info("ReviewInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
