@@ -63,18 +63,24 @@ public class TicketStateSyncJob extends Job {
         for(Ticket t : tickets) {
             try {
                 if(t.state == null) t.state = TicketState.NEW;
-                t.state = t.state.nextState(t, msgMap.get(t.osTicketId()), respMap.get(t.osTicketId()));
-                F.T3<Date, Date, Date> lastXXXDateTime = TicketStateSyncJob.lastXXXDatetime(msgMap.get(t.osTicketId()), respMap.get(t.osTicketId()));
+                // 此 Ticket 客户的邮件
+                List<OsMsg> ticketMsg = msgMap.get(t.osTicketId());
+                // 此 Ticket 我们的回信
+                List<OsResp> ticketResp = respMap.get(t.osTicketId());
+
+                t.state = t.state.nextState(t, ticketMsg, ticketResp);
+                F.T3<Date, Date, Date> lastXXXDateTime = TicketStateSyncJob.lastXXXDatetime(ticketMsg, ticketResp);
                 t.lastResponseTime = lastXXXDateTime._1;
                 t.lastMessageTime = lastXXXDateTime._2;
                 t.lastSyncTime = lastXXXDateTime._3;
-                if(msgMap.size() == 0) t.messageTimes = 0;
-                else t.messageTimes = msgMap.get(t.osTicketId()).size();
-                if(respMap.size() == 0) t.responseTimes = 0;
-                else t.responseTimes = respMap.get(t.osTicketId()).size();
+                if(ticketMsg == null) t.messageTimes = 0;
+                else t.messageTimes = ticketMsg.size();
+                if(ticketResp == null) t.responseTimes = 0;
+                else t.responseTimes = ticketResp.size();
 
                 rtTickets._1.add(t.<Ticket>save());
             } catch(Exception e) {
+                Logger.warn("syncOsTicketDetailsIntoSystem %s", Webs.E(e));
                 rtTickets._2.add(t);
             }
         }
