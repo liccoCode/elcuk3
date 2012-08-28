@@ -192,7 +192,7 @@ public enum TicketState {
                     }
                 } else if(ticket.type == Ticket.T.FEEDBACK) {
                     if(!StringUtils.contains(ticket.feedback.memo, "Closed At")) {
-                        ticket.feedback.memo = String.format("Closed At %s\r\n", Dates.date2DateTime()) + (StringUtils.isBlank(ticket.feedback.memo) ? "" : ticket.feedback.memo);
+                        ticket.feedback.comment(String.format("Closed At %s", Dates.date2DateTime()));
                     }
                 }
             }

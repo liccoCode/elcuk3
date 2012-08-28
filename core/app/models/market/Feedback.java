@@ -1,5 +1,6 @@
 package models.market;
 
+import helper.Dates;
 import helper.GTs;
 import helper.Webs;
 import models.product.Category;
@@ -124,12 +125,12 @@ public class Feedback extends GenericModel {
         if(!this.orderId.equalsIgnoreCase(newFeedback.orderId))
             throw new FastRuntimeException("Feedback OrderId is not the same!");
         if(newFeedback.score != null && !newFeedback.score.equals(this.score)) // score 不一样了, 需要记录
-            this.memo = String.format("Score from %s to %s At %s\r\n", this.score, newFeedback.score, DateTime.now().toString("yyyy-MM-dd HH:mm:ss")) + this.memo;
+            this.comment(String.format("Score from %s to %s At %s", this.score, newFeedback.score, Dates.date2DateTime()));
 
         if(newFeedback.score != null) this.score = newFeedback.score;
         if(StringUtils.isNotBlank(newFeedback.feedback)) this.feedback = newFeedback.feedback;
         if(StringUtils.isNotBlank(newFeedback.email)) this.email = newFeedback.email;
-        if(StringUtils.isNotBlank(newFeedback.memo)) this.memo += newFeedback.memo;
+        if(StringUtils.isNotBlank(newFeedback.memo)) this.comment(newFeedback.memo);
 
         return this.save();
     }
@@ -140,7 +141,7 @@ public class Feedback extends GenericModel {
         this.account = acc;
         this.orderr = Orderr.findById(this.orderId);
         if(!this.isSelfBuildListing())
-            this.memo = String.format("这个 Feedback 对应的 Listing 非自建.\r\n") + this.memo;
+            this.comment("这个 Feedback 对应的 Listing 非自建.");
         return this.save();
     }
 
@@ -172,6 +173,12 @@ public class Feedback extends GenericModel {
             else return this.ticket;
         }
     }
+
+    public void comment(String memo) {
+        if(!StringUtils.contains(this.memo, memo))
+            this.memo = String.format("%s\r\n%s", memo, this.memo);
+    }
+
 
     /**
      * 判断此 Feedback 是否已经过期了? 过期了表示无法再进行处理了.
