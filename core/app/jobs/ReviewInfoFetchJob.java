@@ -55,14 +55,17 @@ public class ReviewInfoFetchJob extends Job {
         F.T2<String, M> splitListingId = Listing.unLid(review.listingId);
         JsonElement reviewElement = Crawl.crawlReview(splitListingId._2.toString(), review.reviewId);
 
-        AmazonListingReview newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
+        JsonObject reviewObj = reviewElement.getAsJsonObject();
+        if(!reviewObj.get("isRemove").getAsBoolean()) {
+            AmazonListingReview newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
 
-        // 1
-        if(StringUtils.isNotBlank(StringUtils.difference(review.review, newReview.review)))
-            review.comment(String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
+            // 1
+            if(StringUtils.isNotBlank(StringUtils.difference(review.review, newReview.review)))
+                review.comment(String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
 
-        // 2
-        review.updateAttr(newReview);
+            // 2
+            review.updateAttr(newReview);
+        }
         return reviewElement;
     }
 

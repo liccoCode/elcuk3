@@ -59,7 +59,10 @@
                 </a>
             </td>
             <th>Rating</th>
-            <td>${review.rating}</td>
+            <td>
+                #{render 'Reviews/_rating_icon.html', review:review/}
+                    <span>${review.rating}</span>
+            </td>
             <th>OsTicketId</th>
             <td>
             #{if review.ticket != null}

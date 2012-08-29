@@ -4,6 +4,7 @@ import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
+import play.libs.F;
 import play.templates.JavaExtensions;
 
 /**
@@ -33,6 +34,22 @@ public class ReviewHelper extends JavaExtensions {
             return "0";
         else
             return feedback.feedback.length() + "";
+    }
+
+    /**
+     * 计算 Review 的 rating 与 lastRating, 比较她们之间的差别
+     *
+     * @param review
+     * @return T2: _.1 badge 颜色, _.2 icon class
+     */
+    public static F.T3<Boolean, String, String> iconRating(AmazonListingReview review) {
+        if(review.lastRating > review.rating) {
+            return new F.T3<Boolean, String, String>(true, "badge-important", "icon-arrow-down");
+        } else if(review.lastRating < review.rating) {
+            return new F.T3<Boolean, String, String>(true, "badge-success", "icon-arrow-up");
+        } else {
+            return new F.T3<Boolean, String, String>(false, "", "");
+        }
     }
 
     /**

@@ -272,7 +272,7 @@ public class AmazonListingReview {
 
         review.review = r.ownText();
 
-        review.alrId = String.format("%s_%s", review.listingId, review.userid).toUpperCase();
+        review.alrId = AmazonListingReview.alrId(review.listingId, review.reviewId);
 
         review.reviewId = StringUtils.split(r.select(".crVotingButtons").first().previousElementSibling().attr("name"), ".")[0];
         review.isVedio = r.select(".flashPlayer").first() != null;
@@ -332,6 +332,10 @@ public class AmazonListingReview {
                 StringUtils.containsIgnoreCase(str_lower, "reviews helpful") || // de
                 StringUtils.containsIgnoreCase(str_lower, "rezension hilfreich") || // de
                 StringUtils.containsIgnoreCase(str_lower, "commentaire utile"); // fr
+    }
+
+    public static String alrId(String lid, String userid) {
+        return String.format("%s_%s", lid, userid).toUpperCase();
     }
 
     /**
