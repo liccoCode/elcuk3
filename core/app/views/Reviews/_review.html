@@ -10,7 +10,9 @@
         </th>
         <th>ReviewId</th>
         <th>OsTicket</th>
-        <th>UserName</th>
+        <th rel="popover" placement="bottom" content="绿色上箭头: Rating 上升了. <br><br>红色下箭头: Rating 下降了. <br><br>绿色叉: Review 被删除了">
+            <i class="icon-question-sign"></i> UserName
+        </th>
         <th>Score</th>
     </tr>
 #{list items:tickets, as:'t'}
@@ -77,6 +79,7 @@
             <a href="${r.reviewLink()}" target="_blank">
                 <i class="icon-external-link"></i> ${r.username}
             </a>
+            #{render 'Tickets/_is_remove.html', rv:r/}
             #{render 'Reviews/_rating_icon.html', review:r/}
         </td>
         <td style="background:${'#' + r.rating.color()}">${r.rating}</td>

@@ -1,4 +1,4 @@
 #{set ratingT3: review.iconRating()/}
 #{if ratingT3._1}
-<span rel="tooltip" title="From ${review.lastRating} TO ${review.rating}" class="pull-right badge ${ratingT3._2}"><i class="${ratingT3._3}"></i></span>
+<i rel="tooltip" title="From ${review.lastRating} TO ${review.rating}" style="color:${'#' + ratingT3._2};" class="pull-right ${ratingT3._3}"></i>
 #{/if}

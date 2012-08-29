@@ -7,7 +7,7 @@
         <th>Email</th>
         <th>Order</th>
         <th>OsTicket</th>
-        <th>Buyer</th>
+        <th rel="popover" content="绿色叉: Feedback 被成功删除了."><i class="icon-question-sign"></i> Buyer</th>
         <th>Score</th>
     </tr>
 
@@ -52,6 +52,7 @@
         <td>
             #{ifnot f.orderr.buyer}<i class='icon-warning-sign'></i>#{/ifnot}
             <a href="${f.orderr.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${f.orderr.buyer}</a>
+            #{render 'Tickets/_is_remove.html', rv:f/}
         </td>
         <td style="background:${'#' + f.score.color()}">${f.score}</td>
     </tr>

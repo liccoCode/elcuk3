@@ -57,17 +57,20 @@ public class FeedbackInfoFetchJob extends Job {
         }
 
         // 1.
-        if(!ticket.feedback.market.equals(ticket.feedback.account.type)) {
-            ticket.state = TicketState.PRE_CLOSE;
-            ticket.memo = "UK 账号在 DE 销售产品时的 Feedback 不再处理.\r\n" + ticket.memo;
-        } else {
-            // 2.
-            String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
-            ticket.feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
-            ticket.isSuccess = ticket.feedback.isRemove;
-            if(ticket.isSuccess) {
+        if(ticket.feedback.market != null && ticket.feedback.account.type != null) {
+            if(!ticket.feedback.market.equals(ticket.feedback.account.type)) {
                 ticket.state = TicketState.PRE_CLOSE;
-                TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
+                ticket.memo = ticket.feedback.account.type.nickName() + " 账号在 " + ticket.feedback.market.nickName() + " 销售产品时的 Feedback 不再处理.\r\n" + ticket.memo;
+            } else { // 如果 1 满足则跳过 2 的原因是因为如果两着不一样, 抓取不到正确的 Feedback 信息
+                // 2.
+                String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
+                ticket.feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
+                ticket.isSuccess = ticket.feedback.isRemove;
+                if(ticket.isSuccess) {
+                    ticket.state = TicketState.PRE_CLOSE;
+                    TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
+                    ticket.feedback.comment(String.format("Feedback 已经被删除(%s)", Dates.date2Date()));
+                }
             }
         }
 
