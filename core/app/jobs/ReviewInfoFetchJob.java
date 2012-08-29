@@ -35,47 +35,58 @@ public class ReviewInfoFetchJob extends Job {
                 Ticket.T.REVIEW, false, TicketState.PRE_CLOSE, TicketState.CLOSE).fetch(size);
         Logger.info("ReviewInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
-            ReviewInfoFetchJob.checkReviewDealState(ticket);
+            JsonElement el = ReviewInfoFetchJob.syncSingleReview(ticket.review);
+            ReviewInfoFetchJob.checkReviewDealState(ticket, el);
             ticket.lastSyncTime = new Date();
             ticket.save();
         }
     }
 
+
+    /**
+     * 更新
+     * 1. 检查 Review 的内容是否有改动
+     * 2. 检查 Review 分值是否改变(通过 updateAttr 来处理)
+     *
+     * @param review
+     * @return Review 的 JSON Element
+     */
+    public static JsonElement syncSingleReview(AmazonListingReview review) {
+        F.T2<String, M> splitListingId = Listing.unLid(review.listingId);
+        JsonElement reviewElement = Crawl.crawlReview(splitListingId._2.toString(), review.reviewId);
+
+        AmazonListingReview newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
+
+        // 1
+        if(StringUtils.isNotBlank(StringUtils.difference(review.review, newReview.review)))
+            review.comment(String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
+
+        // 2
+        review.updateAttr(newReview);
+        return reviewElement;
+    }
+
     /**
      * 对 Review Ticket 进行状态检查处理
      * 1. 检查是否被删除, 如果被删除, 那么 Ticket State 进入 PRE_CLOSE
-     * 2. 检查 Review 的内容是否有改动
-     * 3. 检查 Review 分值是否改变(通过 updateAttr 来处理)
      *
      * @param ticket
      */
-    private static void checkReviewDealState(Ticket ticket) {
+    public static void checkReviewDealState(Ticket ticket, JsonElement reviewElement) {
         if(ticket.review == null) {
             Logger.warn("ReviewInfoFetchJob deal an no Review Ticket(id|fid) [%s|%s]", ticket.id, ticket.fid);
             return;
         }
 
-        F.T2<String, M> splitListingId = Listing.unLid(ticket.review.listingId);
-        JsonElement reviewElement = Crawl.crawlReview(splitListingId._2.toString(), ticket.review.reviewId);
         JsonObject reviewObj = reviewElement.getAsJsonObject();
 
-        // 1
         if(reviewObj.get("isRemove").getAsBoolean()) {
             ticket.review.isRemove = true;
             ticket.isSuccess = ticket.review.isRemove;
             ticket.state = TicketState.PRE_CLOSE;
             ticket.review.comment(String.format("Review 已经被买家自行删除(%s).", Dates.date2Date()));
-            return;
         }
-
-        AmazonListingReview newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
-
-        // 2
-        if(StringUtils.isNotBlank(StringUtils.difference(ticket.review.review, newReview.review)))
-            ticket.review.comment(String.format("[%s] - Review At %s", ticket.review.review, Dates.date2Date()));
-
-        // 3
-        ticket.review.updateAttr(newReview);
     }
+
 
 }

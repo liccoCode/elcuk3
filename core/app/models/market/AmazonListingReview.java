@@ -169,6 +169,11 @@ public class AmazonListingReview extends GenericModel {
     public Boolean isCommentOnAmazon = false;
 
     /**
+     * 在 Amazon 上此 Review 的回复个数
+     */
+    public int comments = 0;
+
+    /**
      * 是 Top 多少?
      */
     @Expose
@@ -275,6 +280,7 @@ public class AmazonListingReview extends GenericModel {
         if(StringUtils.isNotBlank(newReview.reviewId)) this.reviewId = newReview.reviewId;
         if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
         if(newReview.reviewRank > 0) this.reviewRank = newReview.reviewRank;
+        if(newReview.comments > 0) this.comments = newReview.comments;
         // resolved 不做处理
         return this.save();
     }

@@ -1,6 +1,8 @@
 package controllers;
 
+import com.google.gson.JsonElement;
 import helper.J;
+import jobs.ReviewInfoFetchJob;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
@@ -12,6 +14,7 @@ import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -61,6 +64,17 @@ public class Reviews extends Controller {
             review.save();
         }
         renderJSON(new Ret(ord != null));
+    }
+
+    public static void sync(String rid) {
+        AmazonListingReview review = AmazonListingReview.findByReviewId(rid);
+        JsonElement el = ReviewInfoFetchJob.syncSingleReview(review);
+        if(review.ticket != null) {
+            ReviewInfoFetchJob.checkReviewDealState(review.ticket, el);
+            review.ticket.lastSyncTime = new Date();
+            review.ticket.save();
+        }
+        renderJSON(new Ret());
     }
 
 

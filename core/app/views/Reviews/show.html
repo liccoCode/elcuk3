@@ -95,7 +95,9 @@
             <th>Click</th>
             <td>${review.helpUp} / ${review.helpClick}</td>
             <th>客户回复 / 我方联系</th>
-            <td colspan="3">${review.ticket.messageTimes} / ${review.ticket.responseTimes}</td>
+            <td>${review.ticket.messageTimes} / ${review.ticket.responseTimes}</td>
+            <th>Comments <button id="review_sync" class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
+            <td>${review.comments} <i class="icon-comments"></i></td>
         </tr>
 
         <tr>

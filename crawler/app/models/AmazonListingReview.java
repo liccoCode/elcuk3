@@ -12,6 +12,8 @@ import org.jsoup.select.Elements;
 import play.Logger;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 某一个 ListingC 所拥有的 Review 消息
@@ -20,6 +22,8 @@ import java.util.*;
  * Time: 4:33 PM
  */
 public class AmazonListingReview {
+    public static final Pattern SLASH_D = Pattern.compile(" (\\d) ");
+    public static final Pattern QUOTE_D = Pattern.compile("\\((\\d)\\)");
 
     public AmazonListingReview() {
     }
@@ -132,6 +136,11 @@ public class AmazonListingReview {
     public boolean isRemove = false;
 
     /**
+     * 在 Amazon 上此 Review 的回复个数
+     */
+    public int comments;
+
+    /**
      * 从 Amazon 的 Review List Page 解析出多个 Review
      *
      * @param doc
@@ -163,6 +172,8 @@ public class AmazonListingReview {
                 }
                 AmazonListingReview review = parseReviewDiv(listingId, r, false);
 
+                // Comments
+                review.comments = parseTotalCommentsNumber(r);
                 // 放到最后面添加
                 review.reviewRank = (page - 1) * 10 + rank++;
                 reviewList.add(review);
@@ -173,9 +184,31 @@ public class AmazonListingReview {
         return reviewList;
     }
 
+    private static int parseTotalCommentsNumber(Element reviewDiv) {
+        Element cmtEl = reviewDiv.select("> div").last();
+        if(cmtEl == null) return 0;
+        else {
+            Matcher matcher = QUOTE_D.matcher(cmtEl.text());
+            if(matcher.find()) return NumberUtils.toInt(matcher.group(1));
+        }
+        return 0;
+    }
+
     public static AmazonListingReview parseReviewFromOnePage(Document doc) {
         Element div = doc.select("div.hReview").first().previousElementSibling();
-        return parseReviewDiv(String.format("%s_%s", doc.select(".asin").first().text(), AmazonListingReview.amazon_bottom_market(doc)), div, true);
+        AmazonListingReview review = parseReviewDiv(String.format("%s_%s", doc.select(".asin").first().text(), AmazonListingReview.amazon_bottom_market(doc)), div, true);
+        review.comments = parseTotalCommentsNumberOnePage(doc);
+        return review;
+    }
+
+    private static int parseTotalCommentsNumberOnePage(Document doc) {
+        Element pageInfo = doc.select(".cdPageSelectorHeader > .cdPageInfo").first();
+        if(pageInfo == null) return 0;
+        else {
+            Matcher matcher = SLASH_D.matcher(pageInfo.text());
+            if(matcher.find()) return NumberUtils.toInt(matcher.group(1));
+        }
+        return 0;
     }
 
     /**

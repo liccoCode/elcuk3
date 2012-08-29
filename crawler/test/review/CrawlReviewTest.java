@@ -41,28 +41,30 @@ public class CrawlReviewTest extends UnitTest {
     public void testNewPage() {
         List<AmazonListingReview> reviews = AmazonListingReview.parseReviewsFromReviewsListPage(newPage, 1);
         assertEquals(9, reviews.size());
-        AmazonListingReview review = reviews.get(0);
-        assertEquals("B007H4J80K_AMAZON.DE_A1X504FPX6O8G0", review.alrId);
+        AmazonListingReview review = reviews.get(5);
+        assertEquals("B007H4J80K_AMAZON.DE_A3LJE46CWDGG5Q", review.alrId);
         assertEquals("B007H4J80K_amazon.de", review.listingId);
         assertEquals(2.0, review.rating.doubleValue(), 1);
-        assertEquals("Magnete beschädigen möglicherweise das MacBook Air 13''", review.title);
+        assertEquals("ultra-rezension", review.title);
         assertNotNull("review", review.review);
         assertEquals(0, review.helpUp, 0);
-        assertEquals(3, review.helpClick, 0);
-        assertEquals("Max4711", review.username);
-        assertEquals("A1X504FPX6O8G0", review.userid);
-        assertEquals("2012-07-24", review.reviewDate);
+        assertEquals(2, review.helpClick, 0);
+        assertEquals("Bla", review.username);
+        assertEquals("A3LJE46CWDGG5Q", review.userid);
+        assertEquals("2012-06-19", review.reviewDate);
         assertEquals(true, review.purchased);
         assertEquals(false, review.resolved);
         assertEquals(2.0, review.lastRating.doubleValue(), 1);
-        assertEquals("R22VLENNIF5GXZ", review.reviewId);
+        assertEquals("R3HS1DVGNBEMOK", review.reviewId);
         assertEquals(false, review.isVedio);
         assertEquals(false, review.isRealName);
         assertEquals(false, review.isVineVoice);
         assertEquals(0, review.topN);
         assertEquals("", review.vedioPicUrl);
-        assertEquals(1, review.reviewRank);
+        assertEquals(6, review.reviewRank);
         assertEquals("", review.comment);
+        assertEquals(1, review.comments);
+
 
 //        System.out.println("NewPage ----------------------------------------");
 //        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(reviews.get(0)));
@@ -95,6 +97,7 @@ public class CrawlReviewTest extends UnitTest {
         assertEquals("", review.vedioPicUrl);
         assertEquals(1, review.reviewRank);
         assertEquals("", review.comment);
+        assertEquals(0, review.comments);
 //        System.out.println("OldPage ----------------------------------------");
 //        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(reviews.get(0)));
     }
@@ -125,6 +128,7 @@ public class CrawlReviewTest extends UnitTest {
         assertEquals("", review.vedioPicUrl);
         assertEquals(-1, review.reviewRank);
         assertEquals("", review.comment);
+        assertEquals(1, review.comments);
 //        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(review));
     }
 
@@ -153,6 +157,7 @@ public class CrawlReviewTest extends UnitTest {
         assertEquals("", review.vedioPicUrl);
         assertEquals(-1, review.reviewRank);
         assertEquals("", review.comment);
+        assertEquals(0, review.comments);
 //        System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(review));
     }
 
