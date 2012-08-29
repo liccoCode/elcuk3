@@ -1,6 +1,7 @@
 package models.support;
 
 import com.google.gson.annotations.Expose;
+import com.jamonapi.ListenerType;
 import helper.Dates;
 import helper.OsTicket;
 import jobs.TicketStateSyncJob;
@@ -10,17 +11,17 @@ import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
+import query.TicketQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 对需要处理的一个 Review 或者 Feedback 的一个抽象;
@@ -394,5 +395,38 @@ public class Ticket extends Model {
             Ticket ticket = new Ticket(feedback);
             ticket.save();
         }
+    }
+
+    /**
+     * 在首页用来查看 Ticket 处理状况的数据
+     * @return
+     */
+    public static Map<String, Map<String, Long>> frontPageTable(Date from, Date to) {
+        // user row;
+        Map<String, Map<String, Long>> rows = new LinkedHashMap<String, Map<String, Long>>();
+
+        /**
+         * 1. 找出所有的客服人员.
+         * 2. 通过一个一个的客服人员找到一行一行的数据
+         * - 当天的回复的 Email 数
+         * - 当天回复的 Ticket 数
+         * - 接管了的 Ticket 并且没 CLOSE 的
+         * 3. 最后计算统计未分配的 Ticket
+         */
+        List<User> services = User.serviceUsers();
+        Date morning = Dates.morning(from);
+        Date night = Dates.night(to);
+        for(User user : services) {
+            Map<String, Long> row = new HashMap<String, Long>();
+            row.put("day_resp", TicketResponse.count("ticket.resolver=? AND created>=? AND created<=?", user, morning, night));
+            row.put("take_resp_no_close", TicketQuery.userTakedButNotCloseTickets(morning, night, user));
+            row.put("take_no_close", Ticket.count("resolver=? AND state!=?", user, TicketState.CLOSE));
+            rows.put(user.username, row);
+        }
+        Map<String, Long> unTake = new HashMap<String, Long>();
+        unTake.put("total", TicketQuery.unTakeAndNotCloseTickets());
+        unTake.put("duration", TicketQuery.unTakeAndNotCloseTickets(morning, night));
+        rows.put("untake", unTake);
+        return rows;
     }
 }

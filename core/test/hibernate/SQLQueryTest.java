@@ -1,13 +1,18 @@
 package hibernate;
 
 import helper.DBUtils;
+import models.User;
 import models.market.Orderr;
+import models.support.Ticket;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.test.UnitTest;
 import play.utils.FastRuntimeException;
+import query.TicketQuery;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +56,16 @@ public class SQLQueryTest extends UnitTest {
     public void testOrderItemCount() {
         Orderr order = Orderr.findById("026-0210035-5030756");
         assertEquals(2l, order.itemCount().longValue());
+    }
+
+    @Test
+    public void testUserTakedButNotCloseTickets() {
+        System.out.println(TicketQuery.userTakedButNotCloseTickets(DateTime.now().minusMonths(3).toDate(), new Date(), User.<User>findById(4l)));
+    }
+
+    @Test
+    public void testFont() {
+        System.out.println(Ticket.frontPageTable(DateTime.now().minusMonths(3).toDate(), DateTime.now().toDate()));
     }
 
 }

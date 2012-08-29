@@ -8,6 +8,7 @@ import play.db.jpa.Model;
 import play.libs.Crypto;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * 系统中的用户
@@ -44,6 +45,11 @@ public class User extends Model {
     @Column(nullable = false)
     @Required
     public P power;
+
+    /**
+     * 是否为售后支持部门
+     */
+    public boolean isService = false;
 
 
     public boolean closed = false;
@@ -91,20 +97,6 @@ public class User extends Model {
 
     // ------------------------------
 
-    /**
-     * 链接用户(登陆)
-     *
-     * @param username
-     * @param password 明文密码
-     * @return
-     */
-    public static User connect(String username, String password) {
-        return User.find("username=? AND password=?", username, Crypto.encryptAES(password)).first();
-    }
-
-    public static User findByUserName(String username) {
-        return User.find("username=?", username).first();
-    }
 
     /**
      * 修改密码
@@ -137,4 +129,24 @@ public class User extends Model {
         result = 31 * result + username.hashCode();
         return result;
     }
+
+    /**
+     * 链接用户(登陆)
+     *
+     * @param username
+     * @param password 明文密码
+     * @return
+     */
+    public static User connect(String username, String password) {
+        return User.find("username=? AND password=?", username, Crypto.encryptAES(password)).first();
+    }
+
+    public static User findByUserName(String username) {
+        return User.find("username=?", username).first();
+    }
+
+    public static List<User> serviceUsers() {
+        return User.find("isService=? AND closed=?", true, false).fetch();
+    }
+
 }

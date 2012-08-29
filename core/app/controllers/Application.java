@@ -7,12 +7,14 @@ import models.market.Account;
 import models.market.M;
 import models.market.OrderItem;
 import models.market.Orderr;
+import models.support.Ticket;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
 import play.cache.CacheFor;
@@ -29,7 +31,9 @@ public class Application extends Controller {
 
     public static void index() {
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
-        render(odmaps);
+        Map<String, Map<String, Long>> ticketTable = Ticket.frontPageTable(DateTime.now().minusDays(1).toDate(), new Date());
+        Map<String, Map<String, Long>> ticket7Table = Ticket.frontPageTable(DateTime.now().minusDays(7).toDate(), new Date());
+        render(odmaps, ticketTable, ticket7Table);
     }
 
     @CacheFor(value = "20mn")

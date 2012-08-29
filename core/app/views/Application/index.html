@@ -5,6 +5,51 @@
     #{script 'Application/app.coffee'/}
 #{/set}
 
+<div class="row-fluid">
+    <div class="span12">
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <th>User</th>
+                <th>当天回复的邮件数</th>
+                <th>当天处理的 Ticket 数</th>
+                <th>7 天内回复的邮件数</th>
+                <th>7 天内处理的 Ticket 数</th>
+                <th>接管但还没处理完的 Ticket 数</th>
+            </tr>
+        #{list items:ticketTable.keySet(), as:'user'}
+            #{if user != "untake"}
+                <tr>
+                    #{set trow:ticketTable.get(user)/}
+                    #{set t7row:ticket7Table.get(user)/}
+                    <td>${user}</td>
+                    <td>${trow.get('day_resp')}</td>
+                    <td>${trow.get('take_resp_no_close')}</td>
+                    <td>${t7row.get('day_resp')}</td>
+                    <td>${t7row.get('take_resp_no_close')}</td>
+                    <td>${trow.get('take_no_close')}</td>
+                </tr>
+            #{/if}
+        #{/list}
+            <tr>
+                <td></td>
+                <th>当天创建的未被接管的 Ticket 数</th>
+                <th>7 天内创建未被接管的 Ticket 数</th>
+                <th>总未被接管的 Ticket 数</th>
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td>未被接管的</td>
+            #{set trow:ticketTable.get("untake")/}
+            #{set t7row:ticket7Table.get("untake")/}
+                <td>${trow.get("duration")}</td>
+                <td>${t7row.get("duration")}</td>
+                <td>${trow.get("total")}</td>
+                <td colspan="2"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
 <div class="row-fluid" id="orders">
     <div class="span12">
         <h2 class="label label-info" style="font-size:12px">订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>
