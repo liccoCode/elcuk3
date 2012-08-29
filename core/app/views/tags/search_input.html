@@ -1,0 +1,21 @@
+<div class="input-append">
+    <input type="text" class="input" placeHolder="高亮搜索, 请输入搜索关键词">
+    <button id="search_input" class="btn">高亮搜索</button>
+</div>
+<script type="text/javascript">
+    $('#search_input').click(function(e){
+        var o = $(this);
+        var words = o.prev().val().trim();
+        if(words){
+            // 清除上一次搜索的 words
+            var oldWords = o.data('words');
+            if(oldWords) $('#container').unhighlight(oldWords.split(" "));
+            $('#container').highlight(words.split(" "));
+            o.data("words", words);
+            o.text("共搜索到: " + $('span.highlight').size());
+        }else{
+            alert("请输入搜索词");
+        }
+        e.preventDefault();
+    })
+</script>

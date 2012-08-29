@@ -6,3 +6,8 @@ form.cmxform label.error, label.error{
     color:red;
     font-style:italic;
 }
+
+span.highlight{
+    background:#FE9532;
+    font-size:1.5em;
+}
