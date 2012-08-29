@@ -9,6 +9,7 @@ import models.User;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -89,6 +90,9 @@ public class Ticket extends Model {
      */
     @ManyToMany
     public List<TicketReason> reasons = new ArrayList<TicketReason>();
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public List<TicketResponse> responses = new ArrayList<TicketResponse>();
 
     @Expose
     @Required
@@ -214,6 +218,7 @@ public class Ticket extends Model {
 
     /**
      * 是否为有正确客户 Email 地址
+     *
      * @return
      */
     public boolean isNoEmail() {
@@ -272,6 +277,25 @@ public class Ticket extends Model {
             note.append(this.review.comment);
         OsTicket.closeOsTicket(this.osTicketId(), this.resolver.username, note.toString());
         return this;
+    }
+
+    /**
+     * 将 OsTicket 的 Response 给解析出来
+     *
+     * @param ticketResps
+     */
+    public void parseResponse(List<TicketStateSyncJob.OsResp> ticketResps) {
+        if(ticketResps == null || ticketResps.size() == 0) return;
+        for(TicketStateSyncJob.OsResp res : ticketResps) {
+            // 只记录新的, 不更新老的.
+            TicketResponse r = new TicketResponse();
+            r.created = res.created;
+            r.responseId = NumberUtils.toInt(res.response_id);
+            r.ost_ticket_id = res.ticket_id;
+            r.ticket = this;
+
+            if(!this.responses.contains(r)) this.responses.add(r);
+        }
     }
 
     /**

@@ -78,6 +78,8 @@ public class TicketStateSyncJob extends Job {
                 if(ticketResp == null) t.responseTimes = 0;
                 else t.responseTimes = ticketResp.size();
 
+                t.parseResponse(ticketResp);
+
                 rtTickets._1.add(t.<Ticket>save());
             } catch(Exception e) {
                 Logger.warn("syncOsTicketDetailsIntoSystem %s", Webs.E(e));
@@ -162,6 +164,7 @@ public class TicketStateSyncJob extends Job {
         public String msg_id;
         public Date created;
         public String ticketId;
+        public String ticket_id;
 
         public static List<OsResp> resps(JsonArray json) {
             List<OsResp> resps = new ArrayList<OsResp>();
@@ -172,6 +175,7 @@ public class TicketStateSyncJob extends Job {
                 resp.msg_id = obj.get("msg_id").getAsString();
                 resp.created = DateTime.parse(obj.get("created").getAsString(), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
                 resp.ticketId = obj.get("ticketId").getAsString();
+                resp.ticket_id = obj.get("ticket_id").getAsString();
                 resps.add(resp);
             }
             return resps;
