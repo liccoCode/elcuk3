@@ -399,6 +399,7 @@ public class Ticket extends Model {
 
     /**
      * 在首页用来查看 Ticket 处理状况的数据
+     *
      * @return
      */
     public static Map<String, Map<String, Long>> frontPageTable(Date from, Date to) {
@@ -423,6 +424,15 @@ public class Ticket extends Model {
             row.put("take_no_close", Ticket.count("resolver=? AND state!=?", user, TicketState.CLOSE));
             rows.put(user.username, row);
         }
+
+        // un named
+        Map<String, Long> unNameRow = new HashMap<String, Long>();
+        unNameRow.put("day_resp", TicketResponse.count("ticket.resolver=null AND created>=? AND created<=?",  morning, night));
+        unNameRow.put("take_resp_no_close", TicketQuery.noUserTakedButNotCloseTickets(from, to));
+        unNameRow.put("take_no_close", 0l);
+        rows.put("未知用户", unNameRow);
+
+
         Map<String, Long> unTake = new HashMap<String, Long>();
         unTake.put("total", TicketQuery.unTakeAndNotCloseTickets());
         unTake.put("duration", TicketQuery.unTakeAndNotCloseTickets(morning, night));

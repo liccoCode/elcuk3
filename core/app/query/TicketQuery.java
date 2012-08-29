@@ -27,6 +27,11 @@ public class TicketQuery {
                 "WHERE t.resolver_id=? AND tr.created>=? AND tr.created<=?", user.id, Dates.morning(from), Dates.night(to)).get("c");
     }
 
+    public static long noUserTakedButNotCloseTickets(Date from, Date to) {
+        return (Long) DBUtils.row("SELECT count(DISTINCT(tr.ticket_id)) as c FROM TicketResponse tr LEFT JOIN Ticket t on t.id=tr.ticket_id " +
+                "WHERE t.resolver_id IS NULL AND tr.created>=? AND tr.created<=?", Dates.morning(from), Dates.night(to)).get("c");
+    }
+
     /**
      * 没有被处理的, 并且还没有关闭的 Ticket 数量
      * @return
