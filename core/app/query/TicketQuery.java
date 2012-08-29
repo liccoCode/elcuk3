@@ -3,6 +3,7 @@ package query;
 import helper.DBUtils;
 import helper.Dates;
 import models.User;
+import models.support.TicketState;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -33,14 +34,22 @@ public class TicketQuery {
     }
 
     /**
-     * 没有被处理的, 并且还没有关闭的 Ticket 数量
+     * 除开指定状态的 Ticket 数量; state 为 null 则是所有
      * @return
      */
-    public static long unTakeAndNotCloseTickets() {
-        return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND state!='CLOSE';").get("c");
+    public static long unTakeAndNotCloseTickets(TicketState state) {
+        if(state == null) {
+            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL").get("c");
+        } else {
+            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND state!=?;", state).get("c");
+        }
     }
 
-    public static long unTakeAndNotCloseTickets(Date from, Date to) {
-        return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND state!='CLOSE' AND createAt>=? AND createAt<=?;", from, to).get("c");
+    public static long unTakeAndNotCloseTickets(TicketState state, Date from, Date to) {
+        if(state == null) {
+            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND createAt>=? AND createAt<=?;", from, to).get("c");
+        } else {
+            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND state!=? AND createAt>=? AND createAt<=?;", state, from, to).get("c");
+        }
     }
 }

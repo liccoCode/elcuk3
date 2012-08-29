@@ -32,8 +32,10 @@
         #{/list}
             <tr>
                 <td></td>
-                <th>当天创建的未被接管的 Ticket 数</th>
-                <th>7 天内创建未被接管的 Ticket 数</th>
+                <th>当天创建的未被接管未关闭的 Ticket 数</th>
+                <th>7 天内创建未被接管未关闭的 Ticket 数</th>
+                <th>当前创建未接管的 Ticket 数</th>
+                <th>7 天创建未接管的 Ticket 数</th>
                 <th>总未被接管的 Ticket 数</th>
                 <td colspan="2"></td>
             </tr>
@@ -41,6 +43,8 @@
                 <td>未被接管的</td>
             #{set trow:ticketTable.get("untake")/}
             #{set t7row:ticket7Table.get("untake")/}
+                <td>${trow.get("duration_no_close")}</td>
+                <td>${t7row.get("duration_no_close")}</td>
                 <td>${trow.get("duration")}</td>
                 <td>${t7row.get("duration")}</td>
                 <td>${trow.get("total")}</td>

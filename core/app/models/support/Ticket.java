@@ -434,8 +434,11 @@ public class Ticket extends Model {
 
 
         Map<String, Long> unTake = new HashMap<String, Long>();
-        unTake.put("total", TicketQuery.unTakeAndNotCloseTickets());
-        unTake.put("duration", TicketQuery.unTakeAndNotCloseTickets(morning, night));
+        unTake.put("total_no_close", TicketQuery.unTakeAndNotCloseTickets(TicketState.CLOSE));
+        // 指定时间内未接管未关闭
+        unTake.put("duration_no_close", TicketQuery.unTakeAndNotCloseTickets(TicketState.CLOSE, morning, night));
+        // 指定时间内未接管,可关闭可不关闭
+        unTake.put("duration", TicketQuery.unTakeAndNotCloseTickets(null, morning, night));
         rows.put("untake", unTake);
         return rows;
     }
