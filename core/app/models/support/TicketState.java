@@ -184,7 +184,7 @@ public enum TicketState {
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
             if(ticket.isSuccess) {
                 if(ticket.type == Ticket.T.REVIEW) {
-                    if(!StringUtils.contains(ticket.review.comment, "Success Change Review")) {
+                    if(!StringUtils.contains(ticket.review.comment, "Success Change Review") && !ticket.review.lastRating.equals(ticket.review.rating)) {
                         ticket.review.comment(String.format("Success Change Review at %s from %s to %s",
                                 Dates.date2DateTime(),
                                 ticket.review.lastRating == null ? 0 : ticket.review.lastRating,

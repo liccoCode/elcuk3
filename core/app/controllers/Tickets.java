@@ -11,9 +11,12 @@ import models.support.Ticket;
 import models.support.TicketReason;
 import models.support.TicketState;
 import models.view.Ret;
+import models.view.TicketPost;
+import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Controller;
+import play.mvc.Scope;
 import play.mvc.With;
 
 import java.util.Arrays;
@@ -48,6 +51,33 @@ public class Tickets extends Controller {
         Ticket ticket = Ticket.findById(tid);
         List<TicketReason> reasons = TicketReason.find("ORDER BY category.categoryId").fetch();
         render(ticket, reasons);
+    }
+
+
+    /**
+     * 如果是 service 用户则是其工作台, 如果是普通用户则是搜索页面
+     */
+    public static void user() {
+        User user = User.findByUserName(Scope.Session.current().get("username"));
+        TicketPost p = new TicketPost();
+        if(user != null) {
+            List<Ticket> tickets = Ticket.find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE, Ticket.T.TICKET).fetch();
+            List<Ticket> reviews = Ticket.find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE, Ticket.T.REVIEW).fetch();
+            List<Ticket> feedbacks = Ticket.find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE, Ticket.T.FEEDBACK).fetch();
+            render(tickets, reviews, feedbacks, p);
+        } else {
+            render(p);
+        }
+    }
+
+    public static void search(@Valid TicketPost p) {
+        if(Validation.hasErrors()) {
+            render("Tickets/user.html", p);
+        }
+        renderArgs.put("tickets", p.tickets());
+        renderArgs.put("feedbacks", p.feedbacks());
+        renderArgs.put("reviews", p.reviews());
+        render("Tickets/user.html", p);
     }
 
 

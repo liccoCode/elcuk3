@@ -4,6 +4,8 @@ import helper.DBUtils;
 import models.User;
 import models.market.Orderr;
 import models.support.Ticket;
+import models.support.TicketState;
+import models.view.TicketPost;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import play.db.DB;
@@ -56,11 +58,6 @@ public class SQLQueryTest extends UnitTest {
     public void testOrderItemCount() {
         Orderr order = Orderr.findById("026-0210035-5030756");
         assertEquals(2l, order.itemCount().longValue());
-    }
-
-    @Test
-    public void testUserTakedButNotCloseTickets() {
-        System.out.println(TicketQuery.userTakedButNotCloseTickets(DateTime.now().minusMonths(3).toDate(), new Date(), User.<User>findById(4l)));
     }
 
     @Test
