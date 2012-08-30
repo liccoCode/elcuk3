@@ -16,40 +16,107 @@ import java.util.Date;
  * Time: 6:29 PM
  */
 public class TicketQuery {
+
     /**
-     * 某一个用户接手处理的但是还没有处理完的, 时间端内有回复的 Ticket 数量
+     * 用户在时间段内回复的邮件数量; 用户为 null 则查询的为未知用户
+     *
      * @param from
      * @param to
      * @param user
      * @return
      */
-    public static long userTakedButNotCloseTickets(Date from, Date to, User user) {
-        return (Long) DBUtils.row("SELECT count(DISTINCT(tr.ticket_id)) as c FROM TicketResponse tr LEFT JOIN Ticket t on t.id=tr.ticket_id " +
-                "WHERE t.resolver_id=? AND tr.created>=? AND tr.created<=?", user.id, Dates.morning(from), Dates.night(to)).get("c");
-    }
-
-    public static long noUserTakedButNotCloseTickets(Date from, Date to) {
-        return (Long) DBUtils.row("SELECT count(DISTINCT(tr.ticket_id)) as c FROM TicketResponse tr LEFT JOIN Ticket t on t.id=tr.ticket_id " +
-                "WHERE t.resolver_id IS NULL AND tr.created>=? AND tr.created<=?", Dates.morning(from), Dates.night(to)).get("c");
+    public static long userEmailsCount(Date from, Date to, User user) {
+        if(user == null) {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM TicketResponse tr " +
+                    "LEFT JOIN Ticket t on t.id=tr.ticket_id " +
+                    "WHERE t.resolver_id IS NULL AND tr.created>=? AND tr.created<=?",
+                    from, to).get("c");
+        } else {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM TicketResponse tr " +
+                    "LEFT JOIN Ticket t on t.id=tr.ticket_id " +
+                    "WHERE t.resolver_id=? AND tr.created>=? AND tr.created<=?",
+                    user.id, from, to).get("c");
+        }
     }
 
     /**
-     * 除开指定状态的 Ticket 数量; state 为 null 则是所有
+     * 用户在时间段内回复的 Tickets 数; 用户为 null 则查询的为未知用户
+     *
+     * @param from
+     * @param to
      * @return
      */
-    public static long unTakeAndNotCloseTickets(TicketState state) {
-        if(state == null) {
-            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL").get("c");
+    public static long userTakeAndMailedTicketsCount(Date from, Date to, User user) {
+        if(user == null) {
+            return (Long) DBUtils.row("SELECT COUNT(DISTINCT(tr.ticket_id)) AS c FROM TicketResponse tr " +
+                    "LEFT JOIN Ticket t ON t.id=tr.ticket_id " +
+                    "WHERE t.resolver_id IS NULL AND tr.created>=? AND tr.created<=?;",
+                    from, to).get("c");
         } else {
-            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND state!=?;", state).get("c");
+            return (Long) DBUtils.row("SELECT COUNT(DISTINCT(tr.ticket_id)) AS c FROM TicketResponse tr " +
+                    "LEFT JOIN Ticket t ON t.id=tr.ticket_id " +
+                    "WHERE t.resolver_id=? AND tr.created>=? AND tr.created<=?;",
+                    user.id, from, to).get("c");
         }
     }
 
-    public static long unTakeAndNotCloseTickets(TicketState state, Date from, Date to) {
-        if(state == null) {
-            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND createAt>=? AND createAt<=?;", from, to).get("c");
+    /**
+     * 用户总共解决的 Ticket
+     * @param user
+     * @param isClose
+     * @return
+     */
+    public static long userSolvedTicketsCount(User user, boolean isClose) {
+        if(isClose) {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM Ticket WHERE resolver_id" + (user != null ? "=" + user.id : " IS NULL") + " AND state='CLOSE'").get("c");
         } else {
-            return (Long) DBUtils.row("SELECT count(*) as c FROM Ticket WHERE resolver_id IS NULL AND state!=? AND createAt>=? AND createAt<=?;", state, from, to).get("c");
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM Ticket WHERE resolver_id" + (user != null ? "=" + user.id : " IS NULL") + " AND state!='CLOSE'").get("c");
         }
     }
+
+    /**
+     * 某一个用户接手处理的但是还没有处理完的
+     *
+     * @param user
+     * @return
+     */
+    public static long userTakedButNotCloseTickets(User user) {
+        if(user == null) {
+            return (Long) DBUtils.row("SELECT count(DISTINCT(tr.ticket_id)) AS c FROM TicketResponse tr LEFT JOIN Ticket t on t.id=tr.ticket_id " +
+                    "WHERE t.resolver_id IS NULL").get("c");
+        } else {
+            return (Long) DBUtils.row("SELECT count(DISTINCT(tr.ticket_id)) AS c FROM TicketResponse tr LEFT JOIN Ticket t on t.id=tr.ticket_id " +
+                    "WHERE t.resolver_id=?", user.id).get("c");
+        }
+    }
+
+
+    /**
+     * 指定时间段内创建的 Tickets, 可选择是关闭了的还是未关闭的.
+     *
+     * @param from
+     * @param to
+     * @return
+     */
+    public static long periodCreateTicketsCount(Date from, Date to, boolean isClose) {
+        if(isClose) {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM Ticket WHERE createAt>=? AND createAt<=? AND state='CLOSE'", from, to).get("c");
+        } else {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM Ticket WHERE createAt>=? AND createAt<=? AND state!='CLOSE'", from, to).get("c");
+        }
+    }
+
+    /**
+     * 还没有解决完的 Ticket 数量;
+     *
+     * @return
+     */
+    public static long solvedTicketsCount(boolean isClose) {
+        if(isClose) {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM Ticket WHERE state='CLOSE'").get("c");
+        } else {
+            return (Long) DBUtils.row("SELECT COUNT(*) AS c FROM Ticket WHERE state!='CLOSE'").get("c");
+        }
+    }
+
 }

@@ -10,46 +10,36 @@
         <table class="table table-condensed table-bordered">
             <tr>
                 <th>User</th>
-                <th>当天回复的邮件数</th>
-                <th>当天处理的 Ticket 数</th>
-                <th>7 天内回复的邮件数</th>
-                <th>7 天内处理的 Ticket 数</th>
-                <th>接管但还没处理完的 Ticket 数</th>
+                <th>今天回复的邮件数</th>
+                <th>今天处理的 Ticket 数</th>
+                <th>昨天回复的邮件数</th>
+                <th>昨天处理的 Ticket 数</th>
+                <th>还未处理的 Tickets</th>
+                <th>总共处理的 Tickets</th>
             </tr>
         #{list items:ticketTable.keySet(), as:'user'}
             #{if user != "untake"}
                 <tr>
                     #{set trow:ticketTable.get(user)/}
-                    #{set t7row:ticket7Table.get(user)/}
+                    #{set yrow:yesterDayTicketTable.get(user)/}
                     <td>${user}</td>
-                    <td>${trow.get('day_resp')}</td>
-                    <td>${trow.get('take_resp_no_close')}</td>
-                    <td>${t7row.get('day_resp')}</td>
-                    <td>${t7row.get('take_resp_no_close')}</td>
-                    <td>${trow.get('take_no_close')}</td>
+                    <td>${trow.get('user_day_mails')}</td>
+                    <td>${trow.get('user_day_tickets')}</td>
+                    <td>${yrow.get('user_day_mails')}</td>
+                    <td>${yrow.get('user_day_tickets')}</td>
+                    <td>${trow.get('user_un_solved_tickets')}</td>
+                    <td>${trow.get('user_solved_tickets')}</td>
                 </tr>
             #{/if}
         #{/list}
             <tr>
-                <td></td>
-                <th>当天创建的未被接管未关闭的 Ticket 数</th>
-                <th>7 天内创建未被接管未关闭的 Ticket 数</th>
-                <th>当前创建未接管的 Ticket 数</th>
-                <th>7 天创建未接管的 Ticket 数</th>
-                <th>总未被接管的 Ticket 数</th>
-                <td colspan="2"></td>
+                <td>总未完成的 Ticket</td>
+                <td>${ticketMap.get("un_solved_tickets")}</td>
+                <td>总完成的 Ticket</td>
+                <td>${ticketMap.get("solved_tickets")}</td>
+                <td colspan="3"></td>
             </tr>
-            <tr>
-                <td>未被接管的</td>
-            #{set trow:ticketTable.get("untake")/}
-            #{set t7row:ticket7Table.get("untake")/}
-                <td>${trow.get("duration_no_close")}</td>
-                <td>${t7row.get("duration_no_close")}</td>
-                <td>${trow.get("duration")}</td>
-                <td>${t7row.get("duration")}</td>
-                <td>${trow.get("total")}</td>
-                <td colspan="2"></td>
-            </tr>
+
         </table>
     </div>
 </div>

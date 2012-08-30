@@ -31,9 +31,14 @@ public class Application extends Controller {
 
     public static void index() {
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
-        Map<String, Map<String, Long>> ticketTable = Ticket.frontPageTable(DateTime.now().minusDays(1).toDate(), new Date());
-        Map<String, Map<String, Long>> ticket7Table = Ticket.frontPageTable(DateTime.now().minusDays(7).toDate(), new Date());
-        render(odmaps, ticketTable, ticket7Table);
+        Date now = new Date();
+        Date yestorday = DateTime.now().minusDays(1).toDate();
+        Date threeMonth = DateTime.now().minusMonths(3).toDate();
+        Map<String, Map<String, Long>> ticketTable = Ticket.frontPageTable(now, now);
+        Map<String, Map<String, Long>> yesterDayTicketTable = Ticket.frontPageTable(yestorday, yestorday);
+        // 3 个月内的 Ticket 汇总
+        Map<String, Long> ticketMap = Ticket.ticketTotalTable(threeMonth, new Date());
+        render(odmaps, ticketTable, yesterDayTicketTable, ticketMap);
     }
 
     @CacheFor(value = "20mn")

@@ -1,7 +1,6 @@
 package models.support;
 
 import com.google.gson.annotations.Expose;
-import com.jamonapi.ListenerType;
 import helper.Dates;
 import helper.OsTicket;
 import jobs.TicketStateSyncJob;
@@ -11,7 +10,6 @@ import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -409,37 +407,58 @@ public class Ticket extends Model {
         /**
          * 1. 找出所有的客服人员.
          * 2. 通过一个一个的客服人员找到一行一行的数据
-         * - 当天的回复的 Email 数
-         * - 当天回复的 Ticket 数
-         * - 接管了的 Ticket 并且没 CLOSE 的
-         * 3. 最后计算统计未分配的 Ticket
+         * - 时间段内回复的 Email 数
+         * - 时间段内回复的 Ticket 数
+         * - 时间段内指定用户还未完成的 Tickets 数
          */
         List<User> services = User.serviceUsers();
         Date morning = Dates.morning(from);
         Date night = Dates.night(to);
         for(User user : services) {
             Map<String, Long> row = new HashMap<String, Long>();
-            row.put("day_resp", TicketResponse.count("ticket.resolver=? AND created>=? AND created<=?", user, morning, night));
-            row.put("take_resp_no_close", TicketQuery.userTakedButNotCloseTickets(morning, night, user));
-            row.put("take_no_close", Ticket.count("resolver=? AND state!=?", user, TicketState.CLOSE));
+            row.put("user_day_mails", TicketQuery.userEmailsCount(morning, night, user));
+            row.put("user_day_tickets", TicketQuery.userTakeAndMailedTicketsCount(morning, night, user));
+            row.put("user_un_solved_tickets", TicketQuery.userSolvedTicketsCount(user, false));
+            row.put("user_solved_tickets", TicketQuery.userSolvedTicketsCount(user, true));
             rows.put(user.username, row);
         }
 
-        // un named
+        /**
+         * 3. 有处理但是没有被认领的j
+         *  - 时间段内回复的 Email 数
+         *  - 时间段内回复的 Ticket 数
+         *  - 无接管
+         */
         Map<String, Long> unNameRow = new HashMap<String, Long>();
-        unNameRow.put("day_resp", TicketResponse.count("ticket.resolver=null AND created>=? AND created<=?",  morning, night));
-        unNameRow.put("take_resp_no_close", TicketQuery.noUserTakedButNotCloseTickets(from, to));
-        unNameRow.put("take_no_close", 0l);
+        unNameRow.put("user_day_mails", TicketQuery.userEmailsCount(morning, night, null));
+        unNameRow.put("user_day_tickets", TicketQuery.userTakeAndMailedTicketsCount(morning, night, null));
+        unNameRow.put("user_un_solved_tickets", TicketQuery.userSolvedTicketsCount(null, false));
+        unNameRow.put("user_solved_tickets", TicketQuery.userSolvedTicketsCount(null, true));
         rows.put("未知用户", unNameRow);
 
-
-        Map<String, Long> unTake = new HashMap<String, Long>();
-        unTake.put("total_no_close", TicketQuery.unTakeAndNotCloseTickets(TicketState.CLOSE));
-        // 指定时间内未接管未关闭
-        unTake.put("duration_no_close", TicketQuery.unTakeAndNotCloseTickets(TicketState.CLOSE, morning, night));
-        // 指定时间内未接管,可关闭可不关闭
-        unTake.put("duration", TicketQuery.unTakeAndNotCloseTickets(null, morning, night));
-        rows.put("untake", unTake);
         return rows;
+    }
+
+    /**
+     * Ticket 信息汇总
+     * @param from
+     * @param to
+     * @return
+     */
+    public static Map<String, Long> ticketTotalTable(Date from, Date to) {
+        /**
+         * 4. 汇总数据
+         * - 时间段内还未完成的 Ticket 数量
+         * - 时间段内完成的 Ticket 数量
+         * - 未处理完毕的总 Ticket 数
+         */
+        Date morning = Dates.morning(from);
+        Date night = Dates.night(to);
+        Map<String, Long> unTake = new HashMap<String, Long>();
+        unTake.put("period_un_solved_tickets", TicketQuery.periodCreateTicketsCount(morning, night, false));
+        unTake.put("period_solved_ticets", TicketQuery.periodCreateTicketsCount(morning, night, true));
+        unTake.put("solved_tickets", TicketQuery.solvedTicketsCount(true));
+        unTake.put("un_solved_tickets", TicketQuery.solvedTicketsCount(false));
+        return unTake;
     }
 }
