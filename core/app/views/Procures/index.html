@@ -4,9 +4,12 @@
     #{script 'procures/index.coffee'/}
     #{script 'jquery.validate.min.js'/}
 #{/set}
-<div style="margin:5px 0">
-    <a href="@{Procures.create()}" target="_blank" class="btn btn-small btn-primary">创建</a>
+<div class="row-fluid">
+    <div class="span12">
+        <a href="@{Procures.blank()}" target="_blank" class="btn btn-primary">创建</a>
+    </div>
 </div>
+
 <div class="row-fluid">
 
     <div class="span5">

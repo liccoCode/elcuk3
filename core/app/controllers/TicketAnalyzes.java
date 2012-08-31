@@ -1,7 +1,7 @@
 package controllers;
 
 import models.product.Category;
-import models.view.RewAndFdbk;
+import models.view.RewAndFdbkDTO;
 import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -25,14 +25,14 @@ public class TicketAnalyzes extends Controller {
     }
 
     public static void reviews(Date from, Date to, String col) {
-        List<RewAndFdbk> reviews = RewAndFdbk.reviews(from, to);
-        RewAndFdbk.sortByColumn(reviews, col);
+        List<RewAndFdbkDTO> reviews = RewAndFdbkDTO.reviews(from, to);
+        RewAndFdbkDTO.sortByColumn(reviews, col);
         render(reviews);
     }
 
     public static void feedbacks(Date from, Date to, String col) {
-        List<RewAndFdbk> feedbacks = RewAndFdbk.feedbacks(from, to);
-        RewAndFdbk.sortByColumn(feedbacks, col);
+        List<RewAndFdbkDTO> feedbacks = RewAndFdbkDTO.feedbacks(from, to);
+        RewAndFdbkDTO.sortByColumn(feedbacks, col);
         render(feedbacks);
     }
 }

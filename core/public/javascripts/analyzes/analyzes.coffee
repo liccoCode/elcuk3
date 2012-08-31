@@ -234,12 +234,6 @@ $ ->
             else
               pageViewDefaultContent()
               paintProcureUnitInTimeline(params['type'], o.attr('title'))
-
-            display =
-              0: 'EasyAcc'
-              1: 'EasyAcc.U'
-              2: 'EasyAcc.D'
-            $('#a_acc_id_label').html(display[accId])
             false
 
           # sid 中的 ps 修改事件
@@ -247,7 +241,7 @@ $ ->
 
           #页脚的翻页事件
           $('div.pagination a').click ->
-            sellRankLoad(type, $(@).attr('page'))
+            sellRankLoad(type, $(@).text())
             false
         finally
           tgt.unmask()

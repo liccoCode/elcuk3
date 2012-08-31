@@ -3,6 +3,7 @@ package ext;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
+import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.templates.JavaExtensions;
@@ -14,6 +15,21 @@ import play.templates.JavaExtensions;
  * Time: 6:04 PM
  */
 public class ReviewHelper extends JavaExtensions {
+    public static String color(ProcureUnit unit) {
+        switch(unit.stage) {
+            case PLAN:
+                return "3da4c2";
+            case DELIVERY:
+                return "006acc";
+            case DONE:
+                return "5bb75b";
+            case SHIP_OVER:
+                return "108080";
+            case CLOSE:
+            default:
+                return "f9a021";
+        }
+    }
 
 
     /**

@@ -15,9 +15,10 @@
 #{list items:p.items, as:'sell'}
     <tr>
         #{set sku:models.product.Product.merchantSKUtoSKU(sell.merchantSKU)/}
-        <td class="sku" style="cursor:pointer;" aid="0" title="${sku}">${sku}</td>
+        <td class="sku" style="cursor:pointer;" aid="0" title="${sku}"><i class="icon-bolt"></i> ${sku}</td>
         <td>${sell.onplan}</td>
-        <td>${sell.onwork}</td>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#sku_${sell_index}">
+            <i class="icon-reorder"></i> ${sell.onwork}</td>
         <td>${sell.onway}</td>
         <td>${sell.qty}</td>
         <td>${sell._ps}</td>
@@ -26,26 +27,16 @@
         <td>${sell.d1}</td>
         <td>${sell.d7}/${(sell.d7 / 7).format("#.##")}</td>
         <td>${sell.d30}/${(sell.d30 / 30).format("#.##")}</td>
-
+    </tr>
+    <tr id="sku_${sell_index}" style="display:none;">
+        <td colspan="13">
+            这里面的数据等待 Ajax 填充吧. TBD
+        </td>
     </tr>
 #{/list}
     <tr>
         <td colspan="13">
-            <div class="input-prepend">
-                <div class="pagination span3" style="margin-top:0;">
-                    <ul>
-                        <li><a href="#" page="1">1</a></li>
-                        <li><a href="#" page="${p.page - 1}">Prev</a></li>
-                        <li><a href="#" page="${p.page + 1}">Next</a></li>
-                        <li><a href="#" page="${p.totalPage}">${p.totalPage}</a></li>
-                    </ul>
-                </div>
-                <span class="add-on">
-                当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count}
-                    条记录,  <span id="curent_page">${p.page}</span>
-                    / ${p.totalPage} 页
-                </span>
-            </div>
+        #{bootstrap_pager pi:p, url:'#'/}
         </td>
     </tr>
 </table>

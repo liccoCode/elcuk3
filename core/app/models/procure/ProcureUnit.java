@@ -44,60 +44,23 @@ public class ProcureUnit extends Model {
         /**
          * 计划阶段
          */
-        PLAN {
-            @Override
-            public String color() {
-                return "#3da4c2";
-            }
-        },
+        PLAN,
         /**
          * 采购阶段
          */
-        DELIVERY {
-            @Override
-            public String color() {
-                return "#006acc";
-            }
-        },
+        DELIVERY,
         /**
          * 完成了, 全部交货了
          */
-        DONE {
-            @Override
-            public String color() {
-                return "#5bb75b";
-            }
-        },
+        DONE,
         /**
          * 运输完成
          */
-        SHIP_OVER {
-            @Override
-            public String color() {
-                return "#108080";
-            }
-        },
+        SHIP_OVER,
         /**
          * 关闭阶段, 不处理了
          */
-        CLOSE {
-            @Override
-            public String color() {
-                return "#f9a021";
-            }
-
-        };
-
-        /**
-         * 前台使用的 html 代码
-         *
-         * @return
-         */
-        public String to_h() {
-            return String.format("<span style='color:%s'>%s</span>", this.color(), this);
-        }
-
-        public abstract String color();
+        CLOSE
     }
 
     /**

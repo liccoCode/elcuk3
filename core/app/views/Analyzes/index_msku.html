@@ -1,5 +1,5 @@
 <!-- 生成 Analyzes 页面下方的 selling 信息 -->
-<table class="table table-condensed table-bordered" style="text-align:center;">
+<table class="table table-condensed table-bordered">
     <tr>
         <th title="可双击下面 MerchantSKU">MerchantSKU</th>
         <th>ASIN</th>
@@ -15,18 +15,19 @@
         <th>Day30</th>
         <th colspan="2"><a rel="tooltip" title="手动设置的 ps 计算的 TurnOver(在库 | 在途+在库+<b>在产</b>)">TOR</a></th>
         <th colspan="2"><a rel="tooltip" title="系统计算的 ps 计算的 TurnOver(在库 | 在途+在库+<b>在产</b>)">_TOR</a></th>
-        <th>Type</th>
     </tr>
 #{list items:p.items, as:'sell'}
     <tr>
-        <td class="msku" style="cursor:pointer;" aid="${sell.account.id}" title="${sell.merchantSKU}">${sell.merchantSKU}</td>
+        <td class="msku" style="cursor:pointer;" aid="${sell.account.id}" title="${sell.merchantSKU}">
+            <i class="icon-bolt"></i> ${sell.merchantSKU}</td>
         <td class="sid" title="${sell.sellingId}" style="width:150px;">
             <div class="input-append">
                 <span class="add-on"><a target="_blank" href="${sell.asinLink()}">${sell.asin}</a></span>
                 <span class="add-on">${sell.market.nickName()}</span>
             </div>
         </td>
-        <td>${sell.account.prettyName()}</td>
+        <td style="cursor:pointer;" data-toggle="toggle" data-target="#msku_${sell_index}">
+            <i class="icon-reorder"></i> ${sell.account.prettyName()}</td>
         <td>${sell.aps.salePrice}</td>
         <td>${sell.onplan}</td>
         <td>${sell.onwork}</td>
@@ -47,26 +48,16 @@
         #{turnOver turnOver:sell.turnOverT4._3 /}
         #{turnOver turnOver:sell.turnOverT4._2 /}
         #{turnOver turnOver:sell.turnOverT4._4 /}
-        <td>${sell.type}</td>
+    </tr>
+    <tr id="msku_${sell_index}" style="display:none;">
+        <td colspan="17">
+            等待 Ajax 添加? TBD
+        </td>
     </tr>
 #{/list}
     <tr>
-        <td colspan="18">
-            <div class="input-prepend">
-                <div class="pagination span3" style="margin-top:0;">
-                    <ul>
-                        <li><a href="#" page="1">1</a></li>
-                        <li><a href="#" page="${p.page - 1}">Prev</a></li>
-                        <li><a href="#" page="${p.page + 1}">Next</a></li>
-                        <li><a href="#" page="${p.totalPage}">${p.totalPage}</a></li>
-                    </ul>
-                </div>
-                <span class="add-on">
-                当前显示 ${p.size < p.items.size() ? p.size : p.items.size()} 记录,总共 ${p.count}
-                    条记录,  <span id="curent_page">${p.page}</span>
-                    / ${p.totalPage} 页
-                </span>
-            </div>
+        <td colspan="17">
+        #{bootstrap_pager pi:p, url:'#'/}
         </td>
     </tr>
 </table>

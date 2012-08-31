@@ -33,7 +33,7 @@ public class Procures extends Controller {
         render(plans, procures, dones, dlmts, doneDlmts);
     }
 
-    public static void create() {
+    public static void blank() {
         renderArgs.put("suppliers", J.json(ProcureUnit.suppliers()));
         renderArgs.put("sids", J.json(Selling.allSid(true)));
         List<Cooperator> cops = Cooperator.suppliers();

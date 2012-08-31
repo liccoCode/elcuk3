@@ -50,7 +50,7 @@ public class Products extends Controller {
         List<Product> prods = Product.all().fetch(fixs._1, fixs._2);
 
         Long count = Product.count();
-        AnalyzesPager<Product> pi = new AnalyzesPager<Product>(fixs._1, count, fixs._2, prods);
+        Pager<Product> pi = new Pager<Product>(fixs._1, count, fixs._2, prods);
 
         render(prods, pi);
     }

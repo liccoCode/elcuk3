@@ -4,19 +4,19 @@ p(age): 当前页码
 s(ize): 当前页面显示的条数
 u(rl): 方法
 }*
-#{set begin: ((pi.page - 3) >= 1) ? (pi.page - 3) : 1 /}
-#{set end: ((pi.page + 3) <= pi.totalPage) ? (pi.page + 3) : pi.totalPage/}
+#{set begin: ((_pi.page - 3) >= 1) ? (_pi.page - 3) : 1 /}
+#{set end: ((_pi.page + 3) <= _pi.totalPage) ? (_pi.page + 3) : _pi.totalPage/}
 <div class="pagination pagination-centered">
     <ul>
         <li><a href="${_url + "?p=1"}">首页</a></li>
     #{list items:begin..end, as:'i'}
-        #{if pi.page == i}
+        #{if _pi.page == i}
             <li class="active"><a href="#">${i}</a></li>
         #{/if}
         #{else }
             <li><a href="${_url + "?p=" + i}">${i}</a></li>
         #{/else}
     #{/list}
-        <li><a href="${_url + "?p=" + pi.totalPage}">尾页(${pi.totalPage}|${pi.count})</a></li>
+        <li><a href="${_url + "?p=" + _pi.totalPage}">尾页(${_pi.totalPage}|${_pi.count})</a></li>
     </ul>
 </div>
