@@ -64,7 +64,7 @@ public class SystemMails extends Mailer {
     }
 
     public static boolean productPicCheckermail(List<F.T2<Product,Selling>> productAndSellT2s) {
-        setSubject(String.format("{CHECK} Product Picture Information Check"));
+        setSubject(String.format("{CHECK} %s Product Picture Information Check", Dates.date2Date()));
         mailBase();
         addRecipient("alerts@easyacceu.com");
         try {
