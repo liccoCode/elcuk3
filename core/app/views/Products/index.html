@@ -1,15 +1,18 @@
 #{extends 'main_full.html' /}
 #{set title:'Product' /}
 #{set 'moreScripts'}
-    #{script 'products/product.coffee'/}
+*{#{script 'products/product.coffee'/}}*
 #{/set}
 
 <div style="margin:5px 0 0;" class="row">
     <a href="@{Products.blank()}" class="btn btn-primary" target="_blank">添加新产品</a>
 
-    <div class="span3 pull-right input-prepend">
-        <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" data-provide="typeahead" data-items="5" data-source="${fmys}" style="width:172px;" placeHolder="搜索 SKU">
+    <div class="span3 pull-right input-prepend input-append">
+        <form action="@{Products.search()}" method="post">
+            <span class="add-on"><i class="icon-search"></i></span>
+            <input type="text" data-provide="typeahead" data-items="5" data-source="${fmys}" name="sku" value="${sku}" style="width:172px;" placeHolder="搜索 SKU">
+            <button class="btn">搜索</button>
+        </form>
     </div>
 </div>
 
@@ -19,34 +22,6 @@
     等待添加新产品
 #{/if}
 #{else }
-    <table class="table table-condensed table-bordered">
-        <tr>
-            <th>SKU</th>
-            <th>Pics</th>
-            <th>Name</th>
-            <th>L</th>
-            <th>H</th>
-            <th>W</th>
-            <th>Wt</th>
-        </tr>
-        #{list items:prods, as:'prod'}
-            <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
-                <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
-                #{set count:prod.pictureCount() /}
-                <td>${count} <i class="${count > 0 ? 'icon-picture' : 'icon-exclamation-sign'}"></i>
-                </td>
-                <td>${prod.productName}</td>
-                <td>${prod.lengths == null ? 0 : prod.lengths}</td>
-                <td>${prod.heigh == null ? 0 : prod.heigh}</td>
-                <td>${prod.width == null ? 0 : prod.width}</td>
-                <td>${prod.weight == null ? 0 : prod.weight}</td>
-            </tr>
-        #{/list}
-        <tr>
-            <td colspan="7">
-                #{bootstrap_pager c:pi.count, p:pi.page, s:pi.size, u:'/products/index'/}
-            </td>
-        </tr>
-    </table>
+    #{render 'Products/_products.html', prods:prods, pi:pi/}
 #{/else}
 </div>

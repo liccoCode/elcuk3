@@ -15,6 +15,7 @@ import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -34,32 +35,31 @@ import java.util.Map;
 @Check("normal")
 public class Products extends Controller {
 
+    @Before(only = {"index", "search"})
+    public static void setFamilys() {
+        List<String> skus = Family.familys(false);
+        renderArgs.put("fmys", J.json(skus));
+    }
+
+
     /**
      * 展示所有的 Product
      */
     public static void index(Integer p, Integer s) {
-        Integer[] fixs = Webs.fixPage(p, s);
-        p = fixs[0];
-        s = fixs[1];
-        List<Product> prods = Product.all().fetch(p, s);
+        F.T2<Integer, Integer> fixs = Webs.fixPage(p, s);
+        List<Product> prods = Product.all().fetch(fixs._1, fixs._2);
 
         Long count = Product.count();
-        AnalyzesPager<Product> pi = new AnalyzesPager<Product>(s, count, p, prods);
-
-        List<String> skus = Family.familys(false);
-        renderArgs.put("fmys", J.json(skus));
+        AnalyzesPager<Product> pi = new AnalyzesPager<Product>(fixs._1, count, fixs._2, prods);
 
         render(prods, pi);
     }
 
     public static void search(String sku) {
         List<Product> prods = new ArrayList<Product>();
-        if(StringUtils.isBlank(sku))
-            render(prods);
-        else {
+        if(!StringUtils.isBlank(sku))
             prods = Product.find("family.family like ?", sku + "%").fetch();
-            render(prods);
-        }
+        render("Products/index.html", prods, sku);
     }
 
     public static void show(String sku) {
@@ -75,25 +75,21 @@ public class Products extends Controller {
     }
 
     public static void c_index(Integer p, Integer s) {
-        Integer[] fixs = Webs.fixPage(p, s);
-        p = fixs[0];
-        s = fixs[1];
-        List<Category> cates = Category.all().fetch(p, s);
+        F.T2<Integer, Integer> fixs = Webs.fixPage(p, s);
+        List<Category> cates = Category.all().fetch(fixs._1, fixs._2);
         Long count = Category.count();
 
-        Pager<Category> pi = new Pager<Category>(s, count, p, cates);
+        Pager<Category> pi = new Pager<Category>(fixs._1, count, fixs._2, cates);
         render(cates, count, p, s, pi);
     }
 
     public static void w_index(Integer p, Integer s) {
-        Integer[] fixs = Webs.fixPage(p, s);
-        p = fixs[0];
-        s = fixs[1];
-        List<Whouse> whs = Whouse.all().fetch(p, s);
+        F.T2<Integer, Integer> fixs = Webs.fixPage(p, s);
+        List<Whouse> whs = Whouse.all().fetch(fixs._1, fixs._2);
         Long count = Whouse.count();
         List<Account> accs = Account.openedSaleAcc();
 
-        Pager<Whouse> pi = new Pager<Whouse>(s, count, p, whs);
+        Pager<Whouse> pi = new Pager<Whouse>(fixs._1, count, fixs._2, whs);
         render(whs, accs, count, p, s, pi);
     }
 

@@ -4,20 +4,19 @@ p(age): 当前页码
 s(ize): 当前页面显示的条数
 u(rl): 方法
 }*
-#{set maxPage:(java.lang.Math.ceil((_c / _s).toFloat()).intValue())/}
-#{set begin: ((_p - 3) >= 1) ? (_p - 3) : 1 /}
-#{set end: ((_p + 3) <= maxPage) ? (_p + 3) : maxPage/}
+#{set begin: ((pi.page - 3) >= 1) ? (pi.page - 3) : 1 /}
+#{set end: ((pi.page + 3) <= pi.totalPage) ? (pi.page + 3) : pi.totalPage/}
 <div class="pagination pagination-centered">
     <ul>
-        <li><a href="${_u + "?p=1&s=" + _s}">首页</a></li>
+        <li><a href="${_url + "?p=1"}">首页</a></li>
     #{list items:begin..end, as:'i'}
-        #{if _p == i}
+        #{if pi.page == i}
             <li class="active"><a href="#">${i}</a></li>
         #{/if}
         #{else }
-            <li><a href="${_u + "?p=" + i + "&s=" + _s}">${i}</a></li>
+            <li><a href="${_url + "?p=" + i}">${i}</a></li>
         #{/else}
     #{/list}
-        <li><a href="${_u + "?p=" + maxPage + "&s=" + _s}">尾页(${_c})</a></li>
+        <li><a href="${_url + "?p=" + pi.totalPage}">尾页(${pi.totalPage}|${pi.count})</a></li>
     </ul>
 </div>

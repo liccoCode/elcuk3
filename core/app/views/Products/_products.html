@@ -1,6 +1,7 @@
-<table class="table table-striped">
+<table class="table table-condensed table-bordered">
     <tr>
         <th>SKU</th>
+        <th>Pics</th>
         <th>Name</th>
         <th>L</th>
         <th>H</th>
@@ -9,12 +10,22 @@
     </tr>
 #{list items:prods, as:'prod'}
     <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
-        <td class="span2"><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
-        <td class="span6">${prod.productName}</td>
+        <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
+        #{set count:prod.pictureCount() /}
+        <td>${count} <i class="${count > 0 ? 'icon-picture' : 'icon-exclamation-sign'}"></i>
+        </td>
+        <td>${prod.productName}</td>
         <td>${prod.lengths == null ? 0 : prod.lengths}</td>
         <td>${prod.heigh == null ? 0 : prod.heigh}</td>
         <td>${prod.width == null ? 0 : prod.width}</td>
         <td>${prod.weight == null ? 0 : prod.weight}</td>
     </tr>
 #{/list}
+#{if pi}
+    <tr>
+        <td colspan="7">
+            #{bootstrap_pager pi:pi, url:'/products/index'/}
+        </td>
+    </tr>
+#{/if}
 </table>

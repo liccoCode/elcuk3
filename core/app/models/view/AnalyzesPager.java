@@ -18,7 +18,7 @@ public class AnalyzesPager<T> extends Pager<T> {
     public AnalyzesPager() {
     }
 
-    public AnalyzesPager(int size, Long count, int page, List<T> items) {
+    public AnalyzesPager(int page, Long count, int size, List<T> items) {
         this.size = size;
         this.count = count;
         this.page = page;

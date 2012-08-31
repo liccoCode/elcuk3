@@ -16,7 +16,7 @@ public class Pager<T> {
     }
 
 
-    public Pager(int size, Long count, int page, List<T> items) {
+    public Pager(int page, Long count, int size, List<T> items) {
         this.size = size;
         this.count = count;
         this.page = page;
@@ -44,8 +44,11 @@ public class Pager<T> {
 
     public List<T> items;
 
+    /**
+     * 搜索数据的索引开始位置
+     * LIMIT [0],10
+     */
     public int begin;
-    public int end;
 
     public void setPage(int page) {
         if(page <= 0) page = 1;
@@ -67,17 +70,6 @@ public class Pager<T> {
     public int getBegin() {
         if(this.begin <= 0) this.begin = ((this.page < 1 ? 1 : this.page) - 1) * this.size;
         return this.begin;
-    }
-
-    public int getEnd() {
-        if(this.end <= 0) {
-            this.end = this.page * this.size;
-            if(this.count == null || this.count < 0)
-                throw new FastRuntimeException("AnalyzesPager.count must be set first and can not blow then zero!");
-            if(this.count < (this.end + 1))
-                this.end = this.count.intValue() - 1; // 这个 1 是对应与集合的大小 size(10) 与集合内元素的 索引(0~9)
-        }
-        return this.end;
     }
 
     public int getTotalPage() {

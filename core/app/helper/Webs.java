@@ -55,12 +55,14 @@ public class Webs {
      *
      * @param p
      * @param s
+     * @return ._1: page, ._2: perSize
      */
-    public static Integer[] fixPage(Integer p, Integer s) {
-        Integer[] rtVal = new Integer[]{p, s};
-        if(p == null || p < 0) rtVal[0] = 1; // 判断在页码
-        if(s == null || s < 1 || s > 100) rtVal[1] = 20; // 判断显示的条数控制
-        return rtVal;
+    public static F.T2<Integer, Integer> fixPage(Integer p, Integer s) {
+        int page = 1;
+        int size = 20;
+        if(p != null && p >= 1) page = p; // 判断在页码
+        if(s != null && s >= 1 && s <= 100) size = s; // 判断显示的条数控制
+        return new F.T2<Integer, Integer>(page, size);
     }
 
     /**

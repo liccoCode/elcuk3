@@ -85,7 +85,7 @@
             #{render 'Orders/_order_table_tr.html', pi:pi/}
             <tr class="tb_footer">
                 <td colspan="10">
-                    #{bootstrap_pager c:pi.count, s:pi.size, p:pi.page, u:'/orders/index'/}
+                    #{bootstrap_pager pi:pi, url:'/orders/index'/}
                 </td>
             </tr>
         </table>
