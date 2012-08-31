@@ -108,7 +108,6 @@ public class TicketPost {
                 case TICKET:
                     break;
             }
-
         }
 
         if(this.userid > 0) {
