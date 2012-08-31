@@ -10,7 +10,8 @@ import play.templates.JavaExtensions;
  * Time: 5:19 PM
  */
 public class ProcuresHelper extends JavaExtensions {
-    public static String color(ProcureUnit unit) {
+
+    public static String ucolor(ProcureUnit unit) {
         switch(unit.stage) {
             case PLAN:
                 return "3da4c2";
