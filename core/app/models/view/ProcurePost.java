@@ -2,6 +2,7 @@ package models.view;
 
 import helper.Dates;
 import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -33,7 +34,7 @@ public class ProcurePost {
         this.to = new Date();
     }
 
-    public List<ProcureUnit> search() {
+    public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
         return ProcureUnit.find(params._1, params._2.toArray()).fetch();
     }
@@ -58,6 +59,16 @@ public class ProcurePost {
         if(this.stage != null) {
             sbd.append(" AND stage=? ");
             params.add(this.stage);
+        }
+
+        if(StringUtils.isNotBlank(this.search)) {
+            String word = String.format("%%%s%%", this.search.trim());
+            sbd.append(" AND (")
+                    .append("comment LIKE ? OR ")
+                    .append("product.sku LIKE ? OR ")
+                    .append("selling.sellingId LIKE ?")
+                    .append(") ");
+            for(int i = 0; i < 3; i++) params.add(word);
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);

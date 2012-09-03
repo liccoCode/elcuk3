@@ -36,7 +36,7 @@ public class Procures extends Controller {
             p = new ProcurePost();
             units = ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
         } else {
-            units = p.search();
+            units = p.query();
         }
         render(p, units);
     }
