@@ -165,8 +165,8 @@ public class TimelineEventSource {
          * @return
          */
         public Event startAndEndDate(String type) {
-            DateTime planDt = new DateTime(this.unit.plan.planArrivDate.getTime());
-            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.delivery.ensureQty : this.unit.plan.planQty) / ("sku".equals(type) ? this.selling._ps() : this.selling.ps));
+            DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime());
+            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.selling._ps() : this.selling.ps));
             this.start = Dates.date2Date(planDt.toDate());
             this.end = Dates.date2Date(planDt.plusHours((int) (this.lastDays * 24)).toDate());
             this.durationEvent = true;
@@ -174,7 +174,7 @@ public class TimelineEventSource {
         }
 
         private boolean isEnsureQty() {
-            return (this.unit.delivery != null && this.unit.delivery.ensureQty != null);
+            return (this.unit.attrs != null && this.unit.attrs.qty != null);
         }
 
         /**
@@ -187,9 +187,9 @@ public class TimelineEventSource {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
             this.title = String.format("%s | %s Days, %s(%s) %s(%s)",
                     state,
-                    this.lastDays, this.unit.plan.supplier,
+                    this.lastDays, this.unit.cooperator.name,
                     this.unit.sid,
-                    (isEnsureQty() ? this.unit.delivery.ensureQty : this.unit.plan.planQty),
+                    (isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty),
                     (isEnsureQty() ? "EnsureQty" : "PlanQty"));
             this.description = "<h2>这里想看到什么数据??</h2>";
             return this;

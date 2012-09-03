@@ -53,7 +53,7 @@ $ ->
           if r.flag is false
             alert(r.message)
           else
-            $('#plan tr[row][class=active]').remove()
+            $('#attrs tr[row][class=active]').remove()
             UNIT_DETAIL.html(r.message)
           UNIT_DETAIL.unmask()
       )
@@ -113,9 +113,9 @@ $ ->
 
   #初始化 Plan 点击事件
   planRowClick = ->
-    $('#plan tr[row]').click ->
+    $('#attrs tr[row]').click ->
       o = $(@)
-      threeTabClickActive('plan', o)
+      threeTabClickActive('attrs', o)
       UNIT_DETAIL.mask("加载中...")
       UNIT_DETAIL.load('/procures/planDetail', id: o.find('td:eq(0)').html(),
         ->

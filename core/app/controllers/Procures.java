@@ -1,18 +1,14 @@
 package controllers;
 
-import helper.J;
 import models.User;
-import models.embedded.UnitDelivery;
-import models.market.Selling;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
-import models.procure.Shipment;
-import models.view.Ret;
-import play.libs.F;
+import models.product.Whouse;
+import models.view.ProcurePost;
+import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -24,86 +20,45 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
-    public static void index() {
-        List<ProcureUnit> plans = ProcureUnit.findByStage(ProcureUnit.STAGE.PLAN);
-        List<ProcureUnit> procures = ProcureUnit.findByStage(ProcureUnit.STAGE.DELIVERY);
-        List<ProcureUnit> dones = ProcureUnit.findByStage(ProcureUnit.STAGE.DONE);
-        List<Deliveryment> dlmts = Deliveryment.openDeliveryments();
-        List<Deliveryment> doneDlmts = Deliveryment.find("state=?", Deliveryment.S.DELIVERY).fetch();
-        render(plans, procures, dones, dlmts, doneDlmts);
+    @Before(only = {"blank", "save", "index"}, priority = 0)
+    public static void whouses() {
+        renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
 
-    public static void blank() {
-        renderArgs.put("suppliers", J.json(ProcureUnit.suppliers()));
-        renderArgs.put("sids", J.json(Selling.allSid(true)));
-        List<Cooperator> cops = Cooperator.suppliers();
-        render(cops);
+    @Before(only = {"index"}, priority = 1)
+    public static void cooperators() {
+        renderArgs.put("cooperators", Cooperator.<Cooperator>findAll());
     }
 
-    public static void edit(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
+    public static void index(ProcurePost p) {
+        List<ProcureUnit> units = null;
+        if(p == null) {
+            p = new ProcurePost();
+            units = ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
+        } else {
+            units = p.search();
+        }
+        render(p, units);
+    }
+
+    public static void blank(ProcureUnit unit) {
+        if(unit == null || unit.selling == null) {
+            flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
+            render(unit);
+        }
         render(unit);
     }
 
-    public static void update(ProcureUnit p) {
-        checkAuthenticity();
-        if(!p.isPersistent()) throw new FastRuntimeException("此 ProcureUnti 不存在.");
-        p.checkAndUpdate();
-        renderJSON(J.G(p));
+    public static void save(ProcureUnit unit) {
+        validation.valid(unit);
+        validation.valid(unit.attrs);
+        if(Validation.hasErrors()) {
+            render("Procures/blank.html", unit);
+        }
+        unit.handler = User.findByUserName(Secure.Security.connected());
+        unit.checkAndCreate();
+        flash.success("创建成功");
+        redirect("/Procures/index");
     }
 
-    public static void sidSetUp(String sid) {
-        Selling selling = Selling.findById(sid);
-        renderJSON(J.json(new F.T4<String, String, String, String>(
-                selling.listing.listingId,
-                selling.sellingId,
-                selling.listing.product.sku,
-                selling.market.nickName()
-        )));
-    }
-
-    public static void save(ProcureUnit p) {
-        p.handler = User.findByUserName(Secure.Security.connected());
-        renderJSON(J.G(p.checkAndCreate()));
-    }
-
-    public static void close(Long id, String msg) {
-        ProcureUnit p = ProcureUnit.findById(id);
-        if(p == null || !p.isPersistent()) throw new FastRuntimeException("不存在!");
-        p.close(msg);
-        renderJSON(new Ret(true, "ProcureUnit(" + id + ") 因 (" + msg + ") 关闭成功"));
-    }
-
-    // ------------- Plan Tab ---------------------
-    public static void planDetail(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        if(unit.stage != ProcureUnit.STAGE.PLAN)
-            throw new FastRuntimeException("此采购单元已经不是 PLAN 阶段");
-        List<Deliveryment> dlms = Deliveryment.find("state=?", Deliveryment.S.PENDING).fetch();
-        render(unit, dlms);
-    }
-
-    public static void createDeliveryMent() {
-        User user = User.findByUserName(Secure.Security.connected());
-        renderJSON(J.G(Deliveryment.checkAndCreate(user)));
-    }
-
-    public static void procureUnitToDeliveryMent(ProcureUnit p, Deliveryment dlmt) {
-        renderJSON(J.G(p.assignToDeliveryment(dlmt)));
-    }
-
-    public static void procureUnitDone(Long id, UnitDelivery d, String cmt) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        if(unit == null || !unit.isPersistent()) throw new FastRuntimeException("ProcureUnit 不存在!");
-        renderJSON(J.G(unit.deliveryComplete(d, cmt)));
-    }
-
-    // ---------------- Delivery Tab ------------------
-    public static void deliveryDetail(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        if(unit.stage != ProcureUnit.STAGE.DELIVERY)
-            throw new FastRuntimeException("此采购单元的不是 DELIVERY 阶段");
-        List<Shipment> shipments = Shipment.shipmentsByState(Shipment.S.PLAN);
-        render(unit, shipments);
-    }
 }

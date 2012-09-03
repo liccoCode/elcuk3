@@ -1,85 +1,107 @@
 #{extends 'main.html' /}
-#{set title:'Procure Create' /}
+#{set title:'ProcureUnit Create' /}
 #{set 'moreScripts'}
-    #{script 'procures/create.coffee'/}
 #{/set}
-<div>
-    <form id="post_form">
-        <table class="table table-condensed table-bordered" style="margin-top:10px;">
-            <caption><span style="font-size:3ex;">创建采购单元</span></caption>
+
+#{if unit.selling == null}
+<div class="row">
+    <div class="span12 alert alert-error">
+        <p>${flash.error}</p>
+    </div>
+#{/if}
+#{else }
+
+    #{ifErrors }
+        <div class="row">
+            <div class="span12 alert alert-error">
+                #{errors }
+                    <p>${error.key} -> ${error.message()}</p>
+                #{/errors}
+            </div>
+        </div>
+    #{/ifErrors}
+
+
+    #{set product: unit.selling.listing.product/}
+    <form action="/procures/save" method="post">
+        <table class="table table-condensed table-bordered">
             <tr>
-                <td>Selling:</td>
+                <th>SellingId</th>
                 <td>
-                    <div class="input-prepend">
-                        <span class="add-on" id='asin'><a target="_blank">ASIN</a></span>
-                        <span class="add-on" id='sid'><a target="_blank">SID</a></span>
-                        <input name="p.sid" style="width:130px;" type="text" data-provide="typeahead" data-source="${sids}" placeHolder="为哪一个Selling补货">
-                    </div>
+                    <input readonly="" type="text" name="unit.selling.sellingId" value="${unit.selling.sellingId}">
                 </td>
-                <td>Whouse:</td>
+                <th>SKU</th>
                 <td>
-                    <select name="p.whouse.id" size="1">
+                    <input readonly="" type="text" name="unit.product.sku" value="${product.sku}">
+                </td>
+            </tr>
+
+            <tr>
+                #{set copers:product.cooperators() /}
+                <th>工厂</th>
+                <td>
+                    <select name="unit.cooperator.id">
                         <option value="">请选择</option>
-                    #{list items:models.product.Whouse.all().fetch(), as:'wh'}
-                        <option value="${wh.id}">${wh.name}</option>
-                    #{/list}
+                        #{list items:copers, as:'coop'}
+                            <option ${coop == unit.cooperator ? 'selected' : ''} value="${coop.id}">${coop.name}</option>
+                        #{/list}
                     </select>
                 </td>
-                <td>Product:</td>
-                <td><input readonly="" name="p.sku" type="text" placeHolder="采购的哪一个SKU"></td>
-            </tr>
 
-            <tr>
-                <td>预计到库时间:</td>
-                <td><input name="p.plan.planArrivDate" type="date" placeHolder="预计到库时间"></td>
-                <td>采购数量</td>
+                <th>价格</th>
                 <td>
-                    <div class="input-prepend">
-                        <input name="p.plan.planQty" style="width:50px;" type="text" placeHolder="计划采购数量" value="0">
-                        <span class="add-on" style="cursor:pointer" val="+50">+50</span>
-                        <span class="add-on" style="cursor:pointer" val="-50">-50</span>
-                        <span class="add-on" style="cursor:pointer" val="+100">+100</span>
-                        <span class="add-on" style="cursor:pointer" val="-100">-100</span>
+                    <div class="input-append">
+                        <input type="text" class="span1" name="unit.attrs.price" value="${unit.attrs.price}">
+                        #{pickCurrency name:'unit.attrs.currency', class:'span2', c:helper.Currency.CNY /}
                     </div>
                 </td>
-                <td>阶段</td>
-                <td><input readonly="" name="p.stage" type="text" placeHolder="状态" value="PLAN"></td>
             </tr>
 
             <tr>
-                <td>采购商</td>
+                <th>采购数量</th>
                 <td>
-                    <input name="p.plan.supplier" type="text" data-provide="typeahead" data-source="${suppliers}" placeHolder="采购商">
-                *{<select>}*
-                *{<option value="0">请选择</option>}*
-                *{#{list items:cops, as:'cop'}}*
-                *{<option value="${cop.id}">${cop.name}</option>}*
-                *{#{/list}}*
-                *{</select>}*
+                    <input type="text" class="input-small" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
                 </td>
-                <td>采购单价</td>
-                <td><input name="p.plan.unitPrice" type="text" placeHolder="价格"></td>
-                <td>货币</td>
+                <th>预计交货日期</th>
                 <td>
-                #{pickCurrency c:helper.Currency.CNY, name:'p.plan.currency'/}
-                </td>
-            </tr>
-            <tr>
-                <td colspan="6">
-                    Memo:
-                    <textarea rows="5" name="p.comment" class="span12"></textarea>
+                    <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
                 </td>
             </tr>
 
             <tr>
-                <td colspan="6">
-                    <button id='create_procure' class="btn btn-primary">创建</button>
-                    <button id="selling_allsid" class="btn btn-primary">清理缓存</button>
+                <th>预计运输时间</th>
+                <td>
+                    <input type="date" name="unit.attrs.planShipDate" value="${unit.attrs.planShipDate.date()}">
+                </td>
+                <th>预计到库时间</th>
+                <td>
+
+                    <input type="date" name="unit.attrs.planArrivDate" value="${unit.attrs.planArrivDate.date()}">
+                </td>
+            </tr>
+
+            <tr>
+                <th>去往仓库</th>
+                <td>
+                    <select name="unit.whouse.id">
+                        <option value="">请选择</option>
+                        #{list items:whouses, as:'wh'}
+                            <option ${wh == unit.whouse ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+                        #{/list}
+                    </select>
+                </td>
+                <th>阶段</th>
+                <td>
+                    <input type="text" readonly="" name="p.stage" value="${unit.stage ? 'PLAN' : unit.stage}">
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    <button class="btn btn-primary">创建</button>
                 </td>
             </tr>
         </table>
     </form>
-</div>
+#{/else}
 
-<div id="alert">
-</div>

@@ -44,9 +44,9 @@ $ ->
         o.parents('td').unmask()
     )
 
-  $('[name=p\\.plan\\.planQty] ~ .add-on').click ->
+  $('[name=p\\.attrs\\.planQty] ~ .add-on').click ->
     o = $(@)
-    planQty = $('[name=p\\.plan\\.planQty]')
+    planQty = $('[name=p\\.attrs\\.planQty]')
     if !$.isNumeric(planQty.val())
       alert("采购数量只允许为数字!")
       return false

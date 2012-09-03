@@ -1,0 +1,32 @@
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>#</th>
+        <th>Selling</th>
+        <th>Sku</th>
+        <th>仓库</th>
+        <th>供应商</th>
+        <th>采购数量</th>
+        <th>预计交货时间</th>
+        <th>预计到库时间</th>
+        <th>阶段</th>
+        <th>创建时间</th>
+    </tr>
+#{list items:units, as:'unit'}
+    <tr>
+        <td>${unit.id}</td>
+        <td>
+            <a href="@{Sellings.selling(unit.selling.sellingId)}" target="_blank">${unit.selling.sellingId}</a>
+        </td>
+        <td>
+            <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+        </td>
+        <td>${unit.whouse.name}</td>
+        <td>${unit.cooperator?.name}</td>
+        <td>${unit.attrs.planQty}</td>
+        <td>${unit.attrs.planDeliveryDate.los()}</td>
+        <td>${unit.attrs.planArrivDate.los()}</td>
+        <td>${unit.stage}</td>
+        <td>${unit.createDate.los()}</td>
+    </tr>
+#{/list}
+</table>

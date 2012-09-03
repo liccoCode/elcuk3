@@ -1,13 +1,10 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.Currency;
-import helper.Dates;
 import models.User;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -24,7 +21,7 @@ import java.util.List;
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-public class Deliveryment extends GenericModel implements Payment.ClosePayment {
+public class Deliveryment extends GenericModel {
 
     public enum S {
         /**
@@ -144,180 +141,4 @@ public class Deliveryment extends GenericModel implements Payment.ClosePayment {
         return deliveryment.save();
     }
 
-    /**
-     * 对此 Deliveryment 进行付款操作
-     * <p/>
-     * Procure#: #3/4 对已经交货或者部分交货的 采购单 进行付款; 会不断进行 采购单 NEEDPAY 状态检查
-     *
-     * @param payment
-     * @return
-     */
-    public Payment payForDeliveryment(Payment payment) {
-        if(payment == null) throw new FastRuntimeException("没有付款数据, 无法付款.");
-        if(this.isPaymentComplete()) throw new FastRuntimeException("款项已经全部付清, 无需再付款.");
-        payment.paymentCheckItSelf();
-
-        payment.deliveryment = this; //由 Payment 添加关联
-        if(this.state == S.DELIVERY) // 装有当全局交货以后, 才能改变 NEEDPAY 状态
-            payment.deliveryment.state = S.NEEDPAY;
-        payment.deliveryment.save();
-        return payment.save();
-    }
-
-    /**
-     * 判断此采购单是否付款完全
-     *
-     * @return
-     */
-    public boolean isPaymentComplete() {
-        return this.state == S.FULPAY;
-    }
-
-    /**
-     * 将采购单付清全款; 需要检查是否可以将 Deliveryment 变成 Delivery 状态
-     * <p/>
-     * Procure#: #4/4 最后人工手动来进行清款检查. 会对 采购单 FULPAY 状态检查
-     */
-    public void complatePayment() {
-        /**
-         * 1. 检查全款金额
-         */
-        float totalPayedCNY = 0;
-        float totalPayedGBP = 0;
-        float totalPayedUSD = 0;
-        float totalPayedEUR = 0;
-        for(Payment pay : this.payments) {
-            if(pay.state == Payment.S.CLOSE) continue;
-            if(pay.currency == Currency.CNY)
-                totalPayedCNY += pay.price;
-            else if(pay.currency == Currency.USD)
-                totalPayedUSD += pay.price;
-            else if(pay.currency == Currency.GBP)
-                totalPayedGBP += pay.price;
-            else if(pay.currency == Currency.EUR)
-                totalPayedEUR += pay.price;
-        }
-
-        float totalNeedPayCNY = 0;
-        float totalNeedPayGBP = 0;
-        float totalNeedPayUSD = 0;
-        float totalNeedPayEUR = 0;
-        for(ProcureUnit unit : this.units) {
-            if(unit.delivery.deliveryQty == null) throw new FastRuntimeException("产品还未交齐, 无法付款完全.");
-            if(unit.plan.currency == Currency.CNY)
-                totalNeedPayCNY += unit.plan.unitPrice * unit.delivery.deliveryQty;
-            else if(unit.plan.currency == Currency.USD)
-                totalNeedPayUSD += unit.plan.unitPrice * unit.delivery.deliveryQty;
-            else if(unit.plan.currency == Currency.GBP)
-                totalNeedPayGBP += unit.plan.unitPrice * unit.delivery.deliveryQty;
-            else if(unit.plan.currency == Currency.EUR)
-                totalNeedPayEUR += unit.plan.unitPrice * unit.delivery.deliveryQty;
-        }
-
-        boolean fullPayCNY = totalNeedPayCNY == totalPayedCNY;
-        boolean fullPayUSD = totalNeedPayUSD == totalPayedUSD;
-        boolean fullPayGBP = totalNeedPayGBP == totalPayedGBP;
-        boolean fullPayEUR = totalNeedPayEUR == totalPayedEUR;
-        if(fullPayCNY && fullPayGBP && fullPayUSD && fullPayEUR) {
-            this.state = S.FULPAY;
-            this.save();
-        } else {
-            StringBuilder sbd = new StringBuilder("款项还没有付清,请检查!\r\n");
-            sbd.append("CNY: ").append(String.format("%s(%s) / %s ", totalPayedCNY, totalPayedCNY - totalNeedPayCNY, totalNeedPayCNY)).append("\r\n")
-                    .append("USD: ").append(String.format("%s(%s) / %s ", totalPayedUSD, totalPayedUSD - totalNeedPayUSD, totalNeedPayUSD)).append("\r\n")
-                    .append("GBP: ").append(String.format("%s(%s) / %s ", totalPayedGBP, totalPayedGBP - totalNeedPayGBP, totalNeedPayGBP)).append("\r\n")
-                    .append("EUR: ").append(String.format("%s(%s) / %s ", totalPayedEUR, totalPayedEUR - totalNeedPayEUR, totalNeedPayEUR)).append("\r\n");
-            throw new FastRuntimeException(sbd.toString());
-        }
-    }
-
-    public String supplier() {
-        if(this.units != null && this.units.size() > 0)
-            return this.units.get(0).plan.supplier;
-        else
-            return "Empty";
-    }
-
-    @Override
-    public void close(Payment thisPayment) {
-        if(this.state == S.DELIVERY) throw new FastRuntimeException("采购单已经全部交货, 不允许删除付款信息.");
-        try {
-            thisPayment.deliveryment.complatePayment();
-        } catch(FastRuntimeException e) {
-            thisPayment.deliveryment.state = Deliveryment.S.NEEDPAY;
-            thisPayment.deliveryment.save();
-        }
-    }
-
-    /**
-     * 检查此 Deliveryment 是否可以标记为 DELIVERY;
-     * (其所有的 ProcureUnit 全部交货, DONE)
-     */
-    public boolean canBeDelivery() {
-        // 如果连 PENDING 状态都没过, 就不要考虑 DELIVERY 了
-        if(this.state == S.PENDING) return false;
-        for(ProcureUnit pu : this.units) {
-            if(pu.stage != ProcureUnit.STAGE.DONE) return false;
-        }
-        return true;
-    }
-
-    /**
-     * 将 Deliveryment 状态变更为交货.
-     */
-    public void beDelivery() {
-        if(!canBeDelivery()) {
-            this.state = S.DELIVERING;
-        } else {
-            this.state = Deliveryment.S.DELIVERY;
-            this.memo = "所有产品交货完成." + Dates.date2DateTime() + "\r\n" + this.memo;
-        }
-        this.save();
-    }
-
-    /**
-     * 取消这一个 Deliveryment;
-     * 1. 把这一个 Delivery 所影响的所有 ProcureUnit 的数量全部设置为 0
-     * 2. 把所有 ProcureUnit 关联的 ShipItem 的运输库存也调整为 0;
-     * ps: 也就是当这些不存在了.
-     */
-    public void cancel(String user) {
-        for(ProcureUnit unit : this.units) {
-            unit.delivery.deliveryQty = 0;
-            for(ShipItem itm : unit.relateItems) {
-                if(itm.shipment.state == Shipment.S.DONE)
-                    throw new FastRuntimeException("请查看 Shipment " + itm.shipment.id + ",起已经运输完成, 关闭此采购单不合法.");
-                itm.qty = 0;
-                itm.save();
-            }
-            unit.save();
-        }
-        this.memo = String.format("Cancel At %s by %s.\r\n%s", Dates.date2DateTime(), user, this.memo);
-        this.state = S.CANCEL;
-        this.save();
-    }
-
-    /**
-     * 交货的进度
-     *
-     * @return
-     */
-    public F.T2<Integer, Integer> deliveryProgress() {
-        int ensureQty = 0;
-        int deliveriedQty = 0;
-        for(ProcureUnit unit : this.units) {
-            ensureQty += unit.delivery.ensureQty;
-            if(unit.stage == ProcureUnit.STAGE.DONE)
-                deliveriedQty += unit.delivery.deliveryQty;
-        }
-        return new F.T2<Integer, Integer>(deliveriedQty, ensureQty);
-    }
-
-    public F.T2<Integer, Integer> deliveryUnitProgress() {
-        int done = 0;
-        for(ProcureUnit unit : this.units) {
-            if(unit.stage == ProcureUnit.STAGE.DONE) done++;
-        }
-        return new F.T2<Integer, Integer>(done, units.size() - done);
-    }
 }

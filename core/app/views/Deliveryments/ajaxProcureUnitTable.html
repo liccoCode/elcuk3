@@ -18,7 +18,7 @@
 #{list items:dlmt.units, as:'unit'}
     <tr data-toggle="toggle" data-target="#unit_${unit.id}" style="cursor:pointer">
         <td>${unit.id}</td>
-        <td>${unit.plan.planArrivDate.date()}</td>
+        <td>${unit.attrs.planArrivDate.date()}</td>
         <td>${unit.delivery.planDeliveryDate.date()}</td>
         <td>
             #{if unit.delivery.deliveryDate == null}
@@ -39,15 +39,15 @@
         </td>
         #{set leftTransfer: unit.leftTransferQty()/}
         <td>${leftTransfer._1}</td>
-        <td>${unit.plan.supplier}</td>
+        <td>${unit.attrs.supplier}</td>
         <td>${unit.selling.fnSku}</td>
         <td><a href="@{Sellings.selling(unit.sid)}" target="_blank">${unit.sid}</a></td>
         <td>${unit.product.sku}</td>
-        <td>${unit.plan.unitPrice} ${unit.plan.currency}</td>
+        <td>${unit.attrs.price} ${unit.attrs.currency}</td>
     <td>
-    ${unit.delivery.ensureQty * unit.plan.unitPrice}
+    ${unit.delivery.ensureQty * unit.attrs.price}
         #{ifnot unit.delivery.deliveryQty == null}|
-        ${unit.delivery.deliveryQty * unit.plan.unitPrice}</td>
+        ${unit.delivery.deliveryQty * unit.attrs.price}</td>
         #{/ifnot}
         <td style="background:${unit.ucolor()}">${unit.stage}</td>
     </tr>
@@ -65,7 +65,7 @@
                         </td>
                         <td>
                             <span style="color:green;">${unit.delivery.ensureQty}</span> /
-                            <span style="color:#24748c;">${unit.plan.planQty}</span>
+                            <span style="color:#24748c;">${unit.attrs.planQty}</span>
                         </td>
                     </tr>
 

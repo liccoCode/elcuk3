@@ -105,9 +105,10 @@ public class Payment extends GenericModel {
         this.state = Payment.S.CLOSE;
         this.memo += String.format("\r\n(CLOSE|%s)", msg);
         ClosePayment closePayment = null;
-        if(this.type == T.DELIVERY)
-            closePayment = new Deliveryment();
-        else if(this.type == T.SHIP)
+        if(this.type == T.DELIVERY) {
+
+            //TODO 如何处理?
+        } else if(this.type == T.SHIP)
             closePayment = new Shipment();
         if(closePayment == null) throw new FastRuntimeException("正在关闭位置的 Payment 类型!");
         closePayment.close(this);

@@ -137,7 +137,7 @@ public class Cooperator extends Model {
      *
      * @return
      */
-    public List<String> frontSkuHelper() {
+    public List<String> frontSkuAutoPopulate() {
         // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<String>(Product.skus(false));
         final List<String> existSkus = new ArrayList<String>();

@@ -83,13 +83,13 @@ public class Cooperators extends Controller {
         if(copItem == null) copItem = new CooperItem();
         Cooperator cop = Cooperator.findById(cooperId);
         if(cop == null || !cop.isPersistent()) error("不正确的合作者参数");
-        renderArgs.put("skus", J.json(cop.frontSkuHelper()));
+        renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         render(copItem, cop);
     }
 
     public static void editCooperItem(CooperItem copItem) {
         renderArgs.put("cop", copItem.cooperator);
-        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuHelper()));
+        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
         render("Cooperators/newCooperItem.html", copItem);
     }
 
@@ -97,7 +97,7 @@ public class Cooperators extends Controller {
         checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
-        renderArgs.put("skus", J.json(cop.frontSkuHelper()));
+        renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         if(Validation.hasErrors())
             render("Cooperators/newCooperItem.html", copItem, cop);
         copItem.checkAndSave(cop);
@@ -110,7 +110,7 @@ public class Cooperators extends Controller {
         validation.valid(copItem);
         if(Validation.hasErrors()) {
             renderArgs.put("cop", copItem.cooperator);
-            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuHelper()));
+            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
             render("Cooperators/newCooperItem.html", copItem);
         }
         copItem.checkAndUpdate();

@@ -341,7 +341,9 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         if(this.arriveDate == null) throw new FastRuntimeException("完成运输单, 必须拥有具体到达时间");
         if(this.arriveDate.getTime() < this.beginDate.getTime()) throw new FastRuntimeException("实际到达时间小于开始时间?");
         //TODO 运输单完成, 添加判断运输单项关联的 ProcureUnit 是否可以标记完成.
-        for(ShipItem item : this.items) item.unit.beShipOver();
+        for(ShipItem item : this.items) {
+            //TODO 需要处理的
+        }
         this.state = S.DONE;
         return this.save();
     }

@@ -8,6 +8,7 @@ import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
 import models.market.*;
+import models.procure.Cooperator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.NameValuePair;
@@ -459,6 +460,15 @@ public class Product extends GenericModel {
             FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id), jsonStr, FLog.T.SALES);
             throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
         }
+    }
+
+    /**
+     * 获取拥有这个 SKU 的所有供应商
+     *
+     * @return
+     */
+    public List<Cooperator> cooperators() {
+        return Cooperator.find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id", this.sku).fetch();
     }
 
     /**

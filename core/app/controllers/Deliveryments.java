@@ -17,39 +17,5 @@ import play.utils.FastRuntimeException;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Deliveryments extends Controller {
-    public static void detail(String id) {
-        Deliveryment dlmt = Deliveryment.findById(id);
-        render(dlmt);
-    }
 
-    public static void ajaxProcureUnitTable(String id) {
-        Deliveryment dlmt = Deliveryment.findById(id);
-        render(dlmt);
-    }
-
-    public static void payment(Payment pay, Deliveryment payObj) {
-        pay.payer = User.findByUserName(Secure.Security.connected());
-        renderJSON(J.G(payObj.payForDeliveryment(pay)));
-    }
-
-    public static void paymentComplate(Deliveryment dlmt) {
-        if(!dlmt.isPersistent()) throw new FastRuntimeException("你指定需要清款的采购单不合法.");
-        dlmt.complatePayment();
-        renderJSON(J.G(dlmt));
-    }
-
-    public static void comment(String id, String msg) {
-        Deliveryment deliveryment = Deliveryment.findById(id);
-        if(deliveryment == null || !deliveryment.isPersistent()) throw new FastRuntimeException("Deliveryment 不存在.");
-        deliveryment.memo = msg;
-        renderJSON(J.G(deliveryment.save()));
-    }
-
-    @Check("root")
-    public static void cancel(String id) {
-        Deliveryment dlmt = Deliveryment.findById(id);
-        if(dlmt == null || !dlmt.isPersistent()) throw new FastRuntimeException("Deliveryment 不存在.");
-        dlmt.cancel(Secure.Security.connected());
-        renderJSON(new Ret());
-    }
 }

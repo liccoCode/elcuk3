@@ -85,4 +85,15 @@ public class vExtensions extends JavaExtensions {
         long years = delta / (365 * 24 * 60 * 60);
         return Messages.get("left.years", years, pluralize(years));
     }
+
+    public static String los(Date date) {
+        return los(date, false);
+    }
+
+    public static String los(Date date, Boolean stopAtMonth) {
+        if(date.getTime() > System.currentTimeMillis())
+            return vExtensions.left(date, stopAtMonth);
+        else
+            return JavaExtensions.since(date, stopAtMonth);
+    }
 }
