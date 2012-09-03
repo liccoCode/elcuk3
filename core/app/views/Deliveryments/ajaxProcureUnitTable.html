@@ -49,7 +49,7 @@
         #{ifnot unit.delivery.deliveryQty == null}|
         ${unit.delivery.deliveryQty * unit.plan.unitPrice}</td>
         #{/ifnot}
-        <td style="background:${unit.stage.color()}">${unit.stage}</td>
+        <td style="background:${unit.ucolor()}">${unit.stage}</td>
     </tr>
     <tr id="unit_${unit.id}" style="display:none;">
         <td colspan="14">
