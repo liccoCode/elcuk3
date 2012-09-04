@@ -6,6 +6,7 @@ import models.User;
 import models.procure.Deliveryment;
 import models.procure.Payment;
 import models.view.Ret;
+import models.view.post.DeliveryPost;
 import play.Play;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -41,8 +42,14 @@ public class Deliveryments extends Controller {
         renderJSON(new Ret(true, Router.getFullUrl("Procures.index")));
     }
 
-    public static void index() {
-        List<Deliveryment> deliveryments = Deliveryment.openDeliveryments();
-        render(deliveryments);
+    public static void index(DeliveryPost p) {
+        List<Deliveryment> deliveryments = null;
+        if(p == null) {
+            p = new DeliveryPost();
+            deliveryments = Deliveryment.openDeliveryments();
+        } else {
+            deliveryments = p.query();
+        }
+        render(deliveryments, p);
     }
 }

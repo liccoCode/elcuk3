@@ -38,7 +38,7 @@
         <td>${unit.attrs.planQty}</td>
         <td>${unit.attrs.planDeliveryDate.los()}</td>
         <td>${unit.attrs.planArrivDate.los()}</td>
-        <td>${unit.stage}</td>
+        <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
         <td>${unit.createDate.los()}</td>
     </tr>
     <tr id="unit_${unit_index}" style="display:none;">

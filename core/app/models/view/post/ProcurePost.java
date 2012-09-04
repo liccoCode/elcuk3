@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * Date: 9/3/12
  * Time: 4:32 PM
  */
-public class ProcurePost {
+public class ProcurePost extends Post {
     private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
@@ -33,8 +33,6 @@ public class ProcurePost {
         DATE_TYPES.add(new F.T2<String, String>("deliveryDate", "实际 [交货] 时间"));
     }
 
-    public Date from;
-    public Date to;
 
     public long whouseId;
 
@@ -47,8 +45,6 @@ public class ProcurePost {
      */
     public String dateType;
 
-    public String search;
-
     public ProcurePost() {
         this.from = DateTime.now().minusMonths(2).toDate();
         this.to = new Date();
@@ -59,7 +55,7 @@ public class ProcurePost {
         return ProcureUnit.find(params._1, params._2.toArray()).fetch();
     }
 
-    private F.T2<String, List<Object>> params() {
+    public F.T2<String, List<Object>> params() {
         //TODO createDate 修改
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<Object>();

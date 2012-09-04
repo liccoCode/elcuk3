@@ -18,16 +18,13 @@ import java.util.List;
  * Date: 8/30/12
  * Time: 5:36 PM
  */
-public class TicketPost {
-    @Required
-    public Date from;
-    @Required
-    public Date to;
-    public String search;
+public class TicketPost extends Post {
     public TicketState state;
     public boolean isSuccess = false;
     public boolean isRemove = false;
     public long userid = 0;
+
+    private Ticket.T ticketType;
 
     public TicketPost() {
         this.from = DateTime.now().minusMonths(2).toDate();
@@ -38,7 +35,8 @@ public class TicketPost {
     public List<Ticket> tickets() {
         // 如果有 isRemove 参与, 那么 Tickets 不参加搜索
         if(this.isRemove) return new ArrayList<Ticket>();
-        F.T2<String, List<Object>> params = params(Ticket.T.TICKET);
+        this.ticketType = Ticket.T.TICKET;
+        F.T2<String, List<Object>> params = params();
         if(StringUtils.isBlank(this.search)) {
             return Ticket.find(params._1, params._2.toArray()).fetch();
         } else {
@@ -51,7 +49,8 @@ public class TicketPost {
     }
 
     public List<Ticket> feedbacks() {
-        F.T2<String, List<Object>> params = params(Ticket.T.FEEDBACK);
+        this.ticketType = Ticket.T.FEEDBACK;
+        F.T2<String, List<Object>> params = params();
         if(StringUtils.isBlank(this.search)) {
             return Ticket.find(params._1, params._2.toArray()).fetch();
         } else {
@@ -64,7 +63,8 @@ public class TicketPost {
     }
 
     public List<Ticket> reviews() {
-        F.T2<String, List<Object>> params = params(Ticket.T.REVIEW);
+        this.ticketType = Ticket.T.REVIEW;
+        F.T2<String, List<Object>> params = params();
         if(StringUtils.isBlank(this.search)) {
             return Ticket.find(params._1, params._2.toArray()).fetch();
         } else {
@@ -79,12 +79,17 @@ public class TicketPost {
         return String.format("%%%s%%", this.search);
     }
 
-    private F.T2<String, List<Object>> params(Ticket.T type) {
+    public void setTo(Date date) {
+        this.to = Dates.night(date);
+    }
+
+    @Override
+    public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("createAt>=? AND createAt<=? AND type=?");
         List<Object> params = new ArrayList<Object>();
         params.add(this.from);
         params.add(this.to);
-        params.add(type);
+        params.add(this.ticketType);
         if(this.state != null) {
             sbd.append(" AND state=?");
             params.add(this.state);
@@ -96,7 +101,7 @@ public class TicketPost {
         }
 
         if(this.isRemove) {
-            switch(type) {
+            switch(this.ticketType) {
                 case FEEDBACK:
                     sbd.append(" AND feedback.isRemove=?");
                     params.add(this.isRemove);
@@ -116,9 +121,5 @@ public class TicketPost {
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
-    }
-
-    public void setTo(Date date) {
-        this.to = Dates.night(date);
     }
 }

@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Date: 4/5/12
  * Time: 6:59 PM
  */
-public class OrderPOST {
+public class OrderPOST extends Post {
     private static Pattern ORDER_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
 
     public Account account;
@@ -59,27 +59,27 @@ public class OrderPOST {
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
-        F.T2<String, Object[]> params = basicParamParse();
+        F.T2<String, List<Object>> params = params();
 
-        if(params._2.length == 0)
-            return Orderr.find(params._1 + "").fetch(this.page, this.size);
+        if(params._2.size() == 0)
+            return Orderr.find(params._1).fetch(this.page, this.size);
         else
-            return Orderr.find(params._1 + "", params._2).fetch(this.page, this.size);
+            return Orderr.find(params._1, params._2.toArray()).fetch(this.page, this.size);
     }
 
     public Long count() {
-        F.T2<String, Object[]> params = basicParamParse();
+        F.T2<String, List<Object>> params = params();
 
-        if(params._2.length == 0)
-            return Orderr.count(params._1 + "");
+        if(params._2.size() == 0)
+            return Orderr.count(params._1);
         else
-            return Orderr.count(params._1 + "", params._2);
+            return Orderr.count(params._1, params._2.toArray());
     }
 
-    @SuppressWarnings("unchecked")
-    private F.T2<String, Object[]> basicParamParse() {
+    @Override
+    public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("1=1 ");
-        List params = new ArrayList();
+        List<Object> params = new ArrayList<Object>();
         if(this.account != null && this.account.id != null && this.account.id > 0) {
             sbd.append("AND account=? ");
             params.add(this.account);
@@ -133,6 +133,7 @@ public class OrderPOST {
         if(this.orderBy != null) {
             sbd.append("ORDER BY ").append(this.orderBy).append(" ").append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
         }
-        return new F.T2<String, Object[]>(sbd.toString(), params.toArray());
+        return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
+
 }
