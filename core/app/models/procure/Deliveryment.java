@@ -1,10 +1,13 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import controllers.Secure;
 import models.User;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPQL;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -27,65 +30,24 @@ public class Deliveryment extends GenericModel {
         /**
          * 预定, 已经下单
          */
-        PENDING {
-            @Override
-            public String color() {
-                return "#5CB85C";
-            }
-        },
+        PENDING,
         /**
          * 部分交货
          */
-        DELIVERING {
-            @Override
-            public String color() {
-                return "#FAA52C";
-            }
-        },
+        DELIVERING,
         /**
          * 完成, 交货
          */
-        DELIVERY {
-            @Override
-            public String color() {
-                return "#F67300";
-            }
-        },
+        DELIVERY,
         /**
          * 需要付款, 表示货物已经全部完成.
          */
-        NEEDPAY {
-            @Override
-            public String color() {
-                return "#4DB2D0";
-            }
-        },
+        NEEDPAY,
         /**
          * 全部付款
          */
-        FULPAY {
-            @Override
-            public String color() {
-                return "#007BCC";
-            }
-        },
-        CANCEL {
-            @Override
-            public String color() {
-                return "red";
-            }
-        };
-
-        /**
-         * 转换为 html
-         *
-         * @return
-         */
-        public String to_h() {
-            return String.format("<span style='color:%s'>%s</span>", this.color(), this);
-        }
-
-        public abstract String color();
+        FULPAY,
+        CANCEL
     }
 
     @OneToMany(mappedBy = "deliveryment")
@@ -93,7 +55,7 @@ public class Deliveryment extends GenericModel {
     public List<Payment> payments = new ArrayList<Payment>();
 
 
-    @OneToMany(mappedBy = "deliveryment")
+    @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
     @OneToOne
@@ -109,6 +71,11 @@ public class Deliveryment extends GenericModel {
     @Expose
     @Column(nullable = false)
     public S state;
+
+    /**
+     * 可为每一个 Deliveryment 添加一个名称
+     */
+    public String name;
 
 
     @Id
@@ -139,6 +106,32 @@ public class Deliveryment extends GenericModel {
         deliveryment.state = S.PENDING;
         deliveryment.handler = user;
         return deliveryment.save();
+    }
+
+    /**
+     * 通过 ProcureUnit 来创建采购单
+     *
+     * @param pids
+     */
+    public static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        if(pids.size() != units.size()) throw new FastRuntimeException("有错误的 ProcureUnit 请仔细检查.");
+        for(ProcureUnit unit : units) {
+            if(unit.stage != ProcureUnit.STAGE.PLAN)
+                throw new FastRuntimeException(String.format("ProcureUnit #%s stage 不为 PLAN, 无法创建运输单.", unit.id));
+        }
+        Deliveryment deliveryment = new Deliveryment();
+        deliveryment.handler = user;
+        deliveryment.state = S.PENDING;
+        deliveryment.id = Deliveryment.id();
+        deliveryment.name = name.trim();
+        deliveryment.units.addAll(units);
+        for(ProcureUnit unit : deliveryment.units) {
+            unit.deliveryment = deliveryment;
+            unit.stage = ProcureUnit.STAGE.DELIVERY;
+        }
+        deliveryment.save();
+        return deliveryment;
     }
 
 }

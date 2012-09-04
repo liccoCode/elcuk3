@@ -4,7 +4,7 @@ import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
-import models.view.ProcurePost;
+import models.view.post.ProcurePost;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -20,14 +20,15 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
-    @Before(only = {"blank", "save", "index"}, priority = 0)
+    @Before(only = {"blank", "save", "index", "edit", "update"}, priority = 0)
     public static void whouses() {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
 
-    @Before(only = {"index"}, priority = 1)
+    @Before(only = {"index"})
     public static void cooperators() {
         renderArgs.put("cooperators", Cooperator.<Cooperator>findAll());
+        renderArgs.put("dateTypes", ProcurePost.DATE_TYPES);
     }
 
     public static void index(ProcurePost p) {
@@ -59,6 +60,21 @@ public class Procures extends Controller {
         unit.checkAndCreate();
         flash.success("创建成功");
         redirect("/Procures/index");
+    }
+
+    public static void edit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        render(unit);
+    }
+
+    public static void update(ProcureUnit unit) {
+        validation.valid(unit);
+        validation.valid(unit.attrs);
+        if(Validation.hasErrors()) {
+            render("Procures/edit.html", unit);
+        }
+        flash.success("ProcureUnit %s update success!", unit.id);
+        redirect("/Procures/index?p.search=id:" + unit.id);
     }
 
 }

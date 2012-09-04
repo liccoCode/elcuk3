@@ -1,4 +1,4 @@
-package models.view;
+package models.view.post;
 
 import helper.Dates;
 import models.support.Ticket;

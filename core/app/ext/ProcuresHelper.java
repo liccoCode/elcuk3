@@ -1,5 +1,6 @@
 package ext;
 
+import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import play.templates.JavaExtensions;
 
@@ -11,8 +12,8 @@ import play.templates.JavaExtensions;
  */
 public class ProcuresHelper extends JavaExtensions {
 
-    public static String ucolor(ProcureUnit unit) {
-        switch(unit.stage) {
+    public static String rgb(ProcureUnit.STAGE stage) {
+        switch(stage) {
             case PLAN:
                 return "3da4c2";
             case DELIVERY:
@@ -24,6 +25,24 @@ public class ProcuresHelper extends JavaExtensions {
             case CLOSE:
             default:
                 return "f9a021";
+        }
+    }
+
+    public static String rgb(Deliveryment.S state) {
+        switch(state) {
+            case PENDING:
+                return "5CB85C";
+            case DELIVERING:
+                return "FAA52C";
+            case DELIVERY:
+                return "F67300";
+            case NEEDPAY:
+                return "4DB2D0";
+            case FULPAY:
+                return "007BCC";
+            case CANCEL:
+            default:
+                return "red";
         }
     }
 }

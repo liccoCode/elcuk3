@@ -27,5 +27,6 @@ GET     /helper/                                            staticDir:public/ima
 
 # Catch all
 *       /{controller}/{action}                              {controller}.{action}
+*       /{controller}/{action}/{id}                         {controller}.{action}
 *       /api/{controller}/{action}                          api.{controller}.{action}
 

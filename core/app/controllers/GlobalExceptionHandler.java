@@ -29,9 +29,4 @@ public class GlobalExceptionHandler extends Controller {
     public static void templateExecutionException(TemplateExecutionException e) {
         throw e;
     }
-
-    @Catch(value = Exception.class, priority = 3)
-    public static void exceptionCatch(Exception e) {
-        renderJSON(new Ret(Webs.S(e)));
-    }
 }

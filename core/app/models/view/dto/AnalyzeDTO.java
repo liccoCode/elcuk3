@@ -1,4 +1,4 @@
-package models.view;
+package models.view.dto;
 
 import play.libs.F;
 

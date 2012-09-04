@@ -8,7 +8,7 @@ import models.embedded.UnitAttrs;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
-import models.view.TimelineEventSource;
+import models.view.dto.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -159,37 +159,6 @@ public class ProcureUnit extends Model {
         String[] args = StringUtils.split(this.sid, Webs.S);
         if(args.length < 3) throw new FastRuntimeException("SellingID 不符合 [msku]|[Market]|[AccountId] 的格式");
         if(!StringUtils.contains(args[0], this.sku)) throw new FastRuntimeException("SellingId 与 SKU 不一致, 请联系 IT.");
-    }
-
-    /**
-     * @4 将创建好的 ProcureUnit 指派给存在的采购单.
-     * ProcureUnit 从 Plan stage 升级成为 Delivery Stage
-     * <p/>
-     * Procure#: #1/4 采购单元分派给采购单
-     */
-    public ProcureUnit assignToDeliveryment(Deliveryment deliveryment) {
-        /**
-         * 1. 检查是否合法
-         * 2. 进行转换
-         */
-        // 1
-        if(this.attrs.planQty == null || this.attrs.planQty < 0)
-            throw new FastRuntimeException("最终确认数量不能为空!");
-        if(this.attrs.planDeliveryDate == null) throw new FastRuntimeException("预计交货时间不允许为空!");
-        if(this.attrs.planDeliveryDate.getTime() > this.attrs.planArrivDate.getTime())
-            throw new FastRuntimeException("预计交货时间不可能晚于预计到库时间!");
-        if(deliveryment == null || !deliveryment.isPersistent())
-            throw new FastRuntimeException("成为 Delivery Stage 采购单必须先存在.");
-        for(ProcureUnit pu : deliveryment.units) {
-            if(!pu.cooperator.equals(this.cooperator))
-                //TODO supplier 改变, 这里也需要改变
-                throw new FastRuntimeException("只允许相同工厂的 ProcureUnit 添加在同一个采购单中!");
-        }
-
-        // 2
-        this.deliveryment = deliveryment;
-        this.stage = STAGE.DELIVERY;
-        return this.save();
     }
 
 

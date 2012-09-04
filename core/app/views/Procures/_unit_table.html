@@ -1,0 +1,86 @@
+*{需要
+* ProcueUnit: unit
+* Whouse: whouses
+}*
+#{set product: unit.selling.listing.product/}
+<table class="table table-condensed table-bordered">
+    <tr>
+        <th>SellingId</th>
+        <td>
+            <input readonly="" type="text" name="unit.selling.sellingId" value="${unit.selling.sellingId}">
+        </td>
+        <th>SKU</th>
+        <td>
+            <input readonly="" type="text" name="unit.product.sku" value="${product.sku}">
+        </td>
+    </tr>
+
+    <tr>
+    #{set copers:product.cooperators() /}
+        <th>工厂</th>
+        <td>
+            <select name="unit.cooperator.id">
+                <option value="">请选择</option>
+            #{list items:copers, as:'coop'}
+                <option ${coop == unit.cooperator ? 'selected' : ''} value="${coop.id}">${coop.name}</option>
+            #{/list}
+            </select>
+        </td>
+
+        <th>价格</th>
+        <td>
+            <div class="input-append">
+                <input type="text" class="span1" name="unit.attrs.price" value="${unit.attrs.price}">
+            #{pickCurrency name:'unit.attrs.currency', class:'span2', c:helper.Currency.CNY /}
+            </div>
+        </td>
+    </tr>
+
+    <tr>
+        <th>采购数量</th>
+        <td>
+            <input type="text" class="input-small" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
+            <input type="hidden" class="input-small" name="unit.attrs.qty" value="${unit.attrs.qty}">
+        </td>
+        <th>预计交货日期</th>
+        <td>
+            <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
+            <input type="hidden" name="unit.attrs.deliveryDate" value="${unit.attrs.deliveryDate.date()}">
+        </td>
+    </tr>
+
+    <tr>
+        <th>预计运输时间</th>
+        <td>
+            <input type="date" name="unit.attrs.planShipDate" value="${unit.attrs.planShipDate.date()}">
+            <input type="hidden" name="unit.attrs.shipDate" value="${unit.attrs.shipDate.date()}">
+        </td>
+        <th>预计到库时间</th>
+        <td>
+            <input type="date" name="unit.attrs.planArrivDate" value="${unit.attrs.planArrivDate.date()}">
+            <input type="hidden" name="unit.attrs.arriveDate" value="${unit.attrs.arriveDate.date()}">
+        </td>
+    </tr>
+
+    <tr>
+        <th>去往仓库</th>
+        <td>
+            <select name="unit.whouse.id">
+                <option value="">请选择</option>
+            #{list items:whouses, as:'wh'}
+                <option ${wh == unit.whouse ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+            #{/list}
+            </select>
+        </td>
+        <th>阶段</th>
+        <td>
+            <input type="text" readonly="" name="p.stage" value="${unit.stage ? 'PLAN' : unit.stage}">
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="4">
+            <button class="btn btn-primary">${unit.id > 0 ? '更新' : '创建'}</button>
+        </td>
+    </tr>
+</table>

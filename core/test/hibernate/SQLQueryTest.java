@@ -1,20 +1,14 @@
 package hibernate;
 
 import helper.DBUtils;
-import models.User;
 import models.market.Orderr;
 import models.support.Ticket;
-import models.support.TicketState;
-import models.view.TicketPost;
 import org.joda.time.DateTime;
 import org.junit.Test;
-import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.test.UnitTest;
 import play.utils.FastRuntimeException;
-import query.TicketQuery;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 

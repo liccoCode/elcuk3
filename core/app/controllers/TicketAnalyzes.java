@@ -1,7 +1,7 @@
 package controllers;
 
 import models.product.Category;
-import models.view.RewAndFdbkDTO;
+import models.view.dto.RewAndFdbkDTO;
 import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;

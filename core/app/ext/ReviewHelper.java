@@ -5,6 +5,7 @@ import models.market.Feedback;
 import models.market.Orderr;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import play.libs.F;
 import play.templates.JavaExtensions;
 
@@ -34,6 +35,22 @@ public class ReviewHelper extends JavaExtensions {
             return "0";
         else
             return feedback.feedback.length() + "";
+    }
+
+    public static String color(Feedback feedback) {
+        int length = NumberUtils.toInt(length(feedback));
+        if(length <= 15)
+            return "2FCCEF";
+        else if(length <= 50)
+            return "6CB4E6";
+        else if(length <= 100)
+            return "8CA7DE";
+        else if(length <= 200)
+            return "9BA0D8";
+        else if(length <= 300)
+            return "AC96D4";
+        else
+            return "B38ACE";
     }
 
     /**
@@ -95,26 +112,6 @@ public class ReviewHelper extends JavaExtensions {
         else if(length <= 1000)
             return "9BA0D8";
         else if(length <= 2000)
-            return "AC96D4";
-        else
-            return "B38ACE";
-    }
-
-    public static String color(Feedback feedback) {
-        int length = 0;
-        try {
-            length = feedback.feedback.length();
-        } catch(Exception e) { //
-        }
-        if(length <= 15)
-            return "2FCCEF";
-        else if(length <= 50)
-            return "6CB4E6";
-        else if(length <= 100)
-            return "8CA7DE";
-        else if(length <= 200)
-            return "9BA0D8";
-        else if(length <= 300)
             return "AC96D4";
         else
             return "B38ACE";

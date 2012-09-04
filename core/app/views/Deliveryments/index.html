@@ -1,0 +1,42 @@
+#{extends 'main_full.html'/}
+#{set title:"采购单列表 (${deliveryments.size()})" /}
+#{set 'moreScripts'}
+#{/set}
+
+<div class="row-fluid">
+    <div class="span12">
+        Buttons...
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>State</th>
+                <th>User</th>
+            </tr>
+        #{list items:deliveryments, as:'dmt'}
+            <tr>
+                <td>
+                    <a href="#" target="_blank">${dmt.id}</a>
+                </td>
+                <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+                    <span><i class="icon-reorder"></i></span>
+                    <span>${dmt.name}</span>
+                    <span class="badge badge-info">${dmt.units.size()}</span>
+                </td>
+                <td style="color:${'#' + dmt.state.rgb()}">${dmt.state}</td>
+                <td>${dmt.handler.username}</td>
+            </tr>
+            <tr id="dmt_${dmt_index}" style="display:none;">
+                <td colspan="4" style="padding:0;border:none">
+                    #{render 'Procures/_unit_list.html', units:dmt.units/}
+                </td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+</div>

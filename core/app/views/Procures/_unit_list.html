@@ -1,5 +1,12 @@
 <table class="table table-condensed table-bordered">
     <tr>
+    #{if checkbox}
+        <th>
+            <label class="checkbox">
+                <input type="checkbox" id="checkbox_all">
+            </label>
+        </th>
+    #{/if}
         <th>#</th>
         <th>Selling</th>
         <th>Sku</th>
@@ -13,7 +20,13 @@
     </tr>
 #{list items:units, as:'unit'}
     <tr>
-        <td>${unit.id}</td>
+        #{if checkbox}
+            <td>
+                <label class="checkbox"><input type="checkbox" value="${unit.id}" id="checkbox_${unit.id}"></label>
+            </td>
+        #{/if}
+        <td data-toggle="toggle" data-target="#unit_${unit_index}" style="cursor:pointer;">
+            <i class="icon-reorder"></i> ${unit.id}</td>
         <td>
             <a href="@{Sellings.selling(unit.selling.sellingId)}" target="_blank">${unit.selling.sellingId}</a>
         </td>
@@ -27,6 +40,17 @@
         <td>${unit.attrs.planArrivDate.los()}</td>
         <td>${unit.stage}</td>
         <td>${unit.createDate.los()}</td>
+    </tr>
+    <tr id="unit_${unit_index}" style="display:none;">
+        <td colspan="10">
+            <div class="span6" style="float:left;">
+                <h3>Comment:</h3>
+            ${unit.comment}
+            </div>
+            <div class="span6" style="float:left;">
+                <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
+            </div>
+        </td>
     </tr>
 #{/list}
 </table>

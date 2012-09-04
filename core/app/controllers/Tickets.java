@@ -11,7 +11,7 @@ import models.support.Ticket;
 import models.support.TicketReason;
 import models.support.TicketState;
 import models.view.Ret;
-import models.view.TicketPost;
+import models.view.post.TicketPost;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.libs.F;
