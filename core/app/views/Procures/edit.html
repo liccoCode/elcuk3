@@ -1,5 +1,5 @@
 #{extends 'main.html' /}
-#{set title:'ProcureUnit ' + unit.id + ' Edit' /}
+#{set title:'ProcureUnit #' + unit.id + ' Edit' /}
 #{set 'moreScripts'}
 #{/set}
 
@@ -13,16 +13,8 @@
 #{else }
 
     #{ifErrors }
-    <div class="row">
-        <div class="span12 alert alert-error">
-            #{errors }
-                <p>${error.key} -> ${error.message()}</p>
-            #{/errors}
-        </div>
-    </div>
+        #{errorMsgs /}
     #{/ifErrors}
-
-
 
 <form action="/procures/update" method="post">
     <input type="hidden" name="unit.id" value="${unit.id}">

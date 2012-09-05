@@ -17,13 +17,22 @@ public abstract class Post {
     public Date to = new Date();
     public String search;
 
+    public int page = 1;
+    public int perSize = 50;
+    public long count = 1;
+
     public abstract F.T2<String, List<Object>> params();
 
     /**
      * [search] -> [%search%] ,用在 SQL 语句的 LIKE 查询中
+     *
      * @return
      */
     public String word() {
         return String.format("%%%s%%", this.search);
+    }
+
+    public int totalPage() {
+        return new Double(Math.floor(this.count / ((float) this.perSize))).intValue();
     }
 }

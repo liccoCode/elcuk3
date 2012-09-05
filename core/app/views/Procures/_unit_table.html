@@ -74,7 +74,14 @@
         </td>
         <th>阶段</th>
         <td>
-            <input type="text" readonly="" name="p.stage" value="${unit.stage ? 'PLAN' : unit.stage}">
+            <input type="text" readonly="" value="${unit.stage ? 'PLAN' : unit.stage}">
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="4">
+            <h4>Memo</h4>
+            <textarea rows="8" class="span12" name="unit.comment">${unit.comment.raw()}</textarea>
         </td>
     </tr>
 

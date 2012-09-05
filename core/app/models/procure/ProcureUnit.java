@@ -11,7 +11,10 @@ import models.product.Whouse;
 import models.view.dto.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.data.validation.Check;
+import play.data.validation.CheckWith;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
@@ -83,12 +86,14 @@ public class ProcureUnit extends Model {
 
 
     @Expose
+    @CheckWith(MskuCheck.class)
     public String sid; // 一个 SellingId 字段
 
     @OneToOne(fetch = FetchType.LAZY)
     public Product product;
 
     @Expose
+    @CheckWith(SkuCheck.class)
     public String sku;// 冗余 sku 字段
     /**
      * 操作人员
@@ -127,38 +132,20 @@ public class ProcureUnit extends Model {
     public String comment = " ";
 
     /**
-     * 检查参数并且创建新 ProcureUnit
+     * ProcureUnit 的检查
      */
-    public ProcureUnit checkAndCreate() {
-        // 0. 检查是否已经存在
-        if(this.id != null)
-            if(ProcureUnit.findById(this.id) != null) throw new FastRuntimeException("ProcureUnit 已经存在了, 不允许重复创建.");
-        this.check();
-        return this.save();
-    }
-
-    public void checkAndUpdate() {
-        this.check();
-        this.save();
-    }
-
-    private void check() {
-        // 检查预计日期不允许比当前日期小
-        if(this.attrs.planArrivDate.getTime() - System.currentTimeMillis() < 0)
-            throw new FastRuntimeException("预期日期已经过期!");
-        // selling 不能为空
-        if(this.selling == null) throw new FastRuntimeException(String.format("Selling %s 不存在", this.sid));
-        else this.sid = this.selling.sellingId;
-        //  目标仓库必须拥有
-        if(this.whouse == null) throw new FastRuntimeException("目的仓库不能为空");
-        // 采购人必须记录
-        if(this.handler == null) throw new FastRuntimeException("必须拥有一个处理人.");
-        if(this.product == null) throw new FastRuntimeException("没有关联 Product.");
-        else this.sku = this.product.sku;
-        // msku 与 sku 需要符合要求
-        String[] args = StringUtils.split(this.sid, Webs.S);
-        if(args.length < 3) throw new FastRuntimeException("SellingID 不符合 [msku]|[Market]|[AccountId] 的格式");
-        if(!StringUtils.contains(args[0], this.sku)) throw new FastRuntimeException("SellingId 与 SKU 不一致, 请联系 IT.");
+    public void validate() {
+        Validation.current().valid(this);
+        Validation.current().valid(this.attrs);
+        Validation.past("procureunit.planDeliveryDate", this.attrs.planDeliveryDate, this.attrs.planShipDate);
+        Validation.past("procureunit.planShipDate", this.attrs.planShipDate, this.attrs.planArrivDate);
+        Validation.required("procureunit.selling", this.selling);
+        if(this.selling != null) this.sid = this.selling.sellingId;
+        Validation.required("procureunit.whouse", this.whouse);
+        Validation.required("procureunit.handler", this.handler);
+        Validation.required("procureunit.product", this.product);
+        if(this.product != null) this.sku = this.product.sku;
+        Validation.required("procureunit.createDate", this.createDate);
     }
 
 
@@ -174,6 +161,21 @@ public class ProcureUnit extends Model {
 
     public static List<ProcureUnit> findByStage(STAGE stage) {
         return ProcureUnit.find("stage=? ORDER BY planArrivDate", stage).fetch();
+    }
+
+    /**
+     * 设置 ProcureUnit 的 Deliveryment 的时候需要将 STAGE 也变化
+     *
+     * @param deliveryment
+     */
+    public void toggleAssignTodeliveryment(Deliveryment deliveryment, boolean assign) {
+        if(assign) {
+            this.deliveryment = deliveryment;
+            this.stage = ProcureUnit.STAGE.DELIVERY;
+        } else {
+            this.deliveryment = null;
+            this.stage = STAGE.PLAN;
+        }
     }
 
 
@@ -226,4 +228,31 @@ public class ProcureUnit extends Model {
         return eventSource;
     }
 
+    static class MskuCheck extends Check {
+
+        @Override
+        public boolean isSatisfied(Object validatedObject, Object value) {
+            ProcureUnit unit = (ProcureUnit) validatedObject;
+            if(unit.selling == null) return false;
+            String[] args = StringUtils.split(unit.selling.sellingId, Webs.S);
+            if(args.length < 3) {
+                setMessage("validation.msku", unit.selling.sellingId);
+                return false;
+            } else return true;
+        }
+    }
+
+    static class SkuCheck extends Check {
+
+        @Override
+        public boolean isSatisfied(Object validatedObject, Object value) {
+            ProcureUnit unit = (ProcureUnit) validatedObject;
+            if(unit.product == null) return false;
+            String[] args = StringUtils.split(unit.selling.sellingId, Webs.S);
+            if(!StringUtils.contains(args[0], unit.product.sku)) {
+                setMessage("validation.sku", unit.product.sku);
+                return false;
+            } else return true;
+        }
+    }
 }

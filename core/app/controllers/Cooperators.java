@@ -102,7 +102,7 @@ public class Cooperators extends Controller {
             render("Cooperators/newCooperItem.html", copItem, cop);
         copItem.checkAndSave(cop);
         flash.success("创建成功.");
-        show(cop.id, true);
+        redirect("/cooperators/index#" + copItem.cooperator.id);
     }
 
     public static void updateCooperItem(CooperItem copItem) {

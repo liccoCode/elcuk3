@@ -51,13 +51,12 @@ public class Procures extends Controller {
     }
 
     public static void save(ProcureUnit unit) {
-        validation.valid(unit);
-        validation.valid(unit.attrs);
+        unit.handler = User.findByUserName(Secure.Security.connected());
+        unit.validate();
         if(Validation.hasErrors()) {
             render("Procures/blank.html", unit);
         }
-        unit.handler = User.findByUserName(Secure.Security.connected());
-        unit.checkAndCreate();
+        unit.save();
         flash.success("创建成功");
         redirect("/Procures/index");
     }
@@ -68,11 +67,11 @@ public class Procures extends Controller {
     }
 
     public static void update(ProcureUnit unit) {
-        validation.valid(unit);
-        validation.valid(unit.attrs);
+        unit.validate();
         if(Validation.hasErrors()) {
             render("Procures/edit.html", unit);
         }
+        unit.save();
         flash.success("ProcureUnit %s update success!", unit.id);
         redirect("/Procures/index?p.search=id:" + unit.id);
     }

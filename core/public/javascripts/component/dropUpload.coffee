@@ -1,7 +1,7 @@
 $ ->
   window.dropUpload = {}
   # 图片的 Drag&Drop DIV 初始化
-  window.dropUpload.template = '<li class="span2">' +
+  window.dropUpload.template = '<li>' +
   '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
   '<div class="progress"><div class="bar"></div></div>' +
   '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
@@ -122,7 +122,7 @@ $ ->
     )
 
   # 初始化页面的时候加载此 Product 对应的图片; dropbox 图片展示的 div
-  window.dropUpload.loadImages = (fid, dropbox) ->
+  window.dropUpload.loadImages = (fid, dropbox, cls='span2') ->
     uploaded = dropbox.find('.uploaded')
     message = dropbox.find('.message')
     $.getJSON('/attachs/images', fid: fid,
@@ -130,6 +130,7 @@ $ ->
         message.remove() if(imgs.length > 0)
         for img, i in imgs
           imgEl = $(window.dropUpload.template)
+          imgEl.addClass(cls)
           imgUrl = "/attachs/image?a.fileName=" + img['fileName']
           window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl + "&w=140&h=100")
           imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])

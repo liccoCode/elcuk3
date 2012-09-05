@@ -16,13 +16,7 @@
 </style>
 
 #{ifErrors }
-<div class="row">
-    <div class="alert alert-error">
-        #{errors }
-            <p>${error.key} ${error}</p>
-        #{/errors}
-    </div>
-</div>
+    #{errorMsgs /}
 #{/ifErrors}
 
 <div class="row">
@@ -42,9 +36,9 @@
 
                 <td>价格</td>
                 <td>
-                    <div class="input-prepend">
+                    <div class="input-append">
                         <input class="input input-small" type="text" name="copItem.price" value="${copItem.price}">
-                        <span class="add-on">#{pickCurrency name:'copItem.currency', c:copItem.currency/}</span>
+                    #{pickCurrency name:'copItem.currency', c:copItem.currency, class:'span2'/}
                     </div>
                 </td>
             </tr>
