@@ -1,20 +1,14 @@
 package controllers;
 
-import helper.J;
 import helper.Webs;
 import models.User;
 import models.procure.Deliveryment;
-import models.procure.Payment;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
-import org.apache.commons.lang.StringUtils;
-import play.Play;
 import play.data.validation.Validation;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -26,23 +20,6 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Deliveryments extends Controller {
-
-    /**
-     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
-     *
-     * @param pids
-     * @param name
-     */
-    public static void save(List<Long> pids, String name) {
-        validation.required(name);
-        if(Validation.hasErrors()) {
-            renderJSON(new Ret(Webs.V(Validation.errors())));
-        }
-        Deliveryment deliveryment = Deliveryment.createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
-        //TODO 修改为 Deliveryments.show 来查看具体的 Deliveryment
-        flash.success("Deliveryment <a href='%s'>%s</a> 创建成功.", Router.getFullUrl("Procures.index"), deliveryment.id);
-        renderJSON(new Ret(true, Router.getFullUrl("Procures.index")));
-    }
 
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
@@ -57,7 +34,7 @@ public class Deliveryments extends Controller {
 
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        renderArgs.put("plan_units", dmt.unbindInPlanStageProcureUnits());
+        renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         render(dmt);
     }
 
@@ -65,7 +42,7 @@ public class Deliveryments extends Controller {
         validation.valid(dmt);
         Validation.valid("d", "sdf");
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.unbindInPlanStageProcureUnits());
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
         dmt.save();
@@ -82,14 +59,14 @@ public class Deliveryments extends Controller {
     public static void addunits(List<Long> pids, Deliveryment dmt) {
         Validation.required("deliveryments.addunits", pids);
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.unbindInPlanStageProcureUnits());
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
         dmt.assignUnitToDeliveryment(pids);
 
         // 再一次检查, 是否有错误
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.unbindInPlanStageProcureUnits());
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
 
@@ -105,13 +82,26 @@ public class Deliveryments extends Controller {
     public static void delunits(List<Long> pids, Deliveryment dmt) {
         Validation.required("deliveryments.delunits", pids);
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.unbindInPlanStageProcureUnits());
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
         dmt.unAssignUnitInDeliveryment(pids);
 
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.unbindInPlanStageProcureUnits());
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+            render("Deliveryments/show.html", dmt);
+        }
+        redirect("/Deliveryments/show/" + dmt.id);
+    }
+
+    /**
+     * 取消采购单
+     */
+    public static void cancel(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        dmt.cancel();
+        if(Validation.hasErrors()) {
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
         redirect("/Deliveryments/show/" + dmt.id);

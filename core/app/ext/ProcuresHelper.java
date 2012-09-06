@@ -42,7 +42,7 @@ public class ProcuresHelper extends JavaExtensions {
                 return "007BCC";
             case CANCEL:
             default:
-                return "red";
+                return "D14741";
         }
     }
 }

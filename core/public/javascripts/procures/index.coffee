@@ -5,22 +5,10 @@ $ ->
     $('input:checkbox[id=checkbox*][id!=checkbox_all]').prop("checked", $(@).prop("checked"))
 
 
-  $('#create_deliveryment').submit (e) ->
-    e.preventDefault()
-    params = {}
-    $('input:checked[id=checkbox*][id!=checkbox_all]').each((i) -> params["pids[#{i}]"] = $(@).val())
-    mask = $('#container')
-    mask.mask("创建中...")
+  $('#create_deliveryment_btn').click (e) ->
+    form = $('#create_deliveryment')
+    form.attr('action', '/Procures/createDeliveryment')
+    form.submit()
 
-    nameEl = $('#create_deliveryment input[name=name]')
-    params['name'] = nameEl.val()
-
-    $.post('/Deliveryments/save', params,
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          window.location.href = r.message
-        mask.unmask()
-    )
-
+  $("#name_label").change (e) ->
+    $('#name_input').val($(@).val().trim())

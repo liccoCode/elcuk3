@@ -193,6 +193,10 @@ public class ProcureUnit extends Model {
             return find("selling=? AND stage IN (?,?,?)", selling, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
     }
 
+    public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
+        return ProcureUnit.find("stage=?", stage).fetch();
+    }
+
     /**
      * 加载并且返回 Simile Timeline 的 Events
      * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid

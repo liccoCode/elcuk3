@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.Dates;
 import models.procure.Deliveryment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -35,21 +36,27 @@ public class DeliveryPost extends Post {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
 
         if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
-        specialSearch = multiProcureUnit();
-        if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
-        StringBuilder sbd = new StringBuilder("SELECT d FROM Deliveryment d, IN (d.units) u WHERE");
+        // +n 处理需要额外的搜索
+        specialSearch = multiProcureUnit();
+
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE");
         List<Object> params = new ArrayList<Object>();
         sbd.append(" d.createDate>=? AND d.createDate<=?");
-        params.add(this.from);
-        params.add(this.to);
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
+
+        if(specialSearch._1) {
+            sbd.append(" AND ").append(specialSearch._2).append(" ");
+            params.addAll(specialSearch._3);
+        }
 
         if(this.state != null) {
             sbd.append(" AND d.state=?");
             params.add(this.state);
         }
 
-        if(StringUtils.isNotBlank(this.search)) {
+        if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {
             String word = this.word();
             sbd.append(" AND (")
                     .append(" u.sid LIKE ?")
@@ -73,7 +80,7 @@ public class DeliveryPost extends Post {
             Matcher matcher = SIZE.matcher(this.search);
             if(matcher.find()) {
                 int size = NumberUtils.toInt(matcher.group(1));
-                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(units)>=?", new ArrayList<Object>(Arrays.asList(size)));
+                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(d.units)>=?", new ArrayList<Object>(Arrays.asList(size)));
             }
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);

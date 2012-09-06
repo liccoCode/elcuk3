@@ -28,6 +28,12 @@ import java.util.List;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Deliveryment extends GenericModel {
+    public Deliveryment() {
+    }
+
+    public Deliveryment(String id) {
+        this.id = id;
+    }
 
     public enum S {
         /**
@@ -91,10 +97,37 @@ public class Deliveryment extends GenericModel {
     @Lob
     public String memo = " ";
 
-    public List<ProcureUnit> unbindInPlanStageProcureUnits() {
-        if(this.units.size() == 0) throw new FastRuntimeException("通过非正常途径创建的[采购单], 不允许操作.");
-        Cooperator cooperator = this.units.get(0).cooperator;
-        return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN).fetch();
+    /**
+     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     *
+     * @return
+     */
+    public List<ProcureUnit> availableInPlanStageProcureUnits() {
+        if(this.units.size() == 0) {
+            return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
+        } else {
+            Cooperator cooperator = this.units.get(0).cooperator;
+            return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN).fetch();
+        }
+    }
+
+    /**
+     * 取消采购单
+     */
+    public void cancel() {
+        /**
+         * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
+         */
+        for(ProcureUnit unit : this.units) {
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+                Validation.addError("deliveryment.units.cancel", "validation.required");
+            else
+                unit.toggleAssignTodeliveryment(null, false);
+        }
+        if(Validation.hasErrors()) return;
+        this.state = S.CANCEL;
+        this.save();
+        //TODO 完成保存以后, 需要添加日志
     }
 
     /**
@@ -103,11 +136,15 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
+        if(this.state != S.PENDING) {
+            Validation.addError("deliveryment.units.state", "%s");
+            return new ArrayList<ProcureUnit>();
+        }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator singleCop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.PLAN)
-                Validation.addError("deliveryment.units.assign", "validation.required");
-            unit.toggleAssignTodeliveryment(this, true);
+            if(isUnitToDeliverymentValid(unit, singleCop))
+                unit.toggleAssignTodeliveryment(this, true);
         }
         if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
         this.units.addAll(units);
@@ -118,14 +155,16 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 将指定 ProcureUnit 从 Deliveryment 中删除
+     *
      * @param pids
      */
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(ProcureUnit unit : units) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY)
-                Validation.addError("deliveryment.units.unassign", "validation.required");
-            unit.toggleAssignTodeliveryment(null, false);
+                Validation.addError("deliveryment.units.unassign", "%s");
+            else
+                unit.toggleAssignTodeliveryment(null, false);
         }
         if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
         this.units.removeAll(units);
@@ -145,15 +184,6 @@ public class Deliveryment extends GenericModel {
         return Deliveryment.find("state NOT IN (?,?)", S.DELIVERY, S.CANCEL).fetch();
     }
 
-    public static Deliveryment checkAndCreate(User user) {
-        if(user == null) throw new FastRuntimeException("必须拥有创建者.");
-        Deliveryment deliveryment = new Deliveryment();
-        deliveryment.id = Deliveryment.id();
-        deliveryment.state = S.PENDING;
-        deliveryment.handler = user;
-        return deliveryment.save();
-    }
-
     /**
      * 通过 ProcureUnit 来创建采购单
      *
@@ -161,24 +191,38 @@ public class Deliveryment extends GenericModel {
      */
     public static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        if(pids.size() != units.size()) throw new FastRuntimeException("有错误的 ProcureUnit 请仔细检查.");
+        Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
+        if(pids.size() != units.size()) {
+            Validation.addError("deliveryment.units.create", "%s");
+            return deliveryment;
+        }
 
         Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.PLAN)
-                throw new FastRuntimeException(String.format("ProcureUnit #%s stage 不为 PLAN, 无法创建运输单.", unit.id));
-            if(!cop.equals(unit.cooperator))
-                throw new FastRuntimeException("添加进入同一个采购单的[合作商]必须是一样.");
+            isUnitToDeliverymentValid(unit, cop);
         }
-        Deliveryment deliveryment = new Deliveryment();
+        if(Validation.hasErrors()) return deliveryment;
         deliveryment.handler = user;
         deliveryment.state = S.PENDING;
-        deliveryment.id = Deliveryment.id();
         deliveryment.name = name.trim();
         deliveryment.units.addAll(units);
-        for(ProcureUnit unit : deliveryment.units) unit.toggleAssignTodeliveryment(deliveryment, true);
+        for(ProcureUnit unit : deliveryment.units) {
+            unit.toggleAssignTodeliveryment(deliveryment, true);
+        }
         deliveryment.save();
         return deliveryment;
+    }
+
+    private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
+        if(unit.stage != ProcureUnit.STAGE.PLAN) {
+            Validation.addError("deliveryment.units.unassign", "%s");
+            return false;
+        }
+        if(!cop.equals(unit.cooperator)) {
+            Validation.addError("deliveryment.units.singlecop", "%s");
+            return false;
+        }
+        return true;
     }
 
 }

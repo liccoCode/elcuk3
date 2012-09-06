@@ -1,13 +1,17 @@
 package controllers;
 
+import helper.Webs;
 import models.User;
 import models.procure.Cooperator;
+import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
+import models.view.Ret;
 import models.view.post.ProcurePost;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Router;
 import play.mvc.With;
 
 import java.util.List;
@@ -20,12 +24,12 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
-    @Before(only = {"blank", "save", "index", "edit", "update"}, priority = 0)
+    @Before(only = {"blank", "save", "index", "createDeliveryment", "edit", "update"}, priority = 0)
     public static void whouses() {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "createDeliveryment"})
     public static void cooperators() {
         renderArgs.put("cooperators", Cooperator.<Cooperator>findAll());
         renderArgs.put("dateTypes", ProcurePost.DATE_TYPES);
@@ -35,7 +39,7 @@ public class Procures extends Controller {
         List<ProcureUnit> units = null;
         if(p == null) {
             p = new ProcurePost();
-            units = ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
+            units = ProcureUnit.unitsFilterByStage(ProcureUnit.STAGE.PLAN);
         } else {
             units = p.query();
         }
@@ -76,4 +80,27 @@ public class Procures extends Controller {
         redirect("/Procures/index?p.search=id:" + unit.id);
     }
 
+    /**
+     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
+     *
+     * @param pids
+     * @param name
+     */
+    public static void createDeliveryment(List<Long> pids, String name) {
+        Validation.required("procrues.createDeliveryment.name", name);
+        Validation.required("deliveryments.addunits", pids);
+        if(Validation.hasErrors()) {
+            renderArgs.put("units", ProcureUnit.unitsFilterByStage(ProcureUnit.STAGE.PLAN));
+            renderArgs.put("p", new ProcurePost());
+            render("Procures/index.html", name);
+        }
+        Deliveryment deliveryment = Deliveryment.createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+        if(Validation.hasErrors()) {
+            renderArgs.put("units", ProcureUnit.unitsFilterByStage(ProcureUnit.STAGE.PLAN));
+            renderArgs.put("p", new ProcurePost());
+            render("Procures/index.html", name);
+        }
+        flash.success("Deliveryment %s 创建成功.", deliveryment.id);
+        redirect("/Deliveryments/show/" + deliveryment.id);
+    }
 }

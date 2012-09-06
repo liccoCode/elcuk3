@@ -60,6 +60,17 @@
 
 <div class="row-fluid">
     <div class="span12">
+    #{ck 'root'}
+        <form action="@{Deliveryments.cancel()}" method="post">
+            <input type="hidden" name="id" value="${dmt.id}">
+            <button class="btn btn-danger">取消采购单</button>
+        </form>
+    #{/ck}
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
         <h4 class="alert alert-success">已经添加进入[采购单]的[采购单元] <i class="icon-sort-down"></i></h4>
 
         <form id="delivery_form" action="@{Deliveryments.delunits()}" method="post">
