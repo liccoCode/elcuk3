@@ -10,13 +10,13 @@
     </td>
     <th>SKU</th>
     <td>
-        <input readonly="" type="text" name="unit.product.sku" value="${product.sku}">
+        <input readonly="" type="text" name="unit.product.sku" id="unit_sku" value="${product.sku}">
     </td>
 </tr>
 
 <tr>
 #{set copers:product.cooperators() /}
-    <th>工厂</th>
+    <th>供应商</th>
     <td>
         <select name="unit.cooperator.id">
             <option value="">请选择</option>
@@ -29,8 +29,8 @@
     <th>价格</th>
     <td>
         <div class="input-append">
-            <input type="text" class="span1" name="unit.attrs.price" value="${unit.attrs.price}">
-        #{pickCurrency name:'unit.attrs.currency', class:'span2', c:helper.Currency.CNY /}
+            <input type="text" class="span1" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
+        #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:helper.Currency.CNY /}
         </div>
     </td>
 </tr>

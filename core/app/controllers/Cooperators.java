@@ -1,6 +1,8 @@
 package controllers;
 
+import helper.GTs;
 import helper.J;
+import helper.Webs;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -121,5 +123,16 @@ public class Cooperators extends Controller {
     public static void removeCooperItem(CooperItem copItem) {
         copItem.checkAndRemove();
         renderJSON(new Ret());
+    }
+
+    // 供应商的价格
+    public static void price(long id, String sku) {
+        validation.required(id);
+        validation.required(sku);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.V(Validation.errors())));
+
+        CooperItem copItem = CooperItem.find("sku=? AND cooperator.id=?", sku, id).first();
+        renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true).build());
     }
 }
