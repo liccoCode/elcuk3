@@ -63,7 +63,11 @@
     #{ck 'root'}
         <form action="@{Deliveryments.cancel()}" method="post">
             <input type="hidden" name="id" value="${dmt.id}">
-            <button class="btn btn-danger">取消采购单</button>
+
+            <div class="input-append">
+                <input type="text" name="msg" value="${msg}" placeHolder="填写简要关闭的原因">
+                <button class="btn btn-danger">取消采购单</button>
+            </div>
         </form>
     #{/ck}
     </div>
@@ -109,10 +113,21 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+        <h4 class="text-warning"><i class="icon-question-sign" rel="tooltip" placement="right" title="操作记录"></i>
+            Records
+            <i class="icon-sort-down"></i></h4>
+    #{list items:records, as:'rcd'}
+        <p class="text-info">${rcd.record().raw()}</p>
+    #{/list}
     </div>
 </div>
 
+
+<div class="row-fluid">
+    <div class="span12">
+        <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+    </div>
+</div>
 <div class="row-fluid">
     <div style="min-height:300px;" class="span12 well" id="dropbox">
         <ul class="thumbnails uploaded"></ul>

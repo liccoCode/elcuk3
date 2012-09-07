@@ -1,11 +1,14 @@
 package controllers;
 
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.procure.Deliveryment;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
 import play.mvc.With;
@@ -21,6 +24,15 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Deliveryments extends Controller {
 
+    @Before(only = {"show", "update", "addunits", "delunits", "cancel"})
+    public static void showPageSetUp() {
+        String deliverymentId = request.params.get("id");
+        if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dmt.id");
+        Deliveryment dmt = Deliveryment.findById(deliverymentId);
+        renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        renderArgs.put("records", ElcukRecord.records(deliverymentId));
+    }
+
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
         if(p == null) {
@@ -34,17 +46,13 @@ public class Deliveryments extends Controller {
 
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         render(dmt);
     }
 
     public static void update(Deliveryment dmt) {
         validation.valid(dmt);
-        Validation.valid("d", "sdf");
-        if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
-        }
         dmt.save();
         flash.success("更新成功.");
         redirect("/Deliveryments/show/" + dmt.id);
@@ -58,10 +66,8 @@ public class Deliveryments extends Controller {
      */
     public static void addunits(List<Long> pids, Deliveryment dmt) {
         Validation.required("deliveryments.addunits", pids);
-        if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
-        }
         dmt.assignUnitToDeliveryment(pids);
 
         // 再一次检查, 是否有错误
@@ -81,29 +87,26 @@ public class Deliveryments extends Controller {
      */
     public static void delunits(List<Long> pids, Deliveryment dmt) {
         Validation.required("deliveryments.delunits", pids);
-        if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
-        }
         dmt.unAssignUnitInDeliveryment(pids);
 
-        if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
-        }
+
         redirect("/Deliveryments/show/" + dmt.id);
     }
 
     /**
      * 取消采购单
      */
-    public static void cancel(String id) {
+    public static void cancel(String id, String msg) {
+        Validation.required("deliveryments.cancel", msg);
         Deliveryment dmt = Deliveryment.findById(id);
-        dmt.cancel();
-        if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
-            render("Deliveryments/show.html", dmt);
-        }
+        dmt.cancel(msg);
+        if(Validation.hasErrors())
+            render("Deliveryments/show.html", dmt, msg);
+
         redirect("/Deliveryments/show/" + dmt.id);
     }
 }

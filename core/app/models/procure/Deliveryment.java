@@ -1,17 +1,15 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import controllers.Secure;
+import models.ElcukRecord;
 import models.User;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
-import play.data.validation.RequiredCheck;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
-import play.db.jpa.JPQL;
-import play.utils.FastRuntimeException;
+import play.i18n.Messages;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -114,7 +112,7 @@ public class Deliveryment extends GenericModel {
     /**
      * 取消采购单
      */
-    public void cancel() {
+    public void cancel(String msg) {
         /**
          * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
          */
@@ -127,7 +125,8 @@ public class Deliveryment extends GenericModel {
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
         this.save();
-        //TODO 完成保存以后, 需要添加日志
+
+        new ElcukRecord(Messages.get("deliveryment.cancel"), Messages.get("deliveryment.cancel.msg", this.id, msg.trim()), this.id).save();
     }
 
     /**
@@ -150,6 +149,9 @@ public class Deliveryment extends GenericModel {
         this.units.addAll(units);
         // 实在无语, 级联保存无效, 只能如此.
         for(ProcureUnit unit : this.units) unit.save();
+
+        new ElcukRecord(Messages.get("deliveryment.addunit"), Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();
+
         return units;
     }
 
@@ -169,6 +171,8 @@ public class Deliveryment extends GenericModel {
         if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
         this.units.removeAll(units);
         this.save();
+
+        new ElcukRecord(Messages.get("deliveryment.delunit"), Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
         return units;
     }
 
@@ -210,6 +214,9 @@ public class Deliveryment extends GenericModel {
             unit.toggleAssignTodeliveryment(deliveryment, true);
         }
         deliveryment.save();
+
+        new ElcukRecord(Messages.get("deliveryment.createFromProcures"),
+                Messages.get("deliveryment.createFromProcures.msg", pids, deliveryment.id), deliveryment.id).save();
         return deliveryment;
     }
 

@@ -9,6 +9,7 @@ import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ProcurePost;
 import play.data.validation.Validation;
+import play.db.jpa.JPA;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
