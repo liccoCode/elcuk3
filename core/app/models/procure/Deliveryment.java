@@ -44,12 +44,14 @@ public class Deliveryment extends GenericModel {
         DELIVERING,
         /**
          * 完成, 交货
+         *
+         * @deprecated
          */
         DELIVERY,
         /**
-         * 需要付款, 表示货物已经全部完成.
+         * 完成交货.
          */
-        NEEDPAY,
+        DONE,
         /**
          * 全部付款
          */
@@ -176,6 +178,22 @@ public class Deliveryment extends GenericModel {
         return units;
     }
 
+    /**
+     * 检查 Deliveryment 的下一个状态是什么
+     *
+     * @return
+     */
+    public S nextState() {
+        /**
+         * 1. 如果所属的 units 部分 DONE 则为交货中.
+         * 2. 如果所属的 units 全部 DONE 则此采购单也 DONE 交货完成.
+         */
+        for(ProcureUnit unit : this.units) {
+            if(unit.stage != ProcureUnit.STAGE.DONE) return S.DELIVERING;
+        }
+        return S.DONE;
+    }
+
     public static String id() {
         DateTime dt = DateTime.now();
         String count = Deliveryment.count("createDate>=? AND createDate<=?",
@@ -229,6 +247,9 @@ public class Deliveryment extends GenericModel {
             Validation.addError("deliveryment.units.singlecop", "%s");
             return false;
         }
+        Validation.required("procureunit.planDeliveryDate", unit.attrs.planDeliveryDate);
+        Validation.required("procureunit.planShipDate", unit.attrs.planShipDate);
+        Validation.required("procureunit.planArrivDate", unit.attrs.planArrivDate);
         return true;
     }
 

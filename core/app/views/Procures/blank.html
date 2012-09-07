@@ -25,6 +25,13 @@
 
 
 <form action="/procures/save" method="post">
-    #{render 'Procures/_unit_table.html', unit:unit, whouses:whouses/}
+    <table class="table table-condensed table-bordered">
+        #{render 'Procures/_unit_table_trs.html', unit:unit, whouses:whouses/}
+        <tr>
+            <td colspan="4">
+                <button class="btn btn-primary">创建</button>
+            </td>
+        </tr>
+    </table>
 </form>
 #{/else}

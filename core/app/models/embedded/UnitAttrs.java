@@ -7,6 +7,7 @@ import helper.Webs;
 import play.data.validation.InFuture;
 import play.data.validation.Min;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -104,4 +105,23 @@ public class UnitAttrs {
         return Webs.scalePointUp(0, millions / (24f * 60 * 60 * 1000));
     }
 
+    public void validate() {
+        Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate, new Date(this.planShipDate.getTime() + 1));
+        Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
+
+        // 三个 计划与实际 日期之间的检验
+        if(this.planDeliveryDate != null && this.deliveryDate != null)
+            // 为了能够让两个日期相等通过检查
+            Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate, new Date(this.deliveryDate.getTime() + 1));
+        if(this.planShipDate != null && this.shipDate != null)
+            Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.shipDate.getTime() + 1));
+        if(this.planArrivDate != null && this.arriveDate != null)
+            Validation.past("procureunit.planArrivDate", this.planArrivDate, new Date(this.arriveDate.getTime() + 1));
+
+        // 实际时间之间的检查
+        if(this.deliveryDate != null && this.shipDate != null)
+            Validation.past("procureunit.deliveryDate", this.deliveryDate, new Date(this.shipDate.getTime() + 1));
+        if(this.shipDate != null && this.arriveDate != null)
+            Validation.past("procureunit.shipDate", this.shipDate, new Date(this.arriveDate.getTime() + 1));
+    }
 }

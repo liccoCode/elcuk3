@@ -8,7 +8,7 @@ $ ->
       $("input:checkbox.#{region}").prop("checked", o.prop("checked"))
 
   $("#plan_form_submit").click -> $("#plan_form").submit()
-  $('#delivery_form_submit').click -> $('#delivery_form').submit()
+  $('#delunit_form_submit').click -> $('#delivery_form').attr("action", "/deliveryments/delunits").submit()
 
   fidCallBack = () ->
     {fid: $('#deliverymentId').text(), p: 'DELIVERYMENT'}

@@ -17,6 +17,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -34,6 +35,28 @@ import java.util.List;
 public class ProcureUnit extends Model {
 
     public ProcureUnit() {
+    }
+
+    /**
+     * Copy 一个全新的 ProcureUnit, 用来将部分交货的 ProcureUnit 分单交货
+     *
+     * @param unit
+     */
+    public ProcureUnit(ProcureUnit unit) {
+        this.cooperator = unit.cooperator;
+        this.selling = unit.selling;
+        this.sid = unit.sid;
+        this.product = unit.product;
+        this.sku = unit.sku;
+        this.handler = unit.handler;
+        this.whouse = unit.whouse;
+        this.stage = STAGE.PLAN;
+        UnitAttrs attr = new UnitAttrs();
+        attr.planQty = unit.attrs.planQty - unit.attrs.qty;
+        attr.price = unit.attrs.price;
+        attr.currency = unit.attrs.currency;
+        this.attrs = attr;
+        this.comment(String.format("此采购计划由于 #%s 采购计划部分交货而自行分单创建.", unit.id));
     }
 
     /**
@@ -71,7 +94,7 @@ public class ProcureUnit extends Model {
     /**
      * 采购单
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Deliveryment deliveryment;
 
     /**
@@ -137,8 +160,6 @@ public class ProcureUnit extends Model {
     public void validate() {
         Validation.current().valid(this);
         Validation.current().valid(this.attrs);
-        Validation.past("procureunit.planDeliveryDate", this.attrs.planDeliveryDate, this.attrs.planShipDate);
-        Validation.past("procureunit.planShipDate", this.attrs.planShipDate, this.attrs.planArrivDate);
         Validation.required("procureunit.selling", this.selling);
         if(this.selling != null) this.sid = this.selling.sellingId;
         Validation.required("procureunit.whouse", this.whouse);
@@ -146,6 +167,34 @@ public class ProcureUnit extends Model {
         Validation.required("procureunit.product", this.product);
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
+        if(this.attrs != null) this.attrs.validate();
+    }
+
+    /**
+     * ProcureUnit 交货
+     *
+     * @param attrs
+     * @return T2: ._1:是否全部转移, ._2:新转移的采购单元
+     */
+    public F.T2<Boolean, ProcureUnit> delivery(UnitAttrs attrs) {
+        /**
+         * 1.
+         */
+        if(this.stage != STAGE.DELIVERY)
+            Validation.addError("procureunit.delivery.stage", "%s");
+        Validation.min("procureunit.attr.qty", attrs.qty, 0);
+        Validation.required("procureunit.attr.deliveryDate", attrs.deliveryDate);
+        if(Validation.hasErrors()) return new F.T2<Boolean, ProcureUnit>(false, null);
+        this.attrs = attrs;
+
+        boolean isFullDelivery = attrs.planQty.equals(attrs.qty);
+        ProcureUnit unit = null;
+        if(!isFullDelivery) unit = new ProcureUnit(this).save();
+
+        this.stage = STAGE.DONE;
+        this.deliveryment.state = this.deliveryment.nextState();
+        this.save();
+        return new F.T2<Boolean, ProcureUnit>(isFullDelivery, unit);
     }
 
 
@@ -176,6 +225,10 @@ public class ProcureUnit extends Model {
             this.deliveryment = null;
             this.stage = STAGE.PLAN;
         }
+    }
+
+    public void comment(String cmt) {
+        this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
     }
 
 

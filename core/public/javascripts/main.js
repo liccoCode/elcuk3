@@ -139,7 +139,19 @@ function toggle_init(){
     });
 }
 
+/**
+ * 为 Form 里面的 button 添加 confirm 事件
+ */
+function submit_btn_init(){
+    $('body').off('click', '[data-confirm=confirm]').on('click', '[data-confirm=confirm]', function(e){
+        e.preventDefault();
+        if(!confirm('确定提交?')) return false;
+        $(this).parents('form').submit();
+    });
+}
+
 $(function(){
     toggle_init();
+    submit_btn_init();
 });
 

@@ -48,14 +48,48 @@
     </tr>
     <tr id="${tr_key}_${unit_index}" style="display:none;">
         <td colspan="${checkbox ? '13' : '12'}">
-            <div class="span6" style="float:left;">
-                <h3>Comment:</h3>
+            <div class="span4" style="float:left;">
+                <h4 style="margin-top:0">Comment</h4>
             ${unit.comment}
             </div>
-            <div class="span6" style="float:left;">
-                <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
-                <a href="@{Sellings.sellingLabel()}/${unit.sid}" class="btn btn-success">下载 Label</a>
+
+            <div class="span4" style="float:left;padding:0 20px;">
+                <table class="table table-condensed table-bordered">
+                    <tr>
+                        <td>实际交货量</td>
+                        <td>实际交货日期</td>
+                        <td>实际运输日期</td>
+                        <td>实际到库日期</td>
+                    </tr>
+                    <tr>
+                        <td>${unit.attrs.qty}</td>
+                        <td>${unit.attrs.deliveryDate.los()}</td>
+                        <td>${unit.attrs.shipDate.los()}</td>
+                        <td>${unit.attrs.arriveDate.los()}</td>
+                    </tr>
+                </table>
             </div>
+
+            <div class="span4" style="float:left;">
+                <!-- 普通修改 -->
+                <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
+
+                <!-- FnSku 下载 Label -->
+                #{if unit.selling.fnSku}
+                    <a href="@{Sellings.sellingLabel()}/${unit.sid}" class="btn btn-success">
+                        <i class="icon-download"></i> ${unit.selling.fnSku} Label
+                    </a>
+                #{/if}
+                #{else }
+                    <a class="btn btn-warning" href="@{Sellings.selling()}/${unit.selling.sellingId}">补充 FnSku</a>
+                #{/else}
+
+                #{if delivery}
+                    <!-- 交货页面 -->
+                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning">交货</a>
+                #{/if}
+            </div>
+
         </td>
     </tr>
 #{/list}

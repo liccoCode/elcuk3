@@ -36,7 +36,7 @@ public class ProcuresHelper extends JavaExtensions {
                 return "FAA52C";
             case DELIVERY:
                 return "F67300";
-            case NEEDPAY:
+            case DONE:
                 return "4DB2D0";
             case FULPAY:
                 return "007BCC";

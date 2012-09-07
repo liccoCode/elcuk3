@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.User;
+import models.embedded.UnitAttrs;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -10,6 +11,7 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Router;
@@ -103,5 +105,39 @@ public class Procures extends Controller {
         }
         flash.success("Deliveryment %s 创建成功.", deliveryment.id);
         redirect("/Deliveryments/show/" + deliveryment.id);
+    }
+
+    /**
+     * 某一个 ProcureUnit 交货
+     */
+    public static void deliveryUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        renderArgs.put("attrs", unit.attrs);
+        render(unit);
+    }
+
+    /**
+     * 交货更新
+     *
+     * @param attrs
+     */
+    public static void delivery(UnitAttrs attrs, long id, String cmt) {
+        attrs.validate();
+        ProcureUnit unit = ProcureUnit.findById(id);
+        if(Validation.hasErrors()) {
+            render("Procures/deliveryUnit.html", unit, attrs);
+        }
+        unit.comment = cmt;
+        F.T2<Boolean, ProcureUnit> isFullDelivery = unit.delivery(attrs);
+        if(Validation.hasErrors()) {
+            render("Procures/deliveryUnit.html", unit, attrs);
+        }
+        if(isFullDelivery._1) {
+            flash.success("ProcureUnit %s 全部交货!", unit.id);
+        } else if(!isFullDelivery._1 && isFullDelivery._2 != null) {
+            flash.success("ProcureUnits %s 部分交货, 剩余部分将自动创建一个新的[采购单元(%s)]! (%s / %s)",
+                    unit.id, isFullDelivery._2.id, attrs.qty, attrs.planQty);
+        }
+        redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }
 }
