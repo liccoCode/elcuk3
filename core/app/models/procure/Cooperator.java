@@ -41,7 +41,7 @@ public class Cooperator extends Model {
         SHIPPER {
             @Override
             public String to_s() {
-                return "货代";
+                return "运输商";
             }
         };
 

@@ -17,6 +17,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +61,11 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         /**
          * 空运
          */
-        AIR
+        AIR,
+        /**
+         * 快递
+         */
+        EXPRESS
     }
 
     public enum S {
@@ -225,23 +230,6 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     @Lob
     public String memo = " ";
 
-    /**
-     * 计算 Shipment 的 ID
-     *
-     * @return
-     */
-    public static String id() {
-        DateTime dt = DateTime.now();
-        String count = Shipment.count("createDate>=? AND createDate<=?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-30", dt.getYear(), dt.getMonthOfYear())).toDate()) + "";
-        return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
-    }
-
-    public static List<Shipment> shipmentsByState(S state) {
-        return Shipment.find("state=? ORDER BY createDate", state).fetch();
-    }
-
     public Shipment checkAndCreate() {
         return this.save();
     }
@@ -377,4 +365,29 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         }
     }
 
+
+    /**
+     * 计算 Shipment 的 ID
+     *
+     * @return
+     */
+    public static String id() {
+        DateTime dt = DateTime.now();
+        String count = Shipment.count("createDate>=? AND createDate<=?",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-30", dt.getYear(), dt.getMonthOfYear())).toDate()) + "";
+        return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+    }
+
+    public static List<Shipment> shipmentsByState(S state) {
+        return Shipment.find("state=? ORDER BY createDate", state).fetch();
+    }
+
+    /**
+     * 由于 Play 无法将 models 目录下的 Enumer 加载, 所以通过 model 提供一个暴露方法在 View 中使用
+     * @return
+     */
+    public static List<iExpress> iExpress() {
+        return Arrays.asList(iExpress.values());
+    }
 }

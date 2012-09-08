@@ -2,6 +2,7 @@ package ext;
 
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import play.templates.JavaExtensions;
 
 /**
@@ -43,6 +44,22 @@ public class ProcuresHelper extends JavaExtensions {
             case CANCEL:
             default:
                 return "D14741";
+        }
+    }
+
+    public static String rgb(Shipment.S state) {
+        switch(state) {
+            case PLAN:
+                return "3da4c2";
+            case SHIPPING:
+                return "006acc";
+            case CLEARANCE:
+                return "5bb75b";
+            case CANCEL:
+                return "f9a021";
+            case DONE:
+            default:
+                return "108080";
         }
     }
 }

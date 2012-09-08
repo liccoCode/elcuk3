@@ -7,6 +7,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.mvc.Controller;
@@ -23,27 +24,20 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Shipments extends Controller {
-    public static void index() {
-        List<Shipment> pendings = Shipment.shipmentsByState(Shipment.S.PLAN);
-        List<Shipment> shippings = Shipment.shipmentsByState(Shipment.S.SHIPPING);
-        List<Shipment> clear = Shipment.shipmentsByState(Shipment.S.CLEARANCE);
-        List<Shipment> dones = Shipment.find("state=?", Shipment.S.DONE).fetch(1, 20); // 由更多再 Ajax 加载
-
-        render(pendings, shippings, clear, dones);
+    public static void index(ShipmentPost p) {
+        List<Shipment> shipments = null;
+        if(p == null) {
+            p = new ShipmentPost();
+            shipments = Shipment.find("state=?", Shipment.S.PLAN).fetch();
+        } else {
+            shipments = p.query();
+        }
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        render(shipments, p);
     }
 
     public static void blank() {
         Shipment s = new Shipment(Shipment.id());
         render(s);
-    }
-
-    public static void save(Shipment s) {
-        checkAuthenticity();
-        validation.valid(s);
-        if(Validation.hasErrors()) {
-            render("Shipments/blank.html", s);
-        }
-        s.checkAndCreate();
-        index();
     }
 }

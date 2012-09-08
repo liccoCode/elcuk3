@@ -12,7 +12,7 @@ import java.util.List;
  * Date: 9/4/12
  * Time: 5:10 PM
  */
-public abstract class Post {
+public abstract class Post<T> {
     public Date from = DateTime.now().minusMonths(2).toDate();
     public Date to = new Date();
     public String search;
@@ -22,6 +22,10 @@ public abstract class Post {
     public long count = 1;
 
     public abstract F.T2<String, List<Object>> params();
+
+    public List<T> query() {
+        throw new UnsupportedOperationException("请自行实现");
+    }
 
     /**
      * [search] -> [%search%] ,用在 SQL 语句的 LIKE 查询中
