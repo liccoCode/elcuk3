@@ -25,6 +25,7 @@ public class ProcurePost extends Post {
 
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
+        DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
         DATE_TYPES.add(new F.T2<String, String>("planArrivDate", "预计 [到库] 时间"));
         DATE_TYPES.add(new F.T2<String, String>("planShipDate", "预计 [发货] 时间"));
         DATE_TYPES.add(new F.T2<String, String>("planDeliveryDate", "预计 [交货] 时间"));
