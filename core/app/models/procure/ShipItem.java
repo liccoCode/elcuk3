@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
 
@@ -66,10 +67,13 @@ public class ShipItem extends GenericModel {
      * ShipItem 被取消;
      * 1. 运输的数量设置为 0
      * 2. 状态设置为 CANCEL
+     *
+     * @return 删除后的临时对象
      */
-    public void cancel() {
-        this.qty = 0;
-        this.state = S.CANCEL;
-        this.save();
+    public F.T2<ShipItem, ProcureUnit> cancel() {
+        this.shipment = null;
+        ProcureUnit unit = this.unit;
+        this.unit = null;
+        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
     }
 }

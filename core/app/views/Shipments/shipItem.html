@@ -52,7 +52,7 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <form>
+        <form action="@{Shipments.cancelShip()}" method="post">
             <table class="table table-condensed table-bordered">
                 <tr>
                     <th>
@@ -71,7 +71,7 @@
                 <tr>
                     <td>
                         <label class="checkbox">
-                            <input type="checkbox" name="shipItemId" id="checkbox_${itm.id}">
+                            <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
                         </label>
                     </td>
                     <td>${itm.id}</td>
@@ -82,6 +82,12 @@
                     <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>
                 </tr>
             #{/list}
+                <tr>
+                    <td colspan="7">
+                        <input type="hidden" name="id" value="${ship.id}">
+                        <button id="" class="btn btn-warning">取消运输</button>
+                    </td>
+                </tr>
             </table>
         </form>
     </div>
@@ -105,6 +111,7 @@
                     </th>
                     <th>Sku</th>
                     <th>Sid</th>
+                    <th>预计到库日期</th>
                     <th>交货数量</th>
                     <th>剩余可运数量</th>
                     <th>运输数量</th>
@@ -121,15 +128,26 @@
                     </td>
                     <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
                     <td>${unit.sid}</td>
+                    <td>${unit.attrs.planArrivDate.los()}</td>
                     <td>${unit.attrs.qty}</td>
                     #{set leftQty: unit.leftQty()/}
-                    <td>${leftQty?._1}</td>
+                    <td data-toggle="toggle" data-target="#unit_${unit_index}" style="cursor:pointer;">
+                        <i class="icon-reorder"></i> ${leftQty?._1}
+                    </td>
                     <td>
                         <input type="text" name="shipQty" disabled="" class="input-mini" value="${leftQty._1}">
                     </td>
                     <td style="color:${'#' + unit.stage.rgb()}">${unit.stage}</td>
                     <td>${unit.product.productName.omis(80)}</td>
                     <td>${unit.id}</td>
+                </tr>
+                <tr id="unit_${unit_index}" style="display:none;">
+                    <td colspan="10">
+                        <h4>采购单元所涉及的运输单</h4>
+                        #{list items:leftQty._3, as:'lk'}
+                            <a href="@{Shipments.show()}/${lk}" target="_blank">${lk}</a>
+                        #{/list}
+                    </td>
                 </tr>
             #{/list}
                 <tr>

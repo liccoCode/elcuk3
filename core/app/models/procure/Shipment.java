@@ -272,24 +272,51 @@ public class Shipment extends GenericModel {
         if(this.weight != null) Validation.min("ship.weight", this.weight, 0);
     }
 
+    /**
+     * 向 Shipment 添加需要运输的 ProcureUnit(+数量)
+     *
+     * @param unitId
+     * @param shipQty
+     */
     public void addToShip(List<Long> unitId, List<Integer> shipQty) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
         if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
             int shipSize = shipQty.get(i);
-            F.T2<Integer, List<String>> leftQty = unit.leftQty();
+            F.T3<Integer, Integer, List<String>> leftQty = unit.leftQty();
             if(leftQty._1 < shipSize) {
                 Validation.addError("shipment.addToShip.shipQty", "%s");
                 break;
             }
 
             this.items.add(unit.ship(this, shipSize));
+            unit.stage = unit.nextStage();
             unit.save();
         }
 
         if(Validation.hasErrors()) return;
         this.save();
+    }
+
+
+    /**
+     * 从 Shipment 中删除不需要运输的 ShipItem,  数量返回到原有的 ProcureUnit 中
+     *
+     * @param shipItemId
+     */
+    public void cancelShip(List<Integer> shipItemId) {
+        List<ShipItem> items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
+        for(ShipItem itm : items) {
+            if(!itm.shipment.equals(this)) {
+                Validation.addError("shipment.cancelShip", "%s");
+                return;
+            } else {
+                F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
+                cancelT2._2.stage = cancelT2._2.nextStage();
+                cancelT2._2.save();
+            }
+        }
     }
 
     /**
@@ -332,6 +359,25 @@ public class Shipment extends GenericModel {
         return this.iExpressHTML;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Shipment shipment = (Shipment) o;
+
+        if(id != null ? !id.equals(shipment.id) : shipment.id != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
+    }
 
     /**
      * 计算 Shipment 的 ID

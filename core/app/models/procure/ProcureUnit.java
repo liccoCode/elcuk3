@@ -221,28 +221,36 @@ public class ProcureUnit extends Model {
             shipItem.shipment = shipment;
             shipItem.unit = this;
             shipItem.qty = size;
-        }
-        if(size == this.leftQty()._1) {
-            this.stage = STAGE.SHIPPING;
-        } else if(size > 0 && size < this.attrs.qty) {
-            this.stage = STAGE.PART_SHIPPING;
+            this.relateItems.add(shipItem);
         }
         return shipItem;
+    }
+
+    public STAGE nextStage() {
+        F.T3<Integer, Integer, List<String>> leftQty = this.leftQty();
+        if(leftQty._1 == 0) {
+            return STAGE.SHIPPING;
+        } else if(leftQty._1 > 0 && leftQty._1 < this.attrs.qty) {
+            return STAGE.PART_SHIPPING;
+        } else if(leftQty._1.equals(this.attrs.qty)) {
+            return STAGE.DONE;
+        }
+        return this.stage;
     }
 
     /**
      * 剩下的可运输的数量
      *
-     * @return
+     * @return T3: ._1: 剩余的数量, ._2: 总运输的数量, ._3:影响的 ShipmentId
      */
-    public F.T2<Integer, List<String>> leftQty() {
+    public F.T3<Integer, Integer, List<String>> leftQty() {
         int totalShiped = 0;
         List<String> shipments = new ArrayList<String>();
         for(ShipItem item : this.relateItems) {
             totalShiped += item.qty;
             shipments.add(item.shipment.id);
         }
-        return new F.T2<Integer, List<String>>(this.attrs.qty - totalShiped, shipments);
+        return new F.T3<Integer, Integer, List<String>>(this.attrs.qty - totalShiped, totalShiped, shipments);
     }
 
     public String nickName() {

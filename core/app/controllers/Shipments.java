@@ -69,7 +69,7 @@ public class Shipments extends Controller {
         redirect("/Shipments/show/" + ship.id);
     }
 
-    @Before(only = {"shipItem", "ship"})
+    @Before(only = {"shipItem", "ship", "cancelShip"})
     public static void setUpShipPage() {
         List<ProcureUnit> units = ProcureUnit.find("stage IN (?,?)", ProcureUnit.STAGE.DONE, ProcureUnit.STAGE.PART_SHIPPING).fetch();
         renderArgs.put("units", units);
@@ -81,16 +81,31 @@ public class Shipments extends Controller {
     }
 
     public static void ship(String id, List<Long> unitId, List<Integer> shipQty) {
-        Shipment ship = Shipment.findById(id);
         Validation.required("shipments.ship.unitId", unitId);
         Validation.required("shipments.ship.shipQty", shipQty);
+        Validation.required("shipment.id", id);
         Validation.equals("shipments.ship.equal", unitId.size(), "", shipQty.size());
+        Shipment ship = Shipment.findById(id);
+        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
         ship.addToShip(unitId, shipQty);
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
+        redirect("/shipments/shipitem/" + id);
+    }
+
+    public static void cancelShip(List<Integer> shipItemId, String id) {
+        Validation.required("shipments.ship.shipId", shipItemId);
+        Validation.required("shipment.id", id);
+        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        Shipment ship = Shipment.findById(id);
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+
+        ship.cancelShip(shipItemId);
+
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
         redirect("/shipments/shipitem/" + id);
     }
 }
