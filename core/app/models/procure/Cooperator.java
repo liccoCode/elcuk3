@@ -163,4 +163,12 @@ public class Cooperator extends Model {
         return Cooperator.find("type=?", T.SUPPLIER).fetch();
     }
 
+    /**
+     * 所有快递商
+     * @return
+     */
+    public static List<Cooperator> shipper() {
+        return Cooperator.find("type=?", T.SHIPPER).fetch();
+    }
+
 }

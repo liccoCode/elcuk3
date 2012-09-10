@@ -37,7 +37,22 @@ public class Shipments extends Controller {
     }
 
     public static void blank() {
-        Shipment s = new Shipment(Shipment.id());
-        render(s);
+        Shipment ship = new Shipment(Shipment.id());
+        render(ship);
+    }
+
+    public static void save(Shipment ship) {
+        checkAuthenticity();
+        validation.valid(ship);
+        if(Validation.hasErrors()) {
+            render("Shipments/blank.html", ship);
+        }
+        ship.save();
+        redirect("/shipments/show/" + ship.id);
+    }
+
+    public static void show(String id) {
+        Shipment ship = Shipment.findById(id);
+        render(ship);
     }
 }

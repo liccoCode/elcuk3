@@ -100,20 +100,6 @@ public class Payment extends GenericModel {
     @Expose
     public String memo = " ";
 
-    public Payment close(String msg) {
-        if(StringUtils.isBlank(msg)) throw new FastRuntimeException("关闭 Payment 必须留有理由!");
-        this.state = Payment.S.CLOSE;
-        this.memo += String.format("\r\n(CLOSE|%s)", msg);
-        ClosePayment closePayment = null;
-        if(this.type == T.DELIVERY) {
-
-            //TODO 如何处理?
-        } else if(this.type == T.SHIP)
-            closePayment = new Shipment();
-        if(closePayment == null) throw new FastRuntimeException("正在关闭位置的 Payment 类型!");
-        closePayment.close(this);
-        return this.save();
-    }
 
     /**
      * Payment 自己的检查, 付款金额, 类型, 付款时间,类型

@@ -11,6 +11,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class Shipment extends GenericModel implements Payment.ClosePayment {
+public class Shipment extends GenericModel {
 
     public Shipment() {
     }
@@ -57,15 +58,30 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         /**
          * 海运
          */
-        SEA,
+        SEA {
+            @Override
+            public String toString() {
+                return "海运";
+            }
+        },
         /**
          * 空运
          */
-        AIR,
+        AIR {
+            @Override
+            public String toString() {
+                return "空运";
+            }
+        },
         /**
          * 快递
          */
-        EXPRESS
+        EXPRESS {
+            @Override
+            public String toString() {
+                return "快递";
+            }
+        }
     }
 
     public enum S {
@@ -116,35 +132,43 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     @OneToMany(mappedBy = "shipment")
     public List<ShipItem> items = new ArrayList<ShipItem>();
 
+    /**
+     * 运输合作商
+     */
+    @OneToOne
+    public Cooperator cooper;
+
     @Id
     @Column(length = 30)
     @Expose
-    @Required(message = "v.require.shipment.id")
+    @Required
     public String id;
 
     /**
      * 此货运单人工创建的时间
      */
     @Expose
-    @Required(message = "v.require.shipment.createDate")
+    @Required
     public Date createDate = new Date();
 
     @Enumerated(EnumType.STRING)
     @Column(length = 12)
     @Expose
-    @Required(message = "v.require.shipment.state")
+    @Required
     public S state;
 
     /**
      * 货运开始日期
      */
     @Expose
+    @Required
     public Date beginDate;
 
     /**
      * 预计货运到达时间
      */
     @Expose
+    @Required
     public Date planArrivDate;
 
     /**
@@ -158,7 +182,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      */
     @Enumerated(EnumType.STRING)
     @Expose
-    @Required(message = "v.require.shipment.type")
+    @Required
     public T type;
 
     /**
@@ -172,14 +196,12 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      * 计价单价
      */
     @Expose
-    @Required(message = "v.require.shipment.price")
     public Float price;
     /**
      * 单价单位
      */
     @Enumerated(EnumType.STRING)
     @Expose
-    @Required(message = "v.require.shipment.currency")
     public Currency currency;
 
     /**
@@ -196,6 +218,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
 
     /**
      * 货运商
+     * //TODO 需要删除, 使用 cooper 代替
      */
     @Expose
     public String shipper;
@@ -211,14 +234,12 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
      * 起始地址
      */
     @Expose
-    @Required(message = "v.require.shipment.source")
     public String source;
 
     /**
      * 目的地址
      */
     @Expose
-    @Required(message = "v.require.shipment.target")
     public String target;
 
     /**
@@ -230,9 +251,6 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     @Lob
     public String memo = " ";
 
-    public Shipment checkAndCreate() {
-        return this.save();
-    }
 
     /**
      * 创建的计划运输单超过 7 天则表示超时
@@ -242,53 +260,6 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
     public boolean overDue() {
         long t = System.currentTimeMillis() - this.createDate.getTime();
         return t - TimeUnit.DAYS.toMillis(7) > 0;
-    }
-
-    /**
-     * 从 Plan 状态到 Ship 状态
-     *
-     * @param s 用来传递值的临时对象
-     * @return
-     */
-    public Shipment fromPlanToShip(Shipment s) {
-        if(this.state != S.PLAN) throw new FastRuntimeException("Shipment (" + this.id + ") 状态应该为 PLAN!");
-        if(StringUtils.isBlank(s.trackNo)) throw new FastRuntimeException("Trac No 不允许为空!");
-        if(s.internationExpress == null) throw new FastRuntimeException("国际快递商不允许为空!");
-        if(s.beginDate == null) throw new FastRuntimeException("进行 Shipping 状态, 开始时间不能为空!");
-        if(s.planArrivDate == null) throw new FastRuntimeException("必须指定预计到达时间!");
-        this.trackNo = s.trackNo.trim();
-        this.internationExpress = s.internationExpress;
-        this.state = S.SHIPPING;
-        this.beginDate = s.beginDate;
-        this.planArrivDate = s.planArrivDate;
-        return this.save();
-    }
-
-    public Payment payForShipment(Payment payment) {
-        if(payment == null) throw new FastRuntimeException("付款信息为空!");
-        if(StringUtils.isBlank(payment.memo)) throw new FastRuntimeException("必须填写付款原因.");
-        payment.paymentCheckItSelf();
-
-        payment.shipment = this; //由 Payment 添加关联
-        payment.shipment.save();
-        return payment.save();
-    }
-
-    @Override
-    public void close(Payment thisPayment) {
-        // empty check close in shipment.
-    }
-
-    /**
-     * 返回总共付款的 RMB 的金额
-     *
-     * @return
-     */
-    public Float totalPayedCNY() {
-        float totalPayed = 0;
-        for(Payment pay : this.payments)
-            if(pay.state == Payment.S.NORMAL) totalPayed += pay.currency.toCNY(pay.price);
-        return totalPayed;
     }
 
     /**
@@ -321,50 +292,6 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
         return this.iExpressHTML;
     }
 
-    /**
-     * 此运输单完成; 每一个 Shipment 关闭的时候, 都需要检查其中所有 ShipItem 所关联的 ProcureUnit 是否可以进行 SHIP_OVER 状态了.
-     */
-    public Shipment done() {
-        if(this.state == S.PLAN) throw new FastRuntimeException("不允许从 PLAN 状态直接到 DONE");
-        if(this.arriveDate == null) throw new FastRuntimeException("完成运输单, 必须拥有具体到达时间");
-        if(this.arriveDate.getTime() < this.beginDate.getTime()) throw new FastRuntimeException("实际到达时间小于开始时间?");
-        //TODO 运输单完成, 添加判断运输单项关联的 ProcureUnit 是否可以标记完成.
-        for(ShipItem item : this.items) {
-            //TODO 需要处理的
-        }
-        this.state = S.DONE;
-        return this.save();
-    }
-
-    /**
-     * 取消一个 Shipment.
-     */
-    public void cancel() {
-        if(this.state == S.CANCEL) throw new FastRuntimeException("Shipment " + this.id + " 已经为 CANCEL 状态");
-        if(this.state != S.PLAN) throw new FastRuntimeException("已经在路上的 Shipment " + this.id + " 无法取消.");
-        for(ShipItem item : this.items)
-            item.cancel();
-        this.state = S.CANCEL;
-        this.memo = String.format("Shipment 于 %s 关闭, 共影响 %s 个 ShipItem.\r\n", Dates.date2DateTime(), this.items.size()) + this.memo;
-        this.save();
-    }
-
-    /**
-     * 此运输单总共的运输时长
-     * 1. 如果运输单完成了, 则为 (实际到达时间 - 开始时间)
-     * 2. 如果没有完成, 则为 (当前时间 - 开始时间)
-     *
-     * @return
-     */
-    public float shippingDays() {
-        if(this.state == S.DONE) {
-            if(this.arriveDate == null) throw new FastRuntimeException("运输单已经 Done, 但没有 [实际到达时间], 请联系 IT");
-            return TimeUnit.MILLISECONDS.toDays(this.arriveDate.getTime() - this.beginDate.getTime());
-        } else {
-            return TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - this.beginDate.getTime());
-        }
-    }
-
 
     /**
      * 计算 Shipment 的 ID
@@ -385,6 +312,7 @@ public class Shipment extends GenericModel implements Payment.ClosePayment {
 
     /**
      * 由于 Play 无法将 models 目录下的 Enumer 加载, 所以通过 model 提供一个暴露方法在 View 中使用
+     *
      * @return
      */
     public static List<iExpress> iExpress() {
