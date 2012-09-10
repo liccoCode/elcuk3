@@ -10,6 +10,7 @@ import models.view.Ret;
 import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -54,5 +55,42 @@ public class Shipments extends Controller {
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
         render(ship);
+    }
+
+    public static void update(Shipment ship) {
+        checkAuthenticity();
+        validation.valid(ship);
+        ship.validate();
+        if(Validation.hasErrors()) {
+            render("Shipments/show.html", ship);
+        }
+        ship.save();
+        flash.success("更新成功.");
+        redirect("/Shipments/show/" + ship.id);
+    }
+
+    @Before(only = {"shipItem", "ship"})
+    public static void setUpShipPage() {
+        List<ProcureUnit> units = ProcureUnit.find("stage IN (?,?)", ProcureUnit.STAGE.DONE, ProcureUnit.STAGE.PART_SHIPPING).fetch();
+        renderArgs.put("units", units);
+    }
+
+    public static void shipItem(String id) {
+        Shipment ship = Shipment.findById(id);
+        render(ship);
+    }
+
+    public static void ship(String id, List<Long> unitId, List<Integer> shipQty) {
+        Shipment ship = Shipment.findById(id);
+        Validation.required("shipments.ship.unitId", unitId);
+        Validation.required("shipments.ship.shipQty", shipQty);
+        Validation.equals("shipments.ship.equal", unitId.size(), "", shipQty.size());
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+
+        ship.addToShip(unitId, shipQty);
+
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+
+        redirect("/shipments/shipitem/" + id);
     }
 }

@@ -63,13 +63,12 @@
         <table class="table table-condensed table-bordered">
             <tr>
                 <th>#</th>
+                <th>Track No.</th>
                 <th>运输方式</th>
                 <th>目的地</th>
-                <th>TrackNo.</th>
                 <th>国际快递</th>
                 <th>状态</th>
                 <th>计价方式</th>
-                <th>单价</th>
                 <th>运输商</th>
                 <th>开始 <i class="icon-time"></i></th>
                 <th>创建 <i class="icon-time"></i></th>
@@ -77,16 +76,18 @@
             </tr>
         #{list items:shipments, as:'ship'}
             <tr>
+                <td>
+                    <a target="_blank" href="@{Shipments.show()}/${ship.id}">${ship.id}</a>
+                </td>
                 <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
-                    <i class="icon-reorder"></i> ${ship.id} <span class="badge badge-info">${ship.items.size()}</span>
+                    <i class="icon-reorder"></i> ${ship.trackNo}
+                    <span class="badge badge-info">${ship.items.size()}</span>
                 </td>
                 <td>${ship.type}</td>
                 <td>${ship.target}</td>
-                <td>${ship.trackNo}</td>
                 <td>${ship.internationExpress}</td>
                 <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>
                 <td>${ship.pype}</td>
-                <td>${ship.price}</td>
                 <td>${ship.shipper}</td>
                 <td>${ship.beginDate.los()}</td>
                 <td>${ship.createDate.los()}</td>

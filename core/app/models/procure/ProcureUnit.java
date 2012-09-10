@@ -21,6 +21,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -75,6 +76,14 @@ public class ProcureUnit extends Model {
          * 完成了, 全部交货了
          */
         DONE,
+        /**
+         * 正在运输中
+         */
+        SHIPPING,
+        /**
+         * 部分正在运输
+         */
+        PART_SHIPPING,
         /**
          * 运输完成
          */
@@ -183,6 +192,8 @@ public class ProcureUnit extends Model {
         if(this.stage != STAGE.DELIVERY)
             Validation.addError("procureunit.delivery.stage", "%s");
         Validation.min("procureunit.attr.qty", attrs.qty, 0);
+        Validation.min("procureunit.attrs.qty", attrs.qty, attrs.planQty);
+        Validation.required("procureunit.attr.qty", attrs.qty);
         Validation.required("procureunit.attr.deliveryDate", attrs.deliveryDate);
         if(Validation.hasErrors()) return new F.T2<Boolean, ProcureUnit>(false, null);
         this.attrs = attrs;
@@ -197,19 +208,45 @@ public class ProcureUnit extends Model {
         return new F.T2<Boolean, ProcureUnit>(isFullDelivery, unit);
     }
 
+    public ShipItem ship(Shipment shipment, int size) {
+        ShipItem shipItem = null;
+        for(ShipItem itm : shipment.items) {
+            if(itm.unit.equals(this)) {
+                shipItem = itm;
+                shipItem.qty += size;
+            }
+        }
+        if(shipItem == null) {
+            shipItem = new ShipItem();
+            shipItem.shipment = shipment;
+            shipItem.unit = this;
+            shipItem.qty = size;
+        }
+        if(size == this.leftQty()._1) {
+            this.stage = STAGE.SHIPPING;
+        } else if(size > 0 && size < this.attrs.qty) {
+            this.stage = STAGE.PART_SHIPPING;
+        }
+        return shipItem;
+    }
+
+    /**
+     * 剩下的可运输的数量
+     *
+     * @return
+     */
+    public F.T2<Integer, List<String>> leftQty() {
+        int totalShiped = 0;
+        List<String> shipments = new ArrayList<String>();
+        for(ShipItem item : this.relateItems) {
+            totalShiped += item.qty;
+            shipments.add(item.shipment.id);
+        }
+        return new F.T2<Integer, List<String>>(this.attrs.qty - totalShiped, shipments);
+    }
 
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<String> suppliers() {
-        Query query = JPAs.createQuery(new JpqlSelect().select("attrs.supplier").from("ProcureUnit").groupBy("attrs.supplier"));
-        return query.getResultList();
-    }
-
-    public static List<ProcureUnit> findByStage(STAGE stage) {
-        return ProcureUnit.find("stage=? ORDER BY planArrivDate", stage).fetch();
     }
 
     /**
@@ -231,6 +268,25 @@ public class ProcureUnit extends Model {
         this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        ProcureUnit that = (ProcureUnit) o;
+
+        if(id != null ? !id.equals(that.id) : that.id != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
+    }
 
     /**
      * 根据 sku 或者 msku 加载 PLAN, DELIVERY Stage 的 ProcureUnit.
@@ -248,6 +304,16 @@ public class ProcureUnit extends Model {
 
     public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> suppliers() {
+        Query query = JPAs.createQuery(new JpqlSelect().select("attrs.supplier").from("ProcureUnit").groupBy("attrs.supplier"));
+        return query.getResultList();
+    }
+
+    public static List<ProcureUnit> findByStage(STAGE stage) {
+        return ProcureUnit.find("stage=? ORDER BY planArrivDate", stage).fetch();
     }
 
     /**

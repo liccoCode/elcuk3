@@ -2,4 +2,170 @@
 #{set title:"运输单 #" + ship.id /}
 #{set 'moreScripts'}
 #{/set}
-skdlfjsldkj
+
+#{ifErrors }
+    #{errorMsgs /}
+#{/ifErrors}
+
+#{if flash.success}
+<div class="row-fluid">
+    <div class="span12 alert alert-success">
+    ${flash.success}
+    </div>
+</div>
+#{/if}
+
+<div class="row-fluid">
+    <div class="span12 alert alert-info">
+        <h4>采购单信息 <i class="icon-caret-down"></i></h4>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+        <form action="@{Shipments.update()}" method="post">
+        #{authenticityToken /}
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <th>运输单号</th>
+                    <td>
+                        <span id="shipmentId">${ship.id}</span>
+                        <input type="hidden" name="ship.id" value="${ship.id}">
+                    </td>
+                    <th>创建时间</th>
+                    <td>${ship.createDate.datetime()}</td>
+                </tr>
+
+                <tr>
+                    <th>状态</th>
+                    <td>${ship.state}</td>
+                    <th>运输方式</th>
+                    <td>${ship.type}</td>
+                </tr>
+
+                <tr>
+                    <th>预计运输时间</th>
+                    <td>
+                        <input type="date" name="ship.beginDate" value="${ship.beginDate.date()}">
+                    </td>
+                    <th>预计到库时间</th>
+                    <td>
+                        <input type="date" name="ship.planArrivDate" value="${ship.planArrivDate.date()}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>运输体积</th>
+                    <td>
+                        <input type="text" class="input-mini" name="ship.volumn" value="${ship.volumn}">
+                    </td>
+                    <th>运输重量</th>
+                    <td>
+                        <input type="text" class="input-mini" name="ship.weight" value="${ship.weight}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>申报价格(单位 USD)</th>
+                    <td>
+                        <input type="text" class="input-mini" name="ship.declaredValue" value="${ship.declaredValue}">
+                    </td>
+                    <th>押金(例:预付款)</th>
+                    <td>
+                        <input type="text" class="input-mini" name="ship.deposit" value="${ship.deposit}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>其他费用(例:手续费)</th>
+                    <td>
+                        <input type="text" class="input-mini" name="ship.otherFee" value="${ship.otherFee}">
+                    </td>
+                    <th>运费</th>
+                    <td>
+                        <input type="text" class="input-mini" name="ship.shipFee" value="${ship.shipFee}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Track No.</th>
+                    <td>
+                        <div class="input-append">
+                            <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
+                            <a href="${ship.trackNo ? ship.trackNo : '#'}" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                        </div>
+                    </td>
+                    <th>国际快递商</th>
+                    <td>
+                        <select name="ship.internationExpress">
+                        #{list items:models.procure.Shipment.iExpress(), as:'ie'}
+                            <option ${ie == ship.internationExpress ? 'selected' : ''} value="${ie}">${ie}</option>
+                        #{/list}
+                        </select>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>货代</th>
+                    <td>${ship.cooper?.fullName}</td>
+                    <th>总运费(RMB)</th>
+                    <td>1111, 需要计算</td>
+                </tr>
+
+                <tr>
+                    <th>目的地</th>
+                    <td>${ship.target}</td>
+                    <th>始发地</th>
+                    <td>${ship.source}</td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        <h4>Comment</h4>
+                        <textarea rows="8" name="ship.memo" class="span12">${ship.memo}</textarea>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        <button class="btn btn-primary">更新</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12" style="margin-bottom:15px">
+        <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary pull-left">修改运输项目</a>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12 alert alert-info">
+        <h4>运输项目 <i class="icon-caret-down"></i></h4>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <th>#</th>
+                <th>Sku</th>
+                <th>产品名称</th>
+                <th>运输数量</th>
+                <th>申报价格</th>
+            </tr>
+        #{list items:ship.items, as:'si'}
+            <tr>
+                <td>${si.id}</td>
+                <td>${si.unit.sku}</td>
+                <td>${si.unit.product.productName}</td>
+                <td>${si.qty}</td>
+                <td>等待添加</td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+</div>

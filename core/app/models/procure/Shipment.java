@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -39,11 +40,7 @@ public class Shipment extends GenericModel {
     public Shipment(String id) {
         this.createDate = new Date();
 
-        // 计价方式
-        this.pQty = 1f;
-        this.price = 1f;
-        this.currency = Currency.CNY;
-        this.pype = P.VOLUMN;
+        this.pype = P.WEIGHT;
         this.state = S.PLAN;
 
         // 暂时这么写
@@ -129,7 +126,7 @@ public class Shipment extends GenericModel {
     /**
      * 此 Shipment 的运输项
      */
-    @OneToMany(mappedBy = "shipment")
+    @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
     public List<ShipItem> items = new ArrayList<ShipItem>();
 
     /**
@@ -186,29 +183,41 @@ public class Shipment extends GenericModel {
     public T type;
 
     /**
-     * 计价类型
+     * 计价类型; 根据 体积 与 重量自动判断
      */
     @Enumerated(EnumType.STRING)
     @Expose
     public P pype;
 
     /**
-     * 计价单价
+     * 体积, 单位立方米
      */
-    @Expose
-    public Float price;
-    /**
-     * 单价单位
-     */
-    @Enumerated(EnumType.STRING)
-    @Expose
-    public Currency currency;
+    public Float volumn;
 
     /**
-     * 计价数量
+     * 重量, 单位 kg
      */
-    @Expose
-    public Float pQty;
+    public Float weight;
+
+    /**
+     * 申报价格, 单位为 USD
+     */
+    public Float declaredValue = 0f;
+
+    /**
+     * 押金, (申报价值的 20%) 单位为 RMB
+     */
+    public Float deposit = 0f;
+
+    /**
+     * 其他费用, 例如(手续费)
+     */
+    public Float otherFee = 0f;
+
+    /**
+     * 运费 (体积/重量 * 单价)
+     */
+    public Float shipFee = 0f;
 
     /**
      * 类似顺风发货单号的类似跟踪单号
@@ -251,6 +260,37 @@ public class Shipment extends GenericModel {
     @Lob
     public String memo = " ";
 
+    /**
+     * Shipment 的检查
+     */
+    public void validate() {
+        if(this.declaredValue != null) Validation.min("ship.declaredValue", this.declaredValue, 0);
+        if(this.deposit != null) Validation.min("ship.deposit", this.deposit, 0);
+        if(this.otherFee != null) Validation.min("ship.otherfee", this.otherFee, 0);
+        if(this.shipFee != null) Validation.min("ship.shipFee", this.shipFee, 0);
+        if(this.volumn != null) Validation.min("ship.volumn", this.volumn, 0);
+        if(this.weight != null) Validation.min("ship.weight", this.weight, 0);
+    }
+
+    public void addToShip(List<Long> unitId, List<Integer> shipQty) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
+        if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
+        for(int i = 0; i < units.size(); i++) {
+            ProcureUnit unit = units.get(i);
+            int shipSize = shipQty.get(i);
+            F.T2<Integer, List<String>> leftQty = unit.leftQty();
+            if(leftQty._1 < shipSize) {
+                Validation.addError("shipment.addToShip.shipQty", "%s");
+                break;
+            }
+
+            this.items.add(unit.ship(this, shipSize));
+            unit.save();
+        }
+
+        if(Validation.hasErrors()) return;
+        this.save();
+    }
 
     /**
      * 创建的计划运输单超过 7 天则表示超时
