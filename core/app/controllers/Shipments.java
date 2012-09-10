@@ -27,7 +27,7 @@ public class Shipments extends Controller {
         List<Shipment> pendings = Shipment.shipmentsByState(Shipment.S.PLAN);
         List<Shipment> shippings = Shipment.shipmentsByState(Shipment.S.SHIPPING);
         List<Shipment> clear = Shipment.shipmentsByState(Shipment.S.CLEARANCE);
-        List<Shipment> dones = Shipment.find("state=?", Shipment.S.DONE).fetch(1, 20); // 由更多再 Ajax 加载
+        List<Shipment> dones = Shipment.find("state=?", Shipment.S.DONE).fetch(1, 50); // 由更多再 Ajax 加载
 
         render(pendings, shippings, clear, dones);
     }
