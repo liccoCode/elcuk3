@@ -38,8 +38,13 @@
 <tr>
     <th>采购数量</th>
     <td>
-        <input type="text" class="input-small" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
-        <input type="hidden" class="input-small" name="unit.attrs.qty" value="${unit.attrs.qty}">
+        <div class="input-append">
+            <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
+            <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
+            <span class="add-on">箱</span>
+            <button id="calculate_box" class="btn btn-info"><i class="icon-legal"></i></button>
+        </div>
+        <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
     </td>
     <th>预计交货日期</th>
     <td>

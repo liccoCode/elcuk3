@@ -3,6 +3,7 @@ package controllers;
 import helper.Webs;
 import models.User;
 import models.embedded.UnitAttrs;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -139,5 +140,16 @@ public class Procures extends Controller {
                     unit.id, isFullDelivery._2.id, attrs.qty, attrs.planQty);
         }
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
+    }
+
+    public static void calculateBox(long coperId, String sku, int size) {
+        validation.required(coperId);
+        validation.required(sku);
+        validation.required(size);
+
+        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
+
+        CooperItem copi = CooperItem.find("cooperator.id=? AND product.sku=?", coperId, sku).first();
+        renderJSON(new Ret(true, copi.boxToSize(size) + ""));
     }
 }

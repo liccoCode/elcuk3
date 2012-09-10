@@ -56,6 +56,14 @@ public class CooperItem extends Model {
     public Integer period;
 
     /**
+     * 一箱的数量
+     */
+    @Min(0)
+    @Expose
+    @Required
+    public Integer boxSize;
+
+    /**
      * 最低订货量
      */
     @Required
@@ -69,6 +77,14 @@ public class CooperItem extends Model {
     public CooperItem checkAndUpdate() {
         this.check();
         return this.save();
+    }
+
+    /**
+     * 通过 Box 计算数量
+     * @return
+     */
+    public int boxToSize(int size) {
+        return this.boxSize * size;
     }
 
     /**

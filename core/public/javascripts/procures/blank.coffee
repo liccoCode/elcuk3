@@ -20,3 +20,17 @@ $ ->
           $("#unit_price").val(r.price)
         mask.unmask()
     )
+
+  $('#calculate_box').click (e) ->
+    e.preventDefault()
+    coperId = $("select[name=unit\\.cooperator\\.id]").val()
+    if not coperId
+      alert('请先选择 供应商')
+      return false
+    $.post('/procures/calculateBox', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()},
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          $('input[name=unit\\.attrs\\.planQty]').val(r['message'])
+    )
