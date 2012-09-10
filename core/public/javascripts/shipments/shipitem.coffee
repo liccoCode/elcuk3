@@ -23,3 +23,4 @@ $ ->
 
 
   $('#submit_delivery').click (e) -> $(@).parents('form').attr('action', '/shipments/ship')
+  $('#cancel_shipitem').click (e) -> $(@).parents('form').attr('action', '/shipments/cancelShip')

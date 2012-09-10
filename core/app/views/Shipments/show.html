@@ -1,6 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:"运输单 #" + ship.id /}
 #{set 'moreScripts'}
+    #{script 'shipments/show.coffee'/}
 #{/set}
 
 #{ifErrors }
@@ -127,7 +128,12 @@
 
                 <tr>
                     <td colspan="4">
+                    #{if ship.state == models.procure.Shipment.S.PLAN}
                         <button class="btn btn-primary">更新</button>
+                    #{/if}
+                    #{if ship.state != models.procure.Shipment.S.PLAN}
+                        <button id="ship_comment" class="btn btn-primary">Comment</button>
+                    #{/if}
                     </td>
                 </tr>
             </table>
@@ -138,6 +144,13 @@
 <div class="row-fluid">
     <div class="span12" style="margin-bottom:15px">
         <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary pull-left">修改运输项目</a>
+
+        <form action="@{Shipments.beginShip()}" method="post">
+            <input type="hidden" name="id" value="${ship.id}">
+            <button id="begin_shipping" style="margin-left:10px;" data-confirm="confirm" class="btn btn-warning">
+                标记为开始运输
+            </button>
+        </form>
     </div>
 </div>
 

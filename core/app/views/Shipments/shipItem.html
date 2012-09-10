@@ -40,6 +40,12 @@
                 <th>始发地</th>
                 <td>${ship.source}</td>
             </tr>
+
+            <tr>
+                <td colspan="4">
+                    <a href="@{Shipments.show()}/${ship.id}" class="btn btn-success">回到采购单</a>
+                </td>
+            </tr>
         </table>
     </div>
 </div>
@@ -52,7 +58,7 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <form action="@{Shipments.cancelShip()}" method="post">
+        <form method="post">
             <table class="table table-condensed table-bordered">
                 <tr>
                     <th>
@@ -85,7 +91,7 @@
                 <tr>
                     <td colspan="7">
                         <input type="hidden" name="id" value="${ship.id}">
-                        <button id="" class="btn btn-warning">取消运输</button>
+                        <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
                     </td>
                 </tr>
             </table>
@@ -132,7 +138,7 @@
                     <td>${unit.attrs.qty}</td>
                     #{set leftQty: unit.leftQty()/}
                     <td data-toggle="toggle" data-target="#unit_${unit_index}" style="cursor:pointer;">
-                        <i class="icon-reorder"></i> ${leftQty?._1}
+                        <i class="icon-reorder"></i> ${leftQty?._1} <span class="badge badge-info">${leftQty._3.size()}</span>
                     </td>
                     <td>
                         <input type="text" name="shipQty" disabled="" class="input-mini" value="${leftQty._1}">

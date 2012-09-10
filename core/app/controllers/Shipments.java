@@ -1,19 +1,14 @@
 package controllers;
 
-import helper.J;
-import models.User;
-import models.procure.Payment;
+import helper.Webs;
 import models.procure.ProcureUnit;
-import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
-import play.db.jpa.GenericModel;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -69,6 +64,15 @@ public class Shipments extends Controller {
         redirect("/Shipments/show/" + ship.id);
     }
 
+    public static void comment(String id, String cmt) {
+        validation.required(id);
+        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
+        Shipment ship = Shipment.findById(id);
+        ship.memo = cmt;
+        ship.save();
+        renderJSON(new Ret(true, Webs.V(Validation.errors())));
+    }
+
     @Before(only = {"shipItem", "ship", "cancelShip"})
     public static void setUpShipPage() {
         List<ProcureUnit> units = ProcureUnit.find("stage IN (?,?)", ProcureUnit.STAGE.DONE, ProcureUnit.STAGE.PART_SHIPPING).fetch();
@@ -107,5 +111,24 @@ public class Shipments extends Controller {
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
         redirect("/shipments/shipitem/" + id);
+    }
+
+    public static void beginShip(String id) {
+        Shipment ship = Shipment.findById(id);
+        Validation.required("shipment.id", id);
+        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        Validation.required("shipment.trackNo", ship.trackNo);
+        Validation.required("shipment.planArrivDate", ship.planArrivDate);
+        Validation.required("shipment.volumn", ship.volumn);
+        Validation.required("shipment.weight", ship.weight);
+        Validation.required("shipment.declaredValue", ship.declaredValue);
+        Validation.required("shipment.deposit", ship.deposit);
+        Validation.required("shipment.otherFee", ship.otherFee);
+        Validation.required("shipment.shipFee", ship.shipFee);
+
+        if(Validation.hasErrors())
+            render("Shipments/show.html", ship);
+
+        redirect("/shipments/show/" + id);
     }
 }
