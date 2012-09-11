@@ -133,6 +133,16 @@ public class Cooperator extends Model {
     }
 
     /**
+     * 通过 SKU 在此供应商中获取对应的 CooperItem
+     *
+     * @param sku
+     * @return
+     */
+    public CooperItem cooperItem(String sku) {
+        return CooperItem.find("cooperator.id=? AND sku=?", this.id, sku).first();
+    }
+
+    /**
      * 前台使用的 Sku 自动提示, 需要过滤掉已经成为此供应商的 Sku
      *
      * @return
@@ -165,6 +175,7 @@ public class Cooperator extends Model {
 
     /**
      * 所有快递商
+     *
      * @return
      */
     public static List<Cooperator> shipper() {

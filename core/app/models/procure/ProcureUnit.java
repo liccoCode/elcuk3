@@ -359,6 +359,11 @@ public class ProcureUnit extends Model {
         return eventSource;
     }
 
+    public static List<ProcureUnit> waitToShip() {
+        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage!=? ORDER BY attrs.planArrivDate", Deliveryment.S.DONE, Deliveryment.S.CONFIRM, ProcureUnit.STAGE.SHIPPING).fetch();
+    }
+
+
     static class MskuCheck extends Check {
 
         @Override

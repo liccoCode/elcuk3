@@ -12,3 +12,9 @@ $ ->
           alert('更新成功.')
         mask.unmask()
     )
+
+  fidCallBack = () ->
+    {fid: $('#shipmentId').val(), p: 'SHIPMENT'}
+  dropbox = $('#dropbox')
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, 'span1')
+  window.dropUpload.iniDropbox(fidCallBack, dropbox)

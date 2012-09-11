@@ -1,6 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:"运输单 #" + ship.id /}
 #{set 'moreScripts'}
+    #{script 'component/dropUpload.coffee'/}
     #{script 'shipments/show.coffee'/}
 #{/set}
 
@@ -29,8 +30,8 @@
                 <tr>
                     <th>运输单号</th>
                     <td>
-                        <span id="shipmentId">${ship.id}</span>
-                        <input type="hidden" name="ship.id" value="${ship.id}">
+                        <span>${ship.id}</span>
+                        <input type="hidden" id="shipmentId" name="ship.id" value="${ship.id}">
                     </td>
                     <th>创建时间</th>
                     <td>${ship.createDate.datetime()}</td>
@@ -180,5 +181,17 @@
             </tr>
         #{/list}
         </table>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
+        <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+    </div>
+</div>
+<div class="row-fluid">
+    <div style="min-height:300px;" class="span12 well" id="dropbox">
+        <ul class="thumbnails uploaded"></ul>
+        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
     </div>
 </div>

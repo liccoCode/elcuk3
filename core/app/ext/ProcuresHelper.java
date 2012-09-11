@@ -33,14 +33,10 @@ public class ProcuresHelper extends JavaExtensions {
         switch(state) {
             case PENDING:
                 return "5CB85C";
-            case DELIVERING:
+            case CONFIRM:
                 return "FAA52C";
-            case DELIVERY:
-                return "F67300";
             case DONE:
                 return "4DB2D0";
-            case FULPAY:
-                return "007BCC";
             case CANCEL:
             default:
                 return "D14741";

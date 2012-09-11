@@ -24,7 +24,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Deliveryments extends Controller {
 
-    @Before(only = {"show", "update", "addunits", "delunits", "cancel"})
+    @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
     public static void showPageSetUp() {
         String deliverymentId = request.params.get("id");
         if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dmt.id");
@@ -95,6 +95,19 @@ public class Deliveryments extends Controller {
             render("Deliveryments/show.html", dmt);
 
         redirect("/Deliveryments/show/" + dmt.id);
+    }
+
+    /**
+     * 确认采购单, 这样才能进入运输单进行挑选
+     */
+    public static void confirm(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        Validation.equals("deliveryments.confirm", dmt.state, "", Deliveryment.S.PENDING);
+        if(Validation.hasErrors()) render("Deliveryments/show.html", dmt);
+
+        dmt.state = Deliveryment.S.CONFIRM;
+        dmt.save();
+        redirect("/Deliveryments/show/" + id);
     }
 
     /**

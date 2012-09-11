@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.view.Ret;
@@ -75,7 +76,7 @@ public class Shipments extends Controller {
 
     @Before(only = {"shipItem", "ship", "cancelShip"})
     public static void setUpShipPage() {
-        List<ProcureUnit> units = ProcureUnit.find("stage IN (?,?)", ProcureUnit.STAGE.DONE, ProcureUnit.STAGE.PART_SHIPPING).fetch();
+        List<ProcureUnit> units = ProcureUnit.waitToShip();
         renderArgs.put("units", units);
     }
 

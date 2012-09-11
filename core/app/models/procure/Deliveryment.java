@@ -35,27 +35,17 @@ public class Deliveryment extends GenericModel {
 
     public enum S {
         /**
-         * 预定, 已经下单
+         * 预定.
          */
         PENDING,
         /**
-         * 部分交货
+         * 确定采购单
          */
-        DELIVERING,
-        /**
-         * 完成, 交货
-         *
-         * @deprecated
-         */
-        DELIVERY,
+        CONFIRM,
         /**
          * 完成交货.
          */
         DONE,
-        /**
-         * 全部付款
-         */
-        FULPAY,
         CANCEL
     }
 
@@ -189,7 +179,7 @@ public class Deliveryment extends GenericModel {
          * 2. 如果所属的 units 全部 DONE 则此采购单也 DONE 交货完成.
          */
         for(ProcureUnit unit : this.units) {
-            if(unit.stage != ProcureUnit.STAGE.DONE) return S.DELIVERING;
+            if(unit.stage != ProcureUnit.STAGE.DONE) return S.CONFIRM;
         }
         return S.DONE;
     }
@@ -203,7 +193,7 @@ public class Deliveryment extends GenericModel {
     }
 
     public static List<Deliveryment> openDeliveryments() {
-        return Deliveryment.find("state NOT IN (?,?)", S.DELIVERY, S.CANCEL).fetch();
+        return Deliveryment.find("state NOT IN (?,?)", S.DONE, S.CANCEL).fetch();
     }
 
     /**
