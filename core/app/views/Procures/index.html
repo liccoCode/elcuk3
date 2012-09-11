@@ -59,6 +59,13 @@
             </select>
         </div>
 
+        <div class="span1">
+            <label class="checkbox inline">
+                <input type="checkbox" ${p.isPlaced ? 'checked' : ''} value="true" name="p.isPlaced">
+                是否抵达货代处
+            </label>
+        </div>
+
         <div class="span2 input-prepend input-append">
             <span class="add-on"><i class="icon-search"></i></span>
             <input type="text" class="input-medium" name="p.search" value="${p.search}">

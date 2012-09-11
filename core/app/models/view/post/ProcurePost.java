@@ -41,6 +41,8 @@ public class ProcurePost extends Post {
 
     public ProcureUnit.STAGE stage;
 
+    public boolean isPlaced = false;
+
     /**
      * 选择过滤的日期类型
      */
@@ -84,6 +86,11 @@ public class ProcurePost extends Post {
             if(this.stage != null) {
                 sbd.append(" AND stage=? ");
                 params.add(this.stage);
+            }
+
+            if(this.isPlaced) {
+                sbd.append(" AND isPlaced=? ");
+                params.add(this.isPlaced);
             }
 
             if(StringUtils.isNotBlank(this.search)) {

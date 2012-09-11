@@ -1,6 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:"运输单 #" + ship.id /}
 #{set 'moreScripts'}
+    #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
     #{script 'shipments/show.coffee'/}
 #{/set}
@@ -108,7 +109,14 @@
 
                 <tr>
                     <th>货代</th>
-                    <td>${ship.cooper?.fullName}</td>
+                    <td>
+                        <select name="ship.cooper.id">
+                            <option value="">Empty</option>
+                        #{list items:shippers, as:'shiper'}
+                            <option ${shiper == ship.cooper ? 'selected' : ''} value="${shiper.id}">${shiper.fullName}</option>
+                        #{/list}
+                        </select>
+                    </td>
                     <th>总运费(RMB)</th>
                     <td>1111, 需要计算</td>
                 </tr>
@@ -148,8 +156,8 @@
 
         <form action="@{Shipments.beginShip()}" method="post">
             <input type="hidden" name="id" value="${ship.id}">
-            <button id="begin_shipping" style="margin-left:10px;" data-confirm="confirm" class="btn btn-warning">
-                标记为开始运输
+            <button id="begin_shipping" style="margin-left:10px;" data-confirm="confirm" class="btn btn-danger">
+                开始运输
             </button>
         </form>
     </div>

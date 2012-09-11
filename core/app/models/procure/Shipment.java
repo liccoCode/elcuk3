@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * Time: 5:32 PM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Shipment extends GenericModel {
 
     public Shipment() {
@@ -132,7 +132,7 @@ public class Shipment extends GenericModel {
     /**
      * 运输合作商
      */
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     public Cooperator cooper;
 
     @Id

@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -46,6 +47,13 @@ public class Shipments extends Controller {
         }
         ship.save();
         redirect("/shipments/show/" + ship.id);
+    }
+
+
+    @Before(only = {"show", "update", "beginShip"})
+    public static void setUpShowPage() {
+        List<Cooperator> shippers = Cooperator.shipper();
+        renderArgs.put("shippers", shippers);
     }
 
     public static void show(String id) {
@@ -126,6 +134,7 @@ public class Shipments extends Controller {
         Validation.required("shipment.deposit", ship.deposit);
         Validation.required("shipment.otherFee", ship.otherFee);
         Validation.required("shipment.shipFee", ship.shipFee);
+        Validation.min("shipment.items.size", ship.items.size(), 1);
 
         if(Validation.hasErrors())
             render("Shipments/show.html", ship);

@@ -119,7 +119,9 @@
                     <th>Sid</th>
                     <th>预计到库日期</th>
                     <th>交货数量</th>
-                    <th>剩余可运数量</th>
+                    <th rel="popover" content="如果有五角星, 表示货物已经到达货代处">
+                        <i class="icon-question-sign"></i> 剩余可运数量
+                    </th>
                     <th>运输数量</th>
                     <th>阶段</th>
                     <th>ProductName</th>
@@ -138,7 +140,11 @@
                     <td>${unit.attrs.qty}</td>
                     #{set leftQty: unit.leftQty()/}
                     <td data-toggle="toggle" data-target="#unit_${unit_index}" style="cursor:pointer;">
-                        <i class="icon-reorder"></i> ${leftQty?._1} <span class="badge badge-info">${leftQty._3.size()}</span>
+                        #{if unit.isPlaced}
+                            <i class="icon-star" style="color:#FF2200"></i>
+                        #{/if}
+                        <i class="icon-reorder"></i> ${leftQty?._1}
+                        <span class="badge badge-info">${leftQty._3.size()}</span>
                     </td>
                     <td>
                         <input type="text" name="shipQty" disabled="" class="input-mini" value="${leftQty._1}">

@@ -159,6 +159,11 @@ public class ProcureUnit extends Model {
 
     public Date createDate = new Date();
 
+    /**
+     * 货物是否已经到达货代的地方
+     */
+    public boolean isPlaced = false;
+
     @Lob
     @Expose
     public String comment = " ";

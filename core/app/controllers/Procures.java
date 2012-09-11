@@ -84,6 +84,13 @@ public class Procures extends Controller {
         redirect("/Procures/index?p.search=id:" + unit.id);
     }
 
+    public static void markPlace(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.isPlaced = true;
+        unit.save();
+        renderJSON(new Ret());
+    }
+
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
      *
