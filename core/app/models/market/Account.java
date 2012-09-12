@@ -1,5 +1,6 @@
 package models.market;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
 import helper.*;
@@ -557,6 +558,22 @@ public class Account extends Model {
      */
     public static String cookieKey(long aid, M market) {
         return String.format("ACC_COOKIE_%s_%s", aid, market);
+    }
+
+    /**
+     * 通过账户获取 FBA 的发货地址
+     * @param type
+     * @return
+     */
+    public static Address address(M type) {
+        switch(type) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null, "London", "LONDON", "UK", "NW6 7HY");
+            case AMAZON_US:
+                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null, "London", "LONDON", "UK", "NW6 7HY");
+        }
+        return null;
     }
 
 

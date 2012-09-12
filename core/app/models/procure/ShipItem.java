@@ -56,6 +56,11 @@ public class ShipItem extends GenericModel {
     @Expose
     public Integer qty = 0;
 
+    /**
+     * 这个创建 ShipItem 的时候默认填充 Selling 中的 FNSKU, 在创建好了 FBA 以后, 将 FBA 返回的值同步在这.
+     */
+    public String fulfillmentNetworkSKU;
+
     public ShipItem removeFromShipment() {
         /**
          *  TODO 需要检查什么?

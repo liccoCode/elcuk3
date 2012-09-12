@@ -5,6 +5,7 @@ import helper.Currency;
 import helper.Dates;
 import helper.FLog;
 import helper.Webs;
+import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -138,6 +139,14 @@ public class Shipment extends GenericModel {
      */
     @OneToOne(cascade = CascadeType.PERSIST)
     public Cooperator cooper;
+
+    @OneToOne(cascade = CascadeType.PERSIST)
+    public Whouse whouse;
+
+    /**
+     * 这个 Shipment 自己拥有的 title, 会使用在 FBAShipment 上
+     */
+    public String title;
 
     @Id
     @Column(length = 30)
@@ -324,6 +333,11 @@ public class Shipment extends GenericModel {
         }
     }
 
+    public void comment(String cmt) {
+        if(!StringUtils.isNotBlank(cmt)) return;
+        this.memo = String.format("%s\r\n%s", cmt, this.memo).trim();
+    }
+
     public void confirmAndSyncTOAmazon() {
         /**
          * 1. 将本地的状态修改为 CONFIRM
@@ -372,6 +386,12 @@ public class Shipment extends GenericModel {
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
+    }
+
+    public String getTitle() {
+        if(StringUtils.isBlank(this.title))
+            return String.format("Default Title: ShipmentId %s", this.id);
+        return String.format("[%s] %s", this.id, this.title);
     }
 
     @Override
