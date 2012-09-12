@@ -75,7 +75,7 @@ public class CreateInboundShipmentPlanSample {
         /************************************************************************
          * Instantiate Http Client Implementation of FBA Inbound Service MWS 
          ***********************************************************************/
-        // FBAInboundServiceMWS service = new FBAInboundServiceMWSClient(accessKeyId, secretAccessKey, config);
+//        FBAInboundServiceMWS service = new FBAInboundServiceMWSClient(accessKeyId, secretAccessKey, config);
         FBAInboundServiceMWS service = new FBAInboundServiceMWSClient(accessKeyId, secretAccessKey, applicationName, applicationVersion, config);
  
         /************************************************************************

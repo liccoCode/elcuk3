@@ -152,11 +152,24 @@
 
 <div class="row-fluid">
     <div class="span12" style="margin-bottom:15px">
+    #{if ship.state == models.procure.Shipment.S.PLAN}
         <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary pull-left">修改运输项目</a>
+    #{/if}
 
-        <form action="@{Shipments.beginShip()}" method="post">
+    #{ifnot ship.state == models.procure.Shipment.S.CONFIRM}
+        <form action="@{Shipments.confirm()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
-            <button id="begin_shipping" style="margin-left:10px;" data-confirm="confirm" class="btn btn-danger">
+
+            <div class="input-append input-prepend" style="margin-left:10px;">
+                <span class="add-on" rel="popover" content="确认运输项目以后, 则不再允许修改运输项目, 同时会将对应的运输单向 Amazon 创建 Shipment"><i class="icon-question-sign"></i></span>
+                <button data-confirm="confirm" class="btn btn-warning">运输项目确认</button>
+            </div>
+        </form>
+    #{/ifnot}
+
+        <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
+            <input type="hidden" name="id" value="${ship.id}">
+            <button style="margin-left:10px;" data-confirm="confirm" class="btn btn-danger">
                 开始运输
             </button>
         </form>

@@ -224,7 +224,8 @@ public class AWS {
      * @return
      */
     private static MarketplaceWebService client(JobRequest job) {
-        MarketplaceWebService client = cached.get("client_" + job.account.type.name());
+        String key = String.format("client_%s_%s", job.account.id, job.account.type.name());
+        MarketplaceWebService client = cached.get(key);
         if(client != null) return client;
         MarketplaceWebServiceConfig config = new MarketplaceWebServiceConfig();
         switch(job.account.type) {
@@ -249,7 +250,7 @@ public class AWS {
 
         client = new MarketplaceWebServiceClient(
                 job.account.accessKey, job.account.token, "elcuk2", "1.0", config);
-        cached.put("client_" + job.account.type.name(), client);
+        cached.put(key, client);
         return client;
     }
 }

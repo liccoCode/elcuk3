@@ -87,6 +87,10 @@ public class Shipment extends GenericModel {
          */
         PLAN,
         /**
+         * 确认运输单, 不再允许修改
+         */
+        CONFIRM,
+        /**
          * 运输中
          */
         SHIPPING,
@@ -279,6 +283,7 @@ public class Shipment extends GenericModel {
      * @param shipQty
      */
     public void addToShip(List<Long> unitId, List<Integer> shipQty) {
+        Validation.equals("shipment.addToShip.state", this.state, "", S.PLAN);
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
         if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
         for(int i = 0; i < units.size(); i++) {
@@ -317,6 +322,16 @@ public class Shipment extends GenericModel {
                 cancelT2._2.save();
             }
         }
+    }
+
+    public void confirmAndSyncTOAmazon() {
+        /**
+         * 1. 将本地的状态修改为 CONFIRM
+         * 2. 向 Amazon 提交 FBA Shipment 的创建
+         * 3. Amazon Shipment 创建成功后再本地更新, 否则不更新,包裹错误.
+         */
+        this.state = S.CONFIRM;
+        this.save();
     }
 
     /**

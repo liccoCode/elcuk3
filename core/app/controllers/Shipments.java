@@ -141,4 +141,17 @@ public class Shipments extends Controller {
 
         redirect("/shipments/show/" + id);
     }
+
+    /**
+     * 对 Shipment 进行 Confirm, Confirm 以后不再允许添加运输项目
+     * @param id
+     */
+    public static void confirm(String id) {
+        Shipment ship = Shipment.findById(id);
+        Validation.equals("shipment.confirm.state", ship.state, "", Shipment.S.PLAN);
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        ship.confirmAndSyncTOAmazon();
+        flash.success("成功确认, 运输项目已经固定, Amazon 成功创建 Shipment 并且已经 confirm.");
+        redirect("/shipments/show/" + id);
+    }
 }
