@@ -11,4 +11,14 @@ import play.test.UnitTest;
  * Time: 9:47 AM
  */
 public class ProcureUnitTest extends UnitTest {
+    @Test
+    public void testWaitToShip() {
+        try {
+
+            ProcureUnit.waitToShip();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

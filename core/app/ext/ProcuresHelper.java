@@ -58,4 +58,18 @@ public class ProcuresHelper extends JavaExtensions {
                 return "108080";
         }
     }
+
+    /**
+     * 超过或者不足的 ProcureUnit 在页面上的颜色
+     * @return
+     */
+    public static String leekOrOverRgb(ProcureUnit unit) {
+        Integer qty = unit.attrs.qty;
+        Integer planQty = unit.attrs.planQty;
+        if(qty == null) qty = 0;
+        if(planQty == null) planQty = 0;
+        if(qty - planQty > 0) return "84F000";
+        else if(qty - planQty < 0) return "FF7F1C";
+        else return "ffffff";
+    }
 }

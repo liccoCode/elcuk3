@@ -14,16 +14,8 @@
 #{else }
 
     #{ifErrors }
-    <div class="row">
-        <div class="span12 alert alert-error">
-            #{errors }
-                <p>${error.key} -> ${error.message()}</p>
-            #{/errors}
-        </div>
-    </div>
+        #{errorMsgs /}
     #{/ifErrors}
-
-
 
 <form action="/procures/save" method="post">
     <table class="table table-condensed table-bordered">

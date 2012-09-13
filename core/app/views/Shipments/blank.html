@@ -57,6 +57,19 @@
                 </tr>
 
                 <tr>
+                    <th>运往仓库</th>
+                    <td>
+                        <select name="ship.whouse.id">
+                            <option value="">仓库</option>
+                            #{list items:whouses, as:'wh'}
+                            <option ${wh == ship.whouse ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
+                            #{/list}
+                        </select>
+                    </td>
+                    <td colspan="2"></td>
+                </tr>
+
+                <tr>
                     <td colspan="4">
                         <button class="btn btn-primary">创建</button>
                     </td>

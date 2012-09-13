@@ -136,15 +136,15 @@ public class Procures extends Controller {
             render("Procures/deliveryUnit.html", unit, attrs);
         }
         unit.comment = cmt;
-        F.T2<Boolean, ProcureUnit> isFullDelivery = unit.delivery(attrs);
+        F.T2<Boolean, ProcureUnit> isLeekDelivery = unit.delivery(attrs);
         if(Validation.hasErrors()) {
             render("Procures/deliveryUnit.html", unit, attrs);
         }
-        if(isFullDelivery._1) {
-            flash.success("ProcureUnit %s 全部交货!", unit.id);
-        } else if(!isFullDelivery._1 && isFullDelivery._2 != null) {
+        if(isLeekDelivery._1) {
             flash.success("ProcureUnits %s 部分交货, 剩余部分将自动创建一个新的[采购单元(%s)]! (%s / %s)",
-                    unit.id, isFullDelivery._2.id, attrs.qty, attrs.planQty);
+                    unit.id, isLeekDelivery._2.id, attrs.qty, attrs.planQty);
+        } else if(!isLeekDelivery._1 && isLeekDelivery._2 != null) {
+            flash.success("ProcureUnit %s 全部交货!", unit.id);
         }
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }

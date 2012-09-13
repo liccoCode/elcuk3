@@ -1,6 +1,7 @@
 package models.procure;
 
 import models.market.Account;
+import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 
 import javax.persistence.Column;
@@ -57,7 +58,6 @@ public class FBAShipment extends Model {
     public String shipmentId;
 
 
-
     // ShipToAddress
 
     public String addressLine1;
@@ -67,6 +67,8 @@ public class FBAShipment extends Model {
     public String city;
 
     public String countryCode;
+
+    public String postalCode;
 
     /**
      * 哪一个网站?
@@ -92,4 +94,23 @@ public class FBAShipment extends Model {
      * Amazon FBA 上的 title
      */
     public String title;
+
+    public String address() {
+        return String.format("%s %s %s (%s)", this.addressLine1, this.city, this.stateOrProvinceCode, this.centerId);
+    }
+
+    public String codeToCounrty() {
+        if(StringUtils.isBlank(this.countryCode)) return "";
+        this.countryCode = this.countryCode.toUpperCase();
+        if(this.countryCode.equals("GB")) return "United Kingdom";
+        else if(this.countryCode.equals("US")) return "United States";
+        else if(this.countryCode.equals("CA")) return "Canada";
+        else if(this.countryCode.equals("CN")) return "China (Mainland)";
+        else if(this.countryCode.equals("DE")) return "Germany";
+        else if(this.countryCode.equals("FR")) return "France";
+        else if(this.countryCode.equals("IT")) return "Italy";
+        else if(this.countryCode.equals("JP")) return "Japan";
+        //http://mindprod.com/jgloss/countrycodes.html
+        return "";
+    }
 }

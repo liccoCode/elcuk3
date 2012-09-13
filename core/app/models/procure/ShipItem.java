@@ -6,6 +6,7 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * 每一个运输单的运输项
@@ -55,6 +56,19 @@ public class ShipItem extends GenericModel {
      */
     @Expose
     public Integer qty = 0;
+
+    /**
+     * 实际发货时间
+     */
+    @Expose
+    @Temporal(TemporalType.DATE)
+    public Date shipDate;
+    /**
+     * 实际到库时间
+     */
+    @Expose
+    @Temporal(TemporalType.DATE)
+    public Date arriveDate;
 
     /**
      * 这个创建 ShipItem 的时候默认填充 Selling 中的 FNSKU, 在创建好了 FBA 以后, 将 FBA 返回的值同步在这.

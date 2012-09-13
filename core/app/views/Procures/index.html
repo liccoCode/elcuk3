@@ -85,7 +85,7 @@
 
 <div class="row-fluid">
     <div class="span12">
-    #{if p.stage == models.procure.ProcureUnit.STAGE.PLAN}
+    #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
         <div class="input-append">
             <input type="text" id="name_label" placeHolder="采购单的别名(必须)" value="${name}">
             <button id="create_deliveryment_btn" class="btn btn-primary">添加采购单</button>

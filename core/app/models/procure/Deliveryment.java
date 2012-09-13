@@ -168,21 +168,6 @@ public class Deliveryment extends GenericModel {
         return units;
     }
 
-    /**
-     * 检查 Deliveryment 的下一个状态是什么
-     *
-     * @return
-     */
-    public S nextState() {
-        /**
-         * 1. 如果所属的 units 部分 DONE 则为交货中.
-         * 2. 如果所属的 units 全部 DONE 则此采购单也 DONE 交货完成.
-         */
-        for(ProcureUnit unit : this.units) {
-            if(unit.stage != ProcureUnit.STAGE.DONE) return S.CONFIRM;
-        }
-        return S.DONE;
-    }
 
     public static String id() {
         DateTime dt = DateTime.now();

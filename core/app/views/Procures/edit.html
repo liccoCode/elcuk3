@@ -16,15 +16,15 @@
         #{errorMsgs /}
     #{/ifErrors}
 
-<table class="table table-condensed table-bordered">
-    <form action="/procures/update" method="post">
-        <input type="hidden" name="unit.id" value="${unit.id}">
+<form action="/procures/update" method="post">
+    <table class="table table-condensed table-bordered">
         #{render 'Procures/_unit_table_trs.html', unit:unit, whouses:whouses/}
         <tr>
             <td colspan="4">
-                <button class="btn btn-primary">更新</button>
+                <input type="hidden" name="unit.id" value="${unit.id}">
+                <button type="submit" class="btn btn-primary">更新</button>
             </td>
         </tr>
-    </form>
-</table>
+    </table>
+</form>
 #{/else}

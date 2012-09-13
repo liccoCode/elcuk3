@@ -75,6 +75,7 @@ public class FWS {
             fbaShipment.name = shipToAddress.getName();
             fbaShipment.countryCode = shipToAddress.getCountryCode();
             fbaShipment.stateOrProvinceCode = shipToAddress.getStateOrProvinceCode();
+            fbaShipment.postalCode = shipToAddress.getPostalCode();
 
             // Items
             InboundShipmentPlanItemList itemList = member.getItems();
@@ -118,7 +119,7 @@ public class FWS {
      */
     public static FBAShipment.S create(FBAShipment fbashipment) throws FBAInboundServiceMWSException {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
-        String fbaTitle = String.format("%s %s", fbashipment.shipment.title, Dates.date2DateTime());
+        String fbaTitle = String.format("%s %s", fbashipment.shipment.title(), Dates.date2DateTime());
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);

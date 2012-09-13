@@ -18,4 +18,9 @@ public class ShipmentTest extends UnitTest {
         DateTime dt = DateTime.now();
         System.out.println(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()));
     }
+
+    @Test
+    public void testPostFBAShipment() {
+
+    }
 }

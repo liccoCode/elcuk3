@@ -1,10 +1,8 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import helper.Currency;
-import helper.Dates;
-import helper.FLog;
-import helper.Webs;
+import helper.*;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -17,6 +15,7 @@ import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
+import query.ShipmentQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -142,6 +141,9 @@ public class Shipment extends GenericModel {
 
     @OneToOne(cascade = CascadeType.PERSIST)
     public Whouse whouse;
+
+    @OneToOne(mappedBy = "shipment", cascade = CascadeType.PERSIST)
+    public FBAShipment fbaShipment;
 
     /**
      * 这个 Shipment 自己拥有的 title, 会使用在 FBAShipment 上
@@ -283,6 +285,12 @@ public class Shipment extends GenericModel {
         if(this.shipFee != null) Validation.min("ship.shipFee", this.shipFee, 0);
         if(this.volumn != null) Validation.min("ship.volumn", this.volumn, 0);
         if(this.weight != null) Validation.min("ship.weight", this.weight, 0);
+
+        // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
+        if(this.whouse != null) {
+            long samewhouseItems = ShipmentQuery.shipemntItemCountWithSameWhouse(this.id, this.whouse.id);
+            if(samewhouseItems != this.items.size()) Validation.addError("shipment.item.whouse", "%s");
+        }
     }
 
     /**
@@ -305,7 +313,6 @@ public class Shipment extends GenericModel {
             }
 
             this.items.add(unit.ship(this, shipSize));
-            unit.stage = unit.nextStage();
             unit.save();
         }
 
@@ -327,7 +334,6 @@ public class Shipment extends GenericModel {
                 return;
             } else {
                 F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
-                cancelT2._2.stage = cancelT2._2.nextStage();
                 cancelT2._2.save();
             }
         }
@@ -338,14 +344,65 @@ public class Shipment extends GenericModel {
         this.memo = String.format("%s\r\n%s", cmt, this.memo).trim();
     }
 
+    /**
+     * 确认运输单以后, 向 Amazon 创建 FBAShipment
+     */
     public void confirmAndSyncTOAmazon() {
         /**
          * 1. 将本地的状态修改为 CONFIRM
          * 2. 向 Amazon 提交 FBA Shipment 的创建
          * 3. Amazon Shipment 创建成功后再本地更新, 否则不更新,包裹错误.
          */
+        FBAShipment fba = this.postFBAShipment();
+        if(Validation.hasErrors()) return;
         this.state = S.CONFIRM;
+        this.target = fba.address();
         this.save();
+    }
+
+    /**
+     * 具体的开始运输
+     */
+    public void beginShip() {
+        Validation.equals("shipment.beginShip.state", this.state, "", S.CONFIRM);
+
+        try {
+            this.fbaShipment.state = FWS.update(this.fbaShipment, FBAShipment.S.SHIPPED);
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
+        }
+        if(Validation.hasErrors()) return;
+        for(ShipItem item : this.items) {
+            item.shipDate = new Date();
+            item.unit.stage = item.unit.nextStage();
+            item.unit.save();
+        }
+        this.state = S.SHIPPING;
+        this.save();
+    }
+
+    /**
+     * 根据此 Shipment 创建一个 FBAShipment
+     *
+     * @return
+     */
+    public FBAShipment postFBAShipment() {
+        FBAShipment fba = null;
+        try {
+            fba = FWS.plan(this);
+            fba.save();
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
+        }
+        try {
+            if(fba != null) {
+                fba.state = FWS.create(fba);
+                fba.save();
+            }
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("shipment.postFBAShipment.create", "%s " + Webs.E(e));
+        }
+        return fba;
     }
 
     /**
@@ -388,7 +445,7 @@ public class Shipment extends GenericModel {
         return this.iExpressHTML;
     }
 
-    public String getTitle() {
+    public String title() {
         if(StringUtils.isBlank(this.title))
             return String.format("Default Title: ShipmentId %s", this.id);
         return String.format("[%s] %s", this.id, this.title);

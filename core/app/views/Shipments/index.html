@@ -17,7 +17,7 @@
             </select>
         </div>
 
-        <div class="span3">
+        <div class="span4">
             <select name="p.pype" style="width:90px">
                 <option value="">计价方式</option>
             #{list items:models.procure.Shipment.P.values(), as:'pype'}
@@ -45,6 +45,13 @@
                 <option ${express == p.iExpress ? 'selected' : ''} value="${express}">${express}</option>
             #{/list}
             </select>
+
+            <select name="p.whouseId" style="width:98px;margin-left:15px;">
+                <option value="">运往仓库</option>
+                #{list items:whouses, as:'wh'}
+                <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
+                #{/list}
+            </select>
         </div>
         <div class="span3 input-append input-prepend">
             <span class="add-on"><i class="icon-search"></i></span>
@@ -64,6 +71,7 @@
                 <th>#</th>
                 <th>Track No.</th>
                 <th>运输方式</th>
+                <th>去往仓库</th>
                 <th>目的地</th>
                 <th>国际快递</th>
                 <th>状态</th>
@@ -83,6 +91,7 @@
                     <span class="badge badge-info">${ship.items.size()}</span>
                 </td>
                 <td>${ship.type}</td>
+                <td>${ship.whouse?.name()}</td>
                 <td>${ship.target}</td>
                 <td>${ship.internationExpress}</td>
                 <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>

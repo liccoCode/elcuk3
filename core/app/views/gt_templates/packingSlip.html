@@ -18,25 +18,23 @@
             <b>SHIP FROM:</b><br>
 
 
-            EasyAcc<br>
-            Basement Flat 203 Kilburn high road<br>
-            London,&nbsp;
-            LONDON&nbsp;
-            NW6 7HY
-            <br>
-            UK<br>
+        ${shipFrom.name}<br>
+        ${shipFrom.addressLine1}<br>
+        ${shipFrom.city},&nbsp;
+        ${shipFrom.stateOrProvinceCode}&nbsp;
+        ${shipFrom.postalCode}<br>
+        ${shipFrom.countryCode}<br>
 
         </td>
         <td width="43%" align="left" style="border-bottom: 2px solid black; font-size: 12px;">
             <b> SHIP TO:</b><br>
 
-
-            Amazon.co.uk<br>
-            Boundary Way<br>
-            Hertfordshire<br>
-            HEMEL HEMPSTEAD<br>
-            HP27LF<br>
-            United Kingdom<br>
+        ${fba.name}<br>
+        ${fba.addressLine1}<br>
+        ${fba.stateOrProvinceCode}<br>
+        ${fba.city},&nbsp;
+        ${fba.postalCode}<br>
+        ${fba.codeToCounrty()}<br>
 
         </td>
     </tr>

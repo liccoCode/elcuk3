@@ -38,7 +38,7 @@
         <td>
             <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
         </td>
-        <td>${unit.whouse.name}</td>
+        <td>${unit.whouse.name()}</td>
         <td>${unit.cooperator?.name}</td>
         <td>${unit.attrs.planQty}</td>
         <td>${unit.attrs.price.format('#.##')} ${unit.attrs.currency}</td>
@@ -71,14 +71,10 @@
                     <tr>
                         <td>实际交货量</td>
                         <td>实际交货日期</td>
-                        <td>实际运输日期</td>
-                        <td>实际到库日期</td>
                     </tr>
                     <tr>
                         <td>${unit.attrs.qty}</td>
                         <td>${unit.attrs.deliveryDate.los()}</td>
-                        <td>${unit.attrs.shipDate.los()}</td>
-                        <td>${unit.attrs.arriveDate.los()}</td>
                     </tr>
                 </table>
             </div>

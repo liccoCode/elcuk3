@@ -5,6 +5,7 @@ import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
@@ -22,6 +23,13 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Shipments extends Controller {
+
+    @Before(only = {"index", "show", "update", "beginShip", "blank"})
+    public static void whouses() {
+        List<Whouse> whouses = Whouse.findAll();
+        renderArgs.put("whouses", whouses);
+    }
+
     public static void index(ShipmentPost p) {
         List<Shipment> shipments = null;
         if(p == null) {
@@ -42,6 +50,7 @@ public class Shipments extends Controller {
     public static void save(Shipment ship) {
         checkAuthenticity();
         validation.valid(ship);
+        Validation.required("shipment.whouse", ship.whouse);
         if(Validation.hasErrors()) {
             render("Shipments/blank.html", ship);
         }
@@ -136,14 +145,18 @@ public class Shipments extends Controller {
         Validation.required("shipment.shipFee", ship.shipFee);
         Validation.min("shipment.items.size", ship.items.size(), 1);
 
-        if(Validation.hasErrors())
-            render("Shipments/show.html", ship);
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+
+        ship.beginShip();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", ship.fbaShipment.shipmentId);
 
         redirect("/shipments/show/" + id);
     }
 
     /**
      * 对 Shipment 进行 Confirm, Confirm 以后不再允许添加运输项目
+     *
      * @param id
      */
     public static void confirm(String id) {
@@ -151,6 +164,7 @@ public class Shipments extends Controller {
         Validation.equals("shipment.confirm.state", ship.state, "", Shipment.S.PLAN);
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         ship.confirmAndSyncTOAmazon();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
         flash.success("成功确认, 运输项目已经固定, Amazon 成功创建 Shipment 并且已经 confirm.");
         redirect("/shipments/show/" + id);
     }

@@ -2,6 +2,8 @@ package controllers;
 
 import helper.Constant;
 import helper.GTs;
+import models.market.Account;
+import models.procure.FBAShipment;
 import models.procure.Shipment;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.krysalis.barcode4j.HumanReadablePlacement;
@@ -30,17 +32,46 @@ import static play.modules.pdf.PDF.renderPDF;
 public class PDFs extends Controller {
 
     public static void packingSlip(String id) {
-        //TODO 这里需要加载 FBA Shipment Id
+        FBAShipment fba = FBAShipment.find("shipmentId=?", id).first();
         Options options = new Options();
         options.pageSize = IHtmlToPdfTransformer.A4P;
 
-        String content = GTs.render("packingSlip", GTs.newMap("id", id).build());
-        renderPDF(content, options, id);
+        String content = GTs.render("packingSlip", GTs.newMap("id", fba.shipmentId)
+                .put("shipFrom", Account.address(fba.account.type))
+                .put("fba", fba)
+                .build());
+        renderPDF(content, options);
     }
 
+
+    public static void boxLabel(String id) {
+        FBAShipment fba = FBAShipment.find("shipmentId=?", id).first();
+        Options options = new Options();
+        options.pageSize = IHtmlToPdfTransformer.A4P;
+        String content = GTs.render("boxLabel", GTs.newMap("id", fba.shipmentId)
+                .put("shipFrom", Account.address(fba.account.type))
+                .put("fba", fba)
+                .build());
+        renderPDF(content, options);
+    }
+
+
     public static void packing(String id) {
-        String content = GTs.render("packingSlip", GTs.newMap("id", id).build());
+        FBAShipment fba = FBAShipment.find("shipmentId=?", id).first();
+        String content = GTs.render("packingSlip", GTs.newMap("id", fba.shipmentId)
+                .put("shipFrom", Account.address(fba.account.type))
+                .put("fba", fba)
+                .build());
         render(content);
+    }
+
+    public static void box(String id) {
+        FBAShipment fba = FBAShipment.find("shipmentId=?", id).first();
+        String content = GTs.render("boxLabel", GTs.newMap("id", fba.shipmentId)
+                .put("shipFrom", Account.address(fba.account.type))
+                .put("fba", fba)
+                .build());
+        render("PDFs/packing.html", content);
     }
 
     public static void code128(String id) throws IOException {

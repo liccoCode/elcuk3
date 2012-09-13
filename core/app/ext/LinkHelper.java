@@ -1,6 +1,7 @@
 package ext;
 
 import models.market.*;
+import models.procure.FBAShipment;
 import models.support.Ticket;
 import org.apache.commons.lang.StringUtils;
 import play.templates.JavaExtensions;
@@ -141,5 +142,21 @@ public class LinkHelper extends JavaExtensions {
     public static String osTicketLink(Feedback feedback) {
         if(StringUtils.isBlank(feedback.osTicketId)) feedback.osTicketId = "";
         return String.format("http://t.easya.cc/scp/tickets.php?id=%s", feedback.osTicketId.split("-")[0]);
+    }
+
+    public static String fbaLink(FBAShipment fba) {
+        //https://sellercentral.amazon.de/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=FBA5LBGGC
+        switch(fba.account.type) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return "https://sellercentral." + fba.account.type.toString() + "/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=" + fba.shipmentId;
+            case EBAY_UK:
+            default:
+                return "";
+        }
     }
 }

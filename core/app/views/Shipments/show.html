@@ -29,6 +29,12 @@
         #{authenticityToken /}
             <table class="table table-condensed table-bordered">
                 <tr>
+                    <th>Title</th>
+                    <td colspan="3">
+                        <input type="text" name="ship.title" class="span10" value="${ship.title ? ship.title : ship.title()}">
+                    </td>
+                </tr>
+                <tr>
                     <th>运输单号</th>
                     <td>
                         <span>${ship.id}</span>
@@ -57,11 +63,11 @@
                 </tr>
 
                 <tr>
-                    <th>运输体积</th>
+                    <th>运输体积(m3)</th>
                     <td>
                         <input type="text" class="input-mini" name="ship.volumn" value="${ship.volumn}">
                     </td>
-                    <th>运输重量</th>
+                    <th>运输重量(kg)</th>
                     <td>
                         <input type="text" class="input-mini" name="ship.weight" value="${ship.weight}">
                     </td>
@@ -111,7 +117,7 @@
                     <th>货代</th>
                     <td>
                         <select name="ship.cooper.id">
-                            <option value="">Empty</option>
+                            <option value="">选择货代</option>
                         #{list items:shippers, as:'shiper'}
                             <option ${shiper == ship.cooper ? 'selected' : ''} value="${shiper.id}">${shiper.fullName}</option>
                         #{/list}
@@ -119,6 +125,19 @@
                     </td>
                     <th>总运费(RMB)</th>
                     <td>1111, 需要计算</td>
+                </tr>
+
+                <tr>
+                    <th>仓库</th>
+                    <td>
+                        <select name="ship.whouse.id">
+                            <option value="">选择仓库</option>
+                        #{list items:whouses, as:'whouse'}
+                            <option ${whouse == ship.whouse ? "selected" : ""} value="${whouse.id}">${whouse.name()}</option>
+                        #{/list}
+                        </select>
+                    </td>
+                    <td colspan="2"></td>
                 </tr>
 
                 <tr>
@@ -137,10 +156,11 @@
 
                 <tr>
                     <td colspan="4">
-                    #{if ship.state == models.procure.Shipment.S.PLAN}
+                    #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM /}
+                    #{if isPlanAndConfirm}
                         <button class="btn btn-primary">更新</button>
                     #{/if}
-                    #{if ship.state != models.procure.Shipment.S.PLAN}
+                    #{if !isPlanAndConfirm}
                         <button id="ship_comment" class="btn btn-primary">Comment</button>
                     #{/if}
                     </td>
@@ -150,29 +170,34 @@
     </div>
 </div>
 
+#{if ship.fbaShipment}
+    #{render 'Shipments/_fba_shipment.html', fba:ship.fbaShipment/}
+#{/if}
 <div class="row-fluid">
-    <div class="span12" style="margin-bottom:15px">
+    <div class="span12" style="margin-bottom:15px;">
     #{if ship.state == models.procure.Shipment.S.PLAN}
-        <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary pull-left">修改运输项目</a>
+        <a href="@{Shipments.shipItem()}/${ship.id}" style="margin-right:10px;" class="btn btn-primary pull-left">修改运输项目</a>
     #{/if}
 
-    #{ifnot ship.state == models.procure.Shipment.S.CONFIRM}
+    #{if ship.state == models.procure.Shipment.S.PLAN}
         <form action="@{Shipments.confirm()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
 
-            <div class="input-append input-prepend" style="margin-left:10px;">
+            <div class="input-append input-prepend" style="margin-right:10px;">
                 <span class="add-on" rel="popover" content="确认运输项目以后, 则不再允许修改运输项目, 同时会将对应的运输单向 Amazon 创建 Shipment"><i class="icon-question-sign"></i></span>
                 <button data-confirm="confirm" class="btn btn-warning">运输项目确认</button>
             </div>
         </form>
-    #{/ifnot}
+    #{/if}
 
+    #{if isPlanAndConfirm}
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
-            <button style="margin-left:10px;" data-confirm="confirm" class="btn btn-danger">
+            <button style="margin-right:10px;" data-confirm="confirm" class="btn btn-danger">
                 开始运输
             </button>
         </form>
+    #{/if}
     </div>
 </div>
 
@@ -189,7 +214,10 @@
                 <th>#</th>
                 <th>Sku</th>
                 <th>产品名称</th>
+                <th>运输时间</th>
                 <th>运输数量</th>
+                <th>去往仓库</th>
+                <th>采购单</th>
                 <th>申报价格</th>
             </tr>
         #{list items:ship.items, as:'si'}
@@ -197,7 +225,10 @@
                 <td>${si.id}</td>
                 <td>${si.unit.sku}</td>
                 <td>${si.unit.product.productName}</td>
+                <td>${si.shipDate.los()}</td>
+                <td>${si.unit.whouse.name()}</td>
                 <td>${si.qty}</td>
+                <td><a href="@{Deliveryments.show()}/${si.unit.deliveryment.id}">${si.unit.deliveryment.name}</a></td>
                 <td>等待添加</td>
             </tr>
         #{/list}

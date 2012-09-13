@@ -37,6 +37,8 @@ public class ShipmentPost extends Post {
 
     public iExpress iExpress;
 
+    public long whouseId;
+
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
@@ -70,6 +72,11 @@ public class ShipmentPost extends Post {
         if(this.iExpress != null) {
             sbd.append(" AND s.internationExpress=?");
             params.add(this.iExpress);
+        }
+
+        if(this.whouseId > 0) {
+            sbd.append(" AND s.whouse.id=?");
+            params.add(this.whouseId);
         }
 
         if(StringUtils.isNotBlank(this.search)) {

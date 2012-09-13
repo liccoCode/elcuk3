@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.JPAs;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.market.Selling;
@@ -17,6 +18,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -194,23 +196,42 @@ public class ProcureUnit extends Model {
         /**
          * 1.
          */
-        if(this.stage != STAGE.DELIVERY)
+        if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER)
             Validation.addError("procureunit.delivery.stage", "%s");
-        Validation.min("procureunit.attr.qty", attrs.qty, 0);
-        Validation.min("procureunit.attrs.qty", attrs.qty, attrs.planQty);
-        Validation.required("procureunit.attr.qty", attrs.qty);
-        Validation.required("procureunit.attr.deliveryDate", attrs.deliveryDate);
+        Validation.min("procureunit.attrs.qty", attrs.qty, 0);
+        Validation.required("procureunit.attrs.qty", attrs.qty);
+        Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
         if(Validation.hasErrors()) return new F.T2<Boolean, ProcureUnit>(false, null);
         this.attrs = attrs;
 
-        boolean isFullDelivery = attrs.planQty.equals(attrs.qty);
+        // 交货状态处理(1:大于;0:等于;-1:小于)
+        int state = this.deliveryState();
         ProcureUnit unit = null;
-        if(!isFullDelivery) unit = new ProcureUnit(this).save();
+        // 交货不足的情况, 再创建一个 ProcureUnit
+        if(state == -1) unit = this.isLeekDelivery();
+        else unit = this;
+        new ElcukRecord(Messages.get("procureunit.delivery"),
+                Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
+                , this.deliveryment.id).save();
 
-        this.stage = STAGE.DONE;
-        this.deliveryment.state = this.deliveryment.nextState();
         this.save();
-        return new F.T2<Boolean, ProcureUnit>(isFullDelivery, unit);
+        return new F.T2<Boolean, ProcureUnit>(state == -1, unit);
+    }
+
+    /**
+     * 交货的数量少于预期情况
+     */
+    private ProcureUnit isLeekDelivery() {
+        return new ProcureUnit(this).save();
+    }
+
+    /**
+     * 交货的状态, 1: 交货多余计划;  0: 交货等于计划; -1:交货小于计划
+     *
+     * @return
+     */
+    private int deliveryState() {
+        return attrs.qty - attrs.planQty;
     }
 
     public ShipItem ship(Shipment shipment, int size) {
@@ -235,10 +256,8 @@ public class ProcureUnit extends Model {
         F.T3<Integer, Integer, List<String>> leftQty = this.leftQty();
         if(leftQty._1 == 0) {
             return STAGE.SHIPPING;
-        } else if(leftQty._1 > 0 && leftQty._1 < this.attrs.qty) {
+        } else if(leftQty._1 > 0 && leftQty._1 < this.qty()) {
             return STAGE.PART_SHIPPING;
-        } else if(leftQty._1.equals(this.attrs.qty)) {
-            return STAGE.DONE;
         }
         return this.stage;
     }
@@ -255,7 +274,7 @@ public class ProcureUnit extends Model {
             totalShiped += item.qty;
             shipments.add(item.shipment.id);
         }
-        return new F.T3<Integer, Integer, List<String>>(this.attrs.qty - totalShiped, totalShiped, shipments);
+        return new F.T3<Integer, Integer, List<String>>(this.qty() - totalShiped, totalShiped, shipments);
     }
 
     public String nickName() {
@@ -299,6 +318,11 @@ public class ProcureUnit extends Model {
         int result = super.hashCode();
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
+    }
+
+    public int qty() {
+        if(this.attrs.qty != null) return this.attrs.qty;
+        return this.attrs.planQty;
     }
 
     /**
@@ -365,7 +389,8 @@ public class ProcureUnit extends Model {
     }
 
     public static List<ProcureUnit> waitToShip() {
-        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage!=? ORDER BY attrs.planArrivDate", Deliveryment.S.DONE, Deliveryment.S.CONFIRM, ProcureUnit.STAGE.SHIPPING).fetch();
+        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage NOT IN (?,?) ORDER BY attrs.planArrivDate",
+                Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING, STAGE.SHIP_OVER).fetch();
     }
 
 
