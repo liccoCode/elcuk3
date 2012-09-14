@@ -94,7 +94,11 @@ public class ElcukRecord extends Model {
     }
 
     public static List<ElcukRecord> records(String fid) {
-        return ElcukRecord.find("fid=?", fid).fetch();
+        return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid).fetch();
+    }
+
+    public static JPAQuery fid(String fid) {
+        return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid);
     }
 
 

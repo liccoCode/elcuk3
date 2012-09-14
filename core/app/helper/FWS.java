@@ -11,6 +11,7 @@ import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class FWS {
             InboundShipmentPlanList planList = result.getInboundShipmentPlans();
             List<InboundShipmentPlan> members = planList.getMember();
 
+            // TODO 这里进行分仓的情况需要进行处理
             InboundShipmentPlan member = members.get(0);
 
             fbaShipment.account = shipment.whouse.account;
@@ -100,7 +102,8 @@ public class FWS {
             for(InboundShipmentPlan planmember : members) shipmentIds.add(planmember.getShipmentId());
             if(members.size() > 1) {
                 Webs.systemMail("{WARN} Multi FBAShipment Plan " + fbaShipment.shipmentId,
-                        String.format("运输单 %s 创建了多个 FBAShipment 需要去 Amazon 后台与系统中删除多余的. 让多余的重新创建运输单", shipment.id));
+                        String.format("运输单 %s 创建了多个 FBAShipment (%s) 需要去 Amazon 后台与系统中删除多余的. 让多余的重新创建运输单",
+                                shipment.id, StringUtils.join(shipmentIds, ",")));
             }
         } else {
             Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(), "创建 FBAShipment 失败.");

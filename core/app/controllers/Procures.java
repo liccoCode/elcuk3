@@ -1,6 +1,8 @@
 package controllers;
 
+import helper.Dates;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.procure.CooperItem;
@@ -12,6 +14,7 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
+import play.i18n.Messages;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -28,15 +31,17 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
-    @Before(only = {"blank", "save", "index", "createDeliveryment", "edit", "update"}, priority = 0)
+    @Before(only = {"blank", "save", "edit", "update"}, priority = 0)
     public static void whouses() {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
 
-    @Before(only = {"index", "createDeliveryment"})
-    public static void cooperators() {
+    @Before(only = {"index", "createDeliveryment", "remove"})
+    public static void index_sets() {
         renderArgs.put("cooperators", Cooperator.<Cooperator>findAll());
         renderArgs.put("dateTypes", ProcurePost.DATE_TYPES);
+        renderArgs.put("whouses", Whouse.<Whouse>findAll());
+        renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
     }
 
     public static void index(ProcurePost p) {
@@ -66,6 +71,20 @@ public class Procures extends Controller {
         }
         unit.save();
         flash.success("创建成功");
+        redirect("/Procures/index");
+    }
+
+    public static void remove(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        Validation.equals("procures.remove.state", unit.stage, "", ProcureUnit.STAGE.PLAN);
+        if(Validation.hasErrors()) {
+            renderArgs.put("p", new ProcurePost());
+            render("Procures/index");
+        }
+        unit.delete();
+        new ElcukRecord(Messages.get("procureunit.remove"),
+                Messages.get("procureunit.remove.msg", unit.to_log()), "procures.remove").save();
+        flash.success("删除成功");
         redirect("/Procures/index");
     }
 

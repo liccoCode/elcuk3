@@ -49,11 +49,6 @@ public class Deliveryment extends GenericModel {
         CANCEL
     }
 
-    @OneToMany(mappedBy = "deliveryment")
-    @OrderBy("state DESC")
-    public List<Payment> payments = new ArrayList<Payment>();
-
-
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 

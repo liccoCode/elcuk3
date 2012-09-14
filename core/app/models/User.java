@@ -149,4 +149,11 @@ public class User extends Model {
         return User.find("isService=? AND closed=?", true, false).fetch();
     }
 
+    public boolean getClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
+    }
 }

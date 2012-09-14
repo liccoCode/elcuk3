@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.JPAs;
 import helper.Webs;
 import models.ElcukRecord;
@@ -320,9 +321,25 @@ public class ProcureUnit extends Model {
         return result;
     }
 
+    /**
+     * 采购单元相关联的运输单
+     * @return
+     */
+    public List<Shipment> relateShipment() {
+        return Shipment.find("SELECT DISTINCT s FROM Shipment s, IN(s.items) itm WHERE itm.unit.id=?", this.id).fetch();
+    }
+
     public int qty() {
         if(this.attrs.qty != null) return this.attrs.qty;
         return this.attrs.planQty;
+    }
+
+    /**
+     * 转换成记录日志的格式
+     * @return
+     */
+    public String to_log() {
+        return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s]", this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty, Dates.date2Date(this.attrs.planArrivDate));
     }
 
     /**

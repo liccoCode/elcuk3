@@ -1,7 +1,0 @@
-*{
-[80DBK92-W2A]|[A_DE |2] 将 SID 分割成两个超链接
-SID: SellingId
-}*
-#{set t3:models.market.Selling.sidT3(_sid)/}
-<a href="@{Products.show(t3._1)}" target="_blank">${t3._1}|</a>
-<a href="@{Sellings.selling(_sid)}" target="_blank">${t3._2} |${t3._3}</a>

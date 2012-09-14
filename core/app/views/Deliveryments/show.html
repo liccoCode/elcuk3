@@ -129,23 +129,11 @@
 
 <div class="row-fluid">
     <div class="span12 alert">
-        <h4><a href="#" rel="tooltip" placement="right" title="操作记录"><i class="icon-question-sign"></i></a> Records
-            <i class="icon-sort-down"></i>
-        </h4>
+        <h4 class="span1" rel="tooltip" title="操作记录"><i class="icon-question-sign"></i> Records <i class="icon-sort-down"></i></h4>
     </div>
 </div>
 
-<div class="row-fluid">
-    <div class="span12">
-    #{if records.size() == 0}
-        <p class="text-info">暂时没有记录</p>
-    #{/if}
-    #{list items:records, as:'rcd'}
-        <p class="text-info">${rcd.record().raw()}</p>
-    #{/list}
-    </div>
-</div>
-
+#{records records:records/}
 
 <div class="row-fluid">
     <div class="span12">

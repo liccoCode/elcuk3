@@ -43,22 +43,29 @@ public class Account extends Model {
     private static Map<String, String> MERCHANT_ID;
 
     /**
+     * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
+     */
+    private static Map<String, CookieStore> COOKIE_STORE_MAP;
+
+    /**
      * 当使用 MERCHANT_ID 为 final 的时候, 在 OnStartUP 中的 loadModules 初始化报错...
      *
      * @return
      */
     public static Map<String, String> merchant_id() {
-        if(MERCHANT_ID == null) MERCHANT_ID = new HashMap<String, String>();
-        MERCHANT_ID.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
-        MERCHANT_ID.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
+        if(MERCHANT_ID == null) {
+            MERCHANT_ID = new HashMap<String, String>();
+            MERCHANT_ID.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
+            MERCHANT_ID.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
+        }
         //TODO 其实市场的以后看到再添加进来
         return MERCHANT_ID;
     }
 
-    /**
-     * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
-     */
-    public static final Map<String, CookieStore> COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
+    public static Map<String, CookieStore> cookieMap() {
+        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
+        return COOKIE_STORE_MAP;
+    }
 
 
     /**
@@ -155,9 +162,9 @@ public class Account extends Model {
     public CookieStore cookieStore(M market) {
         if(market == null) market = this.type;
         String key = cookieKey(this.id, market);
-        if(!COOKIE_STORE_MAP.containsKey(key))
-            COOKIE_STORE_MAP.put(key, new BasicCookieStore());
-        return COOKIE_STORE_MAP.get(key);
+        if(!cookieMap().containsKey(key))
+            cookieMap().put(key, new BasicCookieStore());
+        return cookieMap().get(key);
     }
 
     public String cookie(String name) {
@@ -552,6 +559,7 @@ public class Account extends Model {
 
     /**
      * 构造放在 Account Cookie_Store_Map 中的 KEY
+     *
      * @param aid
      * @param market
      * @return
@@ -562,6 +570,7 @@ public class Account extends Model {
 
     /**
      * 通过账户获取 FBA 的发货地址
+     *
      * @param type
      * @return
      */

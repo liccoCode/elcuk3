@@ -96,7 +96,7 @@ public class FBAShipment extends Model {
     public String title;
 
     public String address() {
-        return String.format("%s %s %s (%s)", this.addressLine1, this.city, this.stateOrProvinceCode, this.centerId);
+        return String.format("%s %s %s %s (%s)", this.addressLine1, this.city, this.stateOrProvinceCode, this.postalCode, this.centerId);
     }
 
     public String codeToCounrty() {

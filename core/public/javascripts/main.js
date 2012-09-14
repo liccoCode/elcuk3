@@ -150,8 +150,15 @@ function submit_btn_init(){
     });
 }
 
+function link_confirm_init() {
+    $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e) {
+        if(!confirm("确认删除?")) e.preventDefault()
+    });
+}
+
 $(function(){
     toggle_init();
     submit_btn_init();
+    link_confirm_init();
 });
 

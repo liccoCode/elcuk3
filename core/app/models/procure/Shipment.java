@@ -2,11 +2,12 @@ package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import helper.*;
+import helper.FLog;
+import helper.FWS;
+import helper.Webs;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
@@ -45,7 +46,6 @@ public class Shipment extends GenericModel {
 
         // 暂时这么写
         this.source = "深圳";
-        this.shipper = "周伟";
         this.type = T.AIR;
 
         this.id = id;
@@ -119,13 +119,6 @@ public class Shipment extends GenericModel {
          */
         VOLUMN
     }
-
-    /**
-     * 此 Shipment 的付款信息
-     */
-    @OneToMany(mappedBy = "shipment")
-    @OrderBy("state DESC")
-    public List<Payment> payments = new ArrayList<Payment>();
 
     /**
      * 此 Shipment 的运输项
@@ -239,13 +232,6 @@ public class Shipment extends GenericModel {
      */
     @Expose
     public String trackNo;
-
-    /**
-     * 货运商
-     * //TODO 需要删除, 使用 cooper 代替
-     */
-    @Expose
-    public String shipper;
 
     /**
      * 国际快递商人

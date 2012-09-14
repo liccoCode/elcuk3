@@ -3,24 +3,28 @@ User(wyatt):
   password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
+  isService: false
 
 User(jamin):
   username: 'jamin'
   password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
+  isService: false
 
 User(su):
   username: 'su'
   password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
+  isService: false
 
 User(jason):
   username: 'jason'
   password: '123'
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
+  isService: true
 
 market.Account(easyacc):
   username: easyacc.eu@gmail.com
@@ -30,6 +34,7 @@ market.Account(easyacc):
   accessKey: AKIAI6EBPJLG64HWDBGQ
   merchantId: AJUR3R8UN71M4
   closeable: false
+  isSaleAcc: true
 
 market.Account(easyacc_de):
   username: easyacc.de@gmail.com
@@ -39,3 +44,5 @@ market.Account(easyacc_de):
   accessKey: AKIAIAEPZK5CZEIVZFCQ
   merchantId: A22H6OV6Q7XBYK
   closeable: false
+  isSaleAcc: true
+

@@ -54,6 +54,8 @@ unit.sku=\u63D0\u4EA4\u7684 SKU
 
 copItem.boxSize=\u63A8\u8350\u6BCF\u4E00\u7BB1\u5C01\u88C5\u7684\u6570\u91CF
 
+procures.remove.state=\u72B6\u6001\u5FC5\u987B\u4E3A PLAN
+
 
 procureunit.planDeliveryDate=\u9884\u8BA1\u4EA4\u8D27\u65F6\u95F4
 procureunit.planShipDate=\u9884\u8BA1\u8FD0\u8F93\u65F6\u95F4
@@ -143,3 +145,8 @@ deliveryment.createFromProcures.msg=[\u91C7\u8D2D\u5355\u5143] %s \u521B\u5EFA\u
 
 procureunit.delivery=[\u91C7\u8D2D\u5355\u5143]\u4EA4\u8D27
 procureunit.delivery.msg=\u5B9E\u9645\u4EA4\u8D27 %s \u9884\u8BA1\u4EA4\u8D27\u4E3A %s
+
+
+procureunit.remove=\u5220\u9664[\u91C7\u8D2D\u5355\u5143]
+procureunit.remove.msg=\u5220\u9664[\u91C7\u8D2D\u5355\u5143] %s
+
