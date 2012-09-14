@@ -8,6 +8,7 @@ import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -93,7 +94,9 @@ public class Shipments extends Controller {
 
     @Before(only = {"shipItem", "ship", "cancelShip"})
     public static void setUpShipPage() {
-        List<ProcureUnit> units = ProcureUnit.waitToShip();
+        String shipmentId = request.params.get("id");
+        Shipment ship = Shipment.findById(shipmentId);
+        List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id);
         renderArgs.put("units", units);
     }
 
@@ -132,6 +135,7 @@ public class Shipments extends Controller {
     }
 
     public static void beginShip(String id) {
+        checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.id", id);
         if(Validation.hasError("shipment.id")) redirect("/shipments/index");
@@ -160,6 +164,7 @@ public class Shipments extends Controller {
      * @param id
      */
     public static void confirm(String id) {
+        checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         Validation.equals("shipment.confirm.state", ship.state, "", Shipment.S.PLAN);
         if(Validation.hasErrors()) render("Shipments/show.html", ship);

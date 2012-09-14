@@ -25,16 +25,19 @@ import java.util.List;
  */
 public class FWSTest extends UnitTest {
     FBAInboundServiceMWSClient client;
-    String sellerId = "AJUR3R8UN71M4";
+    //    String sellerId = "AJUR3R8UN71M4";//uk
+    String sellerId = "A3RJNQO8PQ21MT";//us
 
     @Before
     public void client() {
-        String accessKey = "AKIAI6EBPJLG64HWDBGQ";
-        String secrityKey = "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf";
+//        String accessKey = "AKIAI6EBPJLG64HWDBGQ";//uk
+//        String secrityKey = "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf";//uk
+        String accessKey = "AKIAIFWFCKKS5EAB3KZA";//us
+        String secrityKey = "4wruCQj0t7ZY9BPKqZg2qH5qAXdvJBvLRo0h3trD";//us
         FBAInboundServiceMWSConfig config = new FBAInboundServiceMWSConfig();
 
         // 设置服务器地址
-        config.setServiceURL(MWSEndpoint.UK.toString());
+        config.setServiceURL(MWSEndpoint.US.toString());
 
         try {
 
@@ -92,6 +95,7 @@ public class FWSTest extends UnitTest {
      *
      * @throws FBAInboundServiceMWSException
      */
+//    @Test
     public void plan() throws FBAInboundServiceMWSException {
         CreateInboundShipmentPlanRequest plan = new CreateInboundShipmentPlanRequest();
 
@@ -127,13 +131,13 @@ public class FWSTest extends UnitTest {
     }
 
 
-    //    @Test
+    //        @Test
     // 向 Amazon 正式创建一个 Shipment , 即时返回
     public void create() throws FBAInboundServiceMWSException {
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(sellerId);
-        create.setShipmentId("FBA5KV4JG");
-        create.setInboundShipmentHeader(new InboundShipmentHeader("测试运输,中文" + Dates.date2DateTime(), address(), "LTN2", "WORKING", "SELLER_LABEL"));
+        create.setShipmentId("FBAMHKX39");
+        create.setInboundShipmentHeader(new InboundShipmentHeader("测试运输,中文" + Dates.date2DateTime(), address(), "PHX6", "WORKING", "SELLER_LABEL"));
         create.setInboundShipmentItems(new InboundShipmentItemList(items()));
 
         CreateInboundShipmentResponse response = client.createInboundShipment(create);
@@ -145,10 +149,10 @@ public class FWSTest extends UnitTest {
     public void update() throws FBAInboundServiceMWSException {
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(sellerId);
-        update.setShipmentId("FBA5KV4JG");
+        update.setShipmentId("FBAMHKX39");
 //        update.setInboundShipmentHeader(new InboundShipmentHeader("测试, 换一串文字 " + Dates.date2DateTime(), address(), "LTN2", "SHIPPED", "SELLER_LABEL"));
-//        update.setInboundShipmentItems(new InboundShipmentItemList(items()));
-        update.setInboundShipmentHeader(new InboundShipmentHeader("测试, 换一串文字 " + Dates.date2DateTime(), address(), "LTN2", "CANCELLED", "SELLER_LABEL"));
+        update.setInboundShipmentItems(new InboundShipmentItemList(items()));
+        update.setInboundShipmentHeader(new InboundShipmentHeader("通过 API 能够跳过 FBA 的分布式创建. 我 CANCELLED 了, 库存如何释放? " + Dates.date2DateTime(), address(), "PHX6", "CANCELLED", "SELLER_LABEL"));
 
         UpdateInboundShipmentResponse response = client.updateInboundShipment(update);
         System.out.println("* ShipmentId: [" + response.getUpdateInboundShipmentResult().getShipmentId() + "]");
@@ -162,15 +166,15 @@ public class FWSTest extends UnitTest {
 
     private List<InboundShipmentItem> items() {
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
-        items.add(new InboundShipmentItem(null, "10HTCEVO3D-1900S", null, 6, null));
-        items.add(new InboundShipmentItem(null, "10HTCG14-1900S", null, 3, null));
+        items.add(new InboundShipmentItem(null, "71KDFHD7-BHSPU,656605389363", null, 300, null));
+//        items.add(new InboundShipmentItem(null, "80DBK12000-AB", null, 3, null));
         return items;
     }
 
     private List<InboundShipmentPlanRequestItem> planItems() {
         List<InboundShipmentPlanRequestItem> items = new ArrayList<InboundShipmentPlanRequestItem>();
-        items.add(new InboundShipmentPlanRequestItem("10HTCEVO3D-1900S", null, null, 2));
-        items.add(new InboundShipmentPlanRequestItem("10HTCG14-1900S", null, null, 3));
+        items.add(new InboundShipmentPlanRequestItem("71KDFHD7-BHSPU,656605389363", null, null, 2));
+//        items.add(new InboundShipmentPlanRequestItem("80DBK12000-AB", null, null, 3));
         return items;
     }
 }

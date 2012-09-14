@@ -91,7 +91,7 @@
                 </tr>
             #{/list}
                 <tr>
-                    <td colspan="7">
+                    <td colspan="8">
                         <input type="hidden" name="id" value="${ship.id}">
                         <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
                     </td>
@@ -125,6 +125,7 @@
                         <i class="icon-question-sign"></i> 剩余可运数量
                     </th>
                     <th>运输数量</th>
+                    <th>运往仓库</th>
                     <th>阶段</th>
                     <th>ProductName</th>
                     <th>ProcureUnit</th>
@@ -159,12 +160,13 @@
                         <td>
                             <input type="text" name="shipQty" disabled="" class="input-mini" value="${leftQty._1}">
                         </td>
+                        <td>${unit.whouse.name()}</td>
                         <td style="color:${'#' + unit.stage.rgb()}">${unit.stage}</td>
                         <td>${unit.product.productName.omis(80)}</td>
                         <td>${unit.id}</td>
                     </tr>
                     <tr id="unit_${unit_index}" style="display:none;">
-                        <td colspan="10">
+                        <td colspan="11">
                             <h4>采购单元所涉及的运输单</h4>
                             #{list items:leftQty._3, as:'lk'}
                                 <a href="@{Shipments.show()}/${lk}" target="_blank">${lk}</a>
@@ -174,7 +176,7 @@
                 #{/if}
             #{/list}
                 <tr>
-                    <td colspan="7">
+                    <td colspan="11">
                         <input type="hidden" name="id" value="${ship.id}">
                         <button id="submit_delivery" class="btn btn-primary">提交运输货物</button>
                         <span id="ship_size" class="badge badge-info">0</span>

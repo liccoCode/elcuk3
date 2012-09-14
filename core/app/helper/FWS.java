@@ -84,6 +84,7 @@ public class FWS {
                 for(InboundShipmentPlanItem item : itemMembers) {
                     if(item.getSellerSKU().equals(spitm.unit.selling.merchantSKU)) {
                         spitm.fulfillmentNetworkSKU = item.getFulfillmentNetworkSKU();
+                        spitm.updateSellingFNSku();
                         // 处理 Amazon 返回的数量与实际提交的数量不一样的情况
                         if(!item.getQuantity().equals(spitm.qty)) {
                             shipment.comment(String.format("%s %s %s diff qty (%s, %s)",

@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -74,6 +75,18 @@ public class ShipItem extends GenericModel {
      * 这个创建 ShipItem 的时候默认填充 Selling 中的 FNSKU, 在创建好了 FBA 以后, 将 FBA 返回的值同步在这.
      */
     public String fulfillmentNetworkSKU;
+
+    /**
+     * 在通过 FBA 更新了 FNsku 以后, 自动尝试更新 Unit 关联的 Selling 的 Fnsku
+     */
+    public void updateSellingFNSku() {
+        if(StringUtils.isNotBlank(this.fulfillmentNetworkSKU)) {
+            if(!this.fulfillmentNetworkSKU.equals(this.unit.selling.fnSku)) {
+                this.unit.selling.fnSku = this.fulfillmentNetworkSKU;
+                this.unit.selling.save();
+            }
+        }
+    }
 
     public ShipItem removeFromShipment() {
         /**

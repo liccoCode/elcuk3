@@ -306,6 +306,10 @@ public class Shipment extends GenericModel {
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
             int shipSize = shipQty.get(i);
+            if(!unit.whouse.equals(this.whouse)) {
+                Validation.addError("shipment.addToShip.whouse", "%s");
+                return;
+            }
             F.T3<Integer, Integer, List<String>> leftQty = unit.leftQty();
             if(leftQty._1 < shipSize) {
                 Validation.addError("shipment.addToShip.shipQty", "%s");

@@ -14,8 +14,7 @@ public class ProcureUnitTest extends UnitTest {
     @Test
     public void testWaitToShip() {
         try {
-
-            ProcureUnit.waitToShip();
+            ProcureUnit.waitToShip(1l);
         } catch(Exception e) {
             e.printStackTrace();
         }
