@@ -5,15 +5,16 @@
 
 <div class="row-fluid">
     <form action="@{Deliveryments.index()}" method="post">
-        <div class="span2 input-prepend">
+        <div class="span3 input-prepend input-append">
             <span class="add-on">From:</span>
             <input type="date" style="width:90px;" name="p.from" value="${p.from.date()}">
             <span class="add-on" style="margin-left:20px;">To:</span>
             <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
+            <span class="add-on">创建时间</span>
         </div>
 
         <div class="span1">
-            <select name="p.state" style="width:80px;">
+            <select name="p.state" style="width:100px;">
                 <option value="">状态</option>
             #{list items:models.procure.Deliveryment.S.values(), as:'s'}
                 <option ${s == p.state ? 'selected' : ''} value="${s}">${s}</option>

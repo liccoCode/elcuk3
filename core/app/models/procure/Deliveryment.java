@@ -172,8 +172,8 @@ public class Deliveryment extends GenericModel {
         return String.format("DL|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
-    public static List<Deliveryment> openDeliveryments() {
-        return Deliveryment.find("state NOT IN (?,?)", S.DONE, S.CANCEL).fetch();
+    public static List<Deliveryment> openDeliveryments(S state) {
+        return Deliveryment.find("state=?", state).fetch();
     }
 
     /**

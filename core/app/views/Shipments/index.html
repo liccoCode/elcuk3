@@ -72,6 +72,7 @@
                 <th>Track No.</th>
                 <th>运输方式</th>
                 <th>去往仓库</th>
+                <th>Title</th>
                 <th>目的地</th>
                 <th>国际快递</th>
                 <th>状态</th>
@@ -92,6 +93,7 @@
                 </td>
                 <td>${ship.type}</td>
                 <td>${ship.whouse?.name()}</td>
+                <td>${ship.title}</td>
                 <td>${ship.target}</td>
                 <td>${ship.internationExpress}</td>
                 <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>

@@ -33,7 +33,7 @@ public class Deliveryments extends Controller {
         List<Deliveryment> deliveryments = null;
         if(p == null) {
             p = new DeliveryPost();
-            deliveryments = Deliveryment.openDeliveryments();
+            deliveryments = Deliveryment.openDeliveryments(Deliveryment.S.PENDING);
         } else {
             deliveryments = p.query();
         }

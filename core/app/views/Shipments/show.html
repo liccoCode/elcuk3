@@ -21,6 +21,16 @@
 <div class="row-fluid">
     <div class="span12 alert alert-info">
         <h4>采购单信息 <i class="icon-caret-down"></i></h4>
+        <ul>
+            <li>运输单只能运往一个仓库, 其运输的货物也需要是同一个仓库的</li>
+            <li>运输单的 Title 处理用来标识系统内的运输单外, 也是 Amazon FBA Shipment 的 Title</li>
+            <li>"运输项目确认" 之后, 则无法再对运输单的运输项目进行修改.</li>
+            <li>"运输项目确认" 之后, 会同步在 Amazon 创建对应的 FBA Shipment 进行跟踪</li>
+            <li>"运输项目确认" 之后, 可以下载对于 FBA ShipmentId 的箱内外麦</li>
+            <li>当运输单开始运输的时候, 需要将数据补全, 并且开始运输以后, 信息不再可以修改</li>
+            <li>"开始运输" 之后, 会同步 FBA Shipment 标记 Shipped</li>
+            <li>Fnsku 会在运输单确认以后, 进行一次同步</li>
+        </ul>
     </div>
 </div>
 <div class="row-fluid">
