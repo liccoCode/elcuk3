@@ -235,18 +235,20 @@ public class AWS {
                 MarketplaceWebServiceConfig config = new MarketplaceWebServiceConfig();
                 switch(job.account.type) {
                     case AMAZON_US:
-                        config.setServiceURL(MWSEndpoint.US.toString());
+                        config.setServiceURL("https://mws.amazonservices.com");
                         break;
                     case AMAZON_UK:
-                        config.setServiceURL(MWSEndpoint.UK.toString());
+                        // 无法使用这个地址, 因为 toString() 使用了 FulfillmentInventory
+//                        config.setServiceURL(MWSEndpoint.UK.toString());
+                        config.setServiceURL("https://mws.amazonservices.co.uk");
                         break;
                     case AMAZON_DE:
-                        config.setServiceURL(MWSEndpoint.DE.toString());
+                        config.setServiceURL("https://mws.amazonservices.de");
                         break;
 //                    case AMAZON_ES: // not right now..
 //                        break;
                     case AMAZON_FR:
-                        config.setServiceURL(MWSEndpoint.FR.toString());
+                        config.setServiceURL("https://mws.amazonservices.fr");
                         break;
                     case AMAZON_IT:
                         config.setServiceURL("https://mws.amazonservices.it");
