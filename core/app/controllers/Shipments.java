@@ -1,17 +1,18 @@
 package controllers;
 
-import helper.J;
-import models.User;
-import models.procure.Payment;
+import helper.Webs;
+import models.procure.Cooperator;
+import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
-import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.product.Whouse;
 import models.view.Ret;
+import models.view.post.ShipmentPost;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
-import play.db.jpa.GenericModel;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -23,118 +24,152 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Shipments extends Controller {
-    public static void index() {
-        List<Shipment> pendings = Shipment.shipmentsByState(Shipment.S.PLAN);
-        List<Shipment> shippings = Shipment.shipmentsByState(Shipment.S.SHIPPING);
-        List<Shipment> clear = Shipment.shipmentsByState(Shipment.S.CLEARANCE);
-        List<Shipment> dones = Shipment.find("state=? ORDER BY createDate DESC", Shipment.S.DONE).fetch(1, 50); // 由更多再 Ajax 加载
+    @Before(only = {"index", "show", "update", "beginShip", "blank"})
+    public static void whouses() {
+        List<Whouse> whouses = Whouse.findAll();
+        renderArgs.put("whouses", whouses);
+    }
 
-        render(pendings, shippings, clear, dones);
+    public static void index(ShipmentPost p) {
+        List<Shipment> shipments = null;
+        if(p == null) {
+            p = new ShipmentPost();
+            shipments = Shipment.find("state=?", Shipment.S.PLAN).fetch();
+        } else {
+            shipments = p.query();
+        }
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        render(shipments, p);
     }
 
     public static void blank() {
-        Shipment s = new Shipment(Shipment.id());
-        render(s);
+        Shipment ship = new Shipment(Shipment.id());
+        render(ship);
     }
 
-    public static void save(Shipment s) {
+    public static void save(Shipment ship) {
         checkAuthenticity();
-        validation.valid(s);
+        validation.valid(ship);
+        Validation.required("shipment.whouse", ship.whouse);
         if(Validation.hasErrors()) {
-            render("Shipments/blank.html", s);
+            render("Shipments/blank.html", ship);
         }
-        s.checkAndCreate();
-        index();
+        ship.save();
+        redirect("/shipments/show/" + ship.id);
+    }
+
+
+    @Before(only = {"show", "update", "beginShip"})
+    public static void setUpShowPage() {
+        List<Cooperator> shippers = Cooperator.shipper();
+        renderArgs.put("shippers", shippers);
+    }
+
+    public static void show(String id) {
+        Shipment ship = Shipment.findById(id);
+        render(ship);
+    }
+
+    public static void update(Shipment ship) {
+        checkAuthenticity();
+        validation.valid(ship);
+        ship.validate();
+        if(Validation.hasErrors()) {
+            render("Shipments/show.html", ship);
+        }
+        ship.save();
+        flash.success("更新成功.");
+        redirect("/Shipments/show/" + ship.id);
+    }
+
+    public static void comment(String id, String cmt) {
+        validation.required(id);
+        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
+        Shipment ship = Shipment.findById(id);
+        ship.memo = cmt;
+        ship.save();
+        renderJSON(new Ret(true, Webs.V(Validation.errors())));
+    }
+
+    @Before(only = {"shipItem", "ship", "cancelShip"})
+    public static void setUpShipPage() {
+        String shipmentId = request.params.get("id");
+        Shipment ship = Shipment.findById(shipmentId);
+        List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id);
+        renderArgs.put("units", units);
+    }
+
+    public static void shipItem(String id) {
+        Shipment ship = Shipment.findById(id);
+        render(ship);
+    }
+
+    public static void ship(String id, List<Long> unitId, List<Integer> shipQty) {
+        Validation.required("shipments.ship.unitId", unitId);
+        Validation.required("shipments.ship.shipQty", shipQty);
+        Validation.required("shipment.id", id);
+        Validation.equals("shipments.ship.equal", unitId.size(), "", shipQty.size());
+        Shipment ship = Shipment.findById(id);
+        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+
+        ship.addToShip(unitId, shipQty);
+
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+
+        redirect("/shipments/shipitem/" + id);
+    }
+
+    public static void cancelShip(List<Integer> shipItemId, String id) {
+        Validation.required("shipments.ship.shipId", shipItemId);
+        Validation.required("shipment.id", id);
+        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        Shipment ship = Shipment.findById(id);
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+
+        ship.cancelShip(shipItemId);
+
+        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+        redirect("/shipments/shipitem/" + id);
+    }
+
+    public static void beginShip(String id) {
+        checkAuthenticity();
+        Shipment ship = Shipment.findById(id);
+        Validation.required("shipment.id", id);
+        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        Validation.required("shipment.trackNo", ship.trackNo);
+        Validation.required("shipment.planArrivDate", ship.planArrivDate);
+        Validation.required("shipment.volumn", ship.volumn);
+        Validation.required("shipment.weight", ship.weight);
+        Validation.required("shipment.declaredValue", ship.declaredValue);
+        Validation.required("shipment.deposit", ship.deposit);
+        Validation.required("shipment.otherFee", ship.otherFee);
+        Validation.required("shipment.shipFee", ship.shipFee);
+        Validation.min("shipment.items.size", ship.items.size(), 1);
+
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+
+        ship.beginShip();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", ship.fbaShipment.shipmentId);
+
+        redirect("/shipments/show/" + id);
     }
 
     /**
-     * 查看一个 Pending 状态的 Shipment
-     */
-    public static void pending(String id) {
-        Shipment s = Shipment.findById(id);
-        List<ProcureUnit> units = ProcureUnit.findWaitingForShip();
-        render(s, units);
-    }
-
-    public static void shipProcureUnit(ProcureUnit unit, Integer qty, String shipmentId) {
-        Shipment shipment = Shipment.findById(shipmentId);
-        modelExist(shipment);
-        renderJSON(J.G(unit.transformToShipment(shipment, qty)));
-    }
-
-    public static void removeItemFromShipment(Long shipItemId) {
-        ShipItem item = ShipItem.findById(shipItemId);
-        modelExist(item);
-        renderJSON(J.G(item.removeFromShipment()));
-    }
-
-    public static void confirmShipment(String shipmentId, Shipment sTmp) {
-        Shipment shipment = Shipment.findById(shipmentId);
-        modelExist(shipment);
-        renderJSON(J.G(shipment.fromPlanToShip(sTmp)));
-    }
-
-    @Check("root")
-    public static void payment(Payment pay, Shipment payObj) {
-        pay.payer = User.findByUserName(Secure.Security.connected());
-        renderJSON(J.G(payObj.payForShipment(pay)));
-    }
-
-
-    /**
-     * 查看一个 Shipping 状态的 Shipment
-     */
-    public static void shipping(String id) {
-        Shipment s = Shipment.findById(id);
-        render(s);
-    }
-
-    public static void refreshIExpress(String id) {
-        Shipment shipment = Shipment.findById(id);
-        modelExist(shipment);
-        renderJSON(new Ret(true, shipment.refreshIExpressHTML()));
-    }
-
-    /**
-     * 查看一个 clearAndReciving 状态的 Shipment
-     */
-    public static void clearing(String id) {
-        shipping(id);
-    }
-
-    /**
-     * 查看一个 Done 状态的 Shipment
-     */
-    public static void done(String id) {
-        shipping(id);
-    }
-
-    public static void cancel(String id) {
-        Shipment shipment = Shipment.findById(id);
-        modelExist(shipment);
-        shipment.cancel();
-        renderJSON(new Ret(true, "共影响 " + shipment.items.size() + " 个 ShipItem."));
-    }
-
-    public static void editMemo(String id, String memo) {
-        Shipment shipment = Shipment.findById(id);
-        modelExist(shipment);
-        shipment.memo = memo;
-        renderJSON(J.G(shipment.save()));
-    }
-
-    /**
-     * 将 Shipment 的状态标记为 DONE
+     * 对 Shipment 进行 Confirm, Confirm 以后不再允许添加运输项目
      *
      * @param id
      */
-    public static void makeDone(String id) {
-        Shipment shipment = Shipment.findById(id);
-        modelExist(shipment);
-        renderJSON(J.G(shipment.done()));
-    }
-
-    private static <T extends GenericModel> void modelExist(T model) {
-        if(model == null || !model.isPersistent()) throw new FastRuntimeException("Model 不存在!");
+    public static void confirm(String id) {
+        checkAuthenticity();
+        Shipment ship = Shipment.findById(id);
+        Validation.equals("shipment.confirm.state", ship.state, "", Shipment.S.PLAN);
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        ship.confirmAndSyncTOAmazon();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        flash.success("成功确认, 运输项目已经固定, Amazon 成功创建 Shipment 并且已经 confirm.");
+        redirect("/shipments/show/" + id);
     }
 }

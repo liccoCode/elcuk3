@@ -1,0 +1,123 @@
+#{extends 'main.html' /}
+#{set title:'ProcureUnit #' + unit.id + ' 交货' /}
+#{set 'moreScripts'}
+#{/set}
+
+#{if unit.selling == null}
+<div class="row">
+    <div class="span12 alert alert-error">
+        <p>${flash.error}</p>
+    </div>
+</div>
+#{/if}
+#{else }
+
+    #{ifErrors }
+        #{errorMsgs /}
+    #{/ifErrors}
+
+<div class="row">
+    <div class="span12 alert alert-info">
+        <ul>
+            <li>通过此页面进行 采购单元 的交货操作</li>
+            <li>如果 采购单元 已经交货完成, 那么不再允许修改</li>
+            <li>如果 采购单元 为部分交货, 那么系统会自动将剩余没有交货的数量复制新的无 预计时间 的 采购单元</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span12">
+        <form action="@{Procures.delivery()}" method="post">
+
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <th>SellingId</th>
+                    <td>
+                    ${unit.selling.sellingId}
+                        <input type="hidden" name="id" value="${unit.id}">
+                    </td>
+                    <th>SKU</th>
+                    <td>${unit.product.sku}</td>
+                </tr>
+
+                <tr>
+                    <th>工厂</th>
+                    <td>${unit.cooperator.fullName}</td>
+                    <th>价格</th>
+                    <td>
+                    ${unit.attrs.price} ${unit.attrs.currency}
+                        <input type="hidden" name="attrs.price" value="${attrs.price}">
+                        <input type="hidden" name="attrs.currency" value="${attrs.currency}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>预计采购数量</th>
+                    #{set isDone:unit.stage == models.procure.ProcureUnit.STAGE.DONE/}
+                    <td>
+                        <div class="input-append">
+                            <input type="text" class="input-small" readonly="" name="attrs.planQty" value="${attrs.planQty}">
+                            <span class="add-on" style="color:${'#'+unit.stage.rgb()}"><strong>${unit.stage}</strong></span>
+                        </div>
+                    </td>
+                    <th>实际交货数量</th>
+                    <td>
+                        <input type="text" class="input-small" ${isDone ? 'readonly=""' : ''} name="attrs.qty" value="${attrs.qty}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>预计交货日期</th>
+                    <td>
+                        <input type="date" readonly="" name="attrs.planDeliveryDate" value="${attrs.planDeliveryDate.date()}">
+                    </td>
+                    <th>实际交货日期</th>
+                    <td>
+                        <input type="date" ${isDone ? 'readonly=""' : ''} name="attrs.deliveryDate" value="${attrs.deliveryDate.date()}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>预计运输日期</th>
+                    <td>
+                        <input type="date" readonly="" name="attrs.planShipDate" value="${attrs.planShipDate.date()}">
+                    </td>
+                    <th>实际运输日期</th>
+                    <td>
+                        <input type="date" name="attrs.shipDate" value="${attrs.shipDate.date()}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>预计到库日期</th>
+                    <td>
+                        <input type="date" readonly="" name="attrs.planArrivDate" value="${attrs.planArrivDate.date()}">
+                    </td>
+                    <th>实际到库日期</th>
+                    <td>
+                        <input type="date" readonly="" name="attrs.arriveDate" value="${attrs.arriveDate.date()}">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <h4>Memo</h4>
+                        <textarea rows="8" class="span12" name="cmt">${unit.comment.raw()}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        #{if isDone}
+                            <p class="text-error">此采购订单已经交货, 无法再进行更改</p>
+                        #{/if}
+                        #{else }
+                            <button class="btn btn-warning" data-confirm="confirm">交货更新</button>
+                        #{/else}
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+#{/else }
+

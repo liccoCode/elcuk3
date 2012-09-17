@@ -1,80 +1,80 @@
 #{extends 'main.html' /}
-#{set title:'Shipments' /}
+#{set title:'创建运输单' /}
 #{set 'moreScripts'}
-    #{script 'shipments/create.coffee'/}
 #{/set}
 
-#{if errors}
-<div class="alert alert-error">
-    <ul>
-        #{errors }
-            <li>${error}</li>
-        #{/errors}
-    </ul>
+<div class="row-fluid">
+    <div class="span12 alert alert-info">
+        <p>创建一份运输单, 此阶段收集基本信息</p>
+    </div>
 </div>
-#{/if}
-#{else }
-<div class="alert alert-info" style="text-align:center">
-    <h2>创建新 Shipment</h2>
-</div>
-#{/else}
 
-<div class="offset2">
-    <form action="@{Shipments.save()}" method="POST" enctype="application/x-www-form-urlencoded" class="form-horizontal">
-    #{authenticityToken /}
-        <fieldset>
-        #{text id:'id', name:'s.id', value:s.id, label:'运输单号', help:'自动生成的系统运输单号', edit:false /}
-        #{text id:'createDate', name:'s.createDate', label:'创建时间', value:s.createDate.datetime(), edit:false /}
-        #{text id:'state', name:'s.state', label:'状态', value:s.state, edit:false /}
-        #{text id:'beginDate', name:'s.beginDate', label:'开始时间', type:'date', value:s.beginDate?.date() /}
-        #{text id:'planArriveDate', name:'s.planArriveDate', type:'date', label:'预计到库时间', value:s.planArrivDate?.datetime() /}
-            <div class="control-group">
-                <label class="control-label" for="type">运输方式</label>
+#{ifErrors }
+    #{errorMsgs /}
+#{/ifErrors}
 
-                <div class="controls">
-                    <div class="input-append">
-                        <select name="s.type" size="1" id="type">
-                        #{list items:models.procure.Shipment.T.values()}
-                            <option ${s.type == _ ? 'selected' : ''} value="${_}">${_}</option>
+
+<div class="row-fluid">
+    <div class="span12">
+        <form action="@{Shipments.save()}" method="post">
+        #{authenticityToken /}
+            <table class="table table-condensed table-bordered">
+                <tr>
+                    <th>运输单编号</th>
+                    <td>
+                        <input type="text" readonly="" name="ship.id" value="${ship.id}">
+                    </td>
+                    <th>创建时间</th>
+                    <td>
+                        <input type="text" readonly="" name="ship.createDate" value="${ship.createDate.datetime()}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>状态</th>
+                    <td>
+                        <input type="text" readonly="" name="ship.state" value="${ship.state}">
+                    </td>
+                    <th>运输方式</th>
+                    <td>
+                        <select name="ship.type">
+                        #{list items:models.procure.Shipment.T.values(), as:'t'}
+                            <option value="${t.name()}">${t}</option>
                         #{/list}
                         </select>
-                    </div>
-                </div>
-            </div>
-            <div class="control-group">
-                <label class="control-label" for="pype">计价类型</label>
+                    </td>
+                </tr>
 
-                <div class="controls">
-                    <div class="input-append">
-                        <select name="s.pype" size="1" id="pype">
-                        #{list items:models.procure.Shipment.P.values()}
-                            <option ${s.pype == _ ? 'selected' : ''} value="${_}">${_}</option>
-                        #{/list}
+                <tr>
+                    <th>开始运输时间</th>
+                    <td>
+                        <input type="date" name="ship.beginDate" value="${ship.beginDate.date()}">
+                    </td>
+                    <th>预计到库时间</th>
+                    <td>
+                        <input type="date" name="ship.planArrivDate" value="${ship.planArrivDate.date()}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>运往仓库</th>
+                    <td>
+                        <select name="ship.whouse.id">
+                            <option value="">仓库</option>
+                            #{list items:whouses, as:'wh'}
+                            <option ${wh == ship.whouse ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
+                            #{/list}
                         </select>
-                    </div>
-                </div>
-            </div>
-        #{text id:'pQty', name:'s.pQty', label:'单位数量', value:s.pQty, help:'按重量计算 KG, 按体积计算 M3' /}
-        #{text id:'price', name:'s.price', label:'单位价格', value:s.price /}
-            <div class="control-group">
-                <label class="control-label" for="currency">币种</label>
+                    </td>
+                    <td colspan="2"></td>
+                </tr>
 
-                <div class="controls">
-                    <div class="input-append">
-                        <select name="s.currency" size="1" id="currency">
-                        #{list items:helper.Currency.values()}
-                            <option ${s.currency == _ ? 'selected' : ''} value="${_}">${_}</option>
-                        #{/list}
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-        #{text id:'trackNo', name:'s.trackNo', label:'快递跟踪编号', value:s.trackNo /}
-        #{text id:'shipper', name:'s.shipper', label:'货代', value:s.shipper /}
-        #{text id:'source', name:'s.source', label:'起始地点', value:s.source /}
-        #{text id:'target', name:'s.target', label:'目的地', placeHolder:'请输入详细目的地址', value:s.target /}
-        </fieldset>
-        <button type="submit" class="btn btn-primary">创建</button>
-    </form>
+                <tr>
+                    <td colspan="4">
+                        <button class="btn btn-primary">创建</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
 </div>

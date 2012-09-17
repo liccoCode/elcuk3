@@ -1,0 +1,7 @@
+<div class="row-fluid">
+    <div class="span12">
+        <a href="${fba.fbaLink()}" target="_blank" class="btn btn-inverse"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
+        <a href="@{PDFs.packingSlip()}/${fba.shipmentId}" class="btn btn-success"><i class="icon-download-alt"></i> 箱内麦</a>
+        <a href="@{PDFs.boxLabel()}/${fba.shipmentId}" class="btn btn-success"><i class="icon-download-alt"></i> 箱外麦</a>
+    </div>
+</div>

@@ -56,6 +56,7 @@ window.$ui =
   dateinput: ->
     for input in $('input[type=date]')
       $input = $(input)
+      return if $input.attr('native') != undefined
       if $input.attr('format') is undefined
         $input.dateinput(format: 'yyyy-mm-dd')
       else

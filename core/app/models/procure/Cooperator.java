@@ -41,7 +41,7 @@ public class Cooperator extends Model {
         SHIPPER {
             @Override
             public String to_s() {
-                return "货代";
+                return "运输商";
             }
         };
 
@@ -133,11 +133,21 @@ public class Cooperator extends Model {
     }
 
     /**
+     * 通过 SKU 在此供应商中获取对应的 CooperItem
+     *
+     * @param sku
+     * @return
+     */
+    public CooperItem cooperItem(String sku) {
+        return CooperItem.find("cooperator.id=? AND sku=?", this.id, sku).first();
+    }
+
+    /**
      * 前台使用的 Sku 自动提示, 需要过滤掉已经成为此供应商的 Sku
      *
      * @return
      */
-    public List<String> frontSkuHelper() {
+    public List<String> frontSkuAutoPopulate() {
         // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<String>(Product.skus(false));
         final List<String> existSkus = new ArrayList<String>();
@@ -156,11 +166,40 @@ public class Cooperator extends Model {
         return allSkus;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        Cooperator that = (Cooperator) o;
+
+        if(this.id != null ? !this.id.equals(that.id) : that.id != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (this.id != null ? this.id.hashCode() : 0);
+        return result;
+    }
+
     /**
      * 返回所有供应商
      */
     public static List<Cooperator> suppliers() {
         return Cooperator.find("type=?", T.SUPPLIER).fetch();
+    }
+
+    /**
+     * 所有快递商
+     *
+     * @return
+     */
+    public static List<Cooperator> shipper() {
+        return Cooperator.find("type=?", T.SHIPPER).fetch();
     }
 
 }

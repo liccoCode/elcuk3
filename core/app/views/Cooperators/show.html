@@ -66,6 +66,7 @@
             <th>SKU</th>
             <th>价格</th>
             <th>生产周期(day)</th>
+            <th>每箱数量</th>
             <th>最低采购量</th>
             <th width="70"></th>
         </tr>
@@ -75,6 +76,7 @@
                 <td rel="popover" content="${itm.memo}">${itm.sku}</td>
                 <td>${itm.price.format('#.##')} ${itm.currency}</td>
                 <td>${itm.period}</td>
+                <td>${itm.boxSize}</td>
                 <td>${itm.lowestOrderNum}</td>
                 <td>
                     <a href="@{Cooperators.editCooperItem()}?copItem.id=${itm.id}" class="btn btn-mini"><i class="icon-edit"></i></a>

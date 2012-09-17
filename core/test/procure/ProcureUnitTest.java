@@ -11,10 +11,13 @@ import play.test.UnitTest;
  * Time: 9:47 AM
  */
 public class ProcureUnitTest extends UnitTest {
-
     @Test
-    public void testProcureUnitCanBeShipOver() {
-        ProcureUnit unit = ProcureUnit.findById(4l);
-        assertEquals(true, unit.canBeShipOver());
+    public void testWaitToShip() {
+        try {
+            ProcureUnit.waitToShip(1l);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
+
 }

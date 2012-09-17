@@ -102,10 +102,10 @@ public class Application extends Controller {
             FileInputStream fis = new FileInputStream(jsonFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
             CookieStore cookieStore = (CookieStore) ois.readObject();
-            Account.COOKIE_STORE_MAP.put(Account.cookieKey(acc.id, acc.type), cookieStore);
+            Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
         }
-        Account.COOKIE_STORE_MAP.get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
-        renderJSON(Account.COOKIE_STORE_MAP.get(Account.cookieKey(acc.id, acc.type)));
+        Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
+        renderJSON(Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)));
     }
 
 }

@@ -5,6 +5,7 @@ import com.amazonaws.mws.MarketplaceWebServiceClient;
 import com.amazonaws.mws.MarketplaceWebServiceConfig;
 import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
+import com.amazonservices.mws.FulfillmentInventory._2010_10_01.MWSEndpoint;
 import models.market.JobRequest;
 import models.market.M;
 import org.apache.commons.io.FileUtils;
@@ -215,7 +216,7 @@ public class AWS {
     }
 
 
-    private static Map<String, MarketplaceWebService> cached = new HashMap<String, MarketplaceWebService>();
+    private static final Map<String, MarketplaceWebService> cached = new HashMap<String, MarketplaceWebService>();
 
     /**
      * 通过 JobRequest 获取缓存了的 MarketplaceWebService 对象
@@ -224,32 +225,39 @@ public class AWS {
      * @return
      */
     private static MarketplaceWebService client(JobRequest job) {
-        MarketplaceWebService client = cached.get("client_" + job.account.type.name());
-        if(client != null) return client;
-        MarketplaceWebServiceConfig config = new MarketplaceWebServiceConfig();
-        switch(job.account.type) {
-            case AMAZON_US:
-                config.setServiceURL("https://mws.amazonservices.com");
-                break;
-            case AMAZON_UK:
-                config.setServiceURL("https://mws.amazonservices.co.uk");
-                break;
-            case AMAZON_DE:
-                config.setServiceURL("https://mws.amazonservices.de");
-                break;
+        String key = String.format("client_%s_%s", job.account.id, job.account.type.name());
+        MarketplaceWebService client;
+        if(cached.containsKey(key)) return cached.get(key);
+        else {
+            synchronized(cached) {
+                if(cached.containsKey(key)) return cached.get(key);
+
+                MarketplaceWebServiceConfig config = new MarketplaceWebServiceConfig();
+                switch(job.account.type) {
+                    case AMAZON_US:
+                        config.setServiceURL(MWSEndpoint.US.toString());
+                        break;
+                    case AMAZON_UK:
+                        config.setServiceURL(MWSEndpoint.UK.toString());
+                        break;
+                    case AMAZON_DE:
+                        config.setServiceURL(MWSEndpoint.DE.toString());
+                        break;
 //                    case AMAZON_ES: // not right now..
 //                        break;
-            case AMAZON_FR:
-                config.setServiceURL("https://mws.amazonservices.fr");
-                break;
-            case AMAZON_IT:
-                config.setServiceURL("https://mws.amazonservices.it");
-                break;
-        }
+                    case AMAZON_FR:
+                        config.setServiceURL(MWSEndpoint.FR.toString());
+                        break;
+                    case AMAZON_IT:
+                        config.setServiceURL("https://mws.amazonservices.it");
+                        break;
+                }
 
-        client = new MarketplaceWebServiceClient(
-                job.account.accessKey, job.account.token, "elcuk2", "1.0", config);
-        cached.put("client_" + job.account.type.name(), client);
+                client = new MarketplaceWebServiceClient(
+                        job.account.accessKey, job.account.token, "elcuk2", "1.0", config);
+                cached.put(key, client);
+            }
+        }
         return client;
     }
 }

@@ -49,8 +49,8 @@ public class Sellings extends Controller {
         selling.save();
     }
 
-    public static void selling(String sid) {
-        Selling s = Selling.findById(sid);
+    public static void selling(String id) {
+        Selling s = Selling.findById(id);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
         F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
@@ -109,12 +109,12 @@ public class Sellings extends Controller {
     /**
      * 下载 Selling 的 FBA_LABEL
      *
-     * @param sid
+     * @param id sellingId
      */
-    public static void sellingLabel(String sid) {
-        Selling selling = Selling.findById(sid);
+    public static void sellingLabel(String id) {
+        Selling selling = Selling.findById(id);
         byte[] bytes = selling.downloadFnSkuLabel();
-        String fileName = String.format("%s.pdf", sid);
+        String fileName = String.format("%s.pdf", id);
         File file = new File(Constant.LABEL_PATH, fileName);
         file.delete(); // 删除原来的, 再写新的
         try {
@@ -122,7 +122,7 @@ public class Sellings extends Controller {
         } catch(IOException e) {
             // ignore
         }
-        renderBinary(file, sid + ".pdf");
+        renderBinary(file, id + ".pdf");
     }
 
 }

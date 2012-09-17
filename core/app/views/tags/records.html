@@ -1,0 +1,10 @@
+<div class="row-fluid">
+    <div class="span12">
+    #{if _records.size() == 0}
+        <p class="text-info">暂时没有记录</p>
+    #{/if}
+    #{list items:_records, as:'rcd'}
+        <p class="text-info">${rcd.record().raw()}</p>
+    #{/list}
+    </div>
+</div>

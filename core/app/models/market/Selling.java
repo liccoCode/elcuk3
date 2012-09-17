@@ -618,7 +618,8 @@ public class Selling extends GenericModel {
     /**
      * 在分析页面计算以后, 缓存起来的 Selling 的缓存 key;
      * 因为有其他地方有需要使用到这里缓存起来的数据, 所以将 key 进行函数化
-     * @param type  只有 sku, msku 两个值
+     *
+     * @param type 只有 sku, msku 两个值
      * @return
      */
     public static String analyzesSellingKey(String type) {
@@ -677,13 +678,14 @@ public class Selling extends GenericModel {
 
             for(String sellKey : analyzeMap.keySet()) {
 
-                // plan, delivering [ProcureUnit.PLAN|DELIVERY]
+                // attrs, delivering [ProcureUnit.PLAN|DELIVERY]
                 List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(analyzeMap.get(sellKey), isSku);
                 for(ProcureUnit unit : units) {
                     if(unit.stage == ProcureUnit.STAGE.PLAN)
-                        analyzeMap.get(sellKey).onplan += unit.plan.planQty;
+                        analyzeMap.get(sellKey).onplan += unit.attrs.planQty;
                     else if(unit.stage == ProcureUnit.STAGE.DELIVERY || unit.stage == ProcureUnit.STAGE.DONE) {
-                        analyzeMap.get(sellKey).onwork += unit.leftTransferQty()._1;
+                        //TODO 需要处理的计算
+                        analyzeMap.get(sellKey).onwork += 0;
                     }
                 }
 

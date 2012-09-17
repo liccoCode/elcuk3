@@ -1,85 +1,30 @@
 #{extends 'main.html' /}
-#{set title:'Procure Create' /}
+#{set title:'ProcureUnit #' + unit.id + ' Edit' /}
 #{set 'moreScripts'}
-    #{script 'procures/edit.coffee'/}
 #{/set}
-<div>
-    <form id="post_form">
-        <table class="table table-condensed table-bordered" style="margin-top:10px;">
-            <caption><span style="font-size:3ex;">更新采购单元</span></caption>
-            <tr>
-                <td>Selling:</td>
-                <td>
-                    <div class="input-prepend">
-                        <span class="add-on"><a href="/listings/listing?lid=${unit.selling.listing.listingId}" target="_blank">ASIN</a></span>
-                        <span class="add-on"><a href="/sellings/selling?sid=${unit.selling.sellingId}" target="_blank">SID</a></span>
-                        <span class="add-on">${unit.selling.sellingId}</span>
-                    </div>
-                    <input type="hidden" name="p.id" value="${unit.id}">
-                #{authenticityToken /}
-                </td>
-                <td>Whouse:</td>
-                <td>
-                    <select name="p.whouse.id" size="1">
-                    #{list items:models.product.Whouse.all().fetch(), as:'wh'}
-                        <option ${unit.whouse.id == wh.id ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
-                    #{/list}
-                    </select>
-                </td>
-                <td>Product:</td>
-                <td>${unit.product.sku}</td>
-            </tr>
 
-            <tr>
-                <td>预计到库时间:</td>
-                <td>
-                    <input name="p.plan.planArrivDate" type="date" placeHolder="预计到库时间" value="${unit.plan.planArrivDate.format("yyyy-MM-dd")}">
-                </td>
-                <td>采购数量</td>
-                <td>
-                    <div class="input-prepend">
-                        <input name="p.plan.planQty" style="width:80px;" type="text" placeHolder="计划采购数量" value="${unit.plan.planQty}">
-                    </div>
-                </td>
-                <td>阶段</td>
-                <td>${unit.stage}</td>
-            </tr>
-
-            <tr>
-                <td>采购商</td>
-                <td>
-                ${unit.plan.supplier}
-                    <input type="hidden" name="p.plan.supplier" value="${unit.plan.supplier}">
-                </td>
-                <td>采购单价</td>
-                <td><input name="p.plan.unitPrice" type="text" placeHolder="价格" value="${unit.plan.unitPrice}"></td>
-                <td>货币</td>
-                <td>
-                    <select name="p.plan.currency" size="1">
-                    #{list items:helper.Currency.values(), as:'c'}
-                        <option ${unit.plan.currency == c ? 'selected' : ''} value="${c}">${c}</option>
-                    #{/list}
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="6">
-                    Memo:
-                    <textarea rows="8" class="span12" name="p.">${unit.comment}</textarea>
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="6">
-                    <button id='update_procureUnit' class="btn btn-small btn-primary">更新</button>
-                </td>
-            </tr>
-        </table>
-    </form>
+#{if unit.selling == null}
+<div class="row">
+    <div class="span12 alert alert-error">
+        <p>${flash.error}</p>
+    </div>
 </div>
+#{/if}
+#{else }
 
-<div id="alert" class="alert invisible">
-    <button type="button" class="close" data-dismiss="alert">×</button>
-    <span></span>
-</div>
+    #{ifErrors }
+        #{errorMsgs /}
+    #{/ifErrors}
+
+<form action="/procures/update" method="post">
+    <table class="table table-condensed table-bordered">
+        #{render 'Procures/_unit_table_trs.html', unit:unit, whouses:whouses/}
+        <tr>
+            <td colspan="4">
+                <input type="hidden" name="unit.id" value="${unit.id}">
+                <button type="submit" class="btn btn-primary">更新</button>
+            </td>
+        </tr>
+    </table>
+</form>
+#{/else}

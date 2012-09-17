@@ -1,5 +1,8 @@
 package ext;
 
+import helper.Dates;
+import models.ElcukRecord;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.i18n.Messages;
 import play.templates.JavaExtensions;
@@ -84,5 +87,35 @@ public class vExtensions extends JavaExtensions {
         }
         long years = delta / (365 * 24 * 60 * 60);
         return Messages.get("left.years", years, pluralize(years));
+    }
+
+    public static String los(Date date) {
+        return los(date, false);
+    }
+
+    public static String los(Date date, Boolean stopAtMonth) {
+        if(date.getTime() > System.currentTimeMillis())
+            return vExtensions.left(date, stopAtMonth);
+        else
+            return JavaExtensions.since(date, stopAtMonth);
+    }
+
+    public static String record(ElcukRecord record) {
+        // [Who] do [What] effect [What]
+        return String.format("%s do %s at %s <strong style='color:red;'>=></strong> %s",
+                JavaExtensions.capFirst(record.username), record.action, Dates.date2DateTime(record.createAt), record.message);
+    }
+
+    /**
+     * 截取字符串的一部分
+     *
+     * @param str
+     * @param size 从多长开始截取
+     * @return
+     */
+    public static String omis(String str, Integer size) {
+        if(StringUtils.isBlank(str)) return "";
+        if(str.length() > size) return String.format("%s...", str.substring(0, size));
+        else return str;
     }
 }

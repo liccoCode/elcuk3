@@ -1,0 +1,7 @@
+<div class="alert alert-error">
+    <ul>
+    #{errors }
+        <li>${play.Play.mode.isDev() ? error.key + ' (debug) -> ' : ''}${error.message()}</li>
+    #{/errors}
+    </ul>
+</div>

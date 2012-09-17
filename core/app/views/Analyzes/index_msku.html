@@ -51,7 +51,11 @@
     </tr>
     <tr id="msku_${sell_index}" style="display:none;">
         <td colspan="17">
-            等待 Ajax 添加? TBD
+            <div class="row-fluid">
+                <div class="span12">
+                    <a href="@{Procures.blank()}?unit.selling.sellingId=${sell.sellingId}" target="_blank" class="btn btn-info"><i class="icon-random"></i> 采购计划</a>
+                </div>
+            </div>
         </td>
     </tr>
 #{/list}

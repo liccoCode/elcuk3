@@ -1,6 +1,8 @@
 package controllers;
 
+import helper.GTs;
 import helper.J;
+import helper.Webs;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -83,13 +85,13 @@ public class Cooperators extends Controller {
         if(copItem == null) copItem = new CooperItem();
         Cooperator cop = Cooperator.findById(cooperId);
         if(cop == null || !cop.isPersistent()) error("不正确的合作者参数");
-        renderArgs.put("skus", J.json(cop.frontSkuHelper()));
+        renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         render(copItem, cop);
     }
 
     public static void editCooperItem(CooperItem copItem) {
         renderArgs.put("cop", copItem.cooperator);
-        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuHelper()));
+        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
         render("Cooperators/newCooperItem.html", copItem);
     }
 
@@ -97,12 +99,12 @@ public class Cooperators extends Controller {
         checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
-        renderArgs.put("skus", J.json(cop.frontSkuHelper()));
+        renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         if(Validation.hasErrors())
             render("Cooperators/newCooperItem.html", copItem, cop);
         copItem.checkAndSave(cop);
         flash.success("创建成功.");
-        show(cop.id, true);
+        redirect("/cooperators/index#" + copItem.cooperator.id);
     }
 
     public static void updateCooperItem(CooperItem copItem) {
@@ -110,7 +112,7 @@ public class Cooperators extends Controller {
         validation.valid(copItem);
         if(Validation.hasErrors()) {
             renderArgs.put("cop", copItem.cooperator);
-            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuHelper()));
+            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
             render("Cooperators/newCooperItem.html", copItem);
         }
         copItem.checkAndUpdate();
@@ -121,5 +123,16 @@ public class Cooperators extends Controller {
     public static void removeCooperItem(CooperItem copItem) {
         copItem.checkAndRemove();
         renderJSON(new Ret());
+    }
+
+    // 供应商的价格
+    public static void price(long id, String sku) {
+        validation.required(id);
+        validation.required(sku);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.V(Validation.errors())));
+
+        CooperItem copItem = CooperItem.find("sku=? AND cooperator.id=?", sku, id).first();
+        renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true).build());
     }
 }

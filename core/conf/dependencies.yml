@@ -7,13 +7,22 @@ require:
     - play -> crud
     - play -> fastergt 1.7
     - play -> coffee 1.0
+    - play -> pdf 0.9
     # jars...
+    - elcuk -> mws 1.0:
+        exclude:
+          - org.codehaus.woodstox -> *
+    - xerces -> xercesImpl 2.10.0
     - org.jsoup -> jsoup 1.6.3
-    - elcuk -> mws 1.0
     - org.apache.httpcomponents -> httpclient 4.1.2
     - org.apache.httpcomponents -> httpmime 4.1.2
     - com.alibaba -> fastjson 1.1.19
     - net.sf.opencsv -> opencsv 2.3
+    - net.sf.barcode4j -> barcode4j 2.1:
+        exclude:
+         # apache ant 不需要, 我不需要构建
+          - org.apache.ant -> *
+
 
 
 repositories:
