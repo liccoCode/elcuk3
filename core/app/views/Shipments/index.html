@@ -21,28 +21,28 @@
             <select name="p.pype" style="width:90px">
                 <option value="">计价方式</option>
             #{list items:models.procure.Shipment.P.values(), as:'pype'}
-                <option ${pype == p.pype ? 'selected' : ''} value="${pype}">${pype}</option>
+                <option ${pype == p.pype ? 'selected' : ''} value="${pype.name()}">${pype}</option>
             #{/list}
             </select>
 
             <select name="p.type" style="width:90px;margin-left:15px;">
                 <option value="">运输方式</option>
             #{list items:models.procure.Shipment.T.values(), as:'t'}
-                <option ${t == p.type ? 'selected' : ''} value="${t}">${t}</option>
+                <option ${t == p.type ? 'selected' : ''} value="${t.name()}">${t}</option>
             #{/list}
             </select>
 
             <select name="p.state" style="width:90px;margin-left:15px;">
                 <option value="">状态</option>
             #{list items:models.procure.Shipment.S.values(), as:'state'}
-                <option ${state == p.state ? 'selected' : ''} value="${state}">${state}</option>
+                <option ${state == p.state ? 'selected' : ''} value="${state.name()}">${state}</option>
             #{/list}
             </select>
 
             <select name="p.iExpress" style="width:98px;margin-left:15px;">
                 <option value="">国际快递商</option>
             #{list items:models.procure.Shipment.iExpress(), as:'express'}
-                <option ${express == p.iExpress ? 'selected' : ''} value="${express}">${express}</option>
+                <option ${express == p.iExpress ? 'selected' : ''} value="${express.name()}">${express}</option>
             #{/list}
             </select>
 

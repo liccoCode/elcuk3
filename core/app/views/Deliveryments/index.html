@@ -17,7 +17,7 @@
             <select name="p.state" style="width:100px;">
                 <option value="">状态</option>
             #{list items:models.procure.Deliveryment.S.values(), as:'s'}
-                <option ${s == p.state ? 'selected' : ''} value="${s}">${s}</option>
+                <option ${s == p.state ? 'selected' : ''} value="${s.name()}">${s}</option>
             #{/list}
             </select>
         </div>
@@ -37,10 +37,14 @@
                 <th>#</th>
                 <th>Name</th>
                 <th>State</th>
+                <th>供应商</th>
+                <th>最先交货时间</th>
+                <th>最后交货时间</th>
                 <th>User</th>
                 <th>Create</th>
             </tr>
         #{list items:deliveryments, as:'dmt'}
+        #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
             <tr>
                 <td>
                     <a href="@{Deliveryments.show}/${dmt.id}" target="_blank">${dmt.id}</a>
@@ -51,11 +55,14 @@
                     <span class="badge badge-info">${dmt.units.size()}</span>
                 </td>
                 <td style="color:${'#' + dmt.state.rgb()}">${dmt.state}</td>
+                <td>${dmt.supplier()?.fullName}</td>
+                <td>${twoDeliveryDate._1?.date()}</td>
+                <td>${twoDeliveryDate._2?.date()}</td>
                 <td>${dmt.handler.username}</td>
                 <td>#{time_tooltip time:dmt.createDate/}</td>
             </tr>
             <tr id="dmt_${dmt_index}" style="display:none;">
-                <td colspan="5" style="padding:0;border:none">
+                <td colspan="8" style="padding:0;border:none">
                     #{render 'Procures/_unit_list.html', units:dmt.units/}
                 </td>
             </tr>

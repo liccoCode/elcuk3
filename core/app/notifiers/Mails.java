@@ -1,5 +1,6 @@
 package notifiers;
 
+import helper.Webs;
 import models.market.*;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
@@ -22,17 +23,27 @@ public class Mails extends Mailer {
     // ------------------------------ Shipment 邮件  -----------------------
 
     public static void shipment_clearance(Shipment shipment) {
-        setSubject("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
-        mailBase();
-        addRecipient("p@easyacceu.com");
-        send(shipment);
+        String title = String.format("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
+        try {
+            setSubject(title);
+            mailBase();
+            addRecipient("p@easyacceu.com");
+            send(shipment);
+        } catch(Exception e) {
+            Logger.warn(title + ":" + Webs.E(e));
+        }
     }
 
     public static void shipment_isdone(Shipment shipment) {
-        setSubject("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,需确认.", shipment.id);
-        mailBase();
-        addRecipient("p@easyacceu.com");
-        send(shipment);
+        String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,需确认.", shipment.id);
+        try {
+            setSubject(title);
+            mailBase();
+            addRecipient("p@easyacceu.com");
+            send(shipment);
+        } catch(Exception e) {
+            Logger.warn(title + ":" + Webs.E(e));
+        }
     }
 
 
@@ -40,10 +51,15 @@ public class Mails extends Mailer {
      * Listing 被人上架了的警告邮件
      */
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
-        setSubject("{WARN}[Offer] More than one offer in one Listing.");
-        mailBase();
-        addRecipient("alerts@easyacceu.com");
-        send(offers, lst);
+        String title = String.format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
+        try {
+            setSubject(title);
+            mailBase();
+            addRecipient("alerts@easyacceu.com");
+            send(offers, lst);
+        } catch(Exception e) {
+            Logger.warn(title + ":" + Webs.E(e));
+        }
     }
 
     /**

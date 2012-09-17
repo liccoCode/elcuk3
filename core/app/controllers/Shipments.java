@@ -165,11 +165,25 @@ public class Shipments extends Controller {
     public static void confirm(String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
-        Validation.equals("shipment.confirm.state", ship.state, "", Shipment.S.PLAN);
+        Validation.equals("shipments.confirm.state", ship.state, "", Shipment.S.PLAN);
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         ship.confirmAndSyncTOAmazon();
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         flash.success("成功确认, 运输项目已经固定, Amazon 成功创建 Shipment 并且已经 confirm.");
+        redirect("/shipments/show/" + id);
+    }
+
+    /**
+     * 确认运输单已经到库
+     *
+     * @param id
+     */
+    public static void ensureDone(String id) {
+        checkAuthenticity();
+        Shipment ship = Shipment.findById(id);
+        ship.ensureDone();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        flash.success("成功确认, 运输单已经确认运输完毕.");
         redirect("/shipments/show/" + id);
     }
 }

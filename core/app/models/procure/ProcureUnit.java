@@ -70,31 +70,66 @@ public class ProcureUnit extends Model {
         /**
          * 计划阶段
          */
-        PLAN,
+        PLAN {
+            @Override
+            public String toString() {
+                return "计划中";
+            }
+        },
         /**
          * 采购阶段
          */
-        DELIVERY,
+        DELIVERY {
+            @Override
+            public String toString() {
+                return "采购中";
+            }
+        },
         /**
          * 完成了, 全部交货了
          */
-        DONE,
+        DONE {
+            @Override
+            public String toString() {
+                return "已交货";
+            }
+        },
         /**
          * 正在运输中
          */
-        SHIPPING,
+        SHIPPING {
+            @Override
+            public String toString() {
+                return "全部运输";
+            }
+        },
         /**
          * 部分正在运输
          */
-        PART_SHIPPING,
+        PART_SHIPPING {
+            @Override
+            public String toString() {
+                return "部分运输";
+            }
+        },
         /**
          * 运输完成
          */
-        SHIP_OVER,
+        SHIP_OVER {
+            @Override
+            public String toString() {
+                return "运输完成";
+            }
+        },
         /**
          * 关闭阶段, 不处理了
          */
-        CLOSE
+        CLOSE {
+            @Override
+            public String toString() {
+                return "关闭";
+            }
+        }
     }
 
     /**
@@ -214,7 +249,7 @@ public class ProcureUnit extends Model {
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
                 , this.deliveryment.id).save();
-
+        this.stage = STAGE.DONE;
         this.save();
         return new F.T2<Boolean, ProcureUnit>(state == -1, unit);
     }
@@ -254,11 +289,20 @@ public class ProcureUnit extends Model {
     }
 
     public STAGE nextStage() {
-        F.T3<Integer, Integer, List<String>> leftQty = this.leftQty();
-        if(leftQty._1 == 0) {
-            return STAGE.SHIPPING;
-        } else if(leftQty._1 > 0 && leftQty._1 < this.qty()) {
-            return STAGE.PART_SHIPPING;
+        if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER) {
+            return this.stage;
+        } else if(this.stage == STAGE.SHIPPING || this.stage == STAGE.PART_SHIPPING) {
+            for(ShipItem item : this.relateItems) {
+                if(item.shipment.state != Shipment.S.DONE) return this.stage;
+            }
+            return STAGE.SHIP_OVER;
+        } else {
+            F.T3<Integer, Integer, List<String>> leftQty = this.leftQty();
+            if(leftQty._1 == 0) {
+                return STAGE.SHIPPING;
+            } else if(leftQty._1 > 0 && leftQty._1 < this.qty()) {
+                return STAGE.PART_SHIPPING;
+            }
         }
         return this.stage;
     }
@@ -323,6 +367,7 @@ public class ProcureUnit extends Model {
 
     /**
      * 采购单元相关联的运输单
+     *
      * @return
      */
     public List<Shipment> relateShipment() {
@@ -336,6 +381,7 @@ public class ProcureUnit extends Model {
 
     /**
      * 转换成记录日志的格式
+     *
      * @return
      */
     public String to_log() {

@@ -10,9 +10,11 @@ import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -37,16 +39,36 @@ public class Deliveryment extends GenericModel {
         /**
          * 预定.
          */
-        PENDING,
+        PENDING {
+            @Override
+            public String toString() {
+                return "计划";
+            }
+        },
         /**
          * 确定采购单
          */
-        CONFIRM,
+        CONFIRM {
+            @Override
+            public String toString() {
+                return "确认并已下单";
+            }
+        },
         /**
          * 完成交货.
          */
-        DONE,
-        CANCEL
+        DONE {
+            @Override
+            public String toString() {
+                return "完成交货";
+            }
+        },
+        CANCEL {
+            @Override
+            public String toString() {
+                return "取消";
+            }
+        }
     }
 
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
@@ -81,6 +103,38 @@ public class Deliveryment extends GenericModel {
 
     @Lob
     public String memo = " ";
+
+    /**
+     * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
+     * @return
+     */
+    public Cooperator supplier() {
+        if(this.units.size() == 0) return null;
+        return this.units.get(0).cooperator;
+    }
+
+    /**
+     * 计算此采购单的最早一个交货与最晚一个交货的时间, 如果只有一个, 那么最早==最晚
+     * @return
+     */
+    public F.T2<Date, Date> firstAndEndDeliveryDate() {
+        Date first = null;
+        Date end = null;
+        List<Date> deliveryDates = new ArrayList<Date>();
+        for(ProcureUnit unit : this.units) {
+            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() && unit.stage != ProcureUnit.STAGE.CLOSE)
+                if(unit.attrs.deliveryDate != null) deliveryDates.add(unit.attrs.deliveryDate);
+        }
+        if(deliveryDates.size() > 2) {
+            Collections.sort(deliveryDates);
+            first = deliveryDates.get(0);
+            end = deliveryDates.get(deliveryDates.size() - 1);
+        } else if(deliveryDates.size() == 1) {
+            first = deliveryDates.get(0);
+            end = first;
+        }
+        return new F.T2<Date, Date>(first, end);
+    }
 
     /**
      * 返回此 Deliveryment 可以用来添加的 ProcureUnits

@@ -209,6 +209,13 @@
             </button>
         </form>
     #{/if}
+    #{if ship.state == models.procure.Shipment.S.CLEARANCE}
+        <form action="@{Shipments.ensureDone()}" method="post">
+            <input type="hidden" name="id" value="${ship.id}">
+            #{authenticityToken /}
+            <button style="margin-right:10px;" data-confirm="confirm" class="btn btn-success">确认到货</button>
+        </form>
+    #{/if}
     </div>
 </div>
 

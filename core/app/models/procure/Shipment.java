@@ -85,28 +85,84 @@ public class Shipment extends GenericModel {
         /**
          * 计划中
          */
-        PLAN,
+        PLAN {
+            @Override
+            public String toString() {
+                return "计划中";
+            }
+        },
         /**
          * 确认运输单, 不再允许修改
          */
-        CONFIRM,
+        CONFIRM {
+            @Override
+            public String toString() {
+                return "确认运输";
+            }
+        },
         /**
          * 运输中
          */
-        SHIPPING,
+        SHIPPING {
+            @Override
+            public String toString() {
+                return "运输中";
+            }
+
+            @Override
+            public S nextState(Shipment ship) {
+                // 如果在 SHIPPING 状态则检查是否处于清关
+                if(ship.internationExpress.isContainsClearance(ship.iExpressHTML))
+                    Mails.shipment_clearance(ship);
+                return CLEARANCE;
+            }
+        },
         /**
          * 清关
          */
-        CLEARANCE,
+        CLEARANCE {
+            @Override
+            public String toString() {
+                return "清关中";
+            }
+
+            @Override
+            public S nextState(Shipment ship) {
+                // 如果在 CLERANCE 检查是否有 Delivery 日期
+                F.T2<Boolean, DateTime> isDeliveredAndTime = ship.internationExpress.isDelivered(ship.iExpressHTML);
+                if(isDeliveredAndTime._1) {
+                    ship.arriveDate = isDeliveredAndTime._2.toDate();
+                    for(ShipItem item : ship.items) {
+                        item.arriveDate = ship.arriveDate;
+                    }
+                    Mails.shipment_isdone(ship);
+                }
+                return CLEARANCE;
+            }
+        },
         /**
          * 完成
          */
-        DONE,
+        DONE {
+            @Override
+            public String toString() {
+                return "完成";
+            }
+        },
 
         /**
          * 取消状态
          */
-        CANCEL
+        CANCEL {
+            @Override
+            public String toString() {
+                return "取消";
+            }
+        };
+
+        public S nextState(Shipment ship) {
+            return this;
+        }
     }
 
     public enum P {
@@ -367,6 +423,9 @@ public class Shipment extends GenericModel {
             item.unit.stage = item.unit.nextStage();
             item.unit.save();
         }
+        // 自动根据 体积与重量的值, 自动计算价格类型
+        if(this.volumn > this.weight) this.pype = P.VOLUMN;
+        else this.pype = P.WEIGHT;
         this.state = S.SHIPPING;
         this.save();
     }
@@ -396,6 +455,20 @@ public class Shipment extends GenericModel {
     }
 
     /**
+     * 完成运输, 最终的确认
+     */
+    public void ensureDone() {
+        Validation.equals("shipments.ensureDone.state", this.state, "", Shipment.S.CLEARANCE);
+        if(Validation.hasErrors()) return;
+        this.state = S.DONE;
+        for(ShipItem item : this.items) {
+            item.unit.stage = item.unit.nextStage();
+            item.unit.save();
+        }
+        this.save();
+    }
+
+    /**
      * 创建的计划运输单超过 7 天则表示超时
      *
      * @return
@@ -413,20 +486,9 @@ public class Shipment extends GenericModel {
     public String refreshIExpressHTML() {
         Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(this.trackNo));
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
+        this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
+        this.state = this.state.nextState(this);
         try {
-            this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
-            if(this.state == S.SHIPPING) { // 如果在 SHIPPING 状态则检查是否处于清关
-                if(this.internationExpress.isContainsClearance(this.iExpressHTML)) {
-                    this.state = S.CLEARANCE;
-                    Mails.shipment_clearance(this);
-                }
-            } else if(this.state == S.CLEARANCE) { // 如果在 CLERANCE 检查是否有 Delivery 日期
-                F.T2<Boolean, DateTime> isDeliveredAndTime = this.internationExpress.isDelivered(this.iExpressHTML);
-                if(isDeliveredAndTime._1) {
-                    this.arriveDate = isDeliveredAndTime._2.toDate();
-                    Mails.shipment_isdone(this);
-                }
-            }
             this.save();
         } catch(Exception e) {
             FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);

@@ -46,7 +46,7 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @Expose
     public ProcureUnit unit;
 
@@ -86,13 +86,6 @@ public class ShipItem extends GenericModel {
                 this.unit.selling.save();
             }
         }
-    }
-
-    public ShipItem removeFromShipment() {
-        /**
-         *  TODO 需要检查什么?
-         */
-        return this.delete();
     }
 
     /**

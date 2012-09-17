@@ -51,10 +51,10 @@
             #{/list}
             </select>
 
-            <select name="p.stage" class="span4">
+            <select name="p.stage" class="span3">
                 <option value="">阶段</option>
             #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
-                <option ${stage == p.stage ? 'selected' : ''} value="${stage}">${stage}</option>
+                <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage}</option>
             #{/list}
             </select>
         </div>
