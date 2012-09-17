@@ -4,7 +4,10 @@
     <title>FBA Packing Slips</title>
 </head>
 <body>
+<!-- 生成 6 张 -->
+#{list items:0..5, as:'i'}
 ${content.raw()}
+#{/list}
 </body>
 </html>
 
