@@ -52,12 +52,12 @@
                 <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">补全 FnSku</a>
             #{/else}
         </td>
-        <td>${unit.attrs.planDeliveryDate.los()}</td>
-        <td>${unit.attrs.planShipDate.los()}</td>
-        <td>${unit.attrs.planArrivDate.los()}</td>
+        <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+        <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
+        <td>#{time_tooltip time:unit.attrs.planArrivDate/}</td>
         <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
-        <td>${unit.createDate.los()}</td>
+        <td>#{time_tooltip time:unit.createDate/}</td>
     </tr>
     <tr id="${tr_key}_${unit_index}" style="display:none;">
         <td colspan="${checkbox ? '15' : '14'}">

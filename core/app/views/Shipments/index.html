@@ -78,9 +78,9 @@
                 <th>状态</th>
                 <th>计价方式</th>
                 <th>运输商</th>
-                <th>开始 <i class="icon-time"></i></th>
-                <th>创建 <i class="icon-time"></i></th>
-                <th>预计到库 <i class="icon-time"></i></th>
+                <th>开始时间</th>
+                <th>创建时间</th>
+                <th>预计到库时间</th>
             </tr>
         #{list items:shipments, as:'ship'}
             <tr>
@@ -99,9 +99,9 @@
                 <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>
                 <td>${ship.pype}</td>
                 <td>${ship.cooper.name}</td>
-                <td>${ship.beginDate.los()}</td>
-                <td>${ship.createDate.los()}</td>
-                <td>${ship.planArrivDate.los()}</td>
+                <td>#{time_tooltip time:ship.beginDate/}</td>
+                <td>#{time_tooltip time:ship.createDate/}</td>
+                <td>#{time_tooltip time:ship.planArrivDate/}</td>
             </tr>
             <tr id="ship_${ship_index}" style="display:none;">
                 <td colspan="12">

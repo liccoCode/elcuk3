@@ -52,7 +52,7 @@
                 </td>
                 <td style="color:${'#' + dmt.state.rgb()}">${dmt.state}</td>
                 <td>${dmt.handler.username}</td>
-                <td><a href="#" rel="tooltip" title="${dmt.createDate.datetime()}">${dmt.createDate.los()}</a></td>
+                <td>#{time_tooltip time:dmt.createDate/}</td>
             </tr>
             <tr id="dmt_${dmt_index}" style="display:none;">
                 <td colspan="5" style="padding:0;border:none">

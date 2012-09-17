@@ -55,11 +55,10 @@ public class ProcurePost extends Post {
 
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1, params._2.toArray()).fetch();
+        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
     }
 
     public F.T2<String, List<Object>> params() {
-        //TODO createDate 修改
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<Object>();
 

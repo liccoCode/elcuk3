@@ -173,7 +173,7 @@ public class Deliveryment extends GenericModel {
     }
 
     public static List<Deliveryment> openDeliveryments(S state) {
-        return Deliveryment.find("state=?", state).fetch();
+        return Deliveryment.find("state=? ORDER BY createDate DESC", state).fetch();
     }
 
     /**

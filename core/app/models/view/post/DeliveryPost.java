@@ -71,7 +71,7 @@ public class DeliveryPost extends Post {
 
     public List<Deliveryment> query() {
         F.T2<String, List<Object>> params = params();
-        return Deliveryment.find(params._1, params._2.toArray()).fetch();
+        return Deliveryment.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray()).fetch();
     }
 
     public F.T3<Boolean, String, List<Object>> multiProcureUnit() {

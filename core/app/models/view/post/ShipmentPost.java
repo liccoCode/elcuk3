@@ -42,7 +42,7 @@ public class ShipmentPost extends Post {
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
-        return Shipment.find(params._1, params._2.toArray()).fetch();
+        return Shipment.find(params._1 + " ORDER BY s.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override

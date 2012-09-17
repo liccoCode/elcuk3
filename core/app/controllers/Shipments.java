@@ -34,7 +34,7 @@ public class Shipments extends Controller {
         List<Shipment> shipments = null;
         if(p == null) {
             p = new ShipmentPost();
-            shipments = Shipment.find("state=?", Shipment.S.PLAN).fetch();
+            shipments = Shipment.find("state=? ORDER By createDate DESC", Shipment.S.PLAN).fetch();
         } else {
             shipments = p.query();
         }
