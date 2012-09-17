@@ -360,16 +360,6 @@ public class ProcureUnit extends Model {
         return ProcureUnit.find("stage=?", stage).fetch();
     }
 
-    @SuppressWarnings("unchecked")
-    public static List<String> suppliers() {
-        Query query = JPAs.createQuery(new JpqlSelect().select("attrs.supplier").from("ProcureUnit").groupBy("attrs.supplier"));
-        return query.getResultList();
-    }
-
-    public static List<ProcureUnit> findByStage(STAGE stage) {
-        return ProcureUnit.find("stage=? ORDER BY planArrivDate", stage).fetch();
-    }
-
     /**
      * 加载并且返回 Simile Timeline 的 Events
      * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid

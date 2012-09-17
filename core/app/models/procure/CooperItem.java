@@ -84,6 +84,7 @@ public class CooperItem extends Model {
      * @return
      */
     public int boxToSize(int size) {
+        if(this.boxSize == null) return size;
         return this.boxSize * size;
     }
 

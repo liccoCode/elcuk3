@@ -22,6 +22,7 @@
         <th>阶段</th>
         <th>抵达货代</th>
         <th>创建时间</th>
+        <th>采购单</th>
     </tr>
 #{list items:units, as:'unit'}
     <tr>
@@ -58,6 +59,11 @@
         <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
         <td>#{time_tooltip time:unit.createDate/}</td>
+        <td>
+            #{if unit.deliveryment}
+                <a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a>
+            #{/if}
+        </td>
     </tr>
     <tr id="${tr_key}_${unit_index}" style="display:none;">
         <td colspan="${checkbox ? '15' : '14'}">
@@ -68,7 +74,7 @@
             <div class="span5" style="float:left">
                 <h4 style="margin-top:0">关联运输单</h4>
                 #{list items:unit.relateShipment(), as:'sp'}
-                <a href="@{Shipments.show()}/${sp.id}">${sp.title()}</a><br>
+                    <a href="@{Shipments.show()}/${sp.id}">${sp.title()}</a><br>
                 #{/list}
             </div>
 
@@ -90,7 +96,7 @@
                 <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
 
                 #{if unit.stage == models.procure.ProcureUnit.STAGE.PLAN}
-                <a href="@{Procures.remove()}/${unit.id}" data-confirm="link" class="btn btn-danger">删除</a>
+                    <a href="@{Procures.remove()}/${unit.id}" data-confirm="link" class="btn btn-danger">删除</a>
                 #{/if}
 
                 #{if delivery}
