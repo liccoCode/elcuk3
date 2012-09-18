@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.HTTP;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
@@ -13,6 +15,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.libs.F;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -56,11 +60,6 @@ public enum iExpress {
                 article.html(boxSize + " 箱");
             }
             return table.html();
-        }
-
-        @Override
-        public String fetchStateHTML(String tracNo) {
-            return HTTP.get(this.trackUrl(tracNo));
         }
 
         @Override
@@ -125,13 +124,47 @@ public enum iExpress {
         }
 
         @Override
-        public String fetchStateHTML(String tracNo) {
-            return HTTP.get(this.trackUrl(tracNo));
+        public String trackUrl(String tracNo) {
+            return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo);
+        }
+    },
+    UPS {
+        @Override
+        public String trackUrl(String tracNo) {
+            return String.format("http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", tracNo);
         }
 
         @Override
-        public String trackUrl(String tracNo) {
-            return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo);
+        public String fetchStateHTML(String tracNo) {
+            String html = HTTP.get(this.trackUrl(tracNo));
+            Document doc = Jsoup.parse(html);
+            Element form = doc.select("#detailFormid").first();
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            for(Element input : form.select("input"))
+                params.add(new BasicNameValuePair(input.attr("name"), input.val()));
+            return HTTP.post(form.attr("action"), params);
+        }
+
+        @Override
+        public String parseExpress(String html, String trackNo) {
+            Document doc = Jsoup.parse(html);
+            return doc.select(".secBody > .dataTable").outerHtml();
+        }
+
+        @Override
+        public boolean isContainsClearance(String content) {
+            return StringUtils.contains(content, "清关机构");
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            Document doc = Jsoup.parse(iExpressHTML);
+            for(Element tr : doc.select("tr")) {
+                if(!StringUtils.contains(tr.outerHtml(), "已递送")) continue;
+                String dateStr = String.format("%s %s", tr.select("td:eq(1)").text(), tr.select("td:eq(2)").text());
+                return new F.T2<Boolean, DateTime>(true, DateTime.parse(dateStr, DateTimeFormat.forPattern("yyyy/MM/dd HH:mm")));
+            }
+            return new F.T2<Boolean, DateTime>(false, new DateTime());
         }
     };
 
@@ -141,15 +174,7 @@ public enum iExpress {
      * @param tracNo
      * @return
      */
-    public abstract String trackUrl(String tracNo);
-
-    /**
-     * 直接返回抓取的 HTML 代码
-     *
-     * @param tracNo
-     * @return
-     */
-    public abstract String fetchStateHTML(String tracNo);
+    abstract String trackUrl(String tracNo);
 
     /**
      * 解析出需要的部分 HTML
@@ -162,4 +187,14 @@ public enum iExpress {
     public abstract boolean isContainsClearance(String content);
 
     public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
+
+    /**
+     * 直接返回抓取的 HTML 代码
+     *
+     * @param tracNo
+     * @return
+     */
+    public String fetchStateHTML(String tracNo) {
+        return HTTP.get(this.trackUrl(tracNo));
+    }
 }

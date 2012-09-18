@@ -116,6 +116,7 @@
                     <th>国际快递商</th>
                     <td>
                         <select name="ship.internationExpress">
+                            <option value="">选择快递商</option>
                         #{list items:models.procure.Shipment.iExpress(), as:'ie'}
                             <option ${ie == ship.internationExpress ? 'selected' : ''} value="${ie}">${ie}</option>
                         #{/list}
@@ -251,6 +252,25 @@
             </tr>
         #{/list}
         </table>
+    </div>
+</div>
+
+<div class="row-fluid">
+    <div class="span12 alert alert-danger">
+        <h4 data-toggle="toggle" data-target="#shipping_details" style="cursor:pointer;" class="span2">
+            运输进程 <i class="icon-reorder"></i>
+        </h4>
+
+        <form action="@{Shipments.refreshProcuress()}" method="post" style="margin:0">
+            <input type="hidden" name="id" value="${ship.id}">
+            #{authenticityToken /}
+            <button class="btn btn-danger"><i class="icon-refresh"></i></button>
+        </form>
+    </div>
+</div>
+<div class="row-fluid">
+    <div id="shipping_details" class="span12" style="display:none;padding-left:30px">
+    ${ship.iExpressHTML.raw()}
     </div>
 </div>
 

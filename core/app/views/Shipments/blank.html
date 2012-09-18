@@ -38,6 +38,7 @@
                     <th>运输方式</th>
                     <td>
                         <select name="ship.type">
+                            <option value="">方式</option>
                         #{list items:models.procure.Shipment.T.values(), as:'t'}
                             <option value="${t.name()}">${t}</option>
                         #{/list}

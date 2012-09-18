@@ -327,6 +327,8 @@ public class Shipment extends GenericModel {
         if(this.shipFee != null) Validation.min("ship.shipFee", this.shipFee, 0);
         if(this.volumn != null) Validation.min("ship.volumn", this.volumn, 0);
         if(this.weight != null) Validation.min("ship.weight", this.weight, 0);
+        if(StringUtils.isNotBlank(this.trackNo))
+            Validation.required("shipment.internationExpress", this.internationExpress);
 
         // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
         if(this.whouse != null) {

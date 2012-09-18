@@ -186,4 +186,14 @@ public class Shipments extends Controller {
         flash.success("成功确认, 运输单已经确认运输完毕.");
         redirect("/shipments/show/" + id);
     }
+
+    public static void refreshProcuress(String id) {
+        checkAuthenticity();
+        Shipment ship = Shipment.findById(id);
+        Validation.required("shipment.trackNo", ship.trackNo);
+        Validation.required("shipment.internationExpress", ship.internationExpress);
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        ship.refreshIExpressHTML();
+        redirect("/shipments/show/" + id);
+    }
 }

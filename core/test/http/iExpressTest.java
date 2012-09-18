@@ -30,11 +30,21 @@ public class iExpressTest extends UnitTest {
         FileUtils.writeStringToFile(new File("/tmp/fedex." + tNo + ".html"), iExpress.FEDEX.parseExpress(html, tNo));
     }
 
+    //    @Test
+    public void testUPSHTML() throws IOException {
+        String tNo = "1Z25304E0441868525";
+        String html = iExpress.UPS.fetchStateHTML(tNo);
+//        FileUtils.writeStringToFile(new File("/tmp/ups." + tNo + ".html"), html);
+        FileUtils.writeStringToFile(new File("/tmp/ups." + tNo + ".html"), iExpress.UPS.parseExpress(html, tNo));
+    }
+
     @Test
     public void testIsDelivered() {
         Shipment ship = Shipment.findById("SP|201206|01");
-        System.out.println(ship.internationExpress.isDelivered(ship.iExpressHTML));
-        ship = Shipment.findById("SP|201206|00");
+//        System.out.println(ship.internationExpress.isDelivered(ship.iExpressHTML));
+//        ship = Shipment.findById("SP|201206|00");
+//        System.out.println(ship.internationExpress.isDelivered(ship.iExpressHTML));
+        ship = Shipment.findById("SP|201208|18");
         System.out.println(ship.internationExpress.isDelivered(ship.iExpressHTML));
     }
 }
