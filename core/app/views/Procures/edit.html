@@ -1,6 +1,7 @@
 #{extends 'main.html' /}
 #{set title:'ProcureUnit #' + unit.id + ' Edit' /}
 #{set 'moreScripts'}
+    #{script 'procures/blank.coffee'/}
 #{/set}
 
 #{if unit.selling == null}

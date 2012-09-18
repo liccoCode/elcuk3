@@ -33,7 +33,7 @@ public abstract class Post<T> {
      * @return
      */
     public String word() {
-        return String.format("%%%s%%", this.search);
+        return String.format("%%%s%%", this.search.trim());
     }
 
     public int totalPage() {
