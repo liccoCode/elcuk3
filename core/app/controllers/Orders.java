@@ -22,11 +22,10 @@ public class Orders extends Controller {
     public static void index(Integer p) {
         List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, 100);
         Long count = Orderr.count();
-        Pager<Orderr> pi = new Pager<Orderr>(count, p, orders);
+        Pager<Orderr> pi = new Pager<Orderr>(p, count, orders);
         List<Account> accs = Account.openedSaleAcc();
 
-
-        render(orders, count, p, pi, accs);
+        render(orders, p, pi, accs);
     }
 
     public static void show(String oid) {

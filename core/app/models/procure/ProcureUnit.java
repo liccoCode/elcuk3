@@ -417,8 +417,8 @@ public class ProcureUnit extends Model {
             throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
 
         DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit.find("stage not in (?,?) AND planArrivDate>=? AND planArrivDate<=? AND " + type/*sid/sku*/ + "=?",
-                STAGE.SHIP_OVER, STAGE.CLOSE, dt.minusMonths(9).toDate(), dt.plusMonths(3).toDate(), val).fetch();
+        List<ProcureUnit> units = ProcureUnit.find("planArrivDate>=? AND planArrivDate<=? AND " + type/*sid/sku*/ + "=?",
+                dt.minusMonths(9).toDate(), dt.plusMonths(3).toDate(), val).fetch();
 
 
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
@@ -427,9 +427,8 @@ public class ProcureUnit extends Model {
         for(ProcureUnit unit : units) {
             TimelineEventSource.Event event = new TimelineEventSource.Event(selling, unit);
             event.startAndEndDate(type)
-                    .titleAndDesc(unit.stage);
-            if(unit.stage == STAGE.DONE) event.color("9C9C9C"); // 默认颜色
-            else event.color();
+                    .titleAndDesc()
+                    .color(unit.stage);
 
             eventSource.events.add(event);
         }

@@ -16,11 +16,11 @@
     <tr>
         #{set sku:models.product.Product.merchantSKUtoSKU(sell.merchantSKU)/}
         <td class="sku" style="cursor:pointer;" aid="0" title="${sku}"><i class="icon-bolt"></i> ${sku}</td>
-        <td>${sell.onplan}</td>
-        <td style="cursor:pointer;" data-toggle="toggle" data-target="#sku_${sell_index}">
+        <td style="color:#A5B600">${sell.onplan}</td>
+        <td class="text-warning" style="cursor:pointer;" data-toggle="toggle" data-target="#sku_${sell_index}">
             <i class="icon-reorder"></i> ${sell.onwork}</td>
-        <td>${sell.onway}</td>
-        <td>${sell.qty}</td>
+        <td class="text-info">${sell.onway}</td>
+        <td style="color:#267B2F">${sell.qty}</td>
         <td>${sell._ps}</td>
         #{turnOver turnOver:sell.turnOverT4._1/}
         #{turnOver turnOver:sell.turnOverT4._3/}

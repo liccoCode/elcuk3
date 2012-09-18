@@ -1,5 +1,6 @@
 package models.view;
 
+import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import java.util.List;
@@ -17,19 +18,23 @@ public class Pager<T> {
 
 
     public Pager(int page, Long count, int size, List<T> items) {
-        this.size = size;
-        this.count = count;
         this.page = page;
+        this.count = count;
+        this.size = size;
         this.items = items;
     }
 
-    public Pager(Long count, int page, List<T> items) {
-        this(100, count, page, items);
+    public Pager(int page, Long count, List<T> items) {
+        this(page, count, 100, items);
     }
 
     public Pager(int page) {
+        this(page, 50);
+    }
+
+    public Pager(int page, int perPage) {
         this.page = page;
-        this.size = 20;
+        this.size = perPage;
     }
 
     public int size;

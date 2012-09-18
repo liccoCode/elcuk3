@@ -684,14 +684,13 @@ public class Selling extends GenericModel {
                     if(unit.stage == ProcureUnit.STAGE.PLAN)
                         analyzeMap.get(sellKey).onplan += unit.attrs.planQty;
                     else if(unit.stage == ProcureUnit.STAGE.DELIVERY || unit.stage == ProcureUnit.STAGE.DONE) {
-                        //TODO 需要处理的计算
-                        analyzeMap.get(sellKey).onwork += 0;
+                        analyzeMap.get(sellKey).onwork += unit.qty();
                     }
                 }
 
                 // onway [Shipment.shipItem]
-                List<ShipItem> shipItems = ShipItem.find(String.format("%s AND shipment.state!=?", isSku ? "unit.sku=?" : "unit.sid=?"),
-                        analyzeMap.get(sellKey).sellingId, Shipment.S.DONE).fetch();
+                List<ShipItem> shipItems = ShipItem.find(String.format("%s AND shipment.state NOT IN (?,?)", isSku ? "unit.sku=?" : "unit.sid=?"),
+                        analyzeMap.get(sellKey).sellingId, Shipment.S.DONE, Shipment.S.CANCEL).fetch();
                 for(ShipItem itm : shipItems) {
                     analyzeMap.get(sellKey).onway += itm.qty;
                 }

@@ -3,6 +3,7 @@ package models.view.dto;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import helper.Dates;
+import helper.GTs;
 import helper.Webs;
 import models.market.Selling;
 import models.procure.ProcureUnit;
@@ -166,7 +167,7 @@ public class TimelineEventSource {
          */
         public Event startAndEndDate(String type) {
             DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime());
-            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.selling._ps() : this.selling.ps));
+            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.selling._ps() : ((this.selling.ps == null || this.selling.ps <= 0) ? 0.1f : this.selling.ps)));
             this.start = Dates.date2Date(planDt.toDate());
             this.end = Dates.date2Date(planDt.plusHours((int) (this.lastDays * 24)).toDate());
             this.durationEvent = true;
@@ -183,15 +184,23 @@ public class TimelineEventSource {
          *
          * @return
          */
-        public Event titleAndDesc(ProcureUnit.STAGE state) {
+        public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
             this.title = String.format("%s | %s Days, %s(%s) %s(%s)",
-                    state,
+                    this.unit.stage,
                     this.lastDays, this.unit.cooperator.name,
                     this.unit.sid,
                     (isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty),
-                    (isEnsureQty() ? "EnsureQty" : "PlanQty"));
-            this.description = "<h2>这里想看到什么数据??</h2>";
+                    (isEnsureQty() ? "Qty" : "PlanQty"));
+            /**
+             * 1. 预计交货时间
+             * 2. 实际交货时间
+             * 3. 预计到库时间
+             * 4. 剩余数量
+             * 5. 运输数量
+             */
+            this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
+            this.link = "/procures/index?p.search=id:" + this.unit.id;
             return this;
         }
 
@@ -208,6 +217,35 @@ public class TimelineEventSource {
 
         public Event color(String color) {
             this.color = "#" + color;
+            return this;
+        }
+
+        public Event color(ProcureUnit.STAGE stage) {
+            String color = "999999";
+            switch(stage) {
+                case PLAN:
+                    color = "A5B600";
+                    break;
+                case DELIVERY:
+                case DONE:
+                    // warnning
+                    color = "C09853";
+                    break;
+                case PART_SHIPPING:
+                case SHIPPING:
+                    // info
+                    color = "3A87AD";
+                    break;
+                case SHIP_OVER:
+                    //mute
+                    color = "999999";
+                    break;
+                case CLOSE:
+                default:
+                    // error
+                    color = "B94A48";
+            }
+            this.color = String.format("#%s", color);
             return this;
         }
     }

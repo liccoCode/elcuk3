@@ -1,0 +1,26 @@
+<ul>
+#{if unit.attrs.planDeliveryDate}
+    <li>预计交货时间: ${unit.attrs.planDeliveryDate}</li>
+#{/if}
+#{if unit.attrs.deliveryDate}
+    <li>实际交货时间: ${unit.attrs.deliveryDate}</li>
+#{/if}
+#{if unit.attrs.planArrivDate}
+    <li>预计到库时间: ${unit.attrs.planArrivDate}</li>
+#{/if}
+    <li>采购量: ${unit.qty()}</li>
+#{if unit.stage == models.procure.ProcureUnit.STAGE.PART_SHIPPING}
+    #{set leftQty: unit.leftQty()/}
+    <li>剩余量: ${leftQty._1}</li>
+    <li>运输量: ${leftQty._2}</li>
+#{/if}
+#{elseif unit.stage == models.procure.ProcureUnit.STAGE.SHIPPING || unit.stage == models.procure.ProcureUnit.STAGE.SHIP_OVER}
+    <li>运输量: ${unit.qty()}</li>
+#{/elseif}
+#{if unit.deliveryment}
+    <li>采购单: <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank"><i class="icon-link"></i> ${unit.deliveryment.id}</a></li>
+#{/if}
+    <li>
+        Memo: ${unit.comment.raw()}
+    </li>
+</ul>
