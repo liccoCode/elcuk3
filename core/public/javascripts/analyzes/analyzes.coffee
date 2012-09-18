@@ -241,7 +241,7 @@ $ ->
 
           #页脚的翻页事件
           $('div.pagination a').click ->
-            sellRankLoad(type, $(@).text())
+            sellRankLoad(type, $(@).attr('page'))
             false
         finally
           tgt.unmask()

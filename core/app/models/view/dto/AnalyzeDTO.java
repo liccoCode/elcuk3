@@ -20,9 +20,15 @@ public class AnalyzeDTO {
      */
     public int plan;
     /**
-     * 正在制作的数量j
+     * 正在制作的数量
      */
     public int work;
+
+    /**
+     * 交货了的数量
+     */
+    public int done;
+
     /**
      * 运输中的数量
      */

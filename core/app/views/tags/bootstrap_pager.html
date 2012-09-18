@@ -8,15 +8,15 @@ u(rl): 方法
 #{set end: ((_pi.page + 3) <= _pi.totalPage) ? (_pi.page + 3) : _pi.totalPage/}
 <div class="pagination pagination-centered">
     <ul>
-        <li><a href="${_url + "?p=1"}">首页</a></li>
+        <li><a page="1" href="${_url + "?p=1"}">首页</a></li>
     #{list items:begin..end, as:'i'}
         #{if _pi.page == i}
-            <li class="active"><a href="#">${i}</a></li>
+            <li class="active"><a page="${i}" href="#">${i}</a></li>
         #{/if}
         #{else }
-            <li><a href="${_url + "?p=" + i}">${i}</a></li>
+            <li><a page="${i}" href="${_url + "?p=" + i}">${i}</a></li>
         #{/else}
     #{/list}
-        <li><a href="${_url + "?p=" + _pi.totalPage}">尾页(${_pi.totalPage}|${_pi.count})</a></li>
+        <li><a page="${_pi.totalPage}" href="${_url + "?p=" + _pi.totalPage}">尾页(${_pi.totalPage}|${_pi.count})</a></li>
     </ul>
 </div>
