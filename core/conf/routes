@@ -24,9 +24,10 @@ GET     /images/                                            staticDir:public/ima
 GET     /img/                                               staticDir:public/images
 GET     /helper/                                            staticDir:public/images/helper
 
+# API 的拦截需要放到前面
+*       /api/{controller}/{action}                          api.{controller}.{action}
 
 # Catch all
 *       /{controller}/{action}                              {controller}.{action}
 *       /{controller}/{action}/{id}                         {controller}.{action}
-*       /api/{controller}/{action}                          api.{controller}.{action}
 
