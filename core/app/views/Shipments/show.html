@@ -148,7 +148,14 @@
                         #{/list}
                         </select>
                     </td>
-                    <td colspan="2"></td>
+                    <td>计价类型</td>
+                    <td>
+                        <select name="ship.pype">
+                            #{list items:models.procure.Shipment.P.values(), as:'p'}
+                            <option ${p == ship.pype ? 'selected' : ''} value="${p.name()}">${p}</option>
+                            #{/list}
+                        </select>
+                    </td>
                 </tr>
 
                 <tr>
@@ -228,30 +235,7 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <table class="table table-condensed table-bordered">
-            <tr>
-                <th>#</th>
-                <th>Sku</th>
-                <th>产品名称</th>
-                <th>运输时间</th>
-                <th>运输数量</th>
-                <th>去往仓库</th>
-                <th>采购单</th>
-                <th>申报价格</th>
-            </tr>
-        #{list items:ship.items, as:'si'}
-            <tr>
-                <td>${si.id}</td>
-                <td>${si.unit.sku}</td>
-                <td>${si.unit.product.productName}</td>
-                <td>${si.shipDate.los()}</td>
-                <td>${si.unit.whouse.name()}</td>
-                <td>${si.qty}</td>
-                <td><a href="@{Deliveryments.show()}/${si.unit.deliveryment.id}">${si.unit.deliveryment.name}</a></td>
-                <td>等待添加</td>
-            </tr>
-        #{/list}
-        </table>
+    #{render 'Shipments/_shipitem.html', items:ship.items/}
     </div>
 </div>
 
@@ -263,7 +247,7 @@
 
         <form action="@{Shipments.refreshProcuress()}" method="post" style="margin:0">
             <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
+        #{authenticityToken /}
             <button class="btn btn-danger"><i class="icon-refresh"></i></button>
         </form>
     </div>

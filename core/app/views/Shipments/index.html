@@ -2,6 +2,13 @@
 #{set title:'运输单列表' /}
 #{set 'moreScripts'}
 #{/set}
+<div class="row-fluid">
+    <div class="span12 alert alert-info">
+        <ul>
+            #{li_net /}
+        </ul>
+    </div>
+</div>
 
 <div class="row-fluid">
     <form action="@{Shipments.index()}" method="post">
@@ -48,9 +55,9 @@
 
             <select name="p.whouseId" style="width:98px;margin-left:15px;">
                 <option value="">运往仓库</option>
-                #{list items:whouses, as:'wh'}
+            #{list items:whouses, as:'wh'}
                 <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
-                #{/list}
+            #{/list}
             </select>
         </div>
         <div class="span3 input-append input-prepend">

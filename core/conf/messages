@@ -105,6 +105,7 @@ shipment.otherFee=\u5176\u4ED6\u8D39\u7528
 shipment.shipFee=\u8FD0\u8F93\u8D39\u7528
 shipment.items.size=\u8FD0\u8F93\u9879\u76EE
 shipment.whouse=\u8FD0\u5F80\u4ED3\u5E93
+shipment.cooper=\u8D27\u4EE3
 shipment.item.whouse=\u8FD0\u8F93\u5355\u4E2D\u62E5\u6709\u4E0E\u8FD0\u8F93\u5355\u53BB\u5F80\u4ED3\u5E93\u4E0D\u4E00\u6837\u7684\u8FD0\u8F93\u5355\u9879\u76EE
 shipment.postFBAShipment.plan=\u5411 Amazon \u521B\u5EFA Shipment Plan \u9519\u8BEF
 shipment.postFBAShipment.create=\u5411 Amazon \u521B\u5EFA Shipment \u9519\u8BEF
@@ -122,6 +123,8 @@ shipment.addToShip.whouse=\u8FD0\u5F80\u4ED3\u5E93\u4E0D\u4E00\u81F4
 
 shipment.beginShip.state=\u5F00\u59CB\u8FD0\u8F93, \u5FC5\u987B\u662F CONFIRM \u7684\u8FD0\u8F93\u5355
 shipment.beginShip.update=\u5411 Amazon \u66F4\u65B0\u5931\u8D25.
+
+shipments.setUpShipPage=\u9700\u8981\u6307\u5B9A\u8FD0\u5F80\u4ED3\u5E93
 
 
 # \u81EA\u5B9A\u4E49\u7684\u68C0\u67E5

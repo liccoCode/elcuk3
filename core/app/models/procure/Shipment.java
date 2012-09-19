@@ -339,11 +339,13 @@ public class Shipment extends GenericModel {
 
     /**
      * 向 Shipment 添加需要运输的 ProcureUnit(+数量)
+     * <p/>
+     * ps: 这个方法不允许并发
      *
      * @param unitId
      * @param shipQty
      */
-    public void addToShip(List<Long> unitId, List<Integer> shipQty) {
+    public synchronized void addToShip(List<Long> unitId, List<Integer> shipQty) {
         Validation.equals("shipment.addToShip.state", this.state, "", S.PLAN);
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
         if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
@@ -394,8 +396,10 @@ public class Shipment extends GenericModel {
 
     /**
      * 确认运输单以后, 向 Amazon 创建 FBAShipment
+     * <p/>
+     * ps: 这个方法不允许并发
      */
-    public void confirmAndSyncTOAmazon() {
+    public synchronized void confirmAndSyncTOAmazon() {
         /**
          * 1. 将本地的状态修改为 CONFIRM
          * 2. 向 Amazon 提交 FBA Shipment 的创建
@@ -410,8 +414,10 @@ public class Shipment extends GenericModel {
 
     /**
      * 具体的开始运输
+     * <p/>
+     * ps: 不允许多个人, 对 Shipment 多次 beginShip
      */
-    public void beginShip() {
+    public synchronized void beginShip() {
         Validation.equals("shipment.beginShip.state", this.state, "", S.CONFIRM);
 
         try {
@@ -425,19 +431,26 @@ public class Shipment extends GenericModel {
             item.unit.stage = item.unit.nextStage();
             item.unit.save();
         }
-        // 自动根据 体积与重量的值, 自动计算价格类型
-        if(this.volumn > this.weight) this.pype = P.VOLUMN;
-        else this.pype = P.WEIGHT;
+        this.pype = this.pype();
         this.state = S.SHIPPING;
         this.save();
     }
 
+    public P pype() {
+        // 自动根据 体积与重量的值, 自动计算价格类型
+        if(this.volumn == null || this.weight == null) return this.pype;
+        if(this.volumn > this.weight) return P.VOLUMN;
+        else return P.WEIGHT;
+    }
+
     /**
      * 根据此 Shipment 创建一个 FBAShipment
+     * <p/>
+     * ps: 这个方法不允许并发
      *
      * @return
      */
-    public FBAShipment postFBAShipment() {
+    public synchronized FBAShipment postFBAShipment() {
         FBAShipment fba = null;
         try {
             fba = FWS.plan(this);

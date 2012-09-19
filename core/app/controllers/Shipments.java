@@ -24,7 +24,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Shipments extends Controller {
-    @Before(only = {"index", "show", "update", "beginShip", "blank"})
+    @Before(only = {"index", "show", "update", "beginShip", "blank", "save"})
     public static void whouses() {
         List<Whouse> whouses = Whouse.findAll();
         renderArgs.put("whouses", whouses);
@@ -77,6 +77,7 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) {
             render("Shipments/show.html", ship);
         }
+        ship.pype = ship.pype();
         ship.save();
         flash.success("更新成功.");
         redirect("/Shipments/show/" + ship.id);
@@ -95,8 +96,12 @@ public class Shipments extends Controller {
     public static void setUpShipPage() {
         String shipmentId = request.params.get("id");
         Shipment ship = Shipment.findById(shipmentId);
-        List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id);
-        renderArgs.put("units", units);
+        try {
+            List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id);
+            renderArgs.put("units", units);
+        } catch(Exception e) {
+            Validation.addError("shipments.setUpShipPage", "%s");
+        }
     }
 
     public static void shipItem(String id) {
@@ -146,6 +151,7 @@ public class Shipments extends Controller {
         Validation.required("shipment.deposit", ship.deposit);
         Validation.required("shipment.otherFee", ship.otherFee);
         Validation.required("shipment.shipFee", ship.shipFee);
+        Validation.required("shipment.cooper", ship.cooper);
         Validation.min("shipment.items.size", ship.items.size(), 1);
 
         if(Validation.hasErrors()) render("Shipments/show.html", ship);

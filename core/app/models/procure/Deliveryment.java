@@ -106,6 +106,7 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
+     *
      * @return
      */
     public Cooperator supplier() {
@@ -115,6 +116,7 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 计算此采购单的最早一个交货与最晚一个交货的时间, 如果只有一个, 那么最早==最晚
+     *
      * @return
      */
     public F.T2<Date, Date> firstAndEndDeliveryDate() {
@@ -233,9 +235,10 @@ public class Deliveryment extends GenericModel {
     /**
      * 通过 ProcureUnit 来创建采购单
      *
+     * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
      * @param pids
      */
-    public static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
+    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
         if(pids.size() != units.size()) {

@@ -4,6 +4,16 @@
 #{/set}
 
 <div class="row-fluid">
+    <div class="span12 alert alert-info">
+        <ul>
+            <li><strong>[最先交货时间]</strong>为采购单有交货情况后, 记录的第一次交货时间</li>
+            <li><strong>[最后交货时间]</strong>为采购单有交货情况后, 记录的第后一次交货时间</li>
+        #{li_net /}
+        </ul>
+    </div>
+</div>
+
+<div class="row-fluid">
     <form action="@{Deliveryments.index()}" method="post">
         <div class="span3 input-prepend input-append">
             <span class="add-on">From:</span>
@@ -44,7 +54,7 @@
                 <th>Create</th>
             </tr>
         #{list items:deliveryments, as:'dmt'}
-        #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+            #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
             <tr>
                 <td>
                     <a href="@{Deliveryments.show}/${dmt.id}" target="_blank">${dmt.id}</a>

@@ -55,7 +55,7 @@
         <h4>确定运输的货物</h4>
         <ul>
             <li>可以将交货与没有交货的[采购单元]都添加/删除进入运输单</li>
-            <li>还没有交货的[采购单元]会使用橙色高亮, 并有 <i class="icon-question-sign"></i> 标记 </li>
+            <li>还没有交货的[采购单元]会使用橙色高亮, 并有 <i class="icon-question-sign"></i> 标记</li>
             <li>如果超额交货, 则与满额交货一样</li>
             <li>如果交货不足, 会自动将不足的部分创建新的[采购单元], 记录缺少的部分</li>
             <li>[采购单元]交货以后, 就不允许修改数量</li>
@@ -67,44 +67,7 @@
 <div class="row-fluid">
     <div class="span12">
         <form method="post">
-            <table class="table table-condensed table-bordered">
-                <tr>
-                    <th>
-                        <label class="checkbox">
-                            <input type="checkbox" class="checkbox_all">
-                        </label>
-                    </th>
-                    <th>#</th>
-                    <th>Sku</th>
-                    <th>Sid</th>
-                    <th>Qty</th>
-                    <th>ProductName</th>
-                    <th>运往仓库</th>
-                    <th>ProcreUnit</th>
-                </tr>
-            #{list items:ship.items, as:'itm'}
-                <tr>
-                    <td>
-                        <label class="checkbox">
-                            <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
-                        </label>
-                    </td>
-                    <td>${itm.id}</td>
-                    <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
-                    <td>${itm.unit.sid}</td>
-                    <td>${itm.qty}</td>
-                    <td>${itm.unit.product.productName.omis(80)}</td>
-                    <td>${itm.unit.whouse.name()}</td>
-                    <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>
-                </tr>
-            #{/list}
-                <tr>
-                    <td colspan="8">
-                        <input type="hidden" name="id" value="${ship.id}">
-                        <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
-                    </td>
-                </tr>
-            </table>
+        #{render 'Shipments/_shipitem.html', items:ship.items, shipmentId:ship.id/}
         </form>
     </div>
 </div>
@@ -127,7 +90,9 @@
                     </th>
                     <th>Sku</th>
                     <th>Sid</th>
+                    <th>采购单</th>
                     <th>预计到库日期</th>
+                    <th>供应商</th>
                     <th>交货数量</th>
                     <th rel="popover" content="如果有五角星, 表示货物已经到达货代处">
                         <i class="icon-question-sign"></i> 剩余可运数量
@@ -149,7 +114,9 @@
                         </td>
                         <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
                         <td>${unit.sid}</td>
-                        <td>${unit.attrs.planArrivDate.los()}</td>
+                        <td><a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a></td>
+                        <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+                        <td>${unit.cooperator?.name}</td>
                         <td>
                             #{if unit.attrs.qty}
                             ${unit.attrs.qty}
@@ -161,6 +128,7 @@
                         <td data-toggle="toggle" data-target="#unit_${unit_index}" style="cursor:pointer;background:${'#' + unit.leekOrOverRgb()}">
                             #{if unit.isPlaced}
                                 <i class="icon-star" style="color:#FF2200"></i>
+                                <i style="color:#84F000"></i>
                             #{/if}
                             <i class="icon-reorder"></i> ${leftQty._1}
                             <span class="badge badge-info">${leftQty._3.size()}</span>
@@ -171,7 +139,7 @@
                         <td>${unit.whouse.name()}</td>
                         <td style="color:${'#' + unit.stage.rgb()}">${unit.stage}</td>
                         <td>${unit.product.productName.omis(80)}</td>
-                        <td>${unit.id}</td>
+                        <td><a href="@{Procures.index()}?p.search=id:${unit.id}" target="_blank">${unit.id}</a></td>
                     </tr>
                     <tr id="unit_${unit_index}" style="display:none;">
                         <td colspan="11">

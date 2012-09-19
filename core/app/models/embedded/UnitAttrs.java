@@ -97,11 +97,5 @@ public class UnitAttrs {
             Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate, new Date(this.planShipDate.getTime() + 1));
         if(this.planShipDate != null && this.planArrivDate != null)
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
-
-        // 计划与实际 日期之间的检验
-        if(this.planDeliveryDate != null && this.deliveryDate != null)
-            // 为了能够让两个日期相等通过检查
-            Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate, new Date(this.deliveryDate.getTime() + 1));
-
     }
 }
