@@ -2,11 +2,13 @@ package helper;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import models.market.Account;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
 import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
 import play.Play;
@@ -14,15 +16,16 @@ import play.data.validation.Error;
 import play.libs.F;
 import play.libs.Mail;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -83,6 +86,32 @@ public class Webs {
         String[] args = listingId.split("_");
         M market = M.val(args[1]);
         return String.format("http://www.%s/dp/%s", market.toString(), args[0]);
+    }
+
+    /**
+     * 测试环境下使用的辅助登陆方法.  会将用户登陆的 CookieStore 保存到 test 目录下, 如果超过 10 小时则放弃缓存, 重新登陆
+     * @param acc
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static void dev_login(Account acc) throws IOException, ClassNotFoundException {
+        File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
+        if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(10)))
+            jsonFile.delete();
+
+        if(!jsonFile.exists()) {
+            acc.loginAmazonSellerCenter();
+            FileOutputStream fos = new FileOutputStream(new File(Play.applicationPath + "/test", acc.prettyName() + ".json"));
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(acc.cookieStore());
+            oos.close();
+        } else {
+            FileInputStream fis = new FileInputStream(jsonFile);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            CookieStore cookieStore = (CookieStore) ois.readObject();
+            Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
+        }
+        Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
     }
 
     /**

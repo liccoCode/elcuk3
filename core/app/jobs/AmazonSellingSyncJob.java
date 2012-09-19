@@ -37,7 +37,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                 JobRequest job = JobRequest.checkJob(acc, this, acc.marketplaceId());
                 if(job == null) continue;
                 job.request();
-                job = JobRequest.checkJob(acc, this, AWS.MID.A1PA6795UKMFR9); // 特殊, UK 需要抓取 DE 市场的
+                job = JobRequest.checkJob(acc, this, M.AMAZON_DE.amid()); // 特殊, UK 需要抓取 DE 市场的
                 if(job == null) continue;
                 job.request();
             } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {

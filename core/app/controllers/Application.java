@@ -1,19 +1,13 @@
 package controllers;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import helper.Dates;
+import helper.Webs;
 import models.market.Account;
-import models.market.M;
 import models.market.OrderItem;
 import models.market.Orderr;
 import models.support.Ticket;
 import models.view.Ret;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.http.client.CookieStore;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
@@ -21,7 +15,8 @@ import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -89,22 +84,9 @@ public class Application extends Controller {
      */
     public static void amazonLogin(long id) throws IOException, ClassNotFoundException {
         if(Play.mode.isProd()) forbidden();
-        Account acc = Account.findById(id);
 
-        File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
-        if(!jsonFile.exists()) {
-            acc.loginAmazonSellerCenter();
-            FileOutputStream fos = new FileOutputStream(new File(Play.applicationPath + "/test", acc.prettyName() + ".json"));
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(acc.cookieStore());
-            oos.close();
-        } else {
-            FileInputStream fis = new FileInputStream(jsonFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            CookieStore cookieStore = (CookieStore) ois.readObject();
-            Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
-        }
-        Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
+        Account acc = Account.findById(id);
+        Webs.dev_login(acc);
         renderJSON(Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)));
     }
 

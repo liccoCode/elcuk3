@@ -136,7 +136,7 @@ public class JobRequest extends Model {
     public String procressState;
 
     @Enumerated(EnumType.STRING)
-    public AWS.MID marketplaceId;
+    public M.MID marketplaceId;
 
     public String path;
 
@@ -153,7 +153,7 @@ public class JobRequest extends Model {
      * @param mid  需要使用哪一个市场的数据;
      * @return
      */
-    public static JobRequest checkJob(Account acc, AmazonJob ajob, AWS.MID mid) {
+    public static JobRequest checkJob(Account acc, AmazonJob ajob, M.MID mid) {
         return newJob(ajob.intervalHours(), ajob.type(), acc, mid);
     }
 
@@ -176,7 +176,7 @@ public class JobRequest extends Model {
      * @param acc      哪一个账户
      * @return
      */
-    private static JobRequest newJob(int interval, T type, Account acc, AWS.MID mid) {
+    private static JobRequest newJob(int interval, T type, Account acc, M.MID mid) {
         if(!acc.type.name().startsWith("AMAZON"))
             throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
         JobRequest job = JobRequest.find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();

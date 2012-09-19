@@ -35,38 +35,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class AWS {
 
-    public enum MID {
-        /**
-         * UK
-         */
-        A1F83G8C2ARO7P {
-            @Override
-            public M market() {
-                return M.AMAZON_UK;
-            }
-        },
-        /**
-         * DE
-         */
-        A1PA6795UKMFR9 {
-            @Override
-            public M market() {
-                return M.AMAZON_DE;
-            }
-        },
-        /**
-         * FR
-         */
-        A13V1IB3VIYZZH {
-            @Override
-            public M market() {
-                return M.AMAZON_FR;
-            }
-        };
-
-        public abstract M market();
-    }
-
     /**
      * 年/月/日/文件名
      */

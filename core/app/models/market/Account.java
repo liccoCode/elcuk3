@@ -199,6 +199,7 @@ public class Account extends Model {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_FR:
+            case AMAZON_US:
                 String body = "";
                 try {
                     /**
@@ -256,6 +257,7 @@ public class Account extends Model {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_FR:
+            case AMAZON_US:
                 /**
                  * 0. clear old cookies
                  * 1. Visit the website, fetch the new Cookie.
@@ -282,7 +284,7 @@ public class Account extends Model {
                     else params.add(new BasicNameValuePair(att, el.val()));
                 }
                 body = HTTP.post(this.cookieStore(market), doc.select("#ap_signin_form").first().attr("action"), params);
-                boolean isLogin = isLogin(Jsoup.parse(body));
+                boolean isLogin = Account.isLoginFront(Jsoup.parse(body));
                 if(Play.mode.isDev())
                     FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
                 boolean loginSucc = false;
@@ -308,9 +310,11 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
+        if(this.type == M.AMAZON_US ||
+                this.type == M.EBAY_UK) return;
         String url = "Account.changeRegion.";
         try {
-            url = this.type.changeRegion(m.amid());
+            url = this.type.changeRegion(m.amid().name());
             HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
             throw new FastRuntimeException(String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
@@ -323,16 +327,18 @@ public class Account extends Model {
      *
      * @return
      */
-    public AWS.MID marketplaceId() {
+    public M.MID marketplaceId() {
         switch(this.type) {
             case AMAZON_UK:
-                return AWS.MID.A1F83G8C2ARO7P;
+                return M.MID.A1F83G8C2ARO7P;
             case AMAZON_DE:
-                return AWS.MID.A1PA6795UKMFR9;
+                return M.MID.A1PA6795UKMFR9;
             case AMAZON_FR:
-                return AWS.MID.A13V1IB3VIYZZH;
+                return M.MID.A13V1IB3VIYZZH;
+            case AMAZON_US:
+                return M.MID.ATVPDKIKX0DER;
             default:
-                return AWS.MID.A1F83G8C2ARO7P;
+                return M.MID.A1F83G8C2ARO7P;
         }
     }
 
@@ -357,10 +363,10 @@ public class Account extends Model {
     }
 
     /**
-     * 下载 Past Settlements 页面的 Flat V2 文件
+     * 下载 Past Settlements 页面的 Flat V2 文件; 这个方法一般属于修复类方法, 需要人工输入一个参数
      *
      * @param market
-     * @param reportId
+     * @param reportId 在页面可以查看到的 reportId
      * @return
      */
     public File briefFlatV2Finance(M market, String reportId) {
@@ -453,7 +459,7 @@ public class Account extends Model {
             if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm"))) upAndDownLink[0] = link;
             else upAndDownLink[1] = link;
         }
-        boolean isLogin = isLogin(doc);
+        boolean isLogin = Account.isLoginFront(doc);
         // 这里检查点击不成功的原因
         if(!isLogin)
             FLog.fileLog(String.format("%s.clickReiew.%s.%s.Failed.html", this.prettyName(), review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
@@ -465,12 +471,12 @@ public class Account extends Model {
     }
 
     /**
-     * 判断此 Doc 页面是否登陆成功
+     * 判断此 Doc 页面是否成功登陆前台
      *
      * @param doc
      * @return
      */
-    private boolean isLogin(Document doc) {
+    public static boolean isLoginFront(Document doc) {
         Element oldAmazon = doc.select("#navidWelcomeMsg").first();
         if(oldAmazon != null) {
             String navidWelcomeMsgStr = doc.select("#navidWelcomeMsg").outerHtml();
@@ -482,6 +488,15 @@ public class Account extends Model {
                     StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
                     StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
         }
+    }
+
+    /**
+     * 判断后端是否登陆
+     * @param doc
+     * @return
+     */
+    public static boolean isLoginEnd(Document doc) {
+        return doc.select("#sc_quicklinks_top").first() != null;
     }
 
     @Override
@@ -539,22 +554,6 @@ public class Account extends Model {
      */
     public static List<Account> openedSaleAcc() {
         return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, true).fetch();
-    }
-
-    /**
-     * 根据 ListingId, 过滤 Account 与 ListingId 所在 Market 相同的 Account
-     *
-     * @param validAccs
-     * @param lid
-     * @return
-     */
-    public static List<Account> accountMarketFilter(List<Account> validAccs, String lid) {
-        List<Account> sameMarketAccs = new ArrayList<Account>();
-        for(Account acc : validAccs) {
-            if(acc.type == Listing.unLid(lid)._2)
-                sameMarketAccs.add(acc);
-        }
-        return sameMarketAccs;
     }
 
     /**

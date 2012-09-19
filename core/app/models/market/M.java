@@ -11,13 +11,70 @@ import java.util.Date;
  * 不同的 Market place
  */
 public enum M {
-    AMAZON_UK,
-    AMAZON_DE,
-    AMAZON_FR,
-    AMAZON_IT,
-    AMAZON_ES,
-    AMAZON_US,
-    EBAY_UK;
+    AMAZON_UK(MID.A1F83G8C2ARO7P),
+    AMAZON_DE(MID.A1PA6795UKMFR9),
+    AMAZON_FR(MID.A13V1IB3VIYZZH),
+    AMAZON_IT(MID.APJ6JRA9NG5V4),
+    AMAZON_ES(MID.A1RKKUPIHCS9HS),
+    AMAZON_US(MID.ATVPDKIKX0DER),
+    EBAY_UK(MID.EBAY_UK);
+
+    private MID mid;
+
+    private M(MID mid) {
+        this.mid = mid;
+    }
+
+
+    /**
+     * 为 Amazon 不同市场的 Id, 与 Market 对应
+     */
+    public enum MID {
+        /**
+         * UK
+         */
+        A1F83G8C2ARO7P(M.AMAZON_UK),
+        /**
+         * DE
+         */
+        A1PA6795UKMFR9(M.AMAZON_DE),
+        /**
+         * FR
+         */
+        A13V1IB3VIYZZH(M.AMAZON_FR),
+        /**
+         * US
+         */
+        ATVPDKIKX0DER(M.AMAZON_US),
+        /**
+         * IT
+         */
+        APJ6JRA9NG5V4(M.AMAZON_IT),
+        /**
+         * ES
+         */
+        A1RKKUPIHCS9HS(AMAZON_ES),
+        EBAY_UK(M.EBAY_UK);
+        private M market;
+
+        private MID(M market) {
+            this.market = market;
+        }
+
+        public M market() {
+            return this.market;
+        }
+    }
+
+
+    /**
+     * Amazon MarketPlaceId, 在 Amazon 上用来区分 uk/de/us 等等市场的 ID
+     *
+     * @return
+     */
+    public MID amid() {
+        return this.mid;
+    }
 
     public boolean isAmazon() {
         return (StringUtils.startsWith(this.name(), "AMAZON"));
@@ -25,31 +82,6 @@ public enum M {
 
     public boolean isEbay() {
         return (StringUtils.startsWith(this.name(), "EBAY"));
-    }
-
-    /**
-     * Amazon MarketPlaceId, 在 Amazon 上用来区分 uk/de/us 等等市场的 ID
-     * !! TODO US 市场的暂时还没有
-     *
-     * @return
-     */
-    public String amid() {
-        switch(this) {
-            case AMAZON_UK:
-                return "A1F83G8C2ARO7P";
-            case AMAZON_DE:
-                return "A1PA6795UKMFR9";
-            case AMAZON_IT:
-                return "APJ6JRA9NG5V4";
-            case AMAZON_FR:
-                return "A13V1IB3VIYZZH";
-            case AMAZON_ES:
-                return "A1RKKUPIHCS9HS";
-            case AMAZON_US:
-            case EBAY_UK:
-            default:
-                return "";
-        }
     }
 
     /**
@@ -276,8 +308,8 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return "https://sellercentral." + this.toString() + "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" + marketplaceID;
+            case AMAZON_US:
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

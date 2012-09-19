@@ -1,14 +1,15 @@
 package market;
 
+import helper.HTTP;
+import helper.Webs;
 import models.market.Account;
 import models.market.M;
+import org.jsoup.Jsoup;
+import org.junit.Before;
 import org.junit.Test;
-import play.mvc.Http;
-import play.test.Fixtures;
-import play.test.FunctionalTest;
+import play.test.UnitTest;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,37 +17,39 @@ import java.util.Map;
  * Date: 12-1-7
  * Time: 上午6:31
  */
-public class AccountTest extends FunctionalTest {
-    //    @Before
-    public void setup() {
-        Fixtures.delete(Account.class);
-    }
+public class AccountTest extends UnitTest {
+    Account acc;
 
-    //    @Test
-    public void createAccount() {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("a.type", M.AMAZON_UK.name());
-        params.put("a.username", "easyacc.eu@gmail.com");
-        params.put("a.password", "6XC$X5oY!jj");
-        Http.Response response = POST("/market/accounts/c", params);
-        System.out.println(response.out.toString());
-    }
-
-    //    @Test
-    public void updateAccount() {
-        Account acc = Account.find("uniqueName", "amazon.co.uk_easyacc.eu@gmail.com").first();
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("a.id", acc.id.toString());
-        params.put("a.type", acc.type.name());
-        params.put("a.username", acc.username);
-        params.put("a.password", acc.password);
-        params.put("a.token", "token!!"); //update
-        System.out.println(POST("/market/accounts/u", params).out.toString());
+    @Before
+    public void setAcc() {
+        acc = Account.findById(131l);
     }
 
     @Test
-    public void readAccount() {
-        Account acc = Account.findById(3l);
-        acc.loginAmazonSize(null);
+    public void readAccount() throws ClassNotFoundException, IOException {
+        try {
+            // 登陆并且缓存登陆
+            //testSellerCentralLogIn
+            Webs.dev_login(acc);
+        } catch(Exception e) {
+            e.printStackTrace();
+            //ignore
+        }
+    }
+
+    //    @Test
+    public void testBriefFlatFinance() {
+        acc.briefFlatFinance(M.AMAZON_US);
+    }
+
+    //    @Test
+    public void testsellerCentralHomePage() throws IOException {
+        String html = HTTP.get(acc.cookieStore(acc.type), acc.type.sellerCentralHomePage());
+        assertTrue(Account.isLoginEnd(Jsoup.parse(html)));
+    }
+
+    @Test
+    public void testamazonSiteLogin() {
+        assertTrue(acc.loginAmazonSize(M.AMAZON_US));
     }
 }
