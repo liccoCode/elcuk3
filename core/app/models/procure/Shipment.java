@@ -337,6 +337,11 @@ public class Shipment extends GenericModel {
         }
     }
 
+    public void setTrackNo(String trackNo) {
+        if(StringUtils.isNotBlank(trackNo)) this.trackNo = trackNo.trim();
+        else this.trackNo = trackNo;
+    }
+
     /**
      * 向 Shipment 添加需要运输的 ProcureUnit(+数量)
      * <p/>

@@ -64,7 +64,7 @@ public enum iExpress {
 
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo);
+            return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo.trim());
         }
     },
     FEDEX {
@@ -125,13 +125,13 @@ public enum iExpress {
 
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo);
+            return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo.trim());
         }
     },
     UPS {
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", tracNo);
+            return String.format("http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", tracNo.trim());
         }
 
         @Override
@@ -174,7 +174,7 @@ public enum iExpress {
      * @param tracNo
      * @return
      */
-    abstract String trackUrl(String tracNo);
+    public abstract String trackUrl(String tracNo);
 
     /**
      * 解析出需要的部分 HTML

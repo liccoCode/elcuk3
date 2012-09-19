@@ -110,7 +110,7 @@
                     <td>
                         <div class="input-append">
                             <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
-                            <a href="${ship.trackNo ? ship.trackNo : '#'}" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                            <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
                         </div>
                     </td>
                     <th>国际快递商</th>
@@ -151,9 +151,9 @@
                     <td>计价类型</td>
                     <td>
                         <select name="ship.pype">
-                            #{list items:models.procure.Shipment.P.values(), as:'p'}
+                        #{list items:models.procure.Shipment.P.values(), as:'p'}
                             <option ${p == ship.pype ? 'selected' : ''} value="${p.name()}">${p}</option>
-                            #{/list}
+                        #{/list}
                         </select>
                     </td>
                 </tr>
