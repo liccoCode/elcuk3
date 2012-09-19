@@ -49,7 +49,7 @@ public class Category extends GenericModel {
 
     @Embedded
     @Expose
-    public CategorySettings settings;
+    public CategorySettings settings = new CategorySettings();
 
     @Override
     public String toString() {
