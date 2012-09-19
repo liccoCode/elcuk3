@@ -112,9 +112,11 @@ public class Shipment extends GenericModel {
             @Override
             public S nextState(Shipment ship) {
                 // 如果在 SHIPPING 状态则检查是否处于清关
-                if(ship.internationExpress.isContainsClearance(ship.iExpressHTML))
+                if(ship.internationExpress.isContainsClearance(ship.iExpressHTML)) {
                     Mails.shipment_clearance(ship);
-                return CLEARANCE;
+                    return CLEARANCE;
+                }
+                return this;
             }
         },
         /**
