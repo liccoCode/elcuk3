@@ -1,14 +1,14 @@
 package controllers;
 
 import helper.Webs;
+import models.ElcukRecord;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Shipments extends Controller {
-    @Before(only = {"index", "show", "update", "beginShip", "blank", "save"})
+    @Before(only = {"index", "blank", "save"})
     public static void whouses() {
         List<Whouse> whouses = Whouse.findAll();
         renderArgs.put("whouses", whouses);
@@ -61,8 +61,11 @@ public class Shipments extends Controller {
 
     @Before(only = {"show", "update", "beginShip"})
     public static void setUpShowPage() {
-        List<Cooperator> shippers = Cooperator.shipper();
-        renderArgs.put("shippers", shippers);
+        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("shippers", Cooperator.shipper());
+        String shipmentId = request.params.get("id");
+        if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
+        renderArgs.put("records", ElcukRecord.records(shipmentId));
     }
 
     public static void show(String id) {
@@ -171,11 +174,18 @@ public class Shipments extends Controller {
     public static void confirm(String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
-        Validation.equals("shipments.confirm.state", ship.state, "", Shipment.S.PLAN);
+        Validation.isTrue("shipment.fbashipment", ship.fbaShipment == null);
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         ship.confirmAndSyncTOAmazon();
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        flash.success("成功确认, 运输项目已经固定, Amazon 成功创建 Shipment 并且已经 confirm.");
+        flash.success("Amazon FBA Shipment 创建成功");
+        redirect("/shipments/show/" + id);
+    }
+
+    public static void updateFba(String id) {
+        checkAuthenticity();
+        Shipment ship = Shipment.findById(id);
+        ship.updateFbaShipment();
         redirect("/shipments/show/" + id);
     }
 

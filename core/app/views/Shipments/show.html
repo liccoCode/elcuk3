@@ -110,7 +110,9 @@
                     <td>
                         <div class="input-append">
                             <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
+                        #{if ship.internationExpress}
                             <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                        #{/if}
                         </div>
                     </td>
                     <th>国际快递商</th>
@@ -193,26 +195,30 @@
 #{/if}
 <div class="row-fluid">
     <div class="span12" style="margin-bottom:15px;">
-    #{if ship.state == models.procure.Shipment.S.PLAN}
+    #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
         <a href="@{Shipments.shipItem()}/${ship.id}" style="margin-right:10px;" class="btn btn-primary pull-left">修改运输项目</a>
     #{/if}
 
-    #{if ship.state == models.procure.Shipment.S.PLAN}
+    #{ifnot ship.fbaShipment}
         <form action="@{Shipments.confirm()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-            <div class="input-append input-prepend" style="margin-right:10px;">
-                <span class="add-on" rel="popover" content="确认运输项目以后, 则不再允许修改运输项目, 同时会将对应的运输单向 Amazon 创建 Shipment"><i class="icon-question-sign"></i></span>
-                <button data-confirm="confirm" class="btn btn-warning">运输项目确认</button>
-            </div>
+            <button data-confirm="confirm" class="btn btn-danger" style="margin-right:10px;">创建 FBA Shipment</button>
         </form>
-    #{/if}
+    #{/ifnot}
+    #{else }
+        <form action="@{Shipments.updateFba()}" method="post" class="pull-left">
+            #{authenticityToken /}
+            <input type="hidden" name="id" value="${ship.id}">
+            <button data-confirm="confirm" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
+        </form>
+    #{/else}
 
     #{if isPlanAndConfirm}
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-            <button style="margin-right:10px;" data-confirm="confirm" class="btn btn-danger">
+            <button style="margin-right:10px;" data-confirm="confirm" class="btn btn-success">
                 开始运输
             </button>
         </form>
@@ -238,6 +244,8 @@
     #{render 'Shipments/_shipitem.html', items:ship.items/}
     </div>
 </div>
+
+#{records records:records/}
 
 <div class="row-fluid">
     <div class="span12 alert alert-danger">

@@ -1,33 +1,35 @@
 package helper;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSClient;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSConfig;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
+import models.ElcukRecord;
 import models.market.Account;
+import models.market.Selling;
 import models.procure.FBAShipment;
+import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import play.i18n.Messages;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Amazon Fulfillment WebService
+ * Amazon FBA 操作
  * User: wyattpan
  * Date: 9/11/12
  * Time: 5:46 PM
  */
-public class FWS {
+public class FBA {
 
     private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<String, FBAInboundServiceMWSClient>();
+    private static final Pattern pattern = Pattern.compile("将\\[运输项目\\] (.*) 从\\[运输单\\]");
 
     /**
      * 根据 Shipment 向 Amazon 创建 FBAShipment plan
@@ -130,7 +132,7 @@ public class FWS {
         create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle,
                 Account.address(fbashipment.account.type), fbashipment.centerId, FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
         // 设置 items
-        List<InboundShipmentItem> items = FWS.shipItemsToInboundShipmentItems(fbashipment.shipment.items);
+        List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(fbashipment.shipment.items);
         create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
@@ -144,11 +146,25 @@ public class FWS {
 
     /**
      * 更新 FBA Shipment, 包括 Amazon FBA Shipment 的状态, ShipItem 的数量
+     *
      * @param fbaShipment
      * @param state
      * @throws FBAInboundServiceMWSException
      */
     public static FBAShipment.S update(FBAShipment fbaShipment, FBAShipment.S state) throws FBAInboundServiceMWSException {
+        return FBA.update(fbaShipment, fbaShipment.shipment.items, state);
+    }
+
+    /**
+     * 更新 FBA Shipment, 包括 Amazon FBA Shipment 的状态, ShipItem 的数量 ; 指定 InboundShipmentItem
+     *
+     * @param fbaShipment
+     * @param updateitems
+     * @param state
+     * @return
+     * @throws FBAInboundServiceMWSException
+     */
+    public static FBAShipment.S update(FBAShipment fbaShipment, List<ShipItem> updateitems, FBAShipment.S state) throws FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
         if(fbaShipment.state == FBAShipment.S.PLAN) return fbaShipment.state;
@@ -158,7 +174,7 @@ public class FWS {
         update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
                 Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(), fbaShipment.labelPrepType));
 
-        List<InboundShipmentItem> items = FWS.shipItemsToInboundShipmentItems(fbaShipment.shipment.items);
+        List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(updateitems);
         update.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
@@ -207,5 +223,28 @@ public class FWS {
             }
         }
         return client;
+    }
+
+    public static List<ShipItem> deleteShipItem(String shipmentid) {
+        List<ElcukRecord> records = ElcukRecord.find("fid=? AND action=?", shipmentid, Messages.get("shipment.cancelShip2")).fetch();
+        Set<String> mskus = new HashSet<String>();
+        //将[运输项目] 71ACA510-BHSPU 从[运输单] ...
+        for(ElcukRecord record : records) {
+            Matcher matcher = pattern.matcher(record.message);
+            if(matcher.find()) {
+                String mskustr = matcher.group(1);
+                mskus.addAll(Arrays.asList(StringUtils.splitByWholeSeparator(mskustr, Webs.SPLIT)));
+            }
+        }
+        List<ShipItem> shipItems = new ArrayList<ShipItem>();
+        for(String msku : mskus) {
+            ShipItem shipItem = new ShipItem();
+            shipItem.unit = new ProcureUnit();
+            shipItem.unit.selling = new Selling();
+            shipItem.unit.selling.merchantSKU = msku;
+            shipItem.qty = 0;
+            shipItems.add(shipItem);
+        }
+        return shipItems;
     }
 }

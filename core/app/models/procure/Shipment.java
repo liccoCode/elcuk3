@@ -2,9 +2,10 @@ package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import helper.FBA;
 import helper.FLog;
-import helper.FWS;
 import helper.Webs;
+import models.ElcukRecord;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -14,15 +15,13 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
+import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -353,9 +352,11 @@ public class Shipment extends GenericModel {
      * @param shipQty
      */
     public synchronized void addToShip(List<Long> unitId, List<Integer> shipQty) {
-        Validation.equals("shipment.addToShip.state", this.state, "", S.PLAN);
+        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("shipments.addShip", "%s");
+        if(Validation.hasErrors()) return;
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
         if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
+        List<String> unitsMerchantSKU = new ArrayList<String>();
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
             int shipSize = shipQty.get(i);
@@ -371,10 +372,15 @@ public class Shipment extends GenericModel {
 
             this.items.add(unit.ship(this, shipSize));
             unit.save();
+            unitsMerchantSKU.add(unit.selling.merchantSKU);
         }
 
         if(Validation.hasErrors()) return;
         this.save();
+        new ElcukRecord(Messages.get("shipment.ship"),
+                Messages.get("shipment.ship.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
+                this.id
+        ).save();
     }
 
 
@@ -385,6 +391,7 @@ public class Shipment extends GenericModel {
      */
     public void cancelShip(List<Integer> shipItemId) {
         List<ShipItem> items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
+        List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ShipItem itm : items) {
             if(!itm.shipment.equals(this)) {
                 Validation.addError("shipment.cancelShip", "%s");
@@ -392,8 +399,13 @@ public class Shipment extends GenericModel {
             } else {
                 F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
                 cancelT2._2.save();
+                unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
             }
         }
+        new ElcukRecord(Messages.get("shipment.cancelShip2"),
+                Messages.get("shipment.cancelShip2.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
+                this.id
+        ).save();
     }
 
     public void comment(String cmt) {
@@ -420,6 +432,24 @@ public class Shipment extends GenericModel {
     }
 
     /**
+     * 将本地运输单的信息同步到 FBA Shipment<br/>
+     * <p/>
+     * 会通过 Record 去寻找从当前 FBAShipemnt 中删除的 ShipItem, 需要将其先从 FBA 中删除了再更新
+     */
+    public synchronized void updateFbaShipment() {
+        try {
+            List<ShipItem> dealItems = new ArrayList<ShipItem>();
+            dealItems.addAll(this.items);
+            dealItems.addAll(FBA.deleteShipItem(this.id));
+            this.fbaShipment.state = FBA.update(this.fbaShipment, dealItems, this.fbaShipment.state);
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
+        }
+        if(Validation.hasErrors()) return;
+        this.fbaShipment.save();
+    }
+
+    /**
      * 具体的开始运输
      * <p/>
      * ps: 不允许多个人, 对 Shipment 多次 beginShip
@@ -428,7 +458,7 @@ public class Shipment extends GenericModel {
         Validation.equals("shipment.beginShip.state", this.state, "", S.CONFIRM);
 
         try {
-            this.fbaShipment.state = FWS.update(this.fbaShipment, FBAShipment.S.SHIPPED);
+            this.fbaShipment.state = FBA.update(this.fbaShipment, FBAShipment.S.SHIPPED);
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
         }
@@ -460,14 +490,14 @@ public class Shipment extends GenericModel {
     public synchronized FBAShipment postFBAShipment() {
         FBAShipment fba = null;
         try {
-            fba = FWS.plan(this);
+            fba = FBA.plan(this);
             fba.save();
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
         }
         try {
             if(fba != null) {
-                fba.state = FWS.create(fba);
+                fba.state = FBA.create(fba);
                 fba.save();
             }
         } catch(FBAInboundServiceMWSException e) {

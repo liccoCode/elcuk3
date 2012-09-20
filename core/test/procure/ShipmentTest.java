@@ -1,5 +1,6 @@
 package procure;
 
+import helper.FBA;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import play.test.UnitTest;
  * Time: 5:00 PM
  */
 public class ShipmentTest extends UnitTest {
-    @Test
+    //    @Test
     public void testUnits() {
         System.out.println(Shipment.id());
         DateTime dt = DateTime.now();
@@ -21,6 +22,6 @@ public class ShipmentTest extends UnitTest {
 
     @Test
     public void testPostFBAShipment() {
-
+        FBA.deleteShipItem("SP|201208|06");
     }
 }
