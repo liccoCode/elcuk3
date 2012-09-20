@@ -36,7 +36,7 @@ public class Procures extends Controller {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
 
-    @Before(only = {"index", "createDeliveryment", "remove"})
+    @Before(only = {"index", "createDeliveryment", "remove", "splitUnit", "doSplitUnit"})
     public static void index_sets() {
         renderArgs.put("cooperators", Cooperator.<Cooperator>findAll());
         renderArgs.put("dateTypes", ProcurePost.DATE_TYPES);
@@ -141,6 +141,29 @@ public class Procures extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         renderArgs.put("attrs", unit.attrs);
         render(unit);
+    }
+
+    public static void splitUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        ProcureUnit newUnit = new ProcureUnit(unit);
+        newUnit.deliveryment = unit.deliveryment;
+        newUnit.product = unit.product;
+        render(unit, newUnit);
+    }
+
+    /**
+     * 分拆操作
+     *
+     * @param id
+     * @param newUnit
+     */
+    public static void doSplitUnit(long id, ProcureUnit newUnit) {
+        checkAuthenticity();
+        ProcureUnit unit = ProcureUnit.findById(id);
+        newUnit.handler = User.findByUserName(ElcukRecord.username());
+        unit.split(newUnit);
+        if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
+        redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }
 
     /**

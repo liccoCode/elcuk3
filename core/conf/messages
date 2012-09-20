@@ -73,6 +73,10 @@ procureunit.delivery.stage=\u975E DELIVERY \u72B6\u6001\u7684[\u91C7\u8D2D\u8BA1
 procureunit.attrs.qty=\u5B9E\u9645\u4EA4\u8D27\u6570\u91CF
 procureunit.attrs.deliveryDate=\u5B9E\u9645\u4EA4\u8D27\u65F6\u95F4
 procureunit.id=\u91C7\u8D2D\u5355\u5143\u7F16\u53F7
+procureunit.selling=\u91C7\u8D2D\u5355\u5143\u5BF9\u5E94\u7684 Selling
+procureunit.sku=\u91C7\u8D2D\u5355\u5143\u7684 SKU
+procureunit.planQty=\u9884\u8BA1\u91C7\u8D2D\u6570\u91CF
+
 
 deliveryments.addunits=\u9700\u8981\u9009\u62E9\u8FDB\u5165[\u91C7\u8D2D\u5355]\u7684[\u91C7\u8D2D\u5355\u5143]
 deliveryments.delunits=\u9700\u8981\u9009\u62E9\u4ECE[\u91C7\u8D2D\u5355]\u4E2D\u5220\u9664\u7684[\u91C7\u8D2D\u5355\u5143]
@@ -138,6 +142,7 @@ validation.future=%s \u5FC5\u987B\u5728 %s \u4E4B\u540E
 validation.past=%s \u5FC5\u987B\u5728 %s \u4E4B\u524D
 validation.min=%s \u5FC5\u987B\u5927\u4E8E\u7B49\u4E8E %s
 validation.equals=%s \u5FC5\u987B\u76F8\u7B49
+validation.max=%s \u4E0D\u80FD\u8D85\u8FC7\u6700\u5927\u503C %s
 
 
 

@@ -55,12 +55,11 @@ public class ProcureUnit extends Model {
         this.handler = unit.handler;
         this.whouse = unit.whouse;
         this.stage = STAGE.PLAN;
-        UnitAttrs attr = new UnitAttrs();
-        attr.planQty = unit.attrs.planQty - unit.attrs.qty;
-        attr.price = unit.attrs.price;
-        attr.currency = unit.attrs.currency;
-        this.attrs = attr;
-        this.comment(String.format("此采购计划由于 #%s 采购计划部分交货而自行分单创建.", unit.id));
+        this.attrs.planQty = unit.attrs.planQty - unit.qty();
+        if(this.attrs.planQty < 0) this.attrs.planQty = 0;
+        this.attrs.price = unit.attrs.price;
+        this.attrs.currency = unit.attrs.currency;
+        this.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
     }
 
     /**
@@ -220,6 +219,32 @@ public class ProcureUnit extends Model {
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
+    }
+
+    /**
+     * <pre>
+     *
+     * 分拆采购计划, 将原来一个采购计划根据 Whouse 与 qty 分拆出两个采购计划;
+     * - 分开去往不同的地方
+     * - 分拆进行先后交货
+     * </pre>
+     *
+     * @param unit
+     */
+    public void split(ProcureUnit unit) {
+        /**
+         * 1. Selling 与 SKU 需要一样
+         */
+        unit.validate();
+        Validation.equals("procureunit.selling", this.selling.sellingId, "", unit.selling.sellingId);
+        Validation.equals("procureunit.sku", this.sku, "", unit.sku);
+        Validation.max("procureunit.planQty", unit.attrs.planQty, this.attrs.planQty);
+        int leftQty = this.attrs.planQty - unit.attrs.planQty;
+        Validation.min("procureunit.planQty", leftQty, 0);
+        if(Validation.hasErrors()) return;
+        this.attrs.planQty = leftQty;
+        unit.save();
+        this.save();
     }
 
     /**

@@ -11,6 +11,7 @@
         <th>#</th>
         <th>Selling</th>
         <th>Sku</th>
+        <th>采购单</th>
         <th>仓库</th>
         <th>供应商</th>
         <th>采购数量</th>
@@ -22,7 +23,6 @@
         <th>阶段</th>
         <th>抵达货代</th>
         <th>创建时间</th>
-        <th>采购单</th>
     </tr>
 #{list items:units, as:'unit'}
     <tr>
@@ -38,6 +38,11 @@
         </td>
         <td>
             <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+        </td>
+        <td>
+            #{if unit.deliveryment}
+                <a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a>
+            #{/if}
         </td>
         <td>${unit.whouse.name()}</td>
         <td>${unit.cooperator?.name}</td>
@@ -59,11 +64,6 @@
         <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
         <td>#{time_tooltip time:unit.createDate/}</td>
-        <td>
-            #{if unit.deliveryment}
-                <a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a>
-            #{/if}
-        </td>
     </tr>
     <tr id="${tr_key}_${unit.id}" style="display:none;">
         <td colspan="${checkbox ? '16' : '15'}">
@@ -101,10 +101,12 @@
 
                 #{if delivery}
                     <!-- 交货页面 -->
-                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning">交货</a>
+                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
+                    <!-- 分拆采购单元 -->
+                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
                     <!-- 确认到货代处 -->
                     #{ifnot unit.isPlaced}
-                        <div class="input-prepend input-append pull-left" style="margin-right:5px;">
+                        <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
                             <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
                             <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">抵达货代处</button>
                         </div>
