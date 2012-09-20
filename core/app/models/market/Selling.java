@@ -44,7 +44,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time: 10:48 AM
  */
 @javax.persistence.Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Selling extends GenericModel {
 
@@ -308,6 +307,9 @@ public class Selling extends GenericModel {
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
+        this.type = T.AMAZON;
+        // 做修复, 当数据从 Amazon 同步回数据以后, 已经拥有 PriceStrategy 所需要的信息了
+        if(this.priceStrategy == null) this.priceStrategy = new PriceStrategy(this);
         this.save();
     }
 
@@ -364,7 +366,7 @@ public class Selling extends GenericModel {
 
                     // 2. 设置需要提交的值
                     String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                    play.libs.F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
+                    F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
 
                     // 3. 提交
                     String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");

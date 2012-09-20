@@ -286,7 +286,7 @@ public class AmazonProps {
         }
         // 检查 merchant 参数
         String msku = doc.select("#offering_sku_display").text().trim();
-        if(!StringUtils.equals(sell.merchantSKU, msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
+        if(!StringUtils.equals(sell.merchantSKU.toUpperCase(), msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
             throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
 
         String[] bulletPoints = new String[5];
@@ -296,7 +296,7 @@ public class AmazonProps {
         this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
 //        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
-//        this.aps.condition_ = doc.select("#offering_condition_display").text(); // 默认为 NEW
+        this.condition_ = doc.select("#offering_condition_display").text().trim().toUpperCase(); // 默认为 NEW
         F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(doc.select("#our_price").val(), sell.account.type);
         for(Element input : inputs) {
             String name = input.attr("name");
@@ -389,6 +389,13 @@ public class AmazonProps {
                         params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns.get(i)));
                 }
             } else {
+                /**
+                 * 因为 Amazon 的 checkbox 都是 checkbox 与 hidden 一并出现, 所以:
+                 * 1. 排除掉 checkbox values 为 false 的不提交
+                 * 2. 仅仅提交拥有 checked 的 checkbox
+                 */
+                if("false".equals(el.val().toLowerCase()) && "hidden".equals(el.attr("type"))) continue;
+                if(StringUtils.isBlank(el.attr("checked")) || !"checked".equals(el.attr("checked"))) continue;
                 params.add(new BasicNameValuePair(name, el.val()));
             }
         }

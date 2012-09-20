@@ -422,8 +422,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return String.format("https://catalog-sc.%s/abis/Classify/SelectCategory", this.toString());
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/Classify/SelectCategory", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -444,8 +445,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return String.format("https://catalog-sc.%s/abis/product/ProcessCreateProduct", this.toString());
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/product/ProcessCreateProduct", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -514,8 +516,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return String.format("https://catalog-sc.%s/abis/image/AddImage.ajax", this.toString());
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/image/AddImage.ajax", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -530,8 +533,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return String.format("https://catalog-sc.%s/abis/image/RemoveImage.ajax", this.toString());
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/image/RemoveImage.ajax", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -540,6 +544,7 @@ public enum M {
 
     /**
      * 这个是根据 Account 所在地来确定, 不同的市场需要先进行 region 切换
+     * Amazon 不同 Listing 的 Session, PageView 数据
      *
      * @param from
      * @param to
@@ -605,25 +610,27 @@ public enum M {
      * @return
      */
     public static String listingEditPage(Selling sell) {
-        //https://catalog-sc.amazon.co.uk/abis/product/DisplayEditProduct?sku=71APNIP-BSLPU&asin=B007LE3Y88
+        //EU: https://catalog-sc.amazon.co.uk/abis/product/DisplayEditProduct?sku=71APNIP-BSLPU&asin=B007LE3Y88
+        //US: https://catalog.amazon.com/abis/product/DisplayEditProduct?sku=71KDFHD7-BHSPU%2C656605389363&asin=B009A5E1DI&marketplaceID=ATVPDKIKX0DER
+        String msku = sell.merchantSKU;
+        if("68-MAGGLASS-3X75BG,B001OQOK5U".equalsIgnoreCase(sell.merchantSKU)) {
+            msku = "68-MAGGLASS-3x75BG,B001OQOK5U";
+        } else if("80-qw1a56-be,2".equalsIgnoreCase(sell.merchantSKU)) {
+            msku = "80-qw1a56-be,2";
+        } else if("80-qw1a56-be".equalsIgnoreCase(sell.merchantSKU)) {
+            msku = "80-qw1a56-be";
+        }
         switch(sell.market) {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                String msku = sell.merchantSKU;
-                if("68-MAGGLASS-3X75BG,B001OQOK5U".equalsIgnoreCase(sell.merchantSKU)) {
-                    msku = "68-MAGGLASS-3x75BG,B001OQOK5U";
-                } else if("80-qw1a56-be,2".equalsIgnoreCase(sell.merchantSKU)) {
-                    msku = "80-qw1a56-be,2";
-                } else if("80-qw1a56-be".equalsIgnoreCase(sell.merchantSKU)) {
-                    msku = "80-qw1a56-be";
-                }
                 return String.format("https://catalog-sc.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
                         sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);
-
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                        sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -632,15 +639,18 @@ public enum M {
 
 
     public static String listingPostPage(M market, String jsessionId) {
-        //https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+        //EU: https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
+        //US: https://catalog.amazon.co.uk/abis/product/ProcessEditProduct
         switch(market) {
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return "https://catalog-sc." + market.toString() + "/abis/product/ProcessEditProduct" +
+                        (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
+            case AMAZON_US:
+                return "https://catalog." + market.toString() + "/abis/product/ProcessEditProduct" +
                         (StringUtils.isNotBlank(jsessionId) ? ";" + jsessionId : "");
             case EBAY_UK:
             default:

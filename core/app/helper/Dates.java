@@ -117,6 +117,8 @@ public class Dates {
                 return new DateTime(date).toString("dd/MM/yyyy");
             case AMAZON_DE:
                 return new DateTime(date).toString("dd.MM.yyyy");
+            case AMAZON_US:
+                return new DateTime(date).toString("MM/dd/yyyy");
             default:
                 return new DateTime(date).toString("dd/MM/yyyy");
         }
@@ -129,6 +131,8 @@ public class Dates {
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
             case AMAZON_DE:
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
+            case AMAZON_US:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("MM/dd/yyyy")).toDate();
             default:
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
         }

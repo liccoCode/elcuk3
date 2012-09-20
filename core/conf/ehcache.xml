@@ -96,7 +96,7 @@ used with JMX monitors.
     statistics="false"
     />
 
-  <!-- 缓存 1 小时 -->
+  <!-- 缓存 1 小时
   <cache
     name="models.market.Selling"
     maxElementsInMemory="10000"
@@ -111,6 +111,7 @@ used with JMX monitors.
     memoryStoreEvictionPolicy="LRU"
     statistics="false"
     />
+     -->
 
   <!-- 账户信息一般不会修改,缓存 10 小时, 账户数量也不会很大 -->
   <cache
