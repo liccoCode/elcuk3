@@ -189,6 +189,7 @@ public class FBA {
     private static List<InboundShipmentItem> shipItemsToInboundShipmentItems(List<ShipItem> shipitems) {
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
         for(ShipItem item : shipitems) {
+            // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
             items.add(new InboundShipmentItem(null, item.unit.selling.merchantSKU, null, item.qty, null));
         }
         return items;
