@@ -3,6 +3,8 @@ package helper;
 import com.google.gson.GsonBuilder;
 import models.MT;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 
 import java.io.PrintWriter;
@@ -164,28 +166,21 @@ public class Webs {
         return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(o);
     }
 
-    /**
-     * 支持 DE 与 FR 语言中的月份字符串转换成 英语 月份的字符串
-     *
-     * @param m
-     * @return
-     */
-    public static String dateMap(String m) {
-        return StringUtils.replaceEach(m, new String[]{
-                // de -> uk
-                "Januar",
-                "Februar",
-                "März",
-                "April",
-                "Mai",
-                "Juni",
-                "Juli",
-                "August",
-                "September",
-                "Oktober",
-                "November",
-                "Dezember",
+    public static DateTime reviewDate(MT market, String dateStr) {
+        switch(market) {
+            case AUS:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("MMM dd yyyy"));
+            case ADE:
+            case AUK:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd MMM yyyy"));
+            case AFR:
+                return DateTime.parse(Webs.dateMapFR2UK(dateStr), DateTimeFormat.forPattern("dd MMM yyyy"));
+        }
+        return null;
+    }
 
+    public static String dateMapFR2UK(String m) {
+        return StringUtils.replaceEach(m, new String[]{
                 // fr -> uk
                 "janvier",
                 "février",
@@ -212,7 +207,31 @@ public class Webs {
                 "October",
                 "November",
                 "December",
+        });
+    }
 
+    /**
+     * 支持 DE 与 FR 语言中的月份字符串转换成 英语 月份的字符串
+     *
+     * @param m
+     * @return
+     */
+    public static String dateMapDE2UK(String m) {
+        return StringUtils.replaceEach(m, new String[]{
+                // de -> uk
+                "Januar",
+                "Februar",
+                "März",
+                "April",
+                "Mai",
+                "Juni",
+                "Juli",
+                "August",
+                "September",
+                "Oktober",
+                "November",
+                "Dezember",
+        }, new String[]{
                 "January",
                 "February",
                 "March",

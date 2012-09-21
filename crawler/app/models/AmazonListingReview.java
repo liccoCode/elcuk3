@@ -1,5 +1,6 @@
 package models;
 
+import helper.Webs;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -152,7 +153,7 @@ public class AmazonListingReview {
         Element rtr = doc.select("#productReviews tr").first();
         if(rtr == null) return reviewList;
 
-        Elements reviews = rtr.select("td > div[style]");
+        Elements reviews = rtr.select("> td > div[style]");
         if(reviews == null) return reviewList;
         Logger.debug("Fetched Review Size is %s", reviews.size());
 
@@ -264,16 +265,15 @@ public class AmazonListingReview {
         String dateStr = "";
         if(single) dateStr = r.select("> div nobr").first().text();
         else dateStr = r.select("> div span nobr").first().text();
-        String[] dates = StringUtils.split(StringUtils.remove(dateStr, "."), " ");
-        review.reviewDate = DateTime.parse(String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2]), DateTimeFormat.forPattern("dd MMM yyyy")).toString("yyyy-MM-dd");
+        String[] dates = StringUtils.split(StringUtils.remove(StringUtils.remove(dateStr, "."), ","), " ");
+        review.reviewDate = Webs.reviewDate(MT.val(review.listingId.split("_")[1]), String.format("%s %s %s", dates[0], dateMap(dates[1]), dates[2])).toString("yyyy-MM-dd");
 
         Element purchasedEl = r.select("> div span.crVerifiedStripe").first();
         review.purchased = purchasedEl != null;
 
         review.review = r.ownText();
 
-        review.alrId = AmazonListingReview.alrId(review.listingId, review.reviewId);
-
+        review.alrId = AmazonListingReview.alrId(review.listingId, review.userid);
         review.reviewId = StringUtils.split(r.select(".crVotingButtons").first().previousElementSibling().attr("name"), ".")[0];
         review.isVedio = r.select(".flashPlayer").first() != null;
         if(review.isVedio) {
