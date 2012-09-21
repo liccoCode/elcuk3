@@ -1,4 +1,4 @@
-package review;
+package crawler;
 
 import com.google.gson.Gson;
 import models.ListingC;

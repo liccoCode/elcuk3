@@ -1,4 +1,4 @@
-package review;
+package crawler;
 
 import models.AmazonListingReview;
 import org.jsoup.Jsoup;

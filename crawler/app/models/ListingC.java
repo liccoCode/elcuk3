@@ -117,10 +117,11 @@ public class ListingC {
         // Basic ListingC Infos
         Element titleEl = doc.select("#btAsinTitle").first();
         lst.title = titleEl.text();
-        lst.byWho = titleEl.parent().nextElementSibling().text();
+        if(lst.market == MT.AUS) lst.byWho = doc.select("#product-title_feature_div a").first().text();
+        else lst.byWho = titleEl.parent().nextElementSibling().text();
 
         // 通过 titleEl 的 id 定位元素后, 再进行 reviewSummary 的定位.
-        Element reviewSumery = titleEl.parent().parent().nextElementSibling().select(".asinReviewsSummary").first();
+        Element reviewSumery = doc.select(".asinReviewsSummary[name=" + lst.asin + "]").first();
         if(reviewSumery == null) { // 还没有 reviews 呢
             lst.reviews = 0;
             lst.rating = 0f;
@@ -140,7 +141,9 @@ public class ListingC {
 
         Element saleRankEl = doc.select("#SalesRank").first();
         if(saleRankEl == null) lst.saleRank = 5001;
-        else {
+        else if(saleRankEl.select(".zg_hrsr").first() != null) {
+            lst.saleRank = Extra.rank(saleRankEl.select(".zg_hrsr_rank").text());
+        } else {
             String comma = StringUtils.replace(saleRankEl.childNode(2).toString(), ",", "");
             lst.saleRank = Extra.flt(StringUtils.replace(comma, ".", "")/*由于排名没有小数点后面, 所以直接去除这个*/).intValue();
         }
@@ -236,19 +239,8 @@ public class ListingC {
 
     public static Float amazonPrice(MT mt, String priceStr) {
         try {
-            switch(mt) {
-                case AUK:
-                case AUS:
-                    return Webs.amazonPriceNumber(mt, priceStr.substring(1));
-                case ADE:
-                case AIT:
-                case AES:
-                case AFR:
-                    return Webs.amazonPriceNumber(mt, priceStr.split(" ")[1]);
-                default:
-                    return 0f;
-
-            }
+            if(mt == MT.AUK || mt == MT.AUS) return Webs.amazonPriceNumber(mt, priceStr.substring(1));
+            else return Webs.amazonPriceNumber(mt, priceStr.split(" ")[1]);
         } catch(Exception e) {
             Logger.warn("ListingC.amazonPrice error.(" + mt.toString() + ") [" + priceStr + "|" + e.getMessage() + "]");
             return 0f;
