@@ -5,7 +5,7 @@
 <div class="row-fluid">
     <div class="span12 alert alert-info">
         <ul>
-            #{li_net /}
+        #{li_net /}
         </ul>
     </div>
 </div>
@@ -88,6 +88,7 @@
                 <th>开始时间</th>
                 <th>创建时间</th>
                 <th>预计到库时间</th>
+                <th>创建者</th>
             </tr>
         #{list items:shipments, as:'ship'}
             <tr>
@@ -109,6 +110,7 @@
                 <td>#{time_tooltip time:ship.beginDate/}</td>
                 <td>#{time_tooltip time:ship.createDate/}</td>
                 <td>#{time_tooltip time:ship.planArrivDate/}</td>
+                <td>${ship.creater?.username}</td>
             </tr>
             <tr id="ship_${ship_index}" style="display:none;">
                 <td colspan="12">

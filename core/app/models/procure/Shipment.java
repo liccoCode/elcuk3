@@ -6,6 +6,7 @@ import helper.FBA;
 import helper.FLog;
 import helper.Webs;
 import models.ElcukRecord;
+import models.User;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -191,6 +192,9 @@ public class Shipment extends GenericModel {
 
     @OneToOne(cascade = CascadeType.PERSIST)
     public Whouse whouse;
+
+    @OneToOne
+    public User creater;
 
     @OneToOne(mappedBy = "shipment", cascade = CascadeType.PERSIST)
     public FBAShipment fbaShipment;
@@ -389,7 +393,7 @@ public class Shipment extends GenericModel {
      *
      * @param shipItemId
      */
-    public void cancelShip(List<Integer> shipItemId) {
+    public void cancelShip(List<Integer> shipItemId, boolean log) {
         List<ShipItem> items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ShipItem itm : items) {
@@ -402,10 +406,12 @@ public class Shipment extends GenericModel {
                 unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
             }
         }
-        new ElcukRecord(Messages.get("shipment.cancelShip2"),
-                Messages.get("shipment.cancelShip2.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
-                this.id
-        ).save();
+        if(log) {
+            new ElcukRecord(Messages.get("shipment.cancelShip2"),
+                    Messages.get("shipment.cancelShip2.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
+                    this.id
+            ).save();
+        }
     }
 
     public void comment(String cmt) {
@@ -437,10 +443,10 @@ public class Shipment extends GenericModel {
      * 会通过 Record 去寻找从当前 FBAShipemnt 中删除的 ShipItem, 需要将其先从 FBA 中删除了再更新
      */
     public synchronized void updateFbaShipment() {
+        List<ShipItem> dealItems = new ArrayList<ShipItem>();
+        dealItems.addAll(this.items);
+        dealItems.addAll(FBA.deleteShipItem(this.id));
         try {
-            List<ShipItem> dealItems = new ArrayList<ShipItem>();
-            dealItems.addAll(this.items);
-            dealItems.addAll(FBA.deleteShipItem(this.id));
             this.fbaShipment.state = FBA.update(this.fbaShipment, dealItems, this.fbaShipment.state);
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));

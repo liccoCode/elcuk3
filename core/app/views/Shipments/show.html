@@ -39,7 +39,7 @@
         #{authenticityToken /}
             <table class="table table-condensed table-bordered">
                 <tr>
-                    <th>Title</th>
+                    <th>Title (Create By ${ship.creater ? ship.creater.username : "System"})</th>
                     <td colspan="3">
                         <input type="text" name="ship.title" class="span10" value="${ship.title ? ship.title : ship.title()}">
                     </td>
@@ -210,6 +210,7 @@
         <form action="@{Shipments.updateFba()}" method="post" class="pull-left">
             #{authenticityToken /}
             <input type="hidden" name="id" value="${ship.id}">
+            <input type="hidden" name="action" value="update">
             <button data-confirm="confirm" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
         </form>
     #{/else}

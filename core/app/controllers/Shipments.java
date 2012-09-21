@@ -2,6 +2,7 @@ package controllers;
 
 import helper.Webs;
 import models.ElcukRecord;
+import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -59,7 +60,7 @@ public class Shipments extends Controller {
     }
 
 
-    @Before(only = {"show", "update", "beginShip"})
+    @Before(only = {"show", "update", "beginShip", "refreshProcuress"})
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shipper());
@@ -81,6 +82,7 @@ public class Shipments extends Controller {
             render("Shipments/show.html", ship);
         }
         ship.pype = ship.pype();
+        ship.creater = User.findByUserName(ElcukRecord.username());
         ship.save();
         flash.success("更新成功.");
         redirect("/Shipments/show/" + ship.id);
@@ -135,7 +137,7 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
-        ship.cancelShip(shipItemId);
+        ship.cancelShip(shipItemId, true);
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
         redirect("/shipments/shipitem/" + id);
@@ -182,10 +184,14 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
-    public static void updateFba(String id) {
+    public static void updateFba(String id, String action) {
         checkAuthenticity();
+        Validation.required("shipments.updateFba.action", action);
         Shipment ship = Shipment.findById(id);
-        ship.updateFbaShipment();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
+        if("update".equals(action)) ship.updateFbaShipment();
+        else flash.error("需要执行的 Action 不正确.");
         redirect("/shipments/show/" + id);
     }
 
