@@ -66,67 +66,47 @@ public enum MT {
      */
     public String reviews(String asin, int page) {
         //http://www.amazon.it/product-reviews/{ASIN}?pageNumber={PAGE}
-        switch(this) {
-            case AUK:
-            case AUS:
-            case ADE:
-            case AES:
-            case AIT:
-            case AFR:
-                return String.format("http://www.%s/product-reviews/%s?pageNumber=%s", this.toString(), asin, page);
-            default:
-                return "";
-        }
+        if(this.isAmazon())
+            return String.format("http://www.%s/product-reviews/%s?pageNumber=%s", this.toString(), asin, page);
+        else
+            return "";
     }
 
     /**
      * 查询单独的 Review 页面
+     *
      * @param reviewId
      * @return
      */
     public String review(String reviewId) {
         //http://www.amazon.de/review/R3SPO0EZCN6OY3
-        switch(this) {
-            case AUK:
-            case AUS:
-            case ADE:
-            case AES:
-            case AIT:
-            case AFR:
-                return String.format("http://www.%s/review/%s", this.toString(), reviewId);
-            default:
-                return "";
-        }
+        if(this.isAmazon())
+            return String.format("http://www.%s/review/%s", this.toString(), reviewId);
+        else
+            return "";
     }
 
     public String listing(String asin) {
         //http://www.amazon.co.uk/dp/B007TR9VRU
-        switch(this) {
-            case AUK:
-            case AUS:
-            case ADE:
-            case AES:
-            case AIT:
-            case AFR:
-                return String.format("http://www.%s/dp/%s", this.toString(), asin);
-            default:
-                return "";
-        }
+        if(this.isAmazon())
+            return String.format("http://www.%s/dp/%s", this.toString(), asin);
+        else
+            return "";
     }
 
     public String offers(String asin) {
         //http://www.amazon.co.uk/gp/offer-listing/B007TR9VRU
-        switch(this) {
-            case AUK:
-            case AUS:
-            case ADE:
-            case AES:
-            case AIT:
-            case AFR:
-                return String.format("http://www.%s/gp/offer-listing/%s", this.toString(), asin);
-            default:
-                return "";
-        }
+        if(this.isAmazon())
+            return String.format("http://www.%s/gp/offer-listing/%s?condition=new", this.toString(), asin);
+        else
+            return "";
+    }
 
+    public boolean isEbay() {
+        return this.name().startsWith("E");
+    }
+
+    public boolean isAmazon() {
+        return this.name().startsWith("A");
     }
 }
