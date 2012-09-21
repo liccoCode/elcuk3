@@ -19,6 +19,8 @@ public class CrawlListingTest extends UnitTest {
     Document usListing;
     Document deListing;
 
+    Document deNoPriceListing = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/de.noprice.B008ORA2FY.html")));
+
     @Before
     public void setUpPage() {
         usListing = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/listing/us.B005FYNSZA.html")));
@@ -58,5 +60,23 @@ public class CrawlListingTest extends UnitTest {
         assertEquals(5, listing.saleRank);
         assertNotNull(listing.productDescription);
         assertEquals(1, listing.offers.size());
+    }
+
+    @Test
+    public void testDENoPriceListing() {
+        ListingC listing = ListingC.parseAmazon(deNoPriceListing);
+        assertEquals("B008ORA2FY", listing.asin);
+        assertEquals("EasyAcc", listing.byWho);
+        assertEquals("EasyAcc Black Leather Protective Folio Tasche hülle Case für GOOGLE Nexus 7 Tablet 8 / 16GB WIFI ASUS -mit Sleep / Wake Magnet / Multi-view-Stand und einem Stylus Eingabestifte als Bonus",
+                listing.title);
+        assertEquals("B008ORA2FY_amazon.de", listing.listingId);
+        assertEquals(15, listing.reviews, 0);
+        assertEquals(4.1, listing.rating, 1);
+        assertEquals(3, listing.likes);
+        assertEquals(0, listing.totalOffers);
+        assertNotNull(listing.technicalDetails);
+        assertEquals(50, listing.saleRank);
+        assertNotNull(listing.productDescription);
+        assertEquals(0, listing.offers.size());
     }
 }
