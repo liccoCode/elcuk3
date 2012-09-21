@@ -3,6 +3,7 @@ package models.support;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.OsTicket;
+import jobs.FeedbackInfoFetchJob;
 import jobs.TicketStateSyncJob;
 import models.ElcukRecord;
 import models.User;
@@ -267,13 +268,16 @@ public class Ticket extends Model {
                 ElcukRecord.username(),
                 Dates.date2DateTime(),
                 reason.trim()) + this.memo;
-        this.save();
-        // 特意在保存之后再进行 Ticket 关闭, 如果保存出错也不用 OsTicket 中的 Ticket 了
         StringBuilder note = new StringBuilder(reason).append("\r\n");
         if(this.type == T.FEEDBACK)
             note.append(this.feedback.memo);
-        else if(this.type == T.REVIEW)
+        else if(this.type == T.REVIEW) {
             note.append(this.review.comment);
+            // 关闭前再去 Amazon 抓取一次订单的状态
+            FeedbackInfoFetchJob.checkFeedbackDealState(this);
+        }
+        // 特意在保存之后再进行 Ticket 关闭, 如果保存出错也不用 OsTicket 中的 Ticket 了
+        this.save();
         OsTicket.closeOsTicket(this.osTicketId(), this.resolver.username, note.toString());
         return this;
     }
