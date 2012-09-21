@@ -138,6 +138,7 @@ public class ListingC {
 
         Element middlePd = doc.select("#technical_details").first();
         if(middlePd != null) lst.technicalDetails = middlePd.parent().outerHtml();
+        else lst.technicalDetails = "";
 
         Element saleRankEl = doc.select("#SalesRank").first();
         if(saleRankEl == null) lst.saleRank = 5001;

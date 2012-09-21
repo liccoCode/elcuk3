@@ -2,6 +2,8 @@ package models;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import play.Logger;
+import play.Play;
 import play.db.jpa.Model;
 import play.jobs.Job;
 import play.libs.Time;
@@ -18,6 +20,7 @@ import javax.persistence.Entity;
  */
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)//添加缓存, 因为经常加载
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Jobex extends Model {
 
     @Column(unique = true, nullable = false)
@@ -31,9 +34,14 @@ public class Jobex extends Model {
     public long lastUpdateTime = 0;
 
     /**
-     * 是否关闭了, 关闭了则不运行
+     * 是否关闭了, 关闭了则不运行;如果关闭了, 无论什么环境都无法运行
      */
     public boolean close = false;
+
+    /**
+     * 在测试环境下是否可以运行
+     */
+    public boolean devRun = false;
 
     @Column(columnDefinition = "varchar(255) DEFAULT ''")
     public String memo;
@@ -74,5 +82,46 @@ public class Jobex extends Model {
         }
         this.lastUpdateTime = System.currentTimeMillis();
         this.save();
+    }
+
+    /**
+     * <pre>
+     * 根据任务的各种条件来判断此任务是否可以执行;
+     * 1. duration
+     * 2. close?
+     * 3. devRun?
+     * </pre>
+     *
+     * @return
+     */
+    public boolean isExcute() {
+        if(this.close) return false;
+        try {
+            /**
+             * 1. 判断当前时间与 job 的上次执行时间之间的检查差据如果大于执行周期, 则执行, 否则不执行
+             */
+            long now = System.currentTimeMillis();
+            long durationMills = 0;
+            try {
+                durationMills = Time.cronInterval(this.duration);
+            } catch(Exception e) {
+                durationMills = Time.parseDuration(this.duration) * 1000;
+            }
+            boolean isExecute = Math.abs(now - this.lastUpdateTime) > durationMills;
+            if(Play.mode.isDev()) isExecute = isExecute && this.devRun;
+
+            if(isExecute) {
+                this.lastUpdateTime = now;
+                this.save();
+            }
+            return isExecute;
+        } catch(Exception e) {
+            Logger.warn("Jobex %s[%s] run error!", this.className, this.id);
+            return false;
+        }
+    }
+
+    public static Jobex findByClassName(String className) {
+        return Jobex.find("className=?", className).first();
     }
 }
