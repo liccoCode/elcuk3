@@ -173,7 +173,7 @@ public class Webs {
         if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
         StringBuilder sbd = new StringBuilder(priceStr);
         String dot = Character.toString(sbd.charAt(sbd.length() - 3));
-        if(dot.equals(".")) { // uk 格式
+        if(dot.equals(".")) { // uk/us 格式
             return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
             return new F.T2<M, Float>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
