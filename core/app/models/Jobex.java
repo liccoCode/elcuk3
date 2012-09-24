@@ -4,6 +4,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
 import play.Play;
+import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.jobs.Job;
 import play.libs.Time;
@@ -24,11 +26,13 @@ import javax.persistence.Entity;
 public class Jobex extends Model {
 
     @Column(unique = true, nullable = false)
+    @Required
     public String className;
 
     /**
      * Play 使用的周期, 如果周期为 null 或者解析失败则转而使用 cron 表达式
      */
+    @Required
     public String duration;
 
     public long lastUpdateTime = 0;
@@ -66,9 +70,25 @@ public class Jobex extends Model {
     public Job now() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Job job = newInstance();
         job.now();
-        this.lastUpdateTime = System.currentTimeMillis();
-        this.save();
         return job;
+    }
+
+    public void validate() {
+        if(!this.validDuration()) Validation.addError(this.duration, "jobex.duration");
+    }
+
+    public boolean validDuration() {
+        try {
+            Time.parseCRONExpression(this.duration);
+        } catch(Exception e) {
+            //ignore
+        }
+        try {
+            Time.parseDuration(this.duration);
+        } catch(Exception e) {
+            return false;
+        }
+        return true;
     }
 
     public void updateJobAttrs(Jobex njob) {
@@ -80,7 +100,6 @@ public class Jobex extends Model {
                 Time.parseDuration(njob.duration);
             this.duration = njob.duration;
         }
-        this.lastUpdateTime = System.currentTimeMillis();
         this.save();
     }
 

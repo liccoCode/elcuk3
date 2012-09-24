@@ -57,6 +57,7 @@ $.formArrayToObj = function(formArr){
 $.checkBox = function(){
     $(':checkbox').change(function(e){
         var o = $(this);
+        if(!o.attr('name')) e.preventDefault()
         o.val(o.is(":checked"));
         console.log(o.attr('name') + " TO " + o.val());
         e.preventDefault();
@@ -130,6 +131,15 @@ $.DateUtil = {
 
 };
 
+/**
+ * 利用 form 表单提交的时候, 添加一个 input hidden 来检查 checkbox 是否点击
+ * @param box
+ */
+function checkbox(box){
+    var o = $(box);
+    o.next().val(o.val());
+}
+
 function toggle_init(){
     // 为页面添加 data-toggle=toggle 元素事件(类似 bootstrap 的 collapse)
     $('body').off('click', '[data-toggle=toggle]').on('click', '[data-toggle=toggle]', function(e){
@@ -150,9 +160,9 @@ function submit_btn_init(){
     });
 }
 
-function link_confirm_init() {
-    $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e) {
-        if(!confirm("确认删除?")) e.preventDefault()
+function link_confirm_init(){
+    $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e){
+        if(!confirm("确认执行此操作?")) e.preventDefault()
     });
 }
 

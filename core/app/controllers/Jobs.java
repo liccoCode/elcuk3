@@ -3,7 +3,8 @@ package controllers;
 import helper.Webs;
 import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
-import jobs.ListingWorkers;
+import jobs.works.ListingReviewWork;
+import jobs.works.ListingWorkers;
 import jobs.SellingRecordCheckJob;
 import models.Jobex;
 import models.market.*;
@@ -13,6 +14,7 @@ import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.libs.Time;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -33,59 +35,49 @@ import java.util.concurrent.TimeUnit;
 @Check("root")
 public class Jobs extends Controller {
 
+    @Before(only = {"index", "update", "create"})
+    public static void indexPage() {
+        renderArgs.put("jobs", Jobex.all().<Jobex>fetch());
+        renderArgs.put("jobReqs", JobRequest.find("ORDER BY requestDate DESC").<Jobex>fetch(30));
+    }
+
     public static void index() {
-        List<Jobex> jobs = Jobex.all().fetch();
-        List<JobRequest> jobReqs = JobRequest.find("ORDER BY requestDate DESC").fetch(30);
-
-        render(jobs, jobReqs);
+        render();
     }
 
-
-    public static void c(Jobex j) {
-        validation.required(j.className);
-        validation.required(j.duration);
-        if(Validation.hasErrors()) renderJSON(new Ret(validation.errorsMap()));
-        try {
-            // 先解析 Cron, 如果 Cron 表达式错误再解析 Duration 如果还错误,则报错
-            if(!Time.CronExpression.isValidExpression(j.duration))
-                Time.parseDuration(j.duration);
-        } catch(IllegalArgumentException e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-        j.save();
-        renderJSON(j);
+    public static void create(Jobex job) {
+        validation.valid(job);
+        job.validate();
+        if(Validation.hasErrors()) render("Jobs/index.html");
+        flash.success("Job %s 添加成功", job.className);
+        job.save();
+        redirect("/Jobs/index");
     }
 
-    public static void u(Jobex j) {
-        validation.required(j.id);
-        if(Validation.hasErrors()) renderJSON(new Ret(validation.errorsMap()));
-        Jobex job = Jobex.findById(j.id);
-        try {
-            job.updateJobAttrs(j);
-        } catch(Exception e) {
-            render(new Ret(Webs.E(e)));
-        }
-        renderJSON(job);
+    public static void update(Jobex job) {
+        validation.required(job.id);
+        validation.valid(job);
+        job.validate();
+        if(Validation.hasErrors()) render("Jobs/index.html");
+        flash.success("Job %s 更新成功", job.className);
+        job.save();
+        redirect("/Jobs/index");
     }
 
     public static void now(long id) {
         validation.required(id);
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
         Jobex job = Jobex.findById(id);
-        if(job == null) renderJSON(new Ret("Job is not exist!"));
+        if(Validation.hasErrors() || job == null) {
+            flash.error("JobId %s 不存在!", id);
+            redirect("/Jobs/index");
+        }
         try {
             job.now();
         } catch(Exception e) {
-            throw new FastRuntimeException(e.getMessage());
+            flash.error("Job %s 因 [%s] 执行失败.", job.className, Webs.E(e));
         }
-        renderJSON(new Ret());
-    }
-
-    public static void close(long id) {
-        Jobex job = Jobex.findById(id);
-        job.close = true;
-        job.save();
-        renderJSON(job);
+        flash.success("Job %s 执行成功", job.className);
+        redirect("/Jobs/index");
     }
 
     // -------------------- Small Fix Method --------------------
@@ -148,7 +140,7 @@ public class Jobs extends Controller {
     public static void reviewFix(String asin, String m) {
         M market = M.val(m);
         try {
-            new ListingWorkers.R(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
+            new ListingReviewWork(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
         } catch(Exception e) {
             throw new FastRuntimeException(Webs.S(e));
         }

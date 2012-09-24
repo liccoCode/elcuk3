@@ -134,6 +134,8 @@ shipment.beginShip.update=\u5411 Amazon \u66F4\u65B0\u5931\u8D25.
 shipments.setUpShipPage=\u9700\u8981\u6307\u5B9A\u8FD0\u5F80\u4ED3\u5E93
 shipments.updateFba.action=\u6267\u884C\u64CD\u4F5C\u4E0D\u80FD\u4E3A\u7A7A
 
+jobex.duration=[%s] Duration \u683C\u5F0F\u9519\u8BEF
+
 
 # \u81EA\u5B9A\u4E49\u7684\u68C0\u67E5
 validation.sku= %s %s \u4E0E ProcureUnit \u671F\u5F85\u7684 SKU \u4E0D\u4E00\u81F4.

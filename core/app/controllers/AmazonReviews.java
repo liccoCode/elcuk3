@@ -2,7 +2,7 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
-import jobs.ListingWorkers;
+import jobs.works.ListingReviewWork;
 import models.market.*;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
@@ -61,7 +61,7 @@ public class AmazonReviews extends Controller {
                 // 如果不存在, 先去抓取 Listing 然后再抓取 Review
                 Listing.crawl(asin, market).<Listing>save();
             } else {
-                new ListingWorkers.R(lid).now().get(30, TimeUnit.SECONDS);
+                new ListingReviewWork(lid).now().get(30, TimeUnit.SECONDS);
             }
         } catch(Exception e) {
             throw new FastRuntimeException(Webs.S(e));

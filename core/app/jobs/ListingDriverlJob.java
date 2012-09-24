@@ -1,5 +1,6 @@
 package jobs;
 
+import jobs.works.ListingWorkers;
 import play.Logger;
 import play.jobs.Job;
 

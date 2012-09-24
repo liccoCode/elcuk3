@@ -1,7 +1,8 @@
 package jobs.fixs;
 
 import helper.Webs;
-import jobs.ListingWorkers;
+import jobs.works.ListingReviewWork;
+import jobs.works.ListingWorkers;
 import models.Jobex;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +32,7 @@ public class ReviewFixJob extends Job {
             if(StringUtils.isBlank(l.listingId)) continue;
             Logger.info("Review: %s", l.listingId);
             try {
-                new ListingWorkers.R(l.listingId).now().get(10, TimeUnit.SECONDS);
+                new ListingReviewWork(l.listingId).now().get(10, TimeUnit.SECONDS);
                 Logger.info("Review: %s Done.", l.listingId);
             } catch(Exception e) {
                 Logger.warn(Webs.E(e));

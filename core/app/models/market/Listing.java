@@ -5,7 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
-import jobs.ListingWorkers;
+import jobs.works.ListingOffersWork;
+import jobs.works.ListingWorkers;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -422,7 +423,7 @@ public class Listing extends GenericModel {
         if(fullOffer) {
             try {
                 // 通过这个方法抓取的 Offer , 获取完整的 Condition 信息
-                new ListingWorkers.O(tobeChangeed).now().get(15, TimeUnit.SECONDS);
+                new ListingOffersWork(tobeChangeed).now().get(15, TimeUnit.SECONDS);
             } catch(Exception e) {
                 Logger.warn("Listing(%s) fetch full offers have something wrong.", tobeChangeed.listingId);
             }

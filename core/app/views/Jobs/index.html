@@ -1,7 +1,6 @@
 #{extends 'main_full.html'/}
 #{set title:'Asynchronous Jobs'/}
 #{set 'moreScripts'}
-    #{script 'jobs/jobs.coffee'/}
 #{/set}
 
 <div class="row-fluid" style="margin:10px 0">
@@ -14,14 +13,14 @@
 
                 <h3>添加一个 Asynchronous Job</h3>
             </div>
-            <div class="modal-body">
-                <form id="job_add_form" class="form-horizontal">
+            <form action="@{Jobs.create()}" method="post" id="job_add_form" class="form-horizontal">
+                <div class="modal-body">
                     <fieldset>
                         <div class="control-group">
                             <label for="j_className">ClassName</label>
 
                             <div class="controls">
-                                <input type="text" id="j_className" name="j.className">
+                                <input type="text" id="j_className" name="job.className">
 
                                 <p class="help-block">Job 的类限定类名</p>
                             </div>
@@ -31,7 +30,7 @@
                             <label for="j_duration">Duration</label>
 
                             <div class="controls">
-                                <input type="text" id="j_duration" name="j.duration">
+                                <input type="text" id="j_duration" name="job.duration">
 
                                 <p class="help-block">Job 的执行周期, 可以使用 1s, 1mn, 1h(不可以填写1.5h) 三个单位时间</p>
 
@@ -40,24 +39,44 @@
                         </div>
 
                         <div class="control-group">
-                            <label for="j_close">Close</label>
+                            <label>Close</label>
 
                             <div class="controls">
-                                <input type="checkbox" name="j.close" value="false">
+                                <input type="checkbox" value="false" onclick="checkbox(this)">
+                                <input type="hidden" name="job.close" value="false">
 
                                 <p class="help-block">Job 是否能够关闭, 如果关闭则不会执行</p>
                             </div>
                         </div>
                     </fieldset>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <a href="#" class="btn btn-primary" id="add_job_btn">Save</a>
-                <a href="#" class="btn" data-dismiss="modal">Close</a>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Save</button>
+                    <a href="#" class="btn" data-dismiss="modal">Close</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+#{if flash.success || flash.error}
+<div class="row-fluid">
+    #{if flash.error}
+        <div class="span12 alert alert-error">
+        ${flash.error}
+        </div>
+    #{/if}
+    #{if flash.success}
+        <div class="span12 alert alert-success">
+        ${flash.success}
+        </div>
+    #{/if}
+</div>
+#{/if}
+
+#{ifErrors }
+    #{errorMsgs /}
+#{/ifErrors}
 
 <div class="row-fluid">
     <div class="span12">
@@ -77,32 +96,39 @@
                     <a href="#" rel="tooltip" data-original-title="Now: ${new java.util.Date().format('yyyy-MM-dd HH:mm:ss')}">LastUpdateTime</a>
                 </th>
                 <th>Closed</th>
+                <th>DevRun</th>
             </tr>
             #{list items:jobs, as:'job'}
-                <tr class="job_itm" id='job_itm_${job.id}'>
-                    <td>
-                        <div class="btn-group">
-                            <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-wrench"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a class='runOnce' jid='${job.id}' title="立即执行一次"><i class="icon-play"></i> 执行</a>
-                                </li>
-                                <li><a class='j_update' jid='${job.id}' title="更新修改了的参数"><i class="icon-edit"></i>
-                                    更新</a></li>
-                            </ul>
-                        </div>
-                    </td>
-                    <td>
-                    ${job.id}
-                        <input type="hidden" name="j.id" value="${job.id}">
-                    </td>
-                    <td><input type="text" style="width:180px;" name="j.className" value="${job.className}"></td>
-                    <td><input type="text" style="width:90px;" name="j.duration" value="${job.duration}"></td>
-                    <td><input type="text" name="j.memo" value="${job.memo}"></td>
-                    <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
-                    <td>
-                        <input type="checkbox" name="j.close" ${job.close ? 'checked' : ''} value="${job.close}">
-                    </td>
-                </tr>
+                <form action="@{Jobs.update()}" method="post" style="display:inline-block;">
+                    <tr class="job_itm" id='job_itm_${job.id}'>
+                        <td>
+                            <button class="btn btn-small btn-primary">更新</button>
+                            <a href="@{Jobs.now()}/${job.id}" data-confirm="link" class="btn btn-small btn-danger">运行一次</a>
+                        </td>
+                        <td>
+                            <label>${job.id}</label>
+                            <input type="hidden" name="job.id" value="${job.id}">
+                        </td>
+                        <td>
+                            <input type="text" class="input input-xlarge" name="job.className" value="${job.className}">
+                        </td>
+                        <td>
+                            <input type="text" class="input input-small" name="job.duration" value="${job.duration}">
+                        </td>
+                        <td>
+                            <input type="text" class="input input-xxlarge" name="job.memo" value="${job.memo}">
+                        </td>
+                        <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
+                        <td>
+                            <input type="checkbox" ${job.close ? 'checked' : ''} onclick="checkbox(this)" value="${job.close}">
+                            <input type="hidden" name="job.close" value="${job.close}">
+                        </td>
+                        <td>
+                            <input type="checkbox" ${job.devRun ? 'checked' : ''} onclick="checkbox(this)" value="${job.devRun}">
+                            <input type="hidden" name="job.devRun" value="${job.devRun}">
+                        </td>
+                    </tr>
+                </form>
             #{/list}
         </table>
     #{/else}

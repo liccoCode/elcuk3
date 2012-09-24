@@ -24,7 +24,7 @@ public class KeepSessionJob extends Job {
 
     @Override
     public void doJob() {
-        if(!Jobex.findByClassName(AmazonFBAQtySyncJob.class.getName()).isExcute()) return;
+        if(!Jobex.findByClassName(KeepSessionJob.class.getName()).isExcute()) return;
         List<Account> accs = Account.openedSaleAcc();
         for(Account ac : accs) {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
