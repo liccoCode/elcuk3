@@ -226,6 +226,13 @@ public class FBA {
         return client;
     }
 
+    /**
+     * 需要在 Amazon FBA 上删除的 items.
+     * ps: 这里不会从 DB 加载完成的 ShipItem 数据, 构建的 ShipItem 仅仅包含删除所必须的参数.
+     *
+     * @param shipmentid
+     * @return
+     */
     public static List<ShipItem> deleteShipItem(String shipmentid) {
         List<ElcukRecord> records = ElcukRecord.find("fid=? AND action=?", shipmentid, Messages.get("shipment.cancelShip2")).fetch();
         Set<String> mskus = new HashSet<String>();

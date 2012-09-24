@@ -10,13 +10,7 @@
     #{errorMsgs /}
 #{/ifErrors}
 
-#{if flash.success}
-<div class="row-fluid">
-    <div class="span12 alert alert-success">
-    ${flash.success}
-    </div>
-</div>
-#{/if}
+#{flash_alert /}
 
 <div class="row-fluid">
     <div class="span12 alert alert-info">
@@ -210,7 +204,7 @@
         <form action="@{Shipments.updateFba()}" method="post" class="pull-left">
             #{authenticityToken /}
             <input type="hidden" name="id" value="${ship.id}">
-            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="act" value="update">
             <button data-confirm="confirm" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
         </form>
     #{/else}

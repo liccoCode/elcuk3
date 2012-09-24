@@ -60,7 +60,7 @@ public class Shipments extends Controller {
     }
 
 
-    @Before(only = {"show", "update", "beginShip", "refreshProcuress"})
+    @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shipper());
@@ -184,13 +184,15 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
-    public static void updateFba(String id, String action) {
+
+    public static void updateFba(String id, String act) {
+        // action 参数是 play! 自己使用的保留字
         checkAuthenticity();
-        Validation.required("shipments.updateFba.action", action);
+        Validation.required("shipments.updateFba.action", act);
         Shipment ship = Shipment.findById(id);
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
-        if("update".equals(action)) ship.updateFbaShipment();
+        if("update".equals(act)) ship.updateFbaShipment();
         else flash.error("需要执行的 Action 不正确.");
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         redirect("/shipments/show/" + id);
