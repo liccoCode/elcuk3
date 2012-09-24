@@ -15,6 +15,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 import play.Play;
 import play.data.validation.Required;
 import play.libs.F;
@@ -388,14 +389,18 @@ public class AmazonProps {
                     for(int i = 0; i < this.rbns.size(); i++)
                         params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns.get(i)));
                 }
+            } else if("activeClientTimeOnTask".equals(name)) {
+                // Amazon 的一个记录值
+                params.add(new BasicNameValuePair(name, 18059 + ""));
             } else {
                 /**
                  * 因为 Amazon 的 checkbox 都是 checkbox 与 hidden 一并出现, 所以:
-                 * 1. 排除掉 checkbox values 为 false 的不提交
-                 * 2. 仅仅提交拥有 checked 的 checkbox
+                 *  排除掉 checkbox , 只需要提交 checkbox 关联的 hidden 元素
                  */
-                if("false".equals(el.val().toLowerCase()) && "hidden".equals(el.attr("type"))) continue;
-                if(StringUtils.isBlank(el.attr("checked")) || !"checked".equals(el.attr("checked"))) continue;
+                if("checkbox".equals(el.attr("type"))) {
+                    Logger.info("Skip param: %s, type; %s", name, el.attr("type"));
+                    continue;
+                }
                 params.add(new BasicNameValuePair(name, el.val()));
             }
         }

@@ -73,7 +73,25 @@ public enum M {
      * @return
      */
     public MID amid() {
-        return this.mid;
+        if(this.mid != null) return this.mid;
+        // 在 dev 环境下, 出现过 mid 为 null 的问题, 不知为什么, 只好如此解决.
+        switch(this) {
+            case AMAZON_UK:
+                return MID.A1F83G8C2ARO7P;
+            case AMAZON_DE:
+                return MID.A1PA6795UKMFR9;
+            case AMAZON_FR:
+                return MID.A13V1IB3VIYZZH;
+            case AMAZON_IT:
+                return MID.APJ6JRA9NG5V4;
+            case AMAZON_ES:
+                return MID.A1RKKUPIHCS9HS;
+            case AMAZON_US:
+                return MID.ATVPDKIKX0DER;
+            case EBAY_UK:
+            default:
+                return MID.EBAY_UK;
+        }
     }
 
     public boolean isAmazon() {

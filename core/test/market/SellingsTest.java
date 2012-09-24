@@ -5,11 +5,18 @@ import helper.J;
 import models.market.Account;
 import models.market.OrderItem;
 import models.market.Selling;
+import org.apache.http.NameValuePair;
 import org.joda.time.DateTime;
+import org.jsoup.nodes.Document;
 import org.junit.Assert;
 import org.junit.Test;
+import play.Play;
+import play.libs.F;
+import play.template2.IO;
 import play.test.FunctionalTest;
+import play.test.UnitTest;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -18,36 +25,13 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午11:59
  */
-public class SellingsTest extends FunctionalTest {
-
-    //    @Test
-    public void testLoad() {
-        Selling sel = Selling.findById("10HTCG14-1900S_amazon.co.uk");
-        System.out.println(J.G(sel));
-
-        Selling sel2 = Selling.findById("10HTCG14-1900S,2_amazon.de");
-        Assert.assertNotNull(sel2.aps);
-        System.out.println(J.G(sel2));
-    }
-
-    //    @Test
-    public void testLoadOrderItem() {
-        OrderItem.skuOrMskuAccountRelateOrderItem("all", "sku", Account.<Account>findById(1l), DateTime.parse("2012-05-13").toDate(), DateTime.parse("2012-06-13").toDate());
-    }
-
-    //    @Test
-    public void testAnalyzesSKUAndMSKU() {
-        List<Selling> sells = Selling.analyzesSKUAndSID("msku");
-        for(Selling sell : sells) {
-            System.out.println(GTs.render("debug_selling", GTs.newMap("sell", sell).build()));
-        }
-    }
+public class SellingsTest extends UnitTest {
+    String html = IO.readContentAsString(Play.getFile("test/html/de.selling.B008CML318.html"));
 
     @Test
-    public void testAnalyzesSKUAndMSKU2() {
-        List<Selling> sells = Selling.analyzesSKUAndSID("sku");
-        for(Selling sell : sells) {
-            System.out.println(GTs.render("debug_selling", GTs.newMap("sell", sell).build()));
-        }
+    public void testSellingAPS() {
+        Selling selling = Selling.findById("71SMP5100-BHSPU,666346129906|A_DE|2");
+        F.T2<Collection<NameValuePair>, Document> t2 = selling.aps.generateDeployAmazonProps(html, selling);
+        System.out.println(t2._1);
     }
 }
