@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time: 7:04 PM
  */
 public class ListingDriverlJob extends Job {
+    // 消费者
     /**
      * 进行更新使用的队列
      */
@@ -31,30 +32,7 @@ public class ListingDriverlJob extends Job {
     @Override
     public void doJob() throws Exception {
         /**
-         * 1. 检查是否可以运行这次任务
-         * 2. 从队列中依次拿出任务并根据参数进行速度调节
-         * 3. 将任务分发到不同的子 Job 中去
          */
-        if(!flag.get()) {
-            Logger.info("Last Time Job is not DONE yet...");
-            return; // FLAG 为 false 则跳过这次任务
-        }
-
-
-        flag.set(false);
-        for(int i = 0; i < CRAW_LISTING_NUM; i++) {
-            String listingId = QUEUE.poll();
-            if(listingId == null) {
-                Logger.debug("Wow! Queue is empty!");
-                continue;
-            }
-            // --- Listing 抓取
-            ListingWorkers.goOrNot(ListingWorkers.T.L, listingId);
-            // --- Review 抓取
-            ListingWorkers.goOrNot(ListingWorkers.T.R, listingId);
-        }
-        flag.set(true);
-        Logger.debug("ListingDriverlJob.Queue left " + QUEUE.size());
     }
 
 

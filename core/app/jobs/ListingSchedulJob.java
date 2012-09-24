@@ -7,6 +7,8 @@ import play.jobs.Job;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 更新系统中的所有 Listing 信息; 与 ListingDriverlJob 配合为典型的 "生产者<->消费者"模式;
@@ -19,27 +21,14 @@ import java.util.concurrent.TimeUnit;
  * Time: 12:39 AM
  */
 public class ListingSchedulJob extends Job {
+    // 生产者
+    private Lock lock = new ReentrantLock();
+
     @Override
     public void doJob() throws Exception {
         /**
-         * 由于所有的 Selling 都是我们自己的选择的, 所以更新时间可以固定; 固定每 40 分钟更新一次 Listing
-         * 1. 判断 lastUpdateTime 超额 40 分钟的前 10 个
-         * 2. 将计算出来的放入 queue 中
+         * 1. check init Listing queue
+         * 2. check is need reload queue?
          */
-        int MAX_SIZE_PER_TIME = 10;
-
-        long now = System.currentTimeMillis();
-
-        List<Listing> listings = Listing.find("lastUpdateTime<=? ORDER BY lastUpdateTime ASC",
-                (now - TimeUnit.MINUTES.toMillis(40))).fetch(MAX_SIZE_PER_TIME);
-        Logger.info("[" + new DateTime(now).toString("yyyy-MM-dd HH:mm:ss") + "] have " + listings.size() + " size Listing to be deal!");
-        for(Listing li : listings) {
-            if(ListingDriverlJob.QUEUE.contains(li.listingId)) {
-                Logger.debug("Skip Listing[" + li.listingId + "], it`s exist!");
-                continue;
-            }
-            ListingDriverlJob.QUEUE.add(li.listingId);
-            Logger.debug("Add Listing[" + li.listingId + "] to Update Queue.");
-        }
     }
 }
