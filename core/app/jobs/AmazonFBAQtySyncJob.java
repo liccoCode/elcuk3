@@ -2,6 +2,7 @@ package jobs;
 
 import helper.GTs;
 import helper.Webs;
+import models.Jobex;
 import models.market.JobRequest;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -10,6 +11,7 @@ import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 import play.libs.IO;
@@ -20,15 +22,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 针对 Amazon FBA 仓库的库存的同步
+ * <pre>
+ * 针对 Amazon FBA 仓库的库存的同步;
+ * 周期:
+ * - 轮询周期: 5mn
+ * - Duration:15mn
+ * - Job Interval: 4h
+ * </pre>
  * User: wyattpan
  * Date: 2/7/12
  * Time: 11:32 AM
  */
+@Every("5mn")
 public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
     public void doJob() throws Exception {
+        if(!Jobex.findByClassName(AmazonFBAQtySyncJob.class.getName()).isExcute()) return;
         /**
          * 1. 从所有 Whouse 中找出 FBA 的 Whouse.
          * 2. 通过 Whouse 关联的 Account 获取账号的  accessKey 等参数向 FBA 申请库存情况列表

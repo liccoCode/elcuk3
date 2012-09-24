@@ -3,6 +3,7 @@ package jobs;
 import helper.FLog;
 import helper.HTTP;
 import helper.Webs;
+import models.Jobex;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
@@ -11,26 +12,34 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
 
 /**
+ * <pre>
  * 通过 Http 的方式去 Amazon 后台寻找丢失的信息;
  * 每隔 10 分钟执行一次;
+ * 周期:
+ * - 轮询周期: 1mn
+ * - Duration: 10mn
+ * </pre>
  * User: wyattpan
  * Date: 4/20/12
  * Time: 5:17 PM
  */
+@Every("1mn")
 public class OrderInfoFetchJob extends Job {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(OrderInfoFetchJob.class.getName()).isExcute()) return;
         /**
          * 1. 加载 SHIPPED 状态的订单, 并且限制数量;
          */
         int size = 10;
         if(Play.mode.isProd()) size = 30; //调整成 30 个订单一次, 每 10 分钟一次;
-        List<Orderr> orders = needCompleteInfoOrders(size);
+        List<Orderr> orders = OrderInfoFetchJob.needCompleteInfoOrders(size);
         for(Orderr ord : orders) {
             try {
                 if(ord.crawlUpdateTimes > 4) {

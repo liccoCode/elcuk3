@@ -3,26 +3,35 @@ package jobs;
 import helper.FLog;
 import helper.GTs;
 import helper.Webs;
+import models.Jobex;
 import models.embedded.AmazonProps;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Product;
 import org.joda.time.DateTime;
 import play.Play;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.*;
 
 /**
+ * <pre>
  * 对 Selling 所处在的 Amazon Node 进行检测
+ * 周期:
+ * - 轮询周期: 1d
+ * - Duration: 0 40 1 1,8.15,22,29 * ?
+ * </pre>
  * User: wyattpan
  * Date: 6/6/12
  * Time: 3:45 PM
  */
+@Every("1d")
 public class SellingCategoryCheckerJob extends Job {
 
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(SellingCategoryCheckerJob.class.getName()).isExcute()) return;
         /**
          * 1. 找到所有的 Category
          * 2. 遍历每一个 Category 下的每一个 Product

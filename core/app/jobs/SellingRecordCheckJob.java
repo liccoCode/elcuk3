@@ -3,35 +3,43 @@ package jobs;
 import helper.Currency;
 import helper.Dates;
 import helper.Webs;
+import models.Jobex;
 import models.market.*;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.JPA;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * <pre>
  * 在检查所有 Selling 的 SellingRecord, 如果没有进行计算;
  * 每天的 00:30 计算昨天的数据
+ * 周期:
+ * - 轮询周期: 5mn
+ * - Duration: 0 40 0,23 * * ?
+ * </pre>
  * User: wyattpan
  * Date: 5/29/12
  * Time: 4:03 PM
  */
+@Every("5mn")
 public class SellingRecordCheckJob extends Job {
 
     public DateTime fixTime;
 
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(SellingRecordCheckJob.class.getName()).isExcute()) return;
         /**
          * 0. 一 fixTime 为基准时间
          * 1. 检查 7 天内的 SellingRecord, 没有的创建, 有的进行更新
          * 2. 下载 2 天前的 SellingRecord 数据.
          */
-
         List<Selling> sellings = Selling.all().fetch();
 
         if(fixTime == null) fixTime = DateTime.now();

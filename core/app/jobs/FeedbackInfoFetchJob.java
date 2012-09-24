@@ -3,6 +3,7 @@ package jobs;
 import helper.Dates;
 import helper.FLog;
 import helper.HTTP;
+import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.M;
@@ -13,6 +14,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.ArrayList;
@@ -21,17 +23,24 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * <pre>
  * 用来补充性质的更新已经在系统中的 Feedback 的信息;
  * 会加载所有有 OsTicketId 的 Feedback , 然后对她们进行更新:
  * 1. 如果发现 Feedback 消失了, 则记录此 Feedback 被处理完了
  * 2. 同时可以更新 Feedback 记录的最新时间(包含时分秒)
+ * 周期:
+ * - 轮询周期: 5mn
+ * - Duration: 40mn
+ * </pre>
  * User: wyattpan
  * Date: 8/9/12
  * Time: 3:44 PM
  */
+@Every("5mn")
 public class FeedbackInfoFetchJob extends Job {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(FeedbackInfoFetchJob.class.getName()).isExcute()) return;
         // 处理还没有关闭的 Ticket, 每次更新 30
         int size = 30;
         if(Play.mode.isDev()) size = 10;

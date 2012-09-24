@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.Dates;
+import models.Jobex;
 import models.market.Account;
 import models.market.JobRequest;
 import models.market.M;
@@ -8,6 +9,7 @@ import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.IO;
 
@@ -17,14 +19,22 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by IntelliJ IDEA.
+ * <pre>
+ * 通过 Amazon FBA 来更新订单的信息.
+ *  * 周期:
+  * - 轮询周期: 10mn
+  * - Duration: 30mn
+  * - Job Interval: 6h
+ * </pre>
  * User: wyattpan
  * Date: 6/11/12
  * Time: 2:44 PM
  */
+@Every("10mn")
 public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(AmazonOrderUpdateJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
 

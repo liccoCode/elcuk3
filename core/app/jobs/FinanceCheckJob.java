@@ -1,10 +1,12 @@
 package jobs;
 
 import helper.Webs;
+import models.Jobex;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.io.File;
@@ -14,14 +16,19 @@ import java.util.List;
  * 用来抓取各个市场的 Finance 信息的任务;
  * 每隔 3h 抓取一次, 因为通过这种方式抓取的 Finance 信息一次文件只能拥有 600 个 Transaction, 所以需要增加更新频率来获取新的
  * Transaction 的数据
+ * 周期:
+ * - 轮询周期: 5mn
+ * - Duration: 3h
  * User: wyattpan
  * Date: 3/19/12
  * Time: 12:01 PM
  */
+@Every("5mn")
 public class FinanceCheckJob extends Job {
 
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(FinanceCheckJob.class.getName()).isExcute()) return;
         List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
             if("AJUR3R8UN71M4".equals(acc.merchantId)) {

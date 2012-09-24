@@ -2,11 +2,13 @@ package jobs;
 
 import helper.Dates;
 import helper.Webs;
+import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import notifiers.SystemMails;
 import org.joda.time.DateTime;
 import play.Play;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -15,14 +17,22 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * <pre>
+ *
  * 将昨天产生的 Feedback 进行邮件通知
+ * 周期:
+ * - 轮询周期: 1h
+ * - Duration: 0 20 0 * * ?
+ * </pre>
  * User: wyattpan
  * Date: 8/23/12
  * Time: 12:18 PM
  */
+@Every("1h")
 public class FAndRNotificationJob extends Job {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(FAndRNotificationJob.class.getName()).isExcute()) return;
         Date yesterday = DateTime.now().minusDays(Play.mode.isDev() ? 10 : 1).toDate();
         List<Feedback> feedbacks = Feedback.find("createDate>=? ORDER BY score",
                 Dates.morning(yesterday)).fetch();

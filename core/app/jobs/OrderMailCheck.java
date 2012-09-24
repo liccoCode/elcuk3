@@ -1,5 +1,6 @@
 package jobs;
 
+import models.Jobex;
 import models.market.Feedback;
 import models.market.Listing;
 import models.market.OrderItem;
@@ -8,6 +9,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -15,14 +17,19 @@ import java.util.List;
 /**
  * 检查所有订单, 确认是否需要发送邮件;
  * // 每隔 20 分钟时检查一次
+ * 周期:
+ * - 轮询周期: 15mn
+ * - Duration: 4h
  * User: wyattpan
  * Date: 2/28/12
  * Time: 10:02 AM
  */
+@Every("15mn")
 public class OrderMailCheck extends Job {
 
     @Override
     public void doJob() throws Exception {
+        if(!Jobex.findByClassName(OrderMailCheck.class.getName()).isExcute()) return;
         Logger.debug("OrderMailCheck Check SHIPPED_MAIL...");
         DateTime dt = DateTime.parse(DateTime.now().toString("yyyy-MM-dd")); // 仅仅保留 年月日
         /**

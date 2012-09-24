@@ -2,12 +2,14 @@ package jobs;
 
 import helper.AWS;
 import helper.Webs;
+import models.Jobex;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -17,15 +19,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用来将 Amazon 上的 Selling 数据同步到系统中, 参照 SKU 关联
+ * <pre>
+ * 用来将 Amazon 上的 Selling 数据同步到系统中, 参照 SKU 关联;
+ * 这个任务一般会是手动执行.
+ * 周期:
+ * - 轮询周期: 1h
+ * - Duration: 24h
+ * - Job Interval: 10h
+ * </pre>
  * User: wyattpan
  * Date: 4/6/12
  * Time: 4:29 PM
  */
+@Every("1h")
 public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(AmazonSellingSyncJob.class.getName()).isExcute()) return;
         /**
          * 1. 找到所有的 Account 并根据所有支持的 MarketPlace 申请同步的文件
          * 2. 下载回列表后进行系统内更新

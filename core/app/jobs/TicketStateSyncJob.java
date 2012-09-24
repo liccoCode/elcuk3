@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import helper.HTTP;
 import helper.OsTicket;
 import helper.Webs;
+import models.Jobex;
 import models.support.Ticket;
 import models.support.TicketState;
 import org.apache.commons.lang.StringUtils;
@@ -14,21 +15,29 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
 import java.util.*;
 
 /**
+ * <pre>
  * 向 OsTicket 系统进行 Ticket 的数据同步
+ * 周期:
+ * - 轮询周期: 1mn
+ * - Duration: 10mn
+ * </pre>
  * User: wyattpan
  * Date: 7/30/12
  * Time: 5:05 PM
  */
+@Every("1mn")
 public class TicketStateSyncJob extends Job {
 
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(TicketStateSyncJob.class.getName()).isExcute()) return;
         List<Ticket> tickets = Ticket.checkStateTickets(100);
         List<String> ticketIds = new ArrayList<String>();
         for(Ticket t : tickets) ticketIds.add(t.osTicketId());

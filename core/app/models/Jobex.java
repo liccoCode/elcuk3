@@ -113,6 +113,9 @@ public class Jobex extends Model {
             if(isExecute) {
                 this.lastUpdateTime = now;
                 this.save();
+                Logger.info("Job ClassName %s is execute.", this.className);
+            } else {
+                Logger.info("Find By ClassName %s is not execute.", this.className);
             }
             return isExecute;
         } catch(Exception e) {

@@ -6,6 +6,7 @@ import ext.LinkHelper;
 import helper.Crawl;
 import helper.Dates;
 import helper.HTTP;
+import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.M;
@@ -14,6 +15,7 @@ import models.support.TicketState;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
+import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -21,14 +23,21 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * <pre>
  * 针对每一个有问题的 Review 进行检查, 查看 Review 的处理状况.
+ * 周期:
+ * - 轮询周期: 1mn
+ * - Duration: 1h
+ * </pre>
  * User: wyattpan
  * Date: 8/24/12
  * Time: 5:56 PM
  */
+@Every("1mn")
 public class ReviewInfoFetchJob extends Job {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(ReviewInfoFetchJob.class.getName()).isExcute()) return;
         int size = 30;
         if(Play.mode.isDev()) size = 10;
         List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",

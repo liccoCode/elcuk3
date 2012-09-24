@@ -5,10 +5,12 @@ import helper.Currency;
 import helper.Dates;
 import helper.Patterns;
 import helper.Webs;
+import models.Jobex;
 import models.market.*;
 import models.product.Product;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import javax.xml.bind.JAXB;
@@ -18,13 +20,19 @@ import java.util.*;
 /**
  * 每隔一段时间到 Amazon 上进行订单的抓取
  * //TODO 在处理好 Product, Listing, Selling 的数据以后再编写
+ *  * 周期:
+  * - 轮询周期: 5mn
+  * - Duration: 10mn
+  * - Job Interval: 1h
  * User: Wyatt
  * Date: 12-1-8
  * Time: 上午5:59
  */
+@Every("5mn")
 public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() throws Exception {
+        if(!Jobex.findByClassName(AmazonOrderFetchJob.class.getName()).isExcute()) return;
         // 对每一个用户都是如此
         List<Account> accs = Account.openedSaleAcc();
         /**

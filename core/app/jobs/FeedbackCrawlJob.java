@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.*;
+import models.Jobex;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.M;
@@ -15,6 +16,7 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Validation;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.io.File;
@@ -22,12 +24,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * <pre>
+ *
  * 用来抓取 Feedback 的线程, 7 小时抓取一次
- * <p/>
+ * 周期:
+ * - 轮询周期: 30mn
+ * - Duration: 7h
+ * </pre>
  * User: wyattpan
  * Date: 3/15/12
  * Time: 9:34 AM
  */
+@Every("30mn")
 public class FeedbackCrawlJob extends Job {
     /**
      * <pre>
@@ -40,7 +48,9 @@ public class FeedbackCrawlJob extends Job {
      */
     @Override
     public void doJob() {
-        Currency.updateCRY();// 附带在 FeedbackCrawlJob 的周期更新一次 Currency.
+        Currency.updateCRY();// 每一次的轮训, 都更新一次 CRY
+
+        if(!Jobex.findByClassName(FeedbackCrawlJob.class.getName()).isExcute()) return;
 
         List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
