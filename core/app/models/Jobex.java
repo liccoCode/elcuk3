@@ -127,7 +127,7 @@ public class Jobex extends Model {
                 durationMills = Time.parseDuration(this.duration) * 1000;
             }
             boolean isExecute = Math.abs(now - this.lastUpdateTime) > durationMills;
-            if(Play.mode.isDev()) isExecute = isExecute && this.devRun;
+            if(Play.mode.isDev()) isExecute = this.devRun && isExecute;
 
             if(isExecute) {
                 this.lastUpdateTime = now;

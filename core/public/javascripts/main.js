@@ -137,7 +137,7 @@ $.DateUtil = {
  */
 function checkbox(box){
     var o = $(box);
-    o.next().val(o.val());
+    o.next().val(o.is(':checked'));
 }
 
 function toggle_init(){
