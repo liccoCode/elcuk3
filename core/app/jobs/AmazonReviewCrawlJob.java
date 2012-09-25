@@ -1,6 +1,7 @@
 package jobs;
 
 import jobs.works.ListingReviewWork;
+import models.Jobex;
 import models.market.Listing;
 import play.jobs.Every;
 import play.jobs.Job;
@@ -17,6 +18,7 @@ import java.util.List;
 public class AmazonReviewCrawlJob extends Job {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(AmazonReviewCrawlJob.class.getName()).isExcute()) return;
         List<Listing> listings = Listing.find("ORDER BY lastUpdateTime").fetch(10);
         for(Listing lst : listings) {
             new ListingReviewWork(lst.listingId).now();
