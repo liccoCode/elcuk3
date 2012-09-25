@@ -2,6 +2,8 @@ package jobs;
 
 import jobs.works.ListingWork;
 import models.Jobex;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 
@@ -38,8 +40,11 @@ public class ListingDriverlJob extends Job {
         int works = THREADS * SPEED;
         for(int i = 0; i < works; i++) {
             // 抓取 Listing 通过需要抓取 offers
+            String listingId = ListingSchedulJob.peekListingId();
+            if(StringUtils.isBlank(listingId)) continue;
             new ListingWork(ListingSchedulJob.peekListingId(), true).now();
         }
+        Logger.info("After Work, Queue size left: %s", ListingSchedulJob.queueSize());
     }
 
 

@@ -29,7 +29,7 @@ public class ListingWork extends Job<Listing> {
         Listing listing = Listing.find("listingId=?", this.listingId).first();
         // Current Only Amazon
         if(listing == null) {
-            Logger.error("The Listing Queue have error! Please check it immediately.");
+            Logger.error("Listing %s is not exist! Check it immediately.", this.listingId);
             return;
         }
         if(listing.market.name().contains("EBAY")) {

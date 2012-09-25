@@ -86,6 +86,10 @@ public class ListingSchedulJob extends Job {
         return WORK_QUEUE.poll();
     }
 
+    public static int queueSize() {
+        return WORK_QUEUE.size();
+    }
+
     /**
      * 重新初始化 ListingSchedulJob 的 基础 Listing 数据
      *
