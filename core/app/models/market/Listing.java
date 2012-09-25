@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
 import jobs.works.ListingOffersWork;
-import jobs.works.ListingWorkers;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -388,8 +387,7 @@ public class Listing extends GenericModel {
          * 否则返回一个瞬时状态的 Listing 对象
          */
         JsonObject lst = listingJson.getAsJsonObject();
-        if("CLOSE".equalsIgnoreCase(lst.get("state").getAsString())) {
-            Logger.info("Listing %s is not exist.(404 page)", lst.get("asin").getAsString());
+        if(lst.get("isRemove").getAsBoolean()) {
             return null;
         }
 

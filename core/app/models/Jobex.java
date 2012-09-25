@@ -81,12 +81,11 @@ public class Jobex extends Model {
         try {
             Time.parseCRONExpression(this.duration);
         } catch(Exception e) {
-            //ignore
-        }
-        try {
-            Time.parseDuration(this.duration);
-        } catch(Exception e) {
-            return false;
+            try {
+                Time.parseDuration(this.duration);
+            } catch(Exception e1) {
+                return false;
+            }
         }
         return true;
     }

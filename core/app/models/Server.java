@@ -54,8 +54,12 @@ public class Server extends Model {
     public static Server server(T type) {
         List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
         if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
-            servers = Server.find("type=?", type).fetch();
-            Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
+            synchronized(Server.class) {
+                if(servers == null || servers.size() == 0) {
+                    servers = Server.find("type=?", type).fetch();
+                    Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
+                }
+            }
         }
         //TODO 根据 ratio 计算获取哪一个
         return servers.get(0);

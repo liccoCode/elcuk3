@@ -28,6 +28,6 @@ public class ListingWorkerTest extends UnitTest {
 
     @Test
     public void testListingFullOffer() {
-        new ListingWork("B006QK90YK_amazon.de").now();
+        new ListingWork("B006QK90YK_amazon.de", false).now();
     }
 }

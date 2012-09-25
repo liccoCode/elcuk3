@@ -17,14 +17,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class ListingWork extends Job<Listing> {
     private String listingId;
+    private boolean fulloffers = false;
 
-    public ListingWork(String listingId) {
+    public ListingWork(String listingId, boolean fulloffers) {
         this.listingId = listingId;
+        this.fulloffers = fulloffers;
     }
 
     @Override
     public void doJob() {
-        Listing listing = Listing.find("listingId=?", listingId).first();
+        Listing listing = Listing.find("listingId=?", this.listingId).first();
         // Current Only Amazon
         if(listing == null) {
             Logger.error("The Listing Queue have error! Please check it immediately.");
@@ -38,24 +40,22 @@ public class ListingWork extends Job<Listing> {
             JsonElement lst = Crawl.crawlListing(listing.market.name(), listing.asin);
             Listing needCheckListing = Listing.parseAndUpdateListingFromCrawl(lst, false);
             if(needCheckListing == null) {
+                // TODO 需要对删除的 Listing 做处理
                 // 如果为 null , 则 7 天内不在检查
                 listing.lastUpdateTime = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7);
                 listing.saleRank = -2;// 使用 saleRank 为 -2 来标记此 Listing 已经 CLOSE 了
                 listing.save();
                 return;
             }
-            try {
-                if(needCheckListing.totalOffers > 1) {
-                    Logger.info("Listing (%s) fetch offers...", needCheckListing.listingId);
-                    new ListingOffersWork(needCheckListing).now().get(10, TimeUnit.SECONDS); // 等待 10 s
-                }
-            } catch(Exception e) {
-                Logger.warn("Listing (%s) no offers.", this.listingId);
-            }
             needCheckListing.check();
             needCheckListing.save();
         } catch(Exception e) {
             Logger.warn("ListingDriverlJob[" + listingId + "]:" + e.getClass().getSimpleName() + "|" + e.getMessage());
+        } finally {
+            if(fulloffers) {
+                Logger.info("Listing (%s) fetch offers...", this.listingId);
+                new ListingOffersWork(this.listingId).now(); // 等待 10 s
+            }
         }
     }
 }

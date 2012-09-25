@@ -36,7 +36,7 @@ public class ListingWorkers extends Job {
     public static void goOrNot(T t, String lid) {
         switch(t) {
             case L:
-                new ListingWork(lid).now(); // 不需要结果, 但需要为每个结果等待 10s
+                new ListingWork(lid, false).now(); // 不需要结果, 但需要为每个结果等待 10s
                 break;
             case R:
                 if(Play.mode.isProd()) {
