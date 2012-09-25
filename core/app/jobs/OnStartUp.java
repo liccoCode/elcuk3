@@ -39,6 +39,7 @@ public class OnStartUp extends Job {
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
             Account.init();
+            new ListingSchedulJob().now();
         }
     }
 }
