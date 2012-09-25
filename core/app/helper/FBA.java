@@ -17,6 +17,7 @@ import org.apache.commons.lang.Validate;
 import play.i18n.Messages;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -186,11 +187,31 @@ public class FBA {
     }
 
 
+    /**
+     * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentItem
+     * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentItem 中
+     * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
+     *
+     * @param shipitems
+     * @return
+     */
     private static List<InboundShipmentItem> shipItemsToInboundShipmentItems(List<ShipItem> shipitems) {
-        List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
+        /**
+         * 1. 根据 ShipItem 的 msku 组成 Map
+         * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
+         */
+        Map<String, AtomicInteger> shipitemsMap = new HashMap<String, AtomicInteger>();
         for(ShipItem item : shipitems) {
+            if(shipitemsMap.containsKey(item.unit.selling.merchantSKU))
+                shipitemsMap.get(item.unit.selling.merchantSKU).addAndGet(item.qty);
+            else
+                shipitemsMap.put(item.unit.selling.merchantSKU, new AtomicInteger(item.qty));
+        }
+
+        List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
+        for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
             // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentItem(null, item.unit.selling.merchantSKU, null, item.qty, null));
+            items.add(new InboundShipmentItem(null, entry.getKey(), null, entry.getValue().get(), null));
         }
         return items;
     }
