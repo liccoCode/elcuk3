@@ -1,17 +1,9 @@
 package jobs;
 
-import com.todaynic.client.mobile.SMS;
-import helper.Crawl;
 import jobs.works.ListingWork;
-import jobs.works.ListingWorkers;
 import models.Jobex;
-import models.Server;
-import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
-
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
