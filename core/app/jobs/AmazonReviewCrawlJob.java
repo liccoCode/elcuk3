@@ -13,7 +13,7 @@ import java.util.List;
  * Date: 9/25/12
  * Time: 9:12 PM
  */
-@Every("1mn")
+@Every("10mn")
 public class AmazonReviewCrawlJob extends Job {
     @Override
     public void doJob() {
