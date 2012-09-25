@@ -105,7 +105,7 @@
                 </tr>
             #{list items:units, as:'unit'}
                 #{set leftQty: unit.leftQty()/}
-                #{if leftQty._1 > 0}
+                #{if leftQty._1 != 0}
                     <tr>
                         <td>
                             <label class="checkbox">
