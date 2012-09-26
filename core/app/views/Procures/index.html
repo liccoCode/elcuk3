@@ -4,24 +4,17 @@
     #{script 'procures/index.coffee'/}
 #{/set}
 
-#{if flash.success}
-<div class="row-fluid">
-    <div class="span12 alert alert-success" style="text-align:center">
-        <p>${flash.success.raw()}</p>
-    </div>
-</div>
-#{/if}
 #{ifErrors }
     #{errorMsgs /}
 #{/ifErrors}
-<div class="row-fluid">
-    <div class="span12 alert alert-info">
-        <ul>
-            <li>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</li>
-        #{li_net /}
-        </ul>
-    </div>
-</div>
+#{flash_alert /}
+
+#{info_row}
+<ul>
+    <li>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</li>
+    #{li_net /}
+</ul>
+#{/info_row}
 
 <div class="row-fluid">
     <form action="@{Procures.index()}" method="post">

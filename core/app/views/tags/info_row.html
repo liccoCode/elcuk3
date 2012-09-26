@@ -1,0 +1,9 @@
+*{常用的提示符}*
+<div class="${row ? 'row' : 'row-fluid'}">
+    <div class="span12 alert alert-info">
+    #{if _title}
+        <h4>${_title}</h4>
+    #{/if}
+    #{doBody /}
+    </div>
+</div>

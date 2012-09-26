@@ -5,11 +5,7 @@
 #{/set}
 
 #{if unit.selling == null}
-<div class="row">
-    <div class="span12 alert alert-error">
-        <p>${flash.error}</p>
-    </div>
-</div>
+    #{flash_alert row:true /}
 #{/if}
 #{else }
 

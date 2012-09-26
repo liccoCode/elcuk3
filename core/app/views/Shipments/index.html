@@ -1,14 +1,13 @@
 #{extends 'main_full.html' /}
-#{set title:'运输单列表' /}
+#{set title:'运输单列表 (' + shipments.size() + ')' /}
 #{set 'moreScripts'}
 #{/set}
-<div class="row-fluid">
-    <div class="span12 alert alert-info">
-        <ul>
-        #{li_net /}
-        </ul>
-    </div>
-</div>
+
+#{info_row}
+<ul>
+    #{li_net /}
+</ul>
+#{/info_row}
 
 <div class="row-fluid">
     <form action="@{Shipments.index()}" method="post">

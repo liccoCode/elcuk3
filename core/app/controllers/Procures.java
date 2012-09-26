@@ -1,6 +1,5 @@
 package controllers;
 
-import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -14,12 +13,10 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
-import play.db.jpa.JPA;
 import play.i18n.Messages;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Router;
 import play.mvc.With;
 
 import java.util.List;
@@ -51,7 +48,11 @@ public class Procures extends Controller {
         long uid = NumberUtils.toLong(unitId);
         ProcureUnit unit = ProcureUnit.findById(uid);
         if(unit.cooperator == null) {
-            flash.error("请将 合作伙伴 补充完整.");
+            flash.error("请将 合作伙伴(供应商) 补充完整.");
+            redirect("/procures/edit/" + unitId);
+        }
+        if(unit.shipType == null) {
+            flash.error("请将 运输方式 补充完整.");
             redirect("/procures/edit/" + unitId);
         }
     }
@@ -117,6 +118,9 @@ public class Procures extends Controller {
 
     public static void markPlace(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        if(unit.cooperator == null || unit.shipType == null) {
+            renderJSON(new Ret(false, "[合作者] 或者 [运输方式] 需要填写完整."));
+        }
         unit.isPlaced = true;
         unit.save();
         renderJSON(new Ret());

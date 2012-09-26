@@ -4,11 +4,7 @@
 #{/set}
 
 #{if unit.selling == null}
-<div class="row">
-    <div class="span12 alert alert-error">
-        <p>${flash.error}</p>
-    </div>
-</div>
+    #{flash_alert row:true /}
 #{/if}
 #{else }
 
@@ -16,15 +12,13 @@
         #{errorMsgs /}
     #{/ifErrors}
 
-<div class="row">
-    <div class="span12 alert alert-info">
-        <ul>
-            <li>通过此页面进行 采购单元 的交货操作</li>
-            <li>如果 采购单元 已经交货完成, 那么不再允许修改</li>
-            <li>如果 采购单元 为部分交货, 那么系统会自动将剩余没有交货的数量复制新的无 预计时间 的 采购单元</li>
-        </ul>
-    </div>
-</div>
+    #{info_row row:true}
+    <ul>
+        <li>通过此页面进行 采购单元 的交货操作</li>
+        <li>如果 采购单元 已经交货完成, 那么不再允许修改</li>
+        <li>如果 采购单元 为部分交货, 那么系统会自动将剩余没有交货的数量复制新的无 预计时间 的 采购单元</li>
+    </ul>
+    #{/info_row}
 
 <div class="row">
     <div class="span12">

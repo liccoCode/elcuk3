@@ -3,15 +3,13 @@
 #{set 'moreScripts'}
 #{/set}
 
-<div class="row-fluid">
-    <div class="span12 alert alert-info">
-        <p>创建一份运输单, 此阶段收集基本信息</p>
-    </div>
-</div>
+#{flash_alert /}
 
 #{ifErrors }
     #{errorMsgs /}
 #{/ifErrors}
+
+#{info_row title:'创建一份运输单, 此阶段收集基本信息' /}
 
 
 <div class="row-fluid">

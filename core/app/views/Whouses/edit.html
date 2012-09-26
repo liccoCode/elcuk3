@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main.html'/}
 #{set title:'修改仓库 ' + wh.name() /}
 #{set 'moreScripts'}
 #{/set}
@@ -9,13 +9,9 @@
 
 #{flash_alert /}
 
-<div class="row-fluid">
-    <div class="span12 alert alert-info">
-        <h4>修改仓库</h4>
-    </div>
-</div>
+#{info_row row:true, title:'修改仓库' /}
 
-<div class="row-fluid">
+<div class="row">
     <div class="span12">
         <form action="@{Whouses.update()}" method="post">
             <table class="table table-condensed table-bordered">

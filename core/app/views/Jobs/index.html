@@ -59,20 +59,7 @@
     </div>
 </div>
 
-#{if flash.success || flash.error}
-<div class="row-fluid">
-    #{if flash.error}
-        <div class="span12 alert alert-error">
-        ${flash.error}
-        </div>
-    #{/if}
-    #{if flash.success}
-        <div class="span12 alert alert-success">
-        ${flash.success}
-        </div>
-    #{/if}
-</div>
-#{/if}
+#{flash_alert /}
 
 #{ifErrors }
     #{errorMsgs /}

@@ -94,7 +94,7 @@ public class ProcureUnit extends Model {
             }
         },
         /**
-         * 正在运输中
+         * 全部运输
          */
         SHIPPING {
             @Override
@@ -474,9 +474,15 @@ public class ProcureUnit extends Model {
         return eventSource;
     }
 
+    /**
+     * 根据 采购单的状态, 采购计划的阶段, 运输方式, 去往仓库 进行运输项目的过滤
+     * @param whouseid
+     * @param type
+     * @return
+     */
     public static List<ProcureUnit> waitToShip(long whouseid, Shipment.T type) {
-        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage NOT IN (?,?) AND shipType=?  AND whouse.id=? ORDER BY attrs.planArrivDate",
-                Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING, STAGE.SHIP_OVER, type, whouseid).fetch();
+        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage NOT IN (?,?,?) AND shipType=?  AND whouse.id=? ORDER BY attrs.planArrivDate",
+                Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING, STAGE.SHIP_OVER, STAGE.CLOSE, type, whouseid).fetch();
     }
 
 

@@ -82,6 +82,7 @@ public class Analyzes extends Controller {
         renderJSON(new Ret());
     }
 
+    @Check("root")
     public static void allSkuCsv(Date from, Date to) {
         String fileName = "SKU_Sales.csv";
         File file = new File(Constant.TMP, fileName);

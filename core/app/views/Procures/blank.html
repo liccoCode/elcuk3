@@ -5,17 +5,14 @@
 #{/set}
 
 #{if unit.selling == null}
-<div class="row">
-    <div class="span12 alert alert-error">
-        <p>${flash.error}</p>
-    </div>
-</div>
+    #{flash_alert row:true /}
 #{/if}
 #{else }
 
     #{ifErrors }
         #{errorMsgs /}
     #{/ifErrors}
+    #{flash_alert row:true /}
 
 <form action="/procures/save" method="post">
     <table class="table table-condensed table-bordered">
