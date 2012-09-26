@@ -22,7 +22,7 @@ public class DeliveryPost extends Post {
     /**
      * 解析 Id 的正则表达式
      */
-    private static final Pattern ID = Pattern.compile("^id:(\\w{2}\\|\\d{6}\\|\\d{2})$");
+    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
 
     /**
      * 解析 +N 这样的数字, 解析出含有 N 个 ProcureUnit 的 Deliveryment
@@ -35,6 +35,7 @@ public class DeliveryPost extends Post {
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
 
+        // 针对 Id 的唯一搜索
         if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
         // +n 处理需要额外的搜索
@@ -60,7 +61,6 @@ public class DeliveryPost extends Post {
             String word = this.word();
             sbd.append(" AND (")
                     .append(" u.sid LIKE ?")
-                    .append(" OR d.memo LIKE ?")
                     .append(" OR d.name LIKE ?")
                     .append(")");
             for(int i = 0; i < 3; i++) params.add(word);
@@ -97,7 +97,7 @@ public class DeliveryPost extends Post {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true, "id=?", new ArrayList<Object>(Arrays.asList(deliverymentId)));
+                return new F.T3<Boolean, String, List<Object>>(true, "SELECT d FROM Deliveryment d WHERE d.id=?", new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);

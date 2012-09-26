@@ -103,7 +103,6 @@ public class ProcurePost extends Post {
             if(StringUtils.isNotBlank(this.search)) {
                 String word = String.format("%%%s%%", this.search.trim());
                 sbd.append(" AND (")
-                        .append("comment LIKE ? OR ")
                         .append("product.sku LIKE ? OR ")
                         .append("selling.sellingId LIKE ?")
                         .append(") ");

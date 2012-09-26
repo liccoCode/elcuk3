@@ -26,4 +26,13 @@ public class RegexTest {
             Assert.assertEquals("223", ma.group(1));
         }
     }
+
+    @Test
+    public void deliveryIdPattern() {
+        Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
+        String str = "DL|201209|17";
+        Matcher matcher = ID.matcher(str);
+        matcher.find();
+        Assert.assertEquals(str, matcher.group(1));
+    }
 }

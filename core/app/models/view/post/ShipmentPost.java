@@ -7,7 +7,10 @@ import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -17,6 +20,7 @@ import java.util.List;
  */
 public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
+    private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
 
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
@@ -47,7 +51,10 @@ public class ShipmentPost extends Post {
 
     @Override
     public F.T2<String, List<Object>> params() {
-//        StringBuilder sbd = new StringBuilder(String.format("%s>=? AND %s<=?", this.dateType, this.dateType));
+        F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
+
+        if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+
         StringBuilder sbd = new StringBuilder(
                 String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i WHERE s.%s>=? AND s.%s<=?", this.dateType, this.dateType));
         List<Object> params = new ArrayList<Object>();
@@ -82,7 +89,6 @@ public class ShipmentPost extends Post {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append("s.memo LIKE ?")
                     .append(" OR s.trackNo LIKE ?")
                     .append(" OR i.unit.sid LIKE ?")
                     .append(")");
@@ -91,5 +97,22 @@ public class ShipmentPost extends Post {
 
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
+    }
+
+    /**
+     * 通过 Id 搜索 Deliveryment
+     *
+     * @return
+     */
+    private F.T3<Boolean, String, List<Object>> deliverymentId() {
+        if(StringUtils.isNotBlank(this.search)) {
+            this.search = this.search.trim();
+            Matcher matcher = ID.matcher(this.search);
+            if(matcher.find()) {
+                String deliverymentId = matcher.group(1);
+                return new F.T3<Boolean, String, List<Object>>(true, "SELECT s FROM Shipment s WHERE s.id=?", new ArrayList<Object>(Arrays.asList(deliverymentId)));
+            }
+        }
+        return new F.T3<Boolean, String, List<Object>>(false, null, null);
     }
 }
