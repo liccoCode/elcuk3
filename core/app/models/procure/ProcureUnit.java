@@ -22,6 +22,7 @@ import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
+import query.ProcureUnitQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -244,7 +245,10 @@ public class ProcureUnit extends Model {
         /**
          * 1. Selling 与 SKU 需要一样
          */
+        Validation.current().valid(this);
         unit.validate();
+        if(this.stage != STAGE.PLAN && this.stage != STAGE.DELIVERY)
+            Validation.addError(this.stage.toString(), "procureunit.split.state");
         Validation.equals("procureunit.selling", this.selling.sellingId, "", unit.selling.sellingId);
         Validation.equals("procureunit.sku", this.sku, "", unit.sku);
         Validation.max("procureunit.planQty", unit.attrs.planQty, this.attrs.planQty);
@@ -252,6 +256,7 @@ public class ProcureUnit extends Model {
         Validation.min("procureunit.planQty", leftQty, 0);
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
+        if(this.stage == STAGE.DELIVERY) unit.stage = this.stage;
         unit.save();
         this.save();
     }
@@ -405,7 +410,9 @@ public class ProcureUnit extends Model {
      * @return
      */
     public List<Shipment> relateShipment() {
-        return Shipment.find("SELECT DISTINCT s FROM Shipment s, IN(s.items) itm WHERE itm.unit.id=?", this.id).fetch();
+        F.T2<List<String>, List<String>> unitShippingRelateIds = ProcureUnitQuery.procureRelateShippingRelateIds(this.id);
+        if(unitShippingRelateIds._1.size() == 0) return new ArrayList<Shipment>();
+        return Shipment.find("id in " + JpqlSelect.inlineParam(unitShippingRelateIds._1)).fetch();
     }
 
     public int qty() {
@@ -476,6 +483,7 @@ public class ProcureUnit extends Model {
 
     /**
      * 根据 采购单的状态, 采购计划的阶段, 运输方式, 去往仓库 进行运输项目的过滤
+     *
      * @param whouseid
      * @param type
      * @return

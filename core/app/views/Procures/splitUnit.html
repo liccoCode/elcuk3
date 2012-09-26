@@ -53,9 +53,14 @@
                 <td>是否到货代 #{yesOrNo f:unit.isPlaced/}</td>
 
                 <th>采购单</th>
-                <td>
-                    <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" class="btn btn-primary">${unit.deliveryment.id}</a>
-                </td>
+                <td>${unit.deliveryment.id}</td>
+            </tr>
+
+            <tr>
+                <th>运输方式</th>
+                <td>${unit.shipType}</td>
+
+                <td colspan="4"></td>
             </tr>
         </table>
     </div>
@@ -145,6 +150,21 @@
                         <input type="hidden" name="newUnit.deliveryment.id" value="${newUnit.deliveryment.id}">
                     </td>
                 </tr>
+
+                <tr>
+                    <th>运输方式</th>
+                    <td>
+                        <select name="newUnit.shipType">
+                            <option value="">请选择</option>
+                            #{list items:models.procure.Shipment.T.values(), as:'t'}
+                            <option ${t == newUnit.shipType ? 'selected' : ''} value="${t.name()}">${t}</option>
+                            #{/list}
+                        </select>
+                    </td>
+
+                    <td colspan="4"></td>
+                </tr>
+
                 <tr>
                     <td colspan="6">
                         <h4>Comment</h4>
@@ -155,6 +175,7 @@
                     <td colspan="6">
                         <input type="hidden" name="newUnit.attrs.deliveryDate" value="${newUnit.attrs.deliveryDate.date()}">
                         <input type="hidden" name="id" value="${unit.id}">
+                        <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" class="btn btn-success">回到采购单</a>
                         <button class="btn btn-primary">分拆</button>
                     </td>
                 </tr>

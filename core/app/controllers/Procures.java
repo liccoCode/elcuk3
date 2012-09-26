@@ -179,6 +179,7 @@ public class Procures extends Controller {
         newUnit.handler = User.findByUserName(ElcukRecord.username());
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
+        flash.success("分拆成功, 如果原来的计划添加到了运输单, 请记得运输数量修正.");
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }
 
