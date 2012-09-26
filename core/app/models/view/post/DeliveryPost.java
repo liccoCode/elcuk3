@@ -63,7 +63,7 @@ public class DeliveryPost extends Post {
                     .append(" u.sid LIKE ?")
                     .append(" OR d.name LIKE ?")
                     .append(")");
-            for(int i = 0; i < 3; i++) params.add(word);
+            for(int i = 0; i < 2; i++) params.add(word);
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);

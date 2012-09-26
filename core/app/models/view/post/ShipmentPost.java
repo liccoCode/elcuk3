@@ -92,7 +92,7 @@ public class ShipmentPost extends Post {
                     .append(" OR s.trackNo LIKE ?")
                     .append(" OR i.unit.sid LIKE ?")
                     .append(")");
-            for(int i = 0; i < 3; i++) params.add(word);
+            for(int i = 0; i < 2; i++) params.add(word);
         }
 
 

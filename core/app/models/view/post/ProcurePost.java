@@ -106,7 +106,7 @@ public class ProcurePost extends Post {
                         .append("product.sku LIKE ? OR ")
                         .append("selling.sellingId LIKE ?")
                         .append(") ");
-                for(int i = 0; i < 3; i++) params.add(word);
+                for(int i = 0; i < 2; i++) params.add(word);
             }
         }
 
