@@ -1,5 +1,5 @@
 #{if flash.success || flash.error}
-<div class="row-fluid">
+<div class="${row ? 'row' : 'row-fluid'}">
     #{if flash.error}
         <div class="span12 alert alert-error">
         ${flash.error}

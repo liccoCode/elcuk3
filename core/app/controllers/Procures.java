@@ -12,6 +12,7 @@ import models.procure.ProcureUnit;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ProcurePost;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.i18n.Messages;
@@ -31,7 +32,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Procures extends Controller {
-    @Before(only = {"blank", "save", "edit", "update"}, priority = 0)
+    @Before(only = {"blank", "save", "edit", "update"}, priority = 1)
     public static void whouses() {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
@@ -42,6 +43,17 @@ public class Procures extends Controller {
         renderArgs.put("dateTypes", ProcurePost.DATE_TYPES);
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
         renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
+    }
+
+    @Before(only = {"splitUnit", "deliveryUnit"}, priority = 0)
+    public static void checkUnitValid() {
+        String unitId = request.params.get("id");
+        long uid = NumberUtils.toLong(unitId);
+        ProcureUnit unit = ProcureUnit.findById(uid);
+        if(unit.cooperator == null) {
+            flash.error("请将 合作伙伴 补充完整.");
+            redirect("/procures/edit/" + unitId);
+        }
     }
 
     public static void index(ProcurePost p) {
@@ -100,7 +112,7 @@ public class Procures extends Controller {
         }
         unit.save();
         flash.success("ProcureUnit %s update success!", unit.id);
-        redirect("/Procures/index?p.search=id:" + unit.id);
+        redirect("/procures/index?p.search=id:" + unit.id);
     }
 
     public static void markPlace(long id) {

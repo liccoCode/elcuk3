@@ -29,7 +29,7 @@ import java.net.URLDecoder;
  * Time: 10:34 AM
  */
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Attach extends Model {
 
     /**

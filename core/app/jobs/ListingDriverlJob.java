@@ -4,6 +4,7 @@ import jobs.works.ListingWork;
 import models.Jobex;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
+import play.Play;
 import play.jobs.Every;
 import play.jobs.Job;
 
@@ -30,6 +31,8 @@ public class ListingDriverlJob extends Job {
 
     @Override
     public void doJob() throws Exception {
+        // 因为 Every 1s 产生的 log 太麻烦, 但 log 我又不能关闭, 需要查看东西, 所以真要在测试环境使用这个执行的时候, 需要注释掉这一行
+        if(Play.mode.isDev()) return;
         if(!Jobex.findByClassName(ListingDriverlJob.class.getName()).isExcute()) return;
         /**
          * 根据:

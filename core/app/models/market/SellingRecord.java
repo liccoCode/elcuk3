@@ -27,7 +27,7 @@ import java.util.*;
  * Time: 6:40 PM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class SellingRecord extends GenericModel {
 
     /**

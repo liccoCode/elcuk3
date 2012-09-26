@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -42,6 +43,8 @@ public class ProcurePost extends Post {
     public ProcureUnit.STAGE stage;
 
     public boolean isPlaced = false;
+
+    public Shipment.T shipType;
 
     /**
      * 选择过滤的日期类型
@@ -85,6 +88,11 @@ public class ProcurePost extends Post {
             if(this.stage != null) {
                 sbd.append(" AND stage=? ");
                 params.add(this.stage);
+            }
+
+            if(this.shipType != null) {
+                sbd.append(" AND shipType=? ");
+                params.add(this.shipType);
             }
 
             if(this.isPlaced) {

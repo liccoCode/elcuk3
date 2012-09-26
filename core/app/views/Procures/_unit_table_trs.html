@@ -81,6 +81,19 @@
 </tr>
 
 <tr>
+    <th>运输类型</th>
+    <td>
+        <select name="unit.shipType">
+            <option value="">请选择</option>
+        #{list items:models.procure.Shipment.T.values(), as:'t'}
+            <option value="${t.name()}">${t}</option>
+        #{/list}
+        </select>
+    </td>
+    <td colspan="2"></td>
+</tr>
+
+<tr>
     <td colspan="4">
         <h4>Memo</h4>
         <textarea rows="8" class="span12" name="unit.comment">${unit.comment.raw()}</textarea>

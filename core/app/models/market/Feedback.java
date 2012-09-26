@@ -32,6 +32,7 @@ import java.util.*;
  */
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Feedback extends GenericModel {
 
     @OneToOne

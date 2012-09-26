@@ -474,9 +474,9 @@ public class ProcureUnit extends Model {
         return eventSource;
     }
 
-    public static List<ProcureUnit> waitToShip(long whouseid) {
-        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage NOT IN (?,?) AND whouse.id=? ORDER BY attrs.planArrivDate",
-                Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING, STAGE.SHIP_OVER, whouseid).fetch();
+    public static List<ProcureUnit> waitToShip(long whouseid, Shipment.T type) {
+        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage NOT IN (?,?) AND shipType=?  AND whouse.id=? ORDER BY attrs.planArrivDate",
+                Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING, STAGE.SHIP_OVER, type, whouseid).fetch();
     }
 
 

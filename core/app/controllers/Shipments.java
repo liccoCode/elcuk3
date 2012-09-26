@@ -102,7 +102,7 @@ public class Shipments extends Controller {
         String shipmentId = request.params.get("id");
         Shipment ship = Shipment.findById(shipmentId);
         try {
-            List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id);
+            List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id, ship.type);
             renderArgs.put("units", units);
         } catch(Exception e) {
             Validation.addError("shipments.setUpShipPage", "%s");
