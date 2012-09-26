@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
+import jobs.ListingSchedulJob;
 import jobs.works.ListingOffersWork;
 import models.product.Product;
 import notifiers.Mails;
@@ -446,7 +447,7 @@ public class Listing extends GenericModel {
             }
             tobeChangeed.offers = newOffers;
         }
-        tobeChangeed.lastUpdateTime = System.currentTimeMillis();
+        tobeChangeed.lastUpdateTime = System.currentTimeMillis() + ListingSchedulJob.calInterval(tobeChangeed);
         if(oldListing != null) return tobeChangeed.save();
         return tobeChangeed;
     }
