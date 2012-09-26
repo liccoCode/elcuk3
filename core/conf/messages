@@ -31,6 +31,11 @@ ship.shipFee=\u8FD0\u8F93\u8D39\u7528
 ship.volumn=\u8FD0\u8F93\u4F53\u79EF
 ship.weight=\u8FD0\u8F93\u91CD\u91CF
 
+wh.name=\u4ED3\u5E93\u540D\u79F0
+wh.type=\u4ED3\u5E93\u7C7B\u578B
+
+wh.fba.account=FBA \u4ED3\u5E93\u5FC5\u987B\u7ED1\u5B9A\u4E00\u4E2A\u7528\u6237
+
 left.seconds=%s seconds left
 left.minutes=%s minutes left
 left.hours=%s hours left

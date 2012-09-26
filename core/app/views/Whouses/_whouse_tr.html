@@ -1,0 +1,53 @@
+<tr>
+    <th>仓库名称</th>
+    <td><input type="text" name="wh.name" value="${wh.name}"></td>
+
+    <th>仓库类型</th>
+    <td>
+        <select name="wh.type">
+            <option value="">选择类型</option>
+        #{list items:models.product.Whouse.T.values(), as:'t'}
+            <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t}</option>
+        #{/list}
+        </select>
+    </td>
+
+    <th>Account</th>
+    <td>
+        <select name="wh.account.id">
+            <option value="">请选择</option>
+        #{list items:accs, as:'acc'}
+            <option ${acc.id == wh.account?.id ? 'selected' : ''} value="${acc.id}">${acc.prettyName()}</option>
+        #{/list}
+        </select>
+    </td>
+</tr>
+
+<tr>
+    <th>Address</th>
+    <td><input readonly="" type="text" name="wh.address" value="${wh.address}"></td>
+
+    <th>City</th>
+    <td>
+        <input type="text" name="wh.city" value="${wh.city}">
+    </td>
+
+    <th>Country</th>
+    <td>
+        <input type="text" name="wh.country" value="${wh.country}">
+    </td>
+</tr>
+
+<tr>
+    <th>PostalCode</th>
+    <td>
+        <input type="text" name="wh.postalCode" value="${wh.postalCode}">
+    </td>
+
+    <th>Province</th>
+    <td>
+        <input type="text" name="wh.province" value="${wh.province}">
+    </td>
+
+    <td colspan="2"></td>
+</tr>

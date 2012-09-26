@@ -701,8 +701,14 @@ public class Selling extends GenericModel {
                 List<SellingQTY> qtys = null;
                 if(isSku)
                     qtys = SellingQTY.qtysAccodingSKU(sellKey);
-                else
-                    qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
+                else {
+                    try {
+                        qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
+                    } catch(Exception e) {
+                        e.printStackTrace();
+                        qtys = new ArrayList<SellingQTY>();
+                    }
+                }
                 for(SellingQTY qty : qtys)
                     analyzeMap.get(sellKey).qty += qty.qty;
             }

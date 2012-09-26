@@ -187,6 +187,15 @@ public class ProcureUnit extends Model {
 
 
     /**
+     * 货物运输的类型 (海运? 空运? 快递)
+     */
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Column(length = 20)
+    public Shipment.T shipType;
+
+
+    /**
      * 此 Unit 的状态
      */
     @Expose

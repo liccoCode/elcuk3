@@ -147,6 +147,7 @@ function toggle_init(){
         $(target).fadeToggle('fast');
         e.preventDefault();
     });
+    $('[data-toggle=toggle]').css("cursor", "pointer");
 }
 
 /**

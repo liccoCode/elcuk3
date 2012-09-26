@@ -2,7 +2,9 @@ package models.product;
 
 import com.google.gson.annotations.Expose;
 import models.market.Account;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -14,6 +16,7 @@ import javax.persistence.*;
  * Time: 上午6:06
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Whouse extends Model {
 
     /**
@@ -63,6 +66,7 @@ public class Whouse extends Model {
 
     @Column(nullable = false)
     @Expose
+    @Required
     public T type;
 
     @Lob
@@ -70,12 +74,16 @@ public class Whouse extends Model {
     public String memo;
 
 
-    @PrePersist
-    public void prePersist() {
-        if(this.address == null) {
-            this.address = String.format("%s %s %s %s",
-                    this.country, this.province, this.city, this.postalCode);
+    public void validate() {
+        if(this.type == T.FBA) {
+            if(this.account == null) Validation.addError("", "wh.fba.account");
         }
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        this.address = String.format("%s %s %s %s", this.country, this.province, this.city, this.postalCode);
     }
 
 

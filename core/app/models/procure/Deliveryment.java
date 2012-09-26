@@ -25,7 +25,6 @@ import java.util.List;
  * Time: 4:50 PM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Deliveryment extends GenericModel {
     public Deliveryment() {
@@ -234,8 +233,9 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 通过 ProcureUnit 来创建采购单
-     *
+     * <p/>
      * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
+     *
      * @param pids
      */
     public synchronized static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
