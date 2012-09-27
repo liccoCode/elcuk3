@@ -5,6 +5,8 @@
 
 #{info_row}
 <ul>
+    <li>带有 <i style="color:#dc143c;" class="icon-warning-sign"></i> 符号表示此运输单没有创建者,没有确认负责人,需要进行确认</li>
+    <li>带有 <i style="color:#C09853;" class="icon-star"></i> 符号表示此运输单为周期型的运输单</li>
     #{li_net /}
 </ul>
 #{/info_row}
@@ -23,7 +25,7 @@
             </select>
         </div>
 
-        <div class="span4">
+        <div class="span5">
             <select name="p.pype" style="width:90px">
                 <option value="">计价方式</option>
             #{list items:models.procure.Shipment.P.values(), as:'pype'}
@@ -57,6 +59,12 @@
             #{list items:whouses, as:'wh'}
                 <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
             #{/list}
+            </select>
+
+            <select name="p.isCycle" style="width:90px;margin-left:15px;">
+                <option value="">全型</option>
+                <option ${p.isCycle == true ? 'selected' : ''} value="true">周期型</option>
+                <option ${p.isCycle == false ? 'selected' : ''} value="false">非周期型</option>
             </select>
         </div>
         <div class="span3 input-append input-prepend">
@@ -100,7 +108,15 @@
                 </td>
                 <td>${ship.type}</td>
                 <td>${ship.whouse?.name()}</td>
-                <td>${ship.title}</td>
+                <td>
+                    #{ifnot ship.creater}
+                        <i style="color:#dc143c;" class="icon-warning-sign"></i>
+                    #{/ifnot}
+                    #{if ship.cycle}
+                        <i style="color:#C09853;" class="icon-star"></i>
+                    #{/if}
+                ${ship.title}
+                </td>
                 <td>${ship.target}</td>
                 <td>${ship.internationExpress}</td>
                 <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>

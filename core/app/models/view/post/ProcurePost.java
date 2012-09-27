@@ -72,8 +72,8 @@ public class ProcurePost extends Post {
         } else {
             if(StringUtils.isBlank(this.dateType)) this.dateType = "planDeliveryDate";
             sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType).append("<=?");
-            params.add(this.from);
-            params.add(this.to);
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
 
             if(this.whouseId > 0) {
                 sbd.append(" AND whouse.id=?");

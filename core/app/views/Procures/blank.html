@@ -19,6 +19,14 @@
         #{render 'Procures/_unit_table_trs.html', unit:unit, whouses:whouses/}
         <tr>
             <td colspan="4">
+                <h4 class="text-info">选择运输单(Option)</h4>
+
+                <div id="shipments"></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <input type="hidden" name="shipmentId" value="">
                 <button class="btn btn-primary">创建</button>
             </td>
         </tr>

@@ -46,7 +46,7 @@ public class Shipment extends GenericModel {
 
         // 暂时这么写
         this.source = "深圳";
-        this.type = T.AIR;
+        this.type = T.EXPRESS;
 
         this.id = id;
     }
@@ -92,12 +92,12 @@ public class Shipment extends GenericModel {
             }
         },
         /**
-         * 确认运输单, 不再允许修改
+         * 确认运输单, 并创建了 FBA Shipment
          */
         CONFIRM {
             @Override
             public String toString() {
-                return "确认运输";
+                return "确认运输,创建 FBA";
             }
         },
         /**
@@ -314,6 +314,11 @@ public class Shipment extends GenericModel {
     public String target;
 
     /**
+     * 是否为周期任务
+     */
+    public boolean cycle = false;
+
+    /**
      * 国际运输的运输信息的记录
      */
     @Lob
@@ -363,6 +368,11 @@ public class Shipment extends GenericModel {
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
+
+            // 如果是完全一个全新的 Shipment 那么则由第一个加入到其他的 ProcureUnit 决定去往仓库
+            if(this.items.size() == 0 && this.whouse == null)
+                this.whouse = unit.whouse;
+
             int shipSize = shipQty.get(i);
             if(!unit.whouse.equals(this.whouse)) {
                 Validation.addError("shipment.addToShip.whouse", "%s");
@@ -374,8 +384,9 @@ public class Shipment extends GenericModel {
                 break;
             }
 
-            this.items.add(unit.ship(this, shipSize));
-            unit.save();
+            ShipItem shipItem = unit.ship(this, shipSize);
+            this.items.add(shipItem);
+            shipItem.save();
             unitsMerchantSKU.add(unit.selling.merchantSKU);
         }
 
@@ -596,6 +607,14 @@ public class Shipment extends GenericModel {
 
     public static List<Shipment> shipmentsByState(S state) {
         return Shipment.find("state=? ORDER BY createDate", state).fetch();
+    }
+
+    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId) {
+        if(whouseId != null) {
+            return Shipment.find("(whouse.id=? OR whouse.id IS NULL) AND state IN (?,?)", whouseId, S.PLAN, S.CONFIRM).fetch();
+        } else {
+            return Shipment.find("whouse.id IS NULL AND state IN (?,?)", S.PLAN, S.CONFIRM).fetch();
+        }
     }
 
     /**

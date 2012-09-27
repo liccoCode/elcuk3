@@ -121,6 +121,7 @@ shipment.item.whouse=\u8FD0\u8F93\u5355\u4E2D\u62E5\u6709\u4E0E\u8FD0\u8F93\u535
 shipment.postFBAShipment.plan=\u5411 Amazon \u521B\u5EFA Shipment Plan \u9519\u8BEF
 shipment.postFBAShipment.create=\u5411 Amazon \u521B\u5EFA Shipment \u9519\u8BEF
 shipment.fbashipment=\u8FD0\u8F93\u5355\u5BF9\u5E94\u7684 FBA Shipment
+shipment.creater=\u8FD0\u8F93\u5355\u521B\u5EFA\u8005
 
 shipments.addShip=\u53EA\u6709 PLAN \u4E0E CONFIRM \u72B6\u6001\u53EF\u4EE5\u6DFB\u52A0\u8FD0\u8F93\u9879\u76EE
 

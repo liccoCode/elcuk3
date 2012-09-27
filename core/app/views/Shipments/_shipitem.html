@@ -27,7 +27,7 @@
         <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
         <td>${itm.unit.sid}</td>
         <td>${itm.qty}</td>
-        <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment.id}">${itm.unit.deliveryment.id}</a></td>
+        <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
         <td>#{time_tooltip time:itm.unit.attrs.planDeliveryDate/}</td>
         <td>${itm.unit.cooperator?.name}</td>
         <td>${itm.unit.product.productName.omis(80)}</td>

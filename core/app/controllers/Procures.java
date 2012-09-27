@@ -4,13 +4,11 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.UnitAttrs;
-import models.procure.CooperItem;
-import models.procure.Cooperator;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
+import models.procure.*;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ProcurePost;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -19,6 +17,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,14 +75,20 @@ public class Procures extends Controller {
         render(unit);
     }
 
-    public static void save(ProcureUnit unit) {
+    public static void save(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
         if(Validation.hasErrors()) {
             render("Procures/blank.html", unit);
         }
         unit.save();
-        flash.success("创建成功");
+        if(StringUtils.isNotBlank(shipmentId)) {
+            Shipment ship = Shipment.findById(shipmentId);
+            ship.addToShip(Arrays.asList(unit.id), Arrays.asList(unit.qty()));
+            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+        } else {
+            flash.success("创建成功");
+        }
         redirect("/Procures/index");
     }
 

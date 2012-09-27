@@ -148,7 +148,7 @@ public class ProcureUnit extends Model {
      * 所关联的运输出去的 ShipItem.
      */
     @OneToMany(mappedBy = "unit")
-    public List<ShipItem> relateItems;
+    public List<ShipItem> relateItems = new ArrayList<ShipItem>();
 
 
     @OneToOne(fetch = FetchType.LAZY)

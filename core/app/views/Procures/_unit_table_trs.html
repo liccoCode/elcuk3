@@ -86,7 +86,7 @@
         <select name="unit.shipType">
             <option value="">请选择</option>
         #{list items:models.procure.Shipment.T.values(), as:'t'}
-            <option value="${t.name()}">${t}</option>
+            <option ${t == unit.shipType ? 'selected' : ''} value="${t.name()}">${t}</option>
         #{/list}
         </select>
     </td>

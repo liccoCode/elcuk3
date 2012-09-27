@@ -15,6 +15,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,8 +51,10 @@ public class Shipments extends Controller {
 
     public static void save(Shipment ship) {
         checkAuthenticity();
+        ship.creater = User.findByUserName(Secure.Security.connected());
         validation.valid(ship);
         Validation.required("shipment.whouse", ship.whouse);
+        Validation.required("shipment.creater", ship.creater);
         if(Validation.hasErrors()) {
             render("Shipments/blank.html", ship);
         }
@@ -220,5 +223,10 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         ship.refreshIExpressHTML();
         redirect("/shipments/show/" + id);
+    }
+
+    public static void unitShipments(Long whouseId) {
+        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId);
+        render(unitRelateShipments);
     }
 }

@@ -41,6 +41,11 @@ public class ShipmentPost extends Post {
 
     public iExpress iExpress;
 
+    /**
+     * 是否为周期型运输单
+     */
+    public Boolean isCycle;
+
     public long whouseId;
 
     @Override
@@ -74,6 +79,11 @@ public class ShipmentPost extends Post {
         if(this.state != null) {
             sbd.append(" AND s.state=?");
             params.add(this.state);
+        }
+
+        if(this.isCycle != null) {
+            sbd.append(" AND cycle=?");
+            params.add(this.isCycle);
         }
 
         if(this.iExpress != null) {
