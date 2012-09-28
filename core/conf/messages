@@ -83,6 +83,7 @@ procureunit.selling=\u91C7\u8D2D\u5355\u5143\u5BF9\u5E94\u7684 Selling
 procureunit.sku=\u91C7\u8D2D\u5355\u5143\u7684 SKU
 procureunit.planQty=\u9884\u8BA1\u91C7\u8D2D\u6570\u91CF
 procureunit.split.state=%s \u72B6\u6001\u4E0D\u5141\u8BB8\u8FDB\u884C[\u91C7\u8D2D\u8BA1\u5212]\u5206\u62C6
+procureunit.validate.whouse=Selling \u4E0D\u5C5E\u4E8E\u76EE\u6807 FBA \u4ED3\u5E93
 
 
 deliveryments.addunits=\u9700\u8981\u9009\u62E9\u8FDB\u5165[\u91C7\u8D2D\u5355]\u7684[\u91C7\u8D2D\u5355\u5143]
@@ -161,6 +162,8 @@ validation.max=%s \u4E0D\u80FD\u8D85\u8FC7\u6700\u5927\u503C %s
 
 
 # \u7CFB\u7EDF\u5185\u7684\u64CD\u4F5C\u65B9\u6CD5\u7684\u65E5\u5FD7 msg
+action.base=%s
+
 deliveryment.addunit=\u4E3A[\u91C7\u8D2D\u5355]\u6DFB\u52A0[\u91C7\u8D2D\u8BA1\u5212]
 deliveryment.addunit.msg=\u5C06 %s [\u91C7\u8D2D\u8BA1\u5212] \u6DFB\u52A0\u5230\u4E86 [\u91C7\u8D2D\u5355] %s
 deliveryment.delunit=\u4E3A[\u91C7\u8D2D\u5355]\u5220\u9664[\u91C7\u8D2D\u8BA1\u5212]
@@ -176,10 +179,17 @@ shipment.cancelShip2=\u4E3A[\u8FD0\u8F93\u5355]\u53D6\u6D88[\u8FD0\u8F93\u9879\u
 shipment.cancelShip2.msg=\u5C06[\u8FD0\u8F93\u9879\u76EE] %s \u4ECE[\u8FD0\u8F93\u5355] %s \u4E2D\u53D6\u6D88
 
 
+procureunit.save=\u521B\u5EFA[\u91C7\u8D2D\u8BA1\u5212]
+procureunit.update=\u66F4\u65B0[\u91C7\u8D2D\u8BA1\u5212]
+procureunit.remove=\u5220\u9664[\u91C7\u8D2D\u5355\u5143]
 procureunit.delivery=[\u91C7\u8D2D\u5355\u5143]\u4EA4\u8D27
 procureunit.delivery.msg=\u5B9E\u9645\u4EA4\u8D27 %s \u9884\u8BA1\u4EA4\u8D27\u4E3A %s
+procureunit.split=\u5206\u62C6[\u91C7\u8D2D\u8BA1\u5212]
+procureunit.split.target=\u5206\u62C6[\u91C7\u8D2D\u8BA1\u5212]\u540E\u65B0\u521B\u5EFA
+procureunit.split.source.msg=\u5206\u62C6\u6570\u91CF From %s To %s
+procureunit.split.target.msg=%s
 
-
-procureunit.remove=\u5220\u9664[\u91C7\u8D2D\u5355\u5143]
-procureunit.remove.msg=\u5220\u9664[\u91C7\u8D2D\u5355\u5143] %s
-
+shipment.update=\u66F4\u65B0[\u8FD0\u8F93\u5355]
+shipment.update.msg=\u66F4\u65B0[\u8FD0\u8F93\u5355] %s
+shipment.beginShip=[\u8FD0\u8F93\u5355]\u5F00\u59CB\u8FD0\u8F93
+shipment.beginShip.msg=[\u8FD0\u8F93\u5355] %s \u5F00\u59CB\u8FD0\u8F93

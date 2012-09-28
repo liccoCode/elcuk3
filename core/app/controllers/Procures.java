@@ -89,6 +89,7 @@ public class Procures extends Controller {
         } else {
             flash.success("创建成功");
         }
+        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
         redirect("/Procures/index");
     }
 
@@ -101,7 +102,7 @@ public class Procures extends Controller {
         }
         unit.delete();
         new ElcukRecord(Messages.get("procureunit.remove"),
-                Messages.get("procureunit.remove.msg", unit.to_log()), "procures.remove").save();
+                Messages.get("action.base", unit.to_log()), "procures.remove").save();
         flash.success("删除成功");
         redirect("/Procures/index");
     }
@@ -117,6 +118,7 @@ public class Procures extends Controller {
             render("Procures/edit.html", unit);
         }
         unit.save();
+        new ElcukRecord(Messages.get("procureunit.update"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
         flash.success("ProcureUnit %s update success!", unit.id);
         redirect("/procures/index?p.search=id:" + unit.id);
     }
@@ -164,30 +166,6 @@ public class Procures extends Controller {
         render(unit);
     }
 
-    public static void splitUnit(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        ProcureUnit newUnit = new ProcureUnit(unit);
-        newUnit.deliveryment = unit.deliveryment;
-        newUnit.product = unit.product;
-        render(unit, newUnit);
-    }
-
-    /**
-     * 分拆操作
-     *
-     * @param id
-     * @param newUnit
-     */
-    public static void doSplitUnit(long id, ProcureUnit newUnit) {
-        checkAuthenticity();
-        ProcureUnit unit = ProcureUnit.findById(id);
-        newUnit.handler = User.findByUserName(ElcukRecord.username());
-        unit.split(newUnit);
-        if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
-        flash.success("分拆成功, 如果原来的计划添加到了运输单, 请记得运输数量修正.");
-        redirect("/Deliveryments/show/" + unit.deliveryment.id);
-    }
-
     /**
      * 交货更新
      *
@@ -210,6 +188,30 @@ public class Procures extends Controller {
         } else if(!isLeekDelivery._1 && isLeekDelivery._2 != null) {
             flash.success("ProcureUnit %s 全部交货!", unit.id);
         }
+        redirect("/Deliveryments/show/" + unit.deliveryment.id);
+    }
+
+    public static void splitUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        ProcureUnit newUnit = new ProcureUnit(unit);
+        newUnit.deliveryment = unit.deliveryment;
+        newUnit.product = unit.product;
+        render(unit, newUnit);
+    }
+
+    /**
+     * 分拆操作
+     *
+     * @param id
+     * @param newUnit
+     */
+    public static void doSplitUnit(long id, ProcureUnit newUnit) {
+        checkAuthenticity();
+        ProcureUnit unit = ProcureUnit.findById(id);
+        newUnit.handler = User.findByUserName(ElcukRecord.username());
+        unit.split(newUnit);
+        if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
+        flash.success("分拆成功, 如果原来的计划添加到了运输单, 请记得运输数量修正.");
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }
 

@@ -2,6 +2,7 @@ package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import helper.FBA;
 import helper.FLog;
 import helper.Webs;
@@ -22,7 +23,10 @@ import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-public class Shipment extends GenericModel {
+public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment() {
     }
@@ -347,6 +351,12 @@ public class Shipment extends GenericModel {
         }
     }
 
+    public void updateShipment() {
+        this.pype = this.pype();
+        if(this.creater == null) this.creater = User.findByUserName(ElcukRecord.username());
+        this.save();
+    }
+
     public void setTrackNo(String trackNo) {
         if(StringUtils.isNotBlank(trackNo)) this.trackNo = trackNo.trim();
         else this.trackNo = trackNo;
@@ -487,6 +497,7 @@ public class Shipment extends GenericModel {
         }
         this.pype = this.pype();
         this.state = S.SHIPPING;
+        new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", this.id), this.id).save();
         this.save();
     }
 
@@ -495,6 +506,22 @@ public class Shipment extends GenericModel {
         if(this.volumn == null || this.weight == null) return this.pype;
         if(this.volumn > this.weight) return P.VOLUMN;
         else return P.WEIGHT;
+    }
+
+    @Override
+    public String to_log() {
+        StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
+        sbd.append("[运输:").append(Dates.date2Date(this.beginDate)).append("] ")
+                .append("[到库:").append(Dates.date2Date(this.planArrivDate)).append("] ");
+        if(this.volumn != null && this.volumn != 0) sbd.append("[运输体积:").append(this.volumn).append("] ");
+        if(this.weight != null && this.weight != 0) sbd.append("[运输重量:").append(this.weight).append("]");
+        if(this.declaredValue != null && this.declaredValue != 0)
+            sbd.append("[申报价(USD):").append(this.declaredValue).append("] ");
+        if(this.deposit != null && this.deposit != 0) sbd.append("[押金:").append(this.deposit).append("] ");
+        if(this.otherFee != null && this.otherFee != 0) sbd.append("[其他费用:").append(this.otherFee).append("] ");
+        if(this.cooper != null) sbd.append("[货代:").append(this.cooper.name).append("] ");
+        if(this.whouse != null) sbd.append("[仓库:").append(this.whouse.name()).append("]");
+        return sbd.toString();
     }
 
     /**

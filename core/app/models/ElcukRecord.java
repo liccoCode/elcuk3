@@ -34,6 +34,17 @@ import java.util.List;
  */
 @Entity
 public class ElcukRecord extends Model {
+    /**
+     * 用来记录 Model 的 Record
+     */
+    public interface Log {
+        /**
+         * 返回需要记录的日志字符串
+         *
+         * @return
+         */
+        public String to_log();
+    }
 
     public ElcukRecord(String action, String message, String fid) {
         this.action = action;
@@ -95,6 +106,10 @@ public class ElcukRecord extends Model {
 
     public static List<ElcukRecord> records(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid).fetch();
+    }
+
+    public static List<ElcukRecord> records(String fid, String action) {
+        return ElcukRecord.find("fid=? AND action=? ORDER BY createAt DESC", fid, action).fetch();
     }
 
     public static JPAQuery fid(String fid) {

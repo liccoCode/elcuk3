@@ -10,6 +10,7 @@ import play.templates.JavaExtensions;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by IntelliJ IDEA.
@@ -39,6 +40,11 @@ public class vExtensions extends JavaExtensions {
 
     public static String dayAfter(int day) {
         return DateTime.now().plusDays(day).toString("yyyy-MM-dd");
+    }
+
+    public static String dayOfWeek(Date date) {
+        DateTime dt = new DateTime(date);
+        return dt.dayOfWeek().getAsText(Locale.CHINA);
     }
 
     /**

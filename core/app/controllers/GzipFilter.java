@@ -2,6 +2,7 @@ package controllers;
 
 import play.mvc.Controller;
 import play.mvc.Finally;
+import play.mvc.Util;
 
 import java.io.*;
 import java.util.zip.GZIPOutputStream;
@@ -25,6 +26,7 @@ public class GzipFilter extends Controller {
         response.out = gzip;
     }
 
+    @Util
     public static ByteArrayOutputStream gzip(final String input)
             throws IOException {
         final InputStream inputStream = new ByteArrayInputStream(input.getBytes());

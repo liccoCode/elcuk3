@@ -37,7 +37,7 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-public class ProcureUnit extends Model {
+public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public ProcureUnit() {
     }
@@ -229,6 +229,11 @@ public class ProcureUnit extends Model {
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
+        if(this.selling != null && this.whouse != null && this.whouse.account != null) {
+            if(!this.selling.account.id.equals(this.whouse.account.id) && this.whouse.type == Whouse.T.FBA) {
+                Validation.addError("", "procureunit.validate.whouse");
+            }
+        }
     }
 
     /**
@@ -245,6 +250,7 @@ public class ProcureUnit extends Model {
         /**
          * 1. Selling 与 SKU 需要一样
          */
+        int originQty = this.attrs.planQty;
         Validation.current().valid(this);
         unit.validate();
         if(this.stage != STAGE.PLAN && this.stage != STAGE.DELIVERY)
@@ -258,6 +264,8 @@ public class ProcureUnit extends Model {
         this.attrs.planQty = leftQty;
         if(this.stage == STAGE.DELIVERY) unit.stage = this.stage;
         unit.save();
+        new ElcukRecord(Messages.get("procureunit.split"), Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "").save();
+        new ElcukRecord(Messages.get("procureunit.split.target"), Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
         this.save();
     }
 
@@ -287,7 +295,7 @@ public class ProcureUnit extends Model {
         else unit = this;
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
-                , this.deliveryment.id).save();
+                , this.id + "").save();
         this.stage = STAGE.DONE;
         this.save();
         return new F.T2<Boolean, ProcureUnit>(state == -1, unit);
@@ -425,8 +433,14 @@ public class ProcureUnit extends Model {
      *
      * @return
      */
+    @Override
     public String to_log() {
-        return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s]", this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty, Dates.date2Date(this.attrs.planArrivDate));
+        return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
+                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty, Dates.date2Date(this.attrs.planArrivDate), this.shipType);
+    }
+
+    public List<ElcukRecord> records() {
+        return ElcukRecord.fid(this.id + "").fetch();
     }
 
     /**

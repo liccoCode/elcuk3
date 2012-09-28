@@ -69,53 +69,56 @@
     </tr>
     <tr id="${tr_key}_${unit.id}" style="display:none;">
         <td colspan="${checkbox ? '17' : '16'}">
-            <div class="span2" style="float:left;">
-                <h4 style="margin-top:0">Comment</h4>
-            ${unit.comment}
+            <div class="row-fluid">
+
+                <div class="span2" style="float:left;">
+                    <h4 style="margin-top:0">Comment</h4>
+                ${unit.comment}
+                </div>
+                <div class="span5" style="float:left">
+                    <h4 style="margin-top:0">关联运输单</h4>
+                    #{list items:unit.relateShipment(), as:'sp'}
+                        <a href="@{Shipments.show()}/${sp.id}">${sp.title()}</a><br>
+                    #{/list}
+                </div>
+
+                <div class="span3" style="float:left;padding:0 20px;">
+                    <table class="table table-condensed table-bordered">
+                        <tr>
+                            <td>实际交货量</td>
+                            <td>实际交货日期</td>
+                        </tr>
+                        <tr>
+                            <td>${unit.attrs.qty}</td>
+                            <td>${unit.attrs.deliveryDate.los()}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="span2" style="float:left;">
+                    <!-- 普通修改 -->
+                    <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
+
+                    #{if unit.stage == models.procure.ProcureUnit.STAGE.PLAN}
+                        <a href="@{Procures.remove()}/${unit.id}" data-confirm="link" class="btn btn-danger">删除</a>
+                    #{/if}
+
+                    #{if delivery}
+                        <!-- 交货页面 -->
+                        <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
+                        <!-- 分拆采购单元 -->
+                        <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
+                        <!-- 确认到货代处 -->
+                        #{ifnot unit.isPlaced}
+                            <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
+                                <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
+                                <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">抵达货代处</button>
+                            </div>
+                        #{/ifnot}
+                    #{/if}
+                </div>
             </div>
-            <div class="span5" style="float:left">
-                <h4 style="margin-top:0">关联运输单</h4>
-                #{list items:unit.relateShipment(), as:'sp'}
-                    <a href="@{Shipments.show()}/${sp.id}">${sp.title()}</a><br>
-                #{/list}
-            </div>
-
-            <div class="span3" style="float:left;padding:0 20px;">
-                <table class="table table-condensed table-bordered">
-                    <tr>
-                        <td>实际交货量</td>
-                        <td>实际交货日期</td>
-                    </tr>
-                    <tr>
-                        <td>${unit.attrs.qty}</td>
-                        <td>${unit.attrs.deliveryDate.los()}</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="span2" style="float:left;">
-                <!-- 普通修改 -->
-                <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
-
-                #{if unit.stage == models.procure.ProcureUnit.STAGE.PLAN}
-                    <a href="@{Procures.remove()}/${unit.id}" data-confirm="link" class="btn btn-danger">删除</a>
-                #{/if}
-
-                #{if delivery}
-                    <!-- 交货页面 -->
-                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
-                    <!-- 分拆采购单元 -->
-                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
-                    <!-- 确认到货代处 -->
-                    #{ifnot unit.isPlaced}
-                        <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
-                            <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
-                            <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">抵达货代处</button>
-                        </div>
-                    #{/ifnot}
-                #{/if}
-            </div>
-
+            #{records notitle:false, records:unit.records()/}
         </td>
     </tr>
 #{/list}

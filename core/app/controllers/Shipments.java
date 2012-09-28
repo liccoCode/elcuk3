@@ -11,6 +11,7 @@ import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -81,12 +82,10 @@ public class Shipments extends Controller {
         checkAuthenticity();
         validation.valid(ship);
         ship.validate();
-        if(Validation.hasErrors()) {
-            render("Shipments/show.html", ship);
-        }
-        ship.pype = ship.pype();
-        ship.creater = User.findByUserName(ElcukRecord.username());
-        ship.save();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        ship.updateShipment();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
         flash.success("更新成功.");
         redirect("/Shipments/show/" + ship.id);
     }
@@ -176,7 +175,7 @@ public class Shipments extends Controller {
      *
      * @param id
      */
-    public static void confirm(String id) {
+    public static void deployToAmazon(String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         Validation.isTrue("shipment.fbashipment", ship.fbaShipment == null);
