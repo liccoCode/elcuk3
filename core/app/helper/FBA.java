@@ -67,7 +67,7 @@ public class FBA {
             InboundShipmentPlan member = members.get(0);
 
             fbaShipment.account = shipment.whouse.account;
-            fbaShipment.shipment = shipment;
+            fbaShipment.shipments.add(shipment);
 
             fbaShipment.shipmentId = member.getShipmentId();
             fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
@@ -124,16 +124,16 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S create(FBAShipment fbashipment) throws FBAInboundServiceMWSException {
+    public static FBAShipment.S create(FBAShipment fbashipment, Shipment shipment) throws FBAInboundServiceMWSException {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
-        String fbaTitle = String.format("%s %s", fbashipment.shipment.title(), Dates.date2DateTime());
+        String fbaTitle = String.format("%s %s", shipment.title(), Dates.date2DateTime());
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);
         create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle,
                 Account.address(fbashipment.account.type), fbashipment.centerId, FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
         // 设置 items
-        List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(fbashipment.shipment.items);
+        List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(shipment.items);
         create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
@@ -152,8 +152,8 @@ public class FBA {
      * @param state
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S update(FBAShipment fbaShipment, FBAShipment.S state) throws FBAInboundServiceMWSException {
-        return FBA.update(fbaShipment, fbaShipment.shipment.items, state);
+    public static FBAShipment.S update(FBAShipment fbaShipment, Shipment shipment, FBAShipment.S state) throws FBAInboundServiceMWSException {
+        return FBA.update(fbaShipment, shipment.items, state);
     }
 
     /**

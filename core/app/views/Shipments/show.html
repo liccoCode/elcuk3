@@ -190,6 +190,13 @@
     #{/if}
 
     #{ifnot ship.fbaShipment}
+        <form action="" method="post" class="pull-left">
+            <div class="input-append">
+                <input type="text" name="fba" value="" style="width:120px;" placeHolder="关联已经存在的 FBA" data-provide="typeahead" data-source="${fbas}">
+                <button class="btn btn-info" style="margin-right:10px;">关联</button>
+            </div>
+        </form>
+
         <form action="@{Shipments.deployToAmazon()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
@@ -228,9 +235,19 @@
 
 <div class="row-fluid">
     <div class="span12">
-    #{render 'Shipments/_shipitem.html', items:ship.items/}
+        <form action="@{Shipments.splitShipment()}" method="post" style="display:inline-block;">
+        #{render 'Shipments/_shipitem.html', items:ship.items/}
+            <div class="input-prepend input-append">
+                <span rel="popover" placement="right" content="适用于同一个 FBA Shipment 但是分为多票运输" class="add-on"><i class="icon-question-sign"></i></span>
+                <input type="hidden" name="id" value="${ship.id}">
+                <button class="btn btn-danger">分拆运输单</button>
+            </div>
+        </form>
     </div>
 </div>
+
+#{info_row title:'相同 FBA Shipment 的运输单'/}
+#{render 'Shipments/_shipment_list.html', shipments:sameFbaShips/}
 
 #{records records:records/}
 

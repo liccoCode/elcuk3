@@ -3,10 +3,11 @@ package models.procure;
 import models.market.Account;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
+import query.FBAShipmentQuery;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * User: wyattpan
@@ -51,8 +52,8 @@ public class FBAShipment extends Model {
     @OneToOne
     public Account account;
 
-    @OneToOne
-    public Shipment shipment;
+    @OneToMany
+    public List<Shipment> shipments = new ArrayList<Shipment>();
 
     @Column(unique = true, nullable = false, length = 20)
     public String shipmentId;
@@ -112,5 +113,9 @@ public class FBAShipment extends Model {
         else if(this.countryCode.equals("JP")) return "Japan";
         //http://mindprod.com/jgloss/countrycodes.html
         return "";
+    }
+
+    public static List<String> uncloseFBAShipmentIds() {
+        return FBAShipmentQuery.uncloseFBAShipmentIds();
     }
 }

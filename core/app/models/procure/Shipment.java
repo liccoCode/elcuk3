@@ -40,10 +40,31 @@ import java.util.concurrent.TimeUnit;
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment() {
+        this.createDate = new Date();
+    }
+
+    /**
+     * 复制一个拥有新 ID 的 Shipment
+     *
+     * @param shipment
+     */
+    public Shipment(Shipment shipment) {
+        this();
+        this.id = Shipment.id();
+        this.state = shipment.state;
+        this.creater = shipment.creater;
+        this.beginDate = shipment.beginDate;
+        this.planArrivDate = shipment.planArrivDate;
+        this.fbaShipment = shipment.fbaShipment;
+        this.pype = shipment.pype;
+        this.type = shipment.type;
+        this.whouse = shipment.whouse;
+        this.source = shipment.source;
+        this.target = shipment.target;
     }
 
     public Shipment(String id) {
-        this.createDate = new Date();
+        this();
 
         this.pype = P.WEIGHT;
         this.state = S.PLAN;
@@ -200,7 +221,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne
     public User creater;
 
-    @OneToOne(mappedBy = "shipment", cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     public FBAShipment fbaShipment;
 
     /**
@@ -296,6 +317,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 类似顺风发货单号的类似跟踪单号
      */
     @Expose
+    @Column(unique = true)
     public String trackNo;
 
     /**
@@ -371,6 +393,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param shipQty
      */
     public synchronized void addToShip(List<Long> unitId, List<Integer> shipQty) {
+        /**
+         * 运输单业务限制检查
+         * 1. 检查运输单总重量只能在 300kg 以下
+         * 2. 如果运输的是电池, 则需要单独运输
+         */
         if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("shipments.addShip", "%s");
         if(Validation.hasErrors()) return;
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
@@ -396,11 +423,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
             ShipItem shipItem = unit.ship(this, shipSize);
             this.items.add(shipItem);
-            shipItem.save();
             unitsMerchantSKU.add(unit.selling.merchantSKU);
         }
-
         if(Validation.hasErrors()) return;
+
+        for(ShipItem itm : this.items) itm.save();
         this.save();
         new ElcukRecord(Messages.get("shipment.ship"),
                 Messages.get("shipment.ship.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
@@ -485,7 +512,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         Validation.equals("shipment.beginShip.state", this.state, "", S.CONFIRM);
 
         try {
-            this.fbaShipment.state = FBA.update(this.fbaShipment, FBAShipment.S.SHIPPED);
+            this.fbaShipment.state = FBA.update(this.fbaShipment, this, FBAShipment.S.SHIPPED);
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
         }
@@ -525,6 +552,29 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 对 Shipment 进行分拆, 主要解决的目的为运输单在 PM 处理好以后, 跟单人员需要将运输单根据实际情况分拆成为不同的运输单进行运输.
+     * 每一票运输单对应一个唯一的 tracking number.
+     */
+    public Shipment splitShipment(List<String> shipItemIds) {
+        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "shipment.splitShipment.state");
+        List<ShipItem> needSplitItems = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
+        Shipment newShipment = new Shipment(this);
+        if(needSplitItems.size() != shipItemIds.size())
+            Validation.addError("", "shipment.splitShipment.size");
+        if(Validation.hasErrors()) return null;
+        newShipment.save();
+        for(ShipItem spitem : needSplitItems) {
+            spitem.shipment = newShipment;
+            spitem.save();
+        }
+        new ElcukRecord(Messages.get("shipment.splitShipment"),
+                Messages.get("shipment.splitShipment.msg", StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
+                this.id).save();
+        return newShipment;
+    }
+
+
+    /**
      * 根据此 Shipment 创建一个 FBAShipment
      * <p/>
      * ps: 这个方法不允许并发
@@ -532,22 +582,21 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public synchronized FBAShipment postFBAShipment() {
-        FBAShipment fba = null;
         try {
-            fba = FBA.plan(this);
-            fba.save();
+            this.fbaShipment = FBA.plan(this);
+            this.save();
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
         }
         try {
-            if(fba != null) {
-                fba.state = FBA.create(fba);
-                fba.save();
+            if(this.fbaShipment != null) {
+                this.fbaShipment.state = FBA.create(this.fbaShipment, this);
+                this.fbaShipment.save();
             }
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.postFBAShipment.create", "%s " + Webs.E(e));
         }
-        return fba;
+        return this.fbaShipment;
     }
 
     /**
@@ -591,6 +640,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
+    }
+
+    /**
+     * 相关的拥有相同 FBA 的 Shipment 排除自己
+     *
+     * @return
+     */
+    public List<Shipment> sameFBAShipment() {
+        if(this.fbaShipment == null) return new ArrayList<Shipment>();
+        return Shipment.find("fbaShipment.id=? AND id!=?", this.fbaShipment.id, this.id).fetch();
     }
 
     public String title() {

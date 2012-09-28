@@ -1,9 +1,11 @@
 package controllers;
 
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
+import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
@@ -68,9 +70,13 @@ public class Shipments extends Controller {
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shipper());
+        renderArgs.put("fbas", J.json(FBAShipment.uncloseFBAShipmentIds()));
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
-        renderArgs.put("records", ElcukRecord.records(shipmentId));
+        if(StringUtils.isNotBlank(shipmentId)) {
+            renderArgs.put("records", ElcukRecord.records(shipmentId));
+            renderArgs.put("sameFbaShips", Shipment.<Shipment>findById(shipmentId).sameFBAShipment());
+        }
     }
 
     public static void show(String id) {
@@ -224,6 +230,24 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
+    /**
+     * 将 Shipment 进行分拆
+     */
+    public static void splitShipment(String id, List<String> shipItemId) {
+        validation.required(shipItemId);
+        Shipment ship = Shipment.findById(id);
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        Shipment newShipment = ship.splitShipment(shipItemId);
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        flash.success("成功分拆运输单, 创建了新运输单 %s", newShipment.id);
+        redirect("/shipments/show/" + id);
+    }
+
+    /**
+     * 加载出来 Whouse 相关的可使用的运输单
+     *
+     * @param whouseId
+     */
     public static void unitShipments(Long whouseId) {
         List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId);
         render(unitRelateShipments);

@@ -99,10 +99,11 @@ public class ShipmentPost extends Post {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append(" OR s.trackNo LIKE ?")
+                    .append("s.trackNo LIKE ?")
+                    .append(" OR s.fbaShipment.shipmentId LIKE ?")
                     .append(" OR i.unit.sid LIKE ?")
                     .append(")");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i < 3; i++) params.add(word);
         }
 
 
