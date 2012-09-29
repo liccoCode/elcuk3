@@ -61,7 +61,8 @@ public class ShipmentPost extends Post {
         if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
         StringBuilder sbd = new StringBuilder(
-                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i WHERE s.%s>=? AND s.%s<=?", this.dateType, this.dateType));
+                // 几个表使用 left join 级联...
+                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i LEFT JOIN i.unit u LEFT JOIN s.fbaShipment fba WHERE s.%s>=? AND s.%s<=?", this.dateType, this.dateType));
         List<Object> params = new ArrayList<Object>();
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
@@ -100,8 +101,8 @@ public class ShipmentPost extends Post {
             String word = this.word();
             sbd.append(" AND (")
                     .append("s.trackNo LIKE ?")
-                    .append(" OR s.fbaShipment.shipmentId LIKE ?")
-                    .append(" OR i.unit.sid LIKE ?")
+                    .append(" OR fba.shipmentId LIKE ?")
+                    .append(" OR u.sid LIKE ?")
                     .append(")");
             for(int i = 0; i < 3; i++) params.add(word);
         }
