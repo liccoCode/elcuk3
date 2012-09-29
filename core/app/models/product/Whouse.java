@@ -8,6 +8,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * 不同的仓库的抽象
@@ -73,6 +74,12 @@ public class Whouse extends Model {
     @Expose
     public String memo;
 
+    /**
+     * 容量的提示字符串
+     */
+    @Lob
+    public String capaticyContent = "";
+
 
     public void validate() {
         if(this.type == T.FBA) {
@@ -115,5 +122,9 @@ public class Whouse extends Model {
 
     public String name() {
         return String.format("%s: %s", this.type, this.name);
+    }
+
+    public static List<Whouse> findByType(T  type) {
+        return Whouse.find("type=?", type).fetch();
     }
 }

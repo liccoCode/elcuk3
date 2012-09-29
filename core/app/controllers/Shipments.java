@@ -176,6 +176,16 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
+    public static void assignFbaShipmentId(String id, String shipmentId) {
+        Shipment ship = Shipment.findById(id);
+        ship.fbaShipment = FBAShipment.findByShipmentId(shipmentId);
+        Validation.required("shipment.fbashipment", ship.fbaShipment);
+        ship.save();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        flash.success("绑定 FBA %s 成功.", shipmentId);
+        redirect("/shipments/show/" + id);
+    }
+
     /**
      * 对 Shipment 进行 Confirm, Confirm 以后不再允许添加运输项目
      *

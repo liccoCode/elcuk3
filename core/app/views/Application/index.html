@@ -5,6 +5,7 @@
     #{script 'Application/app.coffee'/}
 #{/set}
 
+#{info_row title:('Ticket 处理情况总览 <small class="muted">' + now +'</small>').raw()/}
 <div class="row-fluid">
     <div class="span12">
         <table class="table table-condensed table-bordered">
@@ -44,6 +45,14 @@
     </div>
 </div>
 
+#{info_row title:'FBA 仓库库存容量总览'/}
+#{list items:fbaWhouse, as:'fba'}
+<div class="row-fluid" style="margin-bottom:20px;">
+${fba.capaticyContent.raw()}
+</div>
+#{/list}
+
+#{info_row title:'订单总览'/}
 <div class="row-fluid" id="orders">
     <div class="span12">
         <h2 class="label label-info" style="font-size:12px">订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>

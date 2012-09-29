@@ -623,6 +623,28 @@ public enum M {
     }
 
     /**
+     * 查看 FBA 容量的 FBA Inventory 页面
+     *
+     * @return
+     */
+    public String fbaCapacityPage() {
+        //https://sellercentral.amazon.de/gp/ssof/knights/items-list.html/ref=ag_fbalist_cont_fbamnginv
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return String.format("https://sellercentral.%s/gp/ssof/knights/items-list.html/ref=ag_fbalist_cont_fbamnginv",
+                        this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    /**
      * 模拟人工方式修改 Listing 信息的地址
      *
      * @return

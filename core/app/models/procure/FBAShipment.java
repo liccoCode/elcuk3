@@ -118,4 +118,8 @@ public class FBAShipment extends Model {
     public static List<String> uncloseFBAShipmentIds() {
         return FBAShipmentQuery.uncloseFBAShipmentIds();
     }
+
+    public static FBAShipment findByShipmentId(String shipmentId) {
+        return FBAShipment.find("shipmentId=?", shipmentId).first();
+    }
 }

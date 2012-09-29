@@ -1,0 +1,53 @@
+#{set standRatio:((standardSize/standardSizeLimit) * 100)/}
+#{set overRatio:((overSize/overSizeLimit) * 100)/}
+
+<div class="span4" style="text-align:center;font-size:15px;">
+    <small class="muted">${date}</small>
+    Storage Monitor <strong class="text-warning">${whouse.name()}</strong> Whouse
+</div>
+
+
+<div class="span2">
+    Standard-Size: <strong class="text-info">${standardSize} / ${standardSizeLimit}</strong>
+    <span class="pull-right text-info">${standRatio.format('#.###')}%</span>
+</div>
+<div class="span2">
+#{if standRatio < 70}
+    <div class="progress progress-success">
+        <div class="bar" style="width:${standRatio.format('#.###')}%"></div>
+    </div>
+#{/if}
+#{elseif standRatio < 90}
+    <div class="progress progress-warning">
+        <div class="bar" style="width:${standRatio.format('#.###')}%"></div>
+    </div>
+#{/elseif}
+#{else }
+    <div class="progress progress-danger">
+        <div class="bar" style="width:${standRatio.format('#.###')}%"></div>
+    </div>
+#{/else}
+</div>
+
+
+<div class="span2">
+    Over-Size: <strong class="text-info">${overSize} / ${overSizeLimit}</strong>
+    <span class="pull-right text-info">${overRatio.format('#.###')}%</span>
+</div>
+<div class="span2">
+#{if standRatio < 70}
+    <div class="progress progress-success">
+        <div class="bar" style="width:${overRatio.format('#.###')}%"></div>
+    </div>
+#{/if}
+#{elseif standRatio < 90}
+    <div class="progress progress-warning">
+        <div class="bar" style="width:${overRatio.format('#.###')}%"></div>
+    </div>
+#{/elseif}
+#{else }
+    <div class="progress progress-danger">
+        <div class="bar" style="width:${overRatio.format('#.###')}%"></div>
+    </div>
+#{/else}
+</div>

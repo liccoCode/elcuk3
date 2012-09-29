@@ -155,15 +155,26 @@ function toggle_init(){
  */
 function submit_btn_init(){
     $('body').off('click', '[data-confirm=confirm]').on('click', '[data-confirm=confirm]', function(e){
-        e.preventDefault();
-        if(!confirm('确定提交?')) return false;
+        var content = "确认执行此操作?";
+        if($(this).attr('content')) content = $(this).attr('content');
+        if(!confirm(content)) e.preventDefault();
         $(this).parents('form').submit();
     });
 }
 
 function link_confirm_init(){
     $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e){
-        if(!confirm("确认执行此操作?")) e.preventDefault()
+        var content = "确认执行此操作?";
+        if($(this).attr('content')) content = $(this).attr('content');
+        if(!confirm(content)) e.preventDefault()
+    });
+}
+
+function btn_confirm_init(){
+    $('body').off('click', 'button[data-confirm=btn]').on('click', 'button[data-confirm=btn]', function(e){
+        var content = "确认执行此操作?";
+        if($(this).attr('content')) content = $(this).attr('content');
+        if(!confirm(content)) e.preventDefault()
     });
 }
 
@@ -171,5 +182,6 @@ $(function(){
     toggle_init();
     submit_btn_init();
     link_confirm_init();
+    btn_confirm_init();
 });
 

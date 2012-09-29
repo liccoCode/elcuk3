@@ -6,6 +6,7 @@ import helper.Webs;
 import models.market.Account;
 import models.market.OrderItem;
 import models.market.Orderr;
+import models.product.Whouse;
 import models.support.Ticket;
 import models.view.Ret;
 import org.joda.time.DateTime;
@@ -18,6 +19,7 @@ import play.mvc.With;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,7 +35,9 @@ public class Application extends Controller {
         Map<String, Map<String, Long>> yesterDayTicketTable = Ticket.frontPageTable(yestorday, yestorday);
         // 3 个月内的 Ticket 汇总
         Map<String, Long> ticketMap = Ticket.ticketTotalTable(threeMonth, new Date());
-        render(odmaps, ticketTable, yesterDayTicketTable, ticketMap);
+        List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
+        renderArgs.put("now", Dates.date2DateTime(now));
+        render(odmaps, ticketTable, yesterDayTicketTable, ticketMap, fbaWhouse);
     }
 
     @CacheFor(value = "20mn")
