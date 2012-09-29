@@ -35,7 +35,9 @@ public class AmazonFBACapaticyWatcherJob extends Job {
                 continue;
             }
 
+            whouse.account.changeRegion(whouse.account.type);
             String html = HTTP.get(whouse.account.cookieStore(), whouse.account.type.fbaCapacityPage());
+            Logger.info("Watch %s FBA.", whouse.name());
             Document doc = Jsoup.parse(html);
             if(!Account.isLoginEnd(doc)) {
                 Logger.warn("Account %s is not login, skip this one.", whouse.account.prettyName());
