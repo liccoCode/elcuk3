@@ -5,6 +5,7 @@ import models.Jobex;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  * Date: 9/27/12
  * Time: 1:02 PM
  */
+@Every("4h")
 public class ShipmentCycleJob extends Job {
     @Override
     public void doJob() {

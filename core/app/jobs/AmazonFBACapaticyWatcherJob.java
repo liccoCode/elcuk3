@@ -12,6 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import play.Logger;
+import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
  * Date: 9/29/12
  * Time: 10:30 AM
  */
+@Every("30mn")
 public class AmazonFBACapaticyWatcherJob extends Job {
     @Override
     public void doJob() {
