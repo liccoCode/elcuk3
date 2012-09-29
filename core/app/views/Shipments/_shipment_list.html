@@ -34,7 +34,7 @@
                 <i style="color:#C09853;" class="icon-star"></i>
             #{/if}
             #{if ship.fbaShipment}
-                <i style="color:#FFA601;" class="icon-amazon"></i>
+                <span class="pull-right"><i style="color:#FFA601;" class="icon-amazon"></i><strong>${ship.fbaShipment.shipmentId}</strong></span>
             #{/if}
         ${ship.title}
         </td>

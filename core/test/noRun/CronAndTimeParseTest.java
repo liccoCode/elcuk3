@@ -1,8 +1,8 @@
 package noRun;
 
+import ext.ProcuresHelper;
 import helper.Dates;
 import org.junit.Test;
-import play.libs.Crypto;
 import play.libs.Time;
 
 /**
@@ -39,4 +39,23 @@ public class CronAndTimeParseTest {
         String cron = "0 20 0 * * ?";
         System.out.println(Dates.date2DateTime(Time.parseCRONExpression(cron)));
     }
+
+    @Test
+    public void testColor() {
+        System.out.println(Integer.toHexString("FBA5KCDKZ".hashCode()));
+        System.out.println(Integer.toHexString("FBA5RF72D".hashCode()));
+        System.out.println(Integer.toHexString("FBA5K".hashCode()));
+        System.out.println(Integer.toHexString("CDKZ".hashCode()));
+
+        String fba = "FBA5RF72D";
+        String prefix = fba.substring(0, 5);
+        String suffix = fba.substring(5);
+        System.out.println(prefix);
+        System.out.println(suffix);
+
+        System.out.println("-------------------");
+        System.out.println(ProcuresHelper.fbaColor(fba));
+        System.out.println(ProcuresHelper.fbaColor("FBA5KCDKZ"));
+    }
+
 }
