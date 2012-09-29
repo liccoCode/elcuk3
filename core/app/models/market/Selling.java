@@ -285,6 +285,7 @@ public class Selling extends GenericModel {
                         new BasicNameValuePair("variant", fileName)
                 ));
             }
+            this.account.changeRegion(this.account.type);
         }
         this.save();
     }
@@ -304,6 +305,7 @@ public class Selling extends GenericModel {
                 throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
             if(Play.mode.isDev())
                 IO.writeContent(html, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            this.account.changeRegion(this.account.type);
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
@@ -384,6 +386,9 @@ public class Selling extends GenericModel {
 
                     // 4. 更新回数据库
                     this.save();
+
+                    // 还原
+                    this.account.changeRegion(this.account.type);
                     break;
                 case EBAY_UK:
                     break;

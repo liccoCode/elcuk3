@@ -520,6 +520,8 @@ public class Account extends Model {
         synchronized(acc.cookieStore()) {
             acc.changeRegion(market);
             body = HTTP.get(acc.cookieStore(), url);
+            // 还原
+            acc.changeRegion(acc.type);
         }
         if(StringUtils.isBlank(body)) {
             Logger.warn("URL [%s] Download file error.", url);

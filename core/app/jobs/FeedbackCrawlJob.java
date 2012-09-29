@@ -107,6 +107,8 @@ public class FeedbackCrawlJob extends Job {
                         }
                     }
                 }
+                // 还原到原来的 Market
+                acc.changeRegion(acc.type);
             }
         } catch(Exception e) {
             Logger.warn(String.format("Account %s Market %s fetch feedback have some error![%s]", acc.username, market, e.getMessage()));

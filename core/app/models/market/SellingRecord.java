@@ -243,6 +243,7 @@ public class SellingRecord extends GenericModel {
 
 
             } while(hasNext);
+            acc.changeRegion(acc.type);
         }
 
         return records;
