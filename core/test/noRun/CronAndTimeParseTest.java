@@ -1,6 +1,5 @@
 package noRun;
 
-import ext.ProcuresHelper;
 import helper.Dates;
 import org.junit.Test;
 import play.libs.Time;
@@ -54,8 +53,6 @@ public class CronAndTimeParseTest {
         System.out.println(suffix);
 
         System.out.println("-------------------");
-        System.out.println(ProcuresHelper.fbaColor(fba));
-        System.out.println(ProcuresHelper.fbaColor("FBA5KCDKZ"));
     }
 
 }
