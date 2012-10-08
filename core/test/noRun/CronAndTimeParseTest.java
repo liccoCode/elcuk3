@@ -54,8 +54,6 @@ public class CronAndTimeParseTest {
         System.out.println(suffix);
 
         System.out.println("-------------------");
-        System.out.println(ProcuresHelper.fbaColor(fba));
-        System.out.println(ProcuresHelper.fbaColor("FBA5KCDKZ"));
     }
 
 }

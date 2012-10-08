@@ -335,7 +335,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return shipItem;
     }
 
+    /**
+     * <pre>
+     * 对 ProcureUnit 的状态进行改变, 集中在两个点:
+     * 1. 开始运输
+     * 2. 确认运输完成
+     * </pre>
+     * @return
+     */
     public STAGE nextStage() {
+        /**
+         * 1. 如果状态为 CLOSE 与 SHIP_OVER 则不改变状态
+         * 2. 如果在 SHIPPING 与 PART_SHIPPING 则判断是否可以进入 SHIP_OVER 状态
+         * 3. 除开上面的情况外, 根据剩余库存进行判断是 SHIPPING 还是 PART_SHIPPING 状态
+         */
         if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER) {
             return this.stage;
         } else if(this.stage == STAGE.SHIPPING || this.stage == STAGE.PART_SHIPPING) {

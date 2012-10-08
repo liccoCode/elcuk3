@@ -44,7 +44,7 @@
 
             <tr>
                 <th>去往仓库</th>
-                <td>${ship.whouse.name()}</td>
+                <td>${ship.whouse?.name()}</td>
 
                 <th>创建者</th>
                 <td>${ship.creater?.username}</td>
@@ -83,7 +83,7 @@
     <li>采购单的状态 -> 确认并已下单, 完成交货</li>
     <li>采购计划的阶段 -> 计划中, 采购中, 已交货, 部分运输</li>
     <li>运输方式 -> ${ship.type}</li>
-    <li>去往仓库 -> ${ship.whouse.name()}</li>
+    <li>去往仓库 -> ${ship.whouse?.name()}</li>
 </ul>
 #{/warning_row}
 <div class="row-fluid">
