@@ -1,8 +1,10 @@
 package ext;
 
+import helper.Webs;
 import models.market.*;
 import models.procure.FBAShipment;
 import models.support.Ticket;
+import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.templates.JavaExtensions;
 
@@ -111,6 +113,15 @@ public class LinkHelper extends JavaExtensions {
                 return String.format(baseEbay, listing.market.toString(), listing.asin);
         }
         return "#";
+    }
+
+    public static String asinLink(AnalyzeDTO dto) {
+        try {
+            M market = M.val(StringUtils.remove(StringUtils.splitByWholeSeparator(dto.fid, "|")[1], "_").toLowerCase());
+            return String.format("http://www.%s/dp/%s", market.toString(), dto.asin);
+        } catch(Exception e) {
+            return Webs.E(e);
+        }
     }
 
     public static String orderLink(Orderr orderr) {

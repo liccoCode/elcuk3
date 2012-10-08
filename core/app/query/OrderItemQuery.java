@@ -1,10 +1,11 @@
 package query;
 
+import helper.DBUtils;
 import helper.Dates;
 import helper.JPAs;
 import models.market.Account;
 import models.market.Feedback;
-import models.market.Orderr;
+import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.DB;
@@ -12,6 +13,7 @@ import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
+import javax.persistence.Query;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -55,20 +57,19 @@ public class OrderItemQuery {
     }
 
     /**
-     * 加载出 OrderItem 中只含有 sku,sellingId,qty,orderId 的 rows
+     * 加载出 OrderItem 中只含有 sku,sellingId,qty,date,account.id 的 rows
      *
      * @return
      */
     @SuppressWarnings("unchecked")
     public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_aId(Date from, Date to, int filterQuantity) {
-        List<Map> rows = JPAs.createQueryMap(new JpqlSelect()
+        SqlSelect hql = new JpqlSelect()
                 .select("oi.product.sku as sku, oi.selling.sellingId as sid, oi.quantity as qty, oi.createDate as _date, oi.order.account.id as aid")
                 .from("OrderItem oi")
                 .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to)
-                .where("oi.quantity>?").param(filterQuantity)
-                .orderBy("oi.createDate DESC")
-        ).getResultList();
+                .where("oi.createDate<=?").param(to);
+        if(filterQuantity > 0) hql.where("oi.quantity>?").param(filterQuantity);
+        List<Map> rows = JPAs.createQueryMap(hql.orderBy("oi.createDate DESC")).getResultList();
         List<F.T5<String, String, Integer, Date, String>> t4Rows = new ArrayList<F.T5<String, String, Integer, Date, String>>();
         for(Map row : rows) {
             t4Rows.add(new F.T5<String, String, Integer, Date, String>(
@@ -79,6 +80,31 @@ public class OrderItemQuery {
                     row.get("aid").toString()));
         }
         return t4Rows;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<F.T5<String, F.T2<String, String>, Integer, Date, String>> sku_sid_asin_qty_date_aId(Date from, Date to, int filterQuantity) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin", "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid")
+                .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
+                .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
+                .from("OrderItem oi")
+                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate<=?").param(to);
+        if(filterQuantity > 0) sql.where("oi.quantity>?").param(filterQuantity);
+        sql.orderBy("oi.createDate DESC");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<F.T5<String, F.T2<String, String>, Integer, Date, String>> t5Rows = new ArrayList<F.T5<String, F.T2<String, String>, Integer, Date, String>>();
+        for(Map row : rows) {
+            t5Rows.add(new F.T5<String, F.T2<String, String>, Integer, Date, String>(
+                    row.get("sku").toString(),
+                    new F.T2<String, String>(row.get("sid").toString(), row.get("asin").toString()),
+                    NumberUtils.toInt(row.get("qty").toString()),
+                    (Date) row.get("_date"),
+                    row.get("aid").toString()
+            ));
+        }
+        return t5Rows;
     }
 
     public static String feedbackSKU(Feedback feedback) {

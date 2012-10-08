@@ -5,19 +5,15 @@ import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.embedded.AmazonProps;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
 import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
+import models.view.dto.AnalyzeDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -29,12 +25,10 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
-import query.OrderItemQuery;
 
 import javax.persistence.*;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -417,13 +411,12 @@ public class Selling extends GenericModel {
         if(ps == null || ps < 0) throw new FastRuntimeException("PS 格式错误或者 PS 不允许小于 0");
         this.ps = ps;
         // 如果缓存不为空则更新缓存
-        List<Selling> sellings = Cache.get(Selling.analyzesSellingKey("msku"), List.class);
-        if(sellings != null) {
+        List<AnalyzeDTO> dtos = Cache.get(AnalyzeDTO.analyzesKey("sid"), List.class);
+        if(dtos != null) {
             boolean find = false;
-            for(Selling sell : sellings) {
-                if(!sell.sellingId.equals(this.sellingId)) continue;
-                sell.ps = ps;
-                sell.turnOverT4 = sell.turnOverT4Cal();
+            for(AnalyzeDTO dto : dtos) {
+                if(!dto.fid.equals(this.sellingId)) continue;
+                dto.ps = ps;
                 find = true;
             }
             if(!find) throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
@@ -596,203 +589,6 @@ public class Selling extends GenericModel {
 
     public static boolean exist(String merchantSKU) {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
-    }
-
-    /**
-     * 从已经在 Analyzes 页面中显示的计算好了的 Selling 缓存中寻找需要的 Selling
-     *
-     * @param val SKU 或者为 SellingId
-     * @return
-     */
-    public static Selling findSellingOrSKUFromAnalyzesCachedSellingsOrSKUs(String type, String val) {
-        if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
-            throw new FastRuntimeException("只允许按照 sku 与 msku|sid 进行分析.");
-        List<Selling> cachedSellings = Selling.analyzesSKUAndSID(type);
-        for(Selling sell : cachedSellings) {
-            if("sku".equals(type)) {
-                if(StringUtils.contains(sell.merchantSKU, val)) return sell;
-            } else if("sid".equals(type)) {
-                if(sell.sellingId.equals(val)) return sell;
-            }
-        }
-        return null;
-    }
-
-    public static List<Selling> analyzesSKUAndSID(String type) {
-        return analyzesSKUAndSID(type, true);
-    }
-
-    /**
-     * 在分析页面计算以后, 缓存起来的 Selling 的缓存 key;
-     * 因为有其他地方有需要使用到这里缓存起来的数据, 所以将 key 进行函数化
-     *
-     * @param type 只有 sku, msku 两个值
-     * @return
-     */
-    public static String analyzesSellingKey(String type) {
-        return String.format(Caches.SALE_SELLING, "msku".equals(type) ? "sid" : type);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Selling> analyzesSKUAndSID(String type, Boolean useCache) {
-        if(!StringUtils.equalsIgnoreCase("sku", type) && !StringUtils.equalsIgnoreCase("msku", type) && !StringUtils.equalsIgnoreCase("sid", type))
-            throw new FastRuntimeException("只允许按照 SKU 与 MSKU 进行分析.");
-        String cacke_key = Selling.analyzesSellingKey(type);
-        // 判断是否使用 Cache, 如果不使用 Cache, 则清楚缓存, 否则进入原始使用 Cache 的流程
-        if(!useCache) Cache.delete(cacke_key);
-
-        List<Selling> cached = Cache.get(cacke_key, List.class);
-        if(cached != null && cached.size() > 0) return cached;
-
-        synchronized(Selling.class) {
-            cached = Cache.get(cacke_key, List.class);
-            if(cached != null) return cached;
-
-            // 如果不是 sku 那么一定为 msku
-            boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
-
-            /**
-             * 1. 加载所有的 Selling, 用来做基础数据;[没有做过滤]
-             * 2. 根据抓取数据的类型方式, 来对这些 Selling 进行分类;
-             * 3. 加载需要计算的 OrderItem 数据
-             */
-            Map<String, Selling> analyzeMap = new HashMap<String, Selling>();
-
-            // msku, asin, acc, market, price,
-            List<Selling> sellings = Selling.findAll();
-            for(Selling s : sellings)
-                analyzeMap.put(isSku ? Product.merchantSKUtoSKU(s.merchantSKU) : s.sellingId, s);
-
-
-            // d1, d7, d30, _ps
-            DateTime now = new DateTime(Dates.morning(new Date()));
-            List<F.T5<String, String, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_qty_date_aId(now.minusDays(30).toDate(), now.toDate(), 0);
-            for(F.T5<String, String, Integer, Date, String> t5 : t5s) {
-                String key = isSku ? t5._1 : t5._2;
-                Selling currentSelling = analyzeMap.get(key);
-                if(currentSelling == null) {
-                    Logger.warn("T4: %s, Selling is not exist. Key[%s]", t5, key);
-                    continue;
-                }
-                long differTime = Dates.morning(now.toDate()).getTime() - t5._4.getTime();
-                if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                    currentSelling.d1 += t5._3;
-                if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
-                    currentSelling.d7 += t5._3;
-                if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
-                    currentSelling.d30 += t5._3;
-            }
-
-            for(String sellKey : analyzeMap.keySet()) {
-
-                // attrs, delivering [ProcureUnit.PLAN|DELIVERY]
-                List<ProcureUnit> units = ProcureUnit.skuOrMskuRelate(analyzeMap.get(sellKey), isSku);
-                for(ProcureUnit unit : units) {
-                    if(unit.stage == ProcureUnit.STAGE.PLAN)
-                        analyzeMap.get(sellKey).onplan += unit.attrs.planQty;
-                    else if(unit.stage == ProcureUnit.STAGE.DELIVERY || unit.stage == ProcureUnit.STAGE.DONE) {
-                        analyzeMap.get(sellKey).onwork += unit.qty();
-                    }
-                }
-
-                // onway [Shipment.shipItem]
-                List<ShipItem> shipItems = ShipItem.find(String.format("%s AND shipment.state NOT IN (?,?)", isSku ? "unit.sku=?" : "unit.sid=?"),
-                        analyzeMap.get(sellKey).sellingId, Shipment.S.DONE, Shipment.S.CANCEL).fetch();
-                for(ShipItem itm : shipItems) {
-                    analyzeMap.get(sellKey).onway += itm.qty;
-                }
-
-                // qty [SellingQTY]
-                List<SellingQTY> qtys = null;
-                if(isSku)
-                    qtys = SellingQTY.qtysAccodingSKU(sellKey);
-                else {
-                    try {
-                        qtys = SellingQTY.qtysAccodingMSKU(analyzeMap.get(sellKey));
-                    } catch(Exception e) {
-                        e.printStackTrace();
-                        qtys = new ArrayList<SellingQTY>();
-                    }
-                }
-                for(SellingQTY qty : qtys)
-                    analyzeMap.get(sellKey).qty += qty.qty;
-            }
-
-
-            // ps
-            for(Selling sell : analyzeMap.values()) {
-                sell._ps = sell._ps();
-                sell.turnOverT4 = sell.turnOverT4Cal();
-            }
-
-            sellings = new ArrayList<Selling>(analyzeMap.values());
-            Collections.sort(sellings, new Comparator<Selling>() {
-                @Override
-                public int compare(Selling s1, Selling s2) {
-                    return (int) (s2.d7 - s1.d7);
-                }
-            });
-            Cache.add(cacke_key, sellings, "1h"); // 缓存 1 小时
-        }
-        return Cache.get(cacke_key, List.class);
-    }
-
-    /**
-     * 计算系数内的两个 Turnover 值<br/>
-     * 前提:
-     * - ps
-     * - d7
-     * - qty
-     * - onway
-     * - onwork
-     *
-     * @return ._1: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
-     *         ._2: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
-     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
-     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
-     */
-    public F.T4<Float, Float, Float, Float> turnOverT4Cal() {
-        float _ps = this._ps();
-        float ps = this.ps;
-        return new F.T4<Float, Float, Float, Float>(
-                Webs.scale2PointUp(this.qty / _ps),
-                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
-                Webs.scale2PointUp((this.qty + this.onway + this.onwork) / _ps),
-                Webs.scale2PointUp((this.qty + this.onway + this.onwork) / (ps == 0 ? _ps : ps))
-        );
-    }
-
-    /**
-     * 计算并且返回 _ps, 给与参考的 7 天内
-     *
-     * @return
-     */
-    public Float _ps() {
-        float _ps = this.d7 / 7.0f;
-        if(_ps == 0) _ps = 0.1f;
-        else _ps = Webs.scale2PointUp(_ps);
-        return _ps;
-    }
-
-    /**
-     * 比较此 Selling 中自行设计的 ps 与计算出来的 _ps 之间的差值
-     *
-     * @return .1: 差据的大小
-     *         .2: 前台使用的颜色代码
-     */
-    public F.T2<Float, String> psAnd_psDiffer() {
-        float _ps = this._ps();
-        if(_ps() >= 5) {
-            float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
-            String color = "";
-            if(diff >= 0.4)
-                color = "#E45652";
-            else if(diff >= 0.2 && diff < 0.4)
-                color = "#FAAB3B";
-            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
-        } else {
-            return new F.T2<Float, String>(0f, "#fff");
-        }
     }
 
 }

@@ -267,7 +267,10 @@ public class SellingRecord extends GenericModel {
             cacheElement = Cache.get(cacheKey, List.class);
             if(cacheElement != null) return cacheElement;
 
-            cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+            if(acc == null)
+                cacheElement = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
+            else
+                cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
             Cache.add(cacheKey, cacheElement, "1h");
         }
         return Cache.get(cacheKey, List.class);

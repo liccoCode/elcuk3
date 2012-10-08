@@ -11,3 +11,16 @@ span.highlight{
     background:#FE9532;
     font-size:1.5em;
 }
+
+.sortable{
+    cursor:pointer;
+    background:#F5F5F5;
+}
+
+#sku .sku,#sid .sid{
+    cursor:pointer;
+}
+
+[data-toggle="toggle"]{
+    cursor:pointer;
+}

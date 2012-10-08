@@ -14,12 +14,12 @@
     </tr>
     #{list items:productAndSellT2s, as:'t2'}
     #{set prod:t2._1/}
-    #{set sell:t2._2/}
+    #{set dto:t2._2/}
     <tr>
         <td><a href="@@{Products.show(prod.sku)}" target="_blank">${prod.sku}</a></td>
-        <td>${sell.d1}</td>
-        <td>${sell.d7}/${(sell.d7 / 7).format("#.##")}</td>
-        <td>${sell.d30}/${(sell.d30 / 30).format("#.##")}</td>
+        <td>${dto.day1}</td>
+        <td>${dto.day7}/${(dto.day7 / 7).format("#.##")}</td>
+        <td>${dto.day30}/${(dto.day30 / 30).format("#.##")}</td>
         <td>${prod.pictureCount()}</td>
         #{set sellings:prod.sellingCount() /}
         <td>

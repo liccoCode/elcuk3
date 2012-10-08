@@ -37,6 +37,10 @@ public abstract class Post<T> {
     }
 
     public int totalPage() {
-        return new Double(Math.floor(this.count / ((float) this.perSize))).intValue();
+        return new Double(Math.ceil(this.count / ((float) this.perSize))).intValue();
+    }
+
+    public int getTotalPage() {
+        return totalPage();
     }
 }

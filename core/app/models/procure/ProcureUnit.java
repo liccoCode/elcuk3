@@ -10,6 +10,7 @@ import models.embedded.UnitAttrs;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
+import models.view.dto.AnalyzeDTO;
 import models.view.dto.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -362,9 +363,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return STAGE.SHIPPING;
             } else if(leftQty._1 > 0 && leftQty._1 < this.qty()) {
                 return STAGE.PART_SHIPPING;
+            } else {
+                Validation.addError("", "procureunit.nextStage.leftQty");
+                return this.stage;
             }
         }
-        return this.stage;
     }
 
     /**
@@ -491,9 +494,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
         TimelineEventSource eventSource = new TimelineEventSource();
-        Selling selling = Selling.findSellingOrSKUFromAnalyzesCachedSellingsOrSKUs(type, val);
+        AnalyzeDTO analyzeDTO = AnalyzeDTO.findByValAndType(type, val);
         for(ProcureUnit unit : units) {
-            TimelineEventSource.Event event = new TimelineEventSource.Event(selling, unit);
+            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
             event.startAndEndDate(type)
                     .titleAndDesc()
                     .color(unit.stage);
@@ -503,7 +506,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
         // 将当前 Selling 的销售情况展现出来
-        eventSource.events.add(TimelineEventSource.currentQtyEvent(selling, type));
+        eventSource.events.add(TimelineEventSource.currentQtyEvent(analyzeDTO, type));
 
         return eventSource;
     }

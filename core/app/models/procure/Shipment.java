@@ -371,6 +371,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             long samewhouseItems = ShipmentQuery.shipemntItemCountWithSameWhouse(this.id, this.whouse.id);
             if(samewhouseItems != this.items.size()) Validation.addError("shipment.item.whouse", "%s");
         }
+        // 避免 trackNo 为 '' 的时候进入唯一性判断错误
+        if(StringUtils.isBlank(this.trackNo)) this.trackNo = null;
     }
 
     public void updateShipment() {
@@ -381,7 +383,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public void setTrackNo(String trackNo) {
         if(StringUtils.isNotBlank(trackNo)) this.trackNo = trackNo.trim();
-        else this.trackNo = trackNo;
+        else this.trackNo = null;
     }
 
     /**
@@ -510,18 +512,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public synchronized void beginShip() {
         Validation.equals("shipment.beginShip.state", this.state, "", S.CONFIRM);
-
+        for(ShipItem item : this.items) {
+            item.shipDate = new Date();
+            item.unit.stage = item.unit.nextStage();
+        }
+        if(Validation.hasErrors()) return;
         try {
             this.fbaShipment.state = FBA.update(this.fbaShipment, this, FBAShipment.S.SHIPPED);
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
         }
         if(Validation.hasErrors()) return;
-        for(ShipItem item : this.items) {
-            item.shipDate = new Date();
-            item.unit.stage = item.unit.nextStage();
-            item.unit.save();
-        }
+        for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();
         this.state = S.SHIPPING;
         new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", this.id), this.id).save();

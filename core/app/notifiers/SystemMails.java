@@ -6,6 +6,7 @@ import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Selling;
 import models.product.Product;
+import models.view.dto.AnalyzeDTO;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -63,7 +64,7 @@ public class SystemMails extends Mailer {
         return true;
     }
 
-    public static boolean productPicCheckermail(List<F.T2<Product,Selling>> productAndSellT2s) {
+    public static boolean productPicCheckermail(List<F.T2<Product,AnalyzeDTO>> productAndSellT2s) {
         setSubject(String.format("{CHECK} %s Product Picture Information Check", Dates.date2Date()));
         mailBase();
         addRecipient("alerts@easyacceu.com");

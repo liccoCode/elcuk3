@@ -3,6 +3,8 @@ package jobs;
 import models.Jobex;
 import models.market.Selling;
 import models.product.Product;
+import models.view.dto.AnalyzeDTO;
+import models.view.post.AnalyzePost;
 import notifiers.SystemMails;
 import play.jobs.Every;
 import play.jobs.Job;
@@ -31,13 +33,15 @@ public class CheckerProductCheckJob extends Job {
         /**
          * 1. 现在仅检查 Product 的图片问题
          */
-        List<Selling> skuSales = Selling.analyzesSKUAndSID("sku");
-        List<F.T2<Product,Selling>> thisTimeWarnningProduct = new ArrayList<F.T2<Product, Selling>>();
-        for(Selling skuSale : skuSales) {
+        AnalyzePost post = new AnalyzePost();
+        post.type = "sku";
+        List<AnalyzeDTO> skuSales = post.analyzes();
+        List<F.T2<Product, AnalyzeDTO>> thisTimeWarnningProduct = new ArrayList<F.T2<Product, AnalyzeDTO>>();
+        for(AnalyzeDTO skuSale : skuSales) {
             if(thisTimeWarnningProduct.size() >= 10) break;
-            Product prod = Product.findByMerchantSKU(skuSale.merchantSKU);
+            Product prod = Product.findByMerchantSKU(skuSale.fid);
             if(prod.pictureCount() >= 4) continue;
-            thisTimeWarnningProduct.add(new F.T2<Product, Selling>(prod, skuSale));
+            thisTimeWarnningProduct.add(new F.T2<Product, AnalyzeDTO>(prod, skuSale));
         }
 
         SystemMails.productPicCheckermail(thisTimeWarnningProduct);

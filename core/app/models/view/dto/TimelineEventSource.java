@@ -50,8 +50,8 @@ public class TimelineEventSource {
         public Event() {
         }
 
-        public Event(Selling selling, ProcureUnit unit) {
-            this.selling = selling;
+        public Event(AnalyzeDTO analyzeDTO, ProcureUnit unit) {
+            this.analyzeDTO = analyzeDTO;
             this.unit = unit;
         }
 
@@ -153,7 +153,7 @@ public class TimelineEventSource {
 
         // ---------------- 计算使用
         @Transient
-        public volatile Selling selling;
+        public volatile AnalyzeDTO analyzeDTO;
 
         @Transient
         public volatile ProcureUnit unit;
@@ -167,7 +167,7 @@ public class TimelineEventSource {
          */
         public Event startAndEndDate(String type) {
             DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime());
-            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.selling._ps() : ((this.selling.ps == null || this.selling.ps <= 0) ? 0.1f : this.selling.ps)));
+            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.analyzeDTO.getPs_cal() : ((this.analyzeDTO.ps <= 0) ? 0.1f : this.analyzeDTO.ps)));
             this.start = Dates.date2Date(planDt.toDate());
             this.end = Dates.date2Date(planDt.plusHours((int) (this.lastDays * 24)).toDate());
             this.durationEvent = true;
@@ -227,9 +227,11 @@ public class TimelineEventSource {
                     color = "A5B600";
                     break;
                 case DELIVERY:
+                    color = "C09853";
+                    break;
                 case DONE:
                     // warnning
-                    color = "C09853";
+                    color = "FE502A";
                     break;
                 case PART_SHIPPING:
                 case SHIPPING:
@@ -270,17 +272,17 @@ public class TimelineEventSource {
     /**
      * 根据 Selling 与指定的 type 类型, 创建当前 Selling 可卖长度的 Event
      *
-     * @param selling
+     * @param analyzeDTO
      * @param type
      * @return
      */
-    public static Event currentQtyEvent(Selling selling, String type) {
+    public static Event currentQtyEvent(AnalyzeDTO analyzeDTO, String type) {
         Event currenEvent = new Event();
         currenEvent.start = Dates.date2Date();
-        float validPs = ("sku".equals(type) ? selling._ps : selling.ps);
-        float days = Webs.scale2PointUp(selling.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
+        float validPs = ("sku".equals(type) ? analyzeDTO.getPs_cal() : analyzeDTO.ps);
+        float days = Webs.scale2PointUp(analyzeDTO.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
         currenEvent.end = Dates.date2Date(DateTime.now().plusHours((int) (days * 24)).toDate());
-        currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", selling.qty, validPs, days);
+        currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", analyzeDTO.qty, validPs, days);
         currenEvent.description = "No Desc.";
         currenEvent.color("267B2F");
         return currenEvent;
