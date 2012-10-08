@@ -5,7 +5,10 @@ import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 import query.FBAShipmentQuery;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +55,7 @@ public class FBAShipment extends Model {
     @OneToOne
     public Account account;
 
-    @OneToMany
+    @OneToMany(mappedBy = "fbaShipment")
     public List<Shipment> shipments = new ArrayList<Shipment>();
 
     @Column(unique = true, nullable = false, length = 20)
