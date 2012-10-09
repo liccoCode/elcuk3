@@ -217,14 +217,15 @@ $ ->
         # 绑定 sku/sid 的点击事件[unit_line, sales_line, session, turnOver]
         $("##{type} .#{type}").click(
           (e) ->
-            params = paramsObj()
             text = $(@).text().trim()
-
-            # timeline
-            paintProcureUnitInTimeline(params['p.type'], text)
-
             text = text.split('|')[0] if type == SID
             $('[name=p\\.val]').val(text)
+
+            params = paramsObj()
+
+            # timeline
+            paintProcureUnitInTimeline(params['p.type'], $(@).text().trim())
+
             unit_line(params)
             sale_line(params)
 
