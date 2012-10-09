@@ -100,7 +100,7 @@
                     <td>
                         <div class="input-append">
                             <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
-                        #{if ship.internationExpress}
+                        #{if ship.internationExpress && ship.trackNo}
                             <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
                         #{/if}
                         </div>

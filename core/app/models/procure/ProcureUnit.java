@@ -488,8 +488,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
 
         DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit.find("planArrivDate>=? AND planArrivDate<=? AND " + type/*sid/sku*/ + "=?",
-                dt.minusMonths(9).toDate(), dt.plusMonths(3).toDate(), val).fetch();
+        List<ProcureUnit> units = ProcureUnit.find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
+                Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
 
 
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
