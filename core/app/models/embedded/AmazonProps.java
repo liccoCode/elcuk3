@@ -39,6 +39,7 @@ import java.util.*;
  */
 @Embeddable
 public class AmazonProps {
+
     public enum T {
         ARRAY_TO_STR,
         STR_TO_ARRAY
