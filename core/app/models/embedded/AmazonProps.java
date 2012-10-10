@@ -27,6 +27,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
 /**
@@ -164,6 +166,12 @@ public class AmazonProps {
     public String imageName;
 
     /**
+     * 在 Amazon 上用来更新图片的时候的 sku, 每一个 Selling 有一个, 每一个 msku 对应一个 这个值
+     * ps: ManageImage.amzn#sku=NzFTTU44MDAwLUJQVSwy
+     */
+    public String amazonSku;
+
+    /**
      * 这个是在 Amazon 上架的时候, 会去进行 matchAsin 判断, 确实这个 Listing 是否被上架过.
      */
     @Expose
@@ -294,6 +302,12 @@ public class AmazonProps {
         String[] searchTerms = new String[5];
         String[] rbns = new String[2];
 
+        // amazonSKU 图片使用
+        try {
+            this.amazonSku = URLDecoder.decode(StringUtils.substringBetween(doc.select(".buttonCell .awesomeButton").attr("onclick"), "sku=", "&"), "UTF-8");
+        } catch(UnsupportedEncodingException e) {
+            //ignore
+        }
         this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
 //        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW

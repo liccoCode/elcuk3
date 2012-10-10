@@ -241,6 +241,8 @@ public class Selling extends GenericModel {
          */
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("asin", this.asin));
+        if(StringUtils.isNotBlank(this.aps.amazonSku)) params.add(new BasicNameValuePair("sku", this.aps.amazonSku));
+        if(StringUtils.isBlank(this.aps.amazonSku)) throw new FastRuntimeException("没有 AmazonSKU, 请先进行同步, 然后再进行图片上传.");
         Map<String, File> uploadImages = new HashMap<String, File>();
         for(int i = 0; i < images.length; i++) {
             String fileParamName;

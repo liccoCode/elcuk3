@@ -42,20 +42,11 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
          * 2. 下载回列表后进行系统内更新
          */
         List<Account> accs = Account.openedSaleAcc();
-        // 只需要两个账号 3 个市场的 Active Listing
+        // 只需要三个账号 3 个市场的 Active Listing
         for(Account acc : accs) {
-            if("AJUR3R8UN71M4".equals(acc.merchantId)) {
-                JobRequest job = JobRequest.checkJob(acc, this, acc.marketplaceId());
-                if(job == null) continue;
-                job.request();
-                job = JobRequest.checkJob(acc, this, M.AMAZON_DE.amid()); // 特殊, UK 需要抓取 DE 市场的
-                if(job == null) continue;
-                job.request();
-            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
-                JobRequest job = JobRequest.checkJob(acc, this, acc.marketplaceId());
-                if(job == null) continue;
-                job.request();
-            }
+            JobRequest job = JobRequest.checkJob(acc, this, acc.marketplaceId());
+            if(job == null) continue;
+            job.request();
         }
 
         Logger.info("AmazonSellingSyncJob step1 done!");
@@ -107,6 +98,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
      * @return Amazon 上拥有, 但系统中没有的 Selling
      */
     public static F.T2<List<Selling>, List<Listing>> dealSellingFromActiveListingsReport(File file, Account acc, M market) {
+        //TODO 这个方法需要进行修改
         F.T2<List<Selling>, List<Listing>> sellAndListingTuple = new F.T2<List<Selling>, List<Listing>>(new ArrayList<Selling>(), new ArrayList<Listing>());
         List<String> lines = null;
         try {
@@ -119,39 +111,31 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
         lines.remove(0); // 删除第一行的标题
 
         for(String line : lines) {
-            try {
-                String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
+            String[] args = StringUtils.splitPreserveAllTokens(line, "\t");
 
-                /**
-                 * 1. 解析出 Listing, 并且将 Listing 绑定到对应的 Product 身上
-                 *  a. 注意需要先查找系统中是否有对应的 Listing, 如果有则不做处理
-                 *  b. 如果没有对应的 Listing 那么则创建一个新的 Listing 并且保存下来;(Listing 的详细信息等待抓取线程自己去进行更新)
-                 *
-                 * 2. 创建 Selling, 因为这份文件是自己的, 所以接触出来的 Listing 数据就是自己的 Selling
-                 *  a. 注意需要先查找系统中是否有, 有的话则不做处理
-                 *  b. 没有的话则创建 Selling 并且绑定 Listing
-                 */
-                String t_asin = null;
-                String t_msku = null;
-                String t_title = null;
-                String t_price = null;
-                String t_fulfilchannel = null;
-                if(market == M.AMAZON_FR) {
-                    t_asin = args[11].trim();
-                    t_msku = args[2].trim().toUpperCase();
-                    t_title = args[0].trim();
-                    t_price = args[3].trim();
-                    t_fulfilchannel = args[13].trim();
-                } else {
-                    t_asin = args[16].trim();
-                    t_msku = args[3].trim().toUpperCase();
-                    t_title = args[0].trim();
-                    t_price = args[4].trim();
-                    t_fulfilchannel = args[26].trim();
-                }
+            /**
+             * 1. 解析出 Listing, 并且将 Listing 绑定到对应的 Product 身上
+             *  a. 注意需要先查找系统中是否有对应的 Listing, 如果有则不做处理
+             *  b. 如果没有对应的 Listing 那么则创建一个新的 Listing 并且保存下来;(Listing 的详细信息等待抓取线程自己去进行更新)
+             *
+             * 2. 创建 Selling, 因为这份文件是自己的, 所以接触出来的 Listing 数据就是自己的 Selling
+             *  a. 注意需要先查找系统中是否有, 有的话则不做处理
+             *  b. 没有的话则创建 Selling 并且绑定 Listing
+             */
+
+            //de: item-name	item-description	listing-id	seller-sku	price	quantity	open-date	image-url	item-is-marketplace	product-id-type	zshop-shipping-fee	item-note	item-condition	zshop-category1	zshop-browse-path	zshop-storefront-feature	asin1	asin2	asin3	will-ship-internationally	expedited-shipping	zshop-boldface	product-id	bid-for-featured-placement	add-delete	pending-quantity	fulfillment-channel
+            //uk: item-name	item-description	listing-id	seller-sku	price	quantity	open-date	image-url	item-is-marketplace	product-id-type	zshop-shipping-fee	item-note	item-condition	zshop-category1	zshop-browse-path	zshop-storefront-feature	asin1	asin2	asin3	will-ship-internationally	expedited-shipping	zshop-boldface	product-id	bid-for-featured-placement	add-delete	pending-quantity	fulfillment-channel
+            String t_asin = args[16].trim();
+            String t_msku = args[3].trim().toUpperCase();
+            String t_title = args[0].trim();
+            String t_price = args[4].trim();
+            String t_fulfilchannel = args[26].trim();
+            try {
 
                 // 如果属于 UnUsedSKU 那么则跳过这个解析
                 if(Product.unUsedSKU(t_msku)) continue;
+                // 过滤掉 msku 含有 ,2 的, 这些不需要
+                if(t_msku.contains(",2")) continue;
 
                 String lid = Listing.lid(t_asin, market);
                 Listing lst = Listing.findById(lid);
@@ -195,13 +179,12 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                     selling.state = Selling.S.SELLING;
 
                     PriceStrategy priceStrategy = new PriceStrategy();
-                    if(StringUtils.isNotBlank(t_fulfilchannel) && StringUtils.startsWith(t_fulfilchannel.toLowerCase(), "amazon")) {
-                        priceStrategy.type = PriceStrategy.T.FixedPrice;
+                    priceStrategy.type = PriceStrategy.T.FixedPrice;
+                    if(StringUtils.isNotBlank(t_fulfilchannel) && StringUtils.startsWith(t_fulfilchannel.toLowerCase(), "amazon"))
                         selling.type = Selling.T.FBA;
-                    } else {
-                        priceStrategy.type = PriceStrategy.T.LowestPrice;
+                    else
                         selling.type = Selling.T.AMAZON;
-                    }
+
 
                     // 新添加的 PriceStrategy,
                     priceStrategy.cost = lst.displayPrice * 0.5f; //成本价格位展示价格的 50%
@@ -213,9 +196,9 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                     sellAndListingTuple._1.add(selling);
                 }
             } catch(Exception e) {
-                String warMsg = "Skip Add one Listing/Selling. Line[" + line + "]";
-                Logger.warn(warMsg);
-                Webs.systemMail(warMsg, String.format("%s <br/>\r\n%s", warMsg, Webs.E(e)));
+                String warMsg = "Skip Add one Listing/Selling. asin[" + t_asin + "_" + market.toString() + "]";
+                Logger.warn(line);
+                Webs.systemMail(warMsg, String.format("%s <br/>\r\n%s", line, Webs.E(e)));
             }
         }
         return sellAndListingTuple;

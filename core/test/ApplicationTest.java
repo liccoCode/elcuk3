@@ -4,34 +4,13 @@ import org.junit.Test;
 import play.mvc.Http.Response;
 import play.test.FunctionalTest;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 public class ApplicationTest extends FunctionalTest {
 
-    //    @Test
-    public void testThatIndexPageWorks() {
-        Response response = GET("/");
-        assertIsOk(response);
-        assertContentType("text/html", response);
-        assertCharset(play.Play.defaultWebEncoding, response);
-    }
-
     @Test
-    public void testDateTime() {
-        System.out.println(DateTimeZone.getDefault().getID());
-        System.out.println(DateTimeZone.getAvailableIDs());
-        // Asia/Shanghai
-        // US/Central
-        System.out.println(DateTime.now(DateTimeZone.forID("Asia/Shanghai")).toString("yyyy-MM-dd HH:mm:ss"));
-        System.out.println(DateTime.now(DateTimeZone.forID("US/Central")).toString("yyyy-MM-dd HH:mm:ss"));
-    }
-
-
-    @Test
-    public void getDefaultTimeZone() {
-        for(Object key : System.getProperties().keySet()) {
-            if(key.toString().equals("java.class.path")) continue;
-            System.out.println(String.format("%s => %s", key, System.getProperty(key + "")));
-        }
-
-        System.out.println(System.getProperty("user.timezone"));
+    public void t1() throws UnsupportedEncodingException {
+        System.out.println(URLDecoder.decode("sku=NzFBU043LUJQVSw2MTUyMzMyNTEwODQ%3D&asyncUid", "UTF-8"));
     }
 }
