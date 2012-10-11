@@ -1,15 +1,14 @@
 package models.view.post;
 
 import helper.Dates;
-import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,56 +19,41 @@ import java.util.regex.Pattern;
  * Date: 4/5/12
  * Time: 6:59 PM
  */
-public class OrderPOST extends Post {
+public class OrderPOST extends Post<Orderr> {
+    public OrderPOST() {
+        this.from = new DateTime().withZone(Dates.timeZone(null)).minusDays(7).toDate();
+        this.to = new DateTime().withZone(Dates.timeZone(null)).toDate();
+    }
+
+    public OrderPOST(int perSize) {
+        this.perSize = perSize;
+    }
+
     private static Pattern ORDER_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
 
-    public Account account;
+    public Long accountId;
 
     public M market;
 
     public Orderr.S state;
 
-    public Date from;
+    public String orderBy = "createDate";
 
-    public Date to;
-
-    public P orderBy;
-
-    public String desc;
-
-    public Integer page = 1;
-
-    public Integer size = 100;
-
-    /**
-     * 查询字符串
-     */
-    public String search;
-
-    /**
-     * 用来处理 OrderBy 的字段
-     */
-    public enum P {
-        createDate,
-        paymentDate,
-        shipDate,
-        market,
-        state
-    }
+    public String desc = "DESC";
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         F.T2<String, List<Object>> params = params();
+        this.count = this.count(params);
 
         if(params._2.size() == 0)
-            return Orderr.find(params._1).fetch(this.page, this.size);
+            return Orderr.find(params._1).fetch(this.page, this.perSize);
         else
-            return Orderr.find(params._1, params._2.toArray()).fetch(this.page, this.size);
+            return Orderr.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
-    public Long count() {
-        F.T2<String, List<Object>> params = params();
-
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
         if(params._2.size() == 0)
             return Orderr.count(params._1);
         else
@@ -80,9 +64,9 @@ public class OrderPOST extends Post {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("1=1 ");
         List<Object> params = new ArrayList<Object>();
-        if(this.account != null && this.account.id != null && this.account.id > 0) {
-            sbd.append("AND account=? ");
-            params.add(this.account);
+        if(this.accountId != null) {
+            sbd.append("AND account.id=? ");
+            params.add(this.accountId);
         }
 
         if(this.market != null) {
@@ -97,11 +81,9 @@ public class OrderPOST extends Post {
 
 
         if(this.from != null && this.to != null) {
-            this.from = Dates.morning(this.from);
-            this.to = Dates.night(this.to);
             sbd.append("AND createDate>=? AND createDate<=? ");
-            params.add(this.from);
-            params.add(this.to);
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
         }
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
@@ -112,7 +94,7 @@ public class OrderPOST extends Post {
                 int orderUnbers = NumberUtils.toInt(matcher.group(1), 1);
                 sbd.append("AND (select sum(oi.quantity) from OrderItem oi where oi.order.orderId=orderId)>").append(orderUnbers).append(" ");
             } else {
-                this.search = StringUtils.replace(this.search, "'", "''");
+                this.search = this.word();
                 sbd.append("AND (orderId LIKE '%").append(this.search).append("%' OR ").
                         append("address LIKE '%").append(this.search).append("%' OR ").
                         append("address1 LIKE '%").append(this.search).append("%' OR ").
@@ -130,7 +112,7 @@ public class OrderPOST extends Post {
             }
         }
 
-        if(this.orderBy != null) {
+        if(StringUtils.isNotBlank(this.orderBy)) {
             sbd.append("ORDER BY ").append(this.orderBy).append(" ").append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
         }
         return new F.T2<String, List<Object>>(sbd.toString(), params);

@@ -6,11 +6,12 @@
     <th>Buyer</th>
     <th>Phone</th>
     <th>Email</th>
-    <th>Create</th>
-    <th>Payment</th>
+    <th name="createDate" class="sortable">Create <i class="icon-sort"></i></th>
+    <th name="shipDate" class="sortable">ShipDate <i class="icon-sort"></i></th>
+    <th name="paymentDate" class="sortable">Payment <i class="icon-sort"></i></th>
     <th>State</th>
 </tr>
-#{list items:pi.items, as:'ord'}
+#{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
     <td>${ord.market.toString()}</td>
     <td>${ord.address1}</td>
@@ -25,12 +26,9 @@
     <td>
         <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
     </td>
-    <td>
-        <a href="javascript:void(0)" rel="tooltip" title="${ord.createDate?.datetime()}">${ord.createDate?.since()}</a>
-    </td>
-    <td>
-        <a href="javascript:void(0)" rel="tooltip" title="${ord.paymentDate?.datetime()}">${ord.paymentDate?.since()}</a>
-    </td>
+    <td>#{time_tooltip time:ord.createDate/}</td>
+    <td>#{time_tooltip time:ord.shipDate/}</td>
+    <td>#{time_tooltip time:ord.paymentDate/}</td>
     <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
 </tr>
 #{/list}

@@ -19,13 +19,11 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Orders extends Controller {
 
-    public static void index(Integer p) {
-        List<Orderr> orders = Orderr.find("ORDER BY createDate DESC").fetch(p, 100);
-        Long count = Orderr.count();
-        Pager<Orderr> pi = new Pager<Orderr>(p, count, orders);
+    public static void index(OrderPOST p) {
         List<Account> accs = Account.openedSaleAcc();
-
-        render(orders, p, pi, accs);
+        if(p == null) p = new OrderPOST();
+        List<Orderr> orders = p.query();
+        render(p, orders, accs);
     }
 
     public static void show(String oid) {
@@ -36,18 +34,5 @@ public class Orders extends Controller {
             Orderr ord = Orderr.findById(oid);
             render(ord);
         }
-    }
-
-    /**
-     * Orders 页面的搜索方法
-     *
-     * @param p
-     */
-    public static void search(OrderPOST p) {
-        List<Orderr> orders = p.query();
-        Long count = p.count();
-        Pager<Orderr> pi = new Pager<Orderr>(p.size, count, p.page, orders);
-
-        render(pi);
     }
 }

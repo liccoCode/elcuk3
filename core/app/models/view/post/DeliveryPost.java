@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  * Date: 9/4/12
  * Time: 5:09 PM
  */
-public class DeliveryPost extends Post {
+public class DeliveryPost extends Post<Deliveryment> {
     /**
      * 解析 Id 的正则表达式
      */

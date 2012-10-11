@@ -187,7 +187,7 @@
         <a href="@{Shipments.shipItem()}/${ship.id}" style="margin-right:10px;" class="btn btn-primary pull-left">修改运输项目</a>
     #{/if}
 
-    #{ifnot ship.fbaShipment}
+    #{if !ship.fbaShipment && ship.state == models.procure.Shipment.S.PLAN}
         <form action="@{Shipments.assignFbaShipmentId()}" method="post" class="pull-left">
             <div class="input-append">
                 <input type="hidden" name="id" value="${ship.id}">
@@ -203,15 +203,15 @@
                 创建 FBA Shipment
             </button>
         </form>
-    #{/ifnot}
-    #{else }
+    #{/if}
+    #{elseif ship.state == models.procure.Shipment.S.DONE && ship.fbaShipment}
         <form action="@{Shipments.updateFba()}" method="post" class="pull-left">
             #{authenticityToken /}
             <input type="hidden" name="id" value="${ship.id}">
             <input type="hidden" name="act" value="update">
             <button data-confirm="btn" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
         </form>
-    #{/else}
+    #{/elseif}
 
     #{if isPlanAndConfirm}
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">

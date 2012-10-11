@@ -1,5 +1,6 @@
 package models.view.post;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -21,8 +22,36 @@ public abstract class Post<T> {
     public int perSize = 50;
     public long count = 1;
 
+    /**
+     * 用来计算搜索的条件
+     *
+     * @return
+     */
     public abstract F.T2<String, List<Object>> params();
 
+    /**
+     * 计算总行数
+     *
+     * @return
+     */
+    public Long count() {
+        return count(params());
+    }
+
+    /**
+     * 计算总行数
+     *
+     * @return
+     */
+    public Long count(F.T2<String, List<Object>> params) {
+        throw new UnsupportedOperationException("请自行实现");
+    }
+
+    /**
+     * 具体的查询方法
+     *
+     * @return
+     */
     public List<T> query() {
         throw new UnsupportedOperationException("请自行实现");
     }
@@ -33,7 +62,7 @@ public abstract class Post<T> {
      * @return
      */
     public String word() {
-        return String.format("%%%s%%", this.search.trim());
+        return String.format("%%%s%%", StringUtils.replace(this.search.trim(), "'", "''"));
     }
 
     public int totalPage() {

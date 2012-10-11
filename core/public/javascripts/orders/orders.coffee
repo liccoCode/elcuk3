@@ -1,4 +1,13 @@
 $ ->
+  #  $('#p_from').data('dateinput').setValue($.DateUtil.addDay(-7, new Date()))
+  #  $('#p_to').data('dateinput').setValue(new Date())
+  $('#order_list .sortable').click(
+    ->
+      $('#orderBy').val($(@).attr('name'))
+      $('#search_form').submit()
+  )
+
+
   $('#search_form :input[type=date]').dateinput({format: 'yyyy-MM-dd'})
   $('a[rel=tooltip]').tooltip({placement: 'top'})
 
@@ -28,9 +37,6 @@ $ ->
         order_list.unmask()
     )
 
-
-  $('#o_search').keyup (e) ->
-    do_search($('a[day]:eq(2)'), 1) if e.keyCode is 13
 
   # 搜索按钮组
   $('#search_btns a[class]').click ->

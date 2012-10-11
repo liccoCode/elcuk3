@@ -84,6 +84,7 @@ public class Dates {
     }
 
     public static DateTimeZone timeZone(M market) {
+        if(market == null) return DateTimeZone.forID("Asia/Shanghai");
         switch(market) {
             case AMAZON_UK:
             case EBAY_UK:
@@ -99,7 +100,7 @@ public class Dates {
             case AMAZON_US:
                 return DateTimeZone.forID("America/Los_Angeles");
             default:
-                return DateTimeZone.getDefault();
+                return DateTimeZone.forID("Asia/Shanghai");
         }
     }
 
