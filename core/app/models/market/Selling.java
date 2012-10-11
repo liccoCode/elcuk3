@@ -22,6 +22,7 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.Codec;
 import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
@@ -43,6 +44,7 @@ public class Selling extends GenericModel {
 
     public Selling() {
         this.aps = new AmazonProps();
+        this.state = S.NEW;
     }
 
     /**
@@ -155,46 +157,6 @@ public class Selling extends GenericModel {
     @Column(length = 32)
     public String fnSku;
 
-    /**
-     * 动态计算使用的 N 天销量
-     */
-    @Transient
-    public Float d1 = 0f;
-    @Transient
-    public Float d7 = 0f;
-    @Transient
-    public Float d30 = 0f;
-    @Transient
-    public Float _ps = 0f;
-    @Transient
-    public Integer qty = 0;
-    /**
-     * 在计划中的库存
-     */
-    @Transient
-    public Integer onplan = 0;
-
-    /**
-     * 在产的库存
-     */
-    @Transient
-    public Integer onwork = 0;
-    /**
-     * 在途的数量
-     */
-    @Transient
-    public Integer onway = 0;
-
-    /**
-     * Selling 的 TurnOver<br/>
-     * ._1: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
-     * ._2: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天<br/>
-     * ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
-     * ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天<br/>
-     */
-    @Transient
-    public F.T4<Float, Float, Float, Float> turnOverT4 = new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
-
     // -----------------------  Amazon 上架会需要使用到的信息 ----------------------------
     @Embedded
     @Expose
@@ -241,8 +203,7 @@ public class Selling extends GenericModel {
          */
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("asin", this.asin));
-        if(StringUtils.isNotBlank(this.aps.amazonSku)) params.add(new BasicNameValuePair("sku", this.aps.amazonSku));
-        if(StringUtils.isBlank(this.aps.amazonSku)) throw new FastRuntimeException("没有 AmazonSKU, 请先进行同步, 然后再进行图片上传.");
+        params.add(new BasicNameValuePair("sku", Codec.encodeBASE64(this.merchantSKU)));
         Map<String, File> uploadImages = new HashMap<String, File>();
         for(int i = 0; i < images.length; i++) {
             String fileParamName;

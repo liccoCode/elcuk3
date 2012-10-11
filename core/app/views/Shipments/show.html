@@ -6,9 +6,7 @@
     #{script 'shipments/show.coffee'/}
 #{/set}
 
-#{ifErrors }
-    #{errorMsgs /}
-#{/ifErrors}
+#{errorMsgs /}
 
 #{flash_alert /}
 
@@ -201,7 +199,7 @@
         <form action="@{Shipments.deployToAmazon()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-            <button data-confirm="confirm" content="确认要创建 FBA Shipment? 如果货物过多, 请考虑库存不足无法添加货物的情况." class="btn btn-danger" style="margin-right:10px;">
+            <button data-confirm="btn" content="确认要创建 FBA Shipment? 如果货物过多, 请考虑库存不足无法添加货物的情况." class="btn btn-danger" style="margin-right:10px;">
                 创建 FBA Shipment
             </button>
         </form>
@@ -211,7 +209,7 @@
             #{authenticityToken /}
             <input type="hidden" name="id" value="${ship.id}">
             <input type="hidden" name="act" value="update">
-            <button data-confirm="confirm" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
+            <button data-confirm="btn" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
         </form>
     #{/else}
 
@@ -219,7 +217,7 @@
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-            <button style="margin-right:10px;" data-confirm="confirm" class="btn btn-success">
+            <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">
                 开始运输
             </button>
         </form>
@@ -228,7 +226,7 @@
         <form action="@{Shipments.ensureDone()}" method="post">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-            <button style="margin-right:10px;" data-confirm="confirm" class="btn btn-success">确认到货</button>
+            <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">确认到货</button>
         </form>
     #{/if}
     </div>

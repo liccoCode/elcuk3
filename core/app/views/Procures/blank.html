@@ -9,9 +9,7 @@
 #{/if}
 #{else }
 
-    #{ifErrors }
-        #{errorMsgs /}
-    #{/ifErrors}
+    #{errorMsgs /}
     #{flash_alert row:true /}
 
 <form action="/procures/save" method="post">

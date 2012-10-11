@@ -30,14 +30,15 @@ public class FWSTest extends UnitTest {
 
     @Before
     public void client() {
-//        String accessKey = "AKIAI6EBPJLG64HWDBGQ";//uk
-//        String secrityKey = "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf";//uk
-        String accessKey = "AKIAIFWFCKKS5EAB3KZA";//us
-        String secrityKey = "4wruCQj0t7ZY9BPKqZg2qH5qAXdvJBvLRo0h3trD";//us
+        String accessKey = "AKIAI6EBPJLG64HWDBGQ";//uk
+        String secrityKey = "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf";//uk
+//        String accessKey = "AKIAIFWFCKKS5EAB3KZA";//us
+//        String secrityKey = "4wruCQj0t7ZY9BPKqZg2qH5qAXdvJBvLRo0h3trD";//us
         FBAInboundServiceMWSConfig config = new FBAInboundServiceMWSConfig();
 
         // 设置服务器地址
-        config.setServiceURL(MWSEndpoint.US.toString());
+//        config.setServiceURL(MWSEndpoint.US.toString());
+        config.setServiceURL(MWSEndpoint.UK.toString());
 
         try {
 

@@ -6,9 +6,7 @@
     #{script 'deliveryments/show.coffee'/}
 #{/set}
 
-#{ifErrors }
-    #{errorMsgs /}
-#{/ifErrors}
+#{errorMsgs /}
 
 #{if flash.success}
 <div class="alert alert-success" style="text-align:center;">

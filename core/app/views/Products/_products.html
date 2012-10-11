@@ -10,7 +10,7 @@
     </tr>
 #{list items:prods, as:'prod'}
     <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
-        <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
+        <td><a target="_blank" href="@{Products.show}/${prod.sku}">${prod.sku}</a></td>
         #{set count:prod.pictureCount() /}
         <td>${count} <i class="${count > 0 ? 'icon-picture' : 'icon-exclamation-sign'}"></i>
         </td>

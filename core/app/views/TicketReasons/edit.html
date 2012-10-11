@@ -5,14 +5,7 @@
 
 <div>
     <h2>为 Category ${lr.category.name} 添加 Listing 原因</h2>
-#{ifErrors }
-    <div class="alert alert-error">
-        #{errors }
-            <p>${error.key} => ${error.message}</p>
-        #{/errors}
-
-    </div>
-#{/ifErrors}
+    #{errorMsgs /}
 
     <form action="@{TicketReasons.update()}" method="post">
     #{render 'TicketReasons/_table.html', lr:lr/}

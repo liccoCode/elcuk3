@@ -4,15 +4,7 @@
     #{script 'tickets/reviewAndFeedback.coffee'/}
     #{script 'tickets/user.coffee' /}
 #{/set}
-#{ifErrors }
-<div class="row-fluid">
-    <div class="alert alert-error">
-        #{errors }
-            <p>${error.key} => ${error.message}</p>
-        #{/errors}
-    </div>
-</div>
-#{/ifErrors}
+#{errorMsgs /}
 <form action="@{Tickets.search()}" method="post">
     <div class="row-fluid">
 

@@ -2,6 +2,7 @@ package models.product;
 
 import models.procure.Cooperator;
 import org.junit.Test;
+import play.libs.Codec;
 import play.test.UnitTest;
 
 import java.util.List;
@@ -20,5 +21,11 @@ public class ProductTest extends UnitTest {
         assertEquals(2, cooperators.size());
         assertEquals("深圳市分寸科技有限公司", cooperators.get(0).fullName);
         assertEquals("深圳市威拓手袋箱包制作有限公司 ", cooperators.get(1).fullName);
+    }
+
+    @Test
+    public void testBase64() {
+        assertEquals("ODAtcXcxYTU2LWJl", Codec.encodeBASE64("80-qw1a56-be"));
+        assertEquals("ODAtUVcxQTU2LUJF", Codec.encodeBASE64("80-qw1a56-be".toUpperCase()));
     }
 }

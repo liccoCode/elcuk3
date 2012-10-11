@@ -5,15 +5,7 @@
     #{script 'jquery.validate.min.js'/}
 #{/set}
 
-#{ifErrors }
-<div class="row">
-    <div class="alert alert-error">
-        #{errors }
-            <p>${error.key} ${error}</p>
-        #{/errors}
-    </div>
-</div>
-#{/ifErrors}
+#{errorMsgs /}
 
 #{set isNew:(cop.id == null || cop.id <= 0) /}
 

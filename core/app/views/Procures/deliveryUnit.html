@@ -8,9 +8,7 @@
 #{/if}
 #{else }
 
-    #{ifErrors }
-        #{errorMsgs /}
-    #{/ifErrors}
+    #{errorMsgs /}
 
     #{info_row row:true}
     <ul>
@@ -95,7 +93,7 @@
                             <p class="text-error">此采购订单已经交货, 无法再进行更改</p>
                         #{/if}
                         #{else }
-                            <button class="btn btn-warning" data-confirm="confirm">交货更新</button>
+                            <button class="btn btn-warning" data-confirm="btn">交货更新</button>
                         #{/else}
                     </td>
                 </tr>

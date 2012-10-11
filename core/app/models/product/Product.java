@@ -77,16 +77,16 @@ public class Product extends GenericModel {
     public String productName;
 
     @Expose
-    public Float lengths;
+    public Float lengths = 0f;
 
     @Expose
-    public Float heigh;
+    public Float heigh = 0f;
 
     @Expose
-    public Float width;
+    public Float width = 0f;
 
     @Expose
-    public Float weight;
+    public Float weight = 0f;
 
     public Product() {
     }
@@ -185,8 +185,6 @@ public class Product extends GenericModel {
         try {
             if(!StringUtils.equals(StringUtils.split(selling.merchantSKU, ",")[1], selling.aps.upc))
                 throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc],[other]");
-        } catch(FastRuntimeException e) {
-            throw e;
         } catch(Exception e) {
             throw new FastRuntimeException(String.format("(%s) 解析 MerchantSKU 的格式错误!", selling.merchantSKU));
         }
@@ -195,7 +193,7 @@ public class Product extends GenericModel {
 
         selling.type = Selling.T.FBA;
         selling.priceStrategy = new PriceStrategy(selling);
-        selling.state = Selling.S.NEW;
+        selling.state = Selling.S.SELLING;
 
         selling.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
 
@@ -225,10 +223,12 @@ public class Product extends GenericModel {
             Set<NameValuePair> classifyHiddenParams = new HashSet<NameValuePair>();
             for(Element input : inputs) {
                 String name = input.attr("name");
-                if("newCategory".equals(name)) {
-                    classifyHiddenParams.add(new BasicNameValuePair(name, // 首先会选择 Category 身上的值, 如果都没有, 则使用默认值
-                            StringUtils.isBlank(this.category.settings.amazonCategory) ? "consumer_electronics/consumer_electronics" : this.category.settings.amazonCategory));
-                } else classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
+                if(StringUtils.isBlank(category.settings.choseAmazonCategory(selling.market)))
+                    throw new FastRuntimeException(String.format("Category %s 没有设定市场 %s 对应的值", category.categoryId, selling.market));
+                if("newCategory".equals(name))
+                    classifyHiddenParams.add(new BasicNameValuePair(name, category.settings.choseAmazonCategory(selling.market)));
+                else
+                    classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
             }
 
             //  ------------------ 2 -----------------
@@ -241,20 +241,32 @@ public class Product extends GenericModel {
             inputs = doc.select("form[name=productForm] input");
             if(inputs == null || inputs.size() <= 7) throw new FastRuntimeException("没有进入第二步 Identify 页面!");
             /**
-             * encoded_session_hidden_map:222222222........
-             sessionMapPresent:true
-             our_price-uom:GBP
-             discounted_price-uom:GBP
-             item_name:SANER® 1900mAh rechargeable Li-ion Battery for HTC Sensation - Extra Long Life, Compatible with HTC Sensation/G14/Z710E, HTC Sensation XE/ Z715E
-             manufacturer:EasyAcc
-             external_id:660444833512
+             * 每一个类别下提交的参数都不一样, 但通过 JS console 测试 us/de 两个市场,
+             * 如果 UPC 是已经使用过的, 则只需要提交两个参数
+             * > encoded_session_hidden_map:22222....
+             * > external_id:660444833512
+             * 如果是全新的, 那么除了上面的参数还需要两个必须
+             * > item_name:SANER® 1900mAh rechargeabl...
+             * > manufacturer:EasyAcc
+             * 但不同的 Category 会拥有一些其他的必填写参数(与页面上的红色星号参数不一样), 这个需要特殊处理.
+             *
+             * us 默认提交的参数:
+             * encoded_session_hidden_map:skxjkxj
+             * sessionMapPresent:true
+             * our_price-uom:USD
+             * discounted_price-uom:USD
+             * item_name:123123
+             * manufacturer:123123
+             * external_id:615162124756
+             * list_price-uom:USD
              */
             // ------------------ 3 -----------------------
             String ajaxBody = HTTP.post(selling.account.cookieStore(), selling.account.type.matchAsinAjaxLink(), Arrays.asList(
-                    new BasicNameValuePair("encoded_session_hidden_map", doc.select("input[name=encoded_session_hidden_map]").val()),
                     new BasicNameValuePair("sessionMapPresent", "true"),
                     new BasicNameValuePair("our_price-uom", doc.select("input[name=our_price-uom]").val()),
                     new BasicNameValuePair("discounted_price-uom", doc.select("input[name=discounted_price-uom]").val()),
+                    // 必须
+                    new BasicNameValuePair("encoded_session_hidden_map", doc.select("input[name=encoded_session_hidden_map]").val()),
                     new BasicNameValuePair("manufacturer", selling.aps.manufacturer),
                     new BasicNameValuePair("item_name", selling.aps.title),
                     new BasicNameValuePair("external_id", selling.aps.upc)
@@ -264,11 +276,13 @@ public class Product extends GenericModel {
              * 对有已经上架的 Listing 做关联选择.
              */
             Document ajaxDoc = Jsoup.parse(ajaxBody);
-            Element matchAsinEl = ajaxDoc.select("#newAsin").first();
-            if(matchAsinEl != null) {
+            if(ajaxDoc.select("#newAsin").first() != null) {
                 selling.aps.matchAsin = "";
+            } else if(ajaxDoc.select("#errorsFound").first() != null) {
+                // 发生错误, 例如指定类别的必须参数没有提交
+                throw new FastRuntimeException(ajaxDoc.select("#errorsFound").html());
             } else {
-                matchAsinEl = ajaxDoc.select("#matchingAsinList").first();
+                Element matchAsinEl = ajaxDoc.select("#matchingAsinList").first();
                 if(matchAsinEl != null)
                     selling.aps.matchAsin = matchAsinEl.select("div:eq(0)").text();
                 else
@@ -328,8 +342,6 @@ public class Product extends GenericModel {
                     else if("activeClientTimeOnTask".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
                     else if("matchAsin".equals(name))
-                        //QjAwOEFSN1g2WQ==  | 660444833512
-                        //QjAwODNRWDhBVw==  | 614444720150
                         addSellingPrams.add(new BasicNameValuePair(name, selling.aps.matchAsin));
                     else if("encoded_session_hidden_map".equals(name)) {
                         addSellingPrams.add(new BasicNameValuePair(name, input.val()));
@@ -429,8 +441,6 @@ public class Product extends GenericModel {
         selling.listing = Listing.findById(Listing.lid(selling.asin, selling.market));
         if(selling.listing == null) selling.listing = new Listing(selling, this).save();
 
-        //      测试使用的 UPC 614444720150
-        // 测试 MatchASIN UPC 660444833512
         selling.sid();
         return selling.save();
     }

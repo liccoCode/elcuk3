@@ -1,5 +1,6 @@
 package models.embedded;
 
+import models.market.M;
 import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
@@ -22,10 +23,20 @@ public class CategorySettings {
     public String amazonNode;
 
     /**
-     * 上架时候选择 CLASSIFY 的值
+     * Amazon US 上架时候选择 CLASSIFY 的值
      */
     @Column(columnDefinition = "varchar(100) DEFAULT ''")
     public String amazonCategory;
+    /**
+     * Amazon US 上架时候选择 CLASSIFY 的值
+     */
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonUKCategory;
+    /**
+     * Amazon US 上架时候选择 CLASSIFY 的值
+     */
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonDECategory;
 
     public Map<String, String> amazonNodeMap() {
         String[] nodes = StringUtils.split(amazonNode, ",");
@@ -34,5 +45,22 @@ public class CategorySettings {
             nodeMap.put(node, node);
         }
         return nodeMap;
+    }
+
+    /**
+     * 选择 Amazon 上架的时候 Cateogry 的值
+     * @param market
+     * @return
+     */
+    public String choseAmazonCategory(M market) {
+        if(market == M.AMAZON_UK) {
+            return amazonUKCategory;
+        } else if(market == M.AMAZON_DE) {
+            return amazonDECategory;
+        } else if(market == M.AMAZON_US) {
+            return amazonCategory;
+        } else {
+            return "";
+        }
     }
 }

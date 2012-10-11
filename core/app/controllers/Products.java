@@ -62,16 +62,14 @@ public class Products extends Controller {
         render("Products/index.html", prods, sku);
     }
 
-    public static void show(String sku) {
-        Product p = Product.findByMerchantSKU(sku);
+    public static void show(String id) {
+        Product pro = Product.findByMerchantSKU(id);
         List<Category> cats = Category.all().fetch();
-        List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(p);
-        List<AttrName> attnames = AttrName.productUnuseAttrName(p);
-        List<Account> accs = Account.openedSaleAcc();
+        List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
+        List<AttrName> attnames = AttrName.productUnuseAttrName(pro);
 
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(p.sku);
-        renderArgs.put("sids", J.json(sellingAndSellingIds._2));
-        render(p, cats, qtys, attnames, accs);
+
+        render(pro, cats, qtys, attnames);
     }
 
     public static void c_index(Integer p, Integer s) {
@@ -81,6 +79,50 @@ public class Products extends Controller {
 
         Pager<Category> pi = new Pager<Category>(fixs._1, count, fixs._2, cates);
         render(cates, count, p, s, pi);
+    }
+
+    /**
+     * ================= New Product Action ============
+     */
+
+    public static void update(Product pro) {
+        validation.valid(pro);
+        if(Validation.hasErrors()) render("Products/show.html", pro);
+        pro.save();
+        flash.success("更新成功");
+        redirect("/Products/show/" + pro.sku);
+    }
+
+    @Before(only = {"saleAmazon", "saleAmazonListing"})
+    public static void beforeSaleAmazon() {
+        String sku = request.params.get("id");
+        if(StringUtils.isBlank(sku)) sku = request.params.get("pro.sku");
+        if(StringUtils.isNotBlank(sku)) renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
+        renderArgs.put("accs", Account.openedSaleAcc());
+    }
+
+    public static void saleAmazon(String id) {
+        Product pro = Product.findByMerchantSKU(id);
+        Selling s = new Selling();
+        render(pro, s);
+    }
+
+    public static void saleAmazonListing(Selling s, Product pro) {
+        /**
+         * 从前台上传来的一系列的值检查
+         */
+        // 检查
+        validation.valid(s);
+        s.aps.validate();
+        if(Validation.hasErrors()) render("Products/saleAmazon.html", s, pro);
+
+        try {
+            Selling se = pro.saleAmazon(s);
+            redirect("/Sellings/selling/" + se.sellingId);
+        } catch(Exception e) {
+            Validation.addError("", e.getMessage());
+            render("Products/saleAmazon.html", s, pro);
+        }
     }
 
 
@@ -126,7 +168,7 @@ public class Products extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
-        renderJSON(new Ret(true, "/products/show?sku=" + p.sku));
+        renderJSON(new Ret(true, "/products/show/" + p.sku));
     }
 
     public static void pRemove(Product p) {
@@ -170,30 +212,6 @@ public class Products extends Controller {
         }
 
         renderJSON(new Ret(true, "Save:" + saved + ",Update:" + update));
-    }
-
-    public static void saleAmazonListing(Selling s, Product p) {
-        /**
-         * 从前台上传来的一系列的值检查
-         */
-        Validation.required(Messages.get("s.title"), s.aps.title);
-        Validation.required(Messages.get("s.upc"), s.aps.upc);
-        Validation.required(Messages.get("s.manufac"), s.aps.manufacturer);
-        Validation.required(Messages.get("s.rbn"), s.aps.rbns.toArray());
-        Validation.required(Messages.get("s.price"), s.aps.standerPrice);
-        Validation.required(Messages.get("s.tech"), s.aps.keyFeturess);
-        Validation.required(Messages.get("s.keys"), s.aps.searchTermss);
-        Validation.required(Messages.get("s.prodDesc"), s.aps.productDesc);
-        Validation.required(Messages.get("s.msku_req"), s.merchantSKU);
-        if(Validation.hasErrors()) renderJSON(new Ret(Validation.current().errorsMap()));
-
-        // 在 Controller 里面将值处理好
-        try {
-            Selling se = p.saleAmazon(s);
-            renderJSON(J.G(se));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
     }
 
     public static void upcCheck(String upc) {

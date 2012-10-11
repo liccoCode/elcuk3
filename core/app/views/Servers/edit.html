@@ -7,14 +7,7 @@
     <h3>更新服务器 ${s.name} 信息</h3>
 </div>
 
-#{ifErrors }
-<div class="alert alert-error">
-    #{errors }
-        <p>${error.key} -> ${error.message()}</p>
-    #{/errors}
-</div>
-#{/ifErrors}
-
+#{errorMsgs /}
 <div class="row-fluid">
 #{render 'Servers/_server.html', s:s/}
 </div>

@@ -1,161 +1,117 @@
 #{extends 'main.html' /}
-#{set title:p.sku /}
+#{set title:pro.sku /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js' /}
     #{script 'component/dropUpload.coffee'/}
-    #{script 'products/product_detail.js'/}
+    #{script 'products/product_detail.coffee'/}
 #{/set}
 
 <div class="row">
-#{if p == null}
+#{if pro == null}
     读取的 Product 不存在!
 #{/if}
 #{else }
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#basic" data-toggle="tab">Info</a></li>
-        <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">上架<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li><a href="#amazon" data-toggle="tab">@Amazon</a></li>
-                <li><a href="#ebay" data-toggle="tab">@eBay</a></li>
-            </ul>
-        </li>
-    </ul>
+    #{errorMsgs /}
+    #{flash_alert /}
+    #{info_row title:'基本信息'}
+        <ul>
+            <li>长,宽,高的单位为: mm</li>
+            <li>重量的单位为 kg</li>
+        </ul>
+    #{/info_row}
+    <div class="row-fluid">
+        <form action="@{Products.update()}" method="post">
+            <table class="table table-bordered" id="prod_basic">
+                <tr>
+                    <td>SKU</td>
+                    <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
+                    <td>长</td>
+                    <td>
+                        <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
+                    </td>
+                    <td>宽</td>
+                    <td>
+                        <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
+                    </td>
+                    <td>高</td>
+                    <td>
+                        <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
+                    </td>
+                    <td>重量</td>
+                    <td>
+                        <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
+                    </td>
+                </tr>
+                <tr>
+                    <td>产品名称</td>
+                    <td colspan="9">
+                        <textarea rows="3" name="pro.productName" class="span11">${pro.productName}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Category</td>
+                    <td>${pro.category}</td>
+                    <td>Brand</td>
+                    <td>${pro?.family?.brand}</td>
+                    <td>Family</td>
+                    <td>${pro?.family?.family}</td>
+                    <td colspan="4">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="10">
+                        <button class="btn btn-primary" data-loading>保存</button>
+                        <a href="@{Products.saleAmazon()}/${pro.sku}" class="btn btn-info">Amazon 上架</a>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
 
 
-    <div class="tab-content">
-        <div class="tab-pane fade in active" id="basic">
-            <div><span class="label label-success">Product Basic</span></div>
-            <div>
-                <table class="table table-bordered" id="prod_basic">
-                    <tr>
-                        <td>SKU</td>
-                        <td>${p.sku}<input id="p_sku" type="hidden" name="p.sku" value="${p.sku}"></td>
-                        <td>L</td>
-                        <td>
-                            <input type="text" class="input-mini" name="p.lengths" value="${p.lengths == null ? 0 : p.lengths}">
-                        </td>
-                        <td>H</td>
-                        <td>
-                            <input type="text" class="input-mini" name="p.heigh" value="${p.heigh == null ? 0 : p.heigh}">
-                        </td>
-                        <td>W</td>
-                        <td>
-                            <input type="text" class="input-mini" name="p.width" value="${p.width == null ? 0 : p.width}">
-                        </td>
-                        <td>Wt</td>
-                        <td>
-                            <input type="text" class="input-mini" name="p.weight" value="${p.weight == null ? 0 : p.weight}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Title</td>
-                        <td colspan="9">
-                        *{<input type="text" name="p.listingName" class="span10" value="${p.productName}">}*
-                            <textarea rows="3" name="p.productName" class="span11">${p.productName}</textarea>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Category</td>
-                        <td>${p.category}</td>
-                        <td>Brand</td>
-                        <td>${p?.family?.brand}</td>
-                        <td>Family</td>
-                        <td>${p?.family?.family}</td>
-                        <td colspan="4">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td colspan="10">
-                            <a href="#" class="btn btn-primary" sku="${p.sku}"><i class="icon-save"></i></a></td>
-                    </tr>
-                </table>
-            </div>
+    #{info_row title:'Product (Selling)QTY'/}
+    <div>
+        <table class="table table-bordered" id="prod_sqty">
+            <tr>
+                <th>Qid</th>
+                <th>Inbound</th>
+                <th>Qty</th>
+                <th>Unsellable</th>
+                <th>Pending</th>
+                <th>ASIN</th>
+                <th>Whouse</th>
+                <th>&nbsp;</th>
+            </tr>
+            #{list items:qtys, as:'q'}
+                <tr id="prod_qty_${q.id}">
+                    <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#4A8BF4;" name="q.inbound" value="${q.inbound}">
+                    </td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#9BD444;" name="q.qty" value="${q.qty}">
+                    </td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="q.unsellable" value="${q.unsellable}">
+                    </td>
+                    <td>
+                        <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
+                    </td>
+                    <td><a target="_blank" href="${q.selling.asinLink()}">${q.selling.asin}</a>
+                        | ${q.selling.market}</td>
+                    <td>${q.whouse.name}</td>
+                    <td><a href="#" class="btn btn-primary" qid="${q.id}"><i class="icon-save"></i></a></td>
+                </tr>
+            #{/list}
+        </table>
+    </div>
 
 
-            <div><span class="label label-success">Product (Selling)QTY</span></div>
-            <div>
-                <table class="table table-bordered" id="prod_sqty">
-                    <tr>
-                        <th>Qid</th>
-                        <th>Inbound</th>
-                        <th>Qty</th>
-                        <th>Unsellable</th>
-                        <th>Pending</th>
-                        <th>ASIN</th>
-                        <th>Whouse</th>
-                        <th>&nbsp;</th>
-                    </tr>
-                    #{list items:qtys, as:'q'}
-                        <tr id="prod_qty_${q.id}">
-                            <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
-                            <td>
-                                <input type="text" class="input-mini" style="color:#4A8BF4;" name="q.inbound" value="${q.inbound}">
-                            </td>
-                            <td>
-                                <input type="text" class="input-mini" style="color:#9BD444;" name="q.qty" value="${q.qty}">
-                            </td>
-                            <td>
-                                <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="q.unsellable" value="${q.unsellable}">
-                            </td>
-                            <td>
-                                <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
-                            </td>
-                            <td><a target="_blank" href="${q.selling.asinLink()}">${q.selling.asin}</a>
-                                | ${q.selling.market}</td>
-                            <td>${q.whouse.name}</td>
-                            <td><a href="#" class="btn btn-primary" qid="${q.id}"><i class="icon-save"></i></a></td>
-                        </tr>
-                    #{/list}
-                </table>
-            </div>
+    <!-- Product Attrs 这一部分需要重新编写 -->
 
-
-            <div><span class="label label-success">Attrbutes</span>&nbsp;&nbsp;
-                <button id="attr_btn" class="btn btn-mini btn-primary"><i class="icon-save"></i></button>
-            </div>
-            <div id="new_attrs">
-                <div>
-                    #{list items:attnames, as:'an'}
-                        <label class="checkbox inline">
-                            <input type="checkbox" name="${an.name}" value="${an.fullName}">${an.fullName}
-                        </label>
-                    #{/list}
-                </div>
-            </div>
-            <div id="attrs">
-                #{list items:p.attrs, as:'attr'}
-                    #{set i:(attr_index - 1)/}
-                    <div class="attr" id="${attr.attName.name}">
-                        <div>
-                            <label class="inline checkbox">
-                                <input type="checkbox" name="attrs[${i}].close"  ${attr.close ? "checked=''" : ""}>关闭?&nbsp;
-                                <a href="#${attr.id}" data-toggle="collapse" style="cursor:pointer;overflow:hidden;">
-                                ${attr.attName.fullName}(${attr.attName.name}) | ${attr.close} |
-                                    <span id="${attr.id}_value">${attr.value}</span>
-                                </a>
-                            </label>
-                        </div>
-                        <div id="${attr.id}" class="collapse">
-                            <input type="hidden" name="attrs[${i}].id" value="${attr.id}">
-                            <input type="hidden" name="attrs[${i}].attName.name" value="${attr.attName.name}">
-                            <textarea id="${attr.id}_text" rows="4" name="attrs[${i}].value">${attr.value}</textarea>
-                        </div>
-                    </div>
-                #{/list}
-            </div>
-
-            <div class="clearfix"></div>
-            <div><span class="label label-success">Images</span></div>
-            <div style="min-height:300px;background:#eee;" id="dropbox">
-                <ul class="thumbnails uploaded"></ul>
-                <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-            </div>
-        </div>
-
-        <div class="tab-pane fade in" id="amazon">
-            #{amazonPost /}
-        </div>
-        <div class="tab-pane fade in" id="ebay">eBay TBD</div>
+    #{info_row title:"Images"/}
+    <div style="min-height:300px;background:#eee;" id="dropbox">
+        <ul class="thumbnails uploaded"></ul>
+        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
     </div>
 #{/else}
 </div>

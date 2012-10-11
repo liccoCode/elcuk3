@@ -14,14 +14,7 @@
 </div>
 #{/if}
 
-#{ifErrors }
-<div class="alert alert-error">
-    #{errors }
-        <p>${error.key} -> ${error.message()}</p>
-    #{/errors}
-</div>
-#{/ifErrors}
-
+#{errorMsgs /}
 <div class="row-fluid">
 #{render 'Servers/_server.html', s:s/}
 </div>

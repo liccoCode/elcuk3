@@ -18,6 +18,8 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
+import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.libs.F;
 import play.libs.IO;
 import play.utils.FastRuntimeException;
@@ -167,17 +169,23 @@ public class AmazonProps {
     public String imageName;
 
     /**
-     * 在 Amazon 上用来更新图片的时候的 sku, 每一个 Selling 有一个, 每一个 msku 对应一个 这个值
-     * ps: ManageImage.amzn#sku=NzFTTU44MDAwLUJQVSwy
-     */
-    public String amazonSku;
-
-    /**
      * 这个是在 Amazon 上架的时候, 会去进行 matchAsin 判断, 确实这个 Listing 是否被上架过.
+     * 这个值为关联上架的 ASIN 的 base64 的值
      */
     @Expose
     @Column(columnDefinition = "varchar(20) DEFAULT ''")
     public String matchAsin;
+
+    public void validate() {
+        Validation.required(Messages.get("aps.title"), this.title);
+        Validation.required(Messages.get("aps.upc"), this.upc);
+        Validation.required(Messages.get("aps.manufac"), this.manufacturer);
+        Validation.required(Messages.get("aps.rbn"), this.rbns.toArray());
+        Validation.required(Messages.get("aps.price"), this.standerPrice);
+        Validation.required(Messages.get("aps.tech"), this.keyFeturess);
+        Validation.required(Messages.get("aps.keys"), this.searchTermss);
+        Validation.required(Messages.get("aps.prodDesc"), this.productDesc);
+    }
 
     /**
      * <pre>
@@ -303,12 +311,6 @@ public class AmazonProps {
         String[] searchTerms = new String[5];
         String[] rbns = new String[2];
 
-        // amazonSKU 图片使用
-        try {
-            this.amazonSku = URLDecoder.decode(StringUtils.substringBetween(doc.select(".buttonCell .awesomeButton").attr("onclick"), "sku=", "&"), "UTF-8");
-        } catch(UnsupportedEncodingException e) {
-            //ignore
-        }
         this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
 //        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
