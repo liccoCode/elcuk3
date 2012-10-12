@@ -85,10 +85,12 @@ $ ->
     e.preventDefault()
 
   $('#sync_ticket').click (e) ->
+    o = $(@)
     mask = $('#container')
     mask.mask("同步中...")
     $.post('/tickets/sync', tid: ticketId(),
       (r) ->
+        o.button('reset')
         alert(r.message + "\r\n" + " 3s 后自动刷新")
 
         if r.flag is true

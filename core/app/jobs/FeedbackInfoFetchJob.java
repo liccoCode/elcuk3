@@ -117,6 +117,17 @@ public class FeedbackInfoFetchJob extends Job {
     }
 
     /**
+     * 检查返回的内容, 判断请求是否成功.
+     * @param body
+     * @return
+     */
+    public static boolean isRequestSuccess(String body) {
+        //<status>login</status>
+        //<status>success</status>
+        return StringUtils.contains(StringUtils.substringBetween(body, "<status>", "</status>"), "success");
+    }
+
+    /**
      * 检查某一个 Feedback 此刻的状态, 由于 Feedback 不可更改, 所以只有下面几个情况
      * 1. 有了一个新的 Feedback
      * 2. 没有 Feedback

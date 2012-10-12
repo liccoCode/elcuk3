@@ -9,6 +9,7 @@
 
 #{render 'Tickets/_success.html', success:feedback.ticket.isSuccess/}
 
+#{flash_alert /}
 <div class="label label-info">Feedback</div>
 <div>
     <table class="table table-condensed table-bordered">
@@ -44,7 +45,7 @@
 
     #{if haveTicket}
         <tr>
-            <th>最后同步时间 <button id="sync_ticket" class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
+            <th>最后同步时间 <button id="sync_ticket" data-loading class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
             <td>${feedback.ticket.lastSyncTime?.since()}</td>
             <th>最后联系客户时间</th>
             <td title="${feedback.ticket.lastResponseTime?.datetime()}">${feedback.ticket.lastResponseTime?.since()}</td>
@@ -54,7 +55,7 @@
         <tr>
             <th rel="popover" content="${feedback.ticket.state.explan()}"><i class="icon-question-sign"></i> State</th>
             <td>${feedback.ticket.state}</td>
-            <th>是否成功/删除</th>
+            <th>是否成功/删除 <a href="@{Feedbacks.check()}/${feedback.orderId}" data-loading class="btn btn-mini btn-info"><i class="icon-refresh"></i></a></th>
             <td>#{yesOrNo f:feedback.ticket.isSuccess /} | #{yesOrNo f:feedback.isRemove/}</td>
             <th>客户回复 / 我方联系</th>
             <td>${feedback.ticket.messageTimes} / ${feedback.ticket.responseTimes}</td>

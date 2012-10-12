@@ -26,12 +26,12 @@ public class Orders extends Controller {
         render(p, orders, accs);
     }
 
-    public static void show(String oid) {
-        Feedback f = Feedback.findById(oid);
+    public static void show(String id) {
+        Feedback f = Feedback.findById(id);
         if(f != null && f.ticket != null)
-            redirect("Feedbacks.show", oid);
+            redirect("/Feedbacks/show/" + id);
         else {
-            Orderr ord = Orderr.findById(oid);
+            Orderr ord = Orderr.findById(id);
             render(ord);
         }
     }
