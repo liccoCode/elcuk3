@@ -4,6 +4,7 @@ import helper.Dates;
 import models.procure.Deliveryment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -19,6 +20,34 @@ import java.util.regex.Pattern;
  * Time: 5:09 PM
  */
 public class DeliveryPost extends Post<Deliveryment> {
+    public DeliveryPost() {
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        this.from = now.minusDays(5).toDate();
+        this.to = now.toDate();
+        this.dateType = DateType.delivery;
+    }
+
+    public enum DateType {
+        /**
+         * 创建时间
+         */
+        create {
+            @Override
+            public String toString() {
+                return "创建时间";
+            }
+        },
+        /**
+         * 交货时间
+         */
+        delivery {
+            @Override
+            public String toString() {
+                return "交货时间";
+            }
+        }
+    }
+
     /**
      * 解析 Id 的正则表达式
      */
@@ -31,6 +60,9 @@ public class DeliveryPost extends Post<Deliveryment> {
 
     public Deliveryment.S state;
 
+    public DateType dateType;
+
+
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
@@ -41,11 +73,18 @@ public class DeliveryPost extends Post<Deliveryment> {
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
 
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE 1=1 AND");
         List<Object> params = new ArrayList<Object>();
-        sbd.append(" d.createDate>=? AND d.createDate<=?");
-        params.add(Dates.morning(this.from));
-        params.add(Dates.night(this.to));
+
+        if(this.dateType != null) {
+            if(this.dateType == DateType.delivery) {
+                sbd.append(" u.attrs.planDeliveryDate>=? AND u.attrs.planDeliveryDate<=?");
+            } else {
+                sbd.append(" d.createDate>=? AND d.createDate<=?");
+            }
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
+        }
 
         if(specialSearch._1) {
             sbd.append(" AND ").append(specialSearch._2).append(" ");

@@ -138,6 +138,23 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
+     * 交货的状态.
+     *
+     * @return
+     */
+    public F.T2<Integer, Integer> deliveryProcress() {
+        int delivery = 0;
+        int total = 0;
+        for(ProcureUnit unit : this.units) {
+            if(unit.stage == ProcureUnit.STAGE.CLOSE) continue;
+            if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
+                delivery += unit.qty();
+            total += unit.qty();
+        }
+        return new F.T2<Integer, Integer>(delivery, total);
+    }
+
+    /**
      * 返回此 Deliveryment 可以用来添加的 ProcureUnits
      *
      * @return

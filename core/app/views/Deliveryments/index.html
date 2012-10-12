@@ -18,7 +18,12 @@
             <input type="date" style="width:90px;" name="p.from" value="${p.from.date()}">
             <span class="add-on" style="margin-left:20px;">To:</span>
             <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
-            <span class="add-on">创建时间</span>
+
+            <select name="p.dateType" style="width:90px">
+            #{list items:models.view.post.DeliveryPost.DateType.values(), as:'dtype'}
+                <option ${dtype == p.dateType ? 'selected' : ''} value="${dtype.name()}">${dtype}</option>
+            #{/list}
+            </select>
         </div>
 
         <div class="span1">
@@ -48,11 +53,13 @@
                 <th>供应商</th>
                 <th>最先交货时间</th>
                 <th>最后交货时间</th>
+                <th>交货进度</th>
                 <th>User</th>
                 <th>Create</th>
             </tr>
         #{list items:deliveryments, as:'dmt'}
             #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+            #{set procress: dmt.deliveryProcress()/}
             <tr>
                 <td>
                     <a href="@{Deliveryments.show}/${dmt.id}" target="_blank">${dmt.id}</a>
@@ -64,13 +71,22 @@
                 </td>
                 <td style="color:${'#' + dmt.state.rgb()}">${dmt.state}</td>
                 <td>${dmt.supplier()?.fullName}</td>
-                <td>${twoDeliveryDate._1?.date()}</td>
-                <td>${twoDeliveryDate._2?.date()}</td>
+                <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
+                <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
+                <td>
+                    <div class="progress progress-striped" style="margin-bottom:0;">
+                        <div class="bar" style="width: ${(procress._1 / procress._2).format('#%')};">
+                            <p class="text-error">
+                            ${procress._1} / ${procress._2}
+                            </p>
+                        </div>
+                    </div>
+                </td>
                 <td>${dmt.handler.username}</td>
                 <td>#{time_tooltip time:dmt.createDate/}</td>
             </tr>
             <tr id="dmt_${dmt_index}" style="display:none;">
-                <td colspan="8" style="padding:0;border:none">
+                <td colspan="9" style="padding:0;border:none">
                     #{render 'Procures/_unit_list.html', units:dmt.units/}
                 </td>
             </tr>

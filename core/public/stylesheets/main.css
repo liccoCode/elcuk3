@@ -17,10 +17,17 @@ span.highlight{
     background:#F5F5F5;
 }
 
-#sku .sku,#sid .sid{
+#sku .sku, #sid .sid{
     cursor:pointer;
 }
 
 [data-toggle="toggle"]{
     cursor:pointer;
+}
+
+/*对 progress bar 中的数据进行一下修复. width 参数写死了 - -|| */
+.progress .bar p{
+    position:relative;
+    width:80px;
+    left:20px;
 }

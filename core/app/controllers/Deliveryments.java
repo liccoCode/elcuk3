@@ -31,12 +31,8 @@ public class Deliveryments extends Controller {
 
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
-        if(p == null) {
-            p = new DeliveryPost();
-            deliveryments = Deliveryment.openDeliveryments(Deliveryment.S.PENDING);
-        } else {
-            deliveryments = p.query();
-        }
+        if(p == null) p = new DeliveryPost();
+        deliveryments = p.query();
         render(deliveryments, p);
     }
 
