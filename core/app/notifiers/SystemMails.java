@@ -32,7 +32,7 @@ public class SystemMails extends Mailer {
     public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
         setSubject(String.format("{INFO} %s Reviews Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
-        addRecipient("alerts@easyacceu.com");
+        addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
         try {
             send(reviews);
         } catch(Exception e) {
@@ -54,7 +54,7 @@ public class SystemMails extends Mailer {
     public static boolean dailyFeedbackMail(List<Feedback> feedbacks) {
         setSubject(String.format("{INFO} %s Feedback Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
-        addRecipient("alerts@easyacceu.com");
+        addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
         try {
             send(feedbacks);
         } catch(Exception e) {
@@ -64,13 +64,13 @@ public class SystemMails extends Mailer {
         return true;
     }
 
-    public static boolean productPicCheckermail(List<F.T2<Product,AnalyzeDTO>> productAndSellT2s) {
+    public static boolean productPicCheckermail(List<F.T2<Product, AnalyzeDTO>> productAndSellT2s) {
         setSubject(String.format("{CHECK} %s Product Picture Information Check", Dates.date2Date()));
         mailBase();
         addRecipient("alerts@easyacceu.com");
         try {
             send(productAndSellT2s);
-        } catch(Exception e){
+        } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
         }

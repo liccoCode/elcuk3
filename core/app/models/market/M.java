@@ -406,6 +406,7 @@ public enum M {
     /**
      * <pre>
      * 在详细订单页面会自行通过 Ajax 去获取此订单关联的 Feedback 的链接;
+     * 因为订单详细页面的 feedback 数据也是 ajax 获取的.
      * 需要如下参数(POST):
      * action:show-feedback
      * orderID:303-8171136-0010717

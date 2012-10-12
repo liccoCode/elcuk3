@@ -36,11 +36,13 @@ public class SessionLoginTest extends UnitTest {
     public void testFetchFeedback() {
         System.out.println("======================================================");
         // feedback 已经删除了的
-        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(feedback);
+        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
         // 有新 feedback 的
-        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(Feedback.<Feedback>findById("028-8330984-9689160"));
+        feedback = Feedback.findById("028-8330984-9689160");
+        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
         // 没有 feedback 的
-        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(Feedback.<Feedback>findById("028-6451688-5682726"));
+        feedback = Feedback.<Feedback>findById("028-6451688-5682726");
+        FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
     }
 
     @Test

@@ -149,6 +149,8 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
 
             // 如果属于 UnUsedSKU 那么则跳过这个解析
             if(Product.unUsedSKU(vals[0])) continue;
+            // 过滤掉 xxx,2 的 msku
+            if(StringUtils.contains(vals[0], ",2")) continue;
 
             String sqtyId = String.format("%s_%s", vals[0].toUpperCase(), wh.id);
             SellingQTY qty = SellingQTY.findById(sqtyId);

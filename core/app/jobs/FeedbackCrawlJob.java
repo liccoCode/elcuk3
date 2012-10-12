@@ -171,6 +171,8 @@ public class FeedbackCrawlJob extends Job {
             feedback.feedback = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();
             if(b != null) {
+                // de Dieser Artikel wurde durch Amazon versendet. Amazon übernimmt die Verantwortung für den geleisteten Service
+                // uk This item was fulfilled by Amazon, and we take responsibility for this fulfilment experience
                 feedback.memo = b.nextSibling().toString();
             }
 

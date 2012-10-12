@@ -4,6 +4,7 @@ import helper.Dates;
 import helper.FLog;
 import helper.HTTP;
 import models.Jobex;
+import models.market.Account;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.M;
@@ -44,8 +45,9 @@ public class FeedbackInfoFetchJob extends Job {
         // 处理还没有关闭的 Ticket, 每次更新 30
         int size = 30;
         if(Play.mode.isDev()) size = 10;
-        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
-                Ticket.T.FEEDBACK, false, TicketState.PRE_CLOSE, TicketState.CLOSE).fetch(size);
+        // 找出没有处理成功的,不要 CLOSE , PRE_CLOSE 状态的. 与 CLOSE 状态没有处理成功但一个月之内的
+        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND (state NOT IN (?,?) OR (state=? AND createAt>=?)) ORDER BY lastSyncTime",
+                Ticket.T.FEEDBACK, false, TicketState.PRE_CLOSE, TicketState.CLOSE, TicketState.CLOSE, DateTime.now().minusMonths(1).toDate()).fetch(size);
         Logger.info("FeedbackInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
             FeedbackInfoFetchJob.checkFeedbackDealState(ticket);
@@ -73,7 +75,7 @@ public class FeedbackInfoFetchJob extends Job {
                 ticket.memo = ticket.feedback.account.type.nickName() + " 账号在 " + ticket.feedback.market.nickName() + " 销售产品时的 Feedback 不再处理.\r\n" + ticket.memo;
             } else { // 如果 1 满足则跳过 2 的原因是因为如果两着不一样, 抓取不到正确的 Feedback 信息
                 // 2.
-                String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback);
+                String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback.account, ticket.feedback.orderId);
                 ticket.feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
                 ticket.isSuccess = ticket.feedback.isRemove;
                 if(ticket.isSuccess) {
@@ -120,17 +122,18 @@ public class FeedbackInfoFetchJob extends Job {
      * 2. 没有 Feedback
      * 3. Feedback 被删除了
      */
-    public static String fetchAmazonFeedbackHtml(Feedback feedback) {
-        String url = feedback.market.feedbackLink();
-        Logger.info("Sync Feedback %s", feedback.orderId);
-        String body = HTTP.post(feedback.account.cookieStore(), url, Arrays.asList(
+    public static String fetchAmazonFeedbackHtml(Account account, String orderId) {
+        // 需要使用 Feedback 相关联的账户, 而非 Feedback 所在的市场. (出在历史的 uk 账号在 de 购买东西, 以后不会有这样的情况,但需要修复这个问题)
+        String url = account.type.feedbackLink();
+        Logger.info("Sync Feedback %s [%s]", url, orderId);
+        String body = HTTP.post(account.cookieStore(), url, Arrays.asList(
                 new BasicNameValuePair("action", "show-feedback"),
-                new BasicNameValuePair("orderID", feedback.orderId),
+                new BasicNameValuePair("orderID", orderId),
                 new BasicNameValuePair("applicationPath", "/gp/orders-v2")
         ));
 
         if(Play.mode.isDev())
-            FLog.fileLog(String.format("feedback.check.%s.html", feedback.orderId), body, FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("feedback.check.%s.%s.html", account.prettyName(), orderId), body, FLog.T.HTTP_ERROR);
         return body;
     }
 
