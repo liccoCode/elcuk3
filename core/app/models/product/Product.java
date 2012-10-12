@@ -22,6 +22,7 @@ import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.Codec;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -394,11 +395,15 @@ public class Product extends GenericModel {
              * 上架时候的错误信息全部返回给前台.
              */
             body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/, addSellingPrams);
-            // 任何上架操作都记录日志. 大不了自己删除...
+            // 记录任何上架操作都记录日志. 大不了自己删除...
             FLog.fileLog(String.format("%s.%s.%s.step3.html", selling.merchantSKU, selling.account.id, System.currentTimeMillis()), body, FLog.T.SALES);
 
-            // 最后获取成功成见 Listing 以后的 ASIN
             doc = Jsoup.parse(body);
+            // 检查是否提交成功了, 没有成功则抛出异常.
+            if(doc.select("#productHeaderForTabs").first() != null && doc.select(".messageboxerror").first() != null)
+                throw new FastRuntimeException(doc.select(".messageboxerror").first().text());
+
+            // 最后获取成功成见 Listing 以后的 ASIN
             Element form = doc.select("form").first();
             if(form == null) throw new FastRuntimeException(
                     String.format("提交的参数错误.(详细错误信息咨询 IT 查看 E_LOG/listing_sale/%s.%s.step3.html)",
@@ -418,6 +423,7 @@ public class Product extends GenericModel {
                     fetchNewAsinParam.add(new BasicNameValuePair("sku", selling.merchantSKU));
                 }
             }
+
             // inventory-status/status.html 页面的访问, 会自行进行 302 转向访问
             body = HTTP.post(selling.account.cookieStore(), form.attr("action"), finalFormParam);
             FLog.fileLog(String.format("%s.%s.%s.step4.html", selling.merchantSKU, selling.account.id, System.currentTimeMillis()), body, FLog.T.SALES);

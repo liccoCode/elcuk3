@@ -64,18 +64,18 @@ public class SellingRecordTest extends UnitTest {
         assertEquals(2121.30, Webs.amazonPriceNumber(M.AMAZON_UK, uk.substring(1)).doubleValue(), 2);
     }
 
-    @Before
+    //    @Before
     public void login() {
-        Account acc = Account.findById(2l);
+        Account acc = Account.findById(131l);
         acc.loginAmazonSellerCenter();
     }
 
     @Test
     public void testNewRecordFromAmazonBusinessReports() {
-        Account acc = Account.findById(2l);
-        DateTime dt = DateTime.parse("2012-06-03");
+        Account acc = Account.findById(131l);
+        DateTime dt = DateTime.parse("2012-10-10");
         for(int i = 0; i < 1; i++) {
-            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, M.AMAZON_DE, dt.plusDays(i).toDate());
+            Set<SellingRecord> records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, dt.plusDays(i).toDate());
             for(SellingRecord rcd : records)
                 rcd.save();
         }

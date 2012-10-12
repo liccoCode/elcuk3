@@ -27,10 +27,12 @@
                 <input type="hidden" name="s.state" value="${s.state.name()}">
             </td>
         </tr>
+
         <tr>
             <th>Title:</th>
             <td colspan="3"><textarea rows="2" name="s.aps.title" class="span12">${pro.productName}</textarea></td>
         </tr>
+
         <tr>
             <th>MSKU:</th>
             <td>
@@ -47,11 +49,12 @@
                 </select>
             </td>
         </tr>
+
         <tr>
             <th>UPC:</th>
             <td>
                 <div class="input-append">
-                    <input type="text" class="span2" name="s.aps.upc">
+                    <input type="text" class="span2" name="s.aps.upc" value="${s.aps.upc}">
                     <button class="btn btn-warning">@</button>
                 </div>
             </td>
@@ -63,11 +66,12 @@
                 </div>
             </td>
         </tr>
+
         <tr>
             <th>Manufac:</th>
             <td><input type="text" name="s.aps.manufacturer" value="EasyAcc"></td>
             <th>PartNumber:</th>
-            <td><input type="text" name="s.aps.manufacturerPartNumber"></td>
+            <td><input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}"></td>
         </tr>
 
         <tr>
@@ -75,8 +79,8 @@
             <td>
                 <div class="input-prepend">
                 #{rbn_info /}
-                    <input type="text" style="width:80px;" name="s.aps.rbns[0]">
-                    <input type="text" style="width:80px;" name="s.aps.rbns[1]">
+                    <input type="text" style="width:80px;" name="s.aps.rbns[0]" value="${s.aps.rbns[0]}">
+                    <input type="text" style="width:80px;" name="s.aps.rbns[1]" value="${s.aps.rbns[1]}">
                 </div>
             </td>
             <th>Qty:</th>
@@ -88,7 +92,7 @@
             <td>
                 <div class="input-prepend">
                     <span class="currency add-on">&pound;</span>
-                    <input type="text" class="span2" name="s.aps.standerPrice" placeHolder="Ex:19.99">
+                    <input type="text" class="span2" name="s.aps.standerPrice" placeHolder="Ex:19.99" value="${s.aps.standerPrice}">
                 </div>
             </td>
             <th>SalePrice:</th>
@@ -96,7 +100,7 @@
                 <div class="input-prepend">
                     <div class="input-prepend">
                         <span class="currency add-on">&pound;</span>
-                        <input type="text" class="span2" name="s.aps.salePrice" placeHolder="Ex:15.99">
+                        <input type="text" class="span2" name="s.aps.salePrice" placeHolder="Ex:15.99" value="${s.aps.salePrice}">
                     </div>
                 </div>
             </td>
@@ -124,82 +128,89 @@
             <th rowspan="5">Technical:</th>
             <td colspan="3">
                 <div class="input-append">
-                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[0]">
-                    <span class="add-on"></span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <div class="input-append">
-                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[1]">
-                    <span class="add-on"></span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <div class="input-append">
-                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[2]">
-                    <span class="add-on"></span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <div class="input-append">
-                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[3]">
-                    <span class="add-on"></span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <div class="input-append">
-                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[4]">
+                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[0]" value="${s.aps.keyFeturess[0]}">
                     <span class="add-on"></span>
                 </div>
             </td>
         </tr>
 
+        <tr>
+            <td colspan="3">
+                <div class="input-append">
+                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[1]" value="${s.aps.keyFeturess[1]}">
+                    <span class="add-on"></span>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3">
+                <div class="input-append">
+                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[2]" value="${s.aps.keyFeturess[2]}">
+                    <span class="add-on"></span>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3">
+                <div class="input-append">
+                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[3]" value="${s.aps.keyFeturess[3]}">
+                    <span class="add-on"></span>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3">
+                <div class="input-append">
+                    <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[4]" value="${s.aps.keyFeturess[4]}">
+                    <span class="add-on"></span>
+                </div>
+            </td>
+        </tr>
 
         <tr>
             <th rowspan="5">SearchTerms:</th>
             <td colspan="3">
                 <div class="input-append">
-                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[0]">
+                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[0]" value="${s.aps.searchTermss[0]}">
                     <span class="add-on"></span>
                 </div>
             </td>
         </tr>
+
         <tr>
             <td colspan="3">
                 <div class="input-append">
-                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[1]">
+                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[1]" value="${s.aps.searchTermss[1]}">
                     <span class="add-on"></span>
                 </div>
             </td>
         </tr>
+
         <tr>
             <td colspan="3">
                 <div class="input-append">
-                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[2]">
+                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[2]" value="${s.aps.searchTermss[2]}">
                     <span class="add-on"></span>
                 </div>
             </td>
         </tr>
+
         <tr>
             <td colspan="3">
                 <div class="input-append">
-                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[3]">
+                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[3]" value="${s.aps.searchTermss[3]}">
                     <span class="add-on"></span>
                 </div>
             </td>
         </tr>
+
         <tr>
             <td colspan="3">
                 <div class="input-append">
-                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[4]">
+                    <input type="text" searchterms class="span11" name="s.aps.searchTermss[4]" value="${s.aps.searchTermss[4]}">
                     <span class="add-on"></span>
                 </div>
             </td>
@@ -209,7 +220,7 @@
             <th>ProductDesc:</th>
             <td colspan="3">
                 <div class="input-append">
-                    <textarea rows="10" name="s.aps.productDesc" class="span12"></textarea>
+                    <textarea rows="10" name="s.aps.productDesc" class="span12">${s.aps.productDesc}</textarea>
 
                     <div class="clearfix"></div>
                     <span class="add-on">2000 bytes left</span>

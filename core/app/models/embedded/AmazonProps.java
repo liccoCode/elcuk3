@@ -75,7 +75,7 @@ public class AmazonProps {
     @Lob
     public String keyFetures;
     @Transient
-    public List<String> keyFeturess;
+    public List<String> keyFeturess = new ArrayList<String>();
     /**
      * Recommended Browse Nodes;
      * 使用 [,] 进行分割, 一般为 2 个
@@ -84,7 +84,7 @@ public class AmazonProps {
     public String RBN;
 
     @Transient
-    public List<String> rbns;
+    public List<String> rbns = new ArrayList<String>();
     /**
      * For most products, this will be identical to the model number;
      * however, some manufacturers distinguish part number from model number
@@ -147,7 +147,7 @@ public class AmazonProps {
     public String searchTerms;
 
     @Transient
-    public List<String> searchTermss;
+    public List<String> searchTermss = new ArrayList<String>();
 
     /**
      * 使用 Webs.SPLIT 进行分割, 5 行

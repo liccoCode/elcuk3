@@ -59,15 +59,9 @@ public class SellingRecordCheckJob extends Job {
         Set<SellingRecord> records = null;
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
         for(Account acc : accs) {
-            if("AJUR3R8UN71M4".equals(acc.merchantId)) { // UK 账号, uk,de 两个市场的数据都需要
-                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, M.AMAZON_UK, fixTime.plusDays(-2).toDate());
-                records.addAll(SellingRecord.newRecordFromAmazonBusinessReports(acc, M.AMAZON_DE, fixTime.plusDays(-2).toDate()));
-                Logger.info("Account(%s) Fetch UK & DE  %s records.", acc.prettyName(), records.size());
-            } else if("A22H6OV6Q7XBYK".equals(acc.merchantId)) {
-                records = SellingRecord.newRecordFromAmazonBusinessReports(acc, M.AMAZON_DE, fixTime.plusDays(-2).toDate());
-                Logger.info("Account(%s) Fetch DE %s records", acc.prettyName(), records.size());
-            }
-            if(records == null || records.size() <= 0) continue;
+            records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.plusDays(-2).toDate());
+            Logger.info("Fetch Account(%s) %s records", acc.prettyName(), records.size());
+            if(records.size() <= 0) continue;
             // 直接这样处理,因为通过 SellingRecord.newRecordFromAmazonBusinessReports 出来的方法已经存在与 Session 缓存中了.
             for(SellingRecord record : records) {
                 if(JPA.em().contains(record)) // 防止异常情况, 只有存在与一级缓存(Transation)中的才可以保存

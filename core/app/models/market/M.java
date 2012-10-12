@@ -506,8 +506,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
                 return String.format("https://catalog-sc.%s/abis/product/ajax/Match.ajax", this.toString());
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/product/ajax/Match.ajax", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -587,10 +588,14 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
+                // 在 DE 使用了 英文页面以后与 UK 一样了. 可 US 得另外设置日期字符串格式 - -||
                 return String.format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
                         "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s", this.toString(),
                         Dates.listingUpdateFmt(AMAZON_UK, from), Dates.listingUpdateFmt(AMAZON_UK, to), currentPage);
+            case AMAZON_US:
+                return String.format("https://sellercentral.%s/gp/site-metrics/load-report-JSON.html/ref=au_xx_cont_sitereport?" +
+                        "fromDate=%s&toDate=%s&reportID=102:DetailSalesTrafficBySKU&currentPage=%s", this.toString(),
+                        Dates.listingUpdateFmt(AMAZON_US, from), Dates.listingUpdateFmt(AMAZON_US, to), currentPage);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

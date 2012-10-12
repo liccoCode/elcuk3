@@ -107,7 +107,7 @@ $ ->
         val = 'co.uk'
       else
         val = ''
-    $("#market option:contains(amazon.#{val})").prop('selected', true)
+    $("#market option:contains(amazon.#{val})").prop('selected', true).change()
 
   # UPC 检查
   $('input[name=s\\.aps\\.upc] ~ button').click(

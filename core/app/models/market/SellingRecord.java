@@ -157,6 +157,8 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录
+     * <p/>
+     * 拥有自己的 market 参数是因为为了兼容原来的 Amazon UK 账号在 DE 销售, 而 UK/DE 的数据是分开的
      *
      * @return
      */
@@ -177,6 +179,7 @@ public class SellingRecord extends GenericModel {
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
                     FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
+                    return records;
                 }
                 rows = data.get("rows").getAsJsonArray();
                 if(rows.size() == 0)
@@ -184,8 +187,8 @@ public class SellingRecord extends GenericModel {
                 for(JsonElement row : rows) {
                     try {
                         JsonArray rowArr = row.getAsJsonArray();
-                        String msku = StringUtils.splitByWholeSeparator(rowArr.get(3).getAsString(), "\">")[1];
-                        msku = msku.substring(0, msku.length() - 4).toUpperCase(); /*前面截取了 "> 后最后的 </a> 过滤掉*/
+                        String msku = StringUtils.substringBetween(rowArr.get(3).getAsString(), "\">", "</").toUpperCase();
+                        if(StringUtils.contains(msku, ",2")) continue;
                         String sid = Selling.sid(msku, market, acc);
                         String srid = SellingRecord.id(sid, oneDay);
 
