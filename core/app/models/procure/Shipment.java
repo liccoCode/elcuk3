@@ -314,10 +314,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public Float shipFee = 0f;
 
     /**
-     * 类似顺风发货单号的类似跟踪单号
+     * 类似顺风发货单号的类似跟踪单号;
+     *
+     * 不要使用 trackNo 唯一了, 因为业务不允许..
+     * 提供:
+     * 1. 合并运输单
+     * 2. 相同 trackNo 的 Shipment 提示功能
      */
     @Expose
-    @Column(unique = true)
+    @Column
     public String trackNo;
 
     /**
