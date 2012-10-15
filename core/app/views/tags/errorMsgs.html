@@ -1,5 +1,6 @@
 #{ifErrors }
 <div class="alert alert-error">
+    <button type="button" class="close" data-dismiss="alert">×</button>
     <ul>
         #{errors }
             <li>${play.Play.mode.isDev() ? error.key + ' (debug) -> ' : ''}${error.message()}</li>

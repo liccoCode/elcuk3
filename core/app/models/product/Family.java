@@ -1,6 +1,7 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.Cached;
 import helper.Caches;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
@@ -92,6 +93,7 @@ public class Family extends GenericModel {
     }
 
     @SuppressWarnings("unchecked")
+    @Cached("1h")
     public static List<String> familys(boolean clearCache) {
         List<String> familys = null;
         if(!clearCache) {
@@ -103,7 +105,7 @@ public class Family extends GenericModel {
         familys = new ArrayList<String>();
         for(Family fml : familyList) familys.add(fml.family);
         play.cache.Cache.delete(Caches.FAMILYS);
-        play.cache.Cache.add(Caches.FAMILYS, familys);
+        play.cache.Cache.add(Caches.FAMILYS, familys, "1h");
         return familys;
     }
 }

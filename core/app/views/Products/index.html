@@ -11,7 +11,7 @@
         <form action="@{Products.index()}" method="post">
             <span class="add-on"><i class="icon-search"></i></span>
             <input type="hidden" name="p.page" value="${p.page}">
-            <input type="text" data-provide="typeahead" data-items="5" data-source="${fmys}" name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU">
+            <input type="text" data-provide="typeahead" data-items="5" data-source="${families}" name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU">
             <button data-loading class="btn">搜索</button>
         </form>
     </div>

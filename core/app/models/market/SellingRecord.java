@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import helper.Currency;
+import models.ElcukRecord;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;

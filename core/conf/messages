@@ -187,6 +187,9 @@ shipment.cancelShip2.msg=\u5C06[\u8FD0\u8F93\u9879\u76EE] %s \u4ECE[\u8FD0\u8F93
 
 shipment.cancel=\u53D6\u6D88\u8FD0\u8F93\u5355
 
+product.update=\u66F4\u65B0[Product]
+
+sellingqty.update=\u624B\u52A8\u66F4\u65B0[SellingQTY]
 
 procureunit.save=\u521B\u5EFA[\u91C7\u8D2D\u8BA1\u5212]
 procureunit.update=\u66F4\u65B0[\u91C7\u8D2D\u8BA1\u5212]

@@ -27,35 +27,63 @@
                     <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
                     <td>长</td>
                     <td>
-                        <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
+                        <div class="input-append">
+                            <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
+                            <span class="add-on">mm</span>
+                        </div>
                     </td>
+
+                </tr>
+                <tr>
                     <td>宽</td>
                     <td>
-                        <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
+                        <div class="input-append">
+                            <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
+                            <span class="add-on">mm</span>
+                        </div>
                     </td>
                     <td>高</td>
                     <td>
-                        <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
-                    </td>
-                    <td>重量</td>
-                    <td>
-                        <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
+                        <div class="input-append">
+
+                            <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
+                            <span class="add-on">mm</span>
+                        </div>
                     </td>
                 </tr>
                 <tr>
-                    <td>产品名称</td>
-                    <td colspan="9">
-                        <textarea rows="3" name="pro.productName" class="span11">${pro.productName}</textarea>
+                    <td>重量</td>
+                    <td>
+                        <div class="input-append">
+                            <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
+                            <span class="add-on">Kg</span>
+                        </div>
+                    </td>
+
+                    <th>申报价格</th>
+                    <td>
+                        <div class="input-prepend">
+                            <span class="add-on">$</span>
+                            <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
+                        </div>
                     </td>
                 </tr>
                 <tr>
                     <td>Category</td>
                     <td>${pro.category}</td>
                     <td>Brand</td>
-                    <td>${pro?.family?.brand}</td>
+                    <td>${pro.family?.brand}</td>
+                </tr>
+                <tr>
                     <td>Family</td>
-                    <td>${pro?.family?.family}</td>
-                    <td colspan="4">&nbsp;</td>
+                    <td>${pro.family?.family}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td>产品名称</td>
+                    <td colspan="3">
+                        <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="10">
@@ -70,7 +98,7 @@
 
     #{info_row title:'Product (Selling)QTY'/}
     <div>
-        <table class="table table-bordered" id="prod_sqty">
+        <table class="table table-bordered">
             <tr>
                 <th>Qid</th>
                 <th>Inbound</th>
@@ -81,28 +109,32 @@
                 <th>Whouse</th>
                 <th>&nbsp;</th>
             </tr>
-            #{list items:qtys, as:'q'}
-                <tr id="prod_qty_${q.id}">
-                    <td>${q.id}<input type="hidden" name="q.id" value="${q.id}"></td>
-                    <td>
-                        <input type="text" class="input-mini" style="color:#4A8BF4;" name="q.inbound" value="${q.inbound}">
-                    </td>
-                    <td>
-                        <input type="text" class="input-mini" style="color:#9BD444;" name="q.qty" value="${q.qty}">
-                    </td>
-                    <td>
-                        <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="q.unsellable" value="${q.unsellable}">
-                    </td>
-                    <td>
-                        <input type="text" class="input-mini" style="color:#CC6600;" name="q.pending" value="${q.pending}">
-                    </td>
-                    <td><a target="_blank" href="${q.selling.asinLink()}">${q.selling.asin}</a>
-                        | ${q.selling.market}</td>
-                    <td>${q.whouse.name}</td>
-                    <td><a href="#" class="btn btn-primary" qid="${q.id}"><i class="icon-save"></i></a></td>
-                </tr>
+            #{list items:qtys, as:'qty'}
+                <form method="post" action="@{Products.updateSellingQty()}">
+                    <tr>
+                        <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
+                        </td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
+                        </td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
+                        </td>
+                        <td>
+                            <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
+                        </td>
+                        <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
+                        <td>${qty.whouse.name}</td>
+                        <td>
+                            <button class="btn btn-primary" data-confirm='btn'>更新</button>
+                        </td>
+                    </tr>
+                </form>
             #{/list}
         </table>
+        #{records records:records, row:true/}
     </div>
 
 

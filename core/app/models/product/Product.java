@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.market.*;
 import models.procure.Cooperator;
@@ -21,8 +22,8 @@ import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
-import play.libs.Codec;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -38,13 +39,13 @@ import java.util.*;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-public class Product extends GenericModel {
+public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
      */
     @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
-    public List<Listing> listings;
+    public List<Listing> listings = new ArrayList<Listing>();
 
     @ManyToOne
     public Category category;
@@ -86,7 +87,11 @@ public class Product extends GenericModel {
     }
 
     public Product(String sku) {
-        this.sku = sku;
+        this.sku = sku.toUpperCase();
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku.toUpperCase();
     }
 
     /**
@@ -111,16 +116,25 @@ public class Product extends GenericModel {
          * 5. Category 不能为空
          * 6. 产品的名称不能为空
          */
-        if(!Product.validSKU(this.sku)) throw new FastRuntimeException("SKU(" + this.sku + ") 不合法!");
-        if(Product.unUsedSKU(this.sku)) throw new FastRuntimeException("SKU(" + this.sku + ") 为废弃 SKU, 不能使用!");
-        if(this.family == null || !this.family.isPersistent())
-            throw new FastRuntimeException("Family 不存在,请先添加后再创建 Product!");
-        if(!StringUtils.startsWith(this.sku, this.family.family))
-            throw new FastRuntimeException("Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
-        if(this.category == null || !this.category.isPersistent())
-            throw new FastRuntimeException("Category 不存在, 请创添加后再创建 Product!");
-        if(StringUtils.isBlank(this.productName))
-            throw new FastRuntimeException("产品的名称不能为空!");
+        if(StringUtils.isBlank(this.sku)) {
+            Validation.addError("", "Sku 必须存在!");
+            return;
+        }
+        if(!Product.validSKU(this.sku))
+            Validation.addError("", "SKU[ " + this.sku + " ] 不合法!");
+        if(Product.unUsedSKU(this.sku))
+            Validation.addError("", "SKU[ " + this.sku + " ] 为废弃 SKU, 不能使用!");
+        if(this.family == null)
+            Validation.addError("", "Family 不存在,请先添加后再创建 Product!");
+        if(this.family != null && !StringUtils.startsWith(this.sku, this.family.family))
+            Validation.addError("", "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
+        if(Validation.hasErrors()) return;
+
+
+        this.category = this.family.category;
+        if(this.category == null)
+            Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
+        if(Validation.hasErrors()) return;
 
         this.save();
     }
@@ -129,6 +143,7 @@ public class Product extends GenericModel {
      * 删除 Product 的时候需要做一些判断后, 才能够删除.
      */
     public void removeProduct() {
+        checkDelete();
         this.delete();
     }
 
@@ -492,6 +507,12 @@ public class Product extends GenericModel {
         return Selling.find("sellingId LIKE ?", this.sku + "%").fetch();
     }
 
+    @Override
+    public String to_log() {
+        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s]",
+                this.lengths, this.width, this.heigh, this.weight, this.declaredValue, this.productName);
+    }
+
     /**
      * 验证这个 SKU 是否合法
      *
@@ -567,6 +588,7 @@ public class Product extends GenericModel {
      * @return
      */
     public static boolean unUsedSKU(String merchantSKU) {
+        if(StringUtils.isBlank(merchantSKU)) return false;
         return UN_USE_SKU.containsKey(Product.merchantSKUtoSKU(merchantSKU));
     }
 
@@ -594,6 +616,9 @@ public class Product extends GenericModel {
     }
 
     @SuppressWarnings("unchecked")
+    /**
+     * 导出 SKU 销量的 CSV 文件
+     */
     public static String skuSales(Date from, Date to) {
         List<String> skus = Product.skus(false);
         StringWriter stringWriter = new StringWriter();
@@ -658,5 +683,9 @@ public class Product extends GenericModel {
             }
             csvWriter.writeNext(csvRow.toArray(new String[csvRow.size()]));
         }
+    }
+
+    public static boolean exist(String sku) {
+        return Product.count("sku=?", sku) > 0;
     }
 }

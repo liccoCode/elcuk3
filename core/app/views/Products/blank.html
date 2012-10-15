@@ -1,91 +1,94 @@
 #{extends 'main.html' /}
-#{set title:'Create Product' /}
+#{set title:'创建新 Product' /}
 #{set 'moreScripts'}
-    #{script 'products/pNew.js'/}
+    #{script 'Products/blank.coffee'/}
 #{/set}
 
+#{info_row title:'基础信息', row:true}
+<br/>
+<ul>
+    <li>长,宽,高的单位是毫米(mm)</li>
+    <li>重量的单位是千克(kg)</li>
+    <li class="text-error">请尽可能填写 长,宽,高,重量 这些参数, 因为这些参数是运输所需要的用到的计算参数!</li>
+</ul>
+#{/info_row}
 <div class="row">
-    <div class="alert alert-success" id="success_link" style="visibility:hidden;">
-        <a href="#"><h3>添加成功!</h3></a>
-    </div>
-</div>
+    <div class="span12">
+    #{errorMsgs /}
+    #{flash_alert /}
+        <form action="@{Products.create()}" method="post">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <th>Family</th>
+                    <td>
+                        <input type="text" id="pro_family" name="pro.family.family" data-provide="typeahead" data-source="${families}" value="${pro.family?.family}">
+                    </td>
 
-<div class="clearfix"></div>
-<div><span class="label label-success">Basic</span></div>
-<div style="height:200px;overflow:auto;">
-    <table class="table table-bordered table-condensed">
-        <tr>
-            <td>SKU:</td>
-            <td><input type="text" class="input-medium" name="p.sku" id="p_sku" value="${p.sku}"></td>
-            <td>L:</td>
-            <td><input type="text" class="input-mini" name="p.lengths" value="${p.lengths}"></td>
-            <td>H:</td>
-            <td><input type="text" class="input-mini" name="p.heigh" value="${p.heigh}"></td>
-            <td>W:</td>
-            <td><input type="text" class="input-mini" name="p.width" value="${p.width}"></td>
-            <td>Wt:</td>
-            <td><input type="text" class="input-mini" name="p.weight" value="${p.weight}"></td>
-        </tr>
-        <tr>
-            <td>Title:</td>
-            <td colspan="9"><input type="text" name="p.productName" class="span10" value="${p.productName}"></td>
-        </tr>
-        <tr>
-            <td>Category:</td>
-            <td>
-                <select name="p.category.categoryId" size="1" class="span2.5" id="cat_select">
-                    <option value="0">请选择</option>
-                #{list items:cats, as:'c'}
-                    <option value="${c.categoryId}">${c}</option>
-                #{/list}
-                </select>
-            </td>
-            <td>Brand:</td>
-            <td class="span2" id="cat_brand"></td>
-            <td>Family:</td>
-            <td class="span2" id="brand_family"></td>
-            <td colspan="4">&nbsp;</td>
-        </tr>
-    </table>
-</div>
+                    <th>SKU</th>
+                    <td><input type="text" id="pro_sku" name="pro.sku" value="${pro.sku}"></td>
+                </tr>
 
-<!-- TODO Category 选择以后, 会有 Attribute 与 Brand 会改变 -->
+                <tr>
+                    <th>长</th>
+                    <td>
+                        <div class="input-append">
+                            <input type="text" style="width:100px" name="pro.lengths" value="${pro.lengths}">
+                            <span class="add-on">mm</span>
+                        </div>
+                    </td>
 
-<div><span class="label label-success">Attributes</span></div>
-<!-- 必须填写的 Category 继承的 -->
-<div class="row">
-    <div class="span7" style="height:200px;overflow:auto;margin-top:2px">
-        <blockquote id="cat_attr_div">
-            <p>请选择 Category</p>
-        </blockquote>
-    </div>
-    <div class="span4" style="">
-        <blockquote>
-            <h3>左侧部分为从 Category 继承下来的必须填写的 Product 字段</h3>
-        </blockquote>
-    </div>
-    <div class="clearfix"></div>
-    <hr/>
-    <div class="span7" style="height:200px;overflow:auto;">
-        <div style="height:70px;overflow:auto;" id="attr_div_slider">
-            <blockquote>
-                <p>请选择 Category</p>
-            </blockquote>
-        </div>
-        <div style="height:130px;overflow:auto;">
-            <blockquote id="attr_div">
-            </blockquote>
-        </div>
-    </div>
-    <div class="span4" style="height:200px;overflow:auto;">
-        <blockquote>
-            <h3>左侧部分为 AttrName 中存在的可自行添加的其他的 Product 字段</h3>
-        </blockquote>
-    </div>
-</div>
+                    <th>宽(mm)</th>
+                    <td>
+                        <div class="input-append">
+                            <input type="text" style="width:100px" name="pro.width" value="${pro.width}">
+                            <span class="add-on">mm</span>
+                        </div>
+                    </td>
+                </tr>
 
-<div class="row">
-    <div>
-        <button id="addProduct" class="btn btn-primary span12">添加</button>
+                <tr>
+                    <th>高(mm)</th>
+                    <td>
+                        <div class="input-append">
+                            <input type="text" style="width:100px" name="pro.heigh" value="${pro.heigh}">
+                            <span class="add-on">mm</span>
+                        </div>
+                    </td>
+
+                    <th>重量(kg)</th>
+                    <td>
+                        <div class="input-append">
+                            <input type="text" style="width:100px" name="pro.weight" value="${pro.weight}">
+                            <span class="add-on">Kg</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>申报价格(USD)</th>
+                    <td>
+                        <div class="input-prepend">
+                            <span class="add-on">$</span>
+                            <input type="text" style="width:100px" name="pro.declaredValue" value="${pro.declaredValue}">
+                        </div>
+                    </td>
+
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+
+                <tr>
+                    <th>标题</th>
+                    <td colspan="3">
+                        <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="4">
+                        <button class="btn btn-primary">创建</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
     </div>
 </div>

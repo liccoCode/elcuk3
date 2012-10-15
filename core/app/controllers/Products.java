@@ -2,26 +2,24 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.market.Account;
 import models.market.Selling;
 import models.market.SellingQTY;
-import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 产品模块的基本的类别的基本操作在此
@@ -33,10 +31,11 @@ import java.util.Map;
 @Check("normal")
 public class Products extends Controller {
 
-    @Before(only = {"index", "search"})
-    public static void setFamilys() {
-        List<String> skus = Family.familys(false);
-        renderArgs.put("fmys", J.json(skus));
+    @Util
+    private static String extarSku() {
+        String sku = request.params.get("id");
+        if(StringUtils.isBlank(sku)) sku = request.params.get("pro.sku");
+        return sku;
     }
 
 
@@ -50,30 +49,34 @@ public class Products extends Controller {
         render(prods, p);
     }
 
-    public static void show(String id) {
-        Product pro = Product.findByMerchantSKU(id);
-        List<Category> cats = Category.all().fetch();
-        List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
+    @Before(only = {"show", "update"})
+    public static void setUpShowPage() {
+        String sku = Products.extarSku();
+        Product pro = Product.findByMerchantSKU(sku);
 
-        render(pro, cats, qtys);
+        renderArgs.put("cats", Category.all().<Category>fetch());
+        renderArgs.put("qtys", SellingQTY.qtysAccodingSKU(pro));
+        renderArgs.put("records", ElcukRecord.records(sku));
     }
 
-    /**
-     * ================= New Product Action ============
-     */
+    public static void show(String id) {
+        Product pro = Product.findByMerchantSKU(id);
+        render(pro);
+    }
 
     public static void update(Product pro) {
         validation.valid(pro);
+        if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
         if(Validation.hasErrors()) render("Products/show.html", pro);
         pro.save();
         flash.success("更新成功");
+        new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()), pro.sku).save();
         redirect("/Products/show/" + pro.sku);
     }
 
     @Before(only = {"saleAmazon", "saleAmazonListing"})
     public static void beforeSaleAmazon() {
-        String sku = request.params.get("id");
-        if(StringUtils.isBlank(sku)) sku = request.params.get("pro.sku");
+        String sku = Products.extarSku();
         if(StringUtils.isNotBlank(sku)) renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
         renderArgs.put("accs", Account.openedSaleAcc());
     }
@@ -107,45 +110,34 @@ public class Products extends Controller {
      * ========== Product ===============
      */
 
-    public static void blank(Product p) {
-        if(p == null) p = new Product();
-        if(p.isPersistent()) throw new FastRuntimeException("[" + p.sku + "]产品已经存在.");
+    @Before(only = {"blank", "create", "index"})
+    public static void setUpCreatePage() {
+        List<String> families = Family.familys(false);
+        renderArgs.put("families", J.json(families));
+    }
+
+    public static void blank(Product pro) {
+        if(pro == null) pro = new Product();
         List<Category> cats = Category.all().fetch();
-        render(p, cats);
+        render(pro, cats);
     }
 
-
-    //TODO 需要重构的 Product 创建方法
-
-    public static void cat_brands(Category c) {
-        List<Brand> brands = c.brands;
-
-
-        Map<String, Object> json = new HashMap<String, Object>();
-        json.put("brands", brands);
-
-        renderJSON(J.G(json));
+    public static void create(Product pro) {
+        validation.valid(pro);
+        pro.createProduct();
+        if(Validation.hasErrors()) render("Products/blank.html", pro);
+        flash.success("Sku %s 添加成功", pro.sku);
+        redirect("/Products/show/" + pro.sku);
     }
 
-    public static void brand_family(Brand b, Category c) {
-        List<Family> fmys = Family.bcRelateFamily(b, c);
-        for(Family f : fmys) { // 清理不能让 GSON 拥有循环引用
-            f.brand = null;
-            f.category = null;
-            f.products = null;
-        }
-        renderJSON(fmys);
+    public static void updateSellingQty(SellingQTY qty) {
+        if(!SellingQTY.exist(qty.id)) Validation.addError("", String.format("SellingQTY %s 不存在!", qty.id));
+        qty.save();
+        flash.success("更新成功.");
+        new ElcukRecord(Messages.get("sellingqty.update"), Messages.get("action.base", qty.to_log()), qty.product.sku).save();
+        redirect("/Products/show/" + qty.product.sku);
     }
 
-    public static void pCreate(@Valid Product p) {
-        if(p.isPersistent()) renderJSON(new Ret("SKU(" + p.sku + ")已经存在了!"));
-        try {
-            p.createProduct();
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-        renderJSON(new Ret(true, "/products/show/" + p.sku));
-    }
 
     public static void pRemove(Product p) {
         if(!p.isPersistent()) renderJSON(new Ret("产品不存在!"));
@@ -153,15 +145,7 @@ public class Products extends Controller {
         renderJSON(new Ret());
     }
 
-    public static void p_u(Product p) {
-        try {
-            if(p.isPersistent()) p.save();
-        } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
-        }
-        renderJSON(new Ret());
-    }
-
+    //------------------------
 
     public static void p_sqty_u(SellingQTY q) {
         try {

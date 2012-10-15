@@ -1,59 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:'Brand' /}
 #{set 'moreScripts'}
-    #{script 'products/brand.js'/}
+*{#{script 'products/brand.js'/}}*
 #{/set}
-<div style="margin-bottom:10px;">
-    <!-- BTN-1-BEGIN -->
-    <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_category">添加</a>
-
-    <div id="add_modal" class="modal hide fade">
-        <div class="modal-header">
-            <a class="close" data-dismiss="modal">×</a>
-
-            <h3>添加 Brand</h3>
-        </div>
-
-        <div class="modal-body">
-            <form id='add_brand_form' class="form-horizontal">
-                <fieldset>
-                    <div class="control-group">
-                        <label for="b.name" class="control-label">Name</label>
-
-                        <div class="controls">
-                            <input type="text" id="b.name" name="b.name">
-
-                            <p class="help-block">例如: 品牌惠普填写 HP</p>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="b.fullName" class="control-label">Fullname</label>
-
-                        <div class="controls">
-                            <input type="text" id="b.fullName" name="b.fullName">
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="b.memo" class="control-label">Memo</label>
-
-                        <div class="controls">
-                            <textarea id="b.memo" name="b.memo"></textarea>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-        </div>
-
-        <div class="modal-footer">
-            <a href="#" class="btn btn-primary" id="addBrandBtn">Save</a>
-            <a href="#" class="btn" data-dismiss="modal">Close</a>
-        </div>
-    </div>
-    <!-- BTN-1-END -->
-</div>
-
 #{if brands.size() == 0}
 <div class="row-fluid">
     <div>
@@ -63,21 +12,100 @@
 #{/if}
 #{else }
 <div class="row-fluid">
-    <div class="span3 well well-small" id="brand_slider">
+    <div class="span3 well well-small">
         <table class="table table-striped table-bordered table-condensed">
             <tr>
-                <th>Name</th>
                 <th>Brand</th>
+                <th>Name</th>
             </tr>
             #{list items:brands, as:'b'}
-                <tr bid="${b.name}" style="cursor:pointer;">
-                    <td>${b.name}</td>
+                <tr>
                     <td>${b.fullName}</td>
+                    <td><a href="@{Brands.index()}/${b.name}">${b.name}</a></td>
                 </tr>
             #{/list}
         </table>
     </div>
 
-    <div class="span8" id="brand_detail">请选择左侧的 Brand.</div>
+    <div class="span8 well well-small">
+        #{errorMsgs /}
+        #{flash_alert /}
+        #{info_row title:'基本信息'/}
+        <div>
+            <form method="post" action="@{Brands.update()}">
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <td>Brand:</td>
+                        <td>${brand.name}</td>
+                        <td>FullName:</td>
+                        <td>
+                            <input type="text" class="input-medium" value="${brand.fullName}" name="brand.fullName">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Memo</td>
+                        <td colspan="3">
+                            <textarea rows="5" name="brand.memo" class="span12">${brand.memo}</textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <input type="hidden" value="${brand.name}" name="brand.name">
+                            <button data-confirm="btn" class="btn btn-primary">更新</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        #{info_row title:'关联的 Category'/}
+        <div class="row-fluid">
+            <div class="span6">
+                <form method="post" action="@{Brands.bindCategory()}">
+                    <div style="margin-bottom:10px;">
+                        <input type="hidden" name="id" value="${brand.name}">
+                        <button class="btn btn-primary">绑定</button>
+                    </div>
+                    <table class="table table-bordered table-condensed">
+                        <tr>
+                            <th></th>
+                            <th>CategoryId</th>
+                            <th>Name</th>
+                        </tr>
+                        #{list items:brand.unCategories(), as:'cat'}
+                            <tr>
+                                <td><label><input type="checkbox" name="cateIds" value="${cat.categoryId}"></label></td>
+                                <td>${cat.categoryId}</td>
+                                <td>${cat.name}</td>
+                            </tr>
+                        #{/list}
+                    </table>
+                </form>
+            </div>
+
+            <div class="span6">
+                <form action="@{Brands.unbindCategory()}" method="post">
+                    <div style="margin-bottom:10px;">
+                        <input type="hidden" name="id" value="${brand.name}">
+                        <button class="btn btn-warning">解除绑定</button>
+                    </div>
+                    <table class="table table-bordered table-condensed">
+                        <tr>
+                            <th></th>
+                            <th>CategoryId</th>
+                            <th>Name</th>
+                        </tr>
+                        #{list items:brand.categories, as:'cat'}
+                            <tr>
+                                <td><label><input type="checkbox" name="cateIds" value="${cat.categoryId}"></label></td>
+                                <td>${cat.categoryId}</td>
+                                <td>${cat.name}</td>
+                            </tr>
+                        #{/list}
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 #{/else}

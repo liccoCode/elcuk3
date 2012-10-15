@@ -3,6 +3,9 @@ package controllers;
 import models.product.Brand;
 import models.product.Category;
 import models.view.Ret;
+import org.apache.commons.lang.StringUtils;
+import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -17,16 +20,43 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Brands extends Controller {
 
-    public static void index() {
-        List<Brand> brands = Brand.all().fetch();
-        render(brands);
+    @Before(only = {"index", "bindCategory", "unbindCategory"})
+    public static void setUpIndexPage() {
+        renderArgs.put("brands", Brand.all().<Brand>fetch());
     }
 
-    public static void detail(String bid) {
-        Brand brand = Brand.findById(bid);
-        List<Category> cats = Category.all().fetch();
+    public static void index(String id) {
+        Brand brand = (Brand) renderArgs.get("brands", List.class).get(0);
+        if(StringUtils.isNotBlank(id)) brand = Brand.findById(id);
+        render(brand);
+    }
 
-        render(brand, cats);
+    public static void bindCategory(List<String> cateIds, String id) {
+        validation.valid(cateIds);
+        Brand brand = Brand.findById(id);
+        if(Validation.hasErrors()) render("Brands/index.html", brand);
+        brand.bindCategories(cateIds);
+        flash.success("绑定成功");
+        redirect("/Brands/index/" + id);
+    }
+
+    public static void unbindCategory(List<String> cateIds, String id) {
+        validation.valid(cateIds);
+        Brand brand = Brand.findById(id);
+        if(Validation.hasErrors()) render("Brands/index.html", brand);
+        brand.unBindCategories(cateIds);
+        if(Validation.hasErrors()) render("Brands/index.html", brand);
+        flash.success("解除绑定成功");
+        redirect("/Brands/index/" + id);
+    }
+
+    public static void update(Brand brand) {
+        if(!Brand.exist(brand.name)) Validation.addError("", String.format("Brand %s 不存在!", brand.name));
+        validation.valid(brand);
+        if(Validation.hasErrors()) render("Brands/index.html", brand);
+        brand.save();
+        flash.success("更新成功");
+        redirect("/Brands/index/" + brand.name);
     }
 
     /**

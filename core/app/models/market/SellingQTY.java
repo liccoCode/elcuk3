@@ -1,6 +1,7 @@
 package models.market;
 
 import exception.SellingQTYAttachNoWhouseException;
+import models.ElcukRecord;
 import models.product.Product;
 import models.product.Whouse;
 import org.apache.commons.lang.Validate;
@@ -25,7 +26,7 @@ import java.util.List;
  * Time: 7:30 PM
  */
 @Entity
-public class SellingQTY extends GenericModel {
+public class SellingQTY extends GenericModel implements ElcukRecord.Log {
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     public Selling selling;
@@ -72,6 +73,17 @@ public class SellingQTY extends GenericModel {
         this.id = sqtyId;
     }
 
+    public String msku() {
+        return this.id.split("_")[0].toUpperCase();
+    }
+
+    @Override
+    public String to_log() {
+        return String.format("SellingQTY[%s] [Inbound:%s] [Qty:%s] [Unsellable:%s] [Pending:%s]",
+                this.id, this.inbound, this.qty, this.unsellable, this.pending);
+    }
+
+
     /**
      * 将一个全新的 SellingQTY[qty,pending,inbound,unsellable] 关联到 Selling 上, 包括 Selling, Product, 组成 id
      *
@@ -94,7 +106,7 @@ public class SellingQTY extends GenericModel {
     public static List<SellingQTY> qtysAccodingSKU(Product prod) {
         return SellingQTY.find("product=?", prod).fetch();
     }
-    
+
     public static List<SellingQTY> qtysAccodingSKU(String sku) {
         if(!Product.validSKU(sku)) throw new FastRuntimeException(sku + " 不是合法的 SKU");
         return SellingQTY.find("product.sku=?", sku).fetch();
@@ -105,8 +117,8 @@ public class SellingQTY extends GenericModel {
         return find("id=?", String.format("%s_%s", selling.merchantSKU, wh.id)).fetch();
     }
 
-    public String msku() {
-        return this.id.split("_")[0].toUpperCase();
+    public static boolean exist(String id) {
+        return SellingQTY.count("id=?", id) > 0;
     }
 
 }
