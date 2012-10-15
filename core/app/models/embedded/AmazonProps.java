@@ -164,6 +164,9 @@ public class AmazonProps {
 
     /**
      * 此 Selling 所对应的图片名字与顺序. 使用 Webs.SPLIT 进行分割
+     * after mysql 5.0.3 varchar can be 0..65535 length;
+     * need more size to store the imageName.
+     * alter table Selling modify column imageName varchar(600);
      */
     @Expose
     public String imageName;
