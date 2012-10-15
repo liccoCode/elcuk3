@@ -50,14 +50,13 @@
     </tr>
     <tr id="ship_${ship_index}" style="display:none;">
         <td colspan="14">
-            <div class="span4" style="float:left;">
+            <div>
                 <h4 class="text-info">Commemt</h4>
             ${ship.memo.raw()}
             </div>
-            <div class="span8" style="float:left;">
-                #{list items:ship.items, as:'shipitem'}
-                ${shipitem.unit.sid}<br/>
-                #{/list}
+            <hr>
+            <div>
+                #{render 'Shipments/_shipitem.html', items:ship.items/}
             </div>
         </td>
     </tr>

@@ -2,7 +2,6 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 
@@ -100,5 +99,39 @@ public class ShipItem extends GenericModel {
         ProcureUnit unit = this.unit;
         this.unit = null;
         return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+    }
+
+    /**
+     * 总重量 (kg)
+     *
+     * @return
+     */
+    public float totalWeight() {
+        return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
+    }
+
+    /**
+     * 总体积
+     *
+     * @return ._1: 单个体积(m3), ._2:总体积(m3), ._3:总体积(cm3), ._4:体积换算重量(cm3/5000)
+     */
+    public F.T4<Float, Float, Float, Float> totalVolume() {
+        // 单位是 mm
+        float l = this.unit.product.lengths;
+        float w = this.unit.product.width;
+        float h = this.unit.product.heigh;
+
+        float singleVolume = (l * w * h) / 1000000000;
+        // 换算成 m3
+        return new F.T4<Float, Float, Float, Float>(singleVolume, this.qty * singleVolume,
+                this.qty * singleVolume * 1000000, (this.qty * singleVolume * 1000000) / 5000);
+    }
+
+    /**
+     * 总申报价格, 单位 USD
+     * @return
+     */
+    public float totalDeclaredValue() {
+        return this.qty * this.unit.product.declaredValue;
     }
 }

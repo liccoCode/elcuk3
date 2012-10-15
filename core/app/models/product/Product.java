@@ -89,6 +89,11 @@ public class Product extends GenericModel {
     @Expose
     public Float weight = 0f;
 
+    /**
+     * 申报价格 (USD)
+     */
+    public Float declaredValue = 0f;
+
     public Product() {
     }
 

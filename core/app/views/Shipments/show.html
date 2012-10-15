@@ -18,6 +18,7 @@
     <li>"开始运输" 时, 需要将数据补全, 并且开始运输以后, 信息不再可以修改</li>
     <li>在运输单标记开始运输之前, 都可以对信息进行更改,调整</li>
     <li>Fnsku 会在运输单确认以后, 进行一次同步</li>
+    <li>总体积单位为 m3 ,总重量单位为 kg; 如果发现数据为 0, 请检查 Product 数据是否填充完整.</li>
     <li class="text-error">如果是 Create By System, 那么在第一次更新时会设置创建者为更新者</li>
 </ul>
 #{/info_row}
@@ -229,6 +230,15 @@
             <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">确认到货</button>
         </form>
     #{/if}
+    #{ck 'root'}
+        #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
+            <form action="@{Shipments.cancel()}" method="post">
+                <input type="hidden" name="id" value="${ship.id}">
+                #{authenticityToken /}
+                <button style="margin-right:10px;" data-confirm="btn" class="btn btn-danger">取消运输单</button>
+            </form>
+        #{/if}
+    #{/ck}
     </div>
 </div>
 

@@ -3,6 +3,7 @@ package jobs;
 import helper.Dates;
 import models.Jobex;
 import models.procure.Shipment;
+import models.product.Whouse;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import play.jobs.Every;
@@ -23,18 +24,25 @@ public class ShipmentCycleJob extends Job {
     public void doJob() {
         if(!Jobex.findByClassName(ShipmentCycleJob.class.getName()).isExcute()) return;
         DateTime now = DateTime.now(DateTimeZone.forID("Asia/Shanghai"));
-        for(int i = 0; i < 30; i++) {
-            DateTime dealDate = now.plusDays(i);
-            List<Shipment> cyclingShipments = Shipment.find("cycle=? AND beginDate>=? AND beginDate<=?",
-                    true, Dates.morning(dealDate.toDate()), Dates.night(dealDate.toDate())).fetch();
-            if(cyclingShipments.size() > 0) continue;
-            // 周一: 1, 周日: 7
-            if(dealDate.getDayOfWeek() == 2 || dealDate.getDayOfWeek() == 4) {
-                Shipment ship = new Shipment(Shipment.id());
-                ship.cycle = true;
-                ship.beginDate = dealDate.toDate();
-                ship.planArrivDate = dealDate.plusDays(7).toDate();
-                ship.save();
+
+        List<Whouse> whouses = Whouse.findAll();
+        for(Whouse wh : whouses) {
+            for(int i = 0; i < 30; i++) {
+                DateTime dealDate = now.plusDays(i);
+                List<Shipment> cyclingShipments = Shipment.find("cycle=? AND beginDate>=? AND beginDate<=? AND whouse.id=?",
+                        true, Dates.morning(dealDate.toDate()), Dates.night(dealDate.toDate()), wh.id).fetch();
+                if(cyclingShipments.size() > 0) continue;
+                // 周一: 1, 周日: 7
+                if(dealDate.getDayOfWeek() == 2 || dealDate.getDayOfWeek() == 4) {
+                    Shipment ship = new Shipment(Shipment.id());
+                    ship.cycle = true;
+                    ship.beginDate = dealDate.toDate();
+                    ship.planArrivDate = dealDate.plusDays(7).toDate();
+                    ship.whouse = wh;
+                    ship.type = Shipment.T.EXPRESS;
+                    ship.title = String.format("%s 去往 %s 在 %s", ship.id, ship.whouse.name(), Dates.date2Date(ship.beginDate));
+                    ship.save();
+                }
             }
         }
     }

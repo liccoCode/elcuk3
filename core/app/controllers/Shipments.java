@@ -122,6 +122,20 @@ public class Shipments extends Controller {
         render(ship);
     }
 
+    /**
+     * 取消运输单
+     */
+    @Check("root")
+    public static void cancel(String id) {
+        checkAuthenticity();
+        Shipment ship = Shipment.findById(id);
+        ship.cancel();
+        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        new ElcukRecord(Messages.get("shipment.cancel"), Messages.get("action.base", id), id).save();
+        flash.success("运输单取消成功.");
+        redirect("/Shipments/show/" + id);
+    }
+
     public static void ship(String id, List<Long> unitId, List<Integer> shipQty) {
         Validation.required("shipments.ship.unitId", unitId);
         Validation.required("shipments.ship.shipQty", shipQty);
@@ -138,6 +152,12 @@ public class Shipments extends Controller {
         redirect("/shipments/shipitem/" + id);
     }
 
+    /**
+     * 取消运输单项
+     *
+     * @param shipItemId
+     * @param id
+     */
     public static void cancelShip(List<Integer> shipItemId, String id) {
         Validation.required("shipments.ship.shipId", shipItemId);
         Validation.required("shipment.id", id);

@@ -156,4 +156,5 @@ public class User extends Model {
     public void setClosed(boolean closed) {
         this.closed = closed;
     }
+
 }

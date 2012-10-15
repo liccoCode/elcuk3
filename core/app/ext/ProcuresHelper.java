@@ -59,8 +59,23 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String rgb(Shipment.T type) {
+        if(type == null) return "BD4A48";
+        switch(type) {
+            case AIR:
+                return "49A4C6";
+            case EXPRESS:
+                return "468847";
+            case SEA:
+                return "C09853";
+            default:
+                return "333333";
+        }
+    }
+
     /**
      * 超过或者不足的 ProcureUnit 在页面上的颜色
+     *
      * @return
      */
     public static String leekOrOverRgb(ProcureUnit unit) {

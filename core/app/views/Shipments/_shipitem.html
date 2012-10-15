@@ -12,7 +12,10 @@
         <th>采购单</th>
         <th>预计到库时间</th>
         <th>供应商</th>
-        <th>ProductName</th>
+        <th>总重量(kg)</th>
+        <th>总体积(m3)(cm3)(kg)</th>
+        <th>总申报价格</th>
+        <th>抵达?</th>
         <th>运往仓库</th>
         <th>ProcreUnit</th>
     </tr>
@@ -30,7 +33,12 @@
         <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
         <td>#{time_tooltip time:itm.unit.attrs.planDeliveryDate/}</td>
         <td>${itm.unit.cooperator?.name}</td>
-        <td>${itm.unit.product.productName.omis(80)}</td>
+        <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
+        #{set totalVolume:itm.totalVolume()/}
+        <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')} ${totalVolume._4.format('#.#')}
+            / ${totalVolume._1.format('#.######')}</td>
+        <td>${itm.unit.product.declaredValue.format('#.##')}</td>
+        <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
         <td>${itm.unit.whouse.name()}</td>
         <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>
     </tr>

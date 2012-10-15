@@ -315,7 +315,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 类似顺风发货单号的类似跟踪单号;
-     *
+     * <p/>
      * 不要使用 trackNo 唯一了, 因为业务不允许..
      * 提供:
      * 1. 合并运输单
@@ -378,6 +378,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         // 避免 trackNo 为 '' 的时候进入唯一性判断错误
         if(StringUtils.isBlank(this.trackNo)) this.trackNo = null;
+    }
+
+
+    public void cancel() {
+        List<Integer> shipItemIds = new ArrayList<Integer>();
+        for(ShipItem item : this.items) shipItemIds.add(item.id.intValue());
+        this.cancelShip(shipItemIds, true);
+        if(Validation.hasErrors()) return;
+        this.state = S.CANCEL;
+        this.save();
     }
 
     public void updateShipment() {
@@ -449,7 +459,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param shipItemId
      */
     public void cancelShip(List<Integer> shipItemId, boolean log) {
-        List<ShipItem> items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
+        List<ShipItem> items = new ArrayList<ShipItem>();
+        if(shipItemId != null && shipItemId.size() > 0)
+            items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
+
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ShipItem itm : items) {
             if(!itm.shipment.equals(this)) {
@@ -461,7 +474,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
             }
         }
-        if(log) {
+        if(log && shipItemId != null && shipItemId.size() > 0) {
             new ElcukRecord(Messages.get("shipment.cancelShip2"),
                     Messages.get("shipment.cancelShip2.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
                     this.id
@@ -703,9 +716,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId) {
         if(whouseId != null) {
-            return Shipment.find("(whouse.id=? OR whouse.id IS NULL) AND state IN (?,?)", whouseId, S.PLAN, S.CONFIRM).fetch();
+            return Shipment.find("(whouse.id=? OR whouse.id IS NULL) AND state IN (?,?) ORDER BY beginDate", whouseId, S.PLAN, S.CONFIRM).fetch();
         } else {
-            return Shipment.find("whouse.id IS NULL AND state IN (?,?)", S.PLAN, S.CONFIRM).fetch();
+            return Shipment.find("whouse.id IS NULL AND state IN (?,?) ORDER BY beginDate", S.PLAN, S.CONFIRM).fetch();
         }
     }
 
