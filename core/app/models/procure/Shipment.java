@@ -586,7 +586,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public synchronized FBAShipment postFBAShipment() {
         try {
             this.fbaShipment = FBA.plan(this);
-            this.save();
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
         }
