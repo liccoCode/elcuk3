@@ -3,7 +3,6 @@ package amazon;
 import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import models.market.JobRequest;
-import org.junit.Test;
 import play.test.UnitTest;
 
 /**

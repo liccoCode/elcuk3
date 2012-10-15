@@ -1,17 +1,18 @@
 #{extends 'main_full.html' /}
 #{set title:'Product' /}
 #{set 'moreScripts'}
-*{#{script 'products/product.coffee'/}}*
+    #{script 'component/pagination.coffee'/}
 #{/set}
 
 <div style="margin:5px 0 0;" class="row">
     <a href="@{Products.blank()}" class="btn btn-primary" target="_blank">添加新产品</a>
 
     <div class="span3 pull-right input-prepend input-append">
-        <form action="@{Products.search()}" method="post">
+        <form action="@{Products.index()}" method="post">
             <span class="add-on"><i class="icon-search"></i></span>
-            <input type="text" data-provide="typeahead" data-items="5" data-source="${fmys}" name="sku" value="${sku}" style="width:172px;" placeHolder="搜索 SKU">
-            <button class="btn">搜索</button>
+            <input type="hidden" name="p.page" value="${p.page}">
+            <input type="text" data-provide="typeahead" data-items="5" data-source="${fmys}" name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU">
+            <button data-loading class="btn">搜索</button>
         </form>
     </div>
 </div>
@@ -22,6 +23,6 @@
     等待添加新产品
 #{/if}
 #{else }
-    #{render 'Products/_products.html', prods:prods, pi:pi/}
+    #{render 'Products/_products.html', prods:prods, pi:p/}
 #{/else}
 </div>

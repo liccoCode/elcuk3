@@ -5,19 +5,20 @@ import helper.Webs;
 import models.market.Account;
 import models.market.Selling;
 import models.market.SellingQTY;
-import models.product.*;
-import models.view.Pager;
+import models.product.Brand;
+import models.product.Category;
+import models.product.Family;
+import models.product.Product;
 import models.view.Ret;
+import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,21 +43,11 @@ public class Products extends Controller {
     /**
      * 展示所有的 Product
      */
-    public static void index(Integer p, Integer s) {
-        F.T2<Integer, Integer> fixs = Webs.fixPage(p, s);
-        List<Product> prods = Product.all().fetch(fixs._1, fixs._2);
+    public static void index(ProductPost p) {
+        if(p == null) p = new ProductPost();
+        List<Product> prods = p.query();
 
-        Long count = Product.count();
-        Pager<Product> pi = new Pager<Product>(fixs._1, count, fixs._2, prods);
-
-        render(prods, pi);
-    }
-
-    public static void search(String sku) {
-        List<Product> prods = new ArrayList<Product>();
-        if(!StringUtils.isBlank(sku))
-            prods = Product.find("family.family like ?", sku + "%").fetch();
-        render("Products/index.html", prods, sku);
+        render(prods, p);
     }
 
     public static void show(String id) {
@@ -65,15 +56,6 @@ public class Products extends Controller {
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
 
         render(pro, cats, qtys);
-    }
-
-    public static void c_index(Integer p, Integer s) {
-        F.T2<Integer, Integer> fixs = Webs.fixPage(p, s);
-        List<Category> cates = Category.all().fetch(fixs._1, fixs._2);
-        Long count = Category.count();
-
-        Pager<Category> pi = new Pager<Category>(fixs._1, count, fixs._2, cates);
-        render(cates, count, p, s, pi);
     }
 
     /**
@@ -131,6 +113,9 @@ public class Products extends Controller {
         List<Category> cats = Category.all().fetch();
         render(p, cats);
     }
+
+
+    //TODO 需要重构的 Product 创建方法
 
     public static void cat_brands(Category c) {
         List<Brand> brands = c.brands;

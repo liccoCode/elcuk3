@@ -23,6 +23,7 @@ public class OrderPOST extends Post<Orderr> {
     public OrderPOST() {
         this.from = new DateTime().withZone(Dates.timeZone(null)).minusDays(7).toDate();
         this.to = new DateTime().withZone(Dates.timeZone(null)).toDate();
+        this.perSize = 25;
     }
 
     public OrderPOST(int perSize) {
@@ -46,18 +47,12 @@ public class OrderPOST extends Post<Orderr> {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
 
-        if(params._2.size() == 0)
-            return Orderr.find(params._1).fetch(this.page, this.perSize);
-        else
-            return Orderr.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        return Orderr.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        if(params._2.size() == 0)
-            return Orderr.count(params._1);
-        else
-            return Orderr.count(params._1, params._2.toArray());
+        return Orderr.count(params._1, params._2.toArray());
     }
 
     @Override
