@@ -36,7 +36,7 @@ $ ->
     return false if !confirm("确认重新加载? 计算需要一点时间.")
     mask = $('#container')
     mask.mask('计算中...')
-    $.get('/c', key: 'TicketAnalyzes.index',
+    $.get('/c', key: 'TicketAnalyzes.show',
       (r) ->
         window.location.reload()
     )

@@ -49,18 +49,6 @@ public class Product extends GenericModel {
     @ManyToOne
     public Category category;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH}, orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<Product> relates;
-
-    /**
-     * 这个产品从 Category 继承 + 自身的所有的 attrNames 值;
-     * <p/>
-     * 如果某一时刻 Category 或者 Product 身上的 AttrName 被删除了, 这个记录的对应的 AttrName 的值
-     * 不受影响.
-     */
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "product")
-    public List<Attribute> attrs;
-
     @ManyToOne
     public Family family;
 
@@ -134,12 +122,6 @@ public class Product extends GenericModel {
         if(StringUtils.isBlank(this.productName))
             throw new FastRuntimeException("产品的名称不能为空!");
 
-        if(this.attrs != null && this.attrs.size() > 0) {
-            for(Attribute att : this.attrs) {
-                att.id = String.format("%s_%s", this.sku, att.attName.name);
-                att.product = this;
-            }
-        }
         this.save();
     }
 

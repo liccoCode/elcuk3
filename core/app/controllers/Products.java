@@ -63,10 +63,8 @@ public class Products extends Controller {
         Product pro = Product.findByMerchantSKU(id);
         List<Category> cats = Category.all().fetch();
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
-        List<AttrName> attnames = AttrName.productUnuseAttrName(pro);
 
-
-        render(pro, cats, qtys, attnames);
+        render(pro, cats, qtys);
     }
 
     public static void c_index(Integer p, Integer s) {
@@ -136,14 +134,10 @@ public class Products extends Controller {
 
     public static void cat_brands(Category c) {
         List<Brand> brands = c.brands;
-        List<AttrName> attrs = AttrName.all().fetch();
-        List<AttrName> cAttrs = c.attrNames;
 
 
         Map<String, Object> json = new HashMap<String, Object>();
         json.put("brands", brands);
-        json.put("attrs", attrs);
-        json.put("cAttrs", cAttrs);
 
         renderJSON(J.G(json));
     }
@@ -191,24 +185,6 @@ public class Products extends Controller {
             renderJSON(new Ret(false, Webs.E(e)));
         }
         renderJSON(new Ret(true));
-    }
-
-    public static void p_attr(List<Attribute> attrs, Product p) {
-        int saved = 0;
-        int update = 0;
-        for(Attribute a : attrs) {
-            Attribute ma = Attribute.findById(a.id);
-            if(ma != null && ma.isPersistent()) {
-                update++;
-                ma.updateAttr(a);
-            } else {
-                saved++;
-                a.product = p;
-                a.save();
-            }
-        }
-
-        renderJSON(new Ret(true, "Save:" + saved + ",Update:" + update));
     }
 
     public static void upcCheck(String upc) {

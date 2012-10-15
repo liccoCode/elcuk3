@@ -1,8 +1,6 @@
 package controllers;
 
 import helper.J;
-import helper.Webs;
-import models.product.AttrName;
 import models.product.Brand;
 import models.product.Category;
 import models.product.Family;
@@ -10,6 +8,7 @@ import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Valid;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -24,84 +23,69 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Categorys extends Controller {
 
-    public static void index() {
+    @Before(only = {"show", "update", "brand", "unbrand", "delete"})
+    public static void setUpShowPage() {
         List<Category> cates = Category.all().fetch();
-        render(cates);
+        renderArgs.put("cates", cates);
     }
 
-    public static void detail(String cid) {
-        Category cat = Category.findById(cid);
-        List<AttrName> attrs = AttrName.all().fetch();
-        List<Brand> brands = Brand.all().fetch();
-        for(Brand bingB : cat.brands) brands.remove(bingB);
-
-        render(cat, brands, attrs);
+    public static void show(String id) {
+        Category cat = (Category) renderArgs.get("cates", List.class).get(0);
+        if(StringUtils.isNotBlank(id)) cat = Category.findById(id);
+        render(cat);
     }
 
-    public static void bindAttrs(List<AttrName> ats, Category c) {
-        if(!c.isPersistent()) renderJSON(new Ret("Category(" + c.categoryId + ") 不存在!"));
-
-        try {
-            c.bindAndUnBindAttrs(ats);
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+    public static void update(Category cat) {
+        if(!Category.exist(cat.categoryId)) {
+            flash.error(String.format("Category %s 不存在!", cat.categoryId));
+            redirect("/Categorys/show");
         }
-        renderJSON(new Ret());
+        validation.valid(cat);
+        if(Validation.hasErrors()) render("Categorys/show.html", cat);
+        cat.save();
+        redirect("/Categorys/show/" + cat.categoryId);
     }
 
-    /**
-     * Category Create
-     *
-     * @param c
-     */
-    public static void cc(@Valid Category c) {
-        if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        if(c.isPersistent()) renderJSON(new Ret("Category has exist!"));
-        c.save();
-        renderJSON(J.G(c));
+    public static void brand(List<String> brandIds, String id) {
+        validation.required(brandIds);
+        Category cat = Category.findById(id);
+        if(Validation.hasErrors()) render("Categorys/show.html", cat);
+        cat.bindBrands(brandIds);
+        flash.success("绑定成功");
+        redirect("/Categorys/show/" + id);
     }
 
-    public static void cu(Category c) {
-        if(c == null || !c.isPersistent()) renderJSON(new Ret("Category is not Exist!"));
-        c.save();
-        renderJSON(new Ret(true, "Category[" + c.categoryId + "] Update Success!"));
+    public static void unbrand(List<String> brandIds, String id) {
+        validation.required(brandIds);
+        Category cat = Category.findById(id);
+        if(Validation.hasErrors()) render("Categorys/show.html", cat);
+        cat.unbindBrands(brandIds);
+        if(Validation.hasErrors()) render("Categorys/show.html", cat);
+        flash.success("解除绑定成功");
+        redirect("/Categorys/show/" + id);
     }
 
-    /**
-     * 绑定 Brand
-     */
-    public static void bBrand(Category c, Brand b) {
-        if(!c.isPersistent()) renderJSON(new Ret("Category 不存在."));
-        if(!b.isPersistent()) renderJSON(new Ret("Brand 不存在."));
-        if(c.brands.contains(b)) renderJSON(new Ret(String.format("Brand %s 已经存在了", b.name)));
-
-        c.brands.add(b);
-        c.save();
-
-        renderJSON(new Ret());
+    public static void delete(String id) {
+        checkAuthenticity();
+        Category cat = Category.findById(id);
+        cat.deleteCategory();
+        if(Validation.hasErrors()) render("Categorys/show.html", cat);
+        flash.success("Category %s 删除成功", cat.categoryId);
+        redirect("/Categorys/show");
     }
 
-    /**
-     * 解除绑定 Brand
-     *
-     * @param c
-     * @param b
-     */
-    public static void uBrand(Category c, Brand b) {
-        if(!c.isPersistent()) renderJSON(new Ret("Category 不存在."));
-        if(!b.isPersistent()) renderJSON(new Ret("Brand 不存在."));
-        if(c.brands.contains(b)) {
-            List<Family> fmys = Family.bcRelateFamily(b, c);
-            if(fmys != null && fmys.size() > 0) {
-                renderJSON(new Ret(String.format("Brand(%s) 与 Category(%s) 拥有 Family(%s) 不允许解除联系",
-                        b.name, c.name, StringUtils.join(fmys, ","))
-                ));
-            } else {
-                c.brands.remove(b);
-                c.save();
-            }
-        }
-
-        renderJSON(new Ret());
+    public static void blank() {
+        Category cat = new Category();
+        render(cat);
     }
+
+    public static void create(Category cat) {
+        if(StringUtils.isBlank(cat.categoryId)) Validation.addError("", "Category Id 必须填写");
+        validation.valid(cat);
+        if(Validation.hasErrors()) render("Categorys/blank.html", cat);
+        cat.save();
+        flash.success("创建成功.");
+        redirect("/Categorys/show/" + cat.categoryId);
+    }
+
 }

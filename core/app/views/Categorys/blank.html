@@ -1,0 +1,58 @@
+#{extends 'main.html'/}
+#{set title:'创建新 Category' /}
+#{set 'moreScripts'}
+#{/set}
+
+#{info_row title:'创建新的 Category', row:true/}
+<div class="row">
+#{flash_alert row:true/}
+
+    <div class="span12">
+    #{errorMsgs /}
+        <form action="@{Categorys.create()}" method="post">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <td>CategoryId:</td>
+                    <td><input type="text" name="cat.categoryId" value="${cat.categoryId}"></td>
+                    <td>Name:</td>
+                    <td><input class="input-medium" type="text" name="cat.name" value="${cat.name}"></td>
+                </tr>
+                <tr>
+                    <td>AmzNode:</td>
+                    <td colspan="3">
+                        <input type="text" class="span12" name="cat.settings.amazonNode" value="${cat.settings?.amazonNode}" placeHolder="此类别需要检查的 Node 值[,]分割">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px;">AmzCategory:</td>
+                    <td colspan="3">
+                        <input type="text" class="span12" name="cat.settings.amazonCategory" value="${cat.settings?.amazonCategory}" placeHolder="Amazon.com CLASSIFY 阶段的类型">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px;">AmzUKCategory:</td>
+                    <td colspan="3">
+                        <input type="text" class="span12" name="cat.settings.amazonUKCategory" value="${cat.settings?.amazonUKCategory}" placeHolder="Amazon.co.uk CLASSIFY 阶段的类型">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:100px;">AmzDECategory:</td>
+                    <td colspan="3">
+                        <input type="text" class="span12" name="cat.settings.amazonDECategory" value="${cat.settings?.amazonDECategory}" placeHolder="Amazon.de CLASSIFY 阶段的类型">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Memo:</td>
+                    <td colspan="3">
+                        <textarea name="cat.memo" class="span12" rows="10">${cat.memo}</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <button class="btn btn-primary" data-loading>保存</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>

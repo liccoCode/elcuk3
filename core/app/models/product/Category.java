@@ -3,6 +3,11 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import models.embedded.CategorySettings;
 import models.support.TicketReason;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import play.data.validation.Required;
+import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -23,14 +28,8 @@ public class Category extends GenericModel {
     @OrderBy("sku")
     public List<Product> products;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Brand> brands;
-
-    /**
-     * Category 本身就必须拥有一定量的 AttrName , 用来限定其下的产品的属性
-     */
-    @ManyToMany
-    public List<AttrName> attrNames;
 
     @OneToMany(mappedBy = "category")
     public List<TicketReason> reasons = new ArrayList<TicketReason>();
@@ -41,6 +40,7 @@ public class Category extends GenericModel {
 
     @Column(nullable = false, unique = true)
     @Expose
+    @Required
     public String name;
 
     @Lob
@@ -56,18 +56,63 @@ public class Category extends GenericModel {
         return String.format("%s:%s", this.categoryId, this.name);
     }
 
-    public void bindAndUnBindAttrs(List<AttrName> attrNames) {
-        /**
-         * 删除的时候有什么限制吗?
-         *  对于 Category 上的, 删除了就删除了, 在 Product 中已经存在的不理会,让其继续存在就好了,
-         *  在这个 Category 下新创建的 Product 才会收到影响
-         */
-        // 把 Category 所有的清理掉, 然后再重新绑定
-        this.attrNames.clear();
-        if(attrNames != null)
-            for(AttrName at : attrNames) this.attrNames.add(at);
+    /**
+     * Category 绑定品牌
+     *
+     * @param brandIds
+     */
+    public void bindBrands(List<String> brandIds) {
+        List<Brand> brands = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
+        // 过滤出不存在与此 Category 的 brand
+        CollectionUtils.filter(brands, new FilterUnBrands(this.brands));
+        this.brands.addAll(brands);
         this.save();
     }
+
+    /**
+     * 解除绑定
+     *
+     * @param brandIds
+     */
+    public void unbindBrands(List<String> brandIds) {
+        List<Brand> brands = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
+        for(Brand brand : brands) {
+            if(Family.bcRelateFamily(brand, this).size() > 0) {
+                Validation.addError("", String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", brand.name, this.categoryId));
+                return;
+            }
+            this.brands.remove(brand);
+        }
+        this.save();
+    }
+
+    /**
+     * 删除这个 Category, 需要进行删除检查
+     */
+    public void deleteCategory() {
+        /**
+         * 1. 有没有绑定的 Brand
+         * 2. 绑定的每一个 Brand 是否有 Family
+         */
+        if(this.brands.size() > 0)
+            Validation.addError("", String.format("拥有 %s brands 关联, 无法删除.", this.brands.size()));
+        if(this.reasons.size() > 0)
+            Validation.addError("", String.format("拥有 %s TicketReason 关联, 无法删除.", this.reasons.size()));
+        if(Validation.hasErrors()) return;
+        this.delete();
+    }
+
+    /**
+     * 没有绑定关系的品牌
+     *
+     * @return
+     */
+    public List<Brand> unbrands() {
+        List<Brand> brands = Brand.all().fetch();
+        CollectionUtils.filter(brands, new FilterUnBrands(this.brands));
+        return brands;
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -87,5 +132,26 @@ public class Category extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + (categoryId != null ? categoryId.hashCode() : 0);
         return result;
+    }
+
+    public static boolean exist(String id) {
+        return Category.count("categoryId=?", id) > 0;
+    }
+
+    /**
+     * 过滤出没有绑定的 Brands
+     */
+    private static class FilterUnBrands implements Predicate {
+        private List<Brand> existBrands;
+
+        private FilterUnBrands(List<Brand> existBrands) {
+            this.existBrands = existBrands;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            Brand brand = (Brand) o;
+            return !existBrands.contains(brand);
+        }
     }
 }
