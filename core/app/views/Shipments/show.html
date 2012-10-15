@@ -204,7 +204,7 @@
             </button>
         </form>
     #{/if}
-    #{elseif ship.state == models.procure.Shipment.S.DONE && ship.fbaShipment}
+    #{elseif ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM] && ship.fbaShipment}
         <form action="@{Shipments.updateFba()}" method="post" class="pull-left">
             #{authenticityToken /}
             <input type="hidden" name="id" value="${ship.id}">
