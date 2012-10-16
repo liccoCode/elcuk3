@@ -488,6 +488,30 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 根据此 Shipment 创建一个 FBAShipment
+     * <p/>
+     * ps: 这个方法不允许并发
+     *
+     * @return
+     */
+    public synchronized FBAShipment postFBAShipment() {
+        try {
+            this.fbaShipment = FBA.plan(this);
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
+        }
+        try {
+            if(this.fbaShipment != null) {
+                this.fbaShipment.state = FBA.create(this.fbaShipment, this);
+                this.fbaShipment.save();
+            }
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("shipment.postFBAShipment.create", "%s " + Webs.E(e));
+        }
+        return this.fbaShipment;
+    }
+
+    /**
      * 确认运输单以后, 向 Amazon 创建 FBAShipment
      * <p/>
      * ps: 这个方法不允许并发
@@ -535,11 +559,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             item.unit.stage = item.unit.nextStage();
         }
         if(Validation.hasErrors()) return;
-        try {
-            this.fbaShipment.state = FBA.update(this.fbaShipment, this, FBAShipment.S.SHIPPED);
-        } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
-        }
+        this.updateFbaShipment();
         if(Validation.hasErrors()) return;
         for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();
@@ -591,31 +611,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 Messages.get("shipment.splitShipment.msg", StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
                 this.id).save();
         return newShipment;
-    }
-
-
-    /**
-     * 根据此 Shipment 创建一个 FBAShipment
-     * <p/>
-     * ps: 这个方法不允许并发
-     *
-     * @return
-     */
-    public synchronized FBAShipment postFBAShipment() {
-        try {
-            this.fbaShipment = FBA.plan(this);
-        } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
-        }
-        try {
-            if(this.fbaShipment != null) {
-                this.fbaShipment.state = FBA.create(this.fbaShipment, this);
-                this.fbaShipment.save();
-            }
-        } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("shipment.postFBAShipment.create", "%s " + Webs.E(e));
-        }
-        return this.fbaShipment;
     }
 
     /**

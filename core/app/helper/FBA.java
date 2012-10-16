@@ -49,12 +49,8 @@ public class FBA {
         plan.setShipFromAddress(Account.address(shipment.whouse.account.type));
 
         // 要发送的货物
-        List<InboundShipmentPlanRequestItem> planItems = new ArrayList<InboundShipmentPlanRequestItem>();
-        for(ShipItem item : shipment.items) {
-            planItems.add(new InboundShipmentPlanRequestItem(item.unit.selling.merchantSKU, null, null, item.qty));
-        }
+        plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(FBA.shipItemsToInboundShipmentPlanItems(shipment.items)));
 
-        plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(planItems));
         CreateInboundShipmentPlanResponse response = client(shipment.whouse.account).createInboundShipmentPlan(plan);
         CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
 
@@ -192,6 +188,8 @@ public class FBA {
      * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentItem 中
      * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
      *
+     * ps: 创建 FBA, 更新 FBA 时使用
+     *
      * @param shipitems
      * @return
      */
@@ -200,13 +198,7 @@ public class FBA {
          * 1. 根据 ShipItem 的 msku 组成 Map
          * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
          */
-        Map<String, AtomicInteger> shipitemsMap = new HashMap<String, AtomicInteger>();
-        for(ShipItem item : shipitems) {
-            if(shipitemsMap.containsKey(item.unit.selling.merchantSKU))
-                shipitemsMap.get(item.unit.selling.merchantSKU).addAndGet(item.qty);
-            else
-                shipitemsMap.put(item.unit.selling.merchantSKU, new AtomicInteger(item.qty));
-        }
+        Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
 
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
         for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
@@ -214,6 +206,49 @@ public class FBA {
             items.add(new InboundShipmentItem(null, entry.getKey(), null, entry.getValue().get(), null));
         }
         return items;
+    }
+
+    /**
+     * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentPlanRequestItem
+     * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentPlanRequestItem 中
+     * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
+     *
+     * ps: 创建计划时时候
+     *
+     * @param shipitems
+     * @return
+     */
+    private static List<InboundShipmentPlanRequestItem> shipItemsToInboundShipmentPlanItems(List<ShipItem> shipitems) {
+        Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
+
+        List<InboundShipmentPlanRequestItem> items = new ArrayList<InboundShipmentPlanRequestItem>();
+        for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
+            // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
+            items.add(new InboundShipmentPlanRequestItem(entry.getKey(), null, null, entry.getValue().get()));
+        }
+        return items;
+    }
+
+
+    /**
+     * 将 ShipItem 中由于相同 msku 的数量进行合并, Amazon 不允许分开提交.
+     *
+     * @param shipItems
+     * @return
+     */
+    private static Map<String, AtomicInteger> shipItemMerge(List<ShipItem> shipItems) {
+        /**
+         * 1. 根据 ShipItem 的 msku 组成 Map
+         * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
+         */
+        Map<String, AtomicInteger> shipitemsMap = new HashMap<String, AtomicInteger>();
+        for(ShipItem item : shipItems) {
+            if(shipitemsMap.containsKey(item.unit.selling.merchantSKU))
+                shipitemsMap.get(item.unit.selling.merchantSKU).addAndGet(item.qty);
+            else
+                shipitemsMap.put(item.unit.selling.merchantSKU, new AtomicInteger(item.qty));
+        }
+        return shipitemsMap;
     }
 
 
