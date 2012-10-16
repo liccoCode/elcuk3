@@ -196,6 +196,12 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
+    /**
+     * 用来为 Shipment 关联系统中已经存在的 FBAShipemnt
+     * PS: 暂时取消使用
+     * @param id
+     * @param shipmentId
+     */
     public static void assignFbaShipmentId(String id, String shipmentId) {
         Shipment ship = Shipment.findById(id);
         ship.fbaShipment = FBAShipment.findByShipmentId(shipmentId);

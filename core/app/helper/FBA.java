@@ -8,13 +8,11 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import models.ElcukRecord;
 import models.market.Account;
 import models.market.Selling;
-import models.procure.FBAShipment;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.i18n.Messages;
+import play.libs.F;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -66,17 +64,21 @@ public class FBA {
             fbaShipment.shipments.add(shipment);
 
             fbaShipment.shipmentId = member.getShipmentId();
-            fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
             fbaShipment.labelPrepType = member.getLabelPrepType();
 
-            Address shipToAddress = member.getShipToAddress();
-            fbaShipment.addressLine1 = shipToAddress.getAddressLine1();
-            fbaShipment.addressLine2 = shipToAddress.getAddressLine2();
-            fbaShipment.city = shipToAddress.getCity();
-            fbaShipment.name = shipToAddress.getName();
-            fbaShipment.countryCode = shipToAddress.getCountryCode();
-            fbaShipment.stateOrProvinceCode = shipToAddress.getStateOrProvinceCode();
-            fbaShipment.postalCode = shipToAddress.getPostalCode();
+            fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
+
+            // FBA 仓库自适应
+            FBACenter center = FBACenter.findByCenterId(fbaShipment.centerId);
+            if(center == null) {
+                Address fbaAddress = member.getShipToAddress();
+                center = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
+                        fbaAddress.getAddressLine2(), fbaAddress.getCity(),
+                        fbaAddress.getName(), fbaAddress.getCountryCode(),
+                        fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
+                ).save();
+            }
+            fbaShipment.fbaCenter = center;
 
             // Items
             InboundShipmentPlanItemList itemList = member.getItems();
@@ -135,6 +137,7 @@ public class FBA {
         CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
         if(response.isSetCreateInboundShipmentResult()) {
             fbashipment.title = fbaTitle;
+            fbashipment.createAt = new Date();
             return FBAShipment.S.WORKING;
         }
         return FBAShipment.S.PLAN;
@@ -175,19 +178,46 @@ public class FBA {
         update.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
-        if(response.isSetUpdateInboundShipmentResult()) {
+        if(response.isSetUpdateInboundShipmentResult())
             fbaShipment.state = state;
-            return fbaShipment.state;
-        }
         return fbaShipment.state;
     }
+
+    /**
+     * 根据 FBAShipment 获取 Amazon 上的状态.
+     * @param shipmentIds 此账户相关的 FBA ShipmentId
+     * @param account 请求的账户
+     * @return shipmentId : {._1:state, ._2:centerId, ._3:shipmentName}
+     */
+    public static Map<String, F.T3<String, String, String>> listShipments(List<String> shipmentIds, Account account) throws FBAInboundServiceMWSException {
+        Validate.notNull(shipmentIds);
+        Validate.notNull(account);
+        Validate.isTrue(shipmentIds.size() <= 50, "检查 Shipments 的时候, ShipmentIds 的数量必须小于 50 当前数量 " + shipmentIds.size() + ".");
+        Validate.isTrue(shipmentIds.size() <= 0, "需要至少一个 ShipmentId..");
+        ListInboundShipmentsRequest listShipments = new ListInboundShipmentsRequest();
+        listShipments.setSellerId(account.merchantId);
+        listShipments.setShipmentIdList(new ShipmentIdList(shipmentIds));
+        ListInboundShipmentsResponse response = client(account).listInboundShipments(listShipments);
+        List<InboundShipmentInfo> inbounds = response.getListInboundShipmentsResult().getShipmentData().getMember();
+
+        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<String, F.T3<String, String, String>>();
+        for(InboundShipmentInfo info : inbounds) {
+            // Amazon 对于重复提交的 FBA ShipmentId 不会做限制, 所以有过的信息不需要再记录
+            if(shipmentsT3.containsKey(info.getShipmentId()))
+                continue;
+            shipmentsT3.put(info.getShipmentId(),
+                    new F.T3<String, String, String>(info.getShipmentStatus(), info.getDestinationFulfillmentCenterId(), info.getShipmentName()));
+        }
+        return shipmentsT3;
+    }
+
 
 
     /**
      * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentItem
      * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentItem 中
      * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
-     *
+     * <p/>
      * ps: 创建 FBA, 更新 FBA 时使用
      *
      * @param shipitems
@@ -212,7 +242,7 @@ public class FBA {
      * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentPlanRequestItem
      * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentPlanRequestItem 中
      * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
-     *
+     * <p/>
      * ps: 创建计划时时候
      *
      * @param shipitems
@@ -252,6 +282,11 @@ public class FBA {
     }
 
 
+    /**
+     * 获取 FBA 的 FWS 的 client
+     * @param acc
+     * @return
+     */
     private static FBAInboundServiceMWSClient client(Account acc) {
         if(!acc.isSaleAcc) throw new IllegalArgumentException("需要销售账户!");
         String key = String.format("%s_%s", acc.type, acc.id);

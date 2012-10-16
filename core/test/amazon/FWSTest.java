@@ -8,6 +8,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import helper.Dates;
+import helper.J;
 import models.market.Account;
 import models.market.M;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import play.test.UnitTest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,8 +27,8 @@ import java.util.List;
  */
 public class FWSTest extends UnitTest {
     FBAInboundServiceMWSClient client;
-    //    String sellerId = "AJUR3R8UN71M4";//uk
-    String sellerId = "A3RJNQO8PQ21MT";//us
+    String sellerId = "AJUR3R8UN71M4";//uk
+//    String sellerId = "A3RJNQO8PQ21MT";//us
 
     @Before
     public void client() {
@@ -37,8 +39,8 @@ public class FWSTest extends UnitTest {
         FBAInboundServiceMWSConfig config = new FBAInboundServiceMWSConfig();
 
         // 设置服务器地址
-//        config.setServiceURL(MWSEndpoint.US.toString());
         config.setServiceURL(MWSEndpoint.UK.toString());
+//        config.setServiceURL(MWSEndpoint.US.toString());
 
         try {
 
@@ -146,7 +148,7 @@ public class FWSTest extends UnitTest {
         System.out.println("==========================[" + response.getResponseMetadata().getRequestId() + "]================================");
     }
 
-    @Test
+    //    @Test
     public void update() throws FBAInboundServiceMWSException {
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(sellerId);
@@ -158,6 +160,36 @@ public class FWSTest extends UnitTest {
         UpdateInboundShipmentResponse response = client.updateInboundShipment(update);
         System.out.println("* ShipmentId: [" + response.getUpdateInboundShipmentResult().getShipmentId() + "]");
         System.out.println("==========================[" + response.getResponseMetadata().getRequestId() + "]================================");
+    }
+
+
+    //    @Test
+    public void fetchFBAShipmentItems() throws FBAInboundServiceMWSException {
+        ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest();
+        // 查看 WORKING 状态的, RECIVING 状态的和 CLOSE 状态的
+        request.setShipmentId("FBA5YTXH0");
+        request.setSellerId(sellerId);
+        ListInboundShipmentItemsResponse response = client.listInboundShipmentItems(request);
+
+        InboundShipmentItemList items = response.getListInboundShipmentItemsResult().getItemData();
+        List<InboundShipmentItem> inboundItems = items.getMember();
+        for(InboundShipmentItem item : inboundItems) {
+            System.out.println(J.json(item));
+        }
+    }
+
+    @Test
+    public void fetchFBAShipments() throws FBAInboundServiceMWSException {
+        ListInboundShipmentsRequest request = new ListInboundShipmentsRequest();
+        request.setSellerId(sellerId);
+        request.setShipmentIdList(new ShipmentIdList(Arrays.asList("FBA5YTXH0", "FBA5VSVJ5", "FBA5MW91C", "FBA5NTVCH", /*duplicate*/"FBA5YTXH0")));
+
+        ListInboundShipmentsResponse response = client.listInboundShipments(request);
+        InboundShipmentList inbounds = response.getListInboundShipmentsResult().getShipmentData();
+        List<InboundShipmentInfo> infos = inbounds.getMember();
+        for(InboundShipmentInfo info : infos) {
+            System.out.println(J.json(info));
+        }
     }
 
 

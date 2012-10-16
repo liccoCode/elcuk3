@@ -19,6 +19,9 @@
     <li>在运输单标记开始运输之前, 都可以对信息进行更改,调整</li>
     <li>Fnsku 会在运输单确认以后, 进行一次同步</li>
     <li>总体积单位为 m3 ,总重量单位为 kg; 如果发现数据为 0, 请检查 Product 数据是否填充完整.</li>
+    <li class="text-error">如果拥有 <i style="color:#C09853;" class="icon-star"></i> 标记, 为周期型运输单, 其不允许创建 FBA Shipment,
+        而是用来接收 PM 的采购计划.
+    </li>
     <li class="text-error">如果是 Create By System, 那么在第一次更新时会设置创建者为更新者</li>
 </ul>
 #{/info_row}
@@ -179,24 +182,9 @@
     </div>
 </div>
 
-#{if ship.fbaShipment}
-    #{render 'Shipments/_fba_shipment.html', fba:ship.fbaShipment/}
-#{/if}
 <div class="row-fluid">
     <div class="span12" style="margin-bottom:15px;">
-    #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
-        <a href="@{Shipments.shipItem()}/${ship.id}" style="margin-right:10px;" class="btn btn-primary pull-left">修改运输项目</a>
-    #{/if}
-
     #{if !ship.fbaShipment && ship.state == models.procure.Shipment.S.PLAN}
-        <form action="@{Shipments.assignFbaShipmentId()}" method="post" class="pull-left">
-            <div class="input-append">
-                <input type="hidden" name="id" value="${ship.id}">
-                <input type="text" name="shipmentId" value="" style="width:120px;" placeHolder="关联已经存在的 FBA" data-provide="typeahead" data-source="${fbas}">
-                <button class="btn btn-info" style="margin-right:10px;">关联</button>
-            </div>
-        </form>
-
         <form action="@{Shipments.deployToAmazon()}" method="post" class="pull-left">
             <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
@@ -205,14 +193,7 @@
             </button>
         </form>
     #{/if}
-    #{elseif ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM] && ship.fbaShipment}
-        <form action="@{Shipments.updateFba()}" method="post" class="pull-left">
-            #{authenticityToken /}
-            <input type="hidden" name="id" value="${ship.id}">
-            <input type="hidden" name="act" value="update">
-            <button data-confirm="btn" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment</button>
-        </form>
-    #{/elseif}
+
 
     #{if isPlanAndConfirm}
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
@@ -242,23 +223,34 @@
     </div>
 </div>
 
-#{info_row title:'运输项目 <i class="icon-caret-down"></i>'.raw() /}
 
+#{if ship.fbaShipment}
+    #{render 'Shipments/_fba_shipment.html', ship:ship/}
+#{/if}
+
+#{info_row title:'运输项目' /}
 <div class="row-fluid">
     <div class="span12">
         <form action="@{Shipments.splitShipment()}" method="post">
         #{render 'Shipments/_shipitem.html', items:ship.items/}
+        #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
+            <a href="@{Shipments.shipItem()}/${ship.id}" style="margin-right:10px;" class="btn btn-primary pull-left">修改运输项目</a>
+        #{/if}
             <div class="input-prepend input-append">
                 <span rel="popover" placement="right" content="适用于同一个 FBA Shipment 但是分为多票运输" class="add-on"><i class="icon-question-sign"></i></span>
                 <input type="hidden" name="id" value="${ship.id}">
                 <button data-confirm="btn" class="btn btn-danger">分拆运输单</button>
             </div>
         </form>
+
+
     </div>
 </div>
 
-#{info_row title:'相同 FBA Shipment 的运输单'/}
-#{render 'Shipments/_shipment_list.html', shipments:sameFbaShips/}
+#{if sameFbaShips && sameFbaShips.size() > 0}
+    #{info_row title:'相同 FBA Shipment 的运输单'/}
+    #{render 'Shipments/_shipment_list.html', shipments:sameFbaShips/}
+#{/if}
 
 #{records records:records/}
 

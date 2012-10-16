@@ -31,3 +31,7 @@ span.highlight{
     width:80px;
     left:20px;
 }
+
+.alert ul{
+    margin-top:10px;
+}

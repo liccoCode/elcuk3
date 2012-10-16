@@ -1,7 +1,52 @@
+#{info_row title:'Amazon FBA 信息'/}
+#{set fba:ship.fbaShipment/}
 <div class="row-fluid">
     <div class="span12">
-        <a href="${fba.fbaLink()}" target="_blank" class="btn btn-inverse"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
-        <a href="@{PDFs.packingSlip()}/${fba.shipmentId}" class="btn btn-success"><i class="icon-download-alt"></i> 箱内麦</a>
-        <a href="@{PDFs.boxLabel()}/${fba.shipmentId}" class="btn btn-success"><i class="icon-download-alt"></i> 箱外麦</a>
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th>ShipmentId</th>
+                <td><a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
+                </td>
+
+                <th>状态</th>
+                <td><a href="javascript:;" rel="popover" content="${fba.state.msg()}" title="解释">${fba.state}</a></td>
+
+
+                <th>Item Label</th>
+                <td><a href="javascript:;"rel="popover" content="SELLER_LABEL: 卖家自行贴标" title="打标方式">${fba.labelPrepType}</a></td>
+            </tr>
+
+            <tr>
+                <th>创建时间</th>
+                <td>#{time_tooltip time:fba.createAt /}</td>
+
+                <th>开始接收时间</th>
+                <td>#{time_tooltip time:fba.receivingAt /}</td>
+
+                <th>关闭时间</th>
+                <td>#{time_tooltip time:fba.closeAt /}</td>
+            </tr>
+
+            <tr>
+                <td colspan="6">
+                    <a href="@{PDFs.packingSlip()}/${fba.shipmentId}" class="btn btn-success">
+                        <i class="icon-download-alt"></i> 箱内麦
+                    </a>
+                    <a href="@{PDFs.boxLabel()}/${fba.shipmentId}" class="btn btn-success">
+                        <i class="icon-download-alt"></i> 箱外麦
+                    </a>
+
+                #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
+                    <form action="@{Shipments.updateFba()}" method="post" class="pull-left" style="margin-bottom:0;">
+                        #{authenticityToken /}
+                        <input type="hidden" name="id" value="${ship.id}">
+                        <input type="hidden" name="act" value="update">
+                        <button data-confirm="btn" class="btn btn-danger" style="margin-right:10px;">更新 FBA Shpiment
+                        </button>
+                    </form>
+                #{/if}
+                </td>
+            </tr>
+        </table>
     </div>
 </div>

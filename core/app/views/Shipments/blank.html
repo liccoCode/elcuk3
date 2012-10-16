@@ -7,7 +7,11 @@
 
 #{errorMsgs /}
 
-#{info_row title:'创建一份运输单, 此阶段收集基本信息' /}
+#{info_row title:'创建一份运输单, 此阶段收集基本信息'}
+<ul>
+    <li class="text-error">周期型运输单并不可以创建 FBA Shipment, 是为了给 PM 使用, 用来收集他所采购的货物的运输信息, 具体运输情况需运输人员自行制作</li>
+</ul>
+#{/info_row}
 
 
 <div class="row-fluid">
@@ -65,6 +69,12 @@
                     </td>
                     <td>计价方式</td>
                     <td><input type="text" readonly="" value="${ship.pype.name()}"></td>
+                </tr>
+                <tr>
+                    <th>是否为周期型</th>
+                    <td><label><input type="checkbox" value="false" name="ship.cycle"></label></td>
+
+                    <td colspan="2"></td>
                 </tr>
 
                 <tr>

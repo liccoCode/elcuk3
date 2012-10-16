@@ -25,6 +25,13 @@ import javax.persistence.Entity;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Jobex extends Model {
 
+    public Jobex() {
+    }
+
+    public Jobex(boolean close) {
+        this.close = close;
+    }
+
     @Column(unique = true, nullable = false)
     @Required
     public String className;
@@ -143,6 +150,9 @@ public class Jobex extends Model {
     }
 
     public static Jobex findByClassName(String className) {
-        return Jobex.find("className=?", className).first();
+        Jobex jobex = Jobex.find("className=?", className).first();
+        // 自动处理没有在数据库中存在的 Job, 不让执行
+        if(jobex == null) jobex = new Jobex(true);
+        return jobex;
     }
 }
