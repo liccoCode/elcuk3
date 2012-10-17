@@ -181,7 +181,7 @@ public class FBAShipment extends Model {
     public Date closeAt;
 
     /**
-     * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒
+     * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
      *
      * @param state
      */
@@ -189,6 +189,8 @@ public class FBAShipment extends Model {
         if(this.state != state)
             SystemMails.fbaShipmentStateChange(this, this.state, state);
         this.state = state;
+        if(this.state == S.RECEIVING) this.receivingAt = new Date();
+        else if(this.state == S.CLOSED) this.closeAt = new Date();
     }
 
     public String address() {
