@@ -5,6 +5,7 @@ import helper.Webs;
 import models.Jobex;
 import models.market.Account;
 import models.procure.FBAShipment;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
@@ -52,7 +53,8 @@ public class AmazonFBAWatchJob extends Job {
                         }
                     }
                 } catch(Exception e) {
-                    Logger.warn(String.format("Update FBA Shipment failed. %s", Webs.E(e)));
+                    Logger.warn(String.format("Update Account %s FBA Shipment failed. ShipmentIds: %s. %s",
+                            acc.prettyName(), StringUtils.join(shipmentIds, ","), Webs.E(e)));
                 }
             }
 
