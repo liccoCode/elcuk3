@@ -1,7 +1,7 @@
 package models.procure;
 
 import models.market.Account;
-import org.apache.commons.lang.StringUtils;
+import notifiers.SystemMails;
 import play.db.jpa.Model;
 import query.FBAShipmentQuery;
 
@@ -105,6 +105,7 @@ public class FBAShipment extends Model {
 
         /**
          * 状态的解释信息
+         *
          * @return
          */
         public abstract String msg();
@@ -185,9 +186,8 @@ public class FBAShipment extends Model {
      * @param state
      */
     public void isNofityState(S state) {
-        if(this.state != state) {
-            //TODO Notify An email.
-        }
+        if(this.state != state)
+            SystemMails.fbaShipmentStateChange(this, this.state, state);
         this.state = state;
     }
 

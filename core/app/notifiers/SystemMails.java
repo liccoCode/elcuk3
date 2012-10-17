@@ -5,6 +5,7 @@ import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Selling;
+import models.procure.FBAShipment;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.joda.time.DateTime;
@@ -70,6 +71,26 @@ public class SystemMails extends Mailer {
         addRecipient("alerts@easyacceu.com");
         try {
             send(productAndSellT2s);
+        } catch(Exception e) {
+            Logger.warn(Webs.E(e));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * FBA 的状态改变的时候发送邮件
+     * @param fba
+     * @param oldState FBA 的原始状态
+     * @param newState FBA 改变的新状态
+     * @return
+     */
+    public static /*Mailer 的返回值必须为基本类型*/boolean fbaShipmentStateChange(FBAShipment fba, FBAShipment.S oldState, FBAShipment.S newState) {
+        setSubject(String.format("{INFO} FBA %s state FROM %s To %s", fba.shipmentId, oldState, newState));
+        mailBase();
+        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
+        try {
+            send(fba, oldState, newState);
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;

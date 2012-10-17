@@ -1,0 +1,43 @@
+<table>
+    <tr>
+        <td colspan="6">
+            <h4>State From <span style="color:#2857CC">${oldState}</span> to
+                <span style="color:#5DBB5D;">${newState}</span></h4>
+        </td>
+    </tr>
+
+    <tr>
+        <th>ShipmentId</th>
+        <td>
+            <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
+        </td>
+
+        <th>状态</th>
+        <!-- 使用 newState 是因为发送邮件的时候在内存中 fba.state 还没有修改 -->
+        <td>${newState}</td>
+
+        <th>Item Label</th>
+        <td>${fba.labelPrepType}</td>
+    </tr>
+
+    <tr>
+        <th>创建时间</th>
+        <td>#{time_tooltip time:fba.createAt /}</td>
+
+        <th>开始接收时间</th>
+        <td>#{time_tooltip time:fba.receivingAt /}</td>
+
+        <th>关闭时间</th>
+        <td>#{time_tooltip time:fba.closeAt /}</td>
+    </tr>
+</table>
+
+
+<hr>
+<h4>帮助</h4>
+<ul>
+    <li>SELLER_LABEL: 卖家自行贴标</li>
+#{list items:models.procure.FBAShipment.S.values()}
+    <li>${_}: ${_.msg()}</li>
+#{/list}
+</ul>

@@ -191,6 +191,7 @@ public class Shipments extends Controller {
 
         ship.beginShip();
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
         flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", ship.fbaShipment.shipmentId);
 
         redirect("/shipments/show/" + id);
@@ -199,6 +200,7 @@ public class Shipments extends Controller {
     /**
      * 用来为 Shipment 关联系统中已经存在的 FBAShipemnt
      * PS: 暂时取消使用
+     *
      * @param id
      * @param shipmentId
      */
@@ -224,6 +226,7 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         ship.confirmAndSyncTOAmazon();
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", ship.fbaShipment.shipmentId), ship.id).save();
         flash.success("Amazon FBA Shipment 创建成功");
         redirect("/shipments/show/" + id);
     }
@@ -235,10 +238,18 @@ public class Shipments extends Controller {
         Validation.required("shipments.updateFba.action", act);
         Shipment ship = Shipment.findById(id);
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
-        if("update".equals(act)) ship.updateFbaShipment();
-        else flash.error("需要执行的 Action 不正确.");
+        if("update".equals(act)) {
+            ship.updateFbaShipment();
+        } else {
+            //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
+            flash.error("需要执行的 Action 不正确.");
+        }
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        if("update".equals(act)) {
+            new ElcukRecord(Messages.get("shipment.updateFBA"),
+                    Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", ship.fbaShipment.shipmentId, ship.items.size())),
+                    ship.id).save();
+        }
         redirect("/shipments/show/" + id);
     }
 

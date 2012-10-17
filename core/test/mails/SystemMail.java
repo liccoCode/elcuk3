@@ -1,6 +1,7 @@
 package mails;
 
 import helper.Webs;
+import models.procure.FBAShipment;
 import notifiers.SystemMails;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -17,8 +18,14 @@ public class SystemMail extends UnitTest {
         Webs.systemMail("SYSTEM MAIL TEST!", "dfjkjkdjfkdjfkjdjfkj");
     }
 
-    @Test
+    //    @Test
     public void testDailyReviewMail() {
         assertEquals(true, SystemMails.dailyReviewMail(null));
+    }
+
+    @Test
+    public void testFBAShipmentStateChangeMail() {
+        FBAShipment fba = FBAShipment.all().first();
+        SystemMails.fbaShipmentStateChange(fba, fba.state, FBAShipment.S.RECEIVING);
     }
 }

@@ -374,7 +374,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
         if(this.whouse != null) {
             long samewhouseItems = ShipmentQuery.shipemntItemCountWithSameWhouse(this.id, this.whouse.id);
-            if(samewhouseItems != this.items.size()) Validation.addError("shipment.item.whouse", "%s");
+            if(samewhouseItems != this.items.size()) Validation.addError("", "运输单中拥有与运输单去往仓库不一样的运输单项目");
         }
         // 避免 trackNo 为 '' 的时候进入唯一性判断错误
         if(StringUtils.isBlank(this.trackNo)) this.trackNo = null;
@@ -415,7 +415,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 1. 检查运输单总重量只能在 300kg 以下
          * 2. 如果运输的是电池, 则需要单独运输
          */
-        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("shipments.addShip", "%s");
+        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "只有 PLAN 与 CONFIRM 状态可以添加运输项目");
         if(Validation.hasErrors()) return;
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
         if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
@@ -429,12 +429,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
             int shipSize = shipQty.get(i);
             if(!unit.whouse.equals(this.whouse)) {
-                Validation.addError("shipment.addToShip.whouse", "%s");
+                Validation.addError("", "运往仓库不一致");
                 return;
             }
             F.T3<Integer, Integer, List<String>> leftQty = unit.leftQty();
             if(leftQty._1 < shipSize) {
-                Validation.addError("shipment.addToShip.shipQty", "%s");
+                Validation.addError("", "运输的数量无法大于采购的数量");
                 break;
             }
 
@@ -466,7 +466,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ShipItem itm : items) {
             if(!itm.shipment.equals(this)) {
-                Validation.addError("shipment.cancelShip", "%s");
+                Validation.addError("", "取消的运输单项不属于对应运输单");
                 return;
             } else {
                 F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
@@ -498,7 +498,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         try {
             this.fbaShipment = FBA.plan(this);
         } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("shipment.postFBAShipment.plan", "%s " + Webs.E(e));
+            Validation.addError("", "向 Amazon 创建 Shipment Plan 错误 " + Webs.E(e));
         }
         try {
             if(this.fbaShipment != null) {
@@ -506,7 +506,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 this.fbaShipment.save();
             }
         } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("shipment.postFBAShipment.create", "%s " + Webs.E(e));
+            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
         return this.fbaShipment;
     }
@@ -538,13 +538,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 会通过 Record 去寻找从当前 FBAShipemnt 中删除的 ShipItem, 需要将其先从 FBA 中删除了再更新
      */
     public synchronized void updateFbaShipment() {
-        List<ShipItem> dealItems = new ArrayList<ShipItem>();
-        dealItems.addAll(this.items);
-        dealItems.addAll(FBA.deleteShipItem(this.id));
+        List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
+        toBeUpdateItems.addAll(this.items);
+        toBeUpdateItems.addAll(FBA.deleteShipItem(this.id));
         try {
-            this.fbaShipment.state = FBA.update(this.fbaShipment, dealItems, this.fbaShipment.state);
+            this.fbaShipment.state = FBA.update(this.fbaShipment, toBeUpdateItems, this.fbaShipment.state);
         } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("shipment.beginShip.update", "%s " + Webs.E(e));
+            Validation.addError("", "向 Amazon 更新失败. " + Webs.E(e));
         }
         if(Validation.hasErrors()) return;
         this.fbaShipment.save();
@@ -567,7 +567,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();
         this.state = S.SHIPPING;
-        new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", this.id), this.id).save();
         this.save();
     }
 
@@ -599,11 +598,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 每一票运输单对应一个唯一的 tracking number.
      */
     public Shipment splitShipment(List<String> shipItemIds) {
-        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "shipment.splitShipment.state");
+        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "分拆运输单只运输在 \"计划\" 与 \"确认运输\" 状态");
         List<ShipItem> needSplitItems = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
         Shipment newShipment = new Shipment(this);
         if(needSplitItems.size() != shipItemIds.size())
-            Validation.addError("", "shipment.splitShipment.size");
+            Validation.addError("", "分拆运输单的运输项目数量与数据库中记录的不一致");
         if(Validation.hasErrors()) return null;
         newShipment.save();
         for(ShipItem spitem : needSplitItems) {
