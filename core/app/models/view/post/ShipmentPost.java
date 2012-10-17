@@ -46,6 +46,11 @@ public class ShipmentPost extends Post {
      */
     public Boolean isCycle;
 
+    /**
+     * 是否已经创建了 FBA
+     */
+    public Boolean isHaveFBA;
+
     public long whouseId;
 
     @Override
@@ -83,8 +88,15 @@ public class ShipmentPost extends Post {
         }
 
         if(this.isCycle != null) {
-            sbd.append(" AND cycle=?");
+            sbd.append(" AND s.cycle=?");
             params.add(this.isCycle);
+        }
+
+        if(this.isHaveFBA != null) {
+            if(this.isHaveFBA)
+                sbd.append(" AND s.fbaShipment IS NOT NULL");
+            else
+                sbd.append(" AND s.fbaShipment IS NULL");
         }
 
         if(this.iExpress != null) {

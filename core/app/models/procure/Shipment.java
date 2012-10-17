@@ -41,6 +41,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment() {
         this.createDate = new Date();
+        // 暂时这么写
+        this.source = "深圳";
     }
 
     /**
@@ -65,14 +67,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment(String id) {
         this();
-
         this.pype = P.WEIGHT;
         this.state = S.PLAN;
-
-        // 暂时这么写
-        this.source = "深圳";
         this.type = T.EXPRESS;
-
         this.id = id;
     }
 
@@ -162,6 +159,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     for(ShipItem item : ship.items) {
                         item.arriveDate = ship.arriveDate;
                     }
+                    if(ship.fbaShipment != null)
+                        ship.fbaShipment.checkReceipt(ship);
                     Mails.shipment_isdone(ship);
                 }
                 return CLEARANCE;
@@ -212,13 +211,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     /**
      * 运输合作商
      */
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Cooperator cooper;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Whouse whouse;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     public User creater;
 
     @ManyToOne(cascade = CascadeType.PERSIST)
@@ -640,7 +639,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 抓取 DHL, FEDEX 网站的运输信息, 更新系统中 SHIPMENT 的状态
+     * 抓取 DHL, FEDEX 网站的运输信息, 更新系统中 SHIPMENT 的状态;
+     *
+     * 如果此 Shipment 拥有 FBA 会根据具体状态, 更新 FBA 的签收时间
      *
      * @return
      */

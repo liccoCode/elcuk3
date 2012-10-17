@@ -174,11 +174,14 @@ public class FWSTest extends UnitTest {
         InboundShipmentItemList items = response.getListInboundShipmentItemsResult().getItemData();
         List<InboundShipmentItem> inboundItems = items.getMember();
         for(InboundShipmentItem item : inboundItems) {
+//            item.getSellerSKU();
+//            item.getQuantityShipped();
+//            item.getQuantityReceived();
             System.out.println(J.json(item));
         }
     }
 
-    @Test
+//    @Test
     public void fetchFBAShipments() throws FBAInboundServiceMWSException {
         ListInboundShipmentsRequest request = new ListInboundShipmentsRequest();
         request.setSellerId(sellerId);

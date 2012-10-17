@@ -58,6 +58,12 @@ public class ShipItem extends GenericModel {
     public Integer qty = 0;
 
     /**
+     * Amazon 的 FBA ShipmentItem 具体接收的数量
+     */
+    @Expose
+    public Integer recivedQty = 0;
+
+    /**
      * 实际发货时间
      */
     @Expose
@@ -129,6 +135,7 @@ public class ShipItem extends GenericModel {
 
     /**
      * 总申报价格, 单位 USD
+     *
      * @return
      */
     public float totalDeclaredValue() {

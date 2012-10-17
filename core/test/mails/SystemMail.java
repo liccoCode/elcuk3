@@ -2,6 +2,7 @@ package mails;
 
 import helper.Webs;
 import models.procure.FBAShipment;
+import notifiers.FBAMails;
 import notifiers.SystemMails;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -26,6 +27,6 @@ public class SystemMail extends UnitTest {
     @Test
     public void testFBAShipmentStateChangeMail() {
         FBAShipment fba = FBAShipment.all().first();
-        SystemMails.fbaShipmentStateChange(fba, fba.state, FBAShipment.S.RECEIVING);
+        FBAMails.shipmentStateChange(fba, fba.state, FBAShipment.S.RECEIVING);
     }
 }

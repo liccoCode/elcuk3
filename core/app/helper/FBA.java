@@ -185,8 +185,9 @@ public class FBA {
 
     /**
      * 根据 FBAShipment 获取 Amazon 上的状态.
+     *
      * @param shipmentIds 此账户相关的 FBA ShipmentId
-     * @param account 请求的账户
+     * @param account     请求的账户
      * @return shipmentId : {._1:state, ._2:centerId, ._3:shipmentName}
      */
     public static Map<String, F.T3<String, String, String>> listShipments(List<String> shipmentIds, Account account) throws FBAInboundServiceMWSException {
@@ -211,6 +212,31 @@ public class FBA {
         return shipmentsT3;
     }
 
+    /**
+     * 返回对应 FBA Shipment 的 Items 的状态
+     *
+     * @param shipmentId
+     * @param acc
+     * @return msku: {._1: qtyReceived, ._2: qtyShiped}
+     */
+    public static Map<String, F.T2<Integer, Integer>> listShipmentItems(String shipmentId, Account acc) throws FBAInboundServiceMWSException {
+        /**
+         * item.getSellerSKU();
+         * item.getQuantityShipped();
+         * item.getQuantityReceived();
+         */
+        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<String, F.T2<Integer, Integer>>();
+        ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest();
+        request.setShipmentId(shipmentId);
+        request.setSellerId(acc.merchantId);
+        ListInboundShipmentItemsResponse response = client(acc).listInboundShipmentItems(request);
+        List<InboundShipmentItem> inboundItems = response.getListInboundShipmentItemsResult().getItemData().getMember();
+        for(InboundShipmentItem item : inboundItems) {
+            if(fetchItems.containsKey(item.getSellerSKU())) continue;
+            fetchItems.put(item.getSellerSKU(), new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped()));
+        }
+        return fetchItems;
+    }
 
 
     /**
@@ -284,6 +310,7 @@ public class FBA {
 
     /**
      * 获取 FBA 的 FWS 的 client
+     *
      * @param acc
      * @return
      */

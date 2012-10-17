@@ -1,0 +1,15 @@
+<table class="table table-condensed" style="margin:0;">
+    <tr>
+        <th>SellerSKU</th>
+        <th>ShipedQty</th>
+        <th>ReceivedQty</th>
+    </tr>
+#{list items:fbaItems.keySet(), as:'key'}
+    #{set t2:fbaItems.get(key)/}
+    <tr>
+        <td>${key}</td>
+        <td>${t2._2}</td>
+        <td>${t2._1}</td>
+    </tr>
+#{/list}
+</table>

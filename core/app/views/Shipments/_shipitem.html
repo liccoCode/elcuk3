@@ -8,7 +8,8 @@
         <th>#</th>
         <th>Sku</th>
         <th>Sid</th>
-        <th>Qty</th>
+        <th>Qty(Shipped)</th>
+        <th>Received</th>
         <th>采购单</th>
         <th>预计到库时间</th>
         <th>供应商</th>
@@ -30,6 +31,7 @@
         <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
         <td>${itm.unit.sid}</td>
         <td>${itm.qty}</td>
+        <td>${itm.recivedQty}</td>
         <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
         <td>#{time_tooltip time:itm.unit.attrs.planDeliveryDate/}</td>
         <td>${itm.unit.cooperator?.name}</td>

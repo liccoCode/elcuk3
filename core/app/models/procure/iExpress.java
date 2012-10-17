@@ -40,7 +40,7 @@ public enum iExpress {
 
             // is delivered
             String text = tbody.select("td:eq(1)").text();
-            boolean isDelivered = StringUtils.contains(text, "已派送并签收");
+            boolean isDelivered = StringUtils.contains(text, "已派送并签收") || StringUtils.contains(text, "已经签收");
 
             return new F.T2<Boolean, DateTime>(isDelivered, dt);
         }
@@ -186,7 +186,12 @@ public enum iExpress {
 
     public abstract boolean isContainsClearance(String content);
 
+    /**
+     * 检查是否已经签收, 如果签收了,时间是什么时候
+     * @return
+     */
     public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
+
 
     /**
      * 直接返回抓取的 HTML 代码

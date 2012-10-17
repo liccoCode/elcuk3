@@ -1,7 +1,7 @@
 package models.procure;
 
 import models.market.Account;
-import notifiers.SystemMails;
+import notifiers.FBAMails;
 import play.db.jpa.Model;
 import query.FBAShipmentQuery;
 
@@ -168,7 +168,23 @@ public class FBAShipment extends Model {
      */
     public String title;
 
+    /**
+     * Amazon 上的 Items 的 html 记录
+     */
+    @Column(length = 3000/*没有使用 varchar(3000) 虽然可以支持 65535,直接使用了 longtext*/)
+    public String itemsOnAmazonWithHTML;
+
+    /**
+     * 上次向 Amazon 查看 ShipmentItems 的时间
+     */
+    public Date lastWatchAmazonItemsAt;
+
     public Date createAt;
+
+    /**
+     * 签收时间, 需要通过 Shipment 的跟踪来设置
+     */
+    public Date receiptAt;
 
     /**
      * 开始接收的时间
@@ -187,10 +203,19 @@ public class FBAShipment extends Model {
      */
     public void isNofityState(S state) {
         if(this.state != state)
-            SystemMails.fbaShipmentStateChange(this, this.state, state);
+            FBAMails.shipmentStateChange(this, this.state, state);
         this.state = state;
         if(this.state == S.RECEIVING) this.receivingAt = new Date();
         else if(this.state == S.CLOSED) this.closeAt = new Date();
+    }
+
+    /**
+     * 根据 Shipment 的装运输进度来判断 Amazon 是否已经签收
+     * @param shipment
+     */
+    public void checkReceipt(Shipment shipment) {
+        if(this.receiptAt != null) return;
+        this.receiptAt = shipment.arriveDate;
     }
 
     public String address() {

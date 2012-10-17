@@ -57,9 +57,6 @@ public class AmazonFBAWatchJob extends Job {
                             acc.prettyName(), StringUtils.join(shipmentIds, ","), Webs.E(e)));
                 }
             }
-
-
-            // 2. 追踪 FBA ShipmentItems 状态
         }
     }
 }

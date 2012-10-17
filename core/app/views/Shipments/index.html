@@ -12,9 +12,9 @@
 </ul>
 #{/info_row}
 
-<div class="row-fluid">
-    <form action="@{Shipments.index()}" method="post">
-        <div class="span3 input-prepend">
+<form action="@{Shipments.index()}" method="post">
+    <div class="row">
+        <div class="span5 input-prepend">
             <span class="add-on">From:</span>
             <input type="date" style="width:90px;" name="p.from" value="${p.from.date()}">
             <span class="add-on" style="margin-left:20px;">To:</span>
@@ -26,7 +26,17 @@
             </select>
         </div>
 
-        <div class="span5">
+        <div class="span3 input-append input-prepend">
+            <span class="add-on"><i class="icon-search"></i></span>
+            <input type="text" name="p.search" style="width:170px;" value="${p.search}" placeHolder="自动识别 ID 搜索">
+            <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+        <div class="span2">
+            <a href="@{Shipments.blank()}" class="btn btn-primary">创建新运输单</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span12">
             <select name="p.pype" style="width:90px">
                 <option value="">计价方式</option>
             #{list items:models.procure.Shipment.P.values(), as:'pype'}
@@ -34,50 +44,48 @@
             #{/list}
             </select>
 
-            <select name="p.type" style="width:90px;margin-left:15px;">
+            <select name="p.type" style="width:90px;margin-left:2px;">
                 <option value="">运输方式</option>
             #{list items:models.procure.Shipment.T.values(), as:'t'}
                 <option ${t == p.type ? 'selected' : ''} value="${t.name()}">${t}</option>
             #{/list}
             </select>
 
-            <select name="p.state" style="width:90px;margin-left:15px;">
+            <select name="p.state" style="width:90px;margin-left:2px;">
                 <option value="">状态</option>
             #{list items:models.procure.Shipment.S.values(), as:'state'}
                 <option ${state == p.state ? 'selected' : ''} value="${state.name()}">${state}</option>
             #{/list}
             </select>
 
-            <select name="p.iExpress" style="width:98px;margin-left:15px;">
+            <select name="p.iExpress" style="width:98px;margin-left:2px;">
                 <option value="">国际快递商</option>
             #{list items:models.procure.Shipment.iExpress(), as:'express'}
                 <option ${express == p.iExpress ? 'selected' : ''} value="${express.name()}">${express}</option>
             #{/list}
             </select>
 
-            <select name="p.whouseId" style="width:98px;margin-left:15px;">
+            <select name="p.whouseId" style="width:98px;margin-left:2px;">
                 <option value="">运往仓库</option>
             #{list items:whouses, as:'wh'}
                 <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name()}</option>
             #{/list}
             </select>
 
-            <select name="p.isCycle" style="width:90px;margin-left:15px;">
+            <select name="p.isCycle" style="width:80px;margin-left:2px;">
                 <option value="">全型</option>
                 <option ${p.isCycle == true ? 'selected' : ''} value="true">周期型</option>
                 <option ${p.isCycle == false ? 'selected' : ''} value="false">非周期型</option>
             </select>
+
+            <select name="p.isHaveFBA" style="width:80px;margin-left:2px;">
+                <option value="">有FBA?</option>
+                <option ${p.isHaveFBA == true ? 'selected' : ''} value="true">拥有</option>
+                <option ${p.isHaveFBA == false ? 'selected' : ''} value="false">未创建</option>
+            </select>
         </div>
-        <div class="span3 input-append input-prepend">
-            <span class="add-on"><i class="icon-search"></i></span>
-            <input type="text" name="p.search" value="${p.search}" placeHolder="自动识别 ID 搜索">
-            <button class="btn btn-primary" data-loading>搜索</button>
-        </div>
-        <div class="span1 pull-right">
-            <a href="@{Shipments.blank()}" class="btn btn-primary">创建新运输单</a>
-        </div>
-    </form>
-</div>
+    </div>
+</form>
 
 <div class="row-fluid">
     <div class="span12">

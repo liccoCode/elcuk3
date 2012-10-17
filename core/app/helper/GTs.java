@@ -17,7 +17,9 @@ public class GTs {
     public static final String BASE_PATH = "/app/views/gt_templates/%s.html";
 
     /**
-     * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出; 模板都是以 html 结尾
+     * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出; 模板都是以 html 结尾;
+     * 例:
+     * GTs.render('templateName', GTs.newMap('key', val).build());
      *
      * @param name , 区分大小写
      * @param args

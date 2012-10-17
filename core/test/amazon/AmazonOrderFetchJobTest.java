@@ -1,9 +1,17 @@
 package amazon;
 
+import helper.J;
+import jobs.AmazonFBAWatchPlusJob;
 import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import models.market.JobRequest;
+import models.procure.FBAShipment;
+import models.procure.ShipItem;
+import org.junit.Test;
 import play.test.UnitTest;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,8 +29,18 @@ public class AmazonOrderFetchJobTest extends UnitTest {
         job.request();
     }
 
-//    @Test
+    //    @Test
     public void testUpdateState() {
         JobRequest.updateState(fetchJob.type());
+    }
+
+    @Test
+    public void testFetchShipItems() {
+        FBAShipment fbaShipment = FBAShipment.findById(21l);
+        List<ShipItem> items = ShipItem.find("shipment.fbaShipment=?", fbaShipment).fetch();
+        Collections.sort(items, new AmazonFBAWatchPlusJob.SortShipItemQtyDown());
+        for(ShipItem item : items) {
+            System.out.println(J.G(item));
+        }
     }
 }

@@ -35,7 +35,7 @@ public class Mails extends Mailer {
     }
 
     public static void shipment_isdone(Shipment shipment) {
-        String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,需确认.", shipment.id);
+        String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,并且签收,需确认.", shipment.id);
         try {
             setSubject(title);
             mailBase();
