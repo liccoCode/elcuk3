@@ -44,6 +44,10 @@ public class AmazonFBAWatchJob extends Job {
                     Map<String, F.T3<String, String, String>> shipmentT3 = FBA.listShipments(shipmentIds, acc);
                     for(FBAShipment shipment : shipments) {
                         F.T3<String, String, String> t3 = shipmentT3.get(shipment.shipmentId);
+                        if(t3 == null) {
+                            Logger.warn("AmazonFBAWatchJob FBA.listShipments: Amazon have no shipmentId %s", shipment.shipmentId);
+                            continue;
+                        }
                         try {
                             S state = S.valueOf(t3._1);
                             shipment.isNofityState(state);

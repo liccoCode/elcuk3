@@ -104,6 +104,12 @@ public class FBAShipment extends Model {
             public String msg() {
                 return "The shipment was cancelled by the seller after the shipment was sent to the Amazon fulfillment center.";
             }
+        },
+        DELETED {
+            @Override
+            public String msg() {
+                return "The shipment was deleted by the seller.";
+            }
         };
 
         /**
