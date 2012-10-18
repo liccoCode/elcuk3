@@ -66,7 +66,7 @@ public class Shipments extends Controller {
     }
 
 
-    @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
+    @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba", "ensureDone"})
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shipper());
@@ -226,7 +226,7 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         ship.confirmAndSyncTOAmazon();
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", ship.fbaShipment.shipmentId), ship.id).save();
+        new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", ship.id, ship.fbaShipment.shipmentId), ship.id).save();
         flash.success("Amazon FBA Shipment 创建成功");
         redirect("/shipments/show/" + id);
     }

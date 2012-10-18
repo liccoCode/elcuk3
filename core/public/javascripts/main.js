@@ -21,22 +21,6 @@ $.varClosure = function(){
         }
     }
 };
-$.varClosure2 = function(){
-    var o = $(this);
-    if(!o.attr('name')) return false;
-    if(o.val() != undefined){
-        switch(o.attr('type')){
-            case 'checkbox':
-                $.params[o.attr("name")] = o.is(':checked');
-                break;
-            case 'radio':
-                if(o.is(':checked')) $.params[o.attr("name")] = o.val().trim();
-                break;
-            default:
-                $.params[o.attr("name")] = o.val().trim();
-        }
-    }
-};
 
 /**
  * 利用 jquery.form 简化的获取参数的方法, 将 ArrayObj 转换成为 param[obj]
@@ -49,19 +33,6 @@ $.formArrayToObj = function(formArr){
         param[el['name']] = el['value'];
     }
     return param;
-};
-
-/**
- * 对页面上的所有 Checbox 添加 check 事件
- */
-$.checkBox = function(){
-    $(':checkbox').change(function(e){
-        var o = $(this);
-        if(!o.attr('name')) e.preventDefault()
-        o.val(o.is(":checked"));
-        console.log(o.attr('name') + " TO " + o.val());
-        e.preventDefault();
-    })
 };
 
 /**

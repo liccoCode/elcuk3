@@ -417,7 +417,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "只有 PLAN 与 CONFIRM 状态可以添加运输项目");
         if(Validation.hasErrors()) return;
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
-        if(units.size() != shipQty.size()) Validation.addError("shipments.ship.equal", "%s");
+        if(units.size() != shipQty.size()) Validation.addError("", "选中的采购单元数量与运输的数量的个数不一致");
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
@@ -427,7 +427,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 this.whouse = unit.whouse;
 
             int shipSize = shipQty.get(i);
-            if(!unit.whouse.equals(this.whouse)) {
+            if(!unit.whouse.id.equals(this.whouse.id)) {
                 Validation.addError("", "运往仓库不一致");
                 return;
             }
@@ -640,7 +640,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 抓取 DHL, FEDEX 网站的运输信息, 更新系统中 SHIPMENT 的状态;
-     *
+     * <p/>
      * 如果此 Shipment 拥有 FBA 会根据具体状态, 更新 FBA 的签收时间
      *
      * @return

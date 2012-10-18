@@ -215,7 +215,7 @@ public class FBAShipment extends Model {
             FBAMails.shipmentStateChange(this, this.state, state);
         this.state = state;
         if(this.state == S.RECEIVING) this.receivingAt = new Date();
-        else if(this.state == S.CLOSED) this.closeAt = new Date();
+        else if(this.state == S.CLOSED || this.state == S.DELETED) this.closeAt = new Date();
     }
 
     /**

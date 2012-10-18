@@ -108,7 +108,7 @@ public class Whouse extends Model {
 
         Whouse whouse = (Whouse) o;
 
-        if(id != null ? !id.equals(whouse.id) : whouse.id != null) return false;
+        if(name != null ? !name.equals(whouse.name) : whouse.name != null) return false;
 
         return true;
     }
@@ -116,7 +116,7 @@ public class Whouse extends Model {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (id != null ? id.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
 

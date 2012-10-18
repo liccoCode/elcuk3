@@ -252,6 +252,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 1. Selling 与 SKU 需要一样
          */
         int originQty = this.attrs.planQty;
+        // 业务检查
         Validation.current().valid(this);
         unit.validate();
         if(this.stage != STAGE.PLAN && this.stage != STAGE.DELIVERY)
@@ -261,6 +262,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.max("procureunit.planQty", unit.attrs.planQty, this.attrs.planQty);
         int leftQty = this.attrs.planQty - unit.attrs.planQty;
         Validation.min("procureunit.planQty", leftQty, 0);
+        // 如果 unit 对应的 shipment 已经运输, 不可再拆分
+        for(ShipItem shipitem : this.relateItems) {
+            if(shipitem.shipment.state != Shipment.S.CONFIRM && shipitem.shipment.state != Shipment.S.PLAN)
+                Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", shipitem.shipment.id, shipitem.shipment.state));
+        }
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
         if(this.stage == STAGE.DELIVERY) unit.stage = this.stage;
@@ -342,6 +348,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 1. 开始运输
      * 2. 确认运输完成
      * </pre>
+     *
      * @return
      */
     public STAGE nextStage() {
