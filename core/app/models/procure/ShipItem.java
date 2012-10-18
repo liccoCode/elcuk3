@@ -7,6 +7,7 @@ import play.libs.F;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 每一个运输单的运输项
@@ -140,5 +141,9 @@ public class ShipItem extends GenericModel {
      */
     public float totalDeclaredValue() {
         return this.qty * this.unit.product.declaredValue;
+    }
+
+    public static List<ShipItem> sameFBAShipItems(String shipmentId) {
+        return ShipItem.find("shipment.fbaShipment.shipmentId=?", shipmentId).fetch();
     }
 }

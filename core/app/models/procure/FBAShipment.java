@@ -3,12 +3,15 @@ package models.procure;
 import models.market.Account;
 import notifiers.FBAMails;
 import play.db.jpa.Model;
+import play.libs.F;
 import query.FBAShipmentQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * User: wyattpan
@@ -211,11 +214,57 @@ public class FBAShipment extends Model {
 
     /**
      * 根据 Shipment 的装运输进度来判断 Amazon 是否已经签收
+     *
      * @param shipment
      */
     public void checkReceipt(Shipment shipment) {
         if(this.receiptAt != null) return;
         this.receiptAt = shipment.arriveDate;
+    }
+
+    /**
+     * 货物抵达后, FBA Shipment 的签收时间与开始入库时间的检查
+     */
+    public void receiptAndreceivingCheck() {
+        // 只检查 PLAN 到 RECEIVING 之前的状态
+        if(this.state.ordinal() >= S.RECEIVING.ordinal()) return;
+        if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))) {
+            FBAMails.receiptButNotReceiving(this);
+        }
+    }
+
+    /**
+     * 入库过程中的检查
+     *
+     * @param fbaItems Amazon 更新下来的 msku 的入库数量
+     */
+    public void receivingCheck(Map<String, F.T2<Integer, Integer>> fbaItems, List<ShipItem> shippedItems) {
+        if(this.state != S.RECEIVING) return;
+        if(shippedItems == null || shippedItems.size() <= 0) return;
+        if(fbaItems == null || fbaItems.size() <= 0) return;
+
+        List<ShipItem> receivingTolong = new ArrayList<ShipItem>();
+        List<ShipItem> receivingMissToMuch = new ArrayList<ShipItem>();
+
+        for(ShipItem shipItem : shippedItems) {
+            F.T2<Integer, Integer> receivedAndShipped = fbaItems.get(shipItem.unit.selling.merchantSKU);
+            if(receivedAndShipped == null) continue;
+            if(receivedAndShipped._1 == 0) continue;
+
+            // 1. 检查入库时间过长
+            if((System.currentTimeMillis() - this.receivingAt.getTime() >= TimeUnit.DAYS.toMillis(3)
+                    && receivedAndShipped._1 > 0
+                    && receivedAndShipped._1 < shipItem.qty)) {
+                receivingTolong.add(shipItem);
+            }
+
+            // 2. 检查入库数量差据较大
+            if((System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))
+                    && Math.abs(receivedAndShipped._1 - shipItem.qty) >= 10) {
+                receivingMissToMuch.add(shipItem);
+            }
+        }
+        FBAMails.itemsReceivingCheck(this, receivingTolong, receivingMissToMuch);
     }
 
     public String address() {

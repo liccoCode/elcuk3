@@ -14,16 +14,13 @@ import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * FBA Shipment Items 的跟踪
  * 周期:
- * - 轮询周期: 1h
- * - Duration: TODO 使用 cron
+ * - 轮询周期: 20mn
+ * - Duration: 1h
  * User: wyattpan
  * Date: 10/17/12
  * Time: 2:29 PM
@@ -65,14 +62,17 @@ public class AmazonFBAWatchPlusJob extends Job {
              */
             Map<String, F.T2<Integer, Integer>> fbaItems = FBA.listShipmentItems(fbaShipment.shipmentId, fbaShipment.account);
             fbaShipment.itemsOnAmazonWithHTML = GTs.render("itemsOnAmazonWithHTML", GTs.newMap("fbaItems", fbaItems).build());
+            fbaShipment.lastWatchAmazonItemsAt = new Date();
             fbaShipment.save();
 
-            List<ShipItem> shipItems = ShipItem.find("shipment.fbaShipment=?", fbaShipment).fetch();
+            List<ShipItem> shipItems = ShipItem.sameFBAShipItems(fbaShipment.shipmentId);
             Collections.sort(shipItems, new SortShipItemQtyDown());
+            // 使用 copy 为了在删除 map 中元素的时候不影响原有数据
+            Map<String, F.T2<Integer, Integer>> fbaItemsCopy = new HashMap<String, F.T2<Integer, Integer>>(fbaItems);
             for(ShipItem item : shipItems) {
-                F.T2<Integer, Integer> fbaItm = fbaItems.get(item.unit.selling.merchantSKU);
+                F.T2<Integer, Integer> fbaItm = fbaItemsCopy.get(item.unit.selling.merchantSKU);
                 // 找到后删除 Map 中的, 避免 ShipItems 中的重复处理
-                fbaItems.remove(item.unit.selling.merchantSKU);
+                fbaItemsCopy.remove(item.unit.selling.merchantSKU);
                 if(fbaItm == null) {
                     // TODO Amazon 上有系统中没有, 该做什么? 提醒? 现在很多数据都与 Amazon 上不一样, 邮件提醒会疯掉.
                 } else {
@@ -80,6 +80,9 @@ public class AmazonFBAWatchPlusJob extends Job {
                 }
                 item.save();
             }
+
+            // 在处理了系统内的 ShipItem 后检查
+            fbaShipment.receivingCheck(fbaItems, shipItems);
         } catch(FBAInboundServiceMWSException e) {
             Logger.warn("AmazonFBAWatchPlusJob.listFBAShipmentItems Error. %s", Webs.E(e));
         }

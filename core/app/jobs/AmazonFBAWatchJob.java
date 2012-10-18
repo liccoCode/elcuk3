@@ -48,6 +48,8 @@ public class AmazonFBAWatchJob extends Job {
                             S state = S.valueOf(t3._1);
                             shipment.isNofityState(state);
                             shipment.save();
+
+                            shipment.receiptAndreceivingCheck();
                         } catch(Exception e) {
                             Logger.warn(String.format("AmazonFBAWatchJob state parse STATE %s error.", t3._1));
                         }

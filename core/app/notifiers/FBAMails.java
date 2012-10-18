@@ -2,9 +2,13 @@ package notifiers;
 
 import helper.Webs;
 import models.procure.FBAShipment;
+import models.procure.ShipItem;
 import play.Logger;
 import play.Play;
 import play.mvc.Mailer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,6 +33,49 @@ public class FBAMails extends Mailer {
             send(fba, oldState, newState);
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Amazon 签收了, 但是没有入库邮件提醒
+     *
+     * @return
+     */
+    public static boolean receiptButNotReceiving(FBAShipment fba) {
+        setSubject("{WARN} FBA %s 签收了,但超过 2 天还没有开始入库.", fba.shipmentId);
+        mailBase();
+        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
+        try {
+            send(fba);
+        } catch(Exception e) {
+            Logger.warn(Webs.E(e));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * FBA 正在入库的检查邮件
+     *
+     * @param fba
+     * @param receivingTolong
+     * @param receivingMissToMuch
+     */
+    public static boolean itemsReceivingCheck(FBAShipment fba, List<ShipItem> receivingTolong, List<ShipItem> receivingMissToMuch) {
+        if(receivingTolong == null && receivingMissToMuch == null) return false;
+        if(receivingTolong == null) receivingTolong = new ArrayList<ShipItem>();
+        if(receivingMissToMuch == null) receivingMissToMuch = new ArrayList<ShipItem>();
+        if(receivingMissToMuch.size() == 0 && receivingTolong.size() == 0) return false;
+
+        setSubject("{WARN} FBA %s 中 %s Items 入库超时, %s Items 入库数量误差较大",
+                fba.shipmentId, receivingTolong.size(), receivingMissToMuch.size());
+        mailBase();
+        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
+        try {
+            send(fba, receivingTolong, receivingMissToMuch);
+        } catch(Exception e) {
             return false;
         }
         return true;
