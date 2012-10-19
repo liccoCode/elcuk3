@@ -21,7 +21,7 @@ import play.utils.FastRuntimeException;
  * Date: 9/24/12
  * Time: 10:42 AM
  */
-public class ListingReviewWork extends Job<Listing> {
+public class ListingReviewsWork extends Job<Listing> {
     /**
      * 以 LisitngId 的形式加载
      */
@@ -33,11 +33,11 @@ public class ListingReviewWork extends Job<Listing> {
     private Listing listing;
 
 
-    public ListingReviewWork(String listingId) {
+    public ListingReviewsWork(String listingId) {
         this.listingId = listingId;
     }
 
-    public ListingReviewWork(Listing listing) {
+    public ListingReviewsWork(Listing listing) {
         this.listing = listing;
     }
 

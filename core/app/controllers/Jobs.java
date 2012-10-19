@@ -4,7 +4,7 @@ import helper.Webs;
 import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
 import jobs.SellingRecordCheckJob;
-import jobs.works.ListingReviewWork;
+import jobs.works.ListingReviewsWork;
 import models.Jobex;
 import models.market.*;
 import models.view.Ret;
@@ -138,7 +138,7 @@ public class Jobs extends Controller {
     public static void reviewFix(String asin, String m) {
         M market = M.val(m);
         try {
-            new ListingReviewWork(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
+            new ListingReviewsWork(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
         } catch(Exception e) {
             throw new FastRuntimeException(Webs.S(e));
         }

@@ -13,7 +13,7 @@ import play.Logger;
 public class Crawl {
     public static JsonElement crawlListing(String market, String asin) {
         Logger.info("crawlListing %s %s", asin, market);
-        return HTTP.json(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+        return HTTP.json(String.format("%s/listing/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
     }
 
     public static JsonElement crawlOffers(String market, String asin) {

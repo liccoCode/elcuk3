@@ -1,23 +1,19 @@
 package controllers;
 
-import helper.HTTP;
+import jobs.promise.ListingPromise;
+import jobs.promise.OffersPromise;
+import jobs.promise.ReviewPromise;
+import jobs.promise.ReviewsPromise;
 import models.AmazonListingReview;
 import models.ListingC;
 import models.ListingOfferC;
 import models.MT;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import play.Logger;
-import play.Play;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.utils.FastRuntimeException;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ListingCs extends Controller {
@@ -28,7 +24,7 @@ public class ListingCs extends Controller {
      * @param market us, uk, de, it
      * @param asin   amazon asin
      */
-    public static void listings(String market, String asin) throws IOException {
+    public static void listing(String market, String asin) throws IOException {
         validation.required(market);
         validation.required(asin);
         if(Validation.hasErrors()) {
@@ -36,33 +32,16 @@ public class ListingCs extends Controller {
         }
         MT m = MT.val(market);
         if(m == null) renderJSON("{flag:false, message:'invalid market[us,uk,de,it,es,fr]'}");
-        HTTP.clearExpiredCookie();
-        String html = HTTP.get(m.listing(asin));
-        if(Play.mode.isDev())
-            FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
-        // TODO 根据 asin 的规则判断是 Amazon 还是 Ebay
-        try {
-            renderJSON(ListingC.parseAmazon(Jsoup.parse(html)));
-        } catch(NullPointerException e) {
-            renderJSON(new ListingC());
-        }
+        ListingC lst = await(new ListingPromise(m, asin).now());
+        renderJSON(lst);
     }
 
     public static void offers(String market, String asin) throws IOException {
         ////http://www.amazon.co.uk/gp/offer-listing/B007TR9VRU
         MT m = MT.val(market);
         if(m == null) throw new FastRuntimeException("Market is inValid!");
-        String url = m.offers(asin);
-        if(StringUtils.isBlank(url)) throw new FastRuntimeException("Offer URL null, an unsupport Market.");
-        HTTP.clearExpiredCookie();
-        String html = HTTP.get(url);
-        if(Play.mode.isDev()) FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/listings/offers/%s/%s.html", System.getProperty("user.home"), m.name(), asin)), html);
-
-        try {
-            renderJSON(ListingOfferC.parseOffers(m, Jsoup.parse(html)));
-        } catch(Exception e) {
-            render(new ListingOfferC());
-        }
+        List<ListingOfferC> offers = await(new OffersPromise(m, asin).now());
+        renderJSON(offers);
     }
 
     /**
@@ -71,46 +50,19 @@ public class ListingCs extends Controller {
      * @param market
      * @param asin
      */
-    public static void reviews(String market, final String asin) throws IOException {
+    public static void reviews(String market, String asin) throws IOException {
         /**
          * 持续抓取, 直到抓取回来的次数 > 5 或者次数与最大页面一样则不再进行抓取;
          * 抓取过程中解析出得 Review 全部返回.
          */
-        int maxPage = 1;
-        Set<AmazonListingReview> reviews = new HashSet<AmazonListingReview>();
         final MT m = MT.val(market);
         if(m == null) throw new FastRuntimeException("Market is inValid!");
-        int page = 1;
-        while(true) {
-            String url = m.reviews(asin, page);
-            if(StringUtils.isBlank(url)) continue;
-            Logger.info("Fetch Reviews [%s]", url);
-            HTTP.clearExpiredCookie();
-            String html = HTTP.get(url);
-
-            if(Play.mode.isDev())
-                FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/reviews/%s/%s_%s.html", System.getProperty("user.home"), m.name(), asin, page)), html);
-
-            Document doc = Jsoup.parse(html);
-            reviews.addAll(AmazonListingReview.parseReviewsFromReviewsListPage(doc, page));
-            if(maxPage == 1) maxPage = AmazonListingReview.maxPage(doc);
-            Logger.info("Page: %s / %s, Total Reviews: %s", page, maxPage, reviews.size());
-            if(page++ == maxPage) break;
-        }
-        renderJSON(AmazonListingReview.filterReviewWithAsinAndMarket(asin, m, reviews));
+        Set<AmazonListingReview> reviews = await(new ReviewsPromise(m, asin).now());
+        renderJSON(reviews);
     }
 
     public static void review(String market, String reviewId) throws IOException {
-        MT m = MT.val(market);
-        String url = m.review(reviewId);
-        HTTP.clearExpiredCookie();
-        Logger.info("Fetch Single Review [%s]", url);
-        String html = HTTP.get(url);
-
-        if(Play.mode.isDev())
-            FileUtils.writeStringToFile(new File(String.format("%s/elcuk2-data/review/%s/%s.html", System.getProperty("user.home"), m.name(), reviewId)), html);
-
-        if(HTTP.is404(html)) renderJSON(new AmazonListingReview(true));
-        else renderJSON(AmazonListingReview.parseReviewFromOnePage(Jsoup.parse(html)));
+        AmazonListingReview review = await(new ReviewPromise(market, reviewId).now());
+        renderJSON(review);
     }
 }

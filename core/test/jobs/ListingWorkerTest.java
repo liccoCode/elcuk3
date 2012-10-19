@@ -1,8 +1,7 @@
 package jobs;
 
-import jobs.works.ListingReviewWork;
+import jobs.works.ListingReviewsWork;
 import jobs.works.ListingWork;
-import jobs.works.ListingWorkers;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -17,7 +16,7 @@ public class ListingWorkerTest extends UnitTest {
 
     //    @Test
     public void testReviewWorker() {
-        new ListingReviewWork("B007LE3Y88_amazon.co.uk").now();
+        new ListingReviewsWork("B007LE3Y88_amazon.co.uk").now();
     }
 
     //    @Test
