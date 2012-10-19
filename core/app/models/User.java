@@ -7,9 +7,11 @@ import play.data.validation.Password;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.Crypto;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 系统中的用户
@@ -30,16 +32,15 @@ public class User extends Model {
     @Required
     public String username;
 
-    @Column(nullable = false)
-    @Password
-    @Required
-    public String password;
-
     /**
      * 加密以后的密码
      */
     @Required
+    @Password
     public String passwordDigest;
+
+    @Transient
+    public String password;
 
     @Transient
     @Equals("password")
@@ -84,25 +85,6 @@ public class User extends Model {
         this.passwordDigest = Crypto.encryptAES(this.password);
     }
 
-    @PostPersist
-    public void postPersist() {
-        this.password = Crypto.decryptAES(this.password);
-    }
-
-    @PostLoad
-    public void postLoad() {
-        this.password = Crypto.decryptAES(this.password);
-    }
-
-    public void preUpdate() {
-        this.password = Crypto.encryptAES(this.password);
-    }
-
-    @PostUpdate
-    public void postUpdate() {
-        this.password = Crypto.decryptAES(this.password);
-    }
-
     // ------------------------------
 
 
@@ -117,6 +99,12 @@ public class User extends Model {
         this.save();
     }
 
+    /**
+     * 验证用户登陆
+     *
+     * @param password
+     * @return
+     */
     public boolean authenticate(String password) {
         return !StringUtils.isBlank(this.passwordDigest) && this.passwordDigest.equals(Crypto.encryptAES(password));
     }

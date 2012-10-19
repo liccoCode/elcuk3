@@ -5,13 +5,16 @@ import play.cache.Cache;
 import play.data.validation.Validation;
 import play.mvc.Scope;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 用户登陆限制
  * User: wyattpan
  * Date: 1/13/12
  * Time: 12:42 AM
  */
-public class UserCheck extends Secure.Security {
+public class Login extends Secure.Security {
 
     static boolean authenticate(String username, String password) {
         /**
@@ -20,6 +23,7 @@ public class UserCheck extends Secure.Security {
          */
         User user = User.findByUserName(username);
         if(user == null) return false;
+        //TODO 注册用户的 EventStreams<Notification>
         return user.authenticate(password);
     }
 
@@ -41,6 +45,21 @@ public class UserCheck extends Secure.Security {
             return user.power.ordinal() >= User.P.ROOT.ordinal();
         }
         return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static User current() {
+        Map<String, User> users = Cache.get("users", Map.class);
+        if(users == null) {
+            synchronized(Login.class) {
+                users = Cache.get("users", Map.class);
+                if(users == null) { // 双重检测缓存
+                    users = new HashMap<String, User>();
+                    Cache.add("users", users);
+                }
+            }
+        }
+        return users.get(Secure.Security.connected());
     }
 
 

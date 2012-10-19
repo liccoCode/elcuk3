@@ -31,8 +31,8 @@ public class Users extends Controller {
         else {
             managedUser.changePasswd(u.password);
             renderJSON(J.json(managedUser));
-            Cache.delete(UserCheck.ukey(Secure.Security.connected()));
-            Cache.add(UserCheck.ukey(Secure.Security.connected()), managedUser);
+            Cache.delete(Login.ukey(Secure.Security.connected()));
+            Cache.add(Login.ukey(Secure.Security.connected()), managedUser);
         }
     }
 }

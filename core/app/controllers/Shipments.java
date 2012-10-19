@@ -259,28 +259,23 @@ public class Shipments extends Controller {
     public static void updateFba(final String id, final String act) {
         // action 参数是 play! 自己使用的保留字
         checkAuthenticity();
-        await("2s", new F.Action0() {
-            @Override
-            public void invoke() {
-                Validation.required("shipments.updateFba.action", act);
-                Shipment ship = Shipment.findById(id);
-                checkShowError(ship);
-                if("update".equals(act)) {
-                    ship.updateFbaShipment();
-                } else {
-                    //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
-                    flash.error("需要执行的 Action 不正确.");
-                }
-                checkShowError(ship);
-                if("update".equals(act)) {
-                    flash.success("更新 Amazon FBA %s 成功.", ship.fbaShipment.shipmentId);
-                    new ElcukRecord(Messages.get("shipment.updateFBA"),
-                            Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", ship.fbaShipment.shipmentId, ship.items.size())),
-                            ship.id).save();
-                }
-                redirect("/shipments/show/" + id);
-            }
-        });
+        Validation.required("shipments.updateFba.action", act);
+        Shipment ship = Shipment.findById(id);
+        checkShowError(ship);
+        if("update".equals(act)) {
+            ship.updateFbaShipment();
+        } else {
+            //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
+            flash.error("需要执行的 Action 不正确.");
+        }
+        checkShowError(ship);
+        if("update".equals(act)) {
+            flash.success("更新 Amazon FBA %s 成功.", ship.fbaShipment.shipmentId);
+            new ElcukRecord(Messages.get("shipment.updateFBA"),
+                    Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", ship.fbaShipment.shipmentId, ship.items.size())),
+                    ship.id).save();
+        }
+        redirect("/shipments/show/" + id);
     }
 
     /**
