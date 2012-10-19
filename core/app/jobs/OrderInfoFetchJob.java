@@ -106,11 +106,9 @@ public class OrderInfoFetchJob extends Job {
 
         if(order.state == Orderr.S.SHIPPED || order.state == Orderr.S.REFUNDED) {
             // Email
-            if(StringUtils.isBlank(order.email) || !StringUtils.contains(order.email, "@")) {
-                String tmp = StringUtils.remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(), "\"");
-                order.email = StringUtils.remove(tmp, ",");
-                if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
-            }
+            String tmp = StringUtils.remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(), "\"");
+            order.email = StringUtils.remove(tmp, ",");
+            if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
 
             // buyerId
             String url = lin.parent().select("a").attr("href");
@@ -122,16 +120,16 @@ public class OrderInfoFetchJob extends Job {
             }
 
             // Phone
-            if(StringUtils.isBlank(order.phone))
-                order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
+            order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
             if(StringUtils.isNotBlank(order.phone)) order.phone = order.phone.trim();
 
             // Address1 (重复地址, 作为参数)
-            if(StringUtils.isBlank(order.address1))
-                order.address1 = StringUtils.substringBetween(html, "<strong>Shipping Address</strong>", "Phone");
+            order.address1 = StringUtils.substringBetween(html, "Shipping Address", "Phone");
             if(StringUtils.isNotBlank(order.address1)) {
                 order.address1 = StringUtils.replace(order.address1, "<br />", "\r\n").trim();
                 order.address1 = StringUtils.replace(order.address1, "<br>", "\r\n").trim();
+                order.address1 = StringUtils.remove(order.address1, "</strong>");
+                order.address1 = StringUtils.remove(order.address1, ":");
             }
 
         }
