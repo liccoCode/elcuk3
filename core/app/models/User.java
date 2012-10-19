@@ -1,6 +1,7 @@
 package models;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.*;
 import play.data.validation.Email;
 import play.data.validation.Equals;
 import play.data.validation.Password;
@@ -10,6 +11,7 @@ import play.libs.Crypto;
 import play.libs.F;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +22,7 @@ import java.util.Map;
  * Time: 10:37 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class User extends Model {
     public enum P {
         GUEST,
@@ -81,7 +84,6 @@ public class User extends Model {
     @PreUpdate
     public void prePersist() {
         // 密码的加密操作在保存的时候进行; 在程序内部使用时为明文密码
-        this.password = Crypto.encryptAES(this.password);
         this.passwordDigest = Crypto.encryptAES(this.password);
     }
 
@@ -96,6 +98,7 @@ public class User extends Model {
     public void changePasswd(String passwd) {
         //  由于 User 会被保存在 Cache 中, 那么 User 则处于游离状态, 为了保持缓存中游离对象, 所以需要将缓存中的游离对象进行一次更新
         this.password = passwd;
+        this.passwordDigest = Crypto.encryptAES(this.password);
         this.save();
     }
 

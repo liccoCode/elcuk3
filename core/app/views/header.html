@@ -89,20 +89,20 @@
 
         <h3>修改用户名密码</h3>
     </div>
-    <div class="modal-body">
-        <form class="form" style="text-align:center">
+    <form class="form" style="text-align:center" action="@{Users.passwd()}" method="post">
+        <div class="modal-body">
             <label class="label label-info large span2">Username:</label>
-            <input name="u.username" type="text" class="input-large span3" readonly placeholder="Username" value="${controllers.Secure.Security.connected()}">
+            <input name="username" type="text" class="input-large span3" readonly placeholder="Username" value="${controllers.Secure.Security.connected()}">
             <label class="label label-info large span2">New Password:</label>
-            <input name="u.password" type="password" class="input-large span3" placeholder="NewPassword">
+            <input name="password" type="password" class="input-large span3" placeholder="NewPassword">
             <label class="label label-info large span2">Confirm:</label>
-            <input name="u.confirm" type="password" class="input-large span3" placeholder="Confirm New Password">
+            <input name="confirm" type="password" class="input-large span3" placeholder="Confirm New Password">
 
             <div class="label label-warning" style="font-size:12px">修改密码前最好重新登陆一次后再进行修改!</div>
-        </form>
-    </div>
-    <div class="modal-footer">
-        <a href="#" id="change_passwd_btn" class="btn btn-primary">Save</a>
-        <a href="#" class="btn" data-dismiss="modal">Close</a>
-    </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary">修改密码</button>
+            <a href="#" class="btn" data-dismiss="modal">Close</a>
+        </div>
+    </form>
 </div>

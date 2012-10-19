@@ -7,6 +7,7 @@ import play.mvc.Scope;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 用户登陆限制
@@ -54,10 +55,14 @@ public class Login extends Secure.Security {
             synchronized(Login.class) {
                 users = Cache.get("users", Map.class);
                 if(users == null) { // 双重检测缓存
-                    users = new HashMap<String, User>();
+                    users = new ConcurrentHashMap<String, User>();
                     Cache.add("users", users);
                 }
             }
+        }
+        if(users.get(Secure.Security.connected()) == null) {
+            User user = User.findByUserName(Secure.Security.connected());
+            users.put(user.username, user);
         }
         return users.get(Secure.Security.connected());
     }
