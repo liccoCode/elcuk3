@@ -25,7 +25,7 @@
         <th>ReviewDate</th>
     </tr>
 #{list items:savedReviews, as:'r'}
-    <tr drop="${r.reviewId}">
+    <tr drop="${r.reviewId}" style="${r.isRemove ? 'background:#C09853;': ''}">
         <td>${r.helpUp}/${r.helpClick}</td>
         <td>#{yesOrNo f:r.isVedio /}</td>
         <td>#{yesOrNo f:r.isVineVoice /}</td>

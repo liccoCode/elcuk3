@@ -8,6 +8,7 @@ import models.support.Ticket;
 import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.*;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
@@ -19,6 +20,8 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +33,7 @@ import java.util.List;
  * Time: 4:33 PM
  */
 @Entity
+@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class AmazonListingReview extends GenericModel {
 
     /**
@@ -114,6 +118,11 @@ public class AmazonListingReview extends GenericModel {
      */
     @Expose
     public Date createDate;
+
+    /**
+     * 最近的更新时间
+     */
+    public Date updateAt;
 
     /**
      * Amazon 会判断这个 Review 是不是为购买了这个商品的客户发出.
@@ -246,9 +255,11 @@ public class AmazonListingReview extends GenericModel {
         return this.save();
     }
 
-    @PostPersist
-    public void postPersist() {
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
         if(this.purchased == null) this.purchased = false;
+        this.updateAt = new Date();
     }
 
     public AmazonListingReview updateAttr(AmazonListingReview newReview) {
