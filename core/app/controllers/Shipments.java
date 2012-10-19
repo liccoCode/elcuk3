@@ -264,14 +264,14 @@ public class Shipments extends Controller {
             public void invoke() {
                 Validation.required("shipments.updateFba.action", act);
                 Shipment ship = Shipment.findById(id);
-                if(Validation.hasErrors()) render("Shipments/show.html", ship);
+                checkShowError(ship);
                 if("update".equals(act)) {
                     ship.updateFbaShipment();
                 } else {
                     //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
                     flash.error("需要执行的 Action 不正确.");
                 }
-                if(Validation.hasErrors()) render("Shipments/show.html", ship);
+                checkShowError(ship);
                 if("update".equals(act)) {
                     flash.success("更新 Amazon FBA %s 成功.", ship.fbaShipment.shipmentId);
                     new ElcukRecord(Messages.get("shipment.updateFBA"),
