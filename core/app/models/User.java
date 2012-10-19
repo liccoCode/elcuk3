@@ -1,5 +1,6 @@
 package models;
 
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Email;
 import play.data.validation.Equals;
 import play.data.validation.Password;
@@ -33,6 +34,12 @@ public class User extends Model {
     @Password
     @Required
     public String password;
+
+    /**
+     * 加密以后的密码
+     */
+    @Required
+    public String passwordDigest;
 
     @Transient
     @Equals("password")
@@ -70,9 +77,11 @@ public class User extends Model {
      */
 
     @PrePersist
+    @PreUpdate
     public void prePersist() {
         // 密码的加密操作在保存的时候进行; 在程序内部使用时为明文密码
         this.password = Crypto.encryptAES(this.password);
+        this.passwordDigest = Crypto.encryptAES(this.password);
     }
 
     @PostPersist
@@ -85,7 +94,6 @@ public class User extends Model {
         this.password = Crypto.decryptAES(this.password);
     }
 
-    @PreUpdate
     public void preUpdate() {
         this.password = Crypto.encryptAES(this.password);
     }
@@ -107,6 +115,10 @@ public class User extends Model {
         //  由于 User 会被保存在 Cache 中, 那么 User 则处于游离状态, 为了保持缓存中游离对象, 所以需要将缓存中的游离对象进行一次更新
         this.password = passwd;
         this.save();
+    }
+
+    public boolean authenticate(String password) {
+        return !StringUtils.isBlank(this.passwordDigest) && this.passwordDigest.equals(Crypto.encryptAES(password));
     }
 
 

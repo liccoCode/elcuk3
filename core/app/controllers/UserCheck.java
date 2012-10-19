@@ -2,6 +2,7 @@ package controllers;
 
 import models.User;
 import play.cache.Cache;
+import play.data.validation.Validation;
 import play.mvc.Scope;
 
 /**
@@ -11,23 +12,15 @@ import play.mvc.Scope;
  * Time: 12:42 AM
  */
 public class UserCheck extends Secure.Security {
-    public static final String U = "user.name[%s][%s]";
 
     static boolean authenticate(String username, String password) {
-        User user = null;
-        // 测试用
-        if(username.equals("wyatt_pan")) {
-            user = new User("wyatt_pan", "empty");
-            user.power = User.P.ROOT;
-        } else if(username.equals("wyatt_m")) {
-            user = new User("wyatt_m", "empty");
-            user.power = User.P.MANAGER;
-        }
-        if(user == null) {
-            user = User.connect(username, password);
-        }
-        if(user != null) Cache.add(ukey(username), user);
-        return user != null;
+        /**
+         * 1. 判断是否拥有此用户; 使用公司邮箱 @easyacceu.com
+         * 2. 判断用户登陆是否正常
+         */
+        User user = User.findByUserName(username);
+        if(user == null) return false;
+        return user.authenticate(password);
     }
 
     static boolean check(String profile) {
@@ -58,7 +51,7 @@ public class UserCheck extends Secure.Security {
      * @return
      */
     public static String ukey(String username) {
-        return String.format(U, username, Scope.Session.current().getId());
+        return String.format("user.name[%s][%s]", username, Scope.Session.current().getId());
     }
 
     private static User loadAndCacheUser(String username) {

@@ -1,0 +1,18 @@
+namespace :play do
+
+  desc "部署 Play 代码到服务器"
+  task :deploy do
+    branch = `git branch | grep \\*`.split(' ')[1]
+    if branch != 'master'
+      puts "请确认 git 分支在 master 分支 (now:#{branch})"
+      exit
+    end
+    puts '---- push to unfuddle ----'
+    `git push ufd`
+    puts '---- push to bitbucket ----'
+    `git push bit`
+
+    puts "---- TBD -----"
+  end
+
+end
