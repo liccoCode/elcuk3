@@ -14,11 +14,12 @@ import models.view.post.ShipmentPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,13 +85,21 @@ public class Shipments extends Controller {
         render(ship);
     }
 
+    @Util
+    public static void checkShowError(Shipment ship) {
+        if(Validation.hasErrors()) {
+            renderArgs.put("ship", ship);
+            render("Shipments/show.html");
+        }
+    }
+
     public static void update(Shipment ship) {
         checkAuthenticity();
         validation.valid(ship);
         ship.validate();
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        checkShowError(ship);
         ship.updateShipment();
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        checkShowError(ship);
         new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
         flash.success("更新成功.");
         redirect("/Shipments/show/" + ship.id);
@@ -187,10 +196,11 @@ public class Shipments extends Controller {
         Validation.required("shipment.cooper", ship.cooper);
         Validation.min("shipment.items.size", ship.items.size(), 1);
 
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        checkShowError(ship);
 
         ship.beginShip();
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+
+        checkShowError(ship);
         new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
         flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", ship.fbaShipment.shipmentId);
 
@@ -219,38 +229,58 @@ public class Shipments extends Controller {
      *
      * @param id
      */
-    public static void deployToAmazon(String id) {
+    public static void deployToAmazon(final String id) {
         checkAuthenticity();
-        Shipment ship = Shipment.findById(id);
-        Validation.isTrue("shipment.fbashipment", ship.fbaShipment == null);
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        ship.confirmAndSyncTOAmazon();
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", ship.id, ship.fbaShipment.shipmentId), ship.id).save();
-        flash.success("Amazon FBA Shipment 创建成功");
-        redirect("/shipments/show/" + id);
+
+        // 由于需要访问远程, 将线程空出 2 s 以便在这 2s 内其他线程可以处理
+        //TODO 测试
+        await("2s", new F.Action0() {
+            @Override
+            public void invoke() {
+                Shipment ship = Shipment.findById(id);
+                Validation.isTrue("shipment.fbashipment", ship.fbaShipment == null);
+                if(Validation.hasErrors()) {
+                    renderArgs.put("ship", ship);
+                    render("Shipments/show.html", ship);
+                }
+                ship.confirmAndSyncTOAmazon();
+                if(Validation.hasErrors()) {
+                    renderArgs.put("ship", ship);
+                    render("Shipments/show.html", ship);
+                }
+                new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", ship.id, ship.fbaShipment.shipmentId), ship.id).save();
+                flash.success("Amazon FBA Shipment 创建成功");
+                redirect("/shipments/show/" + ship.id);
+            }
+        });
     }
 
 
-    public static void updateFba(String id, String act) {
+    public static void updateFba(final String id, final String act) {
         // action 参数是 play! 自己使用的保留字
         checkAuthenticity();
-        Validation.required("shipments.updateFba.action", act);
-        Shipment ship = Shipment.findById(id);
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        if("update".equals(act)) {
-            ship.updateFbaShipment();
-        } else {
-            //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
-            flash.error("需要执行的 Action 不正确.");
-        }
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        if("update".equals(act)) {
-            new ElcukRecord(Messages.get("shipment.updateFBA"),
-                    Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", ship.fbaShipment.shipmentId, ship.items.size())),
-                    ship.id).save();
-        }
-        redirect("/shipments/show/" + id);
+        await("2s", new F.Action0() {
+            @Override
+            public void invoke() {
+                Validation.required("shipments.updateFba.action", act);
+                Shipment ship = Shipment.findById(id);
+                if(Validation.hasErrors()) render("Shipments/show.html", ship);
+                if("update".equals(act)) {
+                    ship.updateFbaShipment();
+                } else {
+                    //TODO 是否需要添加删除 Amazon FBA 还等待研究, 因为系统内的数据也需要处理
+                    flash.error("需要执行的 Action 不正确.");
+                }
+                if(Validation.hasErrors()) render("Shipments/show.html", ship);
+                if("update".equals(act)) {
+                    flash.success("更新 Amazon FBA %s 成功.", ship.fbaShipment.shipmentId);
+                    new ElcukRecord(Messages.get("shipment.updateFBA"),
+                            Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", ship.fbaShipment.shipmentId, ship.items.size())),
+                            ship.id).save();
+                }
+                redirect("/shipments/show/" + id);
+            }
+        });
     }
 
     /**
@@ -262,19 +292,25 @@ public class Shipments extends Controller {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         ship.ensureDone();
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        checkShowError(ship);
         flash.success("成功确认, 运输单已经确认运输完毕.");
         redirect("/shipments/show/" + id);
     }
 
-    public static void refreshProcuress(String id) {
+    public static void refreshProcuress(final String id) {
         checkAuthenticity();
-        Shipment ship = Shipment.findById(id);
-        Validation.required("shipment.trackNo", ship.trackNo);
-        Validation.required("shipment.internationExpress", ship.internationExpress);
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        ship.refreshIExpressHTML();
-        redirect("/shipments/show/" + id);
+        // 通过 play status 查看这个方法执行平均在 3s, 所以让其放开 3s 线程时间
+        await("3s", new F.Action0() {
+            @Override
+            public void invoke() {
+                Shipment ship = Shipment.findById(id);
+                Validation.required("shipment.trackNo", ship.trackNo);
+                Validation.required("shipment.internationExpress", ship.internationExpress);
+                checkShowError(ship);
+                ship.refreshIExpressHTML();
+                redirect("/shipments/show/" + ship.id);
+            }
+        });
     }
 
     /**
@@ -283,9 +319,9 @@ public class Shipments extends Controller {
     public static void splitShipment(String id, List<String> shipItemId) {
         validation.required(shipItemId);
         Shipment ship = Shipment.findById(id);
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        checkShowError(ship);
         Shipment newShipment = ship.splitShipment(shipItemId);
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        checkShowError(ship);
         flash.success("成功分拆运输单, 创建了新运输单 %s", newShipment.id);
         redirect("/shipments/show/" + id);
     }

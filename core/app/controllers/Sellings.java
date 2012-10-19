@@ -101,9 +101,15 @@ public class Sellings extends Controller {
      * 从 Amazon 上将 Selling 信息同步回来
      */
     public static void syncAmazon(String sid) {
-        Selling selling = Selling.findById(sid);
-        selling.syncFromAmazon();
-        renderJSON(new Ret());
+        final Selling selling = Selling.findById(sid);
+        // play status 检查平均耗时 2.5s , 开放线程时间 3s 后回掉
+        await("3s", new F.Action0() {
+            @Override
+            public void invoke() {
+                selling.syncFromAmazon();
+                renderJSON(new Ret());
+            }
+        });
     }
 
     /**

@@ -103,8 +103,8 @@ public class FBA {
             for(InboundShipmentPlan planmember : members) shipmentIds.add(planmember.getShipmentId());
             if(members.size() > 1) {
                 Webs.systemMail("{WARN} Multi FBAShipment Plan " + fbaShipment.shipmentId,
-                        String.format("运输单 %s 创建了多个 FBAShipment (%s) 需要去 Amazon 后台与系统中删除多余的. 让多余的重新创建运输单",
-                                shipment.id, StringUtils.join(shipmentIds, ",")));
+                        String.format("通过 %s 账户, 运输单 %s 创建了多个 FBAShipment (%s) 需要去 Amazon 后台与系统中删除多余的. 让多余的重新创建运输单",
+                                fbaShipment.account.prettyName(), shipment.id, StringUtils.join(shipmentIds, ",")));
             }
         } else {
             Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(), "创建 FBAShipment 失败.");

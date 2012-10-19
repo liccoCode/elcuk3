@@ -83,7 +83,7 @@ public class AmazonFBAWatchPlusJob extends Job {
 
             // 在处理了系统内的 ShipItem 后检查
             fbaShipment.receivingCheck(fbaItems, shipItems);
-        } catch(FBAInboundServiceMWSException e) {
+        } catch(Exception e) {
             Logger.warn("AmazonFBAWatchPlusJob.listFBAShipmentItems Error. %s", Webs.E(e));
         }
     }
