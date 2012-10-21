@@ -5,7 +5,6 @@ import helper.FBA;
 import helper.Webs;
 import models.market.Account;
 import notifiers.FBAMails;
-import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -247,6 +246,8 @@ public class FBAShipment extends Model {
      * 将本地运输单的信息同步到 FBA Shipment<br/>
      * <p/>
      * 会通过 Record 去寻找从当前 FBAShipemnt 中删除的 ShipItem, 需要将其先从 FBA 中删除了再更新
+     *
+     * @throws FastRuntimeException 更新失败
      */
     public synchronized void updateFBAShipment(S state) {
         List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
@@ -254,8 +255,7 @@ public class FBAShipment extends Model {
         try {
             this.state = FBA.update(this, toBeUpdateItems, state != null ? state : this.state);
         } catch(Exception e) {
-            Validation.addError("", "向 Amazon 更新失败. " + Webs.E(e));
-            return;
+            throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
         }
         this.save();
     }

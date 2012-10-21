@@ -8,7 +8,7 @@
         <th>#</th>
         <th>Sku</th>
         <th>Sid</th>
-        <th>Qty(Shipped)</th>
+        <th>Ship(Plan|Qty)</th>
         <th>Received</th>
         <th>采购单</th>
         <th>预计到库时间</th>
@@ -35,7 +35,9 @@
                 <span class="pull-right">${itm.fba.shipmentId}</span>
             #{/if}
         </td>
-        <td>${itm.qty}</td>
+        <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
+        ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
+        </td>
         <td>${itm.recivedQty}</td>
         <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
         <td>#{time_tooltip time:itm.unit.attrs.planDeliveryDate/}</td>

@@ -647,6 +647,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return F.Option.None();
 
         Shipment newShipment = new Shipment(this);
+        newShipment.comment(String.format("从运输单 %s 分拆 %s items 而来.", this.id, needSplitItems.size()));
         newShipment.save();
         for(ShipItem spitem : needSplitItems) {
             spitem.shipment = newShipment;

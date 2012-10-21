@@ -58,7 +58,7 @@
                 <th>运输方式</th>
                 <td>${unit.shipType}</td>
 
-                <td colspan="4"></td>
+                <td colspan="5"></td>
             </tr>
         </table>
     </div>
@@ -132,7 +132,7 @@
                 <tr>
                     <th>阶段</th>
                     <td>
-                        ${models.procure.ProcureUnit.STAGE.DELIVERY}
+                    ${models.procure.ProcureUnit.STAGE.DELIVERY}
                         <input readonly="" type="hidden" name="newUnit.stage" value="${models.procure.ProcureUnit.STAGE.DELIVERY.name()}">
                     </td>
 
@@ -154,9 +154,9 @@
                     <td>
                         <select name="newUnit.shipType">
                             <option value="">请选择</option>
-                            #{list items:models.procure.Shipment.T.values(), as:'t'}
+                        #{list items:models.procure.Shipment.T.values(), as:'t'}
                             <option ${t == newUnit.shipType ? 'selected' : ''} value="${t.name()}">${t}</option>
-                            #{/list}
+                        #{/list}
                         </select>
                     </td>
 

@@ -1,4 +1,10 @@
-#{info_row title:fba.account.type.name() + ' FBA ' + fba.shipmentId/}
+#{set delete: fba.state in [models.procure.FBAShipment.S.CLOSED, models.procure.FBAShipment.S.CANCELLED, models.procure.FBAShipment.S.DELETED]/}
+#{if delete}
+    #{error_row title:fba.account.type.name() + ' FBA ' + fba.shipmentId /}
+#{/if}
+#{else }
+    #{info_row title:fba.account.type.name() + ' FBA ' + fba.shipmentId/}
+#{/else}
 <div class="row-fluid">
     <div class="span12">
         <table class="table table-bordered table-condensed" style="margin-bottom:1px;">
@@ -8,8 +14,10 @@
                     <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
                 </td>
 
-                <th>状态</th>
-                <td><a href="javascript:;" rel="popover" content="${fba.state.msg()}" title="解释">${fba.state}</a></td>
+                <th colspan="2">状态</th>
+                <td colspan="2">
+                    <a href="javascript:;" rel="popover" content="${fba.state.msg()}" title="解释">${fba.state}</a>
+                </td>
 
 
                 <th>Item Label</th>
@@ -22,7 +30,10 @@
                 <th>创建时间</th>
                 <td>#{time_tooltip time:fba.createAt /}</td>
 
-                <th>开始接收时间</th>
+                <th>签收时间</th>
+                <td>#{time_tooltip time:fba.receiptAt/}</td>
+
+                <th>开始入库时间</th>
                 <td>#{time_tooltip time:fba.receivingAt /}</td>
 
                 <th>关闭时间</th>
@@ -30,7 +41,7 @@
             </tr>
 
             <tr>
-                <td colspan="6">
+                <td colspan="8">
                     <button data-toggle="toggle" data-target="#itemsFromAmazon_${fba.shipmentId}" class="btn btn-small btn-primary pull-left" style="margin-right:10px;">
                         <i class="icon-reorder"></i> More...
                     </button>
@@ -43,12 +54,14 @@
                         </button>
                     </form>
                 #{/if}
+                #{ifnot delete}
                     <a href="@{PDFs.packingSlip()}/${fba.shipmentId}" class="btn btn-small btn-success">
                         <i class="icon-download-alt"></i> 箱内麦
                     </a>
                     <a href="@{PDFs.boxLabel()}/${fba.shipmentId}" class="btn btn-small btn-success">
                         <i class="icon-download-alt"></i> 箱外麦
                     </a>
+                #{/ifnot}
                 </td>
             </tr>
 
@@ -65,19 +78,22 @@
         </table>
     </div>
 </div>
+#{ifnot delete}
 <div class="row-fluid" style="margin-bottom:20px;">
     <div class="span12">
-    #{if fba.shipItems.size() == 0}
-        <span class="add-on">运输项目已经被移除, 需删除 Amazon 上的 FBA 腾出库存</span>
+        #{if fba.shipItems.size() == 0}
+            <span class="add-on">运输项目已经被移除, 需删除 Amazon 上的 FBA 腾出库存</span>
 
-        <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
-            <input type="hidden" value="${fba.id}" name="fbaId">
-            #{authenticityToken /}
-            <button class="btn btn-small btn-danger" data-confirm="btn">删除 ${fba.shipmentId}</button>
-        </form>
-    #{/if}
-    #{else }
-        #{render 'Shipments/_shipitem.html', items:fba.shipItems/}
-    #{/else}
+            <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
+                <input type="hidden" value="${fba.id}" name="fbaId">
+                #{authenticityToken /}
+                <button class="btn btn-small btn-danger" data-confirm="btn">删除 ${fba.shipmentId}</button>
+            </form>
+        #{/if}
+        #{else }
+            #{render 'Shipments/_shipitem.html', items:fba.shipItems/}
+        #{/else}
     </div>
 </div>
+#{/ifnot}
+

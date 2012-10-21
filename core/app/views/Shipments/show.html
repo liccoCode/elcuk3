@@ -224,6 +224,13 @@
 </div>
 
 
+#{info_row title:'FBA 列表区'}
+<ul>
+    <li class="text-error">Amazon 是一次创建, 项目数量不可新创建的(已经创建的数量可更新)</li>
+    <li class="text-error">如果需要取消这份 FBA, 将运输的项目从此 FBA 附属的 Shipment 中剔除即可, 但注意, 剔除了就不可再重新添加回来, <strong>FBA 不可修改</strong>
+    </li>
+</ul>
+#{/info_row}
 #{list ship.fbas}
     #{render 'Shipments/_fba_shipment.html', fba:_/}
 #{/list}

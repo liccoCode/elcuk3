@@ -5,6 +5,7 @@ import models.procure.Deliveryment;
 import models.view.post.DeliveryPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -99,6 +100,7 @@ public class Deliveryments extends Controller {
 
         dmt.state = Deliveryment.S.CONFIRM;
         dmt.save();
+        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
         redirect("/Deliveryments/show/" + id);
     }
 

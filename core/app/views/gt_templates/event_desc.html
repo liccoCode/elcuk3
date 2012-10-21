@@ -18,8 +18,17 @@
     <li>运输量: ${unit.qty()}</li>
 #{/elseif}
 #{if unit.deliveryment}
-    <li>采购单: <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank"><i class="icon-link"></i> ${unit.deliveryment.id}</a></li>
+    <li>采购单:
+        <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank"><i class="icon-link"></i> ${unit.deliveryment.id}
+        </a>
+    </li>
 #{/if}
+#{list items:unit.relateItems}
+    <li>
+        运输单:
+        <a href="@{Shipments.show()}/${_.shipment.id}" target="_blank"><i class="icon-link"></i> ${_.shipment.id}</a>
+    </li>
+#{/list}
     <li>
         Memo: ${unit.comment.raw()}
     </li>

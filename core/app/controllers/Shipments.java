@@ -234,7 +234,11 @@ public class Shipments extends Controller {
 //        action 参数是 play! 自己使用的保留字
         checkAuthenticity();
         FBAShipment fba = FBAShipment.findById(fbaId);
-        fba.updateFBAShipment(null);
+        try {
+            fba.updateFBAShipment(null);
+        } catch(Exception e) {
+            Validation.addError("", e.getMessage());
+        }
         checkShowError(fba.shipment);
         new ElcukRecord(Messages.get("shipment.updateFBA"),
                 Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", fba.shipmentId, fba.shipItems.size())),
@@ -306,7 +310,7 @@ public class Shipments extends Controller {
         checkShowError(ship);
         if(newShipmentOpt.isDefined())
             flash.success("成功分拆运输单, 创建了新运输单 %s", newShipmentOpt.get().id);
-        redirect("/shipments/show/" + id);
+        redirect("/shipments/show/" + newShipmentOpt.get().id);
     }
 
     /**
