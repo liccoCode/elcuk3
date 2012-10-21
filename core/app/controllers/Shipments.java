@@ -38,12 +38,9 @@ public class Shipments extends Controller {
 
     public static void index(ShipmentPost p) {
         List<Shipment> shipments = null;
-        if(p == null) {
+        if(p == null)
             p = new ShipmentPost();
-            shipments = Shipment.find("state=? ORDER By createDate DESC", Shipment.S.PLAN).fetch();
-        } else {
-            shipments = p.query();
-        }
+        shipments = p.query();
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
     }

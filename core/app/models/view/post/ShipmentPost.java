@@ -4,6 +4,7 @@ import helper.Dates;
 import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -21,6 +22,12 @@ import java.util.regex.Pattern;
 public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
+
+    public ShipmentPost() {
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        this.from = now.minusDays(7).toDate();
+        this.to = now.plusDays(7).toDate();
+    }
 
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
