@@ -29,6 +29,28 @@ public class FBACenter extends Model {
         this.stateOrProvinceCode = stateOrProvinceCode;
         this.postalCode = postalCode;
     }
+    /*
+   例子:
+   ShipToAddress: {
+       // -> 在 FBACenter
+       "addressLine1":"Boundary Way",
+       "city":"Hemel Hempstead",
+       "countryCode":"GB",
+       "name":"Amazon.co.uk",
+       "postalCode":"HP27LF",
+       "stateOrProvinceCode":"Hertfordshire"
+
+
+       "setAddressLine1":true,
+       "setAddressLine2":false,
+       "setCity":true,
+       "setCountryCode":true,
+       "setDistrictOrCounty":false,
+       "setName":true,
+       "setPostalCode":true,
+       "setStateOrProvinceCode":true,
+   }
+    */
 
     @Column(unique = true, nullable = false)
     public String centerId;
@@ -64,5 +86,20 @@ public class FBACenter extends Model {
         else if(this.countryCode.equals("JP")) return "Japan";
         //http://mindprod.com/jgloss/countrycodes.html
         return "";
+    }
+
+
+    @Override
+    public String toString() {
+        return "FBACenter{" +
+                "centerId='" + centerId + '\'' +
+                ", addressLine1='" + addressLine1 + '\'' +
+                ", addressLine2='" + addressLine2 + '\'' +
+                ", city='" + city + '\'' +
+                ", name='" + name + '\'' +
+                ", countryCode='" + countryCode + '\'' +
+                ", stateOrProvinceCode='" + stateOrProvinceCode + '\'' +
+                ", postalCode='" + postalCode + '\'' +
+                '}';
     }
 }

@@ -1,9 +1,7 @@
 package procure;
 
-import helper.FBA;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
-import org.junit.Test;
 import play.test.UnitTest;
 
 /**
@@ -18,10 +16,5 @@ public class ShipmentTest extends UnitTest {
         System.out.println(Shipment.id());
         DateTime dt = DateTime.now();
         System.out.println(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()));
-    }
-
-    @Test
-    public void testPostFBAShipment() {
-        FBA.deleteShipItem("SP|201208|06");
     }
 }

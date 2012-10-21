@@ -67,7 +67,7 @@ public class ShipmentPost extends Post {
 
         StringBuilder sbd = new StringBuilder(
                 // 几个表使用 left join 级联...
-                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i LEFT JOIN i.unit u LEFT JOIN s.fbaShipment fba WHERE s.%s>=? AND s.%s<=?", this.dateType, this.dateType));
+                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i LEFT JOIN i.unit u LEFT JOIN s.fbas fba WHERE s.%s>=? AND s.%s<=?", this.dateType, this.dateType));
         List<Object> params = new ArrayList<Object>();
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
@@ -94,9 +94,9 @@ public class ShipmentPost extends Post {
 
         if(this.isHaveFBA != null) {
             if(this.isHaveFBA)
-                sbd.append(" AND s.fbaShipment IS NOT NULL");
+                sbd.append(" AND fba.shipmentId IS NOT NULL");
             else
-                sbd.append(" AND s.fbaShipment IS NULL");
+                sbd.append(" AND fba.shipmentId IS NULL");
         }
 
         if(this.iExpress != null) {

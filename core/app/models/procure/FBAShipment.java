@@ -1,9 +1,14 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import helper.FBA;
+import helper.Webs;
 import models.market.Account;
 import notifiers.FBAMails;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.FBAShipmentQuery;
 
 import javax.persistence.*;
@@ -105,6 +110,9 @@ public class FBAShipment extends Model {
                 return "The shipment was cancelled by the seller after the shipment was sent to the Amazon fulfillment center.";
             }
         },
+        /**
+         * The shipment was deleted by the seller.
+         */
         DELETED {
             @Override
             public String msg() {
@@ -119,34 +127,18 @@ public class FBAShipment extends Model {
          */
         public abstract String msg();
     }
-    /*
-    例子:
-    ShipToAddress: {
-        // -> 在 FBACenter
-    	"addressLine1":"Boundary Way",
-    	"city":"Hemel Hempstead",
-    	"countryCode":"GB",
-    	"name":"Amazon.co.uk",
-    	"postalCode":"HP27LF",
-    	"stateOrProvinceCode":"Hertfordshire"
-
-
-    	"setAddressLine1":true,
-    	"setAddressLine2":false,
-    	"setCity":true,
-    	"setCountryCode":true,
-    	"setDistrictOrCounty":false,
-    	"setName":true,
-    	"setPostalCode":true,
-    	"setStateOrProvinceCode":true,
-    }
-     */
 
     @OneToOne
     public Account account;
 
-    @OneToMany(mappedBy = "fbaShipment")
-    public List<Shipment> shipments = new ArrayList<Shipment>();
+    @ManyToOne
+    public Shipment shipment;
+
+    /**
+     * 与 ShipItem 的关联
+     */
+    @OneToMany(mappedBy = "fba", cascade = CascadeType.PERSIST)
+    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
 
     @Column(unique = true, nullable = false, length = 20)
     public String shipmentId;
@@ -206,6 +198,17 @@ public class FBAShipment extends Model {
     public Date closeAt;
 
     /**
+     * 最后的更新时间
+     */
+    public Date updateAt;
+
+    @PreUpdate
+    @PrePersist
+    public void preUpdate() {
+        this.updateAt = new Date();
+    }
+
+    /**
      * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
      *
      * @param state
@@ -239,6 +242,41 @@ public class FBAShipment extends Model {
         }
     }
 
+
+    /**
+     * 将本地运输单的信息同步到 FBA Shipment<br/>
+     * <p/>
+     * 会通过 Record 去寻找从当前 FBAShipemnt 中删除的 ShipItem, 需要将其先从 FBA 中删除了再更新
+     */
+    public synchronized void updateFBAShipment(S state) {
+        List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
+        toBeUpdateItems.addAll(this.shipItems);
+        try {
+            this.state = FBA.update(this, toBeUpdateItems, state != null ? state : this.state);
+        } catch(Exception e) {
+            Validation.addError("", "向 Amazon 更新失败. " + Webs.E(e));
+            return;
+        }
+        this.save();
+    }
+
+    /**
+     * 删除这个 FBA Shipment
+     */
+    public synchronized void removeFBAShipment() {
+        if(this.shipItems.size() > 0)
+            throw new FastRuntimeException("还拥有运输项目, 无法删除");
+        if(this.state != S.WORKING && this.state != S.PLAN)
+            throw new FastRuntimeException("已经运输出去, 无法删除.");
+        try {
+            this.state = FBA.update(this, this.shipItems, S.DELETED);
+            this.closeAt = new Date();
+            this.save();
+        } catch(FBAInboundServiceMWSException e) {
+            throw new FastRuntimeException(e);
+        }
+    }
+
     /**
      * 入库过程中的检查
      *
@@ -257,20 +295,35 @@ public class FBAShipment extends Model {
             if(receivedAndShipped == null) continue;
             if(receivedAndShipped._1 == 0) continue;
 
-            // 1. 检查入库时间过长
-            if((System.currentTimeMillis() - this.receivingAt.getTime() >= TimeUnit.DAYS.toMillis(3)
-                    && receivedAndShipped._1 > 0
-                    && receivedAndShipped._1 < shipItem.qty)) {
+            /**
+             * 1. 检查入库时间过长
+             * 入库时间长于 3 天, 并且接收了的数量与发送的数量不一样.
+             */
+            if((System.currentTimeMillis() - this.receivingAt.getTime() >= TimeUnit.DAYS.toMillis(3))
+                    // TODO 难道真的要大于 10 个才提醒?
+                    && !receivedAndShipped._1.equals(shipItem.qty)) {
                 receivingTolong.add(shipItem);
             }
 
-            // 2. 检查入库数量差据较大
-            if((System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))
-                    && Math.abs(receivedAndShipped._1 - shipItem.qty) >= 10) {
-                receivingMissToMuch.add(shipItem);
+            /**
+             * 2. 检查入库数量差据较大
+             * 签收时间大于 3 天, 但是还没有进入 RECEVING 与其之后的状态则报告错误
+             */
+            if((System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))) {
+                if(this.state == null) break;
+                switch(this.state) {
+                    case PLAN:
+                    case WORKING:
+                    case SHIPPED:
+                    case IN_TRANSIT:
+                    case DELIVERED:
+                    case CHECKED_IN:
+                        receivingMissToMuch.add(shipItem);
+                }
             }
         }
-        FBAMails.itemsReceivingCheck(this, receivingTolong, receivingMissToMuch);
+        if(this.updateAt != null && (System.currentTimeMillis() - this.updateAt.getTime() >= TimeUnit.HOURS.toMillis(15)))
+            FBAMails.itemsReceivingCheck(this, receivingTolong, receivingMissToMuch);
     }
 
     public String address() {
@@ -288,5 +341,11 @@ public class FBAShipment extends Model {
 
     public static FBAShipment findByShipmentId(String shipmentId) {
         return FBAShipment.find("shipmentId=?", shipmentId).first();
+    }
+
+
+    @Override
+    public String toString() {
+        return this.shipmentId;
     }
 }

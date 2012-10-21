@@ -60,7 +60,7 @@
 
             <select name="p.iExpress" style="width:98px;margin-left:2px;">
                 <option value="">国际快递商</option>
-            #{list items:models.procure.Shipment.iExpress(), as:'express'}
+            #{list items:models.procure.Shipment.Express(), as:'express'}
                 <option ${express == p.iExpress ? 'selected' : ''} value="${express.name()}">${express}</option>
             #{/list}
             </select>

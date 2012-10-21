@@ -6,7 +6,6 @@ import notifiers.FBAMails;
 import org.junit.Test;
 import play.test.UnitTest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +18,7 @@ public class FBAMailsTest extends UnitTest {
 
     @Test
     public void testItemsReceivingCheck() {
-        FBAShipment fba = FBAShipment.findById(21l);
+        FBAShipment fba = FBAShipment.findById(63l);
         List<ShipItem> shipItemList = ShipItem.sameFBAShipItems(fba.shipmentId);
         FBAMails.itemsReceivingCheck(fba, shipItemList, shipItemList);
     }

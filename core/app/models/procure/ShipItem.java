@@ -46,6 +46,12 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
+    /**
+     * 如果一个 ShipItem 拥有了 FBA, 那么这个 FBA 所属的 Shipment 应该与 ShipItem 所属的 Shipment 必须一样
+     */
+    @ManyToOne
+    public FBAShipment fba;
+
     @ManyToOne(cascade = CascadeType.PERSIST)
     @Expose
     public ProcureUnit unit;
@@ -96,8 +102,7 @@ public class ShipItem extends GenericModel {
 
     /**
      * ShipItem 被取消;
-     * 1. 运输的数量设置为 0
-     * 2. 状态设置为 CANCEL
+     * 删除这一条 ShipItem 记录
      *
      * @return 删除后的临时对象
      */
@@ -144,6 +149,6 @@ public class ShipItem extends GenericModel {
     }
 
     public static List<ShipItem> sameFBAShipItems(String shipmentId) {
-        return ShipItem.find("shipment.fbaShipment.shipmentId=?", shipmentId).fetch();
+        return ShipItem.find("fba.shipmentId=?", shipmentId).fetch();
     }
 }

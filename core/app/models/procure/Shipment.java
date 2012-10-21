@@ -1,6 +1,5 @@
 package models.procure;
 
-import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.FBA;
@@ -23,11 +22,9 @@ import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * 一张运输单
@@ -57,7 +54,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.creater = shipment.creater;
         this.beginDate = shipment.beginDate;
         this.planArrivDate = shipment.planArrivDate;
-        this.fbaShipment = shipment.fbaShipment;
+        // FBA 不做处理
         this.pype = shipment.pype;
         this.type = shipment.type;
         this.whouse = shipment.whouse;
@@ -159,8 +156,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     for(ShipItem item : ship.items) {
                         item.arriveDate = ship.arriveDate;
                     }
-                    if(ship.fbaShipment != null)
-                        ship.fbaShipment.checkReceipt(ship);
+                    // 为避免 NPE, 对 fba 初始化了集合
+                    for(FBAShipment fba : ship.fbas)
+                        fba.checkReceipt(ship);
                     Mails.shipment_isdone(ship);
                 }
                 return CLEARANCE;
@@ -220,8 +218,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne(fetch = FetchType.LAZY)
     public User creater;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    public FBAShipment fbaShipment;
+    @OneToMany(mappedBy = "shipment")
+    public List<FBAShipment> fbas = new ArrayList<FBAShipment>();
 
     /**
      * 这个 Shipment 自己拥有的 title, 会使用在 FBAShipment 上
@@ -458,22 +456,35 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param shipItemId
      */
     public void cancelShip(List<Integer> shipItemId, boolean log) {
+        if(shipItemId == null) shipItemId = new ArrayList<Integer>();
         List<ShipItem> items = new ArrayList<ShipItem>();
-        if(shipItemId != null && shipItemId.size() > 0)
+        if(shipItemId.size() > 0)
             items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
+
+        for(ShipItem itm : items) {
+            if(!itm.shipment.equals(this))
+                Validation.addError("", "取消的运输单项不属于对应运输单");
+            if(itm.fba != null) {
+                switch(itm.fba.state) {
+                    case SHIPPED:
+                    case CHECKED_IN:
+                    case DELIVERED:
+                    case IN_TRANSIT:
+                    case RECEIVING:
+                        Validation.addError("", String.format("FBA(%s) 已经无法更改(%s), 所以不允许再修改运输项目.",
+                                itm.fba.shipmentId, itm.fba.state));
+                }
+            }
+        }
+        if(Validation.hasErrors()) return;
 
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ShipItem itm : items) {
-            if(!itm.shipment.equals(this)) {
-                Validation.addError("", "取消的运输单项不属于对应运输单");
-                return;
-            } else {
-                F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
-                cancelT2._2.save();
-                unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
-            }
+            F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
+            cancelT2._2.save();
+            unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
         }
-        if(log && shipItemId != null && shipItemId.size() > 0) {
+        if(log && shipItemId.size() > 0) {
             new ElcukRecord(Messages.get("shipment.cancelShip2"),
                     Messages.get("shipment.cancelShip2.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
                     this.id
@@ -481,9 +492,62 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 返回还没有 FBA 的 ShipItem
+     *
+     * @return
+     */
+    public List<ShipItem> noFbaItems() {
+        List<ShipItem> noFbaItems = new ArrayList<ShipItem>();
+        for(ShipItem itm : this.items) {
+            if(itm.fba == null)
+                noFbaItems.add(itm);
+        }
+        return noFbaItems;
+    }
+
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;
         this.memo = String.format("%s\r\n%s", cmt, this.memo).trim();
+    }
+
+    /**
+     * 确认运输单以后, 向 Amazon 创建 FBAShipment
+     * <p/>
+     */
+    public F.Option<FBAShipment> deployFBA(List<String> shipitemIds) {
+        /**
+         * 1. 将本地的状态修改为 CONFIRM
+         * 2. 向 Amazon 提交 FBA Shipment 的创建
+         * 3. Amazon Shipment 创建成功后再本地更新, 否则不更新,包裹错误.
+         */
+        if(this.cycle)
+            Validation.addError("", "周期型运输单不允许再创建 FBA Shipment, 请运输人员制作运输计划.");
+        if(this.items.size() <= 0)
+            Validation.addError("", "运输单为空, 不需要创建 FBA Shipment");
+
+        // 检查提交的是否为当前运输单的 ShipItem, 是的挑出来, 找到一个不是则报告错误
+        Map<String, ShipItem> shipItemsMap = new HashMap<String, ShipItem>();
+        List<ShipItem> deployItems = new ArrayList<ShipItem>();
+        for(ShipItem itm : this.items)
+            shipItemsMap.put(itm.id.toString(), itm);
+        for(String id : shipitemIds) {
+            if(!shipItemsMap.containsKey(id)) {
+                Validation.addError("", String.format("ShipItem Id %s 不存在运输单 %s 中", id, this.id));
+            } else {
+                deployItems.add(shipItemsMap.get(id));
+            }
+        }
+        if(Validation.hasErrors()) return F.Option.None();
+
+        F.Option<FBAShipment> fbaQpt = this.postFBAShipment(deployItems);
+        if(Validation.hasErrors()) return fbaQpt;
+        if(fbaQpt.isDefined()) {
+            this.state = S.CONFIRM;
+            this.target = fbaQpt.get().address();
+            this.save();
+        }
+        return fbaQpt;
     }
 
     /**
@@ -493,60 +557,30 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public synchronized FBAShipment postFBAShipment() {
+    public synchronized F.Option<FBAShipment> postFBAShipment(List<ShipItem> shipItems) {
+        F.Option<FBAShipment> fbaQpt = null;
         try {
-            this.fbaShipment = FBA.plan(this);
-        } catch(FBAInboundServiceMWSException e) {
+            fbaQpt = FBA.plan(this.whouse.account, shipItems);
+        } catch(Exception e) {
             Validation.addError("", "向 Amazon 创建 Shipment Plan 错误 " + Webs.E(e));
+            return F.Option.None();
         }
         try {
-            if(this.fbaShipment != null) {
-                this.fbaShipment.state = FBA.create(this.fbaShipment, this);
-                this.fbaShipment.save();
+            if(fbaQpt.isDefined()) {
+                // Shipment 与 FBA 由 FBA 自行创建关系
+                fbaQpt.get().shipment = this;
+                fbaQpt.get().state = FBA.create(fbaQpt.get());
+                fbaQpt.get().save();
+                // 需要手动从 ShipItem 建立与 FBA 的关系 - -||
+                for(ShipItem itm : fbaQpt.get().shipItems) {
+                    itm.fba = fbaQpt.get();
+                    itm.save();
+                }
             }
-        } catch(FBAInboundServiceMWSException e) {
+        } catch(Exception e) {
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
-        return this.fbaShipment;
-    }
-
-    /**
-     * 确认运输单以后, 向 Amazon 创建 FBAShipment
-     * <p/>
-     * ps: 这个方法不允许并发
-     */
-    public synchronized void confirmAndSyncTOAmazon() {
-        /**
-         * 1. 将本地的状态修改为 CONFIRM
-         * 2. 向 Amazon 提交 FBA Shipment 的创建
-         * 3. Amazon Shipment 创建成功后再本地更新, 否则不更新,包裹错误.
-         */
-        if(this.cycle) Validation.addError("", "周期型运输单不允许再创建 FBA Shipment, 请运输人员制作运输计划.");
-        if(this.items.size() <= 0) Validation.addError("", "运输单为空, 不需要创建 FBA Shipment");
-        if(Validation.hasErrors()) return;
-        FBAShipment fba = this.postFBAShipment();
-        if(Validation.hasErrors()) return;
-        this.state = S.CONFIRM;
-        this.target = fba.address();
-        this.save();
-    }
-
-    /**
-     * 将本地运输单的信息同步到 FBA Shipment<br/>
-     * <p/>
-     * 会通过 Record 去寻找从当前 FBAShipemnt 中删除的 ShipItem, 需要将其先从 FBA 中删除了再更新
-     */
-    public synchronized void updateFbaShipment() {
-        List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
-        toBeUpdateItems.addAll(this.items);
-        toBeUpdateItems.addAll(FBA.deleteShipItem(this.id));
-        try {
-            this.fbaShipment.state = FBA.update(this.fbaShipment, toBeUpdateItems, this.fbaShipment.state);
-        } catch(FBAInboundServiceMWSException e) {
-            Validation.addError("", "向 Amazon 更新失败. " + Webs.E(e));
-        }
-        if(Validation.hasErrors()) return;
-        this.fbaShipment.save();
+        return fbaQpt;
     }
 
     /**
@@ -561,8 +595,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             item.unit.stage = item.unit.nextStage();
         }
         if(Validation.hasErrors()) return;
-        this.updateFbaShipment();
-        if(Validation.hasErrors()) return;
+        for(FBAShipment fba : this.fbas) {
+            if(fba.state != FBAShipment.S.WORKING) continue;
+            fba.updateFBAShipment(FBAShipment.S.SHIPPED);
+            if(Validation.hasErrors()) return;
+        }
         for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();
         this.state = S.SHIPPING;
@@ -596,13 +633,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 对 Shipment 进行分拆, 主要解决的目的为运输单在 PM 处理好以后, 跟单人员需要将运输单根据实际情况分拆成为不同的运输单进行运输.
      * 每一票运输单对应一个唯一的 tracking number.
      */
-    public Shipment splitShipment(List<String> shipItemIds) {
-        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "分拆运输单只运输在 \"计划\" 与 \"确认运输\" 状态");
+    public F.Option<Shipment> splitShipment(List<String> shipItemIds) {
+        if(this.state != S.PLAN && this.state != S.CONFIRM)
+            Validation.addError("", "分拆运输单只运输在 \"计划\" 与 \"确认运输\" 状态");
+
         List<ShipItem> needSplitItems = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
-        Shipment newShipment = new Shipment(this);
         if(needSplitItems.size() != shipItemIds.size())
             Validation.addError("", "分拆运输单的运输项目数量与数据库中记录的不一致");
-        if(Validation.hasErrors()) return null;
+        for(ShipItem itm : needSplitItems) {
+            if(itm.fba != null)
+                Validation.addError("", "运输项目已经附属了 FBA, 请先请 FBA 中删除再进行拆分");
+        }
+        if(Validation.hasErrors()) return F.Option.None();
+
+        Shipment newShipment = new Shipment(this);
         newShipment.save();
         for(ShipItem spitem : needSplitItems) {
             spitem.shipment = newShipment;
@@ -611,7 +655,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new ElcukRecord(Messages.get("shipment.splitShipment"),
                 Messages.get("shipment.splitShipment.msg", StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
                 this.id).save();
-        return newShipment;
+        return F.Option.Some(newShipment);
     }
 
     /**
@@ -657,16 +701,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
-    }
-
-    /**
-     * 相关的拥有相同 FBA 的 Shipment 排除自己
-     *
-     * @return
-     */
-    public List<Shipment> sameFBAShipment() {
-        if(this.fbaShipment == null) return new ArrayList<Shipment>();
-        return Shipment.find("fbaShipment.id=? AND id!=?", this.fbaShipment.id, this.id).fetch();
     }
 
     public String title() {
@@ -729,7 +763,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public static List<iExpress> iExpress() {
+    public static List<iExpress> Express() {
         return Arrays.asList(iExpress.values());
     }
 }

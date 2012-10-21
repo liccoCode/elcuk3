@@ -1,6 +1,5 @@
 package jobs;
 
-import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import helper.FBA;
 import helper.GTs;
 import helper.Webs;
@@ -8,7 +7,6 @@ import models.Jobex;
 import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
-import models.procure.Shipment;
 import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
@@ -37,8 +35,8 @@ public class AmazonFBAWatchPlusJob extends Job {
         if(!Jobex.findByClassName(AmazonFBAWatchPlusJob.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?) ORDER BY lastWatchAmazonItemsAt",
-                    acc, FBAShipment.S.PLAN, FBAShipment.S.CANCELLED).fetch(30);
+            List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?,?) ORDER BY lastWatchAmazonItemsAt",
+                    acc, FBAShipment.S.PLAN, FBAShipment.S.CANCELLED, FBAShipment.S.DELETED).fetch(30);
 
             for(FBAShipment fba : fbas) {
                 AmazonFBAWatchPlusJob.listFBAShipmentItems(fba);

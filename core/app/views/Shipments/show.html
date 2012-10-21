@@ -111,7 +111,7 @@
                     <td>
                         <select name="ship.internationExpress">
                             <option value="">选择快递商</option>
-                        #{list items:models.procure.Shipment.iExpress(), as:'ie'}
+                        #{list items:models.procure.Shipment.Express(), as:'ie'}
                             <option ${ie == ship.internationExpress ? 'selected' : ''} value="${ie}">${ie}</option>
                         #{/list}
                         </select>
@@ -177,7 +177,7 @@
                     #{/if}
                     </td>
                 </tr>
-                #{if ship.arriveDate}
+            #{if ship.arriveDate}
                 <tr class="alert alert-success">
                     <th>运输单到达(Amazon 签收)时间</th>
                     <td>#{time_tooltip time:ship.arriveDate/}</td>
@@ -186,7 +186,7 @@
                     #{set diffDays:ship.planArrivDate - ship.arriveDate /}
                     <td style="${diffDays > 0 ? 'color:#B94A48' : ''}">${diffDays} Days</td>
                 </tr>
-                #{/if}
+            #{/if}
             </table>
         </form>
     </div>
@@ -194,16 +194,6 @@
 
 <div class="row-fluid">
     <div class="span12" style="margin-bottom:15px;">
-    #{if !ship.fbaShipment && ship.state == models.procure.Shipment.S.PLAN}
-        <form action="@{Shipments.deployToAmazon()}" method="post" class="pull-left">
-            <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-            <button data-confirm="btn" content="确认要创建 FBA Shipment? 如果货物过多, 请考虑库存不足无法添加货物的情况." class="btn btn-danger" style="margin-right:10px;">
-                创建 FBA Shipment
-            </button>
-        </form>
-    #{/if}
-
 
     #{if isPlanAndConfirm}
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
@@ -234,33 +224,27 @@
 </div>
 
 
-#{if ship.fbaShipment}
-    #{render 'Shipments/_fba_shipment.html', ship:ship/}
-#{/if}
+#{list ship.fbas}
+    #{render 'Shipments/_fba_shipment.html', fba:_/}
+#{/list}
 
-#{info_row title:'运输项目' /}
+#{success_row title:'运输项目' /}
 <div class="row-fluid">
     <div class="span12">
-        <form action="@{Shipments.splitShipment()}" method="post">
-        #{render 'Shipments/_shipitem.html', items:ship.items/}
+        <form action="" method="post">
+        #{authenticityToken /}
+            <input type="hidden" name="id" value="${ship.id}">
+        #{render 'Shipments/_shipitem.html', items:ship.noFbaItems()/}
+
         #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
-            <a href="@{Shipments.shipItem()}/${ship.id}" style="margin-right:10px;" class="btn btn-primary pull-left">修改运输项目</a>
+            <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">修改运输项目</a>
         #{/if}
-            <div class="input-prepend input-append">
-                <span rel="popover" placement="right" content="适用于同一个 FBA Shipment 但是分为多票运输" class="add-on"><i class="icon-question-sign"></i></span>
-                <input type="hidden" name="id" value="${ship.id}">
-                <button data-confirm="btn" class="btn btn-danger">分拆运输单</button>
-            </div>
+
+            <button id="create_fba" class="btn btn-warning">创建 FBA</button>
+            <button id="split_shipment" class="btn btn-warning">分拆运输单</button>
         </form>
-
-
     </div>
 </div>
-
-#{if sameFbaShips && sameFbaShips.size() > 0}
-    #{info_row title:'相同 FBA Shipment 的运输单'/}
-    #{render 'Shipments/_shipment_list.html', shipments:sameFbaShips/}
-#{/if}
 
 #{records records:records/}
 
@@ -273,7 +257,7 @@
         <form action="@{Shipments.refreshProcuress()}" method="post" style="margin:0">
             <input type="hidden" name="id" value="${ship.id}">
         #{authenticityToken /}
-            <button class="btn btn-danger"><i class="icon-refresh"></i></button>
+            <button data-confirm="btn" class="btn btn-danger"><i class="icon-refresh"></i></button>
         </form>
     </div>
 </div>

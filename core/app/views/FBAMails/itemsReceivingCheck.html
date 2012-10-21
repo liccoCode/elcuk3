@@ -1,12 +1,5 @@
 <table>
     <tr>
-        <td colspan="6">
-            <h4>State From <span style="color:#2857CC">${oldState}</span> to
-                <span style="color:#5DBB5D;">${newState}</span></h4>
-        </td>
-    </tr>
-
-    <tr>
         <th>ShipmentId</th>
         <td>
             <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
@@ -14,7 +7,7 @@
 
         <th>状态</th>
         <!-- 使用 newState 是因为发送邮件的时候在内存中 fba.state 还没有修改 -->
-        <td>${newState}</td>
+        <td>${fba.state}</td>
 
         <th>Item Label</th>
         <td>${fba.labelPrepType}</td>
@@ -24,11 +17,17 @@
         <th>创建时间</th>
         <td>#{time_tooltip time:fba.createAt /}</td>
 
+        <th>签收时间</th>
+        <td>#{time_tooltip time:fba.receiptAt /}</td>
+
         <th>开始接收时间</th>
         <td>#{time_tooltip time:fba.receivingAt /}</td>
-
+    </tr>
+    <tr>
         <th>关闭时间</th>
         <td>#{time_tooltip time:fba.closeAt /}</td>
+
+        <td colspan="4"></td>
     </tr>
 </table>
 

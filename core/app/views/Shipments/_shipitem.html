@@ -29,7 +29,12 @@
         </td>
         <td>${itm.id}</td>
         <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
-        <td>${itm.unit.sid}</td>
+        <td>
+        ${itm.unit.sid}
+            #{if itm.fba}
+                <span class="pull-right">${itm.fba.shipmentId}</span>
+            #{/if}
+        </td>
         <td>${itm.qty}</td>
         <td>${itm.recivedQty}</td>
         <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
@@ -47,7 +52,7 @@
 #{/list}
 #{if shipmentId}
     <tr>
-        <td colspan="11">
+        <td colspan="15">
             <input type="hidden" name="id" value="${shipmentId}">
             <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
         </td>
