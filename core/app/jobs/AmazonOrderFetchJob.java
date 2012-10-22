@@ -1,13 +1,12 @@
 package jobs;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
+import helper.*;
 import helper.Currency;
-import helper.Dates;
-import helper.Patterns;
-import helper.Webs;
 import models.Jobex;
 import models.market.*;
 import models.product.Product;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.JPA;
@@ -97,12 +96,17 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 order.save();
                 Logger.info("Save Order: " + order.orderId);
             } else { //更新
-                if(managed.state == Orderr.S.CANCEL) continue; // 如果订单已经为 CANCEL 了, 则不更新了
-                if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING || order.state == Orderr.S.SHIPPED) // 新订单为 CANCEL 的则更新
+                // 如果订单已经为 CANCEL 了, 则不更新了
+                if(managed.state == Orderr.S.CANCEL) continue;
+                // 新订单为 CANCEL 的则更新
+                if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING || order.state == Orderr.S.SHIPPED) {
                     managed.updateAttrs(order);
+                    Logger.info("Update Order: " + order.orderId);
+                }
             }
             if(capcity >= 300) {
                 JPA.em().flush();
+                Logger.info("Flush Orders %s", capcity);
                 capcity = 0;
             }
         }
@@ -123,138 +127,145 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     public static List<Orderr> allOrderXML(File file, Account acc) {
         AmazonEnvelopeType envelopeType = JAXB.unmarshal(file, AmazonEnvelopeType.class);
         List<Orderr> orders = new ArrayList<Orderr>();
+        StringBuilder errors = new StringBuilder();
         for(MessageType message : envelopeType.getMessage()) {
             OrderType odt = message.getOrder();
+            try {
 
-            String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
-            if(amazonOrderId.startsWith("S02") || Patterns.A2Z.matcher(amazonOrderId).matches()) {
-                Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
-                continue;
-            }
-
-            Orderr orderr = new Orderr();
-            orderr.account = acc;
-            orderr.orderId = amazonOrderId;
-            orderr.market = M.val(odt.getSalesChannel());
-            orderr.createDate = new DateTime(odt.getPurchaseDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
-            orderr.state = parseOrderState(odt.getOrderStatus());
-
-            if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
-                Date lastUpdateTime = new DateTime(odt.getLastUpdatedDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
-                orderr.paymentDate = lastUpdateTime;
-                orderr.shipDate = lastUpdateTime;
-
-
-                FulfillmentDataType ffdt = odt.getFulfillmentData();
-                orderr.shipLevel = ffdt.getShipServiceLevel();
-
-                AddressType addtype = ffdt.getAddress();
-                orderr.city = addtype.getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
-                orderr.province = addtype.getState();
-                orderr.postalCode = addtype.getPostalCode();
-                orderr.country = addtype.getCountry();
-            }
-
-            List<OrderItemType> oits = odt.getOrderItem();
-            List<OrderItem> orderitems = new ArrayList<OrderItem>();
-
-            Float totalAmount = 0f;
-            Float shippingAmount = 0f;
-            Map<String, Boolean> mailed = new HashMap<String, Boolean>();
-            for(OrderItemType oid : oits) {
-                /**
-                 * 0. 检查这个 order 是否需要进行补充 orderitem
-                 * 1. 将 orderitem 的基本信息补充完全
-                 * 2. 检查 orderitems List 中时候已经存在相同的产品了, 如果有这修改已经存在的产品的数量否则才添加新的
-                 */
-                if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
-
-                OrderItem oi = new OrderItem();
-                oi.market = orderr.market;
-                oi.order = orderr;
-                oi.listingName = oid.getProductName();
-                oi.quantity = oid.getQuantity();
-                oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
-
-
-                // 如果属于 UnUsedSKU 那么则跳过这个解析
-                if(Product.unUsedSKU(oid.getSKU())) continue;
-
-                String sku = Product.merchantSKUtoSKU(oid.getSKU());
-                Product product = Product.findById(sku);
-                Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
-                if(product != null) oi.product = product;
-                else {
-                    String title = String.format("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
-                    Logger.error(title);
-                    if(!mailed.containsKey(sku)) {
-                        Webs.systemMail(title, title);
-                        mailed.put(sku, true);
-                    }
-                    continue; // 发生了这个错误, 这跳过这个 orderitem
-                }
-                if(selling != null) oi.selling = selling;
-                else {
-                    String sid = Selling.sid(oid.getSKU().toUpperCase(), orderr.market, acc);
-                    String title = String.format("Selling[%s] is not in SELLING, it can not be happed!", sid);
-                    Logger.warn(title);
-                    if(mailed.containsKey(sid)) {
-                        Webs.systemMail(title, title);
-                        mailed.put(sid, true);
-                    }
+                String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
+                if(StringUtils.startsWith(amazonOrderId, "S02") || StringUtils.startsWith(amazonOrderId, "S01")) {
+                    Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
                     continue;
                 }
-                oi.id = String.format("%s_%s", orderr.orderId, product.sku);
 
-                // price calculate
-                oi.price = oi.discountPrice = oi.feesAmaount = oi.shippingPrice = 0f; // 初始化值
-                if(orderr.state == Orderr.S.CANCEL) { //基本信息完成后, 如果订单是取消的, 那么价格等都设置为 0 , 不计入计算并
+                Orderr orderr = new Orderr();
+                orderr.account = acc;
+                orderr.orderId = amazonOrderId;
+                orderr.market = M.val(odt.getSalesChannel());
+                orderr.createDate = new DateTime(odt.getPurchaseDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
+                orderr.state = parseOrderState(odt.getOrderStatus());
+
+                if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
+                    Date lastUpdateTime = new DateTime(odt.getLastUpdatedDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
+                    orderr.paymentDate = lastUpdateTime;
+                    orderr.shipDate = lastUpdateTime;
+
+
+                    FulfillmentDataType ffdt = odt.getFulfillmentData();
+                    orderr.shipLevel = ffdt.getShipServiceLevel();
+
+                    AddressType addtype = ffdt.getAddress();
+                    orderr.city = addtype.getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
+                    orderr.province = addtype.getState();
+                    orderr.postalCode = addtype.getPostalCode();
+                    orderr.country = addtype.getCountry();
+                }
+
+                List<OrderItemType> oits = odt.getOrderItem();
+                List<OrderItem> orderitems = new ArrayList<OrderItem>();
+
+                Float totalAmount = 0f;
+                Float shippingAmount = 0f;
+                Map<String, Boolean> mailed = new HashMap<String, Boolean>();
+                for(OrderItemType oid : oits) {
+                    /**
+                     * 0. 检查这个 order 是否需要进行补充 orderitem
+                     * 1. 将 orderitem 的基本信息补充完全
+                     * 2. 检查 orderitems List 中时候已经存在相同的产品了, 如果有这修改已经存在的产品的数量否则才添加新的
+                     */
+                    if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
+
+                    OrderItem oi = new OrderItem();
+                    oi.market = orderr.market;
+                    oi.order = orderr;
+                    oi.listingName = oid.getProductName();
+                    oi.quantity = oid.getQuantity();
+                    oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
+
+
+                    // 如果属于 UnUsedSKU 那么则跳过这个解析
+                    if(Product.unUsedSKU(oid.getSKU())) continue;
+
+                    String sku = Product.merchantSKUtoSKU(oid.getSKU());
+                    Product product = Product.findById(sku);
+                    Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
+                    if(product != null) oi.product = product;
+                    else {
+                        String title = String.format("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
+                        Logger.error(title);
+                        if(!mailed.containsKey(sku)) {
+                            Webs.systemMail(title, title);
+                            mailed.put(sku, true);
+                        }
+                        continue; // 发生了这个错误, 这跳过这个 orderitem
+                    }
+                    if(selling != null) oi.selling = selling;
+                    else {
+                        String sid = Selling.sid(oid.getSKU().toUpperCase(), orderr.market, acc);
+                        String title = String.format("Selling[%s] is not in SELLING, it can not be happed!", sid);
+                        Logger.warn(title);
+                        if(mailed.containsKey(sid)) {
+                            Webs.systemMail(title, title);
+                            mailed.put(sid, true);
+                        }
+                        continue;
+                    }
+                    oi.id = String.format("%s_%s", orderr.orderId, product.sku);
+
+                    // price calculate
+                    oi.price = oi.discountPrice = oi.feesAmaount = oi.shippingPrice = 0f; // 初始化值
+                    if(orderr.state == Orderr.S.CANCEL) { //基本信息完成后, 如果订单是取消的, 那么价格等都设置为 0 , 不计入计算并
+                        addIntoOrderItemList(orderitems, oi);
+                        continue;
+                    }
+
+                    ItemPriceType ipt = oid.getItemPrice();
+                    if(ipt == null) { //如果价格还没有出来, 表示在 Amazon 上数据还没有及时到位, 暂时不记录价格数据
+                        Logger.warn("Order[%s] orderitem don`t have price yet.", orderr.orderId);
+                    } else {
+                        List<ComponentType> costs = oid.getItemPrice().getComponent();
+                        for(ComponentType ct : costs) { // 价格在这个都要统一成为 GBP (英镑), 注意不是 EUR 欧元
+                            AmountType at = ct.getAmount();
+                            String compType = ct.getType().toLowerCase();
+                            oi.currency = helper.Currency.valueOf(at.getCurrency());
+                            if(oi.currency == null) oi.currency = Currency.USD;// 如果 Currency 为 null,则修补为 USD
+                            if("principal".equals(compType)) {
+                                oi.price = at.getValue();
+                                totalAmount += oi.price;
+                                oi.usdCost = oi.currency.toUSD(oi.price);
+                            } else if("shipping".equals(compType)) {
+                                oi.shippingPrice = at.getValue();
+                                shippingAmount += oi.shippingPrice;
+                            } else if("giftwrap".equals(compType)) {
+                                oi.memo += String.format("\nGiftWrap: %s %s.", at.getValue(), oi.currency); //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
+                            }
+                        }
+
+                        // 计算折扣了多少钱
+                        PromotionType promotionType = oid.getPromotion();
+                        if(promotionType != null) {
+                            if(promotionType.getShipPromotionDiscount() != null) {
+                                oi.shippingPrice = oi.shippingPrice - promotionType.getShipPromotionDiscount();
+                            }
+                            if(promotionType.getItemPromotionDiscount() != null) {
+                                oi.discountPrice = promotionType.getItemPromotionDiscount();
+                            }
+                        }
+                    }
+
                     addIntoOrderItemList(orderitems, oi);
-                    continue;
                 }
 
-                ItemPriceType ipt = oid.getItemPrice();
-                if(ipt == null) { //如果价格还没有出来, 表示在 Amazon 上数据还没有及时到位, 暂时不记录价格数据
-                    Logger.warn("Order[%s] orderitem don`t have price yet.", orderr.orderId);
-                } else {
-                    List<ComponentType> costs = oid.getItemPrice().getComponent();
-                    for(ComponentType ct : costs) { // 价格在这个都要统一成为 GBP (英镑), 注意不是 EUR 欧元
-                        AmountType at = ct.getAmount();
-                        String compType = ct.getType().toLowerCase();
-                        oi.currency = helper.Currency.valueOf(at.getCurrency());
-                        if(oi.currency == null) oi.currency = Currency.USD;// 如果 Currency 为 null,则修补为 USD
-                        if("principal".equals(compType)) {
-                            oi.price = at.getValue();
-                            totalAmount += oi.price;
-                            oi.usdCost = oi.currency.toUSD(oi.price);
-                        } else if("shipping".equals(compType)) {
-                            oi.shippingPrice = at.getValue();
-                            shippingAmount += oi.shippingPrice;
-                        } else if("giftwrap".equals(compType)) {
-                            oi.memo += String.format("\nGiftWrap: %s %s.", at.getValue(), oi.currency); //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
-                        }
-                    }
-
-                    // 计算折扣了多少钱
-                    PromotionType promotionType = oid.getPromotion();
-                    if(promotionType != null) {
-                        if(promotionType.getShipPromotionDiscount() != null) {
-                            oi.shippingPrice = oi.shippingPrice - promotionType.getShipPromotionDiscount();
-                        }
-                        if(promotionType.getItemPromotionDiscount() != null) {
-                            oi.discountPrice = promotionType.getItemPromotionDiscount();
-                        }
-                    }
-                }
-
-                addIntoOrderItemList(orderitems, oi);
+                orderr.totalAmount = totalAmount;
+                orderr.shippingAmount = shippingAmount;
+                orderr.items = orderitems;
+                orders.add(orderr);
+            } catch(Exception e) {
+                errors.append(Webs.E(e)).append("\r\n").append(J.json(odt));
             }
-
-            orderr.totalAmount = totalAmount;
-            orderr.shippingAmount = shippingAmount;
-            orderr.items = orderitems;
-            orders.add(orderr);
         }
+        if(StringUtils.isNotBlank(errors.toString()))
+            Webs.systemMail(String.format("解析 %s 订单文件的错误.", file.getAbsolutePath()), errors.toString());
         return orders;
     }
 
