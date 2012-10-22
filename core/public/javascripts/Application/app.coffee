@@ -29,7 +29,8 @@ $ ->
     chart:
       renderTo: id
       type: 'pie'
-    title: {text: title}
+    title:
+      {text: title}
     tooltip:
       formatter: ->
         "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>OrderItems: #{@y} / #{@total}"
@@ -49,12 +50,14 @@ $ ->
   cat = '<span style="color:#F67300">销量</span>'
   sales = '<span style="color:#F67300">销售额</span>'
   pieAll = pieOpBuilder('cat_percent', "类别#{cat}百分比", 0)
-  pieUK = pieOpBuilder('cat_percent_uk', "EasyAcc.U 类别#{cat}百分比", 1)
-  pieDE = pieOpBuilder('cat_percent_de', "EasyAcc.D 类别#{cat}百分比", 2)
+  pieDE = pieOpBuilder('cat_percent_de', "EasyAcc.DE 类别#{cat}百分比", 2)
+  pieUS = pieOpBuilder('cat_percent_us', "EasyAcc.US 类别#{cat}百分比", 131)
+  pieUK = pieOpBuilder('cat_percent_uk', "EasyAcc.UK 类别#{cat}百分比", 1)
 
   salesALL = pieOpBuilder('sales_percent', "类别#{sales}百分比", 0)
-  salesUK = pieOpBuilder('sales_percent_uk', "EasyAcc.U 类别#{sales}百分比", 0)
-  salesDE = pieOpBuilder('sales_percent_de', "EasyAcc.D 类别#{sales}百分比", 0)
+  salesDE = pieOpBuilder('sales_percent_de', "EasyAcc.DE 类别#{sales}百分比", 0)
+  salesUS = pieOpBuilder('sales_percent_us', "EasyAcc.US 类别#{sales}百分比", 0)
+  salesUK = pieOpBuilder('sales_percent_uk', "EasyAcc.US 类别#{sales}百分比", 0)
 
   # category 百分比
   loadCategoryAndSalePercent = (pieTuple, date = $.DateUtil.fmt2(new Date())) ->
@@ -84,6 +87,7 @@ $ ->
     loadCategoryAndSalePercent({o: pieAll, s: salesALL}, date)
     loadCategoryAndSalePercent({o: pieUK, s: salesUK}, date)
     loadCategoryAndSalePercent({o: pieDE, s: salesDE}, date)
+    loadCategoryAndSalePercent({o: pieUS, s: salesUS}, date)
 
   lastDate = $("#orders tr:last td:eq(0)").attr('date')
   drawPies(lastDate)
