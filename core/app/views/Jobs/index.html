@@ -103,7 +103,7 @@
                         <td>
                             <input type="text" class="input input-xxlarge" name="job.memo" value="${job.memo}">
                         </td>
-                        <td>${job.lastUpdateTime.asdate('yyyy-MM-dd HH:mm:ss')}</td>
+                        <td>#{time_tooltip datetime:true, time:new java.util.Date(job.lastUpdateTime)/}</td>
                         <td>
                             <input type="checkbox" ${job.close ? 'checked' : ''} onclick="checkbox(this)" value="${job.close}">
                             <input type="hidden" name="job.close" value="${job.close}">

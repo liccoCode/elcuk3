@@ -285,9 +285,13 @@ public class JobRequest extends Model {
     public static void dealWith(T type, AmazonJob amazon) {
         List<JobRequest> tobeDeal = JobRequest.find("state=? AND type=?", JobRequest.S.END, type).fetch();
         for(JobRequest job : tobeDeal) {
-            amazon.callBack(job);
-            job.state = S.CLOSE;
-            job.save();
+            try {
+                amazon.callBack(job);
+                job.state = S.CLOSE;
+                job.save();
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

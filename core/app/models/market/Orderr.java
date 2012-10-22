@@ -67,7 +67,7 @@ public class Orderr extends GenericModel {
 
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    public List<OrderItem> items;
+    public List<OrderItem> items = new ArrayList<OrderItem>();
 
     /**
      * 订单所属的市场
@@ -87,7 +87,7 @@ public class Orderr extends GenericModel {
 
     @OneToMany(mappedBy = "order")
     @OrderBy("date ASC,cost DESC")
-    public List<SaleFee> fees;
+    public List<SaleFee> fees = new ArrayList<SaleFee>();
     //-------------- Basic ----------------
 
     /**
