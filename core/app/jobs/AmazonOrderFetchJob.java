@@ -10,6 +10,7 @@ import models.market.*;
 import models.product.Product;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.db.jpa.JPA;
 import play.jobs.Every;
 import play.jobs.Job;
 
@@ -20,10 +21,10 @@ import java.util.*;
 /**
  * 每隔一段时间到 Amazon 上进行订单的抓取
  * //TODO 在处理好 Product, Listing, Selling 的数据以后再编写
- *  * 周期:
-  * - 轮询周期: 5mn
-  * - Duration: 10mn
-  * - Job Interval: 1h
+ * * 周期:
+ * - 轮询周期: 5mn
+ * - Duration: 10mn
+ * - Job Interval: 1h
  * User: Wyatt
  * Date: 12-1-8
  * Time: 上午5:59
@@ -88,7 +89,9 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
          */
         List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
 
+        int capcity = 0;
         for(Orderr order : orders) {
+            capcity++;
             Orderr managed = Orderr.findById(order.orderId);
             if(managed == null) { //保存
                 order.save();
@@ -97,6 +100,10 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 if(managed.state == Orderr.S.CANCEL) continue; // 如果订单已经为 CANCEL 了, 则不更新了
                 if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING || order.state == Orderr.S.SHIPPED) // 新订单为 CANCEL 的则更新
                     managed.updateAttrs(order);
+            }
+            if(capcity >= 300) {
+                JPA.em().flush();
+                capcity = 0;
             }
         }
     }
