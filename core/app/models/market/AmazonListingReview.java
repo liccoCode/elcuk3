@@ -3,12 +3,14 @@ package models.market;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
-import helper.*;
+import helper.Dates;
+import helper.GTs;
+import helper.J;
+import helper.OsTicket;
 import models.support.Ticket;
 import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.*;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
@@ -20,8 +22,6 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -229,6 +229,10 @@ public class AmazonListingReview extends GenericModel {
      * 是否被删除
      */
     public boolean isRemove = false;
+    /**
+     * 是否为自建的 Listing
+     */
+    public boolean isSelf = true;
 
     /**
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
@@ -250,6 +254,7 @@ public class AmazonListingReview extends GenericModel {
         if(this.listing == null)
             Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
         else if(!Listing.isSelfBuildListing(this.listing.title)) {
+            this.isSelf = false;
             this.comment(String.format("这个 Review 对应的 Listing 非自建."));
         }
         return this.save();
@@ -292,6 +297,7 @@ public class AmazonListingReview extends GenericModel {
         if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
         if(newReview.reviewRank > 0) this.reviewRank = newReview.reviewRank;
         if(newReview.comments > 0) this.comments = newReview.comments;
+        if(StringUtils.isNotBlank(newReview.title)) this.isSelf = Listing.isSelfBuildListing(newReview.title);
         // resolved 不做处理
         return this.save();
     }

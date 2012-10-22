@@ -1,7 +1,6 @@
 package templates;
 
-import jobs.works.ListingReviewWork;
-import jobs.works.ListingWorkers;
+import jobs.works.ListingReviewsWork;
 import models.market.AmazonListingReview;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -27,6 +26,6 @@ public class OsTicketTest extends UnitTest {
 
     @Test
     public void testListingReviewJob() throws ExecutionException, TimeoutException, InterruptedException {
-        new ListingReviewWork("B005UO263U_amazon.fr").now().get(10, TimeUnit.SECONDS);
+        new ListingReviewsWork("B005UO263U_amazon.fr").now().get(10, TimeUnit.SECONDS);
     }
 }
