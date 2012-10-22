@@ -1,7 +1,8 @@
+role :e, 'root@e.easya.cc'
 namespace :play do
 
   desc "部署 Play 代码到服务器"
-  task :deploy do
+  task :deploy, roles: :e do
     branch = `git branch | grep \\*`.split(' ')[1]
     if branch != 'master'
       puts "请确认 git 分支在 master 分支 (now:#{branch})"
@@ -11,8 +12,6 @@ namespace :play do
     `git push ufd`
     puts '---- push to bitbucket ----'
     `git push bit`
-
-    puts "---- TBD -----"
+    run "cd ~/elcuk2/core;git checkout master;git pull;"
   end
-
 end
