@@ -139,6 +139,7 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 交货的状态.
+     * 如果全部交货, 则进行交货状态更新
      *
      * @return
      */
@@ -150,6 +151,10 @@ public class Deliveryment extends GenericModel {
             if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
                 delivery += unit.qty();
             total += unit.qty();
+        }
+        if(delivery == total) {
+            this.state = S.DONE;
+            this.save();
         }
         return new F.T2<Integer, Integer>(delivery, total);
     }

@@ -308,7 +308,7 @@ public class Listing extends GenericModel {
                 }
             }
         }
-        if(needWarnningOffers >= 2) Mails.moreOfferOneListing(offers, this);
+        if(needWarnningOffers >= 1) Mails.moreOfferOneListing(offers, this);
     }
 
     /**
