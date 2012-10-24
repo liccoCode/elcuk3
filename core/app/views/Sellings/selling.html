@@ -5,6 +5,8 @@
     #{script 'component/amazon.coffee'/}
 #{/set}
 #{if s.market.isAmazon()}
+#{flash_alert /}
+
 <div class="row">
     #{if s.state == models.market.Selling.S.DOWN}
     <div class="alert alert-error">

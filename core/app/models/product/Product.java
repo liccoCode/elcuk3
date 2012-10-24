@@ -271,6 +271,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                     // 必须
                     new BasicNameValuePair("encoded_session_hidden_map", doc.select("input[name=encoded_session_hidden_map]").val()),
                     new BasicNameValuePair("manufacturer", selling.aps.manufacturer),
+                    new BasicNameValuePair("part_number", selling.aps.manufacturerPartNumber),
                     new BasicNameValuePair("item_name", selling.aps.title),
                     new BasicNameValuePair("external_id", selling.aps.upc)
             ));

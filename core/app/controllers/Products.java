@@ -98,6 +98,7 @@ public class Products extends Controller {
 
         try {
             Selling se = pro.saleAmazon(s);
+            flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
             redirect("/Sellings/selling/" + se.sellingId);
         } catch(Exception e) {
             Validation.addError("", e.getMessage());
@@ -112,7 +113,7 @@ public class Products extends Controller {
 
     @Before(only = {"blank", "create", "index"})
     public static void setUpCreatePage() {
-        List<String> families = Family.familys(false);
+        List<String> families = Family.familys(true);
         renderArgs.put("families", J.json(families));
     }
 
