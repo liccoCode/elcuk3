@@ -1,13 +1,15 @@
 package jobs;
 
+import helper.Webs;
 import models.Jobex;
 import models.market.Listing;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -64,17 +66,21 @@ public class ListingSchedulJob extends Job {
         try {
             lock.lock();
             for(String listingId : BASE_LISTING_MAP.keySet()) {
-                Listing lst = BASE_LISTING_MAP.get(listingId);
-                //如果没有 lastUpdateTime 立即执行一次
-                if(lst.lastUpdateTime == null) lst.lastUpdateTime = now - 1;
-                /**
-                 * - 超过当前时间了
-                 * - 会有考虑如果有的 Listing 执行时间特别长, 导致后面更新不到怎么办? 这就是为什么一次性全部累加到 WORK_QUEUE 的原因, 宁可多更新也要避免更新不到.
-                 */
-                if(now - lst.lastUpdateTime >= 0) {
-                    if(lst.saleRank == null && lst.saleRank <= 0) continue;
-                    WORK_QUEUE.add(listingId);
-                    ListingSchedulJob.lastUpdate(listingId, now + ListingSchedulJob.calInterval(lst));
+                try {
+                    Listing lst = BASE_LISTING_MAP.get(listingId);
+                    //如果没有 lastUpdateTime 立即执行一次
+                    if(lst.lastUpdateTime == null) lst.lastUpdateTime = now - 1;
+                    /**
+                     * - 超过当前时间了
+                     * - 会有考虑如果有的 Listing 执行时间特别长, 导致后面更新不到怎么办? 这就是为什么一次性全部累加到 WORK_QUEUE 的原因, 宁可多更新也要避免更新不到.
+                     */
+                    if(now - lst.lastUpdateTime >= 0) {
+                        if(lst.saleRank == null && lst.saleRank <= 0) continue;
+                        WORK_QUEUE.add(listingId);
+                        ListingSchedulJob.lastUpdate(listingId, now + ListingSchedulJob.calInterval(lst));
+                    }
+                } catch(Exception e) {
+                    Logger.error("Listing %s Error. -> %s", listingId, Webs.E(e));
                 }
             }
         } finally {
