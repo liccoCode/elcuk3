@@ -213,11 +213,11 @@ public class FBAShipment extends Model {
      * @param state
      */
     public void isNofityState(S state) {
-        if(this.state != state)
-            FBAMails.shipmentStateChange(this, this.state, state);
         this.state = state;
         if(this.state == S.RECEIVING) this.receivingAt = new Date();
         else if(this.state == S.CLOSED || this.state == S.DELETED) this.closeAt = new Date();
+        if(this.state != state)
+            FBAMails.shipmentStateChange(this, this.state, state);
     }
 
     /**
