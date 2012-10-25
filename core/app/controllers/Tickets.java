@@ -31,6 +31,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Tickets extends Controller {
 
+    @Check("tickets.index")
     public static void index() {
         F.T2<List<Ticket>, List<Ticket>> newTicketsT2 = Ticket.tickets(Ticket.T.TICKET, TicketState.NEW, true);
         List<Ticket> needTwoTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.TWO_MAIL, false)._1;
@@ -57,6 +58,7 @@ public class Tickets extends Controller {
     /**
      * 如果是 service 用户则是其工作台, 如果是普通用户则是搜索页面
      */
+    @Check("tickets.user")
     public static void user() {
         User user = User.findByUserName(Scope.Session.current().get("username"));
         TicketPost p = new TicketPost();
@@ -156,7 +158,6 @@ public class Tickets extends Controller {
         }
     }
 
-    @Check("manager")
     public static void syncAll() {
         TicketStateSyncJob job = new TicketStateSyncJob();
         job.now();

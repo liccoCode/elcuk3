@@ -56,14 +56,11 @@ public class Procures extends Controller {
         }
     }
 
+    @Check("procures.index")
     public static void index(ProcurePost p) {
-        List<ProcureUnit> units = null;
-        if(p == null) {
+        if(p == null)
             p = new ProcurePost();
-            units = ProcureUnit.unitsFilterByStage(ProcureUnit.STAGE.PLAN);
-        } else {
-            units = p.query();
-        }
+        List<ProcureUnit> units = p.query();
         render(p, units);
     }
 
@@ -139,6 +136,7 @@ public class Procures extends Controller {
      * @param pids
      * @param name
      */
+    @Check("procures.createdeliveryment")
     public static void createDeliveryment(List<Long> pids, String name) {
         Validation.required("procrues.createDeliveryment.name", name);
         Validation.required("deliveryments.addunits", pids);
@@ -171,6 +169,7 @@ public class Procures extends Controller {
      *
      * @param attrs
      */
+    @Check("procures.delivery")
     public static void delivery(UnitAttrs attrs, long id, String cmt) {
         attrs.validate();
         ProcureUnit unit = ProcureUnit.findById(id);
@@ -205,6 +204,7 @@ public class Procures extends Controller {
      * @param id
      * @param newUnit
      */
+    @Check("procures.dosplitunit")
     public static void doSplitUnit(long id, ProcureUnit newUnit) {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);

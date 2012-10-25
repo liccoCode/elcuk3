@@ -25,6 +25,10 @@ User(jason):
   email: 'wyatt@easyacceu.com'
   power: 'ROOT'
   isService: true
+User(root):
+  username: root
+  password: root
+  email: wppurking@gmail.com
 
 market.Account(easyacc):
   username: easyacc.eu@gmail.com

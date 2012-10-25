@@ -56,7 +56,9 @@
     <tr>
         <td colspan="15">
             <input type="hidden" name="id" value="${shipmentId}">
-            <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
+            #{ck "shipments.cancelship"}
+                <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
+            #{/ck}
         </td>
     </tr>
 #{/if}

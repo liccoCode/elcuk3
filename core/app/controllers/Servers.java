@@ -14,9 +14,9 @@ import java.util.List;
  * Time: 上午1:58
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
-@Check("root")
 public class Servers extends Controller {
 
+    @Check("servers.index")
     public static void index() {
         List<Server> sers = Server.all().fetch();
         render(sers);

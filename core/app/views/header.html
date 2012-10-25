@@ -14,60 +14,111 @@
                         </ul>
                     </li>
 
+                #{ck "market"}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Listings.index()}">Listing</a></li>
-                        #{ck 'root'}
-                            <li><a href="@{Orders.index(1)}">订单</a></li>
-                            <li><a href="@{Analyzes.index()}">销量分析</a></li>
-                        #{/ck}
-                            <li><a href="@{AmazonReviews.index()}">Review 点击台</a></li>
+                            #{ck "listings.index"}
+                                <li><a href="@{Listings.index()}">Listing</a></li>
+                            #{/ck}
+                            #{ck 'orders.index'}
+                                <li><a href="@{Orders.index()}">订单</a></li>
+                            #{/ck}
+                            #{ck "analyzes.index"}
+                                <li><a href="@{Analyzes.index()}">销量分析</a></li>
+                            #{/ck}
+                            #{ck "amazonreviews.index"}
+                                <li><a href="@{AmazonReviews.index()}">Review 点击台</a></li>
+                            #{/ck}
                         </ul>
                     </li>
+                #{/ck}
 
+                #{ck "support"}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Reviews.index()}">Reviews</a></li>
-                            <li><a href="@{Feedbacks.index()}">Feedbacks</a></li>
-                            <li><a href="@{Tickets.index()}">Tickets</a></li>
-                            <li><a href="@{Tickets.user()}">Tickets 工作台</a></li>
-                            <li><a href="@{TicketAnalyzes.index()}">Tickets 分析</a></li>
+                            #{ck "reviews.index"}
+                                <li><a href="@{Reviews.index()}">Reviews</a></li>
+                            #{/ck}
+                            #{ck "feedbacks.index"}
+                                <li><a href="@{Feedbacks.index()}">Feedbacks</a></li>
+                            #{/ck}
+                            #{ck "tickets.index"}
+                                <li><a href="@{Tickets.index()}">Tickets</a></li>
+                            #{/ck}
+                            #{ck "tickets.user"}
+                                <li><a href="@{Tickets.user()}">Tickets 工作台</a></li>
+                            #{/ck}
+                            #{ck "ticketanalyzes.index"}
+                                <li><a href="@{TicketAnalyzes.index()}">Tickets 分析</a></li>
+                            #{/ck}
                         </ul>
                     </li>
+                #{/ck}
 
 
+                #{ck "product"}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Products.index()}">产品</a></li>
-                            <li><a href="@{Whouses.index()}">仓库</a></li>
+                            #{ck "products.index"}
+                                <li><a href="@{Products.index()}">产品</a></li>
+                            #{/ck}
+                            #{ck "whouses.index"}
+                                <li><a href="@{Whouses.index()}">仓库</a></li>
+                            #{/ck}
                             <li class="divider"></li>
-                            <li><a href="@{Categorys.show()}">产品类别</a></li>
-                            <li><a href="@{Brands.index()}">产品品牌</a></li>
-                            <li><a href="@{Familys.index()}">Family</a></li>
+                            #{ck "categorys.show"}
+                                <li><a href="@{Categorys.show()}">产品类别</a></li>
+                            #{/ck}
+                            #{ck "brands.index"}
+                                <li><a href="@{Brands.index()}">产品品牌</a></li>
+                            #{/ck}
+                            #{ck "familys.index"}
+                                <li><a href="@{Familys.index()}">Family</a></li>
+                            #{/ck}
                         </ul>
                     </li>
+                #{/ck}
 
 
+                #{ck "procure"}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Procures.index()}">采购计划</a></li>
-                            <li><a href="@{Deliveryments.index()}">采购单</a></li>
-                            <li><a href="@{Shipments.index()}">运输单</a></li>
-                            <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+                            #{ck "procures.index"}
+                                <li><a href="@{Procures.index()}">采购计划</a></li>
+                            #{/ck}
+                            #{ck "deliveryments.index"}
+                                <li><a href="@{Deliveryments.index()}">采购单</a></li>
+                            #{/ck}
+                            #{ck "shipments.index"}
+                                <li><a href="@{Shipments.index()}">运输单</a></li>
+                            #{/ck}
+                            #{ck "cooperators.index"}
+                                <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+                            #{/ck}
                         </ul>
                     </li>
+                #{/ck}
 
-                #{ck 'root'}
+                #{ck 'system'}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="@{Jobs.index()}">系统任务管理</a></li>
-                            <li><a href="@{Servers.index()}">服务器管理</a></li>
-                            <li><a href="@{Accounts.index()}">用户管理</a></li>
+                            #{ck "jobs.index"}
+                                <li><a href="@{Jobs.index()}">任务管理</a></li>
+                            #{/ck}
+                            #{ck "servers.index"}
+                                <li><a href="@{Servers.index()}">服务器管理</a></li>
+                            #{/ck}
+                            #{ck "accounts.index"}
+                                <li><a href="@{Accounts.index()}">账户管理</a></li>
+                            #{/ck}
+                            #{ck "users.index"}
+                                <li><a href="@{Users.index()}">用户管理</a></li>
+                            #{/ck}
                         </ul>
                     </li>
                 #{/ck}

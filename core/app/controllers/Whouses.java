@@ -24,6 +24,7 @@ public class Whouses extends Controller {
     }
 
 
+    @Check("whouses.index")
     public static void index() {
         List<Whouse> whs = Whouse.all().fetch();
         render(whs);

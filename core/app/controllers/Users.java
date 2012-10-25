@@ -1,13 +1,13 @@
 package controllers;
 
-import helper.J;
+import models.Privilege;
 import models.User;
 import models.view.Ret;
-import org.apache.commons.lang.StringUtils;
-import play.cache.Cache;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * User 相关的操作
@@ -17,6 +17,21 @@ import play.mvc.With;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Users extends Controller {
+
+    @Check("users.index")
+    public static void index() {
+        List<User> users = User.findAll();
+        List<Privilege> privileges = Privilege.findAll();
+        render(users, privileges);
+    }
+
+    public static void privileges(Long id, List<Long> privilegeId) {
+        if(privilegeId == null || privilegeId.size() == 0) renderJSON(new Ret(false, "必须选择权限"));
+        User user = User.findById(id);
+        user.addPrivileges(privilegeId);
+        int size = user.privileges.size();
+        renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
+    }
 
     public static void passwd(String username, String password, String confirm) {
         if(!username.equals(Secure.Security.connected())) {

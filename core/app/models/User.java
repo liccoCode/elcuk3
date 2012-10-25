@@ -1,19 +1,19 @@
 package models;
 
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.*;
 import play.data.validation.Email;
 import play.data.validation.Equals;
 import play.data.validation.Password;
 import play.data.validation.Required;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
-import play.libs.F;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * 系统中的用户
@@ -30,6 +30,12 @@ public class User extends Model {
         MANAGER,
         ROOT
     }
+
+    /**
+     * 用户所拥有的权限
+     */
+    @ManyToMany
+    public Set<Privilege> privileges = new HashSet<Privilege>();
 
     @Column(nullable = false, unique = true)
     @Required
@@ -89,6 +95,28 @@ public class User extends Model {
 
     // ------------------------------
 
+    /**
+     * 当前用户还没有的权限
+     *
+     * @return
+     */
+    public boolean isHavePrivilege(Privilege privilege) {
+        return this.privileges.contains(privilege);
+    }
+
+    /**
+     * 增加权限
+     *
+     * @param privilegeId
+     */
+    public void addPrivileges(List<Long> privilegeId) {
+        List<Privilege> privileges = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId)).fetch();
+        this.privileges = new HashSet<Privilege>();
+        this.save();
+        this.privileges.addAll(privileges);
+        Privilege.updatePrivileges(this.username, this.privileges);
+        this.save();
+    }
 
     /**
      * 修改密码
@@ -158,6 +186,23 @@ public class User extends Model {
 
     public void setClosed(boolean closed) {
         this.closed = closed;
+    }
+
+    /**
+     * 过滤出没有的权限
+     */
+    static class UnPrivilegePrediect implements Predicate {
+        private String actionName;
+
+        UnPrivilegePrediect(String actionName) {
+            this.actionName = actionName;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            Privilege pri = (Privilege) o;
+            return !StringUtils.equals(this.actionName, pri.name);
+        }
     }
 
 }

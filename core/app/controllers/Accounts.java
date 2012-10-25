@@ -17,8 +17,9 @@ import java.util.List;
  * Time: 上午6:20
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
-@Check("root")
 public class Accounts extends Controller {
+
+    @Check("accounts.index")
     public static void index() {
         List<Account> accs = Account.findAll();
         render(accs);
@@ -47,15 +48,4 @@ public class Accounts extends Controller {
         a.save();
         redirect("/Accounts/index#" + a.id);
     }
-
-    public static void login(Account a) {
-        if(!a.isPersistent()) renderJSON(new Ret("Account 不存在!"));
-        try {
-            a.loginAmazonSellerCenter();
-            renderJSON(new Ret(true, String.format("%s login success.", a.prettyName())));
-        } catch(Exception e) {
-            renderJSON(new Ret(true, String.format("%s login faield. [%s]", a.prettyName(), Webs.E(e))));
-        }
-    }
-
 }

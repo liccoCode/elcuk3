@@ -1,12 +1,15 @@
 package controllers;
 
+import models.Privilege;
 import models.User;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.mvc.Scope;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -24,28 +27,16 @@ public class Login extends Secure.Security {
          */
         User user = User.findByUserName(username);
         if(user == null) return false;
-        //TODO 注册用户的 EventStreams<Notification>
         return user.authenticate(password);
     }
 
     static boolean check(String profile) {
-        /**
-         * 由于登陆是从 Cookie 中添加的, 所以 Cookie 的有效期需要设置为内存中有效, 不能太长.
-         */
-        String username = Secure.Security.connected();
-        User user = Cache.get(ukey(username), User.class);
-        if(user == null) user = loadAndCacheUser(username);
+        User user = current();
         if(user == null) return false;
-        if("guest".equals(profile)) {
-            return user.power.ordinal() >= User.P.GUEST.ordinal();
-        } else if("normal".equals(profile)) {
-            return user.power.ordinal() >= User.P.NORMAL.ordinal();
-        } else if("manager".equals(profile)) {
-            return user.power.ordinal() >= User.P.MANAGER.ordinal();
-        } else if("root".equals(profile)) {
-            return user.power.ordinal() >= User.P.ROOT.ordinal();
-        }
-        return false;
+        if("root".equals(user.username)) return true;
+        Set<Privilege> privileges = Privilege.privileges(user.username);
+        Privilege privilege = (Privilege) CollectionUtils.find(privileges, new PrivilegePrediect(profile.toLowerCase()));
+        return privilege != null;
     }
 
     @SuppressWarnings("unchecked")
@@ -78,10 +69,20 @@ public class Login extends Secure.Security {
         return String.format("user.name[%s][%s]", username, Scope.Session.current().getId());
     }
 
-    private static User loadAndCacheUser(String username) {
-        User user = User.findByUserName(username);
-        if(user != null) Cache.add(ukey(username), user);
-        return user;
-    }
+    /**
+     * 过滤权限
+     */
+    static class PrivilegePrediect implements Predicate {
+        private String actionName;
 
+        PrivilegePrediect(String actionName) {
+            this.actionName = actionName;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            Privilege pri = (Privilege) o;
+            return StringUtils.equals(this.actionName, pri.name);
+        }
+    }
 }

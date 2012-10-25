@@ -52,8 +52,10 @@ public class ProcurePost extends Post {
     public String dateType;
 
     public ProcurePost() {
-        this.from = DateTime.now().minusMonths(2).toDate();
+        this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
+        this.stage = ProcureUnit.STAGE.DONE;
+        this.dateType = "createDate";
     }
 
     public List<ProcureUnit> query() {

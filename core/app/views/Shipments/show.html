@@ -195,23 +195,27 @@
 <div class="row-fluid">
     <div class="span12" style="margin-bottom:15px;">
 
-    #{if isPlanAndConfirm}
-        <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
-            <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-            <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">
-                开始运输
-            </button>
-        </form>
-    #{/if}
+    #{ck "shipments.beginship"}
+        #{if isPlanAndConfirm}
+            <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
+                <input type="hidden" name="id" value="${ship.id}">
+                #{authenticityToken /}
+                <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">
+                    开始运输
+                </button>
+            </form>
+        #{/if}
+    #{/ck}
     #{if ship.state == models.procure.Shipment.S.CLEARANCE}
-        <form action="@{Shipments.ensureDone()}" method="post">
-            <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-            <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">确认到货</button>
-        </form>
+        #{ck "shipments.ensuredone"}
+            <form action="@{Shipments.ensureDone()}" method="post">
+                <input type="hidden" name="id" value="${ship.id}">
+                #{authenticityToken /}
+                <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">确认到货</button>
+            </form>
+        #{/ck}
     #{/if}
-    #{ck 'root'}
+    #{ck 'shipments.cancel'}
         #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
             <form action="@{Shipments.cancel()}" method="post">
                 <input type="hidden" name="id" value="${ship.id}">
@@ -244,11 +248,14 @@
         #{render 'Shipments/_shipitem.html', items:ship.noFbaItems()/}
 
         #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
-            <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">修改运输项目</a>
+            <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">查看运输项目</a>
         #{/if}
-
+        #{ck "shipments.deploytoamazon"}
             <button id="create_fba" class="btn btn-warning">创建 FBA</button>
-            <button id="split_shipment" class="btn btn-warning">分拆运输单</button>
+        #{/ck}
+        #{ck "shipments.splitshipment"}
+            <button id="split_shipment" class="btn btn-warning">分拆运输项目</button>
+        #{/ck}
         </form>
     </div>
 </div>

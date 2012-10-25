@@ -6,7 +6,7 @@
 
 <div class="row-fluid">
     <div class="span12">
-        #{search_input /}
+    #{search_input /}
     </div>
 </div>
 
@@ -37,11 +37,9 @@
             <li>
                 <a href="#closed" data-toggle='tab'>最近关闭的<span class="badge badge-inverse">${closed.size()}</span></a>
             </li>
-        #{ck 'manager'}
             <li>
                 <a href="#funcs" data-toggle='tab'>功能 Tab</a>
             </li>
-        #{/ck}
         </ul>
 
         <div class="tab-content">
@@ -77,11 +75,9 @@
             #{render 'Reviews/_review.html', tickets:closed/}
             </div>
 
-        #{ck 'manager'}
             <div id="funcs" class="tab-pane fade">
                 <button id="ostickt_sync" class="btn btn-primary">手动同步 OsTicket</button>
             </div>
-        #{/ck}
         </div>
 
     </div>

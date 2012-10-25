@@ -36,6 +36,7 @@ public class Shipments extends Controller {
         renderArgs.put("whouses", whouses);
     }
 
+    @Check("shipments.index")
     public static void index(ShipmentPost p) {
         List<Shipment> shipments = null;
         if(p == null)
@@ -130,17 +131,23 @@ public class Shipments extends Controller {
     /**
      * 取消运输单
      */
-    @Check("root")
+    @Check("shipments.cancel")
     public static void cancel(String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
-        ship.cancel();
+        try {
+            ship.cancel();
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+            if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        }
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
         new ElcukRecord(Messages.get("shipment.cancel"), Messages.get("action.base", id), id).save();
         flash.success("运输单取消成功.");
         redirect("/Shipments/show/" + id);
     }
 
+    @Check("shipments.ship")
     public static void ship(String id, List<Long> unitId, List<Integer> shipQty) {
         Validation.required("shipments.ship.unitId", unitId);
         Validation.required("shipments.ship.shipQty", shipQty);
@@ -163,6 +170,7 @@ public class Shipments extends Controller {
      * @param shipItemId
      * @param id
      */
+    @Check("shipments.cancelship")
     public static void cancelShip(List<Integer> shipItemId, String id) {
         Validation.required("shipments.ship.shipId", shipItemId);
         Validation.required("shipment.id", id);
@@ -170,12 +178,18 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
-        ship.cancelShip(shipItemId, true);
+        try {
+            ship.cancelShip(shipItemId, true);
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+            if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
+        }
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
         redirect("/shipments/shipitem/" + id);
     }
 
+    @Check("shipments.beginship")
     public static void beginShip(String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
@@ -208,6 +222,7 @@ public class Shipments extends Controller {
      *
      * @param id
      */
+    @Check("shipments.deploytoamazon")
     public static void deployToAmazon(final String id, final List<String> shipItemId) {
         validation.required(shipItemId);
         checkAuthenticity();
@@ -249,6 +264,7 @@ public class Shipments extends Controller {
      *
      * @param fbaId FBAShipment.id
      */
+    @Check("shipments.deployfba")
     public static void deleteFba(final Long fbaId) {
         checkAuthenticity();
         FBAShipment fba = FBAShipment.findById(fbaId);
@@ -269,6 +285,7 @@ public class Shipments extends Controller {
      *
      * @param id
      */
+    @Check("shipments.ensuredone")
     public static void ensureDone(String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
@@ -299,6 +316,7 @@ public class Shipments extends Controller {
     /**
      * 将 Shipment 进行分拆
      */
+    @Check("shipments.splitshipment")
     public static void splitShipment(String id, List<String> shipItemId) {
         validation.required(shipItemId);
         Shipment ship = Shipment.findById(id);

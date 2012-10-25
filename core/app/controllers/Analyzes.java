@@ -38,8 +38,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 2:14 PM
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
-@Check("manager")
 public class Analyzes extends Controller {
+
+    @Check("analyzes.index")
     public static void index() {
         List<Account> accs = Account.openedSaleAcc();
         render(accs);
@@ -77,7 +78,7 @@ public class Analyzes extends Controller {
         renderJSON(new Ret());
     }
 
-    @Check("root")
+    @Check("analyzes.allskucsv")
     public static void allSkuCsv(Date from, Date to) {
         String fileName = "SKU_Sales.csv";
         File file = new File(Constant.TMP, fileName);
@@ -103,7 +104,7 @@ public class Analyzes extends Controller {
         }
     }
 
-    @Check("root")
+    @Check("analyzes.ajaxsales")
     @CacheFor("30mn")
     public static void ajaxSales(AnalyzePost p) {
         try {
@@ -153,8 +154,7 @@ public class Analyzes extends Controller {
      *
      * @param msku
      */
-    public static void pie(String msku,
-                           Date date) {
+    public static void pie(String msku, Date date) {
         Map<String, AtomicInteger> dataMap = Orderr.orderPieChart(msku, date);
         List<String> datax = new ArrayList<String>();
         for(String key : dataMap.keySet()) {

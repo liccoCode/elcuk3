@@ -10,7 +10,7 @@
 <div class="tabbable tabs-left" xmlns="http://www.w3.org/1999/html">
     <ul id="top_tab" class="nav nav-tabs">
         <li class="active"><a href="#basic" data-toggle="tab">基础</a></li>
-    #{ck 'root'}
+    #{ck 'analyzes.ajaxsales'}
         <li><a href="#root" data-toggle="tab">Root</a></li>
     #{/ck}
     </ul>
@@ -29,7 +29,7 @@
             </div>
         </div>
 
-    #{ck 'root'}
+    #{ck 'analyzes.ajaxsales'}
         <div class="tab-pane fade" id="root">
             <div class="row-fluid">
                 <div id="a_sales" class="span6" style="height:280px"></div>
@@ -86,9 +86,11 @@
                     <button class="btn" id="a_search">搜索</button>
                 </div>
 
+            #{ck "analyzes.allskucsv"}
                 <button id="skus_csv" class="btn btn-primary pull-right" rel="popover" content="X:SKU, Y:时间, 导出销量表">
                     SKU CSV
                 </button>
+            #{/ck}
                 <button id="clear_cache" class="btn btn-primary pull-right" style="margin-right:5px;">
                     Clear Cache
                 </button>

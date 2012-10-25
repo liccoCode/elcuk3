@@ -1,11 +1,17 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
+import helper.FBA;
+import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +25,19 @@ import java.util.List;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class ShipItem extends GenericModel {
     public ShipItem() {
+    }
+
+    /**
+     * 给提交 FBA 的时候使用的
+     *
+     * @param msku
+     * @param qty
+     */
+    public ShipItem(String msku, Integer qty) {
+        this.unit = new ProcureUnit();
+        this.unit.selling = new Selling();
+        this.unit.selling.merchantSKU = msku;
+        this.qty = qty;
     }
 
     public ShipItem(Shipment shipment, ProcureUnit unit) {
@@ -102,7 +121,8 @@ public class ShipItem extends GenericModel {
 
     /**
      * ShipItem 被取消;
-     * 删除这一条 ShipItem 记录
+     * 删除这一条 ShipItem 记录;
+     * 同时删除此 ShipItem 对应的 FBA 中的记录
      *
      * @return 删除后的临时对象
      */
@@ -110,7 +130,17 @@ public class ShipItem extends GenericModel {
         this.shipment = null;
         ProcureUnit unit = this.unit;
         this.unit = null;
-        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        F.T2<ShipItem, ProcureUnit> t2 = new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        if(t2._1.fba != null) {
+            try {
+                // 删除这个对象
+                //TODO 等待测试
+                FBA.update(t2._1.fba, Collections.singletonList(new ShipItem(t2._1.unit.selling.merchantSKU, 0)), t2._1.fba.state);
+            } catch(Exception e) {
+                throw new FastRuntimeException(e);
+            }
+        }
+        return t2;
     }
 
     /**

@@ -39,11 +39,9 @@
                 <a href="#closed" data-toggle='tab'>最近关闭的<span class="badge badge-inverse">${closed.size()}</span></a>
             </li>
 
-        #{ck 'manager'}
             <li>
                 <a href="#funcs" data-toggle='tab'>功能 Tab</a>
             </li>
-        #{/ck}
 
 
         </ul>
@@ -82,11 +80,9 @@
             #{render 'Feedbacks/_feedback.html', tickets:closed/}
             </div>
 
-        #{ck 'manager'}
             <div id="funcs" class="tab-pane fade">
                 <button id="ostickt_sync" class="btn btn-primary">手动同步 OsTicket</button>
             </div>
-        #{/ck}
 
 
         </div>

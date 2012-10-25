@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
  * Time: 12:43 AM
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
-@Check("root")
 public class Jobs extends Controller {
 
     @Before(only = {"index", "update", "create"})
@@ -39,6 +38,7 @@ public class Jobs extends Controller {
         renderArgs.put("jobReqs", JobRequest.find("ORDER BY requestDate DESC").<Jobex>fetch(30));
     }
 
+    @Check("jobs.index")
     public static void index() {
         render();
     }

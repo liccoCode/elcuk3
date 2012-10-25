@@ -6,6 +6,7 @@ import com.amazonaws.mws.MarketplaceWebServiceConfig;
 import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
 import com.amazonservices.mws.FulfillmentInventory._2010_10_01.MWSEndpoint;
+import com.jamonapi.Monitor;
 import models.market.JobRequest;
 import models.market.M;
 import org.apache.commons.io.FileUtils;
@@ -50,6 +51,7 @@ public class AWS {
             case ALL_FBA_ORDER_SHIPPED:
             case MANAGE_FBA_INVENTORY_ARCHIVED:
             case ACTIVE_LISTINGS:
+                //TODO 需要使用 Monitor 来监控到底有多少次的请求
                 MarketplaceWebService service = client(job);
 
                 RequestReportRequest res = new RequestReportRequest()

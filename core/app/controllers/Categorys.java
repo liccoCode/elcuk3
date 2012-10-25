@@ -1,12 +1,7 @@
 package controllers;
 
-import helper.J;
-import models.product.Brand;
 import models.product.Category;
-import models.product.Family;
-import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -29,6 +24,7 @@ public class Categorys extends Controller {
         renderArgs.put("cates", cates);
     }
 
+    @Check("categorys.show")
     public static void show(String id) {
         Category cat = (Category) renderArgs.get("cates", List.class).get(0);
         if(StringUtils.isNotBlank(id)) cat = Category.findById(id);

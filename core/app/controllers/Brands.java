@@ -25,6 +25,7 @@ public class Brands extends Controller {
         renderArgs.put("brands", Brand.all().<Brand>fetch());
     }
 
+    @Check("brands.index")
     public static void index(String id) {
         Brand brand = (Brand) renderArgs.get("brands", List.class).get(0);
         if(StringUtils.isNotBlank(id)) brand = Brand.findById(id);
@@ -65,7 +66,7 @@ public class Brands extends Controller {
      * @param b
      */
     public static void bc(Brand b) {
-        //TODO Brand 的创建的 name 与 fullName 的参数需要验证
+        //TODO 创建品牌的方法需要重写
         if(b.isPersistent()) renderJSON(new Ret("此 Brand 已经在系统中存在."));
 
         b.save();

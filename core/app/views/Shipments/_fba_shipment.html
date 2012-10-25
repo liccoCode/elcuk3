@@ -1,4 +1,4 @@
-#{set delete: fba.state in [models.procure.FBAShipment.S.CLOSED, models.procure.FBAShipment.S.CANCELLED, models.procure.FBAShipment.S.DELETED]/}
+#{set delete: fba.state in [models.procure.FBAShipment.S.CANCELLED, models.procure.FBAShipment.S.DELETED]/}
 #{if delete}
     #{error_row title:fba.account.type.name() + ' FBA ' + fba.shipmentId /}
 #{/if}
@@ -66,7 +66,7 @@
             </tr>
 
             <tr id="itemsFromAmazon_${fba.shipmentId}" style="display:none;">
-                <td colspan="6" style="padding:0;">
+                <td colspan="8" style="padding:0;">
                 #{if fba.itemsOnAmazonWithHTML}
                 ${fba.itemsOnAmazonWithHTML.raw()}
                 #{/if}
@@ -84,11 +84,13 @@
         #{if fba.shipItems.size() == 0}
             <span class="add-on">运输项目已经被移除, 需删除 Amazon 上的 FBA 腾出库存</span>
 
-            <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
-                <input type="hidden" value="${fba.id}" name="fbaId">
-                #{authenticityToken /}
-                <button class="btn btn-small btn-danger" data-confirm="btn">删除 ${fba.shipmentId}</button>
-            </form>
+            #{ck "shipments.deployfba"}
+                <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
+                    <input type="hidden" value="${fba.id}" name="fbaId">
+                    #{authenticityToken /}
+                    <button class="btn btn-small btn-danger" data-confirm="btn">删除 ${fba.shipmentId}</button>
+                </form>
+            #{/ck}
         #{/if}
         #{else }
             #{render 'Shipments/_shipitem.html', items:fba.shipItems/}

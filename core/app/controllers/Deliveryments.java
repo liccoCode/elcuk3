@@ -30,6 +30,7 @@ public class Deliveryments extends Controller {
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
     }
 
+    @Check("deliveryments.index")
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
         if(p == null) p = new DeliveryPost();
@@ -107,6 +108,7 @@ public class Deliveryments extends Controller {
     /**
      * 取消采购单
      */
+    @Check("deliveryments.cancel")
     public static void cancel(String id, String msg) {
         Validation.required("deliveryments.cancel", msg);
         Deliveryment dmt = Deliveryment.findById(id);

@@ -19,6 +19,7 @@ import java.util.List;
 public class TicketAnalyzes extends Controller {
 
     @CacheFor(id = "TicketAnalyzes.index")
+    @Check("ticketanalyzes.index")
     public static void index() {
         List<Category> cates = Category.all().fetch();
         render(cates);

@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class AmazonReviews extends Controller {
+
+    @Check("amazonReviews.index")
     public static void index() {
         Set<String> allAsin = Listing.allASIN();
         renderArgs.put("asins", J.json(allAsin));

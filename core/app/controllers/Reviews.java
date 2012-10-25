@@ -26,6 +26,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Reviews extends Controller {
 
+    @Check("reviews.index")
     public static void index() {
         F.T2<List<Ticket>, List<Ticket>> newT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW, true);
         F.T2<List<Ticket>, List<Ticket>> needTwoT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.TWO_MAIL, true);

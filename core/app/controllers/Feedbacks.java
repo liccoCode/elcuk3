@@ -22,6 +22,7 @@ import java.util.Set;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Feedbacks extends Controller {
+    @Check("feedbacks.index")
     public static void index() {
         F.T2<List<Ticket>, List<Ticket>> newFdbk = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.NEW, true);
         F.T2<List<Ticket>, List<Ticket>> needTwoFdbk = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.TWO_MAIL, true);

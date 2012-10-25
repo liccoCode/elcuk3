@@ -21,6 +21,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Cooperators extends Controller {
 
+    @Check("cooperators.index")
     public static void index() {
         List<Cooperator> coopers = Cooperator.findAll();
         render(coopers);

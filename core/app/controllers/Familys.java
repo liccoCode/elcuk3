@@ -19,6 +19,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Familys extends Controller {
+    @Check("familys.index")
     public static void index() {
         render();
     }

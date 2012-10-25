@@ -2,6 +2,7 @@ package jobs;
 
 import helper.Currency;
 import helper.HTTP;
+import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
@@ -35,6 +36,7 @@ public class OnStartUp extends Job {
 
 
         HTTP.init();
+        Privilege.init();
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.

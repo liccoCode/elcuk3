@@ -104,10 +104,14 @@
                     #{/if}
 
                     #{if delivery}
-                        <!-- 交货页面 -->
-                        <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
-                        <!-- 分拆采购单元 -->
-                        <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
+                        #{ck "procures.delivery"}
+                            <!-- 交货页面 -->
+                            <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
+                        #{/ck}
+                        #{ck "procures.dosplitunit"}
+                            <!-- 分拆采购单元 -->
+                            <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
+                        #{/ck}
                         <!-- 确认到货代处 -->
                         #{ifnot unit.isPlaced}
                             <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">

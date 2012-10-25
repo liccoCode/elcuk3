@@ -28,7 +28,6 @@ import java.util.List;
  * Time: 上午11:57
  */
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
-@Check("normal")
 public class Products extends Controller {
 
     @Util
@@ -42,6 +41,7 @@ public class Products extends Controller {
     /**
      * 展示所有的 Product
      */
+    @Check("products.index")
     public static void index(ProductPost p) {
         if(p == null) p = new ProductPost();
         List<Product> prods = p.query();

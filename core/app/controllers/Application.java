@@ -15,8 +15,8 @@ import play.cache.Cache;
 import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -69,12 +69,6 @@ public class Application extends Controller {
         renderJSON(new Ret(true, String.format("[%s] clear success", key)));
     }
 
-    public static void upload(File file) {
-
-        System.out.println(file.length() / 1024 + " KB");
-        renderJSON(new Ret());
-    }
-
     public static void timeline() {
         render();
     }
@@ -86,11 +80,15 @@ public class Application extends Controller {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public static void amazonLogin(long id) throws IOException, ClassNotFoundException {
+    public static void amazonLogin(long id) {
         if(Play.mode.isProd()) forbidden();
 
         Account acc = Account.findById(id);
-        Webs.dev_login(acc);
+        try {
+            Webs.dev_login(acc);
+        } catch(Exception e) {
+            throw new FastRuntimeException(e);
+        }
         renderJSON(Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)));
     }
 
