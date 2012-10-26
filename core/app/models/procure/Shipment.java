@@ -565,6 +565,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "向 Amazon 创建 Shipment Plan 错误 " + Webs.E(e));
             return F.Option.None();
         }
+        // 对 FBA 的仓库检查, 同一个运输单不可以运输两个不同的 FBA 地址
+        if(fbaQpt.isDefined() && this.fbas.size() > 0) {
+            if(!fbaQpt.get().centerId.equals(this.fbas.get(0).centerId)) {
+                Validation.addError("", "新获取的 FBA 仓库为 %s 与当前存在的去往 FBA 仓库不一样, 无法创建.", fbaQpt.get().centerId);
+                return F.Option.None();
+            }
+        }
         try {
             if(fbaQpt.isDefined()) {
                 // Shipment 与 FBA 由 FBA 自行创建关系

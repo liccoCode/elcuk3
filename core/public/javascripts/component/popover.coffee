@@ -71,12 +71,3 @@ window.$ui =
 
 $ ->
   window.$ui.init()
-
-  # 为首页 header 栏增加 Notification 开关功能
-  if window.webkitNotifications
-    $('#notification_btn').click ->
-      window.webkitNotifications.requestPermission()
-  else
-    console.log('无法使用 Notification 功能')
-    $('#notification_btn').click ->
-      alert('无法使用桌面 Notification 提醒')

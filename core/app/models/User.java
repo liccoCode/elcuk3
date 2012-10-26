@@ -11,6 +11,7 @@ import play.db.jpa.Model;
 import play.libs.Crypto;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,12 @@ public class User extends Model {
      */
     @ManyToMany
     public Set<Privilege> privileges = new HashSet<Privilege>();
+
+    /**
+     * 用户的通知
+     */
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    public List<Notification> notifications = new ArrayList<Notification>();
 
     @Column(nullable = false, unique = true)
     @Required
@@ -159,6 +166,25 @@ public class User extends Model {
         int result = super.hashCode();
         result = 31 * result + username.hashCode();
         return result;
+    }
+
+    /**
+     * 解析出 @xx 的用户
+     *
+     * @param content
+     * @return
+     */
+    public static List<User> parseAtUsers(String content) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * 返回所有开启的用户
+     *
+     * @return
+     */
+    public static List<User> openUsers() {
+        return User.find("closed=?", false).fetch();
     }
 
     /**

@@ -134,6 +134,10 @@ public class Privilege extends Model {
         privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));
         privileges.add(new Privilege("shipments.ensuredone", "确认运输完成"));
 
+        // Notification
+        privileges.add(new Privilege("notifications.notifys", "通知某个用户"));
+        privileges.add(new Privilege("notifications.notifysall", "创建所有用户通知"));
+
         // 财务控制器
         privileges.add(new Privilege("finances", "财务模块"));
         for(Privilege p : privileges) p.save();

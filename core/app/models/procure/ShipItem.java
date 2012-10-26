@@ -135,7 +135,7 @@ public class ShipItem extends GenericModel {
             try {
                 // 删除这个对象
                 //TODO 等待测试
-                FBA.update(t2._1.fba, Collections.singletonList(new ShipItem(t2._1.unit.selling.merchantSKU, 0)), t2._1.fba.state);
+                FBA.update(t2._1.fba, Collections.singletonList(new ShipItem(unit.selling.merchantSKU, 0)), t2._1.fba.state);
             } catch(Exception e) {
                 throw new FastRuntimeException(e);
             }

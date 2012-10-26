@@ -127,7 +127,13 @@
                 <ul class="nav pull-right">
                     <li class="divider-vertical"></li>
                     <li><a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a></li>
-                    <li><a href="javascript:;" id="notification_btn">Notify</a></li>
+                    <li>
+                        <a href="#" class="dropdown-toggle" id="notification_btn" data-toggle="dropdown">Notify
+                            <b class="caret"></b></a>
+                        <ul class="dropdown-menu" id="notifications">
+                            <a href="javascript:;" rel="popover">亲, 还没有通知哦.(TBD)</a>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

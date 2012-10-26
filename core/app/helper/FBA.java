@@ -82,8 +82,8 @@ public class FBA {
                             inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
 
                         for(ShipItem itm : items) {
-                            if(!inboundItemMap.containsKey(itm.unit.selling.merchantSKU)) {
-                                msg.append(String.format("%s not in %s FC`s\r\n",
+                            if(!inboundItemMap.containsKey(fixHistoryMSKU(itm.unit.selling.merchantSKU))) {
+                                msg.append(String.format("%s not in %s FC`s 需要手动重新处理!\r\n",
                                         itm.unit.selling.merchantSKU, waitCheckPlan.getDestinationFulfillmentCenterId()));
                                 isFind = false;
                                 break;
@@ -345,6 +345,7 @@ public class FBA {
 
     /**
      * 历史的 msku 的问题兼容
+     *
      * @return
      */
     private static String fixHistoryMSKU(String msku) {
