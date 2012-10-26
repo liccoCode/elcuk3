@@ -228,6 +228,7 @@ public class FBAShipment extends Model {
     public void checkReceipt(Shipment shipment) {
         if(this.receiptAt != null) return;
         this.receiptAt = shipment.arriveDate;
+        this.save();
     }
 
     /**

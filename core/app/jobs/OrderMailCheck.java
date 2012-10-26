@@ -132,6 +132,7 @@ public class OrderMailCheck extends Job {
                         sendDe++;
                         Mails.amazonDE_REVIEW_MAIL(ord);
                         break;
+                    //TODO 增加对 US 的邀请 Review 邮件
                     default:
                         noMarket++;
                         Logger.info("Uncatched Region..." + ord.market);
