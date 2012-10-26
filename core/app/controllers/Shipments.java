@@ -228,6 +228,7 @@ public class Shipments extends Controller {
         checkAuthenticity();
 
         Shipment ship = Shipment.findById(id);
+        Validation.required("shipment.whouse", ship.whouse);
         checkShowError(ship);
         F.Option<FBAShipment> fbaOpt = ship.deployFBA(shipItemId);
         if(!fbaOpt.isDefined()) checkShowError(Shipment.<Shipment>findById(id));

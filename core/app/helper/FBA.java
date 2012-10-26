@@ -11,6 +11,7 @@ import models.market.Account;
 import models.procure.FBACenter;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -333,12 +334,24 @@ public class FBA {
          */
         Map<String, AtomicInteger> shipitemsMap = new HashMap<String, AtomicInteger>();
         for(ShipItem item : shipItems) {
-            if(shipitemsMap.containsKey(item.unit.selling.merchantSKU))
-                shipitemsMap.get(item.unit.selling.merchantSKU).addAndGet(item.qty);
+            String msku = item.unit.selling.merchantSKU;
+            if(shipitemsMap.containsKey(msku))
+                shipitemsMap.get(msku).addAndGet(item.qty);
             else
-                shipitemsMap.put(item.unit.selling.merchantSKU, new AtomicInteger(item.qty));
+                shipitemsMap.put(fixHistoryMSKU(msku), new AtomicInteger(item.qty));
         }
         return shipitemsMap;
+    }
+
+    /**
+     * 历史的 msku 的问题兼容
+     * @return
+     */
+    private static String fixHistoryMSKU(String msku) {
+        if(StringUtils.equals(msku, "80-QW1A56-BE")) {
+            return "80-qw1a56-be";
+        }
+        return msku;
     }
 
 
