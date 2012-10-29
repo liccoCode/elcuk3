@@ -5,8 +5,6 @@ import helper.Cached;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.SaleFee;
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import play.Logger;
@@ -14,6 +12,7 @@ import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
+import play.templates.JavaExtensions;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -91,17 +90,9 @@ public class Orderr extends GenericModel {
     //-------------- Basic ----------------
 
     /**
-     * <pre>
-     * 发送邮件到达了什么阶段. 默认从 0x0000 开始;(16进制)
-     * 从最前面的位开始
-     * 0x0000 : 还没有发送邮件[SHIPPED_MAIL]
-     * 0x000f : 订单成功发货以后发送邮件
-     * 0x00f0 : 订单的货物抵达以后发送邀请留 Review 的邮件
-     * 0x0f00 : 待定
-     * 0xf000 : 待定
-     * </pre>
+     * 是否发送了 Review Mail
      */
-    public int emailed = 0x0000;
+    public boolean reviewMailed = false;
 
 
     /**
@@ -317,50 +308,6 @@ public class Orderr extends GenericModel {
     }
 
     /**
-     * 将 0x0000 这种 16 进制的第几位修改成 'char'
-     *
-     * @param bit
-     */
-    public void emailed(int bit, char c) {
-        if(c != 'f' && c != 'F' && c != '0') throw new IllegalArgumentException("Just only '1' or '0' is valid!");
-        StringBuilder mailedHex = new StringBuilder(Integer.toHexString(this.emailed));
-        int prefix = 4 - mailedHex.length();
-        for(int i = 0; i < prefix; i++) {
-            mailedHex.insert(0, '0');
-        }
-        switch(bit) {
-            case 1: // 0x000!
-                mailedHex.setCharAt(mailedHex.length() - 1, c);
-                break;
-            case 2: // 0x00!0
-                mailedHex.setCharAt(mailedHex.length() - 2, c);
-                break;
-            case 3: // 0x0!00
-                mailedHex.setCharAt(mailedHex.length() - 3, c);
-                break;
-            case 4: //0x!000
-                mailedHex.setCharAt(mailedHex.length() - 4, c);
-                break;
-        }
-        this.emailed = Integer.valueOf(mailedHex.toString(), 16);
-    }
-
-    /**
-     * 获取第 bit 位上的值
-     *
-     * @param bit
-     * @return
-     */
-    public char emailed(int bit) {
-        StringBuilder mailedHex = new StringBuilder(Integer.toHexString(this.emailed));
-        int prefix = 4 - mailedHex.length();
-        for(int i = 0; i < prefix; i++) {
-            mailedHex.insert(0, '0');
-        }
-        return mailedHex.charAt(bit);
-    }
-
-    /**
      * Review 邮件的 Title 生成
      *
      * @return
@@ -374,24 +321,9 @@ public class Orderr extends GenericModel {
          */
         switch(this.market) {
             case AMAZON_UK:
-                for(OrderItem oi : this.items) {
-                    String ti = oi.selling.listing.title.toLowerCase();
-                    if(StringUtils.startsWith(ti, "saner")) {
-                        return "Thanks for purchasing Saner Products from EasyAcc on Amazon.co.uk (Order: " + this.orderId + ")";
-                    } else if(StringUtils.startsWith(ti, "fencer")) {
-                        return "Thanks for purchasing Fencer Products from EasyAcc on Amazon.co.uk (Order: " + this.orderId + ")";
-                    }
-                }
-                return "Thanks for purchasing EasyAcc Product on Amazon.co.uk (Order: " + this.orderId + ")";
+            case AMAZON_US:
+                return "Thanks for purchasing EasyAcc Product on " + JavaExtensions.capFirst(this.market.toString()) + " (Order: " + this.orderId + ")";
             case AMAZON_DE:
-                for(OrderItem oi : this.items) {
-                    String ti = oi.selling.listing.title.toLowerCase();
-                    if(StringUtils.startsWith(ti, "saner")) {
-                        return "Vielen Dank für den Kauf SANER Produkte aus EasyAcc auf Amazon.de (Bestellung: " + this.orderId + ")";
-                    } else if(StringUtils.startsWith(ti, "fencer")) {
-                        return "Vielen Dank für den Kauf Fencer Produkte aus EasyAcc auf Amazon.de (Bestellung: " + this.orderId + ")";
-                    }
-                }
                 return "Vielen Dank für den Kauf EasyAcc Produkte auf Amazon.de (Bestellung: " + this.orderId + ")";
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
