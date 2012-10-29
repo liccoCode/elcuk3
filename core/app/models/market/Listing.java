@@ -287,28 +287,33 @@ public class Listing extends GenericModel {
         int needWarnningOffers = 0;
 
         for(ListingOffer off : this.offers) {
-            // -------- 1
+            /**
+             * 1. 检查是不是 Amazon
+             * 2. 检查是不是自建
+             * 3. 对于每一个检查到的都需要警告, 记录警告次数
+             */
             if(Account.merchant_id().containsKey(off.offerId)) continue;
+            if(!Listing.isSelfBuildListing(this.title)) continue;
 
-            // ------- 1
-            if(Listing.isSelfBuildListing(this.title)) {
-                if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
-                    Logger.debug("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
-                } else if(off.cond != ListingOffer.C.NEW) {
-                    Logger.info("Offer %s is sale %s condition.", off.offerId, off.cond);
-                } else if(!Account.merchant_id().containsKey(off.offerId)) {
-                    // Mail 警告
-                    if(this.warnningTimes == null) this.warnningTimes = 0;
-                    this.warnningTimes++; // 查询也记录一次
-                    if(this.warnningTimes > 4) {
-                        Logger.debug("Listing [" + this.listingId + "] has warnned more than 3 times.");
-                    } else needWarnningOffers++;
-                } else {
-                    this.warnningTimes = 0; // 其余的归零
-                }
+            if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
+                Logger.info("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+            } else if(off.cond != ListingOffer.C.NEW) {
+                Logger.info("Offer %s is sale %s condition.", off.offerId, off.cond);
+            } else {
+                // Mail 警告
+                if(this.warnningTimes == null) this.warnningTimes = 0;
+                this.warnningTimes++;
+                needWarnningOffers++;
             }
         }
-        if(needWarnningOffers >= 1) Mails.moreOfferOneListing(offers, this);
+
+        if(needWarnningOffers >= 1)
+            Mails.moreOfferOneListing(offers, this);
+        else if(needWarnningOffers <= 0) {
+            // 当不需要警告的时候, 将警告次数清零
+            this.warnningTimes = 0;
+        }
+        this.save();
     }
 
     /**

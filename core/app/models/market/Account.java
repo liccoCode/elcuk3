@@ -57,6 +57,7 @@ public class Account extends Model {
             MERCHANT_ID = new HashMap<String, String>();
             MERCHANT_ID.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
             MERCHANT_ID.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
+            MERCHANT_ID.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
         }
         //TODO 其实市场的以后看到再添加进来
         return MERCHANT_ID;
