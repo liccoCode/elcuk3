@@ -14,38 +14,23 @@
     </tr>
 
     <tr>
+        <th>创建时间</th>
+        <td>#{time_tooltip time:fba.createAt /}</td>
+
         <th>签收时间</th>
         <td>#{time_tooltip time:fba.receiptAt /}</td>
 
-        <th>开始接收时间</th>
-        <td>#{time_tooltip time:fba.receivingAt /}</td>
-
-        <th>接收时长</th>
-        <td>${fba.receivingAt.los()}</td>
+        <th>当前时间</th>
+        <td>#{time_tooltip time:new java.util.Date()/}</td>
     </tr>
     <tr>
-        <th>创建时间</th>
-        <td>#{time_tooltip time:fba.createAt /}</td>
+        <th>开始接收时间</th>
+        <td>#{time_tooltip time:fba.receivingAt /}</td>
 
         <th>关闭时间</th>
         <td>#{time_tooltip time:fba.closeAt /}</td>
 
-        <td colspan="2"></td>
+        <th>运输单</th>
+        <td><a href="@@{Shipments.show()}/${fba.shipment.id}" target="_blank">${fba.shipment.id}</a></td>
     </tr>
-</table>
-
-<h3>入库检查</h3>
-<table>
-    <tr>
-        <th>Msku</th>
-        <th>QTY</th>
-        <th>Received</th>
-    </tr>
-#{list items:receivingTolong,as:'itm'}
-    <tr>
-        <td>${itm.unit.selling.merchantSKU}</td>
-        <td>${itm.qty}</td>
-        <td>${itm.recivedQty}</td>
-    </tr>
-#{/list}
 </table>

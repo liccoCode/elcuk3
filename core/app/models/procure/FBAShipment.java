@@ -197,27 +197,16 @@ public class FBAShipment extends Model {
     public Date closeAt;
 
     /**
-     * 最后的更新时间
-     */
-    public Date updateAt;
-
-    @PreUpdate
-    @PrePersist
-    public void preUpdate() {
-        this.updateAt = new Date();
-    }
-
-    /**
      * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
      *
      * @param state
      */
     public void isNofityState(S state) {
-        this.state = state;
-        if(this.state == S.RECEIVING) this.receivingAt = new Date();
-        else if(this.state == S.CLOSED || this.state == S.DELETED) this.closeAt = new Date();
+        if(state == S.RECEIVING) this.receivingAt = new Date();
+        else if(state == S.CLOSED || state == S.DELETED) this.closeAt = new Date();
         if(this.state != state)
             FBAMails.shipmentStateChange(this, this.state, state);
+        this.state = state;
     }
 
     /**
@@ -226,7 +215,6 @@ public class FBAShipment extends Model {
      * @param shipment
      */
     public void checkReceipt(Shipment shipment) {
-        if(this.receiptAt != null) return;
         this.receiptAt = shipment.arriveDate;
         this.save();
     }
@@ -287,9 +275,10 @@ public class FBAShipment extends Model {
         if(this.state != S.RECEIVING) return;
         if(shippedItems == null || shippedItems.size() <= 0) return;
         if(fbaItems == null || fbaItems.size() <= 0) return;
+        if(this.receiptAt == null)
+            Webs.systemMail(String.format("FBA %s 没有签收时间, 检查", this.shipmentId), "FBA 没有签收时间,检查 FBAShipment.checkReceipt 与 Shipment.S.nextState");
 
         List<ShipItem> receivingTolong = new ArrayList<ShipItem>();
-        List<ShipItem> receivingMissToMuch = new ArrayList<ShipItem>();
 
         for(ShipItem shipItem : shippedItems) {
             F.T2<Integer, Integer> receivedAndShipped = fbaItems.get(shipItem.unit.selling.merchantSKU);
@@ -305,26 +294,9 @@ public class FBAShipment extends Model {
                     && !receivedAndShipped._1.equals(shipItem.qty)) {
                 receivingTolong.add(shipItem);
             }
-
-            /**
-             * 2. 检查入库数量差据较大
-             * 签收时间大于 3 天, 但是还没有进入 RECEVING 与其之后的状态则报告错误
-             */
-            if((System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))) {
-                if(this.state == null) break;
-                switch(this.state) {
-                    case PLAN:
-                    case WORKING:
-                    case SHIPPED:
-                    case IN_TRANSIT:
-                    case DELIVERED:
-                    case CHECKED_IN:
-                        receivingMissToMuch.add(shipItem);
-                }
-            }
         }
-        if(this.updateAt != null && (System.currentTimeMillis() - this.updateAt.getTime() >= TimeUnit.HOURS.toMillis(15)))
-            FBAMails.itemsReceivingCheck(this, receivingTolong, receivingMissToMuch);
+        if(receivingTolong.size() > 0)
+            FBAMails.itemsReceivingCheck(this, receivingTolong);
     }
 
     public String address() {

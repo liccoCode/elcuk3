@@ -35,33 +35,42 @@ public class AmazonFBAWatchJob extends Job {
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
             List<FBAShipment> shipments = FBAShipment.find("account=? AND state NOT IN (?,?,?)", acc, S.PLAN, S.CANCELLED, S.CLOSED).fetch(50);
+            AmazonFBAWatchJob.watchFBAs(acc, shipments);
+        }
+    }
 
-            // 1. 更新 FBA Shipment 状态
-            List<String> shipmentIds = new ArrayList<String>();
-            for(FBAShipment shipment : shipments) shipmentIds.add(shipment.shipmentId);
-            if(shipmentIds.size() > 0) { // 如果没有, 则不需要检查了
-                try {
-                    Map<String, F.T3<String, String, String>> shipmentT3 = FBA.listShipments(shipmentIds, acc);
-                    for(FBAShipment shipment : shipments) {
-                        F.T3<String, String, String> t3 = shipmentT3.get(shipment.shipmentId);
-                        if(t3 == null) {
-                            Logger.warn("AmazonFBAWatchJob FBA.listShipments: Amazon have no shipmentId %s", shipment.shipmentId);
-                            continue;
-                        }
-                        try {
-                            S state = S.valueOf(t3._1);
-                            shipment.isNofityState(state);
-                            shipment.save();
-
-                            shipment.receiptAndreceivingCheck();
-                        } catch(Exception e) {
-                            Logger.warn(String.format("AmazonFBAWatchJob state parse STATE %s error.", t3._1));
-                        }
+    /**
+     * 查看 FBAs; (抽出来方便测试)
+     *
+     * @param acc
+     * @param shipments
+     */
+    public static void watchFBAs(Account acc, List<FBAShipment> shipments) {
+        // 1. 更新 FBA Shipment 状态
+        List<String> shipmentIds = new ArrayList<String>();
+        for(FBAShipment shipment : shipments) shipmentIds.add(shipment.shipmentId);
+        if(shipmentIds.size() > 0) { // 如果没有, 则不需要检查了
+            try {
+                Map<String, F.T3<String, String, String>> shipmentT3 = FBA.listShipments(shipmentIds, acc);
+                for(FBAShipment shipment : shipments) {
+                    F.T3<String, String, String> t3 = shipmentT3.get(shipment.shipmentId);
+                    if(t3 == null) {
+                        Logger.warn("AmazonFBAWatchJob FBA.listShipments: Amazon have no shipmentId %s", shipment.shipmentId);
+                        continue;
                     }
-                } catch(Exception e) {
-                    Logger.warn(String.format("Update Account %s FBA Shipment failed. ShipmentIds: %s. %s",
-                            acc.prettyName(), StringUtils.join(shipmentIds, ","), Webs.E(e)));
+                    try {
+                        S state = S.valueOf(t3._1);
+                        shipment.isNofityState(state);
+                        shipment.save();
+
+                        shipment.receiptAndreceivingCheck();
+                    } catch(Exception e) {
+                        Logger.warn(String.format("AmazonFBAWatchJob state parse STATE %s error.", t3._1));
+                    }
                 }
+            } catch(Exception e) {
+                Logger.warn(String.format("Update Account %s FBA Shipment failed. ShipmentIds: %s. %s",
+                        acc.prettyName(), StringUtils.join(shipmentIds, ","), Webs.E(e)));
             }
         }
     }

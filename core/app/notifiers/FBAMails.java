@@ -61,21 +61,17 @@ public class FBAMails extends Mailer {
      *
      * @param fba
      * @param receivingTolong
-     * @param receivingMissToMuch
      */
-    public static boolean itemsReceivingCheck(FBAShipment fba, List<ShipItem> receivingTolong, List<ShipItem> receivingMissToMuch) {
-        if(receivingTolong == null && receivingMissToMuch == null) return false;
+    public static boolean itemsReceivingCheck(FBAShipment fba, List<ShipItem> receivingTolong) {
         if(receivingTolong == null) receivingTolong = new ArrayList<ShipItem>();
-        if(receivingMissToMuch == null) receivingMissToMuch = new ArrayList<ShipItem>();
-        if(receivingMissToMuch.size() == 0 && receivingTolong.size() == 0) return false;
 
-        setSubject("{WARN} FBA %s 中 %s Items 入库超时, %s Items 入库数量误差较大",
-                fba.shipmentId, receivingTolong.size(), receivingMissToMuch.size());
+        setSubject("{WARN} FBA %s 中 %s Items 入库检查", fba.shipmentId, receivingTolong.size());
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
         try {
-            send(fba, receivingTolong, receivingMissToMuch);
+            send(fba, receivingTolong);
         } catch(Exception e) {
+            Logger.warn(Webs.E(e));
             return false;
         }
         return true;

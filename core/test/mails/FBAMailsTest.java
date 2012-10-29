@@ -20,6 +20,6 @@ public class FBAMailsTest extends UnitTest {
     public void testItemsReceivingCheck() {
         FBAShipment fba = FBAShipment.findById(63l);
         List<ShipItem> shipItemList = ShipItem.sameFBAShipItems(fba.shipmentId);
-        FBAMails.itemsReceivingCheck(fba, shipItemList, shipItemList);
+        FBAMails.itemsReceivingCheck(fba, shipItemList);
     }
 }
