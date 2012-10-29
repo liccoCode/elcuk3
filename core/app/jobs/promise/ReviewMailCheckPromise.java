@@ -27,7 +27,7 @@ public class ReviewMailCheckPromise extends Job {
     @Override
     public void doJob() {
         try {
-            boolean mailSuccess = sendFlag.get(10, TimeUnit.MILLISECONDS);
+            boolean mailSuccess = sendFlag.get(10, TimeUnit.SECONDS);
 
             if(!mailSuccess) {
                 Logger.warn("Order %s review email failed.", this.orderId);
@@ -39,7 +39,7 @@ public class ReviewMailCheckPromise extends Job {
                 Logger.info("Order[%s](%s) email send success!", this.orderId, ord.market);
             }
         } catch(Exception e) {
-            Logger.warn("Order %s(%s) review email failed. [%s]", this.orderId, Webs.E(e));
+            Logger.warn("Order %s review email failed. [%s]", this.orderId, Webs.E(e));
         }
     }
 }
