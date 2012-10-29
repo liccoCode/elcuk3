@@ -30,7 +30,7 @@ public class OrderMailCheck extends Job {
         if(!Jobex.findByClassName(OrderMailCheck.class.getName()).isExcute()) return;
         DateTime dt = DateTime.parse(DateTime.now().toString("yyyy-MM-dd")); // 仅仅保留 年月日
 
-        Logger.info("OrderMailCheck Check REVIEW_MAIL...");
+        Logger.info("Start OrderMailCheck Check REVIEW_MAIL...");
         /**
          * Check 需要发送邀请 Review 的邮件的订单
          */
@@ -79,6 +79,7 @@ public class OrderMailCheck extends Job {
             Feedback fbk = Feedback.findById(ord.orderId);
             if(fbk != null && fbk.score <= 3) {
                 Logger.debug(String.format("Skip %s, because of [Score below 3]", ord.orderId));
+                //TODO 这个数量逐渐增大, 如何处理??
                 below3++;
                 continue;
             }
@@ -137,5 +138,6 @@ public class OrderMailCheck extends Job {
                     Orderr.count("state=? AND reviewMailed=false AND createDate<=? AND createDate>=?",
                             Orderr.S.SHIPPED, dt.plusDays(-12).toDate(), dt.plusDays(-46).toDate()));
         }
+        Logger.info("End OrderMailCheck Check REVIEW_MAIL...");
     }
 }

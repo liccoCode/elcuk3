@@ -36,10 +36,10 @@ public class ReviewMailCheckPromise extends Job {
                 ord.reviewMailed = true;
                 if(Play.mode.isProd())
                     ord.save();
-                Logger.info("Order[" + this.orderId + "] email send success!");
+                Logger.info("Order[%s](%s) email send success!", this.orderId, ord.market);
             }
         } catch(Exception e) {
-            Logger.warn("Order %s review email failed. [%s]", this.orderId, Webs.S(e));
+            Logger.warn("Order %s(%s) review email failed. [%s]", this.orderId, Webs.E(e));
         }
     }
 }
