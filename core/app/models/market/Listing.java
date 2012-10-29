@@ -303,7 +303,8 @@ public class Listing extends GenericModel {
                 // Mail 警告
                 if(this.warnningTimes == null) this.warnningTimes = 0;
                 this.warnningTimes++;
-                needWarnningOffers++;
+                if(this.warnningTimes <= 5)
+                    needWarnningOffers++;
             }
         }
 
