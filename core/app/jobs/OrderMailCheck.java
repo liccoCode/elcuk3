@@ -133,7 +133,8 @@ public class OrderMailCheck extends Job {
 
         int totalUnMailed = notEasyAcc + below3 + noMarket + noEmail + noOrderItems;
         // 没有发送邮件的比率超过 3 成进行检查
-        if(totalUnMailed / (needReview.size() <= 0 ? 10000 : needReview.size()) >= 0.3) {
+        if((totalUnMailed / (needReview.size() <= 0 ? 10000 : needReview.size()) >= 0.3) &&
+                (sendDe + sendUk + sendUs > 20)/*发送的要大于 20 封, 否则提醒邮件太多.*/) {
             Webs.systemMail("没有发送的邮件数量超过 3 成, 需要进行检查.", logInfo + "\r\n总共没有发送的邮件:" +
                     Orderr.count("state=? AND reviewMailed=false AND createDate<=? AND createDate>=?",
                             Orderr.S.SHIPPED, dt.plusDays(-12).toDate(), dt.plusDays(-46).toDate()));

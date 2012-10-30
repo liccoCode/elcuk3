@@ -47,7 +47,7 @@ public enum iExpress {
 
         @Override
         public boolean isContainsClearance(String content) {
-            return StringUtils.contains(content, "快件正在等待清关") || StringUtils.contains(content, "已完成清关");
+            return StringUtils.contains(content, "已完成清关");
         }
 
         @Override
@@ -67,6 +67,9 @@ public enum iExpress {
             return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo.trim());
         }
     },
+
+
+
     FEDEX {
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
@@ -128,6 +131,9 @@ public enum iExpress {
             return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo.trim());
         }
     },
+
+
+
     UPS {
         @Override
         public String trackUrl(String tracNo) {

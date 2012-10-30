@@ -135,6 +135,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     Mails.shipment_clearance(ship);
                     return CLEARANCE;
                 }
+                if(ship.internationExpress.isDelivered(ship.iExpressHTML)._1) {
+                    // 有一些运输单还直接跳过清关状态, 对这个做兼容.
+                    return S.CLEARANCE.nextState(ship);
+                }
                 return this;
             }
         },
@@ -160,8 +164,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     for(FBAShipment fba : ship.fbas)
                         fba.checkReceipt(ship);
                     Mails.shipment_isdone(ship);
+                    return CLEARANCE;
+                } else {
+                    return this;
                 }
-                return CLEARANCE;
             }
         },
         /**
@@ -678,16 +684,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             item.unit.save();
         }
         this.save();
-    }
-
-    /**
-     * 创建的计划运输单超过 7 天则表示超时
-     *
-     * @return
-     */
-    public boolean overDue() {
-        long t = System.currentTimeMillis() - this.createDate.getTime();
-        return t - TimeUnit.DAYS.toMillis(7) > 0;
     }
 
     /**
