@@ -35,9 +35,16 @@
         <th>关闭时间</th>
         <td>#{time_tooltip time:fba.closeAt /}</td>
 
-        <td colspan="4"></td>
+        <th>运输单</th>
+        <td><a href="@@{Shipments.show()}/${fba.shipment.id}">${fba.shipment.id}</a></td>
+
+        <td colspan="2"></td>
     </tr>
 </table>
+
+#{if fba.state == models.procure.FBAShipment.S.CLOSED}
+${fba.itemsOnAmazonWithHTML.raw()}
+#{/if}
 
 
 <hr>

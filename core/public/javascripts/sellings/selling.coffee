@@ -104,7 +104,7 @@ $ ->
       (r) ->
         if r.flag is true
           alertDiv = $(ALERT_TEMPLATE)
-          alertDiv.find('#replace_it').replaceWith("<p>更新成功! <a target='_blank' href='" + r.message + "'>访问 Listing</a></p>")
+          alertDiv.find('#replace_it').replaceWith("<p>更新成功!</p>")
           alertDiv.prependTo('#container')
         else
           alert(r.message)

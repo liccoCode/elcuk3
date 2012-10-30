@@ -122,7 +122,7 @@ public class Analyzes extends Controller {
         try {
             renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.S(e)));
         }
     }
 

@@ -30,7 +30,8 @@
         <th>关闭时间</th>
         <td>#{time_tooltip time:fba.closeAt /}</td>
 
-        <td colspan="2"></td>
+        <th>运输单</th>
+        <td><a href="@@{Shipments.show()}/${fba.shipment.id}" target="_blank">${fba.shipment.id}</a></td>
     </tr>
 </table>
 

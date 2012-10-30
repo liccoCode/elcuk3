@@ -70,15 +70,22 @@ public class Sellings extends Controller {
                 .build()));
     }
 
-    public static void imageUpload(Selling s, String imgs) {
+    public static void imageUpload(final Selling s, final String imgs) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ")" + "不存在!"));
         if(StringUtils.isBlank(s.aps.imageName) && StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        try {
-            s.uploadAmazonImg(imgs, false);
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-        renderJSON(new Ret(true, LinkHelper.asinLink(s)));
+        // 10s 给上传时间
+        await("10s", new F.Action0() {
+            @Override
+            public void invoke() {
+                try {
+                    s.uploadAmazonImg(imgs, false);
+                } catch(Exception e) {
+                    renderJSON(new Ret(Webs.E(e)));
+                }
+                renderJSON(new Ret(true));
+            }
+        });
+
     }
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/

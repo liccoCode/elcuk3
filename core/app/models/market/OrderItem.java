@@ -175,6 +175,7 @@ public class OrderItem extends GenericModel {
                 .put("sale_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("sale_de", new ArrayList<F.T2<Long, Float>>())
                 .put("sale_fr", new ArrayList<F.T2<Long, Float>>())
+                .put("sale_us", new ArrayList<F.T2<Long, Float>>())
                 .build();
         DateTime travel = inFrom.plusDays(0); // copy 一个新的
         while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
@@ -183,6 +184,7 @@ public class OrderItem extends GenericModel {
             float sale_uk = 0;
             float sale_de = 0;
             float sale_fr = 0;
+            float sale_us = 0;
 
             for(OrderItem oi : orderItems) {
                 if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
@@ -192,6 +194,7 @@ public class OrderItem extends GenericModel {
                         if(oi.market == M.AMAZON_UK) sale_uk += usdCost;
                         else if(oi.market == M.AMAZON_DE) sale_de += usdCost;
                         else if(oi.market == M.AMAZON_FR) sale_fr += usdCost;
+                        else if(oi.market == M.AMAZON_US) sale_us += usdCost;
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
@@ -203,6 +206,7 @@ public class OrderItem extends GenericModel {
             hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
             hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
             hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
+            hightChartLines.get("sale_us").add(new F.T2<Long, Float>(travel.getMillis(), sale_us));
             travel = travel.plusDays(1);
         }
 
@@ -237,6 +241,7 @@ public class OrderItem extends GenericModel {
                 .put("unit_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("unit_de", new ArrayList<F.T2<Long, Float>>())
                 .put("unit_fr", new ArrayList<F.T2<Long, Float>>())
+                .put("unit_us", new ArrayList<F.T2<Long, Float>>())
                 .build();
         DateTime travel = inFrom.plusDays(0); // copy 一个新的
         while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
@@ -245,12 +250,14 @@ public class OrderItem extends GenericModel {
             float unit_uk = 0;
             float unit_de = 0;
             float unit_fr = 0;
+            float unit_us = 0;
             for(OrderItem oi : orderItems) {
                 if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
                     unit_all += oi.quantity;
                     if(oi.market == M.AMAZON_UK) unit_uk += oi.quantity;
                     else if(oi.market == M.AMAZON_DE) unit_de += oi.quantity;
                     else if(oi.market == M.AMAZON_FR) unit_fr += oi.quantity;
+                    else if(oi.market == M.AMAZON_US) unit_us += oi.quantity;
                     // 其他市场暂时先不统计
                 }
             }
@@ -259,6 +266,7 @@ public class OrderItem extends GenericModel {
             hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
             hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
             hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
+            hightChartLines.get("unit_us").add(new F.T2<Long, Float>(travel.getMillis(), unit_us));
             travel = travel.plusDays(1);
         }
         return hightChartLines;

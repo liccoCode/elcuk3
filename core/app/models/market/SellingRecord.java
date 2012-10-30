@@ -267,6 +267,7 @@ public class SellingRecord extends GenericModel {
     public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
+        if(cacheElement != null) return cacheElement;
         synchronized(SellingRecord.class) {
             cacheElement = Cache.get(cacheKey, List.class);
             if(cacheElement != null) return cacheElement;
@@ -303,25 +304,26 @@ public class SellingRecord extends GenericModel {
                 .put("ss_de", new ArrayList<F.T2<Long, Float>>())
                 .put("pv_fr", new ArrayList<F.T2<Long, Float>>())
                 .put("ss_fr", new ArrayList<F.T2<Long, Float>>())
+                .put("pv_us", new ArrayList<F.T2<Long, Float>>())
+                .put("ss_us", new ArrayList<F.T2<Long, Float>>())
                 .build();
 
         List<SellingRecord> records = accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
-            switch(rcd.market) {
-                case AMAZON_UK:
-                    highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                    highCharLines.get("ss_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
-                    break;
-                case AMAZON_DE:
-                    highCharLines.get("pv_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                    highCharLines.get("ss_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
-                    break;
-                case AMAZON_FR:
-                    highCharLines.get("pv_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                    highCharLines.get("ss_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
-                    break;
-                default:
-                    // ignore
+            if(rcd.market == M.AMAZON_UK) {
+                highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            } else if(rcd.market == M.AMAZON_DE) {
+                highCharLines.get("pv_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            } else if(rcd.market == M.AMAZON_FR) {
+                highCharLines.get("pv_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            } else if(rcd.market == M.AMAZON_US) {
+                highCharLines.get("pv_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+            } else {
+                Logger.info("Skip one Market %s.", rcd.market);
             }
         }
         return highCharLines;
@@ -338,24 +340,22 @@ public class SellingRecord extends GenericModel {
                 .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_de", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_fr", new ArrayList<F.T2<Long, Float>>())
+                .put("tn_us", new ArrayList<F.T2<Long, Float>>())
                 .build();
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             float turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
-            switch(rcd.market) {
-                case AMAZON_UK:
-                    highCharLines.get("tn_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
-                    break;
-                case AMAZON_DE:
-                    highCharLines.get("tn_de").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
-                    break;
-                case AMAZON_FR:
-                    highCharLines.get("tn_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
-                    break;
-                default:
-                    //ignore
-            }
+            if(rcd.market == M.AMAZON_UK)
+                highCharLines.get("tn_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+            else if(rcd.market == M.AMAZON_DE)
+                highCharLines.get("tn_de").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+            else if(rcd.market == M.AMAZON_FR)
+                highCharLines.get("tn_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+            else if(rcd.market == M.AMAZON_US)
+                highCharLines.get("tn_us").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+            else
+                Logger.info("Skip One Makret %s.", rcd.market);
         }
         return highCharLines;
     }

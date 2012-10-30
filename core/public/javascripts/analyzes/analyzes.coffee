@@ -81,9 +81,11 @@ $ ->
             pv_uk: {name: 'PageView(uk)', data: []}
             pv_de: {name: 'PageView(de)', data: []}
             pv_fr: {name: 'PageView(fr)', data: []}
+            pv_us: {name: 'PageView(us)', data: []}
             ss_uk: {name: 'Session(uk)', data: []}
             ss_de: {name: 'Session(de)', data: []}
             ss_fr: {name: 'Session(fr)', data: []}
+            ss_us: {name: 'Session(us)', data: []}
           ssOp.head('Selling[' + params['p.val'] + '] SS')
           ssOp.clearLines()
           for k,v of r
@@ -102,6 +104,7 @@ $ ->
             tn_uk: {name: 'TurnRatio(uk)', data: []}
             tn_de: {name: 'TurnRatio(de)', data: []}
             tn_fr: {name: 'TurnRatio(fr)', data: []}
+            tn_us: {name: 'TurnRatio(us)', data: []}
           turnOp.head('Selling[' + params['p.val'] + '] 转化率')
           turnOp.clearLines()
           for k, v of r
@@ -127,6 +130,7 @@ $ ->
             unit_uk: {name: 'Unit Order(uk)', data: []}
             unit_de: {name: 'Unit Order(de)', data: []}
             unit_fr: {name: 'Unit Order(fr)', data: []}
+            unit_us: {name: 'Unit Order(us)', data: []}
           for k, v of r
             lines[k].data.push([o['_1'], o['_2']]) for o in v
             unitOp.series.push(lines[k])
@@ -151,6 +155,7 @@ $ ->
             sale_uk: {name: 'Sales(uk)', data: []}
             sale_de: {name: 'Sales(de)', data: []}
             sale_fr: {name: 'Sales(fr)', data: []}
+            sale_us: {name: 'Sales(us)', data: []}
           for k, v of r
             lines[k].data.push([o['_1'], o['_2']]) for o in v
             saleOp.series.push(lines[k])

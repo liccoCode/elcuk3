@@ -1,10 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.Dates;
-import helper.FBA;
-import helper.FLog;
-import helper.Webs;
+import helper.*;
 import models.ElcukRecord;
 import models.User;
 import models.product.Whouse;
@@ -739,9 +736,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public static String id() {
         DateTime dt = DateTime.now();
-        String count = Shipment.count("createDate>=? AND createDate<=?",
+        String count = Shipment.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-30", dt.getYear(), dt.getMonthOfYear())).toDate()) + "";
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear() + 1)).toDate()) + "";
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
