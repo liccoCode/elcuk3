@@ -3,13 +3,12 @@ package controllers;
 import helper.Webs;
 import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
-import jobs.SellingRecordCheckJob;
+import jobs.promise.SellingRecordFixPromise;
 import jobs.works.ListingReviewsWork;
 import models.Jobex;
 import models.market.*;
 import models.view.Ret;
 import notifiers.Mails;
-import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Before;
@@ -87,13 +86,8 @@ public class Jobs extends Controller {
      * @param days
      */
     public static void sellingRecordFix(Date begin, int days) {
-        List<Selling> sellings = Selling.all().fetch();
-        DateTime dt = new DateTime(begin);
-        for(int i = 0; i < days; i++) {
-            SellingRecordCheckJob.checkOneDaySellingRecord(sellings, dt.plusDays(i).toDate());
-            SellingRecordCheckJob.amazonNewestRecords(dt.plusDays(i));
-        }
-        renderJSON(new Ret());
+        new SellingRecordFixPromise(begin, days).now();
+        renderJSON(new Ret(true, "任务已提交"));
     }
 
     /**

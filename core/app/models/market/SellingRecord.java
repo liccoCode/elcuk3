@@ -7,12 +7,11 @@ import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import helper.Currency;
-import models.ElcukRecord;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -174,6 +173,8 @@ public class SellingRecord extends GenericModel {
                 String url = acc.type.salesAndTrafficByAsinLink(oneDay, oneDay, curentPage++);/*需要根据 Account 的所在国家进行访问*/
                 Logger.info("Fetch SellingRecord [%s]", url);
                 String rtJson = HTTP.get(acc.cookieStore(), url);
+                if(Play.mode.isDev())
+                    FLog.fileLog(String.format("%s.%s.%s.raw.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                 JsonObject data = null;
                 try {
                     data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
@@ -203,38 +204,38 @@ public class SellingRecord extends GenericModel {
                                 Logger.error("SellingRecord has no selling (%s) !", sid);
                                 continue;
                             }
-
-                            // Amazon 的订单数据也抓取回来, 但还是会重新计算
-                            record.units = rowArr.get(9).getAsInt();
-                            /**
-                             * 1. de: €2,699.37
-                             * 2. uk: £2,121.30
-                             * 3. fr: €44.99
-                             * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
-                             */
-                            record.sales = Webs.amazonPriceNumber(M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
-                            switch(market) {
-                                case AMAZON_UK:
-                                    record.currency = Currency.GBP;
-                                    break;
-                                case AMAZON_DE:
-                                case AMAZON_FR:
-                                case AMAZON_IT:
-                                case AMAZON_ES:
-                                    record.currency = Currency.EUR;
-                                    break;
-                                case AMAZON_US:
-                                    record.currency = Currency.USD;
-                                    break;
-                                default:
-                                    record.currency = Currency.GBP;
-                            }
-                            record.usdSales = record.currency.toUSD(record.sales);
-                            if(record.usdSales == null) record.usdSales = 0f;
-                            record.orders = rowArr.get(12).getAsInt();
                             record.date = oneDay;
                             record.id = srid;
                         }
+
+                        // Amazon 的订单数据也抓取回来, 但还是会重新计算
+                        record.units = rowArr.get(9).getAsInt();
+                        /**
+                         * 1. de: €2,699.37
+                         * 2. uk: £2,121.30
+                         * 3. fr: €44.99
+                         * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
+                         */
+                        record.sales = Webs.amazonPriceNumber(M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
+                        switch(market) {
+                            case AMAZON_UK:
+                                record.currency = Currency.GBP;
+                                break;
+                            case AMAZON_DE:
+                            case AMAZON_FR:
+                            case AMAZON_IT:
+                            case AMAZON_ES:
+                                record.currency = Currency.EUR;
+                                break;
+                            case AMAZON_US:
+                                record.currency = Currency.USD;
+                                break;
+                            default:
+                                record.currency = Currency.GBP;
+                        }
+                        record.usdSales = record.currency.toUSD(record.sales);
+                        if(record.usdSales == null) record.usdSales = 0f;
+                        record.orders = rowArr.get(12).getAsInt();
                         // 无论数据库中存在不存在都需要更新下面数据
                         record.sessions = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
                         record.pageViews = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
@@ -272,10 +273,11 @@ public class SellingRecord extends GenericModel {
             cacheElement = Cache.get(cacheKey, List.class);
             if(cacheElement != null) return cacheElement;
 
-            if(acc == null)
+            if(acc == null) {
                 cacheElement = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
-            else
+            } else {
                 cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+            }
             Cache.add(cacheKey, cacheElement, "1h");
         }
         return Cache.get(cacheKey, List.class);
@@ -309,6 +311,7 @@ public class SellingRecord extends GenericModel {
                 .build();
 
         List<SellingRecord> records = accountMskuRelateRecords(acc, msku, from, to);
+        //TODO 多 Account 相同 Session 的问题需要处理
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
                 highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
