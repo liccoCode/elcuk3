@@ -82,7 +82,7 @@ public class Selling extends GenericModel {
         EBAY
     }
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
     @OneToMany(mappedBy = "selling", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})

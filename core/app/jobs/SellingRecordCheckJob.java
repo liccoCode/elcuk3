@@ -38,28 +38,34 @@ public class SellingRecordCheckJob extends Job {
         /**
          * 0. 一 fixTime 为基准时间
          * 1. 检查 7 天内的 SellingRecord, 没有的创建, 有的进行更新
-         * 2. 下载 2 天前的 SellingRecord 数据.
+         * 2. 下载 7~2(5) 天前的 SellingRecord 数据.
          */
         List<Selling> sellings = Selling.all().fetch();
 
         if(fixTime == null) fixTime = DateTime.now();
         for(int i = -7; i < 0; i++)
-            checkOneDaySellingRecord(sellings, fixTime.plusDays(i).toDate());
+            SellingRecordCheckJob.checkOneDaySellingRecord(sellings, fixTime.plusDays(i).toDate());
 
         //------- 抓取 Amazon 的数据 (由于抓取 Amazon 的数据是一个整体, 所以最后处理) --------
         /**
          * 找到所有 Amazon 市场的 SellingRecord 数据
          * PS: 只能抓取到两天前的 PageView 数据
          */
-        amazonNewestRecords();
+        for(int i = -7; i <= -2; i++)
+            SellingRecordCheckJob.amazonNewestRecords(fixTime.plusDays(i));
     }
 
-    public void amazonNewestRecords() {
+    /**
+     * 抓取 Amazon 某一天的 Selling Record 数据
+     *
+     * @param fixTime
+     */
+    public static void amazonNewestRecords(DateTime fixTime) {
         List<Account> accs = Account.openedSaleAcc();
         Set<SellingRecord> records = null;
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
         for(Account acc : accs) {
-            records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.plusDays(-2).toDate());
+            records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.toDate());
             Logger.info("Fetch Account(%s) %s records", acc.prettyName(), records.size());
             if(records.size() <= 0) continue;
             // 直接这样处理,因为通过 SellingRecord.newRecordFromAmazonBusinessReports 出来的方法已经存在与 Session 缓存中了.
@@ -78,7 +84,7 @@ public class SellingRecordCheckJob extends Job {
      * @param sellings
      * @param checkDate
      */
-    public void checkOneDaySellingRecord(List<Selling> sellings, Date checkDate) {
+    public static void checkOneDaySellingRecord(List<Selling> sellings, Date checkDate) {
         List<OrderItem> orderitems = OrderItem.find("createDate>=? AND createDate<=?",
                 Dates.morning(checkDate), Dates.night(checkDate)).fetch();
 
