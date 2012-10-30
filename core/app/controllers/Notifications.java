@@ -23,7 +23,7 @@ public class Notifications extends Controller {
          * 1. 将 content 中的内容根据 @xxx 解析出需要通知的人
          * 2. 对每一个人创建一个 Notification
          */
-        Notification.create(Login.current(), content);
+        Notification.notifies(Login.current(), content);
         renderJSON(new Ret(true));
     }
 

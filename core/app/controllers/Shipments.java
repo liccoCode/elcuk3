@@ -3,6 +3,7 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.FBAShipment;
@@ -160,7 +161,8 @@ public class Shipments extends Controller {
         ship.addToShip(unitId, shipQty);
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-
+        if(ship.cycle)
+            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", id, ship.items.size()), String.format("有新的货物添加进入了运输单 %s 记得处理哦.", id), 3);
         redirect("/shipments/shipitem/" + id);
     }
 
@@ -233,6 +235,7 @@ public class Shipments extends Controller {
         F.Option<FBAShipment> fbaOpt = ship.deployFBA(shipItemId);
         if(!fbaOpt.isDefined()) checkShowError(Shipment.<Shipment>findById(id));
         new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), id).save();
+        Notification.notifies("FBA 创建成功", Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), 2);
         flash.success("Amazon FBA %s (with %s items) 创建成功", fbaOpt.get().shipmentId, fbaOpt.get().shipItems.size());
         redirect("/shipments/show/" + id);
     }
@@ -277,6 +280,8 @@ public class Shipments extends Controller {
         if(Validation.hasErrors())
             checkShowError(fba.shipment);
         flash.success("FBA %s 删除成功", fba.shipmentId);
+        Notification.notifies(String.format("FC`s %s 的 FBA(%s) 被删除", fba.centerId, fba.shipmentId),
+                String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id), 2);
         redirect("/shipments/show/" + fba.shipment.id);
 
     }
@@ -293,6 +298,7 @@ public class Shipments extends Controller {
         ship.ensureDone();
         checkShowError(ship);
         flash.success("成功确认, 运输单已经确认运输完毕.");
+        Notification.notifies("运输单完成", String.format("运输单 %s 已经完成运输.", ship.id), 4);
         redirect("/shipments/show/" + id);
     }
 

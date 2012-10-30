@@ -2,9 +2,9 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.JPAs;
 import helper.Webs;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.market.Selling;
@@ -280,48 +280,41 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * ProcureUnit 交货
      *
      * @param attrs
-     * @return T2: ._1:是否全部转移, ._2:新转移的采购单元
+     * @return T2: ._1:是否全部交货, ._2:新转移的采购单元
      */
-    public F.T2<Boolean, ProcureUnit> delivery(UnitAttrs attrs) {
+    public Boolean delivery(UnitAttrs attrs) {
         /**
-         * 1.
+         * 1. 检查交货的数据是否符合
+         * 2. 执行交货
+         *  - 交货不足不允许交货.
+         *  - 全部交货
+         *  - 交货超额, Notify 提醒
+         *
          */
         if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER)
             Validation.addError("procureunit.delivery.stage", "%s");
-        Validation.min("procureunit.attrs.qty", attrs.qty, 0);
+        if(this.deliveryment == null)
+            Validation.addError("", "没有进入采购单, 无法交货.");
         Validation.required("procureunit.attrs.qty", attrs.qty);
+        Validation.min("procureunit.attrs.qty", attrs.qty, 0);
         Validation.required("procureunit.attrs.deliveryDate", attrs.deliveryDate);
-        if(Validation.hasErrors()) return new F.T2<Boolean, ProcureUnit>(false, null);
+        if(Validation.hasErrors())
+            throw new FastRuntimeException("检查不合格");
+
         this.attrs = attrs;
 
-        // 交货状态处理(1:大于;0:等于;-1:小于)
-        int state = this.deliveryState();
-        ProcureUnit unit = null;
-        // 交货不足的情况, 再创建一个 ProcureUnit
-        if(state == -1) unit = this.isLeekDelivery();
-        else unit = this;
+        if(this.attrs.planQty > this.attrs.qty)
+            throw new FastRuntimeException("交货量小于计划量, 请拆分采购计划.");
+        if(this.attrs.planQty < this.attrs.qty)
+            Notification.notifies(String.format("%s 超额交货", this.sku),
+                    String.format("采购计划 %s 超额交货, 请从采购单 %s 找到产品的运输单进行调整, 避免运输数量不足.", this.id, this.deliveryment.id), 3);
+
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
                 , this.id + "").save();
         this.stage = STAGE.DONE;
         this.save();
-        return new F.T2<Boolean, ProcureUnit>(state == -1, unit);
-    }
-
-    /**
-     * 交货的数量少于预期情况
-     */
-    private ProcureUnit isLeekDelivery() {
-        return new ProcureUnit(this).save();
-    }
-
-    /**
-     * 交货的状态, 1: 交货多余计划;  0: 交货等于计划; -1:交货小于计划
-     *
-     * @return
-     */
-    private int deliveryState() {
-        return attrs.qty - attrs.planQty;
+        return this.attrs.planQty.equals(this.attrs.qty);
     }
 
     public ShipItem ship(Shipment shipment, int size) {

@@ -1,7 +1,9 @@
 package controllers;
 
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.procure.*;
@@ -12,7 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -106,16 +107,21 @@ public class Procures extends Controller {
 
     public static void edit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        render(unit);
+        int oldPlanQty = unit.attrs.planQty;
+        render(unit, oldPlanQty);
     }
 
-    public static void update(ProcureUnit unit) {
+    public static void update(ProcureUnit unit, int oldPlanQty) {
+        validation.required(oldPlanQty);
         unit.validate();
         if(Validation.hasErrors()) {
-            render("Procures/edit.html", unit);
+            render("Procures/edit.html", unit, oldPlanQty);
         }
         unit.save();
         new ElcukRecord(Messages.get("procureunit.update"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        if(oldPlanQty != unit.attrs.planQty)
+            Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
+                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单", oldPlanQty, unit.attrs.planQty, Dates.date2Date(unit.attrs.planDeliveryDate)), 2, 3);
         flash.success("ProcureUnit %s update success!", unit.id);
         redirect("/procures/index?p.search=id:" + unit.id);
     }
@@ -177,16 +183,19 @@ public class Procures extends Controller {
             render("Procures/deliveryUnit.html", unit, attrs);
         }
         unit.comment = cmt;
-        F.T2<Boolean, ProcureUnit> isLeekDelivery = unit.delivery(attrs);
-        if(Validation.hasErrors()) {
+        try {
+            Boolean isFullDelivery = unit.delivery(attrs);
+            if(isFullDelivery) {
+                flash.success("ProcureUnit %s 全部交货!", unit.id);
+            } else {
+                flash.success("ProcureUnits %s 超额交货, 预计交货 %s, 实际交货 %s",
+                        unit.id, unit.attrs.planQty, unit.attrs.qty);
+            }
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
             render("Procures/deliveryUnit.html", unit, attrs);
         }
-        if(isLeekDelivery._1) {
-            flash.success("ProcureUnits %s 部分交货, 剩余部分将自动创建一个新的[采购单元(%s)]! (%s / %s)",
-                    unit.id, isLeekDelivery._2.id, attrs.qty, attrs.planQty);
-        } else if(!isLeekDelivery._1 && isLeekDelivery._2 != null) {
-            flash.success("ProcureUnit %s 全部交货!", unit.id);
-        }
+
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }
 
@@ -211,7 +220,6 @@ public class Procures extends Controller {
         newUnit.handler = User.findByUserName(ElcukRecord.username());
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
-        // TODO 需要发送 Notification
         flash.success("分拆成功, 如果原来的计划添加到了运输单, 请记得运输数量修正.");
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }

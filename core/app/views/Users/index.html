@@ -4,6 +4,9 @@
     #{script 'users/index.coffee'/}
 #{/set}
 
+#{flash_alert /}
+#{errorMsgs /}
+
 <div class="row-fluid">
     <div class="span12">
         <table class="table table-bordered table-condensed">
@@ -18,11 +21,48 @@
                 <tr>
                     <td>${user.id}</td>
                     <td>${user.username}</td>
-                    <td>${user.email}</td>
+                    <td data-toggle="toggle" data-target="#${user.username}_info">
+                        <i class="icon-reorder"></i> ${user.email}</td>
                     <td data-toggle="toggle" data-target="#${user.username}_privileges">
                         <i class="icon-reorder"></i> ${user.privileges.size()} 个权限(共 ${privileges.size()} 个)
                     </td>
                 </tr>
+                <tr id="${user.username}_info" style="display:none;">
+                    <td colspan="4" style="padding:0">
+                        <form action="@{Users.update()}" method="post">
+                            <table class="table table-bordered table-condensed" style="border-top:0;border-left:0;border-right:0">
+                                <tr>
+                                    <th>Email</th>
+                                    <td><input type="text" name="user.email" value="${user.email}"></td>
+                                    <th>Is?</th>
+                                    <td>
+                                        <label class="checkbox inline">
+                                            <input ${user.isService ? 'checked' : ''} type="checkbox" name="user.isService" value="true">
+                                            售后部门
+                                        </label>
+                                        <label class="checkbox inline">
+                                            <input ${user.isProcure ? 'checked' : ''} type="checkbox" name="user.isProcure" value="true">
+                                            采购部门
+                                        </label>
+                                        <label class="checkbox inline">
+                                            <input ${user.isShipper ? 'checked' : ''} type="checkbox" name="user.isShipper" value="true">
+                                            运输部门
+                                        </label>
+                                        <label class="checkbox inline">
+                                            <input ${user.isPM ? 'checked' : ''} type="checkbox" name="user.isPM" value="true">
+                                            PM 部门
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="user.id" value="${user.id}">
+                                        <button class="btn btn-primary">更新</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </form>
+                    </td>
+                </tr>
+
                 <tr id="${user.username}_privileges" style="display:none;">
                     <td colspan="4">
                         <form method="post" action="@{Users.privileges()}" class="privilege_form">

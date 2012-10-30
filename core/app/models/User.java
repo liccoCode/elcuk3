@@ -66,7 +66,7 @@ public class User extends Model {
     @Required
     public String email;
 
-    //TODO 这里的三个 isXX 为暂时解决办法, 如果人数多起来, 需要重构为 Role
+    //TODO 这里的四个 isXX 为暂时解决办法, 如果人数多起来, 需要重构为 Role
     /**
      * 是否为售后支持部门
      */
@@ -81,6 +81,11 @@ public class User extends Model {
      * 是否为运输部门
      */
     public boolean isShipper = false;
+
+    /**
+     * PM
+     */
+    public boolean isPM = false;
 
 
     public boolean closed = false;
@@ -104,7 +109,8 @@ public class User extends Model {
     @PreUpdate
     public void prePersist() {
         // 密码的加密操作在保存的时候进行; 在程序内部使用时为明文密码
-        this.passwordDigest = Crypto.encryptAES(this.password);
+        if(StringUtils.isNotBlank(this.password))
+            this.passwordDigest = Crypto.encryptAES(this.password);
     }
 
     // ------------------------------

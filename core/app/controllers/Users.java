@@ -33,6 +33,16 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
     }
 
+    public static void update(User user) {
+        validation.valid(user);
+        if(Validation.hasErrors()) {
+            render("Users/index.html", user);
+        }
+        user.save();
+        flash.success("修改成功.");
+        redirect("/users/index");
+    }
+
     public static void passwd(String username, String password, String confirm) {
         if(!username.equals(Secure.Security.connected())) {
             session.clear();

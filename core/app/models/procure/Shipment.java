@@ -23,7 +23,6 @@ import query.ShipmentQuery;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 
 /**
