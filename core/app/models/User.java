@@ -66,14 +66,21 @@ public class User extends Model {
     @Required
     public String email;
 
-    @Column(nullable = false)
-    @Required
-    public P power;
-
+    //TODO 这里的三个 isXX 为暂时解决办法, 如果人数多起来, 需要重构为 Role
     /**
      * 是否为售后支持部门
      */
     public boolean isService = false;
+
+    /**
+     * 是否为采购部门
+     */
+    public boolean isProcure = false;
+
+    /**
+     * 是否为运输部门
+     */
+    public boolean isShipper = false;
 
 
     public boolean closed = false;

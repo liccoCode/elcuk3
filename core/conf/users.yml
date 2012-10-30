@@ -2,28 +2,24 @@ User(wyatt):
   username: 'wyatt'
   password: '123'
   email: 'wyatt@easyacceu.com'
-  power: 'ROOT'
   isService: false
 
 User(jamin):
   username: 'jamin'
   password: '123'
   email: 'wyatt@easyacceu.com'
-  power: 'ROOT'
   isService: false
 
 User(su):
   username: 'su'
   password: '123'
   email: 'wyatt@easyacceu.com'
-  power: 'ROOT'
   isService: false
 
 User(jason):
   username: 'jason'
   password: '123'
   email: 'wyatt@easyacceu.com'
-  power: 'ROOT'
   isService: true
 User(root):
   username: root
