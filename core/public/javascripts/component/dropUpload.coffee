@@ -4,7 +4,7 @@ window.dropUpload.template = '<li>' +
 '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
 '<div class="progress"><div class="bar"></div></div>' +
 '<div class="action" style="padding-left:15%;"><a href="#" style="position:relative;left:100px;top:-20px;"><i class="icon-remove"></i></a></div>' +
-'<div class="title"><span style="position:relative;top:-50px"></span></div>' +
+'<div class="title" style="position:relative;top:-15px;word-break:break-all;"></div>' +
 '</li>'
 
 window.dropUpload.xlsImg = "/images/uploads/xls.jpg"
@@ -135,6 +135,7 @@ window.dropUpload.loadImages = (fid, dropbox, cls = 'span2') ->
         imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
         imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
         imgEl.find('div.progress').remove()
+        imgEl.find('div.title').text(img['originName'])
         imgEl.appendTo(uploaded)
   )
 
