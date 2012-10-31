@@ -274,8 +274,25 @@ public class SellingRecord extends GenericModel {
             if(cacheElement != null) return cacheElement;
 
             if(acc == null) {
-                cacheElement = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
+                List<SellingRecord> dateMixRecords = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
+                // 需要将相同 Date 不同 Market 的全部累计
+                Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
+                for(SellingRecord rcd : dateMixRecords) {
+                    String key = rcd.date.getTime() + "" + rcd.market;
+                    if(groupByDate.containsKey(key)) {
+                        groupByDate.get(key).sessions += rcd.sessions;
+                        groupByDate.get(key).pageViews += rcd.pageViews;
+                        groupByDate.get(key).orders += rcd.orders;
+                        groupByDate.get(key).orderCanceld += rcd.orderCanceld;
+                        groupByDate.get(key).sales += rcd.sales;
+                        groupByDate.get(key).units += rcd.units;
+                        groupByDate.get(key).usdSales += rcd.usdSales;
+                    } else
+                        groupByDate.put(key, rcd);
+                }
+                cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
             } else {
+                //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
                 cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
             }
             Cache.add(cacheKey, cacheElement, "1h");
@@ -311,7 +328,6 @@ public class SellingRecord extends GenericModel {
                 .build();
 
         List<SellingRecord> records = accountMskuRelateRecords(acc, msku, from, to);
-        //TODO 多 Account 相同 Session 的问题需要处理
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
                 highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
