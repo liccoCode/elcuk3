@@ -57,7 +57,7 @@ $ ->
       (r) ->
         unless r.flag
           $('#excel_buyer').val(r['username'])
-          $("#excel_supplierPhone").val(r['phone'])
+          $("#excel_buyerPhone").val(r['phone'])
         mask.unmask()
     )
 
