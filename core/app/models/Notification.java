@@ -150,7 +150,8 @@ public class Notification extends Model {
             // 登陆的用户才初始化 User Queue Cache, 没有登陆的, 等到登陆再重新缓存
             Notification.initUserNotificationQueue(user);
         }
-        USER_QUEUE_CACHE.get(user.username).add(notification);
+        if(Login.isUserLogin(user))
+            USER_QUEUE_CACHE.get(user.username).add(notification);
     }
 
     public static void initUserNotificationQueue(User user) {
