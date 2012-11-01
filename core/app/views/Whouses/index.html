@@ -73,17 +73,27 @@
                 <th>邮编</th>
                 <th>省,编码</th>
             </tr>
-        #{list items:fbaCenters, as:'fba'}
+        #{list items:fbaCenters, as:'center'}
             <tr>
-                <td>${fba.id}</td>
-                <td>${fba.addressLine1}</td>
-                <td>${fba.addressLine2}</td>
-                <td>${fba.centerId}</td>
-                <td>${fba.city}</td>
-                <td>${fba.countryCode}</td>
-                <td>${fba.name}</td>
-                <td>${fba.postalCode}</td>
-                <td>${fba.stateOrProvinceCode}</td>
+                <td>${center.id}</td>
+                <td>${center.addressLine1}</td>
+                <td>${center.addressLine2}</td>
+                #{set fbas:center.fbas()/}
+                <td data-toggle="toggle" data-target="#center_${center.centerId}">
+                    <i class="icon-reorder"></i> ${center.centerId} <span class="badge badge-success">${fbas._1}</span>
+                </td>
+                <td>${center.city}</td>
+                <td>${center.countryCode}</td>
+                <td>${center.name}</td>
+                <td>${center.postalCode}</td>
+                <td>${center.stateOrProvinceCode}</td>
+            </tr>
+            <tr id="center_${center.centerId}" style="display:none;">
+                <td colspan="9">
+                    #{list items:fbas._2, as:'shipmentId'}
+                        <span class="badge badge-info">${shipmentId}</span>
+                    #{/list}
+                </td>
             </tr>
         #{/list}
         </table>

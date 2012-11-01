@@ -2,9 +2,12 @@ package models.procure;
 
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
+import play.libs.F;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * FBA 仓库. 每一个 FBAShipment 都会关联的
@@ -69,8 +72,16 @@ public class FBACenter extends Model {
 
     public String postalCode;
 
-    public static FBACenter findByCenterId(String centerId) {
-        return FBACenter.find("centerId=?", centerId).first();
+    /**
+     * 向当前 FBA Center 发货的 FBA 数量
+     * @return T2: _.1: 数量. _.2: FBA Ids
+     */
+    public F.T2<Long, List<String>> fbas() {
+        List<FBAShipment> shipments = FBAShipment.find("fbaCenter=?", this).fetch();
+        List<String> shipmentIds = new ArrayList<String>();
+        for(FBAShipment shipment : shipments)
+            shipmentIds.add(shipment.shipmentId);
+        return new F.T2<Long, List<String>>((long)shipments.size(), shipmentIds);
     }
 
     public String codeToCountry() {
@@ -102,4 +113,9 @@ public class FBACenter extends Model {
                 ", postalCode='" + postalCode + '\'' +
                 '}';
     }
+
+    public static FBACenter findByCenterId(String centerId) {
+        return FBACenter.find("centerId=?", centerId).first();
+    }
+
 }
