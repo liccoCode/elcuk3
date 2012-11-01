@@ -27,19 +27,11 @@ $ ->
         if webkitNotifications.checkPermission() is 0
           $.get("/Notifications/nextNotification", {},
             (r) ->
-              if r.flag is undefined
+              if r['title']
                 notification = webkitNotifications.createNotification(
                   "/img/green.png", "#{r.title} #{r.createAt}", r.content
                 ).show()
-
-            # 删除 '亲..'
-            #              if $('#notifications a:contains(亲, 还没有通知哦)').size() > 0
-            #                $('##notifications a').remove()
-
-            # 在最前面添加一个
-
-            # 判断数量是否在 20 个, 大于 20 个删除最后第一
           )
-      # 10 s
-      , 10000
+      # 15 s
+      , 15000
     )
