@@ -169,12 +169,14 @@ public class User extends Model {
     }
 
     /**
-     * 增加权限
+     * 增加权限;(删除原来的, 重新添加现在的)
      *
      * @param privilegeId
      */
     public void addPrivileges(List<Long> privilegeId) {
         List<Privilege> privileges = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId)).fetch();
+        if(privilegeId.size() != privileges.size())
+            throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
         this.privileges = new HashSet<Privilege>();
         this.save();
         this.privileges.addAll(privileges);

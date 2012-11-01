@@ -46,7 +46,11 @@ public class Users extends Controller {
     public static void privileges(Long id, List<Long> privilegeId) {
         if(privilegeId == null || privilegeId.size() == 0) renderJSON(new Ret(false, "必须选择权限"));
         User user = User.findById(id);
-        user.addPrivileges(privilegeId);
+        try {
+            user.addPrivileges(privilegeId);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.E(e)));
+        }
         int size = user.privileges.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
     }

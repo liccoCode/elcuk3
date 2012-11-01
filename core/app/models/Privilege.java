@@ -5,10 +5,7 @@ import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -164,7 +161,7 @@ public class Privilege extends Model {
     public static Set<Privilege> privileges(String username) {
         Set<Privilege> privileges = PRIVILEGE_CACHE.get(username);
         if(privileges == null) {
-            PRIVILEGE_CACHE.put(username, User.findByUserName(username).privileges);
+            PRIVILEGE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/new HashSet<Privilege>(User.findByUserName(username).privileges));
             privileges = PRIVILEGE_CACHE.get(username);
         }
         return privileges;
