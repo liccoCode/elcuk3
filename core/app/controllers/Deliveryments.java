@@ -1,7 +1,11 @@
 package controllers;
 
 import models.ElcukRecord;
+import models.User;
+import models.procure.Cooperator;
 import models.procure.Deliveryment;
+import models.product.Category;
+import models.view.Ret;
 import models.view.post.DeliveryPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -11,6 +15,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 采购单控制器
@@ -28,6 +33,8 @@ public class Deliveryments extends Controller {
         Deliveryment dmt = Deliveryment.findById(deliverymentId);
         renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
+        renderArgs.put("shippers", Cooperator.shipper());
+        renderArgs.put("buyers", User.procurers());
     }
 
     @Check("deliveryments.index")
@@ -96,11 +103,11 @@ public class Deliveryments extends Controller {
      */
     public static void confirm(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        Validation.equals("deliveryments.confirm", dmt.state, "", Deliveryment.S.PENDING);
+        validation.equals(dmt.state, Deliveryment.S.PENDING);
+        validation.required(dmt.deliveryTime);
+        validation.required(dmt.orderTime);
         if(Validation.hasErrors()) render("Deliveryments/show.html", dmt);
-
-        dmt.state = Deliveryment.S.CONFIRM;
-        dmt.save();
+        dmt.confirm();
         new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
         redirect("/Deliveryments/show/" + id);
     }
@@ -117,5 +124,19 @@ public class Deliveryments extends Controller {
             render("Deliveryments/show.html", dmt, msg);
 
         redirect("/Deliveryments/show/" + dmt.id);
+    }
+
+    /**
+     * 获取某一个采购单所有产品的产品要求
+     */
+    public static void productTerms(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        Set<Category> categoryses = dmt.unitsCategorys();
+        StringBuilder sbd = new StringBuilder("");
+        for(Category cate : categoryses) {
+            if(StringUtils.isNotBlank(cate.productTerms))
+                sbd.append(cate.productTerms);
+        }
+        renderJSON(new Ret(true, sbd.toString()));
     }
 }

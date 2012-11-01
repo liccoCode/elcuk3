@@ -73,12 +73,10 @@
     </form>
 </div>
 
+<form method="post" id="create_deliveryment">
 <div class="row-fluid">
     <div class="span12">
-        <form method="post" id="create_deliveryment">
         #{render 'Procures/_unit_list.html', units:units, checkbox:true/}
-            <input type="hidden" id="name_input" name="name" value="${name}">
-        </form>
     </div>
 </div>
 
@@ -87,12 +85,13 @@
     #{if !p.stage || p.stage == models.procure.ProcureUnit.STAGE.PLAN}
         #{ck "procures.createdeliveryment"}
             <div class="input-append">
-                <input type="text" id="name_label" placeHolder="采购单的别名(必须)" value="${name}">
+                <input type="text" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
                 <button id="create_deliveryment_btn" class="btn btn-primary">添加采购单</button>
             </div>
         #{/ck}
     #{/if}
     </div>
 </div>
+</form>
 
 #{records records:logs/}

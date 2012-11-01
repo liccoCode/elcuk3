@@ -88,7 +88,9 @@
                 <tr>
                     <td colspan="10">
                         <button class="btn btn-primary" data-loading>保存</button>
-                        <a href="@{Products.saleAmazon()}/${pro.sku}" class="btn btn-info">Amazon 上架</a>
+                        #{ck "products.saleamazonlisting"}
+                            <a href="@{Products.saleAmazon()}/${pro.sku}" class="btn btn-info">Amazon 上架</a>
+                        #{/ck}
                     </td>
                 </tr>
             </table>

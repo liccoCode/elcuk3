@@ -161,8 +161,6 @@ public class Shipments extends Controller {
         ship.addToShip(unitId, shipQty);
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-        if(ship.cycle)
-            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", id, ship.items.size()), String.format("有新的货物添加进入了运输单 %s 记得处理哦.", id), 3);
         redirect("/shipments/shipitem/" + id);
     }
 

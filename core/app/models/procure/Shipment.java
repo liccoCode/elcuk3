@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.product.Whouse;
 import notifiers.Mails;
@@ -449,6 +450,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 Messages.get("shipment.ship.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
                 this.id
         ).save();
+        if(this.cycle)
+            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()), String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), 3);
     }
 
 

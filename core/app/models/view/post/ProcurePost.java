@@ -58,6 +58,11 @@ public class ProcurePost extends Post {
         this.dateType = "createDate";
     }
 
+    public ProcurePost(ProcureUnit.STAGE stage) {
+        this();
+        this.stage = stage;
+    }
+
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
         return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();

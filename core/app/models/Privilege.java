@@ -140,6 +140,12 @@ public class Privilege extends Model {
 
         // 财务控制器
         privileges.add(new Privilege("finances", "财务模块"));
+
+        // Products 控制
+        privileges.add(new Privilege("products.saleamazonlisting", "Amazon 上架"));
+
+        // Excels 的下载控制
+        privileges.add(new Privilege("excels.deliveryment", "生成采购单 Excel"));
         for(Privilege p : privileges) p.save();
     }
 

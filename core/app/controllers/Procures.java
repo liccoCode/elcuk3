@@ -147,14 +147,16 @@ public class Procures extends Controller {
         Validation.required("procrues.createDeliveryment.name", name);
         Validation.required("deliveryments.addunits", pids);
         if(Validation.hasErrors()) {
-            renderArgs.put("units", ProcureUnit.unitsFilterByStage(ProcureUnit.STAGE.PLAN));
-            renderArgs.put("p", new ProcurePost());
+            ProcurePost p = new ProcurePost(ProcureUnit.STAGE.PLAN);
+            renderArgs.put("units", p.query());
+            renderArgs.put("p", p);
             render("Procures/index.html", name);
         }
         Deliveryment deliveryment = Deliveryment.createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
-            renderArgs.put("units", ProcureUnit.unitsFilterByStage(ProcureUnit.STAGE.PLAN));
-            renderArgs.put("p", new ProcurePost());
+            ProcurePost p = new ProcurePost(ProcureUnit.STAGE.PLAN);
+            renderArgs.put("units", p.query());
+            renderArgs.put("p", p);
             render("Procures/index.html", name);
         }
         flash.success("Deliveryment %s 创建成功.", deliveryment.id);

@@ -27,6 +27,11 @@ public class Cooperators extends Controller {
         render(coopers);
     }
 
+    public static void showJson(long id) {
+        Cooperator coper = Cooperator.findById(id);
+        renderJSON(J.G(coper));
+    }
+
     public static void show(long id, Boolean full) {
         Cooperator coper = Cooperator.findById(id);
         if(coper == null || !coper.isPersistent()) notFound();

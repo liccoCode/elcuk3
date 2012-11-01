@@ -47,6 +47,9 @@ public class Category extends GenericModel {
     @Expose
     public String memo;
 
+    @Column(length = 3000)
+    public String productTerms = " ";
+
     @Embedded
     @Expose
     public CategorySettings settings = new CategorySettings();

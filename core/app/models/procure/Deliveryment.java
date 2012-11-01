@@ -3,7 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import models.product.Category;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -13,10 +13,7 @@ import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 采购单, 用来记录所采购的 ProcureUnit
@@ -76,9 +73,26 @@ public class Deliveryment extends GenericModel {
     @OneToOne
     public User handler;
 
+    /**
+     * 供应商
+     * 一个采购单只能拥有一个供应商
+     */
+    @ManyToOne
+    public Cooperator cooperator;
+
     @Expose
     @Required
     public Date createDate = new Date();
+
+    /**
+     * 下单时间
+     */
+    public Date orderTime;
+
+    /**
+     * 交货时间
+     */
+    public Date deliveryTime;
 
     /**
      * 此采购单的状态
@@ -171,6 +185,25 @@ public class Deliveryment extends GenericModel {
             Cooperator cooperator = this.units.get(0).cooperator;
             return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN).fetch();
         }
+    }
+
+    /**
+     * 确认下采购单
+     */
+    public void confirm() {
+        this.state = Deliveryment.S.CONFIRM;
+        this.save();
+    }
+
+    /**
+     * 获取 Units 的产品类型
+     * @return
+     */
+    public Set<Category> unitsCategorys() {
+        Set<Category> categories = new HashSet<Category>();
+        for(ProcureUnit unit : this.units)
+            categories.add(unit.product.category);
+        return categories;
     }
 
     /**
@@ -269,10 +302,10 @@ public class Deliveryment extends GenericModel {
         }
 
         Cooperator cop = units.get(0).cooperator;
-        for(ProcureUnit unit : units) {
+        for(ProcureUnit unit : units)
             isUnitToDeliverymentValid(unit, cop);
-        }
         if(Validation.hasErrors()) return deliveryment;
+        deliveryment.cooperator = cop;
         deliveryment.handler = user;
         deliveryment.state = S.PENDING;
         deliveryment.name = name.trim();

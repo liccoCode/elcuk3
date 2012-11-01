@@ -88,6 +88,7 @@ public class Products extends Controller {
         render(pro, s);
     }
 
+    @Check("products.saleamazonlisting")
     public static void saleAmazonListing(Selling s, Product pro) {
         /**
          * 从前台上传来的一系列的值检查

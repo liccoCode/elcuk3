@@ -12,16 +12,30 @@
         <label class="label label-info">合作者信息</label>
         <table class="table table-condensed table-bordered">
             <tr>
-                <td>FullName:</td>
+                <td>全称:</td>
                 <td><input type="text" name="cop.fullName" class="required" value="${coper.fullName}"></td>
-                <td>Name:</td>
+                <td>简称:</td>
                 <td><input type="text" name="cop.name" class="required" value="${coper.name}"></td>
             </tr>
             <tr>
-                <td>Contacter:</td>
+                <td>联系人:</td>
                 <td><input type="text" name="cop.contacter" class="required" value="${coper.contacter}"></td>
-                <td>Phone:</td>
+                <td>手机:</td>
                 <td><input type="text" name="cop.phone" class="required" value="${coper.phone}"></td>
+            </tr>
+
+            <tr>
+                <th>固定电话</th>
+                <td><input type="text" name="cop.tel" value="${coper.tel}"></td>
+                <th>传真</th>
+                <td><input type="text" name="cop.fax" value="${coper.fax}"></td>
+            </tr>
+
+            <tr>
+                <th>QQ</th>
+                <td><input type="text" name="cop.qq" value="${coper.qq}"></td>
+                <th>阿里旺旺</th>
+                <td><input type="text" name="cop.wangwang" value="${coper.wangwang}"></td>
             </tr>
 
             <tr>
@@ -30,6 +44,7 @@
                 <td>Id:</td>
                 <td><input type="text" readonly="" name="cop.id" value="${coper.id}"></td>
             </tr>
+
 
             <tr>
                 <td>Address:</td>
@@ -43,6 +58,13 @@
                 <td colspan="4">
                     Memo:
                     <textarea rows="8" class="span12" name="cop.memo">${coper.memo}</textarea>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="4">
+                    交易条款
+                    <textarea rows="8" class="span12" name="cop.tradingTerms">${coper.tradingTerms}</textarea>
                 </td>
             </tr>
 

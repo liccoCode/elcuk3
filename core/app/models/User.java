@@ -1,11 +1,9 @@
 package models;
 
+import com.google.gson.annotations.Expose;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Email;
-import play.data.validation.Equals;
-import play.data.validation.Password;
-import play.data.validation.Required;
+import play.data.validation.*;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
@@ -46,6 +44,7 @@ public class User extends Model {
 
     @Column(nullable = false, unique = true)
     @Required
+    @Expose
     public String username;
 
     /**
@@ -65,6 +64,36 @@ public class User extends Model {
     @Email
     @Required
     public String email;
+
+    @Phone
+    @Expose
+    public String phone;
+
+    /**
+     * 固定电话
+     */
+    @Phone
+    @Expose
+    public String tel;
+
+    /**
+     * 传真
+     */
+    @Phone
+    @Expose
+    public String fax;
+
+    /**
+     * qq 号码
+     */
+    @Expose
+    public String qq;
+
+    /**
+     * 旺旺
+     */
+    @Expose
+    public String wangwang;
 
     //TODO 这里的四个 isXX 为暂时解决办法, 如果人数多起来, 需要重构为 Role
     /**
@@ -198,6 +227,10 @@ public class User extends Model {
      */
     public static List<User> openUsers() {
         return User.find("closed=?", false).fetch();
+    }
+
+    public static List<User> procurers() {
+        return User.find("isProcure=?", true).fetch();
     }
 
     /**

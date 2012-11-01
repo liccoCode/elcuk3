@@ -36,7 +36,12 @@
             #{flash_alert /}
             #{errorMsgs /}
 
-            #{info_row title:'Basic Info'/}
+            #{info_row title:'Basic Info'}
+            <ul>
+                <li>产品要求: 每一个条款占据一行, 不要换行</li>
+                <li>不需要填写前缀 1. 2. 之类的, 系统会自行处理</li>
+            </ul>
+            #{/info_row}
             <div>
                 <form action="@{Categorys.update()}" method="post">
                     <table class="table table-bordered table-condensed">
@@ -71,14 +76,20 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>产品要求</td>
+                            <td colspan="3">
+                                <textarea name="cat.productTerms" class="span12" rows="10">${cat.productTerms}</textarea>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Memo:</td>
                             <td colspan="3">
-                                <textarea name="cat.memo" class="span12" rows="10">${cat.memo}</textarea>
-                                <input type="hidden" name="cat.categoryId" value="${cat.categoryId}">
+                                <textarea name="cat.memo" class="span12" rows="5">${cat.memo}</textarea>
                             </td>
                         </tr>
                         <tr>
                             <td colspan="4">
+                                <input type="hidden" name="cat.categoryId" value="${cat.categoryId}">
                                 <button class="btn btn-primary" data-loading>保存</button>
                             </td>
                         </tr>

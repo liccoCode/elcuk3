@@ -60,6 +60,12 @@ public class Cooperator extends Model {
     public List<CooperItem> cooperItems = new ArrayList<CooperItem>();
 
     /**
+     * 向这个供应商交易的采购单.
+     */
+    @OneToMany(mappedBy = "cooperator")
+    public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+
+    /**
      * 全称
      */
     @Required
@@ -100,10 +106,42 @@ public class Cooperator extends Model {
     public String phone;
 
     /**
+     * 固定电话
+     */
+    @Phone
+    @Expose
+    public String tel;
+
+    /**
+     * 传真
+     */
+    @Phone
+    @Expose
+    public String fax;
+
+    /**
+     * qq 号码
+     */
+    @Expose
+    public String qq;
+
+    /**
+     * 旺旺
+     */
+    @Expose
+    public String wangwang;
+
+    /**
      * 备注信息
      */
     @Lob
     public String memo;
+
+    /**
+     * 类别的默认交易条款
+     */
+    @Column(length = 3000)
+    public String tradingTerms = " ";
 
     /**
      * 是什么类型的供应商

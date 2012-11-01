@@ -1,5 +1,7 @@
 package controllers;
 
+import helper.J;
+import helper.Webs;
 import models.Privilege;
 import models.User;
 import models.view.Ret;
@@ -61,5 +63,14 @@ public class Users extends Controller {
         // 更新当前缓存的密码
         flash.success("密码修改成功");
         redirect("/");
+    }
+
+    public static void showJson(long id) {
+        try {
+            User user = User.findById(id);
+            renderJSON(J.G(user));
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.E(e)));
+        }
     }
 }

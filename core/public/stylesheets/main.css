@@ -35,3 +35,7 @@ span.highlight{
 .alert ul{
     margin-top:10px;
 }
+
+div .alert {
+    margin-bottom:5px;
+}
