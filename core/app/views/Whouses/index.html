@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main.html'/}
 #{set title:'Whouse(' + whs.size() + ')'/}
 #{set 'moreScripts'}
 #{/set}
@@ -58,4 +58,35 @@
     </div>
 </div>
 
+#{info_row title:"FBA FC`s"/}
+<div class="row">
+    <div class="span12">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th>#</th>
+                <th>地址1</th>
+                <th>地址2</th>
+                <th>CenterId</th>
+                <th>城市</th>
+                <th>城市编码</th>
+                <th>仓库名字</th>
+                <th>邮编</th>
+                <th>省,编码</th>
+            </tr>
+        #{list items:fbaCenters, as:'fba'}
+            <tr>
+                <td>${fba.id}</td>
+                <td>${fba.addressLine1}</td>
+                <td>${fba.addressLine2}</td>
+                <td>${fba.centerId}</td>
+                <td>${fba.city}</td>
+                <td>${fba.countryCode}</td>
+                <td>${fba.name}</td>
+                <td>${fba.postalCode}</td>
+                <td>${fba.stateOrProvinceCode}</td>
+            </tr>
+        #{/list}
+        </table>
+    </div>
+</div>
 

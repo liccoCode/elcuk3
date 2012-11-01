@@ -1,6 +1,7 @@
 package controllers;
 
 import models.market.Account;
+import models.procure.FBACenter;
 import models.product.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -21,6 +22,7 @@ public class Whouses extends Controller {
     @Before(only = {"index", "blank", "create", "edit", "update"})
     public static void setUpAccs() {
         renderArgs.put("accs", Account.openedSaleAcc());
+        renderArgs.put("fbaCenters", FBACenter.all().<FBACenter>fetch());
     }
 
 
