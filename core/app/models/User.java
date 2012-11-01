@@ -11,10 +11,7 @@ import play.libs.Crypto;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 系统中的用户
@@ -206,6 +203,40 @@ public class User extends Model {
      */
     public boolean authenticate(String password) {
         return !StringUtils.isBlank(this.passwordDigest) && this.passwordDigest.equals(Crypto.encryptAES(password));
+    }
+
+    /**
+     * 初始化这个 User 的 Notification Queue
+     */
+    public void login() {
+        //TODO 这里的缓存都是通过 Model 自己进行的缓存, 只能够支持单机缓存, 无法分布式.
+        Privilege.privileges(this.username);
+        Notification.initUserNotificationQueue(this);
+    }
+
+    /**
+     * 用户登出前的处理
+     */
+    @SuppressWarnings("unchecked")
+    public void logout() {
+        /**
+         * 1. 清理 Caches 中的 user
+         * 2. 清理 Privileges 缓存
+         * 3. 清理 Notification Queue 缓存
+         */
+        Map<String, User> users = play.cache.Cache.get("users", Map.class);
+        users.remove(this.username);
+        Privilege.clearUserPrivilegesCache(this);
+        Notification.clearUserNotificationQueue(this);
+    }
+
+    /**
+     * 还没有通知的消息
+     *
+     * @return
+     */
+    public List<Notification> unNotifiedNotification() {
+        return Notification.find("user=? AND notifyAt IS NULL ORDER BY createAt", this).fetch();
     }
 
 

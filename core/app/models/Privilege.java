@@ -1,5 +1,6 @@
 package models;
 
+import play.cache.*;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -22,6 +23,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Entity
 public class Privilege extends Model {
+    /**
+     * 将用户的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
+     */
+    private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
+
     public Privilege() {
     }
 
@@ -150,12 +156,7 @@ public class Privilege extends Model {
     }
 
     /**
-     * 将用户的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
-     */
-    private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
-
-    /**
-     * 获取缓存的权限
+     * 初始化或者获取缓存的权限
      *
      * @param username
      * @return
@@ -169,8 +170,23 @@ public class Privilege extends Model {
         return privileges;
     }
 
+    /**
+     * 更新缓存的权限
+     *
+     * @param username
+     * @param privileges
+     */
     public static void updatePrivileges(String username, Set<Privilege> privileges) {
         PRIVILEGE_CACHE.remove(username);
         PRIVILEGE_CACHE.put(username, privileges);
+    }
+
+    /**
+     * 清理缓存的权限
+     *
+     * @param user
+     */
+    public static void clearUserPrivilegesCache(User user) {
+        PRIVILEGE_CACHE.remove(user.username);
     }
 }

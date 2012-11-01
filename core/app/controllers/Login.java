@@ -6,10 +6,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
-import play.data.validation.Validation;
-import play.mvc.Scope;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,6 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Login extends Secure.Security {
 
+    /**
+     * 登陆
+     */
     static boolean authenticate(String username, String password) {
         /**
          * 1. 判断是否拥有此用户; 使用公司邮箱 @easyacceu.com
@@ -39,8 +41,22 @@ public class Login extends Secure.Security {
         return privilege != null;
     }
 
+    /**
+     * 在用户登出以前做处理
+     */
+    static void onDisconnect() {
+        Login.current().logout();
+    }
+
     @SuppressWarnings("unchecked")
     public static User current() {
+        /**
+         * 初始化:
+         * 1. 将用户信息缓存到 Cache.
+         * 2. 初始化 Notification Queue
+         */
+
+        // 初始化 Cache 中的 用户缓存
         Map<String, User> users = Cache.get("users", Map.class);
         if(users == null) {
             synchronized(Login.class) {
@@ -51,8 +67,11 @@ public class Login extends Secure.Security {
                 }
             }
         }
+
+        // 初始化用户缓存中的用户;
         if(users.get(Secure.Security.connected()) == null) {
             User user = User.findByUserName(Secure.Security.connected());
+            user.login();
             users.put(user.username, user);
         }
         return users.get(Secure.Security.connected());

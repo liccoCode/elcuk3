@@ -1,7 +1,6 @@
 package controllers;
 
 import helper.J;
-import jobs.promise.NotificationPromise;
 import models.Notification;
 import models.view.Ret;
 import play.libs.F;
@@ -37,7 +36,7 @@ public class Notifications extends Controller {
      * 下一个通知
      */
     public static void nextNotification() {
-        F.Option<Notification> notification = await(new NotificationPromise(Login.current()).now());
+        F.Option<Notification> notification = Notification.next(Login.current());
         if(notification.isDefined())
             renderJSON(J.G(notification.get()));
         else

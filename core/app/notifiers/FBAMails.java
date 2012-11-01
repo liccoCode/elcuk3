@@ -28,7 +28,7 @@ public class FBAMails extends Mailer {
     public static /*Mailer 的返回值必须为基本类型*/boolean shipmentStateChange(FBAShipment fba, FBAShipment.S oldState, FBAShipment.S newState) {
         setSubject(String.format("{INFO} FBA %s state FROM %s To %s", fba.shipmentId, oldState, newState));
         mailBase();
-        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
+        addRecipient("p@easyacceu.com");
         try {
             send(fba, oldState, newState);
         } catch(Exception e) {
