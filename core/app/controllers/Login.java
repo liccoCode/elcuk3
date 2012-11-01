@@ -20,6 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Login extends Secure.Security {
 
     /**
+     * 登陆的用户 Cache
+     */
+    private static final Map<String, User> USER_CACHE = new ConcurrentHashMap<String, User>();
+
+    /**
      * 登陆
      */
     static boolean authenticate(String username, String password) {
@@ -52,36 +57,35 @@ public class Login extends Secure.Security {
     public static User current() {
         /**
          * 初始化:
-         * 1. 将用户信息缓存到 Cache.
+         * 1. 将用户信息缓存到 User Cache.
          * 2. 初始化 Notification Queue
          */
-
-        // 初始化 Cache 中的 用户缓存
-        Map<String, User> users = Cache.get("users", Map.class);
-        if(users == null) {
-            synchronized(Login.class) {
-                users = Cache.get("users", Map.class);
-                if(users == null) { // 双重检测缓存
-                    users = new ConcurrentHashMap<String, User>();
-                    Cache.add("users", users);
-                }
-            }
-        }
-
         // 初始化用户缓存中的用户;
-        if(users.get(Secure.Security.connected()) == null) {
+        if(USER_CACHE.get(Secure.Security.connected()) == null) {
             User user = User.findByUserName(Secure.Security.connected());
             user.login();
-            users.put(user.username, user);
+            USER_CACHE.put(user.username, user);
         }
-        return users.get(Secure.Security.connected());
+        return USER_CACHE.get(Secure.Security.connected());
     }
 
     @SuppressWarnings("unchecked")
     public static User updateUserCache(User user) {
-        Map<String, User> users = Cache.get("users", Map.class);
-        users.put(user.username, user);
-        return users.get(user.username);
+        USER_CACHE.put(user.username, user);
+        return USER_CACHE.get(user.username);
+    }
+
+    /**
+     * 清除 Users Cache 中的某一个用户的缓存
+     *
+     * @param user
+     */
+    public static void clearUserCache(User user) {
+        USER_CACHE.remove(user.username);
+    }
+
+    public static boolean isUserLogin(User user) {
+        return USER_CACHE.containsKey(user.username);
     }
 
 

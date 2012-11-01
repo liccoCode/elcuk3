@@ -209,6 +209,12 @@ public class User extends Model {
      * 初始化这个 User 的 Notification Queue
      */
     public void login() {
+        /**
+         * User 相关的三个缓存 :
+         * 1. user 用户缓存
+         * 2. 用户权限缓存
+         * 3. 用户 Notification Queue 缓存
+         */
         //TODO 这里的缓存都是通过 Model 自己进行的缓存, 只能够支持单机缓存, 无法分布式.
         Privilege.privileges(this.username);
         Notification.initUserNotificationQueue(this);
@@ -224,8 +230,7 @@ public class User extends Model {
          * 2. 清理 Privileges 缓存
          * 3. 清理 Notification Queue 缓存
          */
-        Map<String, User> users = play.cache.Cache.get("users", Map.class);
-        users.remove(this.username);
+        Login.clearUserCache(this);
         Privilege.clearUserPrivilegesCache(this);
         Notification.clearUserNotificationQueue(this);
     }

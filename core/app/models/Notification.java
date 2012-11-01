@@ -1,6 +1,7 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -145,8 +146,10 @@ public class Notification extends Model {
      * @param notification
      */
     public static void addUserNotification(User user, Notification notification) {
-        if(!USER_QUEUE_CACHE.containsKey(user.username))
+        if(!USER_QUEUE_CACHE.containsKey(user.username) && Login.isUserLogin(user)) {
+            // 登陆的用户才初始化 User Queue Cache, 没有登陆的, 等到登陆再重新缓存
             Notification.initUserNotificationQueue(user);
+        }
         USER_QUEUE_CACHE.get(user.username).add(notification);
     }
 
