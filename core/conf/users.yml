@@ -22,7 +22,7 @@ User(jason):
   email: 'wyatt@easyacceu.com'
   isService: true
 User(root):
-  username: root
+  username: root_user
   password: root
   email: wppurking@gmail.com
 
