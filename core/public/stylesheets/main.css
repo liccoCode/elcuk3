@@ -39,3 +39,7 @@ span.highlight{
 div .alert {
     margin-bottom:5px;
 }
+
+.table input,textarea,select{
+    margin-bottom:0;
+}

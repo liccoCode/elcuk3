@@ -10,7 +10,10 @@ import play.utils.FastRuntimeException;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 用户的提醒消息(push)
@@ -88,7 +91,7 @@ public class Notification extends Model {
      * @param content
      * @return
      */
-    public static void notifies(String title, String content,int... group) {
+    public static void notifies(String title, String content, int... group) {
         if(StringUtils.isBlank(title) || StringUtils.isBlank(content))
             throw new FastRuntimeException("Title 或 Content 一个都不能为空.");
         Set<User> users = new HashSet<User>();

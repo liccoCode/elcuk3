@@ -33,7 +33,7 @@ public class Login extends Secure.Security {
     static boolean check(String profile) {
         User user = current();
         if(user == null) return false;
-        if("root".equals(user.username)) return true;
+        if("root_user".equals(user.username)) return true;
         Set<Privilege> privileges = Privilege.privileges(user.username);
         Privilege privilege = (Privilege) CollectionUtils.find(privileges, new PrivilegePrediect(profile.toLowerCase()));
         return privilege != null;
@@ -58,16 +58,13 @@ public class Login extends Secure.Security {
         return users.get(Secure.Security.connected());
     }
 
-
-    /**
-     * 根据 Session, 获取登陆后存储在 Cache 中的 User 的  key;
-     *
-     * @param username
-     * @return
-     */
-    public static String ukey(String username) {
-        return String.format("user.name[%s][%s]", username, Scope.Session.current().getId());
+    @SuppressWarnings("unchecked")
+    public static User updateUserCache(User user) {
+        Map<String, User> users = Cache.get("users", Map.class);
+        users.put(user.username, user);
+        return users.get(user.username);
     }
+
 
     /**
      * 过滤权限

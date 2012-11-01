@@ -1,12 +1,14 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -77,13 +79,6 @@ public class User extends Model {
     public String tel;
 
     /**
-     * 传真
-     */
-    @Phone
-    @Expose
-    public String fax;
-
-    /**
      * qq 号码
      */
     @Expose
@@ -142,6 +137,29 @@ public class User extends Model {
             this.passwordDigest = Crypto.encryptAES(this.password);
     }
 
+    /**
+     * 用户更新
+     */
+    public void update() {
+        /**
+         * 1. 验证密码是否正确
+         * 2. 进行更新
+         * 3. 更新缓存中的 user
+         */
+        if(!this.authenticate(this.password))
+            throw new FastRuntimeException("密码错误");
+        this.save();
+        Login.updateUserCache(this);
+    }
+
+    public List<Notification> notificationFeeds(int page) {
+        return notificationFeeds(page, 80);
+    }
+
+    public List<Notification> notificationFeeds(int page, int pageSize) {
+        return Notification.find("user=? ORDER BY createAt DESC", this).fetch(page, pageSize);
+    }
+
     // ------------------------------
 
     /**
@@ -177,6 +195,7 @@ public class User extends Model {
         this.password = passwd;
         this.passwordDigest = Crypto.encryptAES(this.password);
         this.save();
+        Login.updateUserCache(this);
     }
 
     /**

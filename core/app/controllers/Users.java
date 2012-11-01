@@ -2,11 +2,16 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
+import models.Notification;
 import models.Privilege;
 import models.User;
 import models.view.Ret;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.List;
@@ -27,6 +32,17 @@ public class Users extends Controller {
         render(users, privileges);
     }
 
+    @Before(only = {"home", "updates"})
+    public static void setHomePage() {
+        int page = NumberUtils.toInt(request.params.get("page"), 1);
+        renderArgs.put("notifications", Login.current().notificationFeeds(page));
+    }
+
+    public static void home() {
+        User user = Login.current();
+        render(user);
+    }
+
     public static void privileges(Long id, List<Long> privilegeId) {
         if(privilegeId == null || privilegeId.size() == 0) renderJSON(new Ret(false, "必须选择权限"));
         User user = User.findById(id);
@@ -35,12 +51,38 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
     }
 
+    public static void updates(User user, String newPassword, String newPasswordConfirm) {
+        validation.valid(user);
+
+        // 如果填写了新密码, 那么则需要修改密码
+        if(StringUtils.isNotBlank(newPassword)) {
+            validation.equals(newPassword, newPasswordConfirm);
+        }
+        if(Validation.hasErrors())
+            render("Users/home.html", user);
+
+        try {
+            user.update();
+            if(StringUtils.isNotBlank(newPassword))
+                user.changePasswd(newPassword);
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+            render("Users/home.html", user);
+        }
+        flash.success("修改成功.");
+        redirect("/users/home");
+    }
+
     public static void update(User user) {
         validation.valid(user);
-        if(Validation.hasErrors()) {
+        if(Validation.hasErrors())
+            render("Users/index.html", user);
+        try {
+            user.update();
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
             render("Users/index.html", user);
         }
-        user.save();
         flash.success("修改成功.");
         redirect("/users/index");
     }
