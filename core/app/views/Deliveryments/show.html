@@ -47,7 +47,7 @@
                 </tr>
                 <tr>
                     <th>供应商</th>
-                    <td>${dmt.cooperator.fullName}</td>
+                    <td>${dmt.cooperator?.fullName}</td>
 
                     <th>下单时间</th>
                     <td><input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}"></td>
@@ -120,136 +120,145 @@
         <h4 data-toggle="toggle" data-target="#excel">生成采购单信息 <i class="icon-reorder"></i></h4>
     </div>
 </div>
-<div id="excel" class="row-fluid" style="display:none;">
-    <div class="span12">
-        <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
-            <table class="table table-bordered table-condensed">
-                <tr>
-                    <th>选择联系人</th>
-                    <td>
-                        <select id="chosereceiver">
-                            <option value="">请选择</option>
-                            #{list items:shippers, as:'sp'}
-                                <option value="${sp.id}">${sp.name}</option>
-                            #{/list}
-                        </select>
-                    </td>
-
-                    <th>收货联系人</th>
-                    <td>
-                        <input type="text" name="excel.receiver" id="excel_receiver">
-                    </td>
-
-                    <th>移动电话</th>
-                    <td><input type="text" name="excel.receiverPhone" id="excel_receiverPhone"></td>
-
-                    <th>固定电话</th>
-                    <td><input type="text" name="excel.receiverTel" id="excel_receiverTel"></td>
-                </tr>
-
-                <tr>
-                    <th>交货地址</th>
-                    <td colspan="3">
-                        <input type="text" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress"></td>
-
-                    <td colspan="2">
-                        <button class="btn btn-success" data-loading id="load_product_terms">加载产品要求</button>
-                    </td>
-                    <td colspan="2"></td>
-                </tr>
-
-                <tr>
-                    <th>交易条款<br>(供应商)</th>
-                    <td colspan="3">
-                        <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12">${dmt.cooperator.tradingTerms}</textarea>
-                    </td>
-                    <th>产品要求<br>(产品线)</th>
-                    <td colspan="3">
-                        <textarea rows="8" name="excel.productTerms" id="excel_productTerms" class="span12"></textarea>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th colspan="4"><h5 style="text-align:center">供货方信息</h5></th>
-                    <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
-                </tr>
-                <tr>
-                    <th>供货方</th>
-                    <td>
-                        <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
-                    </td>
-                    <th>经办人</th>
-                    <td>
-                        <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
-                    </td>
-
-                    <th>买方</th>
-                    <td><input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="香港逸德网络科技有限公司"></td>
-                    <th>经办人</th>
-                    <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
-                </tr>
-
-                <tr>
-                    <th>移动电话</th>
-                    <td>
-                        <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
-                    </td>
-                    <th>固定电话</th>
-                    <td>
-                        <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
-                    </td>
-
-                    <th>移动电话</th>
-                    <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
-                    <th>固定电话</th>
-                    <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185066525"></td>
-                </tr>
-
-                <tr>
-                    <th>传真</th>
-                    <td>
-                        <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
-                    </td>
-                    <td colspan="2"></td>
-
-
-                    <th>传真</th>
-                    <td><input type="text" name="excel.buyerFax" id="excel_buyerFax"></td>
-
-                    <th>选择经办人</th>
-                    <td>
-                        <select id="chosebuyer">
-                            <option value="">请选择</option>
-                            #{list items:buyers, as:'br'}
-                                #{ifnot br.username == 'wyatt'}
-                                    <option value="${br.id}">${br.username}</option>
-                                #{/ifnot}
-                            #{/list}
-                        </select>
-                    </td>
-                </tr>
-
-                <tr>
-                    <th>地址</th>
-                    <td colspan="3">
-                        <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
-                    </td>
-
-                    <th>地址</th>
-                    <td colspan="3">
-                        <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress" value="湖南省芙蓉中路1段530号和府大厦2410室">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="4">
-                        <input type="hidden" name="id" value="${dmt.id}">
-                        <button class="btn btn-success">生成采购单 Excel</button>
-                    </td>
-                </tr>
-            </table>
-        </form>
+    #{if dmt.state == models.procure.Deliveryment.S.CANCEL}
+    <div id="excel" class="row-fluid" style="display:none;">
+        <span class="text-error">采购单已经取消, 不需要生成采购单 Excel</span>
     </div>
-</div>
+    #{/if}
+    #{else }
+    <div id="excel" class="row-fluid" style="display:none;">
+        <div class="span12">
+            <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <th>选择联系人</th>
+                        <td>
+                            <select id="chosereceiver">
+                                <option value="">请选择</option>
+                                #{list items:shippers, as:'sp'}
+                                    <option value="${sp.id}">${sp.name}</option>
+                                #{/list}
+                            </select>
+                        </td>
+
+                        <th>收货联系人</th>
+                        <td>
+                            <input type="text" name="excel.receiver" id="excel_receiver">
+                        </td>
+
+                        <th>移动电话</th>
+                        <td><input type="text" name="excel.receiverPhone" id="excel_receiverPhone"></td>
+
+                        <th>固定电话</th>
+                        <td><input type="text" name="excel.receiverTel" id="excel_receiverTel"></td>
+                    </tr>
+
+                    <tr>
+                        <th>交货地址</th>
+                        <td colspan="3">
+                            <input type="text" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
+                        </td>
+
+                        <td colspan="2">
+                            <button class="btn btn-success" data-loading id="load_product_terms">加载产品要求</button>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+
+                    <tr>
+                        <th>交易条款<br>(供应商)</th>
+                        <td colspan="3">
+                            <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12">${dmt.cooperator.tradingTerms}</textarea>
+                        </td>
+                        <th>产品要求<br>(产品线)</th>
+                        <td colspan="3">
+                            <textarea rows="8" name="excel.productTerms" id="excel_productTerms" class="span12"></textarea>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th colspan="4"><h5 style="text-align:center">供货方信息</h5></th>
+                        <th colspan="4"><h5 style="text-align:center">买方信息</h5></th>
+                    </tr>
+                    <tr>
+                        <th>供货方</th>
+                        <td>
+                            <input type="text" name="excel.supplierCompany" id="excel_supplierCompany" value="${dmt.cooperator.fullName}">
+                        </td>
+                        <th>经办人</th>
+                        <td>
+                            <input type="text" name="excel.supplier" id="excel_supplier" value="${dmt.cooperator.contacter}">
+                        </td>
+
+                        <th>买方</th>
+                        <td><input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="香港逸德网络科技有限公司">
+                        </td>
+                        <th>经办人</th>
+                        <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
+                    </tr>
+
+                    <tr>
+                        <th>移动电话</th>
+                        <td>
+                            <input type="text" name="excel.supplierPhone" id="excel_supplierPhone" value="${dmt.cooperator.phone}">
+                        </td>
+                        <th>固定电话</th>
+                        <td>
+                            <input type="text" name="excel.supplierTel" id="excel_supplierTel" value="${dmt.cooperator.tel}">
+                        </td>
+
+                        <th>移动电话</th>
+                        <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
+                        <th>固定电话</th>
+                        <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185066525"></td>
+                    </tr>
+
+                    <tr>
+                        <th>传真</th>
+                        <td>
+                            <input type="text" name="excel.supplierFax" id="excel_supplierFax" value="${dmt.cooperator.fax}">
+                        </td>
+                        <td colspan="2"></td>
+
+
+                        <th>传真</th>
+                        <td><input type="text" name="excel.buyerFax" id="excel_buyerFax"></td>
+
+                        <th>选择经办人</th>
+                        <td>
+                            <select id="chosebuyer">
+                                <option value="">请选择</option>
+                                #{list items:buyers, as:'br'}
+                                    #{ifnot br.username == 'wyatt'}
+                                        <option value="${br.id}">${br.username}</option>
+                                    #{/ifnot}
+                                #{/list}
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>地址</th>
+                        <td colspan="3">
+                            <input type="text" class="span12" name="excel.supplierAddress" id="excel_supplierAddress" value="${dmt.cooperator.address}">
+                        </td>
+
+                        <th>地址</th>
+                        <td colspan="3">
+                            <input type="text" class="span12" name="excel.buyerAddress" id="excel_buyerAddress" value="湖南省芙蓉中路1段530号和府大厦2410室">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <input type="hidden" name="id" value="${dmt.id}">
+                            <button class="btn btn-success">生成采购单 Excel</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    #{/else}
 #{/ck}
 
 
