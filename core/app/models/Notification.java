@@ -73,10 +73,25 @@ public class Notification extends Model {
             this.title = "系统通知";
     }
 
+    /**
+     * 返回当前实例的简单内容
+     *
+     * @return
+     */
+    public Notification note() {
+        Notification note = new Notification();
+        note.id = this.id;
+        note.title = this.title;
+        note.content = this.content;
+        note.createAt = this.createAt;
+        note.notifyAt = this.notifyAt;
+        return note;
+    }
+
     public static void notificationAll(String title, String content) {
         List<User> users = User.openUsers();
         for(User u : users) {
-            Notification.addUserNotification(u, new Notification(u, title, content).<Notification>save());
+            Notification.addUserNotification(u, new Notification(u, title, content).<Notification>save().note());
         }
     }
 
@@ -115,8 +130,10 @@ public class Notification extends Model {
                 users.addAll(User.find("isPM=?", true).<User>fetch());
         }
 
-        for(User u : users)
-            new Notification(u, title, content).save();
+        for(User u : users) {
+            Notification notify = new Notification(u, title, content).save();
+            Notification.addUserNotification(u, notify.note());
+        }
     }
 
     /**

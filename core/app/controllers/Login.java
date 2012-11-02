@@ -5,7 +5,7 @@ import models.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
-import play.cache.Cache;
+import play.mvc.Util;
 
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +54,7 @@ public class Login extends Secure.Security {
     }
 
     @SuppressWarnings("unchecked")
+    @Util
     public static User current() {
         /**
          * 初始化:
@@ -70,6 +71,7 @@ public class Login extends Secure.Security {
     }
 
     @SuppressWarnings("unchecked")
+    @Util
     public static User updateUserCache(User user) {
         USER_CACHE.put(user.username, user);
         return USER_CACHE.get(user.username);
@@ -80,10 +82,12 @@ public class Login extends Secure.Security {
      *
      * @param user
      */
+    @Util
     public static void clearUserCache(User user) {
         USER_CACHE.remove(user.username);
     }
 
+    @Util
     public static boolean isUserLogin(User user) {
         return USER_CACHE.containsKey(user.username);
     }
