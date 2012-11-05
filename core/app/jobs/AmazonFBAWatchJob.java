@@ -34,7 +34,7 @@ public class AmazonFBAWatchJob extends Job {
 
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            List<FBAShipment> shipments = FBAShipment.find("account=? AND state NOT IN (?,?,?)", acc, S.PLAN, S.CANCELLED, S.CLOSED).fetch(50);
+            List<FBAShipment> shipments = FBAShipment.find("account=? AND state NOT IN (?,?,?,?)", acc, S.PLAN, S.CANCELLED, S.CLOSED, S.DELETED).fetch(50);
             AmazonFBAWatchJob.watchFBAs(acc, shipments);
         }
     }

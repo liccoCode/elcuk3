@@ -7,6 +7,7 @@ import org.junit.Test;
 import play.test.UnitTest;
 
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,10 +34,15 @@ public class AmazonFBAWatchJobTest extends UnitTest {
         AmazonFBAWatchJob.watchFBAs(acc, Collections.singletonList(fbaShipment));
     }
 
-    @Test
+//    @Test
     public void testlistFBAShipmentItems() {
         FBAShipment shipment = FBAShipment.findById(43l);
         shipment.receivingAt = DateTime.parse("2012-10-20").toDate();
         AmazonFBAWatchPlusJob.listFBAShipmentItems(shipment);
+    }
+
+    @Test
+    public void testJos() throws ExecutionException, InterruptedException {
+        new AmazonFBAWatchJob().now().get();
     }
 }

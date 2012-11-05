@@ -202,8 +202,11 @@ public class FBAShipment extends Model {
      * @param state
      */
     public void isNofityState(S state) {
-        if(state == S.RECEIVING) this.receivingAt = new Date();
-        else if(state == S.CLOSED || state == S.DELETED) this.closeAt = new Date();
+        /*没有 receivingAt 时间才更新, 否则每次 RECEIVEING 都更新当前时间..*/
+        if(state == S.RECEIVING && this.receivingAt == null)
+            this.receivingAt = new Date();
+        else if(state == S.CLOSED || state == S.DELETED)
+            this.closeAt = new Date();
         if(this.state != state)
             FBAMails.shipmentStateChange(this, this.state, state);
         this.state = state;
@@ -223,7 +226,7 @@ public class FBAShipment extends Model {
      * 货物抵达后, FBA Shipment 的签收时间与开始入库时间的检查
      */
     public void receiptAndreceivingCheck() {
-        // 只检查 PLAN 到 RECEIVING 之前的状态
+        // 已经开始接收的不再进行提醒
         if(this.state.ordinal() >= S.RECEIVING.ordinal()) return;
         if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))) {
             FBAMails.receiptButNotReceiving(this);
