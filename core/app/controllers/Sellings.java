@@ -1,6 +1,5 @@
 package controllers;
 
-import ext.LinkHelper;
 import helper.Constant;
 import helper.GTs;
 import helper.J;
@@ -12,12 +11,15 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
+import play.data.validation.Error;
+import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,17 +72,26 @@ public class Sellings extends Controller {
                 .build()));
     }
 
-    public static void imageUpload(final Selling s, final String imgs) {
-        if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ")" + "不存在!"));
-        if(StringUtils.isBlank(s.aps.imageName) && StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
-        // 10s 给上传时间
-        //TODO 需要调整成异步
-        try {
-            s.uploadAmazonImg(imgs, false);
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+    public static void imageUpload(final String sid, final String imgs) {
+        if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
+        List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
+            @Override
+            public List<Error> doJobWithResult() throws Exception {
+                List<Error> errors = new ArrayList<Error>();
+                Selling s = Selling.findById(sid);
+                try {
+                    s.uploadAmazonImg(imgs, false);
+                } catch(Exception e) {
+                    errors.add(new Error("", Webs.E(e), new String[]{}));
+                }
+                return errors;
+            }
+        }.now());
+        if(errors.size() > 0) {
+            renderJSON(new Ret(false, J.json(errors)));
+        } else {
+            renderJSON(new Ret(true));
         }
-        renderJSON(new Ret(true));
     }
 
     /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
@@ -104,14 +115,16 @@ public class Sellings extends Controller {
      */
     public static void syncAmazon(final String sid) {
         // play status 检查平均耗时 2.5s , 开放线程时间 3s 后回掉
-        await("3s", new F.Action0() {
+        await(new Job<Selling>() {
             @Override
-            public void invoke() {
+            public Selling doJobWithResult() throws Exception {
                 Selling selling = Selling.findById(sid);
                 selling.syncFromAmazon();
-                renderJSON(new Ret());
+                return selling;
             }
-        });
+
+        }.now());
+        renderJSON(new Ret());
     }
 
     /**
