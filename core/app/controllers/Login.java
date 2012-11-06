@@ -5,6 +5,7 @@ import models.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.mvc.Util;
 
 import java.util.Map;
@@ -50,7 +51,11 @@ public class Login extends Secure.Security {
      * 在用户登出以前做处理
      */
     static void onDisconnect() {
-        Login.current().logout();
+        try {
+            Login.current().logout();
+        } catch(NullPointerException e) {
+            Logger.warn("Current User is null. No Cookie.");
+        }
     }
 
     @SuppressWarnings("unchecked")
