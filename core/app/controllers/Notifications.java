@@ -3,6 +3,8 @@ package controllers;
 import helper.J;
 import models.Notification;
 import models.view.Ret;
+import org.apache.commons.lang.StringUtils;
+import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -28,8 +30,13 @@ public class Notifications extends Controller {
 
     @Check("notifications.notifysall")
     public static void notifysAll(String t, String c) {
+        if(StringUtils.isBlank(c)) {
+            flash.error("请填写 Notification 内容!");
+            redirect("/users/home");
+        }
         Notification.notificationAll(t, c);
-        renderJSON(new Ret(true));
+        flash.success("发送成功");
+        redirect("/users/home");
     }
 
     /**
