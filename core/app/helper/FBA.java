@@ -267,8 +267,9 @@ public class FBA {
         ListInboundShipmentItemsResponse response = client(acc).listInboundShipmentItems(request);
         List<InboundShipmentItem> inboundItems = response.getListInboundShipmentItemsResult().getItemData().getMember();
         for(InboundShipmentItem item : inboundItems) {
-            if(fetchItems.containsKey(item.getSellerSKU())) continue;
-            fetchItems.put(item.getSellerSKU(), new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped()));
+            // 进入系统内 msku 全变成大写
+            if(fetchItems.containsKey(item.getSellerSKU().toUpperCase())) continue;
+            fetchItems.put(item.getSellerSKU().toUpperCase(), new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped()));
         }
         return fetchItems;
     }

@@ -273,8 +273,8 @@ public class AmazonListingReview {
 
         review.review = r.ownText();
 
-        review.alrId = AmazonListingReview.alrId(review.listingId, review.userid);
         review.reviewId = StringUtils.split(r.select(".crVotingButtons").first().previousElementSibling().attr("name"), ".")[0];
+        review.alrId = AmazonListingReview.alrId(review.listingId, review.reviewId);
         review.isVedio = r.select(".flashPlayer").first() != null;
         if(review.isVedio) {
             review.vedioPicUrl = r.select(".flashPlayer").first().select("img").first().attr("src");

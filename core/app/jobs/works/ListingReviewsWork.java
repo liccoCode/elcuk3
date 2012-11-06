@@ -45,7 +45,7 @@ public class ListingReviewsWork extends Job<Listing> {
      * 从 ListingId 与 Listing 中选择出与进行搜索的 Listing, 并且会返回是否需要进行更新的标识
      * (如果是 Listing 的话不需要更新.)
      *
-     * @return
+     * @return T2: ._1: Listing 对象; ._2: 是否通过 lid 加载
      */
     private F.T2<Listing, Boolean> choseListing() {
         if(StringUtils.isBlank(this.listingId)) {
