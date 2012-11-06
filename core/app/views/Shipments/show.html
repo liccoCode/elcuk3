@@ -56,7 +56,10 @@
                 <tr>
                     <th>预计运输时间</th>
                     <td>
-                        <input type="date" name="ship.beginDate" value="${ship.beginDate.date()}">
+                        <input type="date" name="ship.planBeginDate" value="${ship.planBeginDate.date()}">
+                    #{ifnot ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CANCEL, models.procure.Shipment.S.CONFIRM]}
+                        <span class="pull-right">运输时间 #{time_tooltip time:ship.beginDate/}</span>
+                    #{/ifnot}
                     </td>
                     <th>预计到库时间</th>
                     <td>
@@ -184,7 +187,7 @@
 
                     <td>准点误差</td>
                     #{set diffDays:ship.planArrivDate - ship.arriveDate /}
-                    <td style="${diffDays > 0 ? 'color:#B94A48' : ''}">${diffDays} Days</td>
+                    <td style="${diffDays < 0 ? 'color:#B94A48' : ''}">${diffDays} Days</td>
                 </tr>
             #{/if}
             </table>

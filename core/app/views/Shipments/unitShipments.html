@@ -16,7 +16,7 @@
         <td>${ship.title}</td>
         <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
         <td>${ship.state}</td>
-        <td>${ship.beginDate.date()} ${ship.beginDate.dayOfWeek()}</td>
+        <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
         <td>${ship.items.size()}</td>
         <td>#{if ship.cycle}<i style="color:#C09853;" class="icon-star"></i>#{/if} ${ship.creater?.username}</td>
     </tr>

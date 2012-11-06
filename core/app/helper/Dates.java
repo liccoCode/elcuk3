@@ -18,6 +18,16 @@ import java.util.Date;
 public class Dates {
     private static DatatypeFactory df;
 
+    /**
+     * 一天拥有 86400 秒
+     */
+    public static final long DAY_SECONDS = 86400;
+
+    /**
+     * 一天拥有 86400000 毫秒
+     */
+    public static final long DAY_MILLIS = DAY_SECONDS * 1000;
+
     static {
         try {
             df = DatatypeFactory.newInstance();

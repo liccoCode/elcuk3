@@ -195,7 +195,6 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.id", id);
         if(Validation.hasError("shipment.id")) redirect("/shipments/index");
-        Validation.required("shipment.trackNo", ship.trackNo);
         Validation.required("shipment.planArrivDate", ship.planArrivDate);
         Validation.required("shipment.volumn", ship.volumn);
         Validation.required("shipment.weight", ship.weight);
@@ -205,6 +204,9 @@ public class Shipments extends Controller {
         Validation.required("shipment.shipFee", ship.shipFee);
         Validation.required("shipment.cooper", ship.cooper);
         Validation.min("shipment.items.size", ship.items.size(), 1);
+        // 海运不进行 trackNo 检查
+        if(ship.type != Shipment.T.SEA)
+            Validation.required("shipment.trackNo", ship.trackNo);
 
         checkShowError(ship);
 

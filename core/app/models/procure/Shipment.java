@@ -50,6 +50,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.state = shipment.state;
         this.creater = shipment.creater;
         this.beginDate = shipment.beginDate;
+        this.planBeginDate = shipment.planBeginDate;
         this.planArrivDate = shipment.planArrivDate;
         // FBA 不做处理
         this.pype = shipment.pype;
@@ -249,10 +250,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public S state;
 
     /**
-     * 货运开始日期
+     * 预计发货日期
      */
     @Expose
     @Required
+    public Date planBeginDate;
+
+    /**
+     * 货运开始日期
+     */
+    @Expose
     public Date beginDate;
 
     /**
@@ -614,6 +621,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();
+        this.beginDate = new Date();
         this.state = S.SHIPPING;
         this.save();
     }
@@ -628,7 +636,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Override
     public String to_log() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
-        sbd.append("[运输:").append(Dates.date2Date(this.beginDate)).append("] ")
+        sbd.append("[运输:").append(Dates.date2Date(this.planBeginDate)).append("] ")
                 .append("[到库:").append(Dates.date2Date(this.planArrivDate)).append("] ");
         if(this.volumn != null && this.volumn != 0) sbd.append("[运输体积:").append(this.volumn).append("] ");
         if(this.weight != null && this.weight != 0) sbd.append("[运输重量:").append(this.weight).append("]");

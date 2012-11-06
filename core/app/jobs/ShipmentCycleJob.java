@@ -29,18 +29,18 @@ public class ShipmentCycleJob extends Job {
         for(Whouse wh : whouses) {
             for(int i = 0; i < 30; i++) {
                 DateTime dealDate = now.plusDays(i);
-                List<Shipment> cyclingShipments = Shipment.find("cycle=? AND beginDate>=? AND beginDate<=? AND whouse.id=?",
+                List<Shipment> cyclingShipments = Shipment.find("cycle=? AND planBeginDate>=? AND planBeginDate<=? AND whouse.id=?",
                         true, Dates.morning(dealDate.toDate()), Dates.night(dealDate.toDate()), wh.id).fetch();
                 if(cyclingShipments.size() > 0) continue;
                 // 周一: 1, 周日: 7
                 if(dealDate.getDayOfWeek() == 2 || dealDate.getDayOfWeek() == 4) {
                     Shipment ship = new Shipment(Shipment.id());
                     ship.cycle = true;
-                    ship.beginDate = dealDate.toDate();
+                    ship.planBeginDate = dealDate.toDate();
                     ship.planArrivDate = dealDate.plusDays(7).toDate();
                     ship.whouse = wh;
                     ship.type = Shipment.T.EXPRESS;
-                    ship.title = String.format("%s 去往 %s 在 %s", ship.id, ship.whouse.name(), Dates.date2Date(ship.beginDate));
+                    ship.title = String.format("%s 去往 %s 在 %s", ship.id, ship.whouse.name(), Dates.date2Date(ship.planBeginDate));
                     ship.save();
                 }
             }
