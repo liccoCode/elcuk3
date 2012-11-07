@@ -98,8 +98,8 @@ $ ->
     imgDiv = $(@).parent()
     imgDiv.mask("上传图片中...")
     params =
-      's.sellingId': $('#s_sellingId').val()
-      imgs: $('#image_tr + tr input').val()
+      'sid': $('#s_sellingId').val()
+      imgs: $('[name=s\\.aps\\.imageName]').val()
     $.post('/sellings/imageUpload', params,
       (r) ->
         if r.flag is true

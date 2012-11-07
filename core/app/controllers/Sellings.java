@@ -88,7 +88,7 @@ public class Sellings extends Controller {
             }
         }.now());
         if(errors.size() > 0) {
-            renderJSON(new Ret(false, J.json(errors)));
+            renderJSON(new Ret(false, errors.toString()));
         } else {
             renderJSON(new Ret(true));
         }
