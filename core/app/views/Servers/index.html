@@ -42,6 +42,9 @@
             <td>${s.ipAddress}</td>
             <td>
                 <a href="@{Servers.edit(s.id)}" class="btn btn-primary">更新</a>
+                #{if s.type == models.Server.T.CRAWLER}
+                    <a href="${s.url}/app/ping" target="_blank" class="btn btn-success">Ping</a>
+                #{/if}
             </td>
         </tr>
     #{/list}

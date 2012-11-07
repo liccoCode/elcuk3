@@ -59,16 +59,17 @@ public class Server extends Model {
 
     @SuppressWarnings("unchecked")
     public static Server server(T type) {
-//        List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
-//        if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
-//            synchronized(Server.class) {
-//                if(servers == null || servers.size() == 0) {
-//                    servers = Server.find("type=?", type).fetch();
-//                    Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
-//                }
-//            }
-//        }
-        // 将负载均衡交给 nginx 去处理
-        return new Server("http://crawl.easya.cc");
+        //Crawler 将负载均衡交给 nginx 去处理
+        if(type == T.CRAWLER) return new Server("http://crawl.easya.cc");
+        List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
+        if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
+            synchronized(Server.class) {
+                if(servers == null || servers.size() == 0) {
+                    servers = Server.find("type=?", type).fetch();
+                    Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
+                }
+            }
+        }
+        return servers.get(0);
     }
 }
