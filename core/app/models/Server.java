@@ -18,6 +18,13 @@ import java.util.List;
  */
 @Entity
 public class Server extends Model {
+    public Server() {
+    }
+
+    public Server(String url) {
+        this.url = url;
+    }
+
     /**
      * Server 的类型
      */
@@ -52,16 +59,16 @@ public class Server extends Model {
 
     @SuppressWarnings("unchecked")
     public static Server server(T type) {
-        List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
-        if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
-            synchronized(Server.class) {
-                if(servers == null || servers.size() == 0) {
-                    servers = Server.find("type=?", type).fetch();
-                    Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
-                }
-            }
-        }
-        //TODO 根据 ratio 计算获取哪一个
-        return servers.get(0);
+//        List<Server> servers = (List<Server>) Cache.get(String.format(Caches.SERVERS, type.toString()));
+//        if(servers == null || servers.size() == 0) { // 每次缓存 5 分钟
+//            synchronized(Server.class) {
+//                if(servers == null || servers.size() == 0) {
+//                    servers = Server.find("type=?", type).fetch();
+//                    Cache.add(String.format(Caches.SERVERS, type.toString()), servers, "5mn");
+//                }
+//            }
+//        }
+        // 将负载均衡交给 nginx 去处理
+        return new Server("http://crawl.easya.cc");
     }
 }
