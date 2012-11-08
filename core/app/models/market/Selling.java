@@ -491,6 +491,16 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 返回当前 Selling 的 Review 平均 rating 值
+     *
+     * @return
+     */
+    public Float avgRating() {
+        Double rating = (Double) DBUtils.row("select avg(rating) as avgRating from AmazonListingReview where listing_listingId=?", this.listing.listingId).get("avgRating");
+        return rating == null ? 0f : Webs.scale2PointUp(rating.floatValue());
+    }
+
+    /**
      * Selling 实例对象, 自行初始化 sid
      *
      * @return

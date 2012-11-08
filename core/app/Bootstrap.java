@@ -37,9 +37,12 @@ public class Bootstrap extends Job {
 
         HTTP.init();
         Privilege.init();
+
+        if("true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev")))
+            OsTicketCreateCheck.begin();
+
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
-            OsTicketCreateCheck.begin();
             Account.init();
             new ListingSchedulJob().now();
         }

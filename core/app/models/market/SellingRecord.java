@@ -47,9 +47,9 @@ public class SellingRecord extends GenericModel {
         this.date = new Date();
     }
 
-    public SellingRecord(String id, Selling sell, Date date) {
+    public SellingRecord(Selling sell, Date date) {
         this();
-        this.id = id;
+        this.id = SellingRecord.id(sell.sellingId, date);
         this.selling = sell;
         this.account = sell.account;
         this.market = this.selling.market;
@@ -67,7 +67,7 @@ public class SellingRecord extends GenericModel {
     public M market;
 
     /**
-     * hash(sellingId_account.id_market_date) 值, 为 ID
+     * hash(sid_date) 值, 为 ID
      */
     @Id
     @Column(length = 40)
@@ -156,7 +156,7 @@ public class SellingRecord extends GenericModel {
     }
 
     /**
-     * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录
+     * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录; 返回的 Selling 如果数据库中有则是持久化的, 数据库中没有则是新的
      * <p/>
      * 拥有自己的 market 参数是因为为了兼容原来的 Amazon UK 账号在 DE 销售, 而 UK/DE 的数据是分开的
      *
@@ -195,17 +195,15 @@ public class SellingRecord extends GenericModel {
                         String srid = SellingRecord.id(sid, oneDay);
 
                         SellingRecord record = SellingRecord.findById(srid);
+                        // 这里的创建是以 Amazon 的文档为准, 可能会存在系统内拥有 Amazon 文档没有的情况
+                        // 所以正常的 SellingRecord 的产生, 由 SellingRecordGenerteJob 每天运行一次, 这里负责补漏与更新
                         if(record == null) { // 数据库中不存在的时候, 进行如下数据更新
-                            record = new SellingRecord();
-                            record.account = acc;
-                            record.market = market;
-                            record.selling = Selling.findById(sid);
-                            if(record.selling == null) {
+                            Selling sell = Selling.<Selling>findById(sid);
+                            if(sell == null) {
                                 Logger.error("SellingRecord has no selling (%s) !", sid);
                                 continue;
                             }
-                            record.date = oneDay;
-                            record.id = srid;
+                            record = new SellingRecord(sell, oneDay);
                         }
 
                         // Amazon 的订单数据也抓取回来, 但还是会重新计算

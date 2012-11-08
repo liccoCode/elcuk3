@@ -61,10 +61,7 @@ public class SellingRecordCheckJob extends Job {
             if(records.size() <= 0) continue;
             // 直接这样处理,因为通过 SellingRecord.newRecordFromAmazonBusinessReports 出来的方法已经存在与 Session 缓存中了.
             for(SellingRecord record : records) {
-                if(JPA.em().contains(record)) // 防止异常情况, 只有存在与一级缓存(Transation)中的才可以保存
-                    record.save();
-                else
-                    Logger.warn("SellingRecord (%s) is not in Hibernate Session Cache!", record.id);
+                record.save();
             }
         }
     }

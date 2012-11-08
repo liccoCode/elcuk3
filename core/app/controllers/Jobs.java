@@ -3,12 +3,14 @@ package controllers;
 import helper.Webs;
 import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
+import jobs.SellingRecordGenerateJob;
 import jobs.promise.SellingRecordFixPromise;
 import jobs.works.ListingReviewsWork;
 import models.Jobex;
 import models.market.*;
 import models.view.Ret;
 import notifiers.Mails;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Before;
@@ -88,6 +90,16 @@ public class Jobs extends Controller {
     public static void sellingRecordFix(Date begin, int days) {
         new SellingRecordFixPromise(begin, days).now();
         renderJSON(new Ret(true, "任务已提交"));
+    }
+
+    /**
+     * 修复 SellingRecord 根据当前天数的偏移天数
+     *
+     * @param offset
+     */
+    public static void sellingRecordGenerate(int offset) {
+        new SellingRecordGenerateJob(DateTime.now().minusDays(offset)).now();
+        renderText("任务已提交");
     }
 
     /**
