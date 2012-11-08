@@ -1,7 +1,7 @@
-package jobs;
-
 import helper.Currency;
 import helper.HTTP;
+import jobs.ListingSchedulJob;
+import jobs.loop.OsTicketCreateCheck;
 import models.Privilege;
 import models.User;
 import models.finance.FeeType;
@@ -18,7 +18,7 @@ import play.test.Fixtures;
  * Time: 11:10 AM
  */
 @OnApplicationStart
-public class OnStartUp extends Job {
+public class Bootstrap extends Job {
     @Override
     public void doJob() throws Exception {
         // 1. 初始化系统内的用户
@@ -37,9 +37,9 @@ public class OnStartUp extends Job {
 
         HTTP.init();
         Privilege.init();
-
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
+            OsTicketCreateCheck.begin();
             Account.init();
             new ListingSchedulJob().now();
         }
