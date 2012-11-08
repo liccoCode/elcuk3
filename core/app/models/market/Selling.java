@@ -195,7 +195,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(dealImageNames)) throw new FastRuntimeException("此 Selling 没有指定图片.");
         String[] images = StringUtils.splitByWholeSeparator(dealImageNames, Webs.SPLIT);
         if(images.length >= 9)  // 如果有更多的图片,仅仅使用前 9 张, 并且也只存储 9 张图片的名字
-            images = Arrays.copyOfRange(images, 0, 8);
+            images = Arrays.copyOfRange(images, 0, 9);
         this.aps.imageName = StringUtils.join(images, Webs.SPLIT);
         /**
          * MAIN   主图
