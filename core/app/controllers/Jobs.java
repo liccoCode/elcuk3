@@ -116,6 +116,7 @@ public class Jobs extends Controller {
             public void doJob() {
                 Account acc = Account.findById(id);
                 FeedbackCrawlJob.fetchAccountFeedbackOnePage(acc, acc.type, page);
+
                 Notifications.notifys(String.format("更新 Account %s 的第 %s 页 Feedback 完成.", acc.prettyName(), page));
             }
         }.now();
