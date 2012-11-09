@@ -8,13 +8,11 @@ import models.Server;
 import models.market.Account;
 import models.market.Listing;
 import models.market.M;
-import models.market.Selling;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import play.Logger;
 import play.cache.Cache;
-import play.cache.CacheFor;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -44,17 +42,11 @@ public class Listings extends Controller {
         render(lsts, p);
     }
 
-    public static void listingSellings(Listing l, Account a) {
-        List<Selling> sells = l.sellings(a);
-        render(sells);
-    }
-
     /**
      * 详细的查看 Listing
      *
      * @param lid ListingId
      */
-//    @CacheFor(value = "10mn")
     public static void listing(String lid) {
         Listing lst = Listing.findById(lid);
         render(lst);

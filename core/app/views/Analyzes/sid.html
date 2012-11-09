@@ -29,7 +29,9 @@
         <td style="color:#FE502A;">${dto.worked}</td>
         <td class="text-info">${dto.way}</td>
         <td style="color:#267B2F">${dto.qty}</td>
-        <td>${dto.reviews} <small>${dto.reviewRatio.format('#')}</small></td>
+        <td>${dto.reviews}
+            <small>${dto.reviewRatio.format('#')}</small>
+        </td>
         <td>${dto.rating.format('#.##')}</td>
         #{set psDiffer:dto.psDiffer()/}
         <td style="width:90px;background:${'#'+psDiffer._2}">
@@ -51,18 +53,22 @@
         #{turnOver turnOver:t4._4 /}
     </tr>
     <tr id="sid_${dto_index}" style="display:none;">
-        <td colspan="17">
+        <td colspan="19">
             <div class="row-fluid">
                 <div class="span1">
-                    <a href="@{Procures.blank()}?unit.selling.sellingId=${dto.fid}" target="_blank" class="btn btn-info"><i class="icon-random"></i>
-                        采购计划</a>
+                    <a href="@{Procures.blank()}?unit.selling.sellingId=${dto.fid}" target="_blank" class="btn btn-info">
+                        <i class="icon-random"></i> 采购计划
+                    </a>
+                    <a href="@{Sellings.selling()}/${dto.fid}" target="_blank" class="btn btn-success">
+                        Selling 页面
+                    </a>
                 </div>
             </div>
         </td>
     </tr>
 #{/list}
     <tr>
-        <td colspan="17">
+        <td colspan="19">
         #{bootstrap_pager pi:p, url:'#'/}
         </td>
     </tr>

@@ -12,6 +12,6 @@ namespace :play do
     `git push ufd`
     puts '---- push to bitbucket ----'
     `git push bit`
-    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;play start --%prod;sleep 1;tail logs/elcuk2.log"
+    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;play start --%prod;sleep 3;tail logs/elcuk2.log"
   end
 end

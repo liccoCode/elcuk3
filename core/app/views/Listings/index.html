@@ -52,31 +52,9 @@
 #{/cache}
 
     <div class="span9">
-        <div class="row well" style="height:300px;overflow:auto;">
-            <div class="input-prepend">
-                <select id="marker" class="span2" size="1">
-                    <option value="0">All Market</option>
-                #{list items:models.market.M.values(), as:'m'}
-                    <option value="${m.name()}">${m}</option>
-                #{/list}
-                </select>
-            </div>
+        <div class="row well" style="min-height:300px;">
             <div id="l_list" style="height:30%;">
                 listings
-            </div>
-        </div>
-
-        <div id="sellings" class="row well" style="min-height:300px;">
-            <div class="span12">
-                <select id="account" class="span2" size="1">
-                    <option value="0">All Account</option>
-                #{list items:accs, as:'ac'}
-                    <option value="${ac.id}">${ac.prettyName()}</option>
-                #{/list}
-                </select>
-            </div>
-            <div class="span12" id="s_list" style="margin:0 0;">
-                sellings
             </div>
         </div>
     </div>
