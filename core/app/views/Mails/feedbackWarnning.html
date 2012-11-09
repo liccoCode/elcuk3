@@ -13,5 +13,9 @@ Account: ${f.account.username}
 Score: <span style="color:red;">${f.score}</span>
 <br/>
 <a target="_blank" href="https://sellercentral.amazon.co.uk/gp/orders-v2/details/?ie=UTF8&orderID=${f.orderId}">${f.orderId}</a>
+<hr/>
+#{if f.orderr}
+    #{render 'Orders/show.html', ord:f.orderr, part:true/}
+#{/if}
 </body>
 </html>

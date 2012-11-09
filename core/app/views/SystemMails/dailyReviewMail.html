@@ -13,6 +13,7 @@
 </div>
 <table>
     <tr>
+        <th>Seller</th>
         <th>Title</th>
         <th>UserId</th>
         <th>UserName</th>
@@ -31,6 +32,7 @@
     </tr>
 #{list items:reviews, as:'rv'}
     <tr>
+        <td style="${rv.isSelf ? "" : "background:#BBB"}">${rv.listing?.byWho}</td>
         <td>${rv.title}</td>
         <td><a href="${rv.userReviewLink()}" target="_blank">${rv.userid}</a></td>
         <td>${rv.username}</td>

@@ -3,6 +3,7 @@ package controllers;
 import helper.Webs;
 import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
+import jobs.FeedbackCrawlJob;
 import jobs.SellingRecordGenerateJob;
 import jobs.promise.SellingRecordFixPromise;
 import jobs.works.ListingReviewsWork;
@@ -12,6 +13,7 @@ import models.view.Ret;
 import notifiers.Mails;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -103,6 +105,23 @@ public class Jobs extends Controller {
     }
 
     /**
+     * 修复某一个市场上的 Feedback 数据
+     *
+     * @param id
+     * @param page
+     */
+    public static void feedbackFix(final long id, final int page) {
+        new Job() {
+            @Override
+            public void doJob() {
+                Account acc = Account.findById(id);
+                FeedbackCrawlJob.fetchAccountFeedbackOnePage(acc, acc.type, page);
+                Notifications.notifys(String.format("更新 Account %s 的第 %s 页 Feedback 完成.", acc.prettyName(), page));
+            }
+        }.now();
+    }
+
+    /**
      * 修复 Amazon Shipped Order 修复方法
      *
      * @param path 指定修复文件所在的绝对地址
@@ -113,39 +132,5 @@ public class Jobs extends Controller {
         job.path = path;
         new AmazonOrderUpdateJob().callBack(job);
         renderJSON(new Ret(true, "耗时 " + (System.currentTimeMillis() - begin) + "ms 更新成功."));
-    }
-
-    /**
-     * 根据最新从 Amazon 同步回来的 MANAGE_FBA_INVENTORY_ARCHIVED .csv 文件对 fnSku 进行同步更新
-     */
-    public static void fbaFnSkuFix() {
-        List<Account> accs = Account.openedSaleAcc();
-
-        List<F.T4<String, String, String, String>> unfindSelling = new ArrayList<F.T4<String, String, String, String>>();
-        for(Account acc : accs) {
-            JobRequest job = JobRequest.newEstJobRequest(JobRequest.T.MANAGE_FBA_INVENTORY_ARCHIVED, acc, JobRequest.S.CLOSE);
-            List<F.T3<String, String, String>> mskuAndFnSkuAndAsins = AmazonFBAQtySyncJob.fbaCSVParseFnSku(new File(job.path));
-            for(F.T3<String, String, String> mfa : mskuAndFnSkuAndAsins) {
-                Selling selling = Selling.find("merchantSKU=? AND account=? AND asin=?", mfa._1, acc, mfa._3).first();
-                if(selling == null)
-                    unfindSelling.add(new F.T4<String, String, String, String>(mfa._1, mfa._2, mfa._3, acc.prettyName()));
-                else {
-                    selling.fnSku = mfa._2;
-                    selling.save();
-                }
-            }
-        }
-        if(unfindSelling.size() > 0) Mails.fnSkuCheckWarn(unfindSelling);
-        renderJSON(new Ret(true, "处理完毕"));
-    }
-
-    public static void reviewFix(String asin, String m) {
-        M market = M.val(m);
-        try {
-            new ListingReviewsWork(Listing.lid(asin, market)).now().get(20, TimeUnit.SECONDS);
-        } catch(Exception e) {
-            throw new FastRuntimeException(Webs.S(e));
-        }
-        renderJSON(new Ret("成功运行."));
     }
 }

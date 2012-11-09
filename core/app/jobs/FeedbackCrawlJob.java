@@ -56,56 +56,45 @@ public class FeedbackCrawlJob extends Job {
         for(Account acc : accs) {
             switch(acc.type) {
                 case AMAZON_DE:
+                case AMAZON_US:
                 case AMAZON_UK:
-                case AMAZON_FR:
-                    fetchAccountFeedback(acc, M.AMAZON_UK, 5);
-                    fetchAccountFeedback(acc, M.AMAZON_DE, 5);
-                    fetchAccountFeedback(acc, M.AMAZON_FR, 5);
+                    FeedbackCrawlJob.fetchAccountFeedback(acc, acc.type, 5);
                     break;
+                //  现在 FR 是 UK 的账号, 不处理 FR 的.
+                case AMAZON_FR:
                 case AMAZON_ES:
                 case AMAZON_IT:
                     Logger.warn("Not Support Right Now!");
                     break;
             }
         }
+
+        // 最后检查一次创建了 Ticket 但是没有创建成功的(额外开一个 Job, 保证这个 Job 的数据进入 DB)
+        new Job() {
+            @Override
+            public void doJob() {
+                List<Feedback> feedbacks = Feedback.find("score<4 and (osTicketId is null OR osTicketId='') and createDate>=?",
+                        DateTime.now().minusMonths(1).toDate()).fetch();
+                for(Feedback f : feedbacks)
+                    f.checkMailAndTicket();
+            }
+        }.now();
     }
 
     /**
-     * 抓取某一个市场的 N(现在为 5) 页的 feedback
+     * 抓取某一个市场的 N(现在为 5) 页的 feedback 并且更新或者保存到数据库
      *
      * @param acc
      * @param market
      * @param pages
      */
-    private void fetchAccountFeedback(Account acc, M market, int pages) {
+    public static void fetchAccountFeedback(Account acc, M market, int pages) {
         if(pages <= 0) pages = 5;
         try {
-            if(market != M.AMAZON_UK && market != M.AMAZON_FR && market != M.AMAZON_DE) return;
             synchronized(acc.cookieStore()) { // 将 CookieStore 锁住, 防止更改了 Region 以后有其他的地方进行操作.
                 acc.changeRegion(market);
                 for(int i = 1; i <= pages; i++) {
-                    List<Feedback> feedbacks = FeedbackCrawlJob.fetchFeedback(acc, i);
-                    if(feedbacks.size() == 0) {
-                        Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
-                        break;
-                    } else {
-                        Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
-                    }
-
-                    for(Feedback f : feedbacks) {
-                        Feedback managed = Feedback.findById(f.orderId);
-                        if(managed == null) {
-                            try {
-                                f.checkAndSave(acc);
-                                f.checkMailAndTicket();
-                            } catch(Exception e) {
-                                Logger.warn(Webs.E(e) + "|" + J.json(Validation.errors()));
-                            }
-                        } else {
-                            managed.updateAttr(f);
-                            managed.checkMailAndTicket();
-                        }
-                    }
+                    FeedbackCrawlJob.fetchAccountFeedbackOnePage(acc, market, i);
                 }
                 // 还原到原来的 Market
                 acc.changeRegion(acc.type);
@@ -113,6 +102,41 @@ public class FeedbackCrawlJob extends Job {
         } catch(Exception e) {
             Logger.warn(String.format("Account %s Market %s fetch feedback have some error![%s]", acc.username, market, e.getMessage()));
         }
+    }
+
+    /**
+     * 抓取市场上某一页的 Feedbacks, 并且保存到数据库
+     *
+     * @param acc
+     * @param market
+     * @param i
+     * @return
+     */
+    public static List<Feedback> fetchAccountFeedbackOnePage(Account acc, M market, int i) {
+        List<Feedback> feedbacks = FeedbackCrawlJob.fetchFeedback(acc, i);
+        if(feedbacks.size() == 0) {
+            Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
+        } else {
+            Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+        }
+
+        for(Feedback f : feedbacks) {
+            Feedback managed = Feedback.findById(f.orderId);
+            if(managed == null) {
+                try {
+                    f.checkAndSave(acc);
+                    f.checkMailAndTicket();
+                    Logger.info("Save Feedback %s, score: %s", f.orderId, f.score);
+                } catch(Exception e) {
+                    Logger.warn(Webs.E(e) + "|" + J.json(Validation.errors()));
+                }
+            } else {
+                managed.updateAttr(f);
+                managed.checkMailAndTicket();
+                Logger.info("Update Feedback %s, score: %s", f.orderId, f.score);
+            }
+        }
+        return feedbacks;
     }
 
     /**
@@ -125,6 +149,7 @@ public class FeedbackCrawlJob extends Job {
         switch(acc.type) {
             case AMAZON_UK:
             case AMAZON_DE:
+            case AMAZON_US:
                 try {
                     String body = HTTP.get(acc.cookieStore(), acc.type.feedbackPage(page));
                     if(Play.mode.isDev())

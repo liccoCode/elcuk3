@@ -1,6 +1,7 @@
 package mails;
 
 import jobs.OrderMailCheck;
+import models.market.Feedback;
 import models.market.Listing;
 import models.procure.Shipment;
 import notifiers.Mails;
@@ -25,8 +26,15 @@ public class MailTest extends UnitTest {
         Mails.shipment_isdone(ship);
     }
 
-    @Test
+    //    @Test
     public void orderReviewMail() {
         new OrderMailCheck().now();
+    }
+
+    @Test
+    public void testFeedbackWarnning() {
+        Feedback f = Feedback.findById("028-5216345-7276341");
+        f.mailedTimes = 0;
+        Mails.feedbackWarnning(f);
     }
 }

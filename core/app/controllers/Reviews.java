@@ -51,8 +51,6 @@ public class Reviews extends Controller {
             renderArgs.put("f", Feedback.findById(review.orderr.orderId));
 
         F.T2<List<TicketReason>, List<String>> reasons = review.unTagedReasons();
-        renderArgs.put("reasons_json", J.json(reasons._2));
-        renderArgs.put("cat", review.listing.product.category);
         renderArgs.put("unTagReasons", reasons._1);
         render(review);
     }
