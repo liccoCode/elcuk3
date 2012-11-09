@@ -345,10 +345,10 @@ public class Feedback extends GenericModel {
      */
     public static Long feedbackCount(Account acc, Date from, Date to, Boolean good) {
         if(good == null)
-            return Feedback.count("account=? AND createDate>=? AND createDate<=?", acc, from, to);
+            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=?", acc, acc.type, from, to);
         else if(good)
-            return Feedback.count("account=? AND createDate>=? AND createDate<=? AND score>=4", acc, from, to);
+            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=? AND score>=4", acc, acc.type, from, to);
         else
-            return Feedback.count("account=? AND createDate>=? AND createDate<=? AND score<4", acc, from, to);
+            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=? AND score<4", acc, acc.type, from, to);
     }
 }
