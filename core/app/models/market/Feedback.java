@@ -3,7 +3,6 @@ package models.market;
 import helper.Dates;
 import helper.GTs;
 import helper.OsTicket;
-import helper.Webs;
 import models.product.Category;
 import models.product.Product;
 import models.support.Ticket;
@@ -14,6 +13,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import play.Logger;
+import play.cache.Cache;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -34,6 +34,8 @@ import java.util.*;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Feedback extends GenericModel {
+
+    public static final String FRONT_TABLE = "Feedback.frontPageTable";
 
     @OneToOne
     public Orderr orderr;
@@ -184,6 +186,7 @@ public class Feedback extends GenericModel {
 
     /**
      * 判断此 Feedback 是否已经过期了? 过期了表示无法再进行处理了.
+     *
      * @return
      */
     public boolean isExpired() {
@@ -262,5 +265,90 @@ public class Feedback extends GenericModel {
         }
 
         return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
+    }
+
+    /**
+     * 首页计算的 Feedback 的数据
+     *
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, List<F.T3<Long, Long, Long>>> frontPageTable() {
+        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Cache.get(Feedback.FRONT_TABLE, Map.class);
+        if(feedbacksOverView != null) return feedbacksOverView;
+        synchronized(Feedback.class) {
+            feedbacksOverView = Cache.get(Feedback.FRONT_TABLE, Map.class);
+            if(feedbacksOverView != null) return feedbacksOverView;
+
+            List<Account> accs = Account.openedSaleAcc();
+            feedbacksOverView = new LinkedHashMap<String, List<F.T3<Long, Long, Long>>>();
+            for(Account acc : accs) {
+                List<F.T3<Long, Long, Long>> fbk = new ArrayList<F.T3<Long, Long, Long>>();
+                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 1));
+                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 2));
+                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 3));
+                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 4));
+                feedbacksOverView.put(acc.prettyName(), fbk);
+            }
+            // 避免短时间的重复计算
+            Cache.add(Feedback.FRONT_TABLE, feedbacksOverView, "10mn");
+        }
+        return feedbacksOverView;
+    }
+
+    /**
+     * 一个账户:(table)
+     * a. N 天的
+     * b. positive , negtive, all Feedback 数量
+     *
+     * @param acc
+     * @param type 四种类型: 1->30天;  2->90天;  3->365天; 4->LifeTime
+     * @return T3: ._1: +; ._2: -; ._3: all
+     */
+    public static F.T3<Long, Long, Long> accountOneTypeFeedbackCount(Account acc, int type) {
+        DateTime now = DateTime.now();
+        Date night = Dates.night(now.toDate());
+        // 注意: 使用 minusDays 不是用 月,年是需要具体的天数, 月可能有 28/29/30/31 天这样的差别
+        if(type == 1) {
+            return new F.T3<Long, Long, Long>(
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night, true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night, false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night, null));
+        } else if(type == 2) {
+            return new F.T3<Long, Long, Long>(
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night, true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night, false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night, null));
+        } else if(type == 3) {
+            return new F.T3<Long, Long, Long>(
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night, true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night, false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night, null));
+        } else if(type == 4) {
+            return new F.T3<Long, Long, Long>(
+                    // 10 年是为了获取所有长度
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night, true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night, false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night, null));
+        }
+        return new F.T3<Long, Long, Long>(0l, 0l, 0l);
+    }
+
+    /**
+     * 某一个用户一段时间内的 Feedback
+     *
+     * @param acc
+     * @param from
+     * @param to
+     * @param good 是否为好的;  true: +; false:-; null:all
+     * @return
+     */
+    public static Long feedbackCount(Account acc, Date from, Date to, Boolean good) {
+        if(good == null)
+            return Feedback.count("account=? AND createDate>=? AND createDate<=?", acc, from, to);
+        else if(good)
+            return Feedback.count("account=? AND createDate>=? AND createDate<=? AND score>=4", acc, from, to);
+        else
+            return Feedback.count("account=? AND createDate>=? AND createDate<=? AND score<4", acc, from, to);
     }
 }

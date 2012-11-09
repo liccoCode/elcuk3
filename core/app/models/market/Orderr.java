@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Orderr extends GenericModel {
+    public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
     /**
      * 订单的状态 State
      */
@@ -409,12 +410,11 @@ public class Orderr extends GenericModel {
     @SuppressWarnings("unchecked")
     @Cached("1h")
     public static Map<String, Map<String, AtomicInteger>> frontPageOrderTable(int days) {
-        String cacheKey = "home.page";
-        Map<String, Map<String, AtomicInteger>> ordmaps = Cache.get(cacheKey, Map.class);
+        Map<String, Map<String, AtomicInteger>> ordmaps = Cache.get(Orderr.FRONT_TABLE, Map.class);
         if(ordmaps != null) return ordmaps;
 
         synchronized(Orderr.class) {
-            ordmaps = Cache.get(cacheKey, Map.class);
+            ordmaps = Cache.get(Orderr.FRONT_TABLE, Map.class);
             if(ordmaps != null) return ordmaps;
 
 
@@ -505,9 +505,9 @@ public class Orderr extends GenericModel {
 
             Map<String, Map<String, AtomicInteger>> sortOdMaps = new LinkedHashMap<String, Map<String, AtomicInteger>>();
             for(String key : dateKey) sortOdMaps.put(key, odmaps.get(key));
-            Cache.add(cacheKey, sortOdMaps, "1h");
+            Cache.add(Orderr.FRONT_TABLE, sortOdMaps, "1h");
         }
-        return Cache.get(cacheKey, Map.class);
+        return Cache.get(Orderr.FRONT_TABLE, Map.class);
     }
 
 

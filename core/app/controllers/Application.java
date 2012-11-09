@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import helper.Dates;
 import helper.Webs;
 import models.market.Account;
+import models.market.Feedback;
 import models.market.OrderItem;
 import models.market.Orderr;
 import models.product.Whouse;
@@ -13,31 +14,39 @@ import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
 import play.cache.CacheFor;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
 public class Application extends Controller {
 
     public static void index() {
+        long begin = System.currentTimeMillis();
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
         Date now = new Date();
         Date yestorday = DateTime.now().minusDays(1).toDate();
         Date threeMonth = DateTime.now().minusMonths(3).toDate();
         Map<String, Map<String, Long>> ticketTable = Ticket.frontPageTable(now, now);
         Map<String, Map<String, Long>> yesterDayTicketTable = Ticket.frontPageTable(yestorday, yestorday);
+        System.out.println("============Ticket=====================" + (System.currentTimeMillis() - begin) + " ms");
+
+
+        // Feedback 信息
+        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Feedback.frontPageTable();
+        System.out.println("============Feedback=====================" + (System.currentTimeMillis() - begin) + " ms");
+
         // 3 个月内的 Ticket 汇总
         Map<String, Long> ticketMap = Ticket.ticketTotalTable(threeMonth, new Date());
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         renderArgs.put("now", Dates.date2DateTime(now));
-        render(odmaps, ticketTable, yesterDayTicketTable, ticketMap, fbaWhouse);
+        System.out.println("=================================" + (System.currentTimeMillis() - begin) + " ms");
+        render(odmaps, ticketTable, yesterDayTicketTable, ticketMap, fbaWhouse, feedbacksOverView);
     }
 
     @CacheFor(value = "20mn")
@@ -50,7 +59,8 @@ public class Application extends Controller {
     }
 
     public static void clearCache() {
-        Cache.delete("home.page");
+        Cache.delete(Orderr.FRONT_TABLE);
+        Cache.delete(Feedback.FRONT_TABLE);
         renderJSON(new Ret());
     }
 
