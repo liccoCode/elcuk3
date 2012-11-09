@@ -5,6 +5,7 @@ import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
 import jobs.FeedbackCrawlJob;
 import jobs.SellingRecordGenerateJob;
+import jobs.promise.FeedbackFixPromise;
 import jobs.promise.SellingRecordFixPromise;
 import jobs.works.ListingReviewsWork;
 import models.Jobex;
@@ -91,7 +92,7 @@ public class Jobs extends Controller {
      */
     public static void sellingRecordFix(Date begin, int days) {
         new SellingRecordFixPromise(begin, days).now();
-        renderJSON(new Ret(true, "任务已提交"));
+        renderText("任务已提交, 完成后有 Notification 提醒");
     }
 
     /**
@@ -101,7 +102,7 @@ public class Jobs extends Controller {
      */
     public static void sellingRecordGenerate(int offset) {
         new SellingRecordGenerateJob(DateTime.now().minusDays(offset)).now();
-        renderText("任务已提交");
+        renderText("任务已提交, 完成后有 Notification 提醒");
     }
 
     /**
@@ -111,15 +112,8 @@ public class Jobs extends Controller {
      * @param page
      */
     public static void feedbackFix(final long id, final int page) {
-        new Job() {
-            @Override
-            public void doJob() {
-                Account acc = Account.findById(id);
-                FeedbackCrawlJob.fetchAccountFeedbackOnePage(acc, acc.type, page);
-
-                Notifications.notifys(String.format("更新 Account %s 的第 %s 页 Feedback 完成.", acc.prettyName(), page));
-            }
-        }.now();
+        new FeedbackFixPromise(id, page).now();
+        renderText("任务已提交, 完成后有 Notification 提醒");
     }
 
     /**
