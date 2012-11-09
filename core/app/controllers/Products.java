@@ -102,7 +102,7 @@ public class Products extends Controller {
             Selling se = pro.saleAmazon(s);
             flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
             Notification.notifies(String.format("新上架 %s %s", se.asin, se.market),
-                    String.format("MSKU: %s, 价格: %s, Title: %s", se.merchantSKU, se.aps.salePrice, se.aps.title), 4);
+                    String.format("MSKU: %s, 价格: %s, Title: %s", se.merchantSKU, se.aps.salePrice, se.aps.title), Notification.PM);
             redirect("/Sellings/selling/" + se.sellingId);
         } catch(Exception e) {
             Validation.addError("", e.getMessage());

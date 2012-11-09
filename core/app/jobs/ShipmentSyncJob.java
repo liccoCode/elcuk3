@@ -54,7 +54,7 @@ public class ShipmentSyncJob extends Job {
                         if(differTime > TimeUnit.DAYS.toMillis(30)) {
                             Notification.notifies(ShipmentSyncJob.NOTIFY_TITLE,
                                     String.format("海运运输单 %s 已经运输 %s 天, 记得进行跟踪处理,添加状态 Comment.", ship.id, differTime / Dates.DAY_MILLIS),
-                                    3);
+                                    Notification.SHIPPER);
                         }
                     }
                 } else {

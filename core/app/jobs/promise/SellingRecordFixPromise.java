@@ -32,6 +32,6 @@ public class SellingRecordFixPromise extends Job {
             SellingRecordCheckJob.amazonNewestRecords(dt.plusDays(i));
         }
         Notification.notifies("Session/PageView 数据",
-                String.format("从 %s 开始向后 %s 天的 Session 与 PageView 数据更新完毕.", Dates.date2Date(this.begin), this.days), 4);
+                String.format("从 %s 开始向后 %s 天的 Session 与 PageView 数据更新完毕.", Dates.date2Date(this.begin), this.days), Notification.PM);
     }
 }

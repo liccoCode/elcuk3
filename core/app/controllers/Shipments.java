@@ -62,6 +62,7 @@ public class Shipments extends Controller {
             render("Shipments/blank.html", ship);
         }
         ship.save();
+        ship.notifyWithMuchMoreShipmentCreate();
         redirect("/shipments/show/" + ship.id);
     }
 
@@ -235,7 +236,7 @@ public class Shipments extends Controller {
         F.Option<FBAShipment> fbaOpt = ship.deployFBA(shipItemId);
         if(!fbaOpt.isDefined()) checkShowError(Shipment.<Shipment>findById(id));
         new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), id).save();
-        Notification.notifies("FBA 创建成功", Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), 2);
+        Notification.notifies("FBA 创建成功", Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), Notification.PROCURE);
         flash.success("Amazon FBA %s (with %s items) 创建成功", fbaOpt.get().shipmentId, fbaOpt.get().shipItems.size());
         redirect("/shipments/show/" + id);
     }
@@ -281,7 +282,7 @@ public class Shipments extends Controller {
             checkShowError(fba.shipment);
         flash.success("FBA %s 删除成功", fba.shipmentId);
         Notification.notifies(String.format("FC`s %s 的 FBA(%s) 被删除", fba.centerId, fba.shipmentId),
-                String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id), 2);
+                String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id), Notification.PROCURE);
         redirect("/shipments/show/" + fba.shipment.id);
 
     }
@@ -298,7 +299,7 @@ public class Shipments extends Controller {
         ship.ensureDone();
         checkShowError(ship);
         flash.success("成功确认, 运输单已经确认运输完毕.");
-        Notification.notifies("运输单完成", String.format("运输单 %s 已经完成运输.", ship.id), 4);
+        Notification.notifies("运输单完成", String.format("运输单 %s 已经完成运输.", ship.id), Notification.PM);
         redirect("/shipments/show/" + id);
     }
 

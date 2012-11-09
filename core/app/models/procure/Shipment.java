@@ -458,7 +458,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 this.id
         ).save();
         if(this.cycle)
-            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()), String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), 3);
+            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()), String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), Notification.SHIPPER);
     }
 
 
@@ -676,7 +676,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new ElcukRecord(Messages.get("shipment.splitShipment"),
                 Messages.get("shipment.splitShipment.msg", StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
                 this.id).save();
+        this.notifyWithMuchMoreShipmentCreate();
         return F.Option.Some(newShipment);
+    }
+
+    /**
+     * 用来检查并且提醒运输者, 系统内运输单创建数量太多
+     */
+    public void notifyWithMuchMoreShipmentCreate() {
+        long count = Shipment.count("createDate>=? AND createDate<=?", Dates.morning(new Date()), Dates.night(new Date()));
+        //创建10 个以上的运输单才提醒
+        if(count % 10 == 0 && count > 11) {
+            long noitemShipments = Shipment.count("SIZE(items)=0 AND state!=?", Shipment.S.CANCEL);
+            Notification.notifies(String.format("今天已经创建了 %s 个运输单, 并且系统内拥有 %s 个无运输项目的运输单, 请记得处理.", count, noitemShipments), Notification.SHIPPER);
+        }
     }
 
     /**
