@@ -6,6 +6,7 @@ import models.market.Account;
 import models.market.Feedback;
 import models.market.M;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -174,13 +175,18 @@ public class FeedbackCrawlJob extends Job {
     public static List<Feedback> parseFeedBackFromHTML(String html) {
         Document doc = Jsoup.parse(html);
 
-        Element marketEl = doc.select("#marketplaceSelect option[selected]").first();
+        Element marketEl = doc.select("#merchant-website").first();
         M market = null;
         if(marketEl == null) {
             Webs.systemMail("Feedback Market parse Error!", html);
             return new ArrayList<Feedback>();
         } else {
-            market = M.val(marketEl.text().trim());
+            // us/ de
+            if(StringUtils.contains(marketEl.select(".merch-site-span").text(), "amazon.com"))
+                market = M.AMAZON_US;
+            else {
+                market = M.val(doc.select("#marketplaceSelect option[selected]").first().text().trim());
+            }
         }
         Elements feedbacks = doc.select("td[valign=center][align=middle] tr[valign=center]");
         List<Feedback> feedbackList = new ArrayList<Feedback>();
@@ -189,7 +195,10 @@ public class FeedbackCrawlJob extends Job {
             Feedback feedback = new Feedback();
             Elements tds = feb.select("td");
             //time
-            feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+            if(market == M.AMAZON_US)
+                feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("MM/dd/yy")).toDate();
+            else
+                feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
             //score
             feedback.score = NumberUtils.toFloat(tds.get(1).text());
             //comments
