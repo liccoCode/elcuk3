@@ -73,7 +73,7 @@ public class OrderInfoFetchJobTest extends UnitTest {
 
     }
 
-    @Test
+    //    @Test
     public void parseOrderInfoPhoneNumberAndSoOn() {
         Orderr ord = Orderr.findById("028-1442005-1643527");
         Document doc = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/028-1442005-1643527.html")));
@@ -90,7 +90,7 @@ public class OrderInfoFetchJobTest extends UnitTest {
         System.out.println(ord.email);
     }
 
-    @Test
+    //    @Test
     public void parseUSOrder() {
         Orderr ord = Orderr.findById("102-7431234-2278666");
         Document doc = Jsoup.parse(IO.readContentAsString(Play.getFile("test/html/us.102-7431234-2278666.html")));
@@ -99,5 +99,13 @@ public class OrderInfoFetchJobTest extends UnitTest {
         assertEquals("A3F1JT1MCYQCAF", ord.userid);
         assertEquals("lzg433j816ybw3y@marketplace.amazon.com", ord.email);
         System.out.println(ord.address1);
+    }
+
+    @Test
+    public void testParseCancel() throws IOException {
+        Orderr ord = Orderr.findById("102-7431234-2278666");
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, FileUtils.readFileToString(Play.getFile("test/html/cancelled_order.html")));
+        ord.state = Orderr.S.SHIPPED;
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, FileUtils.readFileToString(Play.getFile("test/html/cancelled_order2.html")));
     }
 }

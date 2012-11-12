@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Orderr extends GenericModel {
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
+
     /**
      * 订单的状态 State
      */
@@ -226,58 +227,47 @@ public class Orderr extends GenericModel {
     /**
      * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
      */
-    public void updateAttrs(Orderr orderr) {
-        if(orderr.address != null) this.address = orderr.address;
-        if(orderr.address1 != null) this.address1 = orderr.address1;
-        if(orderr.arriveDate != null) this.arriveDate = orderr.arriveDate;
-        if(orderr.buyer != null) this.buyer = orderr.buyer;
-        if(orderr.city != null) this.city = orderr.city;
-        if(orderr.country != null) this.country = orderr.country;
-        if(orderr.createDate != null) this.createDate = orderr.createDate;
-        if(orderr.email != null) this.email = orderr.email;
-        if(orderr.market != null) this.market = orderr.market;
-        if(orderr.memo != null) this.memo = orderr.memo;
-        if(orderr.paymentDate != null) this.paymentDate = orderr.paymentDate;
-        if(orderr.phone != null) this.phone = orderr.phone;
-        if(orderr.postalCode != null) this.postalCode = orderr.postalCode;
-        if(orderr.province != null) this.province = orderr.province;
-        if(orderr.reciver != null) this.reciver = orderr.reciver;
-        if(orderr.shipDate != null) this.shipDate = orderr.shipDate;
-        if(orderr.shipLevel != null) this.shipLevel = orderr.shipLevel;
-        if(orderr.shippingAmount != null) this.shippingAmount = orderr.shippingAmount;
-        if(orderr.shippingService != null) this.shippingService = orderr.shippingService;
-        if(orderr.totalAmount != null) this.totalAmount = orderr.totalAmount;
-        if(orderr.trackNo != null) this.trackNo = orderr.trackNo;
-        if(orderr.state != null) {
+    public void updateAttrs(Orderr newOrderr) {
+        if(newOrderr.address != null) this.address = newOrderr.address;
+        if(newOrderr.address1 != null) this.address1 = newOrderr.address1;
+        if(newOrderr.arriveDate != null) this.arriveDate = newOrderr.arriveDate;
+        if(newOrderr.buyer != null) this.buyer = newOrderr.buyer;
+        if(newOrderr.city != null) this.city = newOrderr.city;
+        if(newOrderr.country != null) this.country = newOrderr.country;
+        if(newOrderr.createDate != null) this.createDate = newOrderr.createDate;
+        if(newOrderr.email != null) this.email = newOrderr.email;
+        if(newOrderr.market != null) this.market = newOrderr.market;
+        if(newOrderr.memo != null) this.memo = newOrderr.memo;
+        if(newOrderr.paymentDate != null) this.paymentDate = newOrderr.paymentDate;
+        if(newOrderr.phone != null) this.phone = newOrderr.phone;
+        if(newOrderr.postalCode != null) this.postalCode = newOrderr.postalCode;
+        if(newOrderr.province != null) this.province = newOrderr.province;
+        if(newOrderr.reciver != null) this.reciver = newOrderr.reciver;
+        if(newOrderr.shipDate != null) this.shipDate = newOrderr.shipDate;
+        if(newOrderr.shipLevel != null) this.shipLevel = newOrderr.shipLevel;
+        if(newOrderr.shippingAmount != null) this.shippingAmount = newOrderr.shippingAmount;
+        if(newOrderr.shippingService != null) this.shippingService = newOrderr.shippingService;
+        if(newOrderr.totalAmount != null) this.totalAmount = newOrderr.totalAmount;
+        if(newOrderr.trackNo != null) this.trackNo = newOrderr.trackNo;
+        if(newOrderr.state != null) {
             // 这几个状态是不可逆的, 如果有其他地方将订单更新成这几个状态, 那么此订单的状态不允许再进行更改!
-            if(orderr.state == S.REFUNDED || orderr.state == S.CANCEL || orderr.state == S.RETURNNEW) return;
-            this.state = orderr.state;
+            if(newOrderr.state == S.REFUNDED || newOrderr.state == S.CANCEL || newOrderr.state == S.RETURNNEW) return;
+            this.state = newOrderr.state;
         }
 
-        if(orderr.items != null && orderr.items.size() > 0) {
+        //TODO OrderItems 的处理需要重构
+        if(newOrderr.items != null && newOrderr.items.size() > 0) {
             // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
             Set<OrderItem> newlyOi = new HashSet<OrderItem>();
-            if(this.items.size() == 0) { // 如果原始的 Order 中一个 OrderItem 都没有
-                for(OrderItem noi : orderr.items) {
-                    if(noi.isPersistent()) continue;
-                    newlyOi.add(noi);
-                }
-            } else { // 如果原始的 Order 中有 OrderItem
-                for(OrderItem noi : orderr.items) {
+
+            // 如果原始的 Order 中一个 OrderItem 都没有
+            if(this.items.size() == 0) {
+                newlyOi.addAll(newOrderr.items);
+            } else if(this.items.size() != newOrderr.items.size()) { // 如果原始的 Order 中有 OrderItem
+                for(OrderItem noi : newOrderr.items) {
                     for(OrderItem oi : this.items) {
                         if(oi.equals(noi)) {
-                            if(noi.createDate != null) oi.createDate = noi.createDate;
-                            if(noi.discountPrice != null) oi.discountPrice = noi.discountPrice;
-                            if(noi.feesAmaount != null) oi.feesAmaount = noi.feesAmaount;
-                            if(noi.memo != null) oi.memo = noi.memo;
-                            if(noi.price != null) oi.price = noi.price;
-                            if(noi.listingName != null) oi.listingName = noi.listingName;
-                            if(noi.quantity != null) oi.quantity = noi.quantity;
-                            if(noi.shippingPrice != null) oi.shippingPrice = noi.shippingPrice;
-                            if(noi.product != null) oi.product = noi.product;
-                            if(noi.selling != null) oi.selling = noi.selling;
-                            if(noi.currency != null && oi.currency != noi.currency) oi.currency = noi.currency;
-                            if(noi.usdCost != null) oi.usdCost = noi.usdCost;
+                            oi.updateAttr(noi);
                         } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
                             newlyOi.add(noi);
                         }
@@ -286,7 +276,11 @@ public class Orderr extends GenericModel {
             }
             // 如果有两个相同的 object_id 相同的对象添加进入 Orderr.items 进行级联保存或者更新, 那么会在 hibernate 进行保存更新
             // 检查唯一性的时候发生异常! 所以上面的 JPA.em().contains(oi) 判断很有必要!
-            for(OrderItem noi : newlyOi) this.items.add(noi);
+            for(OrderItem noi : newlyOi) {
+                noi.order = this;
+                noi.save();
+                this.items.add(noi);
+            }
         }
 
         this.save();

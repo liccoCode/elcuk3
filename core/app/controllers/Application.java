@@ -34,18 +34,14 @@ public class Application extends Controller {
         Date threeMonth = DateTime.now().minusMonths(3).toDate();
         Map<String, Map<String, Long>> ticketTable = Ticket.frontPageTable(now, now);
         Map<String, Map<String, Long>> yesterDayTicketTable = Ticket.frontPageTable(yestorday, yestorday);
-        System.out.println("============Ticket=====================" + (System.currentTimeMillis() - begin) + " ms");
-
 
         // Feedback 信息
         Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Feedback.frontPageTable();
-        System.out.println("============Feedback=====================" + (System.currentTimeMillis() - begin) + " ms");
 
         // 3 个月内的 Ticket 汇总
         Map<String, Long> ticketMap = Ticket.ticketTotalTable(threeMonth, new Date());
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         renderArgs.put("now", Dates.date2DateTime(now));
-        System.out.println("=================================" + (System.currentTimeMillis() - begin) + " ms");
         render(odmaps, ticketTable, yesterDayTicketTable, ticketMap, fbaWhouse, feedbacksOverView);
     }
 

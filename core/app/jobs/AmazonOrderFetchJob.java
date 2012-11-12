@@ -1,15 +1,16 @@
 package jobs;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
-import helper.*;
 import helper.Currency;
+import helper.Dates;
+import helper.J;
+import helper.Webs;
 import models.Jobex;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.db.jpa.JPA;
 import play.jobs.Every;
 import play.jobs.Job;
 
@@ -81,34 +82,33 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
      * @param jobRequest
      */
     @Override
-    public void callBack(JobRequest jobRequest) {
-        /**
-         * 1. 解析出文件中的所有 Orders.
-         * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
-         */
-        List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
+    public void callBack(final JobRequest jobRequest) {
+        try {
+            new Job() {
+                @Override
+                public void doJob() {
+                    /**
+                     * 1. 解析出文件中的所有 Orders.
+                     * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
+                     */
+                    List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
 
-        int capcity = 0;
-        for(Orderr order : orders) {
-            capcity++;
-            Orderr managed = Orderr.findById(order.orderId);
-            if(managed == null) { //保存
-                order.save();
-                Logger.info("Save Order: " + order.orderId);
-            } else { //更新
-                // 如果订单已经为 CANCEL 了, 则不更新了
-                if(managed.state == Orderr.S.CANCEL) continue;
-                // 新订单为 CANCEL 的则更新
-                if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING || order.state == Orderr.S.SHIPPED) {
-                    managed.updateAttrs(order);
-                    Logger.info("Update Order: " + order.orderId);
+                    for(Orderr order : orders) {
+                        Orderr managed = Orderr.findById(order.orderId);
+                        if(managed == null) { //保存
+                            order.save();
+                            Logger.info("Save Order: " + order.orderId);
+                        } else { //更新
+                            // 如果订单已经为 CANCEL 了, 则不更新了
+                            if(managed.state == Orderr.S.CANCEL) continue;
+                            managed.updateAttrs(order);
+                            Logger.info("Update Order: " + order.orderId);
+                        }
+                    }
                 }
-            }
-            if(capcity >= 300) {
-                JPA.em().flush();
-                Logger.info("Flush Orders %s", capcity);
-                capcity = 0;
-            }
+            }.now().get();
+        } catch(Exception e) {
+            Logger.warn("AmazonOrderFetchJob.callback error.", Webs.S(e));
         }
     }
 

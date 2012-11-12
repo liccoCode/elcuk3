@@ -102,6 +102,22 @@ public class OrderItem extends GenericModel {
     public M market;
 
 
+    public void updateAttr(OrderItem noi) {
+        if(noi.createDate != null) this.createDate = noi.createDate;
+        if(noi.discountPrice != null) this.discountPrice = noi.discountPrice;
+        if(noi.feesAmaount != null) this.feesAmaount = noi.feesAmaount;
+        if(noi.memo != null) this.memo = noi.memo;
+        if(noi.price != null) this.price = noi.price;
+        if(noi.listingName != null) this.listingName = noi.listingName;
+        if(noi.quantity != null) this.quantity = noi.quantity;
+        if(noi.shippingPrice != null) this.shippingPrice = noi.shippingPrice;
+        if(noi.product != null) this.product = noi.product;
+        if(noi.selling != null) this.selling = noi.selling;
+        if(noi.currency != null && this.currency != this.currency) this.currency = noi.currency;
+        if(noi.usdCost != null) this.usdCost = noi.usdCost;
+        this.save();
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -164,6 +180,15 @@ public class OrderItem extends GenericModel {
         return Cache.get(cacheKey, List.class);
     }
 
+    /**
+     * 销量的图形图表
+     * @param skuOrMsku
+     * @param acc
+     * @param type
+     * @param from
+     * @param to
+     * @return
+     */
     public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku, Account acc, String type, Date from, Date to) {
         // 做内部参数的容错
         DateTime inFrom = new DateTime(Dates.date2JDate(from));
@@ -272,6 +297,13 @@ public class OrderItem extends GenericModel {
         return hightChartLines;
     }
 
+    /**
+     * 不同 Category 销量的百分比
+     * @param from
+     * @param to
+     * @param acc
+     * @return
+     */
     public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to, Account acc) {
         List<F.T3<String, Integer, Float>> rows = OrderItemQuery.sku_qty_usdCost(from, to, acc);
 

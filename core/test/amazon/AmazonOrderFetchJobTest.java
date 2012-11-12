@@ -41,28 +41,9 @@ public class AmazonOrderFetchJobTest extends UnitTest {
 
     @Test
     public void testParseOrder() {
-        List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(Play.getFile("test/html/15285572344.txt"), Account.<Account>findById(2l));
-        int i = 0;
-        for(Orderr order : orders) {
-            i++;
-            try {
-                Orderr managed = Orderr.findById(order.orderId);
-                if(managed == null) { //保存
-//                    order.save();
-                    Logger.info("Save Order: " + order.orderId);
-                } else { //更新
-                    if(managed.state == Orderr.S.CANCEL) continue; // 如果订单已经为 CANCEL 了, 则不更新了
-                    if(order.state == Orderr.S.CANCEL || order.state == Orderr.S.PENDING || order.state == Orderr.S.SHIPPED) // 新订单为 CANCEL 的则更新
-                        managed.updateAttrs(order);
-                }
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-            if(i >= 500) {
-                JPA.em().flush();
-                i = 0;
-                System.out.println("================================================================================");
-            }
-        }
+        JobRequest job = new JobRequest();
+        job.path = Play.getFile("test/html/15285572344.txt").getPath();
+        job.account = Account.<Account>findById(2l);
+        new AmazonOrderFetchJob().callBack(job);
     }
 }
