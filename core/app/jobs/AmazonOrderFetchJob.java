@@ -6,11 +6,13 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.Jobex;
+import models.Notification;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.db.helper.JpqlSelect;
 import play.jobs.Every;
 import play.jobs.Job;
 
@@ -87,26 +89,38 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             new Job() {
                 @Override
                 public void doJob() {
+                    long begin = System.currentTimeMillis();
                     /**
                      * 1. 解析出文件中的所有 Orders.
                      * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
                      */
                     List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
-
-                    for(Orderr order : orders) {
-                        Orderr managed = Orderr.findById(order.orderId);
-                        if(managed == null) { //保存
-                            order.save();
-                            Logger.info("Save Order: " + order.orderId);
-                        } else { //更新
-                            // 如果订单已经为 CANCEL 了, 则不更新了
-                            if(managed.state == Orderr.S.CANCEL) continue;
-                            managed.updateAttrs(order);
-                            Logger.info("Update Order: " + order.orderId);
+                    int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
+                    List<Orderr> subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
+                    for(int i = 1; i <= part; i++) {
+                        Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find("orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList))).<Orderr>fetch());
+                        for(Orderr order : subList) {
+                            if(Orderr.count("orderId=?", order.orderId) <= 0) { //保存
+                                order.save();
+                                Logger.info("Save Order: " + order.orderId);
+                            } else { //更新
+                                Orderr managed = managerOrderMap.get(order.orderId);
+                                // 如果订单已经为 CANCEL 了, 则不更新了
+                                if(managed.state == Orderr.S.CANCEL) continue;
+                                managed.updateAttrs(order);
+                                Logger.info("Update Order: " + order.orderId);
+                            }
                         }
+                        subList.clear();
+                        subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
                     }
+
+                    Notification.notifies(
+                            String.format("%s 订单解析完成, 总共耗时: %s 秒, 拆分为 %s 部分处理, 共处理: %s 个订单,",
+                                    jobRequest.path, ((System.currentTimeMillis() - begin) / 1000), part, orders.size()),
+                            1, 4);
                 }
-            }.now().get();
+            }.now();
         } catch(Exception e) {
             Logger.warn("AmazonOrderFetchJob.callback error.", Webs.S(e));
         }

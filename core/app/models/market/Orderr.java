@@ -255,8 +255,7 @@ public class Orderr extends GenericModel {
             this.state = newOrderr.state;
         }
 
-        //TODO OrderItems 的处理需要重构
-        if(newOrderr.items != null && newOrderr.items.size() > 0) {
+        if(newOrderr.items.size() > 0) {
             // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
             Set<OrderItem> newlyOi = new HashSet<OrderItem>();
 
@@ -574,6 +573,32 @@ public class Orderr extends GenericModel {
      */
     public static List<Orderr> ordersInRange(Date from, Date to) {
         return Orderr.find("createDate>=? AND createDate<=?", from, to).fetch();
+    }
+
+    /**
+     * 返回数组集合的 orderIds
+     *
+     * @param orderrs
+     * @return
+     */
+    public static List<String> ids(List<Orderr> orderrs) {
+        if(orderrs == null) orderrs = new ArrayList<Orderr>();
+        List<String> orderIds = new ArrayList<String>();
+        for(Orderr o : orderrs) orderIds.add(o.orderId);
+        return orderIds;
+    }
+
+    /**
+     * 将 Orders 集合映射成为 Map, 方便遍历(减少两层循环的多次遍历循环)
+     *
+     * @param orderrs
+     * @return
+     */
+    public static Map<String, Orderr> list2Map(List<Orderr> orderrs) {
+        Map<String, Orderr> orderMap = new HashMap<String, Orderr>();
+        for(Orderr or : orderrs)
+            orderMap.put(or.orderId, or);
+        return orderMap;
     }
 }
 

@@ -85,7 +85,7 @@ public class Selling extends GenericModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
-    @OneToMany(mappedBy = "selling", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     public List<SellingQTY> qtys;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -169,7 +169,7 @@ public class Selling extends GenericModel {
     /**
      * 这个 Selling 所属的哪一个用户
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Account account;
 
     /**

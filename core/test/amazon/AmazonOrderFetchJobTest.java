@@ -1,21 +1,13 @@
 package amazon;
 
-import helper.J;
-import jobs.AmazonFBAWatchPlusJob;
 import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import models.market.JobRequest;
-import models.market.Orderr;
-import models.procure.FBAShipment;
-import models.procure.ShipItem;
 import org.junit.Test;
-import play.Logger;
 import play.Play;
-import play.db.jpa.JPA;
 import play.test.UnitTest;
 
-import java.io.File;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +35,24 @@ public class AmazonOrderFetchJobTest extends UnitTest {
     public void testParseOrder() {
         JobRequest job = new JobRequest();
         job.path = Play.getFile("test/html/15285572344.txt").getPath();
-        job.account = Account.<Account>findById(2l);
+        job.account = Account.findById(2l);
         new AmazonOrderFetchJob().callBack(job);
+    }
+
+    @Test
+    public void testFetchOrder() {
+        List<Integer> i = new ArrayList<Integer>();
+        for(int a = 0; a < 1000; a++) i.add(a);
+
+        List<Integer> subList = i.subList(0, 100);
+        System.out.println(subList);
+        subList.clear();
+        subList = i.subList(0, 100);
+        System.out.println(subList);
+        subList.clear();
+        subList = i.subList(0, i.size() > 1000 ? 1000 : i.size());
+        System.out.println(subList);
+        subList.clear();
+        System.out.println(i);
     }
 }

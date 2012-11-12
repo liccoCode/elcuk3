@@ -1,15 +1,11 @@
 package helper;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import models.market.Account;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
-import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
 import play.Play;
 import play.data.validation.Error;
@@ -20,7 +16,6 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
