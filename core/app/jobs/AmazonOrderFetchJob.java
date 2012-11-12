@@ -95,6 +95,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                      * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
                      */
                     List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
+                    // 分几个部分处理? 每个部分最多处理 1000 个订单
                     int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
                     List<Orderr> subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
                     for(int i = 1; i <= part; i++) {
@@ -111,6 +112,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                                 Logger.info("Update Order: " + order.orderId);
                             }
                         }
+                        // 查看 Java Doc, 将原始 List 中的这部分子 List 清除
                         subList.clear();
                         subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
                     }
