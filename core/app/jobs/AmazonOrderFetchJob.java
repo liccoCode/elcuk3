@@ -118,11 +118,6 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                         subList.clear();
                         subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
                     }
-
-                    Notification.notifies(
-                            String.format("%s 订单解析完成, 总共耗时: %s 秒, 拆分为 %s 部分处理, 共处理: %s 个订单,",
-                                    jobRequest.account.prettyName(), ((System.currentTimeMillis() - begin) / 1000), part, size),
-                            1, 4);
                 }
             }.now();
         } catch(Exception e) {

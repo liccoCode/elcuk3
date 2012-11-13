@@ -3,9 +3,13 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import helper.FBA;
 import helper.Webs;
+import models.ElcukRecord;
+import models.Notification;
 import models.market.Account;
 import notifiers.FBAMails;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.FBAShipmentQuery;
@@ -196,6 +200,46 @@ public class FBAShipment extends Model {
      */
     public Date closeAt;
 
+
+    /**
+     * 转移 FBA Shipment
+     *
+     * @param shipment
+     */
+    public void moveTo(Shipment shipment) {
+        /**
+         * FBA 转移的限制:
+         * 1. ShipItem 的数量必须是 1 个
+         * 2. 对应 Shipment 的运输地址必须是相同 FBA 仓库
+         */
+        if(this.shipItems.size() != 1)
+            Validation.addError("", "仅有当 FBA 中只有一个运输项目的时候才可以进行转移");
+        if(shipment.fbas.size() > 0) {
+            FBAShipment fba = shipment.fbas.get(0);
+            if(!fba.centerId.equals(this.centerId))
+                Validation.addError("", "运输单中 FBA 的仓库地址不一样, 无法转移.");
+        }
+
+        if(Validation.hasErrors()) return;
+        String oldShipmentId = this.shipment.id;
+
+        // 仅当 FBA 只有一个运输项目的时候才可以转移
+        ShipItem itm = this.shipItems.get(0);
+        itm.shipment = shipment;
+        itm.unit.attrs.planShipDate = shipment.planBeginDate;
+        itm.unit.attrs.planArrivDate = shipment.planArrivDate;
+        itm.save();
+
+        if(shipment.fbas.size() <= 0)
+            shipment.target = this.address();
+        this.shipment = shipment;
+        this.save();
+        new ElcukRecord(Messages.get("shipment.moveFBA"),
+                Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id), oldShipmentId).save();
+        Notification.notifies("FBA 运输单转移", Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
+                Notification.PROCURE, Notification.SHIPPER);
+    }
+
     /**
      * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
      *
@@ -220,6 +264,18 @@ public class FBAShipment extends Model {
     public void checkReceipt(Shipment shipment) {
         this.receiptAt = shipment.arriveDate;
         this.save();
+    }
+
+    /**
+     * 计算的总重量
+     *
+     * @return
+     */
+    public float totalWeight() {
+        float weight = 0f;
+        for(ShipItem itm : this.shipItems)
+            weight += itm.qty * itm.unit.product.weight;
+        return weight;
     }
 
     /**

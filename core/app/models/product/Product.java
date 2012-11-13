@@ -66,15 +66,27 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Expose
     public String productName;
 
+    /**
+     * 长度, 单位 mm
+     */
     @Expose
     public Float lengths = 0f;
 
+    /**
+     * 高度, 单位 mm
+     */
     @Expose
     public Float heigh = 0f;
 
+    /**
+     * 长度, 单位 mm
+     */
     @Expose
     public Float width = 0f;
 
+    /**
+     * 重量, 单位 kg
+     */
     @Expose
     public Float weight = 0f;
 

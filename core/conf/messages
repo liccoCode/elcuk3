@@ -198,3 +198,6 @@ shipment.beginShip=[\u8FD0\u8F93\u5355]\u5F00\u59CB\u8FD0\u8F93
 shipment.beginShip.msg=[\u8FD0\u8F93\u5355] %s \u5F00\u59CB\u8FD0\u8F93
 shipment.splitShipment=\u5206\u62C6[\u8FD0\u8F93\u5355]
 shipment.splitShipment.msg=\u5C06[\u8FD0\u8F93\u9879\u76EE] [%s] \u5206\u62C6\u5230\u65B0[\u8FD0\u8F93\u5355] %s
+shipment.moveFBA=FBA \u8FD0\u8F93\u5355\u8F6C\u79FB
+shipment.moveFBA.msg=%s \u4ECE\u8FD0\u8F93\u5355 %s \u8F6C\u79FB\u5230 %s
+

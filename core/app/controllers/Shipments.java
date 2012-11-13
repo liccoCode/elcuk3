@@ -239,6 +239,21 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
+    /**
+     * 将某一个 FBA 从一个运输单移动到另外一个运输单
+     */
+    public static void moveFba(String shipmentId, String id, String lastShipment) {
+        validation.required(id);
+        if(Validation.hasErrors()) {
+            flash.error("必须选择的一个运输单");
+            show(lastShipment);
+        }
+        FBAShipment fba = FBAShipment.findByShipmentId(shipmentId);
+        Shipment shipment = Shipment.findById(id);
+        fba.moveTo(shipment);
+        show(id);
+    }
+
 
     /**
      * 更新某个 FBAShipment
@@ -259,6 +274,7 @@ public class Shipments extends Controller {
                 Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", fba.shipmentId, fba.shipItems.size())),
                 fba.shipment.id).save();
         flash.success("更新 Amazon FBA %s 成功.", fba.shipmentId);
+        show(fba.shipment.id);
         redirect("/shipments/show/" + fba.shipment.id);
     }
 
@@ -281,8 +297,7 @@ public class Shipments extends Controller {
         flash.success("FBA %s 删除成功", fba.shipmentId);
         Notification.notifies(String.format("FC`s %s 的 FBA(%s) 被删除", fba.centerId, fba.shipmentId),
                 String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id), Notification.PROCURE);
-        redirect("/shipments/show/" + fba.shipment.id);
-
+        show(fba.shipment.id);
     }
 
     /**
@@ -298,7 +313,7 @@ public class Shipments extends Controller {
         checkShowError(ship);
         flash.success("成功确认, 运输单已经确认运输完毕.");
         Notification.notifies("运输单完成", String.format("运输单 %s 已经完成运输.", ship.id), Notification.PM);
-        redirect("/shipments/show/" + id);
+        show(id);
     }
 
     public static void refreshProcuress(final String id) {
@@ -331,7 +346,7 @@ public class Shipments extends Controller {
         checkShowError(ship);
         if(newShipmentOpt.isDefined())
             flash.success("成功分拆运输单, 创建了新运输单 %s", newShipmentOpt.get().id);
-        redirect("/shipments/show/" + newShipmentOpt.get().id);
+        show(newShipmentOpt.get().id);
     }
 
     /**

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import helper.JPAs;
 import models.market.Account;
 import models.market.OrderItem;
+import models.procure.Shipment;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import play.db.helper.JpqlSelect;
@@ -22,7 +23,7 @@ import java.util.Map;
  */
 public class JPQLTest extends UnitTest {
 
-    @Test
+    //    @Test
     public void testOrderItemGroupByCategory() {
         Account acc = new Account();
         acc.id = 1l;
@@ -37,10 +38,18 @@ public class JPQLTest extends UnitTest {
         System.out.println("Rows: " + rows.size());
     }
 
-    @Test
+    //    @Test
     public void testItemGroupByCategory() {
         String json = JSON.toJSONString(OrderItem.itemGroupByCategory(DateTime.parse("2012-06-01").toDate(), DateTime.parse("2012-07-01").toDate(), Account.<Account>findById(1l)),
                 SerializerFeature.PrettyFormat);
         System.out.println(json);
+    }
+
+    @Test
+    public void testShipmentFBA() {
+        Shipment ship = Shipment.findById("SP|201211|01");
+        for(Shipment s : ship.similarShipments()) {
+            System.out.println(s.id);
+        }
     }
 }

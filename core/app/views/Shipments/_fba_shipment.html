@@ -41,6 +41,26 @@
             </tr>
 
             <tr>
+                <th>CenterId</th>
+                <td>${fba.centerId}</td>
+                <th>总重量</th>
+                <td>${fba.totalWeight().format('#.####')}kg</td>
+                <td colspan="4">
+                    <form method="post" action="@{Shipments.moveFba()}" style="margin-bottom:0">
+                        <select name="id">
+                            <option value="">不更改</option>
+                        #{list items:fba.shipment.similarShipments(), as:'s'}
+                            <option value="${s.id}">${s.info()}</option>
+                        #{/list}
+                        </select>
+                        <input type="hidden" name="shipmentId" value="${fba.shipmentId}">
+                        <input type="hidden" name="lastShipment" value="${fba.shipment.id}">
+                        <button class="btn btn-small btn-primary">转移</button>
+                    </form>
+                </td>
+            </tr>
+
+            <tr>
                 <td colspan="8">
                     <button data-toggle="toggle" data-target="#itemsFromAmazon_${fba.shipmentId}" class="btn btn-small btn-primary pull-left" style="margin-right:10px;">
                         <i class="icon-reorder"></i> More...

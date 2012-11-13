@@ -114,7 +114,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         CONFIRM {
             @Override
             public String toString() {
-                return "确认运输,创建 FBA";
+                return "准备运输,已创建 FBA";
             }
         },
         /**
@@ -406,6 +406,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void setTrackNo(String trackNo) {
         if(StringUtils.isNotBlank(trackNo)) this.trackNo = trackNo.trim();
         else this.trackNo = null;
+    }
+
+    /**
+     * 与当前运输单运输地址, FBA 仓库相同的其他运输单
+     *
+     * @return
+     */
+    public List<Shipment> similarShipments() {
+        if(this.fbas.size() > 0)
+            return Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.fbas f WHERE s.whouse=? AND f.centerId=? AND s.state IN (?,?)",
+                    this.whouse, this.fbas.get(0).centerId, S.PLAN, S.CONFIRM).fetch();
+        else
+            return Shipment.find("whouse=? AND state IN (?,?)",
+                    this.whouse, S.PLAN, S.CONFIRM).fetch();
     }
 
     /**
@@ -722,6 +736,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(StringUtils.isBlank(this.title))
             return String.format("Default Title: ShipmentId %s", this.id);
         return String.format("[%s] %s", this.id, this.title);
+    }
+
+    /**
+     * 通过产品数据计算出来的这份运输单的总重量
+     *
+     * @return
+     */
+    public float totalWeight() {
+        //TODO 总重量, 需要根据体积/重量的运输算法来计算
+        float weight = 0f;
+        for(ShipItem itm : this.items) {
+            weight += itm.qty * itm.unit.product.weight;
+        }
+        return weight;
     }
 
     @Override

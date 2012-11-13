@@ -1,5 +1,6 @@
 package ext;
 
+import helper.Dates;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
@@ -86,5 +87,9 @@ public class ProcuresHelper extends JavaExtensions {
         if(qty - planQty > 0) return "84F000";
         else if(qty - planQty < 0) return "FF7F1C";
         else return "ffffff";
+    }
+
+    public static String info(Shipment s) {
+        return String.format("[%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输时间: %s]", s.id, s.state, s.items.size(), s.fbas.size(), s.totalWeight(), Dates.date2Date(s.planBeginDate));
     }
 }
