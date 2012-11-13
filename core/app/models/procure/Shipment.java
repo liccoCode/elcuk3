@@ -608,16 +608,22 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * ps: 不允许多个人, 对 Shipment 多次 beginShip
      */
     public synchronized void beginShip() {
-        Validation.equals("shipment.beginShip.state", this.state, "", S.CONFIRM);
+        if(this.state != S.CONFIRM)
+            throw new FastRuntimeException("运输单没有 CONFIRM 无法运输");
+        for(ShipItem itm : this.items) {
+            if(itm.unit.stage != ProcureUnit.STAGE.DONE)
+                throw new FastRuntimeException(String.format("采购计划 #%s 还没有交货, 无法运输.", itm.unit.id));
+            if(!itm.unit.isPlaced)
+                throw new FastRuntimeException(String.format("采购计划 %s 还没有抵达, 无法运输.", itm.unit.id));
+        }
+
         for(ShipItem item : this.items) {
             item.shipDate = new Date();
             item.unit.stage = item.unit.nextStage();
         }
-        if(Validation.hasErrors()) return;
         for(FBAShipment fba : this.fbas) {
             if(fba.state != FBAShipment.S.WORKING) continue;
             fba.updateFBAShipment(FBAShipment.S.SHIPPED);
-            if(Validation.hasErrors()) return;
         }
         for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();

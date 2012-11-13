@@ -27,12 +27,10 @@ public class ProcurePost extends Post {
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
         DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<String, String>("planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("planShipDate", "预计 [发货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("planDeliveryDate", "预计 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("arriveDate", "实际 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("shipDate", "实际 [发货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("deliveryDate", "实际 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("attrs.planDeliveryDate", "预计 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("attrs.deliveryDate", "实际 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("attrs.planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"));
     }
 
 
@@ -77,7 +75,7 @@ public class ProcurePost extends Post {
             sbd.append("id=?");
             params.add(procrueId);
         } else {
-            if(StringUtils.isBlank(this.dateType)) this.dateType = "planDeliveryDate";
+            if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
             sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType).append("<=?");
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));

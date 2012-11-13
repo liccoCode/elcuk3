@@ -291,7 +291,7 @@ public class Feedback extends GenericModel {
                 feedbacksOverView.put(acc.prettyName(), fbk);
             }
             // 避免短时间的重复计算
-            Cache.add(Feedback.FRONT_TABLE, feedbacksOverView, "10mn");
+            Cache.add(Feedback.FRONT_TABLE, feedbacksOverView, "1h");
         }
         return feedbacksOverView;
     }

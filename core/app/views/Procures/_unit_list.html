@@ -19,8 +19,9 @@
         <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="auto">FnSku</th>
         <th>运输方式</th>
         <th>预计交货时间</th>
-        <th>预计运输时间</th>
+        <th>实际交货时间</th>
         <th>预计到库时间</th>
+        <th>预计运输时间</th>
         <th>阶段</th>
         <th>抵达货代</th>
         <th>创建时间</th>
@@ -61,8 +62,9 @@
         </td>
         <td>${unit.shipType}</td>
         <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
-        <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
+        <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
         <td>#{time_tooltip time:unit.attrs.planArrivDate/}</td>
+        <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
         <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
         <td>#{time_tooltip time:unit.createDate/}</td>
