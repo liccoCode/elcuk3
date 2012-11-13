@@ -39,7 +39,7 @@ public class AmazonFBAWatchPlusJob extends Job {
                     acc, FBAShipment.S.PLAN, FBAShipment.S.CANCELLED, FBAShipment.S.DELETED).fetch(30);
 
             for(FBAShipment fba : fbas) {
-                AmazonFBAWatchPlusJob.listFBAShipmentItems(fba);
+                AmazonFBAWatchPlusJob.syncFBAShipmentItems(fba);
             }
         }
     }
@@ -49,7 +49,7 @@ public class AmazonFBAWatchPlusJob extends Job {
      *
      * @param fbaShipment
      */
-    public static void listFBAShipmentItems(FBAShipment fbaShipment) {
+    public static void syncFBAShipmentItems(FBAShipment fbaShipment) {
         try {
             /**
              * 1. 找到 Amazon 上这个 ShipmentId 的所有产品的数量
@@ -67,6 +67,9 @@ public class AmazonFBAWatchPlusJob extends Job {
             Collections.sort(shipItems, new SortShipItemQtyDown());
             // 使用 copy 为了在删除 map 中元素的时候不影响原有数据
             Map<String, F.T2<Integer, Integer>> fbaItemsCopy = new HashMap<String, F.T2<Integer, Integer>>(fbaItems);
+
+            // 处理 FBA 中一个 msku , 而系统中拥有多个 运输项目 对应一个 FBA 中的 msku 的情况
+
             for(ShipItem item : shipItems) {
                 F.T2<Integer, Integer> fbaItm = fbaItemsCopy.get(item.unit.selling.merchantSKU);
                 // 找到后删除 Map 中的, 避免 ShipItems 中的重复处理
@@ -74,15 +77,40 @@ public class AmazonFBAWatchPlusJob extends Job {
                 if(fbaItm == null) {
                     // TODO Amazon 上有系统中没有, 该做什么? 提醒? 现在很多数据都与 Amazon 上不一样, 邮件提醒会疯掉.
                 } else {
-                    item.recivedQty = fbaItm._1;
+                    // 当接收的 FBA 的数据大于系统内的数量的时候需要做处理. 由于没处理一次 FBA Map 中就少一个, 所以 FBA 中就处理一次.
+                    if(fbaItm._1 > item.recivedQty) {
+                        List<ShipItem> sameItemList = new ArrayList<ShipItem>();
+                        sameItemList.add(item);
+                        // 找到相同的 ShipItems
+                        for(ShipItem sameItem : shipItems) {
+                            if(!sameItem.id.equals(item.id) && sameItem.unit.selling.merchantSKU.equals(item.unit.selling.merchantSKU))
+                                sameItemList.add(sameItem);
+                        }
+                        int fbaQty = fbaItm._1;
+                        for(ShipItem itm : sameItemList) {
+                            if(fbaQty <= 0) break;
+                            // 一个 ShipItem 一个 ShipItem 的满足
+                            itm.recivedQty = Math.min(fbaQty, itm.qty);
+                            fbaQty -= itm.recivedQty;
+                            itm.save();
+                        }
+                        // 如果处理完了还 > 0, 那么则将这个数据随意 append 到一个 ShipItem 上.
+                        if(fbaQty > 0) {
+                            sameItemList.get(0).recivedQty += fbaQty;
+                            sameItemList.get(0).save();
+                        }
+                    } else {
+                        item.recivedQty = fbaItm._1;
+                        item.save();
+                    }
                 }
-                item.save();
             }
 
             // 在处理了系统内的 ShipItem 后检查
+            // TODO 需要考虑相同 FBA Msku 合并 ShipItem 的情况
             fbaShipment.receivingCheck(fbaItems, shipItems);
         } catch(Exception e) {
-            Logger.warn("AmazonFBAWatchPlusJob.listFBAShipmentItems Error. %s", Webs.E(e));
+            Logger.warn("AmazonFBAWatchPlusJob.syncFBAShipmentItems Error. %s", Webs.E(e));
         }
     }
 

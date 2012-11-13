@@ -38,7 +38,7 @@ public class AmazonFBAWatchJobTest extends UnitTest {
     public void testlistFBAShipmentItems() {
         FBAShipment shipment = FBAShipment.findById(43l);
         shipment.receivingAt = DateTime.parse("2012-10-20").toDate();
-        AmazonFBAWatchPlusJob.listFBAShipmentItems(shipment);
+        AmazonFBAWatchPlusJob.syncFBAShipmentItems(shipment);
     }
 
     @Test
