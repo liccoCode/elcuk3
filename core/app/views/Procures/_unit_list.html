@@ -27,7 +27,7 @@
         <th>创建时间</th>
     </tr>
 #{list items:units, as:'unit'}
-    <tr>
+    <tr style="background:${unit.shipItem ? '' : '#EEE'}">
         #{if checkbox}
             <td>
                 <label class="checkbox"><input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"></label>
@@ -64,7 +64,15 @@
         <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
         <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
         <td>#{time_tooltip time:unit.attrs.planArrivDate/}</td>
-        <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
+        #{if !unit.shipItem}
+            <td rel="popover" content="还没有对应运输单">
+                <i class="icon-question-sign"></i>
+                #{time_tooltip time:unit.attrs.planShipDate/}
+            </td>
+        #{/if}
+        #{else }
+            <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
+        #{/else}
         <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
         <td>#{time_tooltip time:unit.createDate/}</td>
@@ -80,7 +88,10 @@
                 <div class="span5" style="float:left">
                     <h4 style="margin-top:0">关联运输单</h4>
                     #{list items:unit.relateShipment(), as:'sp'}
-                        <a href="@{Shipments.show()}/${sp.id}">${sp.title()}</a><br>
+                        <a href="@{Shipments.show()}/${sp.id}">#{if sp.cycle}
+                            <i style="color:#C09853" class="icon-star"></i>#{/if}${sp.title()}
+                        </a>
+                        <br>
                     #{/list}
                 </div>
 

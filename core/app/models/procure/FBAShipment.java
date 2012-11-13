@@ -243,6 +243,10 @@ public class FBAShipment extends Model {
      */
     public synchronized void updateFBAShipment(S state) {
         List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
+        // 在手动更新 FBA 的时候, 同步 ShipItem, ProcureUnit, FBA
+        for(ShipItem itm : this.shipItems)
+            itm.qty = itm.unit.qty();
+
         toBeUpdateItems.addAll(this.shipItems);
         try {
             this.state = FBA.update(this, toBeUpdateItems, state != null ? state : this.state);

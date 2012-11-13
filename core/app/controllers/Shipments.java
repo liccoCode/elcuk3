@@ -150,16 +150,14 @@ public class Shipments extends Controller {
     }
 
     @Check("shipments.ship")
-    public static void ship(String id, List<Long> unitId, List<Integer> shipQty) {
+    public static void ship(String id, List<Long> unitId) {
         Validation.required("shipments.ship.unitId", unitId);
-        Validation.required("shipments.ship.shipQty", shipQty);
         Validation.required("shipment.id", id);
-        Validation.equals("shipments.ship.equal", unitId.size(), "", shipQty.size());
         Shipment ship = Shipment.findById(id);
         if(Validation.hasError("shipment.id")) redirect("/shipments/index");
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
-        ship.addToShip(unitId, shipQty);
+        ship.addToShip(unitId);
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
         redirect("/shipments/shipitem/" + id);

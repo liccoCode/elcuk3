@@ -9,11 +9,6 @@
     <li>预计到库时间: ${unit.attrs.planArrivDate}</li>
 #{/if}
     <li>采购量: ${unit.qty()}</li>
-#{if unit.stage == models.procure.ProcureUnit.STAGE.PART_SHIPPING}
-    #{set leftQty: unit.leftQty()/}
-    <li>剩余量: ${leftQty._1}</li>
-    <li>运输量: ${leftQty._2}</li>
-#{/if}
 #{elseif unit.stage == models.procure.ProcureUnit.STAGE.SHIPPING || unit.stage == models.procure.ProcureUnit.STAGE.SHIP_OVER}
     <li>运输量: ${unit.qty()}</li>
 #{/elseif}
@@ -23,12 +18,13 @@
         </a>
     </li>
 #{/if}
-#{list items:unit.relateItems}
+#{if unit.shipItem}
     <li>
         运输单:
-        <a href="@{Shipments.show()}/${_.shipment.id}" target="_blank"><i class="icon-link"></i> ${_.shipment.id}</a>
+        <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}" target="_blank"><i class="icon-link"></i> ${unit.shipItem.shipment.id}
+        </a>
     </li>
-#{/list}
+#{/if}
     <li>
         Memo: ${unit.comment.raw()}
     </li>

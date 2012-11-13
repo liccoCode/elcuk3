@@ -82,13 +82,13 @@ public class Procures extends Controller {
         unit.save();
         if(StringUtils.isNotBlank(shipmentId)) {
             Shipment ship = Shipment.findById(shipmentId);
-            ship.addToShip(Arrays.asList(unit.id), Arrays.asList(unit.qty()));
+            ship.addToShip(Arrays.asList(unit.id));
             flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
         } else {
             flash.success("创建成功");
         }
         new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
-        redirect("/Procures/index");
+        redirect("/Shipments/show/" + shipmentId);
     }
 
     public static void remove(long id) {
@@ -119,9 +119,15 @@ public class Procures extends Controller {
         }
         unit.save();
         new ElcukRecord(Messages.get("procureunit.update"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
-        if(oldPlanQty != unit.attrs.planQty)
+        if(oldPlanQty != unit.attrs.planQty) {
+            String shipment = "";
+            if(unit.shipItem != null)
+                shipment = unit.shipItem.shipment.id;
             Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
-                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单", oldPlanQty, unit.attrs.planQty, Dates.date2Date(unit.attrs.planDeliveryDate)), Notification.PROCURE, Notification.SHIPPER);
+                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单 %s",
+                            oldPlanQty, unit.attrs.planQty, Dates.date2Date(unit.attrs.planDeliveryDate), shipment),
+                    Notification.PROCURE, Notification.SHIPPER);
+        }
         flash.success("ProcureUnit %s update success!", unit.id);
         redirect("/procures/index?p.search=id:" + unit.id);
     }

@@ -1,15 +1,12 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.FBA;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
 import play.libs.F;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -69,8 +66,8 @@ public class ShipItem extends GenericModel {
     @ManyToOne
     public FBAShipment fba;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
     @Expose
+    @OneToOne
     public ProcureUnit unit;
 
     @Enumerated(EnumType.STRING)
@@ -128,17 +125,7 @@ public class ShipItem extends GenericModel {
         this.shipment = null;
         ProcureUnit unit = this.unit;
         this.unit = null;
-        F.T2<ShipItem, ProcureUnit> t2 = new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
-        if(t2._1.fba != null) {
-            try {
-                // 删除这个对象
-                //TODO 等待测试
-                FBA.update(t2._1.fba, Collections.singletonList(new ShipItem(unit.selling.merchantSKU, 0)), t2._1.fba.state);
-            } catch(Exception e) {
-                throw new FastRuntimeException(e);
-            }
-        }
-        return t2;
+        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
     }
 
     /**

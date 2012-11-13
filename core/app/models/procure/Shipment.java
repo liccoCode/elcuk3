@@ -409,47 +409,35 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 向 Shipment 添加需要运输的 ProcureUnit(+数量)
+     * 向 Shipment 添加需要运输的 ProcureUnit
      * <p/>
      * ps: 这个方法不允许并发
      *
      * @param unitId
-     * @param shipQty
      */
-    public synchronized void addToShip(List<Long> unitId, List<Integer> shipQty) {
+    public synchronized void addToShip(List<Long> unitId) {
         /**
          * 运输单业务限制检查
          * 1. 检查运输单总重量只能在 300kg 以下
          * 2. 如果运输的是电池, 则需要单独运输
          */
-        if(this.state != S.PLAN && this.state != S.CONFIRM) Validation.addError("", "只有 PLAN 与 CONFIRM 状态可以添加运输项目");
-        if(Validation.hasErrors()) return;
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
-        if(units.size() != shipQty.size()) Validation.addError("", "选中的采购单元数量与运输的数量的个数不一致");
-        List<String> unitsMerchantSKU = new ArrayList<String>();
-        for(int i = 0; i < units.size(); i++) {
-            ProcureUnit unit = units.get(i);
+        if(this.state != S.PLAN && this.state != S.CONFIRM)
+            throw new FastRuntimeException("只有 PLAN 与 CONFIRM 状态可以添加运输项目");
 
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
+        List<String> unitsMerchantSKU = new ArrayList<String>();
+        for(ProcureUnit unit : units) {
             // 如果是完全一个全新的 Shipment 那么则由第一个加入到其他的 ProcureUnit 决定去往仓库
             if(this.items.size() == 0 && this.whouse == null)
                 this.whouse = unit.whouse;
 
-            int shipSize = shipQty.get(i);
-            if(!unit.whouse.id.equals(this.whouse.id)) {
-                Validation.addError("", "运往仓库不一致");
-                return;
-            }
-            F.T3<Integer, Integer, List<String>> leftQty = unit.leftQty();
-            if(leftQty._1 < shipSize) {
-                Validation.addError("", "运输的数量无法大于采购的数量");
-                break;
-            }
+            if(!unit.whouse.id.equals(this.whouse.id))
+                throw new FastRuntimeException("运往仓库不一致");
 
-            ShipItem shipItem = unit.ship(this, shipSize);
+            ShipItem shipItem = unit.ship(this);
             this.items.add(shipItem);
             unitsMerchantSKU.add(unit.selling.merchantSKU);
         }
-        if(Validation.hasErrors()) return;
 
         for(ShipItem itm : this.items) itm.save();
         this.save();
@@ -475,7 +463,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         for(ShipItem itm : items) {
             if(!itm.shipment.equals(this))
-                Validation.addError("", "取消的运输单项不属于对应运输单");
+                throw new FastRuntimeException("取消的运输单项不属于对应运输单");
             if(itm.fba != null) {
                 switch(itm.fba.state) {
                     case SHIPPED:
@@ -483,17 +471,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     case DELIVERED:
                     case IN_TRANSIT:
                     case RECEIVING:
-                        Validation.addError("", String.format("FBA(%s) 已经无法更改(%s), 所以不允许再修改运输项目.",
-                                itm.fba.shipmentId, itm.fba.state));
+                        throw new FastRuntimeException(String.format("FBA(%s) 已经无法更改(%s), 所以不允许再修改运输项目.", itm.fba.shipmentId, itm.fba.state));
                 }
             }
         }
-        if(Validation.hasErrors()) return;
 
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ShipItem itm : items) {
             F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
-            cancelT2._2.save();
             unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
         }
         if(log && shipItemId.size() > 0) {
@@ -785,7 +770,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } else {
             where.append("AND whouse.id IS NULL");
         }
-        return Shipment.find(where.toString(), params.toArray()).fetch();
+        return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray()).fetch();
     }
 
     /**

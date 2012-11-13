@@ -148,8 +148,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 所关联的运输出去的 ShipItem.
      */
-    @OneToMany(mappedBy = "unit")
-    public List<ShipItem> relateItems = new ArrayList<ShipItem>();
+    @OneToOne(mappedBy = "unit", cascade = CascadeType.ALL)
+    public ShipItem shipItem;
 
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -231,7 +231,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
         if(this.selling != null && this.whouse != null && this.whouse.account != null) {
-            if(!this.selling.account.id.equals(this.whouse.account.id) && this.whouse.type == Whouse.T.FBA) {
+            if(!this.selling.market.equals(this.whouse.account.type) && this.whouse.type == Whouse.T.FBA) {
                 Validation.addError("", "procureunit.validate.whouse");
             }
         }
@@ -263,16 +263,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         int leftQty = this.attrs.planQty - unit.attrs.planQty;
         Validation.min("procureunit.planQty", leftQty, 0);
         // 如果 unit 对应的 shipment 已经运输, 不可再拆分
-        for(ShipItem shipitem : this.relateItems) {
-            if(shipitem.shipment.state != Shipment.S.CONFIRM && shipitem.shipment.state != Shipment.S.PLAN)
-                Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", shipitem.shipment.id, shipitem.shipment.state));
-        }
+        if(this.shipItem != null && this.shipItem.shipment.state != Shipment.S.CONFIRM && this.shipItem.shipment.state != Shipment.S.PLAN)
+            Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id, this.shipItem.shipment.state));
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
         if(this.stage == STAGE.DELIVERY) unit.stage = this.stage;
         unit.save();
         new ElcukRecord(Messages.get("procureunit.split"), Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "").save();
         new ElcukRecord(Messages.get("procureunit.split.target"), Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
+        if(this.shipItem != null && this.shipItem.shipment != null)
+            Notification.notifies("采购计划分拆",
+                    String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", unit.id, unit.shipItem.shipment.id)
+                    , Notification.PROCURE, Notification.SHIPPER);
         this.save();
     }
 
@@ -317,20 +319,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return this.attrs.planQty.equals(this.attrs.qty);
     }
 
-    public ShipItem ship(Shipment shipment, int size) {
+    /**
+     * 为采购计划添加运输项目(全部运输)
+     *
+     * @param shipment
+     * @return
+     */
+    public ShipItem ship(Shipment shipment) {
         ShipItem shipItem = null;
         for(ShipItem itm : shipment.items) {
             if(itm.unit.equals(this)) {
                 shipItem = itm;
-                shipItem.qty += size;
+                shipItem.qty = this.qty();
             }
         }
         if(shipItem == null) {
             shipItem = new ShipItem();
             shipItem.shipment = shipment;
             shipItem.unit = this;
-            shipItem.qty = size;
-            this.relateItems.add(shipItem);
+            shipItem.qty = this.qty();
+            this.shipItem = shipItem;
         }
         return shipItem;
     }
@@ -353,36 +361,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER) {
             return this.stage;
         } else if(this.stage == STAGE.SHIPPING || this.stage == STAGE.PART_SHIPPING) {
-            for(ShipItem item : this.relateItems) {
-                if(item.shipment.state != Shipment.S.DONE) return this.stage;
-            }
+            if(this.shipItem.shipment.state != Shipment.S.DONE)
+                return this.stage;
             return STAGE.SHIP_OVER;
         } else {
-            F.T3<Integer, Integer, List<String>> leftQty = this.leftQty();
-            if(leftQty._1 == 0) {
-                return STAGE.SHIPPING;
-            } else if(leftQty._1 > 0 && leftQty._1 < this.qty()) {
-                return STAGE.PART_SHIPPING;
+            if(this.shipItem != null) {
+                if(this.qty() == this.shipItem.qty)
+                    return STAGE.SHIPPING;
             } else {
-                Validation.addError("", "procureunit.nextStage.leftQty");
                 return this.stage;
             }
         }
-    }
-
-    /**
-     * 剩下的可运输的数量
-     *
-     * @return T3: ._1: 剩余的数量, ._2: 总运输的数量, ._3:影响的 ShipmentId
-     */
-    public F.T3<Integer, Integer, List<String>> leftQty() {
-        int totalShiped = 0;
-        List<String> shipments = new ArrayList<String>();
-        for(ShipItem item : this.relateItems) {
-            totalShiped += item.qty;
-            shipments.add(item.shipment.id);
-        }
-        return new F.T3<Integer, Integer, List<String>>(this.qty() - totalShiped, totalShiped, shipments);
+        return this.stage;
     }
 
     public String nickName() {
