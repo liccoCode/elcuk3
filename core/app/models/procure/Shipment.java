@@ -409,16 +409,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 与当前运输单运输地址, FBA 仓库相同的其他运输单
+     * 与当前运输单运输地址, FBA 仓库相同的其他运输单;(非周期型)
      *
      * @return
      */
     public List<Shipment> similarShipments() {
         if(this.fbas.size() > 0)
-            return Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.fbas f WHERE s.whouse=? AND f.centerId=? AND s.state IN (?,?)",
+            return Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.fbas f WHERE s.whouse=? AND cycle=false AND f.centerId=? AND s.state IN (?,?)",
                     this.whouse, this.fbas.get(0).centerId, S.PLAN, S.CONFIRM).fetch();
         else
-            return Shipment.find("whouse=? AND state IN (?,?)",
+            return Shipment.find("whouse=? AND cycle=false AND state IN (?,?)",
                     this.whouse, S.PLAN, S.CONFIRM).fetch();
     }
 

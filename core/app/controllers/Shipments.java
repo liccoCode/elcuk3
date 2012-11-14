@@ -242,6 +242,7 @@ public class Shipments extends Controller {
     /**
      * 将某一个 FBA 从一个运输单移动到另外一个运输单
      */
+    @Check("shipments.movefba")
     public static void moveFba(String shipmentId, String id, String lastShipment) {
         validation.required(id);
         if(Validation.hasErrors()) {
