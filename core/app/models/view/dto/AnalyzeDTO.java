@@ -3,7 +3,10 @@ package models.view.dto;
 import helper.Webs;
 import models.market.Selling;
 import models.view.post.AnalyzePost;
+import play.cache.Cache;
 import play.libs.F;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -176,12 +179,14 @@ public class AnalyzeDTO {
     }
 
     /**
-     * AnalyzeDTO 在缓存中使用的 key
-     * @param type
+     * 返回 Analyzes 分析后的 DTO 的缓存值. 由于这个缓存是没有时间限制的, 所以就不需要重新计算了
+     * @param type sku/sid
      * @return
      */
-    public static String analyzesKey(String type) {
-        return String.format("analyze_post_%s", type);
+    @SuppressWarnings("unchecked")
+    public static List<AnalyzeDTO> cachedAnalyzeDTOs(String type) {
+        String cache_key = "sid".equals(type) ? AnalyzePost.AnalyzeDTO_SID_CACHE : AnalyzePost.AnalyzeDTO_SKU_CACHE;
+        return Cache.get(cache_key, List.class);
     }
 
     /**

@@ -1,3 +1,5 @@
+#{list items:fbas, as:'fba'}
+<h3>FBA 情况</h3>
 <table>
     <tr>
         <th>ShipmentId</th>
@@ -42,11 +44,14 @@
         <th>QTY</th>
         <th>Received</th>
     </tr>
-#{list items:receivingTolong,as:'itm'}
-    <tr>
-        <td>${itm.unit.selling.merchantSKU}</td>
-        <td>${itm.qty}</td>
-        <td>${itm.recivedQty}</td>
-    </tr>
-#{/list}
+    #{list items:receivingTolong,as:'itm'}
+        <tr>
+            <td>${itm.unit.selling.merchantSKU}</td>
+            <td>${itm.qty}</td>
+            <td>${itm.recivedQty}</td>
+        </tr>
+    #{/list}
 </table>
+<hr/>
+#{/list}
+

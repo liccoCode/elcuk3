@@ -6,6 +6,7 @@ import notifiers.FBAMails;
 import org.junit.Test;
 import play.test.UnitTest;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -18,8 +19,7 @@ public class FBAMailsTest extends UnitTest {
 
     @Test
     public void testItemsReceivingCheck() {
-        FBAShipment fba = FBAShipment.findById(63l);
-        List<ShipItem> shipItemList = ShipItem.sameFBAShipItems(fba.shipmentId);
-        FBAMails.itemsReceivingCheck(fba, shipItemList);
+        List<FBAShipment> fbas = FBAShipment.find("createAt>='2012-10-17 00:00:00'").fetch();
+        FBAMails.itemsReceivingCheck(new HashSet<FBAShipment>(fbas));
     }
 }

@@ -9,6 +9,7 @@ import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
+import models.view.post.AnalyzePost;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -374,7 +375,7 @@ public class Selling extends GenericModel {
         if(ps == null || ps < 0) throw new FastRuntimeException("PS 格式错误或者 PS 不允许小于 0");
         this.ps = ps;
         // 如果缓存不为空则更新缓存
-        List<AnalyzeDTO> dtos = Cache.get(AnalyzeDTO.analyzesKey("sid"), List.class);
+        List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
         if(dtos != null) {
             boolean find = false;
             for(AnalyzeDTO dto : dtos) {

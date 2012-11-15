@@ -54,10 +54,10 @@
             </select>
 
             <select name="p.state" style="width:90px;margin-left:2px;">
-                <option ${state == p.state ? 'selected' : ''} value="NOCANCEL">非 Cancel</option>
+                <option ${"NOCANCEL" == p.state ? 'selected' : ''} value="NOCANCEL">非 Cancel</option>
                 <option value="">状态</option>
             #{list items:models.procure.Shipment.S.values(), as:'state'}
-                <option ${state == p.state ? 'selected' : ''} value="${state.name()}">${state}</option>
+                <option ${state.name() == p.state ? 'selected' : ''} value="${state.name()}">${state}</option>
             #{/list}
             </select>
 

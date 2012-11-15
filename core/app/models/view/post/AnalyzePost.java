@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
  * Time: 10:16 AM
  */
 public class AnalyzePost extends Post<AnalyzeDTO> {
+    public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
+    public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
     public AnalyzePost() {
         this.perSize = 20;
     }
@@ -53,7 +55,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @SuppressWarnings("unchecked")
     public List<AnalyzeDTO> analyzes() {
         if(StringUtils.isNotBlank(this.type)) this.type = this.type.toLowerCase();
-        String cacke_key = String.format("analyze_post_%s", this.type);
+        String cacke_key = "sid".equals(this.type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
         List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
         if(dtos == null) {
             synchronized(AnalyzePost.class) {

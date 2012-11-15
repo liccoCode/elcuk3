@@ -248,7 +248,7 @@ public class FBAShipment extends Model {
     public void isNofityState(S state) {
         /*没有 receivingAt 时间才更新, 否则每次 RECEIVEING 都更新当前时间..*/
         if(state == S.RECEIVING && this.receivingAt == null)
-            this.receivingAt = new Date();
+            this.receivingAt = new Date(); // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
         else if(state == S.CLOSED || state == S.DELETED)
             this.closeAt = new Date();
         if(this.state != state)
@@ -287,6 +287,31 @@ public class FBAShipment extends Model {
         if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))) {
             FBAMails.receiptButNotReceiving(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        FBAShipment that = (FBAShipment) o;
+
+        if(shipmentId != null ? !shipmentId.equals(that.shipmentId) : that.shipmentId != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (shipmentId != null ? shipmentId.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return this.shipmentId;
     }
 
 
@@ -329,38 +354,6 @@ public class FBAShipment extends Model {
         }
     }
 
-    /**
-     * 入库过程中的检查
-     *
-     * @param fbaItems Amazon 更新下来的 msku 的入库数量
-     */
-    public void receivingCheck(Map<String, F.T2<Integer, Integer>> fbaItems, List<ShipItem> shippedItems) {
-        if(this.state != S.RECEIVING) return;
-        if(shippedItems == null || shippedItems.size() <= 0) return;
-        if(fbaItems == null || fbaItems.size() <= 0) return;
-        if(this.receiptAt == null)
-            Webs.systemMail(String.format("FBA %s 没有签收时间, 检查", this.shipmentId), "FBA 没有签收时间,检查 FBAShipment.checkReceipt 与 Shipment.S.nextState");
-
-        List<ShipItem> receivingTolong = new ArrayList<ShipItem>();
-
-        for(ShipItem shipItem : shippedItems) {
-            F.T2<Integer, Integer> receivedAndShipped = fbaItems.get(shipItem.unit.selling.merchantSKU);
-            if(receivedAndShipped == null) continue;
-            if(receivedAndShipped._1 == 0) continue;
-
-            /**
-             * 1. 检查入库时间过长
-             * 入库时间长于 3 天, 并且接收了的数量与发送的数量不一样.
-             */
-            if((System.currentTimeMillis() - this.receivingAt.getTime() >= TimeUnit.DAYS.toMillis(3))
-                    // TODO 难道真的要大于 10 个才提醒?
-                    && !receivedAndShipped._1.equals(shipItem.qty)) {
-                receivingTolong.add(shipItem);
-            }
-        }
-        if(receivingTolong.size() > 0)
-            FBAMails.itemsReceivingCheck(this, receivingTolong);
-    }
 
     public String address() {
         return String.format("%s %s %s %s (%s)",
@@ -379,9 +372,4 @@ public class FBAShipment extends Model {
         return FBAShipment.find("shipmentId=?", shipmentId).first();
     }
 
-
-    @Override
-    public String toString() {
-        return this.shipmentId;
-    }
 }

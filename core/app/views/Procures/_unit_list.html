@@ -49,7 +49,7 @@
         <td>${unit.whouse.name()}</td>
         <td>${unit.cooperator?.name}</td>
         <td>${unit.attrs.planQty}</td>
-        <td>${unit.attrs.price.format('#.##')} ${unit.attrs.currency}</td>
+        <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
         <td>
             <!-- FnSku 下载 Label -->
             #{if unit.selling.fnSku}

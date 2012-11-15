@@ -415,11 +415,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public List<Shipment> similarShipments() {
         if(this.fbas.size() > 0)
-            return Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.fbas f WHERE s.whouse=? AND cycle=false AND f.centerId=? AND s.state IN (?,?)",
-                    this.whouse, this.fbas.get(0).centerId, S.PLAN, S.CONFIRM).fetch();
+            return Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.fbas f WHERE s.id!=? AND s.whouse=? AND cycle=false AND (f.centerId=? OR SIZE(s.fbas)=0) AND s.state IN (?,?) ORDER BY planBeginDate",
+                    this.id, this.whouse, this.fbas.get(0).centerId, S.PLAN, S.CONFIRM).fetch();
         else
-            return Shipment.find("whouse=? AND cycle=false AND state IN (?,?)",
-                    this.whouse, S.PLAN, S.CONFIRM).fetch();
+            return Shipment.find("id!=? AND whouse=? AND cycle=false AND state IN (?,?) ORDER BY planBeginDate",
+                    this.id, this.whouse, S.PLAN, S.CONFIRM).fetch();
     }
 
     /**
@@ -746,9 +746,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public float totalWeight() {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
         float weight = 0f;
-        for(ShipItem itm : this.items) {
+        for(ShipItem itm : this.items)
             weight += itm.qty * itm.unit.product.weight;
-        }
         return weight;
     }
 

@@ -7,12 +7,14 @@ import models.Jobex;
 import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
+import notifiers.FBAMails;
 import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * FBA Shipment Items 的跟踪
@@ -38,9 +40,10 @@ public class AmazonFBAWatchPlusJob extends Job {
             List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?,?) ORDER BY lastWatchAmazonItemsAt",
                     acc, FBAShipment.S.PLAN, FBAShipment.S.CANCELLED, FBAShipment.S.DELETED).fetch(30);
 
-            for(FBAShipment fba : fbas) {
+            for(FBAShipment fba : fbas)
                 AmazonFBAWatchPlusJob.syncFBAShipmentItems(fba);
-            }
+
+            AmazonFBAWatchPlusJob.receivingCheck(fbas);
         }
     }
 
@@ -105,13 +108,31 @@ public class AmazonFBAWatchPlusJob extends Job {
                     }
                 }
             }
-
-            // 在处理了系统内的 ShipItem 后检查
-            // TODO 需要考虑相同 FBA Msku 合并 ShipItem 的情况
-            fbaShipment.receivingCheck(fbaItems, shipItems);
         } catch(Exception e) {
             Logger.warn("AmazonFBAWatchPlusJob.syncFBAShipmentItems Error. %s", Webs.E(e));
         }
+    }
+
+    /**
+     * 入库过程中的检查
+     *
+     * @param fbas 需要检查的 FBA Shipment
+     */
+    public static void receivingCheck(List<FBAShipment> fbas) {
+        Set<FBAShipment> mailWarning = new HashSet<FBAShipment>();
+        for(FBAShipment fba : fbas) {
+            if(fba.state != FBAShipment.S.RECEIVING) continue;
+            if((System.currentTimeMillis() - fba.receivingAt.getTime()) < TimeUnit.DAYS.toMillis(3)) continue;
+            /**
+             * 入库超过 3 天, 并且数量入库输入不一致
+             */
+            for(ShipItem itm : fba.shipItems) {
+                if(!itm.qty.equals(itm.recivedQty))
+                    mailWarning.add(fba);
+            }
+        }
+        if(mailWarning.size() > 0)
+            FBAMails.itemsReceivingCheck(mailWarning);
     }
 
     public static class SortShipItemQtyDown implements Comparator<ShipItem> {

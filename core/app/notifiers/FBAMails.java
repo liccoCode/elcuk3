@@ -9,6 +9,7 @@ import play.mvc.Mailer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,17 +60,14 @@ public class FBAMails extends Mailer {
     /**
      * FBA 正在入库的检查邮件
      *
-     * @param fba
-     * @param receivingTolong
+     * @param fbas
      */
-    public static boolean itemsReceivingCheck(FBAShipment fba, List<ShipItem> receivingTolong) {
-        if(receivingTolong == null) receivingTolong = new ArrayList<ShipItem>();
-
-        setSubject("{WARN} FBA %s 中 %s Items 入库检查", fba.shipmentId, receivingTolong.size());
+    public static boolean itemsReceivingCheck(Set<FBAShipment> fbas) {
+        setSubject("{WARN} 总共 %s 个 FBA 入库时间过长, 需检查", fbas.size());
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
         try {
-            send(fba, receivingTolong);
+            send(fbas);
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;

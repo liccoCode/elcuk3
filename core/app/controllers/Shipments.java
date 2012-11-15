@@ -209,8 +209,11 @@ public class Shipments extends Controller {
 
         checkShowError(ship);
 
-        ship.beginShip();
-
+        try {
+            ship.beginShip();
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+        }
         checkShowError(ship);
         new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
         flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", StringUtils.join(ship.fbas, ","));

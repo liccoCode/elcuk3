@@ -12,9 +12,10 @@
         <th>Received</th>
         <th>采购单</th>
         <th>预计到库时间</th>
+        <th>TurnOver</th>
         <th>供应商</th>
         <th>总重量(kg)</th>
-        <th>总体积(m3)(cm3)(kg)</th>
+        <th>总体积(m3)(kg)</th>
         <th>总申报价格</th>
         <th>抵达?</th>
         <th>运往仓库</th>
@@ -40,13 +41,14 @@
         </td>
         <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
         <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
-        <td>#{time_tooltip time:itm.unit.attrs.planDeliveryDate/}</td>
+        <td>#{time_tooltip time:itm.unit.attrs.planShipDate/}</td>
+        <td>${itm.getTurnOverT4()._1}</td>
         <td>${itm.unit.cooperator?.name}</td>
         <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
         #{set totalVolume:itm.totalVolume()/}
-        <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')} ${totalVolume._4.format('#.#')}
+        <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')}
             / ${totalVolume._1.format('#.######')}</td>
-        <td>${itm.unit.product.declaredValue.format('#.##')}</td>
+        <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
         <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
         <td>${itm.unit.whouse.name()}</td>
         <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>

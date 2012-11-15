@@ -5,12 +5,12 @@ $ ->
     mask = $('#container')
     mask.mask('更新 Comment')
     $.post('/shipments/comment', {id: $("input[name=ship\\.id]").val(), cmt: $("#ship_memo").val().trim()},
-    (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        alert('更新成功.')
-      mask.unmask()
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          alert('更新成功.')
+        mask.unmask()
     )
 
   fidCallBack = () ->
@@ -31,4 +31,3 @@ $ ->
       e.preventDefault()
     else
       $(@).button('loading').parents('form').attr('action', '/Shipments/deployToAmazon').submit()
-
