@@ -38,7 +38,7 @@ public class Bootstrap extends Job {
         HTTP.init();
         Privilege.init();
 
-        if("true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev")))
+        if(Play.mode.isProd() || (Play.mode.isDev() && "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev"))))
             OsTicketCreateCheck.begin();
 
         if(Play.mode.isProd()) {
