@@ -39,8 +39,7 @@ public class Bootstrap extends Job {
         Privilege.init();
 
         if(Play.mode.isProd() || (Play.mode.isDev() && "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev"))))
-            //OsTicketCreateCheck.begin();
-            System.out.println("暂时不开放");
+            OsTicketCreateCheck.begin();
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
