@@ -29,7 +29,7 @@ import java.util.List;
  * Date: 6/20/12
  * Time: 3:09 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Shipments extends Controller {
     @Before(only = {"index", "blank", "save"})
     public static void whouses() {

@@ -29,7 +29,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午11:41
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Sellings extends Controller {
 
 

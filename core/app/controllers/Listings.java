@@ -28,7 +28,7 @@ import java.util.List;
  * Date: 12/28/11
  * Time: 12:49 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Listings extends Controller {
 
     public static void index() {

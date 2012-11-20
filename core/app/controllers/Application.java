@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Application extends Controller {
 
     public static void index() {

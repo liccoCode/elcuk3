@@ -23,7 +23,7 @@ import java.util.Set;
  * Date: 6/19/12
  * Time: 2:29 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Deliveryments extends Controller {
 
     @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})

@@ -26,7 +26,7 @@ import java.util.Map;
  * Date: 3/20/12
  * Time: 10:11 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 @Check("finances")
 public class Finances extends Controller {
 

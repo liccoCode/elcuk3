@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 12/29/11
  * Time: 12:43 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Jobs extends Controller {
 
     @Before(only = {"index", "update", "create"})

@@ -14,7 +14,7 @@ import play.utils.FastRuntimeException;
  * Date: 7/26/12
  * Time: 5:05 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class TicketReasons extends Controller {
 
     /**

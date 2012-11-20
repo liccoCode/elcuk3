@@ -18,7 +18,7 @@ import java.util.List;
  * Date: 7/16/12
  * Time: 12:12 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Cooperators extends Controller {
 
     @Check("cooperators.index")

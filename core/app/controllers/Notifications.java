@@ -15,7 +15,7 @@ import play.mvc.With;
  * Date: 10/26/12
  * Time: 3:12 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Notifications extends Controller {
 
     @Check("notifications.notifys")

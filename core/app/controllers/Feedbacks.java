@@ -20,7 +20,7 @@ import java.util.Set;
  * Date: 3/15/12
  * Time: 1:41 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Feedbacks extends Controller {
     @Check("feedbacks.index")
     public static void index() {

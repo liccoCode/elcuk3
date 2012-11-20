@@ -13,7 +13,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午1:58
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Servers extends Controller {
 
     @Check("servers.index")

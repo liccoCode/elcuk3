@@ -16,7 +16,7 @@ import java.util.List;
  * Date: 9/26/12
  * Time: 11:34 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Whouses extends Controller {
 
     @Before(only = {"index", "blank", "create", "edit", "update"})

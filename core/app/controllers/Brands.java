@@ -17,7 +17,7 @@ import java.util.List;
  * Date: 4/26/12
  * Time: 11:28 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Brands extends Controller {
 
     @Before(only = {"index", "bindCategory", "unbindCategory"})

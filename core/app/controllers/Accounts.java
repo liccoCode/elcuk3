@@ -16,7 +16,7 @@ import java.util.List;
  * Date: 12-1-7
  * Time: 上午6:20
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Accounts extends Controller {
 
     @Check("accounts.index")

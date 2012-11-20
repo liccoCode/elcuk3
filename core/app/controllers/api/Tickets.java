@@ -1,6 +1,5 @@
 package controllers.api;
 
-import controllers.GzipFilter;
 import helper.Webs;
 import models.support.Ticket;
 import models.view.Ret;
@@ -17,7 +16,7 @@ import java.util.Date;
  * Date: 8/10/12
  * Time: 4:09 PM
  */
-@With({APIChecker.class, GzipFilter.class})
+@With({APIChecker.class})
 public class Tickets extends Controller {
     public static void create(String ticketId, @As("yyyy-MM-dd HH:mm:ss") Date createAt, String title) {
         Ticket t = new Ticket(ticketId, createAt, title);

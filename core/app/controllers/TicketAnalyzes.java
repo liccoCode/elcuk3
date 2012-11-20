@@ -15,7 +15,7 @@ import java.util.List;
  * Date: 8/9/12
  * Time: 4:20 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, GzipFilter.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class TicketAnalyzes extends Controller {
 
     @CacheFor(id = "TicketAnalyzes.index")
