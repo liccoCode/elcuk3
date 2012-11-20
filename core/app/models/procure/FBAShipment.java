@@ -129,12 +129,23 @@ public class FBAShipment extends Model {
          * @return
          */
         public abstract String msg();
+
+        /**
+         * 是否处于可更改状态? 如果 FBA 运输出去了, 或者已经取消了, 则不可以进行变更了
+         *
+         * @return
+         */
+        public boolean isCanModify() {
+            if(this == RECEIVING || this == CANCELLED || this == DELETED || this == SHIPPED || this == CLOSED)
+                return false;
+            else return true;
+        }
     }
 
     @OneToOne
     public Account account;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     public Shipment shipment;
 
     /**
@@ -212,6 +223,8 @@ public class FBAShipment extends Model {
          * 1. ShipItem 的数量必须是 1 个
          * 2. 对应 Shipment 的运输地址必须是相同 FBA 仓库
          */
+        if(!this.state.isCanModify())
+            Validation.addError("", "FBA 已经无法变更状态. " + this.state);
         if(this.shipItems.size() != 1)
             Validation.addError("", "仅有当 FBA 中只有一个运输项目的时候才可以进行转移");
         if(shipment.fbas.size() > 0) {
@@ -222,6 +235,15 @@ public class FBAShipment extends Model {
 
         if(Validation.hasErrors()) return;
         String oldShipmentId = this.shipment.id;
+
+        // 新 Shipment 的状态修改
+        shipment.state = Shipment.S.CONFIRM;
+
+        // 老 Shipment 的处理
+        if(this.shipment.fbas.size() - 1 <= 0) {
+            this.shipment.state = Shipment.S.PLAN;
+            this.shipment.save();
+        }
 
         // 仅当 FBA 只有一个运输项目的时候才可以转移
         ShipItem itm = this.shipItems.get(0);

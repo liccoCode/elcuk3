@@ -19,6 +19,7 @@
     <li>在运输单标记开始运输之前, 都可以对信息进行更改,调整</li>
     <li>Fnsku 会在运输单确认以后, 进行一次同步</li>
     <li>总体积单位为 m3 ,总重量单位为 kg; 如果发现数据为 0, 请检查 Product 数据是否填充完整.</li>
+    <li>[部分更新] 功能,更新 Comment 与 TrackNo 两部分值</li>
     <li class="text-error">如果拥有 <i style="color:#C09853;" class="icon-star"></i> 标记, 为周期型运输单, 其不允许创建 FBA Shipment,
         而是用来接收 PM 的采购计划.
     </li>
@@ -176,7 +177,7 @@
                         <button class="btn btn-primary">更新</button>
                     #{/if}
                     #{if !isPlanAndConfirm}
-                        <button id="ship_comment" class="btn btn-primary">Comment</button>
+                        <button id="ship_comment" class="btn btn-primary">部分更新</button>
                     #{/if}
                     </td>
                 </tr>

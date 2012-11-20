@@ -104,11 +104,13 @@ public class Shipments extends Controller {
         redirect("/Shipments/show/" + ship.id);
     }
 
-    public static void comment(String id, String cmt) {
+    public static void comment(String id, String cmt, String track) {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
         Shipment ship = Shipment.findById(id);
         ship.memo = cmt;
+        if(StringUtils.isNotBlank(track))
+            ship.trackNo = track;
         ship.save();
         renderJSON(new Ret(true, Webs.V(Validation.errors())));
     }
@@ -255,6 +257,10 @@ public class Shipments extends Controller {
         FBAShipment fba = FBAShipment.findByShipmentId(shipmentId);
         Shipment shipment = Shipment.findById(id);
         fba.moveTo(shipment);
+        if(Validation.hasErrors()) {
+            renderArgs.put("ship", fba.shipment);
+            render("Shipments/show.html");
+        }
         show(id);
     }
 

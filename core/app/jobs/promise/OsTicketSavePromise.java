@@ -38,7 +38,7 @@ public class OsTicketSavePromise extends Job<Ticket> {
         if(ticket == null) {
             ticket = new Ticket(t.get("ticketId"), DateTime.parse(t.get("createAt"), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate(), t.get("title"));
             ticket.save();
-            Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id, ticket.fid);
+            Logger.info("Saved OsTicket #%s(%s) [%s].", ticket.osTicketId, ticket.id, ticket.fid);
         } else {
             Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id, ticket.fid);
         }
