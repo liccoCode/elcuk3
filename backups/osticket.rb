@@ -47,7 +47,7 @@ Backup::Model.new(:osticket, 'Description for osticket') do
   #
   store_with Local do |local|
     local.path       = "~/backups/"
-    local.keep       = 10
+    local.keep       = 5
   end
 
   ##
