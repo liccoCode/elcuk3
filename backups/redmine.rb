@@ -57,17 +57,7 @@ Backup::Model.new(:redmine, 'Description for redmine') do
     end
   end
 
-  sync_with RSync::Push do |rsync|
-    rsync.ip = "bak.easya.cc"
-    #rsync.port = 22
-    rsync.username = "root"
-    rsync.path = "~/backups/"
-    rsync.mirror = true
-
-    rsync.directories do |dir|
-      dir.add "~/backups/redmine"
-    end
-  end
+  # TODO 增加备份到 S3
 
 
   ##

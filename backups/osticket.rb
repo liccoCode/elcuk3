@@ -62,17 +62,7 @@ Backup::Model.new(:osticket, 'Description for osticket') do
     end
   end
 
-  sync_with RSync::Push do |rsync|
-    rsync.ip = "bak.easya.cc"
-    #rsync.port = 22
-    rsync.username = "root"
-    rsync.path = "~/backups/"
-    rsync.mirror = true
-
-    rsync.directories do |dir|
-      dir.add "~/backups/osticket"
-    end
-  end
+  # TODO 增加备份到 S3
 
 
   ##

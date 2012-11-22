@@ -129,6 +129,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     else dto.reviewRatio = 0;
                 }
 
+                // TODO 这部分缓存需要处理成为有生命周期的, 因为时间跨度越长, 缓存的数据越大, 而查看的几率越小, 所以需要对这缓存添加生命周期; 同时需要为系统中添加统一的访问这部分缓存的接口.
                 Cache.add(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()));
             }
         }
