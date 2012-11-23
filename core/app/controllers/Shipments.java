@@ -104,6 +104,9 @@ public class Shipments extends Controller {
         redirect("/Shipments/show/" + ship.id);
     }
 
+    /**
+     * 用来更新 Shipment 的 coment 与 trackNo
+     */
     public static void comment(String id, String cmt, String track) {
         validation.required(id);
         if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
@@ -205,9 +208,6 @@ public class Shipments extends Controller {
         Validation.required("shipment.shipFee", ship.shipFee);
         Validation.required("shipment.cooper", ship.cooper);
         Validation.min("shipment.items.size", ship.items.size(), 1);
-        // 海运不进行 trackNo 检查
-        if(ship.type != Shipment.T.SEA)
-            Validation.required("shipment.trackNo", ship.trackNo);
 
         checkShowError(ship);
 
@@ -322,6 +322,7 @@ public class Shipments extends Controller {
         ship.ensureDone();
         checkShowError(ship);
         flash.success("成功确认, 运输单已经确认运输完毕.");
+        new ElcukRecord(Messages.get("shipment.ensureDone"), Messages.get("shipment.ensureDone.msg", ship.id), ship.id).save();
         Notification.notifies("运输单完成", String.format("运输单 %s 已经完成运输.", ship.id), Notification.PM);
         show(id);
     }

@@ -6,6 +6,7 @@ import helper.Webs;
 import models.Jobex;
 import models.Notification;
 import models.procure.Shipment;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
@@ -39,6 +40,8 @@ public class ShipmentSyncJob extends Job {
 
         Logger.info("Fetch [CLEARANCE: %s], [SHIPPING: %s]", clearance.size(), shipping.size());
         for(Shipment ship : all) {
+            // 没有 trackNo 的, 直接略过
+            if(StringUtils.isBlank(ship.trackNo)) continue;
             try {
                 if(ship.type == Shipment.T.SEA) {
                     // 海运的给与提示信息, 暂时无法进行跟踪
