@@ -1,20 +1,14 @@
 package finance;
 
-import jobs.FinanceCheckJob;
-import jobs.KeepSessionJob;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.junit.Before;
 import org.junit.Test;
+import play.Play;
 import play.test.UnitTest;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,31 +19,40 @@ import java.util.List;
 public class SaleFeeParseTest extends UnitTest {
 
     //    @Test
-    public void testParseThrough() {
-        new KeepSessionJob().doJob();
-        new FinanceCheckJob().doJob();
+    public void testFlatFilePerformance() {
+        Account acc = Account.findById(2l);
+        //Test performance, not very important
+        SaleFee.flatFileFinanceParse(Play.getFile("test/html/15836299764_14day.txt"), acc);
     }
 
-    //    @Test
-    public void testParseFlatV2() {
-        ///Volumes/wyatt/Downloads/9299174904.txt
-        Account acc = Account.findById(1l);
-        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk2-data/finance/auto"), new String[]{"txt"}, false));
+    @Test
+    public void testFlatFile() {
+        Account acc = Account.findById(2l);
+        Map<String, List<SaleFee>> saleMap = SaleFee.flatFileFinanceParse(Play.getFile("test/html/15836299764_14day2.txt"), acc);
 
-        for(File f1 : files) {
-            String name = f1.getName();
-            if(StringUtils.isBlank(name)) continue;
-            if(NumberUtils.toInt(name.split("\\.")[0].split("f")[1]) < 5) continue;
+        assertEquals(9, saleMap.size());
 
-            System.out.println("----------------" + f1.getAbsolutePath() + "/" + name + "-------------------");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(f1, acc, M.AMAZON_UK);
-            for(SaleFee f : fees) {
-                f.save();
-            }
-        }
+        String orderId = "303-9140921-5296344";
+        List<SaleFee> normalOrders = saleMap.get(orderId);
+
+        SaleFee fee = normalOrders.get(0);
+        assertEquals(orderId, fee.orderId);
+        assertEquals(M.AMAZON_DE, fee.market);
+        assertEquals("principal", fee.type.name);
+        assertEquals(30.99, fee.cost.doubleValue(), 0.01);
+
+
+        orderId = "SYSTEM";
+        normalOrders = saleMap.get(orderId);
+
+        assertEquals(7, normalOrders.size());
+
+        fee = normalOrders.get(0);
+        assertEquals("storage fee", fee.type.name);
+        assertEquals(-274.14, fee.cost.doubleValue(), 0.01);
     }
 
-    @Before
+    //    @Before
     public void login() {
         Account acc = Account.findById(1l);
         acc.loginAmazonSellerCenter();

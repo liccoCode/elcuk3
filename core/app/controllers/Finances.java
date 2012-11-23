@@ -30,65 +30,9 @@ import java.util.Map;
 @Check("finances")
 public class Finances extends Controller {
 
-    /**
-     * 用来修复手动更新 Amazon 的定时 Payment 报表
-     *
-     * @param n
-     */
-    public static void fix(String n, String m, Account a) {
-        try {
-            if(!a.isPersistent()) renderText("Account is not Persistent!");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(new File(Constant.D_FINANCE + "/fix/" + n + ".txt"), a, M.val(m));
-            SaleFee.clearOldSaleFee(fees);
-            SaleFee.batchSaveWithJDBC(fees);
-            renderText("Saved: " + fees.size() + " fees");
-        } catch(Exception e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            Logger.error(sw.toString());
-            renderText(Webs.E(e) + "\r\n<br/><br/>" + sw.toString());
-        }
-    }
 
     public static void index() {
         render();
     }
 
-    /**
-     * 上传文件解析用的文件
-     *
-     * @param f
-     */
-    public static void upload(File f) {
-        String path = Constant.D_FINANCE + "/fix/" + f.getName().split("\\.")[0] + ".txt";
-        try {
-            FileUtils.copyFile(f, new File(path));
-        } catch(IOException e) {
-            renderJSON(new Error("Exception", Webs.E(e), new String[]{}));
-        }
-        Map<String, String> rt = new HashMap<String, String>();
-        rt.put("flag", "true");
-        rt.put("path", path);
-        rt.put("size", f.getTotalSpace() + "");
-        renderJSON(rt);
-    }
-
-    /**
-     * @param rid
-     * @param acc
-     * @param m
-     */
-    public static void flatV2(String rid, Account acc, String m) {
-        if(!acc.isPersistent()) renderJSON(new Ret("Account 不存在, 错误!"));
-        M market = M.val(m);
-        if(market == null) renderJSON(new Ret("Account is invalid!"));
-        try {
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(acc.briefFlatV2Finance(market, rid), acc, market);
-            SaleFee.clearOldSaleFee(fees);
-            SaleFee.batchSaveWithJDBC(fees);
-            renderJSON(new Ret(true, "Saved: " + fees.size() + " fees"));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.S(e)));
-        }
-    }
 }

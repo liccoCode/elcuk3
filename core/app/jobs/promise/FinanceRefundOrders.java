@@ -32,7 +32,7 @@ public class FinanceRefundOrders extends Job {
         if(StringUtils.isNotBlank(this.orderId))
             orders = Arrays.asList(Orderr.<Orderr>findById(this.orderId));
         else
-            orders = Orderr.find("state=? AND SIZE(fees)<=2"/*如果是 REFUNDED , 应该有 4 个*/, Orderr.S.REFUNDED).fetch(50);
+            orders = Orderr.find("SELECT o FROM Orderr o LEFT JOIN o.fees f WHERE o.state=? AND f.type.name!=?", Orderr.S.REFUNDED, "principal").fetch(50);
 
         for(Orderr ord : orders) {
             if(ord.state != Orderr.S.REFUNDED) continue;

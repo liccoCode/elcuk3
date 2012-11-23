@@ -1,6 +1,7 @@
 package helper;
 
 import com.google.gson.JsonObject;
+import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 
@@ -219,6 +220,28 @@ public enum Currency {
         if(floatPart >= 0.5) floatPart = 0.99f;
         else floatPart = 0.49f;
         return intPart + floatPart;
+    }
+
+    /**
+     * 返回 Market 对应的 Currency
+     *
+     * @param market
+     * @return
+     */
+    public static Currency M(M market) {
+        switch(market) {
+            case AMAZON_DE:
+                return GBP;
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_UK:
+                return EUR;
+            case AMAZON_US:
+                return USD;
+            default:
+                return USD;
+        }
     }
 }
 

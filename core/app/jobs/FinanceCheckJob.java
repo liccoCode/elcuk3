@@ -2,14 +2,11 @@ package jobs;
 
 import helper.Currency;
 import helper.Dates;
-import helper.HTTP;
-import helper.Webs;
 import jobs.promise.FinanceRefundOrders;
 import jobs.promise.FinanceShippedOrders;
 import models.Jobex;
 import models.finance.FeeType;
 import models.finance.SaleFee;
-import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.math.NumberUtils;
@@ -17,11 +14,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,8 +26,8 @@ import java.util.List;
  * 每隔 3h 抓取一次, 因为通过这种方式抓取的 Finance 信息一次文件只能拥有 600 个 Transaction, 所以需要增加更新频率来获取新的
  * Transaction 的数据
  * 周期:
- * - 轮询周期: 5mn
- * - Duration: 3h
+ * - 轮询周期: 1mn
+ * - Duration: 10mn
  * User: wyattpan
  * Date: 3/19/12
  * Time: 12:01 PM
@@ -109,6 +104,7 @@ public class FinanceCheckJob extends Job {
         fee.orderId = orderId;
         fee.order = Orderr.findById(fee.orderId);
         fee.usdCost = fee.currency.toUSD(fee.cost);
+        // 第一次的时候, 销售额使用 productcharges 类型, 第二次使用 Amazon 文档中的 Principal 类型, 区分开
         fee.type = FeeType.findById("productcharges");
         fee.date = Dates.transactionDate(market, tds.get(0).text());
 

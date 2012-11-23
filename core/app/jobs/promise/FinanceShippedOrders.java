@@ -32,7 +32,7 @@ public class FinanceShippedOrders extends Job {
         if(StringUtils.isNotBlank(this.orderId))
             orders = Arrays.asList(Orderr.<Orderr>findById(this.orderId));
         else
-            orders = Orderr.find("state=? AND SIZE(fees)<=1", Orderr.S.SHIPPED).fetch(50);
+            orders = Orderr.find("SELECT o FROM Orderr o LEFT JOIN o.fees f WHERE o.state=? AND f.type.name!=?", Orderr.S.SHIPPED, "principal").fetch(50);
 
         for(Orderr ord : orders) {
             if(ord.state != Orderr.S.SHIPPED) continue;
