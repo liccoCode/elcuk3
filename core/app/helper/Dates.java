@@ -148,4 +148,17 @@ public class Dates {
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
         }
     }
+
+    public static Date transactionDate(M m, String dateStr) {
+        switch(m) {
+            case AMAZON_UK:
+            case AMAZON_FR:
+            case AMAZON_DE:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
+            case AMAZON_US:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("MMM dd, yyyy")).toDate();
+            default:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+        }
+    }
 }

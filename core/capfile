@@ -1,6 +1,11 @@
 role :e, 'root@e.easya.cc'
 namespace :play do
 
+  desc "Push Code"
+  task :push do
+    `git push ufd;git push bit`
+  end
+
   desc "部署 Play 代码到服务器"
   task :deploy, roles: :e do
     branch = `git branch | grep \\*`.split(' ')[1]

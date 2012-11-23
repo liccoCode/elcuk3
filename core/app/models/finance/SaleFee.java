@@ -33,6 +33,17 @@ import java.util.*;
 @Entity
 public class SaleFee extends GenericModel {
 
+    public SaleFee() {
+    }
+
+    public SaleFee(SaleFee fee) {
+        this.market = fee.market;
+        this.orderId = fee.orderId;
+        this.date = fee.date;
+        this.order = fee.order;
+        this.currency = fee.currency;
+        this.account = fee.account;
+    }
 
     @OneToOne
     public Account account;
@@ -118,118 +129,6 @@ public class SaleFee extends GenericModel {
     }
 
     /**
-     * 解析通过 Payments -> Transactions 中 7 天的数据进行 Amazon SaleFee 的提取
-     *
-     * @param file
-     * @param acc
-     * @return
-     */
-    public static List<SaleFee> flagFinanceParse(File file, Account acc, M market) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
-        Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();
-        try {
-            List<String> lines = FileUtils.readLines(file);
-            lines.remove(0);
-            lines.remove(0);
-            lines.remove(0);
-            lines.remove(0); //删除最上面的四行
-
-            int i = 0;
-            for(String line : lines) {
-                try {
-                    String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
-                    String typeStr = StringUtils.join(params[5].split(" "), "").toLowerCase();
-                    String typeStr4 = StringUtils.join(params[4].split(" "), "").toLowerCase();
-                    String orderId = params[1].trim();
-
-                    SaleFee fee = new SaleFee();
-                    fee.orderId = orderId;
-                    fee.account = acc;
-                    fee.market = market;
-
-                    FeeType type = cachedFeeType(typeStr, cachedFeeType);
-
-                    if(type == null) {
-                        if("productcharges".equals(typeStr4))
-                            fee.type = cachedFeeType("productcharges", cachedFeeType);
-                        else if("promorebates".equals(typeStr4))
-                            fee.type = cachedFeeType("promorebates", cachedFeeType);
-                        else {
-                            i++;
-                            Logger.warn("Type not found! [" + typeStr + "]");
-                            if(i < 5)
-                                Webs.systemMail("Type not found!",
-                                        "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]\r\b<br/>" +
-                                                "File: " + file.getAbsolutePath());
-                        }
-                    } else
-                        fee.type = type;
-
-                    if(StringUtils.isBlank(orderId)) {
-                        // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
-                        fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
-                    } else {
-                        fee.orderId = orderId;
-                        Orderr ord = Orderr.findById(fee.orderId);
-                        if(ord == null && !StringUtils.startsWith(orderId, "S"))
-                            Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
-                        else fee.order = ord;
-                    }
-
-                    float usdCost = 0;
-                    float cost = 0;
-                    String priceStr = params[6];
-
-                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的;
-                    fee.date = DateTime.parse(Webs.dateMap(params[0]), DateTimeFormat.forPattern("dd MMM yyyy")).withZone(Dates.timeZone(fee.market)).toDate();
-                    switch(market) {
-                        case AMAZON_UK:
-                            cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());
-                            usdCost = Currency.GBP.toUSD(cost);
-                            fee.currency = Currency.GBP;
-                            break;
-                        case AMAZON_DE:
-                        case AMAZON_FR:
-                        case AMAZON_ES:
-                        case AMAZON_IT:
-                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
-                            // 从 [EUR -1,61] 变成了 [€-1.21]
-                            /**
-                             * 我怕了 Amazon 了, 针对非 UK 市场, 一会 EUR 格式, 一会 € 格式, 所以在这里进行判断是哪一种格式再进行解析
-                             */
-                            if(StringUtils.contains(priceStr, "EUR")) {// [EUR -1,61] 格式
-                                cost = Webs.amazonPriceNumber(market, priceStr.substring(3).trim());
-                            } else { // [€-1.21] 格式
-                                cost = Webs.amazonPriceNumber(M.AMAZON_UK, priceStr.substring(1).trim());
-                            }
-                            usdCost = Currency.EUR.toUSD(cost);
-                            fee.currency = Currency.EUR;
-                            break;
-                        default:
-                            Logger.warn("SaleFee Can not parse market: " + acc.type);
-                    }
-                    fee.cost = cost;
-                    fee.usdCost = usdCost;
-
-                    if(StringUtils.isNotBlank(params[7])) fee.qty = NumberUtils.toInt(params[7]);
-
-                    fees.add(fee);
-                } catch(Exception e) {
-                    i++;//防止行数太多, 发送太多的邮件
-                    Logger.warn("SaleFee Parse Have Error! [" + file.getAbsolutePath() + "|" + line + "]");
-                    if(i < 5)
-                        Webs.systemMail("SaleFee Parse Have Error!", "<h3>" + file.getAbsolutePath() + "|" + line + "</h3>");
-                }
-            }
-        } catch(IOException e) {
-            Logger.warn("File is not exist!");
-        }
-        return fees;
-    }
-
-
-    /**
      * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表
      *
      * @param file
@@ -302,6 +201,12 @@ public class SaleFee extends GenericModel {
                             usdCost = Currency.GBP.toUSD(cost);
                             fee.currency = Currency.GBP;
                             break;
+                        case AMAZON_US:
+                            fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("MM/dd/yyyy")).toDate();
+                            cost = Webs.amazonPriceNumber(market, priceStr);
+                            usdCost = Currency.USD.toUSD(cost);
+                            fee.currency = Currency.USD;
+                            break;
                         case AMAZON_DE:
                         case AMAZON_FR:
                         case AMAZON_ES:
@@ -360,7 +265,7 @@ public class SaleFee extends GenericModel {
                 ps.setFloat(i++, f.usdCost);
                 ps.setString(i++, f.account.id + "");
                 ps.setString(i++, f.order == null ? null : f.order.orderId);
-                ps.setString(i++, f.type == null ? null : f.type.name);
+                ps.setString(i, f.type == null ? null : f.type.name);
                 ps.addBatch();
             }
             ps.executeBatch();

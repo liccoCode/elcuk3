@@ -56,12 +56,6 @@ public class AccountTest extends UnitTest {
     }
 
     //    @Test
-    public void testBriefFlatFinance() {
-        // 测试下载销售记录文件
-        acc.briefFlatFinance(M.AMAZON_US);
-    }
-
-    //    @Test
     public void testsellerCentralHomePage() throws IOException {
         // 测试登陆 Amazon 后台
         String html = HTTP.get(acc.cookieStore(), acc.type.sellerCentralHomePage());

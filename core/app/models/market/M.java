@@ -343,8 +343,8 @@ public enum M {
      * @return
      */
     public String flatFinance() {
-        //https://sellercentral.amazon.co.uk/gp/payments-account/export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
-        //https://sellercentral.amazon.co.uk/gp/payments-account//export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=
+        // 注意有一个 [//export-...]
+        //https://sellercentral.amazon.de/gp/payments-account//export-transactions.html?ie=UTF8&daysAgo=One&eventType=&mostRecentLast=0&pageSize=DownloadSize&subview=daysAgo&view=filter
         switch(this) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -647,6 +647,28 @@ public enum M {
             case AMAZON_US:
                 return String.format("https://sellercentral.%s/gp/ssof/knights/items-list.html/ref=ag_fbalist_cont_fbamnginv",
                         this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    /**
+     * 获取某一个订单的 Transaction 信息的页面
+     *
+     * @param orderId
+     * @return
+     */
+    public String oneTransactionFees(String orderId) {
+        //https://sellercentral.amazon.com/gp/payments-account/view-transactions.html?orderId=110-6815187-8483453&view=search&range=all
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return String.format("https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all", this.toString(), orderId);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

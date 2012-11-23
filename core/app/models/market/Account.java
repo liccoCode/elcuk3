@@ -343,26 +343,6 @@ public class Account extends Model {
         }
     }
 
-
-    /**
-     * 下载 7 天的 Flat Finance
-     *
-     * @return
-     */
-    public File briefFlatFinance(M market) {
-        String body = Account.downFileFromAmazon(this.type.flatFinance(), market, this);
-        DateTime dt = DateTime.now();
-        File f = new File(String.format("%s/%s/%s/%s_%s_%s.txt",
-                Constant.D_FINANCE, market, dt.toString("yyyy.MM"), this.username, this.id, dt.toString("dd_HH'h'")));
-        Logger.info("File Save to :[" + f.getAbsolutePath() + "]");
-        try {
-            FileUtils.writeStringToFile(f, body);
-        } catch(IOException e) {
-            //ignore
-        }
-        return f;
-    }
-
     /**
      * 下载 Past Settlements 页面的 Flat V2 文件; 这个方法一般属于修复类方法, 需要人工输入一个参数
      *
@@ -493,6 +473,7 @@ public class Account extends Model {
 
     /**
      * 判断后端是否登陆
+     *
      * @param doc
      * @return
      */

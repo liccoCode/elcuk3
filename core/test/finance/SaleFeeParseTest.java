@@ -23,14 +23,6 @@ import java.util.List;
  * Time: 1:51 PM
  */
 public class SaleFeeParseTest extends UnitTest {
-    //    @Test
-    public void testParse() {
-        Account acc = Account.findById(1l);
-        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.co.uk/2012.05/easyacc.eu@gmail.com_2012.05.03_21h.txt"), acc, M.AMAZON_DE);
-        for(SaleFee f : fees) {
-            System.out.println(String.format("OrderId: %s, Cost: %s %s, USD_Cost: %s USD", f.orderId, f.cost, f.currency.name(), f.usdCost));
-        }
-    }
 
     //    @Test
     public void testParseThrough() {
@@ -61,11 +53,5 @@ public class SaleFeeParseTest extends UnitTest {
     public void login() {
         Account acc = Account.findById(1l);
         acc.loginAmazonSellerCenter();
-    }
-
-    @Test
-    public void testAccountBriefFlatFinance() {
-        Account acc = Account.findById(1l);
-        acc.briefFlatFinance(M.AMAZON_UK);
     }
 }

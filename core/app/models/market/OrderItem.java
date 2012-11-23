@@ -4,7 +4,6 @@ import helper.*;
 import helper.Currency;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.*;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -12,7 +11,6 @@ import play.libs.F;
 import query.OrderItemQuery;
 
 import javax.persistence.*;
-import javax.persistence.Entity;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
