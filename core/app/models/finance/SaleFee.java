@@ -96,7 +96,7 @@ public class SaleFee extends GenericModel {
 
 
     /**
-     * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表
+     * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表; 解析 Flat File 而不是方便的 Flat2 是因为 DE 没有 T.T
      *
      * @param file
      * @return missing: account, order
