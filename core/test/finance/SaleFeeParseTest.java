@@ -40,6 +40,7 @@ public class SaleFeeParseTest extends UnitTest {
         assertEquals(M.AMAZON_DE, fee.market);
         assertEquals("principal", fee.type.name);
         assertEquals(30.99, fee.cost.doubleValue(), 0.01);
+        assertEquals(2d, fee.account.id.doubleValue(), 1);
 
 
         orderId = "SYSTEM";

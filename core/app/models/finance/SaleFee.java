@@ -99,7 +99,7 @@ public class SaleFee extends GenericModel {
      * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表; 解析 Flat File 而不是方便的 Flat2 是因为 DE 没有 T.T
      *
      * @param file
-     * @return missing: account, order
+     * @return missing: order(use order_id)
      */
     public static Map<String, List<SaleFee>> flatFileFinanceParse(File file, Account account) {
         Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<String, F.T2<AtomicInteger, List<SaleFee>>>();
@@ -142,17 +142,17 @@ public class SaleFee extends GenericModel {
 
                         // shipmentFeeType 通过 FBA 向外面发货产生的费用
                         String shipmentFeeType = params[12].toLowerCase();
-                        if(addOneFee(params[13], params[17], orderId, transactionType, market, fees, shipmentFeeType))
+                        if(addOneFee(params[13], params[17], orderId, transactionType, market, fees, account, shipmentFeeType))
                             continue;
 
                         // productcharge, principal, 产品销售额
                         String priceType = params[23].toLowerCase();
-                        if(addOneFee(params[24], params[17], transactionType, orderId, market, fees, priceType))
+                        if(addOneFee(params[24], params[17], transactionType, orderId, market, fees, account, priceType))
                             continue;
 
                         // item-relate 费用
                         String itemRelateFeeType = params[25].toLowerCase();
-                        addOneFee(params[26], params[17], transactionType, orderId, market, fees, itemRelateFeeType);
+                        addOneFee(params[26], params[17], transactionType, orderId, market, fees, account, itemRelateFeeType);
                     } else if("storage fee".equals(transactionType) || "refund reimbursal".equals(transactionType) ||
                             "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType)) {
 
@@ -161,13 +161,13 @@ public class SaleFee extends GenericModel {
                             if(!mapFees.containsKey(orderId))
                                 mapFees.put(orderId, new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(), new ArrayList<SaleFee>()));
                             F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
-                            if(addOneFee(params[35], params[17], transactionType, orderId, account.type, fees, transactionType/*不然会自动跳出*/))
+                            if(addOneFee(params[35], params[17], transactionType, orderId, account.type, fees, account, transactionType/*不然会自动跳出*/))
                                 continue;
                         }
 
-                        addOneFee(params[35], params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), transactionType);
+                        addOneFee(params[35], params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else if("disposalcomplete".equals(transactionType)) {
-                        addOneFee(params[35], params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), transactionType);
+                        addOneFee(params[35], params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else {
                         Webs.systemMail("Unkonw situation in Amazon FlatV2 Finance File", line);
                     }
@@ -205,7 +205,10 @@ public class SaleFee extends GenericModel {
      * @param subType
      * @return
      */
-    private static boolean addOneFee(String cost, String date, String transactionType, String orderId, M market, F.T2<AtomicInteger, List<SaleFee>> fees, String subType) {
+    private static boolean addOneFee(String cost, String date,
+                                     String transactionType, String orderId,
+                                     M market, F.T2<AtomicInteger, List<SaleFee>> fees,
+                                     Account acc, String subType) {
         if(StringUtils.isNotBlank(subType)) {
             FeeType feeType = FeeType(subType, transactionType, orderId);
             SaleFee fee = new SaleFee();
@@ -213,6 +216,7 @@ public class SaleFee extends GenericModel {
             fee.market = market;
             fee.currency = Currency.M(fee.market);
             fee.cost = NumberUtils.toFloat(cost);
+            fee.account = acc;
             fee.usdCost = fee.currency.toUSD(fee.cost);
             fee.type = feeType;
             fee.date = Dates.parseXMLGregorianDate(date);

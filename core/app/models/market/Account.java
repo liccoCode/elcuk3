@@ -3,7 +3,10 @@ package models.market;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
-import helper.*;
+import helper.Constant;
+import helper.FLog;
+import helper.HTTP;
+import helper.Webs;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -13,7 +16,6 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -344,25 +346,6 @@ public class Account extends Model {
     }
 
     /**
-     * 下载 Past Settlements 页面的 Flat V2 文件; 这个方法一般属于修复类方法, 需要人工输入一个参数
-     *
-     * @param market
-     * @param reportId 在页面可以查看到的 reportId
-     * @return
-     */
-    public File briefFlatV2Finance(M market, String reportId) {
-        String body = Account.downFileFromAmazon(this.type.flatV2Finance(reportId), market, this);
-        File f = new File(String.format("%s/%s/%s.txt", Constant.D_FINANCE, market, reportId));
-        Logger.info("FlatV2 File Save to :[%s]", f.getAbsolutePath());
-        try {
-            FileUtils.writeStringToFile(f, body);
-        } catch(IOException e) {
-            //ignore
-        }
-        return f;
-    }
-
-    /**
      * 此 Account 点击此 Listing 的 like 按钮
      *
      * @param listing
@@ -488,28 +471,6 @@ public class Account extends Model {
 
     public String prettyName() {
         return String.format("%s.%s", this.type.nickName(), this.username.split("@")[0]);
-    }
-
-    /**
-     * 在 Amazon 上通过 URL 下载文件
-     *
-     * @param url
-     * @param market
-     * @return
-     */
-    public static String downFileFromAmazon(String url, M market, Account acc) {
-        String body = "";
-        synchronized(acc.cookieStore()) {
-            acc.changeRegion(market);
-            body = HTTP.get(acc.cookieStore(), url);
-            // 还原
-            acc.changeRegion(acc.type);
-        }
-        if(StringUtils.isBlank(body)) {
-            Logger.warn("URL [%s] Download file error.", url);
-            throw new FastRuntimeException(String.format("Download [%s] error.", url));
-        }
-        return body;
     }
 
     /**

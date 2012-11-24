@@ -338,50 +338,6 @@ public enum M {
     }
 
     /**
-     * 下载 7 天内的 Transaction 数据
-     *
-     * @return
-     */
-    public String flatFinance() {
-        // 注意有一个 [//export-...]
-        //https://sellercentral.amazon.de/gp/payments-account//export-transactions.html?ie=UTF8&daysAgo=One&eventType=&mostRecentLast=0&pageSize=DownloadSize&subview=daysAgo&view=filter
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return "https://sellercentral." + this.toString() + "/gp/payments-account//export-transactions.html?ie=UTF8&pageSize=DownloadSize&daysAgo=Seven&subview=daysAgo&mostRecentLast=0&view=filter&eventType=";
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    /**
-     * 从 Past Settlements 页面下载 Flat File V2 文件进行 Finance 数据的补充
-     *
-     * @param reportId
-     * @return
-     */
-    public String flatV2Finance(String reportId) {
-        //https://sellercentral.amazon.co.uk/gp/reports/documents/_GET_ALT_FLAT_FILE_PAYMENT_SETTLEMENT_DATA__11567294004.txt?ie=UTF8&contentType=text%2Fxls
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return "https://sellercentral." + this.toString() + "/gp/reports/documents/_GET_ALT_FLAT_FILE_PAYMENT_SETTLEMENT_DATA__" + reportId + ".txt?ie=UTF8&contentType=text%2Fxls";
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    /**
      * Amazon 后台的订单页面
      *
      * @param oid
@@ -669,6 +625,27 @@ public enum M {
             case AMAZON_IT:
             case AMAZON_US:
                 return String.format("https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all", this.toString(), orderId);
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    /**
+     * 下载 14days Payments 数据的链接
+     *
+     * @return
+     */
+    public String pastSettlementsUrl() {
+        //https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return String.format("https://sellercentral.%s/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

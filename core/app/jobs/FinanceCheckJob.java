@@ -22,8 +22,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 用来抓取各个市场的 Finance 信息的任务;
- * 每隔 3h 抓取一次, 因为通过这种方式抓取的 Finance 信息一次文件只能拥有 600 个 Transaction, 所以需要增加更新频率来获取新的
+ * 用来触发更新 Shipped 与 Refund 的订单的第一步 Payment 信息;
+ * <pre>
+ *     Amazon Payment 信息分为两部获取:
+ *     1. 为通过 Shipped 与 Refund 的订单上 Amazon 后台页面, 区分抓取处理.
+ *     2. 监控不同账户的 Payments 页面, 如果找到变化就邮件通知, 然后让人手工
+ *        对这一批次的订单的 Payment 信息详细化; 因为只有在这份文档中, Amazon 才会
+ *        将所有订单的全部详细信息列举出来.
+ * </pre>
  * Transaction 的数据
  * 周期:
  * - 轮询周期: 1mn
