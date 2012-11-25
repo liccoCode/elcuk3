@@ -1,6 +1,5 @@
-package jobs;
+package jobs.promise;
 
-import jobs.promise.FinanceCrawlPromise;
 import models.market.Account;
 import org.joda.time.DateTime;
 import org.junit.Test;

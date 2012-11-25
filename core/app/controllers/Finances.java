@@ -1,22 +1,13 @@
 package controllers;
 
-import helper.Constant;
-import helper.Webs;
+import jobs.promise.FinanceCrawlPromise;
 import models.finance.SaleFee;
 import models.market.Account;
-import models.market.M;
-import models.view.Ret;
-import org.apache.commons.io.FileUtils;
-import play.Logger;
-import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,4 +26,15 @@ public class Finances extends Controller {
         render();
     }
 
+    //TODO 需要权限
+    public static void fixFinance(File file, long accId) {
+        Account acc = Account.findById(accId);
+        if(acc == null)
+            error("Error Account Id");
+
+        FinanceCrawlPromise worker = new FinanceCrawlPromise(acc, new Date());
+        Map<String, List<SaleFee>> feeMap = SaleFee.flatFileFinanceParse(file, acc);
+        worker.parseToDB(feeMap);
+        renderText("Deals %s Orders.", feeMap.keySet().size());
+    }
 }

@@ -37,7 +37,11 @@ public class Dates {
     }
 
     public static Date parseXMLGregorianDate(String expression) {
-        return df.newXMLGregorianCalendar(expression).toGregorianCalendar().getTime();
+        try {
+            return df.newXMLGregorianCalendar(expression).toGregorianCalendar().getTime();
+        } catch(Exception e) {
+            return new Date();
+        }
     }
 
     /**

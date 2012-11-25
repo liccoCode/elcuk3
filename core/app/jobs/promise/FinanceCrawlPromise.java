@@ -51,8 +51,20 @@ public class FinanceCrawlPromise extends Job {
             //TODO 通知没有成功
             Logger.warn("Amazon Payment Day 14 file download failed. [%s]", this.url);
         }
+        // TODO 将文件上传到 S3
 
         Map<String, List<SaleFee>> feeMap = SaleFee.flatFileFinanceParse(file.get(), this.account);
+        this.parseToDB(feeMap);
+
+    }
+
+    /**
+     * 将解析出来的 FeeMap 处理并存储进入 DB
+     *
+     * @param feeMap
+     */
+    public void parseToDB(Map<String, List<SaleFee>> feeMap) {
+        Logger.info("Begin to parse FeeMap to DB...");
         /**
          * 1. 首先将所有的设计到的订单的 SaleFee 对象全部删除;
          * 2. 再根据一个个订单的 SaleFee 重新录入 db
@@ -63,22 +75,34 @@ public class FinanceCrawlPromise extends Job {
             List<SaleFee> fees = feeMap.get(orderId);
             if(StringUtils.isBlank(orderId)) {
                 //ignore
+                Logger.warn("---------------------- Empty OrderId: " + orderId + "::" + fees);
             } else {
                 for(SaleFee fee : fees) fee.account = this.account;
-                if("SYSTEM".endsWith(orderId)) {
+                if("SYSTEM".equals(orderId)) {
                     SaleFee.batchSaveWithJDBC(fees);
                 } else {
-                    SaleFee.delete("order.orderId=?", orderId);
-                    SaleFee.batchSaveWithJDBC(fees);
+                    SaleFee.deleteStateOneSaleFees(orderId);
+                    // 这里不再做重复性检查是因为从 Amazon 回来的 day14 已经确保每一份都分开独立, 不会重复的了
+                    try {
+                        SaleFee.batchSaveWithJDBC(fees);
+                    } catch(Exception e) {
+                        Logger.warn("Order [%s] is not exist?", orderId);
+                    }
                 }
             }
         }
+        Logger.info("END parse FeeMap to DB...");
     }
 
+    /**
+     * 包含 Account 的 report 文明名
+     *
+     * @return
+     */
     public String fileName() {
         if(StringUtils.isBlank(this.url)) return "";
         String tailPart = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.url, "_GET_V2_SETTLEMENT_REPORT_DATA__")[1];
-        return StringUtils.split(tailPart, "?")[0];
+        return String.format("%s.%s", this.account.prettyName(), StringUtils.split(tailPart, "?")[0]);
     }
 
     /**

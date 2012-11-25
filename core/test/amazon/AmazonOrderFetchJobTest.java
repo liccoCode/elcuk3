@@ -4,7 +4,6 @@ import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import models.market.JobRequest;
 import org.junit.Test;
-import play.Play;
 import play.test.UnitTest;
 
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class AmazonOrderFetchJobTest extends UnitTest {
     @Test
     public void testParseOrder() {
         JobRequest job = new JobRequest();
-        job.path = Play.getFile("test/html/15285572344.txt").getPath();
+        job.path = "/Users/wyatt/Downloads/16061848184.txt";
         job.account = Account.findById(2l);
         new AmazonOrderFetchJob().callBack(job);
     }

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * 系统内的核心订单
@@ -30,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Orderr extends GenericModel {
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
+    public static final Pattern AMAZON_ORDERID = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
 
     /**
      * 订单的状态 State

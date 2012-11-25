@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * 记录在销售过程中, 不同市场产生的不同的费用;
@@ -110,6 +111,7 @@ public class SaleFee extends GenericModel {
             lines.remove(0);
             lines.remove(0);// 删除最上面的 2 行
 
+            List<String> emailLines = new ArrayList<String>();
             for(String line : lines) {
                 try {
 
@@ -126,7 +128,8 @@ public class SaleFee extends GenericModel {
                      */
                     String transactionType = params[6].toLowerCase();
                     String orderId = params[7];
-                    if("order".equals(transactionType) || "chargeback refund".equals(transactionType) || "refund".equals(transactionType)) {
+                    if("order".equals(transactionType) || "chargeback refund".equals(transactionType) ||
+                            "refund".equals(transactionType) || "adjustment".equals(transactionType)) {
                         M market = M.val(params[11].toLowerCase());
                         if(market == null) market = account.type;
 
@@ -154,27 +157,31 @@ public class SaleFee extends GenericModel {
                         String itemRelateFeeType = params[25].toLowerCase();
                         addOneFee(params[26], params[17], transactionType, orderId, market, fees, account, itemRelateFeeType);
                     } else if("storage fee".equals(transactionType) || "refund reimbursal".equals(transactionType) ||
-                            "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType)) {
+                            "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType) ||
+                            "removalcomplete".equals(transactionType)) {
 
                         // Refund Reimbursal, 有订单关联的
                         if(StringUtils.isNotBlank(orderId)) {
                             if(!mapFees.containsKey(orderId))
                                 mapFees.put(orderId, new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(), new ArrayList<SaleFee>()));
                             F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
-                            if(addOneFee(params[35], params[17], transactionType, orderId, account.type, fees, account, transactionType/*不然会自动跳出*/))
+                            if(addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, fees, account, transactionType/*不然会自动跳出*/))
                                 continue;
                         }
 
-                        addOneFee(params[35], params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
+                        addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else if("disposalcomplete".equals(transactionType)) {
-                        addOneFee(params[35], params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
+                        addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else {
-                        Webs.systemMail("Unkonw situation in Amazon FlatV2 Finance File", line);
+                        emailLines.add(line);
                     }
                 } catch(Exception e) {
-                    Logger.error("%s parse error.", line);
+                    emailLines.add(line);
+                    Logger.error("%s parse error. [%s]", Webs.E(e), line);
                 }
             }
+            if(emailLines.size() > 0)
+                Webs.systemMail("Unkonw situation in Amazon FlatV2 Finance File", StringUtils.join(emailLines, "\r\n"));
         } catch(IOException e) {
             Logger.warn("File is not exist!");
         }
@@ -186,11 +193,24 @@ public class SaleFee extends GenericModel {
             F.T2<AtomicInteger, List<SaleFee>> feesTuple = mapFees.get(key);
             if(!"SYSTEM".equals(key)) {
                 for(SaleFee fee : feesTuple._2)
-                    fee.qty = feesTuple._1.get();
+                    fee.qty = feesTuple._1.get() <= 0 ? 1 : feesTuple._1.get();
             }
             feesMap.put(key, feesTuple._2);
         }
         return feesMap;
+    }
+
+    /**
+     * 用来解析最后的 32 或者是 35 位的费用值; 因为 Amazon 的原因, 添加了三个值, 但是以前的文件缺没有
+     *
+     * @return
+     */
+    private static String lastPrice(String[] params) {
+        try {
+            return params[35];
+        } catch(Exception e) {
+            return params[32];
+        }
     }
 
     /**
@@ -264,7 +284,14 @@ public class SaleFee extends GenericModel {
                 ps.setInt(i++, f.qty);
                 ps.setFloat(i++, f.usdCost);
                 ps.setString(i++, f.account.id + "");
-                ps.setString(i++, f.order == null ? null : f.order.orderId);
+                // 处理订单外键, 例如 SYSTEM, S20-xx 之类的不需要设置外键
+                if(f.order == null) {
+                    if(Pattern.matches(Orderr.AMAZON_ORDERID.pattern(), f.orderId))
+                        ps.setString(i++, f.orderId);
+                    else
+                        ps.setString(i++, null);
+                } else
+                    ps.setString(i++, f.order.orderId);
                 ps.setString(i, f.type == null ? null : f.type.name);
                 ps.addBatch();
             }
@@ -272,6 +299,16 @@ public class SaleFee extends GenericModel {
         } catch(Exception e) {
             throw new DBException(e);
         }
+    }
+
+    /**
+     * 删除第一阶段 Finance 的 productcharges 与 amazon fee;
+     * 后续会有 princle 与具体的费用替代
+     *
+     * @param orderId
+     */
+    public static void deleteStateOneSaleFees(String orderId) {
+        SaleFee.delete("order.orderId=? AND type.name IN (?,?)", orderId, "productcharges", "amazon");
     }
 
     @Override
