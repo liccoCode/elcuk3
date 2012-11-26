@@ -1,5 +1,6 @@
 import helper.Currency;
 import helper.HTTP;
+import helper.S3;
 import jobs.ListingSchedulJob;
 import jobs.loop.OsTicketCreateCheck;
 import models.Privilege;
@@ -37,6 +38,7 @@ public class Bootstrap extends Job {
 
         HTTP.init();
         Privilege.init();
+        S3.init();
 
         if(Play.mode.isProd() || (Play.mode.isDev() && "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev"))))
             OsTicketCreateCheck.begin();

@@ -37,7 +37,11 @@ public class Dates {
     }
 
     public static Date parseXMLGregorianDate(String expression) {
-        return df.newXMLGregorianCalendar(expression).toGregorianCalendar().getTime();
+        try {
+            return df.newXMLGregorianCalendar(expression).toGregorianCalendar().getTime();
+        } catch(Exception e) {
+            return new Date();
+        }
     }
 
     /**
@@ -144,6 +148,19 @@ public class Dates {
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
             case AMAZON_US:
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("MM/dd/yyyy")).toDate();
+            default:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+        }
+    }
+
+    public static Date transactionDate(M m, String dateStr) {
+        switch(m) {
+            case AMAZON_UK:
+            case AMAZON_FR:
+            case AMAZON_DE:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
+            case AMAZON_US:
+                return DateTime.parse(dateStr, DateTimeFormat.forPattern("MMM dd, yyyy")).toDate();
             default:
                 return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
         }

@@ -15,6 +15,14 @@ import java.util.List;
 @Entity
 public class FeeType extends GenericModel {
 
+    public FeeType() {
+    }
+
+    public FeeType(String name, FeeType parent) {
+        this.name = name;
+        this.parent = parent;
+    }
+
     @Id
     public String name;
 
@@ -30,5 +38,9 @@ public class FeeType extends GenericModel {
     @PrePersist
     public void prePersist() {
         this.name = this.name.toLowerCase();
+    }
+
+    public static FeeType amazon() {
+        return FeeType.findById("amazon");
     }
 }

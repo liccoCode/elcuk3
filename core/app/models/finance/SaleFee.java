@@ -11,17 +11,18 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.GenericGenerator;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.db.DB;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * 记录在销售过程中, 不同市场产生的不同的费用;
@@ -33,6 +34,17 @@ import java.util.*;
 @Entity
 public class SaleFee extends GenericModel {
 
+    public SaleFee() {
+    }
+
+    public SaleFee(SaleFee fee) {
+        this.market = fee.market;
+        this.orderId = fee.orderId;
+        this.date = fee.date;
+        this.order = fee.order;
+        this.currency = fee.currency;
+        this.account = fee.account;
+    }
 
     @OneToOne
     public Account account;
@@ -85,256 +97,170 @@ public class SaleFee extends GenericModel {
 
 
     /**
-     * 根据新的 SaleFee 对数据库中存在的老的 SaleFee 进行删除处理.
-     *
-     * @param newFees
-     * @return 返回需要添加进入数据库的 Fees
-     */
-    public static List<SaleFee> clearOldSaleFee(List<SaleFee> newFees) {
-        /**
-         * 1. 将 newFees 涉及到的订单的 Fees 全部加载出来
-         * 2. 以订单为判断, 收集需要删除的 Fee 的订单. 标准为 newFees 的数量 >= 数据库中加载出的 Fees 的数量
-         * 3. 
-         */
-        Set<String> orderIds = new HashSet<String>(); // newFees 所涉及的 Order
-
-        for(SaleFee fe : newFees) {
-            orderIds.add(fe.orderId);
-        }
-        // 清理原来的 SaleFees, 确保每个 Order 的 SaleFee 只有一份不会重复
-        SaleFee.delete("orderId IN ('" + StringUtils.join(orderIds, "','") + "')");
-        return newFees;
-    }
-
-    private static FeeType cachedFeeType(String key, Map<String, FeeType> cached) {
-        FeeType type = null;
-        if(cached.containsKey(key)) {
-            type = cached.get(key);
-        } else {
-            type = FeeType.findById(key);
-            cached.put(key, type);
-        }
-        return type;
-    }
-
-    /**
-     * 解析通过 Payments -> Transactions 中 7 天的数据进行 Amazon SaleFee 的提取
+     * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表; 解析 Flat File 而不是方便的 Flat2 是因为 DE 没有 T.T
      *
      * @param file
-     * @param acc
-     * @return
+     * @return missing: order(use order_id)
      */
-    public static List<SaleFee> flagFinanceParse(File file, Account acc, M market) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
-        Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();
-        try {
-            List<String> lines = FileUtils.readLines(file);
-            lines.remove(0);
-            lines.remove(0);
-            lines.remove(0);
-            lines.remove(0); //删除最上面的四行
-
-            int i = 0;
-            for(String line : lines) {
-                try {
-                    String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
-                    String typeStr = StringUtils.join(params[5].split(" "), "").toLowerCase();
-                    String typeStr4 = StringUtils.join(params[4].split(" "), "").toLowerCase();
-                    String orderId = params[1].trim();
-
-                    SaleFee fee = new SaleFee();
-                    fee.orderId = orderId;
-                    fee.account = acc;
-                    fee.market = market;
-
-                    FeeType type = cachedFeeType(typeStr, cachedFeeType);
-
-                    if(type == null) {
-                        if("productcharges".equals(typeStr4))
-                            fee.type = cachedFeeType("productcharges", cachedFeeType);
-                        else if("promorebates".equals(typeStr4))
-                            fee.type = cachedFeeType("promorebates", cachedFeeType);
-                        else {
-                            i++;
-                            Logger.warn("Type not found! [" + typeStr + "]");
-                            if(i < 5)
-                                Webs.systemMail("Type not found!",
-                                        "Type not found! [Type:" + typeStr + ", Type4: " + typeStr4 + "]\r\b<br/>" +
-                                                "File: " + file.getAbsolutePath());
-                        }
-                    } else
-                        fee.type = type;
-
-                    if(StringUtils.isBlank(orderId)) {
-                        // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
-                        fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
-                    } else {
-                        fee.orderId = orderId;
-                        Orderr ord = Orderr.findById(fee.orderId);
-                        if(ord == null && !StringUtils.startsWith(orderId, "S"))
-                            Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
-                        else fee.order = ord;
-                    }
-
-                    float usdCost = 0;
-                    float cost = 0;
-                    String priceStr = params[6];
-
-                    // 这种格式的文档, UK,DE,FR 暂时日期格式都是一样的;
-                    fee.date = DateTime.parse(Webs.dateMap(params[0]), DateTimeFormat.forPattern("dd MMM yyyy")).withZone(Dates.timeZone(fee.market)).toDate();
-                    switch(market) {
-                        case AMAZON_UK:
-                            cost = Webs.amazonPriceNumber(market, priceStr.substring(1).trim());
-                            usdCost = Currency.GBP.toUSD(cost);
-                            fee.currency = Currency.GBP;
-                            break;
-                        case AMAZON_DE:
-                        case AMAZON_FR:
-                        case AMAZON_ES:
-                        case AMAZON_IT:
-                            // 原本应该传入 Market 为 DE/FR 的,但是 Amazon 自己更新了程序, 所有的 Finance 的价格解析都成为一个统一的格式
-                            // 从 [EUR -1,61] 变成了 [€-1.21]
-                            /**
-                             * 我怕了 Amazon 了, 针对非 UK 市场, 一会 EUR 格式, 一会 € 格式, 所以在这里进行判断是哪一种格式再进行解析
-                             */
-                            if(StringUtils.contains(priceStr, "EUR")) {// [EUR -1,61] 格式
-                                cost = Webs.amazonPriceNumber(market, priceStr.substring(3).trim());
-                            } else { // [€-1.21] 格式
-                                cost = Webs.amazonPriceNumber(M.AMAZON_UK, priceStr.substring(1).trim());
-                            }
-                            usdCost = Currency.EUR.toUSD(cost);
-                            fee.currency = Currency.EUR;
-                            break;
-                        default:
-                            Logger.warn("SaleFee Can not parse market: " + acc.type);
-                    }
-                    fee.cost = cost;
-                    fee.usdCost = usdCost;
-
-                    if(StringUtils.isNotBlank(params[7])) fee.qty = NumberUtils.toInt(params[7]);
-
-                    fees.add(fee);
-                } catch(Exception e) {
-                    i++;//防止行数太多, 发送太多的邮件
-                    Logger.warn("SaleFee Parse Have Error! [" + file.getAbsolutePath() + "|" + line + "]");
-                    if(i < 5)
-                        Webs.systemMail("SaleFee Parse Have Error!", "<h3>" + file.getAbsolutePath() + "|" + line + "</h3>");
-                }
-            }
-        } catch(IOException e) {
-            Logger.warn("File is not exist!");
-        }
-        return fees;
-    }
-
-
-    /**
-     * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表
-     *
-     * @param file
-     * @param acc
-     * @return
-     */
-    public static List<SaleFee> flat2FinanceParse(File file, Account acc, M market) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        Map<String, Orderr> cachedOrder = new HashMap<String, Orderr>();
-        Map<String, FeeType> cachedFeeType = new HashMap<String, FeeType>();
+    public static Map<String, List<SaleFee>> flatFileFinanceParse(File file, Account account) {
+        Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<String, F.T2<AtomicInteger, List<SaleFee>>>();
+        mapFees.put("SYSTEM", new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(1), new ArrayList<SaleFee>()));
 
         try {
             List<String> lines = FileUtils.readLines(file);
             lines.remove(0);
             lines.remove(0);// 删除最上面的 2 行
 
-            int i = 0;
+            List<String> emailLines = new ArrayList<String>();
             for(String line : lines) {
                 try {
+
                     String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
+                    /**
+                     * 1. Order
+                     * 2. Refund
+                     * 3. Storage Fee
+                     * 4. DisposalComplete
+                     * 5. Subscription Fee
+                     * 6. Refund Reimbursal
+                     * 7. BalanceAdjustment
+                     * 8. Chargeback Refund
+                     */
+                    String transactionType = params[6].toLowerCase();
                     String orderId = params[7];
-                    String priceStr = params[14];
-                    String dateStr = params[16];
-                    String qtyStr = params[22];
+                    if("order".equals(transactionType) || "chargeback refund".equals(transactionType) ||
+                            "refund".equals(transactionType) || "adjustment".equals(transactionType)) {
+                        M market = M.val(params[11].toLowerCase());
+                        if(market == null) market = account.type;
 
-                    String typeStr = StringUtils.replace(
-                            StringUtils.join(StringUtils.split(params[13].toLowerCase(), " "), ""),
-                            "fulfillment",
-                            "fulfilment");
-                    // 修正 FlatV2 与系统中 FeeType 名称不一样但费用是一样的费用名称
-                    // 将 FlatV2 中的 principal 转换成 productcharges 类型
-                    if("principal".equals(typeStr)) typeStr = "productcharges";
-                        // 将 FlatV2 中的 storagefee 修正为 fbastoragefee
-                    else if("storagefee".equals(typeStr)) typeStr = "fbastoragefee";
-                        // 将 FlatV2 中的 shippinghb 修正为 shippingholdback
-                    else if("shippinghb".equals(typeStr)) typeStr = "shippingholdback";
-                        // 将 FlatV2 中的 subscriptionfee 修正为 subscription
-                    else if("subscriptionfee".equals(typeStr)) typeStr = "subscription";
+                        if(!mapFees.containsKey(orderId))
+                            mapFees.put(orderId, new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(), new ArrayList<SaleFee>()));
+                        F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
 
-                    SaleFee fee = new SaleFee();
-                    fee.account = acc;
-                    fee.market = market;
+                        // 计算数量
+                        if(StringUtils.isNotBlank(params[22])) {
+                            fees._1.set(NumberUtils.toInt(params[22]));
+                            continue;
+                        }
 
-                    if(StringUtils.isBlank(orderId)) {
-                        // 当从文档中解析不到 orderId 的时候, 记录成 SYSTEM.
-                        fee.orderId = "SYSTEM_" + typeStr.toUpperCase();
+                        // shipmentFeeType 通过 FBA 向外面发货产生的费用
+                        String shipmentFeeType = params[12].toLowerCase();
+                        if(addOneFee(params[13], params[17], orderId, transactionType, market, fees, account, shipmentFeeType))
+                            continue;
+
+                        // productcharge, principal, 产品销售额
+                        String priceType = params[23].toLowerCase();
+                        if(addOneFee(params[24], params[17], transactionType, orderId, market, fees, account, priceType))
+                            continue;
+
+                        // item-relate 费用
+                        String itemRelateFeeType = params[25].toLowerCase();
+                        addOneFee(params[26], params[17], transactionType, orderId, market, fees, account, itemRelateFeeType);
+                    } else if("storage fee".equals(transactionType) || "refund reimbursal".equals(transactionType) ||
+                            "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType) ||
+                            "removalcomplete".equals(transactionType)) {
+
+                        // Refund Reimbursal, 有订单关联的
+                        if(StringUtils.isNotBlank(orderId)) {
+                            if(!mapFees.containsKey(orderId))
+                                mapFees.put(orderId, new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(), new ArrayList<SaleFee>()));
+                            F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
+                            if(addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, fees, account, transactionType/*不然会自动跳出*/))
+                                continue;
+                        }
+
+                        addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
+                    } else if("disposalcomplete".equals(transactionType)) {
+                        addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else {
-                        fee.orderId = orderId;
-                        Orderr ord = Orderr.findById(fee.orderId);
-                        if(ord == null && !StringUtils.startsWith(orderId, "S"))
-                            Logger.error("Order[" + orderId + "] is not exist when parsing SaleFee!");
-                        else fee.order = ord;
+                        emailLines.add(line);
                     }
-
-                    FeeType type = cachedFeeType(typeStr, cachedFeeType);
-                    if(type == null) {
-                        i++;
-                        Logger.warn("Type not found! [" + typeStr + "]");
-                        if(i < 5)
-                            Webs.systemMail("Type not found In FlatV2 Method!", "Type not found! [Type:" + typeStr + "]");
-                    } else
-                        fee.type = type;
-
-                    float usdCost = 0;
-                    float cost = 0;
-                    switch(market) {
-                        case AMAZON_UK:
-                            fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
-                            cost = Webs.amazonPriceNumber(market, priceStr);
-                            usdCost = Currency.GBP.toUSD(cost);
-                            fee.currency = Currency.GBP;
-                            break;
-                        case AMAZON_DE:
-                        case AMAZON_FR:
-                        case AMAZON_ES:
-                        case AMAZON_IT:
-                            fee.date = DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
-                            // Amazon 的每一次收款的 FlatV2 文件中的数据格式没有改变, 还是根据的价格来进行处理的, 所以还是按照 Market 来解析
-                            cost = Webs.amazonPriceNumber(market, priceStr);
-                            usdCost = Currency.EUR.toUSD(cost);
-                            fee.currency = Currency.EUR;
-                            break;
-                        default:
-                            Logger.warn("SaleFee Can not parse market: " + acc.type);
-                    }
-                    fee.usdCost = usdCost;
-                    fee.cost = cost;
-                    if(StringUtils.isNotBlank(qtyStr)) fee.qty = NumberUtils.toInt(qtyStr);
-
-                    fees.add(fee);
                 } catch(Exception e) {
-                    i++; //防止行数太多, 发送太多的邮件
-                    Logger.warn("SaleFee V2 Parse Have Error! [" + file.getAbsolutePath() + "|" + line + "]");
-                    if(i < 5)
-                        Webs.systemMail("SaleFee V2 Parse Have Error!", "<h3>" + file.getAbsolutePath() + "|" + line + "</h3>");
+                    emailLines.add(line);
+                    Logger.error("%s parse error. [%s]", Webs.E(e), line);
                 }
             }
-
+            if(emailLines.size() > 0)
+                Webs.systemMail("Unkonw situation in Amazon FlatV2 Finance File", StringUtils.join(emailLines, "\r\n"));
         } catch(IOException e) {
             Logger.warn("File is not exist!");
         }
 
 
-        return fees;
+        // 在返回前, 还需要将保留再 T2._1 中的 qty 设置到所有的 SaleFee 中
+        Map<String, List<SaleFee>> feesMap = new HashMap<String, List<SaleFee>>();
+        for(String key : mapFees.keySet()) {
+            F.T2<AtomicInteger, List<SaleFee>> feesTuple = mapFees.get(key);
+            if(!"SYSTEM".equals(key)) {
+                for(SaleFee fee : feesTuple._2)
+                    fee.qty = feesTuple._1.get() <= 0 ? 1 : feesTuple._1.get();
+            }
+            feesMap.put(key, feesTuple._2);
+        }
+        return feesMap;
     }
+
+    /**
+     * 用来解析最后的 32 或者是 35 位的费用值; 因为 Amazon 的原因, 添加了三个值, 但是以前的文件缺没有
+     *
+     * @return
+     */
+    private static String lastPrice(String[] params) {
+        try {
+            return params[35];
+        } catch(Exception e) {
+            return params[32];
+        }
+    }
+
+    /**
+     * 向 Map<String, List<T2> 中添加一个 SaleFee; subType 与 transactionType 优先选择 subType 如果没有自动选择 transactionType
+     *
+     * @param cost
+     * @param date
+     * @param transactionType
+     * @param orderId
+     * @param market
+     * @param fees
+     * @param subType
+     * @return
+     */
+    private static boolean addOneFee(String cost, String date,
+                                     String transactionType, String orderId,
+                                     M market, F.T2<AtomicInteger, List<SaleFee>> fees,
+                                     Account acc, String subType) {
+        if(StringUtils.isNotBlank(subType)) {
+            FeeType feeType = FeeType(subType, transactionType, orderId);
+            SaleFee fee = new SaleFee();
+            fee.orderId = orderId;
+            fee.market = market;
+            fee.currency = Currency.M(fee.market);
+            fee.cost = NumberUtils.toFloat(cost);
+            fee.account = acc;
+            fee.usdCost = fee.currency.toUSD(fee.cost);
+            fee.type = feeType;
+            fee.date = Dates.parseXMLGregorianDate(date);
+            fee.memo = transactionType;
+            fees._2.add(fee);
+            return true;
+        }
+        return false;
+    }
+
+    private static FeeType FeeType(String subType, String transactionType, String orderId) {
+        FeeType feeType = null;
+        if(StringUtils.isBlank(subType))
+            feeType = FeeType.findById(transactionType);
+        else
+            feeType = FeeType.findById(subType);
+        if(feeType == null) {
+            feeType = new FeeType(subType, FeeType.amazon()).save();
+            Webs.systemMail("New PriceType At " + orderId,
+                    String.format("FeeType=> transactionType: %s, priceType: %s", transactionType, subType));
+        }
+        return feeType;
+    }
+
 
     /**
      * 由于这个数据量比较大, 所以提供一个批处理保存.
@@ -347,7 +273,6 @@ public class SaleFee extends GenericModel {
                     "INSERT INTO SaleFee(id, cost, currency, `date`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for(SaleFee f : fees) {
-                saleFeeCheck(f);
                 int i = 1;
                 ps.setString(i++, UUID.randomUUID().toString());
                 ps.setFloat(i++, f.cost);
@@ -359,8 +284,15 @@ public class SaleFee extends GenericModel {
                 ps.setInt(i++, f.qty);
                 ps.setFloat(i++, f.usdCost);
                 ps.setString(i++, f.account.id + "");
-                ps.setString(i++, f.order == null ? null : f.order.orderId);
-                ps.setString(i++, f.type == null ? null : f.type.name);
+                // 处理订单外键, 例如 SYSTEM, S20-xx 之类的不需要设置外键
+                if(f.order == null) {
+                    if(Pattern.matches(Orderr.AMAZON_ORDERID.pattern(), f.orderId))
+                        ps.setString(i++, f.orderId);
+                    else
+                        ps.setString(i++, null);
+                } else
+                    ps.setString(i++, f.order.orderId);
+                ps.setString(i, f.type == null ? null : f.type.name);
                 ps.addBatch();
             }
             ps.executeBatch();
@@ -370,26 +302,22 @@ public class SaleFee extends GenericModel {
     }
 
     /**
-     * 对需要保存的 SaleFee 进行检查, 在 batchSaveWithJDBC 执行过程中进行处理
+     * 删除第一阶段 Finance 的 productcharges 与 amazon fee;
+     * 后续会有 princle 与具体的费用替代
+     *
+     * @param orderId
      */
-    private static void saleFeeCheck(SaleFee f) {
-        try {
-            if(f.type != null && "productcharges".equals(f.type.name) && f.cost <= 0 && f.order != null && StringUtils.isNotBlank(f.orderId)) {
-                if(f.order.state == Orderr.S.REFUNDED) {
-                    Logger.info("Order[%s] state is already %s", f.orderId, f.order.state);
-                } else {
-                    // 由于 SaleFee 更新使用的是 JDBC 所以这里不会有印象, 主要是为了能够让 IDE 能够找到 order.state write 的方法
-                    f.order.state = Orderr.S.REFUNDED;
-                    DB.execute("UPDATE Orderr SET state='" + Orderr.S.REFUNDED.name() + "' WHERE orderId='" + f.orderId + "'");
-                    Logger.info("Order[%s] state from %s to %s", f.orderId, f.order.state, Orderr.S.REFUNDED);
-                }
-            }
-        } catch(Exception e) {
-            String message = "Order[" + f.orderId + "] state update to REFUNDED failed!";
-            Logger.warn(message);
-            Webs.systemMail("SaleFeeCheck Error!", message + "\r\n<br/><br/>" + Webs.S(e));
-        }
+    public static void deleteStateOneSaleFees(String orderId) {
+        SaleFee.delete("order.orderId=? AND type.name IN (?,?)", orderId, "productcharges", "amazon");
+    }
 
+    /**
+     * 删除指定 OrderId 下的所有的 SaleFee
+     *
+     * @param orderId
+     */
+    public static void deleteOrderRelateFee(String orderId) {
+        SaleFee.delete("order.orderId=?", orderId);
     }
 
     @Override

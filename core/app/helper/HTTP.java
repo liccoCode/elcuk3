@@ -27,9 +27,12 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import play.Logger;
 import play.Play;
+import play.libs.F;
+import play.libs.IO;
 import play.libs.MimeTypes;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -196,6 +199,20 @@ public class HTTP {
             return new byte[]{};
         }
     }
+
+    public static F.Option<File> getDownFile(String url, String fileName, CookieStore cookie) {
+        HttpGet get = new HttpGet(url);
+        try {
+            File file = new File(String.format("%s/%s", Constant.TMP, fileName));
+            IO.copy(cookieStore(cookie).execute(get).getEntity().getContent(),
+                    new FileOutputStream(file));
+            return F.Option.Some(file);
+        } catch(IOException e) {
+            Logger.warn("HTTP.getDownFile[%s] [%s]", url, Webs.E(e));
+            return F.Option.None();
+        }
+    }
+
 
     /**
      * 通过 Post 进行下载

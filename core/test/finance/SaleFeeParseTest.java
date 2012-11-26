@@ -1,20 +1,16 @@
 package finance;
 
-import jobs.FinanceCheckJob;
-import jobs.KeepSessionJob;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.junit.Before;
 import org.junit.Test;
+import play.Play;
 import play.test.UnitTest;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,49 +19,66 @@ import java.util.List;
  * Time: 1:51 PM
  */
 public class SaleFeeParseTest extends UnitTest {
-    //    @Test
-    public void testParse() {
-        Account acc = Account.findById(1l);
-        List<SaleFee> fees = SaleFee.flagFinanceParse(new File("/Users/wyattpan/elcuk2-data/finance/amazon.co.uk/2012.05/easyacc.eu@gmail.com_2012.05.03_21h.txt"), acc, M.AMAZON_DE);
-        for(SaleFee f : fees) {
-            System.out.println(String.format("OrderId: %s, Cost: %s %s, USD_Cost: %s USD", f.orderId, f.cost, f.currency.name(), f.usdCost));
-        }
-    }
 
     //    @Test
-    public void testParseThrough() {
-        new KeepSessionJob().doJob();
-        new FinanceCheckJob().doJob();
-    }
-
-    //    @Test
-    public void testParseFlatV2() {
-        ///Volumes/wyatt/Downloads/9299174904.txt
-        Account acc = Account.findById(1l);
-        List<File> files = new ArrayList<File>(FileUtils.listFiles(new File("/Users/wyattpan/elcuk2-data/finance/auto"), new String[]{"txt"}, false));
-
-        for(File f1 : files) {
-            String name = f1.getName();
-            if(StringUtils.isBlank(name)) continue;
-            if(NumberUtils.toInt(name.split("\\.")[0].split("f")[1]) < 5) continue;
-
-            System.out.println("----------------" + f1.getAbsolutePath() + "/" + name + "-------------------");
-            List<SaleFee> fees = SaleFee.flat2FinanceParse(f1, acc, M.AMAZON_UK);
-            for(SaleFee f : fees) {
-                f.save();
-            }
-        }
-    }
-
-    @Before
-    public void login() {
-        Account acc = Account.findById(1l);
-        acc.loginAmazonSellerCenter();
+    public void testFlatFilePerformance() {
+        Account acc = Account.findById(2l);
+        //Test performance, not very important
+        SaleFee.flatFileFinanceParse(Play.getFile("test/html/15836299764_14day.txt"), acc);
     }
 
     @Test
-    public void testAccountBriefFlatFinance() {
+    public void testOnece() {
         Account acc = Account.findById(1l);
-        acc.briefFlatFinance(M.AMAZON_UK);
+        Map<String, List<SaleFee>> saleMap = SaleFee.flatFileFinanceParse(new File("/Users/wyatt/Downloads/15224217864.txt"), acc);
+    }
+
+    //    @Test
+    public void testFlatFile() {
+        Account acc = Account.findById(2l);
+        Map<String, List<SaleFee>> saleMap = SaleFee.flatFileFinanceParse(Play.getFile("test/html/15836299764_14day2.txt"), acc);
+
+        assertEquals(11, saleMap.size());
+
+        String orderId = "303-9140921-5296344";
+        List<SaleFee> normalOrders = saleMap.get(orderId);
+
+        SaleFee fee = normalOrders.get(0);
+        assertEquals(orderId, fee.orderId);
+        assertEquals(M.AMAZON_DE, fee.market);
+        assertEquals("principal", fee.type.name);
+        assertEquals(30.99, fee.cost.doubleValue(), 0.01);
+        assertEquals(2d, fee.account.id.doubleValue(), 1);
+        assertEquals(1, fee.qty, 0);
+
+
+        orderId = "SYSTEM";
+        normalOrders = saleMap.get(orderId);
+
+        assertEquals(7, normalOrders.size());
+
+        fee = normalOrders.get(0);
+        assertEquals("storage fee", fee.type.name);
+        assertEquals(-274.14, fee.cost.doubleValue(), 0.01);
+
+        orderId = "302-9413522-1521148";
+        normalOrders = saleMap.get(orderId);
+        fee = normalOrders.get(0);
+        assertEquals("refundcommission", fee.type.name);
+        assertEquals(-0.22, fee.cost.doubleValue(), 0.01);
+    }
+
+    @Test
+    public void testOrderId() {
+        String orderId = "303-4067942-6061902";
+        //303-4067942-6061902
+        Pattern orderPattern = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
+        assertEquals(true, Pattern.matches(orderPattern.pattern(), orderId));
+    }
+
+    //    @Before
+    public void login() {
+        Account acc = Account.findById(1l);
+        acc.loginAmazonSellerCenter();
     }
 }

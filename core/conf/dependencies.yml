@@ -21,6 +21,7 @@ require:
     - org.apache.httpcomponents -> httpmime 4.1.2
     - com.alibaba -> fastjson 1.1.19
     - net.sf.opencsv -> opencsv 2.3
+    - net.java.dev.jets3t -> jets3t 0.9.0
     - net.sf.barcode4j -> barcode4j 2.1:
         exclude:
          # apache ant 不需要, 我不需要构建
