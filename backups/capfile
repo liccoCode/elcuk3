@@ -21,7 +21,7 @@ namespace :bak do
   desc "对 Elcuk2 主系统的备份"
   task :e, hosts: h_e  do
     run "backup perform -t elcuk"
-    system("rsync -axzv --progress #{h_e}:~/backups/elcuk #{lobal_backups}/")
+    system("rsync -axzv --progress --delete #{h_e}:~/backups/elcuk #{lobal_backups}/")
     ['elcuk2-logs', 'elcuk2-data'].each do |dir|
       system("rsync -axzv --progress #{h_e}:~/#{dir} #{lobal_backups}/elcuk/")
     end
