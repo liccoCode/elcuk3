@@ -5,6 +5,7 @@ import jobs.FinanceCheckJob;
 import models.finance.SaleFee;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.jobs.Job;
 
 import java.util.Arrays;
@@ -31,11 +32,14 @@ public class FinanceShippedOrders extends Job {
         List<Orderr> orders = null;
         if(StringUtils.isNotBlank(this.orderId))
             orders = Arrays.asList(Orderr.<Orderr>findById(this.orderId));
-        else
-            orders = Orderr.find("SELECT o FROM Orderr o LEFT JOIN o.fees f WHERE o.state=? AND f.type.name!=?", Orderr.S.SHIPPED, "principal").fetch(50);
+        else {
+            // 对于没有付款记录的订单, 需要将排除解析第二步的 principal fee 的订单全部拿出来进行 fees 的解析并且费用的个数小于等于 1 的(解析过那么必定>=2)
+            orders = Orderr.find("SELECT o FROM Orderr o LEFT JOIN o.fees f WHERE o.state=? AND (f.type.name!=? AND SIZE(o.fees)<=1)", Orderr.S.SHIPPED, "principal").fetch(50);
+        }
 
         for(Orderr ord : orders) {
             if(ord.state != Orderr.S.SHIPPED) continue;
+            Logger.info("FinanceShippedOrders >> %s:%s", ord.orderId, ord.account.prettyName());
             List<SaleFee> fees = FinanceCheckJob.oneTransactionFee(
                     HTTP.get(ord.account.cookieStore(), ord.account.type.oneTransactionFees(ord.orderId)));
             for(SaleFee fee : fees) {

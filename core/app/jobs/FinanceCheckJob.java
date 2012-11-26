@@ -14,6 +14,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 
@@ -33,12 +34,12 @@ import java.util.List;
  * Transaction 的数据
  * 周期:
  * - 轮询周期: 1mn
- * - Duration: 10mn
+ * - Duration: 5mn
  * User: wyattpan
  * Date: 3/19/12
  * Time: 12:01 PM
  */
-@Every("5mn")
+@Every("1mn")
 public class FinanceCheckJob extends Job {
     //https://sellercentral.amazon.de/gp/reports/documents/_GET_V2_SETTLEMENT_REPORT_DATA__15836299764.txt?ie=UTF8&contentType=text%2Fxls
     //https://sellercentral.amazon.de/gp/reports/documents/_GET_V2_SETTLEMENT_REPORT_DATA__15522920744.txt?ie=UTF8&contentType=text%2Fxls
@@ -62,20 +63,24 @@ public class FinanceCheckJob extends Job {
      * @return 返回的 SaleFee 需要设置 Account 账户
      */
     public static List<SaleFee> oneTransactionFee(String html) {
-        Document doc = Jsoup.parse(html);
+        try {
+            Document doc = Jsoup.parse(html);
 
-        M market = M.val(doc.select("#marketplaceSelect option[selected]").text());
-        if(market == null)
-            market = M.val(doc.select("#merchant-website").text().trim());
+            M market = M.val(doc.select("#marketplaceSelect option[selected]").text());
+            if(market == null)
+                market = M.val(doc.select("#merchant-website").text().trim());
 
-        Element table = doc.select("#content-main-entities").first();
-        Elements rows = table.select("> table:eq(2) tr[class!=list-row-white]");
-        String orderId = doc.select("#orderId[value]").val();
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        for(Element row : rows)
-            fees.addAll(oneRowFee(market, orderId, row));
-
-        return fees;
+            Element table = doc.select("#content-main-entities").first();
+            Elements rows = table.select("> table:eq(2) tr[class!=list-row-white]");
+            String orderId = doc.select("#orderId[value]").val();
+            List<SaleFee> fees = new ArrayList<SaleFee>();
+            for(Element row : rows)
+                fees.addAll(oneRowFee(market, orderId, row));
+            return fees;
+        } catch(Exception e) {
+            Logger.warn("Is Account not login?");
+        }
+        return new ArrayList<SaleFee>();
     }
 
     /**

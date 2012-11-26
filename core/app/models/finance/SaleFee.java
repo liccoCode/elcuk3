@@ -311,6 +311,15 @@ public class SaleFee extends GenericModel {
         SaleFee.delete("order.orderId=? AND type.name IN (?,?)", orderId, "productcharges", "amazon");
     }
 
+    /**
+     * 删除指定 OrderId 下的所有的 SaleFee
+     *
+     * @param orderId
+     */
+    public static void deleteOrderRelateFee(String orderId) {
+        SaleFee.delete("order.orderId=?", orderId);
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
