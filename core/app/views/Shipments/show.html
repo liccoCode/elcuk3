@@ -210,15 +210,6 @@
             </form>
         #{/if}
     #{/ck}
-    #{if ship.state == models.procure.Shipment.S.CLEARANCE}
-        #{ck "shipments.ensuredone"}
-            <form action="@{Shipments.ensureDone()}" method="post">
-                <input type="hidden" name="id" value="${ship.id}">
-                #{authenticityToken /}
-                <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">确认到货</button>
-            </form>
-        #{/ck}
-    #{/if}
     #{ck 'shipments.cancel'}
         #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
             <form action="@{Shipments.cancel()}" method="post">
