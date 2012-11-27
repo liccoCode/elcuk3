@@ -10,7 +10,6 @@ import notifiers.FBAMails;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.FBAShipmentQuery;
 
@@ -18,7 +17,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -271,8 +269,10 @@ public class FBAShipment extends Model {
         /*没有 receivingAt 时间才更新, 否则每次 RECEIVEING 都更新当前时间..*/
         if(state == S.RECEIVING && this.receivingAt == null)
             this.receivingAt = new Date(); // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
-        else if(state == S.CLOSED || state == S.DELETED)
+        else if(state == S.CLOSED || state == S.DELETED) {
             this.closeAt = new Date();
+            this.shipment.ensureDone();
+        }
         if(this.state != state)
             FBAMails.shipmentStateChange(this, this.state, state);
         this.state = state;

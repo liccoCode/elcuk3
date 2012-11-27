@@ -704,8 +704,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 完成运输, 最终的确认
      */
     public void ensureDone() {
-        Validation.equals("shipments.ensureDone.state", this.state, "", Shipment.S.CLEARANCE);
-        if(Validation.hasErrors()) return;
         this.state = S.DONE;
         for(ShipItem item : this.items) {
             item.unit.stage = item.unit.nextStage();

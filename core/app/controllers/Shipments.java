@@ -310,23 +310,6 @@ public class Shipments extends Controller {
         show(fba.shipment.id);
     }
 
-    /**
-     * 确认运输单已经到库
-     *
-     * @param id
-     */
-    @Check("shipments.ensuredone")
-    public static void ensureDone(String id) {
-        checkAuthenticity();
-        Shipment ship = Shipment.findById(id);
-        ship.ensureDone();
-        checkShowError(ship);
-        flash.success("成功确认, 运输单已经确认运输完毕.");
-        new ElcukRecord(Messages.get("shipment.ensureDone"), Messages.get("shipment.ensureDone.msg", ship.id), ship.id).save();
-        Notification.notifies("运输单完成", String.format("运输单 %s 已经完成运输.", ship.id), Notification.PM);
-        show(id);
-    }
-
     public static void refreshProcuress(final String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
