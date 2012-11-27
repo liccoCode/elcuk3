@@ -267,25 +267,19 @@ public class FBAShipment extends Model {
      */
     public void isNofityState(S state) {
         /*没有 receivingAt 时间才更新, 否则每次 RECEIVEING 都更新当前时间..*/
-        if(state == S.RECEIVING && this.receivingAt == null)
+        if(state == S.RECEIVING && this.receivingAt == null) {
             this.receivingAt = new Date(); // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
-        else if(state == S.CLOSED || state == S.DELETED) {
+            // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
+            for(ShipItem itm : this.shipItems)
+                itm.unitStage(ProcureUnit.STAGE.INBOUND);
+        } else if(state == S.CLOSED || state == S.DELETED) {
             this.closeAt = new Date();
-            this.shipment.ensureDone();
+            for(ShipItem itm : this.shipItems)
+                itm.unitStage(ProcureUnit.STAGE.CLOSE);
         }
         if(this.state != state)
             FBAMails.shipmentStateChange(this, this.state, state);
         this.state = state;
-    }
-
-    /**
-     * 根据 Shipment 的装运输进度来判断 Amazon 是否已经签收
-     *
-     * @param shipment
-     */
-    public void checkReceipt(Shipment shipment) {
-        this.receiptAt = shipment.arriveDate;
-        this.save();
     }
 
     /**

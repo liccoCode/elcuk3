@@ -46,7 +46,7 @@ public enum iExpress {
         }
 
         @Override
-        public boolean isContainsClearance(String content) {
+        public boolean isClearance(String content) {
             return StringUtils.contains(content, "已完成清关");
         }
 
@@ -69,7 +69,6 @@ public enum iExpress {
     },
 
 
-
     FEDEX {
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
@@ -85,7 +84,7 @@ public enum iExpress {
         }
 
         @Override
-        public boolean isContainsClearance(String content) {
+        public boolean isClearance(String content) {
             return StringUtils.contains(content, "可以向有关国家机构申报本货件");
         }
 
@@ -133,7 +132,6 @@ public enum iExpress {
     },
 
 
-
     UPS {
         @Override
         public String trackUrl(String tracNo) {
@@ -158,7 +156,7 @@ public enum iExpress {
         }
 
         @Override
-        public boolean isContainsClearance(String content) {
+        public boolean isClearance(String content) {
             return StringUtils.contains(content, "清关机构");
         }
 
@@ -190,10 +188,17 @@ public enum iExpress {
      */
     public abstract String parseExpress(String html, String trackNo);
 
-    public abstract boolean isContainsClearance(String content);
+    /**
+     * 是否清关
+     *
+     * @param content
+     * @return
+     */
+    public abstract boolean isClearance(String content);
 
     /**
      * 检查是否已经签收, 如果签收了,时间是什么时候
+     *
      * @return
      */
     public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);

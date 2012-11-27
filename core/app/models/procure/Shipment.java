@@ -128,20 +128,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String toString() {
                 return "运输中";
             }
-
-            @Override
-            public S nextState(Shipment ship) {
-                // 如果在 SHIPPING 状态则检查是否处于清关
-                if(ship.internationExpress.isContainsClearance(ship.iExpressHTML)) {
-                    Mails.shipment_clearance(ship);
-                    return CLEARANCE;
-                }
-                if(ship.internationExpress.isDelivered(ship.iExpressHTML)._1) {
-                    // 有一些运输单还直接跳过清关状态, 对这个做兼容.
-                    return S.CLEARANCE.nextState(ship);
-                }
-                return this;
-            }
         },
         /**
          * 清关
@@ -150,25 +136,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             @Override
             public String toString() {
                 return "清关中";
-            }
-
-            @Override
-            public S nextState(Shipment ship) {
-                // 如果在 CLERANCE 检查是否有 Delivery 日期
-                F.T2<Boolean, DateTime> isDeliveredAndTime = ship.internationExpress.isDelivered(ship.iExpressHTML);
-                if(isDeliveredAndTime._1) {
-                    ship.arriveDate = isDeliveredAndTime._2.toDate();
-                    for(ShipItem item : ship.items) {
-                        item.arriveDate = ship.arriveDate;
-                    }
-                    // 为避免 NPE, 对 fba 初始化了集合
-                    for(FBAShipment fba : ship.fbas)
-                        fba.checkReceipt(ship);
-                    Mails.shipment_isdone(ship);
-                    return CLEARANCE;
-                } else {
-                    return this;
-                }
             }
         },
         /**
@@ -190,10 +157,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 return "取消";
             }
         };
-
-        public S nextState(Shipment ship) {
-            return this;
-        }
     }
 
     public enum P {
@@ -621,7 +584,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         for(ShipItem item : this.items) {
             item.shipDate = new Date();
-            item.unit.stage = item.unit.nextStage();
+            item.unit.stage = ProcureUnit.STAGE.SHIPPING;
         }
         for(FBAShipment fba : this.fbas) {
             if(fba.state != FBAShipment.S.WORKING) continue;
@@ -703,12 +666,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     /**
      * 完成运输, 最终的确认
      */
-    public void ensureDone() {
+    public void shipOver() {
         this.state = S.DONE;
-        for(ShipItem item : this.items) {
-            item.unit.stage = item.unit.nextStage();
-            item.unit.save();
-        }
+        // 当运输单完成运输, ProcureUnit 进入 SHIP_OVER 阶段
+        for(ShipItem item : this.items)
+            item.unitStage(ProcureUnit.STAGE.SHIP_OVER);
         this.save();
     }
 
@@ -719,18 +681,50 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public String refreshIExpressHTML() {
+    public String monitor() {
         Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(this.trackNo));
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
-        this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
-        this.state = this.state.nextState(this);
         try {
-            this.save();
+            this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
+            if(this.state == S.SHIPPING && this.internationExpress.isClearance(this.iExpressHTML)) {
+                // 正在运输,需要检查是否运输清关
+                this.clearance();
+            }
+            if(this.state == S.SHIPPING || this.state == S.CLEARANCE) {
+                // 清关, 检查是否送达; 因为有时候会跳过清关信息, 所以也需要将 SHIPPING 包括进来检查是否送达
+                F.T2<Boolean, DateTime> isDelivered = this.internationExpress.isDelivered(this.iExpressHTML);
+                if(isDelivered._1)
+                    this.delivered(isDelivered._2.toDate());
+            }
         } catch(Exception e) {
             FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
+    }
+
+    /**
+     * 完成清关
+     */
+    private void clearance() {
+        this.state = S.CLEARANCE;
+        this.save();
+        Mails.shipment_clearance(this);
+    }
+
+    /**
+     * 送达目的地
+     */
+    private void delivered(Date deliveredDate) {
+        this.arriveDate = deliveredDate;
+        this.state = S.DONE;
+        // 为避免 NPE, 对 fba 初始化了集合
+        for(FBAShipment fba : this.fbas) {
+            fba.receiptAt = deliveredDate;
+            fba.save();
+        }
+        this.save();
+        Mails.shipment_isdone(this);
     }
 
     public String title() {

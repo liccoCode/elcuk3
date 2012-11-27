@@ -67,7 +67,7 @@ public class Shipments extends Controller {
     }
 
 
-    @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba", "ensureDone"})
+    @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shipper());
@@ -322,7 +322,7 @@ public class Shipments extends Controller {
             public void invoke() {
                 // 由于使用 await 后, 就与原来不是同一个线程, 所以无法使用 Validate
                 Shipment ship = Shipment.findById(id);
-                ship.refreshIExpressHTML();
+                ship.monitor();
                 redirect("/shipments/show/" + ship.id);
             }
         });

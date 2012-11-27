@@ -71,8 +71,7 @@ public class AmazonFBAWatchPlusJob extends Job {
             // 使用 copy 为了在删除 map 中元素的时候不影响原有数据
             Map<String, F.T2<Integer, Integer>> fbaItemsCopy = new HashMap<String, F.T2<Integer, Integer>>(fbaItems);
 
-            // 处理 FBA 中一个 msku , 而系统中拥有多个 运输项目 对应一个 FBA 中的 msku 的情况
-
+            // 处理 FBA 中一个个 msku , 而系统中拥有多个 运输项目 对应一个 FBA 中的 msku 的情况
             for(ShipItem item : shipItems) {
                 F.T2<Integer, Integer> fbaItm = fbaItemsCopy.get(item.unit.selling.merchantSKU);
                 // 找到后删除 Map 中的, 避免 ShipItems 中的重复处理
@@ -80,7 +79,7 @@ public class AmazonFBAWatchPlusJob extends Job {
                 if(fbaItm == null) {
                     // TODO Amazon 上有系统中没有, 该做什么? 提醒? 现在很多数据都与 Amazon 上不一样, 邮件提醒会疯掉.
                 } else {
-                    // 当接收的 FBA 的数据大于系统内的数量的时候需要做处理. 由于没处理一次 FBA Map 中就少一个, 所以 FBA 中就处理一次.
+                    // 当 Amazon FBA 中的接收到的数量大于实际可接收的数量的时候, 需要将检查是否有相同的 msku 存在同一分运输单中, 需要分散到相同 msku 不同 ShipItem 上去.
                     if(fbaItm._1 > item.recivedQty) {
                         List<ShipItem> sameItemList = new ArrayList<ShipItem>();
                         sameItemList.add(item);

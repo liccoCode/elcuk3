@@ -116,6 +116,16 @@ public class ShipItem extends GenericModel {
     }
 
     /**
+     * 通过 ShipItem 通知其关联的 ProcureUnit 的阶段进行改变
+     *
+     * @param stage
+     */
+    public void unitStage(ProcureUnit.STAGE stage) {
+        this.unit.stage = stage;
+        this.unit.save();
+    }
+
+    /**
      * ShipItem 被取消;
      * 删除这一条 ShipItem 记录;
      * 同时删除此 ShipItem 对应的 FBA 中的记录

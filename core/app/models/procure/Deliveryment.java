@@ -197,6 +197,7 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 获取 Units 的产品类型
+     *
      * @return
      */
     public Set<Category> unitsCategorys() {
@@ -311,6 +312,7 @@ public class Deliveryment extends GenericModel {
         deliveryment.name = name.trim();
         deliveryment.units.addAll(units);
         for(ProcureUnit unit : deliveryment.units) {
+            // 将 ProcureUnit 添加进入 Deliveryment , ProcureUnit 进入 DELIVERY 阶段
             unit.toggleAssignTodeliveryment(deliveryment, true);
         }
         deliveryment.save();

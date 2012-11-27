@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 import helper.Dates;
 import helper.GTs;
 import helper.Webs;
-import models.market.Selling;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.JVMRandom;
@@ -233,7 +232,6 @@ public class TimelineEventSource {
                     // warnning
                     color = "FE502A";
                     break;
-                case PART_SHIPPING:
                 case SHIPPING:
                     // info
                     color = "3A87AD";

@@ -56,6 +56,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.sku = unit.sku;
         this.handler = unit.handler;
         this.whouse = unit.whouse;
+        // 刚刚创建 ProcureUnit 为 PLAN 阶段
         this.stage = STAGE.PLAN;
         this.attrs.planQty = unit.attrs.planQty - unit.qty();
         if(this.attrs.planQty < 0) this.attrs.planQty = 0;
@@ -105,21 +106,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 部分正在运输
-         */
-        PART_SHIPPING {
-            @Override
-            public String toString() {
-                return "部分运输";
-            }
-        },
-        /**
          * 运输完成
          */
         SHIP_OVER {
             @Override
             public String toString() {
                 return "运输完成";
+            }
+        },
+        /**
+         * 入库中
+         */
+        INBOUND {
+            @Override
+            public String toString() {
+                return "入库中";
             }
         },
         /**
@@ -267,6 +268,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id, this.shipItem.shipment.state));
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
+        // 如果被分开的 ProcureUnit 已经交货, 那么分开后也应该已经交货, 否则为 PLAN 阶段
         if(this.stage == STAGE.DELIVERY) unit.stage = this.stage;
         unit.save();
         new ElcukRecord(Messages.get("procureunit.split"), Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "").save();
@@ -314,6 +316,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
                 , this.id + "").save();
+        // 当执行交货操作, ProcureUnit 进入交货完成阶段
         this.stage = STAGE.DONE;
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);
@@ -343,44 +346,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return shipItem;
     }
 
-    /**
-     * <pre>
-     * 对 ProcureUnit 的状态进行改变, 集中在两个点:
-     * 1. 开始运输
-     * 2. 确认运输完成
-     * </pre>
-     *
-     * @return
-     */
-    public STAGE nextStage() {
-        /**
-         * 1. 如果状态为 CLOSE 与 SHIP_OVER 则不改变状态
-         * 2. 如果在 SHIPPING 与 PART_SHIPPING 则判断是否可以进入 SHIP_OVER 状态
-         * 3. 除开上面的情况外, 根据剩余库存进行判断是 SHIPPING 还是 PART_SHIPPING 状态
-         */
-        if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER) {
-            return this.stage;
-        } else if(this.stage == STAGE.SHIPPING || this.stage == STAGE.PART_SHIPPING) {
-            if(this.shipItem.shipment.state != Shipment.S.DONE)
-                return this.stage;
-            return STAGE.SHIP_OVER;
-        } else {
-            if(this.shipItem != null) {
-                if(this.qty() == this.shipItem.qty)
-                    return STAGE.SHIPPING;
-            } else {
-                return this.stage;
-            }
-        }
-        return this.stage;
-    }
 
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
 
     /**
-     * 设置 ProcureUnit 的 Deliveryment 的时候需要将 STAGE 也变化
+     * 将 ProcureUnit 添加到/移出 采购单,状态改变
      *
      * @param deliveryment
      */

@@ -1,6 +1,5 @@
 package jobs;
 
-import ext.vExtensions;
 import helper.Dates;
 import helper.Webs;
 import models.Jobex;
@@ -61,7 +60,7 @@ public class ShipmentSyncJob extends Job {
                         }
                     }
                 } else {
-                    ship.refreshIExpressHTML();
+                    ship.monitor();
                 }
             } catch(Exception e) {
                 Logger.warn(Webs.E(e));

@@ -2,6 +2,7 @@ package procure;
 
 import models.procure.Shipment;
 import org.joda.time.DateTime;
+import org.junit.Test;
 import play.test.UnitTest;
 
 /**
@@ -16,5 +17,10 @@ public class ShipmentTest extends UnitTest {
         System.out.println(Shipment.id());
         DateTime dt = DateTime.now();
         System.out.println(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()));
+    }
+
+    @Test
+    public void testMonitor() {
+        //TODO 测试 Shipment 的 Monitor 方法
     }
 }
