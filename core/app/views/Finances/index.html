@@ -2,9 +2,15 @@
 #{set title:'Finances'/}
 #{set 'moreScripts'}
 #{/set}
+
+#{flash_alert /}
+
 <div class="row">
-    <div class="span4 alert">
-        修复 Finance 数据
+    <div class="span4">
+        <h5 class="alert">修复 Finance 数据</h5>
+    </div>
+    <div class="span4">
+        <h5 class="alert">补充 Selling</h5>
     </div>
 </div>
 <div class="row">
@@ -24,6 +30,31 @@
                 <tr>
                     <td>
                         <button class="btn btn-primary">Ok</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div class="span4">
+        <form action="@{Finances.addSelling()}" method="post">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <td colspan="2">
+                        <input type="text" name="url" class="span4" placeHolder="http://www.amazon.co.uk/dp/B00AE3TZCW">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="text" name="sku" class="span2" placeHolder="SKU">
+                    </td>
+                    <td>
+                        <input type="text" name="upc" class="span2" placeHolder="UPC">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn btn-primary">添加</button>
                     </td>
                 </tr>
             </table>
