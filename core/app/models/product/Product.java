@@ -483,7 +483,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             return jsonObj.get("asin").getAsString();
         else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
             FLog.fileLog(String.format("%s.%s.times_%s.js", selling.merchantSKU, selling.account.id, times), jsonStr, FLog.T.SALES);
-            if(times > 12)
+            if(times > 30) // 尝试 30 次吧... 12 次还是会有 PENDING 的问题
                 throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
             Thread.sleep(2500);
             return getNewAsin(selling, fetchNewAsinParam, ++times);

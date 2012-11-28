@@ -9,7 +9,6 @@ import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
-import models.view.post.AnalyzePost;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -499,6 +498,33 @@ public class Selling extends GenericModel {
     public Float avgRating() {
         Double rating = (Double) DBUtils.row("select avg(rating) as avgRating from AmazonListingReview where listing_listingId=?", this.listing.listingId).get("avgRating");
         return rating == null ? 0f : Webs.scale2PointUp(rating.floatValue());
+    }
+
+    /**
+     * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
+     */
+    public Selling patchASelling(String sku, String upc, String asin, M market, Account acc, Product product) {
+        String sid = Selling.sid(String.format("%s,%s", sku, upc), market, acc);
+        if(Selling.findById(sid) != null)
+            throw new FastRuntimeException("Selling 已经存在, 不需要再添加!");
+        this.sellingId = sid;
+        this.asin = asin;
+        this.merchantSKU = String.format("%s,%s", sku, upc);
+        this.save();
+
+        Listing lst = Listing.findById(Listing.lid(asin, market));
+        if(lst == null) {
+            lst = new Listing(this, product);
+            lst.listingId = Listing.lid(asin, market);
+            lst.market = market;
+            lst.save();
+        }
+
+        this.listing = lst;
+        this.account = acc;
+        this.market = market;
+        this.aps.upc = upc;
+        return this.save();
     }
 
     /**
