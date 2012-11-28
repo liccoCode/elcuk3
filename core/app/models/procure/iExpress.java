@@ -31,23 +31,34 @@ public enum iExpress {
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
             if(StringUtils.isBlank(iExpressHTML)) return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            /**
+             * 只会检查最新的信息, 最上面的记录, 根据最新的信息判断是否已经发货
+             */
             Document doc = Jsoup.parse(iExpressHTML);
             Element thead = doc.select("thead:eq(1)").first();
             Element tbody = doc.select("tbody").first();
 
             // parse date
-            DateTime dt = DateTime.parse(thead.select("th:eq(0)").text(), DateTimeFormat.forPattern("E, MMM dd, yyyy").withLocale(Locale.CHINESE));
+            DateTime dt = DateTime.parse(String.format("%s %s", thead.select("th:eq(0)").text(), tbody.select("td:eq(3)").text()),
+                    DateTimeFormat.forPattern("E, MMM dd, yyyy HH:mm").withLocale(Locale.CHINESE));
 
             // is delivered
             String text = tbody.select("td:eq(1)").text();
-            boolean isDelivered = StringUtils.contains(text, "已派送并签收") || StringUtils.contains(text, "已经签收");
+            boolean isDelivered = this.deliverText(text);
 
             return new F.T2<Boolean, DateTime>(isDelivered, dt);
         }
 
+        private boolean deliverText(String text) {
+            return StringUtils.contains(text, "已派送并签收") ||
+                    (StringUtils.contains(text, "已经签收") && !StringUtils.contains(text, "部分快件已经签收"));
+
+        }
+
         @Override
         public boolean isClearance(String content) {
-            return StringUtils.contains(content, "已完成清关");
+            // 如果都完成运输了, 那清关也一定完成了.
+            return this.deliverText(content) || StringUtils.contains(content, "已完成清关");
         }
 
         @Override
@@ -78,14 +89,18 @@ public enum iExpress {
 
             DateTime dt = DateTime.parse(newestTr.select("td:eq(0)").text(), DateTimeFormat.forPattern("MMM dd, yyyy hh:mm a"));
             String text = newestTr.select("td:eq(1)").text();
-            boolean isDelivered = StringUtils.contains(text, "已送达");
+            boolean isDelivered = this.deliverText(text);
 
             return new F.T2<Boolean, DateTime>(isDelivered, dt);
         }
 
+        private boolean deliverText(String text) {
+            return StringUtils.contains(text, "已送达");
+        }
+
         @Override
         public boolean isClearance(String content) {
-            return StringUtils.contains(content, "可以向有关国家机构申报本货件");
+            return this.deliverText(content) || StringUtils.contains(content, "可以向有关国家机构申报本货件");
         }
 
         @Override
@@ -189,7 +204,7 @@ public enum iExpress {
     public abstract String parseExpress(String html, String trackNo);
 
     /**
-     * 是否清关
+     * 是否清关完成; 如果已经运输完成, 再调用检查清关完成, 因为已经签收,必定需要经过清关完成状态, 同时也会含有清关完成信息, 所以一定为清关完成.
      *
      * @param content
      * @return

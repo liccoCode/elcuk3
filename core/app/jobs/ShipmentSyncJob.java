@@ -60,6 +60,7 @@ public class ShipmentSyncJob extends Job {
                         }
                     }
                 } else {
+                    ship.trackWebSite();
                     ship.monitor();
                 }
             } catch(Exception e) {

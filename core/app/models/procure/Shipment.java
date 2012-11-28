@@ -156,7 +156,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String toString() {
                 return "取消";
             }
-        };
+        }
     }
 
     public enum P {
@@ -223,7 +223,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public Date planBeginDate;
 
     /**
-     * 货运开始日期
+     * 货运开始日期(实际发货日期)
      */
     @Expose
     public Date beginDate;
@@ -681,21 +681,38 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public String monitor() {
+    public S monitor() {
+        if(StringUtils.isBlank(this.iExpressHTML)) {
+            Logger.warn("Shipment %s do not have iExpressHTML.", this.id);
+            return this.state;
+        }
+        if(this.state == S.SHIPPING && this.internationExpress.isClearance(this.iExpressHTML)) {
+            // 正在运输,需要检查是否运输清关
+            this.clearance();
+        }
+        if(this.state == S.SHIPPING || this.state == S.CLEARANCE) {
+            // 清关, 检查是否送达; 因为有时候会跳过清关信息, 所以也需要将 SHIPPING 包括进来检查是否送达
+            F.T2<Boolean, DateTime> isDelivered = this.internationExpress.isDelivered(this.iExpressHTML);
+            if(isDelivered._1)
+                this.delivered(isDelivered._2.toDate());
+        }
+        return this.state;
+    }
+
+    /**
+     * 从外部网站获取需要的 html 代码信息
+     *
+     * @return
+     */
+    public String trackWebSite() {
+        if(StringUtils.isBlank(this.trackNo)) {
+            Logger.warn("Shipment %s do not have trackNo.", this.id);
+            return "";
+        }
         Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(this.trackNo));
         String html = this.internationExpress.fetchStateHTML(this.trackNo);
         try {
             this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
-            if(this.state == S.SHIPPING && this.internationExpress.isClearance(this.iExpressHTML)) {
-                // 正在运输,需要检查是否运输清关
-                this.clearance();
-            }
-            if(this.state == S.SHIPPING || this.state == S.CLEARANCE) {
-                // 清关, 检查是否送达; 因为有时候会跳过清关信息, 所以也需要将 SHIPPING 包括进来检查是否送达
-                F.T2<Boolean, DateTime> isDelivered = this.internationExpress.isDelivered(this.iExpressHTML);
-                if(isDelivered._1)
-                    this.delivered(isDelivered._2.toDate());
-            }
         } catch(Exception e) {
             FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
             throw new FastRuntimeException(Webs.S(e));

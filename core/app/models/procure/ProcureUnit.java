@@ -70,7 +70,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public enum STAGE {
         /**
-         * 计划阶段
+         * 计划阶段; 创建一个新的采购计划
          */
         PLAN {
             @Override
@@ -79,16 +79,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 采购阶段
+         * 采购阶段; 从采购计划列表添加进入采购单.
          */
         DELIVERY {
             @Override
             public String toString() {
-                return "采购中";
+                return "制作中";
             }
         },
         /**
-         * 完成了, 全部交货了
+         * 完成了, 全部交货了; 在采购单中进行交货
          */
         DONE {
             @Override
@@ -97,16 +97,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 全部运输
+         * 运输中; 运输单的点击开始运输
          */
         SHIPPING {
             @Override
             public String toString() {
-                return "全部运输";
+                return "运输中";
             }
         },
         /**
-         * 运输完成
+         * 运输完成; 运输单跟踪到派送;
          */
         SHIP_OVER {
             @Override
@@ -115,7 +115,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 入库中
+         * 入库中; Amazon FBA 的状态变更为 RECEVING
          */
         INBOUND {
             @Override
@@ -124,7 +124,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 关闭阶段, 不处理了
+         * 关闭阶段, 不处理了; Amazon FBA 的状态变更为 CLOSE, CANCEL
          */
         CLOSE {
             @Override

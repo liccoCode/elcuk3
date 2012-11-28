@@ -322,6 +322,7 @@ public class Shipments extends Controller {
             public void invoke() {
                 // 由于使用 await 后, 就与原来不是同一个线程, 所以无法使用 Validate
                 Shipment ship = Shipment.findById(id);
+                ship.trackWebSite();
                 ship.monitor();
                 redirect("/shipments/show/" + ship.id);
             }
