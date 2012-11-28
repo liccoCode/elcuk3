@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import play.test.UnitTest;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
@@ -34,11 +35,11 @@ public class AmazonFBAWatchJobTest extends UnitTest {
         AmazonFBAWatchJob.watchFBAs(acc, Collections.singletonList(fbaShipment));
     }
 
-//    @Test
+    //    @Test
     public void testlistFBAShipmentItems() {
         FBAShipment shipment = FBAShipment.findById(43l);
         shipment.receivingAt = DateTime.parse("2012-10-20").toDate();
-        AmazonFBAWatchPlusJob.syncFBAShipmentItems(shipment);
+        new AmazonFBAWatchPlusPromise(Arrays.asList(shipment)).syncFBAShipmentItems();
     }
 
     @Test

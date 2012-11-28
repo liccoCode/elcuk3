@@ -6,6 +6,7 @@
         <th name="working" class="sortable">制作中 <i class="icon-sort"></i></th>
         <th name="worked" class="sortable">交货 <i class="icon-sort"></i></th>
         <th name="way" class="sortable">在途 <i class="icon-sort"></i></th>
+        <th name="inbound" class="sortable">入库 <i class="icon-sort"></i></th>
         <th name="qty" class="sortable">在库 <i class="icon-sort"></i></th>
         <th name="reviewRatio" class="sortable">Reviews <i class="icon-sort"></i></th>
         <th name="rating" class="sortable">Rating <i class="icon-sort"></i></th>
@@ -23,7 +24,8 @@
         <td class="text-warning">${dto.working}</td>
         <td style="color:#FE502A;">${dto.worked}</td>
         <td class="text-info">${dto.way}</td>
-        <td style="color:#267B2F">${dto.qty}</td>
+        <td style="color:#CC6615">${dto.inbound}</td>
+        <td class="text-success">${dto.qty}</td>
         <td><a href="javascript:;" rel="tooltip" title="${dto.reviewRatio}">${dto.reviews}</a></td>
         <td>${dto.rating.format('#.##')}</td>
         <td>${dto.ps_cal.format('#.##')}</td>

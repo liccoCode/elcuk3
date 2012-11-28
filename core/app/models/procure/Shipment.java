@@ -669,8 +669,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void shipOver() {
         this.state = S.DONE;
         // 当运输单完成运输, ProcureUnit 进入 SHIP_OVER 阶段
-        for(ShipItem item : this.items)
+        for(ShipItem item : this.items) {
+            item.arriveDate = this.arriveDate;
             item.unitStage(ProcureUnit.STAGE.SHIP_OVER);
+        }
         this.save();
     }
 
@@ -734,6 +736,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     private void delivered(Date deliveredDate) {
         this.arriveDate = deliveredDate;
+        this.shipOver();
         this.state = S.DONE;
         // 为避免 NPE, 对 fba 初始化了集合
         for(FBAShipment fba : this.fbas) {
@@ -742,6 +745,25 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.save();
         Mails.shipment_isdone(this);
+    }
+
+    /**
+     * FBA 在运输单的状态跟踪抵达之前就已经签收了, 那么需要对运输单做状态改变;
+     * 如果这个运输单的所有 FBA 都进入签收后状态了, 那么这个运输单才可以进行 DONE
+     */
+    public void fbaReceviedBeforeShipmentDelivered() {
+        boolean makeDone = this.fbas.size() > 0;
+        for(FBAShipment fba : this.fbas) {
+            if(!fba.afterReceving()) {
+                makeDone = false;
+                break;
+            }
+        }
+        if(makeDone) {
+            this.state = S.DONE;
+            this.arriveDate = fbas.get(0).receiptAt;
+        }
+        this.save();
     }
 
     public String title() {

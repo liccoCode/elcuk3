@@ -165,10 +165,11 @@ public class TimelineEventSource {
          * @return
          */
         public Event startAndEndDate(String type) {
-            DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime());
+            DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime(), Dates.timeZone(null));
             this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.analyzeDTO.getPs_cal() : ((this.analyzeDTO.ps <= 0) ? 0.1f : this.analyzeDTO.ps)));
-            this.start = Dates.date2Date(planDt.toDate());
-            this.end = Dates.date2Date(planDt.plusHours((int) (this.lastDays * 24)).toDate());
+            this.start = Dates.date2DateTime(planDt.toDate());
+            // 如果不够卖到第二天, 那么就省略
+            this.end = Dates.date2DateTime(planDt.plusDays(this.lastDays.intValue()).toDate());
             this.durationEvent = true;
             return this;
         }
@@ -238,9 +239,14 @@ public class TimelineEventSource {
                     break;
                 case SHIP_OVER:
                     //mute
-                    color = "999999";
+                    color = "D9EDF7";
+                    break;
+                case INBOUND:
+                    color = "CC6615";
                     break;
                 case CLOSE:
+                    color = "999999";
+                    break;
                 default:
                     // error
                     color = "B94A48";

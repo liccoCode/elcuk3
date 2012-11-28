@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class AnalyzePost extends Post<AnalyzeDTO> {
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
+
     public AnalyzePost() {
         this.perSize = 20;
     }
@@ -112,6 +113,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
+                        else if(unit.stage == ProcureUnit.STAGE.INBOUND) dto.inbound += unit.inboundingQty();
                     }
 
                     // ps cal

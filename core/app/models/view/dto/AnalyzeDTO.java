@@ -33,7 +33,7 @@ public class AnalyzeDTO {
     public String fid;
 
     /**
-     *  Selling 的 ASIN (Option)
+     * Selling 的 ASIN (Option)
      */
     public String asin;
 
@@ -60,6 +60,11 @@ public class AnalyzeDTO {
      * 运输中的数量, 也可认为是运输出去了的数量
      */
     public int way = 0;
+
+    /**
+     * 入库中的数量
+     */
+    public int inbound = 0;
 
     /**
      * 库存
@@ -115,6 +120,7 @@ public class AnalyzeDTO {
         }
         return this.ps_cal;
     }
+
     /**
      * 计算系数内的两个 Turnover 值<br/>
      * 前提:
@@ -142,6 +148,7 @@ public class AnalyzeDTO {
 
     /**
      * 今天和昨天的销量的差别
+     *
      * @return ._1 销量差据个数; ._2: 今天是昨天销量的 %; ._3: 颜色; ._4: 上升/下降
      */
     public F.T4<Integer, Float, String, Boolean> day1Differ() {
@@ -180,6 +187,7 @@ public class AnalyzeDTO {
 
     /**
      * 返回 Analyzes 分析后的 DTO 的缓存值. 由于这个缓存是没有时间限制的, 所以就不需要重新计算了
+     *
      * @param type sku/sid
      * @return
      */
@@ -191,6 +199,7 @@ public class AnalyzeDTO {
 
     /**
      * 在缓存中根据 type 与 val 寻找 AnalyzeDTO
+     *
      * @param type
      * @param val
      * @return

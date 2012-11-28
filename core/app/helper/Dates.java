@@ -97,6 +97,12 @@ public class Dates {
         }
     }
 
+    /**
+     * 默认时区为 Asia/Shanghai
+     *
+     * @param market
+     * @return
+     */
     public static DateTimeZone timeZone(M market) {
         if(market == null) return DateTimeZone.forID("Asia/Shanghai");
         switch(market) {

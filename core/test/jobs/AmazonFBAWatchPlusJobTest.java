@@ -4,6 +4,8 @@ import models.procure.FBAShipment;
 import org.junit.Test;
 import play.test.UnitTest;
 
+import java.util.Arrays;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -17,6 +19,6 @@ public class AmazonFBAWatchPlusJobTest extends UnitTest {
      */
     @Test
     public void testMultiShipItemSameFBA() {
-        AmazonFBAWatchPlusJob.syncFBAShipmentItems(FBAShipment.findByShipmentId("FBA62GM8R"));
+        new AmazonFBAWatchPlusPromise(Arrays.asList(FBAShipment.findByShipmentId("FBA62GM8R"))).syncFBAShipmentItems();
     }
 }

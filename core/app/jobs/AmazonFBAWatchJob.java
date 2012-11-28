@@ -20,13 +20,13 @@ import static models.procure.FBAShipment.S;
 /**
  * Amazon FBA 的入库情况跟踪任务;
  * 周期:
- * - 轮询周期: 1h
- * - Duration: 3h
+ * - 轮询周期: 5mn
+ * - Duration: 1h
  * User: wyattpan
  * Date: 10/16/12
  * Time: 11:49 AM
  */
-@Every("1h")
+@Every("5mn")
 public class AmazonFBAWatchJob extends Job {
     @Override
     public void doJob() {
@@ -34,8 +34,9 @@ public class AmazonFBAWatchJob extends Job {
 
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            List<FBAShipment> shipments = FBAShipment.find("account=? AND state NOT IN (?,?,?,?)", acc, S.PLAN, S.CANCELLED, S.CLOSED, S.DELETED).fetch(50);
-            AmazonFBAWatchJob.watchFBAs(acc, shipments);
+            List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?,?,?)", acc, S.PLAN, S.CANCELLED, S.CLOSED, S.DELETED).fetch(50);
+            AmazonFBAWatchJob.watchFBAs(acc, fbas);
+            new AmazonFBAWatchPlusPromise(fbas).now();
         }
     }
 

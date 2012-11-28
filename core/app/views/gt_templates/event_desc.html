@@ -1,27 +1,27 @@
 <ul>
-#{if unit.attrs.planDeliveryDate}
     <li>预计交货时间: ${unit.attrs.planDeliveryDate}</li>
-#{/if}
-#{if unit.attrs.deliveryDate}
     <li>实际交货时间: ${unit.attrs.deliveryDate}</li>
-#{/if}
-#{if unit.attrs.planArrivDate}
+    <li>预计发货时间: ${unit.attrs.planShipDate}</li>
+    <li>实际发货时间: ${unit.shipItem?.shipDate}</li>
     <li>预计到库时间: ${unit.attrs.planArrivDate}</li>
+    <li>实际签收时间: ${unit.shipItem?.fba?.receiptAt?.datetime()}</li>
+    <li>预计采购量: ${unit.attrs.planQty}</li>
+    <li>${unit.stage}: ${unit.qty()}</li>
+#{if unit.stage == models.procure.ProcureUnit.STAGE.INBOUND}
+    <li>入库进度: ${unit.shipItem.recivedQty} / ${unit.qty()}</li>
 #{/if}
-    <li>采购量: ${unit.qty()}</li>
-#{elseif unit.stage == models.procure.ProcureUnit.STAGE.SHIPPING || unit.stage == models.procure.ProcureUnit.STAGE.SHIP_OVER}
-    <li>运输量: ${unit.qty()}</li>
-#{/elseif}
 #{if unit.deliveryment}
     <li>采购单:
-        <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank"><i class="icon-link"></i> ${unit.deliveryment.id}
+        <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank">
+            <i class="icon-link"></i> ${unit.deliveryment.id}
         </a>
     </li>
 #{/if}
 #{if unit.shipItem}
     <li>
         运输单:
-        <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}" target="_blank"><i class="icon-link"></i> ${unit.shipItem.shipment.id}
+        <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}" target="_blank">
+            <i class="icon-link"></i> ${unit.shipItem.shipment.id}
         </a>
     </li>
 #{/if}

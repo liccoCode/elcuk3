@@ -272,6 +272,7 @@ public class FBAShipment extends Model {
             // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
             for(ShipItem itm : this.shipItems)
                 itm.unitStage(ProcureUnit.STAGE.INBOUND);
+            this.shipment.fbaReceviedBeforeShipmentDelivered();
         } else if(state == S.CLOSED || state == S.DELETED) {
             this.closeAt = new Date();
             for(ShipItem itm : this.shipItems)
@@ -328,6 +329,18 @@ public class FBAShipment extends Model {
     @Override
     public String toString() {
         return this.shipmentId;
+    }
+
+    /**
+     * 在签收状态之后
+     *
+     * @return
+     */
+    public boolean afterReceving() {
+        if(this.state == S.RECEIVING || this.state == S.CLOSED || this.state == S.CANCELLED/*像签收有误差的时候人工取消,会是 CANCEL 状态*/)
+            return true;
+        else
+            return false;
     }
 
 

@@ -27,7 +27,7 @@ import java.util.Map;
  * 周期:
  * - 轮询周期: 5mn
  * - Duration:15mn
- * - Job Interval: 4h
+ * - Job Interval: 1h
  * </pre>
  * User: wyattpan
  * Date: 2/7/12
@@ -126,7 +126,8 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
     public int intervalHours() {
-        return 4; // 4 小时
+        // 从原来的 4h 调整为 1h , 为了尽快将 Analyzes 页面的入库与在库数量统一起来
+        return 1;
     }
 
     /**

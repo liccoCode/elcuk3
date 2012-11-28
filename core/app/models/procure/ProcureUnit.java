@@ -407,6 +407,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 正在入库的数量;
+     *
+     * @return
+     */
+    public int inboundingQty() {
+        return this.qty() - this.shipItem.recivedQty;
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return

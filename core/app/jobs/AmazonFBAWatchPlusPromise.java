@@ -3,13 +3,11 @@ package jobs;
 import helper.FBA;
 import helper.GTs;
 import helper.Webs;
-import models.Jobex;
-import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
 import notifiers.FBAMails;
 import play.Logger;
-import play.jobs.Every;
+import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -18,15 +16,18 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * FBA Shipment Items 的跟踪
- * 周期:
- * - 轮询周期: 20mn
- * - Duration: 1h
  * User: wyattpan
  * Date: 10/17/12
  * Time: 2:29 PM
  */
-@Every("20mn")
-public class AmazonFBAWatchPlusJob extends Job {
+public class AmazonFBAWatchPlusPromise extends Job {
+
+    private List<FBAShipment> fbas;
+
+    public AmazonFBAWatchPlusPromise(List<FBAShipment> fbas) {
+        this.fbas = fbas;
+    }
+
     /**
      * NOTE:
      * Fulfillment Outbound Shipment API section together share a maximum request quota of 30 and a restore rate of two requests every second.
@@ -34,17 +35,36 @@ public class AmazonFBAWatchPlusJob extends Job {
 
     @Override
     public void doJob() {
-        if(!Jobex.findByClassName(AmazonFBAWatchPlusJob.class.getName()).isExcute()) return;
-        List<Account> accounts = Account.openedSaleAcc();
-        for(Account acc : accounts) {
-            List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?,?) ORDER BY lastWatchAmazonItemsAt",
-                    acc, FBAShipment.S.PLAN, FBAShipment.S.CANCELLED, FBAShipment.S.DELETED).fetch(30);
+        if(this.fbas == null) this.fbas = new ArrayList<FBAShipment>();
+        this.syncFBAShipmentItems();
+    }
 
-            for(FBAShipment fba : fbas)
-                AmazonFBAWatchPlusJob.syncFBAShipmentItems(fba);
-
-            AmazonFBAWatchPlusJob.receivingCheck(fbas);
+    /**
+     * 同步 FBAs
+     */
+    public void syncFBAShipmentItems() {
+        for(FBAShipment fba : this.reloadContext()) {
+            this.syncFBAShipmentItems(fba);
+            try {
+                // 每处理一个暂停 500ms, 避免超过 2 req/s 的 limit
+                Thread.sleep(500);
+            } catch(InterruptedException e) {
+                //ignore
+            }
         }
+    }
+
+    /**
+     * 每一个 Promise 的 Context 需要自己的 JPA Transaction
+     *
+     * @return
+     */
+    private List<FBAShipment> reloadContext() {
+        if(this.fbas == null || this.fbas.size() == 0) return new ArrayList<FBAShipment>();
+        List<Long> fbaId = new ArrayList<Long>();
+        for(FBAShipment fba : fbas)
+            fbaId.add(fba.id);
+        return FBAShipment.find("id IN " + JpqlSelect.inlineParam(fbaId)).fetch();
     }
 
     /**
@@ -52,7 +72,7 @@ public class AmazonFBAWatchPlusJob extends Job {
      *
      * @param fbaShipment
      */
-    public static void syncFBAShipmentItems(FBAShipment fbaShipment) {
+    private void syncFBAShipmentItems(FBAShipment fbaShipment) {
         try {
             /**
              * 1. 找到 Amazon 上这个 ShipmentId 的所有产品的数量
@@ -108,7 +128,7 @@ public class AmazonFBAWatchPlusJob extends Job {
                 }
             }
         } catch(Exception e) {
-            Logger.warn("AmazonFBAWatchPlusJob.syncFBAShipmentItems Error. %s", Webs.E(e));
+            Logger.warn("AmazonFBAWatchPlusPromise.syncFBAShipmentItems Error. %s", Webs.E(e));
         }
     }
 
