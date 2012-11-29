@@ -8,7 +8,16 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
+ * <pre>
+ *
+ * 提供的参数:
+ * * from:Date
+ * * to:Date
+ * * search:String
+ * * page:int
+ * * perSize:int
+ * * count:long
+ * </pre>
  * User: wyattpan
  * Date: 9/4/12
  * Time: 5:10 PM

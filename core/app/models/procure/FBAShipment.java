@@ -10,6 +10,7 @@ import notifiers.FBAMails;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.FBAShipmentQuery;
 
@@ -384,6 +385,21 @@ public class FBAShipment extends Model {
         } catch(FBAInboundServiceMWSException e) {
             throw new FastRuntimeException(e);
         }
+    }
+
+    /**
+     * 入库进度
+     *
+     * @return
+     */
+    public F.T2<Integer, Integer> progress() {
+        int recevied = 0;
+        int total = 1;
+        for(ShipItem itm : this.shipItems) {
+            recevied += itm.recivedQty;
+            total += itm.qty;
+        }
+        return new F.T2<Integer, Integer>(recevied, total > 1 ? total - 1 : total);
     }
 
 

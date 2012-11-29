@@ -2,6 +2,7 @@ package ext;
 
 import helper.Dates;
 import models.procure.Deliveryment;
+import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import play.templates.JavaExtensions;
@@ -72,6 +73,34 @@ public class ProcuresHelper extends JavaExtensions {
             default:
                 return "333333";
         }
+    }
+
+    public static String rgb(FBAShipment.S state) {
+        if(state == null) return "333333";
+        switch(state) {
+            case PLAN:
+            case WORKING:
+                return "333333";
+            case SHIPPED:
+                return "49A4C6";
+            case IN_TRANSIT:
+                return "3DA4C2";
+            case DELIVERED:
+                return "108080";
+            case CHECKED_IN:
+                return "006ACC";
+            case RECEIVING:
+                return "F9A021";
+            case CLOSED:
+                return "5BB75B";
+            case CANCELLED:
+                return "C09853";
+            case DELETED:
+                return "BD4A48";
+            default:
+                return "333333";
+        }
+
     }
 
     /**

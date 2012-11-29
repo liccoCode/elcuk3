@@ -1,4 +1,4 @@
-#{set delete: fba.state in [models.procure.FBAShipment.S.CANCELLED, models.procure.FBAShipment.S.DELETED]/}
+#{set delete: fba.state in [models.procure.FBAShipment.S.DELETED]/}
 #{if delete}
     #{error_row title:fba.account.type.name() + ' FBA ' + fba.shipmentId /}
 #{/if}

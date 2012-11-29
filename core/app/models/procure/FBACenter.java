@@ -1,5 +1,6 @@
 package models.procure;
 
+import helper.DBUtils;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -8,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * FBA 仓库. 每一个 FBAShipment 都会关联的
@@ -74,6 +76,7 @@ public class FBACenter extends Model {
 
     /**
      * 向当前 FBA Center 发货的 FBA 数量
+     *
      * @return T2: _.1: 数量. _.2: FBA Ids
      */
     public F.T2<Long, List<String>> fbas() {
@@ -81,7 +84,7 @@ public class FBACenter extends Model {
         List<String> shipmentIds = new ArrayList<String>();
         for(FBAShipment shipment : shipments)
             shipmentIds.add(shipment.shipmentId);
-        return new F.T2<Long, List<String>>((long)shipments.size(), shipmentIds);
+        return new F.T2<Long, List<String>>((long) shipments.size(), shipmentIds);
     }
 
     public String codeToCountry() {
@@ -116,6 +119,15 @@ public class FBACenter extends Model {
 
     public static FBACenter findByCenterId(String centerId) {
         return FBACenter.find("centerId=?", centerId).first();
+    }
+
+    public static List<String> centerIds() {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT centerId FROM FBACenter");
+        List<String> ids = new ArrayList<String>();
+        for(Map<String, Object> row : rows) {
+            ids.add(row.get("centerId").toString());
+        }
+        return ids;
     }
 
 }

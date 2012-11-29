@@ -1,0 +1,97 @@
+#{extends 'main_full.html'/}
+#{set title:'Amazon FBA (' + fbas.size() + ')' /}
+#{set 'moreScripts'}
+#{/set}
+<form method="post" action="@{FBAs.index()}">
+    <div class="row">
+        <div class="input-prepend span2">
+            <span class="add-on">From:</span>
+            <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
+        </div>
+        <div class="input-prepend span2">
+            <span class="add-on">To:</span>
+            <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
+        </div>
+        <div class="span2">
+        #{pickMarkets name:'p.market', blank:true, class:'span2'/}
+        </div>
+        <div class="span2">
+            <select name="p.states" class="span2" multiple="multiple">
+                <option value="">State</option>
+            #{list items:models.procure.FBAShipment.S.values()}
+                <option ${p.states.contains(_) ? 'selected' : ''} value="${_}">${_}</option>
+            #{/list}
+            </select>
+        </div>
+
+        <div class="span1">
+            <select name="p.centerId" class="span1">
+                <option value="">CenterId</option>
+            #{list items:centerIds}
+                <option ${p.centerId == _ ? "selected" : ""} value="${_}">${_}</option>
+            #{/list}
+            </select>
+        </div>
+
+        <div class="span2">
+            <label class="inline checkbox">
+                <input ${p.receiptOverTime ? "checked" : ""}  type="checkbox" name="p.receiptOverTime" value="true">
+                签收超时
+            </label>
+            <label class="inline checkbox">
+                <input ${p.receiveOverTime ? "checked" : ""} type="checkbox" name="p.receiveOverTime" value="true">
+                入库超时
+            </label>
+        </div>
+
+        <div class="input-append input-prepend span2">
+            <span class="add-on"><i class="icon-search"></i></span>
+            <input type="text" name="p.search" class="span2" placeHolder="SKU,FBA" value="${p.search}">
+            <button class="btn btn-primary" data-loading="">搜索</button>
+        </div>
+    </div>
+</form>
+
+<div class="row-fluid">
+    <table class="table table-bordered table-condensed">
+        <tr>
+            <th>#</th>
+            <th>ShipmentId</th>
+            <th>运输单</th>
+            <th>CenterId</th>
+            <th>签收时间</th>
+            <th>签收入库时长</th>
+            <th>入库时间</th>
+            <th>入库关闭时长</th>
+            <th>关闭时间</th>
+            <th>入库进度</th>
+            <th>状态</th>
+            <th>市场</th>
+        </tr>
+    #{list items:fbas, as:'fba'}
+        <tr>
+            <td>${fba.id}</td>
+            <td><a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a></td>
+            <td><a href="@{Shipments.show()}/${fba.shipment?.id}" target="_blank">${fba.shipment?.id}</a></td>
+            <td>${fba.centerId}</td>
+            <td>${fba.receiptAt.date()}</td>
+            <td>${fba.receivingAt && fba.receiptAt ? (fba.receivingAt - fba.receiptAt) + " days" : ""}</td>
+            <td>${fba.receivingAt.date()}</td>
+            <td>${fba.receivingAt && fba.closeAt ? (fba.closeAt - fba.receivingAt) + " days" : ""}</td>
+            <td>${fba.closeAt.date()}</td>
+            #{set t2:fba.progress()/}
+            <td>
+                <div class="progress progress-striped" style="margin-bottom:0;">
+                    <div class="bar" style="width: ${(t2._1 / t2._2) * 100}%;">
+                        <p class="text-error">
+                        ${t2._1} / ${t2._2}
+                        </p>
+                    </div>
+                </div>
+            </td>
+            <td style="color:${'#' + fba.state.rgb()}">${fba.state}</td>
+            <td>${fba.account.type}</td>
+        </tr>
+    #{/list}
+    </table>
+</div>
