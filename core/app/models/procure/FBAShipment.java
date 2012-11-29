@@ -266,9 +266,12 @@ public class FBAShipment extends Model {
      * @param state
      */
     public void isNofityState(S state) {
-        /*没有 receivingAt 时间才更新, 否则每次 RECEIVEING 都更新当前时间..*/
-        if(state == S.RECEIVING && this.receivingAt == null) {
-            this.receivingAt = new Date(); // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
+        // 每一次的碰到 RECEIVING 状态都去检查一次的 ShipItem.unit 的阶段
+        if(state == S.RECEIVING) {
+            if(this.receivingAt == null)
+                // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
+                this.receivingAt = new Date();
+
             // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
             for(ShipItem itm : this.shipItems)
                 itm.unitStage(ProcureUnit.STAGE.INBOUND);

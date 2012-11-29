@@ -1,5 +1,6 @@
 package jobs;
 
+import jobs.promise.AmazonFBAWatchPlusPromise;
 import models.procure.FBAShipment;
 import org.junit.Test;
 import play.test.UnitTest;

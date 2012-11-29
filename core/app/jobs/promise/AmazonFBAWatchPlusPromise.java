@@ -1,4 +1,4 @@
-package jobs;
+package jobs.promise;
 
 import helper.FBA;
 import helper.GTs;

@@ -2,6 +2,7 @@ package jobs;
 
 import helper.FBA;
 import helper.Webs;
+import jobs.promise.AmazonFBAWatchPlusPromise;
 import models.Jobex;
 import models.market.Account;
 import models.procure.FBAShipment;

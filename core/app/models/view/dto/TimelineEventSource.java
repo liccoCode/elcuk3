@@ -239,7 +239,7 @@ public class TimelineEventSource {
                     break;
                 case SHIP_OVER:
                     //mute
-                    color = "D9EDF7";
+                    color = "F9AB3A";
                     break;
                 case INBOUND:
                     color = "CC6615";

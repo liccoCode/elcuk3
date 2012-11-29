@@ -1,5 +1,6 @@
 package jobs;
 
+import jobs.promise.AmazonFBAWatchPlusPromise;
 import models.market.Account;
 import models.procure.FBAShipment;
 import org.joda.time.DateTime;

@@ -1,6 +1,5 @@
 package models;
 
-import play.cache.*;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -135,7 +134,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("shipments.deploytoamazon", "创建 FBA"));
         privileges.add(new Privilege("shipments.deployfba", "删除 FBA"));
         privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));
-        privileges.add(new Privilege("shipments.ensuredone", "确认运输完成"));
         privileges.add(new Privilege("shipments.movefba", "转移 FBA"));
 
         // Notification
