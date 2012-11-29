@@ -13,6 +13,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -166,16 +167,39 @@ public class TimelineEventSource {
          */
         public Event startAndEndDate(String type) {
             DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime(), Dates.timeZone(null));
-            this.lastDays = Webs.scale2PointUp((isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty) / ("sku".equals(type) ? this.analyzeDTO.getPs_cal() : ((this.analyzeDTO.ps <= 0) ? 0.1f : this.analyzeDTO.ps)));
-            this.start = Dates.date2DateTime(planDt.toDate());
+            if(this.unit.stage == ProcureUnit.STAGE.INBOUND)
+                this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.shipItem.recivedQty) / ("sku".equals(type) ? this.skuPS() : this.sidPS()));
+            else
+                this.lastDays = Webs.scale2PointUp((this.unit.qty() / ("sku".equals(type) ? this.skuPS() : this.sidPS())));
+            this.start = add8Hour(planDt.toDate());
             // 如果不够卖到第二天, 那么就省略
-            this.end = Dates.date2DateTime(planDt.plusDays(this.lastDays.intValue()).toDate());
+//            this.end = new DateTime(planDt.plusDays(this.lastDays.intValue()).toDate()).toString();
+            this.end = add8Hour(planDt.plusDays(this.lastDays.intValue()).toDate());
             this.durationEvent = true;
             return this;
         }
 
+
         private boolean isEnsureQty() {
             return (this.unit.attrs != null && this.unit.attrs.qty != null);
+        }
+
+        private Float skuPS() {
+            return this.analyzeDTO.getPs_cal();
+        }
+
+        private Float sidPS() {
+            return (this.analyzeDTO.ps <= 0) ? 0.1f : this.analyzeDTO.ps;
+        }
+
+        /**
+         * 自动为时间添加 8h 变为北京时间
+         * PS: 不知为何, 按照 Simile Timeline 的文档, 如何设置时间格式都会少 8 个小时, 所以就如此修补了
+         *
+         * @return
+         */
+        private String add8Hour(Date date) {
+            return new DateTime(date).plusHours(8).toString("yyyy-MM-dd HH:mm:ss");
         }
 
         /**
@@ -190,7 +214,7 @@ public class TimelineEventSource {
                     this.unit.stage,
                     this.lastDays, this.unit.cooperator.name,
                     this.unit.sid,
-                    (isEnsureQty() ? this.unit.attrs.qty : this.unit.attrs.planQty),
+                    this.unit.qty(),
                     (isEnsureQty() ? "Qty" : "PlanQty"));
             /**
              * 1. 预计交货时间
@@ -282,10 +306,10 @@ public class TimelineEventSource {
      */
     public static Event currentQtyEvent(AnalyzeDTO analyzeDTO, String type) {
         Event currenEvent = new Event();
-        currenEvent.start = Dates.date2Date();
+        currenEvent.start = currenEvent.add8Hour(new Date());
         float validPs = ("sku".equals(type) ? analyzeDTO.getPs_cal() : analyzeDTO.ps);
         float days = Webs.scale2PointUp(analyzeDTO.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
-        currenEvent.end = Dates.date2Date(DateTime.now().plusHours((int) (days * 24)).toDate());
+        currenEvent.end = currenEvent.add8Hour(DateTime.now().plusHours((int) (days * 24)).toDate());
         currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", analyzeDTO.qty, validPs, days);
         currenEvent.description = "No Desc.";
         currenEvent.color("267B2F");

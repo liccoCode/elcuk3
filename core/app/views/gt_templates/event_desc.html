@@ -6,10 +6,13 @@
     <li>预计到库时间: ${unit.attrs.planArrivDate}</li>
     <li>实际签收时间: ${unit.shipItem?.fba?.receiptAt?.datetime()}</li>
     <li>预计采购量: ${unit.attrs.planQty}</li>
-    <li>${unit.stage}: ${unit.qty()}</li>
 #{if unit.stage == models.procure.ProcureUnit.STAGE.INBOUND}
+    <li>${unit.stage}: ${unit.qty() - unit.shipItem.recivedQty} (进度条逐渐减少)</li>
     <li>入库进度: ${unit.shipItem.recivedQty} / ${unit.qty()}</li>
 #{/if}
+#{else }
+    <li>${unit.stage}: ${unit.qty()}</li>
+#{/else}
 #{if unit.deliveryment}
     <li>采购单:
         <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank">
@@ -23,6 +26,7 @@
         <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}" target="_blank">
             <i class="icon-link"></i> ${unit.shipItem.shipment.id}
         </a>
+        <span class="badge badge-info">${unit.shipItem.shipment.fbas.size()}</span> FBAs
     </li>
 #{/if}
     <li>
