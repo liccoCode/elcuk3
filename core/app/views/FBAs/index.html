@@ -13,7 +13,7 @@
             <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
         </div>
         <div class="span2">
-        #{pickMarkets name:'p.market', blank:true, class:'span2'/}
+        #{pickMarkets name:'p.market', blank:true, class:'span2', m:p.market/}
         </div>
         <div class="span2">
             <select name="p.states" class="span2" multiple="multiple">
@@ -59,6 +59,7 @@
             <th>ShipmentId</th>
             <th>运输单</th>
             <th>CenterId</th>
+            <th>创建时间</th>
             <th>签收时间</th>
             <th>签收入库时长</th>
             <th>入库时间</th>
@@ -77,6 +78,7 @@
                 <i class="icon-reorder"></i> ${fba.centerId}
                 <span class="badge badge-info">${fba.shipItems.size()}</span>
             </td>
+            <td>${fba.createAt.date()}</td>
             <td>${fba.receiptAt.date()}</td>
             <td>${fba.receivingAt && fba.receiptAt ? (fba.receivingAt - fba.receiptAt) + " days" : ""}</td>
             <td>${fba.receivingAt.date()}</td>

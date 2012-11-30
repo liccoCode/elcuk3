@@ -1,11 +1,14 @@
 package models.view.post;
 
+import helper.Dates;
 import models.market.M;
 import models.procure.FBAShipment;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,7 +25,8 @@ public class FBAPost extends Post<FBAShipment> {
         this.states = states;
     }
 
-    public String market = "";
+    public Date from = DateTime.now().minusDays(45).toDate();
+    public M market;
     public List<FBAShipment.S> states = new ArrayList<FBAShipment.S>();
     public String centerId = "";
 
@@ -41,10 +45,15 @@ public class FBAPost extends Post<FBAShipment> {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT(fba) FROM FBAShipment fba LEFT JOIN fba.shipItems si WHERE 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
-        M m = M.val(this.market);
-        if(m != null) {
+        if(this.from != null && this.to != null) {
+            sbd.append("AND fba.createAt>=? AND fba.createAt<=? ");
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
+        }
+
+        if(this.market != null) {
             sbd.append("AND fba.account.type=? ");
-            params.add(m);
+            params.add(this.market);
         }
 
         if(this.states.size() > 0) {
@@ -72,7 +81,8 @@ public class FBAPost extends Post<FBAShipment> {
 
         if(this.receiveOverTime) {
             // mysql 中两个时间相减一天的时间差为: 1000000
-            sbd.append("AND (fba.closeAt - fba.receivingAt)>=3000000 ");
+            sbd.append("AND (((fba.closeAt - fba.receivingAt)>=3000000) OR (fba.receivingAt<=? AND fba.closeAt IS NULL)) ");
+            params.add(DateTime.now().minusDays(3).toDate());
         }
 
         if(StringUtils.isNotBlank(this.search)) {
