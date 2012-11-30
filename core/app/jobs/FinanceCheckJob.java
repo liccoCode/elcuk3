@@ -2,6 +2,7 @@ package jobs;
 
 import helper.Currency;
 import helper.Dates;
+import helper.Webs;
 import jobs.promise.FinanceRefundOrders;
 import jobs.promise.FinanceShippedOrders;
 import models.Jobex;
@@ -78,7 +79,7 @@ public class FinanceCheckJob extends Job {
                 fees.addAll(oneRowFee(market, orderId, row));
             return fees;
         } catch(Exception e) {
-            Logger.warn("Is Account not login?");
+            Logger.warn("Is Account not login? [%s]", Webs.E(e));
         }
         return new ArrayList<SaleFee>();
     }

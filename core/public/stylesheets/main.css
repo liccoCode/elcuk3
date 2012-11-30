@@ -21,6 +21,12 @@ span.highlight{
     cursor:pointer;
 }
 
+.table-condensed td.toggle_table_td{
+    padding:0;
+    border-top:0;
+    border-right:0;
+}
+
 [data-toggle="toggle"]{
     cursor:pointer;
 }
@@ -36,10 +42,10 @@ span.highlight{
     margin-top:10px;
 }
 
-div .alert {
+div .alert{
     margin-bottom:5px;
 }
 
-.table input,textarea,select{
+.table input, textarea, select{
     margin-bottom:0;
 }

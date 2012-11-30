@@ -5,7 +5,7 @@
     #{script 'component/amazon.coffee'/}
 #{/set}
 #{if s.market.isAmazon()}
-#{flash_alert /}
+    #{flash_alert /}
 
 <div class="row">
     #{if s.state == models.market.Selling.S.DOWN}
@@ -15,7 +15,7 @@
     #{/if}
     #{else }
     <div class="span12">
-        <div class="btn-group" style="margin:5px 0;">
+        <div class="btn-group" style="margin:5px 0;display:inline-block;">
             <button class="btn btn-warning"
                     content="直接更新到数据库"
                     placement='bottom' rel="popover" title="Local Update Button">
@@ -31,6 +31,10 @@
                     placement='bottom' rel="popover" title="Sync From Amazon Button">
                 Sync
             </button>
+        </div>
+        <div class="btn-group" style="margin:5px 0;display:inline-block;">
+            <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">${s.listing.listingId}</a>
+            <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">${s.merchantSKU.split(",")[0]}</a>
         </div>
     </div>
     #{/else}

@@ -64,7 +64,7 @@
             <th>入库时间</th>
             <th>入库关闭时长</th>
             <th>关闭时间</th>
-            <th>入库进度</th>
+            <th colspan="2">入库进度</th>
             <th>状态</th>
             <th>市场</th>
         </tr>
@@ -73,24 +73,58 @@
             <td>${fba.id}</td>
             <td><a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a></td>
             <td><a href="@{Shipments.show()}/${fba.shipment?.id}" target="_blank">${fba.shipment?.id}</a></td>
-            <td>${fba.centerId}</td>
+            <td data-target="#unit_${fba.id}" data-toggle="toggle">
+                <i class="icon-reorder"></i> ${fba.centerId}
+                <span class="badge badge-info">${fba.shipItems.size()}</span>
+            </td>
             <td>${fba.receiptAt.date()}</td>
             <td>${fba.receivingAt && fba.receiptAt ? (fba.receivingAt - fba.receiptAt) + " days" : ""}</td>
             <td>${fba.receivingAt.date()}</td>
             <td>${fba.receivingAt && fba.closeAt ? (fba.closeAt - fba.receivingAt) + " days" : ""}</td>
             <td>${fba.closeAt.date()}</td>
             #{set t2:fba.progress()/}
-            <td>
+            <td style="width:120px">
                 <div class="progress progress-striped" style="margin-bottom:0;">
-                    <div class="bar" style="width: ${(t2._1 / t2._2) * 100}%;">
+                    <div class="bar" style="width: ${(t2._1 / t2._2).format('#%')};">
                         <p class="text-error">
                         ${t2._1} / ${t2._2}
                         </p>
                     </div>
                 </div>
             </td>
+            <td style="width:30px">${(t2._1 / t2._2).format('#%')}</td>
             <td style="color:${'#' + fba.state.rgb()}">${fba.state}</td>
             <td>${fba.account.type}</td>
+        </tr>
+        <tr id="unit_${fba.id}" style="display:none;">
+            <td colspan="13" class="toggle_table_td">
+                <table class="table table-bordered table-condensed">
+                    <tr>
+                        <th>Msku</th>
+                        <th>Title</th>
+                        <th colspan="2">Process</th>
+                    </tr>
+                    #{list items:fba.shipItems, as:'itm'}
+                        <tr>
+                            <td>
+                                <a href="@{Sellings.selling()}/${itm.unit.selling.sellingId}">${itm.unit.selling.merchantSKU}</a>
+                            </td>
+                            <td><a href="@{Products.show()}/${itm.unit.product.sku}">${itm.unit.product.productName}</a>
+                            </td>
+                            <td style="width:10%;">
+                                <div class="progress progress-striped" style="margin-bottom:0;">
+                                    <div class="bar" style="width: ${(itm.recivedQty / itm.qty).format('#%')};">
+                                        <p class="text-error">
+                                        ${itm.recivedQty} / ${itm.qty}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="width:30px">${(itm.recivedQty / itm.qty).format('#%')}</td>
+                        </tr>
+                    #{/list}
+                </table>
+            </td>
         </tr>
     #{/list}
     </table>

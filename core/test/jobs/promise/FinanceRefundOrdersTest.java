@@ -14,6 +14,6 @@ import java.util.concurrent.ExecutionException;
 public class FinanceRefundOrdersTest extends UnitTest {
     @Test
     public void testDoJob() throws ExecutionException, InterruptedException {
-        new FinanceRefundOrders().now().get();
+        new FinanceRefundOrders("303-8772193-7133967").now().get();
     }
 }
