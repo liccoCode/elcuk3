@@ -84,7 +84,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         DELIVERY {
             @Override
             public String toString() {
-                return "制作中";
+                return "采购中";
             }
         },
         /**
@@ -129,7 +129,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         CLOSE {
             @Override
             public String toString() {
-                return "关闭";
+                return "结束";
             }
         }
     }

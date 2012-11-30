@@ -18,16 +18,20 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(ProcureUnit.STAGE stage) {
         switch(stage) {
             case PLAN:
-                return "3da4c2";
+                return "333333";
             case DELIVERY:
-                return "006acc";
+                return "006ACC";
             case DONE:
-                return "5bb75b";
+                return "3DA4C2";
+            case SHIPPING:
+                return "49A4C6";
             case SHIP_OVER:
                 return "108080";
+            case INBOUND:
+                return "F9A021";
             case CLOSE:
             default:
-                return "f9a021";
+                return "5BB75B";
         }
     }
 
@@ -48,13 +52,13 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(Shipment.S state) {
         switch(state) {
             case PLAN:
-                return "3da4c2";
+                return "3DA4C2";
             case SHIPPING:
-                return "006acc";
+                return "006ACC";
             case CLEARANCE:
-                return "5bb75b";
+                return "5BB75B";
             case CANCEL:
-                return "f9a021";
+                return "F9A021";
             case DONE:
             default:
                 return "108080";
