@@ -279,7 +279,7 @@ public class Deliveryment extends GenericModel {
         DateTime dt = DateTime.now();
         String count = Deliveryment.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear() + 1)).toDate()) + "";
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.plusMonths(1).getMonthOfYear())).toDate()) + "";
         return String.format("DL|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
