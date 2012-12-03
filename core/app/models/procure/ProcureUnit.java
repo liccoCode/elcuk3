@@ -275,7 +275,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ElcukRecord(Messages.get("procureunit.split.target"), Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
         if(this.shipItem != null && this.shipItem.shipment != null)
             Notification.notifies("采购计划分拆",
-                    String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", unit.id, unit.shipItem.shipment.id)
+                    String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", this.id, this.shipItem.shipment.id)
                     , Notification.PROCURE, Notification.SHIPPER);
         this.save();
     }

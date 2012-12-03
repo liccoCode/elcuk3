@@ -156,6 +156,8 @@ public class Orderr extends GenericModel {
     /**
      * 备注地址 1
      */
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
     public String address1;
 
     /**
