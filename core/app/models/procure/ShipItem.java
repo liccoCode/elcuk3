@@ -36,9 +36,18 @@ public class ShipItem extends GenericModel {
         this.qty = qty;
     }
 
-    public ShipItem(Shipment shipment, ProcureUnit unit) {
-        this.shipment = shipment;
+    /**
+     * 分拆 ProcureUnit 时候拥有周期型运输单的使用使用
+     *
+     * @param unit
+     * @param shipment
+     */
+    public ShipItem(ProcureUnit unit, Shipment shipment) {
         this.unit = unit;
+        this.shipment = shipment;
+        this.qty = unit.qty();
+        this.fulfillmentNetworkSKU = unit.selling.fnSku;
+        this.state = S.NORMAL;
     }
 
     public enum S {

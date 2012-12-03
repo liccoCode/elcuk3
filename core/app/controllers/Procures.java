@@ -228,7 +228,10 @@ public class Procures extends Controller {
         newUnit.handler = User.findByUserName(ElcukRecord.username());
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
-        flash.success("分拆成功, 如果原来的计划添加到了运输单, 请记得运输数量修正.");
+        if(unit.isHaveCycleShipment())
+            flash.success("分拆成功, 并且成功保留对应的周期型运输单.");
+        else
+            flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
         redirect("/Deliveryments/show/" + unit.deliveryment.id);
     }
 

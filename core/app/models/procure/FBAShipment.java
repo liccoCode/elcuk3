@@ -221,11 +221,14 @@ public class FBAShipment extends Model {
          * FBA 转移的限制:
          * 1. ShipItem 的数量必须是 1 个
          * 2. 对应 Shipment 的运输地址必须是相同 FBA 仓库
+         * 3. 运输项目的运输方式需要一样
          */
         if(!this.state.isCanModify())
             Validation.addError("", "FBA 已经无法变更状态. " + this.state);
         if(this.shipItems.size() != 1)
             Validation.addError("", "仅有当 FBA 中只有一个运输项目的时候才可以进行转移");
+        if(this.shipment.type != shipment.type)
+            Validation.addError("", String.format("%s 无法转移到 %s", this.shipment.type, shipment.type));
         if(shipment.fbas.size() > 0) {
             FBAShipment fba = shipment.fbas.get(0);
             if(!fba.centerId.equals(this.centerId))

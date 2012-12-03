@@ -277,9 +277,10 @@ public class Deliveryment extends GenericModel {
 
     public static String id() {
         DateTime dt = DateTime.now();
+        DateTime nextMonth = dt.plusMonths(1);
         String count = Deliveryment.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.plusMonths(1).getMonthOfYear())).toDate()) + "";
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) + "";
         return String.format("DL|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 

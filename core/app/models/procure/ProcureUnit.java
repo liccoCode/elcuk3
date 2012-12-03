@@ -268,8 +268,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id, this.shipItem.shipment.state));
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
+        if(this.isHaveShipment())
+            this.shipItem.qty = leftQty;
         // 如果被分开的 ProcureUnit 已经交货, 那么分开后也应该已经交货, 否则为 PLAN 阶段
-        if(this.stage == STAGE.DELIVERY) unit.stage = this.stage;
+        if(this.stage == STAGE.DELIVERY)
+            unit.stage = this.stage;
+        // 如果是在周期型运输单中, 则保留运输信息, 否则需要重新选择运输单
+        if(this.isHaveCycleShipment())
+            unit.shipItem = new ShipItem(unit, this.shipItem.shipment);
         unit.save();
         new ElcukRecord(Messages.get("procureunit.split"), Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "").save();
         new ElcukRecord(Messages.get("procureunit.split.target"), Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
@@ -278,6 +284,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", this.id, this.shipItem.shipment.id)
                     , Notification.PROCURE, Notification.SHIPPER);
         this.save();
+    }
+
+    /**
+     * 是否可以保留采购计划的周期型运输单?
+     *
+     * @return
+     */
+    public boolean isHaveCycleShipment() {
+        return this.isHaveShipment() && this.shipItem.shipment.cycle;
+    }
+
+    public boolean isHaveShipment() {
+        return this.shipItem != null && this.shipItem.shipment != null;
     }
 
     /**

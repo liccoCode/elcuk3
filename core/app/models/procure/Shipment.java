@@ -544,7 +544,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         // 对 FBA 的仓库检查, 同一个运输单不可以运输两个不同的 FBA 地址
         if(fbaQpt.isDefined() && this.fbas.size() > 0) {
-            if(!fbaQpt.get().centerId.equals(this.fbas.get(0).centerId)) {
+            if(!fbaQpt.get().centerId.equals(this.fbas.get(0).centerId) && !this.cycle) {
                 Validation.addError("", "新获取的 FBA 仓库为 %s 与当前存在的去往 FBA 仓库不一样, 无法创建.", fbaQpt.get().centerId);
                 return F.Option.None();
             }
@@ -812,9 +812,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public static String id() {
         DateTime dt = DateTime.now();
+        DateTime nextMonth = dt.plusMonths(1);
         String count = Shipment.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.plusMonths(1).getMonthOfYear())).toDate()) + "";
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) + "";
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
