@@ -1,5 +1,7 @@
 package market;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.gson.JsonElement;
 import helper.GTs;
 import helper.HTTP;
@@ -33,7 +35,7 @@ public class ListingTest extends UnitTest {
         }
     }
 
-    @Test
+    //    @Test
     public void testSellingUploadImage() {
         Account acc = Account.findById(1l);
         acc.changeRegion(M.AMAZON_DE);
@@ -44,5 +46,12 @@ public class ListingTest extends UnitTest {
                 params,
                 GTs.MapBuilder.map("MAIN", new File("/Users/wyattpan/elcuk2-data/uploads/10HTCEVO3D-1900S_0.jpg"))
                         .put("PT01", new File("/Users/wyattpan/elcuk2-data/uploads/10HTCEVO3D-1900S_1.jpg")).build()));
+    }
+
+    @Test
+    public void testMonthTable() {
+        Listing lst = Listing.findById("B005JSG7GE_amazon.de");
+        System.out.println("-=======================");
+        System.out.println(JSON.toJSONString(lst.reviewMonthTable(), SerializerFeature.PrettyFormat));
     }
 }

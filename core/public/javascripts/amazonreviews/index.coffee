@@ -1,5 +1,5 @@
 $ ->
-# 绑定翻译按钮
+  # 绑定翻译按钮
   bindTransBtn = ->
     $('button.trans').click (e) ->
       review = $(@).parents('tr').find('.review').text()
@@ -50,7 +50,7 @@ $ ->
     mask.mask('加载中...')
     $('#reviews').load('/amazonReviews/ajaxMagic', $('#search_form :input').fieldSerialize(),
       () ->
-      # 如果没有一个元素, 那么则需要重新抓取.
+        # 如果没有一个元素, 那么则需要重新抓取.
         mask.unmask()
         if $('#reviews tr').size() is 1
           alert('此 Listing 为全新的 Listing, 重新抓取 Listing 中...')
@@ -77,14 +77,14 @@ $ ->
     mask = $('#container')
     mask.mask("重新抓取 Review 信息中...")
     $.get('/amazonReviews/reCrawl', $('#search_form :input').fieldSerialize(), (r) ->
-        if r.flag is false
-          alert(r.message)
+      if r.flag is false
+        alert(r.message)
+      else
+        if r.message is '0'
+          alert('此 Listing 暂时无 Review.')
         else
-          if r.message is '0'
-            alert('此 Listing 暂时无 Review.')
-          else
-            reviewLoadFun()
-        mask.unmask()
+          reviewLoadFun()
+      mask.unmask()
     )
     e.preventDefault()
 
@@ -166,3 +166,12 @@ $ ->
     $('#search_form button').click()
   activeAmazonReview()
 
+
+  # -------- Review 表格
+  $('a[href=#review_table]').on('shown',
+    (e) ->
+      if $("#search_form [name=asin]").val() == ""
+        alert("请输入 ASIN")
+        return
+      $('#review_table').load("/AmazonReviews/reviewTable", $('#search_form :input').fieldSerialize())
+  )

@@ -45,6 +45,13 @@ public class AmazonReviews extends Controller {
         render(savedReviews, lst);
     }
 
+    public static void reviewTable(String asin, String m) {
+        M market = M.val(m);
+        Listing lst = Listing.findById(Listing.lid(asin, market));
+        List<F.T2<Long, Integer>> rows = lst.reviewMonthTable();
+        render(rows);
+    }
+
     /**
      * 点击[有/无]用
      */

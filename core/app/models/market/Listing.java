@@ -5,11 +5,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
+import helper.DBUtils;
 import jobs.ListingSchedulJob;
 import jobs.works.ListingOffersWork;
 import models.product.Product;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -17,10 +20,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -331,6 +331,22 @@ public class Listing extends GenericModel {
         for(Account a : nonClickAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
         Logger.info("Account List: %s", sb.toString());
         return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
+    }
+
+    /**
+     * 查看次 Listing 的所有 Review 按照每月进行输出
+     *
+     * @return
+     */
+    public List<F.T2<Long, Integer>> reviewMonthTable() {
+        List<Map<String, Object>> rows = DBUtils.rows("select listingId, date_format(createDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(createDate, '%Y-%m')", this.listingId);
+        List<F.T2<Long, Integer>> monthTable = new ArrayList<F.T2<Long, Integer>>();
+        for(Map<String, Object> row : rows) {
+            Map<Long, Integer> oneMonth = new HashMap<Long, Integer>();
+            monthTable.add(new F.T2<Long, Integer>(DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
+                    ((Long) row.get("count")).intValue()));
+        }
+        return monthTable;
     }
 
     @Override

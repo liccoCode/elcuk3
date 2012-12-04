@@ -49,7 +49,7 @@ public class FAndRNotificationJob extends Job {
     }
 
     /**
-     * 将 Feedback 切分成 5 星, 5 份
+     * 将 Feedback 切分成 5 星, 5 份; View 中使用
      *
      * @param feedbacks
      * @return
@@ -71,7 +71,7 @@ public class FAndRNotificationJob extends Job {
     }
 
     /**
-     * 将 Review 切分成 5 星, 5 份
+     * 将 Review 切分成 5 星, 5 份; View 中使用
      *
      * @param reviews
      * @return

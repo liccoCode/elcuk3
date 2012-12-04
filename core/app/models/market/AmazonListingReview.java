@@ -253,7 +253,7 @@ public class AmazonListingReview extends GenericModel {
         this.originJson = J.G(this);
         if(this.listing == null)
             Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
-        else if(!Listing.isSelfBuildListing(this.listing.title)) {
+        else if(!this.isSelf()) {
             this.isSelf = false;
             this.comment(String.format("这个 Review 对应的 Listing 非自建."));
         }
@@ -297,9 +297,14 @@ public class AmazonListingReview extends GenericModel {
         if(StringUtils.isNotBlank(newReview.vedioPicUrl)) this.vedioPicUrl = newReview.vedioPicUrl;
         if(newReview.reviewRank > 0) this.reviewRank = newReview.reviewRank;
         if(newReview.comments > 0) this.comments = newReview.comments;
-        if(StringUtils.isNotBlank(newReview.title)) this.isSelf = Listing.isSelfBuildListing(newReview.title);
+        this.isSelf = this.isSelf();
         // resolved 不做处理
         return this.save();
+    }
+
+    private boolean isSelf() {
+        if(this.listing == null) return false;
+        return Listing.isSelfBuildListing(this.listing.title);
     }
 
     public List<Orderr> relateOrder() {
@@ -518,7 +523,11 @@ public class AmazonListingReview extends GenericModel {
     }
 
     public static List<AmazonListingReview> listingReviews(String listingId, String orderBy) {
-        return AmazonListingReview.find("listingId=? ORDER BY " + orderBy + ("reviewRank".equals(orderBy) ? " ASC" : " DESC"), listingId).fetch();
+        return AmazonListingReview.listingReviews(listingId, orderBy, ("reviewRank".equals(orderBy) ? " ASC" : " DESC"));
+    }
+
+    public static List<AmazonListingReview> listingReviews(String listingId, String orderBy, String desc) {
+        return AmazonListingReview.find(String.format("listingId=? ORDER BY %s %s", orderBy, desc), listingId).fetch();
     }
 
     /**
@@ -531,6 +540,12 @@ public class AmazonListingReview extends GenericModel {
         return AmazonListingReview.count("listingId=?", lid);
     }
 
+    /**
+     * Amazon Review 在系统中剩下的可以点击的次数
+     *
+     * @param reviewIds
+     * @return
+     */
     public static List<F.T2<String, Integer>> reviewLeftClickTimes(List<String> reviewIds) {
         List<AmazonListingReview> reviews = AmazonListingReview.find("reviewId IN " + JpqlSelect.inlineParam(reviewIds)).fetch();
         List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<F.T2<String, Integer>>();
