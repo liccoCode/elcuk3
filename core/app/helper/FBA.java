@@ -228,7 +228,8 @@ public class FBA {
     public static Map<String, F.T3<String, String, String>> listShipments(List<String> shipmentIds, Account account) throws FBAInboundServiceMWSException {
         Validate.notNull(shipmentIds);
         Validate.notNull(account);
-        Validate.isTrue(shipmentIds.size() <= 50, "检查 Shipments 的时候, ShipmentIds 的数量必须小于 50 当前数量 " + shipmentIds.size() + ".");
+        // Amazon 提供的这个 API 最多一次查看 50 个 FBA 的状态, 但最多进行 20 个, 避免翻页
+        Validate.isTrue(shipmentIds.size() <= 20, "检查 Shipments 的时候, ShipmentIds 的数量必须小于 20 当前数量 " + shipmentIds.size() + ".");
         Validate.isTrue(shipmentIds.size() > 0, "需要至少一个 ShipmentId..");
         ListInboundShipmentsRequest listShipments = new ListInboundShipmentsRequest();
         listShipments.setSellerId(account.merchantId);

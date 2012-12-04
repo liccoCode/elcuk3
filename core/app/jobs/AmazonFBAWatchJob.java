@@ -50,16 +50,39 @@ public class AmazonFBAWatchJob extends Job {
     public static void watchFBAs(Account acc, List<FBAShipment> shipments) {
         // 1. 更新 FBA Shipment 状态
         List<String> shipmentIds = new ArrayList<String>();
-        for(FBAShipment shipment : shipments) shipmentIds.add(shipment.shipmentId);
+        for(FBAShipment shipment : shipments) {
+            shipmentIds.add(shipment.shipmentId);
+            // 再循环内每达到 20 个, 就执行更新(避免翻页), 否则继续向 id list 中添加;
+            if(shipmentIds.size() == 20) {
+                AmazonFBAWatchJob.amazonFBAState(acc, shipments, shipmentIds);
+                try {
+                    // 避免超过 Amazon API 的每秒限制
+                    Thread.sleep(500);
+                } catch(InterruptedException e) {
+                    //ignore
+                }
+                shipmentIds.clear();
+            }
+        }
+        // 最后如果落到外面, shipmentIds 的数量一定小于 50
+        AmazonFBAWatchJob.amazonFBAState(acc, shipments, shipmentIds);
+    }
+
+    /**
+     * 跟踪 Amazon FBA 的状态
+     *
+     * @param acc
+     * @param shipments
+     * @param shipmentIds
+     */
+    private static void amazonFBAState(Account acc, List<FBAShipment> shipments, List<String> shipmentIds) {
         if(shipmentIds.size() > 0) { // 如果没有, 则不需要检查了
             try {
                 Map<String, F.T3<String, String, String>> shipmentT3 = FBA.listShipments(shipmentIds, acc);
                 for(FBAShipment shipment : shipments) {
                     F.T3<String, String, String> t3 = shipmentT3.get(shipment.shipmentId);
-                    if(t3 == null) {
-                        Logger.warn("AmazonFBAWatchJob FBA.listShipments: Amazon have no shipmentId %s", shipment.shipmentId);
+                    if(t3 == null)
                         continue;
-                    }
                     try {
                         S state = S.valueOf(t3._1);
                         shipment.isNofityState(state);

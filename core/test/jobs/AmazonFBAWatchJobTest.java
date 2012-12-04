@@ -9,6 +9,7 @@ import play.test.UnitTest;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -27,13 +28,12 @@ public class AmazonFBAWatchJobTest extends UnitTest {
         AmazonFBAWatchJob.watchFBAs(acc, Collections.singletonList(fbaSHipments));
     }
 
-    //    @Test
+    @Test
     public void testWatchFBAsReceving() {
         Account acc = Account.findById(2l);
-        FBAShipment fbaShipment = FBAShipment.findById(53l);
+        List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?,?,?)", acc, FBAShipment.S.PLAN, FBAShipment.S.CANCELLED, FBAShipment.S.CLOSED, FBAShipment.S.DELETED).fetch();
         //TODO 注意这里的测试需要 Amazon 的 FBA 状态符合
-        fbaShipment.receiptAt = DateTime.parse("2012-10-25").toDate();
-        AmazonFBAWatchJob.watchFBAs(acc, Collections.singletonList(fbaShipment));
+        AmazonFBAWatchJob.watchFBAs(acc, fbas);
     }
 
     //    @Test
@@ -43,7 +43,7 @@ public class AmazonFBAWatchJobTest extends UnitTest {
         new AmazonFBAWatchPlusPromise(Arrays.asList(shipment)).syncFBAShipmentItems();
     }
 
-    @Test
+    //    @Test
     public void testJos() throws ExecutionException, InterruptedException {
         new AmazonFBAWatchJob().now().get();
     }
