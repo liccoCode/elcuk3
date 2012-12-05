@@ -13,7 +13,6 @@ import play.utils.FastRuntimeException;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -68,9 +67,12 @@ public class AmazonReviews extends Controller {
         try {
             if(!Listing.exist(lid)) {
                 // 如果不存在, 先去抓取 Listing 然后再抓取 Review
-                Listing.crawl(asin, market).<Listing>save();
+                Listing lst = Listing.crawl(asin, market);
+                if(lst != null) lst.save();
+                else
+                    renderJSON(new Ret(false, "Amazon 上 Listing 不存在或者已经被删除."));
             } else {
-                new ListingReviewsWork(lid).now().get(30, TimeUnit.SECONDS);
+                await(new ListingReviewsWork(lid).now());
             }
         } catch(Exception e) {
             throw new FastRuntimeException(Webs.S(e));

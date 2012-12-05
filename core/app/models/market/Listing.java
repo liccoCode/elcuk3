@@ -339,7 +339,7 @@ public class Listing extends GenericModel {
      * @return
      */
     public List<F.T2<Long, Integer>> reviewMonthTable() {
-        List<Map<String, Object>> rows = DBUtils.rows("select listingId, date_format(createDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(createDate, '%Y-%m')", this.listingId);
+        List<Map<String, Object>> rows = DBUtils.rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')", this.listingId);
         List<F.T2<Long, Integer>> monthTable = new ArrayList<F.T2<Long, Integer>>();
         for(Map<String, Object> row : rows) {
             Map<Long, Integer> oneMonth = new HashMap<Long, Integer>();
@@ -393,6 +393,9 @@ public class Listing extends GenericModel {
      */
     public static Listing crawl(String asin, M market) {
         JsonElement listing = Crawl.crawlListing(market.toString(), asin);
+        if(listing.getAsJsonObject().get("isRemove").getAsBoolean()) {
+            return null;
+        }
         return Listing.parseAndUpdateListingFromCrawl(listing, true);
     }
 
