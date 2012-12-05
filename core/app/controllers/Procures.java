@@ -93,14 +93,11 @@ public class Procures extends Controller {
 
     public static void remove(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        Validation.equals("procures.remove.state", unit.stage, "", ProcureUnit.STAGE.PLAN);
+        unit.remove();
         if(Validation.hasErrors()) {
             renderArgs.put("p", new ProcurePost());
             render("Procures/index");
         }
-        unit.delete();
-        new ElcukRecord(Messages.get("procureunit.remove"),
-                Messages.get("action.base", unit.to_log()), "procures.remove").save();
         flash.success("删除成功");
         redirect("/Procures/index");
     }

@@ -112,7 +112,7 @@
                     <!-- 普通修改 -->
                     <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
 
-                    #{if unit.stage == models.procure.ProcureUnit.STAGE.PLAN}
+                    #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
                         <a href="@{Procures.remove()}/${unit.id}" data-confirm="link" class="btn btn-danger">删除</a>
                     #{/if}
 

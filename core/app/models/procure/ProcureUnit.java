@@ -409,6 +409,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return result;
     }
 
+    public void remove() {
+        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
+            new ElcukRecord(Messages.get("procureunit.remove"),
+                    Messages.get("action.base", this.to_log()), "procures.remove").save();
+            this.delete();
+        } else {
+            Validation.addError("", String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
+        }
+    }
+
     /**
      * 采购单元相关联的运输单
      *
