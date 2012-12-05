@@ -576,7 +576,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.CONFIRM)
             throw new FastRuntimeException("运输单没有 CONFIRM 无法运输");
         for(ShipItem itm : this.items) {
-            if(itm.unit.stage != ProcureUnit.STAGE.DONE)
+            if(itm.unit.stage == ProcureUnit.STAGE.PLAN || itm.unit.stage == ProcureUnit.STAGE.DELIVERY)
                 throw new FastRuntimeException(String.format("采购计划 #%s 还没有交货, 无法运输.", itm.unit.id));
             if(!itm.unit.isPlaced)
                 throw new FastRuntimeException(String.format("采购计划 %s 还没有抵达, 无法运输.", itm.unit.id));
