@@ -148,7 +148,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @Override
     public List<AnalyzeDTO> query() {
         List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>(this.analyzes());
-        if(StringUtils.isNotBlank(this.search)) CollectionUtils.filter(dtos, new ContainsPredicate(this.search));
+        if(StringUtils.isNotBlank(this.search)) CollectionUtils.filter(dtos, new SearchPredicate(this.search));
         if(StringUtils.isNotBlank(this.orderBy)) Collections.sort(dtos, new FieldComparator(this.orderBy, this.desc));
         if(StringUtils.isNotBlank(this.aid) && "sid".equalsIgnoreCase(this.type))
             CollectionUtils.filter(dtos, new AccountIdPredicate(this.aid));
@@ -201,17 +201,20 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     }
 
 
-    private static class ContainsPredicate implements Predicate {
+    private static class SearchPredicate implements Predicate {
         private String str;
 
-        private ContainsPredicate(String containsString) {
+        private SearchPredicate(String containsString) {
             this.str = containsString;
         }
 
         @Override
         public boolean evaluate(Object o) {
             AnalyzeDTO dto = (AnalyzeDTO) o;
-            return dto.fid.toLowerCase().contains(str.toLowerCase());
+            if(str.startsWith("^"))
+                return dto.fid.toLowerCase().startsWith(StringUtils.replace(str.toLowerCase(), "^", ""));
+            else
+                return dto.fid.toLowerCase().contains(str.toLowerCase());
         }
     }
 

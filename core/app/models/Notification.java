@@ -8,6 +8,7 @@ import play.db.jpa.Model;
 import play.libs.F;
 
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import java.util.*;
@@ -57,6 +58,7 @@ public class Notification extends Model {
      */
     @Expose
     @Required
+    @Lob
     public String content;
 
     /**
@@ -113,7 +115,7 @@ public class Notification extends Model {
     /**
      * 通知某一个组(1: service group, 2: procure group, 3: shipper group, 4: PM group)
      *
-     * @param group  1: service group, 2: procure group, 3: shipper group, 4: PM group
+     * @param group   1: service group, 2: procure group, 3: shipper group, 4: PM group
      * @param title
      * @param content
      * @return
@@ -140,7 +142,7 @@ public class Notification extends Model {
     /**
      * 系统消息
      *
-     * @param group  1: service group, 2: procure group, 3: shipper group, 4: PM group
+     * @param group   1: service group, 2: procure group, 3: shipper group, 4: PM group
      * @param content
      */
     public static void notifies(String content, int... group) {
