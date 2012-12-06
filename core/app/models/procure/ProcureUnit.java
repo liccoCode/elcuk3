@@ -268,8 +268,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id, this.shipItem.shipment.state));
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
-        if(this.isHaveShipment())
-            this.shipItem.qty = leftQty;
+        this.casscadeShipItemQty(leftQty);
         // 如果被分开的 ProcureUnit 已经交货, 那么分开后也应该已经交货, 否则为 PLAN 阶段
         if(this.stage == STAGE.DELIVERY)
             unit.stage = this.stage;
@@ -335,10 +334,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
                 , this.id + "").save();
+        // 如果拥有运输项目, 那么则将运输项目的数量也进行调整
+        this.casscadeShipItemQty(this.attrs.planQty);
         // 当执行交货操作, ProcureUnit 进入交货完成阶段
         this.stage = STAGE.DONE;
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);
+    }
+
+    private void casscadeShipItemQty(Integer qty) {
+        if(this.isHaveShipment())
+            this.shipItem.qty = qty;
     }
 
     /**
