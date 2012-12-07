@@ -516,8 +516,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 向 Amazon 提交 FBA Shipment 的创建
          * 3. Amazon Shipment 创建成功后再本地更新, 否则不更新,包裹错误.
          */
-        if(this.cycle)
-            Validation.addError("", "周期型运输单不允许再创建 FBA Shipment, 请运输人员制作运输计划.");
         if(this.items.size() <= 0)
             Validation.addError("", "运输单为空, 不需要创建 FBA Shipment");
 
