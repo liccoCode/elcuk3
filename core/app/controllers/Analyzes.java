@@ -5,6 +5,7 @@ import helper.J;
 import helper.Webs;
 import models.market.*;
 import models.procure.ProcureUnit;
+import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
@@ -43,7 +44,8 @@ public class Analyzes extends Controller {
     @Check("analyzes.index")
     public static void index() {
         List<Account> accs = Account.openedSaleAcc();
-        render(accs);
+        List<String> categoryIds = Category.category_ids();
+        render(accs, categoryIds);
     }
 
     // 开发用

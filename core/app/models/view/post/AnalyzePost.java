@@ -42,6 +42,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     // 是否过滤掉含有 ,2 的 sid/sku; 默认过滤
     public boolean filterDot2 = true;
+    public String categoryId;
 
     /**
      * 根据 type 指定是 msku 还是 sku
@@ -148,6 +149,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     @Override
     public List<AnalyzeDTO> query() {
         List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>(this.analyzes());
+        // 过滤 Category
+        if(StringUtils.isNotBlank(this.categoryId)) CollectionUtils.filter(dtos, new SearchPredicate(this.categoryId));
         if(StringUtils.isNotBlank(this.search)) CollectionUtils.filter(dtos, new SearchPredicate(this.search));
         if(StringUtils.isNotBlank(this.orderBy)) Collections.sort(dtos, new FieldComparator(this.orderBy, this.desc));
         if(StringUtils.isNotBlank(this.aid) && "sid".equalsIgnoreCase(this.type))

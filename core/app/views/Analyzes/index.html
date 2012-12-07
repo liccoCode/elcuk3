@@ -65,7 +65,7 @@
                     </label>
                 </div>
 
-                <div class="span2">
+                <div class="span3">
                     <select name="p.desc" style="width:90px;">
                         <option value="true">DESC</option>
                         <option value="false">ASC</option>
@@ -75,6 +75,13 @@
                         <option value="">ALL</option>
                     #{list items:accs, as:'acc'}
                         <option value="${acc.id}">${acc.prettyName()}</option>
+                    #{/list}
+                    </select>
+
+                    <select name="p.categoryId" style="width:90px">
+                        <option value="">ALL</option>
+                    #{list items:categoryIds}
+                        <option value="^${_}">${_}</option>
                     #{/list}
                     </select>
                 </div>

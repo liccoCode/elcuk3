@@ -1,6 +1,7 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.DBUtils;
 import models.embedded.CategorySettings;
 import models.support.TicketReason;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,6 +14,7 @@ import play.db.jpa.GenericModel;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 产品分层中第一级别的 Category 类别
@@ -135,6 +137,14 @@ public class Category extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + (categoryId != null ? categoryId.hashCode() : 0);
         return result;
+    }
+
+    public static List<String> category_ids() {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT categoryId FROM Category ORDER BY categoryId");
+        List<String> categoryIds = new ArrayList<String>();
+        for(Map<String, Object> row : rows)
+            categoryIds.add(row.get("categoryId").toString());
+        return categoryIds;
     }
 
     public static boolean exist(String id) {

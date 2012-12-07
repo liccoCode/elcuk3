@@ -18,6 +18,7 @@
         <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank">
             <i class="icon-link"></i> ${unit.deliveryment.id}
         </a>
+        #${unit.id}
     </li>
 #{/if}
 #{if unit.shipItem}
@@ -27,6 +28,8 @@
             <i class="icon-link"></i> ${unit.shipItem.shipment.id}
         </a>
         <span class="badge badge-info">${unit.shipItem.shipment.fbas.size()}</span> FBAs
+        <br/>
+    ${unit.shipItem.shipment.type}
     </li>
 #{/if}
     <li>
