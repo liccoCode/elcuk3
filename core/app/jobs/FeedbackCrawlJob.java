@@ -200,7 +200,7 @@ public class FeedbackCrawlJob extends Job {
             else
                 feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
             //score
-            feedback.score = NumberUtils.toFloat(tds.get(1).text());
+            feedback.score = NumberUtils.toFloat(StringUtils.replace(tds.get(1).select("b").html(), "&nbsp;", ""));
             //comments
             feedback.feedback = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();

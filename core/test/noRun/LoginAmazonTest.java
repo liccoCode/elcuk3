@@ -8,6 +8,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
+import play.Play;
+import play.template2.IO;
 import play.test.UnitTest;
 
 import java.io.File;
@@ -31,16 +33,17 @@ public class LoginAmazonTest extends UnitTest {
         System.out.println(doc.select("form[name=signin] input").size());
     }
 
-    //    @Test
-    public void parseFeedback() throws IOException {
-        List<Feedback> feds = FeedbackCrawlJob.parseFeedBackFromHTML(FileUtils.readFileToString(new File("/Users/wyattpan/elcuk2-logs/feedback.p2.html")));
+    @Test
+    public void parseFeedbackUk() throws IOException {
+        List<Feedback> feds = FeedbackCrawlJob.parseFeedBackFromHTML(IO.readContentAsString(Play.getFile("test/html/feedback.uk.html")));
+        assertEquals(5f, feds.get(0).score, 0.1);
         for(Feedback f : feds) {
             if(f.score >= 3) continue;
             System.out.println(f);
         }
     }
 
-    @Test
+    //    @Test
     public void parseFeedbackUS() throws IOException {
         List<Feedback> feds = FeedbackCrawlJob.parseFeedBackFromHTML(FileUtils.readFileToString(new File("/Volumes/wyatt/backups/elcuk/elcuk2-logs/AMAZON_US.id_131feedback_p1.html")));
         for(Feedback f : feds) {

@@ -105,6 +105,7 @@ public class Feedback extends GenericModel {
         if(this.score <= 3 && this.isSelfBuildListing()) {
             this.ticket = this.openTicket(null);
             Mails.feedbackWarnning(this);
+            this.ticket.save();
         }
 
         this.save();
