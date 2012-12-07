@@ -60,7 +60,10 @@
     </td>
     <th>预计到库时间</th>
     <td>
-        <input type="date" name="unit.attrs.planArrivDate" value="${unit.attrs.planArrivDate.date()}">
+        <div class="input-append">
+            <input type="date" name="unit.attrs.planArrivDate" value="${unit.attrs.planArrivDate.date()}">
+            <span class="add-on">? 天</span>
+        </div>
     </td>
 </tr>
 
@@ -90,7 +93,11 @@
         #{/list}
         </select>
     </td>
-    <td colspan="2"></td>
+    <td colspan="2">
+    #{if unit.shipItem?.shipment}
+        <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}">${unit.shipItem.shipment.id}  ${unit.shipItem.shipment.type}</a>
+    #{/if}
+    </td>
 </tr>
 
 <tr>

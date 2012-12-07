@@ -149,6 +149,20 @@ public class ShipItem extends GenericModel {
     }
 
     /**
+     * 修改这个运输项目的运输单, 与之对应的 FBA 也会随之改变
+     *
+     * @param shipment
+     */
+    public void changeShipment(Shipment shipment) {
+        if(this.fba != null) {
+            this.fba.shipment = shipment;
+            this.fba.save();
+        }
+        this.shipment = shipment;
+        this.save();
+    }
+
+    /**
      * 总重量 (kg)
      *
      * @return

@@ -42,16 +42,17 @@ $ ->
     shipment.load("/shipments/unitShipments", {whouseId: whouseId},
       ->
         o = $(@)
+        if $("[name=shipmentId]").val()
+          o.find(":checkbox").each ->
+            $(@).prop('checked', true) if $(@).val() == $("[name=shipmentId]").val()
+
         o.find(':checkbox').click(
           ->
             # 保留目标值
-            targetVal = $(@).prop("checked")
+            checked = $(@).prop("checked")
             o.find(':checkbox').prop("checked", false)
-            $(@).prop('checked', targetVal)
-            if targetVal
-              $("[name=shipmentId]").val($(@).val())
-            else
-              $("[name=shipmentId]").val("")
+            $(@).prop('checked', checked)
+            $("[name=shipmentId]").val(checked and $(@).val() or "")
         )
         mask.unmask()
     )
@@ -62,3 +63,11 @@ $ ->
       loadShipment(shipment, select.val())
       select.change(-> loadShipment(shipment, select.val()))
   initShipments($('#shipments'))
+
+  # 计算时间到库日期与运输日期的差据
+  $('[name=unit\\.attrs\\.planArrivDate]').change () ->
+    planShipDate = $('[name=unit\\.attrs\\.planShipDate]')
+    planArrivDate = $(@)
+    if planArrivDate.val() and planShipDate.val()
+      planArrivDate.next().text("#{(new Date(planArrivDate.val()) - new Date(planShipDate.val())) / (24 * 3600 * 1000)} 天")
+

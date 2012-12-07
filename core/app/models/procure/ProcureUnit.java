@@ -238,6 +238,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+    public void updateWithShipment(Shipment shipment) {
+        if(this.shipItem != null)
+            this.shipItem.changeShipment(shipment);
+        if(this.shipType != shipment.type) {
+            Shipment.T originType = this.shipType;
+            this.shipType = shipment.type;
+            int plusDays = (int) ((this.attrs.planArrivDate.getTime() - this.attrs.planShipDate.getTime()) / (24 * 3600 * 1000));
+            if(this.shipType == Shipment.T.AIR)
+                plusDays = 10;
+            else if(this.shipType == Shipment.T.EXPRESS)
+                plusDays = 7;
+            else if(this.shipType == Shipment.T.SEA)
+                plusDays = 45;
+            this.attrs.planArrivDate = new DateTime(this.attrs.planShipDate).plusDays(plusDays).toDate();
+            this.comment(String.format("运输方式从 %s 变为 %s, 自动调整了预计到达日期, 快递 7 天, 空运 10 天, 海运 45 天", originType, this.shipType));
+        }
+        this.save();
+    }
+
     /**
      * <pre>
      *

@@ -108,13 +108,13 @@ public class Procures extends Controller {
         render(unit, oldPlanQty);
     }
 
-    public static void update(ProcureUnit unit, int oldPlanQty) {
+    public static void update(ProcureUnit unit, int oldPlanQty, String shipmentId) {
         validation.required(oldPlanQty);
         unit.validate();
         if(Validation.hasErrors()) {
             render("Procures/edit.html", unit, oldPlanQty);
         }
-        unit.save();
+        unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
         new ElcukRecord(Messages.get("procureunit.update"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
         if(oldPlanQty != unit.attrs.planQty) {
             String shipment = "";
