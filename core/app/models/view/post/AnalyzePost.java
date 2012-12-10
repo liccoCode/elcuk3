@@ -34,6 +34,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         this.perSize = 20;
     }
 
+    public AnalyzePost(String type) {
+        this.type = type;
+    }
+
     public String type = "sid";
     public String aid;
 
@@ -133,7 +137,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 }
 
                 // TODO 这部分缓存需要处理成为有生命周期的, 因为时间跨度越长, 缓存的数据越大, 而查看的几率越小, 所以需要对这缓存添加生命周期; 同时需要为系统中添加统一的访问这部分缓存的接口.
-                Cache.add(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()));
+                Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");
+                Cache.set(cacke_key + ".time", new Date(), "12h");
             }
         }
 
@@ -166,6 +171,11 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             afterPager.add(dtos.get(index));
         }
         return afterPager;
+    }
+
+    public static Date cachedDate(String type) {
+        String cacke_key = "sid".equals(type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
+        return Cache.get(cacke_key + ".time", Date.class);
     }
 
     private static class FieldComparator implements Comparator<AnalyzeDTO> {

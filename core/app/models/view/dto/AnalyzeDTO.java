@@ -3,7 +3,6 @@ package models.view.dto;
 import helper.Webs;
 import models.market.Selling;
 import models.view.post.AnalyzePost;
-import play.cache.Cache;
 import play.libs.F;
 
 import java.util.List;
@@ -193,8 +192,7 @@ public class AnalyzeDTO {
      */
     @SuppressWarnings("unchecked")
     public static List<AnalyzeDTO> cachedAnalyzeDTOs(String type) {
-        String cache_key = "sid".equals(type) ? AnalyzePost.AnalyzeDTO_SID_CACHE : AnalyzePost.AnalyzeDTO_SKU_CACHE;
-        return Cache.get(cache_key, List.class);
+        return new AnalyzePost(type).analyzes();
     }
 
     /**
@@ -205,8 +203,7 @@ public class AnalyzeDTO {
      * @return
      */
     public static AnalyzeDTO findByValAndType(String type, String val) {
-        AnalyzePost post = new AnalyzePost();
-        post.type = type;
+        AnalyzePost post = new AnalyzePost(type);
         for(AnalyzeDTO dto : post.analyzes()) {
             if(val.equalsIgnoreCase(dto.fid)) {
                 return dto;
