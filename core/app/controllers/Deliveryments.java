@@ -33,7 +33,7 @@ public class Deliveryments extends Controller {
         Deliveryment dmt = Deliveryment.findById(deliverymentId);
         renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
-        renderArgs.put("shippers", Cooperator.shipper());
+        renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.procurers());
     }
 

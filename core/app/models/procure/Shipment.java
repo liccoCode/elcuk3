@@ -378,6 +378,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.cancelShip(shipItemIds, true);
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
+        this.trackNo = null;
         this.save();
     }
 

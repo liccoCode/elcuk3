@@ -56,13 +56,13 @@ public class Cooperator extends Model {
     /**
      * 只有 SUPPLIER 会使用到此字段, 表示这个 SUPPLIER 可以生产的 Item.
      */
-    @OneToMany(mappedBy = "cooperator")
+    @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
     public List<CooperItem> cooperItems = new ArrayList<CooperItem>();
 
     /**
      * 向这个供应商交易的采购单.
      */
-    @OneToMany(mappedBy = "cooperator")
+    @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
     public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
 
     /**
@@ -236,7 +236,7 @@ public class Cooperator extends Model {
      *
      * @return
      */
-    public static List<Cooperator> shipper() {
+    public static List<Cooperator> shippers() {
         return Cooperator.find("type=?", T.SHIPPER).fetch();
     }
 

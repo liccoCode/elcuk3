@@ -2,14 +2,14 @@
     <tr>
         <th>#</th>
         <th>Track No.</th>
+        <th>运输商</th>
+        <th>国际快递</th>
         <th>运输方式</th>
         <th>去往仓库</th>
         <th>Title</th>
         <th>目的地</th>
-        <th>国际快递</th>
         <th>状态</th>
         <th>计价方式</th>
-        <th>运输商</th>
         <th>开始时间</th>
         <th>创建时间</th>
         <th>预计到库时间</th>
@@ -24,6 +24,8 @@
             <i class="icon-reorder"></i> ${ship.trackNo}
             <span class="badge badge-info">${ship.items.size()}</span>
         </td>
+        <td>${ship.cooper?.name}</td>
+        <td>${ship.internationExpress}</td>
         <td>${ship.type}</td>
         <td>${ship.whouse?.name()}</td>
         <td>
@@ -39,10 +41,8 @@
         ${ship.title}
         </td>
         <td>${ship.target}</td>
-        <td>${ship.internationExpress}</td>
         <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>
         <td>${ship.pype}</td>
-        <td>${ship.cooper?.name}</td>
         <td>#{time_tooltip time:ship.planBeginDate/}</td>
         <td>#{time_tooltip time:ship.createDate/}</td>
         <td>#{time_tooltip time:ship.planArrivDate/}</td>

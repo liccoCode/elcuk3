@@ -86,7 +86,7 @@ public class Selling extends GenericModel {
     public Listing listing;
 
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    public List<SellingQTY> qtys;
+    public List<SellingQTY> qtys = new ArrayList<SellingQTY>();
 
     @OneToOne(cascade = CascadeType.ALL)
     @Expose

@@ -34,7 +34,9 @@ public class Shipments extends Controller {
     @Before(only = {"index", "blank", "save"})
     public static void whouses() {
         List<Whouse> whouses = Whouse.findAll();
+        List<Cooperator> cooperators = Cooperator.shippers();
         renderArgs.put("whouses", whouses);
+        renderArgs.put("cooperators", cooperators);
     }
 
     @Check("shipments.index")
@@ -70,7 +72,7 @@ public class Shipments extends Controller {
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
-        renderArgs.put("shippers", Cooperator.shipper());
+        renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("fbas", J.json(FBAShipment.uncloseFBAShipmentIds()));
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");

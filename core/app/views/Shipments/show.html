@@ -87,6 +87,12 @@
                     <th>押金(例:预付款)</th>
                     <td>
                         <input type="text" class="input-mini" name="ship.deposit" value="${ship.deposit}">
+                    #{if ship.deposit && ship.deposit > 0}
+                        <span class="badge badge-success">DDP</span>
+                    #{/if}
+                    #{else }
+                        <span class="badge badge-info">DDU</span>
+                    #{/else}
                     </td>
                 </tr>
 
@@ -123,10 +129,10 @@
                 </tr>
 
                 <tr>
-                    <th>货代</th>
+                    <th>运输商</th>
                     <td>
                         <select name="ship.cooper.id">
-                            <option value="">选择货代</option>
+                            <option value="">选择运输商</option>
                         #{list items:shippers, as:'shiper'}
                             <option ${shiper == ship.cooper ? 'selected' : ''} value="${shiper.id}">${shiper.fullName}</option>
                         #{/list}

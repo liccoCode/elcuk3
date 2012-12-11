@@ -52,6 +52,8 @@ public class ShipmentPost extends Post {
 
     public iExpress iExpress;
 
+    public Long cooperId;
+
     /**
      * 是否为周期型运输单
      */
@@ -67,7 +69,7 @@ public class ShipmentPost extends Post {
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
-        return Shipment.find(params._1 + " ORDER BY s.createDate DESC", params._2.toArray()).fetch();
+        return Shipment.find(params._1 + " ORDER BY fba.centerId, s.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
@@ -123,6 +125,11 @@ public class ShipmentPost extends Post {
         if(this.whouseId > 0) {
             sbd.append(" AND s.whouse.id=?");
             params.add(this.whouseId);
+        }
+
+        if(this.cooperId != null) {
+            sbd.append(" AND s.cooper.id=?");
+            params.add(this.cooperId);
         }
 
         if(StringUtils.isNotBlank(this.search)) {

@@ -15,8 +15,8 @@
 #{/info_row}
 
 <form action="@{Shipments.index()}" method="post">
-    <div class="row">
-        <div class="span5 input-prepend">
+    <div class="row-fluid">
+        <div class="span3 input-prepend">
             <span class="add-on">From:</span>
             <input type="date" style="width:90px;" name="p.from" value="${p.from.date()}">
             <span class="add-on" style="margin-left:20px;">To:</span>
@@ -28,16 +28,16 @@
             </select>
         </div>
 
-        <div class="span3 input-append input-prepend">
+        <div class="span2 input-append input-prepend">
             <span class="add-on"><i class="icon-search"></i></span>
             <input type="text" name="p.search" style="width:170px;" value="${p.search}" placeHolder="自动识别 ID 搜索">
             <button class="btn btn-primary" data-loading>搜索</button>
         </div>
-        <div class="span2">
+        <div class="span1">
             <a href="@{Shipments.blank()}" class="btn btn-primary">创建新运输单</a>
         </div>
     </div>
-    <div class="row">
+    <div class="row-fluid">
         <div class="span12">
             <select name="p.pype" style="width:90px">
                 <option value="">计价方式</option>
@@ -55,7 +55,7 @@
 
             <select name="p.state" style="width:90px;margin-left:2px;">
                 <option ${"NOCANCEL" == p.state ? 'selected' : ''} value="NOCANCEL">非 Cancel</option>
-                <option value="">状态</option>
+                <option ${"" == p.state ? 'selected' : ''} value="">状态</option>
             #{list items:models.procure.Shipment.S.values(), as:'state'}
                 <option ${state.name() == p.state ? 'selected' : ''} value="${state.name()}">${state}</option>
             #{/list}
@@ -85,6 +85,13 @@
                 <option value="">有FBA?</option>
                 <option ${p.isHaveFBA == true ? 'selected' : ''} value="true">拥有</option>
                 <option ${p.isHaveFBA == false ? 'selected' : ''} value="false">未创建</option>
+            </select>
+
+            <select name="p.cooperId" style="width:80px;margin-left:2px;">
+                <option value="">运输商</option>
+            #{list items:cooperators, as:'cooper'}
+                <option ${p.cooperId == cooper.id ? 'selected' : ''} value="${cooper.id}">${cooper.name}</option>
+            #{/list}
             </select>
         </div>
     </div>
