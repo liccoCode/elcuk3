@@ -227,12 +227,16 @@ public class FBAShipment extends Model {
             Validation.addError("", "FBA 已经无法变更状态. " + this.state);
         if(this.shipItems.size() != 1)
             Validation.addError("", "仅有当 FBA 中只有一个运输项目的时候才可以进行转移");
-        if(this.shipment.type != shipment.type)
-            Validation.addError("", String.format("%s 无法转移到 %s", this.shipment.type, shipment.type));
         if(shipment.fbas.size() > 0) {
             FBAShipment fba = shipment.fbas.get(0);
             if(!fba.centerId.equals(this.centerId))
                 Validation.addError("", "运输单中 FBA 的仓库地址不一样, 无法转移.");
+        }
+        if(this.shipment.type != shipment.type) {
+            ShipItem itm = this.shipItems.get(0);
+            if(itm.unit.attrs.planArrivDate.getTime() < shipment.planArrivDate.getTime())
+                Validation.addError("", String.format("采购计划延期, 请与 PM 沟通调整计划. 采购计划预计在 %tF 抵达, 而目的运输单在 %tF 抵达.",
+                        itm.unit.attrs.planArrivDate, shipment.planArrivDate));
         }
 
         if(Validation.hasErrors()) return;
@@ -249,9 +253,16 @@ public class FBAShipment extends Model {
 
         // 仅当 FBA 只有一个运输项目的时候才可以转移
         ShipItem itm = this.shipItems.get(0);
+        if(itm.unit.shipType != shipment.type) {
+            Notification.notifies("采购计划运输提前",
+                    String.format("采购计划 #%s 因运输单(%s)调整, 到库日期从 %tF 提前到 %tF", itm.unit.id, shipment.id, itm.unit.attrs.planArrivDate, shipment.planArrivDate),
+                    Notification.PM);
+        }
         itm.shipment = shipment;
         itm.unit.attrs.planShipDate = shipment.planBeginDate;
         itm.unit.attrs.planArrivDate = shipment.planArrivDate;
+        itm.unit.shipType = shipment.type;
+        itm.unit.save();
         itm.save();
 
         if(shipment.fbas.size() <= 0)
@@ -261,7 +272,7 @@ public class FBAShipment extends Model {
         new ElcukRecord(Messages.get("shipment.moveFBA"),
                 Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id), oldShipmentId).save();
         Notification.notifies("FBA 运输单转移", Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
-                Notification.PROCURE, Notification.SHIPPER);
+                Notification.PM, Notification.SHIPPER);
     }
 
     /**

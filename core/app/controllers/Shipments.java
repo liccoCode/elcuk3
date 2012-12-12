@@ -263,6 +263,7 @@ public class Shipments extends Controller {
             renderArgs.put("ship", fba.shipment);
             render("Shipments/show.html");
         }
+        flash.success("FBA #%s 转移成功.", fba.shipmentId);
         show(id);
     }
 

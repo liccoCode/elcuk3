@@ -22,22 +22,20 @@ $.checkNotify = () ->
 
 $ ->
   if window.webkitNotifications
-    setInterval(
-      () ->
-        if webkitNotifications.checkPermission() is 0
-          $.get("/Notifications/nextNotification", {},
-            (r) ->
-              if r['title']
-                notification = webkitNotifications.createNotification(
-                  "/img/green.png", "#{r.title} #{r.createAt}", r.content
-                )
-                notification.show()
-                setTimeout(
-                  ->
-                    notification.cancel()
-                  # 15s 后自动消失
-                  , 15000)
-          )
+    setInterval(->
+      if webkitNotifications.checkPermission() is 0
+        $.get("/Notifications/nextNotification", {}, (r) ->
+          if r['title']
+            notification = webkitNotifications.createNotification(
+              "/img/green.png", "#{r.title} #{r.createAt}", r.content
+            )
+            notification.show()
+            setTimeout(
+              ->
+                notification.cancel()
+              # 6s 后自动消失
+            , 6000)
+        )
       # 15 s
-      , 15000
+    , 15000
     )

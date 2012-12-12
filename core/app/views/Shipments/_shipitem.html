@@ -41,7 +41,7 @@
         </td>
         <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
         <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
-        <td>#{time_tooltip time:itm.unit.attrs.planShipDate/}</td>
+        <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
         <td>${itm.getTurnOverT4()._1}</td>
         <td>${itm.unit.cooperator?.name}</td>
         <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>

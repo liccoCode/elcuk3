@@ -400,7 +400,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public List<Shipment> similarShipments() {
         if(this.fbas.size() > 0)
-            return Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.fbas f WHERE s.id!=? AND s.whouse=? AND cycle=false AND (f.centerId=? OR SIZE(s.fbas)=0) AND s.state IN (?,?) ORDER BY planBeginDate",
+            return Shipment.find("SELECT DISTINCT(s) FROM Shipment s LEFT JOIN s.fbas f WHERE s.id!=? AND s.whouse=? AND cycle=false AND (f.centerId=? OR SIZE(s.fbas)=0) AND s.state IN (?,?) ORDER BY planBeginDate",
                     this.id, this.whouse, this.fbas.get(0).centerId, S.PLAN, S.CONFIRM).fetch();
         else
             return Shipment.find("id!=? AND whouse=? AND cycle=false AND state IN (?,?) ORDER BY planBeginDate",

@@ -1,6 +1,5 @@
 package ext;
 
-import helper.Dates;
 import models.procure.Deliveryment;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
@@ -123,6 +122,7 @@ public class ProcuresHelper extends JavaExtensions {
     }
 
     public static String info(Shipment s) {
-        return String.format("[%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输时间: %s]", s.id, s.state, s.items.size(), s.fbas.size(), s.totalWeight(), Dates.date2Date(s.planBeginDate));
+        return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
+                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(), s.planBeginDate, s.planArrivDate);
     }
 }
