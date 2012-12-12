@@ -840,7 +840,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return Shipment.find("state=? ORDER BY createDate", state).fetch();
     }
 
-    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId) {
+    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType) {
         /**
          * 1. 判断是否有过期的周期型运输单, 有的话自动关闭
          * 2. 判断是否需要创建新的周期型运输单, 有的话自动创建
@@ -887,6 +887,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } else {
             where.append("AND whouse.id IS NULL");
         }
+        if(shipType != null) {
+            where.append(" AND type=?");
+            params.add(shipType);
+        }
+
         return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray()).fetch();
     }
 

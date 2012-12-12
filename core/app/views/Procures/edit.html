@@ -19,9 +19,7 @@
             <td colspan="4">
                 <input type="hidden" name="unit.id" value="${unit.id}">
                 <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
-                #{if unit.shipItem?.shipment}
-                    <input type="hidden" name="shipmentId" value="${unit.shipItem.shipment.id}">
-                #{/if}
+                <input type="hidden" name="shipmentId" value="${unit.shipItem?.shipment ? unit.shipItem.shipment.id : ''}">
                 <button type="submit" class="btn btn-primary">更新</button>
             </td>
         </tr>

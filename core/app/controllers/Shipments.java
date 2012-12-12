@@ -352,8 +352,8 @@ public class Shipments extends Controller {
      *
      * @param whouseId
      */
-    public static void unitShipments(Long whouseId) {
-        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId);
+    public static void unitShipments(Long whouseId, Shipment.T shipType) {
+        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId, shipType);
         render(unitRelateShipments);
     }
 }

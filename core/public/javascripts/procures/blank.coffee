@@ -12,13 +12,13 @@ $ ->
     mask = $('#container')
     mask.mask()
     $.getJSON('/Cooperators/price', {id: id, sku: $('#unit_sku').val()},
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
-          $("#unit_price").val(r.price)
-        mask.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
+        $("#unit_price").val(r.price)
+      mask.unmask()
     )
 
   $('#calculate_box').click (e) ->
@@ -28,40 +28,41 @@ $ ->
       alert('请先选择 供应商')
       return false
     $.post('/procures/calculateBox', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()},
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          $('input[name=unit\\.attrs\\.planQty]').val(r['message'])
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        $('input[name=unit\\.attrs\\.planQty]').val(r['message'])
     )
 
 
-  loadShipment = (shipment, whouseId) ->
+  loadShipment = (shipment, whouseId, shipType) ->
     mask = $('#container')
     mask.mask("加载关联运输单中...")
-    shipment.load("/shipments/unitShipments", {whouseId: whouseId},
-      ->
-        o = $(@)
-        if $("[name=shipmentId]").val()
-          o.find(":checkbox").each ->
-            $(@).prop('checked', true) if $(@).val() == $("[name=shipmentId]").val()
+    shipment.load("/shipments/unitShipments", {whouseId: whouseId, shipType: shipType},
+    ->
+      o = $(@)
+      if $("[name=shipmentId]").val()
+        o.find(":checkbox").each ->
+          $(@).prop('checked', true) if $(@).val() == $("[name=shipmentId]").val()
 
-        o.find(':checkbox').click(
-          ->
-            # 保留目标值
-            checked = $(@).prop("checked")
-            o.find(':checkbox').prop("checked", false)
-            $(@).prop('checked', checked)
-            $("[name=shipmentId]").val(checked and $(@).val() or "")
-        )
-        mask.unmask()
+      o.find(':checkbox').click(
+        ->
+          # 保留目标值
+          checked = $(@).prop("checked")
+          o.find(':checkbox').prop("checked", false)
+          $(@).prop('checked', checked)
+          $("[name=shipmentId]").val(checked and $(@).val() or "")
+      )
+      mask.unmask()
     )
 
   initShipments = (shipment) ->
-    if(shipment.size() == 1)
-      select = $('[name=unit\\.whouse\\.id]')
-      loadShipment(shipment, select.val())
-      select.change(-> loadShipment(shipment, select.val()))
+    whouseSelect = $('[name=unit\\.whouse\\.id]')
+    shipTypeSelect = $('[name=unit\\.shipType]')
+    loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val())
+    whouseSelect.change(-> loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val()))
+    shipTypeSelect.change(-> loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val()))
   initShipments($('#shipments'))
 
   # 计算时间到库日期与运输日期的差据

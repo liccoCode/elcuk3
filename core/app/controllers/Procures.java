@@ -117,12 +117,12 @@ public class Procures extends Controller {
         unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
         new ElcukRecord(Messages.get("procureunit.update"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
         if(oldPlanQty != unit.attrs.planQty) {
-            String shipment = "";
+            String shipment_id = "";
             if(unit.shipItem != null)
-                shipment = unit.shipItem.shipment.id;
+                shipment_id = unit.shipItem.shipment.id;
             Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
                     String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单 %s",
-                            oldPlanQty, unit.attrs.planQty, Dates.date2Date(unit.attrs.planDeliveryDate), shipment),
+                            oldPlanQty, unit.attrs.planQty, Dates.date2Date(unit.attrs.planDeliveryDate), shipment_id),
                     Notification.PROCURE, Notification.SHIPPER);
         }
         flash.success("ProcureUnit %s update success!", unit.id);
