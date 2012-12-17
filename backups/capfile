@@ -21,8 +21,10 @@ namespace :bak do
   desc "对 Elcuk2 主系统的备份"
   task :e, hosts: h_e  do
     run "backup perform -t elcuk"
+    # 备份的是数据库文件, 可以删除
     system("rsync -axzv --progress --delete #{h_e}:~/backups/elcuk #{lobal_backups}/")
     ['elcuk2-logs', 'elcuk2-data'].each do |dir|
+      # 这里备份了图片文件, 不允许使用 --delete 删除
       system("rsync -axzv --progress #{h_e}:~/#{dir} #{lobal_backups}/elcuk/")
     end
   end
