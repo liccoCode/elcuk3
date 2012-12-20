@@ -46,3 +46,12 @@ market.Account(easyacc_de):
   closeable: false
   isSaleAcc: true
 
+market.Account(easyacc_us):
+  username: wyatt@easyacceu.com
+  password: 13297472505us
+  type: AMAZON_US
+  token: 4wruCQj0t7ZY9BPKqZg2qH5qAXdvJBvLRo0h3trD
+  accessKey: AKIAIFWFCKKS5EAB3KZA
+  merchantId: A3RJNQO8PQ21MT
+  closeable: false
+  isSaleAcc: true

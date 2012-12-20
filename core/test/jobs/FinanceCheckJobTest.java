@@ -6,7 +6,7 @@ import jobs.promise.FinanceRefundOrders;
 import jobs.promise.FinanceShippedOrders;
 import models.finance.SaleFee;
 import models.market.M;
-import org.junit.Before;
+import models.market.Orderr;
 import org.junit.Test;
 import play.Play;
 import play.template2.IO;
@@ -107,7 +107,7 @@ public class FinanceCheckJobTest extends UnitTest {
 
     @Test
     public void testFinanceShippedOrders() throws ExecutionException, InterruptedException {
-        new FinanceShippedOrders("303-4405766-7121101").now().get();
+        new FinanceShippedOrders(Orderr.<Orderr>findById("303-4405766-7121101")).now().get();
     }
 
     @Test
