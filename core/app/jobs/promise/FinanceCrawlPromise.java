@@ -81,8 +81,8 @@ public class FinanceCrawlPromise extends Job {
                 if("SYSTEM".equals(orderId)) {
                     SaleFee.batchSaveWithJDBC(fees);
                 } else {
-                    SaleFee.deleteStateOneSaleFees(orderId);
                     // 这里不再做重复性检查是因为从 Amazon 回来的 day14 已经确保每一份都分开独立, 不会重复的了
+                    SaleFee.deleteOrderRelateFee(orderId);
                     try {
                         SaleFee.batchSaveWithJDBC(fees);
                     } catch(Exception e) {
