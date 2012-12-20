@@ -42,6 +42,8 @@ public class OrderPOST extends Post<Orderr> {
 
     public String desc = "DESC";
 
+    public Boolean paymentInfo = true;
+
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         F.T2<String, List<Object>> params = params();
@@ -79,6 +81,10 @@ public class OrderPOST extends Post<Orderr> {
             sbd.append("AND createDate>=? AND createDate<=? ");
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));
+        }
+
+        if(this.paymentInfo != null && this.paymentInfo) {
+            sbd.append("AND SIZE(fees)>0 ");
         }
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.

@@ -8,13 +8,13 @@
 <div class="row">
     <form id="search_form" action="@{Orders.index()}" method="post">
         <div class="span8">
-            <div class="row">
-                <div class="input-prepend span2">
+            <div class="row-fluid">
+                <div class="input-prepend span3">
                     <span class="add-on">From:</span>
                     <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
                 </div>
 
-                <div class="input-prepend span2">
+                <div class="input-prepend span3">
                     <span class="add-on">To:</span>
                     <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
                 </div>
@@ -24,8 +24,8 @@
                     <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">
                 </div>
             </div>
-            <div class="row">
-                <div class="span5">
+            <div class="row-fluid">
+                <div class="span12">
                     <select id="o_market" name="p.market" style="width:100px;">
                         <option value="">Market(ALL)</option>
                     #{list items:models.market.M.values()}
@@ -49,6 +49,12 @@
                     <select name="p.desc" class="span4" style="width:100px;">
                         <option value="DESC">DESC</option>
                         <option value="ASC">ASC</option>
+                    </select>
+
+                    <select name="p.paymentInfo" style="width:100px;">
+                        <option value="">支付信息</option>
+                        <option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>
+                        <option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息</option>
                     </select>
                 </div>
 
