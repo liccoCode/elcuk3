@@ -145,7 +145,7 @@ public class ShipmentPost extends Post {
                         .append(" OR fba.shipmentId LIKE ?")
                         .append(" OR u.sid LIKE ?")
                         .append(")");
-                for(int i = 0; i < 3; i++) params.add(word);
+                for(int i = 0; i < 4; i++) params.add(word);
             }
         }
 
