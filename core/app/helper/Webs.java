@@ -85,13 +85,14 @@ public class Webs {
 
     /**
      * 测试环境下使用的辅助登陆方法.  会将用户登陆的 CookieStore 保存到 test 目录下, 如果超过 10 小时则放弃缓存, 重新登陆
+     *
      * @param acc
      * @throws IOException
      * @throws ClassNotFoundException
      */
     public static void dev_login(Account acc) throws IOException, ClassNotFoundException {
         File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
-        if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(10)))
+        if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(3)))
             jsonFile.delete();
 
         if(!jsonFile.exists()) {

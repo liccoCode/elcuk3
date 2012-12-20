@@ -52,6 +52,6 @@ public class FinanceShippedOrders extends Job<List<SaleFee>> {
     }
 
     public static List<Orderr> orderrs() {
-        return Orderr.find("SELECT o FROM Orderr o WHERE o.state=? AND SIZE(o.fees)<=1", Orderr.S.SHIPPED).fetch(50);
+        return Orderr.find("SELECT o FROM Orderr o WHERE o.state=? AND o.market=o.account.type AND SIZE(o.fees)<=1", Orderr.S.SHIPPED).fetch(50);
     }
 }
