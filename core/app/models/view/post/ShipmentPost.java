@@ -141,6 +141,7 @@ public class ShipmentPost extends Post {
             } else {
                 sbd.append(" AND (")
                         .append("s.trackNo LIKE ?")
+                        .append(" OR s.memo LIKE ?")
                         .append(" OR fba.shipmentId LIKE ?")
                         .append(" OR u.sid LIKE ?")
                         .append(")");
