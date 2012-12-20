@@ -83,8 +83,11 @@ public class OrderPOST extends Post<Orderr> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.paymentInfo != null && this.paymentInfo) {
-            sbd.append("AND SIZE(fees)>0 ");
+        if(this.paymentInfo != null) {
+            if(this.paymentInfo)
+                sbd.append("AND SIZE(fees)>0 ");
+            else if(!this.paymentInfo)
+                sbd.append("AND SIZE(fees)<=0 ");
         }
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
