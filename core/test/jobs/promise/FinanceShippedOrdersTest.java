@@ -76,7 +76,7 @@ public class FinanceShippedOrdersTest extends UnitTest {
 
     @AfterClass
     public static void clearUp() {
-        SaleFee.delete("orderId=?", orderId);
-        Orderr.delete("orderId=?", orderId);
+        SaleFee.delete("orderId IN (?,?)", orderId, orderId2);
+        Orderr.delete("orderId IN (?,?)", orderId, orderId2);
     }
 }
