@@ -11,20 +11,31 @@
 #{/if}
 #{else }
 <div class="row-fluid">
-    <div class="span3 well well-small">
-        <table class="table table-striped table-bordered table-condensed">
-            <tr>
-                <th>Brand</th>
-                <th>Name</th>
-            </tr>
-            #{list items:brands, as:'b'}
+    <form method="post" action="@{Brands.create()}">
+        <div class="span3 well well-small">
+            <table class="table table-striped table-bordered table-condensed">
                 <tr>
-                    <td>${b.fullName}</td>
-                    <td><a href="@{Brands.index()}/${b.name}">${b.name}</a></td>
+                    <th>FullName</th>
+                    <th>Brand</th>
                 </tr>
-            #{/list}
-        </table>
-    </div>
+                #{list items:brands, as:'b'}
+                    <tr>
+                        <td>${b.fullName}</td>
+                        <td><a href="@{Brands.index()}/${b.name}">${b.name}</a></td>
+                    </tr>
+                #{/list}
+                <tr>
+                    <td><input type="text" name="brand.name" class="input-small"></td>
+                    <td><input type="text" name="brand.fullName" class="input-small"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn btn-primary">添加新品牌</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
 
     <div class="span8 well well-small">
         #{errorMsgs /}

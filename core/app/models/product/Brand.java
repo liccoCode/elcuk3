@@ -3,6 +3,7 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
@@ -31,6 +32,7 @@ public class Brand extends GenericModel {
     public String name;
 
     @Expose
+    @Required
     public String fullName;
 
     @Expose

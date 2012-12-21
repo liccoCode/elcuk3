@@ -1,7 +1,6 @@
 package controllers;
 
 import models.product.Brand;
-import models.product.Category;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -20,7 +19,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Brands extends Controller {
 
-    @Before(only = {"index", "bindCategory", "unbindCategory"})
+    @Before(only = {"index", "bindCategory", "unbindCategory", "update", "create"})
     public static void setUpIndexPage() {
         renderArgs.put("brands", Brand.all().<Brand>fetch());
     }
@@ -57,7 +56,15 @@ public class Brands extends Controller {
         if(Validation.hasErrors()) render("Brands/index.html", brand);
         brand.save();
         flash.success("更新成功");
-        redirect("/Brands/index/" + brand.name);
+        index(brand.name);
+    }
+
+    public static void create(Brand brand) {
+        validation.valid(brand);
+        if(Validation.hasErrors()) render("Brands/index.html", brand);
+        brand.save();
+        flash.success("成功添加 %s:%s", brand.name, brand.fullName);
+        index(brand.name);
     }
 
     /**
