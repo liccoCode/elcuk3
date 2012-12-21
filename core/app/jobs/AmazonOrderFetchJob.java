@@ -6,7 +6,6 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.Jobex;
-import models.Notification;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
@@ -156,7 +155,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 orderr.orderId = amazonOrderId;
                 orderr.market = M.val(odt.getSalesChannel());
                 orderr.createDate = new DateTime(odt.getPurchaseDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
-                orderr.state = parseOrderState(odt.getOrderStatus());
+                if(orderr.state != Orderr.S.CANCEL)
+                    orderr.state = parseOrderState(odt.getOrderStatus());
 
                 if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
                     Date lastUpdateTime = new DateTime(odt.getLastUpdatedDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();

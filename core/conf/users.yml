@@ -27,8 +27,8 @@ User(root):
   email: wppurking@gmail.com
 
 market.Account(easyacc):
-  username: easyacc.eu@gmail.com
-  password: 6XC$X5oY!jj
+  username: wyatt@easyacceu.com
+  password: pw5165688
   type: AMAZON_UK
   token: 3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf
   accessKey: AKIAI6EBPJLG64HWDBGQ
@@ -37,9 +37,9 @@ market.Account(easyacc):
   isSaleAcc: true
 
 market.Account(easyacc_de):
-  username: easyacc.de@gmail.com
-  password: 6XC$X5oY!jj
-  type: AMAZON_UK
+  username: wyatt@easyacceu.com
+  password: pw5165688104
+  type: AMAZON_DE
   token: fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF
   accessKey: AKIAIAEPZK5CZEIVZFCQ
   merchantId: A22H6OV6Q7XBYK

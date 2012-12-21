@@ -98,21 +98,22 @@ public class OrderPOST extends Post<Orderr> {
                 int orderUnbers = NumberUtils.toInt(matcher.group(1), 1);
                 sbd.append("AND (select sum(oi.quantity) from OrderItem oi where oi.order.orderId=orderId)>").append(orderUnbers).append(" ");
             } else {
-                this.search = this.word();
-                sbd.append("AND (orderId LIKE '%").append(this.search).append("%' OR ").
-                        append("address LIKE '%").append(this.search).append("%' OR ").
-                        append("address1 LIKE '%").append(this.search).append("%' OR ").
-                        append("buyer LIKE '%").append(this.search).append("%' OR ").
-                        append("city LIKE '%").append(this.search).append("%' OR ").
-                        append("country LIKE '%").append(this.search).append("%' OR ").
-                        append("email LIKE '%").append(this.search).append("%' OR ").
-                        append("postalCode LIKE '%").append(this.search).append("%' OR ").
-                        append("phone LIKE '%").append(this.search).append("%' OR ").
-                        append("province LIKE '%").append(this.search).append("%' OR ").
-                        append("reciver LIKE '%").append(this.search).append("%' OR ").
-                        append("memo LIKE '%").append(this.search).append("%' OR ").
-                        append("userid LIKE '%").append(this.search).append("%' OR ").
-                        append("trackNo LIKE '%").append(this.search).append("%') ");
+                String search = this.word();
+                sbd.append("AND (orderId LIKE ? OR ").
+                        append("address LIKE ? OR ").
+                        append("address1 LIKE ? OR ").
+                        append("buyer LIKE ? OR ").
+                        append("city LIKE ? OR ").
+                        append("country LIKE ? OR ").
+                        append("email LIKE ? OR ").
+                        append("postalCode LIKE ? OR ").
+                        append("phone LIKE ? OR ").
+                        append("province LIKE ? OR ").
+                        append("reciver LIKE ? OR ").
+                        append("memo LIKE ? OR ").
+                        append("userid LIKE ? OR ").
+                        append("trackNo LIKE ?) ");
+                for(int i = 0; i < 14; i++) params.add(search);
             }
         }
 

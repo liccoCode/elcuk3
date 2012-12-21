@@ -28,13 +28,12 @@ $ ->
     $.params = remote: remote
     $('#container :input').map($.varClosure)
     btnGroup.mask('更新中...')
-    $.post('/sellings/update', $.params,
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          alert("Selling: " + r['sellingId'] + " 更新成功!")
-        btnGroup.unmask()
+    $.post('/sellings/update', $.params, (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        alert("Selling: " + r['sellingId'] + " 更新成功!")
+      btnGroup.unmask()
     )
 
   # Update 按钮
@@ -43,6 +42,18 @@ $ ->
 
   # Deploy 按钮
   $('button:contains("Deploy")').click ->
+    # check account 与 market 不一样, 要提醒
+    switch $('[name=s\\.account\\.id]').val()
+      when 1
+        if $('[name=s\\.market]').val() != 'AMAZON_UK'
+          return unless confirm("注意! Account 是 UK 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
+      when 2
+        if $('[name=s\\.market]').val() != 'AMAZON_DE'
+          return unless confirm("注意! Account 是 DE 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
+      when 131
+        if $('[name=s\\.market]').val() != 'AMAZON_US'
+          return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
+      else
     updateAndDeployBaseBtn(@, yes)
 
   # Sync 按钮
@@ -92,7 +103,7 @@ $ ->
 
 
   # 图片上传的按钮
-  $('#img_cal').click(imageIndexCal).find('~ button').click ->
+  $('#img_cal').click(imageIndexCal).find("\~ button").click ->
     return false if !imageIndexCal()
     return false if !confirm("确定要更新到 " + $("select[name=s\\.market]").val() + " ?")
     imgDiv = $(@).parent()
@@ -100,14 +111,13 @@ $ ->
     params =
       'sid': $('#s_sellingId').val()
       imgs: $('[name=s\\.aps\\.imageName]').val()
-    $.post('/sellings/imageUpload', params,
-      (r) ->
-        if r.flag is true
-          alertDiv = $(ALERT_TEMPLATE)
-          alertDiv.find('#replace_it').replaceWith("<p>更新成功!</p>")
-          alertDiv.prependTo('#container')
-        else
-          alert(r.message)
-        imgDiv.unmask()
+    $.post('/sellings/imageUpload', params, (r) ->
+      if r.flag is true
+        alertDiv = $(ALERT_TEMPLATE)
+        alertDiv.find('#replace_it').replaceWith("<p>更新成功!</p>")
+        alertDiv.prependTo('#container')
+      else
+        alert(r.message)
+      imgDiv.unmask()
     )
 

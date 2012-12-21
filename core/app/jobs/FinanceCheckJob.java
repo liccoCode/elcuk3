@@ -10,6 +10,7 @@ import models.finance.FeeType;
 import models.finance.SaleFee;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -95,19 +96,25 @@ public class FinanceCheckJob extends Job {
     private static List<SaleFee> oneRowFee(M market, String orderId, Element row) {
         Elements tds = row.select("td");
         SaleFee fee = new SaleFee();
-        fee.cost = Fee(tds.get(4));
+        float amazonFeeCost = 0;
         switch(market) {
             case AMAZON_US:
                 fee.currency = Currency.USD;
+                fee.cost = FeeUS(tds.get(4));
+                amazonFeeCost = FeeUS(tds.get(5)) + FeeUS(tds.get(6)) + FeeUS(tds.get(7));
+                break;
+            case AMAZON_UK:
+                fee.currency = Currency.GBP;
+                fee.cost = FeeUK(tds.get(4));
+                amazonFeeCost = FeeUK(tds.get(5)) + FeeUK(tds.get(6)) + FeeUK(tds.get(7));
                 break;
             case AMAZON_DE:
-                fee.currency = Currency.GBP;
-                break;
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_UK:
                 fee.currency = Currency.EUR;
+                fee.cost = FeeDE(tds.get(4));
+                amazonFeeCost = FeeDE(tds.get(5)) + FeeDE(tds.get(6)) + FeeDE(tds.get(7));
                 break;
             default:
                 fee.currency = Currency.USD;
@@ -123,7 +130,7 @@ public class FinanceCheckJob extends Job {
 
         SaleFee amazonFee = new SaleFee(fee);
         amazonFee.type = FeeType.findById("amazon");
-        amazonFee.cost = Fee(tds.get(5)) + Fee(tds.get(6)) + Fee(tds.get(7));
+        amazonFee.cost = amazonFeeCost;
         amazonFee.usdCost = amazonFee.currency.toUSD(amazonFee.cost);
         return Arrays.asList(fee, amazonFee);
     }
@@ -134,10 +141,33 @@ public class FinanceCheckJob extends Job {
      * @param td
      * @return
      */
-    private static float Fee(Element td) {
-        if(td.select(".negative").first() == null)
-            return NumberUtils.toFloat(td.text().substring(1));
-        else
-            return -NumberUtils.toFloat(td.text().substring(2));
+    private static float FeeUS(Element td) {
+        String text = td.text();
+        return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "$"), ","));
+    }
+
+
+    /**
+     * 处理 €1221.98 与 -€5.50 这样的值, 去除 €
+     *
+     * @param td
+     * @return
+     */
+    private static float FeeDE(Element td) {
+        String text = td.text();
+        // ,->. .->, 的形式在这里, 只要保持 Amazon 的账号为 English 语言, 则不需要转换
+        return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "€"), ","));
+    }
+
+    /**
+     * 处理 £1221.98 与 -£5.50 这样的值, 去除 £
+     *
+     * @param td
+     * @return
+     */
+    private static float FeeUK(Element td) {
+        String text = td.text();
+        // ,->. .->, 的形式在这里, 只要保持 Amazon 的账号为 English 语言, 则不需要转换
+        return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "£"), ","));
     }
 }
