@@ -87,8 +87,11 @@ public class FBAPost extends Post<FBAShipment> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sbd.append("AND fba.shipmentId LIKE '%").append(word).append("%' OR ")
-                    .append("si.unit.sku LIKE '%").append(word).append("%' ");
+            sbd.append("AND (")
+                    .append("fba.shipmentId LIKE ?")
+                    .append("OR si.unit.sku LIKE ?")
+                    .append(") ");
+            for(int i = 0; i < 2; i++) params.add(word);
         }
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }

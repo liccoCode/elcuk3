@@ -36,11 +36,11 @@
         <div class="span2">
             <label class="inline checkbox">
                 <input ${p.receiptOverTime ? "checked" : ""}  type="checkbox" name="p.receiptOverTime" value="true">
-                签收超时
+                <abbr title="签收超过 2 天算超时">签收超时</abbr>
             </label>
             <label class="inline checkbox">
                 <input ${p.receiveOverTime ? "checked" : ""} type="checkbox" name="p.receiveOverTime" value="true">
-                入库超时
+                <abbr title="签收超过 3 天算超时">入库超时</abbr>
             </label>
         </div>
 
@@ -79,10 +79,28 @@
                 <span class="badge badge-info">${fba.shipItems.size()}</span>
             </td>
             <td>${fba.createAt.date()}</td>
-            <td>${fba.receiptAt.date()}</td>
-            <td>${fba.receivingAt && fba.receiptAt ? (fba.receivingAt - fba.receiptAt) + " days" : ""}</td>
-            <td>${fba.receivingAt.date()}</td>
-            <td>${fba.receivingAt && fba.closeAt ? (fba.closeAt - fba.receivingAt) + " days" : ""}</td>
+            <td>${fba.receiptAt.datetime()}</td>
+            <td>
+                <span class="badge ${fba.receiptAt.badgeSuffix(fba.receivingAt)}">
+                ${fba.receivingAt && fba.receiptAt ? (fba.receivingAt - fba.receiptAt) + " days" : ""}
+                </span>
+            </td>
+            <td>
+            ${fba.receivingAt.datetime()}
+            </td>
+            <td>
+            *{只在没有 closeAt 拥有 receivingAt 的时候显示}*
+                #{if fba.receivingAt && !fba.closeAt}
+                    <span class="badge ${fba.receivingAt.badgeSuffix(new Date())}">
+                ${(new Date() - fba.receivingAt)} days
+                </span>
+                #{/if}
+                #{else }
+                    <span class="badge ${fba.receivingAt.badgeSuffix(fba.closeAt)}">
+                ${fba.receivingAt && fba.closeAt ? (fba.closeAt - fba.receivingAt) + " days" : ""}
+                    </span>
+                #{/else}
+            </td>
             <td>${fba.closeAt.date()}</td>
             #{set t2:fba.progress()/}
             <td style="width:120px">

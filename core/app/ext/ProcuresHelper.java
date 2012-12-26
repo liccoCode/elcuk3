@@ -6,6 +6,9 @@ import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import play.templates.JavaExtensions;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -124,5 +127,27 @@ public class ProcuresHelper extends JavaExtensions {
     public static String info(Shipment s) {
         return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
                 s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(), s.planBeginDate, s.planArrivDate);
+    }
+
+    /**
+     * 根据 end - begin 所计算的时间差, 给与 badge-xxx 提示紧急程度
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    public static String badgeSuffix(Date begin, Date end) {
+        if(end == null) end = new Date();
+        if(begin == null) return "";
+        long diffs = end.getTime() - begin.getTime();
+        if(diffs < TimeUnit.DAYS.toMillis(2))
+            return "badge-success";
+        else if(diffs < TimeUnit.DAYS.toMillis(3))
+            return "badge-info";
+        else if(diffs < TimeUnit.DAYS.toMillis(5))
+            return "badge-warning";
+        else {
+            return "badge-important";
+        }
     }
 }
