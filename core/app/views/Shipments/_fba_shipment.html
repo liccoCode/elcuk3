@@ -24,23 +24,7 @@
                 <td>
                     <a href="javascript:;" rel="popover" content="SELLER_LABEL: 卖家自行贴标" title="打标方式">${fba.labelPrepType}</a>
                 </td>
-            </tr>
 
-            <tr>
-                <th>创建时间</th>
-                <td>#{time_tooltip time:fba.createAt /}</td>
-
-                <th>签收时间</th>
-                <td>#{time_tooltip time:fba.receiptAt/}</td>
-
-                <th>开始入库时间</th>
-                <td>#{time_tooltip time:fba.receivingAt /}</td>
-
-                <th>关闭时间</th>
-                <td>#{time_tooltip time:fba.closeAt /}</td>
-            </tr>
-
-            <tr>
                 <th>CenterId</th>
                 <td>${fba.centerId}</td>
                 <th>总重量</th>
@@ -50,7 +34,7 @@
                     <form method="post" action="@{Shipments.moveFba()}" style="margin-bottom:0">
                         <select name="id">
                             <option value="">不更改</option>
-                            #{list items:fba.shipment.similarShipments(), as:'s'}
+                            #{list items:fba.similarShipments(), as:'s'}
                                 <option value="${s.id}">${s.info()}</option>
                             #{/list}
                         </select>
@@ -61,6 +45,7 @@
                 #{/ck}
                 </td>
             </tr>
+
 
             <tr>
                 <td colspan="8">
@@ -85,7 +70,21 @@
                     </a>
                 #{/ifnot}
                 </td>
+
+                <th>创建时间</th>
+                <td>#{time_tooltip time:fba.createAt /}</td>
+
+                <th>签收时间</th>
+                <td>#{time_tooltip time:fba.receiptAt/}</td>
+
+                <th>开始入库时间</th>
+                <td>#{time_tooltip time:fba.receivingAt /}</td>
+
+                <th>关闭时间</th>
+                <td>#{time_tooltip time:fba.closeAt /}</td>
+
             </tr>
+
 
             <tr id="itemsFromAmazon_${fba.shipmentId}" style="display:none;">
                 <td colspan="8" style="padding:0;">
@@ -101,7 +100,7 @@
     </div>
 </div>
 #{ifnot delete}
-<div class="row-fluid" style="margin-bottom:20px;">
+<div class="row-fluid" style="margin-bottom:10px;">
     <div class="span12">
         #{if fba.shipItems.size() == 0}
             <span class="add-on">运输项目已经被移除, 需删除 Amazon 上的 FBA 腾出库存</span>

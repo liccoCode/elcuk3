@@ -394,20 +394,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 与当前运输单运输地址, FBA 仓库相同的其他运输单;(非周期型)
-     *
-     * @return
-     */
-    public List<Shipment> similarShipments() {
-        if(this.fbas.size() > 0)
-            return Shipment.find("SELECT DISTINCT(s) FROM Shipment s LEFT JOIN s.fbas f WHERE s.id!=? AND s.whouse=? AND cycle=false AND (f.centerId=? OR SIZE(s.fbas)=0) AND s.state IN (?,?) ORDER BY planBeginDate",
-                    this.id, this.whouse, this.fbas.get(0).centerId, S.PLAN, S.CONFIRM).fetch();
-        else
-            return Shipment.find("id!=? AND whouse=? AND cycle=false AND state IN (?,?) ORDER BY planBeginDate",
-                    this.id, this.whouse, S.PLAN, S.CONFIRM).fetch();
-    }
-
-    /**
      * 向 Shipment 添加需要运输的 ProcureUnit
      * <p/>
      * ps: 这个方法不允许并发

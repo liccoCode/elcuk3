@@ -434,4 +434,19 @@ public class FBAShipment extends Model {
         return FBAShipment.find("shipmentId=?", shipmentId).first();
     }
 
+    /**
+     * 与当前运输单运输地址, FBA 仓库相同的其他运输单;(非周期型)
+     *
+     * @return
+     */
+    public List<Shipment> similarShipments() {
+        if(this.shipment == null) return new ArrayList<Shipment>();
+        if(this.shipment.fbas.size() > 0) {
+            return Shipment.find("SELECT DISTINCT(s) FROM Shipment s LEFT JOIN s.fbas f WHERE s.id!=? AND s.whouse=? AND cycle=false AND f.centerId=? AND s.state IN (?,?) ORDER BY planBeginDate",
+                    this.shipment.id, this.shipment.whouse, this.centerId, Shipment.S.PLAN, Shipment.S.CONFIRM).fetch();
+        } else
+            return Shipment.find("id!=? AND whouse=? AND cycle=false AND state IN (?,?) ORDER BY planBeginDate",
+                    this.shipment.id, this.shipment.whouse, Shipment.S.PLAN, Shipment.S.CONFIRM).fetch();
+    }
+
 }
