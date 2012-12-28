@@ -135,9 +135,12 @@ public class FBAShipment extends Model {
          * @return
          */
         public boolean isCanModify() {
-            if(this == RECEIVING || this == CANCELLED || this == DELETED || this == SHIPPED || this == CLOSED)
+            if(this == RECEIVING || this == CANCELLED || this == DELETED ||
+                    this == SHIPPED || this == CLOSED) {
                 return false;
-            else return true;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -223,20 +226,25 @@ public class FBAShipment extends Model {
          * 2. 对应 Shipment 的运输地址必须是相同 FBA 仓库
          * 3. 运输项目的运输方式需要一样
          */
-        if(!this.state.isCanModify())
+        if(!this.state.isCanModify()) {
             Validation.addError("", "FBA 已经无法变更状态. " + this.state);
-        if(this.shipItems.size() != 1)
+        }
+        if(this.shipItems.size() != 1) {
             Validation.addError("", "仅有当 FBA 中只有一个运输项目的时候才可以进行转移");
+        }
         if(shipment.fbas.size() > 0) {
             FBAShipment fba = shipment.fbas.get(0);
-            if(!fba.centerId.equals(this.centerId))
+            if(!fba.centerId.equals(this.centerId)) {
                 Validation.addError("", "运输单中 FBA 的仓库地址不一样, 无法转移.");
+            }
         }
         if(this.shipment.type != shipment.type) {
             ShipItem itm = this.shipItems.get(0);
-            if(itm.unit.attrs.planArrivDate.getTime() < shipment.planArrivDate.getTime())
-                Validation.addError("", String.format("采购计划延期, 请与 PM 沟通调整计划. 采购计划预计在 %tF 抵达, 而目的运输单在 %tF 抵达.",
-                        itm.unit.attrs.planArrivDate, shipment.planArrivDate));
+            if(itm.unit.attrs.planArrivDate.getTime() < shipment.planArrivDate.getTime()) {
+                Validation.addError("",
+                        String.format("采购计划延期, 请与 PM 沟通调整计划. 采购计划预计在 %tF 抵达, 而目的运输单在 %tF 抵达.",
+                                itm.unit.attrs.planArrivDate, shipment.planArrivDate));
+            }
         }
 
         if(Validation.hasErrors()) return;
@@ -255,7 +263,8 @@ public class FBAShipment extends Model {
         ShipItem itm = this.shipItems.get(0);
         if(itm.unit.shipType != shipment.type) {
             Notification.notifies("采购计划运输提前",
-                    String.format("采购计划 #%s 因运输单(%s)调整, 到库日期从 %tF 提前到 %tF", itm.unit.id, shipment.id, itm.unit.attrs.planArrivDate, shipment.planArrivDate),
+                    String.format("采购计划 #%s 因运输单(%s)调整, 到库日期从 %tF 提前到 %tF", itm.unit.id,
+                            shipment.id, itm.unit.attrs.planArrivDate, shipment.planArrivDate),
                     Notification.PM);
         }
         itm.shipment = shipment;
@@ -265,13 +274,16 @@ public class FBAShipment extends Model {
         itm.unit.save();
         itm.save();
 
-        if(shipment.fbas.size() <= 0)
+        if(shipment.fbas.size() <= 0) {
             shipment.target = this.address();
+        }
         this.shipment = shipment;
         this.save();
         new ElcukRecord(Messages.get("shipment.moveFBA"),
-                Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id), oldShipmentId).save();
-        Notification.notifies("FBA 运输单转移", Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
+                Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
+                oldShipmentId).save();
+        Notification.notifies("FBA 运输单转移",
+                Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
                 Notification.PM, Notification.SHIPPER);
     }
 
@@ -284,20 +296,25 @@ public class FBAShipment extends Model {
         // 每一次的碰到 RECEIVING 状态都去检查一次的 ShipItem.unit 的阶段
         if(state == S.RECEIVING) {
             if(this.receivingAt == null)
-                // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
+            // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
+            {
                 this.receivingAt = new Date();
+            }
 
             // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
-            for(ShipItem itm : this.shipItems)
+            for(ShipItem itm : this.shipItems) {
                 itm.unitStage(ProcureUnit.STAGE.INBOUND);
+            }
             this.shipment.fbaReceviedBeforeShipmentDelivered();
         } else if(state == S.CLOSED || state == S.DELETED) {
             this.closeAt = new Date();
-            for(ShipItem itm : this.shipItems)
+            for(ShipItem itm : this.shipItems) {
                 itm.unitStage(ProcureUnit.STAGE.CLOSE);
+            }
         }
-        if(this.state != state)
+        if(this.state != state) {
             FBAMails.shipmentStateChange(this, this.state, state);
+        }
         this.state = state;
     }
 
@@ -308,8 +325,9 @@ public class FBAShipment extends Model {
      */
     public float totalWeight() {
         float weight = 0f;
-        for(ShipItem itm : this.shipItems)
+        for(ShipItem itm : this.shipItems) {
             weight += itm.qty * itm.unit.product.weight;
+        }
         return weight;
     }
 
@@ -319,7 +337,8 @@ public class FBAShipment extends Model {
     public void receiptAndreceivingCheck() {
         // 已经开始接收的不再进行提醒
         if(this.state.ordinal() >= S.RECEIVING.ordinal()) return;
-        if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >= TimeUnit.DAYS.toMillis(2))) {
+        if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >=
+                TimeUnit.DAYS.toMillis(2))) {
             FBAMails.receiptButNotReceiving(this);
         }
     }
@@ -332,7 +351,9 @@ public class FBAShipment extends Model {
 
         FBAShipment that = (FBAShipment) o;
 
-        if(shipmentId != null ? !shipmentId.equals(that.shipmentId) : that.shipmentId != null) return false;
+        if(shipmentId != null ? !shipmentId.equals(that.shipmentId) : that.shipmentId != null) {
+            return false;
+        }
 
         return true;
     }
@@ -355,10 +376,12 @@ public class FBAShipment extends Model {
      * @return
      */
     public boolean afterReceving() {
-        if(this.state == S.RECEIVING || this.state == S.CLOSED || this.state == S.CANCELLED/*像签收有误差的时候人工取消,会是 CANCEL 状态*/)
+        if(this.state == S.RECEIVING || this.state == S.CLOSED ||
+                this.state == S.CANCELLED/*像签收有误差的时候人工取消,会是 CANCEL 状态*/) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
 
@@ -372,8 +395,9 @@ public class FBAShipment extends Model {
     public synchronized void updateFBAShipment(S state) {
         List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
         // 在手动更新 FBA 的时候, 同步 ShipItem, ProcureUnit, FBA
-        for(ShipItem itm : this.shipItems)
+        for(ShipItem itm : this.shipItems) {
             itm.qty = itm.unit.qty();
+        }
 
         toBeUpdateItems.addAll(this.shipItems);
         try {
@@ -388,10 +412,12 @@ public class FBAShipment extends Model {
      * 删除这个 FBA Shipment
      */
     public synchronized void removeFBAShipment() {
-        if(this.shipItems.size() > 0)
+        if(this.shipItems.size() > 0) {
             throw new FastRuntimeException("还拥有运输项目, 无法删除");
-        if(this.state != S.WORKING && this.state != S.PLAN)
+        }
+        if(this.state != S.WORKING && this.state != S.PLAN) {
             throw new FastRuntimeException("已经运输出去, 无法删除.");
+        }
         try {
             this.state = FBA.update(this, this.shipItems, S.DELETED);
             this.closeAt = new Date();
@@ -419,7 +445,8 @@ public class FBAShipment extends Model {
 
     public String address() {
         return String.format("%s %s %s %s (%s)",
-                this.fbaCenter.addressLine1, this.fbaCenter.city, this.fbaCenter.stateOrProvinceCode, this.fbaCenter.postalCode, this.centerId);
+                this.fbaCenter.addressLine1, this.fbaCenter.city,
+                this.fbaCenter.stateOrProvinceCode, this.fbaCenter.postalCode, this.centerId);
     }
 
     public String codeToCounrty() {
@@ -439,14 +466,15 @@ public class FBAShipment extends Model {
      *
      * @return
      */
-    public List<Shipment> similarShipments() {
+    public List<Shipment> targetShipments() {
         if(this.shipment == null) return new ArrayList<Shipment>();
-        if(this.shipment.fbas.size() > 0) {
-            return Shipment.find("SELECT DISTINCT(s) FROM Shipment s LEFT JOIN s.fbas f WHERE s.id!=? AND s.whouse=? AND cycle=false AND f.centerId=? AND s.state IN (?,?) ORDER BY planBeginDate",
-                    this.shipment.id, this.shipment.whouse, this.centerId, Shipment.S.PLAN, Shipment.S.CONFIRM).fetch();
-        } else
-            return Shipment.find("id!=? AND whouse=? AND cycle=false AND state IN (?,?) ORDER BY planBeginDate",
-                    this.shipment.id, this.shipment.whouse, Shipment.S.PLAN, Shipment.S.CONFIRM).fetch();
+        return Shipment.find("SELECT DISTINCT(s) FROM Shipment s" +
+                " LEFT JOIN s.fbas f" +
+                " WHERE s.id!=? AND s.whouse=? AND cycle=false AND" +
+                // 类似的 Shipment 有 FBA 则 centerId 需要一样, 或者没有 FBA
+                " (f.centerId=? OR SIZE(s.fbas)=0) AND s.state IN (?,?) ORDER BY planBeginDate",
+                this.shipment.id, this.shipment.whouse, this.centerId, Shipment.S.PLAN,
+                Shipment.S.CONFIRM).fetch();
     }
 
 }

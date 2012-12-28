@@ -22,6 +22,9 @@ import play.test.Fixtures;
 public class Bootstrap extends Job {
     @Override
     public void doJob() throws Exception {
+        if(Play.id.equalsIgnoreCase("test")) {
+            return;
+        }
         // 1. 初始化系统内的用户
         long users = User.count();
         if(users == 0) {
@@ -40,8 +43,10 @@ public class Bootstrap extends Job {
         Privilege.init();
         S3.init();
 
-        if(Play.mode.isProd() || (Play.mode.isDev() && "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev"))))
+        if(Play.mode.isProd() || (Play.mode.isDev() &&
+                "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev")))) {
             OsTicketCreateCheck.begin();
+        }
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.

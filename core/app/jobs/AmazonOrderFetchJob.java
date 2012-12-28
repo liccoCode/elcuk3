@@ -93,14 +93,18 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                      * 1. 解析出文件中的所有 Orders.
                      * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
                      */
-                    List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
+                    List<Orderr> orders = AmazonOrderFetchJob
+                            .allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
                     // 通过 subList 后, orders List 会变空
                     int size = orders.size();
                     // 分几个部分处理? 每个部分最多处理 1000 个订单
                     int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
-                    List<Orderr> subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
+                    List<Orderr> subList = orders
+                            .subList(0, orders.size() > 1000 ? 1000 : orders.size());
                     for(int i = 1; i <= part; i++) {
-                        Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find("orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList))).<Orderr>fetch());
+                        Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find(
+                                "orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList)))
+                                .<Orderr>fetch());
                         for(Orderr order : subList) {
                             if(Orderr.count("orderId=?", order.orderId) <= 0) { //保存
                                 order.save();
@@ -145,7 +149,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             try {
 
                 String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
-                if(StringUtils.startsWith(amazonOrderId, "S02") || StringUtils.startsWith(amazonOrderId, "S01")) {
+                if(StringUtils.startsWith(amazonOrderId, "S02") ||
+                        StringUtils.startsWith(amazonOrderId, "S01")) {
                     Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
                     continue;
                 }
@@ -154,12 +159,16 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 orderr.account = acc;
                 orderr.orderId = amazonOrderId;
                 orderr.market = M.val(odt.getSalesChannel());
-                orderr.createDate = new DateTime(odt.getPurchaseDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
+                orderr.createDate = new DateTime(
+                        odt.getPurchaseDate().toGregorianCalendar().getTime(),
+                        Dates.timeZone(orderr.market)).toDate();
                 if(orderr.state != Orderr.S.CANCEL)
                     orderr.state = parseOrderState(odt.getOrderStatus());
 
                 if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
-                    Date lastUpdateTime = new DateTime(odt.getLastUpdatedDate().toGregorianCalendar().getTime(), Dates.timeZone(orderr.market)).toDate();
+                    Date lastUpdateTime = new DateTime(
+                            odt.getLastUpdatedDate().toGregorianCalendar().getTime(),
+                            Dates.timeZone(orderr.market)).toDate();
                     orderr.paymentDate = lastUpdateTime;
                     orderr.shipDate = lastUpdateTime;
 
@@ -168,7 +177,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                     orderr.shipLevel = ffdt.getShipServiceLevel();
 
                     AddressType addtype = ffdt.getAddress();
-                    orderr.city = addtype.getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
+                    orderr.city = addtype
+                            .getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
                     orderr.province = addtype.getState();
                     orderr.postalCode = addtype.getPostalCode();
                     orderr.country = addtype.getCountry();
@@ -201,10 +211,13 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
 
                     String sku = Product.merchantSKUtoSKU(oid.getSKU());
                     Product product = Product.findById(sku);
-                    Selling selling = Selling.findById(Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/, acc));
+                    Selling selling = Selling.findById(
+                            Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/,
+                                    acc));
                     if(product != null) oi.product = product;
                     else {
-                        String title = String.format("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
+                        String title = String
+                                .format("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
                         Logger.error(title);
                         if(!mailed.containsKey(sku)) {
                             Webs.systemMail(title, title);
@@ -215,7 +228,9 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                     if(selling != null) oi.selling = selling;
                     else {
                         String sid = Selling.sid(oid.getSKU().toUpperCase(), orderr.market, acc);
-                        String title = String.format("Selling[%s] is not in SELLING, it can not be happed!", sid);
+                        String title = String
+                                .format("Selling[%s] is not in SELLING, it can not be happed!",
+                                        sid);
                         Logger.warn(title);
                         if(mailed.containsKey(sid)) {
                             Webs.systemMail(title, title);
@@ -241,7 +256,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                             AmountType at = ct.getAmount();
                             String compType = ct.getType().toLowerCase();
                             oi.currency = helper.Currency.valueOf(at.getCurrency());
-                            if(oi.currency == null) oi.currency = Currency.USD;// 如果 Currency 为 null,则修补为 USD
+                            if(oi.currency == null)
+                                oi.currency = Currency.USD;// 如果 Currency 为 null,则修补为 USD
                             if("principal".equals(compType)) {
                                 oi.price = at.getValue();
                                 totalAmount += oi.price;
@@ -250,7 +266,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                                 oi.shippingPrice = at.getValue();
                                 shippingAmount += oi.shippingPrice;
                             } else if("giftwrap".equals(compType)) {
-                                oi.memo += String.format("\nGiftWrap: %s %s.", at.getValue(), oi.currency); //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
+                                oi.memo += String.format("\nGiftWrap: %s %s.", at.getValue(),
+                                        oi.currency); //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
                             }
                         }
 
@@ -258,7 +275,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                         PromotionType promotionType = oid.getPromotion();
                         if(promotionType != null) {
                             if(promotionType.getShipPromotionDiscount() != null) {
-                                oi.shippingPrice = oi.shippingPrice - promotionType.getShipPromotionDiscount();
+                                oi.shippingPrice =
+                                        oi.shippingPrice - promotionType.getShipPromotionDiscount();
                             }
                             if(promotionType.getItemPromotionDiscount() != null) {
                                 oi.discountPrice = promotionType.getItemPromotionDiscount();
@@ -278,7 +296,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             }
         }
         if(StringUtils.isNotBlank(errors.toString()))
-            Webs.systemMail(String.format("解析 %s 订单文件的错误.", file.getAbsolutePath()), errors.toString());
+            Webs.systemMail(String.format("解析 %s 订单文件的错误.", file.getAbsolutePath()),
+                    errors.toString());
         return orders;
     }
 
@@ -298,7 +317,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 Logger.info("merge one orderItem[%s] belong to order %s, see the details goto %s",
                         oi.product.sku,
                         oi.order.orderId,
-                        "https://sellercentral.amazon.co.uk/gp/orders-v2/details?ie=UTF8&orderID=" + oi.order.orderId
+                        "https://sellercentral.amazon.co.uk/gp/orders-v2/details?ie=UTF8&orderID=" +
+                                oi.order.orderId
                 );
             }
             return false;

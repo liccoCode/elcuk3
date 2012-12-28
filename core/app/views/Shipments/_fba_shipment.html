@@ -11,7 +11,8 @@
             <tr>
                 <th>ShipmentId</th>
                 <td>
-                    <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
+                    <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}
+                    </a>
                 </td>
 
                 <th colspan="2">状态</th>
@@ -34,7 +35,7 @@
                     <form method="post" action="@{Shipments.moveFba()}" style="margin-bottom:0">
                         <select name="id">
                             <option value="">不更改</option>
-                            #{list items:fba.similarShipments(), as:'s'}
+                            #{list items:fba.targetShipments(), as:'s'}
                                 <option value="${s.id}">${s.info()}</option>
                             #{/list}
                         </select>
@@ -109,7 +110,8 @@
                 <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
                     <input type="hidden" value="${fba.id}" name="fbaId">
                     #{authenticityToken /}
-                    <button class="btn btn-small btn-danger" data-confirm="btn">删除 ${fba.shipmentId}</button>
+                    <button class="btn btn-small btn-danger" data-confirm="btn">
+                        删除 ${fba.shipmentId}</button>
                 </form>
             #{/ck}
         #{/if}
