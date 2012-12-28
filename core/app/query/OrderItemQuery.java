@@ -5,7 +5,6 @@ import helper.Dates;
 import helper.JPAs;
 import models.market.Account;
 import models.market.Feedback;
-import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.DB;
@@ -13,7 +12,6 @@ import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import javax.persistence.Query;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -89,6 +87,8 @@ public class OrderItemQuery {
                 .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
                 .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
                 .from("OrderItem oi")
+                        // 对清理的孤立的 OrderItem 的过滤
+                .where("oi.product_sku IS NOT NULL")
                 .where("oi.createDate>=?").param(from)
                 .where("oi.createDate<=?").param(to);
         if(filterQuantity > 0) sql.where("oi.quantity>?").param(filterQuantity);
