@@ -75,16 +75,20 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 // 准备计算用的数据容器
                 Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
                 if(isSku) {
-                    for(Product product : Product.<Product>findAll())
+                    for(Product product : Product.<Product>findAll()) {
                         analyzeMap.put(product.sku, new AnalyzeDTO(product.sku));
+                    }
                 } else {
-                    for(Selling selling : Selling.<Selling>findAll())
+                    for(Selling selling : Selling.<Selling>findAll()) {
                         analyzeMap.put(selling.sellingId, new AnalyzeDTO(selling));
+                    }
                 }
 
 
                 // sku, sid, qty, date, acc.id
-                List<F.T5<String, F.T2<String, String>, Integer, Date, String>> t5s = OrderItemQuery.sku_sid_asin_qty_date_aId(nowWithMorning.minusDays(30).toDate(), Dates.night(nowWithMorning.toDate()), 0);
+                List<F.T5<String, F.T2<String, String>, Integer, Date, String>> t5s = OrderItemQuery
+                        .sku_sid_asin_qty_date_aId(nowWithMorning.minusDays(30).toDate(),
+                                Dates.night(nowWithMorning.toDate()), 0);
 
                 // 销量
                 for(F.T5<String, F.T2<String, String>, Integer, Date, String> t5 : t5s) {
@@ -110,7 +114,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 // ProcureUnit
                 for(AnalyzeDTO dto : analyzeMap.values()) {
                     // 切换 ProcureUnit 的 sku/sid 的参数
-                    List<ProcureUnit> untis = ProcureUnit.find((isSku ? "sku=?" : "sid=?") + " AND stage NOT IN (?,?)", dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER).fetch();
+                    List<ProcureUnit> untis = ProcureUnit
+                            .find((isSku ? "sku=?" : "sid=?") + " AND stage NOT IN (?,?)", dto.fid,
+                                    ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER).fetch();
 
                     // plan, working, worked, way
                     for(ProcureUnit unit : untis) {
@@ -118,11 +124,14 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
                         else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
-                        else if(unit.stage == ProcureUnit.STAGE.INBOUND) dto.inbound += unit.inboundingQty();
+                        else if(unit.stage == ProcureUnit.STAGE.INBOUND)
+                            dto.inbound += unit.inboundingQty();
                     }
 
                     // ps cal
-                    List<SellingQTY> qtys = SellingQTY.find((isSku ? "product.sku=?" : "selling.sellingId=?"), dto.fid).fetch();
+                    List<SellingQTY> qtys = SellingQTY
+                            .find((isSku ? "product.sku=?" : "selling.sellingId=?"), dto.fid)
+                            .fetch();
                     for(SellingQTY qty : qtys) dto.qty += qty.qty;
 
                     // review
@@ -132,11 +141,11 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     dto.reviews = reviewT3._1;
                     dto.rating = reviewT3._2;
                     if(dto.reviews > 0)
-                        dto.reviewRatio = dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
+                        dto.reviewRatio =
+                                dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
                     else dto.reviewRatio = 0;
                 }
 
-                // TODO 这部分缓存需要处理成为有生命周期的, 因为时间跨度越长, 缓存的数据越大, 而查看的几率越小, 所以需要对这缓存添加生命周期; 同时需要为系统中添加统一的访问这部分缓存的接口.
                 Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");
                 Cache.set(cacke_key + ".time", new Date(), "12h");
             }
@@ -155,9 +164,12 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public List<AnalyzeDTO> query() {
         List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>(this.analyzes());
         // 过滤 Category
-        if(StringUtils.isNotBlank(this.categoryId)) CollectionUtils.filter(dtos, new SearchPredicate(this.categoryId));
-        if(StringUtils.isNotBlank(this.search)) CollectionUtils.filter(dtos, new SearchPredicate(this.search));
-        if(StringUtils.isNotBlank(this.orderBy)) Collections.sort(dtos, new FieldComparator(this.orderBy, this.desc));
+        if(StringUtils.isNotBlank(this.categoryId))
+            CollectionUtils.filter(dtos, new SearchPredicate(this.categoryId));
+        if(StringUtils.isNotBlank(this.search))
+            CollectionUtils.filter(dtos, new SearchPredicate(this.search));
+        if(StringUtils.isNotBlank(this.orderBy))
+            Collections.sort(dtos, new FieldComparator(this.orderBy, this.desc));
         if(StringUtils.isNotBlank(this.aid) && "sid".equalsIgnoreCase(this.type))
             CollectionUtils.filter(dtos, new AccountIdPredicate(this.aid));
         if(this.filterDot2) CollectionUtils.filter(dtos, new UnContainsPredicate(",2"));
@@ -225,7 +237,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         public boolean evaluate(Object o) {
             AnalyzeDTO dto = (AnalyzeDTO) o;
             if(str.startsWith("^"))
-                return dto.fid.toLowerCase().startsWith(StringUtils.replace(str.toLowerCase(), "^", ""));
+                return dto.fid.toLowerCase()
+                        .startsWith(StringUtils.replace(str.toLowerCase(), "^", ""));
             else
                 return dto.fid.toLowerCase().contains(str.toLowerCase());
         }

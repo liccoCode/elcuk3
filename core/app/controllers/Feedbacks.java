@@ -5,7 +5,6 @@ import models.market.Feedback;
 import models.product.Category;
 import models.support.Ticket;
 import models.support.TicketReason;
-import models.support.TicketState;
 import models.view.Ret;
 import play.libs.F;
 import play.mvc.Controller;
@@ -22,23 +21,6 @@ import java.util.Set;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Feedbacks extends Controller {
-    @Check("feedbacks.index")
-    public static void index() {
-        F.T2<List<Ticket>, List<Ticket>> newFdbk = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.NEW, true);
-        F.T2<List<Ticket>, List<Ticket>> needTwoFdbk = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.TWO_MAIL, true);
-        List<Ticket> noRespFeedbacks = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.NO_RESP, false)._1;
-        List<Ticket> newMsgFeedbacks = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.NEW_MSG, false)._1;
-        List<Ticket> preCloseFeedbacks = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.PRE_CLOSE, false)._1;
-        List<Ticket> closed = Ticket.tickets(Ticket.T.FEEDBACK, TicketState.CLOSE, false, 30)._1;
-
-        renderArgs.put("newFeedbacks", newFdbk._1);
-        renderArgs.put("newOverdueFeedbacks", newFdbk._2);
-        renderArgs.put("twoMailFeedbacks", needTwoFdbk._1);
-        renderArgs.put("twoMailOverdueFeedbacks", needTwoFdbk._2);
-        int totalNeedDealFeedbacks = newFdbk._1.size() + newFdbk._2.size() + needTwoFdbk._1.size() + needTwoFdbk._2.size()
-                + noRespFeedbacks.size() + newMsgFeedbacks.size() + preCloseFeedbacks.size();
-        render(noRespFeedbacks, newMsgFeedbacks, totalNeedDealFeedbacks, preCloseFeedbacks, closed);
-    }
 
     public static void show(String id) {
         Feedback feedback = Feedback.findById(id);
@@ -53,7 +35,8 @@ public class Feedbacks extends Controller {
 
     public static void check(String id) {
         Feedback feedback = Feedback.findById(id);
-        String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
+        String html = FeedbackInfoFetchJob
+                .fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
         feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
         if(FeedbackInfoFetchJob.isRequestSuccess(html))
             flash.success("刷新成功. [%s -> %s]", feedback.orderId, feedback.isRemove);

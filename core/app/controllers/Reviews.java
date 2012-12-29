@@ -1,14 +1,12 @@
 package controllers;
 
 import com.google.gson.JsonElement;
-import helper.J;
 import jobs.ReviewInfoFetchJob;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
 import models.support.Ticket;
 import models.support.TicketReason;
-import models.support.TicketState;
 import models.view.Ret;
 import play.libs.F;
 import play.mvc.Controller;
@@ -25,25 +23,6 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Reviews extends Controller {
-
-    @Check("reviews.index")
-    public static void index() {
-        F.T2<List<Ticket>, List<Ticket>> newT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW, true);
-        F.T2<List<Ticket>, List<Ticket>> needTwoT2 = Ticket.tickets(Ticket.T.REVIEW, TicketState.TWO_MAIL, true);
-        List<Ticket> noRespReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.NO_RESP, false)._1;
-        List<Ticket> newMsgReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.NEW_MSG, false)._1;
-        List<Ticket> preCloseReviews = Ticket.tickets(Ticket.T.REVIEW, TicketState.PRE_CLOSE, false)._1;
-        List<Ticket> closed = Ticket.tickets(Ticket.T.REVIEW, TicketState.CLOSE, false, 30)._1;
-
-
-        renderArgs.put("newReviews", newT2._1);
-        renderArgs.put("newOverdueReviews", newT2._2);
-        renderArgs.put("twoMailReviews", needTwoT2._1);
-        renderArgs.put("twoMailOverdueReviews", needTwoT2._2);
-        int totalNeedDealReview = newT2._1.size() + newT2._2.size() + needTwoT2._1.size() + needTwoT2._2.size() +
-                noRespReviews.size() + newMsgReviews.size() + preCloseReviews.size();
-        render(noRespReviews, newMsgReviews, totalNeedDealReview, preCloseReviews, closed);
-    }
 
     public static void show(String rid) {
         AmazonListingReview review = AmazonListingReview.findByReviewId(rid);

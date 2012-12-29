@@ -88,10 +88,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("amazonReviews.index", "Review点击台 页面"));
 
         privileges.add(new Privilege("support", "售后模块"));
-        privileges.add(new Privilege("reviews.index", "Reviews 页面"));
-        privileges.add(new Privilege("feedbacks.index", "Feedbacks 页面"));
-        privileges.add(new Privilege("tickets.index", "Tickets 页面"));
-        privileges.add(new Privilege("tickets.user", "Tickets 工作台 页面"));
+        privileges.add(new Privilege("tickets.index", "Tickets 工作台 页面"));
         privileges.add(new Privilege("ticketanalyzes.index", "Ticket 分析 页面"));
 
         privileges.add(new Privilege("product", "产品模块"));
@@ -160,7 +157,8 @@ public class Privilege extends Model {
     public static Set<Privilege> privileges(String username) {
         Set<Privilege> privileges = PRIVILEGE_CACHE.get(username);
         if(privileges == null) {
-            PRIVILEGE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/new HashSet<Privilege>(User.findByUserName(username).privileges));
+            PRIVILEGE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
+                    new HashSet<Privilege>(User.findByUserName(username).privileges));
             privileges = PRIVILEGE_CACHE.get(username);
         }
         return privileges;

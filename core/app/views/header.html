@@ -38,17 +38,8 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            #{ck "reviews.index"}
-                                <li><a href="@{Reviews.index()}">Reviews</a></li>
-                            #{/ck}
-                            #{ck "feedbacks.index"}
-                                <li><a href="@{Feedbacks.index()}">Feedbacks</a></li>
-                            #{/ck}
                             #{ck "tickets.index"}
-                                <li><a href="@{Tickets.index()}">Tickets</a></li>
-                            #{/ck}
-                            #{ck "tickets.user"}
-                                <li><a href="@{Tickets.user()}">Tickets 工作台</a></li>
+                                <li><a href="@{Tickets.index()}">Tickets 工作台</a></li>
                             #{/ck}
                             #{ck "ticketanalyzes.index"}
                                 <li><a href="@{TicketAnalyzes.index()}">Tickets 分析</a></li>
@@ -127,7 +118,8 @@
 
                 <ul class="nav pull-right">
                     <li class="divider-vertical"></li>
-                    <li><a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a></li>
+                    <li><a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
+                    </li>
                     <li>
                         <a href="#" class="dropdown-toggle" id="notification_btn" data-toggle="dropdown">Notify
                             <b class="caret"></b></a>

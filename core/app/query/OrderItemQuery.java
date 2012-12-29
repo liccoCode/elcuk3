@@ -3,8 +3,7 @@ package query;
 import helper.DBUtils;
 import helper.Dates;
 import helper.JPAs;
-import models.market.Account;
-import models.market.Feedback;
+import models.market.*;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.DB;
@@ -35,7 +34,8 @@ public class OrderItemQuery {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<F.T3<String, Integer, Float>> sku_qty_usdCost(Date from, Date to, Account acc) {
+    public static List<F.T3<String, Integer, Float>> sku_qty_usdCost(Date from, Date to,
+                                                                     Account acc) {
         SqlSelect select = new JpqlSelect()
                 .select("oi.product.sku as sku, oi.quantity as qty, oi.usdCost as usdCost")
                 .from("OrderItem oi")
@@ -48,8 +48,11 @@ public class OrderItemQuery {
         for(Map row : rows) {
             triplus.add(new F.T3<String, Integer, Float>(
                     row.get("sku").toString().substring(0, 2),
-                    NumberUtils.toInt((row.get("qty") == null ? "0" : row.get("qty").toString()), 0),
-                    NumberUtils.toFloat((row.get("usdCost") == null ? "0" : row.get("usdCost").toString()), 0)));
+                    NumberUtils
+                            .toInt((row.get("qty") == null ? "0" : row.get("qty").toString()), 0),
+                    NumberUtils.toFloat(
+                            (row.get("usdCost") == null ? "0" : row.get("usdCost").toString()),
+                            0)));
         }
         return triplus;
     }
@@ -60,7 +63,9 @@ public class OrderItemQuery {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_aId(Date from, Date to, int filterQuantity) {
+    public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_aId(Date from,
+                                                                                         Date to,
+                                                                                         int filterQuantity) {
         SqlSelect hql = new JpqlSelect()
                 .select("oi.product.sku as sku, oi.selling.sellingId as sid, oi.quantity as qty, oi.createDate as _date, oi.order.account.id as aid")
                 .from("OrderItem oi")
@@ -81,9 +86,11 @@ public class OrderItemQuery {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<F.T5<String, F.T2<String, String>, Integer, Date, String>> sku_sid_asin_qty_date_aId(Date from, Date to, int filterQuantity) {
+    public static List<F.T5<String, F.T2<String, String>, Integer, Date, String>> sku_sid_asin_qty_date_aId(
+            Date from, Date to, int filterQuantity) {
         SqlSelect sql = new SqlSelect()
-                .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin", "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid")
+                .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
+                        "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid")
                 .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
                 .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
                 .from("OrderItem oi")
@@ -112,7 +119,8 @@ public class OrderItemQuery {
 
         String sku = null;
         try {
-            PreparedStatement ps = conn.prepareStatement("select product_sku from OrderItem where order_orderId=?");
+            PreparedStatement ps = conn
+                    .prepareStatement("select product_sku from OrderItem where order_orderId=?");
             ps.setString(1, feedback.orderId);
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
@@ -136,7 +144,8 @@ public class OrderItemQuery {
         Connection conn = DB.getConnection();
         int count = 0;
         try {
-            PreparedStatement ps = conn.prepareStatement("select count(i.product_sku) from Feedback f left join OrderItem i on f.orderr_orderId=i.order_orderId where i.product_sku=?");
+            PreparedStatement ps = conn.prepareStatement(
+                    "select count(i.product_sku) from Feedback f left join OrderItem i on f.orderr_orderId=i.order_orderId where i.product_sku=?");
             ps.setString(1, sku);
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
@@ -163,7 +172,8 @@ public class OrderItemQuery {
 
         Map<String, AtomicInteger> skuSales = new HashMap<String, AtomicInteger>();
         try {
-            PreparedStatement ps = conn.prepareStatement("select quantity, product_sku from OrderItem where createDate>=? AND createDate<=?");
+            PreparedStatement ps = conn.prepareStatement(
+                    "select quantity, product_sku from OrderItem where createDate>=? AND createDate<=?");
             ps.setDate(1, new java.sql.Date(begin.getTime()));
             ps.setDate(2, new java.sql.Date(end.getTime()));
             ResultSet rs = ps.executeQuery();
@@ -182,5 +192,77 @@ public class OrderItemQuery {
         }
 
         return skuSales;
+    }
+
+    /**
+     * 所有正常销售的订单的订单项目. 不包括 CANCEL, REFUNDED, RETURNEW 的订单
+     *
+     * @return
+     */
+    public static List<OrderItem> allNormalSaleOrderItem(Date from, Date to) {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
+                " oi.usdCost, oi.market FROM OrderItem oi" +
+                " LEFT JOIN Orderr o ON oi.order_orderId=o.orderId" +
+                " WHERE oi.createDate>=? AND oi.createDate<=? AND o.state NOT IN (?, ?, ?)",
+                from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
+        return rows2OrderItem(rows);
+    }
+
+    /**
+     * 加载某一个 SKU 的所有正常销售的 OrderItem. 不包括 CANCEL, REFUNDED, RETURNEW 的订单
+     *
+     * @param sku
+     * @param from
+     * @param to
+     * @return
+     */
+    public static List<OrderItem> skuNormalSaleOrderItem(String sku, Date from, Date to) {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
+                " oi.usdCost, oi.market FROM OrderItem oi" +
+                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
+                " LEFT JOIN Product p on p.sku=oi.product_sku" +
+                " WHERE p.sku=? AND oi.createDate>=? AND oi.createDate<=? AND" +
+                " o.state NOT IN (?, ?, ?)",
+                sku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
+
+        return rows2OrderItem(rows);
+    }
+
+    public static List<OrderItem> mskuNormalSaleOrderItem(String msku, Date from, Date to) {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
+                " oi.usdCost, oi.market FROM OrderItem oi" +
+                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
+                " LEFT JOIN Selling s on oi.selling_sellingId=s.sellingId" +
+                " WHERE s.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND" +
+                " o.state NOT IN (?, ?, ?)",
+                msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
+        return rows2OrderItem(rows);
+    }
+
+    public static List<OrderItem> mskuWithAccountNormalSaleOrderItem(String msku, long accId,
+                                                                     Date from, Date to) {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
+                " oi.usdCost, oi.market FROM OrderItem oi" +
+                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
+                " LEFT JOIN Selling s on oi.selling_sellingId=s.sellingId" +
+                " LEFT JOIN Account a on s.account_id=a.id" +
+                " WHERE s.merchantSKU=? AND a.id=? AND oi.createDate>=? AND oi.createDate<=? AND" +
+                " o.state NOT IN (?, ?, ?)",
+                msku, accId, from, to,
+                Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
+        return rows2OrderItem(rows);
+    }
+
+    private static List<OrderItem> rows2OrderItem(List<Map<String, Object>> rows) {
+        List<OrderItem> items = new ArrayList<OrderItem>();
+        for(Map<String, Object> row : rows) {
+            OrderItem itm = new OrderItem();
+            itm.quantity = (Integer) row.get("quantity");
+            itm.market = M.val(row.get("market").toString());
+            itm.usdCost = (Float) row.get("usdCost");
+            itm.createDate = new DateTime(row.get("createDate")).toDate();
+            items.add(itm);
+        }
+        return items;
     }
 }

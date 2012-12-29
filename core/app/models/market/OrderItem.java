@@ -145,11 +145,12 @@ public class OrderItem extends GenericModel {
      * @param acc
      * @param from
      * @param to
-     * @return
+     * @return 返回需要用到 createDate, quantity, usdCost, market
      */
     @SuppressWarnings("unchecked")
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
-    public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type, Account acc, Date from, Date to) {
+    public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type,
+                                                                  Account acc, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
         List<OrderItem> orderItems = Cache.get(cacheKey, List.class);
         if(orderItems != null) return orderItems;
@@ -158,19 +159,17 @@ public class OrderItem extends GenericModel {
             if(orderItems != null) return orderItems;
 
             if("all".equalsIgnoreCase(skuOrMsku)) {
-                orderItems = OrderItem.find("createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
-                        from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                orderItems = OrderItemQuery.allNormalSaleOrderItem(from, to);
             } else {
                 if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                    orderItems = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
-                            Product.merchantSKUtoSKU(skuOrMsku), from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                    orderItems = OrderItemQuery.skuNormalSaleOrderItem(
+                            Product.merchantSKUtoSKU(skuOrMsku), from, to);
                 else {
                     if(acc == null)
-                        orderItems = OrderItem.find("selling.merchantSKU=? AND createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
-                                skuOrMsku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                        orderItems = OrderItemQuery.mskuNormalSaleOrderItem(skuOrMsku, from, to);
                     else
-                        orderItems = OrderItem.find("selling.merchantSKU=? AND selling.account=? AND createDate>=? AND createDate<=? AND order.state NOT IN (?,?,?)",
-                                skuOrMsku, acc, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW).fetch();
+                        orderItems = OrderItemQuery.mskuWithAccountNormalSaleOrderItem(skuOrMsku,
+                                acc.id, from, to);
                 }
             }
             Cache.add(cacheKey, orderItems, "5mn");
@@ -180,6 +179,7 @@ public class OrderItem extends GenericModel {
 
     /**
      * 销量的图形图表
+     *
      * @param skuOrMsku
      * @param acc
      * @param type
@@ -187,11 +187,15 @@ public class OrderItem extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku, Account acc, String type, Date from, Date to) {
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku,
+                                                                               Account acc,
+                                                                               String type,
+                                                                               Date from, Date to) {
         // 做内部参数的容错
         DateTime inFrom = new DateTime(Dates.date2JDate(from));
         DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
-        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc, inFrom.toDate(), inTo.toDate());
+        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
+                inFrom.toDate(), inTo.toDate());
         Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
                 /*销售额*/
                 .map("sale_all", new ArrayList<F.T2<Long, Float>>())
@@ -225,7 +229,8 @@ public class OrderItem extends GenericModel {
                 }
             }
             // 当天所有市场的销售额数据
-            hightChartLines.get("sale_all").add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
+            hightChartLines.get("sale_all")
+                    .add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
             hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
             hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
             hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
@@ -248,7 +253,11 @@ public class OrderItem extends GenericModel {
      * @param to        @return {series_size, days, series_n}
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartUnitOrder(String skuOrMsku, Account acc, String type, Date from, Date to) {
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartUnitOrder(String skuOrMsku,
+                                                                                   Account acc,
+                                                                                   String type,
+                                                                                   Date from,
+                                                                                   Date to) {
         // 做内部参数的容错
         DateTime inFrom = new DateTime(Dates.date2JDate(from));
         DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
@@ -257,7 +266,8 @@ public class OrderItem extends GenericModel {
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
-        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc, inFrom.toDate(), inTo.toDate());
+        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
+                inFrom.toDate(), inTo.toDate());
         Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
                 /*销量*/
                 .map("unit_all", new ArrayList<F.T2<Long, Float>>())
@@ -285,7 +295,8 @@ public class OrderItem extends GenericModel {
                 }
             }
             // 当天所有市场的销售订单数据
-            hightChartLines.get("unit_all").add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
+            hightChartLines.get("unit_all")
+                    .add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
             hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
             hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
             hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
@@ -297,29 +308,35 @@ public class OrderItem extends GenericModel {
 
     /**
      * 不同 Category 销量的百分比
+     *
      * @param from
      * @param to
      * @param acc
      * @return
      */
-    public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to, Account acc) {
+    public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to,
+                                                                         Account acc) {
         List<F.T3<String, Integer, Float>> rows = OrderItemQuery.sku_qty_usdCost(from, to, acc);
 
         Map<String, F.T2<AtomicInteger, AtomicReference<Float>>> categoryAndCounts = new HashMap<String, F.T2<AtomicInteger, AtomicReference<Float>>>();
         for(F.T3<String, Integer, Float> row : rows) {
             if(categoryAndCounts.containsKey(row._1)) {
                 categoryAndCounts.get(row._1)._1.addAndGet(row._2);
-                categoryAndCounts.get(row._1)._2.set(categoryAndCounts.get(row._1)._2.get() + row._3);
+                categoryAndCounts.get(row._1)._2
+                        .set(categoryAndCounts.get(row._1)._2.get() + row._3);
             } else
-                categoryAndCounts.put(row._1, new F.T2<AtomicInteger, AtomicReference<Float>>(new AtomicInteger(row._2), new AtomicReference<Float>(row._3)));
+                categoryAndCounts.put(row._1,
+                        new F.T2<AtomicInteger, AtomicReference<Float>>(new AtomicInteger(row._2),
+                                new AtomicReference<Float>(row._3)));
         }
 
         List<F.T3<String, Integer, Float>> categoryAndQty = new ArrayList<F.T3<String, Integer, Float>>();
-        for(String key : categoryAndCounts.keySet())
+        for(String key : categoryAndCounts.keySet()) {
             categoryAndQty.add(new F.T3<String, Integer, Float>(key,
                     categoryAndCounts.get(key)._1.get(),
                     categoryAndCounts.get(key)._2.get()
             ));
+        }
 
         return categoryAndQty;
     }
