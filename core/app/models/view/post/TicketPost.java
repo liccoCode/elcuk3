@@ -29,7 +29,7 @@ public class TicketPost extends Post<Ticket> {
 
     public DT dateType = DT.createAt;
 
-    public Ticket.T type = null;
+    public Ticket.T type = Ticket.T.REVIEW;
 
     public Boolean start = null;
 
@@ -86,7 +86,20 @@ public class TicketPost extends Post<Ticket> {
         }
 
         if(this.isSuccess != null) {
-            //TODO 需要解决
+            if(this.type == Ticket.T.REVIEW) {
+                sbd.append("AND (");
+                if(this.isSuccess) {
+                    sbd.append("t.review.isRemove=?").append(" OR ")
+                            .append("t.review.rating>t.review.lastRating");
+                    params.add(this.isSuccess);
+                } else {
+                    sbd.append("t.review.rating<t.review.lastRating");
+                }
+                sbd.append(") ");
+            } else if(this.type == Ticket.T.FEEDBACK) {
+                sbd.append("AND t.feedback.isRemove=? ");
+                params.add(this.isSuccess);
+            }
         }
 
         if(this.start != null) {
@@ -114,6 +127,7 @@ public class TicketPost extends Post<Ticket> {
     public List<Ticket> query() {
         F.T2<String, List<Object>> t2 = this.params();
         this.count = this.count(t2);
-        return Ticket.find(t2._1, t2._2.toArray()).fetch(this.page, this.perSize);
+        return Ticket.find(t2._1 + " ORDER BY t.createAt DESC", t2._2.toArray())
+                .fetch(this.page, this.perSize);
     }
 }

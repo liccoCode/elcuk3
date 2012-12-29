@@ -274,17 +274,22 @@ public class AmazonListingReview extends GenericModel {
             throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
 
         this.listingId = newReview.listingId;
-        if(newReview.rating != null && !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
+        if(newReview.rating != null &&
+                !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
             this.lastRating = this.rating;
-            this.comment(String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating, Dates.date2DateTime()));
-            if(this.ticket != null) this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
+            this.comment(
+                    String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating,
+                            Dates.date2DateTime()));
+            if(this.ticket != null)
+                this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
         if(StringUtils.isNotBlank(newReview.title)) this.title = newReview.title;
         if(StringUtils.isNotBlank(newReview.review)) this.review = newReview.review;
         if(newReview.helpUp != null && newReview.helpUp > 0) this.helpUp = newReview.helpUp;
-        if(newReview.helpClick != null && newReview.helpClick > 0) this.helpClick = newReview.helpClick;
+        if(newReview.helpClick != null && newReview.helpClick > 0)
+            this.helpClick = newReview.helpClick;
         if(StringUtils.isNotBlank(newReview.userid)) this.userid = newReview.userid;
         if(StringUtils.isNotBlank(newReview.username)) this.username = newReview.username;
         //reviewDate 不修改了
@@ -311,6 +316,20 @@ public class AmazonListingReview extends GenericModel {
         return Orderr.find("userid=?", this.userid).fetch();
     }
 
+    /**
+     * 判断 Rating 与 lastRating 的差别, 是上升了(+)还是下降了(-), 还是没变(0)
+     *
+     * @return
+     */
+    public int isUpOrDown() {
+        if(this.lastRating > this.rating)
+            return -1;
+        else if(this.lastRating < this.rating)
+            return +1;
+        else
+            return 0;
+    }
+
 
     /**
      * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
@@ -319,8 +338,10 @@ public class AmazonListingReview extends GenericModel {
      */
     public void checkMailAndTicket() {
         if(!this.isPersistent()) return;// 如果没有保存进入数据库的, 那么则不进行判断
-        if(Selling.count("listing.listingId=?", this.listingId) == 0) return;// 判断这个 Listing 是我们自己有上架的
-        if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0) return;// 超过 70 天的不处理
+        if(Selling.count("listing.listingId=?", this.listingId) == 0)
+            return;// 判断这个 Listing 是我们自己有上架的
+        if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0)
+            return;// 超过 70 天的不处理
 
 
 //        Rating < 4 并且为自建的 Listing 的开 OsTicket
@@ -412,10 +433,14 @@ public class AmazonListingReview extends GenericModel {
         List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.listing.market);
         if(opendAccs.size() == 0) throw new FastRuntimeException("没有打开的 Review 账号了.");
         List<Account> nonClickAccs = AmazonReviewRecord.checkNonClickAccounts(opendAccs, this);
-        if(nonClickAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("To Click Review %s, hava %s valid accounts.", this.reviewId, nonClickAccs.size());
+        if(nonClickAccs.size() == 0)
+            throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("To Click Review %s, hava %s valid accounts.", this.reviewId,
+                nonClickAccs.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : nonClickAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        for(Account a : nonClickAccs) {
+            sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        }
         Logger.info("Account List: %s", sb.toString());
         return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
     }
@@ -429,7 +454,8 @@ public class AmazonListingReview extends GenericModel {
     public Orderr tryToRelateOrderByUserId() {
         if(this.orderr != null) return this.orderr;
         if(StringUtils.isBlank(this.userid)) return null;
-        return Orderr.find("createDate<=? AND userid=? ORDER BY createDate DESC", this.reviewDate, this.userid).first();
+        return Orderr.find("createDate<=? AND userid=? ORDER BY createDate DESC", this.reviewDate,
+                this.userid).first();
     }
 
     /**
@@ -472,9 +498,11 @@ public class AmazonListingReview extends GenericModel {
             subject += " - No Order found...";
             content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
 
-            this.osTicketId = OsTicket.openOsTicket(name, "support@easyacceu.com", subject, content, OsTicket.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
+            this.osTicketId = OsTicket.openOsTicket(name, "support@easyacceu.com", subject, content,
+                    OsTicket.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
         } else {
-            this.osTicketId = OsTicket.openOsTicket(name, this.orderr.email, subject, content, OsTicket.TopicID.REVIEW, "Review " + this.alrId);
+            this.osTicketId = OsTicket.openOsTicket(name, this.orderr.email, subject, content,
+                    OsTicket.TopicID.REVIEW, "Review " + this.alrId);
         }
         if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
             return null;
@@ -523,11 +551,15 @@ public class AmazonListingReview extends GenericModel {
     }
 
     public static List<AmazonListingReview> listingReviews(String listingId, String orderBy) {
-        return AmazonListingReview.listingReviews(listingId, orderBy, ("reviewRank".equals(orderBy) ? " ASC" : " DESC"));
+        return AmazonListingReview.listingReviews(listingId, orderBy,
+                ("reviewRank".equals(orderBy) ? " ASC" : " DESC"));
     }
 
-    public static List<AmazonListingReview> listingReviews(String listingId, String orderBy, String desc) {
-        return AmazonListingReview.find(String.format("listingId=? ORDER BY %s %s", orderBy, desc), listingId).fetch();
+    public static List<AmazonListingReview> listingReviews(String listingId, String orderBy,
+                                                           String desc) {
+        return AmazonListingReview
+                .find(String.format("listingId=? ORDER BY %s %s", orderBy, desc), listingId)
+                .fetch();
     }
 
     /**
@@ -547,7 +579,8 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     public static List<F.T2<String, Integer>> reviewLeftClickTimes(List<String> reviewIds) {
-        List<AmazonListingReview> reviews = AmazonListingReview.find("reviewId IN " + JpqlSelect.inlineParam(reviewIds)).fetch();
+        List<AmazonListingReview> reviews = AmazonListingReview
+                .find("reviewId IN " + JpqlSelect.inlineParam(reviewIds)).fetch();
         List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<F.T2<String, Integer>>();
         for(AmazonListingReview review : reviews) {
             int leftClick = 0;

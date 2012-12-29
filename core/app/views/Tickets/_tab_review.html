@@ -1,42 +1,25 @@
-<ul class="nav nav-tabs">
-    <li class="active">
-        <a href="#review_${t.id}" data-toggle='tab'>Review</a>
-    </li>
-    <li>
-        <a href="#close_${t.id}" data-toggle='tab'>Close</a>
-    </li>
-</ul>
-
-<div class="tab-content">
-    <div id="review_${t.id}" class="tab-pane fade in active">
-        <div class="row-fluid">
-            <div class="span4">
-                <blockquote>
-                    <p>
-                        <a href="${t.review?.userReviewLink()}" target="_blank">
-                            <i class="icon-external-link"></i>
-                        ${t.review?.review.raw()}
-                        </a>
-                    </p>
-                    <small>${t.review?.orderr?.buyer}</small>
-                </blockquote>
-            </div>
-            <div class="span4">
-                <blockquote>
-                    <p>${t.review.comment.raw()}</p>
-                    <small>Review Memo</small>
-                </blockquote>
-            </div>
-            <div class="span4">
-                <blockquote>
-                    <p>${t.memo.raw()}</p>
-                    <small>Ticket Memo</small>
-                </blockquote>
-            </div>
-        </div>
+<div class="row-fluid">
+    <div class="span4">
+        <blockquote>
+            <p>
+                <a href="${t.review?.userReviewLink()}" target="_blank">
+                    <i class="icon-external-link"></i>
+                ${t.review?.review.raw()}
+                </a>
+            </p>
+            <small>${t.review?.orderr?.buyer}</small>
+        </blockquote>
     </div>
-
-    <div id="close_${t.id}" class="tab-pane fade">
-        CloseL!
+    <div class="span4">
+        <blockquote>
+            <p>${t.review.comment.raw()}</p>
+            <small>Review Memo</small>
+        </blockquote>
+    </div>
+    <div class="span4">
+        <blockquote>
+            <p>${t.memo.raw()}</p>
+            <small>Ticket Memo</small>
+        </blockquote>
     </div>
 </div>

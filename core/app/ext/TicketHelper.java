@@ -13,18 +13,39 @@ import play.templates.JavaExtensions;
  */
 public class TicketHelper extends JavaExtensions {
     /**
-     * Review 的 td score, 颜色区分
+     * 1. Review 的 td score, 颜色区分
+     * 2. rating 变化, 上下箭头
+     * 3. 删除的 叉叉
      *
      * @param review
      * @return
      */
     public static BaseTemplate.RawData tdScore(AmazonListingReview review) {
         StringBuilder sbd = new StringBuilder("<td");
-        if(review != null)
-            sbd.append(tdScore(review.rating));
-        else
-            sbd.append(">");
+        if(review != null) {
+            int upOrDown = review.isUpOrDown();
+            // title
+            if(upOrDown != 0)
+                sbd.append(" rel='tooltip' title='From ").append(review.lastRating)
+                        .append(" To ").append(review.rating).append("' ");
 
+            //  分数
+            sbd.append(tdScore(review.rating));
+
+            // 上下箭头
+            if(upOrDown > 0)
+                sbd.append("<i").append(" style='color:#468847' ")
+                        .append("class='pull-right icon-arrow-up'>");
+            else if(upOrDown < 0)
+                sbd.append("<i").append(" style='color:#B94A48' ")
+                        .append("class='pull-right icon-arrow-down'>");
+
+            // 是否删除
+            if(review.isRemove)
+                sbd.append("<i style='color:#468847' class='pull-right icon-remove'></i>");
+        } else {
+            sbd.append(">");
+        }
 
         sbd.append("</td>");
         return raw(sbd.toString());
@@ -32,10 +53,14 @@ public class TicketHelper extends JavaExtensions {
 
     public static BaseTemplate.RawData tdScore(Feedback feedback) {
         StringBuilder sbd = new StringBuilder("<td");
-        if(feedback != null)
+        if(feedback != null) {
             sbd.append(tdScore(feedback.score));
-        else
+            // 是否删除
+            if(feedback.isRemove)
+                sbd.append("<i style='color:#468847' class='pull-right icon-remove'></i>");
+        } else {
             sbd.append(">");
+        }
 
         sbd.append("</td>");
         return raw(sbd.toString());

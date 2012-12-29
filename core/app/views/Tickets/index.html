@@ -36,7 +36,6 @@
                 </select>
 
                 <select name="p.type" class="inline">
-                    <option value="">Ticket 类型</option>
                 #{list items:models.support.Ticket.T.values()}
                     <option ${p.type == _ ? 'selected' : ''} value="${_.name()}">${_}</option>
                 #{/list}
@@ -49,10 +48,14 @@
                 #{/list}
                 </select>
 
+            #{set succ: ['处理成功': true, '处理失败': false]/}
                 <select name="p.isSuccess" class="inline">
                     <option value="">成功?</option>
-                    <option value="true">成功删除</option>
-                    <option value="false">处理失败</option>
+                #{list items:succ}
+                    <option ${p.isSuccess == _.value ? 'selected' : ''} value="${_.value}">
+                    ${_.key}
+                    </option>
+                #{/list}
                 </select>
 
                 <label class="checkbox inline">
@@ -75,7 +78,6 @@
         <tr>
             <th>#</th>
             <th>Title</th>
-            <th>类型</th>
             <th>OsTicket</th>
             <th>状态</th>
             <th><abbr title="客户最后联系时间">LastMsg</abbr></th>
@@ -87,16 +89,15 @@
         <tr>
             #{render './_tdIdLink.html', t:t/}
             #{render './_tdTitle.html', t:t/}
-            <td>${t.type}</td>
             <td>
                 <a href="${t.osTicketLink()}" target="_blank">
                     <i class="icon-external-link"></i> ${t.osTicketId}
                 </a>
             </td>
             <td>${t.state}</td>
-            <td>#{time_tooltip time: t.lastMessageTime/}</td>
-            <td>#{time_tooltip time: t.lastResponseTime/}</td>
-            <td>#{time_tooltip time: t.createAt/}</td>
+            <td>${t.lastMessageTime.los()}</td>
+            <td>${t.lastResponseTime.los()}</td>
+            <td>${t.createAt.los()}</td>
             #{render './_tdScore.html', t:t/}
         </tr>
         <tr id="toggle_${t.id}" style="display:none;">
