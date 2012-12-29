@@ -32,7 +32,8 @@ public class LinkHelper extends JavaExtensions {
         return "#";
     }
 
-    public static String userReviewLink(Feedback f, String userId) {
+    public static String userFeedbackink(Feedback f) {
+        if(f.orderr == null) return "#";
         String baseAmazon = "http://www.%s/gp/pdp/profile/%s";
         switch(f.market) {
             case AMAZON_US:
@@ -41,7 +42,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_FR:
             case AMAZON_ES:
             case AMAZON_IT:
-                return String.format(baseAmazon, f.market, userId);
+                return String.format(baseAmazon, f.market, f.orderr.userid);
         }
         return "#";
     }
@@ -117,7 +118,9 @@ public class LinkHelper extends JavaExtensions {
 
     public static String asinLink(AnalyzeDTO dto) {
         try {
-            M market = M.val(StringUtils.remove(StringUtils.splitByWholeSeparator(dto.fid, "|")[1], "_").toLowerCase());
+            M market = M
+                    .val(StringUtils.remove(StringUtils.splitByWholeSeparator(dto.fid, "|")[1], "_")
+                            .toLowerCase());
             return String.format("http://www.%s/dp/%s", market.toString(), dto.asin);
         } catch(Exception e) {
             return Webs.E(e);
@@ -133,7 +136,8 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return "https://sellercentral." + orderr.market.toString() + "/gp/orders-v2/details?orderID=" + orderr.orderId;
+                return "https://sellercentral." + orderr.market.toString() +
+                        "/gp/orders-v2/details?orderID=" + orderr.orderId;
             case EBAY_UK:
             default:
                 return "";
@@ -147,12 +151,14 @@ public class LinkHelper extends JavaExtensions {
 
     public static String osTicketLink(AmazonListingReview review) {
         if(StringUtils.isBlank(review.osTicketId)) review.osTicketId = "";
-        return String.format("http://t.easya.cc/scp/tickets.php?id=%s", review.osTicketId.split("-")[0]);
+        return String
+                .format("http://t.easya.cc/scp/tickets.php?id=%s", review.osTicketId.split("-")[0]);
     }
 
     public static String osTicketLink(Feedback feedback) {
         if(StringUtils.isBlank(feedback.osTicketId)) feedback.osTicketId = "";
-        return String.format("http://t.easya.cc/scp/tickets.php?id=%s", feedback.osTicketId.split("-")[0]);
+        return String.format("http://t.easya.cc/scp/tickets.php?id=%s",
+                feedback.osTicketId.split("-")[0]);
     }
 
     public static String fbaLink(FBAShipment fba) {
@@ -164,7 +170,9 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return "https://sellercentral." + fba.account.type.toString() + "/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=" + fba.shipmentId;
+                return "https://sellercentral." + fba.account.type.toString() +
+                        "/gp/ssof/workflow/workflow.html/ref=ag_fbaworkflo_cont_fbaworkflo?ie=UTF8&shipmentId=" +
+                        fba.shipmentId;
             case EBAY_UK:
             default:
                 return "";

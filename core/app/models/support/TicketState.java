@@ -39,7 +39,8 @@ public enum TicketState {
      */
     NEW {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             // TO MAILED
             // TO TWO_MAIL
 
@@ -55,7 +56,8 @@ public enum TicketState {
                     return MAILED;
             } else if(newMsg == null) {
                 //没有客户回复的情况下, 如果此 Ticket 的创建时间到现在已经超过 5 天了, 那么则进入 "二次邮件"
-                Duration duration = new Duration(ticket.createAt.getTime(), System.currentTimeMillis());
+                Duration duration = new Duration(ticket.createAt.getTime(),
+                        System.currentTimeMillis());
                 if(duration.getStandardDays() >= 5)
                     return TWO_MAIL;
             }
@@ -67,15 +69,22 @@ public enum TicketState {
         public String explan() {
             return "新进来的 Review, 没有回复过.";
         }
+
+        @Override
+        public String toString() {
+            return "新创建";
+        }
     },
     /**
      * 需要发送第二封邮件去通知客户的 Ticket. 2
      */
     TWO_MAIL {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             // TO MAILED
-            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket.ishaveNewOperatorResponse(resps, msgs);
+            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket
+                    .ishaveNewOperatorResponse(resps, msgs);
             if(isHaveNewResp._1) return MAILED;
 
             return this;
@@ -85,6 +94,11 @@ public enum TicketState {
         public String explan() {
             return "此 Review 由于买家没有回信, 需要进行第二次邮件联系.";
         }
+
+        @Override
+        public String toString() {
+            return "需要发送第二封邮件";
+        }
     },
 
     /**
@@ -92,7 +106,8 @@ public enum TicketState {
      */
     MAILED {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             //TO NEW_MSG
             //TO NO_RESP
             //TO TWO_MAIL
@@ -107,7 +122,9 @@ public enum TicketState {
              * 2. 客户最后回复时间, 超过 5 天
              */
             TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
-            if(resps.size() < 2 && new Duration(newResp.created.getTime(), System.currentTimeMillis()).getStandardDays() >= 5) {
+            if(resps.size() < 2 &&
+                    new Duration(newResp.created.getTime(), System.currentTimeMillis())
+                            .getStandardDays() >= 5) {
                 return TWO_MAIL;
             }
 
@@ -119,7 +136,8 @@ public enum TicketState {
              */
             if((ticket.state == this || ticket.state == NEW_MSG) && resps.size() >= 2) {
                 TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
-                Duration duration = new Duration(newMsg.created.getTime(), System.currentTimeMillis());
+                Duration duration = new Duration(newMsg.created.getTime(),
+                        System.currentTimeMillis());
                 if(duration.getStandardDays() >= 15)
                     return NO_RESP;
                 else if(resps.size() == 0)
@@ -133,6 +151,11 @@ public enum TicketState {
         public String explan() {
             return "我方已经发送邮件进行了联系.";
         }
+
+        @Override
+        public String toString() {
+            return "已经发送了邮件";
+        }
     },
 
     /**
@@ -140,11 +163,13 @@ public enum TicketState {
      */
     NEW_MSG {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             // TO MAILED
             // TO CLOSE(手动)
 
-            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket.ishaveNewOperatorResponse(resps, msgs);
+            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket
+                    .ishaveNewOperatorResponse(resps, msgs);
             if(isHaveNewResp._1) return MAILED;
 
             return this;
@@ -154,6 +179,11 @@ public enum TicketState {
         public String explan() {
             return "客户有新邮件回复";
         }
+
+        @Override
+        public String toString() {
+            return "有新回复";
+        }
     },
 
     /**
@@ -161,7 +191,8 @@ public enum TicketState {
      */
     NO_RESP {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             // TO NEW_MSG
             // TO CLOSE(手动)
             if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
@@ -174,6 +205,11 @@ public enum TicketState {
         public String explan() {
             return "客户在 20 天内没有回复, 保留在此状态可以自动触发到 NEW_MSG 状态.";
         }
+
+        @Override
+        public String toString() {
+            return "没有回复";
+        }
     },
 
     /**
@@ -181,18 +217,23 @@ public enum TicketState {
      */
     PRE_CLOSE {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             if(ticket.isSuccess) {
                 if(ticket.type == Ticket.T.REVIEW) {
-                    if(!StringUtils.contains(ticket.review.comment, "Success Change Review") && !ticket.review.lastRating.equals(ticket.review.rating)) {
-                        ticket.review.comment(String.format("Success Change Review at %s from %s to %s",
-                                Dates.date2DateTime(),
-                                ticket.review.lastRating == null ? 0 : ticket.review.lastRating,
-                                ticket.review.rating == null ? 0 : ticket.review.rating));
+                    if(!StringUtils.contains(ticket.review.comment, "Success Change Review") &&
+                            !ticket.review.lastRating.equals(ticket.review.rating)) {
+                        ticket.review
+                                .comment(String.format("Success Change Review at %s from %s to %s",
+                                        Dates.date2DateTime(),
+                                        ticket.review.lastRating ==
+                                                null ? 0 : ticket.review.lastRating,
+                                        ticket.review.rating == null ? 0 : ticket.review.rating));
                     }
                 } else if(ticket.type == Ticket.T.FEEDBACK) {
                     if(!StringUtils.contains(ticket.feedback.memo, "Closed At")) {
-                        ticket.feedback.comment(String.format("Closed At %s", Dates.date2DateTime()));
+                        ticket.feedback
+                                .comment(String.format("Closed At %s", Dates.date2DateTime()));
                     }
                 }
             }
@@ -206,6 +247,11 @@ public enum TicketState {
         public String explan() {
             return "等待关闭前的一个状态, 一般用来等待客户更新 Review/Feedback 的评分.";
         }
+
+        @Override
+        public String toString() {
+            return "等待关闭";
+        }
     },
 
     /**
@@ -213,7 +259,8 @@ public enum TicketState {
      */
     CLOSE {
         @Override
-        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps) {
+        public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                     List<TicketStateSyncJob.OsResp> resps) {
             // CLOSE 不能自动变更状态.
             // 只能手动处理
             return this;
@@ -223,12 +270,18 @@ public enum TicketState {
         public String explan() {
             return "关闭状态, 此 Ticket 彻底不予理睬.";
         }
+
+        @Override
+        public String toString() {
+            return "关闭";
+        }
     };
 
     /**
      * 根据此状态与 Ticket 来判断可以进入哪一个状态
      */
-    public abstract TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs, List<TicketStateSyncJob.OsResp> resps);
+    public abstract TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
+                                          List<TicketStateSyncJob.OsResp> resps);
 
     public abstract String explan();
 }

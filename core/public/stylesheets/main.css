@@ -49,3 +49,44 @@ div .alert{
 .table input, textarea, select{
     margin-bottom:0;
 }
+
+/* Search Form */
+.search_form{
+
+}
+
+.search_form div.inline{
+    float:left;
+    display:inline;
+    margin-right:5px;
+}
+
+.search_form div input.date{
+    width:100px;
+}
+
+.search_form div select{
+    width:100px;
+}
+
+.search_form div select.inline{
+    float:left;
+    margin-right:5px;
+}
+
+.search_form label.checkbox{
+    padding-right:5px;
+}
+
+.search_form label.checkbox.inline{
+    float:left;
+    margin-right:5px;
+}
+
+.search_form div input[type=text]{
+    width:100px;
+}
+
+.tab-content .tab-pane{
+    background-color:#ffffff;
+}

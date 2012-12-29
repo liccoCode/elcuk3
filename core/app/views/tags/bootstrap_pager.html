@@ -9,14 +9,17 @@ u(rl): 方法
 <div class="pagination pagination-centered">
     <ul>
         <li><a page="1" href="${_url + "?p=1"}">首页</a></li>
-    #{list items:begin..end, as:'i'}
-        #{if _pi.page == i}
-            <li class="active"><a page="${i}" href="#">${i}</a></li>
-        #{/if}
-        #{else }
-            <li><a page="${i}" href="${_url + "?p=" + i}">${i}</a></li>
-        #{/else}
-    #{/list}
-        <li><a page="${_pi.totalPage}" href="${_url + "?p=" + _pi.totalPage}">尾页(${_pi.totalPage}|${_pi.count})</a></li>
+    #{if begin < end}
+        #{list items:begin..end, as:'i'}
+            #{if _pi.page == i}
+                <li class="active"><a page="${i}" href="#">${i}</a></li>
+            #{/if}
+            #{else }
+                <li><a page="${i}" href="${_url + "?p=" + i}">${i}</a></li>
+            #{/else}
+        #{/list}
+    #{/if}
+        <li><a page="${_pi.totalPage}" href="${_url + "?p=" + _pi.totalPage}">尾页(${_pi.totalPage}
+            |${_pi.count})</a></li>
     </ul>
 </div>

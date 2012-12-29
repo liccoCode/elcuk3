@@ -192,7 +192,8 @@ public class Ticket extends Model {
      */
     public boolean isOverdue() {
         if(this.lastResponseTime != null) {
-            Duration duration = new Duration(this.lastResponseTime.getTime(), System.currentTimeMillis());
+            Duration duration = new Duration(this.lastResponseTime.getTime(),
+                    System.currentTimeMillis());
             return duration.getStandardHours() > 24;
         } else {
             Duration duration = new Duration(this.createAt.getTime(), System.currentTimeMillis());
@@ -214,6 +215,17 @@ public class Ticket extends Model {
      */
     public String osTicketId() {
         return this.osTicketId.split("-")[0];
+    }
+
+    public String title() {
+        if(this.type == T.TICKET)
+            return this.fid;
+        else if(this.type == T.FEEDBACK)
+            return this.feedback.email;
+        else if(this.type == T.REVIEW)
+            return this.review.title;
+        else
+            return "None";
     }
 
     /**
@@ -260,7 +272,8 @@ public class Ticket extends Model {
          * 3. 检查这个 Ticket 是否有 resolver
          */
         if(this.state == TicketState.CLOSE) throw new FastRuntimeException("已经关闭了, 不需要重新关闭.");
-        if(this.reasons.size() == 0) throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
+        if(this.reasons.size() == 0)
+            throw new FastRuntimeException("要关闭此 Ticket, 必须要对此 Ticket 先进行归类(什么问题).");
         if(this.resolver == null) throw new FastRuntimeException("请给 Ticket 添加负责人.");
         if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
         this.state = TicketState.CLOSE;
@@ -308,12 +321,15 @@ public class Ticket extends Model {
      * @param filterOverdue
      * @return
      */
-    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state, boolean filterOverdue) {
+    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state,
+                                                           boolean filterOverdue) {
         return tickets(type, state, filterOverdue, -1);
     }
 
-    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state, boolean filterOverdue, int size) {
-        List<Ticket> tickets = Ticket.find("type=? AND state=? ORDER BY createAt DESC", type, state).fetch((size <= 0 ? Integer.MAX_VALUE : size));
+    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state,
+                                                           boolean filterOverdue, int size) {
+        List<Ticket> tickets = Ticket.find("type=? AND state=? ORDER BY createAt DESC", type, state)
+                .fetch((size <= 0 ? Integer.MAX_VALUE : size));
         if(filterOverdue) {
             List<Ticket> noOverdueTicket = new ArrayList<Ticket>();
             List<Ticket> overdueTicket = new ArrayList<Ticket>();
@@ -333,7 +349,9 @@ public class Ticket extends Model {
      * @return
      */
     public static List<Ticket> checkStateTickets(int size) {
-        return Ticket.find("state!=? AND osTicketId IS NOT NULL AND osTicketId NOT LIKE ? ORDER BY lastSyncTime", TicketState.CLOSE, "%-noemail").fetch(size);
+        return Ticket
+                .find("state!=? AND osTicketId IS NOT NULL AND osTicketId NOT LIKE ? ORDER BY lastSyncTime",
+                        TicketState.CLOSE, "%-noemail").fetch(size);
     }
 
     /**
@@ -343,7 +361,8 @@ public class Ticket extends Model {
      * @param msgs
      * @return
      */
-    public static F.T2<Boolean, TicketStateSyncJob.OsMsg> ishaveNewCustomerEmail(List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
+    public static F.T2<Boolean, TicketStateSyncJob.OsMsg> ishaveNewCustomerEmail(
+            List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
         TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
         if(msgs.size() == 1) newMsg = null; // 需要排除自行在 OsTicket 中创建 Ticket 的时候的那一个客户 Message
         TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
@@ -361,7 +380,8 @@ public class Ticket extends Model {
      * @param msgs
      * @return
      */
-    public static F.T2<Boolean, TicketStateSyncJob.OsResp> ishaveNewOperatorResponse(List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
+    public static F.T2<Boolean, TicketStateSyncJob.OsResp> ishaveNewOperatorResponse(
+            List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
         TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
         TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
         if(newMsg != null && newResp != null) {
@@ -380,7 +400,8 @@ public class Ticket extends Model {
      * 作为第一次修复使用的代码, 后续需要删除.
      */
     public static void initReviewFix() {
-        List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL").fetch();
+        List<AmazonListingReview> reviews = AmazonListingReview.find("osTicketId IS NOT NULL")
+                .fetch();
         for(AmazonListingReview review : reviews) {
             if(review.ticket != null) continue;
             Ticket ticket = new Ticket(review);
@@ -421,7 +442,8 @@ public class Ticket extends Model {
         for(User user : services) {
             Map<String, Long> row = new HashMap<String, Long>();
             row.put("user_day_mails", TicketQuery.userEmailsCount(morning, night, user));
-            row.put("user_day_tickets", TicketQuery.userTakeAndMailedTicketsCount(morning, night, user));
+            row.put("user_day_tickets",
+                    TicketQuery.userTakeAndMailedTicketsCount(morning, night, user));
             row.put("user_un_solved_tickets", TicketQuery.userSolvedTicketsCount(user, false));
             row.put("user_solved_tickets", TicketQuery.userSolvedTicketsCount(user, true));
             rows.put(user.username, row);
@@ -435,7 +457,8 @@ public class Ticket extends Model {
          */
         Map<String, Long> unNameRow = new HashMap<String, Long>();
         unNameRow.put("user_day_mails", TicketQuery.userEmailsCount(morning, night, null));
-        unNameRow.put("user_day_tickets", TicketQuery.userTakeAndMailedTicketsCount(morning, night, null));
+        unNameRow.put("user_day_tickets",
+                TicketQuery.userTakeAndMailedTicketsCount(morning, night, null));
         unNameRow.put("user_un_solved_tickets", TicketQuery.userSolvedTicketsCount(null, false));
         unNameRow.put("user_solved_tickets", TicketQuery.userSolvedTicketsCount(null, true));
         rows.put("未知用户", unNameRow);
@@ -460,8 +483,10 @@ public class Ticket extends Model {
         Date morning = Dates.morning(from);
         Date night = Dates.night(to);
         Map<String, Long> unTake = new HashMap<String, Long>();
-        unTake.put("period_un_solved_tickets", TicketQuery.periodCreateTicketsCount(morning, night, false));
-        unTake.put("period_solved_ticets", TicketQuery.periodCreateTicketsCount(morning, night, true));
+        unTake.put("period_un_solved_tickets",
+                TicketQuery.periodCreateTicketsCount(morning, night, false));
+        unTake.put("period_solved_ticets",
+                TicketQuery.periodCreateTicketsCount(morning, night, true));
         unTake.put("solved_tickets", TicketQuery.solvedTicketsCount(true));
         unTake.put("un_solved_tickets", TicketQuery.solvedTicketsCount(false));
         return unTake;

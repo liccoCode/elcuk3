@@ -5,64 +5,56 @@
     #{script 'component/pagination.coffee'/}
 #{/set}
 
-<div class="row">
-    <form id="search_form" action="@{Orders.index()}" method="post">
-        <div class="span8">
-            <div class="row-fluid">
-                <div class="input-prepend span3">
-                    <span class="add-on">From:</span>
-                    <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
-                </div>
-
-                <div class="input-prepend span3">
-                    <span class="add-on">To:</span>
-                    <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
-                </div>
-
-                <div class="span3 input-prepend">
-                    <span class="add-on">Search:</span>
-                    <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">
-                </div>
+<div class="row-fluid">
+    <form id="search_form" class="search_form" action="@{Orders.index()}" method="get">
+        <div class="span12">
+            <div class="input-prepend inline">
+                <span class="add-on">From:</span>
+                <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
             </div>
-            <div class="row-fluid">
-                <div class="span12">
-                    <select id="o_market" name="p.market" style="width:100px;">
-                        <option value="">Market(ALL)</option>
-                    #{list items:models.market.M.values()}
-                        <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
-                    #{/list}
-                    </select>
-                    <select id="o_acc" name="p.accountId" style="width:100px;">
-                        <option value="">Account</option>
-                    #{list items:accs}
-                        <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
-                    #{/list}
-                    </select>
-                    <select id="o_state" name="p.state" style="width:100px;">
-                        <option value="">State(ALL)</option>
-                    #{list items:models.market.Orderr.S.values()}
-                        <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
-                    #{/list}
-                    </select>
 
-                    <input type="hidden" name="p.orderBy" id="orderBy" value="createDate">
-                    <select name="p.desc" class="span4" style="width:100px;">
-                        <option value="DESC">DESC</option>
-                        <option value="ASC">ASC</option>
-                    </select>
-
-                    <select name="p.paymentInfo" style="width:100px;">
-                        <option value="">支付信息</option>
-                        <option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>
-                        <option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息</option>
-                    </select>
-                </div>
-
+            <div class="input-prepend inline">
+                <span class="add-on">To:</span>
+                <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
             </div>
-        </div>
-        <div class="span4" id="search_btns">
-            <input type="hidden" name="p.page" value="${p.page}">
-            <button class="btn btn-primary" data-loading>Search</button>
+
+            <select id="o_market" name="p.market" class="inline">
+                <option value="">Market(ALL)</option>
+            #{list items:models.market.M.values()}
+                <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
+            #{/list}
+            </select>
+            <select id="o_acc" name="p.accountId" class="inline">
+                <option value="">Account</option>
+            #{list items:accs}
+                <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
+            #{/list}
+            </select>
+            <select id="o_state" name="p.state" class="inline">
+                <option value="">State(ALL)</option>
+            #{list items:models.market.Orderr.S.values()}
+                <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
+            #{/list}
+            </select>
+
+            <input type="hidden" name="p.orderBy" id="orderBy" value="createDate">
+            <select name="p.desc" class="inline">
+                <option value="DESC">DESC</option>
+                <option value="ASC">ASC</option>
+            </select>
+
+            <select name="p.paymentInfo" class="inline">
+                <option value="">支付信息</option>
+                <option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>
+                <option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息
+                </option>
+            </select>
+
+            <div class="inline input-append" id="search_btns">
+                <input type="hidden" name="p.page" value="${p.page}">
+                <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">
+                <button class="btn btn-primary" data-loading>Search</button>
+            </div>
         </div>
     </form>
 </div>

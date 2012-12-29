@@ -1,0 +1,9 @@
+#{if t.type == models.support.Ticket.T.FEEDBACK}
+${t.feedback.tdScore()}
+#{/if}
+#{elseif t.type == models.support.Ticket.T.REVIEW}
+${t.review.tdScore()}
+#{/elseif}
+#{else }
+<td></td>
+#{/else}

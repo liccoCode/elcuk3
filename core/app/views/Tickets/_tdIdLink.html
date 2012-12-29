@@ -1,0 +1,13 @@
+<td>
+#{if t.type == models.support.Ticket.T.FEEDBACK}
+    <a href="@{Feedbacks.show(t.feedback.orderId)}">${t.id}</a>
+#{/if}
+
+#{elseif t.type == models.support.Ticket.T.REVIEW}
+    <a href="@{Reviews.show(t.review.reviewId)}">${t.id}</a>
+#{/elseif}
+
+#{else }
+    <a href="@{Tickets.show(t.id)}">${t.id}</a>
+#{/else}
+</td>

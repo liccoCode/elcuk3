@@ -12,7 +12,6 @@ import models.support.TicketReason;
 import models.support.TicketState;
 import models.view.Ret;
 import models.view.post.TicketPost;
-import play.data.validation.Valid;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Controller;
@@ -32,20 +31,11 @@ import java.util.List;
 public class Tickets extends Controller {
 
     @Check("tickets.index")
-    public static void index() {
-        F.T2<List<Ticket>, List<Ticket>> newTicketsT2 = Ticket.tickets(Ticket.T.TICKET, TicketState.NEW, true);
-        List<Ticket> needTwoTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.TWO_MAIL, false)._1;
-        List<Ticket> noRespTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.NO_RESP, false)._1;
-        List<Ticket> newMsgTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.NEW_MSG, false)._1;
-        List<Ticket> preCloseTickets = Ticket.tickets(Ticket.T.TICKET, TicketState.PRE_CLOSE, false)._1;
-        List<Ticket> closed = Ticket.tickets(Ticket.T.TICKET, TicketState.CLOSE, false, 30)._1;
-
-        renderArgs.put("newTickets", newTicketsT2._1);
-        renderArgs.put("newOverdueTickets", newTicketsT2._2);
-
-        int totals = newTicketsT2._1.size() + newTicketsT2._2.size() + needTwoTickets.size()
-                + noRespTickets.size() + newMsgTickets.size() + preCloseTickets.size();
-        render(needTwoTickets, noRespTickets, newMsgTickets, preCloseTickets, totals, closed);
+    public static void index(TicketPost p) {
+        if(p == null) p = new TicketPost();
+        List<Ticket> tickets = p.query();
+        List<F.T2<String, Long>> userIds = User.userIds();
+        render(tickets, p, userIds);
     }
 
     public static void show(long tid) {
@@ -57,29 +47,26 @@ public class Tickets extends Controller {
 
     /**
      * 如果是 service 用户则是其工作台, 如果是普通用户则是搜索页面
+     * TODO 需要删除 user 权限, 清理 user() 页面为搜索页面
      */
     @Check("tickets.user")
     public static void user() {
         User user = User.findByUserName(Scope.Session.current().get("username"));
         TicketPost p = new TicketPost();
         if(user != null) {
-            List<Ticket> tickets = Ticket.find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE, Ticket.T.TICKET).fetch();
-            List<Ticket> reviews = Ticket.find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE, Ticket.T.REVIEW).fetch();
-            List<Ticket> feedbacks = Ticket.find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE, Ticket.T.FEEDBACK).fetch();
+            List<Ticket> tickets = Ticket
+                    .find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE,
+                            Ticket.T.TICKET).fetch();
+            List<Ticket> reviews = Ticket
+                    .find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE,
+                            Ticket.T.REVIEW).fetch();
+            List<Ticket> feedbacks = Ticket
+                    .find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE,
+                            Ticket.T.FEEDBACK).fetch();
             render(tickets, reviews, feedbacks, p);
         } else {
             render(p);
         }
-    }
-
-    public static void search(@Valid TicketPost p) {
-        if(Validation.hasErrors()) {
-            render("Tickets/user.html", p);
-        }
-        renderArgs.put("tickets", p.tickets());
-        renderArgs.put("feedbacks", p.feedbacks());
-        renderArgs.put("reviews", p.reviews());
-        render("Tickets/user.html", p);
     }
 
 
@@ -149,8 +136,10 @@ public class Tickets extends Controller {
         if(ticket == null) {
             renderJSON(new Ret("Ticket " + tid + " is not exist."));
         }
-        JsonObject syncsJsonDetails = OsTicket.communicationWithOsTicket(Arrays.asList(ticket.osTicketId()));
-        F.T2<List<Ticket>, List<Ticket>> ticketT2 = TicketStateSyncJob.syncOsTicketDetailsIntoSystem(syncsJsonDetails, Arrays.asList(ticket));
+        JsonObject syncsJsonDetails = OsTicket
+                .communicationWithOsTicket(Arrays.asList(ticket.osTicketId()));
+        F.T2<List<Ticket>, List<Ticket>> ticketT2 = TicketStateSyncJob
+                .syncOsTicketDetailsIntoSystem(syncsJsonDetails, Arrays.asList(ticket));
         if(ticketT2._1.size() != 0) {
             renderJSON(new Ret(true, ticketT2._1.get(0).osTicketId()));
         } else {

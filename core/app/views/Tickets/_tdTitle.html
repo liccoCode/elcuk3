@@ -1,0 +1,25 @@
+#{if t.type == models.support.Ticket.T.FEEDBACK}
+<td style="background-color:${t.feedback.color()}" data-toggle="toggle" data-target="#toggle_${t.id}">
+
+    <span class="badge badge-inverse">${t.feedback.length()}</span>
+${t.title()}
+    #{render './_title_tags.html', t:t/}
+</td>
+#{/if}
+
+#{elseif t.type == models.support.Ticket.T.REVIEW}
+<td style="background-color:${t.review.color()}" data-toggle="toggle" data-target="#toggle_${t.id}">
+
+    <span class="badge badge-inverse">${t.review.length()}</span>
+${t.title()}
+    #{render './_title_tags.html', t:t/}
+</td>
+#{/elseif}
+
+
+#{else }
+<td data-toggle="toggle" data-target="#toggle_${t.id}">
+${t.title()}
+    #{render './_title_tags.html', t:t/}
+</td>
+#{/else}

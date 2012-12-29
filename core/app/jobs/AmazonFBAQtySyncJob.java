@@ -47,13 +47,16 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse wh : whs) {
             if(wh.account == null) {
-                Logger.warn("Whouse [" + wh.name + "] is FBA but is not bind an Account right now!!");
+                Logger.warn(
+                        "Whouse [" + wh.name + "] is FBA but is not bind an Account right now!!");
             } else {
                 if(wh.account.closeable) {
-                    Logger.warn("Whouse [%s], Account [%s] is closed.", wh.name, wh.account.uniqueName);
+                    Logger.warn("Whouse [%s], Account [%s] is closed.", wh.name,
+                            wh.account.uniqueName);
                     return;
                 } else {
-                    JobRequest job = JobRequest.checkJob(wh.account, this, wh.account.marketplaceId());
+                    JobRequest job = JobRequest
+                            .checkJob(wh.account, this, wh.account.marketplaceId());
                     if(job == null) continue;
                     job.request();
                 }
@@ -90,7 +93,8 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
                 try {
                     sqty.attach2Selling(sqty.msku(), wh);
                 } catch(Exception e) {
-                    String warmsg = "FBA CSV Report hava Selling[" + sid + "] that system can not be found!";
+                    String warmsg = "FBA CSV Report hava Selling[" + sid +
+                            "] that system can not be found!";
                     Logger.warn(warmsg);
                     Webs.systemMail(warmsg, warmsg + "<br/>\r\n" + Webs.E(e) +
                             ";<br/>\r\n需要通过 Amazon 与系统内的 Selling 进行同步, 处理掉丢失的 Product 与 Selling, 然后再重新进行 FBA 库存的解析.");
@@ -106,6 +110,10 @@ public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
      */
     public final static Map<String, String> FILTER = GTs.MapBuilder
             .map("71KDT-BPUL-2S,2|A_DE|2", "德国账号 FBA 中无法删除")
+            .put("72MTXOOM282-C2P|A_DE|2", "取消的摩托保护膜")
+            .put("72LNTPAD-C2P|A_UK|1", "英国联想保护膜")
+            .put("67CDTIMER-BLUE|A_UK|1", "英国 LCD 灯")
+            .put("69-UNLCDCL-THAWG,B003TJLMSS|A_UK|1", "英国定时器")
             .build();
 
     /**

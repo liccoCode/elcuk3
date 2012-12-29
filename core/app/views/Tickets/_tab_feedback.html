@@ -1,0 +1,41 @@
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a href="#feedback_${t.id}" data-toggle="tab">Feedback</a>
+    </li>
+    <li>
+        <a href="#close_${t.id}" data-toggle="tab">Close</a>
+    </li>
+
+</ul>
+<div class="tab-content">
+    <div id="feedback_${t.id}" class="tab-pane active in">
+        <div class="row-fluid">
+            <div class="span4">
+                <blockquote>
+                    <p>
+                        <a href="${t.feedback?.userFeedbackink()}" target="_blank">
+                            <i class="icon-external-link"></i>
+                        ${t.feedback.feedback.raw()}
+                        </a>
+                    </p>
+                    <small>${t.feedback?.orderr?.buyer}</small>
+                </blockquote>
+            </div>
+            <div class="span4">
+                <blockquote>
+                    <p>${t.feedback.memo.raw()}</p>
+                    <small>Feedback Memo</small>
+                </blockquote>
+            </div>
+            <div class="span4">
+                <blockquote>
+                    <p>
+                    ${t.memo.raw()}
+                    </p>
+                    <small>Ticket Memo</small>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+    <div id="close_${t.id}" class="tab-pane fade"></div>
+</div>

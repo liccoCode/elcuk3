@@ -2,12 +2,14 @@ package models;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.DBUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -174,7 +176,8 @@ public class User extends Model {
      * @param privilegeId
      */
     public void addPrivileges(List<Long> privilegeId) {
-        List<Privilege> privileges = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId)).fetch();
+        List<Privilege> privileges = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId))
+                .fetch();
         if(privilegeId.size() != privileges.size())
             throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
         this.privileges = new HashSet<Privilege>();
@@ -204,7 +207,8 @@ public class User extends Model {
      * @return
      */
     public boolean authenticate(String password) {
-        return !StringUtils.isBlank(this.passwordDigest) && this.passwordDigest.equals(Crypto.encryptAES(password));
+        return !StringUtils.isBlank(this.passwordDigest) &&
+                this.passwordDigest.equals(Crypto.encryptAES(password));
     }
 
     /**
@@ -298,11 +302,24 @@ public class User extends Model {
      * @return
      */
     public static User connect(String username, String password) {
-        return User.find("username=? AND password=?", username, Crypto.encryptAES(password)).first();
+        return User.find("username=? AND password=?", username, Crypto.encryptAES(password))
+                .first();
     }
 
     public static User findByUserName(String username) {
         return User.find("username=?", username).first();
+    }
+
+    public static List<F.T2<String, Long>> userIds() {
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT username, id FROM User");
+        List<F.T2<String, Long>> userIds = new ArrayList<F.T2<String, Long>>();
+        for(Map<String, Object> row : rows) {
+            if("root".equals(row.get("username").toString())) continue;
+            userIds.add(new F.T2<String, Long>(
+                    row.get("username").toString(), (Long) row.get("id"))
+            );
+        }
+        return userIds;
     }
 
     public static List<User> serviceUsers() {

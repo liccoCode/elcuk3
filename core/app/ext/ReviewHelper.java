@@ -36,22 +36,6 @@ public class ReviewHelper extends JavaExtensions {
             return feedback.feedback.length() + "";
     }
 
-    public static String color(Feedback feedback) {
-        int length = NumberUtils.toInt(length(feedback));
-        if(length <= 15)
-            return "2FCCEF";
-        else if(length <= 50)
-            return "6CB4E6";
-        else if(length <= 100)
-            return "8CA7DE";
-        else if(length <= 200)
-            return "9BA0D8";
-        else if(length <= 300)
-            return "AC96D4";
-        else
-            return "B38ACE";
-    }
-
     /**
      * 计算 Review 的 rating 与 lastRating, 比较她们之间的差别
      *
@@ -68,26 +52,21 @@ public class ReviewHelper extends JavaExtensions {
         }
     }
 
-    /**
-     * 根据一个数字, 计算这个数字对应的颜色(5 分评价常用)
-     *
-     * @param rate
-     * @return
-     */
-    public static String color(Number rate) {
-        if(rate.intValue() >= 5) {
-            return "3ED76A";
-        } else if(rate.intValue() >= 4) {
-            return "ADFF1F";
-        } else if(rate.intValue() >= 3) {
-            return "FFE107";
-        } else if(rate.intValue() >= 2) {
-            return "D54C00";
-        } else if(rate.intValue() >= 1) {
-            return "E03F00";
-        } else {
-            return "FF1101";
-        }
+
+    public static String color(Feedback feedback) {
+        int length = NumberUtils.toInt(length(feedback));
+        if(length <= 15)
+            return "#2FCCEF";
+        else if(length <= 50)
+            return "#6CB4E6";
+        else if(length <= 100)
+            return "#8CA7DE";
+        else if(length <= 200)
+            return "#9BA0D8";
+        else if(length <= 300)
+            return "#AC96D4";
+        else
+            return "#B38ACE";
     }
 
     /**
@@ -103,17 +82,17 @@ public class ReviewHelper extends JavaExtensions {
         } catch(Exception e) {//
         }
         if(length <= 100)
-            return "2FCCEF";
+            return "#2FCCEF";
         else if(length <= 240)
-            return "6CB4E6";
+            return "#6CB4E6";
         else if(length <= 500)
-            return "8CA7DE";
+            return "#8CA7DE";
         else if(length <= 1000)
-            return "9BA0D8";
+            return "#9BA0D8";
         else if(length <= 2000)
-            return "AC96D4";
+            return "#AC96D4";
         else
-            return "B38ACE";
+            return "#B38ACE";
     }
 
     public static String color(Orderr.S orderState) {

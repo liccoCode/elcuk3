@@ -2,55 +2,50 @@
 #{set title:'Amazon FBA (' + fbas.size() + ')' /}
 #{set 'moreScripts'}
 #{/set}
-<form method="post" action="@{FBAs.index()}">
-    <div class="row">
-        <div class="input-prepend span2">
-            <span class="add-on">From:</span>
-            <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
-        </div>
-        <div class="input-prepend span2">
-            <span class="add-on">To:</span>
-            <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
-        </div>
-        <div class="span2">
-        #{pickMarkets name:'p.market', blank:true, class:'span2', m:p.market/}
-        </div>
-        <div class="span2">
-            <select name="p.states" class="span2" multiple="multiple">
+<div class="row-fluid">
+    <form method="get" action="@{FBAs.index()}" class="search_form">
+        <div class="span12">
+            <div class="input-prepend inline">
+                <span class="add-on">From:</span>
+                <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
+            </div>
+            <div class="input-prepend inline">
+                <span class="add-on">To:</span>
+                <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
+            </div>
+        #{pickMarkets name:'p.market', blank:true, class:'inline', m:p.market/}
+
+            <select name="p.states" class="inline" multiple="multiple">
                 <option value="">State</option>
             #{list items:models.procure.FBAShipment.S.values()}
                 <option ${p.states.contains(_) ? 'selected' : ''} value="${_}">${_}</option>
             #{/list}
             </select>
-        </div>
 
-        <div class="span1">
-            <select name="p.centerId" class="span1">
+            <select name="p.centerId" class="inline">
                 <option value="">CenterId</option>
             #{list items:centerIds}
                 <option ${p.centerId == _ ? "selected" : ""} value="${_}">${_}</option>
             #{/list}
             </select>
-        </div>
 
-        <div class="span2">
             <label class="inline checkbox">
                 <input ${p.receiptOverTime ? "checked" : ""}  type="checkbox" name="p.receiptOverTime" value="true">
                 <abbr title="签收超过 2 天算超时">签收超时</abbr>
             </label>
+
             <label class="inline checkbox">
                 <input ${p.receiveOverTime ? "checked" : ""} type="checkbox" name="p.receiveOverTime" value="true">
                 <abbr title="签收超过 3 天算超时">入库超时</abbr>
             </label>
-        </div>
 
-        <div class="input-append input-prepend span2">
-            <span class="add-on"><i class="icon-search"></i></span>
-            <input type="text" name="p.search" class="span2" placeHolder="SKU,FBA" value="${p.search}">
-            <button class="btn btn-primary" data-loading="">搜索</button>
+            <div class="input-append inline">
+                <input type="text" name="p.search" placeHolder="SKU,FBA" value="${p.search}">
+                <button class="btn btn-primary" data-loading="">搜索</button>
+            </div>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 
 <div class="row-fluid">
     <table class="table table-bordered table-condensed">
@@ -72,8 +67,12 @@
     #{list items:fbas, as:'fba'}
         <tr>
             <td>${fba.id}</td>
-            <td><a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a></td>
-            <td><a href="@{Shipments.show()}/${fba.shipment?.id}" target="_blank">${fba.shipment?.id}</a></td>
+            <td>
+                <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}
+                </a></td>
+            <td>
+                <a href="@{Shipments.show()}/${fba.shipment?.id}" target="_blank">${fba.shipment?.id}</a>
+            </td>
             <td data-target="#unit_${fba.id}" data-toggle="toggle">
                 <i class="icon-reorder"></i> ${fba.centerId}
                 <span class="badge badge-info">${fba.shipItems.size()}</span>
@@ -129,7 +128,8 @@
                             <td>
                                 <a href="@{Sellings.selling()}/${itm.unit.selling.sellingId}">${itm.unit.selling.merchantSKU}</a>
                             </td>
-                            <td><a href="@{Products.show()}/${itm.unit.product.sku}">${itm.unit.product.productName}</a>
+                            <td>
+                                <a href="@{Products.show()}/${itm.unit.product.sku}">${itm.unit.product.productName}</a>
                             </td>
                             <td style="width:10%;">
                                 <div class="progress progress-striped" style="margin-bottom:0;">

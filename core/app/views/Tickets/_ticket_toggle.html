@@ -1,0 +1,11 @@
+#{if t.type == models.support.Ticket.T.FEEDBACK}
+    #{render './_tab_feedback.html', t:t/}
+#{/if}
+
+#{elseif t.type == models.support.Ticket.T.REVIEW}
+    #{render './_tab_review.html', t:t/}
+#{/elseif}
+
+#{else }
+    #{render './_tab_ticket.html', t:t/}
+#{/else}
