@@ -9,13 +9,11 @@ import models.ElcukRecord;
 import models.User;
 import models.support.Ticket;
 import models.support.TicketReason;
-import models.support.TicketState;
 import models.view.Ret;
 import models.view.post.TicketPost;
 import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Controller;
-import play.mvc.Scope;
 import play.mvc.With;
 
 import java.util.Arrays;
@@ -42,31 +40,6 @@ public class Tickets extends Controller {
         Ticket ticket = Ticket.findById(tid);
         List<TicketReason> reasons = TicketReason.find("ORDER BY category.categoryId").fetch();
         render(ticket, reasons);
-    }
-
-
-    /**
-     * 如果是 service 用户则是其工作台, 如果是普通用户则是搜索页面
-     * TODO 需要删除 user 权限, 清理 user() 页面为搜索页面
-     */
-    @Check("tickets.user")
-    public static void user() {
-        User user = User.findByUserName(Scope.Session.current().get("username"));
-        TicketPost p = new TicketPost();
-        if(user != null) {
-            List<Ticket> tickets = Ticket
-                    .find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE,
-                            Ticket.T.TICKET).fetch();
-            List<Ticket> reviews = Ticket
-                    .find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE,
-                            Ticket.T.REVIEW).fetch();
-            List<Ticket> feedbacks = Ticket
-                    .find("resolver=? AND state!=? AND type=?", user, TicketState.CLOSE,
-                            Ticket.T.FEEDBACK).fetch();
-            render(tickets, reviews, feedbacks, p);
-        } else {
-            render(p);
-        }
     }
 
 
