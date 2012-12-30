@@ -3,6 +3,7 @@ package models.view.post;
 import helper.Dates;
 import models.support.Ticket;
 import models.support.TicketState;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -112,8 +113,20 @@ public class TicketPost extends Post<Ticket> {
             params.add(this.userid);
         }
 
-        System.out.println("SQL: " + sbd);
-        System.out.println("Params:" + params);
+        if(StringUtils.isNotBlank(this.search)) {
+            String word = this.word();
+            sbd.append("AND (")
+                    .append("t.memo LIKE ?").append(" OR ")
+                    .append("t.osTicketId LIKE ?").append(" OR ")
+                    .append("t.review.alrId LIKE ?").append(" OR ")
+                    .append("t.feedback.orderId LIKE ? ").append(" OR ")
+                    .append("t.fid LIKE ?").append(")");
+            // 5 个 ?
+            for(int i = 0; i < 5; i++) {
+                params.add(word);
+            }
+        }
+
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 
