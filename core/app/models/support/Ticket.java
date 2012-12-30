@@ -354,43 +354,6 @@ public class Ticket extends Model {
                         TicketState.CLOSE, "%-noemail").fetch(size);
     }
 
-    /**
-     * 检查这个 Ticket 是否有客户的新回复
-     *
-     * @param resps
-     * @param msgs
-     * @return
-     */
-    public static F.T2<Boolean, TicketStateSyncJob.OsMsg> ishaveNewCustomerEmail(
-            List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
-        TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
-        if(msgs.size() == 1) newMsg = null; // 需要排除自行在 OsTicket 中创建 Ticket 的时候的那一个客户 Message
-        TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
-        if(newMsg != null && newResp != null) {
-            if(newMsg.created.getTime() > newResp.created.getTime())
-                return new F.T2<Boolean, TicketStateSyncJob.OsMsg>(true, newMsg);
-        }
-        return new F.T2<Boolean, TicketStateSyncJob.OsMsg>(false, null);
-    }
-
-    /**
-     * 检查这个 Ticket 是否有新的操作人员的回复
-     *
-     * @param resps
-     * @param msgs
-     * @return
-     */
-    public static F.T2<Boolean, TicketStateSyncJob.OsResp> ishaveNewOperatorResponse(
-            List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
-        TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
-        TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
-        if(newMsg != null && newResp != null) {
-            if(newResp.created.getTime() > newMsg.created.getTime())
-                return new F.T2<Boolean, TicketStateSyncJob.OsResp>(true, newResp);
-        }
-        return new F.T2<Boolean, TicketStateSyncJob.OsResp>(false, null);
-    }
-
     public static Ticket findByOsTicketId(String osTicketId) {
         return Ticket.find("osTicketId=?", osTicketId).first();
     }

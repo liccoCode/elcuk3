@@ -50,9 +50,9 @@ public enum TicketState {
 
             if(newResp != null) {
                 // 在有最新邮件与最新回复的情况下, 客户的最新邮件时间大于最新回复时间则表示有真正的客户新回复来了, 进入 "有新邮件状态"
-                if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+                if(TicketStateSyncJob.ishaveNewCustomerEmail(resps, msgs)._1)
                     return NEW_MSG;
-                else if(Ticket.ishaveNewOperatorResponse(resps, msgs)._1)
+                else if(TicketStateSyncJob.ishaveNewOperatorResponse(resps, msgs)._1)
                     return MAILED;
             } else if(newMsg == null) {
                 //没有客户回复的情况下, 如果此 Ticket 的创建时间到现在已经超过 5 天了, 那么则进入 "二次邮件"
@@ -83,7 +83,7 @@ public enum TicketState {
         public TicketState nextState(Ticket ticket, List<TicketStateSyncJob.OsMsg> msgs,
                                      List<TicketStateSyncJob.OsResp> resps) {
             // TO MAILED
-            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket
+            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = TicketStateSyncJob
                     .ishaveNewOperatorResponse(resps, msgs);
             if(isHaveNewResp._1) return MAILED;
 
@@ -114,7 +114,7 @@ public enum TicketState {
 
 
             // 必须要先检查 NEW_MSG, 要进入 NO_RESP 状态, 必须是在我们自己回了卖家的信才可以
-            if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+            if(TicketStateSyncJob.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
 
             /**
@@ -168,7 +168,7 @@ public enum TicketState {
             // TO MAILED
             // TO CLOSE(手动)
 
-            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = Ticket
+            F.T2<Boolean, TicketStateSyncJob.OsResp> isHaveNewResp = TicketStateSyncJob
                     .ishaveNewOperatorResponse(resps, msgs);
             if(isHaveNewResp._1) return MAILED;
 
@@ -195,7 +195,7 @@ public enum TicketState {
                                      List<TicketStateSyncJob.OsResp> resps) {
             // TO NEW_MSG
             // TO CLOSE(手动)
-            if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+            if(TicketStateSyncJob.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
 
             return this;
@@ -238,7 +238,7 @@ public enum TicketState {
                 }
             }
             // 有新回复还是需要进入 NEW_MSG 状态,  无论是否自建的都需要
-            if(Ticket.ishaveNewCustomerEmail(resps, msgs)._1)
+            if(TicketStateSyncJob.ishaveNewCustomerEmail(resps, msgs)._1)
                 return NEW_MSG;
             return this;
         }

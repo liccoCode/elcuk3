@@ -82,6 +82,7 @@
             <th>状态</th>
             <th><abbr title="客户最后联系时间">LastMsg</abbr></th>
             <th><abbr title="最后回信时间">LastResponse</abbr></th>
+            <th><abbr title="与 OsTicket 的最后同步时间">LastSyncDate</abbr></th>
             <th><abbr title="创建时间">Create</abbr></th>
             <th>Score</th>
         </tr>
@@ -97,6 +98,7 @@
             <td>${t.state}</td>
             <td>${t.lastMessageTime.los()}</td>
             <td>${t.lastResponseTime.los()}</td>
+            <td>${t.lastSyncTime.los()}</td>
             <td>${t.createAt.los()}</td>
             #{render './_tdScore.html', t:t/}
         </tr>

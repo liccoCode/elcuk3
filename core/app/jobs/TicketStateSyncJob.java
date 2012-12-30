@@ -3,14 +3,12 @@ package jobs;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import helper.HTTP;
 import helper.OsTicket;
 import helper.Webs;
 import models.Jobex;
 import models.support.Ticket;
 import models.support.TicketState;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
@@ -63,11 +61,13 @@ public class TicketStateSyncJob extends Job {
      * @param tickets
      * @return 成功与失败的 Ticket, Tuple._1:success, Tuple._2:faled
      */
-    public static F.T2<List<Ticket>, List<Ticket>> syncOsTicketDetailsIntoSystem(JsonObject rsObj, List<Ticket> tickets) {
+    public static F.T2<List<Ticket>, List<Ticket>> syncOsTicketDetailsIntoSystem(JsonObject rsObj,
+                                                                                 List<Ticket> tickets) {
         Map<String, List<OsMsg>> msgMap = OsMsg.msgsMap(rsObj.getAsJsonArray("msgs"));
         Map<String, List<OsResp>> respMap = OsResp.respsMap(rsObj.getAsJsonArray("resps"));
 
-        F.T2<List<Ticket>, List<Ticket>> rtTickets = new F.T2<List<Ticket>, List<Ticket>>(new ArrayList<Ticket>(), new ArrayList<Ticket>());
+        F.T2<List<Ticket>, List<Ticket>> rtTickets = new F.T2<List<Ticket>, List<Ticket>>(
+                new ArrayList<Ticket>(), new ArrayList<Ticket>());
         // 处理一个一个的 Ticket 的状态改变
         for(Ticket t : tickets) {
             try {
@@ -78,7 +78,8 @@ public class TicketStateSyncJob extends Job {
                 List<OsResp> ticketResp = respMap.get(t.osTicketId());
 
                 t.state = t.state.nextState(t, ticketMsg, ticketResp);
-                F.T3<Date, Date, Date> lastXXXDateTime = TicketStateSyncJob.lastXXXDatetime(ticketMsg, ticketResp);
+                F.T3<Date, Date, Date> lastXXXDateTime = TicketStateSyncJob
+                        .lastXXXDatetime(ticketMsg, ticketResp);
                 t.lastResponseTime = lastXXXDateTime._1;
                 t.lastMessageTime = lastXXXDateTime._2;
                 t.lastSyncTime = lastXXXDateTime._3;
@@ -98,6 +99,42 @@ public class TicketStateSyncJob extends Job {
         return rtTickets;
     }
 
+    /**
+     * 检查这个 Ticket 是否有客户的新回复
+     *
+     * @param resps
+     * @param msgs
+     * @return
+     */
+    public static F.T2<Boolean, TicketStateSyncJob.OsMsg> ishaveNewCustomerEmail(
+            List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
+        TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+        if(msgs.size() == 1) newMsg = null; // 需要排除自行在 OsTicket 中创建 Ticket 的时候的那一个客户 Message
+        TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
+        if(newMsg != null && newResp != null) {
+            if(newMsg.created.getTime() > newResp.created.getTime())
+                return new F.T2<Boolean, TicketStateSyncJob.OsMsg>(true, newMsg);
+        }
+        return new F.T2<Boolean, TicketStateSyncJob.OsMsg>(false, null);
+    }
+
+    /**
+     * 检查这个 Ticket 是否有新的操作人员的回复
+     *
+     * @param resps
+     * @param msgs
+     * @return
+     */
+    public static F.T2<Boolean, TicketStateSyncJob.OsResp> ishaveNewOperatorResponse(
+            List<TicketStateSyncJob.OsResp> resps, List<TicketStateSyncJob.OsMsg> msgs) {
+        TicketStateSyncJob.OsMsg newMsg = TicketStateSyncJob.OsMsg.lastestMsg(msgs);
+        TicketStateSyncJob.OsResp newResp = TicketStateSyncJob.OsResp.lastestResp(resps);
+        if(newMsg != null && newResp != null) {
+            if(newResp.created.getTime() > newMsg.created.getTime())
+                return new F.T2<Boolean, TicketStateSyncJob.OsResp>(true, newResp);
+        }
+        return new F.T2<Boolean, TicketStateSyncJob.OsResp>(false, null);
+    }
 
 
     /**
@@ -106,7 +143,8 @@ public class TicketStateSyncJob extends Job {
     private static F.T3<Date, Date, Date> lastXXXDatetime(List<OsMsg> msgs, List<OsResp> resps) {
         OsResp resp = OsResp.lastestResp(resps);
         OsMsg msg = OsMsg.lastestMsg(msgs);
-        return new F.T3<Date, Date, Date>(resp == null ? null : resp.created, msg == null ? null : msg.created, new Date());
+        return new F.T3<Date, Date, Date>(resp == null ? null : resp.created,
+                msg == null ? null : msg.created, new Date());
     }
 
 
@@ -126,7 +164,8 @@ public class TicketStateSyncJob extends Job {
                 OsMsg msg = new OsMsg();
                 msg.msg_id = obj.get("msg_id").getAsString();
                 msg.ticket_id = obj.get("ticket_id").getAsString();
-                msg.created = DateTime.parse(obj.get("created").getAsString(), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+                msg.created = DateTime.parse(obj.get("created").getAsString(),
+                        DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
                 msg.ticketId = obj.get("ticketId").getAsString();
                 msgs.add(msg);
             }
@@ -182,7 +221,8 @@ public class TicketStateSyncJob extends Job {
                 OsResp resp = new OsResp();
                 resp.response_id = obj.get("response_id").getAsString();
                 resp.msg_id = obj.get("msg_id").getAsString();
-                resp.created = DateTime.parse(obj.get("created").getAsString(), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
+                resp.created = DateTime.parse(obj.get("created").getAsString(),
+                        DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate();
                 resp.ticketId = obj.get("ticketId").getAsString();
                 resp.ticket_id = obj.get("ticket_id").getAsString();
                 resps.add(resp);
