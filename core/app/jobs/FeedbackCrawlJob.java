@@ -70,16 +70,6 @@ public class FeedbackCrawlJob extends Job {
             }
         }
 
-        // 最后检查一次创建了 Ticket 但是没有创建成功的(额外开一个 Job, 保证这个 Job 的数据进入 DB)
-        new Job() {
-            @Override
-            public void doJob() {
-                List<Feedback> feedbacks = Feedback.find("score<4 and (osTicketId is null OR osTicketId='') and createDate>=?",
-                        DateTime.now().minusMonths(1).toDate()).fetch();
-                for(Feedback f : feedbacks)
-                    f.checkMailAndTicket();
-            }
-        }.now();
     }
 
     /**
@@ -101,7 +91,8 @@ public class FeedbackCrawlJob extends Job {
                 acc.changeRegion(acc.type);
             }
         } catch(Exception e) {
-            Logger.warn(String.format("Account %s Market %s fetch feedback have some error![%s]", acc.username, market, e.getMessage()));
+            Logger.warn(String.format("Account %s Market %s fetch feedback have some error![%s]",
+                    acc.username, market, e.getMessage()));
         }
     }
 
@@ -116,9 +107,11 @@ public class FeedbackCrawlJob extends Job {
     public static List<Feedback> fetchAccountFeedbackOnePage(Account acc, M market, int i) {
         List<Feedback> feedbacks = FeedbackCrawlJob.fetchFeedback(acc, i);
         if(feedbacks.size() == 0) {
-            Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
+            Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username,
+                    market, i));
         } else {
-            Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
+            Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i,
+                    feedbacks.size()));
         }
 
         for(Feedback f : feedbacks) {
@@ -154,10 +147,13 @@ public class FeedbackCrawlJob extends Job {
                 try {
                     String body = HTTP.get(acc.cookieStore(), acc.type.feedbackPage(page));
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + acc.type.name() + ".id_" + acc.id + "feedback_p" + page + ".html"), body);
+                        FileUtils.writeStringToFile(new File(
+                                Constant.HOME + "/elcuk2-logs/" + acc.type.name() + ".id_" +
+                                        acc.id + "feedback_p" + page + ".html"), body);
                     return FeedbackCrawlJob.parseFeedBackFromHTML(body);
                 } catch(Exception e) {
-                    Logger.warn("[" + acc.type + "] Feedback page can not found Or the session is invalid!");
+                    Logger.warn("[" + acc.type +
+                            "] Feedback page can not found Or the session is invalid!");
                 }
                 break;
             default:
@@ -185,7 +181,8 @@ public class FeedbackCrawlJob extends Job {
             if(StringUtils.contains(marketEl.select(".merch-site-span").text(), "amazon.com"))
                 market = M.AMAZON_US;
             else {
-                market = M.val(doc.select("#marketplaceSelect option[selected]").first().text().trim());
+                market = M.val(doc.select("#marketplaceSelect option[selected]").first().text()
+                        .trim());
             }
         }
         Elements feedbacks = doc.select("td[valign=center][align=middle] tr[valign=center]");
@@ -196,11 +193,14 @@ public class FeedbackCrawlJob extends Job {
             Elements tds = feb.select("td");
             //time
             if(market == M.AMAZON_US)
-                feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("MM/dd/yy")).toDate();
+                feedback.createDate = DateTime
+                        .parse(tds.get(0).text(), DateTimeFormat.forPattern("MM/dd/yy")).toDate();
             else
-                feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                feedback.createDate = DateTime
+                        .parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
             //score
-            feedback.score = NumberUtils.toFloat(StringUtils.replace(tds.get(1).select("b").html(), "&nbsp;", ""));
+            feedback.score = NumberUtils
+                    .toFloat(StringUtils.replace(tds.get(1).select("b").html(), "&nbsp;", ""));
             //comments
             feedback.feedback = tds.get(2).childNode(0).toString();
             Element b = tds.get(2).select("b").first();

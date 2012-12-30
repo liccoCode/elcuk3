@@ -34,13 +34,19 @@ public class OsTicketSavePromise extends Job<Ticket> {
         String body = new String(job.getData());
         Map<String, String> t = J.from(body, new TypeReference<Map<String, String>>() {});
 
+        if(t.get("title").contains("日报"))
+            // 日报不进入系统
+            return null;
+
         Ticket ticket = Ticket.find("osTicketId=?", t.get("ticketId")).first();
         if(ticket == null) {
-            ticket = new Ticket(t.get("ticketId"), DateTime.parse(t.get("createAt"), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate(), t.get("title"));
+            ticket = new Ticket(t.get("ticketId"), DateTime.parse(t.get("createAt"),
+                    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate(), t.get("title"));
             ticket.save();
             Logger.info("Saved OsTicket #%s(%s) [%s].", ticket.osTicketId, ticket.id, ticket.fid);
         } else {
-            Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id, ticket.fid);
+            Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id,
+                    ticket.fid);
         }
         return ticket;
     }
