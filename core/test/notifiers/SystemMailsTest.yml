@@ -1,0 +1,46 @@
+market.Orderr(o1):
+  orderId: 002-2070525-8817024
+  address: 121 Lafayette Rd APT 424
+  address1: Zhuowei Huang\r\n121 Lafayette Rd APT 424\r\nSyracuse,&nbsp;New York&nbsp;13205
+  arriveDate: 2012-12-04 23:00:00
+  buyer: Zhouwei Huang
+  city: Syracuse
+  country: US
+  createDate: 2012-12-03 01:39:16
+  email: bz27hqqsftvmhxb@marketplace.amazon.com
+  market: AMAZON_US
+  memo: null
+  paymentDate: 2012-12-03 11:43:56
+  phone: 3159445885
+  postalCode: 13205
+  province: New York
+  reciver: Zhouwei Huang
+  shipDate: 2012-12-03 10:45:54
+  shipLevel: Expedited
+  shippingAmount: 0
+  shippingService: UPS
+  state: SHIPPED
+  totalAmount: 3.99
+  trackNo: 1ZW2176R0332840273
+  # no use
+  account: null
+  userid: AI1MF0U8E2B1D
+  crawlUpdateTimes: 1
+  reviewMailed: 1
+
+
+
+market.Feedback(f1):
+  orderId: 002-2070525-8817024
+  feedback: It a deal
+  createDate: 2012-12-07 00:00:00
+  email: bz27hqqsftvmhxb@marketplace.amazon.com
+  market: AMAZON_US
+  memo: null
+  score: 5
+  # no use
+  account: null
+  orderr: o1
+  mailedTimes: 0
+  osTicketId: null
+  isRemove: false

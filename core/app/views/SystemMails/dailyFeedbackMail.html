@@ -24,7 +24,7 @@
         <td><a href="${fd.orderr?.orderLink()}">${fd.orderId}</a></td>
         <td><a href="@@{Feedbacks.show()}/${fd.orderId}" target="_blank">${fd.length()}</a></td>
         <td title="${fd.createDate?.date()}">${fd.createDate?.since()}</td>
-        <td style="color:${'#' + fd.score.color()}">${fd.score}</td>
+        <td style="color:${ext.TicketHelper.color(fd.score)}">${fd.score}</td>
         <td><a href="${fd.osTicketLink()}" target="_blank">${fd.osTicketId}</a></td>
     </tr>
 #{/list}

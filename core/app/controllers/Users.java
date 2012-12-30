@@ -2,16 +2,15 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
-import models.Notification;
 import models.Privilege;
 import models.User;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
+import play.libs.Crypto;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.List;
@@ -118,5 +117,9 @@ public class Users extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(false, Webs.E(e)));
         }
+    }
+
+    public static void pass(String p) {
+        renderText(Crypto.encryptAES(p));
     }
 }
