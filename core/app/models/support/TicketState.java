@@ -208,7 +208,7 @@ public enum TicketState {
 
         @Override
         public String toString() {
-            return "没有回复";
+            return "客户无回应";
         }
     },
 

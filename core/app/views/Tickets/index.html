@@ -3,9 +3,12 @@
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
 #{/set}
+#{set 'moreStyles'}
+    #{stylesheet 'tickets.css'/}
+#{/set}
 
 <div class="row-fluid">
-    <form method="get" class="search_form">
+    <form method="get" class="search_form" action="@{Tickets.index()}">
         <div class="span12">
             <div class="row-fluid">
                 <div class="input-prepend inline">
@@ -74,14 +77,53 @@
 </div>
 
 <div class="row-fluid">
+    <div class="span2 pane_state">
+        <a href="@{Tickets.tabSearch(models.support.TicketState.NEW.name(), p.type.name())}">
+        ${models.support.TicketState.NEW}
+            <span class="badge badge-important">${new_count}</span>
+        </a>
+    </div>
+    <div class="span2 pane_state">
+        <a href="@{Tickets.tabSearch(models.support.TicketState.TWO_MAIL.name(), p.type.name())}">
+        ${models.support.TicketState.TWO_MAIL}
+            <span class="badge badge-warning">${twice_count}</span>
+        </a>
+    </div>
+    <div class="span2 pane_state">
+        <a href="@{Tickets.tabSearch(models.support.TicketState.MAILED.name(), p.type.name())}">
+        ${models.support.TicketState.MAILED}
+            <span class="badge badge-info">${mailed_count}</span>
+        </a>
+    </div>
+    <div class="span2 pane_state">
+        <a href="@{Tickets.tabSearch(models.support.TicketState.NEW_MSG.name(), p.type.name())}">
+        ${models.support.TicketState.NEW_MSG}
+            <span class="badge  badge-success">${new_mail_count}</span>
+        </a>
+    </div>
+    <div class="span2 pane_state">
+        <a href="@{Tickets.tabSearch(models.support.TicketState.NO_RESP.name(), p.type.name())}">
+        ${models.support.TicketState.NO_RESP}
+            <span class="badge  badge-inverse">${no_resp_count}</span>
+        </a>
+    </div>
+    <div class="span2 pane_state">
+        <a href="@{Tickets.tabSearch(models.support.TicketState.PRE_CLOSE.name(), p.type.name())}">
+        ${models.support.TicketState.PRE_CLOSE}
+            <span class="badge">${pre_close_count}</span>
+        </a>
+    </div>
+</div>
+
+<div class="row-fluid">
     <table class="table table-bordered table-condensed">
         <tr>
             <th>#</th>
             <th>Title</th>
             <th>OsTicket</th>
             <th>状态</th>
-            <th><abbr title="客户最后联系时间">LastMsg</abbr></th>
-            <th><abbr title="最后回信时间">LastResponse</abbr></th>
+            <th><abbr title="客户最后回信时间">LastMsg</abbr></th>
+            <th><abbr title="客服最后回信时间">LastResponse</abbr></th>
             <th><abbr title="与 OsTicket 的最后同步时间">LastSyncDate</abbr></th>
             <th><abbr title="创建时间">Create</abbr></th>
             <th>Score</th>

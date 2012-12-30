@@ -17,10 +17,11 @@ import play.data.validation.Unique;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.TicketQuery;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 对需要处理的一个 Review 或者 Feedback 的一个抽象;
@@ -381,77 +382,5 @@ public class Ticket extends Model {
             Ticket ticket = new Ticket(feedback);
             ticket.save();
         }
-    }
-
-    /**
-     * 在首页用来查看 Ticket 处理状况的数据
-     *
-     * @return
-     */
-    public static Map<String, Map<String, Long>> frontPageTable(Date from, Date to) {
-        // user row;
-        Map<String, Map<String, Long>> rows = new LinkedHashMap<String, Map<String, Long>>();
-
-        /**
-         * 1. 找出所有的客服人员.
-         * 2. 通过一个一个的客服人员找到一行一行的数据
-         * - 时间段内回复的 Email 数
-         * - 时间段内回复的 Ticket 数
-         * - 时间段内指定用户还未完成的 Tickets 数
-         */
-        List<User> services = User.serviceUsers();
-        Date morning = Dates.morning(from);
-        Date night = Dates.night(to);
-        for(User user : services) {
-            Map<String, Long> row = new HashMap<String, Long>();
-            row.put("user_day_mails", TicketQuery.userEmailsCount(morning, night, user));
-            row.put("user_day_tickets",
-                    TicketQuery.userTakeAndMailedTicketsCount(morning, night, user));
-            row.put("user_un_solved_tickets", TicketQuery.userSolvedTicketsCount(user, false));
-            row.put("user_solved_tickets", TicketQuery.userSolvedTicketsCount(user, true));
-            rows.put(user.username, row);
-        }
-
-        /**
-         * 3. 有处理但是没有被认领的j
-         *  - 时间段内回复的 Email 数
-         *  - 时间段内回复的 Ticket 数
-         *  - 无接管
-         */
-        Map<String, Long> unNameRow = new HashMap<String, Long>();
-        unNameRow.put("user_day_mails", TicketQuery.userEmailsCount(morning, night, null));
-        unNameRow.put("user_day_tickets",
-                TicketQuery.userTakeAndMailedTicketsCount(morning, night, null));
-        unNameRow.put("user_un_solved_tickets", TicketQuery.userSolvedTicketsCount(null, false));
-        unNameRow.put("user_solved_tickets", TicketQuery.userSolvedTicketsCount(null, true));
-        rows.put("未知用户", unNameRow);
-
-        return rows;
-    }
-
-    /**
-     * Ticket 信息汇总
-     *
-     * @param from
-     * @param to
-     * @return
-     */
-    public static Map<String, Long> ticketTotalTable(Date from, Date to) {
-        /**
-         * 4. 汇总数据
-         * - 时间段内还未完成的 Ticket 数量
-         * - 时间段内完成的 Ticket 数量
-         * - 未处理完毕的总 Ticket 数
-         */
-        Date morning = Dates.morning(from);
-        Date night = Dates.night(to);
-        Map<String, Long> unTake = new HashMap<String, Long>();
-        unTake.put("period_un_solved_tickets",
-                TicketQuery.periodCreateTicketsCount(morning, night, false));
-        unTake.put("period_solved_ticets",
-                TicketQuery.periodCreateTicketsCount(morning, night, true));
-        unTake.put("solved_tickets", TicketQuery.solvedTicketsCount(true));
-        unTake.put("un_solved_tickets", TicketQuery.solvedTicketsCount(false));
-        return unTake;
     }
 }

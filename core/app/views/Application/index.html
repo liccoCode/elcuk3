@@ -7,42 +7,7 @@
 
 #{info_row title:('Ticket 处理情况总览 <small class="muted">' + now +'</small>').raw()/}
 <div class="row-fluid">
-    <div class="span12">
-        <table class="table table-condensed table-bordered">
-            <tr>
-                <th>User</th>
-                <th>今天回复的邮件数</th>
-                <th>今天处理的 Ticket 数</th>
-                <th>昨天回复的邮件数</th>
-                <th>昨天处理的 Ticket 数</th>
-                <th>还未处理的 Tickets</th>
-                <th>总共处理的 Tickets</th>
-            </tr>
-        #{list items:ticketTable.keySet(), as:'user'}
-            #{if user != "untake"}
-                <tr>
-                    #{set trow:ticketTable.get(user)/}
-                    #{set yrow:yesterDayTicketTable.get(user)/}
-                    <td>${user}</td>
-                    <td>${trow.get('user_day_mails')}</td>
-                    <td>${trow.get('user_day_tickets')}</td>
-                    <td>${yrow.get('user_day_mails')}</td>
-                    <td>${yrow.get('user_day_tickets')}</td>
-                    <td>${trow.get('user_un_solved_tickets')}</td>
-                    <td>${trow.get('user_solved_tickets')}</td>
-                </tr>
-            #{/if}
-        #{/list}
-            <tr>
-                <td>总未完成的 Ticket</td>
-                <td>${ticketMap.get("un_solved_tickets")}</td>
-                <td>总完成的 Ticket</td>
-                <td>${ticketMap.get("solved_tickets")}</td>
-                <td colspan="3"></td>
-            </tr>
-
-        </table>
-    </div>
+    等待更新新的显示页面, 现在请跳转到 <a href="@{Tickets.index()}">Ticket 工作台</a> 进行处理与查看
 </div>
 
 #{info_row title:'FBA 仓库库存容量总览'/}
@@ -57,7 +22,8 @@ ${fba.capaticyContent.raw()}
 #{info_row title:'订单总览'/}
 <div class="row-fluid" id="orders">
     <div class="span12">
-        <h2 class="label label-info" style="font-size:12px">订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>
+        <h2 class="label label-info" style="font-size:12px">
+            订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>
         </h2>
         <table class="table table-bordered">
             <tr>
@@ -75,7 +41,8 @@ ${fba.capaticyContent.raw()}
             <tr>
                 <td date="${key}">${key}</td>
                 #{list items:models.market.Orderr.S.values(), as:'s'}
-                    <td><a href="#" rel="popover" placement='bottom' title="${s.name()} 细节" content="
+                    <td>
+                        <a href="#" rel="popover" placement='bottom' title="${s.name()} 细节" content="
                     DE: ${row.get(s.name() + "_" + "AMAZON_DE")}<br/>
                     US: ${row.get(s.name() + "_" + "AMAZON_US")}<br/>
                     UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>

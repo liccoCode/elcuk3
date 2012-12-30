@@ -9,11 +9,16 @@ import models.ElcukRecord;
 import models.User;
 import models.support.Ticket;
 import models.support.TicketReason;
+import models.support.TicketState;
 import models.view.Ret;
 import models.view.post.TicketPost;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.libs.F;
+import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.Arrays;
@@ -28,12 +33,58 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Tickets extends Controller {
 
+    @Before(only = {"index", "tabSearch"})
+    public static void ticketState() {
+        Ticket.T type = ticketType();
+        renderArgs.put("new_count", Ticket.count("state=? and type=?", TicketState.NEW, type));
+        renderArgs.put("twice_count",
+                Ticket.count("state=? and type=?", TicketState.TWO_MAIL, type));
+        renderArgs.put("mailed_count",
+                Ticket.count("state=? and type=?", TicketState.MAILED, type));
+        renderArgs.put("new_mail_count",
+                Ticket.count("state=? and type=?", TicketState.NEW_MSG, type
+                ));
+        renderArgs.put("no_resp_count",
+                Ticket.count("state=? and type=?", TicketState.NO_RESP, type));
+        renderArgs.put("pre_close_count",
+                Ticket.count("state=? and type=?", TicketState.PRE_CLOSE, type));
+        renderArgs.put("userIds", User.userIds());
+    }
+
+    @Util
+    public static Ticket.T ticketType() {
+        Ticket.T type = Ticket.T.REVIEW;
+        if(StringUtils.isNotBlank(params.get("type"))) {
+            try {
+                type = Ticket.T.valueOf(params.get("type"));
+            } catch(Exception e) {
+                type = Ticket.T.REVIEW;
+            }
+        } else if(StringUtils.isNotBlank(params.get("p.type"))) {
+            try {
+                type = Ticket.T.valueOf(params.get("p.type"));
+            } catch(Exception e) {
+                type = Ticket.T.REVIEW;
+            }
+        }
+        return type;
+    }
+
     @Check("tickets.index")
     public static void index(TicketPost p) {
         if(p == null) p = new TicketPost();
         List<Ticket> tickets = p.query();
-        List<F.T2<String, Long>> userIds = User.userIds();
-        render(tickets, p, userIds);
+        render(tickets, p);
+    }
+
+    public static void tabSearch(TicketState state, Ticket.T type) {
+        TicketPost p = new TicketPost();
+        p.type = type;
+        p.state = state;
+        p.from = DateTime.parse("2011-03-01").toDate();
+        System.out.println("=================" + p.from);
+        List<Ticket> tickets = p.query();
+        render("Tickets/index.html", tickets, p);
     }
 
     public static void show(long tid) {
