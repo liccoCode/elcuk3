@@ -1,0 +1,13 @@
+.table th{
+    text-align:center;
+    font-size:15px;
+    background-color:#F4F4F4;
+}
+
+.table .label_td{
+    width:120px;
+    text-align:center;
+    padding-top:30px;
+    font-weight:bold;
+    color:#468847;
+}

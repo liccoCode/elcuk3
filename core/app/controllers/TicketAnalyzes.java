@@ -1,13 +1,17 @@
 package controllers;
 
 import models.product.Category;
+import models.support.Ticket;
 import models.view.dto.RewAndFdbkDTO;
 import play.cache.CacheFor;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
+import query.TicketQuery;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 对 Ticket 的分页页面的控制器
@@ -23,6 +27,23 @@ public class TicketAnalyzes extends Controller {
     public static void index() {
         List<Category> cates = Category.all().fetch();
         render(cates);
+    }
+
+    /**
+     * 查看 Ticket 的总体解决情况
+     * 1. 当天还需要处理的 Ticket
+     * 2. 30 天内的 Ticket 处理情况
+     * - a: 成功处理
+     * - b: 悬而未决
+     * - c: 处理失败
+     */
+    public static void overview() {
+        long ticketsWaitForReply = TicketQuery.waitForReply(Ticket.T.TICKET, null);
+        long feedbacksWaitForReply = TicketQuery.waitForReply(Ticket.T.FEEDBACK, null);
+        long reviewsWaitForReply = TicketQuery.waitForReply(Ticket.T.REVIEW, null);
+        Map<String, F.T3<Long, Long, Float>> day30SuccInfo = TicketQuery.dealSuccess();
+
+        render(ticketsWaitForReply, feedbacksWaitForReply, reviewsWaitForReply, day30SuccInfo);
     }
 
     public static void reviews(Date from, Date to, String col) {

@@ -90,3 +90,8 @@ div .alert{
 .tab-content .tab-pane{
     background-color:#ffffff;
 }
+
+/* table 的行 hover*/
+.table tr:hover{
+    background-color:#F4F4F4;
+}

@@ -13,7 +13,7 @@
             <div class="row-fluid">
                 <div class="input-prepend inline">
                     <span class="add-on">From:</span>
-                    <input type="date" name="p.form" value="${p.from?.date()}">
+                    <input type="date" name="p.from" value="${p.from?.date()}">
                 </div>
 
                 <div class="input-prepend inline">
@@ -44,10 +44,10 @@
                 #{/list}
                 </select>
 
-                <select name="p.state" class="inline">
+                <select name="p.states" class="inline" multiple="multiple">
                     <option value="">状态</option>
                 #{list items:models.support.TicketState.values()}
-                    <option ${p.state == _ ? 'selected' : ''} value="${_.name()}">${_}</option>
+                    <option ${p.states.contains(_) ? 'selected' : ''} value="${_.name()}">${_}</option>
                 #{/list}
                 </select>
 

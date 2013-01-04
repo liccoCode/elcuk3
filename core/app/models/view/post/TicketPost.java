@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
  * Time: 5:36 PM
  */
 public class TicketPost extends Post<Ticket> {
-    public TicketState state = null;
+    public List<TicketState> states = new ArrayList<TicketState>();
 
     /**
      * 对 Ticket 是成功;
@@ -61,7 +62,7 @@ public class TicketPost extends Post<Ticket> {
     public TicketPost() {
         this.from = DateTime.now().minusMonths(2).toDate();
         this.to = new Date();
-        this.state = TicketState.NEW;
+        this.states = Arrays.asList(TicketState.NEW);
     }
 
     @Override
@@ -81,9 +82,16 @@ public class TicketPost extends Post<Ticket> {
             params.add(this.type);
         }
 
-        if(this.state != null) {
-            sbd.append("AND t.state=? ");
-            params.add(this.state);
+        if(this.states.size() > 0) {
+            // 因为 Play 会自动填充
+            if(!this.states.contains(null)) {
+                sbd.append("AND (");
+                for(TicketState s : this.states) {
+                    sbd.append("t.state=? OR ");
+                    params.add(s);
+                }
+                sbd.delete(sbd.lastIndexOf("OR"), sbd.length()).append(") ");
+            }
         }
 
         if(this.isSuccess != null) {

@@ -8,7 +8,6 @@ import models.market.Feedback;
 import models.market.OrderItem;
 import models.market.Orderr;
 import models.product.Whouse;
-import models.support.Ticket;
 import models.view.Ret;
 import play.Play;
 import play.cache.Cache;
@@ -17,7 +16,6 @@ import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
-import query.TicketQuery;
 
 import java.io.IOException;
 import java.util.Date;
@@ -31,16 +29,10 @@ public class Application extends Controller {
     public static void index() {
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
         Date now = new Date();
-        long waitForReplyReview = TicketQuery.waitForReply(Ticket.T.REVIEW, null);
-        long waitForReplyFeedback = TicketQuery.waitForReply(Ticket.T.FEEDBACK, null);
-        long waitForReplyTicket = TicketQuery.waitForReply(Ticket.T.TICKET, null);
-
         // Feedback 信息
         Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Feedback.frontPageTable();
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         renderArgs.put("now", Dates.date2DateTime(now));
-        renderArgs.put("ticket3", new F.T3<Long, Long, Long>(
-                waitForReplyReview, waitForReplyFeedback, waitForReplyTicket));
         render(odmaps, fbaWhouse, feedbacksOverView);
     }
 

@@ -42,7 +42,8 @@ public class FBAPost extends Post<FBAShipment> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT(fba) FROM FBAShipment fba LEFT JOIN fba.shipItems si WHERE 1=1 ");
+        StringBuilder sbd = new StringBuilder(
+                "SELECT DISTINCT(fba) FROM FBAShipment fba LEFT JOIN fba.shipItems si WHERE 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
         if(this.from != null && this.to != null) {
@@ -57,6 +58,7 @@ public class FBAPost extends Post<FBAShipment> {
         }
 
         if(this.states.size() > 0) {
+            // Play 会自动添加无法解析的 Enum 为 null
             if(!this.states.contains(null)) {
                 sbd.append("AND (");
                 for(FBAShipment.S s : this.states) {
@@ -64,9 +66,6 @@ public class FBAPost extends Post<FBAShipment> {
                     params.add(s);
                 }
                 sbd.delete(sbd.lastIndexOf("OR"), sbd.length()).append(")");
-            } else {
-                // 清楚选择了 State(所有状态的选项)
-                this.states = new ArrayList<FBAShipment.S>();
             }
         }
 
@@ -81,7 +80,8 @@ public class FBAPost extends Post<FBAShipment> {
 
         if(this.receiveOverTime) {
             // mysql 中两个时间相减一天的时间差为: 1000000
-            sbd.append("AND (((fba.closeAt - fba.receivingAt)>=3000000) OR (fba.receivingAt<=? AND fba.closeAt IS NULL)) ");
+            sbd.append(
+                    "AND (((fba.closeAt - fba.receivingAt)>=3000000) OR (fba.receivingAt<=? AND fba.closeAt IS NULL)) ");
             params.add(DateTime.now().minusDays(3).toDate());
         }
 

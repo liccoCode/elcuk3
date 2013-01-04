@@ -15,7 +15,6 @@ import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
-import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -315,34 +314,6 @@ public class Ticket extends Model {
         }
     }
 
-    /**
-     * 处理加载状态的 Ticket 同时将超时的过滤成另外一个 List
-     *
-     * @param state
-     * @param filterOverdue
-     * @return
-     */
-    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state,
-                                                           boolean filterOverdue) {
-        return tickets(type, state, filterOverdue, -1);
-    }
-
-    public static F.T2<List<Ticket>, List<Ticket>> tickets(T type, TicketState state,
-                                                           boolean filterOverdue, int size) {
-        List<Ticket> tickets = Ticket.find("type=? AND state=? ORDER BY createAt DESC", type, state)
-                .fetch((size <= 0 ? Integer.MAX_VALUE : size));
-        if(filterOverdue) {
-            List<Ticket> noOverdueTicket = new ArrayList<Ticket>();
-            List<Ticket> overdueTicket = new ArrayList<Ticket>();
-            for(Ticket ticket : tickets) {
-                if(ticket.isOverdue()) overdueTicket.add(ticket);
-                else noOverdueTicket.add(ticket);
-            }
-            return new F.T2<List<Ticket>, List<Ticket>>(noOverdueTicket, overdueTicket);
-        } else {
-            return new F.T2<List<Ticket>, List<Ticket>>(tickets, new ArrayList<Ticket>());
-        }
-    }
 
     /**
      * 加载所有需要更新 State 状态的 Ticket

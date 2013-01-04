@@ -80,7 +80,7 @@ public class Tickets extends Controller {
     public static void tabSearch(TicketState state, Ticket.T type) {
         TicketPost p = new TicketPost();
         p.type = type;
-        p.state = state;
+        p.states = Arrays.asList(state);
         p.from = DateTime.parse("2011-03-01").toDate();
         System.out.println("=================" + p.from);
         List<Ticket> tickets = p.query();
