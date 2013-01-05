@@ -41,9 +41,11 @@ public class TicketAnalyzes extends Controller {
         long ticketsWaitForReply = TicketQuery.waitForReply(Ticket.T.TICKET, null);
         long feedbacksWaitForReply = TicketQuery.waitForReply(Ticket.T.FEEDBACK, null);
         long reviewsWaitForReply = TicketQuery.waitForReply(Ticket.T.REVIEW, null);
-        Map<String, F.T3<Long, Long, Float>> day30SuccInfo = TicketQuery.dealSuccess();
+        Map<String, F.T3<Long, Long, Float>> day90SuccInfo = TicketQuery.dealSuccess(90);
+        Map<String, F.T3<Long, Long, Float>> day90FailInfo = TicketQuery.dealFailed(90);
 
-        render(ticketsWaitForReply, feedbacksWaitForReply, reviewsWaitForReply, day30SuccInfo);
+        render(ticketsWaitForReply, feedbacksWaitForReply, reviewsWaitForReply,
+                day90SuccInfo, day90FailInfo);
     }
 
     public static void reviews(Date from, Date to, String col) {

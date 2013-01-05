@@ -30,35 +30,52 @@
 <div class="row-fluid">
     <table class="table table-bordered table-condensed">
         <tr>
-            <th colspan="4">30 天内处理情况</th>
+            <th colspan="5">90 天内处理情况</th>
         </tr>
         <tr>
-            <td class="label_td" rowspan="4">成功处理</td>
+            <td class="label_td text-success" rowspan="4">处理成功</td>
             <td>类型</td>
-            <td>成功数量</td>
-            <td>成功百分比</td>
+            <td>数量</td>
+            <td>百分比</td>
             <td>总数</td>
         </tr>
         <tr>
-        #{set ticket: day30SuccInfo.get("ticket")/}
+        #{set ticket: day90SuccInfo.get("ticket")/}
             <td>Ticket</td>
             <td>${ticket._1}</td>
             <td>${ticket._3.format("#.##%")}</td>
             <td>${ticket._2}</td>
         </tr>
         <tr>
-        #{set review: day30SuccInfo.get("review")/}
+        #{set review: day90SuccInfo.get("review")/}
             <td>Review</td>
             <td>${review._1}</td>
             <td>${review._3.format('#.##%')}</td>
             <td>${review._2}</td>
         </tr>
         <tr>
-        #{set feedback: day30SuccInfo.get("feedback")/}
+        #{set feedback: day90SuccInfo.get("feedback")/}
             <td>Feedback</td>
             <td>${feedback._1}</td>
             <td>${feedback._3.format('#.##%')}</td>
             <td>${feedback._2}</td>
+        </tr>
+        <tr>
+            <td class="label_td text-error" rowspan="4">处理失败</td>
+        </tr>
+        <tr>
+        #{set reviewF: day90FailInfo.get("review")/}
+            <td>Review</td>
+            <td>${reviewF._1}</td>
+            <td>${reviewF._3.format('#.##%')}</td>
+            <td>${reviewF._2}</td>
+        </tr>
+        <tr>
+        #{set feedbackF: day90FailInfo.get("feedback")/}
+            <td>Feedback</td>
+            <td>${feedbackF._1}</td>
+            <td>${feedbackF._3.format('#.##%')}</td>
+            <td>${feedbackF._2}</td>
         </tr>
     </table>
 </div>

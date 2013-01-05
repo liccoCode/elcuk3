@@ -5,8 +5,6 @@ import helper.FLog;
 import helper.HTTP;
 import models.Jobex;
 import models.market.Account;
-import models.market.AmazonListingReview;
-import models.market.Feedback;
 import models.market.M;
 import models.support.Ticket;
 import models.support.TicketState;
@@ -46,8 +44,10 @@ public class FeedbackInfoFetchJob extends Job {
         int size = 30;
         if(Play.mode.isDev()) size = 10;
         // 找出没有处理成功的,不要 CLOSE , PRE_CLOSE 状态的. 与 CLOSE 状态没有处理成功但一个月之内的
-        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND (state NOT IN (?,?) OR (state=? AND createAt>=?)) ORDER BY lastSyncTime",
-                Ticket.T.FEEDBACK, false, TicketState.PRE_CLOSE, TicketState.CLOSE, TicketState.CLOSE, DateTime.now().minusMonths(1).toDate()).fetch(size);
+        List<Ticket> tickets = Ticket
+                .find("type=? AND isSuccess=? AND (state NOT IN (?,?) OR (state=? AND createAt>=?)) ORDER BY lastSyncTime",
+                        Ticket.T.FEEDBACK, false, TicketState.PRE_CLOSE, TicketState.CLOSE,
+                        TicketState.CLOSE, DateTime.now().minusMonths(1).toDate()).fetch(size);
         Logger.info("FeedbackInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
             FeedbackInfoFetchJob.checkFeedbackDealState(ticket);
@@ -64,23 +64,31 @@ public class FeedbackInfoFetchJob extends Job {
      */
     public static void checkFeedbackDealState(Ticket ticket) {
         if(ticket.feedback == null) {
-            Logger.warn("FeedbackInfoFetchJob deal an no Feedback Ticket(id|fid) [%s|%s]", ticket.id, ticket.fid);
+            Logger.warn("FeedbackInfoFetchJob deal an no Feedback Ticket(id|fid) [%s|%s]",
+                    ticket.id, ticket.fid);
             return;
         }
 
         // 1.
         if(ticket.feedback.market != null && ticket.feedback.account.type != null) {
-            if(!ticket.feedback.market.equals(ticket.feedback.account.type) && !ticket.feedback.market.equals(M.AMAZON_FR)/*法国市场还是需要处理, 因为现在 FR 的订单都是 UK 账号的*/) {
+            if(!ticket.feedback.market.equals(ticket.feedback.account.type) &&
+                    !ticket.feedback.market
+                            .equals(M.AMAZON_FR)/*法国市场还是需要处理, 因为现在 FR 的订单都是 UK 账号的*/) {
                 ticket.state = TicketState.PRE_CLOSE;
-                ticket.memo = ticket.feedback.account.type.nickName() + " 账号在 " + ticket.feedback.market.nickName() + " 销售产品时的 Feedback 不再处理.\r\n" + ticket.memo;
+                ticket.memo = ticket.feedback.account.type.nickName() + " 账号在 " +
+                        ticket.feedback.market.nickName() + " 销售产品时的 Feedback 不再处理.\r\n" +
+                        ticket.memo;
             } else { // 如果 1 满足则跳过 2 的原因是因为如果两着不一样, 抓取不到正确的 Feedback 信息
                 // 2.
-                String html = FeedbackInfoFetchJob.fetchAmazonFeedbackHtml(ticket.feedback.account, ticket.feedback.orderId);
+                String html = FeedbackInfoFetchJob
+                        .fetchAmazonFeedbackHtml(ticket.feedback.account, ticket.feedback.orderId);
                 ticket.feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
                 ticket.isSuccess = ticket.feedback.isRemove;
-                if(ticket.isSuccess) {
+                if(ticket.isSuccess && ticket.state != TicketState.CLOSE) {
                     ticket.state = TicketState.PRE_CLOSE;
-                    TicketState.PRE_CLOSE.nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(), new ArrayList<TicketStateSyncJob.OsResp>());
+                    TicketState.PRE_CLOSE
+                            .nextState(ticket, new ArrayList<TicketStateSyncJob.OsMsg>(),
+                                    new ArrayList<TicketStateSyncJob.OsResp>());
                     ticket.feedback.comment(String.format("Feedback 已经被删除(%s)", Dates.date2Date()));
                 }
             }
@@ -88,6 +96,8 @@ public class FeedbackInfoFetchJob extends Job {
 
         // 3.
         if(ticket.feedback.isExpired()) {
+            if(ticket.state == TicketState.CLOSE)
+                return;
             ticket.state = TicketState.PRE_CLOSE;
             ticket.memo = "Feedback 已经过期, 无法再处理, 请标记原因.\r\n" + ticket.memo;
         }
@@ -118,13 +128,15 @@ public class FeedbackInfoFetchJob extends Job {
 
     /**
      * 检查返回的内容, 判断请求是否成功.
+     *
      * @param body
      * @return
      */
     public static boolean isRequestSuccess(String body) {
         //<status>login</status>
         //<status>success</status>
-        return StringUtils.contains(StringUtils.substringBetween(body, "<status>", "</status>"), "success");
+        return StringUtils
+                .contains(StringUtils.substringBetween(body, "<status>", "</status>"), "success");
     }
 
     /**
@@ -144,7 +156,8 @@ public class FeedbackInfoFetchJob extends Job {
         ));
 
         if(Play.mode.isDev())
-            FLog.fileLog(String.format("feedback.check.%s.%s.html", account.prettyName(), orderId), body, FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("feedback.check.%s.%s.html", account.prettyName(), orderId),
+                    body, FLog.T.HTTP_ERROR);
         return body;
     }
 

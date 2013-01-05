@@ -72,7 +72,10 @@ public class Tickets extends Controller {
 
     @Check("tickets.index")
     public static void index(TicketPost p) {
-        if(p == null) p = new TicketPost();
+        if(p == null) {
+            p = new TicketPost();
+            p.states = Arrays.asList(TicketState.NEW);
+        }
         List<Ticket> tickets = p.query();
         render(tickets, p);
     }
@@ -82,7 +85,6 @@ public class Tickets extends Controller {
         p.type = type;
         p.states = Arrays.asList(state);
         p.from = DateTime.parse("2011-03-01").toDate();
-        System.out.println("=================" + p.from);
         List<Ticket> tickets = p.query();
         render("Tickets/index.html", tickets, p);
     }

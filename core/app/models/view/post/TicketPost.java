@@ -8,7 +8,6 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -62,7 +61,7 @@ public class TicketPost extends Post<Ticket> {
     public TicketPost() {
         this.from = DateTime.now().minusMonths(2).toDate();
         this.to = new Date();
-        this.states = Arrays.asList(TicketState.NEW);
+        this.states = new ArrayList<TicketState>();
     }
 
     @Override
