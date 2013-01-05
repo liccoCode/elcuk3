@@ -1,8 +1,14 @@
-#{extends 'main_full.html'/}
-#{set title:'Ticket 的分析页面'/}
-#{set 'moreStyles'}
+#{if full}
+    #{extends 'main_full.html'/}
+    #{set title:'Ticket 的分析页面'/}
+    #{set 'moreStyles'}
+        #{stylesheet 'ticketAnalyzes.css'/}
+    #{/set}
+#{/if}
+#{else }
     #{stylesheet 'ticketAnalyzes.css'/}
-#{/set}
+<h4>等待为 '数量' 添加可搜索链接</h4>
+#{/else}
 <div class="row-fluid">
     <table class="table table-bordered table-condensed">
         <tr>
@@ -33,7 +39,11 @@
             <th colspan="5">90 天内处理情况</th>
         </tr>
         <tr>
-            <td class="label_td text-success" rowspan="4">处理成功</td>
+            <td class="label_td text-success" rowspan="5">
+                <abbr title="Ticket 成功解决并且关闭; Review 分数上升或者删除; Feedback 被删除">处理成功</abbr>
+            </td>
+        </tr>
+        <tr>
             <td>类型</td>
             <td>数量</td>
             <td>百分比</td>
@@ -60,8 +70,12 @@
             <td>${feedback._3.format('#.##%')}</td>
             <td>${feedback._2}</td>
         </tr>
+
+
         <tr>
-            <td class="label_td text-error" rowspan="4">处理失败</td>
+            <td class="label_td text-error" rowspan="3">
+                <abbr title="Review 分数反而下降. Feedback 超过 2 个月后都没删除">处理失败</abbr>
+            </td>
         </tr>
         <tr>
         #{set reviewF: day90FailInfo.get("review")/}
@@ -76,6 +90,62 @@
             <td>${feedbackF._1}</td>
             <td>${feedbackF._3.format('#.##%')}</td>
             <td>${feedbackF._2}</td>
+        </tr>
+
+
+        <tr>
+            <td class="label_td text-warning" rowspan="4">
+                <abbr title="Ticket/Review/Feedback 既没有关闭, 也没有成功处理, 也不是在正在处理中的状态">悬而不决</abbr>
+            </td>
+        </tr>
+        <tr>
+        #{set ticketH: day90HangupInfo.get("ticket")/}
+            <td>Ticket</td>
+            <td>${ticketH._1}</td>
+            <td>${ticketH._3.format('#.##%')}</td>
+            <td>${ticketH._2}</td>
+        </tr>
+        <tr>
+        #{set reviewH: day90HangupInfo.get("review")/}
+            <td>Review</td>
+            <td>${reviewH._1}</td>
+            <td>${reviewH._3.format('#.##%')}</td>
+            <td>${reviewH._2}</td>
+        </tr>
+        <tr>
+        #{set feedbackH: day90HangupInfo.get("feedback")/}
+            <td>Feedback</td>
+            <td>${feedbackH._1}</td>
+            <td>${feedbackH._3.format('#.##%')}</td>
+            <td>${feedbackH._2}</td>
+        </tr>
+
+
+        <tr>
+            <td class="label_td text-info" rowspan="4">
+                <abbr title="Ticket/Review/Feedback 在正常的处理中, 但没有关闭, 成功处理.">处理中</abbr>
+            </td>
+        </tr>
+        <tr>
+        #{set ticketD: day90DealingInfo.get("ticket")/}
+            <td>Ticket</td>
+            <td>${ticketD._1}</td>
+            <td>${ticketD._3.format('#.##%')}</td>
+            <td>${ticketD._2}</td>
+        </tr>
+        <tr>
+        #{set reviewD: day90DealingInfo.get("review")/}
+            <td>Review</td>
+            <td>${reviewD._1}</td>
+            <td>${reviewD._3.format('#.##%')}</td>
+            <td>${reviewD._2}</td>
+        </tr>
+        <tr>
+        #{set feedbackD: day90DealingInfo.get("feedback")/}
+            <td>Feedback</td>
+            <td>${feedbackD._1}</td>
+            <td>${feedbackD._3.format('#.##%')}</td>
+            <td>${feedbackD._2}</td>
         </tr>
     </table>
 </div>

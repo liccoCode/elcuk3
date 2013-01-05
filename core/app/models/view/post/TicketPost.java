@@ -105,8 +105,16 @@ public class TicketPost extends Post<Ticket> {
                 }
                 sbd.append(") ");
             } else if(this.type == Ticket.T.FEEDBACK) {
-                sbd.append("AND t.feedback.isRemove=? ");
-                params.add(this.isSuccess);
+                if(this.isSuccess) {
+                    sbd.append("AND t.feedback.isRemove=? ");
+                    params.add(this.isSuccess);
+                } else {
+                    sbd.append("AND t.feedback.isRemove=? ")
+                            // 创建时间在 60 天前, 并且没有删除
+                            .append("AND t.createAt<=? ");
+                    params.add(this.isSuccess);
+                    params.add(DateTime.now().minusDays(60).toDate());
+                }
             }
         }
 

@@ -37,15 +37,19 @@ public class TicketAnalyzes extends Controller {
      * - b: 悬而未决
      * - c: 处理失败
      */
-    public static void overview() {
+    @CacheFor(id = "ticket_overview", value = "10min")
+    public static void overview(Boolean full) {
+        if(full == null) full = true;
         long ticketsWaitForReply = TicketQuery.waitForReply(Ticket.T.TICKET, null);
         long feedbacksWaitForReply = TicketQuery.waitForReply(Ticket.T.FEEDBACK, null);
         long reviewsWaitForReply = TicketQuery.waitForReply(Ticket.T.REVIEW, null);
         Map<String, F.T3<Long, Long, Float>> day90SuccInfo = TicketQuery.dealSuccess(90);
         Map<String, F.T3<Long, Long, Float>> day90FailInfo = TicketQuery.dealFailed(90);
+        Map<String, F.T3<Long, Long, Float>> day90HangupInfo = TicketQuery.dealHangup(90);
+        Map<String, F.T3<Long, Long, Float>> day90DealingInfo = TicketQuery.dealing(90);
 
-        render(ticketsWaitForReply, feedbacksWaitForReply, reviewsWaitForReply,
-                day90SuccInfo, day90FailInfo);
+        render(full, ticketsWaitForReply, feedbacksWaitForReply, reviewsWaitForReply,
+                day90SuccInfo, day90FailInfo, day90HangupInfo, day90DealingInfo);
     }
 
     public static void reviews(Date from, Date to, String col) {

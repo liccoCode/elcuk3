@@ -1,8 +1,8 @@
 $ ->
   $('#cci').click ->
     $.post('/application/clearCache', {},
-      (r) ->
-        if r.flag then alert('清理首页缓存成功') else alert('清理失败.')
+    (r) ->
+      if r.flag then alert('清理首页缓存成功') else alert('清理失败.')
     )
 
   $('#change_passwd_btn').click (e) ->
@@ -15,12 +15,12 @@ $ ->
     maskDiv = $('#change_passwd')
     maskDiv.mask("更新中...")
     $.post('/users/passwd', params,
-      (data) ->
-        if data['username'] is params['u.username']
-          alert('更新成功')
-        else
-          alert('更新失败;\r\n' + JSON.stringify(data))
-        maskDiv.unmask()
+    (data) ->
+      if data['username'] is params['u.username']
+        alert('更新成功')
+      else
+        alert('更新失败;\r\n' + JSON.stringify(data))
+      maskDiv.unmask()
     )
     e.preventDefault()
 
@@ -65,21 +65,21 @@ $ ->
     mask.mask('加载中...')
     # aid 的值随便使用一个 pieTuple 即可, 因为 category 与 sales 这种计算是统一的
     $.get('/application/categoryPercent', {date: date, aid: pieTuple['o'].aid},
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          tupleKey = o: '_2', s: '_3'
-          for k, v of pieTuple
-            line = data: []
-            line.data.push([o['_1'], o[tupleKey[k]]]) for o in r
-            v.clearLines()
-            v.series.push(line)
-            try
-              new Highcharts.Chart(v)
-            catch e #权限控制
-              console.log(e)
-        mask.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        tupleKey = o: '_2', s: '_3'
+        for k, v of pieTuple
+          line = data: []
+          line.data.push([o['_1'], o[tupleKey[k]]]) for o in r
+          v.clearLines()
+          v.series.push(line)
+          try
+            new Highcharts.Chart(v)
+          catch e #权限控制
+            console.log(e)
+      mask.unmask()
     )
 
   # 重新绘制所有的 Pie 图
@@ -89,6 +89,7 @@ $ ->
     loadCategoryAndSalePercent({o: pieDE, s: salesDE}, date)
     loadCategoryAndSalePercent({o: pieUS, s: salesUS}, date)
 
+  $('#overview').load("/ticketanalyzes/overview?full=false")
   lastDate = $("#orders tr:last td:eq(0)").attr('date')
   drawPies(lastDate)
 
