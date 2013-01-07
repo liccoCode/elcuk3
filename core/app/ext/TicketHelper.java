@@ -100,4 +100,27 @@ public class TicketHelper extends JavaExtensions {
         }
     }
 
+    /**
+     * 根据百分比进行颜色调整
+     *
+     * @param percent
+     * @return
+     */
+    public static String pctColor(Number percent) {
+        float pct = 0;
+        if(percent.floatValue() < 1) pct = percent.floatValue() * 100;
+        else pct = percent.floatValue();
+        if(pct <= 20) {
+            return "#DF534E";
+        } else if(pct <= 50) {
+            return "#F9A732";
+        } else if(pct <= 70) {
+            return "#4FB5D3";
+        } else if(pct <= 100) {
+            return "#5FBF5F";
+        } else {
+            return "#FF1101";
+        }
+    }
+
 }

@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
  */
 public class TicketPost extends Post<Ticket> {
     public List<TicketState> states = new ArrayList<TicketState>();
+    public Date from = super.from;
 
     /**
      * 对 Ticket 是成功;
@@ -34,14 +36,28 @@ public class TicketPost extends Post<Ticket> {
 
     public Boolean start = null;
 
+    /**
+     * 只在内部使用;
+     * - -|| private 竟然通过 Tickets.index 不会设置值
+     */
+    public boolean isHangUp = false;
+    public boolean isDealing = false;
+
     public static enum DT {
         createAt,
         lastSyncTime,
         lastMessageTime,
         lastResponseTime;
 
-        @Override
-        public String toString() {
+        /**
+         * 因为 Play! 为枚举也调用 toString() 而不是 name(), 导致 Tickets.index(obj) 这样调用 Controller
+         * 传递含有枚举值的时候需要将枚举的 toString() 保持为不变才行. 否则会出现:
+         * 期盼的: p.dateType=createAt
+         * 变为: p.dateType=创建时间
+         *
+         * @return
+         */
+        public String to_s() {
             switch(this) {
                 case createAt:
                     return "创建时间";
@@ -54,8 +70,8 @@ public class TicketPost extends Post<Ticket> {
                 default:
                     return "None";
             }
-
         }
+
     }
 
     public TicketPost() {
@@ -68,12 +84,12 @@ public class TicketPost extends Post<Ticket> {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT t FROM Ticket t WHERE 1=1 AND ");
         List<Object> params = new ArrayList<Object>();
-        if(dateType != null) {
-            sbd.append("t.").append(dateType.name()).append(">=? and ")
-                    .append("t.").append(dateType.name()).append("<=? ");
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
-        }
+        if(dateType == null) dateType = DT.createAt;
+        // 必须保证有时间因素
+        sbd.append("t.").append(dateType.name()).append(">=? and ")
+                .append("t.").append(dateType.name()).append("<=? ");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
 
 
         if(this.type != null) {
@@ -93,15 +109,31 @@ public class TicketPost extends Post<Ticket> {
             }
         }
 
+        if(isHangUp) {
+            this.hangUp(sbd, params);
+            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        }
+        if(isDealing) {
+            this.dealing(sbd, params);
+            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        }
+
         if(this.isSuccess != null) {
             if(this.type == Ticket.T.REVIEW) {
                 sbd.append("AND (");
                 if(this.isSuccess) {
-                    sbd.append("t.review.isRemove=?").append(" OR ")
-                            .append("t.review.rating>t.review.lastRating");
-                    params.add(this.isSuccess);
+                    /**
+                     * 1. rating >= 4 , isRemove == false, not in NEW(状态在这不做限制)
+                     * 2. isRemove == true
+                     */
+                    sbd.append("(t.review.isRemove=false").append(" AND ")
+                            .append("t.review.rating>=4)").append(" OR ")
+                            .append("(t.review.isRemove=true)");
                 } else {
-                    sbd.append("t.review.rating<t.review.lastRating");
+                    /**
+                     * lastRating>rating
+                     */
+                    sbd.append("t.review.lastRating>t.review.rating AND t.review.isRemove=false");
                 }
                 sbd.append(") ");
             } else if(this.type == Ticket.T.FEEDBACK) {
@@ -109,11 +141,10 @@ public class TicketPost extends Post<Ticket> {
                     sbd.append("AND t.feedback.isRemove=? ");
                     params.add(this.isSuccess);
                 } else {
-                    sbd.append("AND t.feedback.isRemove=? ")
-                            // 创建时间在 60 天前, 并且没有删除
-                            .append("AND t.createAt<=? ");
+                    sbd.append("AND t.feedback.isRemove=? ");
+                    // 创建时间在 60 天前, 并且没有删除
+                    params.set(1, DateTime.now().minusDays(60).toDate());
                     params.add(this.isSuccess);
-                    params.add(DateTime.now().minusDays(60).toDate());
                 }
             }
         }
@@ -157,5 +188,60 @@ public class TicketPost extends Post<Ticket> {
         this.count = this.count(t2);
         return Ticket.find(t2._1 + " ORDER BY t.createAt DESC", t2._2.toArray())
                 .fetch(this.page, this.perSize);
+    }
+
+    /**
+     * 对于 HangUp Group 的参数
+     *
+     * @param sbd
+     * @param params
+     */
+    private void hangUp(StringBuilder sbd, List<Object> params) {
+        if(this.type == Ticket.T.REVIEW) {
+            sbd.append(" AND t.review.isRemove=false AND t.review.lastRating=t.review.rating ");
+        } else if(this.type == Ticket.T.FEEDBACK) {
+            sbd.append(" AND t.feedback.isRemove=false");
+        }
+    }
+
+    /**
+     * 对于 dealing Group 的参数
+     * ps: 尽管参数一样, 但还暴露一个接口
+     *
+     * @param sbd
+     * @param params
+     */
+    private void dealing(StringBuilder sbd, List<Object> params) {
+        this.hangUp(sbd, params);
+    }
+
+    /**
+     * 对于不同分组的搜索
+     *
+     * @return 调整自身参数, 为对应的 Group 搜索; self
+     */
+    public TicketPost groupSearch(String group, Ticket.T t, int days) {
+        DateTime now = DateTime.now();
+        this.from = now.minusDays(days).toDate();
+        this.type = t;
+        if(StringUtils.equalsIgnoreCase("SUCC", group)) {
+            this.isSuccess = true;
+            if(t == Ticket.T.TICKET)
+                this.states = Arrays.asList(TicketState.CLOSE, TicketState.PRE_CLOSE);
+        } else if(StringUtils.equalsIgnoreCase("FAIL", group)) {
+            this.isSuccess = false;
+        } else if(StringUtils.equalsIgnoreCase("HANGUP", group)) {
+            this.states = Arrays.asList(TicketState.NO_RESP);
+            this.isHangUp = true;
+        } else if(StringUtils.equalsIgnoreCase("DEALING", group)) {
+            this.isDealing = true;
+            this.states = Arrays.asList(TicketState.NEW, TicketState.TWO_MAIL,
+                    TicketState.NEW_MSG, TicketState.MAILED);
+        }
+        return this;
+    }
+
+    public TicketPost groupSearch(String group, Ticket.T t) {
+        return groupSearch(group, t, 90);
     }
 }

@@ -52,22 +52,28 @@
         <tr>
         #{set ticket: day90SuccInfo.get("ticket")/}
             <td>Ticket</td>
-            <td>${ticket._1}</td>
-            <td>${ticket._3.format("#.##%")}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("SUCC", "TICKET")}">${ticket._1}</a>
+            </td>
+            <td style="color:${ticket._3.pctColor()}">${ticket._3.format("#.##%")}</td>
             <td>${ticket._2}</td>
         </tr>
         <tr>
         #{set review: day90SuccInfo.get("review")/}
             <td>Review</td>
-            <td>${review._1}</td>
-            <td>${review._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("SUCC", "REVIEW")}">${review._1}</a>
+            </td>
+            <td style="color:${review._3.pctColor()}">${review._3.format('#.##%')}</td>
             <td>${review._2}</td>
         </tr>
         <tr>
         #{set feedback: day90SuccInfo.get("feedback")/}
             <td>Feedback</td>
-            <td>${feedback._1}</td>
-            <td>${feedback._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("SUCC", "FEEDBACK")}">${feedback._1}</a>
+            </td>
+            <td style="color:${feedback._3.pctColor()}">${feedback._3.format('#.##%')}</td>
             <td>${feedback._2}</td>
         </tr>
 
@@ -80,15 +86,19 @@
         <tr>
         #{set reviewF: day90FailInfo.get("review")/}
             <td>Review</td>
-            <td>${reviewF._1}</td>
-            <td>${reviewF._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("FAIL", "REVIEW")}">${reviewF._1}</a>
+            </td>
+            <td style="color:${reviewF._3.pctColor()}">${reviewF._3.format('#.##%')}</td>
             <td>${reviewF._2}</td>
         </tr>
         <tr>
         #{set feedbackF: day90FailInfo.get("feedback")/}
             <td>Feedback</td>
-            <td>${feedbackF._1}</td>
-            <td>${feedbackF._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("FAIL", "FEEDBACK")}">${feedbackF._1}</a>
+            </td>
+            <td style="color:${feedbackF._3.pctColor()}">${feedbackF._3.format('#.##%')}</td>
             <td>${feedbackF._2}</td>
         </tr>
 
@@ -101,22 +111,27 @@
         <tr>
         #{set ticketH: day90HangupInfo.get("ticket")/}
             <td>Ticket</td>
-            <td>${ticketH._1}</td>
-            <td>${ticketH._3.format('#.##%')}</td>
+            <td><a href="@{TicketAnalyzes.overviewDetails("HANGUP", "TICKET")}">${ticketH._1}</a>
+            </td>
+            <td style="color:${ticketH._3.pctColor()}">${ticketH._3.format('#.##%')}</td>
             <td>${ticketH._2}</td>
         </tr>
         <tr>
         #{set reviewH: day90HangupInfo.get("review")/}
             <td>Review</td>
-            <td>${reviewH._1}</td>
-            <td>${reviewH._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("HANGUP", "REVIEW")}">${reviewH._1}</a>
+            </td>
+            <td style="color:${reviewH._3.pctColor()}">${reviewH._3.format('#.##%')}</td>
             <td>${reviewH._2}</td>
         </tr>
         <tr>
         #{set feedbackH: day90HangupInfo.get("feedback")/}
             <td>Feedback</td>
-            <td>${feedbackH._1}</td>
-            <td>${feedbackH._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("HANGUP", "FEEDBACK")}">${feedbackH._1}</a>
+            </td>
+            <td style="color:${feedbackH._3.pctColor()}">${feedbackH._3.format('#.##%')}</td>
             <td>${feedbackH._2}</td>
         </tr>
 
@@ -129,22 +144,28 @@
         <tr>
         #{set ticketD: day90DealingInfo.get("ticket")/}
             <td>Ticket</td>
-            <td>${ticketD._1}</td>
-            <td>${ticketD._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("DEALING", "TICKET")}">${ticketD._1}</a>
+            </td>
+            <td style="color:${ticketD._3.pctColor()}">${ticketD._3.format('#.##%')}</td>
             <td>${ticketD._2}</td>
         </tr>
         <tr>
         #{set reviewD: day90DealingInfo.get("review")/}
             <td>Review</td>
-            <td>${reviewD._1}</td>
-            <td>${reviewD._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("DEALING", "REVIEW")}">${reviewD._1}</a>
+            </td>
+            <td style="color:${reviewD._3.pctColor()}">${reviewD._3.format('#.##%')}</td>
             <td>${reviewD._2}</td>
         </tr>
         <tr>
         #{set feedbackD: day90DealingInfo.get("feedback")/}
             <td>Feedback</td>
-            <td>${feedbackD._1}</td>
-            <td>${feedbackD._3.format('#.##%')}</td>
+            <td>
+                <a href="@{TicketAnalyzes.overviewDetails("DEALING", "FEEDBACK")}">${feedbackD._1}</a>
+            </td>
+            <td style="color:${feedbackD._3.pctColor()}">${feedbackD._3.format('#.##%')}</td>
             <td>${feedbackD._2}</td>
         </tr>
     </table>

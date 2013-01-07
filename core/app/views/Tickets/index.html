@@ -1,5 +1,5 @@
 #{extends 'main_full.html'/}
-#{set title:'Tickets(' + tickets.size() + ')'/}
+#{set title:'Tickets(' + p.count + ')'/}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
 #{/set}
@@ -24,7 +24,9 @@
 
                 <select name="p.dateType" class="inline">
                 #{list items:models.view.post.TicketPost.DT.values()}
-                    <option ${p.dateType == _ ? 'selected' : ''} value="${_.name()}">${_}</option>
+                    <option ${p.dateType == _ ? 'selected' : ''} value="${_.name()}">
+                    ${_.to_s()}
+                    </option>
                 #{/list}
                 </select>
 
@@ -47,7 +49,9 @@
                 <select name="p.states" class="inline" multiple="multiple">
                     <option value="">状态</option>
                 #{list items:models.support.TicketState.values()}
-                    <option ${p.states.contains(_) ? 'selected' : ''} value="${_.name()}">${_}</option>
+                    <option ${p.states.contains(_) ? 'selected' : ''} value="${_.name()}">
+                    ${_.to_s()}
+                    </option>
                 #{/list}
                 </select>
 

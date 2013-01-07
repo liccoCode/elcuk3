@@ -71,7 +71,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "新创建";
         }
     },
@@ -96,7 +96,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "需要发送第二封邮件";
         }
     },
@@ -153,7 +153,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "已经发送了邮件";
         }
     },
@@ -181,7 +181,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "有新回复";
         }
     },
@@ -207,7 +207,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "客户无回应";
         }
     },
@@ -249,7 +249,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "等待关闭";
         }
     },
@@ -272,7 +272,7 @@ public enum TicketState {
         }
 
         @Override
-        public String toString() {
+        public String to_s() {
             return "关闭";
         }
     };
@@ -284,4 +284,6 @@ public enum TicketState {
                                           List<TicketStateSyncJob.OsResp> resps);
 
     public abstract String explan();
+
+    public abstract String to_s();
 }

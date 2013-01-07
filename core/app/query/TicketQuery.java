@@ -79,8 +79,9 @@ public class TicketQuery {
          * 1. Ticket State Close
          */
         long ticketSucc = (Long) DBUtils.row("SELECT COUNT(*) as c FROM Ticket WHERE type=? AND " +
-                "state=? AND createAt>=? AND createAt<=?",
-                Ticket.T.TICKET.name(), TicketState.CLOSE, from, to).get("c");
+                "state IN (?,?) AND createAt>=? AND createAt<=?",
+                Ticket.T.TICKET.name(), TicketState.CLOSE, TicketState.PRE_CLOSE, from, to)
+                .get("c");
         long ticketTotal = ticketTotal(Ticket.T.TICKET, from, to);
         float ticketPercent = percent(ticketSucc, ticketTotal);
 
@@ -243,7 +244,7 @@ public class TicketQuery {
      */
     public static Map<String, F.T3<Long, Long, Float>> dealing(Date from, Date to) {
         /**
-         * Ticket: type in [NEW, TWO_MAIL, NEW_MSG, MAILED] as &t
+         * Ticket: state in [NEW, TWO_MAIL, NEW_MSG, MAILED] as &t
          */
         TicketState[] ds = new TicketState[]{TicketState.NEW, TicketState.TWO_MAIL,
                 TicketState.NEW_MSG, TicketState.MAILED};
@@ -252,7 +253,7 @@ public class TicketQuery {
         float ticketPercent = percent(ticketDealing, ticketTotal);
 
         /**
-         * Review: type in [*t] and lastRating==rating and isRemove==false
+         * Review: state in [*t] and lastRating==rating and isRemove==false
          */
         long reviewDealing = (Long) DBUtils.row("SELECT COUNT(t.id) as c FROM Ticket t" +
                 " LEFT JOIN AmazonListingReview r on t.review_alrId=r.alrId WHERE" +
@@ -264,6 +265,9 @@ public class TicketQuery {
         long reviewTotal = ticketTotal(Ticket.T.REVIEW, from, to);
         float reviewPercent = percent(reviewDealing, reviewTotal);
 
+        /**
+         * Feedback: state in [*t] and isRemove==false
+         */
         long feedbackDealing = (Long) DBUtils.row("SELECT COUNT(t.id) as c FROM Ticket t" +
                 " LEFT JOIN Feedback f on t.feedback_orderId=f.orderId WHERE" +
                 " t.type=? AND t.state IN (?,?,?,?) AND f.isRemove=false AND" +

@@ -3,6 +3,8 @@ package controllers;
 import models.product.Category;
 import models.support.Ticket;
 import models.view.dto.RewAndFdbkDTO;
+import models.view.post.TicketPost;
+import org.apache.commons.lang.StringUtils;
 import play.cache.CacheFor;
 import play.libs.F;
 import play.mvc.Controller;
@@ -37,7 +39,7 @@ public class TicketAnalyzes extends Controller {
      * - b: 悬而未决
      * - c: 处理失败
      */
-    @CacheFor(id = "ticket_overview", value = "10min")
+//    @CacheFor(id = "ticket_overview", value = "10min")
     public static void overview(Boolean full) {
         if(full == null) full = true;
         long ticketsWaitForReply = TicketQuery.waitForReply(Ticket.T.TICKET, null);
@@ -62,5 +64,17 @@ public class TicketAnalyzes extends Controller {
         List<RewAndFdbkDTO> feedbacks = RewAndFdbkDTO.feedbacks(from, to);
         RewAndFdbkDTO.sortByColumn(feedbacks, col);
         render(feedbacks);
+    }
+
+    /**
+     * 不同的分组的搜索条件导航
+     *
+     * @param group SUCC/FAIL/HANGUP/DEALING
+     */
+    public static void overviewDetails(String group, Ticket.T type) {
+        if(StringUtils.isBlank(group) || type == null) {
+            Application.index();
+        }
+        Tickets.index(new TicketPost().groupSearch(group, type));
     }
 }
