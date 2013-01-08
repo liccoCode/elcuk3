@@ -3,6 +3,7 @@ package jobs.promise;
 import com.alibaba.fastjson.TypeReference;
 import com.trendrr.beanstalk.BeanstalkJob;
 import helper.J;
+import jobs.loop.OsTicketBeanstalkdCheck;
 import models.support.Ticket;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -19,34 +20,44 @@ import java.util.Map;
  */
 public class OsTicketSavePromise extends Job<Ticket> {
     private BeanstalkJob job;
+    private String tube;
 
     /**
      * 将解析 OsTicket 与保存的任务交给这个 Promise (因为需要 JPA Content)
      *
      * @param job
      */
-    public OsTicketSavePromise(BeanstalkJob job) {
+    public OsTicketSavePromise(String tube, BeanstalkJob job) {
         this.job = job;
+        this.tube = tube;
     }
 
     @Override
     public Ticket doJobWithResult() {
-        String body = new String(job.getData());
-        Map<String, String> t = J.from(body, new TypeReference<Map<String, String>>() {});
+        Ticket ticket = null;
+        try {
 
-        if(t.get("title").contains("日报"))
-            // 日报不进入系统
-            return null;
+            String body = new String(job.getData());
+            Map<String, String> t = J.from(body, new TypeReference<Map<String, String>>() {});
 
-        Ticket ticket = Ticket.find("osTicketId=?", t.get("ticketId")).first();
-        if(ticket == null) {
-            ticket = new Ticket(t.get("ticketId"), DateTime.parse(t.get("createAt"),
-                    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate(), t.get("title"));
-            ticket.save();
-            Logger.info("Saved OsTicket #%s(%s) [%s].", ticket.osTicketId, ticket.id, ticket.fid);
-        } else {
-            Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id,
-                    ticket.fid);
+            if(t.get("title").contains("日报"))
+                // 日报不进入系统
+                return null;
+
+            ticket = Ticket.find("osTicketId=?", t.get("ticketId")).first();
+            if(ticket == null) {
+                ticket = new Ticket(t.get("ticketId"), DateTime.parse(t.get("createAt"),
+                        DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate(), t.get("title"));
+                ticket.save();
+                Logger.info("Saved OsTicket #%s(%s) [%s].", ticket.osTicketId, ticket.id,
+                        ticket.fid);
+            } else {
+                Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id,
+                        ticket.fid);
+            }
+            OsTicketBeanstalkdCheck.deleteJob(this.tube, this.job);
+        } catch(Exception e) {
+            this.job.getClient().close();
         }
         return ticket;
     }

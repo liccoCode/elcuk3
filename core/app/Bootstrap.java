@@ -2,7 +2,7 @@ import helper.Currency;
 import helper.HTTP;
 import helper.S3;
 import jobs.ListingSchedulJob;
-import jobs.loop.OsTicketCreateCheck;
+import jobs.loop.OsTicketBeanstalkdCheck;
 import models.Privilege;
 import models.User;
 import models.finance.FeeType;
@@ -45,7 +45,7 @@ public class Bootstrap extends Job {
 
         if(Play.mode.isProd() || (Play.mode.isDev() &&
                 "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev")))) {
-            OsTicketCreateCheck.begin();
+            OsTicketBeanstalkdCheck.begin();
         }
 
         if(Play.mode.isProd()) {

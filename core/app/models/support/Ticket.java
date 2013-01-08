@@ -1,5 +1,6 @@
 package models.support;
 
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.OsTicket;
@@ -15,10 +16,12 @@ import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
 import play.db.jpa.Model;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -314,6 +317,19 @@ public class Ticket extends Model {
         }
     }
 
+    /**
+     * 将 Ticket 与 OsTicket 同步一次
+     *
+     * @return
+     */
+    public F.Option<F.T2<List<Ticket>, List<Ticket>>> syncFromOsticket() {
+        if(StringUtils.isBlank(this.osTicketId())) return F.Option.None();
+        JsonObject rsObj = OsTicket.communicationWithOsTicket(Arrays.asList(this.osTicketId()));
+        return F.Option.Some(
+                TicketStateSyncJob.syncOsTicketDetailsIntoSystem(rsObj, Arrays.asList(this))
+        );
+    }
+
 
     /**
      * 加载所有需要更新 State 状态的 Ticket
@@ -321,9 +337,8 @@ public class Ticket extends Model {
      * @return
      */
     public static List<Ticket> checkStateTickets(int size) {
-        return Ticket
-                .find("state!=? AND osTicketId IS NOT NULL AND osTicketId NOT LIKE ? ORDER BY lastSyncTime",
-                        TicketState.CLOSE, "%-noemail").fetch(size);
+        return Ticket.find("state!=? AND osTicketId IS NOT NULL AND osTicketId NOT LIKE ?" +
+                " ORDER BY lastSyncTime", TicketState.CLOSE, "%-noemail").fetch(size);
     }
 
     public static Ticket findByOsTicketId(String osTicketId) {

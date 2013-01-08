@@ -1,8 +1,6 @@
 package controllers;
 
-import com.google.gson.JsonObject;
 import helper.J;
-import helper.OsTicket;
 import helper.Webs;
 import jobs.TicketStateSyncJob;
 import models.ElcukRecord;
@@ -162,14 +160,17 @@ public class Tickets extends Controller {
         if(ticket == null) {
             renderJSON(new Ret("Ticket " + tid + " is not exist."));
         }
-        JsonObject syncsJsonDetails = OsTicket
-                .communicationWithOsTicket(Arrays.asList(ticket.osTicketId()));
-        F.T2<List<Ticket>, List<Ticket>> ticketT2 = TicketStateSyncJob
-                .syncOsTicketDetailsIntoSystem(syncsJsonDetails, Arrays.asList(ticket));
-        if(ticketT2._1.size() != 0) {
-            renderJSON(new Ret(true, ticketT2._1.get(0).osTicketId()));
+        F.Option<F.T2<List<Ticket>, List<Ticket>>> ticketOt2 = ticket.syncFromOsticket();
+
+        if(ticketOt2.isDefined()) {
+            F.T2<List<Ticket>, List<Ticket>> ticketT2 = ticketOt2.get();
+            if(ticketT2._1.size() != 0) {
+                renderJSON(new Ret(true, ticketT2._1.get(0).osTicketId()));
+            } else {
+                renderJSON(new Ret(ticketT2._2.get(0).osTicketId()));
+            }
         } else {
-            renderJSON(new Ret(ticketT2._2.get(0).osTicketId()));
+            renderJSON(new Ret(String.format("Ticket #%s 不存在与 OsTicket 中", tid)));
         }
     }
 
