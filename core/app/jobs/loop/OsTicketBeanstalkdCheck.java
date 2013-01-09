@@ -44,6 +44,33 @@ public class OsTicketBeanstalkdCheck implements Runnable {
         INSTANCE.closeClients();
     }
 
+    public static void deleteJob(BeanstalkJob job) throws BeanstalkException {
+        BeanstalkClient c = job.getClient();
+        try {
+            c.deleteJob(job);
+        } catch(BeanstalkException e) {
+            if(e.getMessage().startsWith("NOT_FOUND")) {
+                //ignore..
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public static void releaseJob(BeanstalkJob job) throws BeanstalkException {
+        BeanstalkClient c = job.getClient();
+        try {
+            c.release(job, DEFAULT_PRI, 10);
+        } catch(BeanstalkException e) {
+            if(e.getMessage().startsWith("DELETED") || e.getMessage().startsWith("NOT_FOUND")) {
+                //ignore
+            } else {
+                throw e;
+            }
+
+        }
+    }
+
     private static OsTicketBeanstalkdCheck INSTANCE = new OsTicketBeanstalkdCheck();
 
     /**
@@ -119,14 +146,17 @@ public class OsTicketBeanstalkdCheck implements Runnable {
 
             try {
                 BeanstalkClient c = this.tubeClient.get(tube);
-                BeanstalkJob job = c.reserve(1);
+                // 不会重复获取
+                BeanstalkJob job = c.reserve(3);
                 if(job != null) {
                     Logger.info("Dispatching job from tube %s", tube);
                     this.dispatch(tube, job);
+                } else {
+                    Logger.info("1s TimeOut, no job found.");
                 }
             } catch(BeanstalkException e) {
                 //ignore.. just retry
-                Logger.warn("Ignore. Let beanstalkd pass job from reserve to ready again.");
+                Logger.warn("Let beanstalkd pass job from reserve to ready again. %s", Webs.E(e));
             } catch(Exception e) {
                 // 在这里发生 BeanstalkDisconnectedException 表示链接有问题; 邮件提醒
                 Webs.systemMail("Beanstalkd 连接出现问题.",

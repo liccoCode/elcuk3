@@ -3,6 +3,7 @@ package jobs.promise;
 import com.alibaba.fastjson.TypeReference;
 import com.trendrr.beanstalk.BeanstalkJob;
 import helper.J;
+import helper.Webs;
 import jobs.loop.OsTicketBeanstalkdCheck;
 import models.support.Ticket;
 import play.Logger;
@@ -40,10 +41,11 @@ public class OsTicketSyncPromise extends Job<Ticket> {
                 // 如果是新创建的 Ticket, 那么很可能 Save 与 Sync Job 一起触发, 而这一次的 Sync 忽略无大碍
                 Logger.info("OsTicket %s is not exist, can not be synchronize.", t.get("ticketId"));
             }
-            job.getClient().deleteJob(job);
+            OsTicketBeanstalkdCheck.deleteJob(job);
         } catch(Exception e) {
             // 延迟 10s
-            job.getClient().release(job, OsTicketBeanstalkdCheck.DEFAULT_PRI, 10);
+            Logger.warn("Why`s wrong? %s", Webs.E(e));
+            OsTicketBeanstalkdCheck.releaseJob(job);
         }
         return ticket;
     }

@@ -3,6 +3,7 @@ package jobs.promise;
 import com.alibaba.fastjson.TypeReference;
 import com.trendrr.beanstalk.BeanstalkJob;
 import helper.J;
+import helper.Webs;
 import jobs.loop.OsTicketBeanstalkdCheck;
 import models.support.Ticket;
 import org.joda.time.DateTime;
@@ -56,10 +57,11 @@ public class OsTicketSavePromise extends Job<Ticket> {
                 Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id,
                         ticket.fid);
             }
-            job.getClient().deleteJob(job);
+            OsTicketBeanstalkdCheck.deleteJob(job);
         } catch(Exception e) {
             // 延迟 10s
-            job.getClient().release(job, OsTicketBeanstalkdCheck.DEFAULT_PRI, 10);
+            Logger.warn("Why`s wrong? %s", Webs.E(e));
+            OsTicketBeanstalkdCheck.releaseJob(job);
         }
         return ticket;
     }
