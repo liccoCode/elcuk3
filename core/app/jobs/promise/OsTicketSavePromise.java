@@ -33,7 +33,7 @@ public class OsTicketSavePromise extends Job<Ticket> {
     }
 
     @Override
-    public Ticket doJobWithResult() {
+    public Ticket doJobWithResult() throws Exception {
         Ticket ticket = null;
         try {
 
@@ -46,6 +46,7 @@ public class OsTicketSavePromise extends Job<Ticket> {
 
             ticket = Ticket.find("osTicketId=?", t.get("ticketId")).first();
             if(ticket == null) {
+                //TODO 检查为什么没有存储进来
                 ticket = new Ticket(t.get("ticketId"), DateTime.parse(t.get("createAt"),
                         DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")).toDate(), t.get("title"));
                 ticket.save();
@@ -55,9 +56,10 @@ public class OsTicketSavePromise extends Job<Ticket> {
                 Logger.info("OsTicket #%s(%s) [%s] is exist.", ticket.osTicketId, ticket.id,
                         ticket.fid);
             }
-            OsTicketBeanstalkdCheck.deleteJob(this.tube, this.job);
+            job.getClient().deleteJob(job);
         } catch(Exception e) {
-            this.job.getClient().close();
+            // 延迟 10s
+            job.getClient().release(job, OsTicketBeanstalkdCheck.DEFAULT_PRI, 10);
         }
         return ticket;
     }

@@ -37,11 +37,13 @@ public class OsTicketSyncPromise extends Job<Ticket> {
                 Logger.info("Synchronize OsTicket #%s(%s) [%s].", ticket.osTicketId, ticket.id,
                         ticket.fid);
             } else {
+                // 如果是新创建的 Ticket, 那么很可能 Save 与 Sync Job 一起触发, 而这一次的 Sync 忽略无大碍
                 Logger.info("OsTicket %s is not exist, can not be synchronize.", t.get("ticketId"));
             }
-            OsTicketBeanstalkdCheck.deleteJob(this.tube, this.job);
+            job.getClient().deleteJob(job);
         } catch(Exception e) {
-            this.job.getClient().close();
+            // 延迟 10s
+            job.getClient().release(job, OsTicketBeanstalkdCheck.DEFAULT_PRI, 10);
         }
         return ticket;
     }
