@@ -150,8 +150,6 @@ public class OsTicketBeanstalkdCheck implements Runnable {
             if(job != null) {
                 Logger.info("Dispatching job from tube %s", tube);
                 this.dispatch(tube, job);
-            } else {
-                Logger.info("1s TimeOut, no job found. %s", tube);
             }
         } catch(BeanstalkException e) {
             //ignore.. just retry
@@ -167,7 +165,7 @@ public class OsTicketBeanstalkdCheck implements Runnable {
     }
 
     /**
-     * 派发到不同的线程去 Play Job 去执行
+     * 派发不同的 Job 去执行任务, 使用 Job 的原因是为了有事务, 但因为这里的量不大不追求性能, 所以还是简单阻塞 I/O 处理
      *
      * @param tube Beanstalkd 所使用的 tube
      * @param job  需要处理的任务
