@@ -14,6 +14,7 @@ import play.Play;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 系统监听 OsTicket 与系统之间交互的 Beanstalkd 的消息, 并对得到的消息进行处理
@@ -140,30 +141,28 @@ public class OsTicketBeanstalkdCheck implements Runnable {
     /**
      * 不断自循环, 找到一个任务就派发出去
      */
-    public void watching() {
-        for(String tube : this.tubes) {
-            // 因为一个 Conn 需要处理多个 Tube, 所以阻塞时间越短越好.(这里只能设置 1s - -||)
-
-            try {
-                BeanstalkClient c = this.tubeClient.get(tube);
-                // 不会重复获取
-                BeanstalkJob job = c.reserve(3);
-                if(job != null) {
-                    Logger.info("Dispatching job from tube %s", tube);
-                    this.dispatch(tube, job);
-                } else {
-                    Logger.info("1s TimeOut, no job found.");
-                }
-            } catch(BeanstalkException e) {
-                //ignore.. just retry
-                Logger.warn("Let beanstalkd pass job from reserve to ready again. %s", Webs.E(e));
-            } catch(Exception e) {
-                // 在这里发生 BeanstalkDisconnectedException 表示链接有问题; 邮件提醒
-                Webs.systemMail("Beanstalkd 连接出现问题.",
-                        "通过 e.easya.cc 链接 r.easya.cc 11300 端口的 beanstalkd 连接出现问题, " +
-                                "请查看每个服务器的 /etc/hosts 文件, 检查 ip 正常, 检查 iptables 是否开放 11300 端口给源 " +
-                                "ip; " + Webs.E(e));
+    public void watching(String tube) {
+        // 因为一个 Conn 需要处理多个 Tube, 所以阻塞时间越短越好.(这里只能设置 1s - -||)
+        try {
+            BeanstalkClient c = this.tubeClient.get(tube);
+            // 不会重复获取
+            BeanstalkJob job = c.reserve(1);
+            if(job != null) {
+                Logger.info("Dispatching job from tube %s", tube);
+                this.dispatch(tube, job);
+            } else {
+                Logger.info("1s TimeOut, no job found. %s", tube);
             }
+        } catch(BeanstalkException e) {
+            //ignore.. just retry
+            Logger.warn("[%s] Let beanstalkd pass job from reserve to ready again. %s",
+                    tube, Webs.E(e));
+        } catch(Exception e) {
+            // 在这里发生 BeanstalkDisconnectedException 表示链接有问题; 邮件提醒
+            Webs.systemMail("Beanstalkd 连接出现问题.",
+                    "通过 e.easya.cc 链接 r.easya.cc 11300 端口的 beanstalkd 连接出现问题, " +
+                            "请查看每个服务器的 /etc/hosts 文件, 检查 ip 正常, 检查 iptables 是否开放 11300 端口给源 " +
+                            "ip; " + Webs.E(e));
         }
     }
 
@@ -173,16 +172,20 @@ public class OsTicketBeanstalkdCheck implements Runnable {
      * @param tube Beanstalkd 所使用的 tube
      * @param job  需要处理的任务
      */
-    private void dispatch(String tube, BeanstalkJob job) {
-        tube = tube.toLowerCase();
+    private void dispatch(String tube, BeanstalkJob job) throws BeanstalkException {
         //TODO 这里就写成固定的对两个 Queue 的处理, 如果需要更加通用, 再重新进行抽象处理
         // 由于针对 beanstalkd 的操作都是 socket 中的一行 String; 而这些信息不会产生线程之间的共享数据竞争.
         // 如果需要考虑竞争, 那么应该是对共享的 Client 的竞争, 而也由于竞争后不会对 Client 本身造成副作用,
         // 所以没有问题.
-        if(StringUtils.startsWith(tube, "osticket") && StringUtils.contains(tube, "new")) {
-            new OsTicketSavePromise(tube, job).now();
-        } else if(StringUtils.startsWith(tube, "osticket") && StringUtils.contains(tube, "sync")) {
-            new OsTicketSyncPromise(tube, job).now();
+        try {
+            if(StringUtils.startsWith(tube, "osticket") && StringUtils.contains(tube, "new")) {
+                new OsTicketSavePromise(tube, job).now().get(10, TimeUnit.SECONDS);
+            } else if(StringUtils.startsWith(tube, "osticket") &&
+                    StringUtils.contains(tube, "sync")) {
+                new OsTicketSyncPromise(tube, job).now().get(10, TimeUnit.SECONDS);
+            }
+        } catch(Exception e) {
+            throw new BeanstalkException(e);
         }
     }
 
@@ -195,7 +198,9 @@ public class OsTicketBeanstalkdCheck implements Runnable {
             return;
         }
         while(true) {
-            this.watching();
+            for(String tube : this.tubes) {
+                this.watching(tube);
+            }
         }
     }
 }
