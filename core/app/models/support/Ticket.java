@@ -140,12 +140,12 @@ public class Ticket extends Model {
     public Date lastSyncTime;
 
     /**
-     * 客户邮件的次数
+     * 客户联系的次数
      */
     public int messageTimes;
 
     /**
-     * 我们联系客户的次数
+     * 客服联系的次数
      */
     public int responseTimes;
 

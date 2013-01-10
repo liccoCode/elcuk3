@@ -21,6 +21,7 @@ import java.util.List;
 public class TicketPost extends Post<Ticket> {
     public List<TicketState> states = new ArrayList<TicketState>();
     public Date from = super.from;
+    public Date to = super.to;
 
     /**
      * 对 Ticket 是成功;

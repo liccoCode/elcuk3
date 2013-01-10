@@ -12,7 +12,7 @@
                 <input type="hidden" id="ticketId" name="ticketId" value="${ticket.id}">
             </td>
             <th>CrateAt</th>
-            <td title="${ticket.createAt?.date()}">${ticket.createAt?.since()}</td>
+            <td title="${ticket.createAt?.datetime()}">${ticket.createAt?.ios()}</td>
             <th>OsTicket</th>
             <td>
                 <a href="${ticket.osTicketLink()}" target="_blank">
@@ -21,15 +21,20 @@
             </td>
         </tr>
         <tr>
-            <th>最后同步时间 <button id="sync_ticket" class="btn btn-mini btn-success"><i class="icon-refresh"></i></button></th>
-            <td title="${ticket.lastSyncTime?.datetime()}">${ticket.lastSyncTime?.since()}</td>
+            <th>最后同步时间
+                <button id="sync_ticket" class="btn btn-mini btn-success">
+                    <i class="icon-refresh"></i></button>
+            </th>
+            <td title="${ticket.lastSyncTime?.datetime()}">${ticket.lastSyncTime?.los()}</td>
             <th>最后联系客户时间</th>
-            <td title="${ticket.lastResponseTime?.date()}">${ticket.lastResponseTime?.since()}</td>
+            <td title="${ticket.lastResponseTime?.datetime()}">${ticket.lastResponseTime?.los()}</td>
             <th>客户最后联系时间</th>
-            <td title="${ticket.lastMessageTime?.date()}">${ticket.lastMessageTime?.since()}</td>
+            <td title="${ticket.lastMessageTime?.datetime()}">${ticket.lastMessageTime?.los()}</td>
         </tr>
         <tr>
-            <th rel="popover" content="${ticket.state.explan()}"><i class="icon-question-sign"></i> State</th>
+            <th rel="popover" content="${ticket.state.explan()}"><i class="icon-question-sign"></i>
+                State
+            </th>
             <td>${ticket.state}</td>
             <th>客户回复/我方联系</th>
             <td>${ticket.messageTimes} / ${ticket.responseTimes}</td>
