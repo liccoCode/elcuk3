@@ -2,10 +2,13 @@ $ ->
   # 检查字符串长度
   validateMaxLength = (maxLength, obj) ->
     o = $(obj)
-    length = unescape(encodeURI(o.val().trim())).length
+    length = unescape(encodeURI(jsEscapeHtml(o.val().trim()))).length
     o.find('~ span').html((maxLength - length) + " bytes left")
     if length > maxLength then o.css('color', 'red') else o.css('color', '')
     false
+
+  jsEscapeHtml = (string) ->
+    $("<div/>").text(string).html()
 
   # bullet_point 的检查
   $('input[bullet_point]').keyup(
@@ -43,7 +46,7 @@ $ ->
       validateMaxLength(2000, @)
   )
   # 自己按一下, 再页面开始的时候计算一次
-  .keyup().find('~ button').click(previewBtn).click()
+    .keyup().find('~ button').click(previewBtn).click()
 
   #  自动补全的 sid 的功能条
   SID_PREVIEW_TEMPLATE = "<div><h3>Technical</h3><p id='t'></p><hr><h3>SearchTerms</h3><p id='s'></p><hr><h3>ProductDesc</h3><p id='p'></p></div>"
@@ -120,26 +123,26 @@ $ ->
         alert('UPC 必须是数字')
         return false
       $.getJSON('/products/upcCheck', {upc: upc},
-        (r) ->
-          if r.flag is false
-            alert(r.message)
+      (r) ->
+        if r.flag is false
+          alert(r.message)
+        else
+          upcAlertTemplate = "<div class='alert alert-info fade in'>" +
+          "<button class='close' data-dismiss='alert'>×</button>" +
+          "<strong>UPC 检查信息:</strong>" +
+          "</div>"
+          alertEl = $(upcAlertTemplate)
+          if r.length == 0
+            alertEl.find('strong').after("<div>此 UPC 在系统中还没有 Selling</div>")
           else
-            upcAlertTemplate = "<div class='alert alert-info fade in'>" +
-            "<button class='close' data-dismiss='alert'>×</button>" +
-            "<strong>UPC 检查信息:</strong>" +
-            "</div>"
-            alertEl = $(upcAlertTemplate)
-            if r.length == 0
-              alertEl.find('strong').after("<div>此 UPC 在系统中还没有 Selling</div>")
-            else
-              $.each(r,
-                (i, s) ->
-                  alertEl.find('strong').after("<div>#{s['merchantSKU']}|#{s['market']}</div>")
-              )
-            alertEl.insertBefore('#btn_div')
-            mskuEl = $('input[name=s\\.merchantSKU]')
-            mskuEl.val(mskuEl.val().split(',')[0] + ',' + upc)
-            o.removeClass('btn-warning').addClass('btn-success')
+            $.each(r,
+            (i, s) ->
+              alertEl.find('strong').after("<div>#{s['merchantSKU']}|#{s['market']}</div>")
+            )
+          alertEl.insertBefore('#btn_div')
+          mskuEl = $('input[name=s\\.merchantSKU]')
+          mskuEl.val(mskuEl.val().split(',')[0] + ',' + upc)
+          o.removeClass('btn-warning').addClass('btn-success')
       )
   )
 
