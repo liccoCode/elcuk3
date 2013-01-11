@@ -1,6 +1,7 @@
 package jobs.loop;
 
 import com.trendrr.beanstalk.BeanstalkClient;
+import com.trendrr.beanstalk.BeanstalkDisconnectedException;
 import com.trendrr.beanstalk.BeanstalkException;
 import com.trendrr.beanstalk.BeanstalkJob;
 import helper.Webs;
@@ -139,6 +140,26 @@ public class OsTicketBeanstalkdCheck implements Runnable {
     }
 
     /**
+     * 判断当前线程是否可以执行;
+     * 还是加上了同步锁, 避免其他问题产生;
+     *
+     * @return
+     */
+    private synchronized boolean isRunning() {
+        if(!this.running)
+            this.closeClients();
+        return this.running;
+    }
+
+    private void onError(Exception e) {
+        this.running = false;
+        Webs.systemMail("Beanstalkd 连接出现问题.",
+                "通过 e.easya.cc 链接 r.easya.cc 11300 端口的 beanstalkd 连接出现问题, " +
+                        "请查看每个服务器的 /etc/hosts 文件, 检查 ip 正常, 检查 iptables 是否开放 11300 端口给源 " +
+                        "ip; " + Webs.E(e));
+    }
+
+    /**
      * 不断自循环, 找到一个任务就派发出去
      */
     public void watching(String tube) {
@@ -151,16 +172,14 @@ public class OsTicketBeanstalkdCheck implements Runnable {
                 Logger.info("Dispatching job from tube %s", tube);
                 this.dispatch(tube, job);
             }
+        } catch(BeanstalkDisconnectedException e) {
+            this.onError(e);
         } catch(BeanstalkException e) {
             //ignore.. just retry
             Logger.warn("[%s] Let beanstalkd pass job from reserve to ready again. %s",
                     tube, Webs.E(e));
         } catch(Exception e) {
-            // 在这里发生 BeanstalkDisconnectedException 表示链接有问题; 邮件提醒
-            Webs.systemMail("Beanstalkd 连接出现问题.",
-                    "通过 e.easya.cc 链接 r.easya.cc 11300 端口的 beanstalkd 连接出现问题, " +
-                            "请查看每个服务器的 /etc/hosts 文件, 检查 ip 正常, 检查 iptables 是否开放 11300 端口给源 " +
-                            "ip; " + Webs.E(e));
+            this.onError(e);
         }
     }
 
@@ -191,11 +210,8 @@ public class OsTicketBeanstalkdCheck implements Runnable {
     @Override
     public void run() {
         // 如果不运行, 直接结束线程
-        if(!this.running) {
-            this.closeClients();
-            return;
-        }
-        while(true) {
+        // 由于系统内与 Beanstalkd 的交互就仅仅一个 Thread 在处理, 所以没有多线程的竞争.
+        while(this.isRunning()) {
             for(String tube : this.tubes) {
                 this.watching(tube);
             }
