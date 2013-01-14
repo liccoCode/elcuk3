@@ -88,11 +88,11 @@ public class TicketStateSyncJob extends Job {
                 if(ticketResp == null) t.responseTimes = 0;
                 else t.responseTimes = ticketResp.size();
 
-                t.parseResponse(ticketResp);
+                t.saveResponses(ticketResp);
 
                 rtTickets._1.add(t.<Ticket>save());
             } catch(Exception e) {
-                Logger.warn("syncOsTicketDetailsIntoSystem %s", Webs.E(e));
+                Logger.warn("syncOsTicketDetailsIntoSystem %s", Webs.S(e));
                 rtTickets._2.add(t);
             }
         }

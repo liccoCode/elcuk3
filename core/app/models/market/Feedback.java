@@ -104,8 +104,8 @@ public class Feedback extends GenericModel {
 
         if(this.score <= 3 && this.isSelfBuildListing()) {
             this.ticket = this.openTicket(null);
-            Mails.feedbackWarnning(this);
             this.ticket.save();
+            Mails.feedbackWarnning(this);
         }
 
         this.save();
@@ -130,7 +130,8 @@ public class Feedback extends GenericModel {
         if(!this.orderId.equalsIgnoreCase(newFeedback.orderId))
             throw new FastRuntimeException("Feedback OrderId is not the same!");
         if(newFeedback.score != null && !newFeedback.score.equals(this.score)) // score 不一样了, 需要记录
-            this.comment(String.format("Score from %s to %s At %s", this.score, newFeedback.score, Dates.date2DateTime()));
+            this.comment(String.format("Score from %s to %s At %s", this.score, newFeedback.score,
+                    Dates.date2DateTime()));
 
         if(newFeedback.score != null) this.score = newFeedback.score;
         if(StringUtils.isNotBlank(newFeedback.feedback)) this.feedback = newFeedback.feedback;
@@ -170,7 +171,9 @@ public class Feedback extends GenericModel {
         if(StringUtils.isBlank(subject))
             subject = "You left a negative feedback, Please give us a chance to make up!";
 
-        this.osTicketId = OsTicket.openOsTicket(name, email, subject, content, OsTicket.TopicID.FEEDBACK, "Feedback " + this.orderId);
+        this.osTicketId = OsTicket
+                .openOsTicket(name, email, subject, content, OsTicket.TopicID.FEEDBACK,
+                        "Feedback " + this.orderId);
         if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
             return null;
         } else {
@@ -191,7 +194,8 @@ public class Feedback extends GenericModel {
      * @return
      */
     public boolean isExpired() {
-        return new Duration(this.createDate.getTime(), System.currentTimeMillis()).getStandardDays() >= 60;
+        return new Duration(this.createDate.getTime(), System.currentTimeMillis())
+                .getStandardDays() >= 60;
     }
 
 
@@ -217,7 +221,8 @@ public class Feedback extends GenericModel {
 
         Feedback feedback = (Feedback) o;
 
-        if(orderId != null ? !orderId.equals(feedback.orderId) : feedback.orderId != null) return false;
+        if(orderId != null ? !orderId.equals(feedback.orderId) : feedback.orderId != null)
+            return false;
 
         return true;
     }
@@ -236,8 +241,10 @@ public class Feedback extends GenericModel {
      */
     public List<Category> relateCats() {
         List<Category> cats = new ArrayList<Category>();
-        for(OrderItem itm : this.orderr.items)
-            cats.add(Product.<Product>findById(Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);
+        for(OrderItem itm : this.orderr.items) {
+            cats.add(Product.<Product>findById(
+                    Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);
+        }
         return cats;
     }
 
@@ -250,7 +257,8 @@ public class Feedback extends GenericModel {
     public F.T2<Set<TicketReason>, Set<TicketReason>> untagAndAllTags() {
         Set<TicketReason> unTagsReasons = new HashSet<TicketReason>();
         Set<TicketReason> allReasons = new HashSet<TicketReason>();
-        if(this.ticket == null) return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
+        if(this.ticket == null)
+            return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
         List<Category> cats = this.relateCats();
 
         for(Category cat : cats) allReasons.addAll(cat.reasons);
@@ -275,7 +283,8 @@ public class Feedback extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, List<F.T3<Long, Long, Long>>> frontPageTable() {
-        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Cache.get(Feedback.FRONT_TABLE, Map.class);
+        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Cache
+                .get(Feedback.FRONT_TABLE, Map.class);
         if(feedbacksOverView != null) return feedbacksOverView;
         synchronized(Feedback.class) {
             feedbacksOverView = Cache.get(Feedback.FRONT_TABLE, Map.class);
@@ -312,25 +321,37 @@ public class Feedback extends GenericModel {
         // 注意: 使用 minusDays 不是用 月,年是需要具体的天数, 月可能有 28/29/30/31 天这样的差别
         if(type == 1) {
             return new F.T3<Long, Long, Long>(
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night, true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night, false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night, null));
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night,
+                            true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night,
+                            false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night,
+                            null));
         } else if(type == 2) {
             return new F.T3<Long, Long, Long>(
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night, true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night, false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night, null));
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night,
+                            true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night,
+                            false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night,
+                            null));
         } else if(type == 3) {
             return new F.T3<Long, Long, Long>(
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night, true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night, false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night, null));
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night,
+                            true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night,
+                            false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night,
+                            null));
         } else if(type == 4) {
             return new F.T3<Long, Long, Long>(
                     // 10 年是为了获取所有长度
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night, true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night, false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night, null));
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night,
+                            true),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night,
+                            false),
+                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night,
+                            null));
         }
         return new F.T3<Long, Long, Long>(0l, 0l, 0l);
     }
@@ -346,10 +367,15 @@ public class Feedback extends GenericModel {
      */
     public static Long feedbackCount(Account acc, Date from, Date to, Boolean good) {
         if(good == null)
-            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=?", acc, acc.type, from, to);
+            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=?", acc,
+                    acc.type, from, to);
         else if(good)
-            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=? AND score>=4", acc, acc.type, from, to);
+            return Feedback
+                    .count("account=? AND market=? AND createDate>=? AND createDate<=? AND score>=4",
+                            acc, acc.type, from, to);
         else
-            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=? AND score<4", acc, acc.type, from, to);
+            return Feedback
+                    .count("account=? AND market=? AND createDate>=? AND createDate<=? AND score<4",
+                            acc, acc.type, from, to);
     }
 }

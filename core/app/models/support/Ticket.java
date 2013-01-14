@@ -11,7 +11,6 @@ import models.User;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -299,21 +298,22 @@ public class Ticket extends Model {
     }
 
     /**
-     * 将 OsTicket 的 Response 给解析出来
+     * 将 OsTicket 的 Response 给解析出来, 并且保存
      *
      * @param ticketResps
      */
-    public void parseResponse(List<TicketStateSyncJob.OsResp> ticketResps) {
+    public void saveResponses(List<TicketStateSyncJob.OsResp> ticketResps) {
         if(ticketResps == null || ticketResps.size() == 0) return;
         for(TicketStateSyncJob.OsResp res : ticketResps) {
             // 只记录新的, 不更新老的.
-            TicketResponse r = new TicketResponse();
-            r.created = res.created;
-            r.responseId = NumberUtils.toInt(res.response_id);
-            r.ost_ticket_id = res.ticket_id;
-            r.ticket = this;
-
-            if(!this.responses.contains(r)) this.responses.add(r);
+            if(TicketResponse.count("responseId=?", res.response_id) <= 0) {
+                TicketResponse r = new TicketResponse(res);
+                r.ticket = this;
+                r.save();
+            } else {
+                TicketResponse r = TicketResponse.findById(res.response_id);
+                r.updateAttrs(new TicketResponse(res));
+            }
         }
     }
 

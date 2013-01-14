@@ -1,5 +1,7 @@
 package models.support;
 
+import jobs.TicketStateSyncJob;
+import org.apache.commons.lang.math.NumberUtils;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.Entity;
@@ -15,6 +17,15 @@ import java.util.Date;
  */
 @Entity
 public class TicketResponse extends GenericModel {
+    public TicketResponse() {
+    }
+
+    public TicketResponse(TicketStateSyncJob.OsResp resp) {
+        TicketResponse r = new TicketResponse();
+        r.created = resp.created;
+        r.responseId = NumberUtils.toInt(resp.response_id);
+        r.ost_ticket_id = resp.ticket_id;
+    }
 
     @ManyToOne
     public Ticket ticket;
@@ -31,6 +42,14 @@ public class TicketResponse extends GenericModel {
      * 创建时间
      */
     public Date created;
+
+    public void updateAttrs(TicketResponse response) {
+        if(response.created != null)
+            this.created = response.created;
+        if(response.ost_ticket_id != null)
+            this.ost_ticket_id = response.ost_ticket_id;
+        this.save();
+    }
 
     @Override
     public boolean equals(Object o) {
