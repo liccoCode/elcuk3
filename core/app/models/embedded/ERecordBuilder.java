@@ -64,8 +64,14 @@ public class ERecordBuilder {
         record.fid = this.fid;
         if(StringUtils.isNotBlank(this.username))
             record.username = this.username;
-        else
-            record.username = ElcukRecord.username();
+        else {
+            try {
+                record.username = ElcukRecord.username();
+                // 在非访问的情况下调用则无 Session
+            } catch(NullPointerException e) {
+                record.username = "system";
+            }
+        }
         return record;
     }
 

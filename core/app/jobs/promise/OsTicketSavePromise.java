@@ -41,9 +41,18 @@ public class OsTicketSavePromise extends Job<Ticket> {
             String body = new String(job.getData());
             Map<String, String> t = J.from(body, new TypeReference<Map<String, String>>() {});
 
-            if(t.get("title").contains("日报"))
+            String title = t.get("title");
+            if(t.get("title").contains("日报")) {
+                Logger.info("Skip 日报 Ticket create.");
                 // 日报不进入系统
                 return null;
+            }
+            // TODO 需要调整 OsTicket,还需要返回 Ticket 类型
+            if(title.contains("einen negativen Testbericht") || title.contains("negative product review") ||
+                    title.contains("negative feedback")) {
+                Logger.info("Skip Feedback/Review Ticket create.");
+                return null;
+            }
 
             ticket = Ticket.find("osTicketId=?", t.get("ticketId")).first();
             if(ticket == null) {
