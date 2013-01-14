@@ -11,6 +11,7 @@ import models.User;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.Duration;
 import play.data.validation.Required;
 import play.data.validation.Unique;
@@ -306,12 +307,12 @@ public class Ticket extends Model {
         if(ticketResps == null || ticketResps.size() == 0) return;
         for(TicketStateSyncJob.OsResp res : ticketResps) {
             // 只记录新的, 不更新老的.
-            if(TicketResponse.count("responseId=?", res.response_id) <= 0) {
+            if(TicketResponse.count("responseId=?", NumberUtils.toInt(res.response_id)) <= 0) {
                 TicketResponse r = new TicketResponse(res);
                 r.ticket = this;
                 r.save();
             } else {
-                TicketResponse r = TicketResponse.findById(res.response_id);
+                TicketResponse r = TicketResponse.findById(NumberUtils.toInt(res.response_id));
                 r.updateAttrs(new TicketResponse(res));
             }
         }
