@@ -1,6 +1,7 @@
 package notifiers;
 
 import helper.Webs;
+import models.embedded.ERecordBuilder;
 import models.procure.FBAShipment;
 import play.Logger;
 import play.Play;
@@ -38,6 +39,10 @@ public class FBAMails extends Mailer {
         addRecipient("p@easyacceu.com");
         try {
             send(fba, oldState, newState);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(STATE_CHANGE)
+                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
@@ -56,6 +61,10 @@ public class FBAMails extends Mailer {
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
         try {
             send(fba);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(NOT_RECEING)
+                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
@@ -74,6 +83,10 @@ public class FBAMails extends Mailer {
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
         try {
             send(fbas);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(RECEIVING_CHECK)
+                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;

@@ -2,6 +2,7 @@ package notifiers;
 
 import helper.Webs;
 import jobs.promise.ReviewMailCheckPromise;
+import models.embedded.ERecordBuilder;
 import models.market.*;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
@@ -42,6 +43,10 @@ public class Mails extends Mailer {
             mailBase();
             addRecipient("p@easyacceu.com");
             send(shipment);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(CLEARANCE)
+                    .save();
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
         }
@@ -54,6 +59,10 @@ public class Mails extends Mailer {
             mailBase();
             addRecipient("p@easyacceu.com");
             send(shipment);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(IS_DONE)
+                    .save();
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
         }
@@ -71,6 +80,10 @@ public class Mails extends Mailer {
             mailBase();
             addRecipient("alerts@easyacceu.com");
             send(offers, lst);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(MORE_OFFERS)
+                    .save();
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
         }
@@ -146,6 +159,10 @@ public class Mails extends Mailer {
         send(f);
         // send 方法没有抛出异常则表示邮件发送成功
         f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
+        new ERecordBuilder().mail()
+                .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                .fid(FEEDBACK_WARN)
+                .save();
     }
 
 
@@ -169,6 +186,10 @@ public class Mails extends Mailer {
         send(r, title, sbr);
         // send 方法没有抛出异常则表示邮件发送成功
         r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
+        new ERecordBuilder().mail()
+                .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                .fid(REVIEW_WARN)
+                .save();
     }
 
     public static void fnSkuCheckWarn(List<F.T4<String, String, String, String>> unfindSelling) {
@@ -176,6 +197,10 @@ public class Mails extends Mailer {
         mailBase();
         addRecipient("alerts@easyacceu.com");
         send(unfindSelling);
+        new ERecordBuilder().mail()
+                .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                .fid(FNSKU_CHECK)
+                .save();
     }
 
 

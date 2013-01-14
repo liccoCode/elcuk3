@@ -2,6 +2,7 @@ package notifiers;
 
 import helper.Dates;
 import helper.Webs;
+import models.embedded.ERecordBuilder;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.product.Product;
@@ -38,6 +39,10 @@ public class SystemMails extends Mailer {
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
         try {
             send(reviews);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(DAILY_REVIEW)
+                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
@@ -62,6 +67,10 @@ public class SystemMails extends Mailer {
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
         try {
             send(feedbacks);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(DAILY_FEEDBACK)
+                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
@@ -76,6 +85,10 @@ public class SystemMails extends Mailer {
         addRecipient("alerts@easyacceu.com");
         try {
             send(productAndSellT2s);
+            new ERecordBuilder().mail()
+                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
+                    .fid(SKU_PIC_CHECK)
+                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
