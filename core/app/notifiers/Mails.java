@@ -52,7 +52,8 @@ public class Mails extends Mailer {
      * Listing 被人上架了的警告邮件
      */
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
-        String title = String.format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
+        String title = String
+                .format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
         try {
             setSubject(title);
             mailBase();
@@ -92,6 +93,12 @@ public class Mails extends Mailer {
         if(StringUtils.isBlank(order.email)) {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
+        }
+        // 避免系统内删除而 Amazon 还存在的 Selling 出现问题.
+        for(OrderItem oi : order.items) {
+            if(oi.selling == null) {
+                return;
+            }
         }
 
         String title = order.reviewMailTitle();

@@ -166,8 +166,9 @@ public class OsTicketBeanstalkdCheck implements Runnable {
         // 因为一个 Conn 需要处理多个 Tube, 所以阻塞时间越短越好.(这里只能设置 1s - -||)
         try {
             BeanstalkClient c = this.tubeClient.get(tube);
-            // 不会重复获取
-            BeanstalkJob job = c.reserve(1);
+            // 不会重复获取, 减缓时间轮询频率
+            Logger.info("Reserve %s ....", tube);
+            BeanstalkJob job = c.reserve(5);
             if(job != null) {
                 Logger.info("Dispatching job from tube %s", tube);
                 this.dispatch(tube, job);
