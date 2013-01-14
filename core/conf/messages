@@ -157,6 +157,8 @@ secure.error=\u7528\u6237\u4E0D\u5B58\u5728\u6216\u8005\u5BC6\u7801\u9519\u8BEF
 
 # \u7CFB\u7EDF\u5185\u7684\u64CD\u4F5C\u65B9\u6CD5\u7684\u65E5\u5FD7 msg
 action.base=%s
+email.record=\u53D1\u9001 Email
+email.record.msg=Email From %s to %s
 
 deliveryment.addunit=\u4E3A[\u91C7\u8D2D\u5355]\u6DFB\u52A0[\u91C7\u8D2D\u8BA1\u5212]
 deliveryment.addunit.msg=\u5C06 %s [\u91C7\u8D2D\u8BA1\u5212] \u6DFB\u52A0\u5230\u4E86 [\u91C7\u8D2D\u5355] %s

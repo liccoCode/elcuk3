@@ -1,23 +1,23 @@
 package models;
 
-import com.google.gson.annotations.Expose;
+import helper.Dates;
+import notifiers.FBAMails;
+import notifiers.Mails;
+import notifiers.SystemMails;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.joda.time.DateTime;
-import play.Logger;
 import play.data.validation.Required;
-import play.db.jpa.GenericModel;
-import play.db.jpa.JPA;
 import play.db.jpa.Model;
-import play.libs.F;
 import play.mvc.Scope;
-import play.utils.FastRuntimeException;
+import query.ElcukRecordQuery;
 
-import javax.persistence.*;
-import java.lang.reflect.Field;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Lob;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 系统内的操作日志的记录;
@@ -46,9 +46,13 @@ public class ElcukRecord extends Model {
         public String to_log();
     }
 
-    public ElcukRecord(String action, String message, String fid) {
+    public ElcukRecord(String action, String message) {
         this.action = action;
         this.message = message;
+    }
+
+    public ElcukRecord(String action, String message, String fid) {
+        this(action, message);
         this.username = ElcukRecord.username();
         this.fid = fid;
     }
@@ -96,12 +100,39 @@ public class ElcukRecord extends Model {
      */
     public static String username() {
         String username = Scope.Session.current().get("username");
-        if(StringUtils.isBlank(username)) return "System";
+        if(StringUtils.isBlank(username)) return "system";
         else return username;
     }
 
     public long fidL() {
         return NumberUtils.toLong(this.fid);
+    }
+
+    public static List<Map<String, List<Integer>>> emailOverView(Date from, Date to) {
+        List<String> lines = new ArrayList<String>();
+        lines.add(Mails.CLEARANCE);
+        lines.add(Mails.REVIEW_US);
+        lines.add(Mails.REVIEW_UK);
+        lines.add(Mails.REVIEW_DE);
+        lines.add(Mails.FEEDBACK_WARN);
+        lines.add(Mails.REVIEW_WARN);
+        lines.add(Mails.IS_DONE);
+        lines.add(Mails.FNSKU_CHECK);
+        lines.add(Mails.MORE_OFFERS);
+
+        lines.add(SystemMails.DAILY_FEEDBACK);
+        lines.add(SystemMails.DAILY_REVIEW);
+        lines.add(SystemMails.SKU_PIC_CHECK);
+
+        lines.add(FBAMails.NOT_RECEING);
+        lines.add(FBAMails.RECEIVING_CHECK);
+        lines.add(FBAMails.STATE_CHANGE);
+
+        List<Map<String, List<Integer>>> mailLines = new ArrayList<Map<String, List<Integer>>>();
+        for(String lineType : lines) {
+            mailLines.add(ElcukRecordQuery.emails(Dates.morning(from), Dates.night(to), lineType));
+        }
+        return mailLines;
     }
 
     public static List<ElcukRecord> records(String fid) {

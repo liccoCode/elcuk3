@@ -1,7 +1,10 @@
 package jobs.promise;
 
 import helper.Webs;
+import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.market.Orderr;
+import notifiers.Mails;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
@@ -34,12 +37,26 @@ public class ReviewMailCheckPromise extends Job {
             } else {
                 Orderr ord = Orderr.findById(this.orderId);
                 ord.reviewMailed = true;
-                if(Play.mode.isProd())
+                if(Play.mode.isProd()) {
                     ord.save();
+                    new ERecordBuilder().mail().msgArgs("support@easyacceu.com", ord.email)
+                            .fid(fid(ord)).save();
+                }
                 Logger.info("Order[%s](%s) email send success!", this.orderId, ord.market);
             }
         } catch(Exception e) {
             Logger.warn("Order %s review email failed. [%s]", this.orderId, Webs.E(e));
         }
+    }
+
+    private String fid(Orderr order) {
+        if(order.market == M.AMAZON_DE)
+            return Mails.REVIEW_DE;
+        else if(order.market == M.AMAZON_UK)
+            return Mails.REVIEW_UK;
+        else if(order.market == M.AMAZON_US)
+            return Mails.REVIEW_US;
+        else
+            return "amazon_review";
     }
 }

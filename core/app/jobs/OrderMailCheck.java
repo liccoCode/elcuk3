@@ -34,12 +34,13 @@ public class OrderMailCheck extends Job {
         /**
          * Check 需要发送邀请 Review 的邮件的订单
          */
-        List<Orderr> needReview = Orderr.find("state=? AND reviewMailed=false AND createDate<=? AND createDate>=? ORDER BY createDate",
-                Orderr.S.SHIPPED,
-                // 只在 46 天前到 12 天前的订单中寻找需要发送 Review 的
-                dt.plusDays(-12).toDate(),
-                dt.plusDays(-46).toDate()
-        ).fetch(150); // 不能一次性太多了...
+        List<Orderr> needReview = Orderr
+                .find("state=? AND reviewMailed=false AND createDate<=? AND createDate>=? ORDER BY createDate",
+                        Orderr.S.SHIPPED,
+                        // 只在 46 天前到 12 天前的订单中寻找需要发送 Review 的
+                        dt.plusDays(-12).toDate(),
+                        dt.plusDays(-46).toDate()
+                ).fetch(150); // 不能一次性太多了...
         Logger.info(String.format("Load %s Orders From %s To %s.",
                 needReview.size(),
                 dt.plusDays(-46).toString("yyyy-MM-dd"),
@@ -68,7 +69,9 @@ public class OrderMailCheck extends Job {
         for(Orderr ord : needReview) {
             // check: 仅仅发送 EasyAcc 开头的标题的产品的邮件.
             boolean ctn = true;
-            for(OrderItem oi : ord.items) if(!Listing.isSelfBuildListing(oi.listingName)) ctn = false;
+            for(OrderItem oi : ord.items) {
+                if(!Listing.isSelfBuildListing(oi.listingName)) ctn = false;
+            }
             if(!ctn) {
                 Logger.debug(String.format("Skip %s, because of [Not EasyAcc]", ord.orderId));
                 notEasyAcc++;
@@ -136,8 +139,10 @@ public class OrderMailCheck extends Job {
         if((totalUnMailed / (needReview.size() <= 0 ? 10000 : needReview.size()) >= 0.3) &&
                 (sendDe + sendUk + sendUs > 20)/*发送的要大于 20 封, 否则提醒邮件太多.*/) {
             Webs.systemMail("没有发送的邮件数量超过 3 成, 需要进行检查.", logInfo + "\r\n总共没有发送的邮件:" +
-                    Orderr.count("state=? AND reviewMailed=false AND createDate<=? AND createDate>=?",
-                            Orderr.S.SHIPPED, dt.plusDays(-12).toDate(), dt.plusDays(-46).toDate()));
+                    Orderr.count(
+                            "state=? AND reviewMailed=false AND createDate<=? AND createDate>=?",
+                            Orderr.S.SHIPPED, dt.plusDays(-12).toDate(),
+                            dt.plusDays(-46).toDate()));
         }
         Logger.info("End OrderMailCheck Check REVIEW_MAIL...");
     }

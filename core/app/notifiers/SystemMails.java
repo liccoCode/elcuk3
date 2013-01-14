@@ -4,8 +4,6 @@ import helper.Dates;
 import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
-import models.market.Selling;
-import models.procure.FBAShipment;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import org.joda.time.DateTime;
@@ -14,7 +12,6 @@ import play.Play;
 import play.libs.F;
 import play.mvc.Mailer;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +21,10 @@ import java.util.List;
  * Time: 3:10 PM
  */
 public class SystemMails extends Mailer {
+    // 如果有新增加邮件, 需要向 ElcukRecord.emailOverView 注册
+    public static final String DAILY_REVIEW = "daily_review";
+    public static final String DAILY_FEEDBACK = "daily_feedback";
+    public static final String SKU_PIC_CHECK = "product_picture_check";
 
     /**
      * 每天发送的 Review 提醒邮件
@@ -31,7 +32,8 @@ public class SystemMails extends Mailer {
      * @return
      */
     public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
-        setSubject(String.format("{INFO} %s Reviews Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
+        setSubject(String.format("{INFO} %s Reviews Overview.",
+                Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
         try {
@@ -48,12 +50,14 @@ public class SystemMails extends Mailer {
         if(Play.mode.isProd()) {
             SystemMails.setFrom("EasyAcc <support@easyacceu.com>");
         } else {
-            SystemMails.setFrom("EasyAcc <1733913823@qq.com>"); // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
+            // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
+            SystemMails.setFrom("EasyAcc <1733913823@qq.com>");
         }
     }
 
     public static boolean dailyFeedbackMail(List<Feedback> feedbacks) {
-        setSubject(String.format("{INFO} %s Feedback Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate())));
+        setSubject(String.format("{INFO} %s Feedback Overview.",
+                Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
         try {
@@ -66,7 +70,8 @@ public class SystemMails extends Mailer {
     }
 
     public static boolean productPicCheckermail(List<F.T2<Product, AnalyzeDTO>> productAndSellT2s) {
-        setSubject(String.format("{CHECK} %s Product Picture Information Check", Dates.date2Date()));
+        setSubject(String.format("{CHECK} %s Product Picture Information Check",
+                Dates.date2Date()));
         mailBase();
         addRecipient("alerts@easyacceu.com");
         try {

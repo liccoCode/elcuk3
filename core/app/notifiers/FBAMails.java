@@ -2,13 +2,10 @@ package notifiers;
 
 import helper.Webs;
 import models.procure.FBAShipment;
-import models.procure.ShipItem;
 import play.Logger;
 import play.Play;
 import play.mvc.Mailer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -18,6 +15,12 @@ import java.util.Set;
  * Time: 6:17 PM
  */
 public class FBAMails extends Mailer {
+    // 如果有新增加邮件, 需要向 ElcukRecord.emailOverView 注册
+
+    public static final String STATE_CHANGE = "shipment_state_change";
+    public static final String NOT_RECEING = "shipment_receipt_not_receiving";
+    public static final String RECEIVING_CHECK = "shipment_receiving_check";
+
     /**
      * FBA 的状态改变的时候发送邮件
      *
@@ -26,8 +29,11 @@ public class FBAMails extends Mailer {
      * @param newState FBA 改变的新状态
      * @return
      */
-    public static /*Mailer 的返回值必须为基本类型*/boolean shipmentStateChange(FBAShipment fba, FBAShipment.S oldState, FBAShipment.S newState) {
-        setSubject(String.format("{INFO} FBA %s state FROM %s To %s", fba.shipmentId, oldState, newState));
+    public static /*Mailer 的返回值必须为基本类型*/boolean shipmentStateChange(FBAShipment fba,
+                                                                    FBAShipment.S oldState,
+                                                                    FBAShipment.S newState) {
+        setSubject(String.format("{INFO} FBA %s state FROM %s To %s",
+                fba.shipmentId, oldState, newState));
         mailBase();
         addRecipient("p@easyacceu.com");
         try {

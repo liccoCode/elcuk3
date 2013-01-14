@@ -21,6 +21,18 @@ import java.util.concurrent.Future;
  * Time: 11:24 AM
  */
 public class Mails extends Mailer {
+    // 如果有新增加邮件, 需要向 ElcukRecord.emailOverView 注册
+    // Mails 中的不同的邮件类型
+    public static final String CLEARANCE = "shipment_clearance";
+    public static final String IS_DONE = "shipment_isdone";
+    public static final String MORE_OFFERS = "more_offers";
+    public static final String REVIEW_UK = "amazon_review_uk";
+    public static final String REVIEW_DE = "amazon_review_de";
+    public static final String REVIEW_US = "amazon_review_us";
+    public static final String FEEDBACK_WARN = "feedback_warnning";
+    public static final String REVIEW_WARN = "review_warnning";
+    public static final String FNSKU_CHECK = "fnsku_check_warn";
+
     // ------------------------------ Shipment 邮件  -----------------------
 
     public static void shipment_clearance(Shipment shipment) {
