@@ -69,18 +69,23 @@ public class ShipmentPost extends Post {
     @Override
     public List<Shipment> query() {
         F.T2<String, List<Object>> params = this.params();
-        return Shipment.find(params._1 + " ORDER BY fba.centerId, s.createDate DESC", params._2.toArray()).fetch();
+        return Shipment.find(params._1, params._2.toArray()).fetch();
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
 
-        if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+        if(specialSearch._1)
+            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
         StringBuilder sbd = new StringBuilder(
                 // 几个表使用 left join 级联...
-                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i LEFT JOIN i.unit u LEFT JOIN s.fbas fba WHERE s.%s>=? AND s.%s<=?", this.dateType, this.dateType));
+                String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i" +
+                        " LEFT JOIN i.unit u" +
+                        " LEFT JOIN s.fbas fba" +
+                        " WHERE s.%s>=? AND s.%s<=?",
+                        this.dateType, this.dateType));
         List<Object> params = new ArrayList<Object>();
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
@@ -149,7 +154,8 @@ public class ShipmentPost extends Post {
             }
         }
 
-
+        // 因为需要使用 deliverymentId() 方法, 不能够在 param 的地方添加 fba.centerId 路径
+        sbd.append(" ORDER BY fba.centerId, s.createDate DESC");
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 
@@ -164,7 +170,9 @@ public class ShipmentPost extends Post {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true, "SELECT s FROM Shipment s WHERE s.id=?", new ArrayList<Object>(Arrays.asList(deliverymentId)));
+                return new F.T3<Boolean, String, List<Object>>(true,
+                        "SELECT s FROM Shipment s WHERE s.id=?",
+                        new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);
