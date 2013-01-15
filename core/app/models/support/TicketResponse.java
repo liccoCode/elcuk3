@@ -21,10 +21,9 @@ public class TicketResponse extends GenericModel {
     }
 
     public TicketResponse(TicketStateSyncJob.OsResp resp) {
-        TicketResponse r = new TicketResponse();
-        r.created = resp.created;
-        r.responseId = NumberUtils.toInt(resp.response_id);
-        r.ost_ticket_id = resp.ticket_id;
+        this.created = resp.created;
+        this.responseId = NumberUtils.toInt(resp.response_id);
+        this.ost_ticket_id = resp.ticket_id;
     }
 
     @ManyToOne

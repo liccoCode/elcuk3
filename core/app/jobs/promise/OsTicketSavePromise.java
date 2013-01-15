@@ -6,6 +6,7 @@ import helper.J;
 import helper.Webs;
 import jobs.loop.OsTicketBeanstalkdCheck;
 import models.support.Ticket;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
@@ -45,13 +46,26 @@ public class OsTicketSavePromise extends Job<Ticket> {
             if(t.get("title").contains("日报")) {
                 Logger.info("Skip 日报 Ticket create.");
                 // 日报不进入系统
+                OsTicketBeanstalkdCheck.deleteJob(job);
                 return null;
             }
             // TODO 需要调整 OsTicket,还需要返回 Ticket 类型
-            if(title.contains("einen negativen Testbericht") || title.contains("negative product review") ||
+            if(title.contains("einen negativen Testbericht") ||
+                    title.contains("negative product review") ||
                     title.contains("negative feedback")) {
                 Logger.info("Skip Feedback/Review Ticket create.");
+                OsTicketBeanstalkdCheck.deleteJob(job);
                 return null;
+            }
+
+            String topic = t.get("topic");
+            if(StringUtils.isNotBlank(topic)) {
+                topic = topic.toLowerCase();
+                if(topic.contains("feedback") || topic.contains("review")) {
+                    Logger.info("Skip [%s] Ticket create.", topic);
+                    OsTicketBeanstalkdCheck.deleteJob(job);
+                    return null;
+                }
             }
 
             ticket = Ticket.find("osTicketId=?", t.get("ticketId")).first();
