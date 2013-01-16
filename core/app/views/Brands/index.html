@@ -25,8 +25,8 @@
                     </tr>
                 #{/list}
                 <tr>
-                    <td><input type="text" name="brand.name" class="input-small"></td>
                     <td><input type="text" name="brand.fullName" class="input-small"></td>
+                    <td><input type="text" name="brand.name" class="input-small"></td>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -84,7 +84,9 @@
                         </tr>
                         #{list items:brand.unCategories(), as:'cat'}
                             <tr>
-                                <td><label><input type="checkbox" name="cateIds" value="${cat.categoryId}"></label></td>
+                                <td>
+                                    <label><input type="checkbox" name="cateIds" value="${cat.categoryId}"></label>
+                                </td>
                                 <td>${cat.categoryId}</td>
                                 <td>${cat.name}</td>
                             </tr>
@@ -107,7 +109,9 @@
                         </tr>
                         #{list items:brand.categories, as:'cat'}
                             <tr>
-                                <td><label><input type="checkbox" name="cateIds" value="${cat.categoryId}"></label></td>
+                                <td>
+                                    <label><input type="checkbox" name="cateIds" value="${cat.categoryId}"></label>
+                                </td>
                                 <td>${cat.categoryId}</td>
                                 <td>${cat.name}</td>
                             </tr>
