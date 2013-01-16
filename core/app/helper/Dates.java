@@ -61,7 +61,8 @@ public class Dates {
      * @return
      */
     public static Date night(Date date) {
-        return new Date(date2JDate(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
+        return new Date(
+                date2JDate(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
     }
 
     /**
@@ -98,13 +99,13 @@ public class Dates {
     }
 
     /**
-     * 默认时区为 Asia/Shanghai
+     * 默认时区为 UTC 时区
      *
      * @param market
      * @return
      */
     public static DateTimeZone timeZone(M market) {
-        if(market == null) return DateTimeZone.forID("Asia/Shanghai");
+        if(market == null) return DateTimeZone.UTC;
         switch(market) {
             case AMAZON_UK:
             case EBAY_UK:
@@ -120,9 +121,11 @@ public class Dates {
             case AMAZON_US:
                 return DateTimeZone.forID("America/Los_Angeles");
             default:
-                return DateTimeZone.forID("Asia/Shanghai");
+                return DateTimeZone.UTC;
+//                return DateTimeZone.forID("Asia/Shanghai");
         }
     }
+
 
     /**
      * 在进行 Listing 更新的时候, 日期的格式在不同的市场上不同, 这个方法来进行修正格式
@@ -149,13 +152,21 @@ public class Dates {
         switch(m) {
             case AMAZON_UK:
             case AMAZON_FR:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
             case AMAZON_DE:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd.MM.yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("dd.MM.yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
             case AMAZON_US:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("MM/dd/yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
             default:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
         }
     }
 
@@ -164,11 +175,41 @@ public class Dates {
             case AMAZON_UK:
             case AMAZON_FR:
             case AMAZON_DE:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd MMM yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("dd MMM yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
             case AMAZON_US:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("MMM dd, yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("MMM dd, yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
             default:
-                return DateTime.parse(dateStr, DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                return DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m)))
+                        .toDate();
         }
+    }
+
+    /**
+     * 解析 yyyy-MM-dd HH:mm:ss 格式的字符串成为 Datetime(with timezone)
+     *
+     * @param str
+     * @param market
+     * @return
+     */
+    public static DateTime fromDatetime(String str, M market) {
+        return DateTime.parse(str,
+                DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(Dates.timeZone(market)));
+    }
+
+    /**
+     * 解析 yyyy-MM-dd 格式的字符串成为 Datetime(with timezone)
+     *
+     * @param str
+     * @param market
+     * @return
+     */
+    public static DateTime fromDate(String str, M market) {
+        return DateTime.parse(str,
+                DateTimeFormat.forPattern("yyyy-MM-dd").withZone(Dates.timeZone(market)));
     }
 }

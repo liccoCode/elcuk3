@@ -71,4 +71,18 @@ public class AmazonOrderFetchJobTest extends UnitTest {
 
         or.save();
     }
+
+    @Test
+    public void deMarketTime() {
+        System.out.println("=======================");
+        String date = "2013-01-12 12:00:00";
+
+        // DE GMT +1
+        DateTime dt = Dates.fromDatetime(date, M.AMAZON_DE);
+        //Sat Jan 12 11:00:00 UTC 2013
+        System.out.println(dt.toDate());
+        // System GMT +0
+        //Sat Jan 12 11:00:00 UTC 2013
+        System.out.println(dt.withZone(Dates.timeZone(M.AMAZON_DE)).toDate());
+    }
 }
