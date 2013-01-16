@@ -1,0 +1,9 @@
+market.Account(easyacc):
+  username: wyatt@easyacceu.com
+  password: password
+  type: AMAZON_UK
+  token: 3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf
+  accessKey: AKIAI6EBPJLG64HWDBGQ
+  merchantId: AJUR3R8UN71M4
+  closeable: false
+  isSaleAcc: true

@@ -20,4 +20,8 @@ public class Elcuk extends Controller {
         List<Map<String, List<Integer>>> lines = ElcukRecord.emailOverView(from, to);
         renderJSON(lines);
     }
+
+    public static void orders() {
+        renderText("准备中..");
+    }
 }

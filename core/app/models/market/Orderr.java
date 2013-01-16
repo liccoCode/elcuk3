@@ -255,7 +255,8 @@ public class Orderr extends GenericModel {
         if(newOrderr.trackNo != null) this.trackNo = newOrderr.trackNo;
         if(newOrderr.state != null) {
             // 这几个状态是不可逆的, 如果有其他地方将订单更新成这几个状态, 那么此订单的状态不允许再进行更改!
-            if(newOrderr.state == S.REFUNDED || newOrderr.state == S.CANCEL || newOrderr.state == S.RETURNNEW) return;
+            if(newOrderr.state == S.REFUNDED || newOrderr.state == S.CANCEL ||
+                    newOrderr.state == S.RETURNNEW) return;
             this.state = newOrderr.state;
         }
 
@@ -271,7 +272,8 @@ public class Orderr extends GenericModel {
                     for(OrderItem oi : this.items) {
                         if(oi.equals(noi)) {
                             oi.updateAttr(noi);
-                        } else if(!JPA.em().contains(oi)) { // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
+                            // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
+                        } else if(!JPA.em().contains(oi)) {
                             newlyOi.add(noi);
                         }
                     }
@@ -301,7 +303,9 @@ public class Orderr extends GenericModel {
      * @return
      */
     public Long itemCount() {
-        BigDecimal qty = (BigDecimal) DBUtils.row("select sum(quantity) as qty from OrderItem where order_orderId=?", this.orderId).get("qty");
+        BigDecimal qty = (BigDecimal) DBUtils
+                .row("select sum(quantity) as qty from OrderItem where order_orderId=?",
+                        this.orderId).get("qty");
         return qty == null ? 0l : qty.longValue();
     }
 
@@ -320,9 +324,12 @@ public class Orderr extends GenericModel {
         switch(this.market) {
             case AMAZON_UK:
             case AMAZON_US:
-                return "Thanks for purchasing EasyAcc Product on " + JavaExtensions.capFirst(this.market.toString()) + " (Order: " + this.orderId + ")";
+                return "Thanks for purchasing EasyAcc Product on " +
+                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
+                        this.orderId + ")";
             case AMAZON_DE:
-                return "Vielen Dank für den Kauf EasyAcc Produkte auf Amazon.de (Bestellung: " + this.orderId + ")";
+                return "Vielen Dank für den Kauf EasyAcc Produkte auf Amazon.de (Bestellung: " +
+                        this.orderId + ")";
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
                 return "";
@@ -427,8 +434,10 @@ public class Orderr extends GenericModel {
                 if(odmaps.containsKey(key)) {
                     Map<String, AtomicInteger> dateRow = odmaps.get(key);
                     dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
-                    dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
-                    dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.market.name()))
+                            .incrementAndGet(); // Market 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString()))
+                            .incrementAndGet(); // Account 数据
                     dateRow.get(String.format("all")).incrementAndGet();
                     //TODO 记得在更新代码的时候需要将 Account 的 isSaleAcc 修改成为 1
                     dateRow.get(String.format("all_%s", or.market.name())).incrementAndGet();
@@ -439,20 +448,26 @@ public class Orderr extends GenericModel {
                     for(S s : S.values()) {
                         dateRow.put(s.name(), new AtomicInteger(0)); // ALL
                         for(M m : M.values()) {
-                            dateRow.put(String.format("%s_%s", s.name(), m.name()), new AtomicInteger(0)); // Market
+                            dateRow.put(String.format("%s_%s", s.name(), m.name()),
+                                    new AtomicInteger(0)); // Market
                             dateRow.put(String.format("all_%s", m.name()), new AtomicInteger(0));
                         }
                         for(Account a : accs) {
-                            dateRow.put(String.format("%s_%s", s.name(), a.toString()), new AtomicInteger(0)); // Account
-                            dateRow.put(String.format("all_%s", a.toString()), new AtomicInteger(0));
+                            dateRow.put(String.format("%s_%s", s.name(), a.toString()),
+                                    new AtomicInteger(0)); // Account
+                            dateRow.put(String.format("all_%s", a.toString()),
+                                    new AtomicInteger(0));
                         }
                     }
                     dateRow.get(or.state.name()).incrementAndGet(); // ALL 数据
-                    dateRow.get(String.format("%s_%s", or.state.name(), or.market.name())).incrementAndGet(); // Market 数据
-                    dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString())).incrementAndGet(); // Account 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.market.name()))
+                            .incrementAndGet(); // Market 数据
+                    dateRow.get(String.format("%s_%s", or.state.name(), or.account.toString()))
+                            .incrementAndGet(); // Account 数据
                     dateRow.put(String.format("all"), new AtomicInteger(1));
                     dateRow.put(String.format("all_%s", or.market.name()), new AtomicInteger(1));
-                    dateRow.put(String.format("all_%s", or.account.toString()), new AtomicInteger(1));
+                    dateRow.put(String.format("all_%s", or.account.toString()),
+                            new AtomicInteger(1));
                     odmaps.put(key, dateRow);
                 }
             }
@@ -516,20 +531,23 @@ public class Orderr extends GenericModel {
      * @return
      */
     public static Map<String, AtomicInteger> orderPieChart(String msku, Date date) {
-        DateTime day = Instant.parse(new DateTime(date.getTime()).toString("yyyy-MM-dd")).toDateTime();
+        DateTime day = Instant.parse(new DateTime(date.getTime()).toString("yyyy-MM-dd"))
+                .toDateTime();
         Date dayBegin = day.toDate();
         Date dayEnd = day.plusDays(1).toDate();
 
         List<Orderr> orderrs = Orderr.ordersInRange(dayBegin, dayEnd);
 
         Map<String, AtomicInteger> rtMap = new LinkedHashMap<String, AtomicInteger>();
-        for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime(); begin += TimeUnit.HOURS.toMillis(1)) {
+        for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime();
+            begin += TimeUnit.HOURS.toMillis(1)) {
             rtMap.put(begin.toString(), new AtomicInteger(0));
             for(Orderr or : orderrs) {
                 for(OrderItem oi : or.items) {
                     if(oi.selling.merchantSKU.equals(msku) ||
                             "all".equalsIgnoreCase(msku)) {//如果搜索的 MerchantSKU 为 all 也进行计算
-                        if(or.createDate.getTime() < begin || or.createDate.getTime() > begin + TimeUnit.HOURS.toMillis(1))
+                        if(or.createDate.getTime() < begin ||
+                                or.createDate.getTime() > begin + TimeUnit.HOURS.toMillis(1))
                             continue;
 
                         if(rtMap.containsKey(begin.toString())) {
@@ -600,8 +618,9 @@ public class Orderr extends GenericModel {
      */
     public static Map<String, Orderr> list2Map(List<Orderr> orderrs) {
         Map<String, Orderr> orderMap = new HashMap<String, Orderr>();
-        for(Orderr or : orderrs)
+        for(Orderr or : orderrs) {
             orderMap.put(or.orderId, or);
+        }
         return orderMap;
     }
 }

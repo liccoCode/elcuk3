@@ -1,4 +1,5 @@
 import helper.Currency;
+import helper.Dates;
 import helper.HTTP;
 import helper.S3;
 import jobs.ListingSchedulJob;
@@ -12,6 +13,8 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 import play.test.Fixtures;
 
+import java.util.TimeZone;
+
 /**
  * 项目启动的时候的数据初始化.
  * User: wyattpan
@@ -22,6 +25,9 @@ import play.test.Fixtures;
 public class Bootstrap extends Job {
     @Override
     public void doJob() throws Exception {
+        // 设置为 中国上海 时间
+        TimeZone.setDefault(Dates.timeZone(null).toTimeZone());
+
         if(Play.id.equalsIgnoreCase("test")) {
             return;
         }

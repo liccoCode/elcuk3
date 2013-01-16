@@ -88,7 +88,6 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
             new Job() {
                 @Override
                 public void doJob() {
-                    long begin = System.currentTimeMillis();
                     /**
                      * 1. 解析出文件中的所有 Orders.
                      * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
@@ -99,8 +98,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                     int size = orders.size();
                     // 分几个部分处理? 每个部分最多处理 1000 个订单
                     int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
-                    List<Orderr> subList = orders
-                            .subList(0, orders.size() > 1000 ? 1000 : orders.size());
+                    List<Orderr> subList = orders.subList(0,
+                            orders.size() > 1000 ? 1000 : orders.size());
                     for(int i = 1; i <= part; i++) {
                         Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find(
                                 "orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList)))
@@ -159,17 +158,18 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 orderr.account = acc;
                 orderr.orderId = amazonOrderId;
                 orderr.market = M.val(odt.getSalesChannel());
-                orderr.createDate = new DateTime(
-                        odt.getPurchaseDate().toGregorianCalendar().getTime(),
-                        Dates.timeZone(orderr.market)).toDate();
+                orderr.createDate = parseOrderDate(odt.getPurchaseDate().toGregorianCalendar(),
+                        orderr.market);
+
                 if(orderr.state != Orderr.S.CANCEL)
                     orderr.state = parseOrderState(odt.getOrderStatus());
 
                 if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
-                    Date lastUpdateTime = new DateTime(
-                            odt.getLastUpdatedDate().toGregorianCalendar().getTime(),
-                            Dates.timeZone(orderr.market)).toDate();
-                    orderr.paymentDate = lastUpdateTime;
+                    Date lastUpdateTime = parseOrderDate(
+                            odt.getLastUpdatedDate().toGregorianCalendar(),
+                            orderr.market);
+
+                    orderr.paymentDate = orderr.createDate;
                     orderr.shipDate = lastUpdateTime;
 
 
@@ -177,8 +177,8 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                     orderr.shipLevel = ffdt.getShipServiceLevel();
 
                     AddressType addtype = ffdt.getAddress();
-                    orderr.city = addtype
-                            .getCity(); // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
+                    // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
+                    orderr.city = addtype.getCity();
                     orderr.province = addtype.getState();
                     orderr.postalCode = addtype.getPostalCode();
                     orderr.country = addtype.getCountry();
@@ -344,5 +344,15 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         } else {
             return Orderr.S.PENDING;
         }
+    }
+
+    /**
+     * 将 Amazon 给与的 GregorianCalendar 时间修改不同国家自己的时区
+     *
+     * @param date
+     * @return
+     */
+    private static Date parseOrderDate(GregorianCalendar date, M market) {
+        return new DateTime(date.getTime(), Dates.timeZone(market)).toDate();
     }
 }
