@@ -10,6 +10,7 @@ import play.db.DB;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.libs.F;
+import query.vo.AnalyzeVO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,8 +35,8 @@ public class OrderItemQuery {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static List<F.T3<String, Integer, Float>> sku_qty_usdCost(Date from, Date to,
-                                                                     Account acc) {
+    public List<F.T3<String, Integer, Float>> sku_qty_usdCost(Date from, Date to,
+                                                              Account acc) {
         SqlSelect select = new JpqlSelect()
                 .select("oi.product.sku as sku, oi.quantity as qty, oi.usdCost as usdCost")
                 .from("OrderItem oi")
@@ -57,36 +58,8 @@ public class OrderItemQuery {
         return triplus;
     }
 
-    /**
-     * 加载出 OrderItem 中只含有 sku,sellingId,qty,date,account.id 的 rows
-     *
-     * @return
-     */
     @SuppressWarnings("unchecked")
-    public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_aId(Date from,
-                                                                                         Date to,
-                                                                                         int filterQuantity) {
-        SqlSelect hql = new JpqlSelect()
-                .select("oi.product.sku as sku, oi.selling.sellingId as sid, oi.quantity as qty, oi.createDate as _date, oi.order.account.id as aid")
-                .from("OrderItem oi")
-                .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to);
-        if(filterQuantity > 0) hql.where("oi.quantity>?").param(filterQuantity);
-        List<Map> rows = JPAs.createQueryMap(hql.orderBy("oi.createDate DESC")).getResultList();
-        List<F.T5<String, String, Integer, Date, String>> t4Rows = new ArrayList<F.T5<String, String, Integer, Date, String>>();
-        for(Map row : rows) {
-            t4Rows.add(new F.T5<String, String, Integer, Date, String>(
-                    row.get("sku").toString(),
-                    row.get("sid").toString(),
-                    NumberUtils.toInt(row.get("qty").toString()),
-                    (Date) row.get("_date"),
-                    row.get("aid").toString()));
-        }
-        return t4Rows;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<F.T5<String, F.T2<String, String>, Integer, Date, String>> sku_sid_asin_qty_date_aId(
+    public List<F.T5<String, F.T2<String, String>, Integer, Date, String>> sku_sid_asin_qty_date_aId(
             Date from, Date to, int filterQuantity) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
@@ -114,7 +87,34 @@ public class OrderItemQuery {
         return t5Rows;
     }
 
-    public static String feedbackSKU(Feedback feedback) {
+    public List<AnalyzeVO> analyzeVos(Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
+                        "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid")
+                .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
+                .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
+                .from("OrderItem oi")
+                .where("oi.product_sku IS NOT NULL")
+                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate<=?").param(to)
+                .where("oi.market=?").param(market.name())
+                .orderBy("oi.createDate DESC");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+        for(Map<String, Object> row : rows) {
+            AnalyzeVO vo = new AnalyzeVO();
+            vo.sku = row.get("sku").toString();
+            vo.sid = row.get("sid").toString();
+            vo.asin = row.get("asin").toString();
+            vo.qty = NumberUtils.toInt(row.get("qty").toString());
+            vo.date = (Date) row.get("_date");
+            vo.aid = row.get("aid").toString();
+            vos.add(vo);
+        }
+        return vos;
+    }
+
+    public String feedbackSKU(Feedback feedback) {
         Connection conn = DB.getConnection();
 
         String sku = null;
@@ -140,7 +140,7 @@ public class OrderItemQuery {
      * @param sku
      * @return
      */
-    public static int skuFeedbackCount(String sku) {
+    public int skuFeedbackCount(String sku) {
         Connection conn = DB.getConnection();
         int count = 0;
         try {
@@ -159,12 +159,12 @@ public class OrderItemQuery {
         return count;
     }
 
-    public static Map<String, AtomicInteger> skuSales() {
+    public Map<String, AtomicInteger> skuSales() {
         DateTime dt = DateTime.now();
         return skuSales(dt.minusYears(2).toDate(), dt.toDate());
     }
 
-    public static Map<String, AtomicInteger> skuSales(Date from, Date to) {
+    public Map<String, AtomicInteger> skuSales(Date from, Date to) {
         Date begin = Dates.morning(from);
         Date end = Dates.night(to);
 
@@ -199,7 +199,7 @@ public class OrderItemQuery {
      *
      * @return
      */
-    public static List<OrderItem> allNormalSaleOrderItem(Date from, Date to) {
+    public List<OrderItem> allNormalSaleOrderItem(Date from, Date to) {
         List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
                 " oi.usdCost, oi.market FROM OrderItem oi" +
                 " LEFT JOIN Orderr o ON oi.order_orderId=o.orderId" +
@@ -216,7 +216,7 @@ public class OrderItemQuery {
      * @param to
      * @return
      */
-    public static List<OrderItem> skuNormalSaleOrderItem(String sku, Date from, Date to) {
+    public List<OrderItem> skuNormalSaleOrderItem(String sku, Date from, Date to) {
         List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
                 " oi.usdCost, oi.market FROM OrderItem oi" +
                 " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
@@ -228,7 +228,7 @@ public class OrderItemQuery {
         return rows2OrderItem(rows);
     }
 
-    public static List<OrderItem> mskuNormalSaleOrderItem(String msku, Date from, Date to) {
+    public List<OrderItem> mskuNormalSaleOrderItem(String msku, Date from, Date to) {
         List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
                 " oi.usdCost, oi.market FROM OrderItem oi" +
                 " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
@@ -239,8 +239,8 @@ public class OrderItemQuery {
         return rows2OrderItem(rows);
     }
 
-    public static List<OrderItem> mskuWithAccountNormalSaleOrderItem(String msku, long accId,
-                                                                     Date from, Date to) {
+    public List<OrderItem> mskuWithAccountNormalSaleOrderItem(String msku, long accId,
+                                                              Date from, Date to) {
         List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
                 " oi.usdCost, oi.market FROM OrderItem oi" +
                 " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
@@ -253,7 +253,7 @@ public class OrderItemQuery {
         return rows2OrderItem(rows);
     }
 
-    private static List<OrderItem> rows2OrderItem(List<Map<String, Object>> rows) {
+    private List<OrderItem> rows2OrderItem(List<Map<String, Object>> rows) {
         List<OrderItem> items = new ArrayList<OrderItem>();
         for(Map<String, Object> row : rows) {
             OrderItem itm = new OrderItem();

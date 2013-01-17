@@ -36,7 +36,7 @@ public class OsTicketBeanstalkdCheck implements Runnable {
     public synchronized static void begin() {
         if(!OsTicketBeanstalkdCheck.isBegin) {
             OsTicketBeanstalkdCheck.isBegin = true;
-            T.submit(OsTicketBeanstalkdCheck.INSTANCE);
+            T.submit(OsTicketBeanstalkdCheck.get());
             Logger.info("OsTicketBeanstalkdCheck start...");
         }
     }
@@ -73,7 +73,14 @@ public class OsTicketBeanstalkdCheck implements Runnable {
         }
     }
 
-    private static OsTicketBeanstalkdCheck INSTANCE = new OsTicketBeanstalkdCheck();
+    private static OsTicketBeanstalkdCheck INSTANCE;
+
+    public static OsTicketBeanstalkdCheck get() {
+        if(INSTANCE == null)
+            return new OsTicketBeanstalkdCheck();
+        else
+            return INSTANCE;
+    }
 
     /**
      * 因 Beanstalkd 的特性, 所以让每一个 tube 拥有一个 Client 去处理

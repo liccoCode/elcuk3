@@ -19,6 +19,11 @@ public class Dates {
     private static DatatypeFactory df;
 
     /**
+     * 中国时区
+     */
+    public static DateTimeZone CN = DateTimeZone.forID("Asia/Shanghai");
+
+    /**
      * 一天拥有 86400 秒
      */
     public static final long DAY_SECONDS = 86400;
@@ -122,7 +127,6 @@ public class Dates {
                 return DateTimeZone.forID("America/Los_Angeles");
             default:
                 return DateTimeZone.UTC;
-//                return DateTimeZone.forID("Asia/Shanghai");
         }
     }
 
@@ -211,5 +215,19 @@ public class Dates {
     public static DateTime fromDate(String str, M market) {
         return DateTime.parse(str,
                 DateTimeFormat.forPattern("yyyy-MM-dd").withZone(Dates.timeZone(market)));
+    }
+
+    public static DateTime cn(String time) {
+        //yyyy-MM-dd HH:mm:ss
+        if(time.contains(":")) {
+            return DateTime.parse(time,
+                    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(CN));
+        } else {
+            return DateTime.parse(time, DateTimeFormat.forPattern("yyyy-MM-dd").withZone(CN));
+        }
+    }
+
+    public static DateTime cn(Date time) {
+        return cn(Dates.date2DateTime(time));
     }
 }

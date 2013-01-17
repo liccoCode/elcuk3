@@ -159,17 +159,18 @@ public class OrderItem extends GenericModel {
             if(orderItems != null) return orderItems;
 
             if("all".equalsIgnoreCase(skuOrMsku)) {
-                orderItems = OrderItemQuery.allNormalSaleOrderItem(from, to);
+                orderItems = new OrderItemQuery().allNormalSaleOrderItem(from, to);
             } else {
                 if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                    orderItems = OrderItemQuery.skuNormalSaleOrderItem(
+                    orderItems = new OrderItemQuery().skuNormalSaleOrderItem(
                             Product.merchantSKUtoSKU(skuOrMsku), from, to);
                 else {
                     if(acc == null)
-                        orderItems = OrderItemQuery.mskuNormalSaleOrderItem(skuOrMsku, from, to);
+                        orderItems = new OrderItemQuery().mskuNormalSaleOrderItem(
+                                skuOrMsku, from, to);
                     else
-                        orderItems = OrderItemQuery.mskuWithAccountNormalSaleOrderItem(skuOrMsku,
-                                acc.id, from, to);
+                        orderItems = new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                                skuOrMsku, acc.id, from, to);
                 }
             }
             Cache.add(cacheKey, orderItems, "5mn");
@@ -316,7 +317,8 @@ public class OrderItem extends GenericModel {
      */
     public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to,
                                                                          Account acc) {
-        List<F.T3<String, Integer, Float>> rows = OrderItemQuery.sku_qty_usdCost(from, to, acc);
+        List<F.T3<String, Integer, Float>> rows = new OrderItemQuery()
+                .sku_qty_usdCost(from, to, acc);
 
         Map<String, F.T2<AtomicInteger, AtomicReference<Float>>> categoryAndCounts = new HashMap<String, F.T2<AtomicInteger, AtomicReference<Float>>>();
         for(F.T3<String, Integer, Float> row : rows) {

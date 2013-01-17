@@ -1,8 +1,10 @@
 package controllers;
 
 import helper.Constant;
+import helper.Dates;
 import helper.J;
 import helper.Webs;
+import jobs.promise.AnalyzePostForkPromise;
 import models.market.*;
 import models.procure.ProcureUnit;
 import models.product.Category;
@@ -22,6 +24,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import query.vo.AnalyzeVO;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +63,8 @@ public class Analyzes extends Controller {
     public static void countAfter() {
         if(Play.mode.isDev()) {
             Object begin = request.args.get("begin");
-            Logger.info("%s past %s", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
+            Logger.info("%s past %s", request.action,
+                    System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
         }
     }
 
@@ -100,7 +104,8 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxUnit(AnalyzePost p) {
         try {
-            renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)), p.type, p.from, p.to)));
+            renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val,
+                    Account.<Account>findById(NumberUtils.toLong(p.aid)), p.type, p.from, p.to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -110,7 +115,9 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSales(AnalyzePost p) {
         try {
-            renderJSON(J.json(OrderItem.ajaxHighChartSales(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)), p.type, p.from, p.to)));
+            renderJSON(J.json(OrderItem
+                    .ajaxHighChartSales(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)),
+                            p.type, p.from, p.to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -122,7 +129,8 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingRecord(AnalyzePost p) {
         try {
-            renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
+            renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
+                    Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -134,7 +142,8 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingTurn(AnalyzePost p) {
         try {
-            renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
+            renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
+                    Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -146,7 +155,8 @@ public class Analyzes extends Controller {
      * @param type
      * @param val
      */
-    @CacheFor("30mn")// 这个方法提供缓存, 但是前台使用 POST 计算, 不用缓存, 因为此方法在 Hibernate 的二级缓存与系统缓存的支持下, 执行在 0~20 ms 左右
+    @CacheFor("30mn")
+// 这个方法提供缓存, 但是前台使用 POST 计算, 不用缓存, 因为此方法在 Hibernate 的二级缓存与系统缓存的支持下, 执行在 0~20 ms 左右
     public static void ajaxProcureUnitTimeline(String type, String val) {
         renderJSON(J.G(ProcureUnit.timelineEvents(type, val)));
     }
@@ -171,4 +181,27 @@ public class Analyzes extends Controller {
         if(sell == null || !sell.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
         renderJSON(J.G(sell.ps(ps)));
     }
+
+    /**
+     * 日期测试代码, 保留
+     *
+     * @param date
+     */
+    public static void test(Date date) {
+        DateTime de = Dates.fromDate(Dates.date2Date(date), M.AMAZON_DE);
+        DateTime uk = Dates.fromDate(Dates.date2Date(date), M.AMAZON_UK);
+        DateTime us = Dates.fromDate(Dates.date2Date(date), M.AMAZON_US);
+        renderText("GMT:%s\nDE:%s\nUK:%s\nUS:%s", date, de.toDate(), uk.toDate(), us.toDate());
+    }
+
+    public static void test2() {
+        DateTime from = DateTime.parse("2012-11-01");
+        DateTime to = DateTime.parse("2012-11-02");
+        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+        for(M m : M.values()) {
+            vos.addAll(await(new AnalyzePostForkPromise(from, to, m).now()));
+        }
+        renderJSON(vos);
+    }
+
 }
