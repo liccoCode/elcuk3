@@ -3,7 +3,10 @@ package query;
 import helper.DBUtils;
 import helper.Dates;
 import helper.JPAs;
-import models.market.*;
+import models.market.Account;
+import models.market.Feedback;
+import models.market.M;
+import models.market.Orderr;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.DB;
@@ -199,13 +202,19 @@ public class OrderItemQuery {
      *
      * @return
      */
-    public List<OrderItem> allNormalSaleOrderItem(Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o ON oi.order_orderId=o.orderId" +
-                " WHERE oi.createDate>=? AND oi.createDate<=? AND o.state NOT IN (?, ?, ?)",
-                from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-        return rows2OrderItem(rows);
+    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.createDate", "oi.quantity", "oi.usdCost")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate<=?").param(to)
+                .where("o.state NOT IN (?,?,?)")
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
+                        Orderr.S.RETURNNEW.name());
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows, market);
     }
 
     /**
@@ -216,53 +225,60 @@ public class OrderItemQuery {
      * @param to
      * @return
      */
-    public List<OrderItem> skuNormalSaleOrderItem(String sku, Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
-                " LEFT JOIN Product p on p.sku=oi.product_sku" +
-                " WHERE p.sku=? AND oi.createDate>=? AND oi.createDate<=? AND" +
-                " o.state NOT IN (?, ?, ?)",
-                sku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-
-        return rows2OrderItem(rows);
+    public List<AnalyzeVO> skuNormalSaleOrderItem(String sku, Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.createDate", "oi.quantity", "oi.usdCost")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .leftJoin("Product p ON p.sku=oi.product_sku")
+                .where("p.sku=?").param(sku)
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate<=?").param(to)
+                .where("o.state NOT IN (?,?,?)")
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
+                        Orderr.S.RETURNNEW.name());
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows, market);
     }
 
-    public List<OrderItem> mskuNormalSaleOrderItem(String msku, Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
-                " LEFT JOIN Selling s on oi.selling_sellingId=s.sellingId" +
-                " WHERE s.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND" +
-                " o.state NOT IN (?, ?, ?)",
-                msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-        return rows2OrderItem(rows);
+    public List<AnalyzeVO> mskuWithAccountNormalSaleOrderItem(String msku, Long accId,
+                                                              Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.createDate", "oi.quantity", "oi.usdCost")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId");
+        // 如果有 account 就增加过滤
+        if(accId != null)
+            sql.leftJoin("Account a ON s.account_id=a.id").where("a.id=?").param(accId);
+        sql.where("s.merchantSKU=?").param(msku)
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate<=?").param(to)
+                .where("o.state NOT IN (?,?,?)")
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
+                        Orderr.S.RETURNNEW.name());
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows, market);
     }
 
-    public List<OrderItem> mskuWithAccountNormalSaleOrderItem(String msku, long accId,
-                                                              Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
-                " LEFT JOIN Selling s on oi.selling_sellingId=s.sellingId" +
-                " LEFT JOIN Account a on s.account_id=a.id" +
-                " WHERE s.merchantSKU=? AND a.id=? AND oi.createDate>=? AND oi.createDate<=? AND" +
-                " o.state NOT IN (?, ?, ?)",
-                msku, accId, from, to,
-                Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-        return rows2OrderItem(rows);
+    private List<AnalyzeVO> rows2Vo(List<Map<String, Object>> rows) {
+        return rows2Vo(rows, null);
     }
 
-    private List<OrderItem> rows2OrderItem(List<Map<String, Object>> rows) {
-        List<OrderItem> items = new ArrayList<OrderItem>();
+    private List<AnalyzeVO> rows2Vo(List<Map<String, Object>> rows, M market) {
+        List<AnalyzeVO> items = new ArrayList<AnalyzeVO>();
         for(Map<String, Object> row : rows) {
-            OrderItem itm = new OrderItem();
-            itm.quantity = (Integer) row.get("quantity");
-            itm.market = M.val(row.get("market").toString());
+            AnalyzeVO itm = new AnalyzeVO();
+            itm.qty = (Integer) row.get("quantity");
+            // 兼容性问题
+            itm.market = market == null ? M.val(row.get("market").toString()) : market;
             itm.usdCost = (Float) row.get("usdCost");
-            itm.createDate = new DateTime(row.get("createDate")).toDate();
+            itm.date = new DateTime(row.get("createDate")).toDate();
             items.add(itm);
         }
         return items;
     }
+
 }

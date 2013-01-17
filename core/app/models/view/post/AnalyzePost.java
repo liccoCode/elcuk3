@@ -1,7 +1,6 @@
 package models.view.post;
 
 import helper.Dates;
-import jobs.promise.AnalyzePostForkPromise;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -15,15 +14,12 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
-import play.utils.FastRuntimeException;
 import query.AmazonListingReviewQuery;
 import query.vo.AnalyzeVO;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * 分析页面的 Post 请求
@@ -34,6 +30,10 @@ import java.util.concurrent.TimeoutException;
 public class AnalyzePost extends Post<AnalyzeDTO> {
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
+    /**
+     * 开启的, 会去搜索的市场
+     */
+    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR};
     public Date from = super.from;
     public Date to = super.to;
 
@@ -97,14 +97,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                  * 市场自己的 UTC 时间, 加载出这些数据最后再汇总.
                  */
                 List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-                try {
-                    vos.addAll(marketsAnalyzeVOs(nowWithMorning.minusDays(30),
-                            nowWithMorning.plusDays(1),
-                            M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR));
-                } catch(Exception e) {
-                    throw new FastRuntimeException(
-                            String.format("发生错误 %s, 请稍等片刻后重试", e.getMessage()));
-                }
+                vos.addAll(AnalyzeVO.marketsSellingRanks(
+                        nowWithMorning.minusDays(30),
+                        nowWithMorning.plusDays(1),
+                        MARKETS));
 
 
                 // sku, sid, qty, date, acc.id
@@ -288,31 +284,5 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             AnalyzeDTO dto = (AnalyzeDTO) o;
             return this.aid.equals(dto.aid);
         }
-    }
-
-    /**
-     * 执行市场, 加载执行不同市场不同时间的日期
-     *
-     * @param from
-     * @param to
-     * @param markets
-     * @return
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws TimeoutException
-     */
-    private List<AnalyzeVO> marketsAnalyzeVOs(DateTime from, DateTime to, M... markets)
-            throws InterruptedException, ExecutionException, TimeoutException {
-        List<F.Promise<List<AnalyzeVO>>> vos = new ArrayList<F.Promise<List<AnalyzeVO>>>();
-
-        for(M m : markets) {
-            vos.add(new AnalyzePostForkPromise(from, to, m).now());
-        }
-        // 结果汇总
-        List<AnalyzeVO> marketsVos = new ArrayList<AnalyzeVO>();
-        for(F.Promise<List<AnalyzeVO>> p : vos) {
-            marketsVos.addAll(p.get(5, TimeUnit.SECONDS));
-        }
-        return marketsVos;
     }
 }

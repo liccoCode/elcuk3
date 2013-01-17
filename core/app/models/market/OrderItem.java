@@ -3,12 +3,13 @@ package models.market;
 import helper.*;
 import helper.Currency;
 import models.product.Product;
-import org.apache.commons.lang.StringUtils;
+import models.view.post.AnalyzePost;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import query.OrderItemQuery;
+import query.vo.AnalyzeVO;
 
 import javax.persistence.*;
 import java.util.*;
@@ -149,31 +150,21 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
-    public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type,
+    public static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type,
                                                                   Account acc, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
-        List<OrderItem> orderItems = Cache.get(cacheKey, List.class);
-        if(orderItems != null) return orderItems;
-        synchronized(OrderItem.class) {
-            orderItems = Cache.get(cacheKey, List.class);
-            if(orderItems != null) return orderItems;
-
-            if("all".equalsIgnoreCase(skuOrMsku)) {
-                orderItems = new OrderItemQuery().allNormalSaleOrderItem(from, to);
-            } else {
-                if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                    orderItems = new OrderItemQuery().skuNormalSaleOrderItem(
-                            Product.merchantSKUtoSKU(skuOrMsku), from, to);
-                else {
-                    if(acc == null)
-                        orderItems = new OrderItemQuery().mskuNormalSaleOrderItem(
-                                skuOrMsku, from, to);
-                    else
-                        orderItems = new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                                skuOrMsku, acc.id, from, to);
-                }
-            }
-            Cache.add(cacheKey, orderItems, "5mn");
+        List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
+        if(vos != null) return vos;
+        synchronized(AnalyzeVO.class) {
+            vos = Cache.get(cacheKey, List.class);
+            if(vos != null) return vos;
+            vos = AnalyzeVO.marketsLines(
+                    new F.T2<String, String>(skuOrMsku, type),
+                    acc == null ? null : acc.id,
+                    new DateTime(from),
+                    new DateTime(to),
+                    AnalyzePost.MARKETS);
+            Cache.add(cacheKey, vos, "5mn");
         }
         return Cache.get(cacheKey, List.class);
     }
@@ -195,7 +186,7 @@ public class OrderItem extends GenericModel {
         // 做内部参数的容错
         DateTime inFrom = new DateTime(Dates.date2JDate(from));
         DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
-        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
+        List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 inFrom.toDate(), inTo.toDate());
         Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
                 /*销售额*/
@@ -214,15 +205,15 @@ public class OrderItem extends GenericModel {
             float sale_fr = 0;
             float sale_us = 0;
 
-            for(OrderItem oi : orderItems) {
-                if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
+            for(AnalyzeVO vo : vos) {
+                if(Dates.date2JDate(vo.date).getTime() == travel.getMillis()) {
                     try {
-                        float usdCost = oi.usdCost == null ? 0 : oi.usdCost;
+                        float usdCost = vo.usdCost == null ? 0 : vo.usdCost;
                         sale_all += usdCost;
-                        if(oi.market == M.AMAZON_UK) sale_uk += usdCost;
-                        else if(oi.market == M.AMAZON_DE) sale_de += usdCost;
-                        else if(oi.market == M.AMAZON_FR) sale_fr += usdCost;
-                        else if(oi.market == M.AMAZON_US) sale_us += usdCost;
+                        if(vo.market == M.AMAZON_UK) sale_uk += usdCost;
+                        else if(vo.market == M.AMAZON_DE) sale_de += usdCost;
+                        else if(vo.market == M.AMAZON_FR) sale_fr += usdCost;
+                        else if(vo.market == M.AMAZON_US) sale_us += usdCost;
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
@@ -267,7 +258,7 @@ public class OrderItem extends GenericModel {
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
-        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
+        List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 inFrom.toDate(), inTo.toDate());
         Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
                 /*销量*/
@@ -285,13 +276,13 @@ public class OrderItem extends GenericModel {
             float unit_de = 0;
             float unit_fr = 0;
             float unit_us = 0;
-            for(OrderItem oi : orderItems) {
-                if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
-                    unit_all += oi.quantity;
-                    if(oi.market == M.AMAZON_UK) unit_uk += oi.quantity;
-                    else if(oi.market == M.AMAZON_DE) unit_de += oi.quantity;
-                    else if(oi.market == M.AMAZON_FR) unit_fr += oi.quantity;
-                    else if(oi.market == M.AMAZON_US) unit_us += oi.quantity;
+            for(AnalyzeVO vo : vos) {
+                if(Dates.date2JDate(vo.date).getTime() == travel.getMillis()) {
+                    unit_all += vo.qty;
+                    if(vo.market == M.AMAZON_UK) unit_uk += vo.qty;
+                    else if(vo.market == M.AMAZON_DE) unit_de += vo.qty;
+                    else if(vo.market == M.AMAZON_FR) unit_fr += vo.qty;
+                    else if(vo.market == M.AMAZON_US) unit_us += vo.qty;
                     // 其他市场暂时先不统计
                 }
             }
