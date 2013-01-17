@@ -130,7 +130,8 @@ public class ElcukRecord extends Model {
 
         List<Map<String, List<Integer>>> mailLines = new ArrayList<Map<String, List<Integer>>>();
         for(String lineType : lines) {
-            mailLines.add(ElcukRecordQuery.emails(Dates.morning(from), Dates.night(to), lineType));
+            mailLines.add(new ElcukRecordQuery().emails(
+                    Dates.morning(from), Dates.night(to), lineType));
         }
         return mailLines;
     }

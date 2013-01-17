@@ -1,8 +1,6 @@
 package query;
 
 import helper.DBUtils;
-import models.procure.ProcureUnit;
-import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -22,12 +20,14 @@ public class ProcureUnitQuery {
      * @param unitId
      * @return
      */
-    public static F.T2<List<String>, List<String>> procureRelateShippingRelateIds(long unitId) {
-        List<Map<String, Object>> shipmentIdRows = DBUtils.rows("select s.id as shipmentId, si.id as shipItemId, u.id as uid from ProcureUnit u " +
-                "left join ShipItem si on si.unit_id=u.id " +
-                "left join Shipment s on si.shipment_id=s.id " +
-                "where u.id=?", unitId);
-        F.T2<List<String>, List<String>> ids = new F.T2<List<String>, List<String>>(new ArrayList<String>(), new ArrayList<String>());
+    public F.T2<List<String>, List<String>> procureRelateShippingRelateIds(long unitId) {
+        List<Map<String, Object>> shipmentIdRows = DBUtils
+                .rows("select s.id as shipmentId, si.id as shipItemId, u.id as uid from ProcureUnit u " +
+                        "left join ShipItem si on si.unit_id=u.id " +
+                        "left join Shipment s on si.shipment_id=s.id " +
+                        "where u.id=?", unitId);
+        F.T2<List<String>, List<String>> ids = new F.T2<List<String>, List<String>>(
+                new ArrayList<String>(), new ArrayList<String>());
 
         for(Map<String, Object> row : shipmentIdRows) {
             if(row.get("shipItemId") == null) continue;

@@ -24,7 +24,7 @@ public class TicketQuery {
      * @param type
      * @return
      */
-    public static long waitForReply(Ticket.T type, Long userid) {
+    public long waitForReply(Ticket.T type, Long userid) {
         StringBuilder sql = new StringBuilder("SELECT count(*) as c FROM Ticket WHERE ")
                 .append("type=? AND responseTimes<=messageTimes AND state NOT IN ('PRE_CLOSE', 'CLOSE')");
         if(userid != null && userid > 0)
@@ -32,7 +32,7 @@ public class TicketQuery {
         return (Long) DBUtils.row(sql.toString(), type.name()).get("c");
     }
 
-    public static long ticketTotal(Ticket.T type, Date from, Date to) {
+    public long ticketTotal(Ticket.T type, Date from, Date to) {
         // 为了避免自己循环调用
         return ticketTotal(type, from, to, new TicketState[]{});
     }
@@ -42,7 +42,7 @@ public class TicketQuery {
      *
      * @return
      */
-    public static long ticketTotal(Ticket.T type, Date from, Date to, TicketState... state) {
+    public long ticketTotal(Ticket.T type, Date from, Date to, TicketState... state) {
         StringBuilder sbd = new StringBuilder("SELECT COUNT(t.id) as c FROM Ticket t WHERE" +
                 " t.createAt>=? AND t.createAt<=?");
         if(type != null)
@@ -71,7 +71,7 @@ public class TicketQuery {
      *
      * @return ticket/review/feedback: _1: success; _2:total; _3: percent
      */
-    public static Map<String, F.T3<Long, Long, Float>> dealSuccess(Date from, Date to) {
+    public Map<String, F.T3<Long, Long, Float>> dealSuccess(Date from, Date to) {
         // PS: 因为所有计算都是以 Ticket 为左表, 而创建 Ticket 则代表 Reivew/Feedback 需要处理
         // 所以不再进行 review.lastRating<4 或者 feedback.score<4 这些用来过滤出产生了负评的 review/feedback
         /**
@@ -130,7 +130,7 @@ public class TicketQuery {
      *
      * @return
      */
-    public static Map<String, F.T3<Long, Long, Float>> dealSuccess(int days) {
+    public Map<String, F.T3<Long, Long, Float>> dealSuccess(int days) {
         DateTime now = DateTime.now();
         return dealSuccess(Dates.morning(now.minusDays(days).toDate()), Dates.night(now.toDate()));
     }
@@ -140,7 +140,7 @@ public class TicketQuery {
      *
      * @return ticket/review/feedback: _1: success; _2:total; _3: percent
      */
-    public static Map<String, F.T3<Long, Long, Float>> dealFailed(Date from, Date to) {
+    public Map<String, F.T3<Long, Long, Float>> dealFailed(Date from, Date to) {
         /**
          * Ticket: unkonw...
          * 先不计算失败的 Ticket
@@ -184,7 +184,7 @@ public class TicketQuery {
     /**
      * N 天内处理失败的列表(例如: 90)
      */
-    public static Map<String, F.T3<Long, Long, Float>> dealFailed(int days) {
+    public Map<String, F.T3<Long, Long, Float>> dealFailed(int days) {
         DateTime now = DateTime.now();
         return dealFailed(Dates.morning(now.minusDays(days).toDate()), Dates.night(now.toDate()));
     }
@@ -194,7 +194,7 @@ public class TicketQuery {
      *
      * @return ticket/review/feedback: _1: success; _2:total; _3: percent
      */
-    public static Map<String, F.T3<Long, Long, Float>> dealHangup(Date from, Date to) {
+    public Map<String, F.T3<Long, Long, Float>> dealHangup(Date from, Date to) {
 
         /**
          * Ticket: type == Ticket and state == NO_RESP
@@ -232,7 +232,7 @@ public class TicketQuery {
         return rows;
     }
 
-    public static Map<String, F.T3<Long, Long, Float>> dealHangup(int days) {
+    public Map<String, F.T3<Long, Long, Float>> dealHangup(int days) {
         DateTime now = DateTime.now();
         return dealHangup(Dates.morning(now.minusDays(days).toDate()), Dates.night(now.toDate()));
     }
@@ -242,7 +242,7 @@ public class TicketQuery {
      *
      * @return ticket/review/feedback: _1: success; _2:total; _3: percent
      */
-    public static Map<String, F.T3<Long, Long, Float>> dealing(Date from, Date to) {
+    public Map<String, F.T3<Long, Long, Float>> dealing(Date from, Date to) {
         /**
          * Ticket: state in [NEW, TWO_MAIL, NEW_MSG, MAILED] as &t
          */
@@ -285,7 +285,7 @@ public class TicketQuery {
         return rows;
     }
 
-    public static Map<String, F.T3<Long, Long, Float>> dealing(int days) {
+    public Map<String, F.T3<Long, Long, Float>> dealing(int days) {
         DateTime now = DateTime.now();
         return dealing(Dates.morning(now.minusDays(days).toDate()), Dates.night(now.toDate()));
     }

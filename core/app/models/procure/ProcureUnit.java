@@ -233,7 +233,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
         if(this.selling != null && this.whouse != null && this.whouse.account != null) {
-            if(!this.selling.market.equals(this.whouse.account.type) && this.whouse.type == Whouse.T.FBA) {
+            if(!this.selling.market.equals(this.whouse.account.type) &&
+                    this.whouse.type == Whouse.T.FBA) {
                 Validation.addError("", "procureunit.validate.whouse");
             }
         }
@@ -272,14 +273,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         unit.validate();
         if(this.stage != STAGE.PLAN && this.stage != STAGE.DELIVERY)
             Validation.addError(this.stage.toString(), "procureunit.split.state");
-        Validation.equals("procureunit.selling", this.selling.sellingId, "", unit.selling.sellingId);
+        Validation
+                .equals("procureunit.selling", this.selling.sellingId, "", unit.selling.sellingId);
         Validation.equals("procureunit.sku", this.sku, "", unit.sku);
         Validation.max("procureunit.planQty", unit.attrs.planQty, this.attrs.planQty);
         int leftQty = this.attrs.planQty - unit.attrs.planQty;
         Validation.min("procureunit.planQty", leftQty, 0);
         // 如果 unit 对应的 shipment 已经运输, 不可再拆分
-        if(this.shipItem != null && this.shipItem.shipment.state != Shipment.S.CONFIRM && this.shipItem.shipment.state != Shipment.S.PLAN)
-            Validation.addError("", String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id, this.shipItem.shipment.state));
+        if(this.shipItem != null && this.shipItem.shipment.state != Shipment.S.CONFIRM &&
+                this.shipItem.shipment.state != Shipment.S.PLAN)
+            Validation.addError("",
+                    String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id,
+                            this.shipItem.shipment.state));
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
         this.casscadeShipItemQty(leftQty);
@@ -290,11 +295,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.isHaveCycleShipment())
             unit.shipItem = new ShipItem(unit, this.shipItem.shipment);
         unit.save();
-        new ElcukRecord(Messages.get("procureunit.split"), Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "").save();
-        new ElcukRecord(Messages.get("procureunit.split.target"), Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
+        new ElcukRecord(Messages.get("procureunit.split"),
+                Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "")
+                .save();
+        new ElcukRecord(Messages.get("procureunit.split.target"),
+                Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
         if(this.shipItem != null && this.shipItem.shipment != null)
             Notification.notifies("采购计划分拆",
-                    String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", this.id, this.shipItem.shipment.id)
+                    String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", this.id,
+                            this.shipItem.shipment.id)
                     , Notification.PROCURE, Notification.SHIPPER);
         this.save();
     }
@@ -343,7 +352,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("交货量小于计划量, 请拆分采购计划.");
         if(this.attrs.planQty < this.attrs.qty)
             Notification.notifies(String.format("%s 超额交货", this.sku),
-                    String.format("采购计划 %s 超额交货, 请从采购单 %s 找到产品的运输单进行调整, 避免运输数量不足.", this.id, this.deliveryment.id), Notification.SHIPPER);
+                    String.format("采购计划 %s 超额交货, 请从采购单 %s 找到产品的运输单进行调整, 避免运输数量不足.", this.id,
+                            this.deliveryment.id), Notification.SHIPPER);
 
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
@@ -435,7 +445,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     Messages.get("action.base", this.to_log()), "procures.remove").save();
             this.delete();
         } else {
-            Validation.addError("", String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
+            Validation.addError("",
+                    String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
         }
     }
 
@@ -445,7 +456,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        F.T2<List<String>, List<String>> unitShippingRelateIds = ProcureUnitQuery.procureRelateShippingRelateIds(this.id);
+        F.T2<List<String>, List<String>> unitShippingRelateIds = new ProcureUnitQuery()
+                .procureRelateShippingRelateIds(this.id);
         if(unitShippingRelateIds._1.size() == 0) return new ArrayList<Shipment>();
         return Shipment.find("id in " + JpqlSelect.inlineParam(unitShippingRelateIds._1)).fetch();
     }
@@ -472,7 +484,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Override
     public String to_log() {
         return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
-                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty, Dates.date2Date(this.attrs.planArrivDate), this.shipType);
+                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
+                Dates.date2Date(this.attrs.planArrivDate), this.shipType);
     }
 
     public List<ElcukRecord> records() {
@@ -488,9 +501,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public static List<ProcureUnit> skuOrMskuRelate(Selling selling, boolean isSku) {
         if(isSku)
-            return find("sku=? AND stage IN (?,?,?)", Product.merchantSKUtoSKU(selling.merchantSKU), STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
+            return find("sku=? AND stage IN (?,?,?)", Product.merchantSKUtoSKU(selling.merchantSKU),
+                    STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
         else
-            return find("selling=? AND stage IN (?,?,?)", selling, STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).fetch();
+            return find("selling=? AND stage IN (?,?,?)", selling, STAGE.PLAN, STAGE.DELIVERY,
+                    STAGE.DONE).fetch();
     }
 
     public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
@@ -508,8 +523,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
 
         DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit.find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
-                Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val).fetch();
+        List<ProcureUnit> units = ProcureUnit
+                .find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
+                        Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val)
+                .fetch();
 
 
         // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
@@ -539,8 +556,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public static List<ProcureUnit> waitToShip(long whouseid, Shipment.T type) {
-        return ProcureUnit.find("deliveryment.state IN (?,?) AND stage NOT IN (?,?,?) AND shipType=?  AND whouse.id=? ORDER BY attrs.planArrivDate",
-                Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING, STAGE.SHIP_OVER, STAGE.CLOSE, type, whouseid).fetch();
+        return ProcureUnit
+                .find("deliveryment.state IN (?,?) AND stage NOT IN (?,?,?) AND shipType=?  AND whouse.id=? ORDER BY attrs.planArrivDate",
+                        Deliveryment.S.DONE, Deliveryment.S.CONFIRM, STAGE.SHIPPING,
+                        STAGE.SHIP_OVER, STAGE.CLOSE, type, whouseid).fetch();
     }
 
 

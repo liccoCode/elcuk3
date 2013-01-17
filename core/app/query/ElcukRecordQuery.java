@@ -20,7 +20,7 @@ public class ElcukRecordQuery {
      * @param lineType
      * @return
      */
-    public static Map<String, List<Integer>> emails(Date from, Date to, String lineType) {
+    public Map<String, List<Integer>> emails(Date from, Date to, String lineType) {
         List<Map<String, Object>> rows = DBUtils.rows("SELECT action, count(*) as c, " +
                 "date_format(createAt,'%Y-%m-%d') as date FROM ElcukRecord WHERE" +
                 " createAt>=? AND createAt<=? AND action=? AND fid=?" +

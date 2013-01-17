@@ -154,8 +154,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     // review
                     F.T3<Integer, Float, List<String>> reviewT3;
-                    if(isSku) reviewT3 = AmazonListingReviewQuery.skuRelateReviews(dto.fid);
-                    else reviewT3 = AmazonListingReviewQuery.sidRelateReviews(dto.fid);
+                    if(isSku) reviewT3 = new AmazonListingReviewQuery().skuRelateReviews(dto.fid);
+                    else reviewT3 = new AmazonListingReviewQuery().sidRelateReviews(dto.fid);
                     dto.reviews = reviewT3._1;
                     dto.rating = reviewT3._2;
                     if(dto.reviews > 0)
