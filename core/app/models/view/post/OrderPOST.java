@@ -79,8 +79,21 @@ public class OrderPOST extends Post<Orderr> {
 
         if(this.from != null && this.to != null) {
             sbd.append("AND createDate>=? AND createDate<=? ");
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
+            /**
+             * 如果选择了某一个市场, 则需要将时间也匹配上时区; 例:
+             * 1. 搜索 2013-01-17 日美国市场的订单
+             * 2. 转换语义: 搜索北京时间 2013-01-17 16:00:00 ~ 2013-01-18 16:00:00 的美国市场的订单
+             * 3. 转换后搜索
+             */
+            if(this.market != null) {
+                params.add(Dates.fromDatetime(Dates.date2DateTime(this.from), this.market)
+                        .toDate());
+                params.add(Dates.fromDatetime(Dates.date2DateTime(Dates.night(this.to)),
+                        this.market).toDate());
+            } else {
+                params.add(Dates.morning(this.from));
+                params.add(Dates.night(this.to));
+            }
         }
 
         if(this.paymentInfo != null) {
@@ -96,7 +109,9 @@ public class OrderPOST extends Post<Orderr> {
             Matcher matcher = ORDER_NUM_PATTERN.matcher(this.search);
             if(matcher.matches()) {
                 int orderUnbers = NumberUtils.toInt(matcher.group(1), 1);
-                sbd.append("AND (select sum(oi.quantity) from OrderItem oi where oi.order.orderId=orderId)>").append(orderUnbers).append(" ");
+                sbd.append("AND (select sum(oi.quantity) from OrderItem oi")
+                        .append(" WHERE oi.order.orderId=orderId)>")
+                        .append(orderUnbers).append(" ");
             } else {
                 String search = this.word();
                 sbd.append("AND (orderId LIKE ? OR ").
@@ -118,7 +133,8 @@ public class OrderPOST extends Post<Orderr> {
         }
 
         if(StringUtils.isNotBlank(this.orderBy)) {
-            sbd.append("ORDER BY ").append(this.orderBy).append(" ").append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
+            sbd.append("ORDER BY ").append(this.orderBy).append(" ")
+                    .append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
         }
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }

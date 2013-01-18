@@ -66,7 +66,8 @@ public class Dates {
      * @return
      */
     public static Date night(Date date) {
-        return new DateTime(date).plusDays(1).withTimeAtStartOfDay().toDate();
+        // 为了不让时间到达第二天
+        return new DateTime(date).plusDays(1).withTimeAtStartOfDay().minusMillis(1).toDate();
     }
 
     /**
