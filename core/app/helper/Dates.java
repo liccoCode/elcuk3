@@ -60,14 +60,13 @@ public class Dates {
     }
 
     /**
-     * 返回一个 Date 日期这一天的最后
+     * 返回一个 Date 日期这一天的最后(也就是第二天的最开始)
      *
      * @param date
      * @return
      */
     public static Date night(Date date) {
-        return new Date(
-                date2JDate(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
+        return new DateTime(date).plusDays(1).withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -79,7 +78,7 @@ public class Dates {
     public static Date date2JDate(Date date) {
         Date tmp = date;
         if(tmp == null) tmp = new Date();
-        return DateTime.parse(new DateTime(tmp).toString("yyyy-MM-dd")).toDate();
+        return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
     public static String date2Date() {
