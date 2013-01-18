@@ -3,7 +3,6 @@ package models.market;
 import helper.*;
 import helper.Currency;
 import models.product.Product;
-import models.view.post.AnalyzePost;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -158,15 +157,19 @@ public class OrderItem extends GenericModel {
         synchronized(AnalyzeVO.class) {
             vos = Cache.get(cacheKey, List.class);
             if(vos != null) return vos;
-            vos = AnalyzeVO.marketsLines(
-                    new F.T2<String, String>(skuOrMsku, type),
-                    acc == null ? null : acc.id,
-                    new DateTime(from),
-                    new DateTime(to),
-                    AnalyzePost.MARKETS);
-            Cache.add(cacheKey, vos, "5mn");
+            if("all".equalsIgnoreCase(skuOrMsku))
+                vos = new OrderItemQuery().allNormalSaleOrderItem(from, to);
+            else if("sku".equalsIgnoreCase(type))
+                vos = new OrderItemQuery().skuNormalSaleOrderItem(skuOrMsku, from, to);
+            else if("sid".equalsIgnoreCase(type))
+                vos = new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                        skuOrMsku, acc == null ? null : acc.id, from, to);
+            if(vos != null)
+                Cache.add(cacheKey, vos, "5mn");
+            else
+                vos = new ArrayList<AnalyzeVO>();
         }
-        return Cache.get(cacheKey, List.class);
+        return vos;
     }
 
     /**
@@ -308,19 +311,23 @@ public class OrderItem extends GenericModel {
      */
     public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to,
                                                                          Account acc) {
-        List<F.T3<String, Integer, Float>> rows = new OrderItemQuery()
-                .sku_qty_usdCost(from, to, acc);
+        List<AnalyzeVO> vos = new OrderItemQuery().groupCategory(
+                from, to, acc == null ? null : acc.id);
 
         Map<String, F.T2<AtomicInteger, AtomicReference<Float>>> categoryAndCounts = new HashMap<String, F.T2<AtomicInteger, AtomicReference<Float>>>();
-        for(F.T3<String, Integer, Float> row : rows) {
-            if(categoryAndCounts.containsKey(row._1)) {
-                categoryAndCounts.get(row._1)._1.addAndGet(row._2);
-                categoryAndCounts.get(row._1)._2
-                        .set(categoryAndCounts.get(row._1)._2.get() + row._3);
-            } else
-                categoryAndCounts.put(row._1,
-                        new F.T2<AtomicInteger, AtomicReference<Float>>(new AtomicInteger(row._2),
-                                new AtomicReference<Float>(row._3)));
+        for(AnalyzeVO vo : vos) {
+            //sku_qty_usdCost
+            if(categoryAndCounts.containsKey(vo.sku)) {
+                categoryAndCounts.get(vo.sku)._1.addAndGet(vo.qty);
+                categoryAndCounts.get(vo.sku)._2.set(
+                        categoryAndCounts.get(vo.sku)._2.get() + vo.usdCost);
+            } else {
+                categoryAndCounts.put(
+                        vo.sku,
+                        new F.T2<AtomicInteger, AtomicReference<Float>>(
+                                new AtomicInteger(vo.qty),
+                                new AtomicReference<Float>(vo.usdCost)));
+            }
         }
 
         List<F.T3<String, Integer, Float>> categoryAndQty = new ArrayList<F.T3<String, Integer, Float>>();

@@ -4,7 +4,6 @@ import helper.Constant;
 import helper.Dates;
 import helper.J;
 import helper.Webs;
-import jobs.promise.AnalyzePostForkPromise;
 import models.market.*;
 import models.procure.ProcureUnit;
 import models.product.Category;
@@ -24,6 +23,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
 import java.io.File;
@@ -197,10 +197,7 @@ public class Analyzes extends Controller {
     public static void test2() {
         DateTime from = DateTime.parse("2012-11-01");
         DateTime to = DateTime.parse("2012-11-02");
-        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-        for(M m : M.values()) {
-            vos.addAll(await(new AnalyzePostForkPromise(from, to, m).now()));
-        }
+        List<AnalyzeVO> vos = new OrderItemQuery().analyzeVos(from.toDate(), to.toDate());
         renderJSON(vos);
     }
 

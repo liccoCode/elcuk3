@@ -110,7 +110,7 @@ public class Dates {
      * @return
      */
     public static DateTimeZone timeZone(M market) {
-        if(market == null) return DateTimeZone.UTC;
+        if(market == null) return Dates.CN;
         switch(market) {
             case AMAZON_UK:
             case EBAY_UK:
@@ -126,7 +126,7 @@ public class Dates {
             case AMAZON_US:
                 return DateTimeZone.forID("America/Los_Angeles");
             default:
-                return DateTimeZone.UTC;
+                return Dates.CN;
         }
     }
 
