@@ -77,6 +77,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                 boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
 
+                // 从北京时间
                 DateTime startOfDay = new DateTime(this.to).withTimeAtStartOfDay();
 
                 // 准备计算用的数据容器
