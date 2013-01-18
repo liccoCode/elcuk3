@@ -1,5 +1,5 @@
 #{extends 'main_full.html'/}
-#{set title:'Orders (' + orders.size() + ')'/}
+#{set title:'Orders (' + p.count() + ')'/}
 #{set 'moreScripts'}
     #{script 'orders/orders.coffee'/}
     #{script 'component/pagination.coffee'/}

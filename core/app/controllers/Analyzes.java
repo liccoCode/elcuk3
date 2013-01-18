@@ -183,8 +183,6 @@ public class Analyzes extends Controller {
 
     /**
      * 日期测试代码, 保留
-     *
-     * @param date
      */
     public static void test() {
         Date date = new Date();
@@ -203,7 +201,8 @@ public class Analyzes extends Controller {
     public static void test2() {
         DateTime from = DateTime.parse("2012-11-01");
         DateTime to = DateTime.parse("2012-11-02");
-        List<AnalyzeVO> vos = new OrderItemQuery().analyzeVos(from.toDate(), to.toDate());
+        List<AnalyzeVO> vos = new OrderItemQuery()
+                .analyzeVos(from.toDate(), to.toDate(), M.AMAZON_US);
         renderJSON(vos);
     }
 

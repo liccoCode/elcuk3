@@ -143,12 +143,13 @@ public class OrderItemQuery {
      *
      * @return
      */
-    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to) {
+    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .where("oi.createDate>=?").param(from)
+                .where("oi.market=?").param(market.name())
                 .where("oi.createDate<=?").param(to)
                 .where("o.state NOT IN (?,?,?)")
                 .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
@@ -165,7 +166,7 @@ public class OrderItemQuery {
      * @param to
      * @return
      */
-    public List<AnalyzeVO> skuNormalSaleOrderItem(String sku, Date from, Date to) {
+    public List<AnalyzeVO> skuNormalSaleOrderItem(String sku, Date from, Date to, M market) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
                 .from("OrderItem oi")
@@ -173,6 +174,8 @@ public class OrderItemQuery {
                 .leftJoin("Product p ON p.sku=oi.product_sku")
                 .where("p.sku=?").param(sku)
                 .where("oi.createDate>=?").param(from)
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate<=?").param(to)
                 .where("oi.createDate<=?").param(to)
                 .where("o.state NOT IN (?,?,?)")
                 .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
@@ -182,7 +185,7 @@ public class OrderItemQuery {
     }
 
     public List<AnalyzeVO> mskuWithAccountNormalSaleOrderItem(String msku, Long accId,
-                                                              Date from, Date to) {
+                                                              Date from, Date to, M market) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
                 .from("OrderItem oi")
@@ -193,6 +196,7 @@ public class OrderItemQuery {
             sql.leftJoin("Account a ON s.account_id=a.id").where("a.id=?").param(accId);
         sql.where("s.merchantSKU=?").param(msku)
                 .where("oi.createDate>=?").param(from)
+                .where("oi.market=?").param(market.name())
                 .where("oi.createDate<=?").param(to)
                 .where("o.state NOT IN (?,?,?)")
                 .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),

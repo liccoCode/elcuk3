@@ -49,36 +49,38 @@ public class OrderPOST extends Post<Orderr> {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
 
-        return Orderr.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        return Orderr.find("SELECT o" + params._1, params._2.toArray())
+                .fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return Orderr.count(params._1, params._2.toArray());
+        return Orderr.count("SELECT COUNT(o)" + params._1, params._2.toArray());
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("1=1 ");
+        StringBuilder sbd = new StringBuilder(" FROM Orderr o");
+        sbd.append(" LEFT JOIN o.items oi WHERE 1=1 ");
         List<Object> params = new ArrayList<Object>();
         if(this.accountId != null) {
-            sbd.append("AND account.id=? ");
+            sbd.append("AND o.account.id=? ");
             params.add(this.accountId);
         }
 
         if(this.market != null) {
-            sbd.append("AND market=? ");
+            sbd.append("AND o.market=? ");
             params.add(this.market);
         }
 
         if(this.state != null) {
-            sbd.append("AND state=? ");
+            sbd.append("AND o.state=? ");
             params.add(this.state);
         }
 
 
         if(this.from != null && this.to != null) {
-            sbd.append("AND createDate>=? AND createDate<=? ");
+            sbd.append("AND o.createDate>=? AND o.createDate<=? ");
             /**
              * 如果选择了某一个市场, 则需要将时间也匹配上时区; 例:
              * 1. 搜索 2013-01-17 日美国市场的订单
@@ -96,9 +98,9 @@ public class OrderPOST extends Post<Orderr> {
 
         if(this.paymentInfo != null) {
             if(this.paymentInfo)
-                sbd.append("AND SIZE(fees)>0 ");
+                sbd.append("AND SIZE(o.fees)>0 ");
             else if(!this.paymentInfo)
-                sbd.append("AND SIZE(fees)<=0 ");
+                sbd.append("AND SIZE(o.fees)<=0 ");
         }
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
@@ -112,26 +114,27 @@ public class OrderPOST extends Post<Orderr> {
                         .append(orderUnbers).append(" ");
             } else {
                 String search = this.word();
-                sbd.append("AND (orderId LIKE ? OR ").
-                        append("address LIKE ? OR ").
-                        append("address1 LIKE ? OR ").
-                        append("buyer LIKE ? OR ").
-                        append("city LIKE ? OR ").
-                        append("country LIKE ? OR ").
-                        append("email LIKE ? OR ").
-                        append("postalCode LIKE ? OR ").
-                        append("phone LIKE ? OR ").
-                        append("province LIKE ? OR ").
-                        append("reciver LIKE ? OR ").
-                        append("memo LIKE ? OR ").
-                        append("userid LIKE ? OR ").
-                        append("trackNo LIKE ?) ");
-                for(int i = 0; i < 14; i++) params.add(search);
+                sbd.append("AND (o.orderId LIKE ? OR ").
+                        append("o.address LIKE ? OR ").
+                        append("o.address1 LIKE ? OR ").
+                        append("o.buyer LIKE ? OR ").
+                        append("o.city LIKE ? OR ").
+                        append("o.country LIKE ? OR ").
+                        append("o.email LIKE ? OR ").
+                        append("o.postalCode LIKE ? OR ").
+                        append("o.phone LIKE ? OR ").
+                        append("o.province LIKE ? OR ").
+                        append("o.reciver LIKE ? OR ").
+                        append("o.memo LIKE ? OR ").
+                        append("o.userid LIKE ? OR ").
+                        append("o.trackNo LIKE ? OR ").
+                        append("oi.product.sku LIKE ?) ");
+                for(int i = 0; i < 15; i++) params.add(search);
             }
         }
 
         if(StringUtils.isNotBlank(this.orderBy)) {
-            sbd.append("ORDER BY ").append(this.orderBy).append(" ")
+            sbd.append("ORDER BY o.").append(this.orderBy).append(" ")
                     .append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
         }
         return new F.T2<String, List<Object>>(sbd.toString(), params);

@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.Dates;
 import helper.Webs;
 import models.market.M;
 import models.market.Selling;
@@ -10,7 +11,6 @@ import models.view.dto.AnalyzeDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
@@ -81,7 +81,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
 
                 // 从北京时间?
-                DateTime startOfDay = new DateTime(this.to).withTimeAtStartOfDay();
+                Date startOfDay = Dates.night(this.to);
 
                 // 准备计算用的数据容器?
                 Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
@@ -104,8 +104,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                             @Override
                             public List<AnalyzeVO> doJobWithResult() throws Exception {
                                 return new OrderItemQuery().analyzeVos(
-                                        m.withTimeZone(from).toDate(),
-                                        m.withTimeZone(to).toDate(),
+                                        m.withTimeZone(Dates.morning(from)).toDate(),
+                                        m.withTimeZone(Dates.night(to)).toDate(),
                                         m);
                             }
                         }.now());
@@ -127,7 +127,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         continue;
                     }
 
-                    long differTime = startOfDay.toDate().getTime() - vo.date.getTime();
+                    long differTime =
+                            vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
                     if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
                         currentDto.day0 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)

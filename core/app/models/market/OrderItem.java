@@ -3,15 +3,19 @@ package models.market;
 import helper.*;
 import helper.Currency;
 import models.product.Product;
+import models.view.post.AnalyzePost;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.jobs.Job;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -149,25 +153,46 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
-    public static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type,
-                                                                  Account acc, Date from, Date to) {
+    public static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(
+            final String skuOrMsku, final String type, final Account acc, final Date from,
+            final Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
         List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
         if(vos != null) return vos;
         synchronized(AnalyzeVO.class) {
             vos = Cache.get(cacheKey, List.class);
             if(vos != null) return vos;
-            if("all".equalsIgnoreCase(skuOrMsku))
-                vos = new OrderItemQuery().allNormalSaleOrderItem(from, to);
-            else if("sku".equalsIgnoreCase(type))
-                vos = new OrderItemQuery().skuNormalSaleOrderItem(skuOrMsku, from, to);
-            else if("sid".equalsIgnoreCase(type))
-                vos = new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                        skuOrMsku, acc == null ? null : acc.id, from, to);
-            if(vos != null)
+            vos = new ArrayList<AnalyzeVO>();
+            List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
+            try {
+                for(final M m : AnalyzePost.MARKETS) {
+                    voPromises.add(new Job<List<AnalyzeVO>>() {
+                        @Override
+                        public List<AnalyzeVO> doJobWithResult() throws Exception {
+                            Date _from = m.withTimeZone(from).toDate();
+                            Date _to = m.withTimeZone(to).toDate();
+                            if("all".equalsIgnoreCase(skuOrMsku))
+                                return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
+                            else if("sku".equalsIgnoreCase(type))
+                                return new OrderItemQuery()
+                                        .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
+                            else if("sid".equalsIgnoreCase(type))
+                                return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                                        skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
+                            else
+                                return new ArrayList<AnalyzeVO>();
+                        }
+                    }.now());
+                }
+                for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
+                    vos.addAll(voP.get(10, TimeUnit.SECONDS));
+                }
+            } catch(Exception e) {
+                throw new FastRuntimeException(
+                        String.format("因为 %s 问题(超过 10s), 请然后重新尝试搜索.", Webs.E(e)));
+            }
+            if(vos.size() > 0)
                 Cache.add(cacheKey, vos, "5mn");
-            else
-                vos = new ArrayList<AnalyzeVO>();
         }
         return vos;
     }
@@ -261,6 +286,7 @@ public class OrderItem extends GenericModel {
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
+        //TODO 销量曲线的时间 x 轴问题
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 inFrom.toDate(), inTo.toDate());
         Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
