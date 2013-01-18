@@ -41,7 +41,7 @@ public class OrderItemQuery {
     }
 
 
-    public List<AnalyzeVO> analyzeVos(Date from, Date to) {
+    public List<AnalyzeVO> analyzeVos(Date from, Date to, M market) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
                         "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid",
@@ -50,6 +50,7 @@ public class OrderItemQuery {
                 .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
                 .from("OrderItem oi")
                 .where("oi.product_sku IS NOT NULL")
+                .where("oi.market=?").param(market.name())
                 .where("oi.createDate>=?").param(from)
                 .where("oi.createDate<=?").param(to)
                 .orderBy("oi.createDate DESC");

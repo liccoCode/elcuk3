@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.Webs;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -12,7 +13,9 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
+import play.jobs.Job;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.AmazonListingReviewQuery;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
@@ -77,10 +80,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                 boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
 
-                // 从北京时间
+                // 从北京时间?
                 DateTime startOfDay = new DateTime(this.to).withTimeAtStartOfDay();
 
-                // 准备计算用的数据容器
+                // 准备计算用的数据容器?
                 Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
                 if(isSku) {
                     for(Product product : Product.<Product>findAll()) {
@@ -92,11 +95,30 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     }
                 }
 
-                List<AnalyzeVO> vos = new OrderItemQuery().analyzeVos(
-                        startOfDay.minusDays(30).toDate(),
-                        startOfDay.toDate());
+                List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+                // 通过 Job 异步 fork 加载不同时段的数据
+                List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
+                try {
+                    for(final M m : MARKETS) {
+                        voPromises.add(new Job<List<AnalyzeVO>>() {
+                            @Override
+                            public List<AnalyzeVO> doJobWithResult() throws Exception {
+                                return new OrderItemQuery().analyzeVos(
+                                        m.withTimeZone(from).toDate(),
+                                        m.withTimeZone(to).toDate(),
+                                        m);
+                            }
+                        }.now());
+                    }
+                    for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
+                        vos.addAll(voP.get(5, TimeUnit.SECONDS));
+                    }
+                } catch(Exception e) {
+                    throw new FastRuntimeException(
+                            String.format("因为 %s 问题, 请然后重新尝试搜索.", Webs.E(e)));
+                }
 
-                // 销量
+                // 销量 AnalyzeVO
                 for(AnalyzeVO vo : vos) {
                     String key = isSku ? vo.sku : vo.sid;
                     AnalyzeDTO currentDto = analyzeMap.get(key);
@@ -118,7 +140,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                 // ProcureUnit
                 for(AnalyzeDTO dto : analyzeMap.values()) {
-                    // 切换 ProcureUnit 的 sku/sid 的参数
+                    // 切换 ProcureUnit 的 sku/sid 的参数?
                     List<ProcureUnit> untis = ProcureUnit
                             .find((isSku ? "sku=?" : "sid=?") + " AND stage NOT IN (?,?)", dto.fid,
                                     ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER).fetch();

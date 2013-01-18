@@ -86,10 +86,8 @@ public class OrderPOST extends Post<Orderr> {
              * 3. 转换后搜索
              */
             if(this.market != null) {
-                params.add(Dates.fromDatetime(Dates.date2DateTime(this.from), this.market)
-                        .toDate());
-                params.add(Dates.fromDatetime(Dates.date2DateTime(Dates.night(this.to)),
-                        this.market).toDate());
+                params.add(this.market.withTimeZone(this.from).toDate());
+                params.add(this.market.withTimeZone(Dates.night(this.to)).toDate());
             } else {
                 params.add(Dates.morning(this.from));
                 params.add(Dates.night(this.to));
