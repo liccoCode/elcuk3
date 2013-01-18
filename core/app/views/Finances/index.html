@@ -12,6 +12,9 @@
     <div class="span4">
         <h5 class="alert">补充 Selling</h5>
     </div>
+    <div class="span4">
+        <h5 class="alert">修复订单数据</h5>
+    </div>
 </div>
 <div class="row">
     <div class="span4">
@@ -50,6 +53,32 @@
                     </td>
                     <td>
                         <input type="text" name="upc" class="span2" placeHolder="UPC">
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <button class="btn btn-primary">添加</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div class="span4">
+        <form action="@{Finances.reParseOrder()}" method="post" enctype="multipart/form-data">
+            <table class="table table-bordered table-condensed">
+                <tr>
+                    <td colspan="2">
+                        <select name="acc.id" style="width:150px;">
+                        #{list items:accs}
+                            <option value="${_.id}">${_.prettyName()}</option>
+                        #{/list}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="file" name="file">
                     </td>
                 </tr>
                 <tr>

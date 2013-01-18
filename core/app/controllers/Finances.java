@@ -1,9 +1,12 @@
 package controllers;
 
 import helper.Webs;
+import jobs.AmazonOrderFetchJob;
+import jobs.AmazonOrderUpdateJob;
 import jobs.promise.FinanceCrawlPromise;
 import models.finance.SaleFee;
 import models.market.Account;
+import models.market.JobRequest;
 import models.market.M;
 import models.market.Selling;
 import models.product.Product;
@@ -31,7 +34,8 @@ public class Finances extends Controller {
 
 
     public static void index() {
-        render();
+        List<Account> accs = Account.openedSaleAcc();
+        render(accs);
     }
 
     //TODO 需要权限
@@ -85,6 +89,19 @@ public class Finances extends Controller {
             flash.error(Webs.E(e));
             index();
         }
+    }
+
+    public static void reParseOrder(File file, Account acc) {
+        String name = file.getName();
+        JobRequest req = new JobRequest();
+        req.account = acc;
+        req.path = file.getAbsolutePath();
+        if(name.contains("txt")) {
+            new AmazonOrderUpdateJob().callBack(req);
+        } else if(name.contains("xml")) {
+            new AmazonOrderFetchJob().callBack(req);
+        }
+        renderText("已经处理.");
     }
 
     /**

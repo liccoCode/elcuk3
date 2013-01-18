@@ -4,6 +4,7 @@ import models.ElcukRecord;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class Elcuk extends Controller {
         renderJSON(lines);
     }
 
-    public static void orders() {
+    public static void orders(File file) {
         renderText("准备中..");
     }
 }

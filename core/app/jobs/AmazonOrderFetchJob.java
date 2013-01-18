@@ -2,14 +2,12 @@ package jobs;
 
 import com.elcuk.mws.jaxb.ordertracking.*;
 import helper.Currency;
-import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.Jobex;
 import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.db.helper.JpqlSelect;
 import play.jobs.Every;
@@ -85,43 +83,39 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void callBack(final JobRequest jobRequest) {
         try {
-            new Job() {
-                @Override
-                public void doJob() {
-                    /**
-                     * 1. 解析出文件中的所有 Orders.
-                     * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
-                     */
-                    List<Orderr> orders = AmazonOrderFetchJob
-                            .allOrderXML(new File(jobRequest.path), jobRequest.account); // 1. 解析出订单
-                    // 通过 subList 后, orders List 会变空
-                    int size = orders.size();
-                    // 分几个部分处理? 每个部分最多处理 1000 个订单
-                    int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
-                    List<Orderr> subList = orders.subList(0,
-                            orders.size() > 1000 ? 1000 : orders.size());
-                    for(int i = 1; i <= part; i++) {
-                        Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find(
-                                "orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList)))
-                                .<Orderr>fetch());
-                        for(Orderr order : subList) {
-                            if(Orderr.count("orderId=?", order.orderId) <= 0) { //保存
-                                order.save();
-                                Logger.info("Save Order: " + order.orderId);
-                            } else { //更新
-                                Orderr managed = managerOrderMap.get(order.orderId);
-                                // 如果订单已经为 CANCEL 了, 则不更新了
-                                if(managed.state == Orderr.S.CANCEL) continue;
-                                managed.updateAttrs(order);
-                                Logger.info("Update Order: " + order.orderId);
-                            }
-                        }
-                        // 查看 Java Doc, 将原始 List 中的这部分子 List 清除
-                        subList.clear();
-                        subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
+            /**
+             * 1. 解析出文件中的所有 Orders.
+             * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
+             */
+            // 1. 解析出订单
+            List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(
+                    new File(jobRequest.path), jobRequest.account);
+            // 通过 subList 后, orders List 会变空
+            // 分几个部分处理? 每个部分最多处理 1000 个订单
+            int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
+            List<Orderr> subList = orders.subList(0,
+                    orders.size() > 1000 ? 1000 : orders.size());
+            // 2. 保存或者更新
+            for(int i = 1; i <= part; i++) {
+                Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find(
+                        "orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList)))
+                        .<Orderr>fetch());
+                for(Orderr order : subList) {
+                    if(Orderr.count("orderId=?", order.orderId) <= 0) { //保存
+                        order.save();
+                        Logger.info("Save Order: " + order.orderId);
+                    } else { //更新
+                        Orderr managed = managerOrderMap.get(order.orderId);
+                        // 如果订单已经为 CANCEL 了, 则不更新了
+                        if(managed.state == Orderr.S.CANCEL) continue;
+                        managed.updateAttrs(order);
+                        Logger.info("Update Order: " + order.orderId);
                     }
                 }
-            }.now();
+                // 查看 Java Doc, 将原始 List 中的这部分子 List 清除
+                subList.clear();
+                subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
+            }
         } catch(Exception e) {
             Logger.warn("AmazonOrderFetchJob.callback error.", Webs.S(e));
         }
@@ -158,16 +152,14 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 orderr.account = acc;
                 orderr.orderId = amazonOrderId;
                 orderr.market = M.val(odt.getSalesChannel());
-                orderr.createDate = parseOrderDate(odt.getPurchaseDate().toGregorianCalendar(),
-                        orderr.market);
+                // ALl Orders 中的时间是 UTC 的, 使用 GregorianCalendar 就是正确的, 会自动转换为 JVM Default TimeZone
+                orderr.createDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
 
                 if(orderr.state != Orderr.S.CANCEL)
                     orderr.state = parseOrderState(odt.getOrderStatus());
 
                 if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
-                    Date lastUpdateTime = parseOrderDate(
-                            odt.getLastUpdatedDate().toGregorianCalendar(),
-                            orderr.market);
+                    Date lastUpdateTime = odt.getLastUpdatedDate().toGregorianCalendar().getTime();
 
                     orderr.paymentDate = orderr.createDate;
                     orderr.shipDate = lastUpdateTime;
@@ -344,15 +336,5 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         } else {
             return Orderr.S.PENDING;
         }
-    }
-
-    /**
-     * 将 Amazon 给与的 GregorianCalendar 时间修改不同国家自己的时区
-     *
-     * @param date
-     * @return
-     */
-    private static Date parseOrderDate(GregorianCalendar date, M market) {
-        return new DateTime(date.getTime(), Dates.timeZone(market)).toDate();
     }
 }

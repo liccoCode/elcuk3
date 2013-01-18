@@ -7,7 +7,6 @@ import models.market.JobRequest;
 import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
@@ -22,9 +21,9 @@ import java.util.Set;
  * <pre>
  * 通过 Amazon FBA 来更新订单的信息.
  *  * 周期:
-  * - 轮询周期: 10mn
-  * - Duration: 30mn
-  * - Job Interval: 6h
+ * - 轮询周期: 10mn
+ * - Duration: 30mn
+ * - Job Interval: 6h
  * </pre>
  * User: wyattpan
  * Date: 6/11/12
@@ -80,7 +79,8 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
          * 1. 将需要更新的数据从 csv 文件中提取出来
          * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
          */
-        Set<Orderr> orderSet = AmazonOrderUpdateJob.updateOrderXML(new File(jobRequest.path), jobRequest.account.type);
+        Set<Orderr> orderSet = AmazonOrderUpdateJob
+                .updateOrderXML(new File(jobRequest.path), jobRequest.account.type);
         for(Orderr order : orderSet) {
             Orderr managed = Orderr.findById(order.orderId);
             if(managed == null) {
@@ -115,10 +115,12 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                     Logger.info("Skip Self Order[" + vals[0] + "].");
                     continue;
                 }
+                // 例子数据
+                //110-2162328-5179422		DmlbKXMtN	Dprp1L4JR	07664457044546		2013-01-15T12:24:57+00e00	2013-01-17T05:51:50+00:00	2013-01-17T05:06:24+00:00	2013-01-17T16:10:00+00:00	blnpdwtsw5npzjr@marketplace.amazon.com	Diana Gil		80DBK12000-AB	EasyAcc 12000mAh 4 x USB Portable External Battery Pack Charger Power Bank for Tablets: iPad 3, iPad mini; Kindle Fire HD, Google Nexus 7, Nexus 10; S	1	USD	40.99	0.00	3.85	0.00	0.00	0.00	Standard	Diana Gil	163 Lloyd Street	2ND Floor		New Haven	CT	06513	US									0.00	-3.85	SMARTPOST	9102901001301798807420	2013-01-24T04:00:00+00:00	LEX1	AFN	Amazon.com
                 Orderr order = new Orderr();
                 order.orderId = vals[0];
-                order.paymentDate = new DateTime(Dates.parseXMLGregorianDate(vals[7]), Dates.timeZone(market)).toDate();
-                order.shipDate = new DateTime(Dates.parseXMLGregorianDate(vals[8]), Dates.timeZone(market)).toDate();
+                order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
+                order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
                 order.shippingService = vals[42];
                 if(StringUtils.isNotBlank(vals[43])) {
                     order.trackNo = vals[43];
