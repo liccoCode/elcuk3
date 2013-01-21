@@ -98,6 +98,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
                 // 通过 Job 异步 fork 加载不同时段的数据
                 List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
+                Logger.info("Start Fork to fetch Analyzes Sellings.");
                 try {
                     for(final M m : MARKETS) {
                         voPromises.add(new Job<List<AnalyzeVO>>() {
@@ -111,11 +112,13 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         }.now());
                     }
                     for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
-                        vos.addAll(voP.get(30, TimeUnit.SECONDS));
+                        vos.addAll(voP.get(1, TimeUnit.MINUTES));
                     }
                 } catch(Exception e) {
                     throw new FastRuntimeException(
                             String.format("因为 %s 问题, 请然后重新尝试搜索.", Webs.E(e)));
+                } finally {
+                    Logger.info("End of Fork Fetch.");
                 }
 
                 // 销量 AnalyzeVO

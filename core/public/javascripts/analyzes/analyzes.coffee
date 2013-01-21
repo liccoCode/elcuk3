@@ -1,4 +1,6 @@
 $ ->
+  Highcharts.setOptions(global:
+    {useUTC: false})
   SKU = 'sku'
   SID = 'sid'
   defaultDate = $.DateUtil.addDay(-30)
@@ -23,9 +25,9 @@ $ ->
   # 用来构造给 HighChart 使用的默认 options 的方法
   lineOp = (container, yName) ->
     chart:
-      {renderTo: container}
+      renderTo: container
     title:
-      {text: 'Chart Title'}
+      text: 'Chart Title'
     xAxis:
       type: 'datetime'
       dateTimeLabelFormats:

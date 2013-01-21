@@ -144,6 +144,10 @@ public class OrderItem extends GenericModel {
     /**
      * 根据 sku 或者 msku 从 OrderItem 中查询对应 Account 的 OrderItem
      * ps: 结果缓存 5mn (缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存)
+     * 将时间语义转换为对应市场的, 例:
+     * 查询 2013-01-01 这天的数据
+     * ->
+     * 查询 美国 2013-01-01 这天的数据; 系统中记录的是北京时间,所以会进行时间转换
      *
      * @param skuOrMsku sku 或者 merchantSKU(msku)
      * @param type      sku/all/msku
@@ -221,7 +225,8 @@ public class OrderItem extends GenericModel {
         HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
         // 从开始时间起, 以 1 天的时间间隔去 group 数据, 没有的设置为 0
         DateTime travel = _from.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= _to.getMillis()) { // 开始计算每一天的数据
+        while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
+            String travelStr = travel.toString("yyyy-MM-dd");
             // 销售额
             float sale_all = 0;
             float sale_uk = 0;
@@ -230,7 +235,8 @@ public class OrderItem extends GenericModel {
             float sale_us = 0;
 
             for(AnalyzeVO vo : vos) {
-                if(Dates.date2JDate(vo.date).getTime() == travel.getMillis()) {
+                DateTime marketLocalTime = new DateTime(vo.date, Dates.timeZone(vo.market));
+                if(marketLocalTime.toString("yyyy-MM-dd").equals(travelStr)) {
                     try {
                         float usdCost = vo.usdCost == null ? 0 : vo.usdCost;
                         sale_all += usdCost;
@@ -280,13 +286,13 @@ public class OrderItem extends GenericModel {
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
-        //TODO 销量曲线的时间 x 轴问题
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 _from.toDate(), _to.toDate());
 
         HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= _to.getMillis()) { // 开始计算每一天的数据
+        while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
+            String travelStr = travel.toString("yyyy-MM-dd");
             // 销量
             float unit_all = 0;
             float unit_uk = 0;
@@ -294,7 +300,12 @@ public class OrderItem extends GenericModel {
             float unit_fr = 0;
             float unit_us = 0;
             for(AnalyzeVO vo : vos) {
-                if(Dates.date2JDate(vo.date).getTime() == travel.getMillis()) {
+                /**
+                 * 将北京时间换成对应市场的本地时间, 因为加载出了对应市场时间的数据后,
+                 * 需要再将时间还原到对应市场, 然后进行市场当天数据的 group
+                 */
+                DateTime marketLocalTime = new DateTime(vo.date, Dates.timeZone(vo.market));
+                if(marketLocalTime.toString("yyyy-MM-dd").equalsIgnoreCase(travelStr)) {
                     unit_all += vo.qty;
                     if(vo.market == M.AMAZON_UK) unit_uk += vo.qty;
                     else if(vo.market == M.AMAZON_DE) unit_de += vo.qty;
