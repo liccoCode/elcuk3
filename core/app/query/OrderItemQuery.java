@@ -2,14 +2,13 @@ package query;
 
 import helper.DBUtils;
 import helper.Dates;
-import helper.JPAs;
-import models.market.*;
-import org.apache.commons.lang.math.NumberUtils;
+import models.market.Feedback;
+import models.market.M;
+import models.market.Orderr;
 import org.joda.time.DateTime;
 import play.db.DB;
-import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
-import play.libs.F;
+import query.vo.AnalyzeVO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,96 +24,41 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Time: 11:54 AM
  */
 public class OrderItemQuery {
-    /**
-     * 加载出 OrderItem 中只含有 sku 与 qty 的 rows
-     *
-     * @param from
-     * @param to
-     * @param acc
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static List<F.T3<String, Integer, Float>> sku_qty_usdCost(Date from, Date to,
-                                                                     Account acc) {
-        SqlSelect select = new JpqlSelect()
-                .select("oi.product.sku as sku, oi.quantity as qty, oi.usdCost as usdCost")
-                .from("OrderItem oi")
-                .where("oi.createDate>=?").param(from)
+
+    public List<AnalyzeVO> groupCategory(Date from, Date to, Long accId) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.product_sku as sku", "oi.quantity as qty", "oi.usdCost as usdCost")
+                .from("OrderItem oi");
+        if(accId != null) {
+            sql.leftJoin("Orderr o ON o.orderId=oi.order_orderId")
+                    .where("o.account_id=?").param(accId);
+        }
+        sql.where("oi.createDate>=?").param(from)
                 .where("oi.createDate<=?").param(to)
                 .where("oi.quantity>0");
-        if(acc != null) select.where("oi.order.account=?").param(acc);
-        List<Map> rows = JPAs.createQueryMap(select).getResultList();
-        List<F.T3<String, Integer, Float>> triplus = new ArrayList<F.T3<String, Integer, Float>>();
-        for(Map row : rows) {
-            triplus.add(new F.T3<String, Integer, Float>(
-                    row.get("sku").toString().substring(0, 2),
-                    NumberUtils
-                            .toInt((row.get("qty") == null ? "0" : row.get("qty").toString()), 0),
-                    NumberUtils.toFloat(
-                            (row.get("usdCost") == null ? "0" : row.get("usdCost").toString()),
-                            0)));
-        }
-        return triplus;
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows);
     }
 
-    /**
-     * 加载出 OrderItem 中只含有 sku,sellingId,qty,date,account.id 的 rows
-     *
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static List<F.T5<String, String, Integer, Date, String>> sku_sid_qty_date_aId(Date from,
-                                                                                         Date to,
-                                                                                         int filterQuantity) {
-        SqlSelect hql = new JpqlSelect()
-                .select("oi.product.sku as sku, oi.selling.sellingId as sid, oi.quantity as qty, oi.createDate as _date, oi.order.account.id as aid")
-                .from("OrderItem oi")
-                .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to);
-        if(filterQuantity > 0) hql.where("oi.quantity>?").param(filterQuantity);
-        List<Map> rows = JPAs.createQueryMap(hql.orderBy("oi.createDate DESC")).getResultList();
-        List<F.T5<String, String, Integer, Date, String>> t4Rows = new ArrayList<F.T5<String, String, Integer, Date, String>>();
-        for(Map row : rows) {
-            t4Rows.add(new F.T5<String, String, Integer, Date, String>(
-                    row.get("sku").toString(),
-                    row.get("sid").toString(),
-                    NumberUtils.toInt(row.get("qty").toString()),
-                    (Date) row.get("_date"),
-                    row.get("aid").toString()));
-        }
-        return t4Rows;
-    }
 
-    @SuppressWarnings("unchecked")
-    public static List<F.T5<String, F.T2<String, String>, Integer, Date, String>> sku_sid_asin_qty_date_aId(
-            Date from, Date to, int filterQuantity) {
+    public List<AnalyzeVO> analyzeVos(Date from, Date to, M market) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
-                        "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid")
+                        "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid",
+                        "oi.market")
                 .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
                 .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
                 .from("OrderItem oi")
-                        // 对清理的孤立的 OrderItem 的过滤
                 .where("oi.product_sku IS NOT NULL")
+                .where("oi.market=?").param(market.name())
                 .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to);
-        if(filterQuantity > 0) sql.where("oi.quantity>?").param(filterQuantity);
-        sql.orderBy("oi.createDate DESC");
+                .where("oi.createDate<=?").param(to)
+                .orderBy("oi.createDate DESC");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        List<F.T5<String, F.T2<String, String>, Integer, Date, String>> t5Rows = new ArrayList<F.T5<String, F.T2<String, String>, Integer, Date, String>>();
-        for(Map row : rows) {
-            t5Rows.add(new F.T5<String, F.T2<String, String>, Integer, Date, String>(
-                    row.get("sku").toString(),
-                    new F.T2<String, String>(row.get("sid").toString(), row.get("asin").toString()),
-                    NumberUtils.toInt(row.get("qty").toString()),
-                    (Date) row.get("_date"),
-                    row.get("aid").toString()
-            ));
-        }
-        return t5Rows;
+        return rows2Vo(rows);
     }
 
-    public static String feedbackSKU(Feedback feedback) {
+    public String feedbackSKU(Feedback feedback) {
         Connection conn = DB.getConnection();
 
         String sku = null;
@@ -140,7 +84,7 @@ public class OrderItemQuery {
      * @param sku
      * @return
      */
-    public static int skuFeedbackCount(String sku) {
+    public int skuFeedbackCount(String sku) {
         Connection conn = DB.getConnection();
         int count = 0;
         try {
@@ -159,12 +103,12 @@ public class OrderItemQuery {
         return count;
     }
 
-    public static Map<String, AtomicInteger> skuSales() {
+    public Map<String, AtomicInteger> skuSales() {
         DateTime dt = DateTime.now();
         return skuSales(dt.minusYears(2).toDate(), dt.toDate());
     }
 
-    public static Map<String, AtomicInteger> skuSales(Date from, Date to) {
+    public Map<String, AtomicInteger> skuSales(Date from, Date to) {
         Date begin = Dates.morning(from);
         Date end = Dates.night(to);
 
@@ -199,13 +143,19 @@ public class OrderItemQuery {
      *
      * @return
      */
-    public static List<OrderItem> allNormalSaleOrderItem(Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o ON oi.order_orderId=o.orderId" +
-                " WHERE oi.createDate>=? AND oi.createDate<=? AND o.state NOT IN (?, ?, ?)",
-                from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-        return rows2OrderItem(rows);
+    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .where("oi.createDate>=?").param(from)
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate<=?").param(to)
+                .where("o.state NOT IN (?,?,?)")
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
+                        Orderr.S.RETURNNEW.name());
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows);
     }
 
     /**
@@ -216,53 +166,66 @@ public class OrderItemQuery {
      * @param to
      * @return
      */
-    public static List<OrderItem> skuNormalSaleOrderItem(String sku, Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
-                " LEFT JOIN Product p on p.sku=oi.product_sku" +
-                " WHERE p.sku=? AND oi.createDate>=? AND oi.createDate<=? AND" +
-                " o.state NOT IN (?, ?, ?)",
-                sku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-
-        return rows2OrderItem(rows);
+    public List<AnalyzeVO> skuNormalSaleOrderItem(String sku, Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .leftJoin("Product p ON p.sku=oi.product_sku")
+                .where("p.sku=?").param(sku)
+                .where("oi.createDate>=?").param(from)
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate<=?").param(to)
+                .where("oi.createDate<=?").param(to)
+                .where("o.state NOT IN (?,?,?)")
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
+                        Orderr.S.RETURNNEW.name());
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows);
     }
 
-    public static List<OrderItem> mskuNormalSaleOrderItem(String msku, Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
-                " LEFT JOIN Selling s on oi.selling_sellingId=s.sellingId" +
-                " WHERE s.merchantSKU=? AND oi.createDate>=? AND oi.createDate<=? AND" +
-                " o.state NOT IN (?, ?, ?)",
-                msku, from, to, Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-        return rows2OrderItem(rows);
+    public List<AnalyzeVO> mskuWithAccountNormalSaleOrderItem(String msku, Long accId,
+                                                              Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId");
+        // 如果有 account 就增加过滤
+        if(accId != null)
+            sql.leftJoin("Account a ON s.account_id=a.id").where("a.id=?").param(accId);
+        sql.where("s.merchantSKU=?").param(msku)
+                .where("oi.createDate>=?").param(from)
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate<=?").param(to)
+                .where("o.state NOT IN (?,?,?)")
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
+                        Orderr.S.RETURNNEW.name());
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows);
     }
 
-    public static List<OrderItem> mskuWithAccountNormalSaleOrderItem(String msku, long accId,
-                                                                     Date from, Date to) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT oi.createDate, oi.quantity," +
-                " oi.usdCost, oi.market FROM OrderItem oi" +
-                " LEFT JOIN Orderr o on oi.order_orderId=o.orderId" +
-                " LEFT JOIN Selling s on oi.selling_sellingId=s.sellingId" +
-                " LEFT JOIN Account a on s.account_id=a.id" +
-                " WHERE s.merchantSKU=? AND a.id=? AND oi.createDate>=? AND oi.createDate<=? AND" +
-                " o.state NOT IN (?, ?, ?)",
-                msku, accId, from, to,
-                Orderr.S.CANCEL, Orderr.S.REFUNDED, Orderr.S.RETURNNEW);
-        return rows2OrderItem(rows);
-    }
-
-    private static List<OrderItem> rows2OrderItem(List<Map<String, Object>> rows) {
-        List<OrderItem> items = new ArrayList<OrderItem>();
+    private List<AnalyzeVO> rows2Vo(List<Map<String, Object>> rows) {
+        List<AnalyzeVO> items = new ArrayList<AnalyzeVO>();
         for(Map<String, Object> row : rows) {
-            OrderItem itm = new OrderItem();
-            itm.quantity = (Integer) row.get("quantity");
-            itm.market = M.val(row.get("market").toString());
-            itm.usdCost = (Float) row.get("usdCost");
-            itm.createDate = new DateTime(row.get("createDate")).toDate();
-            items.add(itm);
+            AnalyzeVO vo = new AnalyzeVO();
+            if(row.get("sku") != null)
+                vo.sku = row.get("sku").toString();
+            if(row.get("qty") != null)
+                vo.qty = (Integer) row.get("qty");
+            if(row.get("market") != null)
+                vo.market = M.val(row.get("market").toString());
+            if(row.get("usdCost") != null)
+                vo.usdCost = (Float) row.get("usdCost");
+            if(row.get("_date") != null)
+                vo.date = new DateTime(row.get("_date")).toDate();
+            if(row.get("sid") != null)
+                vo.sid = row.get("sid").toString();
+            if(row.get("aid") != null)
+                vo.aid = row.get("aid").toString();
+            items.add(vo);
         }
         return items;
     }
+
 }

@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class FBAShipmentQuery {
 
-    public static List<String> uncloseFBAShipmentIds() {
+    public List<String> uncloseFBAShipmentIds() {
         //TODO 还有条件需要添加的...
         List<Map<String, Object>> rows = DBUtils.rows("SELECT id, shipmentId FROM FBAShipment");
         List<String> ids = new ArrayList<String>();

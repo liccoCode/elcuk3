@@ -19,6 +19,11 @@ public class Dates {
     private static DatatypeFactory df;
 
     /**
+     * 中国时区
+     */
+    public static DateTimeZone CN = DateTimeZone.forID("Asia/Shanghai");
+
+    /**
      * 一天拥有 86400 秒
      */
     public static final long DAY_SECONDS = 86400;
@@ -55,14 +60,14 @@ public class Dates {
     }
 
     /**
-     * 返回一个 Date 日期这一天的最后
+     * 返回一个 Date 日期这一天的最后(也就是第二天的最开始)
      *
      * @param date
      * @return
      */
     public static Date night(Date date) {
-        return new Date(
-                date2JDate(new DateTime(date.getTime()).plusDays(1).toDate()).getTime() - 1000);
+        // 为了不让时间到达第二天
+        return new DateTime(date).plusDays(1).withTimeAtStartOfDay().minusMillis(1).toDate();
     }
 
     /**
@@ -74,7 +79,7 @@ public class Dates {
     public static Date date2JDate(Date date) {
         Date tmp = date;
         if(tmp == null) tmp = new Date();
-        return DateTime.parse(new DateTime(tmp).toString("yyyy-MM-dd")).toDate();
+        return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
     public static String date2Date() {
@@ -105,7 +110,7 @@ public class Dates {
      * @return
      */
     public static DateTimeZone timeZone(M market) {
-        if(market == null) return DateTimeZone.UTC;
+        if(market == null) return Dates.CN;
         switch(market) {
             case AMAZON_UK:
             case EBAY_UK:
@@ -121,8 +126,7 @@ public class Dates {
             case AMAZON_US:
                 return DateTimeZone.forID("America/Los_Angeles");
             default:
-                return DateTimeZone.UTC;
-//                return DateTimeZone.forID("Asia/Shanghai");
+                return Dates.CN;
         }
     }
 
@@ -211,5 +215,19 @@ public class Dates {
     public static DateTime fromDate(String str, M market) {
         return DateTime.parse(str,
                 DateTimeFormat.forPattern("yyyy-MM-dd").withZone(Dates.timeZone(market)));
+    }
+
+    public static DateTime cn(String time) {
+        //yyyy-MM-dd HH:mm:ss
+        if(time.contains(":")) {
+            return DateTime.parse(time,
+                    DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(CN));
+        } else {
+            return DateTime.parse(time, DateTimeFormat.forPattern("yyyy-MM-dd").withZone(CN));
+        }
+    }
+
+    public static DateTime cn(Date time) {
+        return cn(Dates.date2DateTime(time));
     }
 }

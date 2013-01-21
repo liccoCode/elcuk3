@@ -129,8 +129,10 @@ public class ElcukRecord extends Model {
         lines.add(FBAMails.STATE_CHANGE);
 
         List<Map<String, List<Integer>>> mailLines = new ArrayList<Map<String, List<Integer>>>();
+        //TODO 需要对加载出来的数据做处理
         for(String lineType : lines) {
-            mailLines.add(ElcukRecordQuery.emails(Dates.morning(from), Dates.night(to), lineType));
+            mailLines.add(new ElcukRecordQuery().emails(
+                    Dates.morning(from), Dates.night(to), lineType));
         }
         return mailLines;
     }

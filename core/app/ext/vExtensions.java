@@ -20,6 +20,15 @@ import java.util.Locale;
  */
 public class vExtensions extends JavaExtensions {
 
+    /**
+     * 中国时区
+     *
+     * @return
+     */
+    public static String CN(Date date) {
+        return new DateTime(date, Dates.CN).toLocalDateTime().toString();
+    }
+
     /*util.Date*/
     public static String datetime(Date date) {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
@@ -109,7 +118,8 @@ public class vExtensions extends JavaExtensions {
     public static String record(ElcukRecord record) {
         // [Who] do [What] effect [What]
         return String.format("%s do %s at %s <strong style='color:red;'>=></strong> %s",
-                JavaExtensions.capFirst(record.username), record.action, Dates.date2DateTime(record.createAt), record.message);
+                JavaExtensions.capFirst(record.username), record.action,
+                Dates.date2DateTime(record.createAt), record.message);
     }
 
     /**

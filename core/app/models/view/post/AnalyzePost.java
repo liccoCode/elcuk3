@@ -1,6 +1,8 @@
 package models.view.post;
 
 import helper.Dates;
+import helper.Webs;
+import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.procure.ProcureUnit;
@@ -9,12 +11,14 @@ import models.view.dto.AnalyzeDTO;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
+import play.jobs.Job;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.AmazonListingReviewQuery;
 import query.OrderItemQuery;
+import query.vo.AnalyzeVO;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -29,6 +33,12 @@ import java.util.concurrent.TimeUnit;
 public class AnalyzePost extends Post<AnalyzeDTO> {
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
+    /**
+     * 开启的, 会去搜索的市场
+     */
+    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR};
+    public Date from = super.from;
+    public Date to = super.to;
 
     public AnalyzePost() {
         this.perSize = 20;
@@ -70,9 +80,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                 boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
 
-                DateTime nowWithMorning = new DateTime(Dates.morning(new Date()));
+                // 从北京时间?
+                Date startOfDay = Dates.night(this.to);
 
-                // 准备计算用的数据容器
+                // 准备计算用的数据容器?
                 Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
                 if(isSku) {
                     for(Product product : Product.<Product>findAll()) {
@@ -84,36 +95,56 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     }
                 }
 
+                List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+                // 通过 Job 异步 fork 加载不同时段的数据
+                List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
+                Logger.info("Start Fork to fetch Analyzes Sellings.");
+                try {
+                    for(final M m : MARKETS) {
+                        voPromises.add(new Job<List<AnalyzeVO>>() {
+                            @Override
+                            public List<AnalyzeVO> doJobWithResult() throws Exception {
+                                return new OrderItemQuery().analyzeVos(
+                                        m.withTimeZone(Dates.morning(from)).toDate(),
+                                        m.withTimeZone(Dates.night(to)).toDate(),
+                                        m);
+                            }
+                        }.now());
+                    }
+                    for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
+                        vos.addAll(voP.get(1, TimeUnit.MINUTES));
+                    }
+                } catch(Exception e) {
+                    throw new FastRuntimeException(
+                            String.format("因为 %s 问题, 请然后重新尝试搜索.", Webs.E(e)));
+                } finally {
+                    Logger.info("End of Fork Fetch.");
+                }
 
-                // sku, sid, qty, date, acc.id
-                List<F.T5<String, F.T2<String, String>, Integer, Date, String>> t5s = OrderItemQuery
-                        .sku_sid_asin_qty_date_aId(nowWithMorning.minusDays(30).toDate(),
-                                Dates.night(nowWithMorning.toDate()), 0);
-
-                // 销量
-                for(F.T5<String, F.T2<String, String>, Integer, Date, String> t5 : t5s) {
-                    // 切换 sku/sid 的 key
-                    String key = isSku ? t5._1 : t5._2._1;
+                // 销量 AnalyzeVO
+                for(AnalyzeVO vo : vos) {
+                    String key = isSku ? vo.sku : vo.sid;
                     AnalyzeDTO currentDto = analyzeMap.get(key);
                     if(currentDto == null) {
-                        Logger.warn("T4: %s, DTO is not exist. Key[%s]", t5, key);
+                        Logger.warn("AnalyzeVO: %s, DTO is not exist. Key[%s]", vo, key);
                         continue;
                     }
 
-                    long differTime = nowWithMorning.toDate().getTime() - t5._4.getTime();
+                    long differTime =
+                            vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
                     if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                        currentDto.day0 += t5._3;
+                        currentDto.day0 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
-                        currentDto.day1 += t5._3;
+                        currentDto.day1 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
-                        currentDto.day7 += t5._3;
+                        currentDto.day7 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
-                        currentDto.day30 += t5._3;
+                        currentDto.day30 += vo.qty;
                 }
 
                 // ProcureUnit
                 for(AnalyzeDTO dto : analyzeMap.values()) {
-                    // 切换 ProcureUnit 的 sku/sid 的参数
+                    // 切换 ProcureUnit 的 sku/sid 的参数?
                     List<ProcureUnit> untis = ProcureUnit
                             .find((isSku ? "sku=?" : "sid=?") + " AND stage NOT IN (?,?)", dto.fid,
                                     ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER).fetch();
@@ -136,8 +167,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     // review
                     F.T3<Integer, Float, List<String>> reviewT3;
-                    if(isSku) reviewT3 = AmazonListingReviewQuery.skuRelateReviews(dto.fid);
-                    else reviewT3 = AmazonListingReviewQuery.sidRelateReviews(dto.fid);
+                    if(isSku) reviewT3 = new AmazonListingReviewQuery().skuRelateReviews(dto.fid);
+                    else reviewT3 = new AmazonListingReviewQuery().sidRelateReviews(dto.fid);
                     dto.reviews = reviewT3._1;
                     dto.rating = reviewT3._2;
                     if(dto.reviews > 0)

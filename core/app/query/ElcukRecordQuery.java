@@ -1,6 +1,7 @@
 package query;
 
 import helper.DBUtils;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 
 import java.util.*;
@@ -20,13 +21,16 @@ public class ElcukRecordQuery {
      * @param lineType
      * @return
      */
-    public static Map<String, List<Integer>> emails(Date from, Date to, String lineType) {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT action, count(*) as c, " +
-                "date_format(createAt,'%Y-%m-%d') as date FROM ElcukRecord WHERE" +
-                " createAt>=? AND createAt<=? AND action=? AND fid=?" +
-                " GROUP BY date_format(createAt, '%Y-%m-%d')",
-                from, to, Messages.get("email.record"), lineType);
-
+    public Map<String, List<Integer>> emails(Date from, Date to, String lineType) {
+        SqlSelect sql = new SqlSelect()
+                .select("count(*) as c", "date_format(createAt, '%Y-%m-%d') as date")
+                .from("ElcukRecord")
+                .where("createAt>=?").param(from)
+                .where("createAt<=?").param(to)
+                .where("action=?").param(Messages.get("email.record"))
+                .where("fid=?").param(lineType)
+                .groupBy("date_format(createAt, '%Y-%m-%d')");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, List<Integer>> line = new HashMap<String, List<Integer>>();
         List<Integer> points = new ArrayList<Integer>();
         for(Map<String, Object> row : rows) {

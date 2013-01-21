@@ -194,7 +194,9 @@ public class RewAndFdbkDTO {
             Date begin = Dates.morning(from);
             Date end = Dates.night(to);
 
-            List<AmazonListingReview> calReviews = AmazonListingReview.find("createDate>=? AND createDate<=? AND listing.product IS NOT NULL", begin, end).fetch();
+            List<AmazonListingReview> calReviews = AmazonListingReview
+                    .find("createDate>=? AND createDate<=? AND listing.product IS NOT NULL", begin,
+                            end).fetch();
             for(AmazonListingReview r : calReviews) {
                 String fid = null;
                 if(r.ticket != null) fid = r.ticket.fid;
@@ -206,7 +208,7 @@ public class RewAndFdbkDTO {
             }
 
             // 销量...
-            Map<String, AtomicInteger> skuSales = OrderItemQuery.skuSales();
+            Map<String, AtomicInteger> skuSales = new OrderItemQuery().skuSales();
 
             // 总数
             for(String sku : groupBySku.keySet()) {
@@ -222,7 +224,8 @@ public class RewAndFdbkDTO {
                 if(rvw.sales == null) rvw.sales = 100000f;
 
                 rvw.negtiveRatio = rvw.historyNegtive / rvw.sales;
-                rvw.successRatio = rvw.historyNegtive > 0 ? (rvw.success / (rvw.historyNegtive * 1f)) : 0;
+                rvw.successRatio =
+                        rvw.historyNegtive > 0 ? (rvw.success / (rvw.historyNegtive * 1f)) : 0;
                 reviews.add(rvw);
             }
             Cache.add(cackeKey, reviews, "30mn");
@@ -247,9 +250,10 @@ public class RewAndFdbkDTO {
 
             Map<String, RewAndFdbkDTO> groupBySku = new HashMap<String, RewAndFdbkDTO>();
 
-            List<Feedback> feedbackList = Feedback.find("createDate>=? AND createDate<=?", begin, end).fetch();
+            List<Feedback> feedbackList = Feedback
+                    .find("createDate>=? AND createDate<=?", begin, end).fetch();
             for(Feedback fdbk : feedbackList) {
-                String fid = OrderItemQuery.feedbackSKU(fdbk);
+                String fid = new OrderItemQuery().feedbackSKU(fdbk);
                 if(StringUtils.isBlank(fid)) continue;
 
                 if(!groupBySku.containsKey(fid))
@@ -259,13 +263,13 @@ public class RewAndFdbkDTO {
             }
 
             // 销量...
-            Map<String, AtomicInteger> skuSales = OrderItemQuery.skuSales();
+            Map<String, AtomicInteger> skuSales = new OrderItemQuery().skuSales();
 
             // 总数
             for(String sku : groupBySku.keySet()) {
                 RewAndFdbkDTO rvw = groupBySku.get(sku);
                 rvw.fid = sku;
-                rvw.total = OrderItemQuery.skuFeedbackCount(sku);
+                rvw.total = new OrderItemQuery().skuFeedbackCount(sku);
 
                 Number number = skuSales.get(sku);
                 if(number == null) {
@@ -275,7 +279,8 @@ public class RewAndFdbkDTO {
                 if(rvw.sales == null) rvw.sales = 100000f;
 
                 rvw.negtiveRatio = rvw.historyNegtive / rvw.sales;
-                rvw.successRatio = rvw.historyNegtive > 0 ? (rvw.success / (rvw.historyNegtive * 1f)) : 0;
+                rvw.successRatio =
+                        rvw.historyNegtive > 0 ? (rvw.success / (rvw.historyNegtive * 1f)) : 0;
                 feedbacks.add(rvw);
             }
             Cache.add(cacheKey, feedbacks, "30mn");

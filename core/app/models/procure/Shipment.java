@@ -364,8 +364,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         // Whouse 不为 null 则需要检查 whouse 与其中的 item 数量是否一致
         if(this.whouse != null) {
-            long samewhouseItems = ShipmentQuery.shipemntItemCountWithSameWhouse(this.id, this.whouse.id);
-            if(samewhouseItems != this.items.size()) Validation.addError("", "运输单中拥有与运输单去往仓库不一样的运输单项目");
+            long samewhouseItems = new ShipmentQuery().shipemntItemCountWithSameWhouse(
+                    this.id, this.whouse.id);
+            if(samewhouseItems != this.items.size())
+                Validation.addError("", "运输单中拥有与运输单去往仓库不一样的运输单项目");
         }
         // 避免 trackNo 为 '' 的时候进入唯一性判断错误
         if(StringUtils.isBlank(this.trackNo)) this.trackNo = null;
@@ -409,7 +411,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.PLAN && this.state != S.CONFIRM)
             throw new FastRuntimeException("只有 PLAN 与 CONFIRM 状态可以添加运输项目");
 
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId)).fetch();
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId))
+                .fetch();
         List<String> unitsMerchantSKU = new ArrayList<String>();
         for(ProcureUnit unit : units) {
             // 如果是完全一个全新的 Shipment 那么则由第一个加入到其他的 ProcureUnit 决定去往仓库
@@ -427,11 +430,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : this.items) itm.save();
         this.save();
         new ElcukRecord(Messages.get("shipment.ship"),
-                Messages.get("shipment.ship.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
+                Messages.get("shipment.ship.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT),
+                        this.id),
                 this.id
         ).save();
         if(this.cycle)
-            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()), String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), Notification.SHIPPER);
+            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()),
+                    String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), Notification.SHIPPER);
     }
 
 
@@ -456,7 +461,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     case DELIVERED:
                     case IN_TRANSIT:
                     case RECEIVING:
-                        throw new FastRuntimeException(String.format("FBA(%s) 已经无法更改(%s), 所以不允许再修改运输项目.", itm.fba.shipmentId, itm.fba.state));
+                        throw new FastRuntimeException(
+                                String.format("FBA(%s) 已经无法更改(%s), 所以不允许再修改运输项目.",
+                                        itm.fba.shipmentId, itm.fba.state));
                 }
             }
         }
@@ -468,7 +475,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         if(log && shipItemId.size() > 0) {
             new ElcukRecord(Messages.get("shipment.cancelShip2"),
-                    Messages.get("shipment.cancelShip2.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
+                    Messages.get("shipment.cancelShip2.msg",
+                            StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
                     this.id
             ).save();
         }
@@ -509,8 +517,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // 检查提交的是否为当前运输单的 ShipItem, 是的挑出来, 找到一个不是则报告错误
         Map<String, ShipItem> shipItemsMap = new HashMap<String, ShipItem>();
         List<ShipItem> deployItems = new ArrayList<ShipItem>();
-        for(ShipItem itm : this.items)
+        for(ShipItem itm : this.items) {
             shipItemsMap.put(itm.id.toString(), itm);
+        }
         for(String id : shipitemIds) {
             if(!shipItemsMap.containsKey(id)) {
                 Validation.addError("", String.format("ShipItem Id %s 不存在运输单 %s 中", id, this.id));
@@ -548,7 +557,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // 对 FBA 的仓库检查, 同一个运输单不可以运输两个不同的 FBA 地址
         if(fbaQpt.isDefined() && this.fbas.size() > 0) {
             if(!fbaQpt.get().centerId.equals(this.fbas.get(0).centerId) && !this.cycle) {
-                Validation.addError("", "新获取的 FBA 仓库为 %s 与当前存在的去往 FBA 仓库不一样, 无法创建.", fbaQpt.get().centerId);
+                Validation.addError("", "新获取的 FBA 仓库为 %s 与当前存在的去往 FBA 仓库不一样, 无法创建.",
+                        fbaQpt.get().centerId);
                 return F.Option.None();
             }
         }
@@ -579,7 +589,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.CONFIRM)
             throw new FastRuntimeException("运输单没有 CONFIRM 无法运输");
         for(ShipItem itm : this.items) {
-            if(itm.unit.stage == ProcureUnit.STAGE.PLAN || itm.unit.stage == ProcureUnit.STAGE.DELIVERY)
+            if(itm.unit.stage == ProcureUnit.STAGE.PLAN ||
+                    itm.unit.stage == ProcureUnit.STAGE.DELIVERY)
                 throw new FastRuntimeException(String.format("采购计划 #%s 还没有交货, 无法运输.", itm.unit.id));
             if(!itm.unit.isPlaced)
                 throw new FastRuntimeException(String.format("采购计划 %s 还没有抵达, 无法运输.", itm.unit.id));
@@ -612,12 +623,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
         sbd.append("[运输:").append(Dates.date2Date(this.planBeginDate)).append("] ")
                 .append("[到库:").append(Dates.date2Date(this.planArrivDate)).append("] ");
-        if(this.volumn != null && this.volumn != 0) sbd.append("[运输体积:").append(this.volumn).append("] ");
-        if(this.weight != null && this.weight != 0) sbd.append("[运输重量:").append(this.weight).append("]");
+        if(this.volumn != null && this.volumn != 0)
+            sbd.append("[运输体积:").append(this.volumn).append("] ");
+        if(this.weight != null && this.weight != 0)
+            sbd.append("[运输重量:").append(this.weight).append("]");
         if(this.declaredValue != null && this.declaredValue != 0)
             sbd.append("[申报价(USD):").append(this.declaredValue).append("] ");
-        if(this.deposit != null && this.deposit != 0) sbd.append("[押金:").append(this.deposit).append("] ");
-        if(this.otherFee != null && this.otherFee != 0) sbd.append("[其他费用:").append(this.otherFee).append("] ");
+        if(this.deposit != null && this.deposit != 0)
+            sbd.append("[押金:").append(this.deposit).append("] ");
+        if(this.otherFee != null && this.otherFee != 0)
+            sbd.append("[其他费用:").append(this.otherFee).append("] ");
         if(this.cooper != null) sbd.append("[货代:").append(this.cooper.name).append("] ");
         if(this.whouse != null) sbd.append("[仓库:").append(this.whouse.name()).append("]");
         return sbd.toString();
@@ -631,7 +646,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.PLAN && this.state != S.CONFIRM)
             Validation.addError("", "分拆运输单只运输在 \"计划\" 与 \"确认运输\" 状态");
 
-        List<ShipItem> needSplitItems = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
+        List<ShipItem> needSplitItems = ShipItem
+                .find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
         if(needSplitItems.size() != shipItemIds.size())
             Validation.addError("", "分拆运输单的运输项目数量与数据库中记录的不一致");
         for(ShipItem itm : needSplitItems) {
@@ -641,14 +657,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return F.Option.None();
 
         Shipment newShipment = new Shipment(this);
-        newShipment.comment(String.format("从运输单 %s 分拆 %s items 而来.", this.id, needSplitItems.size()));
+        newShipment
+                .comment(String.format("从运输单 %s 分拆 %s items 而来.", this.id, needSplitItems.size()));
         newShipment.save();
         for(ShipItem spitem : needSplitItems) {
             spitem.shipment = newShipment;
             spitem.save();
         }
         new ElcukRecord(Messages.get("shipment.splitShipment"),
-                Messages.get("shipment.splitShipment.msg", StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
+                Messages.get("shipment.splitShipment.msg",
+                        StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
                 this.id).save();
         this.notifyWithMuchMoreShipmentCreate();
         return F.Option.Some(newShipment);
@@ -658,11 +676,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 用来检查并且提醒运输者, 系统内运输单创建数量太多
      */
     public void notifyWithMuchMoreShipmentCreate() {
-        long count = Shipment.count("createDate>=? AND createDate<=?", Dates.morning(new Date()), Dates.night(new Date()));
+        long count = Shipment.count("createDate>=? AND createDate<=?", Dates.morning(new Date()),
+                Dates.night(new Date()));
         //创建10 个以上的运输单才提醒
         if(count % 10 == 0 && count > 11) {
             long noitemShipments = Shipment.count("SIZE(items)=0 AND state!=?", Shipment.S.CANCEL);
-            Notification.notifies(String.format("今天已经创建了 %s 个运输单, 并且系统内拥有 %s 个无运输项目的运输单, 请记得处理.", count, noitemShipments), Notification.SHIPPER);
+            Notification.notifies(
+                    String.format("今天已经创建了 %s 个运输单, 并且系统内拥有 %s 个无运输项目的运输单, 请记得处理.", count,
+                            noitemShipments), Notification.SHIPPER);
         }
     }
 
@@ -697,7 +718,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         if(this.state == S.SHIPPING || this.state == S.CLEARANCE) {
             // 清关, 检查是否送达; 因为有时候会跳过清关信息, 所以也需要将 SHIPPING 包括进来检查是否送达
-            F.T2<Boolean, DateTime> isDelivered = this.internationExpress.isDelivered(this.iExpressHTML);
+            F.T2<Boolean, DateTime> isDelivered = this.internationExpress
+                    .isDelivered(this.iExpressHTML);
             if(isDelivered._1)
                 this.delivered(isDelivered._2.toDate());
         }
@@ -719,7 +741,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         try {
             this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
         } catch(Exception e) {
-            FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo, this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("%s.%s.%s.html", this.id, this.trackNo,
+                    this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
@@ -783,8 +806,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public float totalWeight() {
         //TODO 总重量, 需要根据体积/重量的运输算法来计算
         float weight = 0f;
-        for(ShipItem itm : this.items)
+        for(ShipItem itm : this.items) {
             weight += itm.qty * itm.unit.product.weight;
+        }
         return weight;
     }
 
@@ -817,9 +841,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
         String count = Shipment.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) + "";
-        return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
+                        .toDate(),
+                DateTime.parse(
+                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
+                        .toDate()) + "";
+        return String.format("SP|%s|%s", dt.toString("yyyyMM"),
+                count.length() == 1 ? "0" + count : count);
     }
 
     public static List<Shipment> shipmentsByState(S state) {
@@ -844,20 +872,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment.find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
-                S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate()).fetch();
+        List<Shipment> planedShipments = Shipment
+                .find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
+                        S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
+                .fetch();
         // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 4
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime tmp = now.plusDays(i);
             if(tmp.dayOfWeek().get() == 2 || tmp.dayOfWeek().get() == 4) {
-                Object exist = CollectionUtils.find(planedShipments, new PlanDateEqual(tmp.toDate()));
+                Object exist = CollectionUtils
+                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
                 if(exist == null)
                     Shipment.checkWhouseNewShipment(tmp.toDate(), T.EXPRESS);
                 if(exist == null && tmp.dayOfWeek().get() == 4)
                     Shipment.checkWhouseNewShipment(tmp.toDate(), T.SEA);
             } else if(tmp.dayOfWeek().get() == 3 || tmp.dayOfWeek().get() == 5) {
-                Object exist = CollectionUtils.find(planedShipments, new PlanDateEqual(tmp.toDate()));
+                Object exist = CollectionUtils
+                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
                 if(exist == null)
                     Shipment.checkWhouseNewShipment(tmp.toDate(), T.AIR);
             }
@@ -878,7 +910,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             params.add(shipType);
         }
 
-        return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray()).fetch();
+        return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray())
+                .fetch();
     }
 
     /**
@@ -900,8 +933,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         List<Shipment> newShipments = new ArrayList<Shipment>();
         List<Whouse> whs = Whouse.all().fetch();
         for(Whouse wh : whs) {
-            if(Shipment.count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
-                    planBeginDate, wh, shipmentType, S.PLAN, S.CONFIRM) > 0)
+            if(Shipment
+                    .count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
+                            planBeginDate, wh, shipmentType, S.PLAN, S.CONFIRM) > 0)
                 continue;
 
             Shipment shipment = new Shipment();
@@ -916,7 +950,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 shipment.planArrivDate = new DateTime(planBeginDate).plusDays(45).toDate();
             shipment.whouse = wh;
             shipment.type = shipmentType;
-            shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(), Dates.date2Date(shipment.planBeginDate));
+            shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
+                    Dates.date2Date(shipment.planBeginDate));
 
             newShipments.add(shipment.<Shipment>save());
         }

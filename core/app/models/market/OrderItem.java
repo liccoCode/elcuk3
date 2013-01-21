@@ -3,15 +3,20 @@ package models.market;
 import helper.*;
 import helper.Currency;
 import models.product.Product;
-import org.apache.commons.lang.StringUtils;
+import models.view.dto.HighChartLines;
+import models.view.post.AnalyzePost;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.jobs.Job;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
+import query.vo.AnalyzeVO;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -139,6 +144,10 @@ public class OrderItem extends GenericModel {
     /**
      * 根据 sku 或者 msku 从 OrderItem 中查询对应 Account 的 OrderItem
      * ps: 结果缓存 5mn (缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存)
+     * 将时间语义转换为对应市场的, 例:
+     * 查询 2013-01-01 这天的数据
+     * ->
+     * 查询 美国 2013-01-01 这天的数据; 系统中记录的是北京时间,所以会进行时间转换
      *
      * @param skuOrMsku sku 或者 merchantSKU(msku)
      * @param type      sku/all/msku
@@ -149,32 +158,48 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
-    public static List<OrderItem> skuOrMskuAccountRelateOrderItem(String skuOrMsku, String type,
-                                                                  Account acc, Date from, Date to) {
+    public static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(
+            final String skuOrMsku, final String type, final Account acc, final Date from,
+            final Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
-        List<OrderItem> orderItems = Cache.get(cacheKey, List.class);
-        if(orderItems != null) return orderItems;
-        synchronized(OrderItem.class) {
-            orderItems = Cache.get(cacheKey, List.class);
-            if(orderItems != null) return orderItems;
-
-            if("all".equalsIgnoreCase(skuOrMsku)) {
-                orderItems = OrderItemQuery.allNormalSaleOrderItem(from, to);
-            } else {
-                if(StringUtils.isNotBlank(type) && "sku".equalsIgnoreCase(type))
-                    orderItems = OrderItemQuery.skuNormalSaleOrderItem(
-                            Product.merchantSKUtoSKU(skuOrMsku), from, to);
-                else {
-                    if(acc == null)
-                        orderItems = OrderItemQuery.mskuNormalSaleOrderItem(skuOrMsku, from, to);
-                    else
-                        orderItems = OrderItemQuery.mskuWithAccountNormalSaleOrderItem(skuOrMsku,
-                                acc.id, from, to);
+        List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
+        if(vos != null) return vos;
+        synchronized(AnalyzeVO.class) {
+            vos = Cache.get(cacheKey, List.class);
+            if(vos != null) return vos;
+            vos = new ArrayList<AnalyzeVO>();
+            List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
+            try {
+                for(final M m : AnalyzePost.MARKETS) {
+                    voPromises.add(new Job<List<AnalyzeVO>>() {
+                        @Override
+                        public List<AnalyzeVO> doJobWithResult() throws Exception {
+                            Date _from = m.withTimeZone(from).toDate();
+                            Date _to = m.withTimeZone(to).toDate();
+                            if("all".equalsIgnoreCase(skuOrMsku))
+                                return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
+                            else if("sku".equalsIgnoreCase(type))
+                                return new OrderItemQuery()
+                                        .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
+                            else if("sid".equalsIgnoreCase(type))
+                                return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                                        skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
+                            else
+                                return new ArrayList<AnalyzeVO>();
+                        }
+                    }.now());
                 }
+                for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
+                    vos.addAll(voP.get(30, TimeUnit.SECONDS));
+                }
+            } catch(Exception e) {
+                throw new FastRuntimeException(
+                        String.format("因为 %s 问题(超过 10s), 请然后重新尝试搜索.", Webs.E(e)));
             }
-            Cache.add(cacheKey, orderItems, "5mn");
+            if(vos.size() > 0)
+                Cache.add(cacheKey, vos, "5mn");
         }
-        return Cache.get(cacheKey, List.class);
+        return vos;
     }
 
     /**
@@ -187,25 +212,21 @@ public class OrderItem extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku,
-                                                                               Account acc,
-                                                                               String type,
-                                                                               Date from, Date to) {
+    public static HighChartLines ajaxHighChartSales(String skuOrMsku,
+                                                    Account acc,
+                                                    String type,
+                                                    Date from, Date to) {
         // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.date2JDate(from));
-        DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
-        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
-                inFrom.toDate(), inTo.toDate());
-        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
-                /*销售额*/
-                .map("sale_all", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_de", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_us", new ArrayList<F.T2<Long, Float>>())
-                .build();
-        DateTime travel = inFrom.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
+        DateTime _from = new DateTime(Dates.morning(from));
+        DateTime _to = new DateTime(Dates.night(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
+                _from.toDate(), _to.toDate());
+
+        HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
+        // 从开始时间起, 以 1 天的时间间隔去 group 数据, 没有的设置为 0
+        DateTime travel = _from.plusDays(0); // copy 一个新的
+        while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
+            String travelStr = travel.toString("yyyy-MM-dd");
             // 销售额
             float sale_all = 0;
             float sale_uk = 0;
@@ -213,15 +234,16 @@ public class OrderItem extends GenericModel {
             float sale_fr = 0;
             float sale_us = 0;
 
-            for(OrderItem oi : orderItems) {
-                if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
+            for(AnalyzeVO vo : vos) {
+                DateTime marketLocalTime = new DateTime(vo.date, Dates.timeZone(vo.market));
+                if(marketLocalTime.toString("yyyy-MM-dd").equals(travelStr)) {
                     try {
-                        float usdCost = oi.usdCost == null ? 0 : oi.usdCost;
+                        float usdCost = vo.usdCost == null ? 0 : vo.usdCost;
                         sale_all += usdCost;
-                        if(oi.market == M.AMAZON_UK) sale_uk += usdCost;
-                        else if(oi.market == M.AMAZON_DE) sale_de += usdCost;
-                        else if(oi.market == M.AMAZON_FR) sale_fr += usdCost;
-                        else if(oi.market == M.AMAZON_US) sale_us += usdCost;
+                        if(vo.market == M.AMAZON_UK) sale_uk += usdCost;
+                        else if(vo.market == M.AMAZON_DE) sale_de += usdCost;
+                        else if(vo.market == M.AMAZON_FR) sale_fr += usdCost;
+                        else if(vo.market == M.AMAZON_US) sale_us += usdCost;
                     } catch(Exception e) {
                         e.printStackTrace();
                     }
@@ -229,16 +251,15 @@ public class OrderItem extends GenericModel {
                 }
             }
             // 当天所有市场的销售额数据
-            hightChartLines.get("sale_all")
-                    .add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
-            hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
-            hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
-            hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
-            hightChartLines.get("sale_us").add(new F.T2<Long, Float>(travel.getMillis(), sale_us));
+            lines.line("sale_all").add(sale_all);
+            lines.line("sale_fr").add(sale_fr);
+            lines.line("sale_uk").add(sale_uk);
+            lines.line("sale_us").add(sale_us);
+            lines.line("sale_de").add(sale_de);
             travel = travel.plusDays(1);
         }
 
-        return hightChartLines;
+        return lines;
     }
 
     /**
@@ -252,58 +273,56 @@ public class OrderItem extends GenericModel {
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
-    @SuppressWarnings("unchecked")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartUnitOrder(String skuOrMsku,
-                                                                                   Account acc,
-                                                                                   String type,
-                                                                                   Date from,
-                                                                                   Date to) {
+    public static HighChartLines ajaxHighChartUnitOrder(String skuOrMsku,
+                                                        Account acc,
+                                                        String type,
+                                                        Date from,
+                                                        Date to) {
         // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.date2JDate(from));
-        DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        DateTime _from = new DateTime(Dates.date2JDate(from));
+        DateTime _to = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
-        List<OrderItem> orderItems = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
-                inFrom.toDate(), inTo.toDate());
-        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
-                /*销量*/
-                .map("unit_all", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_de", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_us", new ArrayList<F.T2<Long, Float>>())
-                .build();
-        DateTime travel = inFrom.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
+        List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
+                _from.toDate(), _to.toDate());
+
+        HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
+        DateTime travel = _from.plusDays(0); // copy 一个新的
+        while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
+            String travelStr = travel.toString("yyyy-MM-dd");
             // 销量
             float unit_all = 0;
             float unit_uk = 0;
             float unit_de = 0;
             float unit_fr = 0;
             float unit_us = 0;
-            for(OrderItem oi : orderItems) {
-                if(Dates.date2JDate(oi.createDate).getTime() == travel.getMillis()) {
-                    unit_all += oi.quantity;
-                    if(oi.market == M.AMAZON_UK) unit_uk += oi.quantity;
-                    else if(oi.market == M.AMAZON_DE) unit_de += oi.quantity;
-                    else if(oi.market == M.AMAZON_FR) unit_fr += oi.quantity;
-                    else if(oi.market == M.AMAZON_US) unit_us += oi.quantity;
+            for(AnalyzeVO vo : vos) {
+                /**
+                 * 将北京时间换成对应市场的本地时间, 因为加载出了对应市场时间的数据后,
+                 * 需要再将时间还原到对应市场, 然后进行市场当天数据的 group
+                 */
+                DateTime marketLocalTime = new DateTime(vo.date, Dates.timeZone(vo.market));
+                if(marketLocalTime.toString("yyyy-MM-dd").equalsIgnoreCase(travelStr)) {
+                    unit_all += vo.qty;
+                    if(vo.market == M.AMAZON_UK) unit_uk += vo.qty;
+                    else if(vo.market == M.AMAZON_DE) unit_de += vo.qty;
+                    else if(vo.market == M.AMAZON_FR) unit_fr += vo.qty;
+                    else if(vo.market == M.AMAZON_US) unit_us += vo.qty;
                     // 其他市场暂时先不统计
                 }
             }
             // 当天所有市场的销售订单数据
-            hightChartLines.get("unit_all")
-                    .add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
-            hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
-            hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
-            hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
-            hightChartLines.get("unit_us").add(new F.T2<Long, Float>(travel.getMillis(), unit_us));
+            lines.line("unit_all").add(unit_all);
+            lines.line("unit_fr").add(unit_fr);
+            lines.line("unit_uk").add(unit_uk);
+            lines.line("unit_us").add(unit_us);
+            lines.line("unit_de").add(unit_de);
             travel = travel.plusDays(1);
         }
-        return hightChartLines;
+        return lines;
     }
 
     /**
@@ -316,18 +335,23 @@ public class OrderItem extends GenericModel {
      */
     public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to,
                                                                          Account acc) {
-        List<F.T3<String, Integer, Float>> rows = OrderItemQuery.sku_qty_usdCost(from, to, acc);
+        List<AnalyzeVO> vos = new OrderItemQuery().groupCategory(
+                from, to, acc == null ? null : acc.id);
 
         Map<String, F.T2<AtomicInteger, AtomicReference<Float>>> categoryAndCounts = new HashMap<String, F.T2<AtomicInteger, AtomicReference<Float>>>();
-        for(F.T3<String, Integer, Float> row : rows) {
-            if(categoryAndCounts.containsKey(row._1)) {
-                categoryAndCounts.get(row._1)._1.addAndGet(row._2);
-                categoryAndCounts.get(row._1)._2
-                        .set(categoryAndCounts.get(row._1)._2.get() + row._3);
-            } else
-                categoryAndCounts.put(row._1,
-                        new F.T2<AtomicInteger, AtomicReference<Float>>(new AtomicInteger(row._2),
-                                new AtomicReference<Float>(row._3)));
+        for(AnalyzeVO vo : vos) {
+            //sku_qty_usdCost
+            if(categoryAndCounts.containsKey(vo.sku)) {
+                categoryAndCounts.get(vo.sku)._1.addAndGet(vo.qty);
+                categoryAndCounts.get(vo.sku)._2.set(
+                        categoryAndCounts.get(vo.sku)._2.get() + vo.usdCost);
+            } else {
+                categoryAndCounts.put(
+                        vo.sku,
+                        new F.T2<AtomicInteger, AtomicReference<Float>>(
+                                new AtomicInteger(vo.qty),
+                                new AtomicReference<Float>(vo.usdCost)));
+            }
         }
 
         List<F.T3<String, Integer, Float>> categoryAndQty = new ArrayList<F.T3<String, Integer, Float>>();

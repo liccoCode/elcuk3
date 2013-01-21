@@ -25,7 +25,7 @@ import java.util.TimeZone;
 public class Bootstrap extends Job {
     @Override
     public void doJob() throws Exception {
-        // 设置为 中国上海 时间
+        // 设置为 北京 时间;整个系统内的时间, 以北京时间为准
         TimeZone.setDefault(Dates.timeZone(null).toTimeZone());
 
         if(Play.id.equalsIgnoreCase("test")) {

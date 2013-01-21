@@ -28,11 +28,9 @@ public class Application extends Controller {
 
     public static void index() {
         Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
-        Date now = new Date();
         // Feedback 信息
         Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Feedback.frontPageTable();
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        renderArgs.put("now", Dates.date2DateTime(now));
         render(odmaps, fbaWhouse, feedbacksOverView);
     }
 

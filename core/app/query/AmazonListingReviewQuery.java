@@ -6,7 +6,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,9 +23,10 @@ public class AmazonListingReviewQuery {
      *
      * @return ._1: review 数量; ._2: reivew 分数; ._3: reviewId
      */
-    public static F.T3<Integer, Float, List<String>> sidRelateReviews(String sid) {
+    public F.T3<Integer, Float, List<String>> sidRelateReviews(String sid) {
         SqlSelect sql = new SqlSelect()
-                .select("count(r.alrId) as c", "avg(r.rating) as rating", "group_concat(r.reviewId) as reviewIds")
+                .select("count(r.alrId) as c", "avg(r.rating) as rating",
+                        "group_concat(r.reviewId) as reviewIds")
                 .from("AmazonListingReview r")
                 .leftJoin("Selling s USING(listing_listingId)")
                 .where("s.sellingId=?").param(sid);
@@ -46,9 +46,10 @@ public class AmazonListingReviewQuery {
      *
      * @return ._1: review 数量; ._2: reivew 分数; ._3: reviewId
      */
-    public static F.T3<Integer, Float, List<String>> skuRelateReviews(String sku) {
+    public F.T3<Integer, Float, List<String>> skuRelateReviews(String sku) {
         SqlSelect sql = new SqlSelect()
-                .select("count(r.alrId) as c", "avg(r.rating) as rating", "group_concat(r.reviewId) as reviewIds")
+                .select("count(r.alrId) as c", "avg(r.rating) as rating",
+                        "group_concat(r.reviewId) as reviewIds")
                 .from("AmazonListingReview r")
                 .leftJoin("Listing l ON r.listing_listingId=l.listingId")
                 .where("l.product_sku=?").param(sku);

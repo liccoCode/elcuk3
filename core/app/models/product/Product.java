@@ -8,7 +8,10 @@ import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
 import models.embedded.AmazonProps;
-import models.market.*;
+import models.market.Listing;
+import models.market.M;
+import models.market.PriceStrategy;
+import models.market.Selling;
 import models.procure.Cooperator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -44,7 +47,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
      */
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+                    CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<Listing> listings = new ArrayList<Listing>();
 
     @ManyToOne
@@ -112,7 +117,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @PreRemove
     public void checkDelete() {
         if(this.listings != null && this.listings.size() > 0) {
-            throw new FastRuntimeException("Product [" + this.sku + "] have relate Listing, cannot be delete.");
+            throw new FastRuntimeException(
+                    "Product [" + this.sku + "] have relate Listing, cannot be delete.");
         }
     }
 
@@ -139,7 +145,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.family == null)
             Validation.addError("", "Family 不存在,请先添加后再创建 Product!");
         if(this.family != null && !StringUtils.startsWith(this.sku, this.family.family))
-            Validation.addError("", "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
+            Validation.addError("",
+                    "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(Validation.hasErrors()) return;
 
 
@@ -201,7 +208,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             if(!StringUtils.equals(StringUtils.split(selling.merchantSKU, ",")[1], selling.aps.upc))
                 throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc],[other]");
         } catch(Exception e) {
-            throw new FastRuntimeException(String.format("(%s) 解析 MerchantSKU 的格式错误!", selling.merchantSKU));
+            throw new FastRuntimeException(
+                    String.format("(%s) 解析 MerchantSKU 的格式错误!", selling.merchantSKU));
         }
 
         selling.price = selling.aps.salePrice;
@@ -229,9 +237,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
              */
 
             // --------------   1   -------------------
-            String body = HTTP.get(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/);
+            String body = HTTP
+                    .get(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/);
             if(Play.mode.isDev())
-                FLog.fileLog(String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
+                FLog.fileLog(
+                        String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id),
+                        body, FLog.T.SALES);
 
             Document doc = Jsoup.parse(body);
             Elements inputs = doc.select("form[name=selectProductTypeForm] input");
@@ -239,22 +250,29 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             for(Element input : inputs) {
                 String name = input.attr("name");
                 if(StringUtils.isBlank(category.settings.choseAmazonCategory(selling.market)))
-                    throw new FastRuntimeException(String.format("Category %s 没有设定市场 %s 对应的值", category.categoryId, selling.market));
+                    throw new FastRuntimeException(
+                            String.format("Category %s 没有设定市场 %s 对应的值", category.categoryId,
+                                    selling.market));
                 if("newCategory".equals(name))
-                    classifyHiddenParams.add(new BasicNameValuePair(name, category.settings.choseAmazonCategory(selling.market)));
+                    classifyHiddenParams.add(new BasicNameValuePair(name,
+                            category.settings.choseAmazonCategory(selling.market)));
                 else
                     classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
             }
 
             //  ------------------ 2 -----------------
-            body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/, classifyHiddenParams);
+            body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/,
+                    classifyHiddenParams);
             if(Play.mode.isDev())
-                FLog.fileLog(String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
+                FLog.fileLog(
+                        String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id),
+                        body, FLog.T.SALES);
             doc = Jsoup.parse(body);
 
             Set<NameValuePair> addSellingPrams = new HashSet<NameValuePair>();
             inputs = doc.select("form[name=productForm] input");
-            if(inputs == null || inputs.size() <= 7) throw new FastRuntimeException("没有进入第二步 Identify 页面!");
+            if(inputs == null || inputs.size() <= 7)
+                throw new FastRuntimeException("没有进入第二步 Identify 页面!");
             /**
              * 每一个类别下提交的参数都不一样, 但通过 JS console 测试 us/de 两个市场,
              * 如果 UPC 是已经使用过的, 则只需要提交两个参数
@@ -276,17 +294,25 @@ public class Product extends GenericModel implements ElcukRecord.Log {
              * list_price-uom:USD
              */
             // ------------------ 3 -----------------------
-            String ajaxBody = HTTP.post(selling.account.cookieStore(), selling.account.type.matchAsinAjaxLink(), Arrays.asList(
-                    new BasicNameValuePair("sessionMapPresent", "true"),
-                    new BasicNameValuePair("our_price-uom", doc.select("input[name=our_price-uom]").val()),
-                    new BasicNameValuePair("discounted_price-uom", doc.select("input[name=discounted_price-uom]").val()),
-                    // 必须
-                    new BasicNameValuePair("encoded_session_hidden_map", doc.select("input[name=encoded_session_hidden_map]").val()),
-                    new BasicNameValuePair("manufacturer", selling.aps.manufacturer),
-                    new BasicNameValuePair("part_number", selling.aps.manufacturerPartNumber),
-                    new BasicNameValuePair("item_name", selling.aps.title),
-                    new BasicNameValuePair("external_id", selling.aps.upc)
-            ));
+            String ajaxBody = HTTP
+                    .post(selling.account.cookieStore(), selling.account.type.matchAsinAjaxLink(),
+                            Arrays.asList(
+                                    new BasicNameValuePair("sessionMapPresent", "true"),
+                                    new BasicNameValuePair("our_price-uom",
+                                            doc.select("input[name=our_price-uom]").val()),
+                                    new BasicNameValuePair("discounted_price-uom",
+                                            doc.select("input[name=discounted_price-uom]").val()),
+                                    // 必须
+                                    new BasicNameValuePair("encoded_session_hidden_map",
+                                            doc.select("input[name=encoded_session_hidden_map]")
+                                                    .val()),
+                                    new BasicNameValuePair("manufacturer",
+                                            selling.aps.manufacturer),
+                                    new BasicNameValuePair("part_number",
+                                            selling.aps.manufacturerPartNumber),
+                                    new BasicNameValuePair("item_name", selling.aps.title),
+                                    new BasicNameValuePair("external_id", selling.aps.upc)
+                            ));
 
             /**
              * 对有已经上架的 Listing 做关联选择.
@@ -336,9 +362,11 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                     else if("manufacturer".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturer));
                     else if("brand_name".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, StringUtils.isBlank(selling.aps.brand) ? "EasyAcc" : selling.aps.brand)); // ?? 这个品牌的名字现在都使用我们自己的?
+                        addSellingPrams.add(new BasicNameValuePair(name, StringUtils.isBlank(
+                                selling.aps.brand) ? "EasyAcc" : selling.aps.brand)); // ?? 这个品牌的名字现在都使用我们自己的?
                     else if("part_number".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturerPartNumber));
+                        addSellingPrams.add(new BasicNameValuePair(name,
+                                selling.aps.manufacturerPartNumber));
                     else if("model".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.aps.modelNumber));
                     else if("external_id".equals(name))
@@ -346,17 +374,24 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                     else if("offering_sku".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.merchantSKU));
                     else if("our_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.standerPrice)));
+                        addSellingPrams.add(new BasicNameValuePair(name,
+                                Webs.priceLocalNumberFormat(M.AMAZON_UK,
+                                        selling.aps.standerPrice)));
                     else if("discounted_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.salePrice)));
+                        addSellingPrams.add(new BasicNameValuePair(name,
+                                Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.salePrice)));
                     else if("discounted_price_start_date".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
+                        addSellingPrams.add(new BasicNameValuePair(name,
+                                Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
                     else if("discounted_price_end_date".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, Dates.listingUpdateFmt(selling.market, selling.aps.endDate)));
+                        addSellingPrams.add(new BasicNameValuePair(name,
+                                Dates.listingUpdateFmt(selling.market, selling.aps.endDate)));
                     else if("Offer_Inventory_Quantity".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.quantity + ""));
+                        addSellingPrams
+                                .add(new BasicNameValuePair(name, selling.aps.quantity + ""));
                     else if("activeClientTimeOnTask".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
+                        addSellingPrams.add(new BasicNameValuePair(name,
+                                "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
                     else if("matchAsin".equals(name))
                         addSellingPrams.add(new BasicNameValuePair(name, selling.aps.matchAsin));
                     else if("encoded_session_hidden_map".equals(name)) {
@@ -370,10 +405,16 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                     } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
                         if(selling.aps.rbns != null) {
                             if(selling.aps.rbns.size() == 1)
-                                addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns.get(0)));
+                                addSellingPrams
+                                        .add(new BasicNameValuePair("recommended_browse_nodes[0]",
+                                                selling.aps.rbns.get(0)));
                             else if(selling.aps.rbns.size() == 2) {
-                                addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[0]", selling.aps.rbns.get(0)));
-                                addSellingPrams.add(new BasicNameValuePair("recommended_browse_nodes[1]", selling.aps.rbns.get(1)));
+                                addSellingPrams
+                                        .add(new BasicNameValuePair("recommended_browse_nodes[0]",
+                                                selling.aps.rbns.get(0)));
+                                addSellingPrams
+                                        .add(new BasicNameValuePair("recommended_browse_nodes[1]",
+                                                selling.aps.rbns.get(1)));
                             }
                         }
                     } else {
@@ -401,21 +442,28 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 String name = select.attr("name");
                 // Condition
                 if("offering_condition".equals(name))
-                    addSellingPrams.add(new BasicNameValuePair(name, "New|New")); // 商品的 Condition 设置为 NEW
+                    addSellingPrams
+                            .add(new BasicNameValuePair(name, "New|New")); // 商品的 Condition 设置为 NEW
                 else
-                    addSellingPrams.add(new BasicNameValuePair(name, select.select("option[selected]").val()));
+                    addSellingPrams.add(new BasicNameValuePair(name,
+                            select.select("option[selected]").val()));
             }
             // -------------  5 -----------------
             /**
              * 上架时候的错误信息全部返回给前台.
              */
-            body = HTTP.post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/, addSellingPrams);
+            body = HTTP
+                    .post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/,
+                            addSellingPrams);
             // 记录任何上架操作都记录日志. 大不了自己删除...
-            FLog.fileLog(String.format("%s.%s.%s.step3.html", selling.merchantSKU, selling.account.id, System.currentTimeMillis()), body, FLog.T.SALES);
+            FLog.fileLog(
+                    String.format("%s.%s.%s.step3.html", selling.merchantSKU, selling.account.id,
+                            System.currentTimeMillis()), body, FLog.T.SALES);
 
             doc = Jsoup.parse(body);
             // 检查是否提交成功了, 没有成功则抛出异常.
-            if(doc.select("#productHeaderForTabs").first() != null && doc.select(".messageboxerror").first() != null)
+            if(doc.select("#productHeaderForTabs").first() != null &&
+                    doc.select(".messageboxerror").first() != null)
                 throw new FastRuntimeException(doc.select(".messageboxerror").first().text());
 
             // 最后获取成功成见 Listing 以后的 ASIN
@@ -441,7 +489,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
             // inventory-status/status.html 页面的访问, 会自行进行 302 转向访问
             body = HTTP.post(selling.account.cookieStore(), form.attr("action"), finalFormParam);
-            FLog.fileLog(String.format("%s.%s.%s.step4.html", selling.merchantSKU, selling.account.id, System.currentTimeMillis()), body, FLog.T.SALES);
+            FLog.fileLog(
+                    String.format("%s.%s.%s.step4.html", selling.merchantSKU, selling.account.id,
+                            System.currentTimeMillis()), body, FLog.T.SALES);
 
             // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
             if(StringUtils.isBlank(selling.asin) && StringUtils.isBlank(selling.aps.matchAsin)) {
@@ -474,22 +524,30 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @param times             循环的次数, 依次传递下去
      * @return
      */
-    private String getNewAsin(Selling selling, List<NameValuePair> fetchNewAsinParam, int times) throws InterruptedException {
-        String jsonStr = HTTP.post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
-        Logger.info("Fetch ProductCreateStatus [%s] with [%s]", selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
+    private String getNewAsin(Selling selling, List<NameValuePair> fetchNewAsinParam, int times)
+            throws InterruptedException {
+        String jsonStr = HTTP
+                .post(selling.account.cookieStore(), selling.account.type.productCreateStatusLink(),
+                        fetchNewAsinParam);
+        Logger.info("Fetch ProductCreateStatus [%s] with [%s]",
+                selling.account.type.productCreateStatusLink(), fetchNewAsinParam);
         JsonElement jsonEl = new JsonParser().parse(jsonStr);
         JsonObject jsonObj = jsonEl.getAsJsonObject();
         if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
             return jsonObj.get("asin").getAsString();
         else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
-            FLog.fileLog(String.format("%s.%s.times_%s.js", selling.merchantSKU, selling.account.id, times), jsonStr, FLog.T.SALES);
+            FLog.fileLog(String.format("%s.%s.times_%s.js", selling.merchantSKU, selling.account.id,
+                    times), jsonStr, FLog.T.SALES);
             if(times > 30) // 尝试 30 次吧... 12 次还是会有 PENDING 的问题
-                throw new FastRuntimeException("使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
+                throw new FastRuntimeException(
+                        "使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
             Thread.sleep(2500);
             return getNewAsin(selling, fetchNewAsinParam, ++times);
         } else {
-            FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id), jsonStr, FLog.T.SALES);
-            throw new FastRuntimeException("使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
+            FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id),
+                    jsonStr, FLog.T.SALES);
+            throw new FastRuntimeException(
+                    "使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
         }
     }
 
@@ -499,7 +557,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public List<Cooperator> cooperators() {
-        return Cooperator.find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id", this.sku).fetch();
+        return Cooperator
+                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id",
+                        this.sku).fetch();
     }
 
     /**
@@ -523,7 +583,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Override
     public String to_log() {
         return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s]",
-                this.lengths, this.width, this.heigh, this.weight, this.declaredValue, this.productName);
+                this.lengths, this.width, this.heigh, this.weight, this.declaredValue,
+                this.productName);
     }
 
     /**
@@ -644,12 +705,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         List<String> csvHeader = new ArrayList<String>();
         csvHeader.add("Time DE");
 
+        /*
+        TODO 需要修复
         for(String sku : skus) {
             csvHeader.add(sku);
-            Map<String, ArrayList<F.T2<Long, Float>>> oneSku = OrderItem.ajaxHighChartUnitOrder(sku, null, "sku", from, to);
-            List<F.T2<Long, Float>> oneSkuTimeSalesDe = oneSku.get("unit_de");
-            List<F.T2<Long, Float>> oneSkuTimeSalesUk = oneSku.get("unit_uk");
-            List<F.T2<Long, Float>> oneSkuTimeSalesAll = oneSku.get("unit_all");
+            HighChartLines oneSku = OrderItem.ajaxHighChartUnitOrder(sku, null, "sku", from, to);
+            HighChartLines.Line oneSkuTimeSalesDe = oneSku.line("unit_de");
+            HighChartLines.Line oneSkuTimeSalesUk = oneSku.line("unit_uk");
+            HighChartLines.Line oneSkuTimeSalesAll = oneSku.line("unit_all");
             for(F.T2<Long, Float> oneSkuSale : oneSkuTimeSalesDe) {
                 if(deSales.containsKey(oneSkuSale._1))
                     deSales.get(oneSkuSale._1).add(new F.T2<String, Float>(sku, oneSkuSale._2));
@@ -672,6 +735,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             }
 
         }
+        */
 
         onMarketSkuSalesCsv(csvWriter, deSales, csvHeader, "DE");
         onMarketSkuSalesCsv(csvWriter, ukSales, csvHeader, "UK");
@@ -683,7 +747,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 将数据写到 CSV 文件中.
      */
-    private static void onMarketSkuSalesCsv(CSVWriter csvWriter, Map<Long, List<F.T2<String, Float>>> allSkuSales, List<String> csvHeader, String market) {
+    private static void onMarketSkuSalesCsv(CSVWriter csvWriter,
+                                            Map<Long, List<F.T2<String, Float>>> allSkuSales,
+                                            List<String> csvHeader, String market) {
         csvWriter.writeNext(new String[]{"--", "--", "--", "--", "--", "--"}); // 分割一栏
         csvHeader.set(0, "Time " + market);
         csvWriter.writeNext(csvHeader.toArray(new String[csvHeader.size()]));
