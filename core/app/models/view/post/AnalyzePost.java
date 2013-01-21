@@ -111,7 +111,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         }.now());
                     }
                     for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
-                        vos.addAll(voP.get(5, TimeUnit.SECONDS));
+                        vos.addAll(voP.get(30, TimeUnit.SECONDS));
                     }
                 } catch(Exception e) {
                     throw new FastRuntimeException(

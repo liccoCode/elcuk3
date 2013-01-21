@@ -3,6 +3,7 @@ package models.market;
 import helper.*;
 import helper.Currency;
 import models.product.Product;
+import models.view.dto.HighChartLines;
 import models.view.post.AnalyzePost;
 import org.joda.time.DateTime;
 import play.cache.Cache;
@@ -185,7 +186,7 @@ public class OrderItem extends GenericModel {
                     }.now());
                 }
                 for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
-                    vos.addAll(voP.get(10, TimeUnit.SECONDS));
+                    vos.addAll(voP.get(30, TimeUnit.SECONDS));
                 }
             } catch(Exception e) {
                 throw new FastRuntimeException(
@@ -207,25 +208,20 @@ public class OrderItem extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartSales(String skuOrMsku,
-                                                                               Account acc,
-                                                                               String type,
-                                                                               Date from, Date to) {
+    public static HighChartLines ajaxHighChartSales(String skuOrMsku,
+                                                    Account acc,
+                                                    String type,
+                                                    Date from, Date to) {
         // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.date2JDate(from));
-        DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        DateTime _from = new DateTime(Dates.morning(from));
+        DateTime _to = new DateTime(Dates.night(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
-                inFrom.toDate(), inTo.toDate());
-        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
-                /*销售额*/
-                .map("sale_all", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_de", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("sale_us", new ArrayList<F.T2<Long, Float>>())
-                .build();
-        DateTime travel = inFrom.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
+                _from.toDate(), _to.toDate());
+
+        HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
+        // 从开始时间起, 以 1 天的时间间隔去 group 数据, 没有的设置为 0
+        DateTime travel = _from.plusDays(0); // copy 一个新的
+        while(travel.getMillis() <= _to.getMillis()) { // 开始计算每一天的数据
             // 销售额
             float sale_all = 0;
             float sale_uk = 0;
@@ -249,16 +245,15 @@ public class OrderItem extends GenericModel {
                 }
             }
             // 当天所有市场的销售额数据
-            hightChartLines.get("sale_all")
-                    .add(new F.T2<Long, Float>(travel.getMillis(), sale_all));
-            hightChartLines.get("sale_uk").add(new F.T2<Long, Float>(travel.getMillis(), sale_uk));
-            hightChartLines.get("sale_de").add(new F.T2<Long, Float>(travel.getMillis(), sale_de));
-            hightChartLines.get("sale_fr").add(new F.T2<Long, Float>(travel.getMillis(), sale_fr));
-            hightChartLines.get("sale_us").add(new F.T2<Long, Float>(travel.getMillis(), sale_us));
+            lines.line("sale_all").add(sale_all);
+            lines.line("sale_fr").add(sale_fr);
+            lines.line("sale_uk").add(sale_uk);
+            lines.line("sale_us").add(sale_us);
+            lines.line("sale_de").add(sale_de);
             travel = travel.plusDays(1);
         }
 
-        return hightChartLines;
+        return lines;
     }
 
     /**
@@ -272,15 +267,14 @@ public class OrderItem extends GenericModel {
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
-    @SuppressWarnings("unchecked")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartUnitOrder(String skuOrMsku,
-                                                                                   Account acc,
-                                                                                   String type,
-                                                                                   Date from,
-                                                                                   Date to) {
+    public static HighChartLines ajaxHighChartUnitOrder(String skuOrMsku,
+                                                        Account acc,
+                                                        String type,
+                                                        Date from,
+                                                        Date to) {
         // 做内部参数的容错
-        DateTime inFrom = new DateTime(Dates.date2JDate(from));
-        DateTime inTo = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        DateTime _from = new DateTime(Dates.date2JDate(from));
+        DateTime _to = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         /**
          * 加载出限定时间内的指定 Msku 的 OrderItem
          * 按照天过滤成销量数据
@@ -288,17 +282,11 @@ public class OrderItem extends GenericModel {
          */
         //TODO 销量曲线的时间 x 轴问题
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
-                inFrom.toDate(), inTo.toDate());
-        Map<String, ArrayList<F.T2<Long, Float>>> hightChartLines = GTs.MapBuilder
-                /*销量*/
-                .map("unit_all", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_de", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("unit_us", new ArrayList<F.T2<Long, Float>>())
-                .build();
-        DateTime travel = inFrom.plusDays(0); // copy 一个新的
-        while(travel.getMillis() <= inTo.getMillis()) { // 开始计算每一天的数据
+                _from.toDate(), _to.toDate());
+
+        HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
+        DateTime travel = _from.plusDays(0); // copy 一个新的
+        while(travel.getMillis() <= _to.getMillis()) { // 开始计算每一天的数据
             // 销量
             float unit_all = 0;
             float unit_uk = 0;
@@ -316,15 +304,14 @@ public class OrderItem extends GenericModel {
                 }
             }
             // 当天所有市场的销售订单数据
-            hightChartLines.get("unit_all")
-                    .add(new F.T2<Long, Float>(travel.getMillis(), unit_all));
-            hightChartLines.get("unit_uk").add(new F.T2<Long, Float>(travel.getMillis(), unit_uk));
-            hightChartLines.get("unit_de").add(new F.T2<Long, Float>(travel.getMillis(), unit_de));
-            hightChartLines.get("unit_fr").add(new F.T2<Long, Float>(travel.getMillis(), unit_fr));
-            hightChartLines.get("unit_us").add(new F.T2<Long, Float>(travel.getMillis(), unit_us));
+            lines.line("unit_all").add(unit_all);
+            lines.line("unit_fr").add(unit_fr);
+            lines.line("unit_uk").add(unit_uk);
+            lines.line("unit_us").add(unit_us);
+            lines.line("unit_de").add(unit_de);
             travel = travel.plusDays(1);
         }
-        return hightChartLines;
+        return lines;
     }
 
     /**
