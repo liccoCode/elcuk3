@@ -24,74 +24,79 @@ $ ->
     )
     e.preventDefault()
 
-
-  pieOpBuilder = (id, title, aid) ->
-    chart:
-      renderTo: id
-      type: 'pie'
-    title:
-      {text: title}
-    tooltip:
-      formatter: ->
-        "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>OrderItems: #{@y} / #{@total}"
-    plotOptions:
-      pie:
-        cursor: 'point'
-        dataLabels:
-          enabled: true
-          color: '#000'
+  class PieChart
+    constructor: (@container, @aid) ->
+      @opt =
+        chart:
+          renderTo: ''
+          type: 'pie'
+        title:
+          text: ''
+        tooltip:
           formatter: ->
-            "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
-    series: []
-    aid: aid
-    clearLines: () ->
-      @series = []
+            "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%<br/>OrderItems: #{@y} / #{@total}"
+        plotOptions:
+          pie:
+            cursor: 'point'
+            dataLabels:
+              enabled: true
+              color: '#000'
+              formatter: ->
+                "<b>#{@point.name}</b>: #{@percentage.toFixed(2)}%"
+        series: [
+          data: []
+        ]
+        aid: @aid
 
-  cat = '<span style="color:#F67300">销量</span>'
-  sales = '<span style="color:#F67300">销售额</span>'
-  pieAll = pieOpBuilder('cat_percent', "类别#{cat}百分比", 0)
-  pieDE = pieOpBuilder('cat_percent_de', "EasyAcc.DE 类别#{cat}百分比", 2)
-  pieUS = pieOpBuilder('cat_percent_us', "EasyAcc.US 类别#{cat}百分比", 131)
-  pieUK = pieOpBuilder('cat_percent_uk', "EasyAcc.UK 类别#{cat}百分比", 1)
+    # units/sales
+    percent: (type = 'units', date = $.DateUtil.fmt2(new Date()), mask_selector = '#orders') =>
+      self = @
+      LoadMask.mask(mask_selector)
+      $.get('/application/percent', {type: type, date: date, aid: @aid}, (r) ->
+        self.title(type)
+        self.series(r['series'])
+        self.renderTo(self.container)
+        LoadMask.un_mask(mask_selector)
+      )
 
-  salesALL = pieOpBuilder('sales_percent', "类别#{sales}百分比", 0)
-  salesDE = pieOpBuilder('sales_percent_de', "EasyAcc.DE 类别#{sales}百分比", 0)
-  salesUS = pieOpBuilder('sales_percent_us', "EasyAcc.US 类别#{sales}百分比", 0)
-  salesUK = pieOpBuilder('sales_percent_uk', "EasyAcc.US 类别#{sales}百分比", 0)
+    title: (type) ->
+      t =
+        units: '销量'
+        sales: '销售额'
+      m =
+        1: '.UK'
+        2: '.DE'
+        131: '.US'
+        0: ''
+      cat = "<span style=\"color:#F67300\">#{t[type]}</span>"
+      @opt.title.text = "EasyAcc#{m[@aid]} 类型#{cat}百分比"
 
-  # category 百分比
-  loadCategoryAndSalePercent = (pieTuple, date = $.DateUtil.fmt2(new Date())) ->
-    mask = $('#orders')
-    mask.mask('加载中...')
-    # aid 的值随便使用一个 pieTuple 即可, 因为 category 与 sales 这种计算是统一的
-    $.get('/application/categoryPercent', {date: date, aid: pieTuple['o'].aid},
-    (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        tupleKey = o: '_2', s: '_3'
-        for k, v of pieTuple
-          line = data: []
-          line.data.push([o['_1'], o[tupleKey[k]]]) for o in r
-          v.clearLines()
-          v.series.push(line)
-          try
-            new Highcharts.Chart(v)
-          catch e #权限控制
-            console.log(e)
-      mask.unmask()
-    )
+    series: (datas) ->
+      @opt.series[0].data = datas.map((point) -> [point.name, point.data])
+
+    push: (data) ->
+      @opt.series[0].data.push(data)
+
+    renderTo: (id) ->
+      @opt.chart.renderTo = id
+      new Highcharts.Chart(@opt)
+
 
   # 重新绘制所有的 Pie 图
   drawPies = (date) ->
-    loadCategoryAndSalePercent({o: pieAll, s: salesALL}, date)
-    loadCategoryAndSalePercent({o: pieUK, s: salesUK}, date)
-    loadCategoryAndSalePercent({o: pieDE, s: salesDE}, date)
-    loadCategoryAndSalePercent({o: pieUS, s: salesUS}, date)
+    new PieChart("cat_percent", 0).percent('units', date)
+    new PieChart("cat_percent_de", 2).percent('units', date)
+    new PieChart("cat_percent_us", 1).percent('units', date)
+    new PieChart("cat_percent_uk", 131).percent('units', date)
+
+    new PieChart("sales_percent", 0).percent('sales', date)
+    new PieChart("sales_percent_de", 2).percent('sales', date)
+    new PieChart("sales_percent_us", 131).percent('sales', date)
+    new PieChart("sales_percent_uk", 1).percent('sales', date)
+
 
   $('#overview').load("/ticketanalyzes/overview?full=false")
-  lastDate = $("#orders tr:last td:eq(0)").attr('date')
-  drawPies(lastDate)
+  drawPies($("#orders tr:last td:eq(0)").attr('date'))
 
   #为table 中的日期添加查看指定天的 类别百分比数据
   $('#orders td[date]').css('cursor', 'pointer').click ->

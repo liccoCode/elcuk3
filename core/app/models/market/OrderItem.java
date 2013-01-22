@@ -1,10 +1,10 @@
 package models.market;
 
 import helper.*;
-import helper.Currency;
 import models.product.Product;
-import models.view.dto.HighChartLines;
+import models.view.dto.HighChart;
 import models.view.post.AnalyzePost;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -15,10 +15,10 @@ import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 订单的具体订单项
@@ -212,17 +212,17 @@ public class OrderItem extends GenericModel {
      * @param to
      * @return
      */
-    public static HighChartLines ajaxHighChartSales(String skuOrMsku,
-                                                    Account acc,
-                                                    String type,
-                                                    Date from, Date to) {
+    public static HighChart ajaxHighChartSales(String skuOrMsku,
+                                               Account acc,
+                                               String type,
+                                               Date from, Date to) {
         // 做内部参数的容错
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 _from.toDate(), _to.toDate());
 
-        HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
+        HighChart lines = new HighChart().startAt(_from.getMillis());
         // 从开始时间起, 以 1 天的时间间隔去 group 数据, 没有的设置为 0
         DateTime travel = _from.plusDays(0); // copy 一个新的
         while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
@@ -273,11 +273,11 @@ public class OrderItem extends GenericModel {
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
-    public static HighChartLines ajaxHighChartUnitOrder(String skuOrMsku,
-                                                        Account acc,
-                                                        String type,
-                                                        Date from,
-                                                        Date to) {
+    public static HighChart ajaxHighChartUnitOrder(String skuOrMsku,
+                                                   Account acc,
+                                                   String type,
+                                                   Date from,
+                                                   Date to) {
         // 做内部参数的容错
         DateTime _from = new DateTime(Dates.date2JDate(from));
         DateTime _to = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
@@ -289,7 +289,7 @@ public class OrderItem extends GenericModel {
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 _from.toDate(), _to.toDate());
 
-        HighChartLines lines = new HighChartLines().startAt(_from.getMillis());
+        HighChart lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
         while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
             String travelStr = travel.toString("yyyy-MM-dd");
@@ -326,43 +326,53 @@ public class OrderItem extends GenericModel {
     }
 
     /**
-     * 不同 Category 销量的百分比
+     * 不同 Category 销量的百分比;
      *
+     * @param type units/sales
      * @param from
      * @param to
-     * @param acc
+     * @param acc  de/uk/us/all
      * @return
      */
-    public static List<F.T3<String, Integer, Float>> itemGroupByCategory(Date from, Date to,
-                                                                         Account acc) {
-        List<AnalyzeVO> vos = new OrderItemQuery().groupCategory(
-                from, to, acc == null ? null : acc.id);
-
-        Map<String, F.T2<AtomicInteger, AtomicReference<Float>>> categoryAndCounts = new HashMap<String, F.T2<AtomicInteger, AtomicReference<Float>>>();
-        for(AnalyzeVO vo : vos) {
-            //sku_qty_usdCost
-            if(categoryAndCounts.containsKey(vo.sku)) {
-                categoryAndCounts.get(vo.sku)._1.addAndGet(vo.qty);
-                categoryAndCounts.get(vo.sku)._2.set(
-                        categoryAndCounts.get(vo.sku)._2.get() + vo.usdCost);
-            } else {
-                categoryAndCounts.put(
-                        vo.sku,
-                        new F.T2<AtomicInteger, AtomicReference<Float>>(
-                                new AtomicInteger(vo.qty),
-                                new AtomicReference<Float>(vo.usdCost)));
+    public static HighChart categoryPercent(String type, final Date from, final Date to,
+                                            Account acc) {
+        HighChart pieChart = new HighChart();
+        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+        if(acc != null) {
+            // 转换成为不同对应市场的时间
+            vos = new OrderItemQuery().groupCategory(
+                    acc.type.withTimeZone(from).toDate(),
+                    acc.type.withTimeZone(to).toDate(),
+                    acc.id);
+        } else {
+            try {
+                List<F.Promise<List<AnalyzeVO>>> futures = new ArrayList<F.Promise<List<AnalyzeVO>>>();
+                for(final M m : AnalyzePost.MARKETS) {
+                    futures.add(new Job<List<AnalyzeVO>>() {
+                        @Override
+                        public List<AnalyzeVO> doJobWithResult() throws Exception {
+                            return new OrderItemQuery().groupCategory(
+                                    m.withTimeZone(from).toDate(),
+                                    m.withTimeZone(to).toDate(),
+                                    m
+                            );
+                        }
+                    }.now());
+                }
+                for(F.Promise<List<AnalyzeVO>> fu : futures) {
+                    vos.addAll(fu.get(1, TimeUnit.MINUTES));
+                }
+            } catch(Exception e) {
+                throw new FastRuntimeException("请售后重试");
             }
         }
-
-        List<F.T3<String, Integer, Float>> categoryAndQty = new ArrayList<F.T3<String, Integer, Float>>();
-        for(String key : categoryAndCounts.keySet()) {
-            categoryAndQty.add(new F.T3<String, Integer, Float>(key,
-                    categoryAndCounts.get(key)._1.get(),
-                    categoryAndCounts.get(key)._2.get()
-            ));
+        for(AnalyzeVO vo : vos) {
+            if(StringUtils.equals(type, "sales"))
+                pieChart.pie(vo.sku, vo.usdCost);
+            else
+                pieChart.pie(vo.sku, vo.qty.floatValue());
         }
-
-        return categoryAndQty;
+        return pieChart;
     }
 
 

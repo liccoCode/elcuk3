@@ -709,10 +709,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         TODO 需要修复
         for(String sku : skus) {
             csvHeader.add(sku);
-            HighChartLines oneSku = OrderItem.ajaxHighChartUnitOrder(sku, null, "sku", from, to);
-            HighChartLines.Line oneSkuTimeSalesDe = oneSku.line("unit_de");
-            HighChartLines.Line oneSkuTimeSalesUk = oneSku.line("unit_uk");
-            HighChartLines.Line oneSkuTimeSalesAll = oneSku.line("unit_all");
+            HighChart oneSku = OrderItem.ajaxHighChartUnitOrder(sku, null, "sku", from, to);
+            HighChart.Line oneSkuTimeSalesDe = oneSku.line("unit_de");
+            HighChart.Line oneSkuTimeSalesUk = oneSku.line("unit_uk");
+            HighChart.Line oneSkuTimeSalesAll = oneSku.line("unit_all");
             for(F.T2<Long, Float> oneSkuSale : oneSkuTimeSalesDe) {
                 if(deSales.containsKey(oneSkuSale._1))
                     deSales.get(oneSkuSale._1).add(new F.T2<String, Float>(sku, oneSkuSale._2));

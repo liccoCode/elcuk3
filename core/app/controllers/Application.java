@@ -11,7 +11,6 @@ import models.product.Whouse;
 import models.view.Ret;
 import play.Play;
 import play.cache.Cache;
-import play.cache.CacheFor;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -34,10 +33,12 @@ public class Application extends Controller {
         render(odmaps, fbaWhouse, feedbacksOverView);
     }
 
-    @CacheFor(value = "20mn")
-    public static void categoryPercent(Date date, long aid) {
+    //    @CacheFor(value = "40mn")
+    public static void percent(String type, Date date, long aid) {
         renderJSON(JSON.toJSON(
-                OrderItem.itemGroupByCategory(Dates.morning(date),
+                OrderItem.categoryPercent(
+                        type,
+                        Dates.morning(date),
                         Dates.night(date),
                         Account.<Account>findById(aid)))
         );

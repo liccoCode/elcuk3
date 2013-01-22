@@ -27,15 +27,39 @@ public class OrderItemQuery {
 
     public List<AnalyzeVO> groupCategory(Date from, Date to, Long accId) {
         SqlSelect sql = new SqlSelect()
-                .select("oi.product_sku as sku", "oi.quantity as qty", "oi.usdCost as usdCost")
-                .from("OrderItem oi");
+                // tip: just a hack
+                .select("p.category_categoryId as sku",
+                        "sum(oi.quantity) as qty",
+                        "sum(oi.usdCost) as usdCost")
+                .from("OrderItem oi")
+                .leftJoin("Product p on p.sku=oi.product_sku");
         if(accId != null) {
             sql.leftJoin("Orderr o ON o.orderId=oi.order_orderId")
                     .where("o.account_id=?").param(accId);
         }
         sql.where("oi.createDate>=?").param(from)
                 .where("oi.createDate<=?").param(to)
-                .where("oi.quantity>0");
+                .where("oi.product_sku IS NOT NULL")
+                .where("oi.quantity>0")
+                .groupBy("p.category_categoryId");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        return rows2Vo(rows);
+    }
+
+    public List<AnalyzeVO> groupCategory(Date from, Date to, M market) {
+        SqlSelect sql = new SqlSelect()
+                // tip: just a hack
+                .select("p.category_categoryId as sku",
+                        "sum(oi.quantity) as qty",
+                        "sum(oi.usdCost) as usdCost")
+                .from("OrderItem oi")
+                .leftJoin("Product p on p.sku=oi.product_sku")
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate<=?").param(to)
+                .where("oi.product_sku IS NOT NULL")
+                .where("oi.quantity>0")
+                .groupBy("p.category_categoryId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
     }
@@ -64,7 +88,7 @@ public class OrderItemQuery {
         String sku = null;
         try {
             PreparedStatement ps = conn
-                    .prepareStatement("select product_sku from OrderItem where order_orderId=?");
+                    .prepareStatement("SELECT product_sku FROM OrderItem WHERE order_orderId=?");
             ps.setString(1, feedback.orderId);
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
@@ -89,7 +113,7 @@ public class OrderItemQuery {
         int count = 0;
         try {
             PreparedStatement ps = conn.prepareStatement(
-                    "select count(i.product_sku) from Feedback f left join OrderItem i on f.orderr_orderId=i.order_orderId where i.product_sku=?");
+                    "SELECT COUNT(i.product_sku) FROM Feedback f LEFT JOIN OrderItem i ON f.orderr_orderId=i.order_orderId WHERE i.product_sku=?");
             ps.setString(1, sku);
             ResultSet rs = ps.executeQuery();
             while(rs.next()) {
@@ -117,7 +141,7 @@ public class OrderItemQuery {
         Map<String, AtomicInteger> skuSales = new HashMap<String, AtomicInteger>();
         try {
             PreparedStatement ps = conn.prepareStatement(
-                    "select quantity, product_sku from OrderItem where createDate>=? AND createDate<=?");
+                    "SELECT quantity, product_sku FROM OrderItem WHERE createDate>=? AND createDate<=?");
             ps.setDate(1, new java.sql.Date(begin.getTime()));
             ps.setDate(2, new java.sql.Date(end.getTime()));
             ResultSet rs = ps.executeQuery();
@@ -212,11 +236,11 @@ public class OrderItemQuery {
             if(row.get("sku") != null)
                 vo.sku = row.get("sku").toString();
             if(row.get("qty") != null)
-                vo.qty = (Integer) row.get("qty");
+                vo.qty = ((Number) row.get("qty")).intValue();
             if(row.get("market") != null)
                 vo.market = M.val(row.get("market").toString());
             if(row.get("usdCost") != null)
-                vo.usdCost = (Float) row.get("usdCost");
+                vo.usdCost = ((Number) row.get("usdCost")).floatValue();
             if(row.get("_date") != null)
                 vo.date = new DateTime(row.get("_date")).toDate();
             if(row.get("sid") != null)

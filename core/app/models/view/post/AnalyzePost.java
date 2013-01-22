@@ -97,6 +97,12 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                 List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
                 // 通过 Job 异步 fork 加载不同时段的数据
+                /**
+                 * FIXME 这类型的代码在下面, 这些需要进行重构到一起
+                 * 1. 此处
+                 * 2. OrderItem.categoryPercent
+                 * 3. OrderItem.skuOrMskuAccountRelateOrderItem
+                 */
                 List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
                 Logger.info("Start Fork to fetch Analyzes Sellings.");
                 try {

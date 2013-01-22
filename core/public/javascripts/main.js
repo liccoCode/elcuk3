@@ -5,6 +5,32 @@ Timeline_ajax_url = "/js/timeline/timeline_ajax/simile-ajax-api.js";
 Timeline_urlPrefix = '/js/timeline/timeline_js/';
 Timeline_parameters = 'bundle=true';
 
+var LoadMask = {
+    /**
+     * 锁屏幕
+     * @param selector
+     */
+    mask: function(selector){
+        var times = localStorage.getItem(selector + "_times");
+        if(!times){
+            times = 0;
+            $(selector).mask("处理中...");
+        }
+        localStorage.setItem(selector + "_times", ++times);
+        console.log(times);
+    },
+    un_mask: function(selector){
+        var times = localStorage.getItem(selector + "_times");
+        if(--times <= 0){
+            localStorage.removeItem(selector + "_times");
+            $(selector).unmask();
+        }else{
+            localStorage.setItem(selector + "_times", times)
+        }
+        console.log(times);
+    }
+};
+
 $.varClosure = function(){
     var o = $(this);
     if(!o.attr('name')) return false;
@@ -62,7 +88,7 @@ $.DateUtil = {
      * @param date
      * @param day
      */
-    addDay:function(day, date){
+    addDay: function(day, date){
         if(date){
             if($.type(date) != 'date'){
                 throw 'the date is not type of Date';
@@ -77,7 +103,7 @@ $.DateUtil = {
     /**
      * mm/dd/yyyy 格式的年月日
      */
-    fmt1:function(date){
+    fmt1: function(date){
         var month = date.getMonth() + 1;
         var ddate = date.getDate();
         return (month < 10 ? '0' + month :month) + '/' + (ddate < 10 ? '0' + ddate :ddate) + '/' + date.getFullYear();
@@ -86,7 +112,7 @@ $.DateUtil = {
      * yyyy-MM-dd 格式的年月日
      * @param date
      */
-    fmt2:function(date){
+    fmt2: function(date){
         var month = date.getMonth() + 1;
         var ddate = date.getDate();
         return date.getFullYear() + "-" + (month < 10 ? '0' + month :month) + '-' + (ddate < 10 ? '0' + ddate :ddate)
@@ -96,7 +122,7 @@ $.DateUtil = {
      * yyyy-MM-dd HH:mm:ss 格式
      * @param date
      */
-    fmt3:function(date){
+    fmt3: function(date){
         return this.fmt2(date) + " " + date.getHours() + ':' + date.getMinutes() + ":" + date.getSeconds();
     }
 
