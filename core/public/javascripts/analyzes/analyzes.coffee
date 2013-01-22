@@ -14,6 +14,7 @@ $ ->
     tabs: -> $("##{@tabs_id}")
     content: -> $("##{@content_id}")
     active: -> $("##{@tabs_id} [data-toggle=tab]").parent().filter('.active').find('a').attr('href')[1..-1]
+    content_selector: -> "#" + @content_id
 
 
   # 获取下面的 Tab 元素组合
@@ -101,111 +102,120 @@ $ ->
   # ------------------- 曲线绘制 ---------------------
   # 绘制 Session 的曲线
   ss_line = (params) ->
+    LoadMask.mask(BELOWTAb.content_selector())
     $.getJSON('/analyzes/ajaxSellingRecord', params, (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        lines =
-          pv_uk:
-            {name: 'PageView(uk)', data: []}
-          pv_de:
-            {name: 'PageView(de)', data: []}
-          pv_fr:
-            {name: 'PageView(fr)', data: []}
-          pv_us:
-            {name: 'PageView(us)', data: []}
-          ss_uk:
-            {name: 'Session(uk)', data: []}
-          ss_de:
-            {name: 'Session(de)', data: []}
-          ss_fr:
-            {name: 'Session(fr)', data: []}
-          ss_us:
-            {name: 'Session(us)', data: []}
-        sessionLine.head('Selling[' + params['p.val'] + '] SS')
-        sessionLine.clearLines()
-        for k,v of r
-          lines[k].data.push([o['_1'], o['_2']]) for o in v
-          sessionLine.series.push(lines[k])
-        $('#' + sessionLine.id()).data('char', new Highcharts.Chart(sessionLine))
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          lines =
+            pv_uk:
+              {name: 'PageView(uk)', data: []}
+            pv_de:
+              {name: 'PageView(de)', data: []}
+            pv_fr:
+              {name: 'PageView(fr)', data: []}
+            pv_us:
+              {name: 'PageView(us)', data: []}
+            ss_uk:
+              {name: 'Session(uk)', data: []}
+            ss_de:
+              {name: 'Session(de)', data: []}
+            ss_fr:
+              {name: 'Session(fr)', data: []}
+            ss_us:
+              {name: 'Session(us)', data: []}
+          sessionLine.head('Selling[' + params['p.val'] + '] SS')
+          sessionLine.clearLines()
+          for k,v of r
+            lines[k].data.push([o['_1'], o['_2']]) for o in v
+            sessionLine.series.push(lines[k])
+          $('#' + sessionLine.id()).data('char', new Highcharts.Chart(sessionLine))
+      finally
+        LoadMask.unmask(BELOWTAb.content_selector())
     )
 
   # 绘制转换率曲线
   turn_line = (params) ->
+    LoadMask.mask(BELOWTAb.content_selector())
     $.getJSON('/analyzes/ajaxSellingTurn', params, (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        lines =
-          tn_uk:
-            {name: 'TurnRatio(uk)', data: []}
-          tn_de:
-            {name: 'TurnRatio(de)', data: []}
-          tn_fr:
-            {name: 'TurnRatio(fr)', data: []}
-          tn_us:
-            {name: 'TurnRatio(us)', data: []}
-        turnOverLine.head('Selling[' + params['p.val'] + '] 转化率')
-        turnOverLine.clearLines()
-        for k, v of r
-          lines[k].data.push([o['_1'], o['_2']]) for o in v
-          # 填充完曲线数据
-          turnOverLine.series.push(lines[k]) # 添加曲线
-        $('#' + turnOverLine.id()).data('char', new Highcharts.Chart(turnOverLine))
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          lines =
+            tn_uk:
+              {name: 'TurnRatio(uk)', data: []}
+            tn_de:
+              {name: 'TurnRatio(de)', data: []}
+            tn_fr:
+              {name: 'TurnRatio(fr)', data: []}
+            tn_us:
+              {name: 'TurnRatio(us)', data: []}
+          turnOverLine.head('Selling[' + params['p.val'] + '] 转化率')
+          turnOverLine.clearLines()
+          for k, v of r
+            lines[k].data.push([o['_1'], o['_2']]) for o in v
+            # 填充完曲线数据
+            turnOverLine.series.push(lines[k]) # 添加曲线
+          $('#' + turnOverLine.id()).data('char', new Highcharts.Chart(turnOverLine))
+      finally
+        LoadMask.unmask(BELOWTAb.content_selector())
     )
 
   # 绘制销量曲线
   unit_line = (params) ->
-    maskDiv = BELOWTAb.content()
-    maskDiv.mask('加载中...')
-    $.getJSON('/analyzes/ajaxUnit', params,
-    (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        display_sku = params['p.val']
-        unitLines = newSaleUnitLines()
-        unitLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
-        names =
-          unit_all: 'Unit Order(all)'
-          unit_uk: 'Unit Order(uk)'
-          unit_de: 'Unit Order(de)'
-          unit_fr: 'Unit Order(fr)'
-          unit_us: 'Unit Order(us)'
-        # 将曲线的名字更换为可读性更强的
-        r['series'].map((l) -> l.name = names[l.name])
-        for line in r['series']
-          unitLines.series.push(line)
-        unitLines.xStart(r['pointStart'])
-        console.log(unitLines)
-        $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
-      maskDiv.unmask()
+    LoadMask.mask(BELOWTAb.content_selector())
+    $.getJSON('/analyzes/ajaxUnit', params, (r) ->
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          display_sku = params['p.val']
+          unitLines = newSaleUnitLines()
+          unitLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
+          names =
+            unit_all: 'Unit Order(all)'
+            unit_uk: 'Unit Order(uk)'
+            unit_de: 'Unit Order(de)'
+            unit_fr: 'Unit Order(fr)'
+            unit_us: 'Unit Order(us)'
+          # 将曲线的名字更换为可读性更强的
+          r['series'].map((l) -> l.name = names[l.name])
+          for line in r['series']
+            unitLines.series.push(line)
+          unitLines.xStart(r['pointStart'])
+          console.log(unitLines)
+          $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
+      finally
+        LoadMask.unmask(BELOWTAb.content_selector())
     )
 
   # 绘制销售额曲线
   sale_line = (params) ->
-    maskDiv = BELOWTAb.content()
-    maskDiv.mask('加载中...')
+    LoadMask.mask(BELOWTAb.content_selector())
     $.getJSON('/analyzes/ajaxSales', params,
     (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        display_sku = params['p.val']
-        salesLines = newSalesLines()
-        salesLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Sales(USD)")
-        names =
-          sale_all: 'Sales(all)'
-          sale_uk: 'Sales(uk)'
-          sale_de: 'Sales(de)'
-          sale_fr: 'Sales(fr)'
-          sale_us: 'Sales(us)'
-        r['series'].map((l) -> l.name = names[l.name])
-        for line in r['series']
-          salesLines.series.push(line)
-        salesLines.xStart(r['pointStart'])
-        $('#' + salesLines.id()).data('char', new Highcharts.Chart(salesLines))
-      maskDiv.unmask()
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          display_sku = params['p.val']
+          salesLines = newSalesLines()
+          salesLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Sales(USD)")
+          names =
+            sale_all: 'Sales(all)'
+            sale_uk: 'Sales(uk)'
+            sale_de: 'Sales(de)'
+            sale_fr: 'Sales(fr)'
+            sale_us: 'Sales(us)'
+          r['series'].map((l) -> l.name = names[l.name])
+          for line in r['series']
+            salesLines.series.push(line)
+          salesLines.xStart(r['pointStart'])
+          $('#' + salesLines.id()).data('char', new Highcharts.Chart(salesLines))
+      finally
+        LoadMask.unmask(BELOWTAb.content_selector())
     )
 
   # -------------------------------------------------------------------
@@ -224,25 +234,25 @@ $ ->
 
   # 绘制 ProcureUnit 的 timeline 中的数据
   paintProcureUnitInTimeline = (type, val)->
-    maskEl = BELOWTAb.content()
-    maskEl.mask('加载中...')
+    LoadMask.mask(BELOWTAb.content_selector())
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
     (r) ->
-      if r.flag is false
-        alert(r.message)
-      else
-        #eventSource.loadJSON(json, url)
-        eventSource = $('#tl').data('source')
-        eventSource.clear()
-        eventSource.loadJSON(r, '/')
-      maskEl.unmask()
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          #eventSource.loadJSON(json, url)
+          eventSource = $('#tl').data('source')
+          eventSource.clear()
+          eventSource.loadJSON(r, '/')
+      finally
+        LoadMask.unmask(BELOWTAb.content_selector())
       #$('#tl').data('timeline').paint()
     )
 
   # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
   sellRankLoad = () ->
-    mask = $("#container")
-    mask.mask("加载中...")
+    LoadMask.mask();
     type = $("[name=p\\.type]").val()
     target = $("##{type}").load('/Analyzes/analyzes', $("#click_param").formSerialize(),
     ->
@@ -265,31 +275,26 @@ $ ->
         sellRankLoad()
 
       # 绑定 sku/sid 的点击事件[unit_line, sales_line, session, turnOver]
-      $("##{type} .#{type}").click(
-        (e) ->
-          text = $(@).text().trim()
-          text = text.split('|')[0] if type == SID
-          $('[name=p\\.val]').val(text)
+      $("##{type} .#{type}").click((e) ->
+        text = $(@).text().trim()
+        text = text.split('|')[0] if type == SID
+        $('[name=p\\.val]').val(text)
+        params = paramsObj()
+        # timeline
+        paintProcureUnitInTimeline(params['p.type'], $(@).text().trim())
 
-          params = paramsObj()
-
-          # timeline
-          paintProcureUnitInTimeline(params['p.type'], $(@).text().trim())
-
-          console.log(TOPTAB.active())
-
-          switch(TOPTAB.active())
-            when 'root'
-              sale_line(params)
-            when 'basic'
-              unit_line(params)
-            else
-              console.log('skip')
+        switch(TOPTAB.active())
+          when 'root'
+            sale_line(params)
+          when 'basic'
+            unit_line(params)
+          else
+            console.log('skip')
 
 
-          if type == SID
-            ss_line(params)
-            turn_line(params)
+        if type == SID
+          ss_line(params)
+          turn_line(params)
       )
 
       if type == SID
@@ -298,8 +303,7 @@ $ ->
       else if type == SKU
         pageViewDefaultContent()
 
-
-      mask.unmask()
+      LoadMask.unmask();
     )
 
   pageViewDefaultContent = () ->
@@ -339,8 +343,7 @@ $ ->
     sale_line(paramsObj())
 
   # 为页面下方的 Tab 切换添加事件
-  BELOWTAb.tabs().find('[data-toggle=tab]').on('shown',
-  (e) ->
+  BELOWTAb.tabs().find('[data-toggle=tab]').on('shown', (e) ->
     tabId = $(e.target).attr('href').substr(1)
     $('[name=p\\.type]').val(tabId)
     sellRankLoad() if $("##{tabId}").html() == "wait"

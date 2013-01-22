@@ -56,7 +56,7 @@ $ ->
         self.title(type)
         self.series(r['series'])
         self.renderTo(self.container)
-        LoadMask.un_mask(mask_selector)
+        LoadMask.unmask(mask_selector)
       )
 
     title: (type) ->
