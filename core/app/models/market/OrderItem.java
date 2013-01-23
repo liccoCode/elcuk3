@@ -3,14 +3,10 @@ package models.market;
 import helper.*;
 import models.product.Product;
 import models.view.dto.HighChart;
-import models.view.post.AnalyzePost;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
-import play.jobs.Job;
-import play.libs.F;
-import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
@@ -18,7 +14,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 订单的具体订单项
@@ -168,34 +163,29 @@ public class OrderItem extends GenericModel {
             vos = Cache.get(cacheKey, List.class);
             if(vos != null) return vos;
             vos = new ArrayList<AnalyzeVO>();
-            List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
-            try {
-                for(final M m : AnalyzePost.MARKETS) {
-                    voPromises.add(new Job<List<AnalyzeVO>>() {
-                        @Override
-                        public List<AnalyzeVO> doJobWithResult() throws Exception {
-                            Date _from = m.withTimeZone(from).toDate();
-                            Date _to = m.withTimeZone(to).toDate();
-                            if("all".equalsIgnoreCase(skuOrMsku))
-                                return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
-                            else if("sku".equalsIgnoreCase(type))
-                                return new OrderItemQuery()
-                                        .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
-                            else if("sid".equalsIgnoreCase(type))
-                                return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                                        skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
-                            else
-                                return new ArrayList<AnalyzeVO>();
-                        }
-                    }.now());
+
+            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+                @Override
+                public List<AnalyzeVO> doJobWithResult(M m) {
+                    Date _from = m.withTimeZone(from).toDate();
+                    Date _to = m.withTimeZone(to).toDate();
+                    if("all".equalsIgnoreCase(skuOrMsku))
+                        return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
+                    else if("sku".equalsIgnoreCase(type))
+                        return new OrderItemQuery()
+                                .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
+                    else if("sid".equalsIgnoreCase(type))
+                        return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                                skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
+                    else
+                        return new ArrayList<AnalyzeVO>();
                 }
-                for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
-                    vos.addAll(voP.get(30, TimeUnit.SECONDS));
+
+                @Override
+                public String id() {
+                    return "OrderItem.skuOrMskuAccountRelateOrderItem";
                 }
-            } catch(Exception e) {
-                throw new FastRuntimeException(
-                        String.format("因为 %s 问题(超过 10s), 请然后重新尝试搜索.", Webs.E(e)));
-            }
+            }));
             if(vos.size() > 0)
                 Cache.add(cacheKey, vos, "5mn");
         }
@@ -345,26 +335,20 @@ public class OrderItem extends GenericModel {
                     acc.type.withTimeZone(to).toDate(),
                     acc.id);
         } else {
-            try {
-                List<F.Promise<List<AnalyzeVO>>> futures = new ArrayList<F.Promise<List<AnalyzeVO>>>();
-                for(final M m : AnalyzePost.MARKETS) {
-                    futures.add(new Job<List<AnalyzeVO>>() {
-                        @Override
-                        public List<AnalyzeVO> doJobWithResult() throws Exception {
-                            return new OrderItemQuery().groupCategory(
-                                    m.withTimeZone(from).toDate(),
-                                    m.withTimeZone(to).toDate(),
-                                    m
-                            );
-                        }
-                    }.now());
+            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+                @Override
+                public List<AnalyzeVO> doJobWithResult(M m) {
+                    return new OrderItemQuery().groupCategory(
+                            m.withTimeZone(from).toDate(),
+                            m.withTimeZone(to).toDate(),
+                            m);
                 }
-                for(F.Promise<List<AnalyzeVO>> fu : futures) {
-                    vos.addAll(fu.get(1, TimeUnit.MINUTES));
+
+                @Override
+                public String id() {
+                    return "OrderItem.categoryPercent";
                 }
-            } catch(Exception e) {
-                throw new FastRuntimeException("请售后重试");
-            }
+            }));
         }
         for(AnalyzeVO vo : vos) {
             if(StringUtils.equals(type, "sales"))

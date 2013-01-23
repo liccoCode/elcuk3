@@ -1,7 +1,7 @@
 package models.view.post;
 
 import helper.Dates;
-import helper.Webs;
+import helper.Promises;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -13,9 +13,7 @@ import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.cache.Cache;
-import play.jobs.Job;
 import play.libs.F;
-import play.utils.FastRuntimeException;
 import query.AmazonListingReviewQuery;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
@@ -95,37 +93,27 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     }
                 }
 
-                List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
                 // 通过 Job 异步 fork 加载不同时段的数据
                 /**
-                 * FIXME 这类型的代码在下面, 这些需要进行重构到一起
                  * 1. 此处
                  * 2. OrderItem.categoryPercent
                  * 3. OrderItem.skuOrMskuAccountRelateOrderItem
                  */
-                List<F.Promise<List<AnalyzeVO>>> voPromises = new ArrayList<F.Promise<List<AnalyzeVO>>>();
-                Logger.info("Start Fork to fetch Analyzes Sellings.");
-                try {
-                    for(final M m : MARKETS) {
-                        voPromises.add(new Job<List<AnalyzeVO>>() {
-                            @Override
-                            public List<AnalyzeVO> doJobWithResult() throws Exception {
-                                return new OrderItemQuery().analyzeVos(
-                                        m.withTimeZone(Dates.morning(from)).toDate(),
-                                        m.withTimeZone(Dates.night(to)).toDate(),
-                                        m);
-                            }
-                        }.now());
+                List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+                vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+                    @Override
+                    public List<AnalyzeVO> doJobWithResult(M m) {
+                        return new OrderItemQuery().analyzeVos(
+                                m.withTimeZone(Dates.morning(from)).toDate(),
+                                m.withTimeZone(Dates.night(to)).toDate(),
+                                m);
                     }
-                    for(F.Promise<List<AnalyzeVO>> voP : voPromises) {
-                        vos.addAll(voP.get(1, TimeUnit.MINUTES));
+
+                    @Override
+                    public String id() {
+                        return "AnalyzePost.analyzes";
                     }
-                } catch(Exception e) {
-                    throw new FastRuntimeException(
-                            String.format("因为 %s 问题, 请然后重新尝试搜索.", Webs.E(e)));
-                } finally {
-                    Logger.info("End of Fork Fetch.");
-                }
+                }));
 
                 // 销量 AnalyzeVO
                 for(AnalyzeVO vo : vos) {

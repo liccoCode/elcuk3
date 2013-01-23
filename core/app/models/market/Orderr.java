@@ -420,6 +420,10 @@ public class Orderr extends GenericModel {
         synchronized(Orderr.class) {
             ordmaps = Cache.get(Orderr.FRONT_TABLE, Map.class);
             if(ordmaps != null) return ordmaps;
+            /**
+             * 1. 将不同市场的 yyyy-MM-dd 日期的订单加载出来
+             * 2. 对订单按照时间进行 group. 由于时间会调整, 不能使用 DB 的 group
+             */
 
 
             DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));

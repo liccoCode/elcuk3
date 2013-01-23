@@ -83,23 +83,36 @@ public class Dates {
     }
 
     public static String date2Date() {
-        return date2Date(null);
+        return date2Date(DateTime.now());
     }
 
     public static String date2Date(Date date) {
-        if(date == null) return DateTime.now().toString("yyyy-MM-dd");
-        else return new DateTime(date).toString("yyyy-MM-dd");
+        if(date == null) date = new Date();
+        return date2Date(new DateTime(date));
+    }
+
+    public static String date2Date(DateTime date) {
+        if(date == null) {
+            return DateTime.now().toString("");
+        } else {
+            return date.toString("yyyy-MM-dd");
+        }
     }
 
     public static String date2DateTime() {
-        return date2DateTime(null);
+        return date2DateTime(DateTime.now());
     }
 
     public static String date2DateTime(Date date) {
+        if(date == null) date = new Date();
+        return date2DateTime(new DateTime(date));
+    }
+
+    public static String date2DateTime(DateTime date) {
         if(date == null) {
             return DateTime.now().toString("yyyy-MM-dd HH:mm:ss");
         } else {
-            return new DateTime(date).toString("yyyy-MM-dd HH:mm:ss");
+            return date.toString("yyyy-MM-dd HH:mm:ss");
         }
     }
 
