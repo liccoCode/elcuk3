@@ -9,6 +9,7 @@ import models.market.OrderItem;
 import models.market.Orderr;
 import models.product.Whouse;
 import models.view.Ret;
+import models.view.dto.DashBoard;
 import play.Play;
 import play.cache.Cache;
 import play.cache.CacheFor;
@@ -21,17 +22,16 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Application extends Controller {
 
     public static void index() {
-        Map<String, Map<String, AtomicInteger>> odmaps = Orderr.frontPageOrderTable(9);
+        DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
         Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Feedback.frontPageTable();
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render(odmaps, fbaWhouse, feedbacksOverView);
+        render(dashborad, fbaWhouse, feedbacksOverView);
     }
 
     @CacheFor(value = "40mn")
@@ -87,6 +87,10 @@ public class Application extends Controller {
             throw new FastRuntimeException(e);
         }
         renderJSON(Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)));
+    }
+
+    public static void o() {
+        renderJSON(Orderr.frontPageOrderTable(9));
     }
 
 }

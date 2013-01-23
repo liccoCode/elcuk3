@@ -729,6 +729,16 @@ public enum M {
     }
 
     /**
+     * 为时间根据市场增加市场时区调整
+     *
+     * @param time
+     * @return
+     */
+    public DateTime toTimeZone(Date time) {
+        return new DateTime(time, Dates.timeZone(this));
+    }
+
+    /**
      * 模拟人工方式修改 Listing 信息的地址
      *
      * @return

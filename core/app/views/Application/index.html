@@ -17,54 +17,7 @@ ${fba.capaticyContent.raw()}
 #{/list}
 
 #{render 'Application/feedbackOverView.html', feedbacksOverView:feedbacksOverView/}
-
-#{info_row title:'订单总览'/}
-<div class="row-fluid" id="orders">
-    <div class="span12">
-        <h2 class="label label-info" style="font-size:12px">
-            订单信息&nbsp;<a href="#" id="cci" class="btn btn-mini">清理缓存</a>
-        </h2>
-        <table class="table table-bordered">
-            <tr>
-                <th>日期</th>
-                <th>PENDING</th>
-                <th>PAYMENT</th>
-                <th>SHIPPED</th>
-                <th>REFUNDED</th>
-                <th>RETURNNEW</th>
-                <th>CANCEL</th>
-                <th><a href="#" rel="tooltip" data-original-title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
-            </tr>
-        #{list items:odmaps.keySet(), as:'key'}
-            #{set row:odmaps.get(key)/}
-            <tr>
-                <td date="${key}">${key}</td>
-                #{list items:models.market.Orderr.S.values(), as:'s'}
-                    <td>
-                        <a href="#" rel="popover" placement='bottom' title="${s.name()} 细节" content="
-                    DE: ${row.get(s.name() + "_" + "AMAZON_DE")}<br/>
-                    US: ${row.get(s.name() + "_" + "AMAZON_US")}<br/>
-                    UK: ${row.get(s.name() + "_" + "AMAZON_UK")}<br/>
-                    FR: ${row.get(s.name() + "_" + "AMAZON_FR")}<br/><hr/>
-                    EasyAcc.DE: ${row.get(s.name() + "_" + "amazon.de_wyatt")}<br/>
-                    EasyAcc.US: ${row.get(s.name() + "_" + "amazon.com_wyatt")}<br/>
-                    EasyAcc.EU: ${row.get(s.name() + "_" + "amazon.co.uk_wyatt")}<br/>
-                    ">${row.get(s.name())}</a></td>
-                #{/list}
-                <td><a href="#" rel="popover" placement='left' title="订单数细节" content="
-                    DE: ${row.get("all_" + "AMAZON_DE")}<br/>
-                    US: ${row.get("all_" + "AMAZON_US")}<br/>
-                    UK: ${row.get("all_" + "AMAZON_UK")}<br/>
-                    FR: ${row.get("all_" + "AMAZON_FR")}<br/><hr/>
-                    EasyAcc.DE: ${row.get("all_" + "amazon.de_wyatt")}<br/>
-                    EasyAcc.US: ${row.get("all_" + "amazon.com_wyatt")}<br/>
-                    EasyAcc.EU: ${row.get("all_" + "amazon.co.uk_wyatt")}<br/>
-                ">${row.get('all')}</a></td>
-            </tr>
-        #{/list}
-        </table>
-    </div>
-</div>
+#{render 'Application/_orderTable.html', dashborad: dashborad /}
 
 <div class="row-fluid">
     <div class="span3" style="height:400px;" id='cat_percent'></div>
