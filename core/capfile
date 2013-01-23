@@ -18,6 +18,7 @@ namespace :play do
     puts '---- push to bitbucket ----'
     `git push bit`
     # 最后多查看两次 logs
-    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;play start --%prod;sleep 3;tail logs/elcuk2.log;sleep 3;tail logs/elcuk2.log"
+    look = "sleep 3;tail logs/elcuk2.log;"
+    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;sleep 2;play start --%prod;#{look * 3}"
   end
 end

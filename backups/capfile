@@ -20,28 +20,24 @@ namespace :bak do
 
   desc "对 Elcuk2 主系统的备份"
   task :e, hosts: h_e  do
-    run "backup perform -t elcuk"
-    # 备份的是数据库文件, 可以删除
+    # 这里备份了图片文件, 本地自行备份图片
+    run "backup perform -t elcuk;rsync -axzv --progress ~/elcuk2-data/uploads ~/backups/elcuk/"
+    # 备份的是数据库文件, 将数据弄成完全与服务器一样,多余的删除
     system("rsync -axzv --progress --delete #{h_e}:~/backups/elcuk #{lobal_backups}/")
-    ['elcuk2-logs', 'elcuk2-data'].each do |dir|
-      # 这里备份了图片文件, 不允许使用 --delete 删除
-      system("rsync -axzv --progress #{h_e}:~/#{dir} #{lobal_backups}/elcuk/")
-    end
   end
 
   desc "对 OsTicekt 服务器的备份"
   task :t, hosts: h_t do
     # 首先执行两台服务器上的 backup 脚本,然后再对 ~/backups/ 目录进行 rsync 同步
     run "backup perform -t osticket"
-    system("rsync -axzv --progress #{h_t}:~/backups/osticket #{lobal_backups}/")
+    system("rsync -axzv --progress --delete #{h_t}:~/backups/osticket #{lobal_backups}/")
   end
 
   desc "对 Redmine 服务器的备份"
   task :r, hosts: h_r do
     # 首先执行两台服务器上的 backup 脚本,然后再对 ~/backups/ 目录进行 rsync 同步
     run "backup perform -t redmine"
-    system("rsync -axzv --progress #{h_r}:~/backups/redmine #{lobal_backups}/")
+    system("rsync -axzv --progress --delete #{h_r}:~/backups/redmine #{lobal_backups}/")
   end
-
 
 end
