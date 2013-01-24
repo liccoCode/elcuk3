@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
@@ -8,6 +9,7 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -79,6 +81,9 @@ public class ShipItem extends GenericModel {
     @Expose
     @OneToOne
     public ProcureUnit unit;
+
+    @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     @Enumerated(EnumType.STRING)
     public S state = S.NORMAL;
@@ -184,7 +189,8 @@ public class ShipItem extends GenericModel {
 
         float singleVolume = (l * w * h) / 1000000000;
         // 换算成 m3
-        return new F.T3<Float, Float, Float>(singleVolume, this.qty * singleVolume, (this.qty * singleVolume * 1000000) / 5000);
+        return new F.T3<Float, Float, Float>(singleVolume, this.qty * singleVolume,
+                (this.qty * singleVolume * 1000000) / 5000);
     }
 
     /**
@@ -194,7 +200,8 @@ public class ShipItem extends GenericModel {
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
-        if(dtos == null || dtos.size() == 0) return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+        if(dtos == null || dtos.size() == 0)
+            return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
         for(AnalyzeDTO dto : dtos) {
             if(!dto.fid.equals(this.unit.sid)) continue;
             return dto.getTurnOverT4();

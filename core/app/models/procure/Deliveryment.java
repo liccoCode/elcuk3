@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
+import models.finance.PaymentUnit;
 import models.product.Category;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -69,6 +70,9 @@ public class Deliveryment extends GenericModel {
 
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+
+    @OneToMany(mappedBy = "deliveryment", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     @OneToOne
     public User handler;
@@ -137,7 +141,8 @@ public class Deliveryment extends GenericModel {
         Date end = null;
         List<Date> deliveryDates = new ArrayList<Date>();
         for(ProcureUnit unit : this.units) {
-            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() && unit.stage != ProcureUnit.STAGE.CLOSE)
+            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() &&
+                    unit.stage != ProcureUnit.STAGE.CLOSE)
                 if(unit.attrs.deliveryDate != null) deliveryDates.add(unit.attrs.deliveryDate);
         }
         if(deliveryDates.size() > 2) {
@@ -183,7 +188,8 @@ public class Deliveryment extends GenericModel {
             return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
         } else {
             Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN).fetch();
+            return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN)
+                    .fetch();
         }
     }
 
@@ -202,8 +208,9 @@ public class Deliveryment extends GenericModel {
      */
     public Set<Category> unitsCategorys() {
         Set<Category> categories = new HashSet<Category>();
-        for(ProcureUnit unit : this.units)
+        for(ProcureUnit unit : this.units) {
             categories.add(unit.product.category);
+        }
         return categories;
     }
 
@@ -224,7 +231,8 @@ public class Deliveryment extends GenericModel {
         this.state = S.CANCEL;
         this.save();
 
-        new ElcukRecord(Messages.get("deliveryment.cancel"), Messages.get("deliveryment.cancel.msg", this.id, msg.trim()), this.id).save();
+        new ElcukRecord(Messages.get("deliveryment.cancel"),
+                Messages.get("deliveryment.cancel.msg", this.id, msg.trim()), this.id).save();
     }
 
     /**
@@ -248,7 +256,8 @@ public class Deliveryment extends GenericModel {
         // 实在无语, 级联保存无效, 只能如此.
         for(ProcureUnit unit : this.units) unit.save();
 
-        new ElcukRecord(Messages.get("deliveryment.addunit"), Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();
+        new ElcukRecord(Messages.get("deliveryment.addunit"),
+                Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();
 
         return units;
     }
@@ -270,7 +279,8 @@ public class Deliveryment extends GenericModel {
         this.units.removeAll(units);
         this.save();
 
-        new ElcukRecord(Messages.get("deliveryment.delunit"), Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
+        new ElcukRecord(Messages.get("deliveryment.delunit"),
+                Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
         return units;
     }
 
@@ -279,9 +289,13 @@ public class Deliveryment extends GenericModel {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
         String count = Deliveryment.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) + "";
-        return String.format("DL|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
+                        .toDate(),
+                DateTime.parse(
+                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
+                        .toDate()) + "";
+        return String.format("DL|%s|%s", dt.toString("yyyyMM"),
+                count.length() == 1 ? "0" + count : count);
     }
 
     public static List<Deliveryment> openDeliveryments(S state) {
@@ -295,7 +309,8 @@ public class Deliveryment extends GenericModel {
      *
      * @param pids
      */
-    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
+    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name,
+                                                               User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
         if(pids.size() != units.size()) {
@@ -304,8 +319,9 @@ public class Deliveryment extends GenericModel {
         }
 
         Cooperator cop = units.get(0).cooperator;
-        for(ProcureUnit unit : units)
+        for(ProcureUnit unit : units) {
             isUnitToDeliverymentValid(unit, cop);
+        }
         if(Validation.hasErrors()) return deliveryment;
         deliveryment.cooperator = cop;
         deliveryment.handler = user;
@@ -319,7 +335,8 @@ public class Deliveryment extends GenericModel {
         deliveryment.save();
 
         new ElcukRecord(Messages.get("deliveryment.createFromProcures"),
-                Messages.get("deliveryment.createFromProcures.msg", pids, deliveryment.id), deliveryment.id).save();
+                Messages.get("deliveryment.createFromProcures.msg", pids, deliveryment.id),
+                deliveryment.id).save();
         return deliveryment;
     }
 

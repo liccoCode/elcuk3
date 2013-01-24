@@ -3,6 +3,8 @@ package models;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.DBUtils;
+import models.finance.Payment;
+import models.finance.PaymentUnit;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.*;
@@ -36,6 +38,15 @@ public class User extends Model {
      */
     @ManyToMany
     public Set<Privilege> privileges = new HashSet<Privilege>();
+
+    @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
+    public List<Payment> paymentPaied = new ArrayList<Payment>();
+
+    /**
+     * 一个人可以拥有很多个请款单元
+     */
+    @OneToMany(mappedBy = "payee", fetch = FetchType.LAZY)
+    public List<PaymentUnit> pamentApplies = new ArrayList<PaymentUnit>();
 
     /**
      * 用户的通知

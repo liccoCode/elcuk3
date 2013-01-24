@@ -7,6 +7,7 @@ import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
@@ -134,6 +135,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
     }
+
+    @OneToMany(mappedBy = "procureUnit", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     /**
      * 此采购计划的供应商信息.

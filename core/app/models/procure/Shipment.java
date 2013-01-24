@@ -8,6 +8,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
+import models.finance.PaymentUnit;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.collections.CollectionUtils;
@@ -193,6 +194,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
     public List<ShipItem> items = new ArrayList<ShipItem>();
+
+    @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     /**
      * 运输合作商
