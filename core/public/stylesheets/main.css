@@ -95,3 +95,16 @@ div .alert{
 .table tr:hover{
     background-color:#F4F4F4;
 }
+
+/* 使用在 table tr 控制 td 的宽度 */
+.ten{
+    width:10%;
+}
+
+.five{
+    width:5%;
+}
+
+.twenty{
+    width:20%;
+}

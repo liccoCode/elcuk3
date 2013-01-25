@@ -1,12 +1,14 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import exception.PaymentException;
 import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
+import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
@@ -384,13 +386,77 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 为 ProcureUnit 计费(请款), 同时传入一个修正价格
+     * 为 ProcureUnit 计费(请款), 同时传入一个修正价格;
      *
      * @param fixValue
      * @return
      */
-    public PaymentUnit billing(float fixValue) {
-        return null;
+    public PaymentUnit billing(float fixValue, boolean prepay) {
+        /**
+         * todo: (申请押金如何处理?)
+         * 如果没有交货不允许申请
+         */
+        if(this.leftAmount() <= 0)
+            throw new PaymentException("不需要请款了");
+        if(this.attrs.qty == null && !prepay)
+            throw new PaymentException("还没有交货, 不允许非预付款申请.");
+
+        PaymentUnit fee = new PaymentUnit();
+        fee.procureUnit = this;
+        // 如果有 ProcureUnit , 那么则拥有 Deliveryment
+        fee.deliveryment = this.deliveryment;
+        fee.payment = Payment.makePayment(this);
+        fee.payee = User.findByUserName(User.username());
+
+        fee.fixValue = fixValue;
+        fee.currency = this.attrs.currency;
+        // 计算剩下的需要支付的款项
+        if(prepay) {
+            fee.amount = this.totalBalance() * 0.3f; /* 30% 预付款*/
+        } else {
+            fee.amount = this.leftAmount();
+        }
+        // 计算完成之后还需要再检查一次
+        if(this.totalAmount() + fee.amount > this.totalBalance()) {
+            // 因为 makePayment 已经创建了 payment 所以在这里如果不需要, 那么则需要删除这个 Payment
+            if(fee.payment != null) fee.payment.delete();
+            throw new PaymentException(String.format("请款总额超过需要支付的金额: %s / %s %s",
+                    this.totalAmount() + fee.amount, this.totalBalance(), fee.currency.name()));
+        }
+        return fee.save();
+    }
+
+    /**
+     * 计算剩下的支付款项;
+     *
+     * @return
+     */
+    public float leftAmount() {
+        return this.totalBalance() - this.totalAmount();
+    }
+
+    /**
+     * 总共需要支付的金额
+     *
+     * @return
+     */
+    public float totalBalance() {
+        return (this.qty() * this.attrs.price);
+    }
+
+    /**
+     * 已经支付的所有金额
+     *
+     * @return
+     */
+    public float totalAmount() {
+        float amount = 0;
+        for(PaymentUnit fee : this.fees) {
+            if(!this.attrs.currency.equals(fee.currency))
+                throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
+            amount += fee.amount;
+        }
+        return amount;
     }
 
 

@@ -10,6 +10,7 @@ import models.view.post.DeliveryPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.modules.router.Get;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -45,6 +46,7 @@ public class Deliveryments extends Controller {
         render(deliveryments, p);
     }
 
+    @Get("/deliveryment/{id}")
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         render(dmt);
@@ -108,7 +110,8 @@ public class Deliveryments extends Controller {
         validation.required(dmt.orderTime);
         if(Validation.hasErrors()) render("Deliveryments/show.html", dmt);
         dmt.confirm();
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
+        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
+                .save();
         redirect("/Deliveryments/show/" + id);
     }
 

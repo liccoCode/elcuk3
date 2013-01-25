@@ -24,9 +24,6 @@ GET     /images/                                            staticDir:public/ima
 GET     /img/                                               staticDir:public/images
 GET     /helper/                                            staticDir:public/images/helper
 
-# Payments
-GET     /deliveryment/{deliveryId}/payments                 Payments.index
-POST    /deliveryment/{deliveryId}/payments                 Payments.deliverymentApply
 
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}

@@ -1,5 +1,6 @@
 package models.finance;
 
+import helper.Currency;
 import models.User;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -22,19 +23,40 @@ public class PaymentUnit extends Model {
         /**
          * 申请
          */
-        APPLY,
+        APPLY {
+            @Override
+            public String toString() {
+                return "已申请";
+            }
+        },
+
         /**
          * 审核中
          */
-        REVIEWING,
+        REVIEWING {
+            @Override
+            public String toString() {
+                return "审核中";
+            }
+        },
         /**
          * 批准
          */
-        APPROVAL,
+        APPROVAL {
+            @Override
+            public String toString() {
+                return "批准";
+            }
+        },
         /**
-         * 支付完成(关联的支付单完成支付)
+         * 已支付(关联的支付单完成支付)
          */
-        PAID
+        PAID {
+            @Override
+            public String toString() {
+                return "已支付";
+            }
+        }
     }
 
     @ManyToOne
@@ -69,6 +91,17 @@ public class PaymentUnit extends Model {
     public Shipment shipment;
 
     public Date createdAt;
+
+    public float fixValue = 0;
+
+    /**
+     * 申请的金额
+     */
+    public float amount = 0;
+    /**
+     * 申请的币种
+     */
+    public Currency currency = Currency.CNY;
 
     @Lob
     public String memo;

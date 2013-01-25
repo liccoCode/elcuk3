@@ -41,6 +41,11 @@ public enum Currency {
         public Float toCNY(Float value) {
             return value * GBP_CNY;
         }
+
+        @Override
+        public String symbol() {
+            return "£";
+        }
     },
     /**
      * 欧元
@@ -67,6 +72,11 @@ public enum Currency {
         @Override
         public Float toCNY(Float value) {
             return value * EUR_CNY;
+        }
+
+        @Override
+        public String symbol() {
+            return "€";
         }
     },
     /**
@@ -95,6 +105,11 @@ public enum Currency {
         public Float toGBP(Float value) {
             return value * CNY_GBP; // 1 CNY = 0.1004 GBP
         }
+
+        @Override
+        public String symbol() {
+            return "¥";
+        }
     },
     /**
      * 美元
@@ -122,6 +137,11 @@ public enum Currency {
         public Float toCNY(Float value) {
             return value * USD_CNY;
         }
+
+        @Override
+        public String symbol() {
+            return "$";
+        }
     };
 
     /**
@@ -136,6 +156,8 @@ public enum Currency {
     public abstract Float toUSD(Float value);
 
     public abstract Float toCNY(Float value);
+
+    public abstract String symbol();
 
     //GBP
     private static float GBP_EUR = 1.20175971f;
@@ -199,8 +221,12 @@ public enum Currency {
     private static Float ratio(String from, String to) {
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
-            JsonObject json = HTTP.json(("http://www.google.com/ig/calculator?hl=en&q=1" + from + "=?" + to)).getAsJsonObject();
-            Logger.info("[" + json.get("lhs").getAsString() + " TO " + json.get("rhs").getAsString() + "]");
+            JsonObject json = HTTP
+                    .json(("http://www.google.com/ig/calculator?hl=en&q=1" + from + "=?" + to))
+                    .getAsJsonObject();
+            Logger.info(
+                    "[" + json.get("lhs").getAsString() + " TO " + json.get("rhs").getAsString() +
+                            "]");
             return NumberUtils.toFloat(json.get("rhs").getAsString().split(" ")[0], -1);
         } catch(Exception e) {
             Logger.warn(Webs.E(e));

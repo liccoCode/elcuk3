@@ -1,8 +1,17 @@
 #{extends 'main_full.html' /}
 #{set title:"采购单[${dmt.id}]请款信息"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'payments.css'/}
+#{/set}
 #{set 'moreScripts'}
 *{#{script 'procures/index.coffee'/}}*
 #{/set}
+
+#{flash_alert /}
+
+<div class="row-fluid btn-toolbar">
+    <a href="/deliveryment/${dmt.id}" class="btn btn-success">回到采购单</a>
+</div>
 
 #{info_row title:'采购单元支付信息' /}
 <div class="row-fluid">
@@ -14,10 +23,11 @@
             <th>采购数量</th>
             <th>实际交货数量</th>
             <th>单价</th>
+            <th class="ten">进度</th>
             <th>实际交货时间</th>
             <th>阶段</th>
-            <th>抵达货代</th>
-            <th>请款?</th>
+            <th class="five">抵达货代</th>
+            <th class="ten">请款?</th>
         </tr>
     #{list items:dmt.units, as:'unit'}
         <tr>
@@ -27,25 +37,54 @@
             <td>${unit.attrs.planQty}</td>
             <td data-toggle="toggle" data-target="#unit_${unit.id}">
                 <i class="icon-reorder"></i>
-                <i class="badge badge-warning">${unit.fees.size()}</i>
+                <i class="badge ${unit.fees.size() > 0 ? 'badge-warning' : ''}">${unit.fees.size()}</i>
             ${unit.attrs.qty}
             </td>
             <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
+            <td>${unit.totalAmount()} / ${unit.totalBalance()}
+                (${(unit.totalAmount() / unit.totalBalance()).format("#.#%")})
+            </td>
             <td>${unit.attrs.deliveryDate}</td>
             <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
             <td>#{yesOrNo f:unit.isPlaced/}</td>
             <td>
-                <a href="/deliveryment/${dmt.id}/payments" class="btn btn-info btn-small">
-                    填写请款
-                </a>
+                <form class="inner_form" method="post" action="/deliveryment/${dmt.id}/payments">
+                    <label class="inline checkbox">
+                        <input type="checkbox" name="prepay" value="true"> 预付款
+                    </label>
+                    <input type="hidden" name="procureUnitId" value="${unit.id}">
+                    <button class="btn btn-info btn-small">
+                        填写请款
+                    </button>
+                </form>
             </td>
         </tr>
         <tr id="unit_${unit.id}" style="display:none;">
-            <td colspan="9" class="toggle_table_td">
+            <td colspan="11" class="toggle_table_td">
                 #{if unit.fees.size() <= 0}
                     <div style="padding:10px">没有支付信息</div>
                 #{/if}
                 #{else }
+                    <table class="table table-bordered table-condensed">
+                        <tr>
+                            <th>#</th>
+                            <th>总请款金额</th>
+                            <th>修正值</th>
+                            <th>请款人</th>
+                            <th>请款时间</th>
+                            <th>状态</th>
+                        </tr>
+                        #{list items:unit.fees, as:'fee'}
+                            <tr>
+                                <td>${fee.id}</td>
+                                <td>${fee.amount.formatCurrency(fee.currency.name())}</td>
+                                <td>${fee.currency.symbol()} ${fee.fixValue}</td>
+                                <td>${fee.payee.username}</td>
+                                <td>${fee.createdAt.los()}</td>
+                                <td>${fee.state}</td>
+                            </tr>
+                        #{/list}
+                    </table>
                 #{/else}
             </td>
         </tr>

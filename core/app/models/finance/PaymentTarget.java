@@ -1,5 +1,6 @@
 package models.finance;
 
+import models.procure.Deliveryment;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -19,6 +20,13 @@ import java.util.List;
  */
 @Entity
 public class PaymentTarget extends Model {
+    public PaymentTarget() {
+    }
+
+    public PaymentTarget(Deliveryment dmt) {
+        this.name = dmt.cooperator.name;
+    }
+
     @OneToMany(mappedBy = "target")
     public List<Payment> payments = new ArrayList<Payment>();
 
