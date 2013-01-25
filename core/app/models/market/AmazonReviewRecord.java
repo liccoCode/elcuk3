@@ -1,7 +1,7 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import models.ElcukRecord;
+import models.User;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -33,7 +33,7 @@ public class AmazonReviewRecord extends GenericModel {
      */
     public AmazonReviewRecord(AmazonListingReview review, Account acc, boolean isUp) {
         this.account = acc;
-        this.username = ElcukRecord.username();
+        this.username = User.username();
         this.createAt = new Date();
         this.isUp = isUp;
         F.T2<String, M> unLid = Listing.unLid(review.listingId);
@@ -154,10 +154,12 @@ public class AmazonReviewRecord extends GenericModel {
      * @param amazonListingReview
      * @return 返回没有点击过的 Account
      */
-    public static List<Account> checkNonClickAccounts(List<Account> accs, AmazonListingReview amazonListingReview) {
+    public static List<Account> checkNonClickAccounts(List<Account> accs,
+                                                      AmazonListingReview amazonListingReview) {
         List<Account> nonClickAccounts = new ArrayList<Account>();
         for(Account acc : accs) {
-            if(AmazonReviewRecord.count("account=? AND reviewId=?", acc, amazonListingReview.reviewId) == 0)
+            if(AmazonReviewRecord
+                    .count("account=? AND reviewId=?", acc, amazonListingReview.reviewId) == 0)
                 nonClickAccounts.add(acc);
         }
         return nonClickAccounts;

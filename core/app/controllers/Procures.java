@@ -87,7 +87,8 @@ public class Procures extends Controller {
         } else {
             flash.success("创建成功");
         }
-        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        new ElcukRecord(Messages.get("procureunit.save"),
+                Messages.get("action.base", unit.to_log()), unit.id + "").save();
         redirect("/Shipments/show/" + shipmentId);
     }
 
@@ -115,14 +116,16 @@ public class Procures extends Controller {
             render("Procures/edit.html", unit, oldPlanQty);
         }
         unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
-        new ElcukRecord(Messages.get("procureunit.update"), Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        new ElcukRecord(Messages.get("procureunit.update"),
+                Messages.get("action.base", unit.to_log()), unit.id + "").save();
         if(oldPlanQty != unit.attrs.planQty) {
             String shipment_id = "";
             if(unit.shipItem != null)
                 shipment_id = unit.shipItem.shipment.id;
             Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
                     String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单 %s",
-                            oldPlanQty, unit.attrs.planQty, Dates.date2Date(unit.attrs.planDeliveryDate), shipment_id),
+                            oldPlanQty, unit.attrs.planQty,
+                            Dates.date2Date(unit.attrs.planDeliveryDate), shipment_id),
                     Notification.PROCURE, Notification.SHIPPER);
         }
         flash.success("ProcureUnit %s update success!", unit.id);
@@ -155,7 +158,8 @@ public class Procures extends Controller {
             renderArgs.put("p", p);
             render("Procures/index.html", name);
         }
-        Deliveryment deliveryment = Deliveryment.createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+        Deliveryment deliveryment = Deliveryment
+                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             ProcurePost p = new ProcurePost(ProcureUnit.STAGE.PLAN);
             renderArgs.put("units", p.query());
@@ -222,7 +226,7 @@ public class Procures extends Controller {
     public static void doSplitUnit(long id, ProcureUnit newUnit) {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
-        newUnit.handler = User.findByUserName(ElcukRecord.username());
+        newUnit.handler = User.findByUserName(User.username());
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
         if(unit.isHaveCycleShipment())
@@ -239,7 +243,8 @@ public class Procures extends Controller {
 
         if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
 
-        CooperItem copi = CooperItem.find("cooperator.id=? AND product.sku=?", coperId, sku).first();
+        CooperItem copi = CooperItem.find("cooperator.id=? AND product.sku=?", coperId, sku)
+                .first();
         renderJSON(new Ret(true, copi.boxToSize(size) + ""));
     }
 }

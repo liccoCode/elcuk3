@@ -1,6 +1,7 @@
 package models.embedded;
 
 import models.ElcukRecord;
+import models.User;
 import org.apache.commons.lang.StringUtils;
 import play.i18n.Messages;
 
@@ -66,7 +67,7 @@ public class ERecordBuilder {
             record.username = this.username;
         else {
             try {
-                record.username = ElcukRecord.username();
+                record.username = User.username();
                 // 在非访问的情况下调用则无 Session
             } catch(NullPointerException e) {
                 record.username = "system";
