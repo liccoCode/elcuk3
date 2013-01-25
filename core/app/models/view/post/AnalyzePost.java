@@ -8,12 +8,15 @@ import models.market.SellingQTY;
 import models.procure.ProcureUnit;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
+import models.view.dto.TimelineEventSource;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 import query.AmazonListingReviewQuery;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
@@ -295,5 +298,43 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             AnalyzeDTO dto = (AnalyzeDTO) o;
             return this.aid.equals(dto.aid);
         }
+    }
+
+    // ---------------- TimeLine ------------------------
+
+    /**
+     * 加载并且返回 Simile Timeline 的 Events
+     * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid
+     */
+    public static TimelineEventSource timelineEvents(String type, String val) {
+        if(StringUtils.isBlank(type)) type = "sid";
+        if("msku".equals(type)) type = "sid"; // 兼容
+        if(!"sku".equals(type) && !"sid".equals(type))
+            throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
+
+        DateTime dt = DateTime.now();
+        List<ProcureUnit> units = ProcureUnit
+                .find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
+                        Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val)
+                .fetch();
+
+
+        // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
+        TimelineEventSource eventSource = new TimelineEventSource();
+        AnalyzeDTO analyzeDTO = AnalyzeDTO.findByValAndType(type, val);
+        for(ProcureUnit unit : units) {
+            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
+            event.startAndEndDate(type)
+                    .titleAndDesc()
+                    .color(unit.stage);
+
+            eventSource.events.add(event);
+        }
+
+
+        // 将当前 Selling 的销售情况展现出来
+        eventSource.events.add(TimelineEventSource.currentQtyEvent(analyzeDTO, type));
+
+        return eventSource;
     }
 }

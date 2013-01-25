@@ -12,6 +12,7 @@ import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.libs.Crypto;
 import play.libs.F;
+import play.mvc.Scope;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -280,6 +281,17 @@ public class User extends Model {
         int result = super.hashCode();
         result = 31 * result + username.hashCode();
         return result;
+    }
+
+    /**
+     * 当前登陆用户的名称
+     *
+     * @return
+     */
+    public static String username() {
+        String username = Scope.Session.current().get("username");
+        if(StringUtils.isBlank(username)) return "system";
+        else return username;
     }
 
     /**

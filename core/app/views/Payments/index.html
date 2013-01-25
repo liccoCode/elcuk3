@@ -1,0 +1,54 @@
+#{extends 'main_full.html' /}
+#{set title:"采购单[${dmt.id}]请款信息"  /}
+#{set 'moreScripts'}
+*{#{script 'procures/index.coffee'/}}*
+#{/set}
+
+#{info_row title:'采购单元支付信息' /}
+<div class="row-fluid">
+    <table class="table table-bordered table-condensed">
+        <tr>
+            <th>#</th>
+            <th>SKU</th>
+            <th>供应商</th>
+            <th>采购数量</th>
+            <th>实际交货数量</th>
+            <th>单价</th>
+            <th>实际交货时间</th>
+            <th>阶段</th>
+            <th>抵达货代</th>
+            <th>请款?</th>
+        </tr>
+    #{list items:dmt.units, as:'unit'}
+        <tr>
+            <td>${unit.id}</td>
+            <td>${unit.sku}</td>
+            <td>${unit.cooperator.name}</td>
+            <td>${unit.attrs.planQty}</td>
+            <td data-toggle="toggle" data-target="#unit_${unit.id}">
+                <i class="icon-reorder"></i>
+                <i class="badge badge-warning">${unit.fees.size()}</i>
+            ${unit.attrs.qty}
+            </td>
+            <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
+            <td>${unit.attrs.deliveryDate}</td>
+            <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
+            <td>#{yesOrNo f:unit.isPlaced/}</td>
+            <td>
+                <a href="/deliveryment/${dmt.id}/payments" class="btn btn-info btn-small">
+                    填写请款
+                </a>
+            </td>
+        </tr>
+        <tr id="unit_${unit.id}" style="display:none;">
+            <td colspan="9" class="toggle_table_td">
+                #{if unit.fees.size() <= 0}
+                    <div style="padding:10px">没有支付信息</div>
+                #{/if}
+                #{else }
+                #{/else}
+            </td>
+        </tr>
+    #{/list}
+    </table>
+</div>

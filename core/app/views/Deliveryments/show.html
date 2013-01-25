@@ -50,10 +50,14 @@
                     <td>${dmt.cooperator?.fullName}</td>
 
                     <th>下单时间</th>
-                    <td><input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}"></td>
+                    <td>
+                        <input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}">
+                    </td>
 
                     <th>交货时间</th>
-                    <td><input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}"></td>
+                    <td>
+                        <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}">
+                    </td>
                 </tr>
 
                 <tr>
@@ -75,7 +79,9 @@
             <div class="input-prepend input-append" style="float:left;">
                 <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
                 <input type="hidden" name="id" value="${dmt.id}">
-                <button data-confirm="btn" content="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">确认</button>
+                <button data-confirm="btn" content="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
+                    确认
+                </button>
             </div>
         </form>
     #{/if}
@@ -89,6 +95,9 @@
             </div>
         </form>
     #{/ck}
+        <div style="float:left;display:inline-block">
+            <a href="/deliveryment/${dmt.id}/payments" class="btn btn-large btn-success">请款</a>
+        </div>
     </div>
 </div>
 
@@ -147,7 +156,8 @@
                         </td>
 
                         <th>移动电话</th>
-                        <td><input type="text" name="excel.receiverPhone" id="excel_receiverPhone"></td>
+                        <td><input type="text" name="excel.receiverPhone" id="excel_receiverPhone">
+                        </td>
 
                         <th>固定电话</th>
                         <td><input type="text" name="excel.receiverTel" id="excel_receiverTel"></td>
@@ -160,7 +170,9 @@
                         </td>
 
                         <td colspan="2">
-                            <button class="btn btn-success" data-loading id="load_product_terms">加载产品要求</button>
+                            <button class="btn btn-success" data-loading id="load_product_terms">
+                                加载产品要求
+                            </button>
                         </td>
                         <td colspan="2"></td>
                     </tr>
@@ -191,7 +203,8 @@
                         </td>
 
                         <th>买方</th>
-                        <td><input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="香港逸德网络科技有限公司">
+                        <td>
+                            <input type="text" name="excel.buyerCompany" id="excel_buyerCompany" value="香港逸德网络科技有限公司">
                         </td>
                         <th>经办人</th>
                         <td><input type="text" name="excel.buyer" id="excel_buyer"></td>
@@ -210,7 +223,9 @@
                         <th>移动电话</th>
                         <td><input type="text" name="excel.buyerPhone" id="excel_buyerPhone"></td>
                         <th>固定电话</th>
-                        <td><input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185066525"></td>
+                        <td>
+                            <input type="text" name="excel.buyerTel" id="excel_buyerTel" value="073185066525">
+                        </td>
                     </tr>
 
                     <tr>
@@ -295,6 +310,7 @@
 <div class="row-fluid">
     <div style="min-height:300px;" class="span12 well" id="dropbox">
         <ul class="thumbnails uploaded"></ul>
-        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop
+        </div>
     </div>
 </div>

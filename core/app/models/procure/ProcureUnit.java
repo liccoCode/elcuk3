@@ -11,10 +11,7 @@ import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
-import models.view.dto.AnalyzeDTO;
-import models.view.dto.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
@@ -313,19 +310,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 是否可以保留采购计划的周期型运输单?
-     *
-     * @return
-     */
-    public boolean isHaveCycleShipment() {
-        return this.isHaveShipment() && this.shipItem.shipment.cycle;
-    }
-
-    public boolean isHaveShipment() {
-        return this.shipItem != null && this.shipItem.shipment != null;
-    }
-
-    /**
      * ProcureUnit 交货
      *
      * @param attrs
@@ -399,6 +383,30 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return shipItem;
     }
 
+    /**
+     * 为 ProcureUnit 计费(请款), 同时传入一个修正价格
+     *
+     * @param fixValue
+     * @return
+     */
+    public PaymentUnit billing(float fixValue) {
+        return null;
+    }
+
+
+    /**
+     * 是否可以保留采购计划的周期型运输单?
+     *
+     * @return
+     */
+    public boolean isHaveCycleShipment() {
+        return this.isHaveShipment() && this.shipItem.shipment.cycle;
+    }
+
+    public boolean isHaveShipment() {
+        return this.shipItem != null && this.shipItem.shipment != null;
+    }
+
 
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
@@ -423,25 +431,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        if(!super.equals(o)) return false;
-
-        ProcureUnit that = (ProcureUnit) o;
-
-        if(id != null ? !id.equals(that.id) : that.id != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        return result;
-    }
 
     public void remove() {
         if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
@@ -496,6 +485,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ElcukRecord.fid(this.id + "").fetch();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        ProcureUnit that = (ProcureUnit) o;
+
+        if(id != null ? !id.equals(that.id) : that.id != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
+    }
+
     /**
      * 根据 sku 或者 msku 加载 PLAN, DELIVERY Stage 的 ProcureUnit.
      *
@@ -514,42 +523,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
-    }
-
-    /**
-     * 加载并且返回 Simile Timeline 的 Events
-     * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid
-     */
-    public static TimelineEventSource timelineEvents(String type, String val) {
-        if(StringUtils.isBlank(type)) type = "sid";
-        if("msku".equals(type)) type = "sid"; // 兼容
-        if(!"sku".equals(type) && !"sid".equals(type))
-            throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
-
-        DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit
-                .find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
-                        Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val)
-                .fetch();
-
-
-        // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
-        TimelineEventSource eventSource = new TimelineEventSource();
-        AnalyzeDTO analyzeDTO = AnalyzeDTO.findByValAndType(type, val);
-        for(ProcureUnit unit : units) {
-            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
-            event.startAndEndDate(type)
-                    .titleAndDesc()
-                    .color(unit.stage);
-
-            eventSource.events.add(event);
-        }
-
-
-        // 将当前 Selling 的销售情况展现出来
-        eventSource.events.add(TimelineEventSource.currentQtyEvent(analyzeDTO, type));
-
-        return eventSource;
     }
 
     /**
