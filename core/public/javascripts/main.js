@@ -180,5 +180,6 @@ $(function(){
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });
+    Notify.loopCheck();
 });
 

@@ -4,7 +4,7 @@
     #{stylesheet 'payments.css'/}
 #{/set}
 #{set 'moreScripts'}
-*{#{script 'procures/index.coffee'/}}*
+    #{script 'payments.coffee'/}
 #{/set}
 
 #{flash_alert /}
@@ -15,7 +15,7 @@
 
 #{info_row title:'采购单元支付信息' /}
 <div class="row-fluid">
-    <table class="table table-bordered table-condensed">
+    <table class="table table-bordered table-condensed" id="procure_units_fees">
         <tr>
             <th>#</th>
             <th>SKU</th>
@@ -37,7 +37,9 @@
             <td>${unit.attrs.planQty}</td>
             <td data-toggle="toggle" data-target="#unit_${unit.id}">
                 <i class="icon-reorder"></i>
-                <i class="badge ${unit.fees.size() > 0 ? 'badge-warning' : ''}">${unit.fees.size()}</i>
+                <i class="badge ${unit.fees().size() > 0 ? 'badge-warning' : ''}">
+                ${unit.fees().size()}
+                </i>
             ${unit.attrs.qty}
             </td>
             <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
@@ -61,7 +63,7 @@
         </tr>
         <tr id="unit_${unit.id}" style="display:none;">
             <td colspan="11" class="toggle_table_td">
-                #{if unit.fees.size() <= 0}
+                #{if unit.fees().size() <= 0}
                     <div style="padding:10px">没有支付信息</div>
                 #{/if}
                 #{else }
@@ -73,17 +75,29 @@
                             <th>请款人</th>
                             <th>请款时间</th>
                             <th>状态</th>
+                            <th class="ten"></th>
                         </tr>
-                        #{list items:unit.fees, as:'fee'}
-                            <tr>
+                        #{list items:unit.fees(), as:'fee'}
+                            <tr id="payunit_${fee.id}">
                                 <td>${fee.id}</td>
-                                <td>${fee.amount.formatCurrency(fee.currency.name())}</td>
-                                <td>${fee.currency.symbol()} ${fee.fixValue}</td>
+                                <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
+                                <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
                                 <td>${fee.payee.username}</td>
                                 <td>${fee.createdAt.los()}</td>
                                 <td>${fee.state}</td>
+                                <td>
+                                    <button uid="${unit.id}" class="btn btn-small btn-danger remove">
+                                        <i class="icon-remove"></i>
+                                    </button>
+                                </td>
                             </tr>
                         #{/list}
+                        <tr>
+                            <th>汇总:</th>
+                            <td id="fee_${unit.id}_amount"></td>
+                            <td id="fee_${unit.id}_fix_value"></td>
+                            <td colspan="4">&nbsp;</td>
+                        </tr>
                     </table>
                 #{/else}
             </td>
@@ -91,3 +105,5 @@
     #{/list}
     </table>
 </div>
+
+#{warning_row title:'采购单支付信息' /}

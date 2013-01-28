@@ -1,5 +1,6 @@
 package models.finance;
 
+import exception.PaymentException;
 import helper.Currency;
 import models.User;
 import models.procure.Deliveryment;
@@ -94,6 +95,8 @@ public class PaymentUnit extends Model {
 
     public float fixValue = 0;
 
+    public boolean remove = false;
+
     /**
      * 申请的金额
      */
@@ -112,5 +115,28 @@ public class PaymentUnit extends Model {
     @PrePersist
     public void beforeSave() {
         this.createdAt = new Date();
+    }
+
+    @PreRemove
+    public void softDelete() {
+        // 防止错误使用 Model.delete 删除
+        throw new PaymentException("只允许软删除.");
+    }
+
+    public PaymentUnit remove() {
+        if(this.isApproval())
+            throw new PaymentException("请款已经被批准, 请向财务确定删除.");
+
+        this.remove = true;
+        return this.save();
+    }
+
+    /**
+     * 在 APPROVAL 之前的状态都被认为是没有批准
+     *
+     * @return
+     */
+    private boolean isApproval() {
+        return this.state == S.APPROVAL || this.state == S.PAID;
     }
 }

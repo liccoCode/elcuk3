@@ -451,12 +451,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         float amount = 0;
-        for(PaymentUnit fee : this.fees) {
+        for(PaymentUnit fee : this.fees()) {
             if(!this.attrs.currency.equals(fee.currency))
                 throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
             amount += fee.amount;
         }
         return amount;
+    }
+
+    /**
+     * 没有关闭的款项
+     *
+     * @return
+     */
+    public List<PaymentUnit> fees() {
+        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+        for(PaymentUnit fee : this.fees) {
+            if(fee.remove) continue;
+            fees.add(fee);
+        }
+        return fees;
     }
 
 
