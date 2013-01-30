@@ -139,8 +139,18 @@ public class Privilege extends Model {
 
         // 财务控制器
         privileges.add(new Privilege("finances", "财务模块"));
+        //todo: 要记得向系统添加权限
+        privileges.add(new Privilege("finances.index", "系统内修复"));
+        privileges.add(new Privilege("finances.fixfinance", "修复 Amazon 财务数据"));
+        privileges.add(new Privilege("finances.addselling", "修复系统内上架失败 Selling"));
+        privileges.add(new Privilege("finances.reparseorder", "重新解析订单文件"));
 
-        // Products 控制
+        // FeeTypes 控制器
+        privileges.add(new Privilege("feetypes", "费用类型"));
+        privileges.add(new Privilege("feetypes.index", "费用类型页面"));
+        // todo: 到这里都是新的
+
+        // Products 控制器
         privileges.add(new Privilege("products.saleamazonlisting", "Amazon 上架"));
 
         // Excels 的下载控制

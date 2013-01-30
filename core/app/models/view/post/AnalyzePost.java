@@ -142,6 +142,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 // ProcureUnit
                 for(AnalyzeDTO dto : analyzeMap.values()) {
                     // 切换 ProcureUnit 的 sku/sid 的参数?
+                    // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
                     List<ProcureUnit> untis = ProcureUnit
                             .find((isSku ? "sku=?" : "sid=?") + " AND stage NOT IN (?,?)", dto.fid,
                                     ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER).fetch();

@@ -12,22 +12,22 @@ var LoadMask = {
      */
     mask: function(selector){
         if(!selector) selector = "#container";
-        var times = localStorage.getItem(selector + "_times");
+        var times = sessionStorage[selector + "_times"];
         if(!times){
             times = 0;
             $(selector).mask("处理中...");
         }
-        localStorage.setItem(selector + "_times", ++times);
+        sessionStorage[selector + "_times"] = ++times;
         console.log(selector + "_times:" + times);
     },
     unmask: function(selector){
         if(!selector) selector = "#container";
-        var times = localStorage.getItem(selector + "_times");
+        var times = sessionStorage[selector + "_times"];
         if(--times <= 0){
-            localStorage.removeItem(selector + "_times");
+            delete sessionStorage[selector + "_times"];
             $(selector).unmask();
         }else{
-            localStorage.setItem(selector + "_times", times)
+            sessionStorage[selector + "_times"] = times;
         }
         console.log(selector + "_times:" + times);
     }

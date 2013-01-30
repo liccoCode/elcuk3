@@ -95,6 +95,20 @@
                     </li>
                 #{/ck}
 
+                #{ck 'finances'}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">财务模块<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            #{ck "finances.index"}
+                                <li><a href="@{Finances.index()}">系统内修复</a></li>
+                            #{/ck}
+                            #{ck "feetypes.index"}
+                                <li><a href="@{FeeTypes.index()}">费用类型</a></li>
+                            #{/ck}
+                        </ul>
+                    </li>
+                #{/ck}
+
                 #{ck 'system'}
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>

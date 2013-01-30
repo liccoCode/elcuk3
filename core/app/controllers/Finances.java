@@ -33,12 +33,13 @@ import java.util.regex.Pattern;
 public class Finances extends Controller {
 
 
+    @Check("finances.index")
     public static void index() {
         List<Account> accs = Account.openedSaleAcc();
         render(accs);
     }
 
-    //TODO 需要权限
+    @Check("finances.fixfinance")
     public static void fixFinance(File file, long accId) {
         Account acc = Account.findById(accId);
         if(acc == null)
@@ -53,6 +54,7 @@ public class Finances extends Controller {
     /**
      * 修复 Amazon 上已经有的 Selling 没有则无法创建
      */
+    @Check("finances.addselling")
     public static void addSelling(String url, String sku, String upc) {
         // 修复方法, 直接写在 Controller 中了.
         String[] parts = Finances.parseUrl(url);
@@ -91,6 +93,7 @@ public class Finances extends Controller {
         }
     }
 
+    @Check("finances.reparseorder")
     public static void reParseOrder(File file, Account acc) {
         String name = file.getName();
         JobRequest req = new JobRequest();
