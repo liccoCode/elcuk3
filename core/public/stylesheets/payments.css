@@ -2,6 +2,13 @@
     margin:0;
 }
 
+#add_form{
+    display:none;
+    margin-right:auto;
+    margin-left:auto;
+    text-align:center;
+}
+
 label.checkbox input[type=checkbox]{
     margin-right:5px;
 }

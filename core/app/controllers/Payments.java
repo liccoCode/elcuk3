@@ -1,11 +1,14 @@
 package controllers;
 
 import exception.PaymentException;
+import models.finance.FeeType;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import play.modules.router.Get;
 import play.modules.router.Post;
 import play.mvc.Controller;
+
+import java.util.List;
 
 /**
  * Payments Controller
@@ -20,7 +23,8 @@ public class Payments extends Controller {
     @Get("/deliveryment/{deliveryId}/payments")
     public static void index(String deliveryId) {
         Deliveryment dmt = Deliveryment.findById(deliveryId);
-        render(dmt);
+        List<FeeType> procureFeeTypes = FeeType.procure();
+        render(dmt, procureFeeTypes);
     }
 
     @Post("/deliveryment/{deliveryId}/payments")

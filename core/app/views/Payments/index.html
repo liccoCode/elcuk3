@@ -13,6 +13,66 @@
     <a href="/deliveryment/${dmt.id}" class="btn btn-success">回到采购单</a>
 </div>
 
+#{warning_row title:'采购单支付信息' /}
+<div class="btn-toolbar">
+    <button data-target="#add_form" data-toggle="toggle" class="btn btn-success">向采购单添加请款</button>
+</div>
+
+<div class="row-fluid" id="add_form">
+    <form>
+
+        <label>金额</label>
+        <input type="text" name="pu.amount" value="0">
+        <label>币种</label>
+    #{pickCurrency /}
+        <label>采购费用类型</label>
+        <select name="pu.feeType">
+        #{list items:procureFeeTypes, as:'ft'}
+            <option value="${ft.name}">${ft.nickName}</option>
+        #{/list}
+        </select>
+        <br>
+        <button class="btn btn-primary">申请</button>
+    </form>
+</div>
+<div class="row-fluid">
+    <table class="table table-bordered table-condensed">
+    #{if dmt.fees().size() <= 0}
+        <tr>
+            <td>暂时全部是采购单元的请款</td>
+        </tr>
+    #{/if}
+    #{else }
+        <tr>
+            <th>#</th>
+            <th>总请款金额</th>
+            <th>修正值</th>
+            <th>费用类型</th>
+            <th>请款人</th>
+            <th>请款时间</th>
+            <th>状态</th>
+        </tr>
+        #{list items:dmt.fees(), as:'fee'}
+            <tr id="payunit_${fee.id}">
+                <td>${fee.id}</td>
+                <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
+                <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
+                <td>${fee.feeType?.nickName}</td>
+                <td>${fee.payee.username}</td>
+                <td>${fee.createdAt.los()}</td>
+                <td>${fee.state}</td>
+            </tr>
+        #{/list}
+    *{<tr>}*
+    *{<th>汇总:</th>}*
+    *{<td id="fee_${unit.id}_amount"></td>}*
+    *{<td id="fee_${unit.id}_fix_value"></td>}*
+    *{<td colspan="5">&nbsp;</td>}*
+    *{</tr>}*
+    #{/else}
+    </table>
+</div>
+
 #{info_row title:'采购单元支付信息' /}
 <div class="row-fluid">
     <table class="table table-bordered table-condensed" id="procure_units_fees">
@@ -72,6 +132,7 @@
                             <th>#</th>
                             <th>总请款金额</th>
                             <th>修正值</th>
+                            <th>费用类型</th>
                             <th>请款人</th>
                             <th>请款时间</th>
                             <th>状态</th>
@@ -82,6 +143,7 @@
                                 <td>${fee.id}</td>
                                 <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
                                 <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
+                                <td>${fee.feeType?.nickName}</td>
                                 <td>${fee.payee.username}</td>
                                 <td>${fee.createdAt.los()}</td>
                                 <td>${fee.state}</td>
@@ -96,7 +158,7 @@
                             <th>汇总:</th>
                             <td id="fee_${unit.id}_amount"></td>
                             <td id="fee_${unit.id}_fix_value"></td>
-                            <td colspan="4">&nbsp;</td>
+                            <td colspan="5">&nbsp;</td>
                         </tr>
                     </table>
                 #{/else}
@@ -105,5 +167,3 @@
     #{/list}
     </table>
 </div>
-
-#{warning_row title:'采购单支付信息' /}

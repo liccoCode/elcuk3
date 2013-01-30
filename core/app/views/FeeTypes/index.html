@@ -24,6 +24,8 @@
     <form method="post" action="/feetypes">
         <label>费用名称</label>
         <input type="text" name="ft.name">
+        <label>NickName</label>
+        <input type="text" name="ft.nickName">
         <label>费用解释</label>
         <input type="text" name="ft.memo">
         <label>父费用类型</label>
@@ -42,6 +44,7 @@
     <table class="table table-bordered table-condensed types">
         <tr>
             <th>Name</th>
+            <th>NickName</th>
             <th>解释</th>
             <th>创建时间</th>
             <th>更新时间</th>
@@ -49,6 +52,9 @@
     #{list items:types, as:'top'}
         <tr>
             <td>${top.name}</td>
+            <td>
+                <input type="text" name="nickName" value="${top.nickName}">
+            </td>
             <td>
                 <input type="text" value="${top.memo}">
                 <button class="btn btn-primary submit">更新</button>
@@ -60,6 +66,7 @@
         #{list items:top.children, as:'sub'}
             <tr class="level_1">
                 <td><i class="icon-double-angle-right"></i>${sub.name}</td>
+                <td><input type="text" name="nickName" value="${sub.nickName}"></td>
                 <td>
                     <input type="text" value="${sub.memo}">
                     <button class="btn btn-primary submit">更新</button>

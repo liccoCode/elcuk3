@@ -106,6 +106,9 @@ public class PaymentUnit extends Model {
      */
     public Currency currency = Currency.CNY;
 
+    @OneToOne
+    public FeeType feeType;
+
     @Lob
     public String memo;
 
@@ -114,6 +117,8 @@ public class PaymentUnit extends Model {
 
     @PrePersist
     public void beforeSave() {
+        if(this.feeType == null)
+            throw new PaymentException("支付单元必须拥有费用类型.");
         this.createdAt = new Date();
     }
 

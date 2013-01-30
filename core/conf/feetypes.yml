@@ -107,3 +107,16 @@ finance.FeeType(productcharges):
   name: 'productcharges'
   memo: '就是 Principal 费用, 即商品销售的价格'
 
+finance.FeeType(procure):
+  name: 'procure'
+  memo: '采购方面所涉及的费用类型'
+
+finance.FeeType(cashpledge):
+  name: 'cashpledge'
+  nickName: '预付款'
+  memo: '采购的预付款, 一般为 30%'
+  parent: procure
+
+finance.FeeType(transport):
+  name: 'transport'
+  memo: '运输方面所设计的费用类型'

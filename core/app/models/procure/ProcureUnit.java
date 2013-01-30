@@ -8,6 +8,7 @@ import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
+import models.finance.FeeType;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.market.Selling;
@@ -393,7 +394,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public PaymentUnit billing(float fixValue, boolean prepay) {
         /**
-         * todo: (申请押金如何处理?)
          * 如果没有交货不允许申请
          */
         if(this.leftAmount() <= 0)
@@ -413,8 +413,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 计算剩下的需要支付的款项
         if(prepay) {
             fee.amount = this.totalBalance() * 0.3f; /* 30% 预付款*/
+            fee.feeType = FeeType.cashpledge();
         } else {
             fee.amount = this.leftAmount();
+            fee.feeType = FeeType.procurement();
         }
         // 计算完成之后还需要再检查一次
         if(this.totalAmount() + fee.amount > this.totalBalance()) {

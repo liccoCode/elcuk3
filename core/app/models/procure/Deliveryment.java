@@ -71,6 +71,9 @@ public class Deliveryment extends GenericModel {
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
+    /**
+     * 这个采购单级别所拥有的请款, 这里会包括采购单与采购单项级别的所有
+     */
     @OneToMany(mappedBy = "deliveryment", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
@@ -282,6 +285,20 @@ public class Deliveryment extends GenericModel {
         new ElcukRecord(Messages.get("deliveryment.delunit"),
                 Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
         return units;
+    }
+
+    /**
+     * 过滤出仅仅是采购单级别的请款
+     *
+     * @return
+     */
+    public List<PaymentUnit> fees() {
+        List<PaymentUnit> dmtFees = new ArrayList<PaymentUnit>();
+        for(PaymentUnit fee : this.fees) {
+            if(fee.procureUnit == null)
+                dmtFees.add(fee);
+        }
+        return dmtFees;
     }
 
 

@@ -36,6 +36,11 @@ public class FeeType extends GenericModel {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     public List<FeeType> children;
 
+    /**
+     * 这项费用的简单名称
+     */
+    public String nickName;
+
     @Lob
     public String memo;
 
@@ -49,6 +54,8 @@ public class FeeType extends GenericModel {
         if(!Pattern.matches("\\w+", this.name))
             throw new PaymentException("FeeType 的 name 必须为字母");
         this.name = StringUtils.join(StringUtils.split(this.name, " ")).toLowerCase().trim();
+        if(StringUtils.isBlank(this.nickName))
+            this.nickName = this.name;
     }
 
     @PreUpdate
@@ -90,6 +97,15 @@ public class FeeType extends GenericModel {
     }
 
     /**
+     * 寻找所有采购费用类型的子类型
+     *
+     * @return
+     */
+    public static List<FeeType> procure() {
+        return FeeType.find("parent.name=?", "procure").fetch();
+    }
+
+    /**
      * 最顶层的节点
      *
      * @return
@@ -97,4 +113,23 @@ public class FeeType extends GenericModel {
     public static List<FeeType> tops() {
         return FeeType.find("parent IS NULL").fetch();
     }
+
+    /**
+     * 固定需要的 采购预付款
+     *
+     * @return
+     */
+    public static FeeType cashpledge() {
+        return FeeType.findById("cashpledge");
+    }
+
+    /**
+     * 固定需要的 采购款
+     *
+     * @return
+     */
+    public static FeeType procurement() {
+        return FeeType.findById("procurement");
+    }
+
 }

@@ -1,8 +1,13 @@
 $ ->
   $("button.submit").click ->
-    name = $(@).parents('tr').find("td:eq(0)").text()
+    self = @
+    name = $(self).parents('tr').find("td:eq(0)").text()
     LoadMask.mask()
-    $.post("/feetype/#{name}/update", {memo: $(@).prev().val()}, (r) ->
+    params =
+      memo: $(self).prev().val(),
+      nickName: $(self).parents('tr').find("td:eq(1) input").val()
+
+    $.post("/feetype/#{name}/update", params, (r) ->
       try
         if r.flag
           Notify.ok("更新成功", r.message)

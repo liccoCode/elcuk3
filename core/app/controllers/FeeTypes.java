@@ -23,11 +23,12 @@ public class FeeTypes extends Controller {
     }
 
     @Post("/feetype/{name}/update")
-    public static void update(String name, String memo) {
+    public static void update(String name, String memo, String nickName) {
         try {
             FeeType type = FeeType.findById(name);
             String oldMemo = type.memo;
             type.memo = memo;
+            type.nickName = nickName;
             type.save();
             renderJSON(new Ret(true, String.format("FeeType %s 的 Memo 从 %s 变更为 %s", name, oldMemo,
                     memo)));
