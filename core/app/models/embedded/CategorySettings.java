@@ -38,6 +38,9 @@ public class CategorySettings {
     @Column(columnDefinition = "varchar(100) DEFAULT ''")
     public String amazonDECategory;
 
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonFRCategory;
+
     public Map<String, String> amazonNodeMap() {
         String[] nodes = StringUtils.split(amazonNode, ",");
         Map<String, String> nodeMap = new HashMap<String, String>();
@@ -49,6 +52,7 @@ public class CategorySettings {
 
     /**
      * 选择 Amazon 上架的时候 Cateogry 的值
+     *
      * @param market
      * @return
      */
@@ -59,6 +63,8 @@ public class CategorySettings {
             return amazonDECategory;
         } else if(market == M.AMAZON_US) {
             return amazonCategory;
+        } else if(market == M.AMAZON_FR) {
+            return amazonFRCategory;
         } else {
             return "";
         }

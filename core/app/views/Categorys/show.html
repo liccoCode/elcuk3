@@ -19,7 +19,9 @@
                 #{list items:cates, as:'cat_left'}
                     <tr>
                         <td>${cat_left.categoryId}</td>
-                        <td><a href="@{Categorys.show()}/${cat_left.categoryId}">${cat_left.name}</a></td>
+                        <td>
+                            <a href="@{Categorys.show()}/${cat_left.categoryId}">${cat_left.name}</a>
+                        </td>
                     </tr>
                 #{/list}
             </table>
@@ -37,10 +39,10 @@
             #{errorMsgs /}
 
             #{info_row title:'Basic Info'}
-            <ul>
-                <li>产品要求: 每一个条款占据一行, 不要换行</li>
-                <li>不需要填写前缀 1. 2. 之类的, 系统会自行处理</li>
-            </ul>
+                <ul>
+                    <li>产品要求: 每一个条款占据一行, 不要换行</li>
+                    <li>不需要填写前缀 1. 2. 之类的, 系统会自行处理</li>
+                </ul>
             #{/info_row}
             <div>
                 <form action="@{Categorys.update()}" method="post">
@@ -49,7 +51,9 @@
                             <td>CategoryId:</td>
                             <td>${cat.categoryId}</td>
                             <td>Name:</td>
-                            <td><input class="input-medium" type="text" name="cat.name" value="${cat.name}"></td>
+                            <td>
+                                <input class="input-medium" type="text" name="cat.name" value="${cat.name}">
+                            </td>
                         </tr>
                         <tr>
                             <td>AmzNode:</td>
@@ -73,6 +77,12 @@
                             <td style="width:100px;">AmzDECategory:</td>
                             <td colspan="3">
                                 <input type="text" class="span12" name="cat.settings.amazonDECategory" value="${cat.settings?.amazonDECategory}" placeHolder="Amazon.de CLASSIFY 阶段的类型">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:100px;">AmzFRCategory:</td>
+                            <td colspan="3">
+                                <input type="text" class="span12" name="cat.settings.amazonFRCategory" value="${cat.settings?.amazonFRCategory}" placeHolder="Amazon.fr CLASSIFY 阶段的类型">
                             </td>
                         </tr>
                         <tr>
@@ -144,7 +154,8 @@
                             </tr>
                             #{list items:cat.unbrands(), as:'brand'}
                                 <tr>
-                                    <td><label><input type="checkbox" name="brandIds" value="${brand.name}"></label>
+                                    <td>
+                                        <label><input type="checkbox" name="brandIds" value="${brand.name}"></label>
                                     </td>
                                     <td>${brand.name}</td>
                                     <td>${brand.fullName}</td>
@@ -169,7 +180,9 @@
                             </tr>
                             #{list items:cat.brands, as:'b'}
                                 <tr>
-                                    <td><label><input type="checkbox" name="brandIds" value="${b.name}"></label></td>
+                                    <td>
+                                        <label><input type="checkbox" name="brandIds" value="${b.name}"></label>
+                                    </td>
                                     <td>${b.name}</td>
                                     <td>${b.fullName}</td>
                                     <td>${b.memo}</td>
