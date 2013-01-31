@@ -1,4 +1,5 @@
 $ ->
+  # 采购单元的一行行数据
   class UnitRow
     constructor: (@uid) ->
       # 减去标题行与总结行
@@ -7,7 +8,6 @@ $ ->
     remove: (feeId) ->
       self = @
       self.fees -= 1
-      console.log(self.fees)
       if self.fees <= 0
         $("#unit_#{self.uid} .toggle_table_td").html('<div style="padding:10px">没有支付信息</div>')
         $("[data-target=#unit_#{self.uid}] .badge").removeClass('badge-warning').text(-> parseInt($(@).text()) - 1)
@@ -36,19 +36,71 @@ $ ->
       $("#unit_#{@uid} #{sub_selector}").each(-> amount += parseFloat($(@).text().split(' ')[1]))
       amount
 
+  class DmtRow
+    @TABLEID = "deliveryment_fees"
+    constructor: () ->
+      @dmtId = $("#deliverymentId").val()
+      @fees = $("##{DmtRow.TABLEID}").find('tr').size() - 1
+
+    remove: (feeId) ->
+      self = @
+      self.fees -= 1
+      if self.fees <= 0
+        $("##{DmtRow.TABLEID}").html('<tr><td>暂时全部是采购单元的请款</td></tr>')
+      else
+        $("#payunit_#{feeId}").remove()
+
+    cal_ammount: () ->
+      amount = 0
+      $("##{DmtRow.TABLEID} .amount").each ->
+        amount = parseFloat($(@).text().split(' ')[1])
+      $('#fee_amount').text(amount)
+      @
+
+    cal_fix_value: () ->
+      amount = 0
+      $("##{DmtRow.TABLEID} .fix_value").each ->
+        amount = parseFloat($(@).text().split(' ')[1])
+      $('#fee_fix_value').text(amount)
+      @
+
+
+  # 所有 Deliveryment 的删除按钮
+  $('button.dmt_remove').click ->
+    return unless confirm('请不要着急点确定, 请先确认是否真的需要删除?')
+    feeId = $(@).parents('tr').attr('id').split('_')[1]
+    LoadMask.mask()
+    $.post("/paymentunits/#{feeId}/remove", (r) ->
+      try
+        if(r.flag)
+          new DmtRow().remove(feeId)
+          Notify.ok("删除成功.", r.message)
+        else
+          Notify.alarm("删除失败.", r.message)
+      finally
+        LoadMask.unmask()
+    )
 
   # 所有 PaymentUnit 删除按钮
-  $('button.remove').click ->
+  $('button.unit_remove').click ->
+    return unless confirm('请不要着急点确定, 请先确认是否真的需要删除?')
     feeId = $(@).parents('tr').attr('id').split('_')[1]
     self = @
     uid = $(self).attr('uid')
+    LoadMask.mask()
     $.post("/paymentunits/#{feeId}/remove", (r) ->
-      if(r.flag)
-        new UnitRow(uid).remove(feeId)
-        Notify.ok("删除成功.", r.message)
-      else
-        Notify.alarm("删除失败.", r.message)
+      try
+        if(r.flag)
+          new UnitRow(uid).remove(feeId)
+          Notify.ok("删除成功.", r.message)
+        else
+          Notify.alarm("删除失败.", r.message)
+      finally
+        LoadMask.unmask()
     )
+
+  # 计算 Deliveryment 的 amount
+  new DmtRow().cal_ammount().cal_fix_value()
 
   # 为所有 ProcureUnit 的点击事件增加计算 amount
   $("#procure_units_fees [data-target]").click ->

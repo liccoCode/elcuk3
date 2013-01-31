@@ -9,7 +9,6 @@ require:
     - play -> coffee 1.0
     - play -> pdf 0.9
     - play -> excel 1.2.3
-    - play -> mockito 0.1
     - play -> router 1.3
     # jars...
     - com.trendrr -> beanstalk 1.0

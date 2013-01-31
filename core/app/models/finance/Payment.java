@@ -1,7 +1,6 @@
 package models.finance;
 
 import models.User;
-import models.procure.ProcureUnit;
 import org.joda.time.DateTime;
 import play.db.jpa.Model;
 
@@ -79,13 +78,13 @@ public class Payment extends Model {
      *
      * @return
      */
-    public static Payment makePayment(ProcureUnit unit) {
+    public static Payment makePayment(String deliverymentId) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.unit fee WHERE " +
                         "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? " +
                         "ORDER BY p.createdAt DESC",
-                unit.deliveryment.id, now.minusHours(24).toDate(), now.toDate()).first();
+                deliverymentId, now.minusHours(24).toDate(), now.toDate()).first();
 
         if(payment == null) {
             payment = new Payment();

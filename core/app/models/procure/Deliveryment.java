@@ -1,8 +1,10 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import exception.PaymentException;
 import models.ElcukRecord;
 import models.User;
+import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.product.Category;
 import org.joda.time.DateTime;
@@ -288,6 +290,25 @@ public class Deliveryment extends GenericModel {
     }
 
     /**
+     * 对采购单级别请款
+     */
+    public void billing(PaymentUnit unit) {
+        /**
+         * 1. 检查
+         *  a. 请款费用不为零
+         * 2. 采购单关联
+         * 3. 申请人关联
+         * 4. 请款单关联/创建
+         */
+        if(unit.amount == 0)
+            throw new PaymentException("请款金额不允许为 0");
+        unit.deliveryment = this;
+        unit.payee = User.findByUserName(User.username());
+        unit.payment = Payment.makePayment(this.id);
+        unit.save();
+    }
+
+    /**
      * 过滤出仅仅是采购单级别的请款
      *
      * @return
@@ -295,7 +316,7 @@ public class Deliveryment extends GenericModel {
     public List<PaymentUnit> fees() {
         List<PaymentUnit> dmtFees = new ArrayList<PaymentUnit>();
         for(PaymentUnit fee : this.fees) {
-            if(fee.procureUnit == null)
+            if(!fee.remove && fee.procureUnit == null)
                 dmtFees.add(fee);
         }
         return dmtFees;

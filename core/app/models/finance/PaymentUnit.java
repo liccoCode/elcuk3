@@ -119,6 +119,8 @@ public class PaymentUnit extends Model {
     public void beforeSave() {
         if(this.feeType == null)
             throw new PaymentException("支付单元必须拥有费用类型.");
+        if(this.currency == null)
+            throw new PaymentException("支付单元的货币种类不允许为空.");
         this.createdAt = new Date();
     }
 

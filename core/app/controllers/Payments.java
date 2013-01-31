@@ -2,6 +2,7 @@ package controllers;
 
 import exception.PaymentException;
 import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import play.modules.router.Get;
@@ -27,10 +28,13 @@ public class Payments extends Controller {
         render(dmt, procureFeeTypes);
     }
 
-    @Post("/deliveryment/{deliveryId}/payments")
-    public static void deliverymentApply(String deliveryId, Long procureUnitId, boolean prepay) {
-        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
+    /**
+     * 采购单中的采购项目请款
+     */
+    @Post("/deliveryment/{deliveryId}/unitfees")
+    public static void procureUnitApply(String deliveryId, Long procureUnitId, boolean prepay) {
         try {
+            ProcureUnit unit = ProcureUnit.findById(procureUnitId);
             unit.billing(0, prepay);
             flash.success("请款添加成功.");
         } catch(PaymentException e) {
@@ -38,4 +42,21 @@ public class Payments extends Controller {
         }
         index(deliveryId);
     }
+
+    /**
+     * 采购单中的采购单级别请款
+     */
+    @Post("/deliveryment/{deliveryId}/fees")
+    public static void deliverymentApply(String deliveryId, PaymentUnit pu) {
+        Deliveryment dmt = Deliveryment.findById(deliveryId);
+        try {
+            dmt.billing(pu);
+            flash.success("请款成功.");
+        } catch(PaymentException e) {
+            flash.error("因 %s 原因请款失败.", e.getMessage());
+        }
+        renderArgs.put("pu", pu);
+        index(deliveryId);
+    }
+
 }

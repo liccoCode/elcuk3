@@ -11,6 +11,7 @@
 
 <div class="row-fluid btn-toolbar">
     <a href="/deliveryment/${dmt.id}" class="btn btn-success">回到采购单</a>
+    <input type="hidden" id="deliverymentId" value="${dmt.id}">
 </div>
 
 #{warning_row title:'采购单支付信息' /}
@@ -19,14 +20,13 @@
 </div>
 
 <div class="row-fluid" id="add_form">
-    <form>
-
+    <form method="post" action="/deliveryment/${dmt.id}/fees">
         <label>金额</label>
-        <input type="text" name="pu.amount" value="0">
+        <input type="text" name="pu.amount" value="${pu == null ? 0 : pu.amount}">
         <label>币种</label>
-    #{pickCurrency /}
+    #{pickCurrency c:(pu == null ? helper.Currency.CNY : pu.currency) /}
         <label>采购费用类型</label>
-        <select name="pu.feeType">
+        <select name="pu.feeType.name">
         #{list items:procureFeeTypes, as:'ft'}
             <option value="${ft.name}">${ft.nickName}</option>
         #{/list}
@@ -36,7 +36,7 @@
     </form>
 </div>
 <div class="row-fluid">
-    <table class="table table-bordered table-condensed">
+    <table class="table table-bordered table-condensed" id="deliveryment_fees">
     #{if dmt.fees().size() <= 0}
         <tr>
             <td>暂时全部是采购单元的请款</td>
@@ -49,8 +49,9 @@
             <th>修正值</th>
             <th>费用类型</th>
             <th>请款人</th>
-            <th>请款时间</th>
+            <th class="ten">请款时间</th>
             <th>状态</th>
+            <th></th>
         </tr>
         #{list items:dmt.fees(), as:'fee'}
             <tr id="payunit_${fee.id}">
@@ -59,16 +60,21 @@
                 <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
                 <td>${fee.feeType?.nickName}</td>
                 <td>${fee.payee.username}</td>
-                <td>${fee.createdAt.los()}</td>
+                <td>#{time_tooltip time:fee.createdAt, datetime:true /}</td>
                 <td>${fee.state}</td>
+                <td>
+                    <button class="btn btn-small btn-danger dmt_remove">
+                        <i class="icon-remove"></i>
+                    </button>
+                </td>
             </tr>
         #{/list}
-    *{<tr>}*
-    *{<th>汇总:</th>}*
-    *{<td id="fee_${unit.id}_amount"></td>}*
-    *{<td id="fee_${unit.id}_fix_value"></td>}*
-    *{<td colspan="5">&nbsp;</td>}*
-    *{</tr>}*
+        <tr>
+            <th>汇总:</th>
+            <td id="fee_amount"></td>
+            <td id="fee_fix_value"></td>
+            <td colspan="5">&nbsp;</td>
+        </tr>
     #{/else}
     </table>
 </div>
@@ -110,7 +116,7 @@
             <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
             <td>#{yesOrNo f:unit.isPlaced/}</td>
             <td>
-                <form class="inner_form" method="post" action="/deliveryment/${dmt.id}/payments">
+                <form class="inner_form" method="post" action="/deliveryment/${dmt.id}/unitfees">
                     <label class="inline checkbox">
                         <input type="checkbox" name="prepay" value="true"> 预付款
                     </label>
@@ -134,7 +140,7 @@
                             <th>修正值</th>
                             <th>费用类型</th>
                             <th>请款人</th>
-                            <th>请款时间</th>
+                            <th class="ten">请款时间</th>
                             <th>状态</th>
                             <th class="ten"></th>
                         </tr>
@@ -145,10 +151,10 @@
                                 <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
                                 <td>${fee.feeType?.nickName}</td>
                                 <td>${fee.payee.username}</td>
-                                <td>${fee.createdAt.los()}</td>
+                                <td>#{time_tooltip time:fee.createdAt, datetime:true /}</td>
                                 <td>${fee.state}</td>
                                 <td>
-                                    <button uid="${unit.id}" class="btn btn-small btn-danger remove">
+                                    <button uid="${unit.id}" class="btn btn-small btn-danger unit_remove">
                                         <i class="icon-remove"></i>
                                     </button>
                                 </td>

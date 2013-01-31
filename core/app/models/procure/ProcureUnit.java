@@ -405,7 +405,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         fee.procureUnit = this;
         // 如果有 ProcureUnit , 那么则拥有 Deliveryment
         fee.deliveryment = this.deliveryment;
-        fee.payment = Payment.makePayment(this);
+        fee.payment = Payment.makePayment(this.deliveryment.id);
         fee.payee = User.findByUserName(User.username());
 
         fee.fixValue = fixValue;
