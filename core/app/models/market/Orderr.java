@@ -231,6 +231,11 @@ public class Orderr extends GenericModel {
      */
     public Integer crawlUpdateTimes = 0;
 
+    /**
+     * 是否为有问题的订单.
+     */
+    public boolean warnning = false;
+
 
     /**
      * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
@@ -342,6 +347,41 @@ public class Orderr extends GenericModel {
 
     public boolean isHaveFeedback() {
         return Feedback.count("orderr=?", this) > 0;
+    }
+
+    /**
+     * 这个订单的销售额.
+     *
+     * @return
+     */
+    public float totalUSDSales() {
+        float totalSales = 0;
+        if(this.market.name().startsWith("AMAZON")) {
+            for(SaleFee fee : this.fees) {
+                if(fee.type.parent != null && !"amazon".equals(fee.type.parent.name)) continue;
+                if("principal".equals(fee.type.name) || "productcharges".equals(fee.type.name))
+                    totalSales += fee.usdCost;
+            }
+        }
+        return totalSales;
+    }
+
+    /**
+     * 不同市场上所有收取的费用
+     *
+     * @return
+     */
+    public float totalMarketFee() {
+        float totalMarketFee = 0;
+        if(this.market.name().startsWith("AMAZON")) {
+            for(SaleFee fee : this.fees) {
+                if("principal".equals(fee.type.name) || "productcharges".equals(fee.type.name))
+                    continue;
+                if(fee.type.parent != null && !"amazon".equals(fee.type.parent.name)) continue;
+                totalMarketFee += fee.usdCost;
+            }
+        }
+        return Math.abs(totalMarketFee);
     }
 
     @Override
@@ -570,6 +610,12 @@ public class Orderr extends GenericModel {
             orderMap.put(or.orderId, or);
         }
         return orderMap;
+    }
+
+    public static void warnningToDeal(Date from, Date to, M market) {
+        DBUtils.row("UPDATE Orderr set warnning=false WHERE warnning=true AND market=?" +
+                " AND createDate>=? AND createDate<=?",
+                market.name(), market.withTimeZone(from), market.withTimeZone(to));
     }
 }
 
