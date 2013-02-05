@@ -10,7 +10,7 @@ $ ->
       to: $('#p_to').val()
       market: $('#o_market option:selected').val()
       return unless confirm("From: #{params.from} To: #{params.to} Market: #{params.market}
-            确认要处理吗? 如果没有处理成功更新订单还会处理重复回来.")
+              确认要处理吗? 如果没有处理成功更新订单还会处理重复回来.")
     if params.market == ''
       alert('请至少选择一个市场')
       return

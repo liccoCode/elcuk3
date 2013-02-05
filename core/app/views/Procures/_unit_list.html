@@ -16,6 +16,9 @@
         <th>供应商</th>
         <th>采购数量</th>
         <th>单价</th>
+        <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
+            <abbr title=" ">总价</abbr>
+        </th>
         <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="auto">FnSku</th>
         <th>运输方式</th>
         <th>预计交货时间</th>
@@ -50,6 +53,7 @@
         <td>${unit.cooperator?.name}</td>
         <td>${unit.attrs.planQty}</td>
         <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
+        <td>${(unit.qty() * unit.attrs.price).formatCurrency(unit.attrs.currency.name())}</td>
         <td>
             <!-- FnSku 下载 Label -->
             #{if unit.selling.fnSku}
@@ -57,7 +61,8 @@
                 </a>
             #{/if}
             #{else }
-                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">补全 FnSku</a>
+                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">补全
+                    FnSku</a>
             #{/else}
         </td>
         <td>${unit.shipType}</td>
@@ -129,7 +134,9 @@
                         #{ifnot unit.isPlaced}
                             <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
                                 <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
-                                <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">抵达货代处</button>
+                                <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">
+                                    抵达货代处
+                                </button>
                             </div>
                         #{/ifnot}
                     #{/if}

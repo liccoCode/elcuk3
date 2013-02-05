@@ -71,7 +71,7 @@ public class FinanceShippedOrders extends Job<List<SaleFee>> {
                 totalMarketFees += fee.usdCost;
             }
         }
-        return (totalSales > 0) && (totalMarketFees / totalSales) > 0.2;
+        return (totalSales > 0) && (totalMarketFees / totalSales) > 0.25;
     }
 
     public static List<Orderr> orderrs() {
