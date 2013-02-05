@@ -1,0 +1,18 @@
+<table class="table table-bordered table-condensed">
+    <tr>
+        <th>Cost</th>
+        <th>Cost(USD)</th>
+        <th>Date</th>
+        <th>FeeType</th>
+        <th>Qty</th>
+    </tr>
+#{list items:fees, as:'f'}
+    <tr>
+        <td>${f.cost} ${f.currency.name()}</td>
+        <td>${f.usdCost.format('#.###')} USD</td>
+        <td>${f.date.date()}</td>
+        <td>${f.type.name}</td>
+        <td>${f.qty}</td>
+    </tr>
+#{/list}
+</table>

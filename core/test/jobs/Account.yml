@@ -7,3 +7,13 @@ market.Account(easyacc):
   merchantId: AJUR3R8UN71M4
   closeable: false
   isSaleAcc: true
+
+market.Account(easyacc_de):
+ username: wyatt@easyacceu.com
+ password: pw5165688104
+ type: AMAZON_DE
+ token: fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF
+ accessKey: AKIAIAEPZK5CZEIVZFCQ
+ merchantId: A22H6OV6Q7XBYK
+ closeable: false
+ isSaleAcc: true

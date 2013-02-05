@@ -33,19 +33,23 @@ public class FinanceRefundOrders extends Job {
         if(StringUtils.isNotBlank(this.orderId))
             orders = Arrays.asList(Orderr.<Orderr>findById(this.orderId));
         else
-            orders = Orderr.find("SELECT o FROM Orderr o WHERE o.state=? AND SIZE(o.fees)<=1", Orderr.S.REFUNDED).fetch(50);
+            orders = Orderr.find("SELECT o FROM Orderr o WHERE o.state=? AND SIZE(o.fees)<=1",
+                    Orderr.S.REFUNDED).fetch(50);
 
         for(Orderr ord : orders) {
             if(ord.state != Orderr.S.REFUNDED) continue;
             // Refund 的首先删除原来的, 然后再重新添加新抓取的
             Logger.info("FinanceRefundOrders >> %s:%s", ord.orderId, ord.account.prettyName());
             List<SaleFee> fees = FinanceCheckJob.oneTransactionFee(
-                    HTTP.get(ord.account.cookieStore(), ord.account.type.oneTransactionFees(ord.orderId)));
+                    HTTP.get(ord.account.cookieStore(),
+                            ord.account.type.oneTransactionFees(ord.orderId)));
             SaleFee.deleteOrderRelateFee(ord.orderId);
             for(SaleFee fee : fees) {
                 fee.account = ord.account;
                 fee.save();
             }
+            ord.warnning = FinanceShippedOrders.isWarnning(fees);
+            ord.save();
         }
     }
 }

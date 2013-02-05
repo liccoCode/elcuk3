@@ -42,16 +42,41 @@ public class FinanceShippedOrders extends Job<List<SaleFee>> {
             if(ord.state != Orderr.S.SHIPPED) continue;
             Logger.info("FinanceShippedOrders >> %s:%s", ord.orderId, ord.account.prettyName());
             fees = FinanceCheckJob.oneTransactionFee(
-                    HTTP.get(ord.account.cookieStore(), ord.account.type.oneTransactionFees(ord.orderId)));
+                    HTTP.get(ord.account.cookieStore(),
+                            ord.account.type.oneTransactionFees(ord.orderId)));
             for(SaleFee fee : fees) {
                 fee.account = ord.account;
                 fee.save();
             }
+            ord.warnning = FinanceShippedOrders.isWarnning(fees);
+            ord.save();
         }
         return fees;
     }
 
+    /**
+     * 根据 SaleFee 判断是否需要警告
+     *
+     * @param fees
+     * @return
+     */
+    public static boolean isWarnning(List<SaleFee> fees) {
+        float totalSales = 0;
+        float totalMarketFees = 0;
+        for(SaleFee fee : fees) {
+            if(fee.type.parent != null && !"amazon".equals(fee.type.parent.name)) continue;
+            if("principal".equals(fee.type.name) || "productcharges".equals(fee.type.name)) {
+                totalSales += fee.usdCost;
+            } else {
+                totalMarketFees += fee.usdCost;
+            }
+        }
+        return (totalSales > 0) && (totalMarketFees / totalSales) > 0.25;
+    }
+
     public static List<Orderr> orderrs() {
-        return Orderr.find("SELECT o FROM Orderr o WHERE o.state=? AND o.market=o.account.type AND SIZE(o.fees)<=1", Orderr.S.SHIPPED).fetch(50);
+        return Orderr
+                .find("SELECT o FROM Orderr o WHERE o.state=? AND o.market=o.account.type AND SIZE(o.fees)<=1",
+                        Orderr.S.SHIPPED).fetch(50);
     }
 }
