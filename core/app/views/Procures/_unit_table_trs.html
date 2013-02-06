@@ -95,7 +95,7 @@
     </td>
     <td colspan="2">
     #{if unit.shipItem?.shipment}
-        <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}">${unit.shipItem.shipment.id}  ${unit.shipItem.shipment.type}</a>
+        <a href="@{Shipments.show(unit.shipItem.shipment.id)}">${unit.shipItem.shipment.id}  ${unit.shipItem.shipment.type}</a>
     #{/if}
     </td>
 </tr>

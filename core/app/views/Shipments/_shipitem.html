@@ -40,7 +40,9 @@
         ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
         </td>
         <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
-        <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
+        <td>
+            <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}">${itm.unit.deliveryment?.id}</a>
+        </td>
         <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
         <td>${itm.getTurnOverT4()._1}</td>
         <td>${itm.unit.cooperator?.name}</td>
@@ -51,7 +53,9 @@
         <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
         <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
         <td>${itm.unit.whouse.name()}</td>
-        <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>
+        <td>
+            <a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a>
+        </td>
     </tr>
 #{/list}
 #{if shipmentId}

@@ -71,7 +71,7 @@
                 <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}
                 </a></td>
             <td>
-                <a href="@{Shipments.show()}/${fba.shipment?.id}" target="_blank">${fba.shipment?.id}</a>
+                <a href="@{Shipments.show(fba.shipment?.id)}" target="_blank">${fba.shipment?.id}</a>
             </td>
             <td data-target="#unit_${fba.id}" data-toggle="toggle">
                 <i class="icon-reorder"></i> ${fba.centerId}

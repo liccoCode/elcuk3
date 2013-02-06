@@ -32,13 +32,15 @@ public class Deliveryments extends Controller {
         String deliverymentId = request.params.get("id");
         if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dmt.id");
         Deliveryment dmt = Deliveryment.findById(deliverymentId);
-        renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        if(dmt != null)
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.procurers());
     }
 
     @Check("deliveryments.index")
+    @Get("/deliveryments")
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
         if(p == null) p = new DeliveryPost();
@@ -46,7 +48,7 @@ public class Deliveryments extends Controller {
         render(deliveryments, p);
     }
 
-    @Get("/deliveryments/{id}")
+    @Get(value = "/deliveryments/{id}", priority = 100)
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         render(dmt);

@@ -64,7 +64,7 @@
             #{set procress: dmt.deliveryProcress()/}
             <tr>
                 <td>
-                    <a href="@{Deliveryments.show}/${dmt.id}" target="_blank">${dmt.id}</a>
+                    <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
                 </td>
                 <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
                     <span><i class="icon-reorder"></i></span>

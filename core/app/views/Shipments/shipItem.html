@@ -50,7 +50,7 @@
 
             <tr>
                 <td colspan="4">
-                    <a href="@{Shipments.show()}/${ship.id}" class="btn btn-success">回到运输单</a>
+                    <a href="@{Shipments.show(ship.id)}" class="btn btn-success">回到运输单</a>
                 </td>
             </tr>
         </table>
@@ -59,10 +59,14 @@
 
 #{info_row title:'确定运输的货物'}
 <ul>
-    <li>还没有交货的[采购单元]会使用 <span style="color:#FF7F1C;">橙色</span>高亮, 并有 <i class="icon-question-sign"></i> 标记</li>
+    <li>还没有交货的[采购单元]会使用 <span style="color:#FF7F1C;">橙色</span>高亮, 并有
+        <i class="icon-question-sign"></i> 标记
+    </li>
     <li>如果实际交货数量大于[采购单元]的预计交货数量会使用 <span style="color:#84F000;">亮绿色</span>高亮</li>
-    <li>如果超额交货, 则多余的数量会继续显示在下面的 <span class="text-warning">等待运输的货物</span> 中, 可根据实际运输数量对原有的运输数量进行修正</li>
-    <li>如果交货不足, 在[交货]操作之前可按照规定进行采购计划进行[分拆]操作, <span class="text-warning">等待运输的货物</span> 中会出现为<strong>负数</strong>的采购计划,
+    <li>如果超额交货, 则多余的数量会继续显示在下面的 <span class="text-warning">等待运输的货物</span> 中, 可根据实际运输数量对原有的运输数量进行修正
+    </li>
+    <li>如果交货不足, 在[交货]操作之前可按照规定进行采购计划进行[分拆]操作, <span class="text-warning">等待运输的货物</span>
+        中会出现为<strong>负数</strong>的采购计划,
         请添加进入运输单进行修正.
     </li>
     <li class="text-error">如果想修改某一个运输项的数量,请进入对应的采购单,对采购计划进行分拆,再回到此页面(刷新)将无差数据对冲叠加解决.</li>
@@ -118,9 +122,12 @@
                                 <input type="checkbox" name="unitId" id="checkbox_${unit.id}" value="${unit.id}">
                             </label>
                         </td>
-                        <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>
+                        <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+                        </td>
                         <td>${unit.sid}</td>
-                        <td><a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a></td>
+                        <td>
+                            <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
+                        </td>
                         <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
                         <td>${unit.cooperator?.name}</td>
                         <td>
@@ -131,7 +138,9 @@
                         <td>${unit.whouse.name()}</td>
                         <td style="color:${'#' + unit.stage.rgb()}">${unit.stage}</td>
                         <td>${unit.product.productName.omis(80)}</td>
-                        <td><a href="@{Procures.index()}?p.search=id:${unit.id}" target="_blank">${unit.id}</a></td>
+                        <td>
+                            <a href="@{Procures.index()}?p.search=id:${unit.id}" target="_blank">${unit.id}</a>
+                        </td>
                     </tr>
                 #{/if}
             #{/list}

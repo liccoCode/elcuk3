@@ -46,7 +46,7 @@
         </td>
         <td>
             #{if unit.deliveryment}
-                <a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a>
+                <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
             #{/if}
         </td>
         <td>${unit.whouse.name()}</td>
@@ -93,7 +93,7 @@
                 <div class="span5" style="float:left">
                     <h4 style="margin-top:0">关联运输单</h4>
                     #{list items:unit.relateShipment(), as:'sp'}
-                        <a href="@{Shipments.show()}/${sp.id}">#{if sp.cycle}
+                        <a href="@{Shipments.show(sp.id)}">#{if sp.cycle}
                             <i style="color:#C09853" class="icon-star"></i>#{/if}${sp.title()}
                         </a>
                         <br>

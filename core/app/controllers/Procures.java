@@ -167,7 +167,7 @@ public class Procures extends Controller {
             render("Procures/index.html", name);
         }
         flash.success("Deliveryment %s 创建成功.", deliveryment.id);
-        redirect("/Deliveryments/show/" + deliveryment.id);
+        Deliveryments.show(deliveryment.id);
     }
 
     /**
@@ -205,7 +205,7 @@ public class Procures extends Controller {
             render("Procures/deliveryUnit.html", unit, attrs);
         }
 
-        redirect("/Deliveryments/show/" + unit.deliveryment.id);
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     public static void splitUnit(long id) {
@@ -233,7 +233,7 @@ public class Procures extends Controller {
             flash.success("分拆成功, 并且成功保留对应的周期型运输单.");
         else
             flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
-        redirect("/Deliveryments/show/" + unit.deliveryment.id);
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     public static void calculateBox(long coperId, String sku, int size) {
