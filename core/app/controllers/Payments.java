@@ -2,6 +2,7 @@ package controllers;
 
 import exception.PaymentException;
 import models.finance.FeeType;
+import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -20,9 +21,18 @@ import java.util.List;
 //@With({GlobalExceptionHandler.class, Secure.class})
 public class Payments extends Controller {
 
+    @Get("/payments")
+    public static void index() {
+        List<Payment> payments = Payment.findAll();
+        render(payments);
+    }
 
+
+    /**
+     * 采购单的请款
+     */
     @Get("/deliveryment/{deliveryId}/payments")
-    public static void index(String deliveryId) {
+    public static void deliveryPayments(String deliveryId) {
         Deliveryment dmt = Deliveryment.findById(deliveryId);
         List<FeeType> procureFeeTypes = FeeType.procure();
         render(dmt, procureFeeTypes);
@@ -40,7 +50,7 @@ public class Payments extends Controller {
         } catch(PaymentException e) {
             flash.error(e.getMessage());
         }
-        index(deliveryId);
+        deliveryPayments(deliveryId);
     }
 
     /**
@@ -56,7 +66,7 @@ public class Payments extends Controller {
             flash.error("因 %s 原因请款失败.", e.getMessage());
         }
         renderArgs.put("pu", pu);
-        index(deliveryId);
+        deliveryPayments(deliveryId);
     }
 
 }

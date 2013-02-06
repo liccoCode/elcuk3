@@ -5,6 +5,7 @@ import models.market.Feedback;
 import models.market.M;
 import models.market.Orderr;
 import models.view.post.OrderPOST;
+import play.modules.router.Get;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -37,7 +38,7 @@ public class Orders extends Controller {
         }
     }
 
-    //    @Get("/orders/warnfix")
+    @Get("/orders/warnfix")
     public static void warrningOrders(Date from, Date to, String market) {
         try {
             M m = M.val(market);

@@ -46,7 +46,7 @@ public class Deliveryments extends Controller {
         render(deliveryments, p);
     }
 
-    @Get("/deliveryment/{id}")
+    @Get("/deliveryments/{id}")
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         render(dmt);
@@ -58,7 +58,7 @@ public class Deliveryments extends Controller {
             render("Deliveryments/show.html", dmt);
         dmt.save();
         flash.success("更新成功.");
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
@@ -78,8 +78,7 @@ public class Deliveryments extends Controller {
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
-
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
@@ -97,7 +96,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
 
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
@@ -112,7 +111,7 @@ public class Deliveryments extends Controller {
         dmt.confirm();
         new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
                 .save();
-        redirect("/Deliveryments/show/" + id);
+        show(id);
     }
 
     /**
@@ -126,7 +125,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt, msg);
 
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
