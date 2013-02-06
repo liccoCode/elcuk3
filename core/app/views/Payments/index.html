@@ -6,3 +6,38 @@
 #{set 'moreScripts'}
     #{script 'payments.coffee'/}
 #{/set}
+
+#{info_row title: "请款项目"/}
+<div class="row-fluid">
+    <table class="table table-bordered table-condensed">
+        <tr>
+            <th>#</th>
+            <th class="ten">状态</th>
+            <th class="ten">支付人</th>
+            <th>实际支付金额</th>
+            <th class="ten">创建时间</th>
+            <th class="ten">最后更新时间</th>
+        </tr>
+    #{list items:payments, as:'pay'}
+        <tr>
+            <td>${pay.id}</td>
+            <td>${pay.state}</td>
+            <td>${pay.payer?.username}</td>
+            <td data-toggle="toggle" data-target="#pay_${pay.id}">
+                <i class="icon-reorder"></i>
+                <i class="badge badge-info">${pay.units.size()}</i>
+            ${pay.actualPaid}
+            </td>
+            <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
+            <td>#{time_tooltip time:pay.lastUpdateAt, datetime:true/}</td>
+        </tr>
+        <tr id="pay_${pay.id}" style="display:none;">
+            <td colspan="6" class="toggle_table_td">
+                <table class="table table-bordered table-condensed">
+                    #{render 'Payments/_units.html', fees:pay.units, del:false/}
+                </table>
+            </td>
+        </tr>
+    #{/list}
+    </table>
+</div>

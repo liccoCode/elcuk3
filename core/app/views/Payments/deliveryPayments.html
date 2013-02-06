@@ -43,32 +43,7 @@
         </tr>
     #{/if}
     #{else }
-        <tr>
-            <th>#</th>
-            <th>总请款金额</th>
-            <th>修正值</th>
-            <th>费用类型</th>
-            <th>请款人</th>
-            <th class="ten">请款时间</th>
-            <th>状态</th>
-            <th></th>
-        </tr>
-        #{list items:dmt.fees(), as:'fee'}
-            <tr id="payunit_${fee.id}">
-                <td>${fee.id}</td>
-                <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
-                <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
-                <td>${fee.feeType?.nickName}</td>
-                <td>${fee.payee.username}</td>
-                <td>#{time_tooltip time:fee.createdAt, datetime:true /}</td>
-                <td>${fee.state}</td>
-                <td>
-                    <button class="btn btn-small btn-danger dmt_remove">
-                        <i class="icon-remove"></i>
-                    </button>
-                </td>
-            </tr>
-        #{/list}
+        #{render './_units.html', fees:dmt.fees()/}
         <tr>
             <th>汇总:</th>
             <td id="fee_amount"></td>
@@ -134,32 +109,7 @@
                 #{/if}
                 #{else }
                     <table class="table table-bordered table-condensed">
-                        <tr>
-                            <th>#</th>
-                            <th>总请款金额</th>
-                            <th>修正值</th>
-                            <th>费用类型</th>
-                            <th>请款人</th>
-                            <th class="ten">请款时间</th>
-                            <th>状态</th>
-                            <th class="ten"></th>
-                        </tr>
-                        #{list items:unit.fees(), as:'fee'}
-                            <tr id="payunit_${fee.id}">
-                                <td>${fee.id}</td>
-                                <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
-                                <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
-                                <td>${fee.feeType?.nickName}</td>
-                                <td>${fee.payee.username}</td>
-                                <td>#{time_tooltip time:fee.createdAt, datetime:true /}</td>
-                                <td>${fee.state}</td>
-                                <td>
-                                    <button uid="${unit.id}" class="btn btn-small btn-danger unit_remove">
-                                        <i class="icon-remove"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        #{/list}
+                        #{render './_units.html', fees:unit.fees()/}
                         <tr>
                             <th>汇总:</th>
                             <td id="fee_${unit.id}_amount"></td>

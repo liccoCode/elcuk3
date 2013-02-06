@@ -66,7 +66,7 @@ $ ->
 
 
   # 所有 Deliveryment 的删除按钮
-  $('button.dmt_remove').click ->
+  $('#deliveryment_fees button.remove').click ->
     return unless confirm('请不要着急点确定, 请先确认是否真的需要删除?')
     feeId = $(@).parents('tr').attr('id').split('_')[1]
     LoadMask.mask()
@@ -82,12 +82,12 @@ $ ->
     )
 
   # 所有 PaymentUnit 删除按钮
-  $('button.unit_remove').click ->
+  $('#procure_units_fees button.remove').click ->
     return unless confirm('请不要着急点确定, 请先确认是否真的需要删除?')
-    feeId = $(@).parents('tr').attr('id').split('_')[1]
     self = @
-    uid = $(self).attr('uid')
-    LoadMask.mask()
+    feeId = $(self).parents('tr').attr('id').split('_')[1]
+    uid = $(self).parents('table').parents('tr').attr('id').split('_')[1]
+    LoadMask.mask();
     $.post("/paymentunits/#{feeId}/remove", (r) ->
       try
         if(r.flag)

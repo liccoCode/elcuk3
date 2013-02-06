@@ -29,7 +29,7 @@ public class Payment extends Model {
     }
 
     @OneToMany(mappedBy = "payment")
-    public List<PaymentUnit> unit = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> units = new ArrayList<PaymentUnit>();
 
     /**
      * 关联谁支付的款项, "谁请款"记载在 Unit 身上
@@ -46,6 +46,9 @@ public class Payment extends Model {
      */
     public Date paymentDate;
 
+    /**
+     * 最终实际支付
+     */
     public Float actualPaid = 0f;
 
     @Lob
@@ -81,7 +84,7 @@ public class Payment extends Model {
     public static Payment makePayment(String deliverymentId) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find(
-                "SELECT p FROM Payment p LEFT JOIN p.unit fee WHERE " +
+                "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
                         "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? " +
                         "ORDER BY p.createdAt DESC",
                 deliverymentId, now.minusHours(24).toDate(), now.toDate()).first();
