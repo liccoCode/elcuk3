@@ -1,8 +1,11 @@
 package models.finance;
 
+import exception.PaymentException;
+import helper.Currency;
 import models.User;
 import org.joda.time.DateTime;
 import play.db.jpa.Model;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -51,6 +54,12 @@ public class Payment extends Model {
      */
     public Float actualPaid = 0f;
 
+    /**
+     * 最后支付的币种是什么
+     */
+    @Enumerated(EnumType.STRING)
+    public Currency currency = Currency.CNY;
+
     @Lob
     public String memo;
 
@@ -72,6 +81,26 @@ public class Payment extends Model {
     @PreUpdate
     public void beforeUpdate() {
         this.lastUpdateAt = new Date();
+    }
+
+    /**
+     * 分别计算 USD 与 CNY 的总金额
+     *
+     * @return _.1: USD; _.2: CNY
+     */
+    public F.T2<Float, Float> totalFees() {
+        // todo: 将付款的金额限制在 USD 与 CNY
+        float usd = 0;
+        float cny = 0;
+        for(PaymentUnit unit : this.units) {
+            if(unit.currency == Currency.CNY)
+                cny += unit.amount();
+            else if(unit.currency == Currency.USD)
+                usd += unit.amount();
+            else
+                throw new PaymentException(PaymentException.INVALID_CURRENCY);
+        }
+        return new F.T2<Float, Float>(usd, cny);
     }
 
     /**

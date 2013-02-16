@@ -9,6 +9,8 @@ import play.utils.FastRuntimeException;
  * Time: 3:19 PM
  */
 public class PaymentException extends FastRuntimeException {
+    public static String INVALID_CURRENCY = "不允许的币种.";
+
     public PaymentException() {
         super();
     }
@@ -24,4 +26,5 @@ public class PaymentException extends FastRuntimeException {
     public PaymentException(Throwable cause) {
         super(cause);
     }
+
 }

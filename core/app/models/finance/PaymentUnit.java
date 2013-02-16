@@ -104,6 +104,7 @@ public class PaymentUnit extends Model {
     /**
      * 申请的币种
      */
+    @Enumerated(EnumType.STRING)
     public Currency currency = Currency.CNY;
 
     @OneToOne
@@ -136,6 +137,15 @@ public class PaymentUnit extends Model {
 
         this.remove = true;
         return this.save();
+    }
+
+    /**
+     * 计算 Amount 与 Fix 的合计
+     *
+     * @return
+     */
+    public float amount() {
+        return this.amount + this.fixValue;
     }
 
     /**

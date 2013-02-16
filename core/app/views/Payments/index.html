@@ -20,7 +20,7 @@
         </tr>
     #{list items:payments, as:'pay'}
         <tr>
-            <td>${pay.id}</td>
+            <td><a href="@{Payments.show(pay.id)}">${pay.id}</a></td>
             <td>${pay.state}</td>
             <td>${pay.payer?.username}</td>
             <td data-toggle="toggle" data-target="#pay_${pay.id}">

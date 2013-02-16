@@ -1,11 +1,16 @@
 package controllers;
 
 import exception.PaymentException;
+import helper.HTTP;
 import models.finance.FeeType;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import models.product.Attach;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import play.cache.CacheFor;
 import play.modules.router.Get;
 import play.modules.router.Post;
 import play.mvc.Controller;
@@ -27,6 +32,29 @@ public class Payments extends Controller {
         render(payments);
     }
 
+    @Get(value = "/payments/{<[0-9]+>id}", priority = 100)
+    public static void show(Long id) {
+        Payment payment = Payment.findById(id);
+        render(payment);
+    }
+
+    @Get("/payments/rates")
+    @CacheFor("10mn")
+    public static void rates() {
+        Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
+        renderText(doc.select("table table table").get(0).outerHtml());
+    }
+
+    // --------- File Resources -----------
+    @Post("/payments/files/upload")
+    public static void uploads(Attach a) {
+        // 1. save file
+        // 2. fork upload to S3
+        //todo: Payments 的上传需要特殊处理.
+    }
+
+
+    // ----------- Deliveryment Nested payments Resources ---------------
 
     /**
      * 采购单的请款
@@ -68,5 +96,6 @@ public class Payments extends Controller {
         renderArgs.put("pu", pu);
         deliveryPayments(deliveryId);
     }
+
 
 }

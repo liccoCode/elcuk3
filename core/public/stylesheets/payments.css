@@ -12,3 +12,9 @@
 label.checkbox input[type=checkbox]{
     margin-right:5px;
 }
+
+#exchange div{
+    max-height:150px;
+    overflow-y:auto;
+    margin-bottom:15px;
+}

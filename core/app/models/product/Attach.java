@@ -6,8 +6,6 @@ import helper.J;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
@@ -52,7 +50,33 @@ public class Attach extends Model {
         /**
          * SHIPMENT
          */
-        SHIPMENT
+        SHIPMENT,
+        /**
+         * 支付信息的凭证
+         */
+        PAYMENTS {
+            /**
+             * Payment 删除方法为软删除.
+             * @param attach
+             */
+            @Override
+            public void delete(Attach attach) {
+                // 1. 标记文件软删除
+                // 2. 将文件挪动到软删除的目录下.
+                //todo: 需要添加软删除标记
+            }
+        };
+
+        /**
+         * 默认的附件删除方法.物理删除
+         *
+         * @param attach
+         */
+        public void delete(Attach attach) {
+            attach.delete();
+            String localtion = attach.location;
+            FileUtils.deleteQuietly(new File(localtion));
+        }
     }
 
     @PrePersist
@@ -119,9 +143,7 @@ public class Attach extends Model {
     public void rm() {
         // 1. 删除数据库中存储的文件
         // 2. 删除本地存储的文件
-        String localtion = this.location;
-        this.delete();
-        FileUtils.deleteQuietly(new File(localtion));
+        this.p.delete(this);
     }
 
     public static Attach findAttach(Attach a) {
@@ -148,7 +170,8 @@ public class Attach extends Model {
         long subfix = RandomUtils.nextInt();
         this.fileSize = this.file.length();
         this.originName = URLDecoder.decode(this.file.getName());
-        this.fileName = String.format("%s_%s%s", this.fid, subfix, this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
+        this.fileName = String.format("%s_%s%s", this.fid, subfix,
+                this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
         this.location = String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
         return this;
     }

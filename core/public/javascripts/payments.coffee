@@ -105,3 +105,19 @@ $ ->
   # 为所有 ProcureUnit 的点击事件增加计算 amount
   $("#procure_units_fees [data-target]").click ->
     new UnitRow($(@).attr('data-target').split('_')[1]).cal_ammount().cal_fix_value()
+
+
+  # ----------------------- payments.show -----------------
+  window.PaymentShowCtrl = ($scope, $http) ->
+    $scope.exchange_rate_html = '等待加载...'
+
+    $scope.exchangeRate = ->
+      LoadMask.mask()
+      $http.get('/payments/rates').then((promise) -> $scope.exchange_rate_html = promise.data; LoadMask.unmask())
+
+    $scope.uploadInit = ->
+      window.dropUpload.iniDropbox(->
+        fid: $scope.paymentId
+        p: 'PAYMENTS'
+      , $('#dropbox'))
+
