@@ -2,6 +2,7 @@ package models.finance;
 
 import exception.DBException;
 import helper.Currency;
+import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.market.Account;
@@ -287,7 +288,7 @@ public class SaleFee extends GenericModel {
     public static void batchSaveWithJDBC(List<SaleFee> fees) {
         try {
             PreparedStatement ps = DB.getConnection().prepareStatement(
-                    "INSERT INTO SaleFee(id, cost, currency, `date`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
+                    "INSERT INTO SaleFee(id, cost, currency, `DATE`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for(SaleFee f : fees) {
                 int i = 1;
@@ -335,7 +336,7 @@ public class SaleFee extends GenericModel {
      * @param orderId
      */
     public static void deleteOrderRelateFee(String orderId) {
-        SaleFee.delete("order.orderId=?", orderId);
+        DBUtils.row("DELETE FROM SaleFee where orderId=?", orderId);
     }
 
     @Override
