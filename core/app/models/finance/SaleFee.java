@@ -338,7 +338,8 @@ public class SaleFee extends GenericModel {
     public static void deleteOrderRelateFee(String orderId) {
         try {
             PreparedStatement ps = DB.getConnection().prepareStatement(
-                    "DELETE FROM SaleFee WHERE orderId=?");
+                    // 不要使用 orderId 这个没索引,速度太慢了.
+                    "DELETE FROM SaleFee WHERE order_orderId=?");
             ps.setString(1, orderId);
             ps.executeUpdate();
         } catch(Exception e) {
