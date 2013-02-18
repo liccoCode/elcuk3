@@ -2,7 +2,6 @@ package models.finance;
 
 import exception.DBException;
 import helper.Currency;
-import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.market.Account;
@@ -21,6 +20,7 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -335,8 +335,11 @@ public class SaleFee extends GenericModel {
      *
      * @param orderId
      */
-    public static void deleteOrderRelateFee(String orderId) {
-        DBUtils.row("DELETE FROM SaleFee where orderId=?", orderId);
+    public static void deleteOrderRelateFee(String orderId) throws SQLException {
+        PreparedStatement ps = DB.getConnection().prepareStatement(
+                "DELETE FROM SaleFee WHERE orderId=?");
+        ps.setString(1, orderId);
+        ps.executeUpdate();
     }
 
     @Override
