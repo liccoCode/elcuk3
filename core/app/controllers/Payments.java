@@ -2,14 +2,19 @@ package controllers;
 
 import exception.PaymentException;
 import helper.HTTP;
+import helper.J;
+import helper.Webs;
 import models.finance.FeeType;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.product.Attach;
+import models.view.Ret;
+import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import play.Logger;
 import play.cache.CacheFor;
 import play.modules.router.Get;
 import play.modules.router.Post;
@@ -32,7 +37,7 @@ public class Payments extends Controller {
         render(payments);
     }
 
-    @Get(value = "/payments/{<[0-9]+>id}", priority = 100)
+    @Get("/payments/{<[0-9]+>id}")
     public static void show(Long id) {
         Payment payment = Payment.findById(id);
         render(payment);
@@ -48,9 +53,15 @@ public class Payments extends Controller {
     // --------- File Resources -----------
     @Post("/payments/files/upload")
     public static void uploads(Attach a) {
-        // 1. save file
-        // 2. fork upload to S3
-        //todo: Payments 的上传需要特殊处理.
+        a.setUpAttachName();
+        Logger.info("%s File save to %s.[%s kb] at Payments", a.fid, a.location,
+                a.fileSize / 1024);
+        try {
+            Payment.<Payment>findById(NumberUtils.toLong(a.fid)).upload(a);
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+        renderJSON(J.G(a));
     }
 
 

@@ -10,6 +10,7 @@ import play.utils.FastRuntimeException;
  */
 public class PaymentException extends FastRuntimeException {
     public static String INVALID_CURRENCY = "不允许的币种.";
+    public static String MKDIR_ERROR = "路径创建失败.";
 
     public PaymentException() {
         super();

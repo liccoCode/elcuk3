@@ -3,11 +3,15 @@ package models.finance;
 import exception.PaymentException;
 import helper.Currency;
 import models.User;
+import models.product.Attach;
+import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.Model;
 import play.libs.F;
 
 import javax.persistence.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +24,7 @@ import java.util.List;
  */
 @Entity
 public class Payment extends Model {
+
     public enum S {
         /**
          * 等待支付
@@ -81,6 +86,14 @@ public class Payment extends Model {
     @PreUpdate
     public void beforeUpdate() {
         this.lastUpdateAt = new Date();
+    }
+
+    public void upload(Attach a) throws IOException {
+        // 1. save file
+        // 2. fork upload to S3
+        //todo: Payments 的上传需要特殊处理. 如何上传到 S3?
+        FileUtils.copyFile(a.file, new File(a.location));
+        a.save();
     }
 
     /**

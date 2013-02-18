@@ -116,8 +116,11 @@ $ ->
       $http.get('/payments/rates').then((promise) -> $scope.exchange_rate_html = promise.data; LoadMask.unmask())
 
     $scope.uploadInit = ->
+      # 1. 首先初始化 dropbox
+      # 2. Load 图片
       window.dropUpload.iniDropbox(->
         fid: $scope.paymentId
         p: 'PAYMENTS'
-      , $('#dropbox'))
+      , $('#dropbox'), '/payments/files/upload')
+      window.dropUpload.loadImages($scope.paymentId, $('#dropbox'), 'PAYMENTS')
 

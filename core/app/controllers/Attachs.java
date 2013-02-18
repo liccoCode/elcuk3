@@ -66,8 +66,9 @@ public class Attachs extends Controller {
         renderJSON(new Ret());
     }
 
-    public static void images(String fid) {
-        List<Attach> imgs = Attach.find("fid=?", fid).fetch();
+    public static void images(String fid, String p) {
+        // 如果 fid 能够唯一定位则可以只使用 fid, 如果 fid 无法直接定位, 则需要借助
+        List<Attach> imgs = Attach.attaches(fid, p);
         renderJSON(J.G(imgs));
     }
 }

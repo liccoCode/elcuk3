@@ -14,6 +14,7 @@ import org.jsoup.helper.Validate;
 import play.data.validation.Error;
 import play.jobs.Job;
 import play.libs.F;
+import play.modules.router.Get;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -54,7 +55,8 @@ public class Sellings extends Controller {
     public static void selling(String id) {
         Selling s = Selling.findById(id);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling
+                .sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         render(s);
     }
@@ -132,6 +134,7 @@ public class Sellings extends Controller {
      *
      * @param id sellingId
      */
+    @Get("/sellings/{id}/label")
     public static void sellingLabel(String id) {
         Selling selling = Selling.findById(id);
         byte[] bytes = selling.downloadFnSkuLabel();

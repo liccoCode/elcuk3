@@ -1,6 +1,7 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import exception.PaymentException;
 import helper.Constant;
 import helper.J;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +17,9 @@ import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 import java.io.File;
+import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.List;
 
 /**
  * 系统中, 可以附加的附件; 这个 Model 存在这里, 其自己不知道自己附属与谁, 但其拥有者知道(单项关系), 但并非使用 DB 的
@@ -64,6 +67,14 @@ public class Attach extends Model {
                 // 1. 标记文件软删除
                 // 2. 将文件挪动到软删除的目录下.
                 //todo: 需要添加软删除标记
+                attach.remove = true;
+                try {
+                    FileUtils.moveFile(attach.getFile(), new File(attach.softDeleteLocation()));
+                    attach.location = attach.softDeleteLocation();
+                } catch(IOException e) {
+                    throw new PaymentException(PaymentException.MKDIR_ERROR);
+                }
+                attach.save();
             }
         };
 
@@ -120,6 +131,11 @@ public class Attach extends Model {
     @Expose
     public Long fileSize;
 
+    /**
+     * 软删除标记
+     */
+    public boolean remove = false;
+
     @Transient
     public File file;
 
@@ -172,9 +188,19 @@ public class Attach extends Model {
         this.originName = URLDecoder.decode(this.file.getName());
         this.fileName = String.format("%s_%s%s", this.fid, subfix,
                 this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
-        this.location = String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
+        this.location = this.location();
         return this;
     }
+
+    public String location() {
+        return String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
+    }
+
+    public String softDeleteLocation() {
+        return String.format("%s/%s_DELETE/%s", Constant.UPLOAD_PATH, p, this.fileName);
+    }
+
+    // --------------- scopes -------------
 
     public static Attach findByFileName(String fileName) {
         return Attach.find("fileName=?", fileName).first();
@@ -182,5 +208,12 @@ public class Attach extends Model {
 
     public static Attach findByOutName(String outName) {
         return Attach.find("outName=?", outName).first();
+    }
+
+    public static List<Attach> attaches(String fid, String p) {
+        if(StringUtils.isNotBlank(p))
+            return Attach.find("fid=? AND p=? AND remove=false", fid, Attach.P.valueOf(p)).fetch();
+        else
+            return Attach.find("fid=? AND remove=false", fid).fetch();
     }
 }

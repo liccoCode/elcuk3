@@ -121,21 +121,21 @@ window.dropUpload =
     )
 
   # 初始化页面的时候加载此 Product 对应的图片; dropbox 图片展示的 div
-  loadImages: (fid, dropbox, cls = 'span2') ->
+  loadImages: (fid, dropbox, p = '', cls = 'span2') ->
     uploaded = dropbox.find('.uploaded')
     message = dropbox.find('.message')
-    $.getJSON('/attachs/images', fid: fid,
-      (imgs) ->
-        message.remove() if(imgs.length > 0)
-        for img, i in imgs
-          imgEl = $(window.dropUpload.template)
-          imgEl.addClass(cls)
-          imgUrl = "/attachs/image?a.fileName=" + img['fileName']
-          window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl + "&w=140&h=100")
-          imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
-          imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
-          imgEl.find('div.progress').remove()
-          imgEl.find('div.title').text(img['originName'])
-          imgEl.appendTo(uploaded)
+    $.getJSON('/attachs/images', {fid: fid, p: p},
+    (imgs) ->
+      message.remove() if(imgs.length > 0)
+      for img, i in imgs
+        imgEl = $(window.dropUpload.template)
+        imgEl.addClass(cls)
+        imgUrl = "/attachs/image?a.fileName=" + img['fileName']
+        window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl + "&w=140&h=100")
+        imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
+        imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage)
+        imgEl.find('div.progress').remove()
+        imgEl.find('div.title').text(img['originName'])
+        imgEl.appendTo(uploaded)
     )
 
