@@ -15,6 +15,7 @@ import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.modules.router.Get;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -60,6 +61,7 @@ public class Products extends Controller {
         renderArgs.put("records", ElcukRecord.records(sku));
     }
 
+    @Get("/products/{<[0-9]{2,}[-]?[A-Z0-9]+[-][A-Z0-9]+>id}")
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
         render(pro);
@@ -71,14 +73,16 @@ public class Products extends Controller {
         if(Validation.hasErrors()) render("Products/show.html", pro);
         pro.save();
         flash.success("更新成功");
-        new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()), pro.sku).save();
+        new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", pro.to_log()),
+                pro.sku).save();
         redirect("/Products/show/" + pro.sku);
     }
 
     @Before(only = {"saleAmazon", "saleAmazonListing"})
     public static void beforeSaleAmazon() {
         String sku = Products.extarSku();
-        if(StringUtils.isNotBlank(sku)) renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
+        if(StringUtils.isNotBlank(sku))
+            renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
         renderArgs.put("accs", Account.openedSaleAcc());
     }
 
@@ -102,7 +106,8 @@ public class Products extends Controller {
             Selling se = pro.saleAmazon(s);
             flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
             Notification.notifies(String.format("新上架 %s %s", se.asin, se.market),
-                    String.format("MSKU: %s, 价格: %s, Title: %s", se.merchantSKU, se.aps.salePrice, se.aps.title), Notification.PM);
+                    String.format("MSKU: %s, 价格: %s, Title: %s", se.merchantSKU, se.aps.salePrice,
+                            se.aps.title), Notification.PM);
             redirect("/Sellings/selling/" + se.sellingId);
         } catch(Exception e) {
             Validation.addError("", e.getMessage());
@@ -136,10 +141,12 @@ public class Products extends Controller {
     }
 
     public static void updateSellingQty(SellingQTY qty) {
-        if(!SellingQTY.exist(qty.id)) Validation.addError("", String.format("SellingQTY %s 不存在!", qty.id));
+        if(!SellingQTY.exist(qty.id))
+            Validation.addError("", String.format("SellingQTY %s 不存在!", qty.id));
         qty.save();
         flash.success("更新成功.");
-        new ElcukRecord(Messages.get("sellingqty.update"), Messages.get("action.base", qty.to_log()), qty.product.sku).save();
+        new ElcukRecord(Messages.get("sellingqty.update"),
+                Messages.get("action.base", qty.to_log()), qty.product.sku).save();
         redirect("/Products/show/" + qty.product.sku);
     }
 

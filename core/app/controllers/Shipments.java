@@ -83,7 +83,7 @@ public class Shipments extends Controller {
         }
     }
 
-    @Get(value = "/shipments/{id}", priority = 100)
+    @Get("/shipments/{<[A-Z]{2}[|][0-9]{6}[|][0-9]{2}>id}")
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
         render(ship);

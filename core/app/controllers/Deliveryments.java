@@ -40,7 +40,7 @@ public class Deliveryments extends Controller {
     }
 
     @Check("deliveryments.index")
-    @Get("/deliveryments")
+    @Get(value = "/deliveryments")
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
         if(p == null) p = new DeliveryPost();
@@ -48,7 +48,8 @@ public class Deliveryments extends Controller {
         render(deliveryments, p);
     }
 
-    @Get(value = "/deliveryments/{id}", priority = 100)
+    //payments/{<[0-9]+>id}
+    @Get("/deliveryments/{<[A-Z]{2}[|][0-9]{6}[|][0-9]{2}>id}")
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         render(dmt);
