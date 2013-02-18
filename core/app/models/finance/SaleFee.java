@@ -77,7 +77,6 @@ public class SaleFee extends GenericModel {
      */
     public String orderId;
 
-    @Temporal(TemporalType.DATE)
     public Date date;
     /**
      * 费用, 系统内的费用使用 USD 结算
@@ -104,7 +103,8 @@ public class SaleFee extends GenericModel {
      */
     public static Map<String, List<SaleFee>> flatFileFinanceParse(File file, Account account) {
         Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<String, F.T2<AtomicInteger, List<SaleFee>>>();
-        mapFees.put("SYSTEM", new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(1), new ArrayList<SaleFee>()));
+        mapFees.put("SYSTEM", new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(1),
+                new ArrayList<SaleFee>()));
 
         try {
             List<String> lines = FileUtils.readLines(file);
@@ -128,13 +128,17 @@ public class SaleFee extends GenericModel {
                      */
                     String transactionType = params[6].toLowerCase();
                     String orderId = params[7];
-                    if("order".equals(transactionType) || "chargeback refund".equals(transactionType) ||
-                            "refund".equals(transactionType) || "adjustment".equals(transactionType)) {
+                    if("order".equals(transactionType) ||
+                            "chargeback refund".equals(transactionType) ||
+                            "refund".equals(transactionType) ||
+                            "adjustment".equals(transactionType)) {
                         M market = M.val(params[11].toLowerCase());
                         if(market == null) market = account.type;
 
                         if(!mapFees.containsKey(orderId))
-                            mapFees.put(orderId, new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(), new ArrayList<SaleFee>()));
+                            mapFees.put(orderId,
+                                    new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(),
+                                            new ArrayList<SaleFee>()));
                         F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
 
                         // 计算数量
@@ -145,33 +149,43 @@ public class SaleFee extends GenericModel {
 
                         // shipmentFeeType 通过 FBA 向外面发货产生的费用
                         String shipmentFeeType = params[12].toLowerCase();
-                        if(addOneFee(params[13], params[17], orderId, transactionType, market, fees, account, shipmentFeeType))
+                        if(addOneFee(params[13], params[17], orderId, transactionType, market, fees,
+                                account, shipmentFeeType))
                             continue;
 
                         // productcharge, principal, 产品销售额
                         String priceType = params[23].toLowerCase();
-                        if(addOneFee(params[24], params[17], transactionType, orderId, market, fees, account, priceType))
+                        if(addOneFee(params[24], params[17], transactionType, orderId, market, fees,
+                                account, priceType))
                             continue;
 
                         // item-relate 费用
                         String itemRelateFeeType = params[25].toLowerCase();
-                        addOneFee(params[26], params[17], transactionType, orderId, market, fees, account, itemRelateFeeType);
-                    } else if("storage fee".equals(transactionType) || "refund reimbursal".equals(transactionType) ||
-                            "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType) ||
+                        addOneFee(params[26], params[17], transactionType, orderId, market, fees,
+                                account, itemRelateFeeType);
+                    } else if("storage fee".equals(transactionType) ||
+                            "refund reimbursal".equals(transactionType) ||
+                            "balanceadjustment".equals(transactionType) ||
+                            "subscription fee".equals(transactionType) ||
                             "removalcomplete".equals(transactionType)) {
 
                         // Refund Reimbursal, 有订单关联的
                         if(StringUtils.isNotBlank(orderId)) {
                             if(!mapFees.containsKey(orderId))
-                                mapFees.put(orderId, new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(), new ArrayList<SaleFee>()));
+                                mapFees.put(orderId,
+                                        new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(),
+                                                new ArrayList<SaleFee>()));
                             F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
-                            if(addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, fees, account, transactionType/*不然会自动跳出*/))
+                            if(addOneFee(lastPrice(params), params[17], transactionType, orderId,
+                                    account.type, fees, account, transactionType/*不然会自动跳出*/))
                                 continue;
                         }
 
-                        addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
+                        addOneFee(lastPrice(params), params[17], transactionType, orderId,
+                                account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else if("disposalcomplete".equals(transactionType)) {
-                        addOneFee(lastPrice(params), params[17], transactionType, orderId, account.type, mapFees.get("SYSTEM"), account, transactionType);
+                        addOneFee(lastPrice(params), params[17], transactionType, orderId,
+                                account.type, mapFees.get("SYSTEM"), account, transactionType);
                     } else {
                         emailLines.add(line);
                     }
@@ -181,7 +195,8 @@ public class SaleFee extends GenericModel {
                 }
             }
             if(emailLines.size() > 0)
-                Webs.systemMail("Unkonw situation in Amazon FlatV2 Finance File", StringUtils.join(emailLines, "\r\n"));
+                Webs.systemMail("Unkonw situation in Amazon FlatV2 Finance File",
+                        StringUtils.join(emailLines, "\r\n"));
         } catch(IOException e) {
             Logger.warn("File is not exist!");
         }
@@ -192,8 +207,9 @@ public class SaleFee extends GenericModel {
         for(String key : mapFees.keySet()) {
             F.T2<AtomicInteger, List<SaleFee>> feesTuple = mapFees.get(key);
             if(!"SYSTEM".equals(key)) {
-                for(SaleFee fee : feesTuple._2)
+                for(SaleFee fee : feesTuple._2) {
                     fee.qty = feesTuple._1.get() <= 0 ? 1 : feesTuple._1.get();
+                }
             }
             feesMap.put(key, feesTuple._2);
         }
@@ -256,7 +272,8 @@ public class SaleFee extends GenericModel {
         if(feeType == null) {
             feeType = new FeeType(subType, FeeType.amazon()).save();
             Webs.systemMail("New PriceType At " + orderId,
-                    String.format("FeeType=> transactionType: %s, priceType: %s", transactionType, subType));
+                    String.format("FeeType=> transactionType: %s, priceType: %s", transactionType,
+                            subType));
         }
         return feeType;
     }
@@ -308,7 +325,8 @@ public class SaleFee extends GenericModel {
      * @param orderId
      */
     public static void deleteStateOneSaleFees(String orderId) {
-        SaleFee.delete("order.orderId=? AND type.name IN (?,?)", orderId, "productcharges", "amazon");
+        SaleFee.delete("order.orderId=? AND type.name IN (?,?)", orderId, "productcharges",
+                "amazon");
     }
 
     /**

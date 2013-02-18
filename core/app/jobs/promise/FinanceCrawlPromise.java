@@ -10,14 +10,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
+import play.data.validation.Error;
 import play.jobs.Job;
 import play.libs.F;
 
 import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 /**
  * 用来抓取并且处理 Amazon 每 14 天生成的所有费用的文件.(不会周期运行, 一次性运输任务)
@@ -25,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 11/24/12
  * Time: 7:50 PM
  */
-public class FinanceCrawlPromise extends Job {
+public class FinanceCrawlPromise extends Job<List<Error>> {
 
     private Account account;
     private Date date;
@@ -38,7 +36,7 @@ public class FinanceCrawlPromise extends Job {
     }
 
     @Override
-    public void doJob() {
+    public List<Error> doJobWithResult() throws Exception {
         /**
          * 1. 抓取 Payments 页面的第二个链接;
          * 2. 根据链接下载内容
@@ -46,7 +44,12 @@ public class FinanceCrawlPromise extends Job {
          */
         String html = HTTP.get(this.account.cookieStore(), this.account.type.pastSettlementsUrl());
         this.pickReportUrl(html);
-        F.Option<File> file = HTTP.getDownFile(this.url, this.fileName(), this.account.cookieStore());
+        if(StringUtils.isBlank(this.url)) {
+            Logger.warn("没有解析到下载 URL.");
+            return Arrays.asList(new Error("", "没有解析到下载 URL.", new String[]{}));
+        }
+        F.Option<File> file = HTTP
+                .getDownFile(this.url, this.fileName(), this.account.cookieStore());
         if(!file.isDefined()) {
             //TODO 通知没有成功
             Logger.warn("Amazon Payment Day 14 file download failed. [%s]", this.url);
@@ -55,8 +58,9 @@ public class FinanceCrawlPromise extends Job {
 
         Map<String, List<SaleFee>> feeMap = SaleFee.flatFileFinanceParse(file.get(), this.account);
         this.parseToDB(feeMap);
-
+        return new ArrayList<Error>();
     }
+
 
     /**
      * 将解析出来的 FeeMap 处理并存储进入 DB
@@ -101,8 +105,10 @@ public class FinanceCrawlPromise extends Job {
      */
     public String fileName() {
         if(StringUtils.isBlank(this.url)) return "";
-        String tailPart = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.url, "_GET_V2_SETTLEMENT_REPORT_DATA__")[1];
-        return String.format("%s.%s", this.account.prettyName(), StringUtils.split(tailPart, "?")[0]);
+        String tailPart = StringUtils.splitByWholeSeparatorPreserveAllTokens(this.url,
+                "_GET_V2_SETTLEMENT_REPORT_DATA__")[1];
+        return String
+                .format("%s.%s", this.account.prettyName(), StringUtils.split(tailPart, "?")[0]);
     }
 
     /**
@@ -118,10 +124,6 @@ public class FinanceCrawlPromise extends Job {
         Element targetTr = trs.get(1);
         String period = StringUtils.split(targetTr.select("td > a").text(), "-")[1].trim();
         Date periodSufix = Dates.transactionDate(this.account.type, period);
-
-        // 超过 2 天不进下一步解析了
-        if(Math.abs(this.date.getTime() - periodSufix.getTime()) > TimeUnit.DAYS.toMillis(2))
-            return "";
 
         Elements flatFileBtns = targetTr.select("div > a:contains(Download Flat File)");
         if(flatFileBtns.size() == 0)
