@@ -15,12 +15,12 @@ import play.Logger;
 import play.db.DB;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -335,11 +335,15 @@ public class SaleFee extends GenericModel {
      *
      * @param orderId
      */
-    public static void deleteOrderRelateFee(String orderId) throws SQLException {
-        PreparedStatement ps = DB.getConnection().prepareStatement(
-                "DELETE FROM SaleFee WHERE orderId=?");
-        ps.setString(1, orderId);
-        ps.executeUpdate();
+    public static void deleteOrderRelateFee(String orderId) {
+        try {
+            PreparedStatement ps = DB.getConnection().prepareStatement(
+                    "DELETE FROM SaleFee WHERE orderId=?");
+            ps.setString(1, orderId);
+            ps.executeUpdate();
+        } catch(Exception e) {
+            throw new FastRuntimeException(e);
+        }
     }
 
     @Override
