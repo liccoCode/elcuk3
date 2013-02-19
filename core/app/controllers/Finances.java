@@ -4,12 +4,15 @@ import helper.Webs;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
 import jobs.promise.FinanceCrawlPromise;
+import models.Notification;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.JobRequest;
 import models.market.M;
 import models.market.Selling;
 import models.product.Product;
+import models.view.Ret;
+import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -49,6 +52,20 @@ public class Finances extends Controller {
         Map<String, List<SaleFee>> feeMap = SaleFee.flatFileFinanceParse(file, acc);
         worker.parseToDB(feeMap);
         renderText("Deals %s Orders.", feeMap.keySet().size());
+    }
+
+    public static void settlement(long accId) {
+        Account acc = Account.findById(accId);
+        FinanceCrawlPromise worker = new FinanceCrawlPromise(acc, new Date());
+        List<Error> errors = await(worker.now());
+        if(errors.size() > 0) {
+            Notification
+                    .notifies("Settlement 费用文件因 " + errors.toString() + " 处理失败.", Notification.PM);
+            renderJSON(new Ret(false, errors.toString()));
+        } else {
+            Notification.notifies("Settlement 费用文件处理完成.", Notification.PM);
+            renderJSON(new Ret(true, "成功处理"));
+        }
     }
 
     /**
