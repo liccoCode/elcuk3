@@ -16,10 +16,9 @@
         <li>通过 Product 上架, 会自动创建 Listing(如果 Listing 存在, 则不会改变), Selling.</li>
     </ul>
 </div>
-<div id='upc_check_modal' class="modal hide fade">
+<div id='check_modal' class="modal hide fade">
     <div class="modal-header">
-        <button type="button" class="close" data-dismiss='modal' aria-hidden='true'>×</button>
-        <h3>使用 UPC <span id="upc_num"></span> 上架的 Selling</h3>
+        <h3>使用 <span id="upc_num"></span> 上架的 Selling</h3>
     </div>
     <div class="modal-body">
         <p class="text-error">当前 SKU 为: ${pro.sku}</p>
@@ -27,12 +26,12 @@
         <div class="innder-modal"></div>
     </div>
     <div class="modal-footer">
-        <a href="#" data-dismiss='modal' class="btn">取消</a>
-        <a href="#" id="upc_apply" class="btn btn-primary">应用 UPC</a>
+        <a href="#" id='check_cancel' data-dismiss='modal' class="btn">取消</a>
+        <a href="#" id="check_apply" class="btn btn-primary">应用</a>
     </div>
     <blockquote class="template">
-        <p class='upc_title'></p>
-        <small class='upc_id'></small>
+        <p class='check_title'></p>
+        <small class='check_id'></small>
     </blockquote>
 </div>
 
@@ -59,7 +58,7 @@
     <th>MSKU:</th>
     <td>
         <input type="text" id="msku" name="s.merchantSKU" readonly="" value="${pro.sku}">
-        <input type="hidden" name="pro.sku" value="${pro.sku}">
+        <input type="hidden" id="sku" name="pro.sku" value="${pro.sku}">
     </td>
     <th>Acc:</th>
     <td>
@@ -84,7 +83,7 @@
     <td>
         <div class="input-append input-prepend">
             <input type="text" readonly="" name="s.aps.condition_" value="NEW" class="span1">
-        #{pickMarkets id:'market', class:'span2', name:'s.market', m:s.market/}
+        #{pickMarkets id:'market', class:'span2', name:'s.market', m:s.market, blank:true/}
         </div>
     </td>
 </tr>
