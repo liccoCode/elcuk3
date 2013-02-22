@@ -108,19 +108,24 @@ $ ->
 
 
   # ----------------------- payments.show -----------------
-  window.PaymentShowCtrl = ($scope, $http) ->
-    $scope.exchange_rate_html = '等待加载...'
+  paymentId = -> $('#paymentId').val()
 
-    $scope.exchangeRate = ->
-      LoadMask.mask()
-      $http.get('/payments/rates').then((promise) -> $scope.exchange_rate_html = promise.data; LoadMask.unmask())
+  exchangeRate = () ->
+    LoadMask.mask()
+    $('#exchange_rate').load('/payments/rates', -> LoadMask.unmask())
 
-    $scope.uploadInit = ->
-      # 1. 首先初始化 dropbox
-      # 2. Load 图片
-      window.dropUpload.iniDropbox(->
-        fid: $scope.paymentId
-        p: 'PAYMENTS'
-      , $('#dropbox'), '/payments/files/upload')
-      window.dropUpload.loadImages($scope.paymentId, $('#dropbox'), 'PAYMENTS')
+  $('#refreshRate').click(exchangeRate)
+  $('#exchange_rate').ready(exchangeRate)
+
+
+  uploadInit = ->
+    # 1. 首先初始化 dropbox
+    # 2. Load 图片
+    window.dropUpload.iniDropbox(->
+      fid: paymentId()
+      p: 'PAYMENTS'
+    , $('#dropbox'), '/payments/files/upload')
+    window.dropUpload.loadImages(paymentId(), $('#dropbox'), 'PAYMENTS')
+
+  $('#dropbox').ready(uploadInit)
 
