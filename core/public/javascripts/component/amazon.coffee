@@ -113,36 +113,33 @@ $ ->
     $("#market option:contains(amazon.#{val})").prop('selected', true).change()
 
   # UPC 检查
-  $('input[name=s\\.aps\\.upc] ~ button').click(
-    (e) ->
-      e.preventDefault()
-      o = $(@)
-      upcEl = o.prev()
-      upc = upcEl.val()
-      if !$.isNumeric(upc)
-        alert('UPC 必须是数字')
-        return false
-      $.getJSON('/products/upcCheck', {upc: upc},
-      (r) ->
+  $('#check_upc').click (e) ->
+    e.preventDefault()
+    upc = $(@).removeClass('btn-warning btn-success').addClass('btn-warning').prev().val()
+    if !$.isNumeric(upc)
+      alert('UPC 必须是数字')
+      return false
+
+    $.getJSON('/products/upcCheck', {upc: upc})
+      .done((r) ->
         if r.flag is false
           alert(r.message)
         else
-          upcAlertTemplate = "<div class='alert alert-info fade in'>" +
-          "<button class='close' data-dismiss='alert'>×</button>" +
-          "<strong>UPC 检查信息:</strong>" +
-          "</div>"
-          alertEl = $(upcAlertTemplate)
-          if r.length == 0
-            alertEl.find('strong').after("<div>此 UPC 在系统中还没有 Selling</div>")
-          else
-            $.each(r,
-            (i, s) ->
-              alertEl.find('strong').after("<div>#{s['merchantSKU']}|#{s['market']}</div>")
+          modal = $('#upc_check_modal').find('#upc_num').html(upc + " (#{r.length})").end()
+          template = modal.find('.template')
+          r.forEach (obj, index, arr) ->
+            modal.find('.innder-modal').append(
+              template.clone().removeClass('template').find('.upc_id').html(obj.sellingId).end()
+                .find('.upc_title').html(obj.aps.title).end()
             )
-          alertEl.insertBefore('#btn_div')
-          mskuEl = $('input[name=s\\.merchantSKU]')
-          mskuEl.val(mskuEl.val().split(',')[0] + ',' + upc)
-          o.removeClass('btn-warning').addClass('btn-success')
+          modal.modal('show')
       )
-  )
+
+  $('#upc_apply').click (e) ->
+    e.preventDefault()
+    $('#msku').val(->
+      $('#upc_check_modal').modal('hide')
+      $('#check_upc').removeClass('btn-warning').addClass('btn-success')
+      @value += "," + $('[name=s\\.aps\\.upc]').val()
+    )
 

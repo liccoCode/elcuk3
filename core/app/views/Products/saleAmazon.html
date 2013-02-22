@@ -16,6 +16,26 @@
         <li>通过 Product 上架, 会自动创建 Listing(如果 Listing 存在, 则不会改变), Selling.</li>
     </ul>
 </div>
+<div id='upc_check_modal' class="modal hide fade">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss='modal' aria-hidden='true'>×</button>
+        <h3>使用 UPC <span id="upc_num"></span> 上架的 Selling</h3>
+    </div>
+    <div class="modal-body">
+        <p class="text-error">当前 SKU 为: ${pro.sku}</p>
+
+        <div class="innder-modal"></div>
+    </div>
+    <div class="modal-footer">
+        <a href="#" data-dismiss='modal' class="btn">取消</a>
+        <a href="#" id="upc_apply" class="btn btn-primary">应用 UPC</a>
+    </div>
+    <blockquote class="template">
+        <p class='upc_title'></p>
+        <small class='upc_id'></small>
+    </blockquote>
+</div>
+
 <form action="@{Products.saleAmazonListing()}" method="post" autocomplete="off">
 <table class="table table-condensed">
 <tr>
@@ -30,13 +50,15 @@
 
 <tr>
     <th>Title:</th>
-    <td colspan="3"><textarea rows="2" name="s.aps.title" class="span12">${pro.productName}</textarea></td>
+    <td colspan="3">
+        <textarea rows="2" name="s.aps.title" class="span12">${pro.productName}</textarea>
+    </td>
 </tr>
 
 <tr>
     <th>MSKU:</th>
     <td>
-        <input type="text" name="s.merchantSKU" readonly="" value="${pro.sku}">
+        <input type="text" id="msku" name="s.merchantSKU" readonly="" value="${pro.sku}">
         <input type="hidden" name="pro.sku" value="${pro.sku}">
     </td>
     <th>Acc:</th>
@@ -55,7 +77,7 @@
     <td>
         <div class="input-append">
             <input type="text" class="span2" name="s.aps.upc" value="${s.aps.upc}">
-            <button class="btn btn-warning">@</button>
+            <button id='check_upc' class="btn btn-warning">@</button>
         </div>
     </td>
     <th>Condition/Market:</th>
@@ -71,7 +93,9 @@
     <th>Manufac:</th>
     <td><input type="text" name="s.aps.manufacturer" value="EasyAcc"></td>
     <th>PartNumber:</th>
-    <td><input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}"></td>
+    <td>
+        <input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}">
+    </td>
 </tr>
 
 <tr>
@@ -108,7 +132,9 @@
 
 <tr>
     <th>StartDate</th>
-    <td><input type="text" name="s.aps.startDate" value="${new java.util.Date().format("yyyy-MM-dd")}"></td>
+    <td>
+        <input type="text" name="s.aps.startDate" value="${new java.util.Date().format("yyyy-MM-dd")}">
+    </td>
     <th>EndtDate</th>
     <td><input type="text" name="s.aps.endDate" value="2015-01-01"></td>
 </tr>

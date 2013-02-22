@@ -95,3 +95,7 @@ div .alert{
 .table tr:hover{
     background-color:#F4F4F4;
 }
+
+.template{
+    display:none;
+}
