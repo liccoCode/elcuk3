@@ -5,6 +5,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.market.Account;
+import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
 import models.product.Category;
@@ -179,6 +180,21 @@ public class Products extends Controller {
             renderJSON(J.G(upcSellings));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void skuMarketCheck(String sku, String market) {
+        Product product = Product.findById(sku);
+        M mkt = M.AMAZON_DE;
+        try {
+            mkt = M.val(market);
+        } catch(Exception e) {
+            //ignore.. default to DE market
+        }
+        if(product != null) {
+            renderJSON(J.G(product.sellingCountWithMarket(mkt)));
+        } else {
+            renderJSON(new Ret("SKU: [" + sku + "] 不存在!"));
         }
     }
 }

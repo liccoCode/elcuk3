@@ -16,6 +16,25 @@
         <li>通过 Product 上架, 会自动创建 Listing(如果 Listing 存在, 则不会改变), Selling.</li>
     </ul>
 </div>
+<div id='check_modal' class="modal hide fade">
+    <div class="modal-header">
+        <h3>使用 <span id="upc_num"></span> 上架的 Selling</h3>
+    </div>
+    <div class="modal-body">
+        <p class="text-error">当前 SKU 为: ${pro.sku}</p>
+
+        <div class="innder-modal"></div>
+    </div>
+    <div class="modal-footer">
+        <a href="#" id='check_cancel' data-dismiss='modal' class="btn">取消</a>
+        <a href="#" id="check_apply" class="btn btn-primary">应用</a>
+    </div>
+    <blockquote class="template">
+        <p class='check_title'></p>
+        <small class='check_id'></small>
+    </blockquote>
+</div>
+
 <form action="@{Products.saleAmazonListing()}" method="post" autocomplete="off">
 <table class="table table-condensed">
 <tr>
@@ -30,14 +49,16 @@
 
 <tr>
     <th>Title:</th>
-    <td colspan="3"><textarea rows="2" name="s.aps.title" class="span12">${pro.productName}</textarea></td>
+    <td colspan="3">
+        <textarea rows="2" name="s.aps.title" class="span12">${pro.productName}</textarea>
+    </td>
 </tr>
 
 <tr>
     <th>MSKU:</th>
     <td>
-        <input type="text" name="s.merchantSKU" readonly="" value="${pro.sku}">
-        <input type="hidden" name="pro.sku" value="${pro.sku}">
+        <input type="text" id="msku" name="s.merchantSKU" readonly="" value="${pro.sku}">
+        <input type="hidden" id="sku" name="pro.sku" value="${pro.sku}">
     </td>
     <th>Acc:</th>
     <td>
@@ -55,14 +76,14 @@
     <td>
         <div class="input-append">
             <input type="text" class="span2" name="s.aps.upc" value="${s.aps.upc}">
-            <button class="btn btn-warning">@</button>
+            <button id='check_upc' class="btn btn-warning">@</button>
         </div>
     </td>
     <th>Condition/Market:</th>
     <td>
         <div class="input-append input-prepend">
             <input type="text" readonly="" name="s.aps.condition_" value="NEW" class="span1">
-        #{pickMarkets id:'market', class:'span2', name:'s.market', m:s.market/}
+        #{pickMarkets id:'market', class:'span2', name:'s.market', m:s.market, blank:true/}
         </div>
     </td>
 </tr>
@@ -71,7 +92,9 @@
     <th>Manufac:</th>
     <td><input type="text" name="s.aps.manufacturer" value="EasyAcc"></td>
     <th>PartNumber:</th>
-    <td><input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}"></td>
+    <td>
+        <input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}">
+    </td>
 </tr>
 
 <tr>
@@ -108,7 +131,9 @@
 
 <tr>
     <th>StartDate</th>
-    <td><input type="text" name="s.aps.startDate" value="${new java.util.Date().format("yyyy-MM-dd")}"></td>
+    <td>
+        <input type="text" name="s.aps.startDate" value="${new java.util.Date().format("yyyy-MM-dd")}">
+    </td>
     <th>EndtDate</th>
     <td><input type="text" name="s.aps.endDate" value="2015-01-01"></td>
 </tr>

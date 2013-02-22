@@ -87,10 +87,41 @@ $ ->
         $('[name=s\\.aps\\.searchTermss\\[' + i + '\\]]').val(s).blur()
   )
 
-  #Market 更换价格单位按钮
-  $('#market').change ->
+  # 显示 Selling 上架信息的 Modal 窗口
+  show_selling_modal = (title, sellings, callback, close_callback = undefined) ->
+    $.Deferred()
+    modal = $('#check_modal').find('#upc_num').html(title).end()
+    if sellings.length == 0
+      modal.find('.innder-modal').html('<p>暂时没有上架 Selling</p>')
+    else
+      template = modal.find('.innder-modal').html('').end().find('.template')
+      sellings.forEach (obj, index, arr) ->
+        modal.find('.innder-modal').append(
+          template.clone().removeClass('template').find('.check_id').html('SKU: ' + obj.sellingId).end()
+            .find('.check_title').html(obj.aps.title).end()
+        )
+    modal.modal('show')
+    cancel_btn = $('#check_cancel').off('clicl')
+    if close_callback
+      cancel_btn.on('click', close_callback)
+    else
+      cancel_btn.on('click', -> modal.modal('hide'))
+    $('#check_apply').off('click').on('click', callback)
+
+  # upc 检查 Selling 的关闭事件
+  modal_upc_check_close =  (e) ->
+    e.preventDefault()
+    $('#msku').val(->
+      $('#check_modal').modal('hide')
+      $('#check_upc').removeClass('btn-warning').addClass('btn-success')
+      "#{@value},#{$('[name=s\\.aps\\.upc]').val()}"
+    )
+
+  modal_sku_check_close = (e) ->
+    e.preventDefault()
+    $('#check_modal').modal('hide')
     currency = ''
-    switch $(@).val()
+    switch $('#market').val()
       when 'AMAZON_UK', 'EBAY_UK'
         currency = '&pound;'
       when 'AMAZON_US'
@@ -98,6 +129,26 @@ $ ->
       else
         currency = '&euro;'
     $('span.currency').html(currency)
+
+  modal_sku_check_cancel = (e) ->
+    $('#market').val(0)
+    $('#check_modal').modal('hide')
+
+
+  #Market 更换价格单位按钮
+  $('#market').change ->
+    # 1. SKU + Market 的 Selling 提示
+    market = $(@).val()
+    $.getJSON('/products/skuMarketCheck', {sku: $('#sku').val(), market: market})
+      .done((r) ->
+        if r.flag is false
+          alert r.message
+        else
+          show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_sku_check_close, modal_sku_check_cancel)
+      );
+    # 2. 货币符号的变化. -> modal_sku_check_close
+    false
+
 
   # 账号对应的市场切换
   $('#account').change ->
@@ -113,36 +164,19 @@ $ ->
     $("#market option:contains(amazon.#{val})").prop('selected', true).change()
 
   # UPC 检查
-  $('input[name=s\\.aps\\.upc] ~ button').click(
-    (e) ->
-      e.preventDefault()
-      o = $(@)
-      upcEl = o.prev()
-      upc = upcEl.val()
-      if !$.isNumeric(upc)
-        alert('UPC 必须是数字')
-        return false
-      $.getJSON('/products/upcCheck', {upc: upc},
-      (r) ->
+  $('#check_upc').click (e) ->
+    e.preventDefault()
+    $('#msku').val(-> @value.split(',')[0])
+    upc = $(@).removeClass('btn-warning btn-success').addClass('btn-warning').prev().val()
+    if !$.isNumeric(upc)
+      alert('UPC 必须是数字')
+      return false
+
+    $.getJSON('/products/upcCheck', {upc: upc})
+      .done((r) ->
         if r.flag is false
           alert(r.message)
         else
-          upcAlertTemplate = "<div class='alert alert-info fade in'>" +
-          "<button class='close' data-dismiss='alert'>×</button>" +
-          "<strong>UPC 检查信息:</strong>" +
-          "</div>"
-          alertEl = $(upcAlertTemplate)
-          if r.length == 0
-            alertEl.find('strong').after("<div>此 UPC 在系统中还没有 Selling</div>")
-          else
-            $.each(r,
-            (i, s) ->
-              alertEl.find('strong').after("<div>#{s['merchantSKU']}|#{s['market']}</div>")
-            )
-          alertEl.insertBefore('#btn_div')
-          mskuEl = $('input[name=s\\.merchantSKU]')
-          mskuEl.val(mskuEl.val().split(',')[0] + ',' + upc)
-          o.removeClass('btn-warning').addClass('btn-success')
+          show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_upc_check_close)
       )
-  )
 

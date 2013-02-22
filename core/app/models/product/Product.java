@@ -577,7 +577,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public List<Selling> sellingCount() {
-        return Selling.find("sellingId LIKE ?", this.sku + "%").fetch();
+        return sellingCountWithMarket(null);
+    }
+
+    public List<Selling> sellingCountWithMarket(M market) {
+        if(market == null)
+            return Selling.find("sellingId LIKE ?", this.sku + "%").fetch();
+        else
+            return Selling.find("market=? AND sellingId LIKE ?", market, this.sku + "%").fetch();
     }
 
     @Override
