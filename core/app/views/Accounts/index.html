@@ -30,7 +30,8 @@
                     <th>IsAUK</th>
                     <th>IsADE</th>
                     <th>IsAUS</th>
-                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a>
+                    </th>
                 </tr>
             #{list items:accs, as:'acc'}
                 #{if acc.isSaleAcc}
@@ -53,7 +54,8 @@
                     <th>IsAUK</th>
                     <th>IsADE</th>
                     <th>IsAUS</th>
-                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a>
+                    </th>
                 </tr>
             #{list items:accs, as:'acc'}
                 #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_UK}
@@ -76,7 +78,8 @@
                     <th>IsAUK</th>
                     <th>IsADE</th>
                     <th>IsAUS</th>
-                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a>
+                    </th>
                 </tr>
             #{list items:accs, as:'acc'}
                 #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_DE}
@@ -99,13 +102,14 @@
                     <th>IsAUK</th>
                     <th>IsADE</th>
                     <th>IsAUS</th>
-                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a></th>
+                    <th><a href="#" rel="tooltip" placement="top" data-original-title="关闭使用此账户">Closeable</a>
+                    </th>
                 </tr>
-            *{#{list items:accs, as:'acc'}}*
-            *{#{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_US}}*
-            *{#{render 'Accounts/acctr.html', acc:acc/}}*
-            *{#{/if}}*
-            *{#{/list}}*
+            #{list items:accs, as:'acc'}
+                #{if !acc.isSaleAcc && acc.type == models.market.M.AMAZON_US}
+                    #{render 'Accounts/acctr.html', acc:acc/}
+                #{/if}
+            #{/list}
             </table>
         </div>
     </div>
