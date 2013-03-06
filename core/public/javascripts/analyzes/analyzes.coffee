@@ -4,7 +4,7 @@ $ ->
   SKU = 'sku'
   SID = 'sid'
   # TODO: 需要还原成 -30 天
-  defaultDate = $.DateUtil.addDay(-210)
+  defaultDate = $.DateUtil.addDay(-30)
   now = $.DateUtil.addDay(30, defaultDate)
 
   class Tabs
