@@ -51,7 +51,7 @@ $ ->
     tooltip:
       shared: true
       formatter: ->
-        s = "<b>#{@x}</b><br>"
+        s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
         @points.forEach((point) ->
           totalY = point.series.yData.reduce((a, b)-> a + b)
           s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
