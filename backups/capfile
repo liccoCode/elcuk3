@@ -1,3 +1,4 @@
+# encoding=utf-8
 # 自己定义的各种 capistrano 命令
 
 base = "easya.cc"
