@@ -12,22 +12,22 @@ var LoadMask = {
      */
     mask: function(selector){
         if(!selector) selector = "#container";
-        var times = localStorage.getItem(selector + "_times");
+        var times = sessionStorage.getItem(selector + "_times");
         if(!times){
             times = 0;
             $(selector).mask("处理中...");
         }
-        localStorage.setItem(selector + "_times", ++times);
+        sessionStorage.setItem(selector + "_times", ++times);
         console.log(selector + "_times:" + times);
     },
     unmask: function(selector){
         if(!selector) selector = "#container";
-        var times = localStorage.getItem(selector + "_times");
+        var times = sessionStorage.getItem(selector + "_times");
         if(--times <= 0){
-            localStorage.removeItem(selector + "_times");
+            sessionStorage.removeItem(selector + "_times");
             $(selector).unmask();
         }else{
-            localStorage.setItem(selector + "_times", times)
+            sessionStorage.setItem(selector + "_times", times)
         }
         console.log(selector + "_times:" + times);
     }
@@ -98,8 +98,8 @@ $.DateUtil = {
         }else{
             date = new Date();
         }
-        var newDate = new Date();
-        newDate.setDate(date.getDate() + day);
+        var newDate = new Date(date.getTime());
+        newDate.setDate(newDate.getDate() + day);
         return newDate;
     },
     /**
