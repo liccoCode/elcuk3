@@ -10,7 +10,6 @@ import models.view.post.DeliveryPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.modules.router.Get;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -40,7 +39,6 @@ public class Deliveryments extends Controller {
     }
 
     @Check("deliveryments.index")
-    @Get(value = "/deliveryments")
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
         if(p == null) p = new DeliveryPost();
@@ -48,8 +46,7 @@ public class Deliveryments extends Controller {
         render(deliveryments, p);
     }
 
-    //payments/{<[0-9]+>id}
-    @Get("/deliveryments/{<[A-Z]{2}[|][0-9]{6}[|][0-9]{2}>id}")
+    //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         render(dmt);

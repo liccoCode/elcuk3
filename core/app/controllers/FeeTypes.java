@@ -3,7 +3,6 @@ package controllers;
 import exception.PaymentException;
 import models.finance.FeeType;
 import models.view.Ret;
-import play.modules.router.Post;
 import play.mvc.Controller;
 
 import java.util.List;
@@ -22,7 +21,6 @@ public class FeeTypes extends Controller {
         render(types);
     }
 
-    @Post("/feetype/{name}/update")
     public static void update(String name, String memo, String nickName) {
         try {
             FeeType type = FeeType.findById(name);
@@ -37,7 +35,6 @@ public class FeeTypes extends Controller {
         }
     }
 
-    @Post("/feetypes")
     public static void create(FeeType ft, String parentName) {
         ft.save();
         ft.parent(FeeType.<FeeType>findById(parentName));
@@ -45,7 +42,6 @@ public class FeeTypes extends Controller {
         index();
     }
 
-    @Post("/feetype/{name}/delete")
     public static void remove(String name) {
         FeeType ft = FeeType.findById(name);
         if(ft == null)

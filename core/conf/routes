@@ -24,7 +24,41 @@ GET     /images/                                            staticDir:public/ima
 GET     /img/                                               staticDir:public/images
 GET     /helper/                                            staticDir:public/images/helper
 
+
+# Deliveryments
+GET    /deliveryments                                        Deliveryments.index
+GET    /deliveryment/{id} Deliveryments.show
+
+# FeeTypes
+POST    /feetype/{name}/update                               FeeTypes.update
+POST    /feetype                                             FeeTypes.create
+POST    /feetype/{name}/delete                               FeeTypes.remove
+
+# Orders
 GET     /orders/warnfix                                     Orders.warrningOrders
+
+# Payments
+GET     /payments                                           Payments.index
+GET     /payment/{id}                                       Payments.show
+GET     /payment/rates                                      Payments.rates
+POST    /payment/files/upload                               Payments.uploads
+GET     /deliveryment/{deliveryId}/payments                 Payments.deliveryPayments
+POST    /deliveryment/{deliveryId}/unitfees                 Payments.procureUnitApply
+POST    /deliveryment/{deliveryId}/fees                     Payments.deliverymentApply
+
+# PaymentUnits
+POST    /paymentunits/{id}/remove                           PaymentUnits.remove
+
+# Products
+GET     /product/{<[0-9]{2,}[-]?[A-Z0-9]+[-][A-Z0-9]+>id}   Products.show
+
+# Sellings
+GET     /selling/{id}                                       Sellings.selling
+GET     /selling/{id}/label                                 Sellings.sellingLabel
+
+# Shipments
+GET     /shipments                                          Shipments.index
+GET     /shipment/{id}                                      Shipments.show
 
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}

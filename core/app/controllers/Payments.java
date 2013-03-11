@@ -16,9 +16,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
-import play.modules.router.Get;
-import play.modules.router.Post;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -28,22 +27,19 @@ import java.util.List;
  * Date: 1/24/13
  * Time: 4:43 PM
  */
-//@With({GlobalExceptionHandler.class, Secure.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Payments extends Controller {
 
-    @Get("/payments")
     public static void index() {
         List<Payment> payments = Payment.findAll();
         render(payments);
     }
 
-    @Get("/payments/{<[0-9]+>id}")
     public static void show(Long id) {
         Payment payment = Payment.findById(id);
         render(payment);
     }
 
-    @Get("/payments/rates")
     @CacheFor("10mn")
     public static void rates() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
@@ -51,7 +47,6 @@ public class Payments extends Controller {
     }
 
     // --------- File Resources -----------
-    @Post("/payments/files/upload")
     public static void uploads(Attach a) {
         a.setUpAttachName();
         Logger.info("%s File save to %s.[%s kb] at Payments", a.fid, a.location,
@@ -70,7 +65,6 @@ public class Payments extends Controller {
     /**
      * 采购单的请款
      */
-    @Get("/deliveryment/{deliveryId}/payments")
     public static void deliveryPayments(String deliveryId) {
         Deliveryment dmt = Deliveryment.findById(deliveryId);
         List<FeeType> procureFeeTypes = FeeType.procure();
@@ -80,7 +74,6 @@ public class Payments extends Controller {
     /**
      * 采购单中的采购项目请款
      */
-    @Post("/deliveryment/{deliveryId}/unitfees")
     public static void procureUnitApply(String deliveryId, Long procureUnitId, boolean prepay) {
         try {
             ProcureUnit unit = ProcureUnit.findById(procureUnitId);
@@ -95,7 +88,6 @@ public class Payments extends Controller {
     /**
      * 采购单中的采购单级别请款
      */
-    @Post("/deliveryment/{deliveryId}/fees")
     public static void deliverymentApply(String deliveryId, PaymentUnit pu) {
         Deliveryment dmt = Deliveryment.findById(deliveryId);
         try {

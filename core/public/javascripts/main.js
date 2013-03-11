@@ -7,6 +7,20 @@ Timeline_parameters = 'bundle=true';
 
 var LoadMask = {
     /**
+     * 在页面进入的时候都需要清理带有 _times 的 sessionStorage
+     */
+    clear: function(){
+        console.log('begin clean LoadMask...');
+        for(var key in sessionStorage){
+            if(!sessionStorage.hasOwnProperty(key)) continue;
+            if(key.indexOf('_times') > 0){
+                delete sessionStorage[key];
+                console.log('delete key' + key)
+            }
+        }
+        console.log('end of clean LoadMask.')
+    },
+    /**
      * 锁屏幕
      * @param selector
      */
@@ -181,5 +195,6 @@ $(function(){
         $(this).val($(this).val().trim())
     });
     Notify.loopCheck();
+    LoadMask.clear();
 });
 

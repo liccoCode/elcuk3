@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
-import play.modules.router.Get;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -41,7 +40,6 @@ public class Shipments extends Controller {
     }
 
     @Check("shipments.index")
-    @Get("/shipments")
     public static void index(ShipmentPost p) {
         List<Shipment> shipments = null;
         if(p == null)
@@ -83,7 +81,6 @@ public class Shipments extends Controller {
         }
     }
 
-    @Get("/shipments/{<[A-Z]{2}[|][0-9]{6}[|][0-9]{2}>id}")
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
         render(ship);

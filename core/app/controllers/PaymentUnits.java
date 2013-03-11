@@ -3,7 +3,6 @@ package controllers;
 import exception.PaymentException;
 import models.finance.PaymentUnit;
 import models.view.Ret;
-import play.modules.router.Post;
 import play.mvc.Controller;
 
 /**
@@ -14,7 +13,6 @@ import play.mvc.Controller;
  */
 public class PaymentUnits extends Controller {
 
-    @Post("/paymentunits/{id}/remove")
     public static void remove(Long id) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         try {

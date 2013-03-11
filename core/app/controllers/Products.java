@@ -16,7 +16,6 @@ import models.view.post.ProductPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.modules.router.Get;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -62,7 +61,6 @@ public class Products extends Controller {
         renderArgs.put("records", ElcukRecord.records(sku));
     }
 
-    @Get("/products/{<[0-9]{2,}[-]?[A-Z0-9]+[-][A-Z0-9]+>id}")
     public static void show(String id) {
         Product pro = Product.findByMerchantSKU(id);
         render(pro);

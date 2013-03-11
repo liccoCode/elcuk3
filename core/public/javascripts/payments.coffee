@@ -115,7 +115,7 @@ $ ->
     $('#exchange_rate').load('/payments/rates', -> LoadMask.unmask())
 
   $('#refreshRate').click(exchangeRate)
-  $('#exchange_rate').ready(exchangeRate)
+  $('#exchange_rate').ready(exchangeRate) if $('#exchange_rate').size() > 0
 
 
   uploadInit = ->
@@ -127,5 +127,5 @@ $ ->
     , $('#dropbox'), '/payments/files/upload')
     window.dropUpload.loadImages(paymentId(), $('#dropbox'), 'PAYMENTS')
 
-  $('#dropbox').ready(uploadInit)
+  $('#dropbox').ready(uploadInit) if $('#dropbox').size() > 0
 
