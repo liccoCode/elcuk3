@@ -4,7 +4,7 @@ $ ->
   SKU = 'sku'
   SID = 'sid'
   defaultDate = $.DateUtil.addDay(-30)
-  now = new Date()
+  now = $.DateUtil.addDay(30, defaultDate)
 
   class Tabs
     constructor: (name) ->
@@ -49,8 +49,15 @@ $ ->
             {}
     tooltip:
       shared: true
+      formatter: ->
+        s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
+        @points.forEach((point) ->
+          totalY = point.series.yData.reduce((a, b)-> a + b)
+          s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
+        )
+        s
       crosshairs: true
-      xDateFormat: '%Y-%m-%d %A',
+      xDateFormat: '%Y-%m-%d %A'
     series: []
     # 设置这条线的'标题'
     head: (title) ->

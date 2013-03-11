@@ -112,8 +112,8 @@ $.DateUtil = {
         }else{
             date = new Date();
         }
-        var newDate = new Date();
-        newDate.setDate(date.getDate() + day);
+        var newDate = new Date(date.getTime());
+        newDate.setDate(newDate.getDate() + day);
         return newDate;
     },
     /**
