@@ -322,6 +322,19 @@ public class Deliveryment extends GenericModel {
         return dmtFees;
     }
 
+    /**
+     * 通过 PaymentUnit 来寻找关联的 Payment.
+     *
+     * @return
+     */
+    public List<Payment> relatePayments() {
+        Set<Payment> payments = new HashSet<Payment>();
+        for(PaymentUnit unit : this.fees) {
+            payments.add(unit.payment);
+        }
+        return new ArrayList<Payment>(payments);
+    }
+
 
     public static String id() {
         DateTime dt = DateTime.now();

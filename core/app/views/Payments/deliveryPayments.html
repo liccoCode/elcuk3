@@ -78,14 +78,15 @@
             <td>${unit.attrs.planQty}</td>
             <td data-toggle="toggle" data-target="#unit_${unit.id}">
                 <i class="icon-reorder"></i>
-                <i class="badge ${unit.fees().size() > 0 ? 'badge-warning' : ''}">
-                ${unit.fees().size()}
-                </i>
+                <i class="badge">${unit.applyBadge()}</i>
+                <i class="badge badge-important">${unit.denyBadge()}</i>
+                <i class="badge badge-info">${unit.approvalBadge()}</i>
+                <i class="badge badge-success">${unit.paidBadge()}</i>
             ${unit.attrs.qty}
             </td>
             <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
             <td>${unit.totalAmount()} / ${unit.totalBalance()}
-                (${(unit.totalAmount() / unit.totalBalance()).format("#.#%")})
+                <strong>(${(unit.totalAmount() / unit.totalBalance()).format("#.#%")})</strong>
             </td>
             <td>${unit.attrs.deliveryDate}</td>
             <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>

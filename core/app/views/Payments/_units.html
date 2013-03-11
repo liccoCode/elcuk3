@@ -1,25 +1,29 @@
 #{set delete: del == null ? true : del /}
 <tr>
-    <th>#</th>
     <th>费用类型</th>
     <th>总请款金额</th>
     <th>修正值</th>
     <th>请款人</th>
     <th class="ten">请款时间</th>
     <th>状态</th>
+    <th>#</th>
 #{if delete}
     <th></th>
 #{/if}
 </tr>
 #{list items:fees, as:'fee'}
 <tr id="payunit_${fee.id}">
-    <td>${fee.id}</td>
     <td>${fee.feeType?.nickName}</td>
     <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
     <td class="fix_value">${fee.currency.symbol()} ${fee.fixValue}</td>
     <td>${fee.payee.username}</td>
     <td>#{time_tooltip time:fee.createdAt, datetime:true /}</td>
-    <td>${fee.state}</td>
+    <td>
+        #{a @Payments.show(fee.payment.id)}
+            <span style="color:${fee.stateColor()}">${fee.state}</span>
+        #{/a}
+    </td>
+    <td>${fee.id}</td>
     #{if delete}
         <td>
             <button class="btn btn-small btn-danger remove">
