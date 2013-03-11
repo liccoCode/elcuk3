@@ -7,6 +7,7 @@ import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -93,6 +94,7 @@ public class PaymentUnit extends Model {
 
     public Date createdAt;
 
+    @Required
     public float fixValue = 0;
 
     public boolean remove = false;
@@ -145,7 +147,20 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return this.amount + this.fixValue;
+        return this.amount + this.fixValueAmount();
+    }
+
+    /**
+     * FixValue 计算的总价
+     *
+     * @return
+     */
+    public float fixValueAmount() {
+        if(this.procureUnit != null)
+            return this.fixValue * this.procureUnit.qty();
+            //TODO: 还有其他类型的 FixValue 需要补全
+        else
+            return 0;
     }
 
     /**
@@ -164,7 +179,7 @@ public class PaymentUnit extends Model {
      */
     public String foreignKey() {
         /**
-         * first: deliveryment
+         * first: deliveryment|procureUnit 在其中
          * second: shipment
          * third: shipItem
          */
@@ -176,5 +191,10 @@ public class PaymentUnit extends Model {
             return this.shipItem.id + "";
         else
             return "无外键(孤儿), 请联系 It";
+    }
+
+    public void fixValue(Float fixValue) {
+        this.fixValue = fixValue;
+        this.save();
     }
 }

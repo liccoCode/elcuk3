@@ -50,7 +50,8 @@ POST    /deliveryment/{deliveryId}/unitfees                 Payments.procureUnit
 POST    /deliveryment/{deliveryId}/fees                     Payments.deliverymentApply
 
 # PaymentUnits
-POST    /paymentunits/{id}/remove                           PaymentUnits.remove
+POST    /paymentunit/{id}/remove                            PaymentUnits.remove
+POST    /paymentunit/{id}                                   PaymentUnits.update
 
 # Products
 GET     /product/{<[0-9]{2,}[-]?[A-Z0-9]+[-][A-Z0-9]+>id}   Products.show

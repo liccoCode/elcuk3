@@ -456,7 +456,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         for(PaymentUnit fee : this.fees()) {
             if(!this.attrs.currency.equals(fee.currency))
                 throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
-            amount += fee.amount;
+            amount += fee.amount();
         }
         return amount;
     }

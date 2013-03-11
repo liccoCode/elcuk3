@@ -1,8 +1,10 @@
 package controllers;
 
 import exception.PaymentException;
+import helper.J;
 import models.finance.PaymentUnit;
 import models.view.Ret;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 
 /**
@@ -21,6 +23,19 @@ public class PaymentUnits extends Controller {
         } catch(PaymentException e) {
             renderJSON(new Ret(false, e.getMessage()));
         }
+    }
+
+    public static void update(Long id, Float fixValue) {
+        PaymentUnit unit = PaymentUnit.findById(id);
+        Validation.required("fixValue", fixValue);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Validation.errors().toString()));
+
+        unit.fixValue(fixValue);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, J.G(Validation.errors())));
+        else
+            renderJSON(new Ret("更新成功."));
     }
 
 }

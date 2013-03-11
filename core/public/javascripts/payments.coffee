@@ -1,4 +1,5 @@
 $ ->
+  # ---------------------------------------- 采购单(deliveryPayments) 请款页面 -----------------
   # 采购单元的一行行数据
   class UnitRow
     constructor: (@uid) ->
@@ -105,6 +106,21 @@ $ ->
   # 为所有 ProcureUnit 的点击事件增加计算 amount
   $("#procure_units_fees [data-target]").click ->
     new UnitRow($(@).attr('data-target').split('_')[1]).cal_ammount().cal_fix_value()
+
+  $('.fixValue').keyup((e) ->
+    e.preventDefault()
+    if e.keyCode == 13
+      LoadMask.mask()
+      $.post("#{@getAttribute('data-url')}", {fixValue: @value}).done((r) ->
+        try
+          if r.flag == false
+            alert(r.message)
+          else
+            e.target.blur()
+        finally
+          LoadMask.unmask()
+      )
+  )
 
 
   # ----------------------- payments.show -----------------
