@@ -101,12 +101,16 @@ div .alert{
 }
 
 /* 使用在 table tr 控制 td 的宽度 */
-.ten{
-    width:10%;
+.three{
+    width:3%;
 }
 
 .five{
     width:5%;
+}
+
+.ten{
+    width:10%;
 }
 
 .twenty{
@@ -115,4 +119,8 @@ div .alert{
 
 .template{
     display:none;
+}
+
+.table-checkboxk label{
+    padding-left:5px;
 }

@@ -194,7 +194,7 @@ $(function(){
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });
-    Notify.loopCheck();
+    if(!PLAY_MODE) Notify.loopCheck();
     LoadMask.clear();
 });
 

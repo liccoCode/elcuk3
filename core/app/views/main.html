@@ -5,6 +5,11 @@
     <title>#{get 'title' /}</title>
     <meta charset="${_response_encoding}">
     <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+#{if play.Play.mode.isDev()}
+    <script type="text/javascript">
+        PLAY_MODE = "DEV";
+    </script>
+#{/if}
 #{stylesheet 'bootstrap.min.css'/}
 #{stylesheet 'font-awesome.css'/}
 #{stylesheet 'jquery.loadmask.css'/}
@@ -12,7 +17,7 @@
 #{stylesheet 'dateinput.css'/}
 #{get 'moreStyles' /}
 #{script 'jquery.1.7.2.min.js'/}
-#{script 'bootstrap.js'/}
+#{script 'bootstrap.min.js'/}
 #{script 'jquery.loadmask.min.js'/}
 #{script 'jquery.highlight.js'/}
 #{script 'jquery.form.js'/}
@@ -28,6 +33,7 @@
 <div class="container" id="container" style="margin-top:20px;">
 #{doLayout /}
 </div>
+#{render 'footer.html'/}
 
 </body>
 </html>

@@ -92,13 +92,14 @@
             <td>#{yesOrNo f:unit.isPlaced/}</td>
             <td>
                 <form class="inner_form" method="post" action="@{Payments.procureUnitApply(dmt.id)}">
-                    <label class="inline checkbox">
-                        <input type="checkbox" name="prepay" value="true"> 预付款
-                    </label>
                     <input type="hidden" name="procureUnitId" value="${unit.id}">
                     <button class="btn btn-info btn-small">
-                        填写请款
+                        请款
                     </button>
+                    <label class="inline checkbox">
+                        <input type="checkbox" name="prepay" value="true">
+                        预付款
+                    </label>
                 </form>
             </td>
         </tr>

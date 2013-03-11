@@ -19,6 +19,7 @@ import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,11 +53,33 @@ public class Payments extends Controller {
         Logger.info("%s File save to %s.[%s kb] at Payments", a.fid, a.location,
                 a.fileSize / 1024);
         try {
+
             Payment.<Payment>findById(NumberUtils.toLong(a.fid)).upload(a);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
         renderJSON(J.G(a));
+    }
+
+    public static void approval(Long id, List<Long> unitIds) {
+        if(unitIds == null) unitIds = new ArrayList<Long>();
+        Payment payment = Payment.findById(id);
+        flash.success("%s 个支付计划成功审核", payment.approval(unitIds));
+        show(id);
+    }
+
+    public static void deny(Long id, List<Long> unitIds) {
+        if(unitIds == null) unitIds = new ArrayList<Long>();
+        Payment payment = Payment.findById(id);
+        flash.success("%s 个支付计划被驳回", payment.deny(unitIds));
+        show(id);
+    }
+
+    public static void paid(Long id, List<Long> unitIds) {
+        if(unitIds == null) unitIds = new ArrayList<Long>();
+        Payment payment = Payment.findById(id);
+        flash.success("%s 个支付计划支付成功", payment.paid(unitIds));
+        show(id);
     }
 
 

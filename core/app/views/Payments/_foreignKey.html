@@ -1,0 +1,7 @@
+#{set f_key: fee.foreignKey()/}
+#{if f_key.startsWith("DL")}
+    #{a @Payments.deliveryPayments(f_key)}${f_key}#{/a}
+#{/if}
+#{else }
+${f_key}
+#{/else}

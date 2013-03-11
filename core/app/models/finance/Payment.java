@@ -13,6 +13,7 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -94,6 +95,45 @@ public class Payment extends Model {
         //todo: Payments 的上传需要特殊处理. 如何上传到 S3?
         FileUtils.copyFile(a.file, new File(a.location));
         a.save();
+    }
+
+    public int approval(List<Long> unitIds) {
+        int approvalNum = 0;
+        for(PaymentUnit unit : this.units) {
+            if(!unitIds.contains(unit.id)) continue;
+            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state))
+                continue;
+            approvalNum++;
+            unit.state = PaymentUnit.S.APPROVAL;
+            unit.save();
+        }
+        return approvalNum;
+    }
+
+    public int deny(List<Long> unitIds) {
+        int denyNum = 0;
+        for(PaymentUnit unit : this.units) {
+            if(!unitIds.contains(unit.id)) continue;
+            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state))
+                continue;
+            denyNum++;
+            unit.state = PaymentUnit.S.DENY;
+            unit.save();
+        }
+        return denyNum;
+    }
+
+    public int paid(List<Long> unitIds) {
+        int paidNum = 0;
+        for(PaymentUnit unit : this.units) {
+            if(!unitIds.contains(unit.id)) continue;
+            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state))
+                continue;
+            paidNum++;
+            unit.state = PaymentUnit.S.PAID;
+            unit.save();
+        }
+        return paidNum;
     }
 
     /**

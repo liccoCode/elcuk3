@@ -117,6 +117,18 @@ $ ->
   $('#refreshRate').click(exchangeRate)
   $('#exchange_rate').ready(exchangeRate) if $('#exchange_rate').size() > 0
 
+  # 表格上访的功能按钮
+  $('#select_all').click ->
+    $('#unit_list :checkbox[name=unitIds]').prop('checked', true)
+
+  $('#select_inverse').click ->
+    $('#unit_list :checkbox[name=unitIds]').prop('checked', (i, attr)-> !attr)
+
+  for id in ['#approval', '#deny', '#paid']
+    $(id).click ->
+      self = $(@)
+      $('#unit_list').attr('action', self.attr('data-url')).submit()
+
 
   uploadInit = ->
     # 1. 首先初始化 dropbox

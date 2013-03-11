@@ -32,12 +32,12 @@ public class PaymentUnit extends Model {
         },
 
         /**
-         * 审核中
+         * 驳回
          */
-        REVIEWING {
+        DENY {
             @Override
             public String toString() {
-                return "审核中";
+                return "驳回";
             }
         },
         /**
@@ -155,5 +155,26 @@ public class PaymentUnit extends Model {
      */
     private boolean isApproval() {
         return this.state == S.APPROVAL || this.state == S.PAID;
+    }
+
+    /**
+     * 采购单元所关联的外键
+     *
+     * @return
+     */
+    public String foreignKey() {
+        /**
+         * first: deliveryment
+         * second: shipment
+         * third: shipItem
+         */
+        if(this.deliveryment != null)
+            return this.deliveryment.id;
+        else if(this.shipment != null)
+            return this.shipment.id;
+        else if(this.shipItem != null)
+            return this.shipItem.id + "";
+        else
+            return "无外键(孤儿), 请联系 It";
     }
 }
