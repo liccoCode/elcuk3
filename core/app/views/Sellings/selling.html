@@ -10,7 +10,8 @@
 <div class="row">
     #{if s.state == models.market.Selling.S.DOWN}
     <div class="alert alert-error">
-        <p style="text-align:center;">Selling ${s.sellingId} 已经不在 Amazon 中存在了, 系统中已经标记为 DOWN, 不再允许向 Amazon 发送请求</p>
+        <p style="text-align:center;">Selling ${s.sellingId} 已经不在 Amazon 中存在了, 系统中已经标记为 DOWN, 不再允许向
+            Amazon 发送请求</p>
     </div>
     #{/if}
     #{else }
@@ -62,7 +63,8 @@
 
 <tr>
     <th>Title:</th>
-    <td colspan="3"><textarea rows="2" name="s.aps.title" class="span12">${s.aps.title}</textarea></td>
+    <td colspan="3"><textarea rows="2" name="s.aps.title" class="span12">${s.aps.title}</textarea>
+    </td>
 </tr>
 <tr>
     <th>MSKU:</th>
@@ -100,7 +102,9 @@
     <th>Manufac:</th>
     <td><input type="text" name="s.aps.manufacturer" value="${s.aps.manufacturer}"></td>
     <th>PartNumber:</th>
-    <td><input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}"></td>
+    <td>
+        <input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}">
+    </td>
 </tr>
 
 <tr>
@@ -137,15 +141,26 @@
 
 <tr>
     <th>StartDate</th>
-    <td><input type="text" name="s.aps.startDate" value="${s.aps.startDate.format("yyyy-MM-dd")}"></td>
+    <td><input type="text" name="s.aps.startDate" value="${s.aps.startDate.format("yyyy-MM-dd")}">
+    </td>
     <th>EndtDate</th>
     <td><input type="text" name="s.aps.endDate" value="${s.aps.endDate.format("yyyy-MM-dd")}"></td>
 </tr>
 
 <tr>
+    <th>Gift Options</th>
+    <td>
+        <label class="checkbox inline">
+            <input name="s.aps.isGiftWrap" type="checkbox" ${s.aps.isGiftWrap ? 'checked':''} value="true">
+            Gift&nbsp;Wrap
+        </label>
+        <label class="checkbox inline">
+            <input name="s.aps.isGiftMessage" type="checkbox" ${s.aps.isGiftMessage ? 'checked':''} value="true">
+            Gift&nbsp;Message
+        </label>
+    </td>
     <th>FnSku</th>
     <td><input type="text" name="s.fnSku" value="${s.fnSku}"></td>
-    <td colspan="2"></td>
 </tr>
 
 <!-- 功能条 -->

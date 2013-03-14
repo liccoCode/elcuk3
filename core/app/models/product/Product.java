@@ -269,7 +269,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         body, FLog.T.SALES);
             doc = Jsoup.parse(body);
 
-            Set<NameValuePair> addSellingPrams = new HashSet<NameValuePair>();
+            Set<NameValuePair> sellingParams = new HashSet<NameValuePair>();
             inputs = doc.select("form[name=productForm] input");
             if(inputs == null || inputs.size() <= 7)
                 throw new FastRuntimeException("没有进入第二步 Identify 页面!");
@@ -338,7 +338,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 String tagType = input.attr("type");
                 if("radio".equals(tagType)) { //对于 radio 的只能选择 checked 的,不能让后面的元素把前面的值给覆盖了.
                     if(StringUtils.isBlank(input.attr("checked"))) continue;
-                    addSellingPrams.add(new BasicNameValuePair(name, input.val()));
+                    sellingParams.add(new BasicNameValuePair(name, input.val()));
                 } else if("checkbox".equals(tagType)) {
                     /**
                      * Amazon  中 checkbox 都是不需要提交的. 都有一个 hidden 的元素与其对应
@@ -358,67 +358,72 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
                 } else { // 非 Radio 的 input 按照如下处理
                     if("item_name".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.title));
+                        sellingParams.add(new BasicNameValuePair(name, selling.aps.title));
                     else if("manufacturer".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.manufacturer));
+                        sellingParams.add(new BasicNameValuePair(name, selling.aps.manufacturer));
                     else if("brand_name".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, StringUtils.isBlank(
+                        sellingParams.add(new BasicNameValuePair(name, StringUtils.isBlank(
                                 selling.aps.brand) ? "EasyAcc" : selling.aps.brand)); // ?? 这个品牌的名字现在都使用我们自己的?
                     else if("part_number".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name,
+                        sellingParams.add(new BasicNameValuePair(name,
                                 selling.aps.manufacturerPartNumber));
                     else if("model".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.modelNumber));
+                        sellingParams.add(new BasicNameValuePair(name, selling.aps.modelNumber));
                     else if("external_id".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.upc));
+                        sellingParams.add(new BasicNameValuePair(name, selling.aps.upc));
                     else if("offering_sku".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.merchantSKU));
+                        sellingParams.add(new BasicNameValuePair(name, selling.merchantSKU));
                     else if("our_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name,
+                        sellingParams.add(new BasicNameValuePair(name,
                                 Webs.priceLocalNumberFormat(M.AMAZON_UK,
                                         selling.aps.standerPrice)));
                     else if("discounted_price".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name,
+                        sellingParams.add(new BasicNameValuePair(name,
                                 Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.salePrice)));
                     else if("discounted_price_start_date".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name,
+                        sellingParams.add(new BasicNameValuePair(name,
                                 Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
                     else if("discounted_price_end_date".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name,
+                        sellingParams.add(new BasicNameValuePair(name,
                                 Dates.listingUpdateFmt(selling.market, selling.aps.endDate)));
                     else if("Offer_Inventory_Quantity".equals(name))
-                        addSellingPrams
+                        sellingParams
                                 .add(new BasicNameValuePair(name, selling.aps.quantity + ""));
                     else if("activeClientTimeOnTask".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name,
+                        sellingParams.add(new BasicNameValuePair(name,
                                 "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
+                    else if("offering_can_be_gift_wrapped".equals(name) && selling.aps.isGiftWrap)
+                        sellingParams.add(new BasicNameValuePair(name, "on"));
+                    else if("offering_can_be_gift_messaged".equals(name) &&
+                            selling.aps.isGiftMessage)
+                        sellingParams.add(new BasicNameValuePair(name, "on"));
                     else if("matchAsin".equals(name))
-                        addSellingPrams.add(new BasicNameValuePair(name, selling.aps.matchAsin));
+                        sellingParams.add(new BasicNameValuePair(name, selling.aps.matchAsin));
                     else if("encoded_session_hidden_map".equals(name)) {
-                        addSellingPrams.add(new BasicNameValuePair(name, input.val()));
+                        sellingParams.add(new BasicNameValuePair(name, input.val()));
                         // 在发现了 encoded_session_hidden_map 以后需要添加这样一个属性(JS 动态添加的)
-                        addSellingPrams.add(new BasicNameValuePair("sessionMapPresent", "true"));
+                        sellingParams.add(new BasicNameValuePair("sessionMapPresent", "true"));
                     } else if(StringUtils.startsWith(name, "bullet_point")) {
-                        selling.aps.bulletPointsCheck(addSellingPrams);
+                        selling.aps.bulletPointsCheck(sellingParams);
                     } else if(StringUtils.startsWith(name, "generic_keywords")) {
-                        selling.aps.searchTermsCheck(addSellingPrams);
+                        selling.aps.searchTermsCheck(sellingParams);
                     } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
                         if(selling.aps.rbns != null) {
                             if(selling.aps.rbns.size() == 1)
-                                addSellingPrams
+                                sellingParams
                                         .add(new BasicNameValuePair("recommended_browse_nodes[0]",
                                                 selling.aps.rbns.get(0)));
                             else if(selling.aps.rbns.size() == 2) {
-                                addSellingPrams
+                                sellingParams
                                         .add(new BasicNameValuePair("recommended_browse_nodes[0]",
                                                 selling.aps.rbns.get(0)));
-                                addSellingPrams
+                                sellingParams
                                         .add(new BasicNameValuePair("recommended_browse_nodes[1]",
                                                 selling.aps.rbns.get(1)));
                             }
                         }
                     } else {
-                        addSellingPrams.add(new BasicNameValuePair(name, input.val()));
+                        sellingParams.add(new BasicNameValuePair(name, input.val()));
                     }
                 }
             }
@@ -432,9 +437,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             for(Element textarea : textAreas) {
                 String name = textarea.attr("name");
                 if("product_description".equals(name))
-                    addSellingPrams.add(new BasicNameValuePair(name, selling.aps.productDesc));
+                    sellingParams.add(new BasicNameValuePair(name, selling.aps.productDesc));
                 else
-                    addSellingPrams.add(new BasicNameValuePair(name, textarea.val()));
+                    sellingParams.add(new BasicNameValuePair(name, textarea.val()));
             }
 
             Elements selects = doc.select("form[name=productForm] select");
@@ -442,10 +447,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 String name = select.attr("name");
                 // Condition
                 if("offering_condition".equals(name))
-                    addSellingPrams
+                    sellingParams
                             .add(new BasicNameValuePair(name, "New|New")); // 商品的 Condition 设置为 NEW
                 else
-                    addSellingPrams.add(new BasicNameValuePair(name,
+                    sellingParams.add(new BasicNameValuePair(name,
                             select.select("option[selected]").val()));
             }
             // -------------  5 -----------------
@@ -454,7 +459,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
              */
             body = HTTP
                     .post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/,
-                            addSellingPrams);
+                            sellingParams);
             // 记录任何上架操作都记录日志. 大不了自己删除...
             FLog.fileLog(
                     String.format("%s.%s.%s.step3.html", selling.merchantSKU, selling.account.id,
