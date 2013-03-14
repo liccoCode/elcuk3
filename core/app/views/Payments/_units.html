@@ -1,9 +1,9 @@
 #{set delete: del == null ? true : del /}
 <tr>
     <th>费用类型</th>
-    <th>总请款金额</th>
+    <th>请款金额</th>
     <th class="fifteen">修正值</th>
-    <th>总请款 + 总修正值</th>
+    <th>请款 + 修正额</th>
     <th>请款人</th>
     <th class="ten">请款时间</th>
     <th>状态</th>
@@ -15,7 +15,7 @@
 #{list items:fees, as:'fee'}
 <tr id="payunit_${fee.id}">
     <td>${fee.feeType?.nickName}</td>
-    <td class="amount">${fee.currency.symbol()} ${fee.amount()}</td>
+    <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
     <td class="fix_value">
         <div class="input-prepend">
             <span class="add-on">${fee.currency.symbol()}</span>
