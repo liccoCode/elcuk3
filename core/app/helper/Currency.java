@@ -43,6 +43,21 @@ public enum Currency {
         }
 
         @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return GBP_CNY;
+                case GBP:
+                    return 1;
+                case EUR:
+                    return GBP_EUR;
+                case USD:
+                default:
+                    return GBP_USD;
+            }
+        }
+
+        @Override
         public String symbol() {
             return "£";
         }
@@ -72,6 +87,21 @@ public enum Currency {
         @Override
         public Float toCNY(Float value) {
             return value * EUR_CNY;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return EUR_CNY;
+                case GBP:
+                    return EUR_GBP;
+                case EUR:
+                    return 1;
+                case USD:
+                default:
+                    return EUR_USD;
+            }
         }
 
         @Override
@@ -107,6 +137,21 @@ public enum Currency {
         }
 
         @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return 1;
+                case GBP:
+                    return CNY_GBP;
+                case EUR:
+                    return CNY_EUR;
+                case USD:
+                default:
+                    return CNY_USD;
+            }
+        }
+
+        @Override
         public String symbol() {
             return "¥";
         }
@@ -139,6 +184,21 @@ public enum Currency {
         }
 
         @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return USD_CNY;
+                case GBP:
+                    return USD_GBP;
+                case EUR:
+                    return USD_EUR;
+                case USD:
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
         public String symbol() {
             return "$";
         }
@@ -156,6 +216,8 @@ public enum Currency {
     public abstract Float toUSD(Float value);
 
     public abstract Float toCNY(Float value);
+
+    public abstract float ratio(Currency currency);
 
     public abstract String symbol();
 

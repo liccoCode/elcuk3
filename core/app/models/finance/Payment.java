@@ -31,11 +31,29 @@ public class Payment extends Model {
         /**
          * 等待支付
          */
-        WAITING,
+        WAITING {
+            @Override
+            public String toString() {
+                return "等待支付";
+            }
+        },
         /**
          * 支付完成
          */
-        PAID
+        PAID {
+            @Override
+            public String toString() {
+                return "完成支付";
+            }
+        },
+
+        CLOSE {
+            @Override
+            public String toString() {
+                return "处理完毕";
+            }
+        }
+
     }
 
     @OneToMany(mappedBy = "payment")
@@ -153,6 +171,7 @@ public class Payment extends Model {
         float usd = 0;
         float cny = 0;
         for(PaymentUnit unit : this.units) {
+            if(unit.remove) continue;
             if(unit.currency == Currency.CNY)
                 cny += unit.amount();
             else if(unit.currency == Currency.USD)
@@ -160,7 +179,24 @@ public class Payment extends Model {
             else
                 throw new PaymentException(PaymentException.INVALID_CURRENCY);
         }
+        if(usd == 0) usd = Currency.CNY.toUSD(cny);
+        if(cny == 0) cny = Currency.USD.toCNY(usd);
         return new F.T2<Float, Float>(usd, cny);
+    }
+
+    /**
+     * 计算不同状态的数量
+     *
+     * @param state
+     * @return
+     */
+    public int unitsStateSize(PaymentUnit.S state) {
+        int size = 0;
+        for(PaymentUnit unit : this.units) {
+            if(!unit.remove && unit.state == state)
+                size++;
+        }
+        return size;
     }
 
     /**

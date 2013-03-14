@@ -31,9 +31,6 @@
             <button id="approval" data-url='@{Payments.approval(payment.id)}' class="btn btn-small btn-primary">
                 批准
             </button>
-            <button id="paid" data-url='@{Payments.paid(payment.id)}' class="btn btn-small btn-success">
-                已付款
-            </button>
             <button id="deny" data-url='@{Payments.deny(payment.id)}' class="btn btn-small btn-danger">
                 驳回
             </button>
@@ -69,6 +66,63 @@
             #{/list}
         </table>
     #{/form}
+    #{form @Payments.paid(payment.id), id:'paid_form', class:'form-inline'}
+        <input type="submit" id="paid" data-url='@{Payments.paid(payment.id)}' class="btn
+            btn-small btn-success" value="付款"/>
+        #{pickCurrency name:'currency' /}
+        <input type="text" name="actualPaid" placeholder="金额">
+    #{/form}
+    </div>
+    <div class="row-fluid">
+        <div class="span4">
+            <dl class="dl-horizontal">
+                <dt>状态(排除删除的)</dt>
+                <dd>数量</dd>
+
+                <dt style="color:${models.finance.PaymentUnit.S.APPLY.stateColor()}">已申请</dt>
+                <dd>${payment.unitsStateSize(models.finance.PaymentUnit.S.APPLY)}</dd>
+
+                <dt style="color:${models.finance.PaymentUnit.S.APPROVAL.stateColor()}">批准</dt>
+                <dd>${payment.unitsStateSize(models.finance.PaymentUnit.S.APPROVAL)}</dd>
+
+                <dt style="color:${models.finance.PaymentUnit.S.PAID.stateColor()}">已支付</dt>
+                <dd>${payment.unitsStateSize(models.finance.PaymentUnit.S.PAID)}</dd>
+
+                <dt style="color:${models.finance.PaymentUnit.S.DENY.stateColor()}">驳回</dt>
+                <dd>${payment.unitsStateSize(models.finance.PaymentUnit.S.DENY)}</dd>
+            </dl>
+        </div>
+
+        <div class="span4">
+            <dl class="dl-horizontal">
+                <dt>类型</dt>
+                <dd>需要付款的金额</dd>
+
+            #{set totalFee: payment.totalFees()/}
+
+                <dt>美元支付</dt>
+                <dd>${helper.Currency.USD.symbol()} ${totalFee._1}</dd>
+
+                <dt>人民币支付</dt>
+                <dd>${helper.Currency.CNY.symbol()} ${totalFee._2}</dd>
+
+                <dt>USD to CNY</dt>
+                <dd>${helper.Currency.USD.ratio(helper.Currency.CNY)}</dd>
+            </dl>
+        </div>
+
+        <div class="span4">
+            <dl class="dl-horizontal">
+                <dt>支付状态</dt>
+                <dd>${payment.state}</dd>
+
+                <dt>币种</dt>
+                <dd>${payment.currency.symbol()}</dd>
+
+                <dt>金额</dt>
+                <dd>${payment.actualPaid}</dd>
+            </dl>
+        </div>
     </div>
 
     <div class="row-fluid">
@@ -89,23 +143,6 @@
                 </p>
             </div>
         </div>
-        <table class="table table-bordered table-condensed">
-            <tr>
-                <th rowspan="3">实际支付</th>
-                <td rowspan="3" class="ten">#{pickCurrency /}</td>
-                <td rowspan="3" class="ten">
-                    <input type="text" value="${payment.actualPaid}">
-                </td>
-            </tr>
-            <tr>
-                <th>汇总 USD</th>
-                <td>${helper.Currency.USD.symbol()} ${payment.totalFees()._1}</td>
-            </tr>
-            <tr>
-                <th>汇总 CNY</th>
-                <td>${helper.Currency.CNY.symbol()} ${payment.totalFees()._2}</td>
-            </tr>
-        </table>
     </div>
 
     <div class="row-fluid">

@@ -167,6 +167,9 @@ $ ->
   $('#select_inverse').click ->
     $('#unit_list :checkbox[name=unitIds]').prop('checked', (i, attr)-> !attr)
 
+  $('#paid_form').submit (e)->
+    false
+
   for id in ['#approval', '#deny', '#paid']
     $(id).click ->
       self = $(@)

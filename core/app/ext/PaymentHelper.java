@@ -48,7 +48,11 @@ public class PaymentHelper extends JavaExtensions {
     }
 
     public static String stateColor(PaymentUnit punit) {
-        switch(punit.state) {
+        return stateColor(punit.state);
+    }
+
+    public static String stateColor(PaymentUnit.S state) {
+        switch(state) {
             case APPLY:
                 return "#999999";
             case DENY:

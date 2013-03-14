@@ -87,8 +87,8 @@
                 <i class="badge badge-success">${unit.paidBadge()}</i>
                 <span id="unit_qty_${unit.id}">${unit.attrs.qty}</span>
             </td>
-            <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
-            <td>${unit.sumFixValue().formatCurrency(unit.attrs.currency.name())}</td>
+            <td>${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
+            <td>${unit.attrs.currency.symbol()} ${unit.sumFixValue()}</td>
             <td>${unit.totalApplyAmount()} / ${unit.totalBalance()}
                 <strong>(${(unit.totalApplyAmount() / unit.totalBalance()).format("#.#%")})</strong>
             </td>
