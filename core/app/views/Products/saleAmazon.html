@@ -134,8 +134,22 @@
     <td>
         <input type="text" name="s.aps.startDate" value="${new java.util.Date().format("yyyy-MM-dd")}">
     </td>
-    <th>EndtDate</th>
+    <th>EndDate</th>
     <td><input type="text" name="s.aps.endDate" value="2015-01-01"></td>
+</tr>
+
+<tr>
+    <th>Gift Options</th>
+    <td colspan="3">
+        <label class="checkbox inline">
+            <input name="s.aps.isGiftWrap" type="checkbox" ${s.aps.isGiftWrap ? 'checked':''} value="true">
+            Gift&nbsp;Wrap
+        </label>
+        <label class="checkbox inline">
+            <input name="s.aps.isGiftMessage" type="checkbox" ${s.aps.isGiftMessage ? 'checked':''} value="true">
+            Gift&nbsp;Message
+        </label>
+    </td>
 </tr>
 
 <tr>
