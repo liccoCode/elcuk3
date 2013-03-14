@@ -8,6 +8,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -193,8 +194,21 @@ public class PaymentUnit extends Model {
             return "无外键(孤儿), 请联系 It";
     }
 
+    /**
+     * 修改修正价格;
+     * 1. 如果属于驳回状态, 那么自动变为已申请状态
+     * 2. 如果属于已支付状态, 不允许再修改修正价格
+     *
+     * @param fixValue
+     */
     public void fixValue(Float fixValue) {
+        if(this.state == S.PAID) {
+            Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
+            return;
+        }
         this.fixValue = fixValue;
+        if(this.state == S.DENY)
+            this.state = S.APPLY;
         this.save();
     }
 }
