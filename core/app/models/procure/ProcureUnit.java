@@ -443,7 +443,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float totalBalance() {
-        return (this.qty() * this.attrs.price);
+        return (this.qty() * (this.attrs.price + this.sumFixValue()));
+    }
+
+    /**
+     * 获取采购计划下, 所有请款项的修正价总额
+     *
+     * @return
+     */
+    public float sumFixValue() {
+        float sumFixValue = 0;
+        for(PaymentUnit fee : this.fees()) {
+            sumFixValue += fee.fixValue;
+        }
+        return sumFixValue;
     }
 
     /**
@@ -456,9 +469,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         for(PaymentUnit fee : this.fees()) {
             if(!this.attrs.currency.equals(fee.currency))
                 throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
-            amount += fee.amount();
+            if(fee.state == PaymentUnit.S.PAID)
+                amount += fee.amount();
         }
         return amount;
+    }
+
+    /**
+     * 已经请款的所有金额
+     *
+     * @return
+     */
+    public float totalApplyAmount() {
+        float applyAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            if(!this.attrs.currency.equals(fee.currency))
+                throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
+            applyAmount += fee.amount();
+        }
+        return applyAmount;
     }
 
     /**

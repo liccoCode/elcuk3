@@ -65,7 +65,9 @@
             <th>采购数量</th>
             <th>实际交货数量</th>
             <th>单价</th>
-            <th class="ten">进度</th>
+            <th>总修正价</th>
+            <th class="ten">请款进度(已请款/需支付)</th>
+            <th class="ten">支付进度(已经支付/需支付)</th>
             <th>实际交货时间</th>
             <th>阶段</th>
             <th class="five">抵达货代</th>
@@ -86,6 +88,10 @@
                 <span id="unit_qty_${unit.id}">${unit.attrs.qty}</span>
             </td>
             <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
+            <td>${unit.sumFixValue().formatCurrency(unit.attrs.currency.name())}</td>
+            <td>${unit.totalApplyAmount()} / ${unit.totalBalance()}
+                <strong>(${(unit.totalApplyAmount() / unit.totalBalance()).format("#.#%")})</strong>
+            </td>
             <td>${unit.totalAmount()} / ${unit.totalBalance()}
                 <strong>(${(unit.totalAmount() / unit.totalBalance()).format("#.#%")})</strong>
             </td>
