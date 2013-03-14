@@ -48,8 +48,8 @@
             <th>汇总:</th>
             <td id="fee_amount"></td>
             <td id="fee_fix_value"></td>
-            <td id="fee_amount_fixvalue">14600</td>
-            <td colspan="4">&nbsp;</td>
+            <td id="fee_amount_fixvalue">0</td>
+            <td colspan="5">&nbsp;</td>
         </tr>
     #{/else}
     </table>
@@ -76,14 +76,14 @@
             <td>${unit.id}</td>
             <td>${unit.sku}</td>
             <td>${unit.cooperator.name}</td>
-            <td>${unit.attrs.planQty}</td>
+            <td id="unit_planQty_${unit.id}">${unit.attrs.planQty}</td>
             <td data-toggle="toggle" data-target="#unit_${unit.id}">
                 <i class="icon-reorder"></i>
                 <i class="badge">${unit.applyBadge()}</i>
                 <i class="badge badge-important">${unit.denyBadge()}</i>
                 <i class="badge badge-info">${unit.approvalBadge()}</i>
                 <i class="badge badge-success">${unit.paidBadge()}</i>
-            ${unit.attrs.qty}
+                <span id="unit_qty_${unit.id}">${unit.attrs.qty}</span>
             </td>
             <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
             <td>${unit.totalAmount()} / ${unit.totalBalance()}
@@ -117,8 +117,8 @@
                             <th>汇总:</th>
                             <td id="fee_${unit.id}_amount"></td>
                             <td id="fee_${unit.id}_fix_value"></td>
-                            <td id="fee_${unit.id}_amount_fixvalue">14600</td>
-                            <td colspan="4">&nbsp;</td>
+                            <td id="fee_${unit.id}_amount_fixvalue">0</td>
+                            <td colspan="5">&nbsp;</td>
                         </tr>
                     </table>
                 #{/else}
