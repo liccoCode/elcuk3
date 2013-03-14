@@ -6,6 +6,7 @@ import models.User;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.libs.F;
 
@@ -101,8 +102,10 @@ public class Payment extends Model {
         int approvalNum = 0;
         for(PaymentUnit unit : this.units) {
             if(!unitIds.contains(unit.id)) continue;
-            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state))
+            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state)) {
+                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.toString()));
                 continue;
+            }
             approvalNum++;
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
@@ -114,8 +117,10 @@ public class Payment extends Model {
         int denyNum = 0;
         for(PaymentUnit unit : this.units) {
             if(!unitIds.contains(unit.id)) continue;
-            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state))
+            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state)) {
+                Validation.addError("", String.format("%s 状态拒绝 '驳回'", unit.state.toString()));
                 continue;
+            }
             denyNum++;
             unit.state = PaymentUnit.S.DENY;
             unit.save();
@@ -127,8 +132,10 @@ public class Payment extends Model {
         int paidNum = 0;
         for(PaymentUnit unit : this.units) {
             if(!unitIds.contains(unit.id)) continue;
-            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state))
+            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state)) {
+                Validation.addError("", String.format("%s 状态拒绝 '支付'", unit.state.toString()));
                 continue;
+            }
             paidNum++;
             unit.state = PaymentUnit.S.PAID;
             unit.save();

@@ -16,6 +16,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -64,21 +65,30 @@ public class Payments extends Controller {
     public static void approval(Long id, List<Long> unitIds) {
         if(unitIds == null) unitIds = new ArrayList<Long>();
         Payment payment = Payment.findById(id);
-        flash.success("%s 个支付计划成功审核", payment.approval(unitIds));
+        int effect = payment.approval(unitIds);
+        if(Validation.hasErrors())
+            render("Payments/show.html", payment);
+        flash.success("%s 个支付计划成功审核", effect);
         show(id);
     }
 
     public static void deny(Long id, List<Long> unitIds) {
         if(unitIds == null) unitIds = new ArrayList<Long>();
         Payment payment = Payment.findById(id);
-        flash.success("%s 个支付计划被驳回", payment.deny(unitIds));
+        int effect = payment.deny(unitIds);
+        if(Validation.hasErrors())
+            render("Payments/show.html", payment);
+        flash.success("%s 个支付计划被驳回", effect);
         show(id);
     }
 
     public static void paid(Long id, List<Long> unitIds) {
         if(unitIds == null) unitIds = new ArrayList<Long>();
         Payment payment = Payment.findById(id);
-        flash.success("%s 个支付计划支付成功", payment.paid(unitIds));
+        int effect = payment.paid(unitIds);
+        if(Validation.hasErrors())
+            render("Payments/show.html", payment);
+        flash.success("%s 个支付计划支付成功", effect);
         show(id);
     }
 
