@@ -68,7 +68,7 @@ public class Payments extends Controller {
         int effect = payment.approval(unitIds);
         if(Validation.hasErrors())
             render("Payments/show.html", payment);
-        flash.success("%s 个支付计划成功审核", effect);
+        flash.success("%s 条请款成功审核", effect);
         show(id);
     }
 
@@ -78,7 +78,7 @@ public class Payments extends Controller {
         int effect = payment.deny(unitIds);
         if(Validation.hasErrors())
             render("Payments/show.html", payment);
-        flash.success("%s 个支付计划被驳回", effect);
+        flash.success("%s 条请款被驳回", effect);
         show(id);
     }
 
@@ -88,7 +88,7 @@ public class Payments extends Controller {
         int effect = payment.paid(unitIds);
         if(Validation.hasErrors())
             render("Payments/show.html", payment);
-        flash.success("%s 个支付计划支付成功", effect);
+        flash.success("%s 条请款支付成功", effect);
         show(id);
     }
 
