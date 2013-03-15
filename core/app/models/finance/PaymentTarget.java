@@ -93,4 +93,9 @@ public class PaymentTarget extends Model {
         }
         this.delete();
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%s %s]%s", this.accountUser, this.accountNumber, this.name);
+    }
 }

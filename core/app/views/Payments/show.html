@@ -74,7 +74,7 @@
                 #{a @PaymentTargets.index(), class:'btn btn-success'}添加支付目标#{/a}
             #{/if}
             #{else }
-                #{select 'targetId', items:targets, valueProperty:'id', labelProperty:'name'}#{/select}
+                #{select 'targetId', items:targets, valueProperty:'id'}#{/select}
             #{/else}
 
             <div class="input-append">
