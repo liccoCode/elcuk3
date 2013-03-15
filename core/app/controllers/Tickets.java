@@ -114,7 +114,7 @@ public class Tickets extends Controller {
 
     public static void iTakeIt(long tid) {
         Ticket ticket = Ticket.findById(tid);
-        ticket.resolver = User.findByUserName(User.username());
+        ticket.resolver = User.current();
         ticket.save();
         renderJSON(new Ret());
     }

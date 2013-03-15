@@ -226,7 +226,7 @@ public class Procures extends Controller {
     public static void doSplitUnit(long id, ProcureUnit newUnit) {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
-        newUnit.handler = User.findByUserName(User.username());
+        newUnit.handler = User.current();
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
         if(unit.isHaveCycleShipment())

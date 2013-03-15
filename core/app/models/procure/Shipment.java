@@ -390,7 +390,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public void updateShipment() {
         this.pype = this.pype();
-        if(this.creater == null) this.creater = User.findByUserName(User.username());
+        if(this.creater == null) this.creater = User.current();
         this.save();
     }
 
