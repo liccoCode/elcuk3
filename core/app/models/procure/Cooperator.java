@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.finance.PaymentTarget;
 import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -64,6 +65,12 @@ public class Cooperator extends Model {
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
     public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+
+    /**
+     * 这个合作伙伴的所有可用支付方式
+     */
+    @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
+    public List<PaymentTarget> paymentMethods = new ArrayList<PaymentTarget>();
 
     /**
      * 全称
@@ -189,8 +196,9 @@ public class Cooperator extends Model {
         // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<String>(Product.skus(false));
         final List<String> existSkus = new ArrayList<String>();
-        for(CooperItem itm : this.cooperItems)
+        for(CooperItem itm : this.cooperItems) {
             existSkus.add(itm.sku);
+        }
 
         CollectionUtils.filter(allSkus, new Predicate() {
             @Override
