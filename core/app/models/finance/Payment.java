@@ -189,6 +189,7 @@ public class Payment extends Model {
         this.actualPaid = actualPaid;
         this.paymentDate = new Date();
         this.payer = User.current();
+        this.state = S.PAID;
         this.save();
         return paidNum;
     }

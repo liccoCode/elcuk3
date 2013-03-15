@@ -66,21 +66,23 @@
             #{/list}
         </table>
     #{/form}
-    #{form @Payments.paid(payment.id), class: 'form-inline'}
-        <input type="text" name="currency" class="input-mini" value="${payment.currency}" readonly="">
+    #{if payment.state == models.finance.Payment.S.WAITING}
+        #{form @Payments.paid(payment.id), class: 'form-inline'}
+            <input type="text" name="currency" class="input-mini" value="${payment.currency}" readonly="">
 
-        #{if targets.size() <= 0}
-            #{a @PaymentTargets.index(), class:'btn btn-success'}添加支付目标#{/a}
-        #{/if}
-        #{else }
-            #{select 'targetId', items:targets, valueProperty:'id', labelProperty:'name'}#{/select}
-        #{/else}
+            #{if targets.size() <= 0}
+                #{a @PaymentTargets.index(), class:'btn btn-success'}添加支付目标#{/a}
+            #{/if}
+            #{else }
+                #{select 'targetId', items:targets, valueProperty:'id', labelProperty:'name'}#{/select}
+            #{/else}
 
-        <div class="input-append">
-            <input type="text" id="actualPaid" name="actualPaid" placeholder="金额">
-            <input type="submit" id="paid" url='@{Payments.paid(payment.id)}' class="btn btn-success" value="付款"/>
-        </div>
-    #{/form}
+            <div class="input-append">
+                <input type="text" id="actualPaid" name="actualPaid" placeholder="金额">
+                <input type="submit" id="paid" url='@{Payments.paid(payment.id)}' class="btn btn-success" value="付款"/>
+            </div>
+        #{/form}
+    #{/if}
     </div>
     <div class="row-fluid">
         <div class="span4">
