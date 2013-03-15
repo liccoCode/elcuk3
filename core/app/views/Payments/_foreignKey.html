@@ -1,6 +1,9 @@
 #{set f_key: fee.foreignKey()/}
 #{if f_key.startsWith("DL")}
-    #{a @Payments.deliveryPayments(f_key)}${f_key}#{/a}
+    #{a @Payments.deliveryPayments(f_key)}
+    ${f_key}
+    <span class="text-warning">${fee.procureUnit ? '#' + fee.procureUnit.id : ''}</span>
+    #{/a}
 #{/if}
 #{else }
 ${f_key}

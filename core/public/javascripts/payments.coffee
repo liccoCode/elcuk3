@@ -167,13 +167,18 @@ $ ->
   $('#select_inverse').click ->
     $('#unit_list :checkbox[name=unitIds]').prop('checked', (i, attr)-> !attr)
 
-  $('#paid_form').submit (e)->
-    false
+  check_checkbox = () ->
+    $('#unit_list :checkbox[name=unitIds]').filter((index, el) -> return el.checked).size() > 0
 
-  for id in ['#approval', '#deny', '#paid']
-    $(id).click ->
+  for id in ['#approval', '#deny']
+    $(id).click (e) ->
+      e.preventDefault()
       self = $(@)
-      $('#unit_list').attr('action', self.attr('data-url')).submit()
+      if check_checkbox()
+        $('#unit_list').attr('action', self.attr('url')).submit()
+      else
+        alert('请先勾选需要处理的请款项')
+  $('#paid').click -> $('#unit_list').attr('action', self.attr('url')).submit()
 
 
   uploadInit = ->

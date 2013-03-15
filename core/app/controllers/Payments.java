@@ -1,6 +1,7 @@
 package controllers;
 
 import exception.PaymentException;
+import helper.Currency;
 import helper.HTTP;
 import helper.J;
 import helper.Webs;
@@ -82,10 +83,15 @@ public class Payments extends Controller {
         show(id);
     }
 
-    public static void paid(Long id, List<Long> unitIds) {
-        if(unitIds == null) unitIds = new ArrayList<Long>();
+    public static void paid(Long id, Currency currency, Float actualPaid) {
         Payment payment = Payment.findById(id);
-        int effect = payment.paid(unitIds);
+
+        Validation.required("币种", currency);
+        Validation.required("支付金额", actualPaid);
+        if(Validation.hasErrors())
+            render("Payments/show.html", payment);
+
+        int effect = payment.paid(currency, actualPaid);
         if(Validation.hasErrors())
             render("Payments/show.html", payment);
         flash.success("%s 条请款支付成功", effect);

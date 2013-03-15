@@ -283,6 +283,7 @@ public class User extends Model {
         return result;
     }
 
+
     /**
      * 当前登陆用户的名称
      *
@@ -294,6 +295,10 @@ public class User extends Model {
         else return username;
     }
 
+    public static User current() {
+        return User.findByUserName(username());
+    }
+
     /**
      * 解析出 @xx 的用户
      *
@@ -303,6 +308,7 @@ public class User extends Model {
     public static List<User> parseAtUsers(String content) {
         throw new UnsupportedOperationException();
     }
+
 
     /**
      * 返回所有开启的用户

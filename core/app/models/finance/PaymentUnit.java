@@ -188,8 +188,6 @@ public class PaymentUnit extends Model {
             return this.deliveryment.id;
         else if(this.shipment != null)
             return this.shipment.id;
-        else if(this.shipItem != null)
-            return this.shipItem.id + "";
         else
             return "无外键(孤儿), 请联系 It";
     }

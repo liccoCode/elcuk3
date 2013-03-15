@@ -146,18 +146,49 @@ public class Payment extends Model {
         return denyNum;
     }
 
-    public int paid(List<Long> unitIds) {
+    /**
+     * 对请款单进行支付操作.
+     * 1. 请款单中的币种只能拥有一种
+     * 2. 根据前台的 currency 进行判断币种
+     * 3. 检查没有批准的, 支付就是对这个请款单中的所有已经批准的进行支付
+     *
+     * @param unitIds
+     * @param currency
+     * @param actualPaid
+     * @return
+     */
+    public int paid(Currency currency, Float actualPaid) {
         int paidNum = 0;
+        // 1. 首先验证
         for(PaymentUnit unit : this.units) {
-            if(!unitIds.contains(unit.id)) continue;
+            if(unit.remove) continue;
             if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state)) {
                 Validation.addError("", String.format("%s 状态拒绝 '支付'", unit.state.toString()));
-                continue;
+                break;
             }
+            if(currency != unit.currency) {
+                Validation.addError("", String.format("请款单中拥有不同的币种? 请联系 IT."));
+                break;
+            }
+        }
+        if(this.units().size() != this.unitsStateSize(PaymentUnit.S.APPROVAL))
+            Validation.addError("", String.format("还有没有审批完成的请款项, 请审批完成后再付款."));
+        Validation.current().valid(this);
+        // 2. 验证后有错误返回
+        if(Validation.hasErrors()) return paidNum;
+
+        // 3. 验证后没错误 更新.
+        for(PaymentUnit unit : this.units) {
+            if(unit.remove) continue;
             paidNum++;
             unit.state = PaymentUnit.S.PAID;
             unit.save();
         }
+        this.currency = currency;
+        this.actualPaid = actualPaid;
+        this.paymentDate = new Date();
+        this.payer = User.current();
+        this.save();
         return paidNum;
     }
 
@@ -197,6 +228,34 @@ public class Payment extends Model {
                 size++;
         }
         return size;
+    }
+
+    /**
+     * 返回 Payment 没有删除的 PaymentUnit
+     *
+     * @return
+     */
+    public List<PaymentUnit> units() {
+        List<PaymentUnit> unRemove = new ArrayList<PaymentUnit>();
+        for(PaymentUnit unit : this.units) {
+            if(unit.remove) continue;
+            unRemove.add(unit);
+        }
+        return unRemove;
+    }
+
+
+    /**
+     * 如果拥有 PaymentUnit 那么返回第一个 PaymentUnit 的 Currency 否则是自己默认的
+     *
+     * @return
+     */
+    public Currency firstFeeCurrency() {
+        for(PaymentUnit fee : this.units) {
+            if(fee.remove) continue;
+            return fee.currency;
+        }
+        return this.currency;
     }
 
     /**
