@@ -98,7 +98,7 @@ $ ->
     return unless confirm('请不要着急点确定, 请先确认是否真的需要删除?')
     feeId = $(@).parents('tr').attr('id').split('_')[1]
     LoadMask.mask()
-    $.post("/paymentunits/#{feeId}/remove", (r) ->
+    $.ajax({url: "/paymentunit/#{feeId}", type: 'DELETE'}).done((r) ->
       try
         if(r.flag)
           new DmtRow().remove(feeId)

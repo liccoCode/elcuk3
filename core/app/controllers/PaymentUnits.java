@@ -15,7 +15,7 @@ import play.mvc.Controller;
  */
 public class PaymentUnits extends Controller {
 
-    public static void remove(Long id) {
+    public static void destroy(Long id) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         try {
             payUnit.remove();

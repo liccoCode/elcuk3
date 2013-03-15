@@ -50,7 +50,7 @@ POST    /deliveryment/{deliveryId}/unitfees                 Payments.procureUnit
 POST    /deliveryment/{deliveryId}/fees                     Payments.deliverymentApply
 
 # PaymentUnits
-POST    /paymentunit/{id}/remove                            PaymentUnits.remove
+DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 POST    /paymentunit/{id}                                   PaymentUnits.update
 
 # PaymentTargets

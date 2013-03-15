@@ -264,7 +264,8 @@ public class Payment extends Model {
     /**
      * 制作一个 Deliveryment 的支付单
      * 1. 时间(24h 之内)
-     * 2. 外键 Id
+     * 2. 同一个工厂
+     * 3. 出于等待支付状态
      *
      * @return
      */
@@ -272,9 +273,9 @@ public class Payment extends Model {
         DateTime now = DateTime.now();
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
-                        "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? " +
-                        "ORDER BY p.createdAt DESC",
-                deliveryment.id, now.minusHours(24).toDate(), now.toDate()).first();
+                        "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? AND " +
+                        "p.state=? ORDER BY p.createdAt DESC",
+                deliveryment.id, now.minusHours(24).toDate(), now.toDate(), S.WAITING).first();
 
         if(payment == null) {
             payment = new Payment();

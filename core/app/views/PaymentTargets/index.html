@@ -8,6 +8,7 @@
 
 <div class="row-fluid">
     <div class="span12">
+    #{errorMsgs /}
     #{flash_alert /}
         <div class="btn-toolbar">
             <a href="#create_modal" class="btn btn-success" data-toggle='modal'>添加一个支付账号</a>
@@ -16,6 +17,7 @@
             <tr>
                 <th>#</th>
                 <th>名称</th>
+                <th>账户</th>
                 <th>账号</th>
                 <th>创建时间</th>
                 <th class="ten"></th>
@@ -24,6 +26,7 @@
             <tr>
                 <td>${tgt.id}</td>
                 <td copId=${tgt.cooper.id}>${tgt.name}</td>
+                <td>${tgt.accountUser}</td>
                 <td>${tgt.accountNumber}</td>
                 <td>${tgt.createdAt}</td>
                 <td>
@@ -52,6 +55,11 @@
         #{errorMsgs /}
         #{flash_alert /}
         <dl class="dl-horizontal">
+            <dt>账户</dt>
+            <dd>
+                <input type="text" name="t.accountUser" value="${t.accountUser}">
+            </dd>
+
             <dt>账号</dt>
             <dd>
                 <input type="text" name="t.accountNumber" value="${t.accountNumber}">
@@ -87,6 +95,10 @@
                 <input type="text" id="target_name" name="t.name" value="">
             </dd>
 
+            <dt>账户</dt>
+            <dd>
+                <input type="text" id="target_accountUser" name="t.accountUser" value="${t.accountUser}">
+            </dd>
 
             <dt>账号</dt>
             <dd>

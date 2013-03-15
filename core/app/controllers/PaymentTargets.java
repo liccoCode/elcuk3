@@ -19,7 +19,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class PaymentTargets extends Controller {
 
-    @Before(only = {"index", "save"})
+    @Before(only = {"index", "save", "update", "destroy"})
     public static void indexBefore() {
         List<PaymentTarget> targets = PaymentTarget.findAll();
         List<Cooperator> copers = Cooperator.findAll();
@@ -35,6 +35,7 @@ public class PaymentTargets extends Controller {
 
     public static void save(PaymentTarget t, Cooperator c) {
         Validation.required("账号", t.accountNumber);
+        Validation.required("账户", t.accountUser);
 
         if(Validation.hasErrors())
             render("PaymentTargets/index.html", t);
@@ -49,7 +50,9 @@ public class PaymentTargets extends Controller {
     }
 
     public static void update(Long targetId, PaymentTarget t, Cooperator c) {
-        Validation.current().valid(t);
+        Validation.required("账号", t.accountNumber);
+        Validation.required("账户", t.accountUser);
+
         if(Validation.hasErrors())
             render("PaymentTargets/index.html", t);
 
@@ -57,6 +60,9 @@ public class PaymentTargets extends Controller {
 
         PaymentTarget target = PaymentTarget.findById(targetId);
         target.updateAttr(t);
+
+        if(Validation.hasErrors())
+            render("PaymentTargets/index.html", t);
 
         flash.success("更新成功.");
         index();

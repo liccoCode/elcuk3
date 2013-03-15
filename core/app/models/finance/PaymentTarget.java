@@ -44,6 +44,13 @@ public class PaymentTarget extends Model {
     @Column(unique = true, nullable = false)
     public String accountNumber;
 
+    /**
+     * 银行账户
+     */
+    @Required
+    @Column(nullable = false)
+    public String accountUser;
+
     public Date createdAt;
 
     @PrePersist
@@ -55,6 +62,7 @@ public class PaymentTarget extends Model {
         this.name = coper.fullName;
         this.cooper = coper;
         // accountNumber 已经保存
+        if(!Validation.current().valid(this).ok) return;
         this.save();
     }
 
@@ -63,6 +71,10 @@ public class PaymentTarget extends Model {
             this.name = target.name;
         if(StringUtils.isNotBlank(target.accountNumber))
             this.accountNumber = target.accountNumber;
+        if(StringUtils.isNotBlank(target.accountUser))
+            this.accountUser = target.accountUser;
+
+        if(!Validation.current().valid(this).ok) return;
         Cooperator cooper = Cooperator.findById(target.cooper.id);
         if(cooper != null)
             this.cooper = cooper;
