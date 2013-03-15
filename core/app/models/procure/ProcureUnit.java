@@ -402,10 +402,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new PaymentException("还没有交货, 不允许非预付款申请.");
 
         PaymentUnit fee = new PaymentUnit();
+        fee.payment = Payment.makePayment(this.deliveryment);
         fee.procureUnit = this;
         // 如果有 ProcureUnit , 那么则拥有 Deliveryment
         fee.deliveryment = this.deliveryment;
-        fee.payment = Payment.makePayment(this.deliveryment.id);
         fee.payee = User.current();
 
         fee.fixValue = fixValue;

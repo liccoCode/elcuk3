@@ -3,6 +3,7 @@ package models.finance;
 import exception.PaymentException;
 import helper.Currency;
 import models.User;
+import models.procure.Deliveryment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -258,23 +259,28 @@ public class Payment extends Model {
         return this.currency;
     }
 
+
     /**
-     * 制作一个 Payment, 如果符合条件则寻找一个, 否则创建新的;
+     * 制作一个 Deliveryment 的支付单
      * 1. 时间(24h 之内)
      * 2. 外键 Id
      *
      * @return
      */
-    public static Payment makePayment(String deliverymentId) {
+    public static Payment makePayment(Deliveryment deliveryment) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
                         "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? " +
                         "ORDER BY p.createdAt DESC",
-                deliverymentId, now.minusHours(24).toDate(), now.toDate()).first();
+                deliveryment.id, now.minusHours(24).toDate(), now.toDate()).first();
 
         if(payment == null) {
             payment = new Payment();
+            if(deliveryment.cooperator.paymentMethods.size() <= 0)
+                throw new PaymentException(
+                        String.format("请添加合作伙伴 %s 的支付方式", deliveryment.cooperator.fullName));
+            payment.target = deliveryment.cooperator.paymentMethods.get(0);
             payment.save();
         }
         return payment;

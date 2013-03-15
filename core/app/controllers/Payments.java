@@ -7,6 +7,7 @@ import helper.J;
 import helper.Webs;
 import models.finance.FeeType;
 import models.finance.Payment;
+import models.finance.PaymentTarget;
 import models.finance.PaymentUnit;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
@@ -18,6 +19,7 @@ import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -36,6 +38,12 @@ public class Payments extends Controller {
     public static void index() {
         List<Payment> payments = Payment.findAll();
         render(payments);
+    }
+
+    @Before(only = {"show", "approval", "deny", "paid"})
+    public static void beforeShow() {
+        List<PaymentTarget> targets = PaymentTarget.findAll();
+        renderArgs.put("targets", targets);
     }
 
     public static void show(Long id) {

@@ -302,9 +302,9 @@ public class Deliveryment extends GenericModel {
          */
         if(unit.amount == 0)
             throw new PaymentException("请款金额不允许为 0");
+        unit.payment = Payment.makePayment(this);
         unit.deliveryment = this;
         unit.payee = User.current();
-        unit.payment = Payment.makePayment(this.id);
         unit.save();
     }
 
