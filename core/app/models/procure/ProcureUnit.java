@@ -394,9 +394,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public PaymentUnit billing(float fixValue, boolean prepay) {
         /**
-         * 如果没有交货不允许申请
+         * 1. 如果没有交货不允许申请
+         * 2. TODO: 添加的币种必须与已经存在的 Payment 一样(新的 Payment 固定币种, 不同的新建)
          */
-        if(this.leftAmount() <= 0)
+        if(this.leftApplyAmount() <= 0)
             throw new PaymentException("不需要请款了");
         if(this.attrs.qty == null && !prepay)
             throw new PaymentException("还没有交货, 不允许非预付款申请.");
@@ -415,7 +416,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fee.amount = this.totalBalance() * 0.3f; /* 30% 预付款*/
             fee.feeType = FeeType.cashpledge();
         } else {
-            fee.amount = this.leftAmount();
+            fee.amount = this.leftApplyAmount();
             fee.feeType = FeeType.procurement();
         }
         // 计算完成之后还需要再检查一次
@@ -429,12 +430,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 计算剩下的支付款项;
+     * 计算剩下还需要支付款项;
      *
      * @return
      */
     public float leftAmount() {
         return this.totalBalance() - this.totalAmount();
+    }
+
+    /**
+     * 计算剩下还需要请款的款项
+     *
+     * @return
+     */
+    public float leftApplyAmount() {
+        return this.totalBalance() - this.totalApplyAmount();
     }
 
     /**
