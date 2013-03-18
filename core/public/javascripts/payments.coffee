@@ -187,7 +187,7 @@ $ ->
     window.dropUpload.iniDropbox(->
       fid: paymentId()
       p: 'PAYMENTS'
-    , $('#dropbox'), '/payments/files/upload')
+    , $('#dropbox'), '/payment/files/upload')
     window.dropUpload.loadImages(paymentId(), $('#dropbox'), 'PAYMENTS')
 
   $('#dropbox').ready(uploadInit) if $('#dropbox').size() > 0
