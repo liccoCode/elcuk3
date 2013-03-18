@@ -76,6 +76,11 @@ public class Payment extends Model {
     public Date paymentDate;
 
     /**
+     * 支付的时候记录的 USD 现汇买入价
+     */
+    public Float usdRate = 6.2f;
+
+    /**
      * 最终实际支付
      */
     public Float actualPaid = 0f;
