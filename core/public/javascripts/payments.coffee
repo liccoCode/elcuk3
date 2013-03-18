@@ -116,7 +116,7 @@ $ ->
     feeId = $(self).parents('tr').attr('id').split('_')[1]
     uid = $(self).parents('table').parents('tr').attr('id').split('_')[1]
     LoadMask.mask();
-    $.post("/paymentunits/#{feeId}/remove", (r) ->
+    $.ajax({url: "/paymentunit/#{feeId}", type: 'DELETE'}).done((r) ->
       try
         if(r.flag)
           new UnitRow(uid).remove(feeId)

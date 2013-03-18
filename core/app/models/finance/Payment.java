@@ -266,6 +266,7 @@ public class Payment extends Model {
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
      * 3. 出于等待支付状态
+     * 4. 额度上线 6W 美金
      *
      * @return
      */
@@ -277,7 +278,7 @@ public class Payment extends Model {
                         "p.state=? ORDER BY p.createdAt DESC",
                 deliveryment.id, now.minusHours(24).toDate(), now.toDate(), S.WAITING).first();
 
-        if(payment == null) {
+        if(payment == null || payment.totalFees()._1 > 60000) {
             payment = new Payment();
             if(deliveryment.cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
