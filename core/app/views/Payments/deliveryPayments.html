@@ -4,7 +4,7 @@
     #{stylesheet 'payments.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'payments.coffee'/}
+    #{script 'payments/deliveryPayments.coffee'/}
 #{/set}
 
 #{flash_alert /}
@@ -65,7 +65,7 @@
             <th>采购数量</th>
             <th>实际交货数量</th>
             <th>单价</th>
-            <th>总修正价</th>
+            <th>总单价修正价</th>
             <th class="ten">请款进度(已请款/需支付)</th>
             <th class="ten">支付进度(已经支付/需支付)</th>
             <th>实际交货时间</th>
@@ -87,7 +87,7 @@
                 <i class="badge badge-success">${unit.paidBadge()}</i>
                 <span id="unit_qty_${unit.id}">${unit.attrs.qty}</span>
             </td>
-            <td>${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
+            <td id="price_${unit.id}">${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
             <td>${unit.attrs.currency.symbol()} ${unit.sumFixValue()}</td>
             <td>${unit.totalApplyAmount()} / ${unit.totalBalance()}
                 <strong>(${(unit.totalApplyAmount() / unit.totalBalance()).format("#.#%")})</strong>

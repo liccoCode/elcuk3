@@ -2,7 +2,7 @@
 <tr>
     <th>费用类型</th>
     <th>请款金额</th>
-    <th class="fifteen">修正值</th>
+    <th class="fifteen">单价修正值</th>
     <th>请款 + 修正额</th>
     <th>请款人</th>
     <th class="ten">请款时间</th>
@@ -17,10 +17,11 @@
     <td>${fee.feeType?.nickName}</td>
     <td class="amount">${fee.currency.symbol()} ${fee.amount}</td>
     <td class="fix_value">
-        <div class="input-prepend">
+        <div class="input-prepend input-append">
             <span class="add-on">${fee.currency.symbol()}</span>
             <input feeId='${fee.id}' class="input input-small fixValue" type="text"
-                   data-url='@{PaymentUnits.update(fee.id)}' value="${fee.fixValue}">
+                   url='@{PaymentUnits.update(fee.id)}' value="${fee.fixValue}">
+            <span class="add-on"></span>
         </div>
     </td>
     <td>${fee.amount} + ${fee.fixValueAmount()}</td>
