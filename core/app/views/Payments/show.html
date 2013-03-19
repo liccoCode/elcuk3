@@ -42,6 +42,7 @@
                 <th>#</th>
                 <th>外键</th>
                 <th>总金额</th>
+                <th>总修正额</th>
                 <th>费用类型</th>
                 <th>状态</th>
             </tr>
@@ -60,6 +61,7 @@
                     <td>${fee.id}</td>
                     <td>#{render './_foreignKey.html', fee:fee /}</td>
                     <td>${fee.currency.symbol()} ${fee.amount}</td>
+                    <td>${fee.fixValueAmount()}</td>
                     <td>${fee.feeType.nickName}</td>
                     <td style="color:${fee.stateColor()}">${fee.state}</td>
                 </tr>
@@ -68,17 +70,21 @@
     #{/form}
     #{if payment.state == models.finance.Payment.S.WAITING}
         #{form @Payments.paid(payment.id), class: 'form-inline'}
-            <input type="text" name="currency" class="input-mini" value="${payment.currency}" readonly="">
+            #{pickCurrency id:'paid_currency', name:'currency', class:'input-small',c:currency?currency:payment.currency /}
 
             #{if targets.size() <= 0}
                 #{a @PaymentTargets.index(), class:'btn btn-success'}添加支付目标#{/a}
             #{/if}
             #{else }
-                #{select 'targetId', items:targets, valueProperty:'id'}#{/select}
+                #{select id:'paid_targetId', name:'targetId', items:targets, valueProperty:'id',
+                class:'input-xlarge'}#{/select}
             #{/else}
 
+            <input type="text" name="usRatio" id='paid_usRatio' class="input-mini">
+            <input type="text" name="ratioPublishTime" id="paid_ratioPublishTime" class="input-medium">
+
             <div class="input-append">
-                <input type="text" id="actualPaid" name="actualPaid" placeholder="金额">
+                <input type="text" id="paid_actualPaid" name="actualPaid" placeholder="金额">
                 <input type="submit" id="paid" url='@{Payments.paid(payment.id)}' class="btn btn-success" value="付款"/>
             </div>
         #{/form}
@@ -115,10 +121,10 @@
                 <dd>${helper.Currency.USD.symbol()} ${totalFee._1}</dd>
 
                 <dt>人民币支付</dt>
-                <dd>${helper.Currency.CNY.symbol()} ${totalFee._2}</dd>
+                <dd id="totalFee_CNY">${helper.Currency.CNY.symbol()} ${totalFee._2}</dd>
 
-                <dt>USD to CNY</dt>
-                <dd>${helper.Currency.USD.ratio(helper.Currency.CNY)}</dd>
+                <dt>美元(中行汇率)</dt>
+                <dd id="totalFee_USD"></dd>
             </dl>
         </div>
 
@@ -128,13 +134,18 @@
                 <dd>${payment.state}</dd>
 
                 <dt>币种</dt>
-                <dd>${payment.currency.symbol()}</dd>
+                <dd>${payment.currency}</dd>
 
                 <dt>金额</dt>
                 <dd>${payment.actualPaid}</dd>
 
                 <dt>支付账号</dt>
-                <dd>${payment.target.accountNumber}</dd>
+                <dd>${payment.target.toString()}</dd>
+
+            #{if payment.state == models.finance.Payment.S.PAID}
+                <dt>支付汇率</dt>
+                <dd>${payment.usdRate} at [${payment.usdRatePublishDate}]</dd>
+            #{/if}
             </dl>
         </div>
     </div>

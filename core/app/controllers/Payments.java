@@ -18,12 +18,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
+import play.data.binding.As;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,7 +44,14 @@ public class Payments extends Controller {
 
     @Before(only = {"show", "approval", "deny", "paid"})
     public static void beforeShow() {
-        List<PaymentTarget> targets = PaymentTarget.findAll();
+        Long id = NumberUtils.toLong(params.get("id"), 0);
+        List<PaymentTarget> targets;
+        if(id <= 0) {
+            targets = PaymentTarget.findAll();
+        } else {
+            Payment payment = Payment.findById(id);
+            targets = payment.paymentTargetFromPaymentUnits();
+        }
         renderArgs.put("targets", targets);
     }
 
@@ -91,17 +100,20 @@ public class Payments extends Controller {
         show(id);
     }
 
-    public static void paid(Long id, Currency currency, Float actualPaid) {
+    public static void paid(Long id, Currency currency, Float actualPaid,
+                            Float usRatio, @As("yyyy-MM-dd HH:mm:ss") Date ratioPublishTime) {
         Payment payment = Payment.findById(id);
 
         Validation.required("币种", currency);
         Validation.required("支付金额", actualPaid);
+        Validation.required("最新'美元现汇买入价'", usRatio);
+        Validation.required("发布时间", ratioPublishTime);
         if(Validation.hasErrors())
-            render("Payments/show.html", payment);
+            render("Payments/show.html", payment, currency);
 
-        int effect = payment.paid(currency, actualPaid);
+        int effect = payment.paid(currency, actualPaid, usRatio, ratioPublishTime);
         if(Validation.hasErrors())
-            render("Payments/show.html", payment);
+            render("Payments/show.html", payment, currency);
         flash.success("%s 条请款支付成功", effect);
         show(id);
     }

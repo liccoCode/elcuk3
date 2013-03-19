@@ -80,6 +80,8 @@ public class Payment extends Model {
      */
     public Float usdRate = 6.2f;
 
+    public Date usdRatePublishDate;
+
     /**
      * 最终实际支付
      */
@@ -153,27 +155,42 @@ public class Payment extends Model {
     }
 
     /**
+     * 从 PaymentUnits 中提取 PaymentTarget, 如果没有 PaymentUnit 那么则返回所有 PaymentTargets
+     *
+     * @return
+     */
+    public List<PaymentTarget> paymentTargetFromPaymentUnits() {
+        if(this.units().size() > 0) {
+            PaymentUnit firstPaymentUnit = this.units().get(0);
+            if(firstPaymentUnit.deliveryment != null) {
+                return firstPaymentUnit.deliveryment.cooperator.paymentMethods;
+            } else {
+                //TODO 对 shipment 的判断还需要添加
+                return new ArrayList<PaymentTarget>();
+            }
+        } else {
+            return PaymentTarget.findAll();
+        }
+    }
+
+    /**
      * 对请款单进行支付操作.
      * 1. 请款单中的币种只能拥有一种
-     * 2. 根据前台的 currency 进行判断币种
-     * 3. 检查没有批准的, 支付就是对这个请款单中的所有已经批准的进行支付
+     * 2. 检查没有批准的, 支付就是对这个请款单中的所有已经批准的进行支付
+     * // 这里的付款已经不用理会币种了, 币种的判断到向 Payment 中添加 PaymentUnit 的入口处判断
      *
      * @param unitIds
      * @param currency
      * @param actualPaid
      * @return
      */
-    public int paid(Currency currency, Float actualPaid) {
+    public int paid(Currency currency, Float actualPaid, Float usRatio, Date ratioPublishTime) {
         int paidNum = 0;
         // 1. 首先验证
         for(PaymentUnit unit : this.units) {
             if(unit.remove) continue;
             if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state)) {
                 Validation.addError("", String.format("%s 状态拒绝 '支付'", unit.state.toString()));
-                break;
-            }
-            if(currency != unit.currency) {
-                Validation.addError("", String.format("请款单中拥有不同的币种? 请联系 IT."));
                 break;
             }
         }
@@ -194,6 +211,8 @@ public class Payment extends Model {
         this.actualPaid = actualPaid;
         this.paymentDate = new Date();
         this.payer = User.current();
+        this.usdRate = usRatio;
+        this.usdRatePublishDate = ratioPublishTime;
         this.state = S.PAID;
         this.save();
         return paidNum;
@@ -208,8 +227,7 @@ public class Payment extends Model {
         // todo: 将付款的金额限制在 USD 与 CNY
         float usd = 0;
         float cny = 0;
-        for(PaymentUnit unit : this.units) {
-            if(unit.remove) continue;
+        for(PaymentUnit unit : this.units()) {
             if(unit.currency == Currency.CNY)
                 cny += unit.amount();
             else if(unit.currency == Currency.USD)
