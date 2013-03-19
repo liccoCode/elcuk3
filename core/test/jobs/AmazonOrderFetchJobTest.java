@@ -4,6 +4,7 @@ import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl
 import helper.Dates;
 import models.market.Account;
 import models.market.M;
+import models.market.OrderItem;
 import models.market.Orderr;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -37,11 +38,15 @@ public class AmazonOrderFetchJobTest extends UnitTest {
                 ac);
         assertEquals(3, orders.size());
         for(Orderr ord : orders) {
+            System.out.println("---------------OrderItem Size: " + ord.items.size());
+            for(OrderItem oi : ord.items) {
+                System.out.println(oi.currency);
+            }
             if(!ord.orderId.equals("303-7430213-7282761"))
                 continue;
             //2013-01-14T22:59:59+00:00----2013-01-15 06:59:59
-            System.out.println("2013-01-14T22:59:59+00:00" + "----"
-                    + ord.createDate.toString());
+            System.out.println("2013-01-14T22:59:59+00:00" + "----" + ord.createDate.toString());
+
         }
     }
 

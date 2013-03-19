@@ -283,9 +283,9 @@ public enum Currency {
     private static Float ratio(String from, String to) {
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
-            JsonObject json = HTTP
-                    .json(("http://www.google.com/ig/calculator?hl=en&q=1" + from + "=?" + to))
-                    .getAsJsonObject();
+            JsonObject json = HTTP.json(
+                    ("http://www.google.com/ig/calculator?hl=en&q=1" + from + "=?" +
+                            to)).getAsJsonObject();
             Logger.info(
                     "[" + json.get("lhs").getAsString() + " TO " + json.get("rhs").getAsString() +
                             "]");
@@ -318,12 +318,12 @@ public enum Currency {
      */
     public static Currency M(M market) {
         switch(market) {
-            case AMAZON_DE:
+            case AMAZON_UK:
                 return GBP;
+            case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_UK:
                 return EUR;
             case AMAZON_US:
                 return USD;
