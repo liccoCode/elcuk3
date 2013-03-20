@@ -24,6 +24,7 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
@@ -75,24 +76,33 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 长度, 单位 mm
      */
     @Expose
+    @Required
+    // 因为默认是 >=
+    @Min(0.001)
     public Float lengths = 0f;
 
     /**
      * 高度, 单位 mm
      */
     @Expose
+    @Required
+    @Min(0.001)
     public Float heigh = 0f;
 
     /**
-     * 长度, 单位 mm
+     * 宽度, 单位 mm
      */
     @Expose
+    @Required
+    @Min(0.001)
     public Float width = 0f;
 
     /**
      * 重量, 单位 kg
      */
     @Expose
+    @Required
+    @Min(0.001)
     public Float weight = 0f;
 
     /**
@@ -133,6 +143,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          * 4. 检查 SKU 前缀是否与 Family 一致
          * 5. Category 不能为空
          * 6. 产品的名称不能为空
+         * 7. 长宽高一定需要填写
          */
         if(StringUtils.isBlank(this.sku)) {
             Validation.addError("", "Sku 必须存在!");
@@ -148,7 +159,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("",
                     "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(Validation.hasErrors()) return;
-
 
         this.category = this.family.category;
         if(this.category == null)
