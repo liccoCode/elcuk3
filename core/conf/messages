@@ -16,6 +16,11 @@ s.merchantSKU=MerchantSKU \u5FC5\u987B\u586B\u5199
 s.msku=MerchantSKU \u5DF2\u7ECF\u5B58\u5728!
 
 pro.productName=\u4EA7\u54C1\u540D\u79F0
+pro.lengths=\u957F
+pro.width=\u5BBD
+pro.heigh=\u9AD8
+pro.weight=\u91CD\u91CF
+
 
 ship.id=Shipment ID \u4E0D\u5141\u8BB8\u4E3A\u7A7A
 ship.createDate=\u521B\u5EFA\u65F6\u95F4
