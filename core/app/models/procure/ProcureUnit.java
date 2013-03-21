@@ -322,6 +322,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 返回 ProcureUnit 的目标市场
+     *
+     * @param unit
+     * @return
+     */
+    public String shipMarket() {
+        if(this.selling == null)
+            throw new FastRuntimeException("采购计划没有关联 Selling, 不允许!");
+        return this.selling.market.humanName();
+    }
+
+    public String shipType() {
+        if(this.shipType == null)
+            throw new FastRuntimeException("采购计划不可以没有运输方式!");
+        return this.shipType.toString();
+    }
+
+    /**
      * ProcureUnit 交货
      *
      * @param attrs
