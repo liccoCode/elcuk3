@@ -126,7 +126,8 @@ public class ProcuresHelper extends JavaExtensions {
 
     public static String info(Shipment s) {
         return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
-                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(), s.planBeginDate, s.planArrivDate);
+                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(),
+                s.planBeginDate, s.planArrivDate);
     }
 
     /**

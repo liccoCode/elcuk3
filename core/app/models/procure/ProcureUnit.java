@@ -312,6 +312,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
     }
 
+
+    /**
+     * 返回 ProcureUnit 的目标市场
+     *
+     * @return
+     */
+    public String shipMarket() {
+        if(this.selling == null)
+            throw new FastRuntimeException("采购计划没有关联 Selling, 不允许!");
+        return this.selling.market.humanName();
+    }
+
+    public String shipType() {
+        if(this.shipType == null)
+            throw new FastRuntimeException("采购计划不可以没有运输方式!");
+        return this.shipType.toString();
+    }
+
     /**
      * ProcureUnit 交货
      *
@@ -588,6 +606,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public int inboundingQty() {
         return this.qty() - this.shipItem.recivedQty;
+    }
+
+    /**
+     * 寻找 ProcureUnit 关联的 FBA
+     *
+     * @return
+     */
+    public FBAShipment fba() {
+        if(this.shipItem != null && this.shipItem.fba != null)
+            return this.shipItem.fba;
+        else
+            return null;
     }
 
     /**
