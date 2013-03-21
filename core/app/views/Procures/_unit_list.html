@@ -86,18 +86,39 @@
         <td colspan="${checkbox ? '17' : '16'}">
             <div class="row-fluid">
 
-                <div class="span2" style="float:left;">
-                    <h4 style="margin-top:0">Comment</h4>
-                ${unit.comment}
+                <div class="span3" style="float:left;padding-right:10px;">
+                    <dl>
+                        <dt>Comment</dt>
+                        <dd>${unit.comment}</dd>
+                    </dl>
+
                 </div>
-                <div class="span5" style="float:left">
-                    <h4 style="margin-top:0">关联运输单</h4>
-                    #{list items:unit.relateShipment(), as:'sp'}
-                        <a href="@{Shipments.show()}/${sp.id}">#{if sp.cycle}
-                            <i style="color:#C09853" class="icon-star"></i>#{/if}${sp.title()}
-                        </a>
-                        <br>
-                    #{/list}
+                <div class="span3" style="float:left">
+                    <dl>
+                        <dt>关联运输单</dt>
+                        <dd>
+                            #{list items:unit.relateShipment(), as:'sp'}
+                                <a href="@{Shipments.show()}/${sp.id}">#{if sp.cycle}
+                                    <i style="color:#C09853" class="icon-star"></i>#{/if}${sp.title()}
+                                </a>
+                                <br>
+                            #{/list}
+                        </dd>
+                    </dl>
+                    <dl>
+                        <dt>关联 FBA</dt>
+                        <dd>
+                            #{if unit.fba()}
+                                <a href="${unit.fba().fbaLink()}">
+                                    <i class="icon-external-link"></i>
+                                ${unit.fba().shipmentId}
+                                </a>
+                            #{/if}
+                            #{else }
+                                <span class="text-warning">还没有 FBA</span>
+                            #{/else}
+                        </dd>
+                    </dl>
                 </div>
 
                 <div class="span3" style="float:left;padding:0 20px;">

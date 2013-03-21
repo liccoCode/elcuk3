@@ -477,6 +477,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 寻找 ProcureUnit 关联的 FBA
+     *
+     * @return
+     */
+    public FBAShipment fba() {
+        if(this.shipItem != null && this.shipItem.fba != null)
+            return this.shipItem.fba;
+        else
+            return null;
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return
