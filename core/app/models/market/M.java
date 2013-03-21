@@ -13,13 +13,50 @@ import java.util.Date;
  * 不同的 Market place
  */
 public enum M {
-    AMAZON_UK,
-    AMAZON_DE,
-    AMAZON_FR,
-    AMAZON_IT,
-    AMAZON_ES,
-    AMAZON_US,
-    EBAY_UK;
+    AMAZON_UK {
+        @Override
+        public String humanName() {
+            return "英国亚马逊";
+        }
+    },
+    AMAZON_DE {
+        @Override
+        public String humanName() {
+            return "德国亚马逊";
+        }
+    },
+    AMAZON_FR {
+        @Override
+        public String humanName() {
+            return "法国亚马逊";
+        }
+    },
+    AMAZON_IT {
+        @Override
+        public String humanName() {
+            return "意大利亚马逊";
+        }
+    },
+    AMAZON_ES {
+        @Override
+        public String humanName() {
+            return "西班牙亚马逊";
+        }
+    },
+    AMAZON_US {
+        @Override
+        public String humanName() {
+            return "美国亚马逊";
+        }
+    },
+    EBAY_UK {
+        @Override
+        public String humanName() {
+            return "英国 Ebay";
+        }
+    };
+
+    public abstract String humanName();
 
     /**
      * 为 Amazon 不同市场的 Id, 与 Market 对应
