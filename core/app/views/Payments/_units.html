@@ -29,7 +29,7 @@
     <td>#{time_tooltip time:fee.createdAt, datetime:true /}</td>
     <td>
         #{a @Payments.show(fee.payment.id)}
-            <span style="color:${fee.stateColor()}">#${fee.payment.id} ${fee.state}</span>
+            <span style="color:${fee.stateColor()}">${fee.payment.paymentNumber} ${fee.state}</span>
         #{/a}
     </td>
     <td>${fee.id}</td>

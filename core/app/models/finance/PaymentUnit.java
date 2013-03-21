@@ -3,10 +3,7 @@ package models.finance;
 import exception.PaymentException;
 import helper.Currency;
 import models.User;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
+import models.procure.*;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -190,6 +187,21 @@ public class PaymentUnit extends Model {
             return this.shipment.id;
         else
             return "无外键(孤儿), 请联系 It";
+    }
+
+    /**
+     * 单个请款项目所链接的合作者
+     *
+     * @return
+     */
+    public Cooperator cooperator() {
+        String fk = this.foreignKey();
+        if(fk.startsWith("DL")) {
+            return Deliveryment.<Deliveryment>findById(fk).cooperator;
+        } else if(fk.startsWith("SP")) {
+            return Shipment.<Deliveryment>findById(fk).cooperator;
+        }
+        return null;
     }
 
     /**

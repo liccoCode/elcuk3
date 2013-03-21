@@ -421,7 +421,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new PaymentException("还没有交货, 不允许非预付款申请.");
 
         PaymentUnit fee = new PaymentUnit();
-        fee.payment = Payment.makePayment(this.deliveryment);
+        fee.payment = Payment.buildPayment(this.deliveryment);
         fee.procureUnit = this;
         // 如果有 ProcureUnit , 那么则拥有 Deliveryment
         fee.deliveryment = this.deliveryment;
@@ -439,7 +439,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         // 计算完成之后还需要再检查一次
         if(this.totalAmount() + fee.amount > this.totalBalance()) {
-            // 因为 makePayment 已经创建了 payment 所以在这里如果不需要, 那么则需要删除这个 Payment
+            // 因为 buildPayment 已经创建了 payment 所以在这里如果不需要, 那么则需要删除这个 Payment
             if(fee.payment != null) fee.payment.delete();
             throw new PaymentException(String.format("请款总额超过需要支付的金额: %s / %s %s",
                     this.totalAmount() + fee.amount, this.totalBalance(), fee.currency.name()));

@@ -1,5 +1,6 @@
 package ext;
 
+import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.ProcureUnit;
 import play.templates.JavaExtensions;
@@ -63,6 +64,18 @@ public class PaymentHelper extends JavaExtensions {
                 return "#4B8644";
             default:
                 return "#999999";
+        }
+    }
+
+    public static String stateColor(Payment payment) {
+        switch(payment.state) {
+            case PAID:
+                return "#468847";
+            case CLOSE:
+                return "#999999";
+            case WAITING:
+            default:
+                return "#B34745";
         }
     }
 }

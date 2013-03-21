@@ -2,11 +2,14 @@ package models.finance;
 
 import exception.PaymentException;
 import helper.Currency;
+import helper.Dates;
 import models.User;
+import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
+import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -14,10 +17,7 @@ import play.libs.F;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 支付单, 真正用于一次的支付操作.
@@ -60,6 +60,9 @@ public class Payment extends Model {
     @OneToMany(mappedBy = "payment")
     public List<PaymentUnit> units = new ArrayList<PaymentUnit>();
 
+    @ManyToOne
+    public Cooperator cooperator;
+
     /**
      * 关联谁支付的款项, "谁请款"记载在 Unit 身上
      */
@@ -69,6 +72,14 @@ public class Payment extends Model {
     public Date createdAt;
 
     public Date lastUpdateAt;
+
+    /**
+     * 每一份请款单都会拥有一个唯一的请款单编号. 组成:
+     * [Cooperator.name]-[numberOfYear]-[Year(Short)]
+     * QW-004-13
+     */
+    @Required
+    public String paymentNumber;
 
     /**
      * 实际支付时间
@@ -269,23 +280,39 @@ public class Payment extends Model {
         return unRemove;
     }
 
-
     /**
-     * 如果拥有 PaymentUnit 那么返回第一个 PaymentUnit 的 Currency 否则是自己默认的
+     * 返回和这个请款单有联系的合作者;
+     * <p/>
+     * ps: 正常情况下每一个 Payment 都应该只有一个合作伙伴, 同时也只有一个币种
      *
      * @return
      */
-    public Currency firstFeeCurrency() {
-        for(PaymentUnit fee : this.units) {
-            if(fee.remove) continue;
-            return fee.currency;
+    public List<Cooperator> cooperators() {
+        Set<Cooperator> cooperatorSet = new HashSet<Cooperator>();
+        for(PaymentUnit unit : this.units()) {
+            if(unit.cooperator() == null) continue;
+            cooperatorSet.add(unit.cooperator());
         }
-        return this.currency;
+        return new ArrayList<Cooperator>(cooperatorSet);
+    }
+
+    /**
+     * 返回和这个请款单有链接的请款人
+     *
+     * @return
+     */
+    public List<User> applyers() {
+        Set<User> users = new HashSet<User>();
+        for(PaymentUnit unit : this.units()) {
+            if(unit.payee == null) throw new PaymentException("请款项目的请款人不存在? 请联系 IT!");
+            users.add(unit.payee);
+        }
+        return new ArrayList<User>(users);
     }
 
 
     /**
-     * 制作一个 Deliveryment 的支付单
+     * 制作一个 Deliveryment 的支付单;(自己为自己的工厂方法)
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
      * 3. 出于等待支付状态
@@ -293,7 +320,7 @@ public class Payment extends Model {
      *
      * @return
      */
-    public static Payment makePayment(Deliveryment deliveryment) {
+    public static Payment buildPayment(Deliveryment deliveryment) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
@@ -306,10 +333,34 @@ public class Payment extends Model {
             if(deliveryment.cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
                         String.format("请添加合作伙伴 %s 的支付方式", deliveryment.cooperator.fullName));
+            payment.cooperator = deliveryment.cooperator;
             payment.target = deliveryment.cooperator.paymentMethods.get(0);
-            payment.save();
+            payment.generatePaymentNumber().save();
         }
         return payment;
+    }
+
+    /**
+     * 计算需要的 PaymentNumber 数据
+     *
+     * @return
+     */
+    public Payment generatePaymentNumber() {
+        /**
+         * 1. 确定当前的年份
+         * 2. 根据年份 + cooperator 确定是今天的第几次请款
+         * 3. 生成 PaymentNumber
+         */
+        String year = DateTime.now().toString("yyyy");
+        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
+        long count = Payment.count("cooperator=? AND createdAt>=? AND createdAt<=?",
+                this.cooperator,
+                Dates.cn(String.format("%s-01-01", year)).toDate(),
+                Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
+        //String.format("%1$03d", 441
+        this.paymentNumber = String.format("%s-%03d-%s",
+                this.cooperator.name, count, DateTime.now().toString("yy"));
+        return this;
     }
 
     @Override

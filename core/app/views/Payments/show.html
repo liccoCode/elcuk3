@@ -15,8 +15,8 @@
             <input id="paymentId" readonly="true" type="text" value="${payment.id}">
         </div>
         <div class="input-prepend span5">
-            <span class="add-on">Title</span>
-            <input type="text" class="input-xxlarge" placeholder="标题, TBD" value="">
+            <span class="add-on">请款单编号</span>
+            <input type="text" class="input-medium" readonly="" value="${payment.paymentNumber}">
         </div>
     </div>
 
@@ -131,7 +131,7 @@
         <div class="span4">
             <dl class="dl-horizontal">
                 <dt>支付状态</dt>
-                <dd>${payment.state}</dd>
+                <dd style="color:${payment.stateColor()}">${payment.state}</dd>
 
                 <dt>币种</dt>
                 <dd>${payment.currency}</dd>

@@ -6,22 +6,42 @@
 #{set 'moreScripts'}
 #{/set}
 
-#{info_row title: "请款项目"/}
+#{info_row title: "请款项目"}
+<ul>
+    <li class="text-warning">分页与搜索后续补上</li>
+</ul>
+#{/info_row}
 <div class="row-fluid">
     <table class="table table-bordered table-condensed">
         <tr>
             <th>#</th>
+            <th class="five">请款单编号</th>
             <th class="ten">状态</th>
+            <th class="ten">涉及的请款人</th>
             <th class="ten">支付人</th>
-            <th>实际支付金额</th>
+            <th class="ten">合作伙伴</th>
+            <th>总请款金额</th>
+            <th>总实际支付金额</th>
             <th class="ten">创建时间</th>
             <th class="ten">最后更新时间</th>
         </tr>
     #{list items:payments, as:'pay'}
         <tr>
             <td><a href="@{Payments.show(pay.id)}">${pay.id}</a></td>
-            <td>${pay.state}</td>
-            <td>${pay.payer?.username}</td>
+            <td>${pay.paymentNumber}</td>
+            <td style="color:${pay.stateColor()}">${pay.state}</td>
+            <td>
+                #{list items:pay.applyers(), as:'applyer'}
+                    <span class="label label-info">${applyer.username}</span>
+                #{/list}
+            </td>
+            <td><span class="label label-warning">${pay.payer?.username}</span></td>
+            <td>
+                #{list items:pay.cooperators(), as:'cop'}
+                    <span class="label label-success">${cop.fullName}</span>
+                #{/list}
+            </td>
+            <td>${helper.Currency.CNY.symbol()} ${pay.totalFees()._2}</td>
             <td data-toggle="toggle" data-target="#pay_${pay.id}">
                 <i class="icon-reorder"></i>
                 <i class="badge badge-info">${pay.units.size()}</i>

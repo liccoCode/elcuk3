@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.finance.Payment;
 import models.finance.PaymentTarget;
 import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
@@ -71,6 +72,12 @@ public class Cooperator extends Model {
      */
     @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
     public List<PaymentTarget> paymentMethods = new ArrayList<PaymentTarget>();
+
+    /**
+     * 这个合作伙伴的所有支付信息
+     */
+    @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
+    public List<Payment> payments = new ArrayList<Payment>();
 
     /**
      * 全称
