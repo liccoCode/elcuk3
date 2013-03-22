@@ -10,11 +10,11 @@
 #{flash_alert /}
 
 <div class="row-fluid btn-toolbar">
-    <a href="@{Deliveryments.show(dmt.id)}" class="btn btn-success">回到采购单</a>
+    <a href="@{Deliveryments.show(dmt.id)}" class="btn btn-success">回到 ${dmt.id}</a>
     <input type="hidden" id="deliverymentId" value="${dmt.id}">
 </div>
 
-#{warning_row title:'采购单支付信息' /}
+#{warning_row title:'采购单 ' + dmt.id + ' 支付信息' /}
 <div class="btn-toolbar">
     <button data-target="#add_form" data-toggle="toggle" class="btn btn-success">向采购单添加请款</button>
 </div>
