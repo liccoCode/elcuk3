@@ -31,13 +31,14 @@ public class ProductPost extends Post<Product> {
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = skuSearch();
-        if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+        if(specialSearch._1)
+            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
         StringBuilder sbd = new StringBuilder("1=1");
         List<Object> params = new ArrayList<Object>();
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND family.family LIKE ?");
-            params.add(this.search);
+            sbd.append(" AND sku LIKE ?");
+            params.add(this.search + "%");
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
@@ -52,12 +53,14 @@ public class ProductPost extends Post<Product> {
     }
 
     private F.T3<Boolean, String, List<Object>> skuSearch() {
-        if(StringUtils.isBlank(this.search)) return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        if(StringUtils.isBlank(this.search))
+            return new F.T3<Boolean, String, List<Object>>(false, null, null);
 
         Matcher matcher = SKU.matcher(this.search);
         if(matcher.find()) {
             String sku = matcher.group(1);
-            return new F.T3<Boolean, String, List<Object>>(true, "sku=?", new ArrayList<Object>(Arrays.asList(sku)));
+            return new F.T3<Boolean, String, List<Object>>(true, "sku=?",
+                    new ArrayList<Object>(Arrays.asList(sku)));
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);
     }
