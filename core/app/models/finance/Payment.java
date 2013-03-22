@@ -357,7 +357,6 @@ public class Payment extends Model {
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
                 Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
-        //String.format("%1$03d", 441
         this.paymentNumber = String.format("%s-%03d-%s",
                 this.cooperator.name, count, DateTime.now().toString("yy"));
         return this;

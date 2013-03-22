@@ -47,6 +47,26 @@ var LoadMask = {
     }
 };
 
+/**
+ * Effect, 包含几个页面效果
+ */
+var EF = {
+    /**
+     * 滚动到该元素
+     * @param selector
+     */
+    scoll: function(selector){
+        var mao = $(selector);
+        $('body').animate({scrollTop: mao.offset().top - mao.height()}, 1000)
+    },
+
+    colorAnimate: function(selector, from, to){
+        if(from == undefined) from = '#E35651';
+        if(to == undefined) to = '#FFF';
+        $(selector).css('backgroundColor', from).animate({backgroundColor: to}, 3000)
+    }
+};
+
 $.varClosure = function(){
     var o = $(this);
     if(!o.attr('name')) return false;

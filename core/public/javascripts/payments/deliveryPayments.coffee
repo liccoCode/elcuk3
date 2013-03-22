@@ -154,3 +154,13 @@ $ ->
         self.next().text ->
           parseFloat(parseFloat(self.val()) * parseFloat($("#unit_planQty_#{procureUnitId}").text()))
   ).keyup()
+
+  # url #procureId 检查
+  do ->
+    hash = window.location.hash
+    return unless hash
+    if $.isNumeric(hash[1..-1])
+      $("#anchor_#{hash[1..-1]}").click()
+      EF.scoll("#unit_#{hash[1..-1]}")
+      EF.colorAnimate("#unit_#{hash[1..-1]} table")
+

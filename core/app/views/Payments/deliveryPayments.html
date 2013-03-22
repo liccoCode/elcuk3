@@ -79,7 +79,7 @@
             <td>${unit.sku}</td>
             <td>${unit.cooperator.name}</td>
             <td id="unit_planQty_${unit.id}">${unit.attrs.planQty}</td>
-            <td data-toggle="toggle" data-target="#unit_${unit.id}">
+            <td id="anchor_${unit.id}" data-toggle="toggle" data-target="#unit_${unit.id}">
                 <i class="icon-reorder"></i>
                 <i class="badge">${unit.applyBadge()}</i>
                 <i class="badge badge-important">${unit.denyBadge()}</i>
