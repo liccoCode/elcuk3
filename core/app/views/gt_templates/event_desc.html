@@ -1,9 +1,11 @@
 <ul>
     <li>预计交货时间: ${unit.attrs.planDeliveryDate}</li>
+#{if unit.attrs.deliveryDate}
     <li>实际交货时间: ${unit.attrs.deliveryDate}</li>
-    <li>预计发货时间: ${unit.attrs.planShipDate}</li>
+#{/if}
+    <li>预计发货时间: ${unit.planShipBeginDate()}</li>
     <li>实际发货时间: ${unit.shipItem?.shipDate}</li>
-    <li>预计到库时间: ${unit.attrs.planArrivDate}</li>
+    <li>预计到库时间: ${unit.planShipArriveDate()}</li>
     <li>实际签收时间: ${unit.shipItem?.fba?.receiptAt?.datetime()}</li>
     <li>预计采购量: ${unit.attrs.planQty}</li>
 #{if unit.stage == models.procure.ProcureUnit.STAGE.INBOUND}
