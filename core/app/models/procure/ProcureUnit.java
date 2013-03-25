@@ -621,6 +621,34 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 通过运输计划获取到其运输单的预计开船时间
+     * 1. 如果有运输单则返回运输单的预计开船时间
+     * 2. 没有运输单则返回采购计划预计运输时间
+     *
+     * @return
+     */
+    public Date planShipBeginDate() {
+        if(this.shipItem == null) {
+            return this.attrs.planShipDate;
+        } else {
+            return this.shipItem.shipment.planBeginDate;
+        }
+    }
+
+    /**
+     * 通过运输计划获取到运输单的预计到库时间
+     *
+     * @return
+     */
+    public Date planShipArriveDate() {
+        if(this.shipItem == null) {
+            return this.attrs.planArrivDate;
+        } else {
+            return this.shipItem.shipment.planArrivDate;
+        }
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return
