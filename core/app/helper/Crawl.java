@@ -12,23 +12,28 @@ import play.Logger;
  */
 public class Crawl {
     public static JsonElement crawlListing(String market, String asin) {
-        Logger.info("crawlListing %s %s", asin, market);
-        return HTTP.json(String.format("%s/listing/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+        Logger.info("crawlListing %s", crawlUrl("listing", market, asin));
+        return HTTP.json(crawlUrl("listing", market, asin));
     }
 
     public static JsonElement crawlOffers(String market, String asin) {
-        Logger.info("crawlOffers %s %s", asin, market);
-        return HTTP.json(String.format("%s/offers/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+        Logger.info("crawlOffers %s", crawlUrl("offers", market, asin));
+        return HTTP.json(crawlUrl("offers", market, asin));
     }
 
     public static JsonElement crawlReviews(String market, String asin) {
-        Logger.info("crawlReview[s] %s %s", asin, market);
-        return HTTP.json(String.format("%s/reviews/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+        Logger.info("crawlReview[s] %s", crawlUrl("reviews", market, asin));
+        return HTTP.json(crawlUrl("reviews", market, asin));
     }
 
     public static JsonElement crawlReview(String market, String reviewId) {
-        Logger.info("crawlReview %s %s", reviewId, market);
-        return HTTP.json(String.format("%s/review/%s/%s", Server.server(Server.T.CRAWLER).url, market, reviewId));
+        Logger.info("crawlReview %s", crawlUrl("review", market, reviewId));
+        return HTTP.json(crawlUrl("review", market, reviewId));
+    }
+
+    private static String crawlUrl(String action, String market, String asin) {
+        return String.format("%s/%s/%s/%s",
+                Server.server(Server.T.CRAWLER).url, action, market, asin);
     }
 
 }
