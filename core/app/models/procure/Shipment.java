@@ -876,23 +876,30 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
-        // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 4
+        // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 GB:2 US:2 DE:3
+
+
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime tmp = now.plusDays(i);
-            if(tmp.dayOfWeek().get() == 2 || tmp.dayOfWeek().get() == 4) {
-                Object exist = CollectionUtils
-                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
-                if(exist == null)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.EXPRESS);
-                if(exist == null && tmp.dayOfWeek().get() == 4)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.SEA);
-            } else if(tmp.dayOfWeek().get() == 3 || tmp.dayOfWeek().get() == 5) {
-                Object exist = CollectionUtils
-                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
-                if(exist == null)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.AIR);
-            }
+            Object exist = CollectionUtils
+                                .find(planedShipments, new PlanDateEqual(tmp.toDate()));
+            if(exist!=null)
+                continue;
+            if(tmp.dayOfWeek().get() == 2) {
+                Shipment.checkWhouseNewShipment(tmp.toDate(), T.EXPRESS);
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.SEA,"GB");
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.SEA,"US");
+
+
+            }else if(tmp.dayOfWeek().get() == 3){
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.SEA,"DE");
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.AIR);
+            }else if(tmp.dayOfWeek().get()==4){
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.EXPRESS);
+            }else
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.AIR);
+
         }
 
 
@@ -930,8 +937,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public static List<Shipment> checkWhouseNewShipment(Date planBeginDate, T shipmentType) {
-        List<Shipment> newShipments = new ArrayList<Shipment>();
         List<Whouse> whs = Whouse.all().fetch();
+        return checkWhouseNewShipment(planBeginDate, shipmentType, whs);
+    }
+
+    private static List<Shipment> checkWhouseNewShipment(Date planBeginDate, T shipmentType , List<Whouse> whs) {
+        List<Shipment> newShipments=new ArrayList<Shipment>();
         for(Whouse wh : whs) {
             if(Shipment
                     .count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
@@ -956,5 +967,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             newShipments.add(shipment.<Shipment>save());
         }
         return newShipments;
+    }
+
+    /**
+         * 判断不同仓库之间是否需要创建 Shipment,shipmentType为SEA时,需要指定country
+         *
+         * @param planBeginDate 创建 Shipment 的 PlanBeginDate
+         * @return
+         */
+    public static List<Shipment> checkWhouseNewShipment(Date planBeginDate,T shipmentType,String country){
+        List<Whouse> whs = Whouse.find("byCountry",country).fetch();
+        return checkWhouseNewShipment(planBeginDate, shipmentType, whs);
     }
 }
