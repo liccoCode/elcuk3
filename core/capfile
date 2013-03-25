@@ -3,7 +3,7 @@ namespace :play do
 
   desc "Push Code"
   task :push do
-    `git push origin;git push bit`
+    `git push bit`
   end
 
   desc "部署 Play 代码到服务器"
