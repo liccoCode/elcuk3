@@ -897,6 +897,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 Shipment.checkWhouseNewShipment(tmp.toDate(),T.AIR);
             }else if(tmp.dayOfWeek().get()==4){
                 Shipment.checkWhouseNewShipment(tmp.toDate(),T.EXPRESS);
+                //除 GB US DE 创建的时间不同,其他国家的都是周4
+                Shipment.checkWhouseNewShipment(tmp.toDate(),T.SEA,"");
             }else
                 Shipment.checkWhouseNewShipment(tmp.toDate(),T.AIR);
 
@@ -948,7 +950,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     .count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
                             planBeginDate, wh, shipmentType, S.PLAN, S.CONFIRM) > 0)
                 continue;
-
+            Logger.debug("whouse is not apply on shipment %s",wh.country);
             Shipment shipment = new Shipment();
             shipment.id = Shipment.id();
             shipment.cycle = true;
@@ -976,7 +978,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * @return
          */
     public static List<Shipment> checkWhouseNewShipment(Date planBeginDate,T shipmentType,String country){
-        List<Whouse> whs = Whouse.find("byCountry",country).fetch();
+        List<Whouse> whs ;
+        if("".equals(country))
+            whs=Whouse.find("country not in (?,?,?)","GB","UK","DE").fetch();
+        else
+            whs= Whouse.find("byCountry",country).fetch();
         return checkWhouseNewShipment(planBeginDate, shipmentType, whs);
     }
 }
