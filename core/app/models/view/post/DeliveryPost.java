@@ -9,6 +9,7 @@ import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,13 +28,19 @@ public class DeliveryPost extends Post<Deliveryment> {
         this.dateType = DateType.delivery;
     }
 
+    /**
+     * 由于在 Action Redirect 的时候, 需要保留参数, 而 Play 并没有保留, 所以只能多写一次
+     */
+    public Date from;
+    public Date to;
+
     public enum DateType {
         /**
          * 创建时间
          */
         create {
             @Override
-            public String toString() {
+            public String label() {
                 return "创建时间";
             }
         },
@@ -42,10 +49,12 @@ public class DeliveryPost extends Post<Deliveryment> {
          */
         delivery {
             @Override
-            public String toString() {
+            public String label() {
                 return "交货时间";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     /**

@@ -2,12 +2,14 @@ package controllers;
 
 import models.ElcukRecord;
 import models.User;
+import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.product.Category;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
@@ -39,14 +41,19 @@ public class Deliveryments extends Controller {
         renderArgs.put("buyers", User.procurers());
     }
 
+    @Before(only = {"index", "goToDeliverymentApply"})
+    public static void beforeIndex() {
+        List<Cooperator> suppliers = Cooperator.suppliers();
+        renderArgs.put("suppliers", suppliers);
+    }
+
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
-        List<Cooperator> suppliers = Cooperator.suppliers();
         if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
-        render(deliveryments, p, suppliers, deliverymentIds);
+        render(deliveryments, p, deliverymentIds);
     }
 
     //DL|201301|08
@@ -149,7 +156,21 @@ public class Deliveryments extends Controller {
      * 进入采购单请款生成页面
      */
     public static void goToDeliverymentApply(List<String> deliverymentIds, DeliveryPost p) {
-        System.out.println(deliverymentIds);
-        index(p, deliverymentIds);
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds.size() <= 0) {
+            flash.error("请选择需纳入请款的采购单(相同供应商).");
+            index(p, deliverymentIds);
+        }
+
+        ProcureApply apply = ProcureApply.buildProcureApply(deliverymentIds);
+        if(apply == null || Validation.hasErrors()) {
+            for(Error error : Validation.errors()) {
+                flash.error(error.message());
+            }
+            index(p, deliverymentIds);
+        } else {
+            flash.success("请款单 %s 申请成功.", apply.serialNumber);
+            Applys.procure();
+        }
     }
 }

@@ -15,9 +15,9 @@ import java.util.Date;
 @MappedSuperclass
 public abstract class Apply extends Model {
     /**
-     * 请款单的名称
+     * 请款单的编号
      */
-    public String title;
+    public String serialNumber;
 
     /**
      * 请款的时间

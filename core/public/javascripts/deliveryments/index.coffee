@@ -1,3 +1,3 @@
 $ ->
   $('#goToDeliverymentApply').click ->
-    $('#deliverys_form').attr('action', @getAttribute('url')).submit()
+    $('#deliverys_form').attr('method', 'post').attr('action', @getAttribute('url')).submit()

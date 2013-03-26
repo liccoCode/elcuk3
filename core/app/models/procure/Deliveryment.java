@@ -38,7 +38,7 @@ public class Deliveryment extends GenericModel {
          */
         PENDING {
             @Override
-            public String toString() {
+            public String label() {
                 return "计划";
             }
         },
@@ -47,7 +47,7 @@ public class Deliveryment extends GenericModel {
          */
         CONFIRM {
             @Override
-            public String toString() {
+            public String label() {
                 return "确认并已下单";
             }
         },
@@ -56,16 +56,18 @@ public class Deliveryment extends GenericModel {
          */
         DONE {
             @Override
-            public String toString() {
+            public String label() {
                 return "完成交货";
             }
         },
         CANCEL {
             @Override
-            public String toString() {
+            public String label() {
                 return "取消";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
