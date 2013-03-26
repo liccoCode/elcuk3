@@ -1,13 +1,20 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import models.market.Account;
+import models.procure.Shipment;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -94,6 +101,8 @@ public class Whouse extends Model {
     }
 
 
+
+
     public void setName(String name) {
         this.name = name;
         if(this.name != null) this.name = this.name.toUpperCase();
@@ -126,5 +135,74 @@ public class Whouse extends Model {
 
     public static List<Whouse> findByType(T  type) {
         return Whouse.find("type=?", type).fetch();
+    }
+
+    /**
+     * 根据星期判断shipmentType来处理运往某仓库的Shipment
+     * @param planShipments 新建的运输单
+     * @param now 今天
+     * @return 暂时无返回
+     */
+    public void checkWhouseNewShipment(List<Shipment> planShipments,DateTime now){
+        // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 GB:2 US:2 DE:3
+        for(int i = 0; i <60 ; i++) {
+           DateTime tmp=now.plus(i);
+            Object exist = CollectionUtils
+                          .find(planShipments,new PlanDateEqual(tmp.toDate()));
+            if(exist!=null)
+                continue;
+
+            if(tmp.dayOfWeek().get() == 2) {
+                checkWhouseNewShipment(tmp.toDate(), Shipment.T.EXPRESS,tmp.plus(7).toDate());
+                if(this.account.isAUK||this.account.isAUS)
+                   checkWhouseNewShipment(tmp.toDate(), Shipment.T.SEA,tmp.plus(45).toDate());
+            }else if(tmp.dayOfWeek().get() == 3){
+                if(this.account.isADE)
+                checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
+                checkWhouseNewShipment(tmp.toDate(),Shipment.T.AIR,tmp.plus(14).toDate());
+            }else if(tmp.dayOfWeek().get()==4){
+                checkWhouseNewShipment(tmp.toDate(),Shipment.T.EXPRESS,tmp.plus(7).toDate());
+                //除 GB US DE 创建的时间不同,其他国家的都是周4
+                if(!this.account.isADE&&!this.account.isAUS&&!this.account.isAUK)
+                checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
+            }else
+                checkWhouseNewShipment(tmp.toDate(),Shipment.T.AIR,tmp.plus(14).toDate());
+        }
+
+    }
+
+    /**
+     * 确定新建运输单的目的地仓库
+     * @param planBeginDate 计划开始时间
+     * @param shipmentType  运输类型
+     */
+    private void  checkWhouseNewShipment(Date planBeginDate,Shipment.T shipmentType,Date arriveDate){
+        if(Shipment.count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",planBeginDate, this, shipmentType, Shipment.S.PLAN, Shipment.S.CONFIRM) > 0)
+            return ;
+        Shipment shipment = new Shipment();
+        shipment.id = Shipment.id();
+        shipment.cycle = true;
+        shipment.planBeginDate = planBeginDate;
+        shipment.planArrivDate = arriveDate;
+        shipment.whouse = this;
+        shipment.type = shipmentType;
+        shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
+                Dates.date2Date(shipment.planBeginDate));
+        shipment.save();
+    }
+
+    class PlanDateEqual implements Predicate {
+            // 期待的日期
+            private Date date;
+
+            PlanDateEqual(Date date) {
+                this.date = date;
+            }
+
+            @Override
+            public boolean evaluate(Object o) {
+                Shipment ship = (Shipment) o;
+                return Dates.morning(ship.planBeginDate).equals(Dates.morning(this.date));
+            }
     }
 }
