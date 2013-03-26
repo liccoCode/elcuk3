@@ -41,9 +41,10 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.index")
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
+        List<Cooperator> suppliers = Cooperator.suppliers();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
-        render(deliveryments, p);
+        render(deliveryments, p, suppliers);
     }
 
     //DL|201301|08
