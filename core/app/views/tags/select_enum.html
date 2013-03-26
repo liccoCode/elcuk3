@@ -1,0 +1,6 @@
+<select size="1" name="${_name}">
+#{doBody /}
+#{list items:_items}
+    <option ${_ == _value ? 'selected=selected' : ''} value="${_.name()}">${_}</option>
+#{/list}
+</select>

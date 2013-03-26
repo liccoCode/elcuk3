@@ -14,6 +14,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -39,12 +40,13 @@ public class Deliveryments extends Controller {
     }
 
     @Check("deliveryments.index")
-    public static void index(DeliveryPost p) {
+    public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;
         List<Cooperator> suppliers = Cooperator.suppliers();
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
-        render(deliveryments, p, suppliers);
+        render(deliveryments, p, suppliers, deliverymentIds);
     }
 
     //DL|201301|08
@@ -141,5 +143,13 @@ public class Deliveryments extends Controller {
                 sbd.append(cate.productTerms);
         }
         renderJSON(new Ret(true, sbd.toString()));
+    }
+
+    /**
+     * 进入采购单请款生成页面
+     */
+    public static void goToDeliverymentApply(List<String> deliverymentIds, DeliveryPost p) {
+        System.out.println(deliverymentIds);
+        index(p, deliverymentIds);
     }
 }

@@ -28,6 +28,7 @@ GET     /helper/                                            staticDir:public/ima
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
+GET    /deliveryments/apply                                  Deliveryments.goToDeliverymentApply
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
