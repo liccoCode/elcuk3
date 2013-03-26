@@ -7,6 +7,7 @@ import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
@@ -520,8 +521,33 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 预付款申请
      */
-    public void billingPrePay() {
+    public PaymentUnit billingPrePay() {
+        /**
+         * 1. 检查是否此采购计划是否已经存在一个预付款
+         * 2. 采购计划需要已经交货
+         * 2. 申请预付款
+         */
+        if(this.hasPrePay())
+            Validation.addError("", "不允许重复申请预付款.");
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            Validation.addError("", "请确定采购计划的交货数量(交货)");
+        if(Validation.hasErrors()) return null;
 
+        PaymentUnit fee = new PaymentUnit(this);
+        return fee.save();
+    }
+
+    /**
+     * 是否拥有了 预付款
+     *
+     * @return
+     */
+    public boolean hasPrePay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.cashpledge())
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -529,6 +555,28 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public void billingTailPay() {
 
+    }
+
+    /**
+     * 是否拥有了尾款
+     *
+     * @return
+     */
+    public boolean hasTailPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.procurement())
+                return true;
+        }
+        return false;
+    }
+
+    public List<PaymentUnit> fees() {
+        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+        for(PaymentUnit fee : this.fees) {
+            if(fee.remove) continue;
+            fees.add(fee);
+        }
+        return fees;
     }
 
     /**

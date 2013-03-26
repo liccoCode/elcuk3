@@ -30,7 +30,6 @@ GET     /apply/{id}/procure                                 Applys.procure
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
-POST   /deliveryments/apply                                  Deliveryments.goToDeliverymentApply
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
@@ -45,8 +44,11 @@ GET     /payments                                           Payments.index
 GET     /payment/rates                                      Payments.rates
 POST    /payment/files/upload                               Payments.uploads
 
-# PaymentUnits
+# ProcureUnits
 POST    /paymentunit/{id}/apply/${applyId}                  PaymentUnits.billingPrePay
+
+# PaymentUnits
+POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index

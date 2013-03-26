@@ -210,3 +210,6 @@ shipment.moveFBA.msg=%s \u4ECE\u8FD0\u8F93\u5355 %s \u8F6C\u79FB\u5230 %s
 shipment.ensureDone=\u8FD0\u8F93\u5355\u5B8C\u6210
 shipment.ensureDone.msg=\u8FD0\u8F93\u5355 %s \u786E\u8BA4\u5B8C\u6210
 
+paymentunit.fixValue=\u8C03\u6574[\u8BF7\u6B3E\u4FEE\u6B63\u503C]
+paymentunit.fixValue.msg=%s \u56E0 %s \u4ECE %s \u8C03\u6574\u5230 %s
+

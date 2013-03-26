@@ -25,13 +25,13 @@ public class PaymentUnits extends Controller {
         }
     }
 
-    public static void update(Long id, Float fixValue) {
+    public static void fixValue(Long id, Float fixValue, String reason) {
         PaymentUnit unit = PaymentUnit.findById(id);
         Validation.required("fixValue", fixValue);
         if(Validation.hasErrors())
             renderJSON(new Ret(false, Validation.errors().toString()));
 
-        unit.fixValue(fixValue);
+        unit.fixValue(fixValue, reason);
         if(Validation.hasErrors())
             renderJSON(new Ret(false, J.G(Validation.errors())));
         else

@@ -2,14 +2,17 @@ package models.finance;
 
 import exception.PaymentException;
 import helper.Currency;
+import models.ElcukRecord;
 import models.User;
 import models.procure.*;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 支付的最小单元, 用于组成一封支付单
@@ -57,6 +60,20 @@ public class PaymentUnit extends Model {
                 return "已支付";
             }
         }
+    }
+
+    public PaymentUnit() {
+        this.createdAt = new Date();
+        this.state = S.APPLY;
+    }
+
+    public PaymentUnit(ProcureUnit procureUnit) {
+        this();
+        this.feeType = FeeType.cashpledge();
+        this.procureUnit = procureUnit;
+        this.deliveryment = procureUnit.deliveryment;
+        this.amount = procureUnit.attrs.price * procureUnit.qty();
+        this.currency = procureUnit.attrs.currency;
     }
 
     @ManyToOne
@@ -205,20 +222,34 @@ public class PaymentUnit extends Model {
     }
 
     /**
+     * 所有与 PaymentUnit 相关的执行记录
+     *
+     * @return
+     */
+    public List<ElcukRecord> records() {
+        return ElcukRecord.records(this.id + "", Messages.get("paymentunit.fixValue"));
+    }
+
+    /**
      * 修改修正价格;
      * 1. 如果属于驳回状态, 那么自动变为已申请状态
      * 2. 如果属于已支付状态, 不允许再修改修正价格
      *
      * @param fixValue
      */
-    public void fixValue(Float fixValue) {
+    public void fixValue(Float fixValue, String reason) {
         if(this.state == S.PAID) {
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
             return;
         }
+        float oldFixValue = this.fixValue;
         this.fixValue = fixValue;
         if(this.state == S.DENY)
             this.state = S.APPLY;
         this.save();
+        new ElcukRecord(Messages.get("paymentunit.fixValue"),
+                Messages.get("paymentunit.fixValue.msg", User.current().username, reason,
+                        oldFixValue, this.fixValue),
+                this.id + "").save();
     }
 }

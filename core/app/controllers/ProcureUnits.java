@@ -1,6 +1,9 @@
 package controllers;
 
+import models.finance.PaymentUnit;
 import models.procure.ProcureUnit;
+import play.data.validation.Error;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 
 /**
@@ -17,7 +20,14 @@ public class ProcureUnits extends Controller {
      */
     public static void billingPrePay(Long id, Long applyId) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        unit.billingPrePay();
+        PaymentUnit fee = unit.billingPrePay();
+        if(Validation.hasErrors()) {
+            for(Error error : Validation.errors()) {
+                flash.error(error.message());
+            }
+        } else {
+            flash.success("%s 请款成功", fee.feeType.nickName);
+        }
         Applys.procure(applyId);
     }
 
@@ -29,4 +39,5 @@ public class ProcureUnits extends Controller {
     public static void billingTailPay(Long id, Long applyId) {
 
     }
+
 }
