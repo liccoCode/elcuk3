@@ -1,15 +1,12 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import exception.PaymentException;
 import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
-import models.finance.FeeType;
-import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
@@ -402,134 +399,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.shipItem = shipItem;
         }
         return shipItem;
-    }
-
-    /**
-     * 为 ProcureUnit 计费(请款), 同时传入一个修正价格;
-     *
-     * @param fixValue
-     * @return
-     */
-    public PaymentUnit billing(float fixValue, boolean prepay) {
-        /**
-         * 1. 如果没有交货不允许申请
-         * 2. TODO: 添加的币种必须与已经存在的 Payment 一样(新的 Payment 固定币种, 不同的新建)
-         */
-        if(this.leftApplyAmount() <= 0)
-            throw new PaymentException("不需要请款了");
-        if(this.attrs.qty == null && !prepay)
-            throw new PaymentException("还没有交货, 不允许非预付款申请.");
-
-        PaymentUnit fee = new PaymentUnit();
-        fee.payment = Payment.buildPayment(this.deliveryment);
-        fee.procureUnit = this;
-        // 如果有 ProcureUnit , 那么则拥有 Deliveryment
-        fee.deliveryment = this.deliveryment;
-        fee.payee = User.current();
-
-        fee.fixValue = fixValue;
-        fee.currency = this.attrs.currency;
-        // 计算剩下的需要支付的款项
-        if(prepay) {
-            fee.amount = this.totalBalance() * 0.3f; /* 30% 预付款*/
-            fee.feeType = FeeType.cashpledge();
-        } else {
-            fee.amount = this.leftApplyAmount();
-            fee.feeType = FeeType.procurement();
-        }
-        // 计算完成之后还需要再检查一次
-        if(this.totalAmount() + fee.amount > this.totalBalance()) {
-            // 因为 buildPayment 已经创建了 payment 所以在这里如果不需要, 那么则需要删除这个 Payment
-            if(fee.payment != null) fee.payment.delete();
-            throw new PaymentException(String.format("请款总额超过需要支付的金额: %s / %s %s",
-                    this.totalAmount() + fee.amount, this.totalBalance(), fee.currency.name()));
-        }
-        return fee.save();
-    }
-
-    /**
-     * 计算剩下还需要支付款项;
-     *
-     * @return
-     */
-    public float leftAmount() {
-        return this.totalBalance() - this.totalAmount();
-    }
-
-    /**
-     * 计算剩下还需要请款的款项
-     *
-     * @return
-     */
-    public float leftApplyAmount() {
-        return this.totalBalance() - this.totalApplyAmount();
-    }
-
-    /**
-     * 总共需要支付的金额
-     *
-     * @return
-     */
-    public float totalBalance() {
-        return (this.qty() * (this.attrs.price + this.sumFixValue()));
-    }
-
-    /**
-     * 获取采购计划下, 所有请款项的修正价总额
-     *
-     * @return
-     */
-    public float sumFixValue() {
-        float sumFixValue = 0;
-        for(PaymentUnit fee : this.fees()) {
-            sumFixValue += fee.fixValue;
-        }
-        return sumFixValue;
-    }
-
-    /**
-     * 已经支付的所有金额
-     *
-     * @return
-     */
-    public float totalAmount() {
-        float amount = 0;
-        for(PaymentUnit fee : this.fees()) {
-            if(!this.attrs.currency.equals(fee.currency))
-                throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
-            if(fee.state == PaymentUnit.S.PAID)
-                amount += fee.amount();
-        }
-        return amount;
-    }
-
-    /**
-     * 已经请款的所有金额
-     *
-     * @return
-     */
-    public float totalApplyAmount() {
-        float applyAmount = 0;
-        for(PaymentUnit fee : this.fees()) {
-            if(!this.attrs.currency.equals(fee.currency))
-                throw new FastRuntimeException("币种不一样, 暂时不进行累加计算.");
-            applyAmount += fee.amount();
-        }
-        return applyAmount;
-    }
-
-    /**
-     * 没有关闭的款项
-     *
-     * @return
-     */
-    public List<PaymentUnit> fees() {
-        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
-        for(PaymentUnit fee : this.fees) {
-            if(fee.remove) continue;
-            fees.add(fee);
-        }
-        return fees;
     }
 
 

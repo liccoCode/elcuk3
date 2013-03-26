@@ -2,7 +2,6 @@ package ext;
 
 import models.finance.Payment;
 import models.finance.PaymentUnit;
-import models.procure.ProcureUnit;
 import play.templates.JavaExtensions;
 
 /**
@@ -12,42 +11,6 @@ import play.templates.JavaExtensions;
  * Time: 4:56 PM
  */
 public class PaymentHelper extends JavaExtensions {
-    public static int applyBadge(ProcureUnit procureUnit) {
-        int apply = 0;
-        for(PaymentUnit unit : procureUnit.fees()) {
-            if(unit.state == PaymentUnit.S.APPLY)
-                apply++;
-        }
-        return apply;
-    }
-
-    public static int denyBadge(ProcureUnit procureUnit) {
-        int deny = 0;
-        for(PaymentUnit unit : procureUnit.fees()) {
-            if(unit.state == PaymentUnit.S.DENY)
-                deny++;
-        }
-        return deny;
-    }
-
-    public static int approvalBadge(ProcureUnit procureUnit) {
-        int approval = 0;
-        for(PaymentUnit unit : procureUnit.fees()) {
-            if(unit.state == PaymentUnit.S.APPROVAL)
-                approval++;
-        }
-        return approval;
-    }
-
-    public static int paidBadge(ProcureUnit procureUnit) {
-        int paid = 0;
-        for(PaymentUnit unit : procureUnit.fees()) {
-            if(unit.state == PaymentUnit.S.PAID)
-                paid++;
-        }
-        return paid;
-    }
-
     public static String stateColor(PaymentUnit punit) {
         return stateColor(punit.state);
     }

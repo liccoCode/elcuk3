@@ -27,7 +27,7 @@ GET     /helper/                                            staticDir:public/ima
 
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
-GET    /deliveryment/{id} Deliveryments.show
+GET    /deliveryment/{id}                                    Deliveryments.show
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
@@ -39,15 +39,8 @@ GET     /orders/warnfix                                     Orders.warrningOrder
 
 # Payments
 GET     /payments                                           Payments.index
-GET     /payment/{id}                                       Payments.show
 GET     /payment/rates                                      Payments.rates
-POST    /payment/{id}/paid                                  Payments.paid
-POST    /payment/{id}/deny                                  Payments.deny
-POST    /payment/{id}/approval                              Payments.approval
 POST    /payment/files/upload                               Payments.uploads
-GET     /deliveryment/{deliveryId}/payments                 Payments.deliveryPayments
-POST    /deliveryment/{deliveryId}/unitfees                 Payments.procureUnitApply
-POST    /deliveryment/{deliveryId}/fees                     Payments.deliverymentApply
 
 # PaymentUnits
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy

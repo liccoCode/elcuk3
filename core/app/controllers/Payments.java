@@ -1,16 +1,9 @@
 package controllers;
 
-import exception.PaymentException;
-import helper.Currency;
 import helper.HTTP;
 import helper.J;
 import helper.Webs;
-import models.finance.FeeType;
 import models.finance.Payment;
-import models.finance.PaymentTarget;
-import models.finance.PaymentUnit;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
 import models.product.Attach;
 import models.view.Ret;
 import org.apache.commons.lang.math.NumberUtils;
@@ -18,14 +11,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
-import play.data.binding.As;
-import play.data.validation.Validation;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,24 +28,6 @@ public class Payments extends Controller {
     public static void index() {
         List<Payment> payments = Payment.findAll();
         render(payments);
-    }
-
-    @Before(only = {"show", "approval", "deny", "paid"})
-    public static void beforeShow() {
-        Long id = NumberUtils.toLong(params.get("id"), 0);
-        List<PaymentTarget> targets;
-        if(id <= 0) {
-            targets = PaymentTarget.findAll();
-        } else {
-            Payment payment = Payment.findById(id);
-            targets = payment.paymentTargetFromPaymentUnits();
-        }
-        renderArgs.put("targets", targets);
-    }
-
-    public static void show(Long id) {
-        Payment payment = Payment.findById(id);
-        render(payment);
     }
 
     @CacheFor("10mn")
@@ -80,84 +50,6 @@ public class Payments extends Controller {
         renderJSON(J.G(a));
     }
 
-    public static void approval(Long id, List<Long> unitIds) {
-        if(unitIds == null) unitIds = new ArrayList<Long>();
-        Payment payment = Payment.findById(id);
-        int effect = payment.approval(unitIds);
-        if(Validation.hasErrors())
-            render("Payments/show.html", payment);
-        flash.success("%s 条请款成功审核", effect);
-        show(id);
-    }
-
-    public static void deny(Long id, List<Long> unitIds) {
-        if(unitIds == null) unitIds = new ArrayList<Long>();
-        Payment payment = Payment.findById(id);
-        int effect = payment.deny(unitIds);
-        if(Validation.hasErrors())
-            render("Payments/show.html", payment);
-        flash.success("%s 条请款被驳回", effect);
-        show(id);
-    }
-
-    public static void paid(Long id, Currency currency, Float actualPaid,
-                            Float usRatio, @As("yyyy-MM-dd HH:mm:ss") Date ratioPublishTime) {
-        Payment payment = Payment.findById(id);
-
-        Validation.required("币种", currency);
-        Validation.required("支付金额", actualPaid);
-        Validation.required("最新'美元现汇买入价'", usRatio);
-        Validation.required("发布时间", ratioPublishTime);
-        if(Validation.hasErrors())
-            render("Payments/show.html", payment, currency);
-
-        int effect = payment.paid(currency, actualPaid, usRatio, ratioPublishTime);
-        if(Validation.hasErrors())
-            render("Payments/show.html", payment, currency);
-        flash.success("%s 条请款支付成功", effect);
-        show(id);
-    }
-
-
     // ----------- Deliveryment Nested payments Resources ---------------
-
-    /**
-     * 采购单的请款
-     */
-    public static void deliveryPayments(String deliveryId) {
-        Deliveryment dmt = Deliveryment.findById(deliveryId);
-        List<FeeType> procureFeeTypes = FeeType.procure();
-        render(dmt, procureFeeTypes);
-    }
-
-    /**
-     * 采购单中的采购项目请款
-     */
-    public static void procureUnitApply(String deliveryId, Long procureUnitId, boolean prepay) {
-        try {
-            ProcureUnit unit = ProcureUnit.findById(procureUnitId);
-            unit.billing(0, prepay);
-            flash.success("请款添加成功.");
-        } catch(PaymentException e) {
-            flash.error(e.getMessage());
-        }
-        deliveryPayments(deliveryId);
-    }
-
-    /**
-     * 采购单中的采购单级别请款
-     */
-    public static void deliverymentApply(String deliveryId, PaymentUnit pu) {
-        Deliveryment dmt = Deliveryment.findById(deliveryId);
-        try {
-            dmt.billing(pu);
-            flash.success("请款成功.");
-        } catch(PaymentException e) {
-            flash.error("因 %s 原因请款失败.", e.getMessage());
-        }
-        renderArgs.put("pu", pu);
-        deliveryPayments(deliveryId);
-    }
-
 
 }

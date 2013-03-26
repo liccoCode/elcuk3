@@ -1,11 +1,9 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import exception.PaymentException;
 import models.ElcukRecord;
 import models.User;
-import models.finance.Payment;
-import models.finance.PaymentUnit;
+import models.finance.ProcureApply;
 import models.product.Category;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -73,11 +71,8 @@ public class Deliveryment extends GenericModel {
     @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
-    /**
-     * 这个采购单级别所拥有的请款, 这里会包括采购单与采购单项级别的所有
-     */
-    @OneToMany(mappedBy = "deliveryment", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    @ManyToOne
+    public ProcureApply apply;
 
     @OneToOne
     public User handler;
@@ -288,53 +283,6 @@ public class Deliveryment extends GenericModel {
                 Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
         return units;
     }
-
-    /**
-     * 对采购单级别请款
-     */
-    public void billing(PaymentUnit unit) {
-        /**
-         * 1. 检查
-         *  a. 请款费用不为零
-         * 2. 采购单关联
-         * 3. 申请人关联
-         * 4. 请款单关联/创建
-         */
-        if(unit.amount == 0)
-            throw new PaymentException("请款金额不允许为 0");
-        unit.payment = Payment.buildPayment(this);
-        unit.deliveryment = this;
-        unit.payee = User.current();
-        unit.save();
-    }
-
-    /**
-     * 过滤出仅仅是采购单级别的请款
-     *
-     * @return
-     */
-    public List<PaymentUnit> fees() {
-        List<PaymentUnit> dmtFees = new ArrayList<PaymentUnit>();
-        for(PaymentUnit fee : this.fees) {
-            if(!fee.remove && fee.procureUnit == null)
-                dmtFees.add(fee);
-        }
-        return dmtFees;
-    }
-
-    /**
-     * 通过 PaymentUnit 来寻找关联的 Payment.
-     *
-     * @return
-     */
-    public List<Payment> relatePayments() {
-        Set<Payment> payments = new HashSet<Payment>();
-        for(PaymentUnit unit : this.fees) {
-            payments.add(unit.payment);
-        }
-        return new ArrayList<Payment>(payments);
-    }
-
 
     public static String id() {
         DateTime dt = DateTime.now();

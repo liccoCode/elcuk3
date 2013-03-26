@@ -60,6 +60,15 @@ public class Payment extends Model {
     @OneToMany(mappedBy = "payment")
     public List<PaymentUnit> units = new ArrayList<PaymentUnit>();
 
+    /**
+     * Payment 所关联的采购请款单;
+     * 这里很想做成 Apply 这个父类, 可是 Hibernate 的关系需要有 Model 存在,
+     * 而作为 Abstract Class 或者 MappedSuperClass 的 Apply 实际上是不存在的, 所以无法达到这种效果, 只能
+     * 退而求其次.
+     */
+    @ManyToOne
+    public ProcureApply pApply;
+
     @ManyToOne
     public Cooperator cooperator;
 
@@ -71,7 +80,7 @@ public class Payment extends Model {
 
     public Date createdAt;
 
-    public Date lastUpdateAt;
+    public Date updateAt;
 
     /**
      * 每一份请款单都会拥有一个唯一的请款单编号. 组成:
@@ -119,12 +128,12 @@ public class Payment extends Model {
     @PrePersist
     public void beforeSave() {
         this.createdAt = new Date();
-        this.lastUpdateAt = new Date();
+        this.updateAt = new Date();
     }
 
     @PreUpdate
     public void beforeUpdate() {
-        this.lastUpdateAt = new Date();
+        this.updateAt = new Date();
     }
 
     public void upload(Attach a) throws IOException {
