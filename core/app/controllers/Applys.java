@@ -1,5 +1,6 @@
 package controllers;
 
+import models.finance.ProcureApply;
 import play.mvc.Controller;
 
 /**
@@ -12,7 +13,8 @@ public class Applys extends Controller {
     /**
      * 采购请款单
      */
-    public static void procure() {
-
+    public static void procure(Long id) {
+        ProcureApply apply = ProcureApply.findById(id);
+        render(apply);
     }
 }

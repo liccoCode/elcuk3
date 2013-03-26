@@ -1,18 +1,15 @@
 package models.finance;
 
 import helper.Dates;
+import models.User;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import javax.persistence.*;
+import java.util.*;
 
 /**
  * 具体的采购的请款单
@@ -23,12 +20,13 @@ import java.util.Set;
 @Entity
 public class ProcureApply extends Apply {
 
-    @OneToMany(mappedBy = "apply")
+    @OneToMany(mappedBy = "apply", cascade = CascadeType.PERSIST)
     public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
 
     /**
      * 用来记录 Deliveryment 中指定的 Cooperator. 为方便的冗余数据
      */
+    @OneToOne
     public Cooperator cooperator;
 
     /**
@@ -36,6 +34,12 @@ public class ProcureApply extends Apply {
      */
     @OneToMany(mappedBy = "pApply")
     public List<Payment> payments = new ArrayList<Payment>();
+
+    /**
+     * 请款人
+     */
+    @ManyToOne
+    public User applier;
 
     /**
      * 通过 DeliverymentIds 生成一份采购请款单
@@ -63,6 +67,13 @@ public class ProcureApply extends Apply {
         if(Validation.hasErrors()) return null;
         ProcureApply apply = new ProcureApply();
         apply.generateSerialNumber(coopers.iterator().next());
+        apply.createdAt = apply.updateAt = new Date();
+        apply.applier = User.current();
+        apply.save();
+        for(Deliveryment dmt : deliveryments) {
+            dmt.apply = apply;
+            dmt.save();
+        }
         return apply;
     }
 

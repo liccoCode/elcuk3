@@ -170,7 +170,7 @@ public class Deliveryments extends Controller {
             index(p, deliverymentIds);
         } else {
             flash.success("请款单 %s 申请成功.", apply.serialNumber);
-            Applys.procure();
+            Applys.procure(apply.id);
         }
     }
 }

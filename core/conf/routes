@@ -24,6 +24,8 @@ GET     /images/                                            staticDir:public/ima
 GET     /img/                                               staticDir:public/images
 GET     /helper/                                            staticDir:public/images/helper
 
+# Applys
+GET     /apply/{id}/procure                                 Applys.procure
 
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
@@ -44,8 +46,7 @@ GET     /payment/rates                                      Payments.rates
 POST    /payment/files/upload                               Payments.uploads
 
 # PaymentUnits
-DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
-POST    /paymentunit/{id}                                   PaymentUnits.update
+POST    /paymentunit/{id}/apply/${applyId}                  PaymentUnits.billingPrePay
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index

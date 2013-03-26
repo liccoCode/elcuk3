@@ -1,6 +1,5 @@
 package models.finance;
 
-import models.User;
 import play.db.jpa.Model;
 
 import javax.persistence.MappedSuperclass;
@@ -22,7 +21,7 @@ public abstract class Apply extends Model {
     /**
      * 请款的时间
      */
-    public Date createAt;
+    public Date createdAt;
 
     /**
      * 最后更新时间
@@ -30,13 +29,10 @@ public abstract class Apply extends Model {
     public Date updateAt;
 
     /**
-     * 请款人
-     */
-    public User applier;
-
-    /**
      * NOTE:
-     * Payments 由于 Hibernate 限制, 无法在 MappedSuperclass 中处理关系, 所以只能
+     * 1. 请款人 User
+     * 2. 涉及的付款单 Payments
+     * 由于 Hibernate 限制, 无法在 MappedSuperclass 中处理关系, 所以只能
      * 在每个子类中自行设置
      */
 }

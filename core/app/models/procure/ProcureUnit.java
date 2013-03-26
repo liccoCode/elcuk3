@@ -518,6 +518,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 预付款申请
+     */
+    public void billingPrePay() {
+
+    }
+
+    /**
+     * 尾款申请
+     */
+    public void billingTailPay() {
+
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return

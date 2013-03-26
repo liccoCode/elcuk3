@@ -79,7 +79,7 @@
         #{else }
             <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
         #{/else}
-        <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
+        <td style="background:${unit.stage.rgb()}">${unit.stage}</td>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
         <td>#{time_tooltip time:unit.createDate/}</td>
     </tr>

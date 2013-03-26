@@ -1,0 +1,114 @@
+#{extends 'main_full.html'/}
+#{set title:"请款单 ${apply.serialNumber}" /}
+#{set 'moreScripts'}
+    #{script 'deliveryments/index.coffee'/}
+#{/set}
+#{info_row title:'采购请款单' /}
+#{list items:apply.deliveryments, as:'dmt'}
+<div class="row-fluid">
+    <div class="span3">
+        <dl class="dl-horizontal">
+            <dt>#</dt>
+            <dd>${dmt.id}</dd>
+            <dt>状态</dt>
+            <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
+            <dt>供应商</dt>
+            <dd>${dmt.cooperator.fullName}</dd>
+            <dt>交货进度</dt>
+            #{set progress:dmt.deliveryProcress() /}
+            <dd>${(progress._1 / progress._2).format('#.##%')}</dd>
+            <dt>创建时间</dt>
+            <dd>${dmt.createDate}</dd>
+            <dt>下单时间</dt>
+            <dd>${dmt.orderTime}</dd>
+            #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+            <dt>最后交货时间</dt>
+            <dd>${twoDeliveryDate._2}</dd>
+        </dl>
+    </div>
+
+    <div class="span9">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th>#</th>
+                <th>SKU</th>
+                <th>Selling</th>
+                <th>数量(计划/交货)</th>
+                <th>单价</th>
+                <th>单价*数量</th>
+                <th>阶段</th>
+                <th>抵达货代</th>
+                <th>FBA</th>
+            </tr>
+            #{list items:dmt.units, as:'procureUnit'}
+                <tr>
+                    <td>
+                        #{set pid:procureUnit.id/}
+                        ${procureUnit.id}
+                    </td>
+                    <td>
+                        <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
+                    </td>
+                    <td>
+                        <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
+                    </td>
+                    <td data-toggle="toggle" data-target="#unit_${pid}">
+                        <i class="icon-reorder"></i>
+                    ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
+                    </td>
+                    <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
+                    <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.qty() * procureUnit.attrs.price}</td>
+                    <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage}</td>
+                    <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
+                    <td>
+                        #{if procureUnit.shipItem.fba}
+                            <a target="_blank" href="@{Shipments.show(procureUnit.shipItem.shipment.id)}#${procureUnit.shipItem.id}">
+                            ${procureUnit.shipItem.fba.shipmentId} #${procureUnit.shipItem.id}
+                            </a>
+                        #{/if}
+                        #{else }
+                            暂时还没有 FBA
+                        #{/else}
+                    </td>
+                </tr>
+                <tr id="unit_${pid}" style="display:none">
+                    <td colspan="9">
+                        <div class="row-fluid">
+                            <div class="span4">
+                                #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
+                                    <label for="prepay_${pid}">预付款</label>
+                                    <input id="prepay_${pid}" type="text" name="sd" placeholder="这里不需要填写需要自动计算">
+                                    <input type="submit" value="申请预付款" class="btn">
+                                #{/form}
+                                #{form @Procures.blank()}
+                                    <label for="tailpay_${pid}">尾款</label>
+                                    <input id="tailpay_${pid}" type="text" name="sd">
+                                    <input type="submit" value="申请尾款" class="btn">
+                                #{/form}
+                            </div>
+                            <div class="span8">
+                                #{if procureUnit.fees.size() > 0}
+                                    <table class="table table-condensed">
+                                        <tr>
+                                            <th>#</th>
+                                        </tr>
+                                        #{list items:procureUnit.fees, as:'fee'}
+                                            <tr>
+                                                <td>${fee.id}</td>
+                                            </tr>
+                                        #{/list}
+                                    </table>
+                                #{/if}
+                                #{else }
+                                    <span class="text-center">没有请款记录</span>
+                                #{/else}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            #{/list}
+        </table>
+    </div>
+</div>
+<hr>
+#{/list}

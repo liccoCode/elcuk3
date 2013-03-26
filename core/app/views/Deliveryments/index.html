@@ -79,7 +79,7 @@
                         <span>${dmt.name}</span>
                         <span class="badge badge-info">${dmt.units.size()}</span>
                     </td>
-                    <td style="color:${'#' + dmt.state.rgb()}">${dmt.state}</td>
+                    <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
                     <td>${dmt.supplier()?.fullName}</td>
                     <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
                     <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
