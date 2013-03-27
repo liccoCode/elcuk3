@@ -9,8 +9,10 @@ import org.apache.http.client.CookieStore;
 import play.Logger;
 import play.Play;
 import play.data.validation.Error;
+import play.data.validation.Validation;
 import play.libs.F;
 import play.libs.Mail;
+import play.mvc.Scope;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -92,12 +94,14 @@ public class Webs {
      */
     public static void dev_login(Account acc) throws IOException, ClassNotFoundException {
         File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
-        if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(3)))
+        if(jsonFile.exists() &&
+                (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(3)))
             jsonFile.delete();
 
         if(!jsonFile.exists()) {
             acc.loginAmazonSellerCenter();
-            FileOutputStream fos = new FileOutputStream(new File(Play.applicationPath + "/test", acc.prettyName() + ".json"));
+            FileOutputStream fos = new FileOutputStream(
+                    new File(Play.applicationPath + "/test", acc.prettyName() + ".json"));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(acc.cookieStore());
             oos.close();
@@ -165,7 +169,8 @@ public class Webs {
      * @param priceStr
      * @return
      */
-    public static F.T2<M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr, M defaultMarket) {
+    public static F.T2<M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr,
+                                                                  M defaultMarket) {
         if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
         StringBuilder sbd = new StringBuilder(priceStr);
         String dot = Character.toString(sbd.charAt(sbd.length() - 3));
@@ -284,9 +289,16 @@ public class Webs {
      */
     public static String V(List<play.data.validation.Error> errors) {
         StringBuilder sbd = new StringBuilder();
-        for(Error err : errors)
+        for(Error err : errors) {
             sbd.append(err.getKey()).append("=>").append(err.message()).append("<br>");
+        }
         return sbd.toString();
+    }
+
+    public static void errorToFlash(Scope.Flash flash) {
+        for(Error error : Validation.errors()) {
+            flash.error(error.message());
+        }
     }
 
     /**

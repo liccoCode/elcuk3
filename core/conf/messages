@@ -211,5 +211,5 @@ shipment.ensureDone=\u8FD0\u8F93\u5355\u5B8C\u6210
 shipment.ensureDone.msg=\u8FD0\u8F93\u5355 %s \u786E\u8BA4\u5B8C\u6210
 
 paymentunit.fixValue=\u8C03\u6574[\u8BF7\u6B3E\u4FEE\u6B63\u503C]
-paymentunit.fixValue.msg=%s \u56E0 %s \u4ECE %s \u8C03\u6574\u5230 %s
+paymentunit.fixValue.msg=%s \u56E0 %s \u539F\u56E0\u5C06\u4FEE\u6B63\u503C\u4ECE %s \u8C03\u6574\u5230 %s
 

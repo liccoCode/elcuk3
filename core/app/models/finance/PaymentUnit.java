@@ -240,10 +240,13 @@ public class PaymentUnit extends Model {
      * @param fixValue
      */
     public void fixValue(Float fixValue, String reason) {
-        if(this.state == S.PAID) {
+        if(this.state == S.PAID)
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
-            return;
-        }
+        if(this.fixValue == fixValue)
+            Validation.addError("", "修正值没有修改");
+
+        if(Validation.hasErrors()) return;
+
         float oldFixValue = this.fixValue;
         this.fixValue = fixValue;
         if(this.state == S.DENY)

@@ -1,7 +1,7 @@
 package controllers;
 
 import exception.PaymentException;
-import helper.J;
+import helper.Webs;
 import models.finance.PaymentUnit;
 import models.view.Ret;
 import play.data.validation.Validation;
@@ -26,16 +26,18 @@ public class PaymentUnits extends Controller {
     }
 
     public static void fixValue(Long id, Float fixValue, String reason) {
-        PaymentUnit unit = PaymentUnit.findById(id);
+        PaymentUnit paymentUnit = PaymentUnit.findById(id);
         Validation.required("fixValue", fixValue);
         if(Validation.hasErrors())
             renderJSON(new Ret(false, Validation.errors().toString()));
 
-        unit.fixValue(fixValue, reason);
-        if(Validation.hasErrors())
-            renderJSON(new Ret(false, J.G(Validation.errors())));
-        else
-            renderJSON(new Ret("更新成功."));
+        paymentUnit.fixValue(fixValue, reason);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("修正值更新成功.");
+        }
+        Applys.procure(paymentUnit.procureUnit.deliveryment.apply.id);
     }
 
 }

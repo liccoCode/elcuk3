@@ -7,137 +7,150 @@
 #{info_row title:'采购请款单' /}
 #{list items:apply.deliveryments, as:'dmt'}
 <div class="row-fluid">
-    <div class="span3">
-        <dl class="dl-horizontal">
-            <dt>#</dt>
-            <dd>${dmt.id}</dd>
-            <dt>状态</dt>
-            <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
-            <dt>供应商</dt>
-            <dd>${dmt.cooperator.fullName}</dd>
-            <dt>交货进度</dt>
-            #{set progress:dmt.deliveryProcress() /}
-            <dd>${(progress._1 / progress._2).format('#.##%')}</dd>
-            <dt>创建时间</dt>
-            <dd>${dmt.createDate}</dd>
-            <dt>下单时间</dt>
-            <dd>${dmt.orderTime}</dd>
-            #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
-            <dt>最后交货时间</dt>
-            <dd>${twoDeliveryDate._2}</dd>
-        </dl>
-    </div>
+  <div class="span3">
+    <dl class="dl-horizontal">
+      <dt>#</dt>
+      <dd>${dmt.id}</dd>
+      <dt>状态</dt>
+      <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
+      <dt>供应商</dt>
+      <dd>${dmt.cooperator.fullName}</dd>
+      <dt>交货进度</dt>
+        #{set progress:dmt.deliveryProcress() /}
+      <dd>${(progress._1 / progress._2).format('#.##%')}</dd>
+      <dt>创建时间</dt>
+      <dd>${dmt.createDate}</dd>
+      <dt>下单时间</dt>
+      <dd>${dmt.orderTime}</dd>
+        #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
+      <dt>最后交货时间</dt>
+      <dd>${twoDeliveryDate._2}</dd>
+    </dl>
+  </div>
 
-    <div class="span9">
-        <table class="table table-bordered table-condensed">
-            <tr>
-                <th>#</th>
-                <th>SKU</th>
-                <th>Selling</th>
-                <th>数量(计划/交货)</th>
-                <th>单价</th>
-                <th>单价*数量</th>
-                <th>阶段</th>
-                <th>抵达货代</th>
-                <th>FBA</th>
-            </tr>
-            #{list items:dmt.units, as:'procureUnit'}
-                <tr>
-                    <td>
-                        #{set pid:procureUnit.id/}
-                    ${procureUnit.id}
-                        <span class="badge ${procureUnit.badgeInfo()}">${procureUnit.fees.size()
-                        }</span>
-                    </td>
-                    <td>
-                        <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
-                    </td>
-                    <td>
-                        <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
-                    </td>
-                    <td data-toggle="toggle" data-target="#unit_${pid}">
-                        <i class="icon-reorder"></i>
-                    ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
-                    </td>
-                    <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
-                    <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.qty() * procureUnit.attrs.price}</td>
-                    <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage}</td>
-                    <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
-                    <td>
-                        #{if procureUnit.shipItem.fba}
-                            <a target="_blank" href="@{Shipments.show(procureUnit.shipItem.shipment.id)}#${procureUnit.shipItem.id}">
-                            ${procureUnit.shipItem.fba.shipmentId} #${procureUnit.shipItem.id}
-                            </a>
-                        #{/if}
-                        #{else }
-                            暂时还没有 FBA
-                        #{/else}
-                    </td>
-                </tr>
-                <tr id="unit_${pid}" style="display:none">
-                    <td colspan="9">
-                        <div class="row-fluid">
-                            <div class="span1">
-                                #{ifnot procureUnit.hasPrePay()}
-                                    #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
-                                        <input type="submit" value="申请预付款" class="btn">
+  <div class="span9">
+    <table class="table table-bordered table-condensed">
+      <tr>
+        <th>#</th>
+        <th>SKU</th>
+        <th>Selling</th>
+        <th>数量(计划/交货)</th>
+        <th>单价</th>
+        <th>单价*数量</th>
+        <th>阶段</th>
+        <th>抵达货代</th>
+        <th>FBA</th>
+      </tr>
+        #{list items:dmt.units, as:'procureUnit'}
+          <tr>
+            <td>
+                #{set pid:procureUnit.id/}
+            ${procureUnit.id}
+              <span class="badge ${procureUnit.badgeInfo()}">${procureUnit.fees.size()}</span>
+            </td>
+            <td>
+              <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
+            </td>
+            <td>
+              <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
+            </td>
+            <td data-toggle="toggle" data-target="#unit_${pid}">
+              <i class="icon-reorder"></i>
+            ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
+            </td>
+            <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
+            <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.qty() * procureUnit.attrs.price}</td>
+            <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage}</td>
+            <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
+            <td>
+                #{if procureUnit.shipItem.fba}
+                  <a target="_blank" href="@{Shipments.show(procureUnit.shipItem.shipment.id)}#${procureUnit.shipItem.id}">
+                  ${procureUnit.shipItem.fba.shipmentId} #${procureUnit.shipItem.id}
+                  </a>
+                #{/if}
+                #{else }
+                  暂时还没有 FBA
+                #{/else}
+            </td>
+          </tr>
+          <tr id="unit_${pid}" style="display:none">
+            <td colspan="9">
+              <div class="row-fluid">
+                <div class="span1">
+                    #{ifnot procureUnit.hasPrePay()}
+                        #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
+                          <input type="submit" value="申请预付款" class="btn">
+                        #{/form}
+                    #{/ifnot}
+                    #{ifnot procureUnit.hasTailPay()}
+                        #{form @Procures.blank()}
+                          <input type="submit" value="申请尾款" class="btn">
+                        #{/form}
+                    #{/ifnot}
+                </div>
+                <div class="span11">
+                    #{if procureUnit.fees.size() > 0}
+                      <table class="table table-condensed" style="margin-bottom:0">
+                        <tr>
+                          <th></th>
+                          <th>#</th>
+                          <th>状态</th>
+                          <th>请款类型</th>
+                          <th>请款金额</th>
+                          <th>修正值</th>
+                        </tr>
+                          #{list items:procureUnit.fees, as:'fee'}
+                            <tr>
+                              <td>
+                                <div class="btn-group">
+                                  <a class="btn dropdown-toggle" data-toggle='dropdown' href="#">
+                                    Action
+                                    <span class="caret"></span>
+                                  </a>
+                                  <ul class="dropdown-menu">
+                                    <li>
+                                      <a href="">哈哈</a>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </td>
+                              <td>${fee.id}</td>
+                              <td style="color:${fee.stateColor()}">${fee.state.label()}</td>
+                              <td>${fee.feeType.nickName}</td>
+                              <td>${fee.currency.symbol()} ${fee.amount}</td>
+                              <td>
+                                <div class="row-fluid">
+                                    #{form @PaymentUnits.fixValue(fee.id), class:'form-inline', method:'POST'}
+                                      <div class="input-prepend">
+                                        <span class="add-on">${fee.currency.symbol()}</span>
+                                        <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
+                                      </div>
+                                      <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
+                                      <input type="submit" value="修正" class="btn">
                                     #{/form}
-                                #{/ifnot}
-                                #{ifnot procureUnit.hasTailPay()}
-                                    #{form @Procures.blank()}
-                                        <input type="submit" value="申请尾款" class="btn">
-                                    #{/form}
-                                #{/ifnot}
-                            </div>
-                            <div class="span11">
-                                #{if procureUnit.fees.size() > 0}
-                                    <table class="table table-condensed" style="margin-bottom:0">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>状态</th>
-                                            <th>请款类型</th>
-                                            <th>请款金额</th>
-                                            <th>修正值</th>
-                                        </tr>
-                                        #{list items:procureUnit.fees, as:'fee'}
-                                            <tr>
-                                                <td>${fee.id}</td>
-                                                <td style="color:${fee.stateColor()}">${fee.state.label()}</td>
-                                                <td>${fee.feeType.nickName}</td>
-                                                <td>${fee.currency.symbol()} ${fee.amount}</td>
-                                                <td>
-                                                    <div class="row-fluid">
-                                                        #{form @PaymentUnits.fixValue(fee.id), class:'form-inline', method:'POST'}
-                                                            <div class="input-prepend">
-                                                                <span class="add-on">${fee.currency.symbol()}</span>
-                                                                <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
-                                                            </div>
-                                                            <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
-                                                            <input type="submit" value="修正" class="btn">
-                                                        #{/form}
-                                                    </div>
-                                                    <div class="row-fluid">
-                                                        <ul>
-                                                            #{list items:fee.records(),  as:'rcd'}
-                                                                <li>${rcd.message}</li>
-                                                            #{/list}
-                                                        </ul>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        #{/list}
-                                    </table>
-                                #{/if}
-                                #{else }
-                                    <span class="text-center">没有请款记录</span>
-                                #{/else}
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            #{/list}
-        </table>
-    </div>
+                                </div>
+                                <div class="row-fluid">
+                                  <ul>
+                                      #{list items:fee.records(),  as:'rcd'}
+                                        <li>${rcd.message}</li>
+                                      #{/list}
+                                  </ul>
+                                </div>
+                              </td>
+                            </tr>
+                          #{/list}
+                      </table>
+                    #{/if}
+                    #{else }
+                      <span class="text-center">没有请款记录</span>
+                    #{/else}
+                </div>
+              </div>
+            </td>
+          </tr>
+        #{/list}
+    </table>
+  </div>
 </div>
 <hr>
 #{/list}
