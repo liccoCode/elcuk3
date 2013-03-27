@@ -38,20 +38,6 @@ import java.util.*;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
-    /*public static class PlanDateEqual implements Predicate {
-        // 期待的日期
-        private Date date;
-
-        PlanDateEqual(Date date) {
-            this.date = date;
-        }
-
-        @Override
-        public boolean evaluate(Object o) {
-            Shipment ship = (Shipment) o;
-            return Dates.morning(ship.planBeginDate).equals(Dates.morning(this.date));
-        }
-    }*/
 
     public Shipment() {
         this.createDate = new Date();
@@ -909,7 +895,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public static List<iExpress> Express() {
         return Arrays.asList(iExpress.values());
     }
-
 
 
 }
