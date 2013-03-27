@@ -545,7 +545,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public PaymentUnit billingTailPay() {
         /**
          * 0. 基本检查
-         * 1.
+         * 1. 检查是否已经存在一个尾款
+         * 2. 申请尾款
          */
         this.billingValid();
         if(this.hasTailPay())
@@ -556,6 +557,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         fee.feeType = FeeType.procurement();
         fee.amount = this.leftAmount();
         return fee.save();
+    }
+
+    /**
+     * 1. 采购计划所在的采购单需要拥有一个请款单
+     * 2. 采购计划需要已经交货
+     */
+    private void billingValid() {
+        if(this.deliveryment.apply == null)
+            Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.deliveryment.id));
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            Validation.addError("", "请确定采购计划的交货数量(交货)");
     }
 
     /**
@@ -587,17 +599,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float totalAmount() {
         return this.qty() * this.attrs.price;
-    }
-
-    /**
-     * 1. 采购计划所在的采购单需要拥有一个请款单
-     * 2. 采购计划需要已经交货
-     */
-    private void billingValid() {
-        if(this.deliveryment.apply == null)
-            Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.deliveryment.id));
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
-            Validation.addError("", "请确定采购计划的交货数量(交货)");
     }
 
     /**
