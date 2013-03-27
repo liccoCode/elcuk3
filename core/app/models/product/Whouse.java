@@ -3,6 +3,7 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
 import models.market.Account;
+import models.market.M;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -151,20 +152,20 @@ public class Whouse extends Model {
                           .find(planShipments,new PlanDateEqual(tmp.toDate()));
             if(exist!=null)
                 continue;
-
+            M type=this.account.type;
             if(tmp.dayOfWeek().get() == 2) {
                 checkWhouseNewShipment(tmp.toDate(), Shipment.T.EXPRESS,tmp.plus(7).toDate());
-                if(this.account.isAUK||this.account.isAUS)
+                if(type.equals(M.AMAZON_UK)||type.equals(M.AMAZON_US))
                    checkWhouseNewShipment(tmp.toDate(), Shipment.T.SEA,tmp.plus(45).toDate());
             }else if(tmp.dayOfWeek().get() == 3){
-                if(this.account.isADE)
-                checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
+                if(type.equals(M.AMAZON_DE))
+                    checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
                 checkWhouseNewShipment(tmp.toDate(),Shipment.T.AIR,tmp.plus(14).toDate());
             }else if(tmp.dayOfWeek().get()==4){
                 checkWhouseNewShipment(tmp.toDate(),Shipment.T.EXPRESS,tmp.plus(7).toDate());
                 //除 GB US DE 创建的时间不同,其他国家的都是周4
-                if(!this.account.isADE&&!this.account.isAUS&&!this.account.isAUK)
-                checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
+                if(!type.equals(M.AMAZON_DE)&&!type.equals(M.AMAZON_UK)&&!type.equals(M.AMAZON_US))
+                     checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
             }else
                 checkWhouseNewShipment(tmp.toDate(),Shipment.T.AIR,tmp.plus(14).toDate());
         }

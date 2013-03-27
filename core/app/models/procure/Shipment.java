@@ -876,7 +876,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
-        //指定接收仓库
+        //确定仓库接收的运输单
         List<Whouse> whs = Whouse.all().fetch();
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < whs.size(); i++) {
