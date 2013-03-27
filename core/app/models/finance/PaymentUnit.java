@@ -116,6 +116,9 @@ public class PaymentUnit extends Model {
 
     public Date createdAt;
 
+    /**
+     * 总修正值, 而非单个修正值
+     */
     @Required
     public float fixValue = 0;
 
@@ -157,7 +160,11 @@ public class PaymentUnit extends Model {
 
     public PaymentUnit remove() {
         if(this.isApproval())
-            throw new PaymentException("请款已经被批准, 请向财务确定删除.");
+            Validation.addError("", "请款已经被批准, 请向财务确定删除.");
+        if(this.remove)
+            Validation.addError("", "已经删除了");
+
+        if(Validation.hasErrors()) return null;
 
         this.remove = true;
         return this.save();
@@ -173,7 +180,10 @@ public class PaymentUnit extends Model {
         /**
          * 1. 变更状态允许
          * 2. 原因填写
+         * 3. 删除检查
          */
+        if(this.remove)
+            Validation.addError("", "已经删除了");
         if(!Arrays.asList(S.APPLY, S.APPROVAL, S.DENY).contains(this.state))
             Validation.addError("", this.state.label() + " 状态拒绝 '驳回'");
         if(StringUtils.isBlank(reason))
@@ -193,20 +203,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return this.amount + this.fixValueAmount();
-    }
-
-    /**
-     * FixValue 计算的总价
-     *
-     * @return
-     */
-    public float fixValueAmount() {
-        if(this.procureUnit != null)
-            return this.fixValue * this.procureUnit.qty();
-            //TODO: 还有其他类型的 FixValue 需要补全
-        else
-            return 0;
+        return this.amount + this.fixValue;
     }
 
     /**
@@ -274,16 +271,19 @@ public class PaymentUnit extends Model {
      * 修改修正价格;
      * 1. 如果属于驳回状态, 那么自动变为已申请状态
      * 2. 如果属于已支付状态, 不允许再修改修正价格
+     * 3. 不允许修改删除的
      *
      * @param fixValue
      */
     public void fixValue(Float fixValue, String reason) {
         if(this.state == S.PAID)
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
-        if(this.fixValue == fixValue)
+        if(this.fixValue == fixValue && fixValue != 0)
             Validation.addError("", "修正值没有修改");
         if(StringUtils.isBlank(reason))
             Validation.addError("", "修改修正价, 必须填写原因");
+        if(this.remove)
+            Validation.addError("", "此请款已经被删除, 无法修改.");
 
         if(Validation.hasErrors()) return;
 

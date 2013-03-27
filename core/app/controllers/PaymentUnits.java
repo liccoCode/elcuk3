@@ -1,6 +1,5 @@
 package controllers;
 
-import exception.PaymentException;
 import helper.Webs;
 import models.finance.PaymentUnit;
 import models.view.Ret;
@@ -17,12 +16,12 @@ public class PaymentUnits extends Controller {
 
     public static void destroy(Long id) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
-        try {
-            payUnit.remove();
-            renderJSON(new Ret(true, String.format("PaymentUnit %s 删除成功.", id)));
-        } catch(PaymentException e) {
-            renderJSON(new Ret(false, e.getMessage()));
-        }
+        payUnit.remove();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("删除成功");
+        Applys.procure(payUnit.deliveryment.apply.id);
     }
 
     public static void fixValue(Long id, Float fixValue, String reason) {
