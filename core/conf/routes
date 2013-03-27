@@ -43,6 +43,9 @@ GET     /orders/warnfix                                     Orders.warrningOrder
 GET     /payments                                           Payments.index
 GET     /payment/rates                                      Payments.rates
 POST    /payment/files/upload                               Payments.uploads
+GET     /payment/{id}                                       Payments.show
+POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
+POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
 
 # ProcureUnits
 POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay

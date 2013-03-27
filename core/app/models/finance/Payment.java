@@ -146,36 +146,6 @@ public class Payment extends Model {
         a.save();
     }
 
-    public int approval(List<Long> unitIds) {
-        int approvalNum = 0;
-        for(PaymentUnit unit : this.units) {
-            if(!unitIds.contains(unit.id)) continue;
-            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state)) {
-                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.label()));
-                continue;
-            }
-            approvalNum++;
-            unit.state = PaymentUnit.S.APPROVAL;
-            unit.save();
-        }
-        return approvalNum;
-    }
-
-    public int deny(List<Long> unitIds) {
-        int denyNum = 0;
-        for(PaymentUnit unit : this.units) {
-            if(!unitIds.contains(unit.id)) continue;
-            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state)) {
-                Validation.addError("", String.format("%s 状态拒绝 '驳回'", unit.state.label()));
-                continue;
-            }
-            denyNum++;
-            unit.state = PaymentUnit.S.DENY;
-            unit.save();
-        }
-        return denyNum;
-    }
-
     /**
      * 从 PaymentUnits 中提取 PaymentTarget, 如果没有 PaymentUnit 那么则返回所有 PaymentTargets
      *
@@ -308,17 +278,36 @@ public class Payment extends Model {
     }
 
     /**
-     * 返回和这个请款单有链接的请款人
+     * 对付款单所涉及的某些采购计划进行确认操作
      *
-     * @return
+     * @param paymentUnitIds
      */
-    public List<User> applyers() {
-        Set<User> users = new HashSet<User>();
-        for(PaymentUnit unit : this.units()) {
-            if(unit.payee == null) throw new PaymentException("请款项目的请款人不存在? 请联系 IT!");
-            users.add(unit.payee);
+    public void unitsApproval(List<Long> paymentUnitIds) {
+        /**
+         * 1. 判断确认是否都是这个付款单的, 如果有其他的报错
+         * 2. 判断软删除的, 软删除的不允许处理
+         * 3. 判断状态是允许的
+         */
+        List<Long> existIds = new ArrayList<Long>();
+        for(PaymentUnit fee : this.units) {
+            existIds.add(fee.id);
         }
-        return new ArrayList<User>(users);
+        for(Long expectId : paymentUnitIds) {
+            if(!existIds.contains(expectId))
+                Validation.addError("", expectId + " 不属于付款单 " + this.paymentNumber);
+            if(PaymentUnit.<PaymentUnit>findById(expectId).remove)
+                Validation.addError("", expectId + " 请款已经软删除");
+        }
+        for(PaymentUnit unit : this.units) {
+            if(!Arrays.asList(PaymentUnit.S.APPLY).contains(unit.state))
+                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.label()));
+        }
+
+        if(Validation.hasErrors()) return;
+        for(PaymentUnit unit : this.units) {
+            unit.state = PaymentUnit.S.APPROVAL;
+            unit.save();
+        }
     }
 
 

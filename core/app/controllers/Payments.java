@@ -11,6 +11,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -36,6 +37,24 @@ public class Payments extends Controller {
         renderText(doc.select("table table table").get(0).outerHtml());
     }
 
+    //TODO 查看需要权限
+    public static void show(Long id) {
+        Payment payment = Payment.findById(id);
+        render(payment);
+    }
+
+    //TODO approval 需要权限
+    public static void paymentUnitApproval(Long id, List<Long> paymentUnitIds) {
+        checkAuthenticity();
+        Payment payment = Payment.findById(id);
+        payment.unitsApproval(paymentUnitIds);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("批复成功");
+        show(id);
+    }
+
     // --------- File Resources -----------
     public static void uploads(Attach a) {
         a.setUpAttachName();
@@ -49,7 +68,5 @@ public class Payments extends Controller {
         }
         renderJSON(J.G(a));
     }
-
-    // ----------- Deliveryment Nested payments Resources ---------------
 
 }

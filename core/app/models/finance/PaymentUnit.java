@@ -5,12 +5,14 @@ import helper.Currency;
 import models.ElcukRecord;
 import models.User;
 import models.procure.*;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -76,6 +78,7 @@ public class PaymentUnit extends Model {
         this.amount = procureUnit.attrs.price * procureUnit.qty();
         this.currency = procureUnit.attrs.currency;
         this.payment = Payment.buildPayment(this.deliveryment, this.currency);
+        this.payee = User.current();
         this.payment.pApply = this.deliveryment.apply;
         this.payment.save();
     }
@@ -160,6 +163,30 @@ public class PaymentUnit extends Model {
         return this.save();
     }
 
+
+    /**
+     * 驳回
+     *
+     * @return
+     */
+    public void deny(String reason) {
+        /**
+         * 1. 变更状态允许
+         * 2. 原因填写
+         */
+        if(!Arrays.asList(S.APPLY, S.APPROVAL, S.DENY).contains(this.state))
+            Validation.addError("", this.state.label() + " 状态拒绝 '驳回'");
+        if(StringUtils.isBlank(reason))
+            Validation.addError("", "驳回的原因必须填写");
+
+        if(Validation.hasErrors()) return;
+        this.state = S.DENY;
+        this.save();
+        new ElcukRecord(Messages.get("paymentunit.deny"),
+                Messages.get("paymentunit.deny.msg", User.current().username, reason),
+                this.id + "").save();
+    }
+
     /**
      * 计算 Amount 与 Fix 的合计
      *
@@ -226,12 +253,21 @@ public class PaymentUnit extends Model {
     }
 
     /**
-     * 所有与 PaymentUnit 相关的执行记录
+     * 调整修正价的日志
      *
      * @return
      */
-    public List<ElcukRecord> records() {
+    public List<ElcukRecord> fixValueRecords() {
         return ElcukRecord.records(this.id + "", Messages.get("paymentunit.fixValue"));
+    }
+
+    /**
+     * 拒绝操作的日志
+     *
+     * @return
+     */
+    public List<ElcukRecord> denyRecords() {
+        return ElcukRecord.records(this.id + "", Messages.get("paymentunit.deny"));
     }
 
     /**
@@ -246,6 +282,8 @@ public class PaymentUnit extends Model {
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
         if(this.fixValue == fixValue)
             Validation.addError("", "修正值没有修改");
+        if(StringUtils.isBlank(reason))
+            Validation.addError("", "修改修正价, 必须填写原因");
 
         if(Validation.hasErrors()) return;
 

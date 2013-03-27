@@ -40,4 +40,14 @@ public class PaymentUnits extends Controller {
         Applys.procure(paymentUnit.procureUnit.deliveryment.apply.id);
     }
 
+    public static void deny(Long paymentId, Long id, String reason) {
+        PaymentUnit paymentUnit = PaymentUnit.findById(id);
+        paymentUnit.deny(reason);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("成功驳回");
+        Payments.show(paymentId);
+    }
+
 }

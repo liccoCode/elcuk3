@@ -133,8 +133,8 @@
                                 </div>
                                 <div class="row-fluid">
                                   <ul>
-                                      #{list items:fee.records(),  as:'rcd'}
-                                        <li>${rcd.message}</li>
+                                      #{list fee.fixValueRecords()}
+                                        <li>${_.message}</li>
                                       #{/list}
                                   </ul>
                                 </div>
@@ -172,7 +172,9 @@
     </tr>
   #{list items:apply.payments, as:'payment'}
     <tr>
-      <td>${payment.id}</td>
+      <td>
+        <a href="@{Payments.show(payment.id)}" target="_blank">${payment.id}</a>
+      </td>
       <td>${payment.paymentNumber}</td>
       <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
         #{if payment.currency == helper.Currency.CNY}

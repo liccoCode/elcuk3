@@ -1,0 +1,105 @@
+#{extends 'main_full.html'/}
+#{set title:"${payment.paymentNumber}" /}
+#{set 'moreScripts'}
+    #{script 'payments/show.coffee'/}
+#{/set}
+
+#{flash_alert /}
+#{form @Payments.paymentUnitApproval(payment.id), method:'POST'}
+<div class="row-fluid" xmlns="http://www.w3.org/1999/html">
+  <div class="btn-toolbar">
+    <input type="submit" class="btn btn-info" value="批准"/>
+  </div>
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th></th>
+      <th>采购计划</th>
+      <th>交货日期</th>
+      <th>SKU</th>
+      <th>单价</th>
+      <th>修正价</th>
+      <th>数量</th>
+      <th>付款类型</th>
+      <th>付款金额</th>
+      <th>请款人</th>
+      <th>状态</th>
+      <th>#</th>
+    </tr>
+      #{list items:payment.units(), as:'paymentUnit'}
+        <tr>
+            #{set punit: paymentUnit.procureUnit/}
+            #{set records:paymentUnit.fixValueRecords()/}
+            #{set denyRecords: paymentUnit.denyRecords()/}
+          <td>
+            <label>
+              <input type="checkbox" name="paymentUnitIds" value="${paymentUnit.id}">
+            </label>
+          </td>
+          <td>${paymentUnit.deliveryment.id} #${punit.id}</td>
+          <td>${punit.attrs.deliveryDate}</td>
+          <td>${punit.sku}</td>
+          <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
+            #{if (records.size() + denyRecords.size()) > 0}
+              <td data-toggle='toggle' data-target='#unit_${paymentUnit.id}'>
+                <i class="icon-reorder"></i>
+              ${payment.currency.symbol()} ${paymentUnit.fixValue}
+              </td>
+            #{/if}
+            #{else }
+              <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
+            #{/else}
+          <td>${punit.qty()}</td>
+          <td>${paymentUnit.feeType.nickName}</td>
+          <td>${payment.currency.symbol()} ${paymentUnit.amount()}</td>
+          <td>${paymentUnit.payee.username}</td>
+          <td>
+            <span class="label ${paymentUnit.stateLabel()}">${paymentUnit.state.label()}</span>
+              #{if paymentUnit.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
+                <button url='@{PaymentUnits.deny(payment.id, paymentUnit.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
+                  驳回
+                </button>
+              #{/if}
+          </td>
+          <td>${payment.pApply.serialNumber} #${paymentUnit.id}</td>
+        </tr>
+        <tr id="unit_${paymentUnit.id}" style="display:none">
+          <td colspan="4"></td>
+          <td colspan="4">
+              #{if records.size() > 0}
+                <ul>
+                    #{list records}
+                      <li>${_.message}</li>
+                    #{/list}
+                </ul>
+              #{/if}
+          </td>
+          <td colspan="4">
+              #{if denyRecords.size() > 0}
+                <ul>
+                    #{list denyRecords}
+                      <li>${_.message}</li>
+                    #{/list}
+                </ul>
+              #{/if}
+          </td>
+        </tr>
+      #{/list}
+  </table>
+</div>
+#{/form}
+
+<div id="deny_modal" class="modal hide fade">
+  <form action="#" method="post" id="deny_form">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3><span class="text-info" id="deny_title"></span></h3>
+    </div>
+    <div class="modal-body">
+      <label for="deny_reason">驳回原因</label>
+      <textarea id="deny_reason" rows="3" class="span6" name="reason"></textarea>
+    </div>
+    <div class="modal-footer">
+      <input type="submit" class="btn btn-danger" value="驳回">
+    </div>
+  </form>
+</div>
