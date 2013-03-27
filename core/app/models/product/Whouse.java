@@ -9,6 +9,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -147,11 +148,12 @@ public class Whouse extends Model {
     public void checkWhouseNewShipment(List<Shipment> planShipments,DateTime now){
         // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 GB:2 US:2 DE:3
         for(int i = 0; i <60 ; i++) {
-           DateTime tmp=now.plus(i);
+            DateTime tmp=now.plusDays(i);
             Object exist = CollectionUtils
                           .find(planShipments,new PlanDateEqual(tmp.toDate()));
             if(exist!=null)
                 continue;
+
             M type=this.account.type;
             if(tmp.dayOfWeek().get() == 2) {
                 checkWhouseNewShipment(tmp.toDate(), Shipment.T.EXPRESS,tmp.plus(7).toDate());
@@ -180,16 +182,8 @@ public class Whouse extends Model {
     private void  checkWhouseNewShipment(Date planBeginDate,Shipment.T shipmentType,Date arriveDate){
         if(Shipment.count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",planBeginDate, this, shipmentType, Shipment.S.PLAN, Shipment.S.CONFIRM) > 0)
             return ;
-        Shipment shipment = new Shipment();
-        shipment.id = Shipment.id();
-        shipment.cycle = true;
-        shipment.planBeginDate = planBeginDate;
-        shipment.planArrivDate = arriveDate;
-        shipment.whouse = this;
-        shipment.type = shipmentType;
-        shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
-                Dates.date2Date(shipment.planBeginDate));
-        shipment.save();
+        Shipment.create(planBeginDate,this,shipmentType,arriveDate);
+
     }
 
     class PlanDateEqual implements Predicate {

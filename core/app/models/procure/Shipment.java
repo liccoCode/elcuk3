@@ -39,6 +39,7 @@ import java.util.*;
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
 
+
     public Shipment() {
         this.createDate = new Date();
         this.state = S.PLAN;
@@ -865,9 +866,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.all().fetch();
         DateTime now = new DateTime(Dates.morning(new Date()));
-        for(int i = 0; i < whs.size(); i++) {
-            whs.get(i).checkWhouseNewShipment(planedShipments,now);
-        }
+        for(Whouse whouse :whs)
+            whouse.checkWhouseNewShipment(planedShipments,now);
+
 
         // 加载
         StringBuilder where = new StringBuilder("cycle=? AND state IN (?,?)");
@@ -896,5 +897,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return Arrays.asList(iExpress.values());
     }
 
+    /**
+     * 新建运输单
+     * @param planBeginDate 计划开始时间
+     * @param whouse    接受仓库
+     * @param type      运输方式
+     * @param arriveDate 预计到达时间
+     */
+    public static void create(Date planBeginDate,Whouse whouse,T type,Date arriveDate){
+        Shipment shipment = new Shipment();
+        shipment.id = Shipment.id();
+        shipment.cycle = true;
+        shipment.planBeginDate = planBeginDate;
+        shipment.planArrivDate = arriveDate;
+        shipment.whouse = whouse;
+        shipment.type = type;
+        shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
+                Dates.date2Date(shipment.planBeginDate));
+        shipment.save();
+    }
 
 }
