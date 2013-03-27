@@ -75,6 +75,9 @@ public class PaymentUnit extends Model {
         this.deliveryment = procureUnit.deliveryment;
         this.amount = procureUnit.attrs.price * procureUnit.qty();
         this.currency = procureUnit.attrs.currency;
+        this.payment = Payment.buildPayment(this.deliveryment, this.currency);
+        this.payment.pApply = this.deliveryment.apply;
+        this.payment.save();
     }
 
     @ManyToOne

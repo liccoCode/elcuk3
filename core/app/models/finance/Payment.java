@@ -34,7 +34,7 @@ public class Payment extends Model {
          */
         WAITING {
             @Override
-            public String toString() {
+            public String label() {
                 return "等待支付";
             }
         },
@@ -43,17 +43,19 @@ public class Payment extends Model {
          */
         PAID {
             @Override
-            public String toString() {
+            public String label() {
                 return "完成支付";
             }
         },
 
         CLOSE {
             @Override
-            public String toString() {
+            public String label() {
                 return "处理完毕";
             }
-        }
+        };
+
+        public abstract String label();
 
     }
 
@@ -149,7 +151,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units) {
             if(!unitIds.contains(unit.id)) continue;
             if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state)) {
-                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.toString()));
+                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.label()));
                 continue;
             }
             approvalNum++;
@@ -164,7 +166,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units) {
             if(!unitIds.contains(unit.id)) continue;
             if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(unit.state)) {
-                Validation.addError("", String.format("%s 状态拒绝 '驳回'", unit.state.toString()));
+                Validation.addError("", String.format("%s 状态拒绝 '驳回'", unit.state.label()));
                 continue;
             }
             denyNum++;
@@ -210,7 +212,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units) {
             if(unit.remove) continue;
             if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state)) {
-                Validation.addError("", String.format("%s 状态拒绝 '支付'", unit.state.toString()));
+                Validation.addError("", String.format("%s 状态拒绝 '支付'", unit.state.label()));
                 break;
             }
         }
@@ -324,12 +326,12 @@ public class Payment extends Model {
      * 制作一个 Deliveryment 的支付单;(自己为自己的工厂方法)
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
-     * 3. 出于等待支付状态
+     * 3. 处于等待支付状态
      * 4. 额度上线 6W 美金
      *
      * @return
      */
-    public static Payment buildPayment(Deliveryment deliveryment) {
+    public static Payment buildPayment(Deliveryment deliveryment, Currency currency) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
@@ -344,6 +346,7 @@ public class Payment extends Model {
                         String.format("请添加合作伙伴 %s 的支付方式", deliveryment.cooperator.fullName));
             payment.cooperator = deliveryment.cooperator;
             payment.target = deliveryment.cooperator.paymentMethods.get(0);
+            payment.currency = currency;
             payment.generatePaymentNumber().save();
         }
         return payment;
@@ -366,7 +369,7 @@ public class Payment extends Model {
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
                 Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
-        this.paymentNumber = String.format("%s-%03d-%s",
+        this.paymentNumber = String.format("付款单[%s-%03d-%s]",
                 this.cooperator.name, count, DateTime.now().toString("yy"));
         return this;
     }

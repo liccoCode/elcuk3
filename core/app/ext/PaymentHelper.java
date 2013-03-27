@@ -39,7 +39,7 @@ public class PaymentHelper extends JavaExtensions {
                 return "#999999";
             case WAITING:
             default:
-                return "#B34745";
+                return "#F8941D";
         }
     }
 

@@ -1,7 +1,8 @@
 package controllers;
 
+import exception.PaymentException;
 import helper.Webs;
-import models.finance.PaymentUnit;
+import models.finance.FeeType;
 import models.procure.ProcureUnit;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -20,11 +21,15 @@ public class ProcureUnits extends Controller {
      */
     public static void billingPrePay(Long id, Long applyId) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        PaymentUnit fee = unit.billingPrePay();
+        try {
+            unit.billingPrePay();
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
-            flash.success("%s 请款成功", fee.feeType.nickName);
+            flash.success("%s 请款成功", FeeType.cashpledge().nickName);
         Applys.procure(applyId);
     }
 
@@ -35,11 +40,15 @@ public class ProcureUnits extends Controller {
      */
     public static void billingTailPay(Long id, Long applyId) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        PaymentUnit fee = unit.billingTailPay();
+        try {
+            unit.billingTailPay();
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
-            flash.success("%s 请款成功", fee.feeType.nickName);
+            flash.success("%s 请款成功", FeeType.procurement().nickName);
         Applys.procure(applyId);
     }
 

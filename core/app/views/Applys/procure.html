@@ -158,4 +158,33 @@
 #{/list}
 
 #{warning_row title:'相关的付款单' /}
-1. 支付完成的与没有支付的区分开<br>
+<div class="row-fluid">
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th>#</th>
+      <th>支付单编号</th>
+      <th>状态</th>
+      <th>总金额</th>
+      <th>已申请</th>
+      <th>驳回</th>
+      <th>批准</th>
+      <th>已支付</th>
+    </tr>
+  #{list items:apply.payments, as:'payment'}
+    <tr>
+      <td>${payment.id}</td>
+      <td>${payment.paymentNumber}</td>
+      <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
+        #{if payment.currency == helper.Currency.CNY}
+          <td>${payment.currency.symbol()} ${payment.totalFees()._2}</td>
+        #{/if}
+        #{elseif payment.currency == helper.Currency.USD}
+          <td>${payment.currency.symbol()} ${payment.totalFees()._1}</td>
+        #{/elseif}
+        #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
+          <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>
+        #{/list}
+    </tr>
+  #{/list}
+  </table>
+</div>
