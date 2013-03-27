@@ -46,13 +46,15 @@
             <td>
                 #{set pid:procureUnit.id/}
             ${procureUnit.id}
-              <span class="badge ${procureUnit.badgeInfo()}">${procureUnit.fees.size()}</span>
             </td>
             <td>
               <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
             </td>
             <td>
               <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
+                #{list items:procureUnit.fees(), as:'fee'}
+                  <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
+                #{/list}
             </td>
             <td data-toggle="toggle" data-target="#unit_${pid}">
               <i class="icon-reorder"></i>
@@ -83,7 +85,7 @@
                         #{/form}
                     #{/ifnot}
                     #{ifnot procureUnit.hasTailPay()}
-                        #{form @Procures.blank()}
+                        #{form @ProcureUnits.billingTailPay(pid, apply.id), method:'POST'}
                           <input type="submit" value="申请尾款" class="btn">
                         #{/form}
                     #{/ifnot}
@@ -154,3 +156,6 @@
 </div>
 <hr>
 #{/list}
+
+#{warning_row title:'相关的付款单' /}
+1. 支付完成的与没有支付的区分开<br>

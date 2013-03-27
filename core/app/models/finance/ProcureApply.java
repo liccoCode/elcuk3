@@ -41,6 +41,24 @@ public class ProcureApply extends Apply {
     @ManyToOne
     public User applier;
 
+    public void generateSerialNumber(Cooperator cooperator) {
+        /**
+         * 1. 确定当前的年份
+         * 2. 根据年份 + cooperator 确定是今天的第几次请款
+         * 3. 生成 PaymentNumber
+         */
+        this.cooperator = cooperator;
+        String year = DateTime.now().toString("yyyy");
+        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
+        long count = ProcureApply.count("cooperator=? AND createdAt>=? AND createdAt<=?",
+                this.cooperator,
+                Dates.cn(String.format("%s-01-01", year)).toDate(),
+                Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
+        this.serialNumber = String
+                .format("%s-%03d-%s", this.cooperator.name, count, DateTime.now().toString("yy"));
+    }
+
+
     /**
      * 通过 DeliverymentIds 生成一份采购请款单
      *
@@ -75,22 +93,5 @@ public class ProcureApply extends Apply {
             dmt.save();
         }
         return apply;
-    }
-
-    public void generateSerialNumber(Cooperator cooperator) {
-        /**
-         * 1. 确定当前的年份
-         * 2. 根据年份 + cooperator 确定是今天的第几次请款
-         * 3. 生成 PaymentNumber
-         */
-        this.cooperator = cooperator;
-        String year = DateTime.now().toString("yyyy");
-        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
-        long count = ProcureApply.count("cooperator=? AND createdAt>=? AND createdAt<=?",
-                this.cooperator,
-                Dates.cn(String.format("%s-01-01", year)).toDate(),
-                Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
-        this.serialNumber = String
-                .format("%s-%03d-%s", this.cooperator.name, count, DateTime.now().toString("yy"));
     }
 }

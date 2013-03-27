@@ -71,7 +71,6 @@ public class PaymentUnit extends Model {
 
     public PaymentUnit(ProcureUnit procureUnit) {
         this();
-        this.feeType = FeeType.cashpledge();
         this.procureUnit = procureUnit;
         this.deliveryment = procureUnit.deliveryment;
         this.amount = procureUnit.attrs.price * procureUnit.qty();

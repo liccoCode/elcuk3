@@ -45,7 +45,8 @@ GET     /payment/rates                                      Payments.rates
 POST    /payment/files/upload                               Payments.uploads
 
 # ProcureUnits
-POST    /paymentunit/{id}/apply/${applyId}                  PaymentUnits.billingPrePay
+POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
+POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
 
 # PaymentUnits
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue

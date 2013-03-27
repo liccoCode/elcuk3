@@ -19,11 +19,11 @@ public class PaymentHelper extends JavaExtensions {
     public static String stateColor(PaymentUnit.S state) {
         switch(state) {
             case APPLY:
-                return "#999999";
+                return "#333333";
             case DENY:
                 return "#BA4A48";
             case APPROVAL:
-                return "#3987AD";
+                return "#3A87AD";
             case PAID:
                 return "#4B8644";
             default:
@@ -51,6 +51,21 @@ public class PaymentHelper extends JavaExtensions {
             return "badge-info";
         } else {
             return "";
+        }
+    }
+
+    public static String stateLabel(PaymentUnit unit) {
+        switch(unit.state) {
+            case APPLY:
+                return "label-inverse";
+            case DENY:
+                return "label-important";
+            case APPROVAL:
+                return "label-info";
+            case PAID:
+                return "label-success";
+            default:
+                return "";
         }
     }
 }
