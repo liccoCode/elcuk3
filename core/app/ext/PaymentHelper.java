@@ -2,6 +2,7 @@ package ext;
 
 import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.procure.ProcureUnit;
 import play.templates.JavaExtensions;
 
 /**
@@ -39,6 +40,17 @@ public class PaymentHelper extends JavaExtensions {
             case WAITING:
             default:
                 return "#B34745";
+        }
+    }
+
+    public static String badgeInfo(ProcureUnit unit) {
+        int size = unit.fees.size();
+        if(size >= 2) {
+            return "badge-warning";
+        } else if(size > 0) {
+            return "badge-info";
+        } else {
+            return "";
         }
     }
 }

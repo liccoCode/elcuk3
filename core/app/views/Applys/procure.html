@@ -45,7 +45,9 @@
                 <tr>
                     <td>
                         #{set pid:procureUnit.id/}
-                        ${procureUnit.id}
+                    ${procureUnit.id}
+                        <span class="badge ${procureUnit.badgeInfo()}">${procureUnit.fees.size()
+                        }</span>
                     </td>
                     <td>
                         <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
@@ -92,6 +94,7 @@
                                     <table class="table table-condensed" style="margin-bottom:0">
                                         <tr>
                                             <th>#</th>
+                                            <th>状态</th>
                                             <th>请款类型</th>
                                             <th>请款金额</th>
                                             <th>修正值</th>
@@ -99,6 +102,7 @@
                                         #{list items:procureUnit.fees, as:'fee'}
                                             <tr>
                                                 <td>${fee.id}</td>
+                                                <td style="color:${fee.stateColor()}">${fee.state.label()}</td>
                                                 <td>${fee.feeType.nickName}</td>
                                                 <td>${fee.currency.symbol()} ${fee.amount}</td>
                                                 <td>

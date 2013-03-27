@@ -28,7 +28,7 @@ public class PaymentUnit extends Model {
          */
         APPLY {
             @Override
-            public String toString() {
+            public String label() {
                 return "已申请";
             }
         },
@@ -38,7 +38,7 @@ public class PaymentUnit extends Model {
          */
         DENY {
             @Override
-            public String toString() {
+            public String label() {
                 return "驳回";
             }
         },
@@ -47,7 +47,7 @@ public class PaymentUnit extends Model {
          */
         APPROVAL {
             @Override
-            public String toString() {
+            public String label() {
                 return "批准";
             }
         },
@@ -56,10 +56,12 @@ public class PaymentUnit extends Model {
          */
         PAID {
             @Override
-            public String toString() {
+            public String label() {
                 return "已支付";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     public PaymentUnit() {

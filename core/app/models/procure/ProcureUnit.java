@@ -534,7 +534,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Validation.hasErrors()) return null;
 
         PaymentUnit fee = new PaymentUnit(this);
+        // 预付款的逻辑在这里实现, 总额的 30% 为预付款
+        fee.amount = (float) (fee.amount * 0.3);
         return fee.save();
+    }
+
+    /**
+     * 尾款申请
+     */
+    public void billingTailPay() {
+
     }
 
     /**
@@ -548,13 +557,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return true;
         }
         return false;
-    }
-
-    /**
-     * 尾款申请
-     */
-    public void billingTailPay() {
-
     }
 
     /**
