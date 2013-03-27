@@ -2,10 +2,8 @@ package jobs;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import ext.LinkHelper;
 import helper.Crawl;
 import helper.Dates;
-import helper.HTTP;
 import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
@@ -15,7 +13,6 @@ import models.support.TicketState;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -33,15 +30,16 @@ import java.util.List;
  * Date: 8/24/12
  * Time: 5:56 PM
  */
-@Every("1mn")
 public class ReviewInfoFetchJob extends Job {
     @Override
     public void doJob() {
         if(!Jobex.findByClassName(ReviewInfoFetchJob.class.getName()).isExcute()) return;
         int size = 30;
         if(Play.mode.isDev()) size = 10;
-        List<Ticket> tickets = Ticket.find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
-                Ticket.T.REVIEW, false, TicketState.PRE_CLOSE, TicketState.CLOSE).fetch(size);
+        List<Ticket> tickets = Ticket
+                .find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
+                        Ticket.T.REVIEW, false, TicketState.PRE_CLOSE, TicketState.CLOSE)
+                .fetch(size);
         Logger.info("ReviewInfoFetchJob to Amazon sync %s tickets.", tickets.size());
         for(Ticket ticket : tickets) {
             JsonElement el = ReviewInfoFetchJob.syncSingleReview(ticket.review);
@@ -62,15 +60,18 @@ public class ReviewInfoFetchJob extends Job {
      */
     public static JsonElement syncSingleReview(AmazonListingReview review) {
         F.T2<String, M> splitListingId = Listing.unLid(review.listingId);
-        JsonElement reviewElement = Crawl.crawlReview(splitListingId._2.toString(), review.reviewId);
+        JsonElement reviewElement = Crawl
+                .crawlReview(splitListingId._2.toString(), review.reviewId);
 
         JsonObject reviewObj = reviewElement.getAsJsonObject();
         if(!reviewObj.get("isRemove").getAsBoolean()) {
-            AmazonListingReview newReview = AmazonListingReview.parseAmazonReviewJson(reviewElement);
+            AmazonListingReview newReview = AmazonListingReview
+                    .parseAmazonReviewJson(reviewElement);
 
             // 1
             if(StringUtils.isNotBlank(StringUtils.difference(review.review, newReview.review)))
-                review.comment(String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
+                review.comment(
+                        String.format("[%s] - Review At %s", review.review, Dates.date2Date()));
 
             // 2
             review.updateAttr(newReview);
@@ -86,7 +87,8 @@ public class ReviewInfoFetchJob extends Job {
      */
     public static void checkReviewDealState(Ticket ticket, JsonElement reviewElement) {
         if(ticket.review == null) {
-            Logger.warn("ReviewInfoFetchJob deal an no Review Ticket(id|fid) [%s|%s]", ticket.id, ticket.fid);
+            Logger.warn("ReviewInfoFetchJob deal an no Review Ticket(id|fid) [%s|%s]", ticket.id,
+                    ticket.fid);
             return;
         }
 

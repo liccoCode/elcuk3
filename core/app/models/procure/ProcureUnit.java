@@ -523,10 +523,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public PaymentUnit billingPrePay() {
         /**
+         * 0. 采购计划所在的采购单需要拥有一个请款单
          * 1. 检查是否此采购计划是否已经存在一个预付款
          * 2. 采购计划需要已经交货
-         * 2. 申请预付款
+         * 3. 申请预付款
          */
+        if(this.deliveryment.apply == null)
+            Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.deliveryment.id));
         if(this.hasPrePay())
             Validation.addError("", "不允许重复申请预付款.");
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))

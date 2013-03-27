@@ -10,7 +10,6 @@ import models.product.Category;
 import models.product.Product;
 import org.joda.time.DateTime;
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.*;
@@ -26,7 +25,6 @@ import java.util.*;
  * Date: 6/6/12
  * Time: 3:45 PM
  */
-@Every("1d")
 public class SellingCategoryCheckerJob extends Job {
 
     @Override
@@ -43,7 +41,8 @@ public class SellingCategoryCheckerJob extends Job {
 
         List<Category> cats = Category.all().fetch();
         for(Category cat : cats) {
-            String key = String.format(String.format("%s | %s", cat.categoryId, cat.settings.amazonNode));
+            String key = String
+                    .format(String.format("%s | %s", cat.categoryId, cat.settings.amazonNode));
             invalidSelling.put(key, new HashSet<Selling>());
 
             Map<String, String> allowNodes = cat.settings.amazonNodeMap();
@@ -64,9 +63,12 @@ public class SellingCategoryCheckerJob extends Job {
         }
 
         Webs.systemMail("SellingCategoryCheckerJob invalid Selling Amazon Node.",
-                GTs.render("SellingCategoryCheckerJob", GTs.newMap("invalidMap", invalidSelling).build()));
+                GTs.render("SellingCategoryCheckerJob",
+                        GTs.newMap("invalidMap", invalidSelling).build()));
         if(Play.mode.isDev())
-            FLog.fileLog(String.format("SellingCategoryCheckerJob.%s.html", DateTime.now().toString("yyyy-MM-dd.HH.mm.ss")),
-                    GTs.render("SellingCategoryCheckerJob", GTs.newMap("invalidMap", invalidSelling).build()), FLog.T.JOBS_ERROR);
+            FLog.fileLog(String.format("SellingCategoryCheckerJob.%s.html",
+                    DateTime.now().toString("yyyy-MM-dd.HH.mm.ss")),
+                    GTs.render("SellingCategoryCheckerJob",
+                            GTs.newMap("invalidMap", invalidSelling).build()), FLog.T.JOBS_ERROR);
     }
 }

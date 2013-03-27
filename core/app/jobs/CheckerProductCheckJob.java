@@ -1,14 +1,11 @@
 package jobs;
 
 import models.Jobex;
-import models.market.Selling;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.AnalyzePost;
 import notifiers.SystemMails;
-import play.jobs.Every;
 import play.jobs.Job;
-import play.jobs.On;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -25,7 +22,6 @@ import java.util.List;
  * Date: 8/24/12
  * Time: 12:22 PM
  */
-@Every("1d")
 public class CheckerProductCheckJob extends Job {
     @Override
     public void doJob() {

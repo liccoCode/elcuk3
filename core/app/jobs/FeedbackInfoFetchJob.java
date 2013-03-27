@@ -13,7 +13,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import java.util.List;
  * Date: 8/9/12
  * Time: 3:44 PM
  */
-@Every("5mn")
 public class FeedbackInfoFetchJob extends Job {
     @Override
     public void doJob() {

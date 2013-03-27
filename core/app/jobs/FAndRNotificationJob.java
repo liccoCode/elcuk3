@@ -8,7 +8,6 @@ import models.market.Feedback;
 import notifiers.SystemMails;
 import org.joda.time.DateTime;
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -28,7 +27,6 @@ import java.util.List;
  * Date: 8/23/12
  * Time: 12:18 PM
  */
-@Every("1h")
 public class FAndRNotificationJob extends Job {
     @Override
     public void doJob() {
@@ -41,8 +39,9 @@ public class FAndRNotificationJob extends Job {
         }
 
 
-        List<AmazonListingReview> reviews = AmazonListingReview.find("reviewDate>=? ORDER BY rating",
-                Dates.morning(yesterday)).fetch();
+        List<AmazonListingReview> reviews = AmazonListingReview
+                .find("reviewDate>=? ORDER BY rating",
+                        Dates.morning(yesterday)).fetch();
         if(!SystemMails.dailyReviewMail(reviews)) {
             Webs.systemMail("Review Daily Mail send Error.", reviews.size() + " reviews.");
         }
@@ -54,7 +53,8 @@ public class FAndRNotificationJob extends Job {
      * @param feedbacks
      * @return
      */
-    public static F.T5<List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>> divFeedbackIntoFive(List<Feedback> feedbacks) {
+    public static F.T5<List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>> divFeedbackIntoFive(
+            List<Feedback> feedbacks) {
         List<Feedback> one = new ArrayList<Feedback>();
         List<Feedback> two = new ArrayList<Feedback>();
         List<Feedback> three = new ArrayList<Feedback>();
@@ -67,7 +67,8 @@ public class FAndRNotificationJob extends Job {
             else if(fe.score <= 4) four.add(fe);
             else if(fe.score <= 5) five.add(fe);
         }
-        return new F.T5<List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>>(one, two, three, four, five);
+        return new F.T5<List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>, List<Feedback>>(
+                one, two, three, four, five);
     }
 
     /**

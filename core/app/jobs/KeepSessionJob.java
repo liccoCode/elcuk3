@@ -3,7 +3,6 @@ package jobs;
 import models.Jobex;
 import models.market.Account;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.List;
  * Date: 3/14/12
  * Time: 4:38 PM
  */
-@Every("5mn")
 public class KeepSessionJob extends Job {
 
     @Override

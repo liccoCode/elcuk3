@@ -1,6 +1,5 @@
 package jobs;
 
-import helper.AWS;
 import helper.Webs;
 import models.Jobex;
 import models.market.*;
@@ -9,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -31,7 +29,6 @@ import java.util.List;
  * Date: 4/6/12
  * Time: 4:29 PM
  */
-@Every("1h")
 public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
@@ -70,7 +67,9 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override
     public void callBack(JobRequest jobRequest) {
-        F.T2<List<Selling>, List<Listing>> sellAndListingTuple = AmazonSellingSyncJob.dealSellingFromActiveListingsReport(new File(jobRequest.path), jobRequest.account, jobRequest.marketplaceId.market());
+        F.T2<List<Selling>, List<Listing>> sellAndListingTuple = AmazonSellingSyncJob
+                .dealSellingFromActiveListingsReport(new File(jobRequest.path), jobRequest.account,
+                        jobRequest.marketplaceId.market());
         for(Listing lst : sellAndListingTuple._2) lst.save();
         for(Selling sell : sellAndListingTuple._1) sell.save();
     }
@@ -97,9 +96,12 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
      *
      * @return Amazon 上拥有, 但系统中没有的 Selling
      */
-    public static F.T2<List<Selling>, List<Listing>> dealSellingFromActiveListingsReport(File file, Account acc, M market) {
+    public static F.T2<List<Selling>, List<Listing>> dealSellingFromActiveListingsReport(File file,
+                                                                                         Account acc,
+                                                                                         M market) {
         //TODO 这个方法需要进行修改
-        F.T2<List<Selling>, List<Listing>> sellAndListingTuple = new F.T2<List<Selling>, List<Listing>>(new ArrayList<Selling>(), new ArrayList<Listing>());
+        F.T2<List<Selling>, List<Listing>> sellAndListingTuple = new F.T2<List<Selling>, List<Listing>>(
+                new ArrayList<Selling>(), new ArrayList<Listing>());
         List<String> lines = null;
         try {
             lines = FileUtils.readLines(file);
@@ -141,9 +143,11 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                 Listing lst = Listing.findById(lid);
                 Product prod = Product.findByMerchantSKU(t_msku);
                 if(prod == null) {
-                    String warnMsg = "[Warnning!] Listing[" + lid + "] Missing Product[" + t_msku + "].";
+                    String warnMsg =
+                            "[Warnning!] Listing[" + lid + "] Missing Product[" + t_msku + "].";
                     Logger.warn(warnMsg);
-                    Webs.systemMail(warnMsg, String.format("Listing %s Missing Product %s.", lid, t_msku));
+                    Webs.systemMail(warnMsg,
+                            String.format("Listing %s Missing Product %s.", lid, t_msku));
                     continue;// 如果 Product 不存在, 需要跳过这个 Listing!
                 }
 
@@ -180,7 +184,8 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
 
                     PriceStrategy priceStrategy = new PriceStrategy();
                     priceStrategy.type = PriceStrategy.T.FixedPrice;
-                    if(StringUtils.isNotBlank(t_fulfilchannel) && StringUtils.startsWith(t_fulfilchannel.toLowerCase(), "amazon"))
+                    if(StringUtils.isNotBlank(t_fulfilchannel) &&
+                            StringUtils.startsWith(t_fulfilchannel.toLowerCase(), "amazon"))
                         selling.type = Selling.T.FBA;
                     else
                         selling.type = Selling.T.AMAZON;
@@ -196,7 +201,9 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                     sellAndListingTuple._1.add(selling);
                 }
             } catch(Exception e) {
-                String warMsg = "Skip Add one Listing/Selling. asin[" + t_asin + "_" + market.toString() + "]";
+                String warMsg =
+                        "Skip Add one Listing/Selling. asin[" + t_asin + "_" + market.toString() +
+                                "]";
                 Logger.warn(line);
                 Webs.systemMail(warMsg, String.format("%s <br/>\r\n%s", line, Webs.E(e)));
             }

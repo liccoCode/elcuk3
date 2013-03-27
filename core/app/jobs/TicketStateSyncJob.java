@@ -13,7 +13,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -30,7 +29,6 @@ import java.util.*;
  * Date: 7/30/12
  * Time: 5:05 PM
  */
-@Every("1mn")
 public class TicketStateSyncJob extends Job {
 
     @Override
