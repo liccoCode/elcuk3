@@ -32,17 +32,17 @@ public class Bootstrap extends Job {
             return;
         }
         // 1. 初始化系统内的用户
-       /* long users = User.count();
+        long users = User.count();
         if(users == 0) {
             Fixtures.delete(User.class);
             Fixtures.loadModels("users.yml");
-        }*/
+        }
 
-      /*  long feeTypes = FeeType.count();
+        long feeTypes = FeeType.count();
         if(feeTypes == 0) {
             Fixtures.delete(FeeType.class);
             Fixtures.loadModels("feetypes.yml");
-        }*/
+        }
 
 
         HTTP.init();
