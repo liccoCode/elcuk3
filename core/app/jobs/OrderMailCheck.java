@@ -119,7 +119,7 @@ public class OrderMailCheck extends Job {
                 Logger.info("Uncatched Region..." + ord.market);
             }
             //使用 Amazon SES 后可以将这个频率调高点, 每秒 5 封
-            Thread.sleep(500);
+            Thread.sleep(400);
         }
         String logInfo = String.format("%s From %s:" +
                 " Send(%s uk| %s de | %s us)," +
