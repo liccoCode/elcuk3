@@ -40,9 +40,10 @@ public class Deliveryments extends Controller {
     @Check("deliveryments.index")
     public static void index(DeliveryPost p) {
         List<Deliveryment> deliveryments = null;
+        List<Cooperator> suppliers = Cooperator.suppliers();
         if(p == null) p = new DeliveryPost();
         deliveryments = p.query();
-        render(deliveryments, p);
+        render(deliveryments, p, suppliers);
     }
 
     public static void show(String id) {
@@ -108,7 +109,8 @@ public class Deliveryments extends Controller {
         validation.required(dmt.orderTime);
         if(Validation.hasErrors()) render("Deliveryments/show.html", dmt);
         dmt.confirm();
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
+        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
+                .save();
         redirect("/Deliveryments/show/" + id);
     }
 
