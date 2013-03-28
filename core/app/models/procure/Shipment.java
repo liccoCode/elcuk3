@@ -39,20 +39,7 @@ import java.util.*;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
-    static class PlanDateEqual implements Predicate {
-        // 期待的日期
-        private Date date;
 
-        PlanDateEqual(Date date) {
-            this.date = date;
-        }
-
-        @Override
-        public boolean evaluate(Object o) {
-            Shipment ship = (Shipment) o;
-            return Dates.morning(ship.planBeginDate).equals(Dates.morning(this.date));
-        }
-    }
 
     public Shipment() {
         this.createDate = new Date();
@@ -866,38 +853,25 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         // 自动关闭.
         List<Shipment> overDueShipments = Shipment.find("state IN (?,?) AND planBeginDate<=?",
-                S.PLAN, S.CONFIRM, DateTime.now().minusDays(3).toDate()).fetch();
-        for(Shipment shipment : overDueShipments) {
-            if(shipment.items.size() > 0)
-                continue;
-            shipment.state = S.CANCEL;
-            shipment.comment("运输单过期, 自动 CANCEL");
-            shipment.save();
-        }
+                        S.PLAN, S.CONFIRM, DateTime.now().minusDays(3).toDate()).fetch();
+                for(Shipment shipment : overDueShipments) {
+                    if(shipment.items.size() > 0)
+                        continue;
+                    shipment.state = S.CANCEL;
+                    shipment.comment("运输单过期, 自动 CANCEL");
+                    shipment.save();
+                }
 
         // 自动创建
         List<Shipment> planedShipments = Shipment
                 .find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
-        // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 4
+        //确定仓库接收的运输单
+        List<Whouse> whs = Whouse.all().fetch();
         DateTime now = new DateTime(Dates.morning(new Date()));
-        for(int i = 0; i < 60; i++) {
-            DateTime tmp = now.plusDays(i);
-            if(tmp.dayOfWeek().get() == 2 || tmp.dayOfWeek().get() == 4) {
-                Object exist = CollectionUtils
-                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
-                if(exist == null)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.EXPRESS);
-                if(exist == null && tmp.dayOfWeek().get() == 4)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.SEA);
-            } else if(tmp.dayOfWeek().get() == 3 || tmp.dayOfWeek().get() == 5) {
-                Object exist = CollectionUtils
-                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
-                if(exist == null)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.AIR);
-            }
-        }
+        for(Whouse whouse :whs)
+            whouse.checkWhouseNewShipment(planedShipments,now);
 
 
         // 加载
@@ -928,37 +902,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 判断不同仓库之间是否需要创建 Shipment
-     *
-     * @param planBeginDate 创建 Shipment 的 PlanBeginDate
-     * @return
+     * 新建运输单
+     * @param planBeginDate 计划开始时间
+     * @param whouse    接受仓库
+     * @param type      运输方式
+     * @param arriveDate 预计到达时间
      */
-    public static List<Shipment> checkWhouseNewShipment(Date planBeginDate, T shipmentType) {
-        List<Shipment> newShipments = new ArrayList<Shipment>();
-        List<Whouse> whs = Whouse.all().fetch();
-        for(Whouse wh : whs) {
-            if(Shipment
-                    .count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
-                            planBeginDate, wh, shipmentType, S.PLAN, S.CONFIRM) > 0)
-                continue;
-
-            Shipment shipment = new Shipment();
-            shipment.id = Shipment.id();
-            shipment.cycle = true;
-            shipment.planBeginDate = planBeginDate;
-            if(shipmentType == T.EXPRESS)
-                shipment.planArrivDate = new DateTime(planBeginDate).plusDays(7).toDate();
-            else if(shipmentType == T.AIR)
-                shipment.planArrivDate = new DateTime(planBeginDate).plusDays(14).toDate();
-            else
-                shipment.planArrivDate = new DateTime(planBeginDate).plusDays(45).toDate();
-            shipment.whouse = wh;
-            shipment.type = shipmentType;
-            shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
-                    Dates.date2Date(shipment.planBeginDate));
-
-            newShipments.add(shipment.<Shipment>save());
-        }
-        return newShipments;
+    public static void create(Date planBeginDate,Whouse whouse,T type,Date arriveDate){
+        Shipment shipment = new Shipment();
+        shipment.id = Shipment.id();
+        shipment.cycle = true;
+        shipment.planBeginDate = planBeginDate;
+        shipment.planArrivDate = arriveDate;
+        shipment.whouse = whouse;
+        shipment.type = type;
+        shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
+                Dates.date2Date(shipment.planBeginDate));
+        shipment.save();
     }
+
 }
