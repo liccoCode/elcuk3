@@ -168,7 +168,7 @@ public class Whouse extends Model {
                 //除 GB US DE 创建的时间不同,其他国家的都是周4
                 if(!type.equals(M.AMAZON_DE)&&!type.equals(M.AMAZON_UK)&&!type.equals(M.AMAZON_US))
                      checkWhouseNewShipment(tmp.toDate(),Shipment.T.SEA,tmp.plus(45).toDate());
-            }else
+            }else if(tmp.dayOfWeek().get()==5)
                 checkWhouseNewShipment(tmp.toDate(),Shipment.T.AIR,tmp.plus(14).toDate());
         }
 
