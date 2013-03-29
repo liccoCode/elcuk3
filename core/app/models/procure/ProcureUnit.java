@@ -530,6 +530,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.billingValid();
         if(this.hasPrePay())
             Validation.addError("", "不允许重复申请预付款.");
+        if(this.hasTailPay())
+            Validation.addError("", "已经申请了尾款, 不需要再申请预付款.");
         if(Validation.hasErrors()) return null;
 
         PaymentUnit fee = new PaymentUnit(this);
