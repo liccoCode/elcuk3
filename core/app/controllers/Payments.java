@@ -31,7 +31,7 @@ public class Payments extends Controller {
         render(payments);
     }
 
-    @CacheFor("10mn")
+    @CacheFor("5mn")
     public static void rates() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
         renderText(doc.select("table table table").get(0).outerHtml());

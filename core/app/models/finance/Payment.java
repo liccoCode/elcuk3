@@ -310,6 +310,20 @@ public class Payment extends Model {
         }
     }
 
+    /**
+     * 批准后的总金额
+     *
+     * @return
+     */
+    public float approvalAmount() {
+        float approvalAmount = 0;
+        for(PaymentUnit fee : this.units()) {
+            if(fee.state == PaymentUnit.S.APPLY)
+                approvalAmount += fee.amount();
+        }
+        return approvalAmount;
+    }
+
 
     /**
      * 制作一个 Deliveryment 的支付单;(自己为自己的工厂方法)

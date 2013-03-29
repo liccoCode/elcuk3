@@ -88,6 +88,37 @@
 </div>
 #{/form}
 
+<div class="row-fluid">
+  <div class="span6" id="boc_rate" style="max-height:250px;overflow-y:auto">
+  </div>
+  <div class="span6">
+    <div class="btn-toolbar">
+      <button url='@{Payments.rates()}' class="btn" id="boc_rate_btn">
+        <i class="icon-refresh"></i> 更新
+      </button>
+    </div>
+    <div class="row-fluid">
+      <div class="span4">
+        <dl class="dl-horizontal" style="margin-top:0">
+          <dt>批准后总金额</dt>
+          <dd><span id="currency">${payment.currency.symbol()}</span>
+            <span id="costs">${payment.approvalAmount()}</span></dd>
+          <dt>需要支付的美金</dt>
+          <dd>$ <span id="usd_costs"></span></dd>
+          <dt>美元 -> 人民币</dt>
+          <dd>$ 1 -> ¥ <span id="usd_rates"></span></dd>
+        </dl>
+      </div>
+      <div class="span8">
+        1. 供应商
+        2. 账号
+        3. 币种
+        4. 金额
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="deny_modal" class="modal hide fade">
   <form action="#" method="post" id="deny_form">
     <div class="modal-header">
