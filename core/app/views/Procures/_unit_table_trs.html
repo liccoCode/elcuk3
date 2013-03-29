@@ -86,12 +86,13 @@
 <tr>
     <th>运输方式</th>
     <td>
-        <select name="unit.shipType">
-            <option value="">请选择</option>
         #{list items:models.procure.Shipment.T.values(), as:'t'}
-            <option ${t == unit.shipType ? 'selected' : ''} value="${t.name()}">${t}</option>
+            <label class="radio">
+              <input type="radio" name="unit.shipType"  value="${t.name()}" ${t ==null? t == unit.shipType ? 'checked': 'unchecked':'unchecked'}>
+                ${t}
+            </label>
+
         #{/list}
-        </select>
     </td>
     <td colspan="2">
     #{if unit.shipItem?.shipment}

@@ -37,6 +37,8 @@ $ ->
 
 
   loadShipment = (shipment, whouseId, shipType) ->
+    if whouseId is  ''
+      return
     mask = $('#container')
     mask.mask("加载关联运输单中...")
     shipment.load("/shipments/unitShipments", {whouseId: whouseId, shipType: shipType},
@@ -55,16 +57,28 @@ $ ->
           $("[name=shipmentId]").val(checked and $(@).val() or "")
       )
       mask.unmask()
+      ##初始化加载页面的toggle事件.
+      toggle_init()
     )
 
   initShipments = (shipment) ->
-    whouseSelect = $('[name=unit\\.whouse\\.id]')
-    shipTypeSelect = $('[name=unit\\.shipType]')
-    loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val())
-    whouseSelect.change(-> loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val()))
-    shipTypeSelect.change(-> loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val()))
-  initShipments($('#shipments'))
 
+    whouseSelect = $('[name=unit\\.whouse\\.id]')
+    shipTypeSelect = $('input[name="unit.shipType"]')
+
+    ##如果页面加载时unit.shipType为空,默认选中第一项
+    if !shipTypeSelect.is(":checked")
+      shipTypeSelect.eq(0).attr("checked",'checked')
+
+    ##判断是否选择仓库,否则不加载数据
+    if whouseSelect.val()  isnt ''
+      loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val())
+    whouseSelect.change(->
+      loadShipment(shipment, whouseSelect.val(), shipTypeSelect.filter(":checked").val()))
+    shipTypeSelect.change(->
+      loadShipment(shipment, whouseSelect.val(),this.value))
+
+  initShipments($('#shipments'))
   # 计算时间到库日期与运输日期的差据
   $('[name=unit\\.attrs\\.planArrivDate]').change () ->
     planShipDate = $('[name=unit\\.attrs\\.planShipDate]')
