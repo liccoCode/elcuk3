@@ -37,8 +37,6 @@ $ ->
 
 
   loadShipment = (shipment, whouseId, shipType) ->
-    if whouseId is  ''
-      return
     mask = $('#container')
     mask.mask("加载关联运输单中...")
     shipment.load("/shipments/unitShipments", {whouseId: whouseId, shipType: shipType},
@@ -76,6 +74,9 @@ $ ->
     whouseSelect.change(->
       loadShipment(shipment, whouseSelect.val(), shipTypeSelect.filter(":checked").val()))
     shipTypeSelect.change(->
+      if whouseSelect.val() is ''
+        alert '请选择 去往仓库'
+        return false
       loadShipment(shipment, whouseSelect.val(),this.value))
 
   initShipments($('#shipments'))
