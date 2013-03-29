@@ -60,7 +60,11 @@
                 </button>
               #{/if}
           </td>
-          <td>${payment.pApply.serialNumber} #${paymentUnit.id}</td>
+          <td>
+            <a href="@{Applys.procure(payment.pApply.id)}#${paymentUnit.id}" target="_blank">
+            ${payment.pApply.serialNumber} #${paymentUnit.id}
+            </a>
+          </td>
         </tr>
         <tr id="unit_${paymentUnit.id}" style="display:none">
           <td colspan="4"></td>
