@@ -195,6 +195,20 @@ public class Cooperator extends Model {
     }
 
     /**
+     * 检查一个 PaymentTarget 是否属于这个 Cooperator
+     *
+     * @param paymentTarget
+     * @return
+     */
+    public boolean paymentTargetOwner(PaymentTarget paymentTarget) {
+        for(PaymentTarget target : this.paymentMethods) {
+            if(target.equals(paymentTarget))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * 前台使用的 Sku 自动提示, 需要过滤掉已经成为此供应商的 Sku
      *
      * @return

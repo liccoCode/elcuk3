@@ -100,9 +100,9 @@ public class Payment extends Model {
     /**
      * 支付的时候记录的 USD 现汇买入价
      */
-    public Float usdRate = 6.2f;
+    public Float rate = 6.2f;
 
-    public Date usdRatePublishDate;
+    public Date ratePublishDate;
 
     /**
      * 最终实际支付
@@ -166,48 +166,83 @@ public class Payment extends Model {
     }
 
     /**
-     * 对请款单进行支付操作.
-     * 1. 请款单中的币种只能拥有一种
-     * 2. 检查没有批准的, 支付就是对这个请款单中的所有已经批准的进行支付
-     * // 这里的付款已经不用理会币种了, 币种的判断到向 Payment 中添加 PaymentUnit 的入口处判断
+     * 对付款单所涉及的某些采购计划进行确认操作
      *
-     * @param unitIds
-     * @param currency
-     * @param actualPaid
-     * @return
+     * @param paymentUnitIds
      */
-    public int paid(Currency currency, Float actualPaid, Float usRatio, Date ratioPublishTime) {
-        int paidNum = 0;
-        // 1. 首先验证
-        for(PaymentUnit unit : this.units) {
-            if(unit.remove) continue;
-            if(!Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.APPROVAL).contains(unit.state)) {
-                Validation.addError("", String.format("%s 状态拒绝 '支付'", unit.state.label()));
+    public void unitsApproval(List<Long> paymentUnitIds) {
+        /**
+         * 1. 判断确认是否都是这个付款单的, 如果有其他的报错
+         * 2. 判断软删除的, 软删除的不允许处理
+         * 3. 判断状态是允许的
+         */
+        List<Long> existIds = new ArrayList<Long>();
+        for(PaymentUnit fee : this.units) {
+            existIds.add(fee.id);
+        }
+        for(Long expectId : paymentUnitIds) {
+            if(!existIds.contains(expectId))
+                Validation.addError("", expectId + " 不属于付款单 " + this.paymentNumber);
+            if(PaymentUnit.<PaymentUnit>findById(expectId).remove)
+                Validation.addError("", expectId + " 请款已经软删除");
+        }
+
+        // 对申请的部分做批准处理
+        List<PaymentUnit> waitForDeals = this.waitForDealPaymentUnit(paymentUnitIds);
+        for(PaymentUnit unit : waitForDeals) {
+            if(PaymentUnit.S.APPLY != unit.state)
+                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.label()));
+        }
+
+        if(Validation.hasErrors()) return;
+        for(PaymentUnit unit : waitForDeals) {
+            unit.state = PaymentUnit.S.APPROVAL;
+            unit.save();
+        }
+    }
+
+    private List<PaymentUnit> waitForDealPaymentUnit(List<Long> paymentUnitIds) {
+        List<PaymentUnit> paymentUnits = new ArrayList<PaymentUnit>();
+        for(Long id : paymentUnitIds) {
+            PaymentUnit unit = PaymentUnit.findById(id);
+            if(unit.payment.id.equals(this.id))
+                paymentUnits.add(unit);
+        }
+        return paymentUnits;
+    }
+
+    public void payIt(Long paymentTargetId, Currency currency, Float actualPaid) {
+        /**
+         * 0. 验证
+         *  - paymentTargetId 必须是当前 Payment 的 Cooperator 的某一个支付方式
+         *  - 必须所有请款项通过审核才允许付款
+         * 1. 重新去 boc 中国银行获取最新的美元汇率 + 时间
+         * 2. 计算支付
+         */
+        PaymentTarget paymentTarget = PaymentTarget.findById(paymentTargetId);
+        if(!this.cooperator.paymentTargetOwner(paymentTarget))
+            Validation.addError("", "所提交的支付账号并非当前付款单的供应商的支付账号!");
+
+        for(PaymentUnit unit : this.units()) {
+            if(PaymentUnit.S.APPROVAL != unit.state) {
+                Validation.addError("", "还有没有审批完成的请款项, 请审批完成后再付款.");
                 break;
             }
         }
-        if(this.units().size() != this.unitsStateSize(PaymentUnit.S.APPROVAL))
-            Validation.addError("", String.format("还有没有审批完成的请款项, 请审批完成后再付款."));
-        Validation.current().valid(this);
-        // 2. 验证后有错误返回
-        if(Validation.hasErrors()) return paidNum;
 
-        // 3. 验证后没错误 更新.
-        for(PaymentUnit unit : this.units) {
-            if(unit.remove) continue;
-            paidNum++;
+        if(Validation.hasErrors()) return;
+
+        for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
         }
-        this.currency = currency;
+
+        String html = Currency.bocRatesHtml();
+        this.rate = currency.rate(html);
+        this.ratePublishDate = Currency.rateDateTime(html);
         this.actualPaid = actualPaid;
-        this.paymentDate = new Date();
-        this.payer = User.current();
-        this.usdRate = usRatio;
-        this.usdRatePublishDate = ratioPublishTime;
         this.state = S.PAID;
         this.save();
-        return paidNum;
     }
 
     /**
@@ -277,38 +312,6 @@ public class Payment extends Model {
         return new ArrayList<Cooperator>(cooperatorSet);
     }
 
-    /**
-     * 对付款单所涉及的某些采购计划进行确认操作
-     *
-     * @param paymentUnitIds
-     */
-    public void unitsApproval(List<Long> paymentUnitIds) {
-        /**
-         * 1. 判断确认是否都是这个付款单的, 如果有其他的报错
-         * 2. 判断软删除的, 软删除的不允许处理
-         * 3. 判断状态是允许的
-         */
-        List<Long> existIds = new ArrayList<Long>();
-        for(PaymentUnit fee : this.units) {
-            existIds.add(fee.id);
-        }
-        for(Long expectId : paymentUnitIds) {
-            if(!existIds.contains(expectId))
-                Validation.addError("", expectId + " 不属于付款单 " + this.paymentNumber);
-            if(PaymentUnit.<PaymentUnit>findById(expectId).remove)
-                Validation.addError("", expectId + " 请款已经软删除");
-        }
-        for(PaymentUnit unit : this.units) {
-            if(!Arrays.asList(PaymentUnit.S.APPLY).contains(unit.state))
-                Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.label()));
-        }
-
-        if(Validation.hasErrors()) return;
-        for(PaymentUnit unit : this.units) {
-            unit.state = PaymentUnit.S.APPROVAL;
-            unit.save();
-        }
-    }
 
     /**
      * 批准后的总金额
@@ -318,7 +321,7 @@ public class Payment extends Model {
     public float approvalAmount() {
         float approvalAmount = 0;
         for(PaymentUnit fee : this.units()) {
-            if(fee.state == PaymentUnit.S.APPLY)
+            if(PaymentUnit.S.DENY != fee.state)
                 approvalAmount += fee.amount();
         }
         return approvalAmount;

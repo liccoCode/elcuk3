@@ -1,14 +1,12 @@
 package controllers;
 
-import helper.HTTP;
+import helper.Currency;
 import helper.J;
 import helper.Webs;
 import models.finance.Payment;
 import models.product.Attach;
 import models.view.Ret;
 import org.apache.commons.lang.math.NumberUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import play.Logger;
 import play.cache.CacheFor;
 import play.data.validation.Validation;
@@ -33,8 +31,7 @@ public class Payments extends Controller {
 
     @CacheFor("5mn")
     public static void rates() {
-        Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
-        renderText(doc.select("table table table").get(0).outerHtml());
+        renderText(Currency.bocRatesHtml());
     }
 
     //TODO 查看需要权限
@@ -52,6 +49,31 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("批复成功");
+        show(id);
+    }
+
+    /**
+     * 为当前付款单付款
+     */
+    public static void payForIt(Long id, Long paymentTargetId,
+                                Currency currency, Float actualPaid) {
+
+        Validation.required("供应商支付账号", paymentTargetId);
+        Validation.required("币种", currency);
+        Validation.required("具体支付金额", actualPaid);
+
+        Payment payment = Payment.findById(id);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
+        }
+
+        payment.payIt(paymentTargetId, currency, actualPaid);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("支付成功.");
+
         show(id);
     }
 

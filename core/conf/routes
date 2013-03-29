@@ -46,6 +46,7 @@ POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
 POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
 POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
+POST    /payment/{id}/pay                                   Payments.payForIt
 
 # ProcureUnits
 POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay

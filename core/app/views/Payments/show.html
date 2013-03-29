@@ -111,13 +111,51 @@
           <dd>$ <span id="usd_costs"></span></dd>
           <dt>美元 -> 人民币</dt>
           <dd>$ 1 -> ¥ <span id="usd_rates"></span></dd>
+          <dt>汇率时间</dt>
+          <dd>skj</dd>
         </dl>
       </div>
       <div class="span8">
-        1. 供应商
-        2. 账号
-        3. 币种
-        4. 金额
+      #{if payment.state == models.finance.Payment.S.PAID}
+        已经支付
+      #{/if}
+      #{else }
+          #{form @Payments.payForIt(payment.id), method:'POST', class:'form-horizontal', id:'pay_form'}
+            <div class="control-group">
+              <label class="control-label">供应商</label>
+
+              <div class="controls">
+                <input type="text" placeholder="供应商" value="${payment.cooperator.fullName}" readonly="">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">账号</label>
+
+              <div class="controls">
+                  #{select 'paymentTargetId', items: payment.cooperator.paymentMethods, valueProperty:id}#{/select}
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">币种</label>
+
+              <div class="controls">
+                  #{pickCurrency name:'currency', c:payment.currency /}
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">金额</label>
+
+              <div class="controls">
+                <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
+              </div>
+            </div>
+            <div class="control-group">
+              <div class="controls">
+                <input type="submit" value="付款" class="btn btn-primary">
+              </div>
+            </div>
+          #{/form}
+      #{/else}
       </div>
     </div>
   </div>

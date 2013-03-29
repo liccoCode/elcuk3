@@ -36,7 +36,8 @@ public class PaymentUnits extends Controller {
         } else {
             flash.success("修正值更新成功.");
         }
-        Applys.procure(paymentUnit.procureUnit.deliveryment.apply.id);
+        // NOTE: 如果 fixValue 的 routes 文件改变, 这里也需要改变
+        redirect("/apply/" + paymentUnit.procureUnit.deliveryment.apply.id + "/procure#" + id);
     }
 
     public static void deny(Long paymentId, Long id, String reason) {

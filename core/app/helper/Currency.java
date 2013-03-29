@@ -3,10 +3,13 @@ package helper;
 import com.google.gson.JsonObject;
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import play.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 
 /**
  * 不同货币单位的枚举类
@@ -61,6 +64,13 @@ public enum Currency {
         public String symbol() {
             return "£";
         }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 619.71 -> 6.1971
+            return NumberUtils.toFloat(doc.select("tr:eq(1) td:eq(1)").text()) / 100;
+        }
     },
     /**
      * 欧元
@@ -107,6 +117,13 @@ public enum Currency {
         @Override
         public String symbol() {
             return "€";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 619.71 -> 6.1971
+            return NumberUtils.toFloat(doc.select("tr:eq(12) td:eq(1)").text()) / 100;
         }
     },
     /**
@@ -155,6 +172,11 @@ public enum Currency {
         public String symbol() {
             return "¥";
         }
+
+        @Override
+        public Float rate(String html) {
+            return 1.0f;
+        }
     },
     /**
      * 美元
@@ -201,6 +223,13 @@ public enum Currency {
         @Override
         public String symbol() {
             return "$";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 619.71 -> 6.1971
+            return NumberUtils.toFloat(doc.select("tr:eq(3) td:eq(1)").text()) / 100;
         }
     };
 
@@ -330,6 +359,38 @@ public enum Currency {
             default:
                 return USD;
         }
+    }
+
+    /**
+     * 返回中国银行的最新汇率表
+     *
+     * @return
+     */
+    public static String bocRatesHtml() {
+        Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
+        return doc.select("table table table").get(0).outerHtml();
+    }
+
+    /**
+     * 从 Boc 的 汇率 HTML 中解析 Rate
+     *
+     * @param html
+     * @return
+     */
+    public abstract Float rate(String html);
+
+    /**
+     * 解析出当前汇率的时间是什么
+     *
+     * @param html
+     * @return
+     */
+    public static Date rateDateTime(String html) {
+        Document doc = Jsoup.parse(html);
+        return Dates.cn(String.format("%s %s",
+                doc.select("tr:eq(3) td:eq(6)").text(),
+                doc.select("tr:eq(3) td:eq(7)").text()
+        )).toDate();
     }
 }
 
