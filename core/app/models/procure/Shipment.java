@@ -926,4 +926,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         shipment.save();
     }
 
+    /**
+     * 获得最小运输量
+     * @return
+     */
+    public  float minimumTraffic(){
+        return this.totalWeight()/1000;
+    }
+
+    /**
+         * 获得最小运输量
+         * @return
+    */
+    public String minimumTrafficStr(){
+        return String.format("%s/%s",this.totalWeight(),1000);
+    }
+
 }

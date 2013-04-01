@@ -25,9 +25,10 @@
         <td>
             <div class="progress progress-striped" style="margin-bottom:0;">
                 *{每种运输方式的最小运输量暂时没有确定 写死1000}*
-                <div class="bar" style="width: ${(ship.totalWeight() / 1000).format('#%')};">
+                <div class="bar" style="width: ${ship.minimumTraffic().format('#%')};">
                     <p class="text-info">
-                    ${ship.totalWeight()} / 1000
+
+                    ${ship.minimumTrafficStr()}
                     </p>
                 </div>
             </div>
@@ -39,7 +40,7 @@
             <td colspan="9">
                 <div>
                     *{_shipitem页面重用显示items 去掉checkbox和与shipment重复的whouse}*
-                    #{render 'Shipments/_shipitem.html', items:ship.items,noCheckBoxOrWhouse:true/}
+                    #{render 'Shipments/_shipitem.html', items:ship.items,needCheckBoxAndWhouse:false/}
                 </div>
             </td>
         </tr>

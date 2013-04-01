@@ -64,12 +64,15 @@ $ ->
     whouseSelect = $('[name=unit\\.whouse\\.id]')
     shipTypeSelect = $('input[name="unit.shipType"]')
 
-    ##如果页面加载时unit.shipType为空,默认选中第一项
-    if !shipTypeSelect.is(":checked")
-      shipTypeSelect.eq(0).attr("checked",'checked')
+    whouse=$('[name=unit\\.selling\\.sellingId]').val().split("|")[1]
+    whouse=whouse.replace("A","FBA")
 
-    ##判断是否选择仓库,否则不加载数据
-    if whouseSelect.val()  isnt ''
+    for value,option of whouseSelect.find("option")
+      if option.text==whouse
+        whouseSelect.val(value)
+        break
+
+    if shipTypeSelect.is(":checked")
       loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val())
     whouseSelect.change(->
       loadShipment(shipment, whouseSelect.val(), shipTypeSelect.filter(":checked").val()))
