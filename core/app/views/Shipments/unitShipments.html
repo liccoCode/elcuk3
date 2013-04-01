@@ -24,11 +24,10 @@
         <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
         <td>
             <div class="progress progress-striped" style="margin-bottom:0;">
-                *{每种运输方式的最小运输量暂时没有确定 写死1000}*
-                <div class="bar" style="width: ${ship.minimumTraffic().format('#%')};">
+                <div class="bar" style="width: ${(ship.totalWeight()/ship.minimumTraffic()).format('#%')};">
                     <p class="text-info">
 
-                    ${ship.minimumTrafficStr()}
+                    ${ship.totalWeight()+"/"+ship.minimumTraffic()}
                     </p>
                 </div>
             </div>
