@@ -240,7 +240,9 @@ public class Payment extends Model {
         String html = Currency.bocRatesHtml();
         this.rate = currency.rate(html);
         this.ratePublishDate = Currency.rateDateTime(html);
+        this.paymentDate = new Date();
         this.actualPaid = actualPaid;
+        this.payer = User.current();
         this.state = S.PAID;
         this.save();
     }
