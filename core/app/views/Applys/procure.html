@@ -91,7 +91,7 @@
                     #{/ifnot}
                 </div>
                 <div class="span11">
-                    #{if procureUnit.fees.size() > 0}
+                    #{if procureUnit.fees().size() > 0}
                       <table class="table table-condensed" style="margin-bottom:0">
                         <tr>
                           <th></th>
@@ -102,14 +102,18 @@
                           <th>修正值</th>
                         </tr>
                           #{list items:procureUnit.fees(), as:'fee'}
-                            <tr id="paymentUnit${fee.id}">
+                            <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
                               <td>
-                                  #{form @PaymentUnits.destroy(fee.id), method:'DELETE'}
-                                    <input type="submit" class="btn btn-danger" value="取消"/>
-                                  #{/form}
+                                  #{ifnot fee.remove || fee.isApproval()}
+                                      #{form @PaymentUnits.destroy(fee.id), method:'DELETE'}
+                                        <input type="submit" class="btn btn-danger" value="取消"/>
+                                      #{/form}
+                                  #{/ifnot}
                               </td>
                               <td>${fee.id}</td>
-                              <td style="color:${fee.stateColor()}">${fee.state.label()}</td>
+                              <td>
+                                <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                              </td>
                               <td>${fee.feeType.nickName}</td>
                               <td>${fee.currency.symbol()} ${fee.amount}</td>
                               <td>
@@ -128,22 +132,14 @@
                               #{set fixValueRecords: fee.fixValueRecords()/}
                               #{set denyRecords: fee.denyRecords()/}
                               #{if (denyRecords.size() + fixValueRecords.size()) > 0}
-                                <tr>
+                                <tr class="${fee.isApproval()? 'muted':''}">
                                   <td colspan="6">
                                     <div class="row-fluid">
                                       <div class="span6">
-                                        <ul>
-                                            #{list denyRecords}
-                                              <li>${_.message}</li>
-                                            #{/list}
-                                        </ul>
+                                          #{records_ul records:denyRecords /}
                                       </div>
                                       <div class="span6">
-                                        <ul>
-                                            #{list fixValueRecords}
-                                              <li>${_.message}</li>
-                                            #{/list}
-                                        </ul>
+                                          #{records_ul records:fixValueRecords /}
                                       </div>
                                     </div>
                                   </td>

@@ -41,17 +41,19 @@
           <td>${punit.attrs.deliveryDate}</td>
           <td>${punit.sku}</td>
           <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
-          <td>${punit.qty()}</td>
-          <td>${paymentUnit.feeType.nickName}</td>
             #{if (records.size() + denyRecords.size()) > 0}
               <td data-toggle='toggle' data-target='#unit_${paymentUnit.id}'>
                 <i class="icon-reorder"></i>
-              ${payment.currency.symbol()} ${paymentUnit.fixValue}
+                <span>${punit.qty()}</span>
               </td>
             #{/if}
             #{else }
-              <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
+              <td>
+                <span>${punit.qty()}</span>
+              </td>
             #{/else}
+          <td>${paymentUnit.feeType.nickName}</td>
+          <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
           <td>${payment.currency.symbol()} ${paymentUnit.amount()}</td>
           <td>${paymentUnit.payee.username}</td>
           <td>
@@ -70,22 +72,14 @@
         </tr>
         <tr id="unit_${paymentUnit.id}" style="display:none">
           <td colspan="4"></td>
-          <td colspan="4">
+          <td colspan="3">
               #{if records.size() > 0}
-                <ul>
-                    #{list records}
-                      <li>${_.message}</li>
-                    #{/list}
-                </ul>
+                  #{records_ul records: records/}
               #{/if}
           </td>
-          <td colspan="4">
+          <td colspan="5">
               #{if denyRecords.size() > 0}
-                <ul>
-                    #{list denyRecords}
-                      <li>${_.message}</li>
-                    #{/list}
-                </ul>
+                  #{records_ul records: denyRecords/}
               #{/if}
           </td>
         </tr>
