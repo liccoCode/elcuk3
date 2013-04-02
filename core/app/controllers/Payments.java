@@ -53,6 +53,7 @@ public class Payments extends Controller {
     }
 
     /**
+     * TODO 需要权限
      * 为当前付款单付款
      */
     public static void payForIt(Long id, Long paymentTargetId,
@@ -75,6 +76,16 @@ public class Payments extends Controller {
             flash.success("支付成功.");
 
         show(id);
+    }
+
+    public static void shouldPaidUpdate(Long id, Float shouldPaid) {
+        Payment payment = Payment.findById(id);
+        payment.shouldPaid(shouldPaid);
+        if(Validation.hasErrors()) {
+            renderJSON(new Ret(false, J.json(Validation.errors())));
+        } else {
+            renderJSON(new Ret(true, "更新成功"));
+        }
     }
 
     // --------- File Resources -----------

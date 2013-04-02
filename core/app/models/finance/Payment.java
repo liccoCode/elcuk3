@@ -105,6 +105,11 @@ public class Payment extends Model {
     public Date ratePublishDate;
 
     /**
+     * 应该支付的金额
+     */
+    public Float shouldPaid = 0f;
+
+    /**
      * 最终实际支付
      */
     public Float actualPaid = 0f;
@@ -366,6 +371,20 @@ public class Payment extends Model {
             payment.generatePaymentNumber().save();
         }
         return payment;
+    }
+
+    /**
+     * 修改 shouldPaid
+     *
+     * @param shouldPaid
+     */
+    public void shouldPaid(Float shouldPaid) {
+        if(shouldPaid == null)
+            Validation.addError("", "应付金额必须填写");
+        // 非 WATING 状态不允许修改
+        if(this.state != S.WAITING) return;
+        this.shouldPaid = shouldPaid;
+        this.save();
     }
 
     /**

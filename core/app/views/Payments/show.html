@@ -98,7 +98,7 @@
       <div class="span4">
         <dl class="dl-horizontal" style="margin-top:0">
           <dt>批准后总金额</dt>
-          <dd><span id="currency">${payment.currency.symbol()}</span>
+          <dd><span id="currency_label">${payment.currency.symbol()}</span>
             <span id="costs">${payment.approvalAmount()}</span></dd>
           <dt>需要支付的美金</dt>
           <dd>$ <span id="usd_costs"></span></dd>
@@ -119,6 +119,8 @@
           <dd>${payment.ratePublishDate}</dd>
           <dt>支付人</dt>
           <dd>${payment.payer?.username}</dd>
+          <dt>应该支付</dt>
+          <dd>${payment.currency.symbol()} ${payment.shouldPaid}</dd>
           <dt>实际支付金额</dt>
           <dd>${payment.currency.symbol()} ${payment.actualPaid}</dd>
         </dl>
@@ -143,7 +145,7 @@
               <label class="control-label">币种</label>
 
               <div class="controls">
-                  #{pickCurrency name:'currency', c:payment.currency /}
+                  #{pickCurrency id:'currency', name:'currency', c:payment.currency /}
               </div>
             </div>
             <div class="control-group">
@@ -159,6 +161,20 @@
               </div>
             </div>
           #{/form}
+        <form action="#" class="form-horizontal" onsubmit="return false;">
+          <div class="control-group">
+            <label class="control-label">应付金额</label>
+
+            <div class="controls">
+              <div class="input-append">
+                <input type="text" class="input-small"
+                       url='@{Payments.shouldPaidUpdate (payment.id)}'
+                       placeholder="手动输入确认" name="actualPaid" id="shouldPaid">
+                <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
+              </div>
+            </div>
+          </div>
+        </form>
       #{/else}
       </div>
     </div>
