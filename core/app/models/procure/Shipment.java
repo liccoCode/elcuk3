@@ -930,13 +930,17 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 获得最小运输量
      * @return
      */
-    public  float minimumTraffic(){
-        if(this.type.equals(T.AIR))
-            return 500;
-        else if (this.type.equals(T.SEA)){
-            return 1000;
+    public  String minimumTraffic(){
+        float totalWeight=totalWeight();
+        float diff=500-totalWeight;
+        String msg="总量"+totalWeight();
+        if(this.type.equals(T.AIR)||this.type.equals(T.SEA)){
+            if(diff>0)
+                msg+=" 差"+diff;
         }else
-            return 400;
+            if(diff<0)
+                msg+=" 超出"+(-diff);
+       return msg;
     }
 
 }
