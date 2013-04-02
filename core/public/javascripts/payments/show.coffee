@@ -39,3 +39,7 @@ $ ->
     p: 'PAYMENTS'
   , $('#dropbox'), '/payment/files/upload')
   window.dropUpload.loadImages($('#dropbox').attr('paymentId'), $('#dropbox'), 'PAYMENTS')
+
+  do ->
+    paymentUnitId = window.location.hash[1..-1]
+    EF.colorAnimate("#paymentUnit_#{paymentUnitId}")

@@ -43,8 +43,9 @@
       </tr>
         #{list items:dmt.units, as:'procureUnit'}
           <tr>
-            <td>
-                #{set pid:procureUnit.id/}
+              #{set pid:procureUnit.id/}
+            <td data-toggle="toggle" data-target="#unit_${pid}">
+              <i class="icon-reorder"></i>
             ${procureUnit.id}
             </td>
             <td>
@@ -56,10 +57,7 @@
                   <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
                 #{/list}
             </td>
-            <td data-toggle="toggle" data-target="#unit_${pid}">
-              <i class="icon-reorder"></i>
-            ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
-            </td>
+            <td>${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}</td>
             <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
             <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.qty() * procureUnit.attrs.price}</td>
             <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage}</td>
@@ -95,6 +93,7 @@
                       <table class="table table-condensed" style="margin-bottom:0">
                         <tr>
                           <th></th>
+                          <th>付款单</th>
                           <th>#</th>
                           <th>状态</th>
                           <th>请款类型</th>
@@ -110,6 +109,11 @@
                                       #{/form}
                                   #{/ifnot}
                               </td>
+                              <td>
+                                <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
+                                ${fee.payment.paymentNumber}
+                                </a>
+                              </td>
                               <td>${fee.id}</td>
                               <td>
                                 <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
@@ -118,14 +122,19 @@
                               <td>${fee.currency.symbol()} ${fee.amount}</td>
                               <td>
                                 <div class="row-fluid">
-                                    #{form @PaymentUnits.fixValue(fee.id), class:'form-inline', method:'POST'}
-                                      <div class="input-prepend">
-                                        <span class="add-on">${fee.currency.symbol()}</span>
-                                        <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
-                                      </div>
-                                      <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
-                                      <input type="submit" value="修正" class="btn">
-                                    #{/form}
+                                    #{if fee.isApproval()}
+                                    ${fee.currency.symbol()} ${fee.fixValue}
+                                    #{/if}
+                                    #{else }
+                                        #{form @PaymentUnits.fixValue(fee.id), class:'form-inline', method:'POST'}
+                                          <div class="input-prepend">
+                                            <span class="add-on">${fee.currency.symbol()}</span>
+                                            <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
+                                          </div>
+                                          <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
+                                          <input type="submit" value="修正" class="btn">
+                                        #{/form}
+                                    #{/else}
                                 </div>
                               </td>
                             </tr>
@@ -133,7 +142,7 @@
                               #{set denyRecords: fee.denyRecords()/}
                               #{if (denyRecords.size() + fixValueRecords.size()) > 0}
                                 <tr class="${fee.isApproval()? 'muted':''}">
-                                  <td colspan="6">
+                                  <td colspan="7">
                                     <div class="row-fluid">
                                       <div class="span6">
                                           #{records_ul records:denyRecords /}

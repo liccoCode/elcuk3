@@ -28,7 +28,7 @@
       <th>#</th>
     </tr>
       #{list items:payment.units(), as:'paymentUnit'}
-        <tr>
+        <tr id="paymentUnit_${paymentUnit.id}">
             #{set punit: paymentUnit.procureUnit/}
             #{set records:paymentUnit.fixValueRecords()/}
             #{set denyRecords: paymentUnit.denyRecords()/}
@@ -37,21 +37,18 @@
               <input type="checkbox" name="paymentUnitIds" value="${paymentUnit.id}">
             </label>
           </td>
-          <td>${paymentUnit.deliveryment.id} #${punit.id}</td>
+          <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${paymentUnit.id}'>
+              #{if (records.size() + denyRecords.size()) > 0}
+                <i class="icon-reorder"></i>
+              #{/if}
+            <a href="@{Deliveryments.show(paymentUnit.deliveryment.id)}#${punit.id}">
+            ${paymentUnit.deliveryment.id} #${punit.id}
+            </a>
+          </td>
           <td>${punit.attrs.deliveryDate}</td>
           <td>${punit.sku}</td>
           <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
-            #{if (records.size() + denyRecords.size()) > 0}
-              <td data-toggle='toggle' data-target='#unit_${paymentUnit.id}'>
-                <i class="icon-reorder"></i>
-                <span>${punit.qty()}</span>
-              </td>
-            #{/if}
-            #{else }
-              <td>
-                <span>${punit.qty()}</span>
-              </td>
-            #{/else}
+          <td>${punit.qty()}</td>
           <td>${paymentUnit.feeType.nickName}</td>
           <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
           <td>${payment.currency.symbol()} ${paymentUnit.amount()}</td>

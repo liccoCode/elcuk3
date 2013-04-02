@@ -57,13 +57,13 @@ var EF = {
      */
     scoll: function(selector){
         var mao = $(selector);
-        $('body').animate({scrollTop: mao.offset().top - mao.height()}, 1000)
+        $('body').animate({scrollTop: mao.offset().top - mao.height() - 50}, 1000)
     },
 
     colorAnimate: function(selector, from, to){
         if(from == undefined) from = '#E35651';
         if(to == undefined) to = '#FFF';
-        $(selector).css('backgroundColor', from).animate({backgroundColor: to}, 3000)
+        $(selector).css('backgroundColor', from).animate({backgroundColor: to}, 3500)
     }
 };
 
