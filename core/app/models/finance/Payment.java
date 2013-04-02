@@ -329,6 +329,14 @@ public class Payment extends Model {
         return approvalAmount;
     }
 
+    public List<User> applyers() {
+        Set<User> users = new HashSet<User>();
+        for(PaymentUnit unit : this.units()) {
+            users.add(unit.payee);
+        }
+        return new ArrayList<User>(users);
+    }
+
 
     /**
      * 制作一个 Deliveryment 的支付单;(自己为自己的工厂方法)

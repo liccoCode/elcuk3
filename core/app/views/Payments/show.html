@@ -1,5 +1,5 @@
 #{extends 'main_full.html'/}
-#{set title:"${payment.paymentNumber}" /}
+#{set title:"${payment.paymentNumber?:''}" /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
@@ -19,9 +19,9 @@
       <th>交货日期</th>
       <th>SKU</th>
       <th>单价</th>
-      <th>修正价</th>
       <th>数量</th>
       <th>付款类型</th>
+      <th>总额修正价</th>
       <th>付款金额</th>
       <th>请款人</th>
       <th>状态</th>
@@ -41,6 +41,8 @@
           <td>${punit.attrs.deliveryDate}</td>
           <td>${punit.sku}</td>
           <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
+          <td>${punit.qty()}</td>
+          <td>${paymentUnit.feeType.nickName}</td>
             #{if (records.size() + denyRecords.size()) > 0}
               <td data-toggle='toggle' data-target='#unit_${paymentUnit.id}'>
                 <i class="icon-reorder"></i>
@@ -50,8 +52,6 @@
             #{else }
               <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
             #{/else}
-          <td>${punit.qty()}</td>
-          <td>${paymentUnit.feeType.nickName}</td>
           <td>${payment.currency.symbol()} ${paymentUnit.amount()}</td>
           <td>${paymentUnit.payee.username}</td>
           <td>

@@ -2,6 +2,7 @@ package models.finance;
 
 import play.db.jpa.Model;
 
+import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.util.Date;
 
@@ -16,6 +17,7 @@ public abstract class Apply extends Model {
     /**
      * 请款单的编号
      */
+    @Column(unique = true)
     public String serialNumber;
 
     /**

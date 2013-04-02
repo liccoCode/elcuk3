@@ -17,18 +17,12 @@ import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.ProcureUnitQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 每一个采购单元
@@ -458,10 +452,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        F.T2<List<String>, List<String>> unitShippingRelateIds = new ProcureUnitQuery()
-                .procureRelateShippingRelateIds(this.id);
-        if(unitShippingRelateIds._1.size() == 0) return new ArrayList<Shipment>();
-        return Shipment.find("id in " + JpqlSelect.inlineParam(unitShippingRelateIds._1)).fetch();
+        Set<Shipment> shipments = new HashSet<Shipment>();
+        if(this.shipItem != null) {
+            shipments.add(this.shipItem.shipment);
+        }
+        return new ArrayList<Shipment>(shipments);
     }
 
     public int qty() {
