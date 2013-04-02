@@ -2,6 +2,7 @@ package notifiers;
 
 import helper.Dates;
 import helper.Webs;
+import models.MailsRecord;
 import models.embedded.ERecordBuilder;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
@@ -13,6 +14,7 @@ import play.Play;
 import play.libs.F;
 import play.mvc.Mailer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +39,8 @@ public class SystemMails extends Mailer {
                 Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
+        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),DAILY_REVIEW,MailsRecord.T.SYSTEM);
         try {
             send(reviews);
             new ERecordBuilder().mail()
@@ -45,7 +49,10 @@ public class SystemMails extends Mailer {
                     .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
+            mr.success=false;
             return false;
+        }finally {
+            mr.save();
         }
         return true;
     }
@@ -65,6 +72,8 @@ public class SystemMails extends Mailer {
                 Dates.date2Date(new DateTime().minusDays(1).toDate())));
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
+        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),DAILY_FEEDBACK,MailsRecord.T.SYSTEM);
         try {
             send(feedbacks);
             new ERecordBuilder().mail()
@@ -72,8 +81,11 @@ public class SystemMails extends Mailer {
                     .fid(DAILY_FEEDBACK)
                     .save();
         } catch(Exception e) {
+            mr.success=false;
             Logger.warn(Webs.E(e));
             return false;
+        }finally {
+            mr.save();
         }
         return true;
     }
@@ -83,6 +95,8 @@ public class SystemMails extends Mailer {
                 Dates.date2Date()));
         mailBase();
         addRecipient("alerts@easyacceu.com");
+        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),SKU_PIC_CHECK,MailsRecord.T.SYSTEM);
         try {
             send(productAndSellT2s);
             new ERecordBuilder().mail()
@@ -91,7 +105,10 @@ public class SystemMails extends Mailer {
                     .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
+            mr.success=false;
             return false;
+        }finally {
+            mr.save();
         }
         return true;
     }

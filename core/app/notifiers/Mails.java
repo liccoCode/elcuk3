@@ -2,6 +2,7 @@ package notifiers;
 
 import helper.Webs;
 import jobs.promise.ReviewMailCheckPromise;
+import models.MailsRecord;
 import models.embedded.ERecordBuilder;
 import models.market.*;
 import models.procure.Shipment;
@@ -12,6 +13,7 @@ import play.exceptions.MailException;
 import play.libs.F;
 import play.mvc.Mailer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -38,33 +40,38 @@ public class Mails extends Mailer {
 
     public static void shipment_clearance(Shipment shipment) {
         String title = String.format("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
+        MailsRecord mr=MailsRecord.findByTitle(title);
         try {
             setSubject(title);
             mailBase();
             addRecipient("p@easyacceu.com");
+            mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),CLEARANCE,MailsRecord.T.NORMAL);
             send(shipment);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(CLEARANCE)
-                    .save();
+
+
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
+            mr.success=false;
+        }finally {
+            mr.save();
         }
     }
 
     public static void shipment_isdone(Shipment shipment) {
         String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,并且签收,需确认.", shipment.id);
+        MailsRecord mr=MailsRecord.findByTitle(title);
         try {
             setSubject(title);
             mailBase();
             addRecipient("p@easyacceu.com");
+            mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),CLEARANCE,MailsRecord.T.NORMAL);
             send(shipment);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(IS_DONE)
-                    .save();
+
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
+            mr.success=false;
+        }finally {
+            mr.save();
         }
     }
 
@@ -75,20 +82,21 @@ public class Mails extends Mailer {
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
         String title = String
                 .format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
+        MailsRecord mr=MailsRecord.findByTitle(title);
         try {
             setSubject(title);
             mailBase();
             addRecipient("alerts@easyacceu.com");
+            mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),CLEARANCE,MailsRecord.T.NORMAL);
             send(offers, lst);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(MORE_OFFERS)
-                    .save();
+
         } catch(Exception e) {
+            mr.success=false;
             Logger.warn(title + ":" + Webs.E(e));
+        }finally {
+            mr.save();
         }
     }
-
 
     // ------------------- Review 邮件 --------------------------------
 
@@ -98,15 +106,15 @@ public class Mails extends Mailer {
      * @param order
      */
     public static void amazonUK_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order);
+        reviewMailBase(order,REVIEW_UK);
     }
 
     public static void amazonDE_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order);
+        reviewMailBase(order,REVIEW_DE);
     }
 
     public static void amazonUS_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order);
+        reviewMailBase(order,REVIEW_US);
     }
 
     /**
@@ -114,7 +122,7 @@ public class Mails extends Mailer {
      *
      * @param order
      */
-    private static void reviewMailBase(Orderr order) {
+    private static void reviewMailBase(Orderr order,String tmp) {
         if(StringUtils.isBlank(order.email)) {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
@@ -136,11 +144,17 @@ public class Mails extends Mailer {
         if(Play.mode.isProd()) addRecipient(order.email);
         else addRecipient("wppurking@gmail.com");
 
+        MailsRecord mr=MailsRecord.findByTitle(title);
+        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),
+                tmp,MailsRecord.T.NORMAL);
         try {
             final Future<Boolean> future = send(order, title);
             new ReviewMailCheckPromise(order.orderId, future).now();
         } catch(MailException e) {
+            mr.success=false;
             Logger.warn("Order[" + order.orderId + "] Send Error! " + e.getMessage());
+        }finally {
+            mr.save();
         }
     }
 
@@ -153,16 +167,23 @@ public class Mails extends Mailer {
      */
     public static void feedbackWarnning(Feedback f) {
         if(f.mailedTimes != null && f.mailedTimes >= 2) return;
+
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
-        send(f);
-        // send 方法没有抛出异常则表示邮件发送成功
-        f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
-        new ERecordBuilder().mail()
-                .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                .fid(FEEDBACK_WARN)
-                .save();
+        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),
+                        (ArrayList<String>)infos.get().get("recipients"),FEEDBACK_WARN,MailsRecord.T.NORMAL);
+        try{
+            send(f);
+            f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
+        }catch(Exception e){
+            mr.success=false;
+        }finally {
+            mr.save();
+        }
+
+
     }
 
 
@@ -183,24 +204,37 @@ public class Mails extends Mailer {
         setSubject(title);
         mailBase();
         addRecipient("services@easyacceu.com");
-        send(r, title, sbr);
+
+        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+                mr.addParams(infos.get().get("from").toString(),
+                                (ArrayList<String>)infos.get().get("recipients"),REVIEW_WARN,MailsRecord.T.NORMAL);
+        try{
+            send(r, title, sbr);
+            r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
+        }catch(Exception e){
+            mr.success=false;
+        }finally {
+            mr.save();
+        }
         // send 方法没有抛出异常则表示邮件发送成功
-        r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
-        new ERecordBuilder().mail()
-                .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                .fid(REVIEW_WARN)
-                .save();
+
     }
 
     public static void fnSkuCheckWarn(List<F.T4<String, String, String, String>> unfindSelling) {
         setSubject("{WARN}[FBA] 如下 Selling 在更新 Selling.fnSku 时无法在系统中找到.");
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        send(unfindSelling);
-        new ERecordBuilder().mail()
-                .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                .fid(FNSKU_CHECK)
-                .save();
+        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+                       mr.addParams(infos.get().get("from").toString(),
+                                       (ArrayList<String>)infos.get().get("recipients"),FNSKU_CHECK,MailsRecord.T.NORMAL);
+        try{
+            send(unfindSelling);
+        }catch(Exception e){
+            mr.success=false;
+        }finally {
+            mr.save();
+        }
+
     }
 
 
