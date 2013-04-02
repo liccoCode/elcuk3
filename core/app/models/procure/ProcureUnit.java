@@ -590,6 +590,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 当前采购计划所有请款的修正总额
+     *
+     * @return
+     */
+    public float fixValueAmount() {
+        float fixValueAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            fixValueAmount += fee.fixValue;
+        }
+        return fixValueAmount;
+    }
+
+    /**
      * 总共需要申请的金额
      *
      * @return

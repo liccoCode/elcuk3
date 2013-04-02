@@ -4,6 +4,7 @@ import helper.Dates;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -40,6 +41,57 @@ public class ProcureApply extends Apply {
      */
     @ManyToOne
     public User applier;
+
+    /**
+     * 已经请款的金额
+     *
+     * @return
+     */
+    public float appliedAmount() {
+        float appliedAmount = 0;
+        for(Deliveryment dmt : this.deliveryments) {
+            for(ProcureUnit unit : dmt.units) {
+                appliedAmount += unit.appliedAmount();
+            }
+        }
+        return appliedAmount;
+    }
+
+    public float totalAmount() {
+        float totalAmount = 0;
+        for(Deliveryment dmt : this.deliveryments) {
+            for(ProcureUnit unit : dmt.units) {
+                totalAmount += unit.totalAmount();
+            }
+        }
+        return totalAmount;
+    }
+
+    public float fixValueAmount() {
+        float fixValueAmount = 0;
+        for(Deliveryment dmt : this.deliveryments) {
+            for(ProcureUnit unit : dmt.units) {
+                fixValueAmount += unit.fixValueAmount();
+            }
+        }
+        return fixValueAmount;
+    }
+
+    /**
+     * 返回请款单涉及的 Currency
+     *
+     * @return
+     */
+    public helper.Currency currency() {
+        helper.Currency currency = null;
+        for(Deliveryment dmt : this.deliveryments) {
+            for(ProcureUnit unit : dmt.units) {
+                if(currency != null) break;
+                currency = unit.attrs.currency;
+            }
+        }
+        return currency;
+    }
 
     public void generateSerialNumber(Cooperator cooperator) {
         /**
