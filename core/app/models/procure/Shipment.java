@@ -883,9 +883,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } else {
             where.append("AND whouse.id IS NULL");
         }
+        //当运输方式是 air 或者 express的时候,统一一起查出来
         if(shipType != null) {
-            where.append(" AND type=?");
-            params.add(shipType);
+            if(shipType.equals(T.AIR)||shipType.equals(T.EXPRESS)){
+                where.append(" AND type in (?,?)");
+                params.add(T.AIR);
+                params.add(T.EXPRESS);
+            }else{
+                where.append(" AND type =?");
+                params.add(shipType);
+            }
+
+
         }
 
         return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray())
@@ -919,6 +928,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
                 Dates.date2Date(shipment.planBeginDate));
         shipment.save();
+    }
+
+    /**
+     * 获得不同运输方式的标准运输量
+     * @return
+     */
+    public  float minimumTraffic(){
+	//海运和空运暂时的最小运输量是500 而快递是不能超过500
+        return  500;
     }
 
 }
