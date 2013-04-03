@@ -1,10 +1,14 @@
+
+#{set needCheckBoxAndWhouse:(needCheckBoxAndWhouse==null) /}
 <table class="table table-condensed table-bordered">
     <tr>
+        #{if needCheckBoxAndWhouse }
         <th>
             <label class="checkbox">
                 <input type="checkbox" class="checkbox_all">
             </label>
         </th>
+        #{/if}
         <th>#</th>
         <th>Sku</th>
         <th>Sid</th>
@@ -18,16 +22,20 @@
         <th>总体积(m3)(kg)</th>
         <th>总申报价格</th>
         <th>抵达?</th>
+        #{if needCheckBoxAndWhouse }
         <th>运往仓库</th>
+        #{/if}
         <th>ProcreUnit</th>
     </tr>
 #{list items:items, as:'itm'}
     <tr>
+        #{if needCheckBoxAndWhouse }
         <td>
             <label class="checkbox">
                 <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
             </label>
         </td>
+        #{/if}
         <td>${itm.id}</td>
         <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
         <td>
@@ -50,13 +58,14 @@
             / ${totalVolume._1.format('#.######')}</td>
         <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
         <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
-        <td>${itm.unit.whouse.name()}</td>
+
+        #{if needCheckBoxAndWhouse } <td>${itm.unit.whouse.name()}</td>  #{/if}
         <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>
     </tr>
 #{/list}
 #{if shipmentId}
     <tr>
-        <td colspan="15">
+        <td colspan="${needCheckBoxAndWhouse?15:13}">
             <input type="hidden" name="id" value="${shipmentId}">
             #{ck "shipments.cancelship"}
                 <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>

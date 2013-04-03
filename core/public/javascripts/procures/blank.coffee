@@ -55,16 +55,34 @@ $ ->
           $("[name=shipmentId]").val(checked and $(@).val() or "")
       )
       mask.unmask()
+      ##初始化加载页面的toggle事件.
+      toggle_init()
     )
 
   initShipments = (shipment) ->
-    whouseSelect = $('[name=unit\\.whouse\\.id]')
-    shipTypeSelect = $('[name=unit\\.shipType]')
-    loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val())
-    whouseSelect.change(-> loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val()))
-    shipTypeSelect.change(-> loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val()))
-  initShipments($('#shipments'))
 
+    whouseSelect = $('[name=unit\\.whouse\\.id]')
+    shipTypeSelect = $('input[name="unit.shipType"]')
+
+    whouse=$('[name=unit\\.selling\\.sellingId]').val().split("|")[1]
+    whouse=whouse.replace("A","FBA")
+
+    for value,option of whouseSelect.find("option")
+      if option.text==whouse
+        whouseSelect.val(value)
+        break
+
+    if shipTypeSelect.is(":checked")
+      loadShipment(shipment, whouseSelect.val(), shipTypeSelect.val())
+    whouseSelect.change(->
+      loadShipment(shipment, whouseSelect.val(), shipTypeSelect.filter(":checked").val()))
+    shipTypeSelect.change(->
+      if whouseSelect.val() is ''
+        alert '请选择 去往仓库'
+        return false
+      loadShipment(shipment, whouseSelect.val(),this.value))
+
+  initShipments($('#shipments'))
   # 计算时间到库日期与运输日期的差据
   $('[name=unit\\.attrs\\.planArrivDate]').change () ->
     planShipDate = $('[name=unit\\.attrs\\.planShipDate]')
