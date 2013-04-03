@@ -3,7 +3,6 @@ package notifiers;
 import helper.Webs;
 import jobs.promise.ReviewMailCheckPromise;
 import models.MailsRecord;
-import models.embedded.ERecordBuilder;
 import models.market.*;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
@@ -40,12 +39,12 @@ public class Mails extends Mailer {
 
     public static void shipment_clearance(Shipment shipment) {
         String title = String.format("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
-        MailsRecord mr=MailsRecord.findByTitle(title);
+        MailsRecord mr=MailsRecord.findFailedByTitle(title);
         try {
             setSubject(title);
             mailBase();
             addRecipient("p@easyacceu.com");
-            mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),CLEARANCE,MailsRecord.T.NORMAL);
+            mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
             send(shipment);
 
 
@@ -59,12 +58,12 @@ public class Mails extends Mailer {
 
     public static void shipment_isdone(Shipment shipment) {
         String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,并且签收,需确认.", shipment.id);
-        MailsRecord mr=MailsRecord.findByTitle(title);
+        MailsRecord mr=MailsRecord.findFailedByTitle(title);
         try {
             setSubject(title);
             mailBase();
             addRecipient("p@easyacceu.com");
-            mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),CLEARANCE,MailsRecord.T.NORMAL);
+            mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
             send(shipment);
 
         } catch(Exception e) {
@@ -82,12 +81,12 @@ public class Mails extends Mailer {
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
         String title = String
                 .format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
-        MailsRecord mr=MailsRecord.findByTitle(title);
+        MailsRecord mr=MailsRecord.findFailedByTitle(title);
         try {
             setSubject(title);
             mailBase();
             addRecipient("alerts@easyacceu.com");
-            mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),CLEARANCE,MailsRecord.T.NORMAL);
+            mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
             send(offers, lst);
 
         } catch(Exception e) {
@@ -144,7 +143,7 @@ public class Mails extends Mailer {
         if(Play.mode.isProd()) addRecipient(order.email);
         else addRecipient("wppurking@gmail.com");
 
-        MailsRecord mr=MailsRecord.findByTitle(title);
+        MailsRecord mr=MailsRecord.findFailedByTitle(title);
         mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),
                 tmp,MailsRecord.T.NORMAL);
         try {
@@ -171,7 +170,7 @@ public class Mails extends Mailer {
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
-        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
         mr.addParams(infos.get().get("from").toString(),
                         (ArrayList<String>)infos.get().get("recipients"),FEEDBACK_WARN,MailsRecord.T.NORMAL);
         try{
@@ -205,7 +204,7 @@ public class Mails extends Mailer {
         mailBase();
         addRecipient("services@easyacceu.com");
 
-        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
                 mr.addParams(infos.get().get("from").toString(),
                                 (ArrayList<String>)infos.get().get("recipients"),REVIEW_WARN,MailsRecord.T.NORMAL);
         try{
@@ -224,9 +223,9 @@ public class Mails extends Mailer {
         setSubject("{WARN}[FBA] 如下 Selling 在更新 Selling.fnSku 时无法在系统中找到.");
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
+        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
                        mr.addParams(infos.get().get("from").toString(),
-                                       (ArrayList<String>)infos.get().get("recipients"),FNSKU_CHECK,MailsRecord.T.NORMAL);
+                               (ArrayList<String>) infos.get().get("recipients"), FNSKU_CHECK, MailsRecord.T.NORMAL);
         try{
             send(unfindSelling);
         }catch(Exception e){
