@@ -6,7 +6,7 @@
         <th>运输方式</th>
         <th>状态</th>
         <th>运输开始时间</th>
-        <th>运输达标量</th>
+        <th>运输总量(kg)</th>
         <th>运输项目数量</th>
         <th>创建者</th>
     </tr>
@@ -23,14 +23,15 @@
         <td>${ship.state}</td>
         <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
         <td>
-            <div class="progress progress-striped" style="margin-bottom:0;">
-                <div class="bar" style="width: ${(ship.totalWeight()/ship.minimumTraffic()).format('#%')};">
-                    <p class="text-info">
+          ${ship.totalWeight()}
+          #{if ship.minimumTraffic()>0}
+            ${" 超出:"+ship.minimumTraffic()}
+          #{/if}
+          #{elseif ship.minimumTraffic()<0}
+            ${" 差:"+(-ship.minimumTraffic())}
+          #{/elseif}
 
-                    ${ship.totalWeight()+"/"+ship.minimumTraffic()}
-                    </p>
-                </div>
-            </div>
+
         </td>
         <td>${ship.items.size()}</td>
         <td>#{if ship.cycle}<i style="color:#C09853;" class="icon-star"></i>#{/if} ${ship.creater?.username}</td>

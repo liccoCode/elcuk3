@@ -796,7 +796,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : this.items) {
             weight += itm.qty * itm.unit.product.weight;
         }
-        return weight;
+        //保留小数点后两位
+        return (float)(Math.round(weight*100)/100);
     }
 
     @Override
@@ -927,16 +928,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 获得最小运输量
+     * 计算运输总重量与达标量之间的差值
      * @return
      */
-    public  float minimumTraffic(){
-        if(this.type.equals(T.AIR))
-            return 500;
-        else if (this.type.equals(T.SEA)){
-            return 1000;
+    public  double minimumTraffic(){
+        double diff =totalWeight()-500;
+        if(this.type.equals(T.EXPRESS)){
+            //快递 diff>0代表超出范围
+            if(diff<0){
+                diff=0;
+            }
         }else
-            return 400;
+            // 空运或者海运 diff<0代表没有达到要求
+            if(diff>0){
+                diff=0;
+            }
+        //达标时都设为0
+        return diff;
     }
 
 }
