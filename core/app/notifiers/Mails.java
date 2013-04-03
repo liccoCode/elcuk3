@@ -46,8 +46,6 @@ public class Mails extends Mailer {
             addRecipient("p@easyacceu.com");
             mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
             send(shipment);
-
-
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
             mr.success=false;

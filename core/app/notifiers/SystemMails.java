@@ -45,10 +45,7 @@ public class SystemMails extends Mailer {
                    (ArrayList<String>)infos.get().get("recipients"),DAILY_REVIEW,MailsRecord.T.SYSTEM);
         try {
             send(reviews);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(DAILY_REVIEW)
-                    .save();
+
         } catch(Exception e) {
             mr.success=false;
             Logger.warn(Webs.E(e));
@@ -80,10 +77,7 @@ public class SystemMails extends Mailer {
                        (ArrayList<String>)infos.get().get("recipients"),DAILY_FEEDBACK,MailsRecord.T.SYSTEM);
         try {
             send(feedbacks);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(DAILY_FEEDBACK)
-                    .save();
+
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
@@ -102,10 +96,7 @@ public class SystemMails extends Mailer {
                       (ArrayList<String>)infos.get().get("recipients"),SKU_PIC_CHECK,MailsRecord.T.SYSTEM);
         try {
             send(productAndSellT2s);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(SKU_PIC_CHECK)
-                    .save();
+
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             mr.success=false;
