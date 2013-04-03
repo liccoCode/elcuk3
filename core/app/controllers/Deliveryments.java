@@ -41,7 +41,7 @@ public class Deliveryments extends Controller {
         renderArgs.put("buyers", User.procurers());
     }
 
-    @Before(only = {"index", "goToDeliverymentApply"})
+    @Before(only = {"index", "deliverymentToApply"})
     public static void beforeIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
         renderArgs.put("suppliers", suppliers);
@@ -155,7 +155,8 @@ public class Deliveryments extends Controller {
     /**
      * 进入采购单请款生成页面
      */
-    public static void goToDeliverymentApply(List<String> deliverymentIds, DeliveryPost p) {
+    @Check("deliveryments.deliverymenttoapply")
+    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p) {
         if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");

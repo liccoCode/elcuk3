@@ -6,6 +6,7 @@ import models.finance.FeeType;
 import models.procure.ProcureUnit;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 /**
  * Created by IntelliJ IDEA.
@@ -13,12 +14,14 @@ import play.mvc.Controller;
  * Date: 3/26/13
  * Time: 5:56 PM
  */
+@With({GlobalExceptionHandler.class, Secure.class})
 public class ProcureUnits extends Controller {
     /**
      * 预付款申请
      *
      * @param id
      */
+    @Check("procureunits.billingprepay")
     public static void billingPrePay(Long id, Long applyId) {
         ProcureUnit unit = ProcureUnit.findById(id);
         try {
@@ -38,6 +41,7 @@ public class ProcureUnits extends Controller {
      *
      * @param id
      */
+    @Check("procureunits.billingtailpay")
     public static void billingTailPay(Long id, Long applyId) {
         ProcureUnit unit = ProcureUnit.findById(id);
         try {

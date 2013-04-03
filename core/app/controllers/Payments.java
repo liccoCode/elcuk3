@@ -24,6 +24,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Payments extends Controller {
 
+    @Check("payments.index")
     public static void index() {
         List<Payment> payments = Payment.findAll();
         render(payments);
@@ -34,13 +35,13 @@ public class Payments extends Controller {
         renderText(Currency.bocRatesHtml());
     }
 
-    //TODO 查看需要权限
+    @Check("payments.show")
     public static void show(Long id) {
         Payment payment = Payment.findById(id);
         render(payment);
     }
 
-    //TODO approval 需要权限
+    @Check("payments.paymentunitapproval")
     public static void paymentUnitApproval(Long id, List<Long> paymentUnitIds) {
         checkAuthenticity();
         Payment payment = Payment.findById(id);
@@ -53,9 +54,9 @@ public class Payments extends Controller {
     }
 
     /**
-     * TODO 需要权限
      * 为当前付款单付款
      */
+    @Check("payments.payforit")
     public static void payForIt(Long id, Long paymentTargetId,
                                 Currency currency, Float actualPaid) {
 
@@ -78,6 +79,7 @@ public class Payments extends Controller {
         show(id);
     }
 
+    @Check("payments.shouldpaidupdate")
     public static void shouldPaidUpdate(Long id, Float shouldPaid) {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
@@ -89,6 +91,7 @@ public class Payments extends Controller {
     }
 
     // --------- File Resources -----------
+    @Check("payments.uploads")
     public static void uploads(Attach a) {
         a.setUpAttachName();
         Logger.info("%s File save to %s.[%s kb] at Payments", a.fid, a.location,

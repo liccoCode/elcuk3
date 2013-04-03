@@ -28,11 +28,13 @@ public class PaymentTargets extends Controller {
     }
 
 
+    @Check("paymenttargets.index")
     public static void index() {
         PaymentTarget t = new PaymentTarget();
         render(t);
     }
 
+    @Check("paymenttargets.save")
     public static void save(PaymentTarget t, Cooperator c) {
         Validation.required("账号", t.accountNumber);
         Validation.required("账户", t.accountUser);
@@ -49,6 +51,7 @@ public class PaymentTargets extends Controller {
         index();
     }
 
+    @Check("paymenttargets.update")
     public static void update(Long targetId, PaymentTarget t, Cooperator c) {
         Validation.required("账号", t.accountNumber);
         Validation.required("账户", t.accountUser);
@@ -68,6 +71,7 @@ public class PaymentTargets extends Controller {
         index();
     }
 
+    @Check("paymenttargets.destroy")
     public static void destroy(Long targetId) {
         PaymentTarget target = PaymentTarget.findById(targetId);
         target.destroy();

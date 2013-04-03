@@ -5,6 +5,7 @@ import models.finance.PaymentUnit;
 import models.view.Ret;
 import play.data.validation.Validation;
 import play.mvc.Controller;
+import play.mvc.With;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,8 +13,10 @@ import play.mvc.Controller;
  * Date: 1/28/13
  * Time: 10:43 AM
  */
+@With({GlobalExceptionHandler.class, Secure.class})
 public class PaymentUnits extends Controller {
 
+    @Check("paymentunits.destroy")
     public static void destroy(Long id) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.remove();
@@ -24,6 +27,7 @@ public class PaymentUnits extends Controller {
         Applys.procure(payUnit.deliveryment.apply.id);
     }
 
+    @Check("paymentunits.fixvalue")
     public static void fixValue(Long id, Float fixValue, String reason) {
         PaymentUnit paymentUnit = PaymentUnit.findById(id);
         Validation.required("fixValue", fixValue);
@@ -40,6 +44,7 @@ public class PaymentUnits extends Controller {
         redirect("/apply/" + paymentUnit.procureUnit.deliveryment.apply.id + "/procure#" + id);
     }
 
+    @Check("paymentunits.deny")
     public static void deny(Long paymentId, Long id, String reason) {
         PaymentUnit paymentUnit = PaymentUnit.findById(id);
         paymentUnit.deny(reason);
