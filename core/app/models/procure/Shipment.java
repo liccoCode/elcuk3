@@ -796,7 +796,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : this.items) {
             weight += itm.qty * itm.unit.product.weight;
         }
-        //保留小数点后两位
         return weight;
     }
 
