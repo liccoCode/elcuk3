@@ -27,7 +27,7 @@
           #{set diff: ship.totalWeight()-ship.minimumTraffic() /}
           #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
             #{if diff>0}
-                ${" 超出"+diff.format("0..00")}
+                ${" 超出"+diff.format("0.00")}
             #{/if}
           #{/if}
           #{else }
