@@ -2,7 +2,66 @@
 #{set title:'邮件日志'/}
 #{set 'moreScripts'}
     #{script 'highcharts.js'/}
-    #{script 'timeline/timeline_js/timeline-api.js'/}
-    #{script 'analyzes/timeline.coffee'/}
     #{script 'mailsrecord/mailsrecord.coffee'/}
 #{/set}
+<div class="tabbable tabs-left">
+
+    <div id="top_tabContent" class="tab-content">
+            <div class="tab-pane fade in active" id="normal">
+                <div class="row-fluid">
+                    <div id="mail_records" class="span6" style="height:280px"></div>
+
+                </div>
+
+                <div class="row-fluid">
+                                <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
+                </div>
+            </div>
+
+     </div>
+
+</div>
+
+    <div id="a_toolbar" class="row-fluid">
+        <form  name="params">
+            <div class="span12">
+                <div class="input-prepend inline">
+                    <span class="add-on">From:</span>
+                    <input type="date" id="m_from" name="m.from">
+                </div>
+
+                <div class="input-prepend input-append inline">
+                    <span class="add-on">TO:</span>
+                    <input type="date" id="m_to" name="m.to">
+                </div>
+
+                <div class="input-prepend inline">
+                   <span class="add-on">STATUS:</span>
+                    <select name="m.success" class="inline">
+                            <option value="true" selected="selected">成功</option>
+                            <option value="false">失败</option>
+                    </select>
+                </div>
+
+                <div class="input-prepend inline">
+                    <span class="add-on">类型:</span>
+                    <select name="m.type" class="inline">
+                            <option value="NORMAL" selected="selected">NORMAL</option>
+                            <option value="FBA">FBA</option>
+                            <option value="SYSTEM">SYSTEM</option>
+                    </select>
+                </div>
+
+
+                <div class="input-prepend inline">
+                    <span class="add-on">GROUP:</span>
+                    <select name="p.group" class="inline">
+                        <option value=""></option>
+                        <option value="true">@easya.cc</option>
+                        <option value="false">@amazon.de</option>
+                        <option value="false">@amazon.com</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>

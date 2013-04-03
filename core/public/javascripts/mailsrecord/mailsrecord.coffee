@@ -1,0 +1,102 @@
+$ ->
+Highcharts.setOptions(global:
+     {useUTC: false})
+defaultDate = $.DateUtil.addDay(-30)
+now = $.DateUtil.addDay(30, defaultDate)
+
+lineOp = (container, yName) ->
+    chart:
+      renderTo: container
+    title:
+      text: 'Chart Title'
+    xAxis:
+      type: 'datetime'
+      dateTimeLabelFormats:
+        day: '%Y-%m-%d %e'
+      tickInterval: 5 * (24 * 3600 * 1000)
+    yAxis:
+      title:
+        text: yName
+      min: 0
+    plotOptions:
+      series: # 需要从服务器获取开始时间
+        pointStart: new Date().getTime()
+        # 1day
+        pointInterval: 24 * 3600 * 1000
+        cursor: 'pointer'
+        point:
+          events:
+            {}
+    tooltip:
+      shared: true
+      formatter: ->
+        s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
+        @points.forEach((point) ->
+          totalY = point.series.yData.reduce((a, b)-> a + b)
+          s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
+        )
+        s
+      crosshairs: true
+      xDateFormat: '%Y-%m-%d %A'
+    series: []
+    # 设置这条线的'标题'
+    head: (title) ->
+      @title.text = title
+      @
+    click: (func) ->
+      @plotOptions.series.point.events.click = func
+      @
+    mouseOver: (func) ->
+      @plotOptions.series.point.events.mouseOver = func
+      @
+    mouseOut: (func) ->
+      @plotOptions.series.point.events.mouseOut = func
+      @
+    formatter: (func) ->
+      @tooltip.formatter = func
+      @
+    clearLines: () ->
+      @series = []
+      @
+    xStart: (datetime_millions) ->
+      @plotOptions.series.pointStart = datetime_millions
+      @
+    id: -> container
+
+
+mailRecordLines=->lineOp("mail_record","Mail Records")
+
+unit_line = (params) ->
+    #LoadMask.mask(BELOWTAb.content_selector())
+    $.getJSON('/mailsrecords/ajaxRecord', params, (r) ->
+      try
+        if r.flag is false
+          alert(r.message)
+        else
+          display_sku = params['p.val']
+          unitLines = newSaleUnitLines()
+          unitLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
+          names =
+            unit_all: 'Unit Order(all)'
+            unit_uk: 'Unit Order(uk)'
+            unit_de: 'Unit Order(de)'
+            unit_fr: 'Unit Order(fr)'
+            unit_us: 'Unit Order(us)'
+          # 将曲线的名字更换为可读性更强的
+          r['series'].map((l) -> l.name = names[l.name])
+          for line in r['series']
+            unitLines.series.push(line)
+          unitLines.xStart(r['pointStart'])
+          console.log(unitLines)
+          $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
+      finally
+        #LoadMask.unmask(BELOWTAb.content_selector())
+    )
+
+
+paramsObj = () -> $.formArrayToObj($('#params').formToArray())
+
+# init
+$('#m_from').data('dateinput').setValue(defaultDate)
+$('#m_to').data('dateinput').setValue(now)
+
