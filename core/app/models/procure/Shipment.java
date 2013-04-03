@@ -11,8 +11,6 @@ import models.User;
 import models.finance.PaymentUnit;
 import models.product.Whouse;
 import notifiers.Mails;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -38,7 +36,6 @@ import java.util.*;
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
-
 
 
     public Shipment() {
@@ -853,14 +850,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         // 自动关闭.
         List<Shipment> overDueShipments = Shipment.find("state IN (?,?) AND planBeginDate<=?",
-                        S.PLAN, S.CONFIRM, DateTime.now().minusDays(3).toDate()).fetch();
-                for(Shipment shipment : overDueShipments) {
-                    if(shipment.items.size() > 0)
-                        continue;
-                    shipment.state = S.CANCEL;
-                    shipment.comment("运输单过期, 自动 CANCEL");
-                    shipment.save();
-                }
+                S.PLAN, S.CONFIRM, DateTime.now().minusDays(3).toDate()).fetch();
+        for(Shipment shipment : overDueShipments) {
+            if(shipment.items.size() > 0)
+                continue;
+            shipment.state = S.CANCEL;
+            shipment.comment("运输单过期, 自动 CANCEL");
+            shipment.save();
+        }
 
         // 自动创建
         List<Shipment> planedShipments = Shipment
@@ -870,8 +867,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.all().fetch();
         DateTime now = new DateTime(Dates.morning(new Date()));
-        for(Whouse whouse :whs)
-            whouse.checkWhouseNewShipment(planedShipments,now);
+        for(Whouse whouse : whs) {
+            whouse.checkWhouseNewShipment(planedShipments, now);
+        }
 
 
         // 加载
@@ -885,11 +883,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         //当运输方式是 air 或者 express的时候,统一一起查出来
         if(shipType != null) {
-            if(shipType.equals(T.AIR)||shipType.equals(T.EXPRESS)){
+            if(shipType.equals(T.AIR) || shipType.equals(T.EXPRESS)) {
                 where.append(" AND type in (?,?)");
                 params.add(T.AIR);
                 params.add(T.EXPRESS);
-            }else{
+            } else {
                 where.append(" AND type =?");
                 params.add(shipType);
             }
@@ -912,12 +910,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 新建运输单
+     *
      * @param planBeginDate 计划开始时间
-     * @param whouse    接受仓库
-     * @param type      运输方式
-     * @param arriveDate 预计到达时间
+     * @param whouse        接受仓库
+     * @param type          运输方式
+     * @param arriveDate    预计到达时间
      */
-    public static void create(Date planBeginDate,Whouse whouse,T type,Date arriveDate){
+    public static void create(Date planBeginDate, Whouse whouse, T type, Date arriveDate) {
         Shipment shipment = new Shipment();
         shipment.id = Shipment.id();
         shipment.cycle = true;
@@ -932,11 +931,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 获得不同运输方式的标准运输量
+     *
      * @return
      */
-    public  float minimumTraffic(){
-	//海运和空运暂时的最小运输量是500 而快递是不能超过500
-        return  500;
+    public float minimumTraffic() {
+        //海运和空运暂时的最小运输量是500 而快递是不能超过500
+        return 500;
     }
 
 }
