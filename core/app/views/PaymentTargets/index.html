@@ -7,115 +7,121 @@
 #{/set}
 
 <div class="row-fluid">
-    <div class="span12">
-    #{errorMsgs /}
-    #{flash_alert /}
-        <div class="btn-toolbar">
-            <a href="#create_modal" class="btn btn-success" data-toggle='modal'>添加一个支付账号</a>
-        </div>
-        <table class="table table-bordered table-condensed">
-            <tr>
-                <th>#</th>
-                <th>名称</th>
-                <th>账户</th>
-                <th>账号</th>
-                <th>创建时间</th>
-                <th class="ten"></th>
-            </tr>
-        #{list items:targets, as:'tgt'}
-            <tr>
-                <td>${tgt.id}</td>
-                <td copId=${tgt.cooper.id}>${tgt.name}</td>
-                <td>${tgt.accountUser}</td>
-                <td>${tgt.accountNumber}</td>
-                <td>${tgt.createdAt}</td>
-                <td>
-                    <a href="javascript:void(0);" data-method='update' class="btn btn-success">
-                        <i class="icon-refresh"></i> 编辑
-                    </a>
-                    <a href="javascript:void(0);" data-method='delete' class="btn btn-danger"
-                       data-id='${tgt.id}'>
-                        <i class="icon-remove"></i> 删除
-                    </a>
-                </td>
-            </tr>
-        #{/list}
-        </table>
+  <div class="span12">
+  #{errorMsgs /}
+  #{flash_alert /}
+    <div class="btn-toolbar">
+    #{power.ck 'paymenttargets.save'}
+      <a href="#create_modal" class="btn btn-success" data-toggle='modal'>添加一个支付账号</a>
+    #{/power.ck}
     </div>
+    <table class="table table-bordered table-condensed">
+      <tr>
+        <th>#</th>
+        <th>名称</th>
+        <th>账户</th>
+        <th>账号</th>
+        <th>创建时间</th>
+        <th class="ten"></th>
+      </tr>
+    #{list items:targets, as:'tgt'}
+      <tr>
+        <td>${tgt.id}</td>
+        <td copId=${tgt.cooper.id}>${tgt.name}</td>
+        <td>${tgt.accountUser}</td>
+        <td>${tgt.accountNumber}</td>
+        <td>${tgt.createdAt}</td>
+        <td>
+            #{power.ck 'paymenttargets.update'}
+              <a href="javascript:void(0);" data-method='update' class="btn btn-success">
+                <i class="icon-refresh"></i> 编辑
+              </a>
+            #{/power.ck}
+            #{power.ck 'paymenttargets.destroy'}
+              <a href="javascript:void(0);" data-method='delete' class="btn btn-danger"
+                 data-id='${tgt.id}'>
+                <i class="icon-remove"></i> 删除
+              </a>
+            #{/power.ck }
+        </td>
+      </tr>
+    #{/list}
+    </table>
+  </div>
 </div>
 
 #{form @PaymentTargets.save()}
 <div id="create_modal" class="modal hide fade">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3>添加一个新的支付账号</h3>
-    </div>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>添加一个新的支付账号</h3>
+  </div>
 
-    <div class="modal-body">
-        #{errorMsgs /}
-        #{flash_alert /}
-        <dl class="dl-horizontal">
-            <dt>账户</dt>
-            <dd>
-                <input type="text" name="t.accountUser" value="${t.accountUser}">
-            </dd>
+  <div class="modal-body">
+      #{errorMsgs /}
+      #{flash_alert /}
+    <dl class="dl-horizontal">
+      <dt>账户</dt>
+      <dd>
+        <input type="text" name="t.accountUser" value="${t.accountUser}">
+      </dd>
 
-            <dt>账号</dt>
-            <dd>
-                <input type="text" name="t.accountNumber" value="${t.accountNumber}">
-            </dd>
+      <dt>账号</dt>
+      <dd>
+        <input type="text" name="t.accountNumber" value="${t.accountNumber}">
+      </dd>
 
-            <dt>合作伙伴</dt>
-            <dd>
-                #{select 'c.id', items:copers, valueProperty:'id', labelProperty:'name'}#{/select}
-            </dd>
-        </dl>
-    </div>
+      <dt>合作伙伴</dt>
+      <dd>
+          #{select 'c.id', items:copers, valueProperty:'id', labelProperty:'name'}#{/select}
+      </dd>
+    </dl>
+  </div>
 
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <input type="submit" value="添加" class="btn btn-primary">
-    </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <input type="submit" value="添加" class="btn btn-primary">
+  </div>
 </div>
 #{/form}
 
 #{form @PaymentTargets.update(1), id:'update_form'}
 <div id="update_modal" class="modal hide fade">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3>修改支付目标</h3>
-    </div>
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3>修改支付目标</h3>
+  </div>
 
-    <div class="modal-body">
-        #{errorMsgs /}
-        #{flash_alert /}
-        <dl class="dl-horizontal">
-            <dt>名称</dt>
-            <dd>
-                <input type="text" id="target_name" name="t.name" value="">
-            </dd>
+  <div class="modal-body">
+      #{errorMsgs /}
+      #{flash_alert /}
+    <dl class="dl-horizontal">
+      <dt>名称</dt>
+      <dd>
+        <input type="text" id="target_name" name="t.name" value="">
+      </dd>
 
-            <dt>账户</dt>
-            <dd>
-                <input type="text" id="target_accountUser" name="t.accountUser" value="${t.accountUser}">
-            </dd>
+      <dt>账户</dt>
+      <dd>
+        <input type="text" id="target_accountUser" name="t.accountUser" value="${t.accountUser}">
+      </dd>
 
-            <dt>账号</dt>
-            <dd>
-                <input type="text" id="target_accountNum" name="t.accountNumber" value="">
-            </dd>
+      <dt>账号</dt>
+      <dd>
+        <input type="text" id="target_accountNum" name="t.accountNumber" value="">
+      </dd>
 
-            <dt>合作伙伴</dt>
-            <dd>
-                #{select 'c.id', id:'target_cooper', items:copers, valueProperty:'id',
+      <dt>合作伙伴</dt>
+      <dd>
+          #{select 'c.id', id:'target_cooper', items:copers, valueProperty:'id',
                 labelProperty:'name'}#{/select}
-            </dd>
-        </dl>
-    </div>
+      </dd>
+    </dl>
+  </div>
 
-    <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <input type="submit" value="修改" class="btn btn-primary">
-    </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <input type="submit" value="修改" class="btn btn-primary">
+  </div>
 </div>
 #{/form}

@@ -103,8 +103,10 @@
         #{/list}
     </table>
     <div class="btn-toolbar">
-      <input url='@{Deliveryments.deliverymentToApply()}'
-             type="submit" id="goToDeliverymentApply" class="btn  btn-success" value="采购单请款">
+        #{power.ck 'deliveryments.deliverymenttoapply'}
+          <input url='@{Deliveryments.deliverymentToApply()}'
+                 type="submit" id="goToDeliverymentApply" class="btn  btn-success" value="采购单请款">
+        #{/power.ck}
     </div>
   </div>
 </div>

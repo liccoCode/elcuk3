@@ -10,7 +10,9 @@
 #{form @Payments.paymentUnitApproval(payment.id), method:'POST'}
 <div class="row-fluid" xmlns="http://www.w3.org/1999/html">
   <div class="btn-toolbar">
-    <input type="submit" class="btn btn-info" value="批准"/>
+      #{power.ck 'payments.paymentunitapproval'}
+        <input type="submit" class="btn btn-info" value="批准"/>
+      #{/power.ck}
   </div>
   <table class="table table-bordered table-condensed">
     <tr>
@@ -55,11 +57,13 @@
           <td>${paymentUnit.payee.username}</td>
           <td>
             <span class="label ${paymentUnit.stateLabel()}">${paymentUnit.state.label()}</span>
-              #{if paymentUnit.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
-                <button url='@{PaymentUnits.deny(payment.id, paymentUnit.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
-                  驳回
-                </button>
-              #{/if}
+              #{power.ck 'paymentunits.deny'}
+                  #{if paymentUnit.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
+                    <button url='@{PaymentUnits.deny(payment.id, paymentUnit.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
+                      驳回
+                    </button>
+                  #{/if}
+              #{/power.ck}
           </td>
           <td>
             <a href="@{Applys.procure(payment.pApply.id)}#${paymentUnit.id}" target="_blank">
@@ -126,67 +130,71 @@
         </dl>
       #{/if}
       #{else }
-          #{form @Payments.payForIt(payment.id), method:'POST', class:'form-horizontal', id:'pay_form'}
-            <div class="control-group">
-              <label class="control-label">供应商</label>
+          #{power.ck 'payments.payforit'}
+              #{form @Payments.payForIt(payment.id), method:'POST', class:'form-horizontal', id:'pay_form'}
+                <div class="control-group">
+                  <label class="control-label">供应商</label>
 
-              <div class="controls">
-                <input type="text" placeholder="供应商" value="${payment.cooperator.fullName}" readonly="">
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">账号</label>
+                  <div class="controls">
+                    <input type="text" placeholder="供应商" value="${payment.cooperator.fullName}" readonly="">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">账号</label>
 
-              <div class="controls">
-                  #{select 'paymentTargetId', items: payment.cooperator.paymentMethods, valueProperty:id}#{/select}
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">币种</label>
+                  <div class="controls">
+                      #{select 'paymentTargetId', items: payment.cooperator.paymentMethods, valueProperty:id}#{/select}
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">币种</label>
 
-              <div class="controls">
-                  #{pickCurrency id:'currency', name:'currency', c:payment.currency /}
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">金额</label>
+                  <div class="controls">
+                      #{pickCurrency id:'currency', name:'currency', c:payment.currency /}
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">金额</label>
 
-              <div class="controls">
-                <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
-              </div>
-            </div>
-            <div class="control-group">
-              <div class="controls">
-                <input type="submit" value="付款" class="btn btn-primary">
-              </div>
-            </div>
-          #{/form}
-        <form action="#" class="form-horizontal" onsubmit="return false;">
-          <div class="control-group">
-            <label class="control-label">应付金额</label>
+                  <div class="controls">
+                    <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="controls">
+                    <input type="submit" value="付款" class="btn btn-primary">
+                  </div>
+                </div>
+              #{/form}
+            <form action="#" class="form-horizontal" onsubmit="return false;">
+              <div class="control-group">
+                <label class="control-label">应付金额</label>
 
-            <div class="controls">
-              <div class="input-append">
-                <input type="text" class="input-small"
-                       url='@{Payments.shouldPaidUpdate (payment.id)}'
-                       placeholder="手动输入确认" name="actualPaid" id="shouldPaid">
-                <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
+                <div class="controls">
+                  <div class="input-append">
+                    <input type="text" class="input-small"
+                           url='@{Payments.shouldPaidUpdate (payment.id)}'
+                           placeholder="手动输入确认" name="actualPaid" id="shouldPaid">
+                    <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </form>
+            </form>
+          #{/power.ck}
       #{/else}
       </div>
     </div>
   </div>
 </div>
 
+#{power.ck 'payments.uploads'}
 <div class="row-fluid" style="margin-top:20px">
   <div style="min-height:300px;background:#eee;" id="dropbox" paymentId='${payment.id}'>
     <ul class="thumbnails uploaded"></ul>
     <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
   </div>
 </div>
+#{/power.ck}
 
 <div id="deny_modal" class="modal hide fade">
   <form action="#" method="post" id="deny_form">

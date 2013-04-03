@@ -77,16 +77,20 @@
             <td colspan="9">
               <div class="row-fluid">
                 <div class="span1">
-                    #{ifnot procureUnit.hasPrePay()}
-                        #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
-                          <input type="submit" value="申请预付款" class="btn">
-                        #{/form}
-                    #{/ifnot}
-                    #{ifnot procureUnit.hasTailPay()}
-                        #{form @ProcureUnits.billingTailPay(pid, apply.id), method:'POST'}
-                          <input type="submit" value="申请尾款" class="btn">
-                        #{/form}
-                    #{/ifnot}
+                    #{power.ck 'procureunits.billingprepay'}
+                        #{ifnot procureUnit.hasPrePay()}
+                            #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
+                              <input type="submit" value="申请预付款" class="btn">
+                            #{/form}
+                        #{/ifnot}
+                    #{/power.ck}
+                    #{power.ck 'procureunits.billingtailpay'}
+                        #{ifnot procureUnit.hasTailPay()}
+                            #{form @ProcureUnits.billingTailPay(pid, apply.id), method:'POST'}
+                              <input type="submit" value="申请尾款" class="btn">
+                            #{/form}
+                        #{/ifnot}
+                    #{/power.ck}
                 </div>
                 <div class="span11">
                     #{if procureUnit.fees().size() > 0}
@@ -103,11 +107,13 @@
                           #{list items:procureUnit.fees(), as:'fee'}
                             <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
                               <td>
-                                  #{ifnot fee.remove || fee.isApproval()}
-                                      #{form @PaymentUnits.destroy(fee.id), method:'DELETE'}
-                                        <input type="submit" class="btn btn-danger" value="取消"/>
-                                      #{/form}
-                                  #{/ifnot}
+                                  #{power.ck 'paymentunits.destroy'}
+                                      #{ifnot fee.remove || fee.isApproval()}
+                                          #{form @PaymentUnits.destroy(fee.id), method:'DELETE'}
+                                            <input type="submit" class="btn btn-danger" value="取消"/>
+                                          #{/form}
+                                      #{/ifnot}
+                                  #{/power.ck}
                               </td>
                               <td>
                                 <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
@@ -131,8 +137,10 @@
                                             <span class="add-on">${fee.currency.symbol()}</span>
                                             <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
                                           </div>
-                                          <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
-                                          <input type="submit" value="修正" class="btn">
+                                            #{power.ck 'paymentunits.fixvalue' }
+                                              <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
+                                              <input type="submit" value="修正" class="btn">
+                                            #{/power.ck}
                                         #{/form}
                                     #{/else}
                                 </div>
