@@ -8,7 +8,7 @@ import play.mvc.Controller;
  * Date: 13-4-2
  * Time: 下午3:28
  */
-public class MailsRecord extends Controller {
+public class MailsRecords extends Controller {
 
     public static void index(){
 

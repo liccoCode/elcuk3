@@ -73,13 +73,18 @@ public class MailsRecord extends GenericModel {
     @Expose
     public String recipients;
 
-
-    public static MailsRecord findByTitle(String title) {
+    /**
+     * 根据title查找发送失败的邮件记录
+     * @param title
+     * @return
+     */
+    public static MailsRecord findFailedByTitle(String title) {
        MailsRecord mr=MailsRecord.find("title=? and success=false",title).first();
        if(mr==null)
            mr=new MailsRecord(title);
         return mr;
     }
+
 
    public void addParams(String from, ArrayList<String> recipients, String tmp, T type) {
        this.sender=from;

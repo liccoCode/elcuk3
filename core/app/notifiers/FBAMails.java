@@ -39,14 +39,11 @@ public class FBAMails extends Mailer {
                 fba.shipmentId, oldState, newState));
         mailBase();
         addRecipient("p@easyacceu.com");
-        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
-        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),STATE_CHANGE,MailsRecord.T.FBA);
+        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),
+                    (ArrayList<String>)infos.get().get("recipients"),STATE_CHANGE,MailsRecord.T.FBA);
         try {
             send(fba, oldState, newState);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(STATE_CHANGE)
-                    .save();
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             mr.success=false;
@@ -66,17 +63,14 @@ public class FBAMails extends Mailer {
         setSubject("{WARN} FBA %s 签收了,但超过 2 天还没有开始入库.", fba.shipmentId);
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
-        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),NOT_RECEING,MailsRecord.T.FBA);
+        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),
+                           (ArrayList<String>)infos.get().get("recipients"),NOT_RECEING,MailsRecord.T.FBA);
         try {
             send(fba);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(NOT_RECEING)
-                    .save();
         } catch(Exception e) {
-            mr.success=false;
             Logger.warn(Webs.E(e));
+            mr.success = false;
             return false;
         }finally {
             mr.save();
@@ -93,18 +87,15 @@ public class FBAMails extends Mailer {
         setSubject("{WARN} 总共 %s 个 FBA 入库时间过长, 需检查", fbas.size());
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-
-        MailsRecord mr=MailsRecord.findByTitle(infos.get().get("subject").toString());
-        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),RECEIVING_CHECK,MailsRecord.T.FBA);
+        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
+        mr.addParams(infos.get().get("from").toString(),
+                                  (ArrayList<String>)infos.get().get("recipients"),RECEIVING_CHECK,MailsRecord.T.FBA);
         try {
             send(fbas);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(RECEIVING_CHECK)
-                    .save();
+
         } catch(Exception e) {
-            mr.success=false;
             Logger.warn(Webs.E(e));
+            mr.success=false;
             return false;
         }finally {
             mr.save();
