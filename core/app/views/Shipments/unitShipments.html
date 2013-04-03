@@ -23,13 +23,18 @@
         <td>${ship.state}</td>
         <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
         <td>
-          ${helper.Webs.scale2PointUp(ship.totalWeight())}
-          #{if ship.diffByType()>0}
-            ${" 超出:"+helper.Webs.scale2PointUp(ship.diffByType())}
+          ${ship.totalWeight().format("0.00")}
+          #{set diff: ship.totalWeight()-ship.minimumTraffic() /}
+          #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
+            #{if diff>0}
+                ${" 超出"+diff.format("0..00")}
+            #{/if}
           #{/if}
-          #{elseif ship.diffByType()<0}
-            ${" 差:"+(helper.Webs.scale2PointUp(-ship.diffByType()))}
-          #{/elseif}
+          #{else }
+            #{if diff<0}
+                ${" 差"+(-diff).format("0.00")}
+            #{/if}
+          #{/else}
 
 
         </td>

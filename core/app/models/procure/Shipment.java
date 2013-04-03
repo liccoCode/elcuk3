@@ -927,31 +927,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 计算运输总重量与达标量之间的差值
+     * 获得不同运输方式的标准运输量
      * @return
      */
-    public  float diff(){
-        return  totalWeight()-500;
-    }
-
-    /**
-     * 处理不同运输方式的差值
-     * @return
-     */
-    public float diffByType(){
-        float diff=diff();
-        if(this.type.equals(T.EXPRESS)){
-           //快递 diff>0代表超出范围
-           if(diff<0){
-               diff=0;
-           }
-        }else
-           // 空运或者海运 diff<0代表没有达到要求
-           if(diff>0){
-               diff=0;
-           }
-            //达标时都设为0
-        return diff;
+    public  float minimumTraffic(){
+        return  500;
     }
 
 }
