@@ -4,6 +4,7 @@ import models.ElcukRecord;
 import models.User;
 import org.apache.commons.lang.StringUtils;
 import play.i18n.Messages;
+import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,20 +29,29 @@ public class ERecordBuilder {
     public ERecordBuilder() {
     }
 
+    /**
+     * KeyMsg 为 [key].msg
+     *
+     * @param key
+     */
+    public ERecordBuilder(String key) {
+        this(key, key + ".msg");
+    }
+
     public ERecordBuilder(String key, String keyMsg) {
         this.key = key;
         this.keyMsg = keyMsg;
     }
 
     public ERecordBuilder actionArgs(String... args) {
-        if(args != null)
-            this.keyArgs = Arrays.asList(args);
+        if(args != null && args.length > 0)
+            keyArgs.addAll(Arrays.asList(args));
         return this;
     }
 
     public ERecordBuilder msgArgs(String... args) {
-        if(args != null)
-            this.msgArgs = Arrays.asList(args);
+        if(args != null && args.length > 0)
+            msgArgs.addAll(Arrays.asList(args));
         return this;
     }
 
@@ -52,12 +62,23 @@ public class ERecordBuilder {
     }
 
     public ERecordBuilder fid(String fid) {
-        if(StringUtils.isNotBlank(fid))
-            this.fid = fid;
+        if(StringUtils.isBlank(fid))
+            throw new FastRuntimeException("设置的外键不能为空");
+        this.fid = fid;
+        return this;
+    }
+
+    public ERecordBuilder fid(Long fid) {
+        if(fid == null)
+            throw new FastRuntimeException("设置的外键不能为空");
+        this.fid = fid + "";
         return this;
     }
 
     public ElcukRecord record() {
+        if(StringUtils.isBlank(this.fid))
+            throw new FastRuntimeException("外键不能为空");
+
         ElcukRecord record = new ElcukRecord(
                 Messages.get(this.key, this.keyArgs.toArray()),
                 Messages.get(this.keyMsg, this.msgArgs.toArray())

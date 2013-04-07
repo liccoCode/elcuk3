@@ -3,7 +3,9 @@ package models.finance;
 import exception.PaymentException;
 import helper.Currency;
 import helper.Dates;
+import models.ElcukRecord;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.product.Attach;
@@ -12,6 +14,7 @@ import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.*;
@@ -115,7 +118,12 @@ public class Payment extends Model {
     public Float actualPaid = 0f;
 
     /**
-     * 最后支付的币种是什么
+     * 最后支付的币种
+     */
+    public Currency actualCurrency;
+
+    /**
+     * 付款单的币种
      */
     @Enumerated(EnumType.STRING)
     public Currency currency = Currency.CNY;
@@ -194,6 +202,9 @@ public class Payment extends Model {
 
         // 对申请的部分做批准处理
         List<PaymentUnit> waitForDeals = this.waitForDealPaymentUnit(paymentUnitIds);
+        if(waitForDeals.size() != paymentUnitIds.size())
+            Validation.addError("", "提交的需要批准的数据与系统不一致!");
+
         for(PaymentUnit unit : waitForDeals) {
             if(PaymentUnit.S.APPLY != unit.state)
                 Validation.addError("", String.format("%s 状态拒绝 '批准'", unit.state.label()));
@@ -203,6 +214,12 @@ public class Payment extends Model {
         for(PaymentUnit unit : waitForDeals) {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
+            //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
+            new ERecordBuilder("payment.approval")
+                    .msgArgs(unit.procureUnit.qty() + "", unit.procureUnit.sku,
+                            "#" + unit.id, unit.currency.symbol() + " " + unit.amount())
+                    .fid(this.id)
+                    .save();
         }
     }
 
@@ -234,6 +251,8 @@ public class Payment extends Model {
                 break;
             }
         }
+        if(!Arrays.asList(Currency.CNY, Currency.USD).contains(currency))
+            Validation.addError("", "现在只支持美元与人民币两种支付币种");
 
         if(Validation.hasErrors()) return;
 
@@ -246,10 +265,19 @@ public class Payment extends Model {
         this.rate = currency.rate(html);
         this.ratePublishDate = Currency.rateDateTime(html);
         this.paymentDate = new Date();
+        // 切换到最后选择的支付账号
+        this.target = paymentTarget;
+        this.actualCurrency = currency;
         this.actualPaid = actualPaid;
         this.payer = User.current();
         this.state = S.PAID;
         this.save();
+        new ERecordBuilder("payment.payit")
+                .msgArgs(this.target.toString(),
+                        this.actualCurrency.symbol() + " " + this.actualPaid,
+                        this.rate + "", Dates.date2Date(this.ratePublishDate))
+                .fid(this.id)
+                .save();
     }
 
     /**
@@ -407,6 +435,11 @@ public class Payment extends Model {
         this.paymentNumber = String.format("付款单[%s-%03d-%s]",
                 this.cooperator.name, count, DateTime.now().toString("yy"));
         return this;
+    }
+
+    public List<ElcukRecord> records() {
+        return ElcukRecord.records(this.id + "",
+                Arrays.asList(Messages.get("payment.approval"), Messages.get("payment.payit")));
     }
 
     @Override

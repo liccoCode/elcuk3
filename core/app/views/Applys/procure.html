@@ -107,13 +107,14 @@
                           #{list items:procureUnit.fees(), as:'fee'}
                             <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
                               <td>
-                                  #{power.ck 'paymentunits.destroy'}
-                                      #{ifnot fee.remove || fee.isApproval()}
-                                          #{form @PaymentUnits.destroy(fee.id), method:'DELETE'}
-                                            <input type="submit" class="btn btn-danger" value="取消"/>
-                                          #{/form}
-                                      #{/ifnot}
-                                  #{/power.ck}
+                              *{#{power.ck 'paymentunits.destroy'}}*
+                                  #{ifnot fee.remove || fee.isApproval()}
+                                    <button class="paymentUnitCancel btn btn-danger"
+                                            url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>
+                                      取消
+                                    </button>
+                                  #{/ifnot}
+                              *{#{/power.ck}}*
                               </td>
                               <td>
                                 <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
@@ -178,6 +179,26 @@
 </div>
 <hr>
 #{/list}
+#{power.ck 'paymentunits.destroy'}
+<div class="modal hide fade" id="paymentUnit_destroy">
+  <form action="#" method="POST" id="paymentUnit_destroy_form">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>取消请款</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <label for="destroy_reason">原因</label>
+        <textarea id="destroy_reason" name="reason" rows="4" class="span12"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">关闭</a>
+      <input type="submit" value="取消请款" class="btn btn-danger">
+    </div>
+  </form>
+</div>
+#{/power.ck }
 
 #{warning_row title:'相关的付款单' /}
 <div class="row-fluid">
@@ -208,3 +229,6 @@
   #{/list}
   </table>
 </div>
+
+
+

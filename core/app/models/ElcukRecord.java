@@ -5,6 +5,7 @@ import notifiers.FBAMails;
 import notifiers.Mails;
 import notifiers.SystemMails;
 import play.data.validation.Required;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import query.ElcukRecordQuery;
 
@@ -127,6 +128,12 @@ public class ElcukRecord extends Model {
 
     public static List<ElcukRecord> records(String fid, String action) {
         return ElcukRecord.find("fid=? AND action=? ORDER BY createAt DESC", fid, action).fetch();
+    }
+
+    public static List<ElcukRecord> records(String fid, List<String> actions) {
+        return ElcukRecord.find("fid=? AND " +
+                JpqlSelect.whereIn("action", actions) +
+                " ORDER BY createAt DESC", fid).fetch();
     }
 
     public static JPAQuery fid(String fid) {

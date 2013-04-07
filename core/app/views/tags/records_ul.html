@@ -2,8 +2,10 @@
 #{list _records}
   <li>
     <p>
-      <span>${_.message}</span><br>
-      <small>- ${_.createAt}</small>
+      <span>${_.message}</span>
+        #{if _nobr}&nbsp;#{/if}
+        #{else }<br/>#{/else}
+      <small>- by ${_.username.capFirst()} at ${_.createAt}</small>
     </p>
   </li>
 #{/list}

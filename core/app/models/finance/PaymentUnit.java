@@ -4,6 +4,7 @@ import exception.PaymentException;
 import helper.Currency;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
@@ -158,16 +159,23 @@ public class PaymentUnit extends Model {
         throw new PaymentException("只允许软删除.");
     }
 
-    public PaymentUnit remove() {
+    public PaymentUnit remove(String reason) {
+        if(StringUtils.isBlank(reason))
+            Validation.addError("", "必须填写取消的理由.");
         if(this.isApproval())
-            Validation.addError("", "请款已经被批准, 请向财务确定删除.");
+            Validation.addError("", "请款已经被批准, 不允许删除记录, 请与财务交流调整.");
         if(this.remove)
             Validation.addError("", "已经删除了");
 
         if(Validation.hasErrors()) return null;
 
         this.remove = true;
-        return this.save();
+        this.save();
+        new ERecordBuilder("paymentunit.destroy")
+                .msgArgs(reason)
+                .fid(this.procureUnit.id) // 取消的操作, 记录在 ProcureUnit 身上, 因为是对采购计划取消请款
+                .save();
+        return this;
     }
 
 
@@ -192,9 +200,10 @@ public class PaymentUnit extends Model {
         if(Validation.hasErrors()) return;
         this.state = S.DENY;
         this.save();
-        new ElcukRecord(Messages.get("paymentunit.deny"),
-                Messages.get("paymentunit.deny.msg", User.current().username, reason),
-                this.id + "").save();
+        new ERecordBuilder("paymentunit.deny")
+                .msgArgs(reason)
+                .fid(this.id)
+                .save();
     }
 
     /**
@@ -292,9 +301,10 @@ public class PaymentUnit extends Model {
         if(this.state == S.DENY)
             this.state = S.APPLY;
         this.save();
-        new ElcukRecord(Messages.get("paymentunit.fixValue"),
-                Messages.get("paymentunit.fixValue.msg", User.current().username, reason,
-                        oldFixValue, this.fixValue),
-                this.id + "").save();
+        new ERecordBuilder("paymentunit.fixValue")
+                .msgArgs(reason, oldFixValue + "", this.fixValue + "")
+                .fid(this.id)
+                .save();
     }
 }
+

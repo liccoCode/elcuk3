@@ -17,9 +17,9 @@ import play.mvc.With;
 public class PaymentUnits extends Controller {
 
     @Check("paymentunits.destroy")
-    public static void destroy(Long id) {
+    public static void destroy(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
-        payUnit.remove();
+        payUnit.remove(reason);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else

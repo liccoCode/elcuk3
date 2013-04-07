@@ -6,6 +6,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
@@ -533,7 +534,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 预付款的逻辑在这里实现, 总额的 30% 为预付款
         fee.feeType = FeeType.cashpledge();
         fee.amount = (float) (fee.amount * 0.3);
-        return fee.save();
+        fee.save();
+        new ERecordBuilder("procureunit.prepay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
     }
 
     /**
@@ -553,7 +560,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         PaymentUnit fee = new PaymentUnit(this);
         fee.feeType = FeeType.procurement();
         fee.amount = this.leftAmount();
-        return fee.save();
+        fee.save();
+        new ERecordBuilder("procureunit.tailpay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
     }
 
     /**

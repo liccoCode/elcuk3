@@ -45,7 +45,15 @@ public class Payments extends Controller {
     public static void paymentUnitApproval(Long id, List<Long> paymentUnitIds) {
         checkAuthenticity();
         Payment payment = Payment.findById(id);
+        if(paymentUnitIds == null || paymentUnitIds.size() <= 0)
+            Validation.addError("", "请选择需要批准的请款");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
+        }
+
         payment.unitsApproval(paymentUnitIds);
+
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else

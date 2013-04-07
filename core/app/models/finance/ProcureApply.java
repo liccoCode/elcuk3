@@ -2,9 +2,11 @@ package models.finance;
 
 import helper.Dates;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -119,6 +121,7 @@ public class ProcureApply extends Apply {
      */
     public static ProcureApply buildProcureApply(List<String> deliverymentIds) {
         /**
+         * 0. 检查提交的采购单 ID 数量与加载的采购单数量是否一致
          * 1. 检查请款的供应商是否一致.
          * 2. 生成请款单编号
          * 3. 生成 ProcureApply
@@ -126,6 +129,8 @@ public class ProcureApply extends Apply {
 
         List<Deliveryment> deliveryments = Deliveryment
                 .find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
+        if(deliverymentIds.size() != deliveryments.size())
+            Validation.addError("", "提交的采购单参数与系统内不符.");
         Set<Cooperator> coopers = new HashSet<Cooperator>();
         for(Deliveryment dmt : deliveryments) {
             coopers.add(dmt.cooperator);
@@ -144,6 +149,10 @@ public class ProcureApply extends Apply {
             dmt.apply = apply;
             dmt.save();
         }
+        new ERecordBuilder("procureapply.save")
+                .msgArgs(StringUtils.join(deliverymentIds, ","))
+                .fid(apply.id + "")
+                .save();
         return apply;
     }
 }

@@ -28,9 +28,10 @@ public class FTags extends FastTags {
     public static void _ck(Map<?, ?> args, Closure body, PrintWriter out,
                            GroovyTemplate.ExecutableTemplate template, int fromLine) {
         try {
-            Boolean allow = (Boolean) Java
-                    .invokeChildOrStatic(Secure.Security.class, "check", args.get("arg"));
-            if(allow) out.print(JavaExtensions.toString(body));
+            Boolean allow = (Boolean) Java.invokeChildOrStatic(
+                    Secure.Security.class, "check", args.get("arg"));
+            if(allow)
+                out.print(JavaExtensions.toString(body));
             // 否则不允许出现内容
         } catch(TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
