@@ -144,6 +144,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          * 5. Category 不能为空
          * 6. 产品的名称不能为空
          * 7. 长宽高一定需要填写
+         * 8. 申报价不为空
          */
         if(StringUtils.isBlank(this.sku)) {
             Validation.addError("", "Sku 必须存在!");
@@ -158,6 +159,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.family != null && !StringUtils.startsWith(this.sku, this.family.family))
             Validation.addError("",
                     "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
+        if(this.declaredValue == null)
+            Validation.addError("", "申报价值必须填写");
         if(Validation.hasErrors()) return;
 
         this.category = this.family.category;
