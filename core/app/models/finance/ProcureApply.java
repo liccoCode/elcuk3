@@ -1,6 +1,7 @@
 package models.finance;
 
 import helper.Dates;
+import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
@@ -10,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.i18n.Messages;
 
 import javax.persistence.*;
 import java.util.*;
@@ -110,6 +112,10 @@ public class ProcureApply extends Apply {
                 Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
         this.serialNumber = String
                 .format("%s-%03d-%s", this.cooperator.name, count, DateTime.now().toString("yy"));
+    }
+
+    public List<ElcukRecord> records() {
+        return ElcukRecord.records(this.id + "", Messages.get("procureapply.save"));
     }
 
 
