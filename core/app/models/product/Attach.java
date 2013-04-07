@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import exception.PaymentException;
 import helper.Constant;
 import helper.J;
+import models.embedded.ERecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
@@ -66,7 +67,6 @@ public class Attach extends Model {
             public void delete(Attach attach) {
                 // 1. 标记文件软删除
                 // 2. 将文件挪动到软删除的目录下.
-                //todo: 需要添加软删除标记
                 attach.remove = true;
                 try {
                     FileUtils.moveFile(attach.getFile(), new File(attach.softDeleteLocation()));
@@ -75,6 +75,10 @@ public class Attach extends Model {
                     throw new PaymentException(PaymentException.MKDIR_ERROR);
                 }
                 attach.save();
+                new ERecordBuilder("payment.uploadDestroy")
+                        .msgArgs(attach.fileName)
+                        .fid(attach.fid)
+                        .save();
             }
         };
 

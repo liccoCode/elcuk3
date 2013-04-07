@@ -438,8 +438,13 @@ public class Payment extends Model {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "",
-                Arrays.asList(Messages.get("payment.approval"), Messages.get("payment.payit")));
+        List<String> actions = Arrays.asList(
+                Messages.get("payment.approval"),
+                Messages.get("payment.payit"),
+                Messages.get("payment.uploadDestroy")
+        );
+
+        return ElcukRecord.records(this.id + "", actions);
     }
 
     @Override
