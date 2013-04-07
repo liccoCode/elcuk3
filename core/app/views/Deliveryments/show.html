@@ -85,7 +85,7 @@
       </div>
     </form>
   #{/if}
-  #{ck 'deliveryments.cancel'}
+  #{power.ck 'deliveryments.cancel'}
     <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;">
       <input type="hidden" name="id" value="${dmt.id}">
 
@@ -94,7 +94,7 @@
         <button class="btn btn-danger">取消采购单</button>
       </div>
     </form>
-  #{/ck}
+  #{/power.ck}
   #{if dmt.apply}
     <div style="float:left;display:inline-block">
       <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
@@ -126,7 +126,7 @@
 </div>
 
 
-#{ck "excels.deliveryment"}
+#{power.ck "excels.deliveryment"}
 <div class="row-fluid">
   <div class="span12 alert">
     <h4 data-toggle="toggle" data-target="#excel">生成采购单信息 <i class="icon-reorder"></i></h4>
@@ -277,7 +277,7 @@
       </div>
     </div>
     #{/else}
-#{/ck}
+#{/power.ck}
 
 
 
