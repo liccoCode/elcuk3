@@ -22,7 +22,7 @@ public class AnalyzeDTO {
     public AnalyzeDTO(Selling sell) {
         this.fid = sell.sellingId;
         this.asin = sell.asin;
-        this.aid = sell.account.id + "";
+        if(sell.account != null) this.aid = sell.account.id + "";
         this.ps = sell.ps;
     }
 
@@ -141,7 +141,8 @@ public class AnalyzeDTO {
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.working + this.worked) / _ps),
-                Webs.scale2PointUp((this.qty + this.way + this.working + this.worked) / (ps == 0 ? _ps : ps))
+                Webs.scale2PointUp(
+                        (this.qty + this.way + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
@@ -172,7 +173,8 @@ public class AnalyzeDTO {
     public F.T2<Float, String> psDiffer() {
         float _ps = this.getPs_cal();
         if(_ps >= 5) {
-            float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
+            float diff = Math.abs(_ps - this.ps) /
+                    (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
             String color = "";
             if(diff >= 0.4)
                 color = "E45652";

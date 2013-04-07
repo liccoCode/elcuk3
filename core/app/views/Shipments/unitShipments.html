@@ -1,53 +1,54 @@
 <table class="table table-condensed table-bordered">
-    <tr>
-        <th></th>
-        <th>#</th>
-        <th>标题</th>
-        <th>运输方式</th>
-        <th>状态</th>
-        <th>运输开始时间</th>
-        <th>运输总量(kg)</th>
-        <th>运输项目数量</th>
-        <th>创建者</th>
-    </tr>
+  <tr>
+    <th></th>
+    <th>#</th>
+    <th>标题</th>
+    <th>运输方式</th>
+    <th>状态</th>
+    <th>运输开始时间</th>
+    <th>运输总量(kg)</th>
+    <th>运输项目数量</th>
+    <th>创建者</th>
+  </tr>
 #{list items:unitRelateShipments, as:'ship'}
-    <tr>
-        <td><input type="checkbox" value="${ship.id}"></td>
+  <tr>
+    <td><input type="checkbox" value="${ship.id}"></td>
 
-        <td >
-            <span style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}"> <i class="icon-reorder"></i></span>
-            <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
-        </td>
-        <td>${ship.title}</td>
-        <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
-        <td>${ship.state}</td>
-        <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
-        <td>
-          ${ship.totalWeight().format("0.00")}
+    <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
+      <i class="icon-reorder"></i>
+      <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
+    </td>
+    <td>${ship.title}</td>
+    <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
+    <td>${ship.state}</td>
+    <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
+    <td>
+    ${ship.totalWeight().format("0.00")}
           #{set diff: ship.totalWeight()-ship.minimumTraffic() /}
           #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
-            #{if diff>0}
-                ${" 超出"+diff.format("0.00")}
-            #{/if}
-          #{/if}
+        #{if diff>0}
+        ${" 超出"+diff.format("0.00")}
+        #{/if}
+    #{/if}
           #{else }
-            #{if diff<0}
-                ${" 差"+(-diff).format("0.00")}
-            #{/if}
-          #{/else}
+        #{if diff<0}
+        ${" 差"+(-diff).format("0.00")}
+        #{/if}
+    #{/else}
 
 
-        </td>
-        <td>${ship.items.size()}</td>
-        <td>#{if ship.cycle}<i style="color:#C09853;" class="icon-star"></i>#{/if} ${ship.creater?.username}</td>
-    </tr>
-    <tr id="ship_${ship_index}" style="display:none">
-            <td colspan="9">
-                <div>
-                    *{_shipitem页面重用显示items 去掉checkbox和与shipment重复的whouse}*
-                    #{render 'Shipments/_shipitem.html', items:ship.items,needCheckBoxAndWhouse:false/}
-                </div>
-            </td>
-        </tr>
+    </td>
+    <td>${ship.items.size()}</td>
+    <td>#{if ship.cycle}
+      <i style="color:#C09853;" class="icon-star"></i>#{/if} ${ship.creater?.username}</td>
+  </tr>
+  <tr id="ship_${ship_index}" style="display:none">
+    <td colspan="9">
+      <div>
+      *{_shipitem页面重用显示items 去掉checkbox和与shipment重复的whouse}*
+                    #{render 'Shipments/_shipitem.html', items: ship.items, checkbox:false /}
+      </div>
+    </td>
+  </tr>
 #{/list}
 </table>
