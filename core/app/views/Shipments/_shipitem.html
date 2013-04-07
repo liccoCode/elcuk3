@@ -1,7 +1,7 @@
-#{set needCheckBoxAndWhouse:(needCheckBoxAndWhouse==null) /}
+#{set useCheckbox: checkbox == null || checkbox /}
 <table class="table table-condensed table-bordered">
   <tr>
-  #{if needCheckBoxAndWhouse }
+  #{if useCheckbox}
     <th>
       <label class="checkbox">
         <input type="checkbox" class="checkbox_all">
@@ -21,14 +21,14 @@
     <th>总体积(m3)(kg)</th>
     <th>总申报价格</th>
     <th>抵达?</th>
-  #{if needCheckBoxAndWhouse }
+  #{if useCheckbox}
     <th>运往仓库</th>
   #{/if}
     <th>ProcreUnit</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr>
-      #{if needCheckBoxAndWhouse }
+      #{if useCheckbox}
         <td>
           <label class="checkbox">
             <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
@@ -48,7 +48,7 @@
     </td>
     <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
     <td>
-      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}">${itm.unit.deliveryment?.id}</a>
+      <a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a>
     </td>
     <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
     <td>${itm.getTurnOverT4()._1}</td>
@@ -60,7 +60,7 @@
     <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
 
-      #{if needCheckBoxAndWhouse }
+      #{if useCheckbox}
         <td>${itm.unit.whouse.name()}</td>  #{/if}
     <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a>
     </td>
@@ -68,11 +68,11 @@
 #{/list}
 #{if shipmentId}
   <tr>
-    <td colspan="${needCheckBoxAndWhouse?15:13}">
+    <td colspan="${useCheckbox ? 15 : 13}">
       <input type="hidden" name="id" value="${shipmentId}">
-        #{power.ck "shipments.cancelship"}
+        #{ck "shipments.cancelship"}
           <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
-        #{/power.ck}
+        #{/ck}
     </td>
   </tr>
 #{/if}
