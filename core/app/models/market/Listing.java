@@ -277,11 +277,13 @@ public class Listing extends GenericModel {
      * 根据 Listing 的状态, 进行 Listing 的检查并更新;
      * 1. 如果这个 Listing 是我们自己的, 检查是否被跟.
      */
-    public void checkAndSave() {
+    public void checkAndSaveOffers() {
         /**
-         *  1. 检查此 Listing 上是否有自己多个店铺上架
-         *  2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
+         * 0. 只检查自建的 Listing
+         * 1. 检查此 Listing 上是否有自己多个店铺上架
+         * 2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
          */
+        if(!Listing.isSelfBuildListing(this.title)) return;
         if(this.offers == null || this.offers.size() == 0) {
             Logger.warn("Listing [" + this.listingId + "] have no offers!");
             return;

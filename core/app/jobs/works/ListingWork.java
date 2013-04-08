@@ -54,7 +54,7 @@ public class ListingWork extends Job<Listing> {
             }
             // 保存 Offers
             needCheckListing.save();
-            needCheckListing.checkAndSave();
+            needCheckListing.checkAndSaveOffers();
         } catch(Exception e) {
             Logger.warn("ListingDriverlJob[%s]: %s", this.listingId, Webs.E(e));
         }

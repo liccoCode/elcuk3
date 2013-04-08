@@ -98,7 +98,7 @@ public class Listings extends Controller {
         JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
         Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst, true);
         if(nLst != null) {
-            nLst.checkAndSave();
+            nLst.checkAndSaveOffers();
             if(nLst.isPersistent()) renderJSON(new Ret());
         } else renderJSON(new Ret("更新失败."));
     }
