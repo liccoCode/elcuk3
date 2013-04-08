@@ -1,67 +1,79 @@
+#{set useCheckbox: checkbox == null || checkbox /}
 <table class="table table-condensed table-bordered">
-    <tr>
-        <th>
-            <label class="checkbox">
-                <input type="checkbox" class="checkbox_all">
-            </label>
-        </th>
-        <th>#</th>
-        <th>Sku</th>
-        <th>Sid</th>
-        <th>Ship(Plan|Qty)</th>
-        <th>Received</th>
-        <th>采购单</th>
-        <th>预计到库时间</th>
-        <th>TurnOver</th>
-        <th>供应商</th>
-        <th>总重量(kg)</th>
-        <th>总体积(m3)(kg)</th>
-        <th>总申报价格</th>
-        <th>抵达?</th>
-        <th>运往仓库</th>
-        <th>ProcreUnit</th>
-    </tr>
+  <tr>
+  #{if useCheckbox}
+    <th>
+      <label class="checkbox">
+        <input type="checkbox" class="checkbox_all">
+      </label>
+    </th>
+  #{/if}
+    <th>#</th>
+    <th>Sku</th>
+    <th>Sid</th>
+    <th>Ship(Plan|Qty)</th>
+    <th>Received</th>
+    <th>采购单</th>
+    <th>预计到库时间</th>
+    <th>TurnOver</th>
+    <th>供应商</th>
+    <th>总重量(kg)</th>
+    <th>总体积(m3)(kg)</th>
+    <th>总申报价格</th>
+    <th>抵达?</th>
+  #{if useCheckbox}
+    <th>运往仓库</th>
+  #{/if}
+    <th>ProcreUnit</th>
+  </tr>
 #{list items:items, as:'itm'}
-    <tr>
+  <tr>
+      #{if useCheckbox}
         <td>
-            <label class="checkbox">
-                <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
-            </label>
+          <label class="checkbox">
+            <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
+          </label>
         </td>
-        <td>${itm.id}</td>
-        <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
-        <td>
-        ${itm.unit.sid}
-            #{if itm.fba}
-                <span class="pull-right">${itm.fba.shipmentId}</span>
-            #{/if}
-        </td>
-        <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
-        ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
-        </td>
-        <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
-        <td><a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a></td>
-        <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
-        <td>${itm.getTurnOverT4()._1}</td>
-        <td>${itm.unit.cooperator?.name}</td>
-        <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
-        #{set totalVolume:itm.totalVolume()/}
-        <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')}
-            / ${totalVolume._1.format('#.######')}</td>
-        <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
-        <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
-        <td>${itm.unit.whouse.name()}</td>
-        <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a></td>
-    </tr>
+      #{/if}
+    <td>${itm.id}</td>
+    <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
+    <td>
+    ${itm.unit.sid}
+        #{if itm.fba}
+          <span class="pull-right">${itm.fba.shipmentId}</span>
+        #{/if}
+    </td>
+    <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
+    ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
+    </td>
+    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
+    <td>
+      <a href="@{Deliveryments.show()}/${itm.unit.deliveryment?.id}">${itm.unit.deliveryment?.id}</a>
+    </td>
+    <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
+    <td>${itm.getTurnOverT4()._1}</td>
+    <td>${itm.unit.cooperator?.name}</td>
+    <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
+      #{set totalVolume:itm.totalVolume()/}
+    <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')}
+      / ${totalVolume._1.format('#.######')}</td>
+    <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
+    <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
+
+      #{if useCheckbox}
+        <td>${itm.unit.whouse.name()}</td>  #{/if}
+    <td><a href="@{Procures.index()}?p.search=id:${itm.unit.id}" target="_blank">${itm.unit.id}</a>
+    </td>
+  </tr>
 #{/list}
 #{if shipmentId}
-    <tr>
-        <td colspan="15">
-            <input type="hidden" name="id" value="${shipmentId}">
-            #{ck "shipments.cancelship"}
-                <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
-            #{/ck}
-        </td>
-    </tr>
+  <tr>
+    <td colspan="${useCheckbox ? 15 : 13}">
+      <input type="hidden" name="id" value="${shipmentId}">
+        #{ck "shipments.cancelship"}
+          <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
+        #{/ck}
+    </td>
+  </tr>
 #{/if}
 </table>
