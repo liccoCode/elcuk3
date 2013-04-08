@@ -2,14 +2,17 @@
 
 <html>
 <head>
-    <title>#{get 'title' /}</title>
-    <meta charset="${_response_encoding}">
-    <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
-#{if play.Play.mode.isDev()}
-    <script type="text/javascript">
-        PLAY_MODE = "DEV";
-    </script>
-#{/if}
+  <title>#{get 'title' /}</title>
+  <meta charset="${_response_encoding}">
+  <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+  <script type="text/javascript">
+      #{if play.Play.mode.isDev()}
+      window.PLAY_MODE = "DEV";
+      #{/if}
+      #{else }
+      window.PLAY_MODE = "PROD";
+      #{/else}
+  </script>
 #{stylesheet 'bootstrap.min.css'/}
 #{stylesheet 'font-awesome.css'/}
 #{stylesheet 'jquery.loadmask.css'/}
