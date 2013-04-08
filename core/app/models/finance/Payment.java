@@ -392,7 +392,7 @@ public class Payment extends Model {
             payment = new Payment();
             if(deliveryment.cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
-                        String.format("请添加合作伙伴 %s 的支付方式", deliveryment.cooperator.fullName));
+                        Messages.get("paymenttarget.missing", deliveryment.cooperator.fullName));
             payment.cooperator = deliveryment.cooperator;
             payment.target = deliveryment.cooperator.paymentMethods.get(0);
             payment.currency = currency;

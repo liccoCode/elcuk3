@@ -68,7 +68,7 @@ finance.FeeType(promorebates):
   parent: amazon
 
 finance.FeeType(cross-borderfulfilmentfee):
-  name: 'cross-borderfulfilmentfee'
+  name: 'crossborderfulfilmentfee'
   memo: 'Amazon Europe 特有的, 夸市场时 FBA 收取的费用'
   parent: amazon
 
@@ -115,6 +115,12 @@ finance.FeeType(cashpledge):
   name: 'cashpledge'
   nickName: '预付款'
   memo: '采购的预付款, 一般为 30%'
+  parent: procure
+
+finance.FeeType(procurement):
+  name: 'procurement'
+  nickName: '采购货款'
+  memo: '采购货物的货款'
   parent: procure
 
 finance.FeeType(transport):
