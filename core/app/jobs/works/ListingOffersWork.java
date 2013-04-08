@@ -52,7 +52,7 @@ public class ListingOffersWork extends Job<Listing> {
             off.listing = lst;
             off.save();
         }
-        lst.checkAndSave();
+        lst.checkAndSaveOffers();
     }
 
     /**
