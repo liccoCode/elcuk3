@@ -49,6 +49,7 @@ public class Bootstrap extends Job {
         HTTP.init();
         Privilege.init();
         JobsSetup.init();
+        Account.initOfferIds();
 
         if(Play.mode.isProd())
             S3.init();
@@ -60,7 +61,7 @@ public class Bootstrap extends Job {
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
-            Account.init();
+            Account.initLogin();
             new ListingSchedulJob().now();
         }
     }
