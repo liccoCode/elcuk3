@@ -35,26 +35,22 @@ public class SystemMails extends Mailer {
      * @return
      */
     public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
-        String title=String.format("{INFO} %s Reviews Overview.",
-                        Dates.date2Date(new DateTime().minusDays(1).toDate()));
+        String title = String.format("{INFO} %s Reviews Overview.",
+                Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),
-                   (ArrayList<String>)infos.get().get("recipients"),DAILY_REVIEW,MailsRecord.T.SYSTEM);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_REVIEW);
             send(reviews);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(DAILY_REVIEW)
-                    .save();
+            mr.success = true;
         } catch(Exception e) {
-            mr.success=false;
             Logger.warn(Webs.E(e));
             return false;
-        }finally {
-            mr.save();
+        } finally {
+            if(mr != null)
+                mr.save();
         }
         return true;
     }
@@ -70,48 +66,43 @@ public class SystemMails extends Mailer {
     }
 
     public static boolean dailyFeedbackMail(List<Feedback> feedbacks) {
-        String title=String.format("{INFO} %s Feedback Overview.",
-                        Dates.date2Date(new DateTime().minusDays(1).toDate()));
+        String title = String.format("{INFO} %s Feedback Overview.",
+                Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),
-                       (ArrayList<String>)infos.get().get("recipients"),DAILY_FEEDBACK,MailsRecord.T.SYSTEM);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_FEEDBACK);
             send(feedbacks);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(DAILY_FEEDBACK)
-                    .save();
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
+        } finally {
+            if(mr != null)
+                mr.save();
         }
         return true;
     }
 
     public static boolean productPicCheckermail(List<F.T2<Product, AnalyzeDTO>> productAndSellT2s) {
-        String title=String.format("{CHECK} %s Product Picture Information Check",
-                        Dates.date2Date());
+        String title = String.format("{CHECK} %s Product Picture Information Check",
+                Dates.date2Date());
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),
-                      (ArrayList<String>)infos.get().get("recipients"),SKU_PIC_CHECK,MailsRecord.T.SYSTEM);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, SKU_PIC_CHECK);
             send(productAndSellT2s);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(SKU_PIC_CHECK)
-                    .save();
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success=false;
             return false;
-        }finally {
-            mr.save();
+        } finally {
+            if(mr != null)
+                mr.save();
         }
         return true;
     }

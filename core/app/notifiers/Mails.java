@@ -39,38 +39,37 @@ public class Mails extends Mailer {
 
     public static void shipment_clearance(Shipment shipment) {
         String title = String.format("{CLEARANCE}[SHIPMENT] 运输单 [%s] 已经开始清关.", shipment.id);
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
+        MailsRecord mr = null;
         try {
             setSubject(title);
             mailBase();
             addRecipient("p@easyacceu.com");
-            mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, CLEARANCE);
             send(shipment);
-
-
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
-            mr.success=false;
-        }finally {
-            mr.save();
+        } finally {
+            if(mr != null)
+                mr.save();
         }
     }
 
     public static void shipment_isdone(Shipment shipment) {
         String title = String.format("{ARRIVED}[SHIPMENT] 运输单 [%s] 已经抵达,并且签收,需确认.", shipment.id);
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
+        MailsRecord mr = null;
         try {
             setSubject(title);
             mailBase();
             addRecipient("p@easyacceu.com");
-            mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, IS_DONE);
             send(shipment);
-
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
-            mr.success=false;
-        }finally {
-            mr.save();
+        } finally {
+            if(mr != null)
+                mr.save();
         }
     }
 
@@ -81,19 +80,19 @@ public class Mails extends Mailer {
     public static void moreOfferOneListing(List<ListingOffer> offers, Listing lst) {
         String title = String
                 .format("{WARN}[Offer] %s More than one offer in one Listing.", lst.listingId);
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
+        MailsRecord mr = null;
         try {
             setSubject(title);
             mailBase();
             addRecipient("alerts@easyacceu.com");
-            mr.addParams(infos.get().get("from").toString(), (ArrayList<String>) infos.get().get("recipients"), CLEARANCE, MailsRecord.T.NORMAL);
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, MORE_OFFERS);
             send(offers, lst);
-
+            mr.success = true;
         } catch(Exception e) {
-            mr.success=false;
             Logger.warn(title + ":" + Webs.E(e));
-        }finally {
-            mr.save();
+        } finally {
+            if(mr != null)
+                mr.save();
         }
     }
 
@@ -105,15 +104,15 @@ public class Mails extends Mailer {
      * @param order
      */
     public static void amazonUK_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order,REVIEW_UK);
+        reviewMailBase(order, REVIEW_UK);
     }
 
     public static void amazonDE_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order,REVIEW_DE);
+        reviewMailBase(order, REVIEW_DE);
     }
 
     public static void amazonUS_REVIEW_MAIL(Orderr order) {
-        reviewMailBase(order,REVIEW_US);
+        reviewMailBase(order, REVIEW_US);
     }
 
     /**
@@ -121,7 +120,7 @@ public class Mails extends Mailer {
      *
      * @param order
      */
-    private static void reviewMailBase(Orderr order,String tmp) {
+    private static void reviewMailBase(Orderr order, String tmp) {
         if(StringUtils.isBlank(order.email)) {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
@@ -142,18 +141,13 @@ public class Mails extends Mailer {
         mailBase();
         if(Play.mode.isProd()) addRecipient(order.email);
         else addRecipient("wppurking@gmail.com");
-
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),(ArrayList<String>)infos.get().get("recipients"),
-                tmp,MailsRecord.T.NORMAL);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, tmp);
             final Future<Boolean> future = send(order, title);
-            new ReviewMailCheckPromise(order.orderId, future).now();
+            new ReviewMailCheckPromise(order.orderId, future, mr).now();
         } catch(MailException e) {
-            mr.success=false;
             Logger.warn("Order[" + order.orderId + "] Send Error! " + e.getMessage());
-        }finally {
-            mr.save();
         }
     }
 
@@ -170,16 +164,17 @@ public class Mails extends Mailer {
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
-        mr.addParams(infos.get().get("from").toString(),
-                        (ArrayList<String>)infos.get().get("recipients"),FEEDBACK_WARN,MailsRecord.T.NORMAL);
-        try{
+        MailsRecord mr = null;
+        try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FEEDBACK_WARN);
             send(f);
             f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
-        }catch(Exception e){
-            mr.success=false;
-        }finally {
-            mr.save();
+            mr.success = true;
+        } catch(Exception e) {
+
+        } finally {
+            if(mr != null)
+                mr.save();
         }
 
 
@@ -203,17 +198,17 @@ public class Mails extends Mailer {
         setSubject(title);
         mailBase();
         addRecipient("services@easyacceu.com");
-
-        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
-                mr.addParams(infos.get().get("from").toString(),
-                                (ArrayList<String>)infos.get().get("recipients"),REVIEW_WARN,MailsRecord.T.NORMAL);
-        try{
+        MailsRecord mr = null;
+        try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, REVIEW_WARN);
             send(r, title, sbr);
             r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
-        }catch(Exception e){
-            mr.success=false;
-        }finally {
-            mr.save();
+            mr.success = true;
+        } catch(Exception e) {
+
+        } finally {
+            if(mr != null)
+                mr.save();
         }
         // send 方法没有抛出异常则表示邮件发送成功
 
@@ -223,15 +218,16 @@ public class Mails extends Mailer {
         setSubject("{WARN}[FBA] 如下 Selling 在更新 Selling.fnSku 时无法在系统中找到.");
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(infos.get().get("subject").toString());
-                       mr.addParams(infos.get().get("from").toString(),
-                               (ArrayList<String>) infos.get().get("recipients"), FNSKU_CHECK, MailsRecord.T.NORMAL);
-        try{
+        MailsRecord mr = null;
+        try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FNSKU_CHECK);
             send(unfindSelling);
-        }catch(Exception e){
-            mr.success=false;
-        }finally {
-            mr.save();
+            mr.success = true;
+        } catch(Exception e) {
+
+        } finally {
+            if(mr != null)
+                mr.save();
         }
 
     }
