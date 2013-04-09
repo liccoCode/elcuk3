@@ -7,7 +7,6 @@ import models.Notification;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit;
  * Date: 8/15/12
  * Time: 6:04 PM
  */
-@Every("5mn")
 public class ShipmentSyncJob extends Job {
     public static final String NOTIFY_TITLE = "海运提醒";
 
@@ -48,14 +46,16 @@ public class ShipmentSyncJob extends Job {
                      * 1. 寻找当天的 Notification, 如果没有则提醒, 有则跳过
                      * 2. 检查海运超过 30 天, 开始提醒, 每天一次.
                      */
-                    if(Notification.count("title=? AND createAt<=?", ShipmentSyncJob.NOTIFY_TITLE, Dates.night(new Date())) <= 0) {
+                    if(Notification.count("title=? AND createAt<=?", ShipmentSyncJob.NOTIFY_TITLE,
+                            Dates.night(new Date())) <= 0) {
                         Date beginDate = ship.beginDate;
                         // 做一个兼容...
                         if(beginDate == null) beginDate = ship.planBeginDate;
                         long differTime = System.currentTimeMillis() - beginDate.getTime();
                         if(differTime > TimeUnit.DAYS.toMillis(30)) {
                             Notification.notifies(ShipmentSyncJob.NOTIFY_TITLE,
-                                    String.format("海运运输单 %s 已经运输 %s 天, 记得进行跟踪处理,添加状态 Comment.", ship.id, differTime / Dates.DAY_MILLIS),
+                                    String.format("海运运输单 %s 已经运输 %s 天, 记得进行跟踪处理,添加状态 Comment.",
+                                            ship.id, differTime / Dates.DAY_MILLIS),
                                     Notification.SHIPPER);
                         }
                     }

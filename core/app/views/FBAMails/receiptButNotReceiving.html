@@ -2,7 +2,8 @@
     <tr>
         <th>ShipmentId</th>
         <td>
-            <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}</a>
+            <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}
+            </a>
         </td>
 
         <th>状态</th>
@@ -31,6 +32,7 @@
         <td>#{time_tooltip time:fba.closeAt /}</td>
 
         <th>运输单</th>
-        <td><a href="@@{Shipments.show()}/${fba.shipment.id}" target="_blank">${fba.shipment.id}</a></td>
+        <td><a href="@@{Shipments.show(fba.shipment.id)}" target="_blank">${fba.shipment.id}</a>
+        </td>
     </tr>
 </table>

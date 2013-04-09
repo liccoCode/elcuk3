@@ -1,6 +1,8 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.finance.Payment;
+import models.finance.PaymentTarget;
 import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -64,6 +66,18 @@ public class Cooperator extends Model {
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
     public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+
+    /**
+     * 这个合作伙伴的所有可用支付方式
+     */
+    @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
+    public List<PaymentTarget> paymentMethods = new ArrayList<PaymentTarget>();
+
+    /**
+     * 这个合作伙伴的所有支付信息
+     */
+    @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
+    public List<Payment> payments = new ArrayList<Payment>();
 
     /**
      * 全称
@@ -181,6 +195,20 @@ public class Cooperator extends Model {
     }
 
     /**
+     * 检查一个 PaymentTarget 是否属于这个 Cooperator
+     *
+     * @param paymentTarget
+     * @return
+     */
+    public boolean paymentTargetOwner(PaymentTarget paymentTarget) {
+        for(PaymentTarget target : this.paymentMethods) {
+            if(target.equals(paymentTarget))
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * 前台使用的 Sku 自动提示, 需要过滤掉已经成为此供应商的 Sku
      *
      * @return
@@ -189,8 +217,9 @@ public class Cooperator extends Model {
         // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<String>(Product.skus(false));
         final List<String> existSkus = new ArrayList<String>();
-        for(CooperItem itm : this.cooperItems)
+        for(CooperItem itm : this.cooperItems) {
             existSkus.add(itm.sku);
+        }
 
         CollectionUtils.filter(allSkus, new Predicate() {
             @Override

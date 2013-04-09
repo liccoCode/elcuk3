@@ -2,9 +2,17 @@
 
 <html>
 <head>
-    <title>#{get 'title' /}</title>
-    <meta charset="${_response_encoding}">
-    <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+  <title>#{get 'title' /}</title>
+  <meta charset="${_response_encoding}">
+  <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+  <script type="text/javascript">
+      #{if play.Play.mode.isDev()}
+      window.PLAY_MODE = "DEV";
+      #{/if}
+      #{else }
+      window.PLAY_MODE = "PROD";
+      #{/else}
+  </script>
 #{stylesheet 'bootstrap.min.css'/}
 #{stylesheet 'font-awesome.css'/}
 #{stylesheet 'jquery.loadmask.css'/}
@@ -12,14 +20,15 @@
 #{stylesheet 'dateinput.css'/}
 #{get 'moreStyles' /}
 #{script 'jquery.1.7.2.min.js'/}
-#{script 'bootstrap.js'/}
+#{script 'jquery.animate-colors-min.js'/}
+#{script 'bootstrap.min.js'/}
 #{script 'jquery.loadmask.min.js'/}
 #{script 'jquery.highlight.js'/}
 #{script 'jquery.form.js'/}
 #{script 'jquery.tools.date.min.js'/}
-#{script 'main.js'/}
-#{script 'component/popover.coffee'/}
 #{script 'component/notify.coffee'/}
+#{script 'component/popover.coffee'/}
+#{script 'main.js'/}
 #{get 'moreScripts' /}
 </head>
 <body style="padding-top: 40px;">
@@ -28,6 +37,7 @@
 <div class="container-fluid" id="container" style="margin-top:20px;">
 #{doLayout /}
 </div>
+#{render 'footer.html'/}
 
 </body>
 </html>

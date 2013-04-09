@@ -159,6 +159,8 @@ validation.invalid=\u8F93\u5165\u503C\u975E\u6CD5
 
 secure.error=\u7528\u6237\u4E0D\u5B58\u5728\u6216\u8005\u5BC6\u7801\u9519\u8BEF
 
+paymenttarget.missing=<a href='/paymenttargets'>\u8BF7\u6DFB\u52A0\u5408\u4F5C\u4F19\u4F34 %s \u7684\u652F\u4ED8\u65B9\u5F0F</a>
+
 
 # \u7CFB\u7EDF\u5185\u7684\u64CD\u4F5C\u65B9\u6CD5\u7684\u65E5\u5FD7 msg
 action.base=%s
@@ -195,6 +197,10 @@ procureunit.split=\u5206\u62C6[\u91C7\u8D2D\u8BA1\u5212]
 procureunit.split.target=\u5206\u62C6[\u91C7\u8D2D\u8BA1\u5212]\u540E\u65B0\u521B\u5EFA
 procureunit.split.source.msg=\u5206\u62C6\u6570\u91CF From %s To %s
 procureunit.split.target.msg=%s
+procureunit.prepay=\u7533\u8BF7\u9884\u4ED8\u6B3E
+procureunit.prepay.msg=\u4E3A %s \u7533\u8BF7 %s \u9884\u4ED8\u6B3E
+procureunit.tailpay=\u7533\u8BF7\u5C3E\u6B3E
+procureunit.tailpay.msg=\u4E3A %s \u7533\u8BF7 %s \u5C3E\u6B3E
 
 shipment.update=\u66F4\u65B0[\u8FD0\u8F93\u5355]
 shipment.updateFBA=[\u8FD0\u8F93\u5355]\u66F4\u65B0 FBA
@@ -210,3 +216,20 @@ shipment.moveFBA.msg=%s \u4ECE\u8FD0\u8F93\u5355 %s \u8F6C\u79FB\u5230 %s
 shipment.ensureDone=\u8FD0\u8F93\u5355\u5B8C\u6210
 shipment.ensureDone.msg=\u8FD0\u8F93\u5355 %s \u786E\u8BA4\u5B8C\u6210
 
+paymentunit.fixValue=\u8C03\u6574[\u8BF7\u6B3E\u4FEE\u6B63\u503C]
+paymentunit.fixValue.msg=\u56E0 [%s] \u539F\u56E0\u5C06\u4FEE\u6B63\u503C\u4ECE %s \u8C03\u6574\u5230 %s
+paymentunit.deny=\u9A73\u56DE[\u8BF7\u6B3E]
+paymentunit.deny.msg=\u56E0 [%s] \u539F\u56E0\u9A73\u56DE\u8BF7\u6B3E
+paymentunit.destroy=\u53D6\u6D88[\u8BF7\u6B3E\u9879\u76EE]
+paymentunit.destroy.msg=\u56E0 %s \u539F\u56E0\u53D6\u6D88\u8BF7\u6B3E
+
+payment.approval=\u8BF7\u6B3E\u6279\u51C6
+payment.approval.msg=\u6279\u51C6 %s \u4E2A %s(%s) \u8BF7\u6B3E, \u91D1\u989D %s
+payment.payit=\u4ED8\u6B3E\u5355\u4ED8\u6B3E
+payment.payit.msg=\u652F\u4ED8\u7ED9 %s \u603B\u91D1\u989D %s (\u6C47\u7387: %s at %s);
+payment.uploadDestroy=\u5220\u9664\u9644\u4EF6
+payment.uploadDestroy.msg=\u5220\u9664\u4E86\u9644\u4EF6 %s
+
+
+procureapply.save=\u521B\u5EFA[\u91C7\u8D2D\u8BF7\u6B3E\u5355]
+procureapply.save.msg=\u4E3A %s \u7533\u8BF7\u91C7\u8D2D\u8BF7\u6B3E\u5355

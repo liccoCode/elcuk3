@@ -18,7 +18,7 @@
 #{list items:shipments, as:'ship'}
     <tr>
         <td>
-            <a target="_blank" href="@{Shipments.show()}/${ship.id}">${ship.id}</a>
+            <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
         </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
             <i class="icon-reorder"></i> ${ship.trackNo}
@@ -44,7 +44,7 @@
         ${ship.title}
         </td>
         <td>${ship.target}</td>
-        <td style="color:${'#' + ship.state.rgb()}">${ship.state}</td>
+        <td style="color:${ship.state.rgb()}">${ship.state}</td>
         <td>${ship.pype}</td>
         <td>#{time_tooltip time:ship.planBeginDate/}</td>
         <td>#{time_tooltip time:ship.createDate/}</td>

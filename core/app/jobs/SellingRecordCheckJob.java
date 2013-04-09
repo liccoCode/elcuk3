@@ -5,8 +5,6 @@ import models.market.Account;
 import models.market.SellingRecord;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.db.jpa.JPA;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -24,7 +22,6 @@ import java.util.Set;
  * Date: 5/29/12
  * Time: 4:03 PM
  */
-@Every("5mn")
 public class SellingRecordCheckJob extends Job {
 
     public DateTime fixTime;
@@ -42,8 +39,9 @@ public class SellingRecordCheckJob extends Job {
          * 找到所有 Amazon 市场的 SellingRecord 数据
          * PS: 只能抓取到两天前的 PageView 数据
          */
-        for(int i = -5; i <= 0; i++)
+        for(int i = -5; i <= 0; i++) {
             SellingRecordCheckJob.amazonNewestRecords(fixTime.plusDays(i));
+        }
     }
 
     /**
@@ -56,7 +54,8 @@ public class SellingRecordCheckJob extends Job {
         Set<SellingRecord> records = null;
         // 现在写死, 只有 2 个账户, UK 需要抓取 uk, de; DE 只需要抓取 de
         for(Account acc : accs) {
-            records = SellingRecord.newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.toDate());
+            records = SellingRecord
+                    .newRecordFromAmazonBusinessReports(acc, acc.type, fixTime.toDate());
             Logger.info("Fetch Account(%s) %s records", acc.prettyName(), records.size());
             if(records.size() <= 0) continue;
             // 直接这样处理,因为通过 SellingRecord.newRecordFromAmazonBusinessReports 出来的方法已经存在与 Session 缓存中了.

@@ -5,9 +5,7 @@ import models.market.AmazonListingReview;
 import org.junit.Test;
 import play.test.UnitTest;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,14 +16,15 @@ import java.util.concurrent.TimeoutException;
 public class OsTicketTest extends UnitTest {
     //    @Test
     public void testCreateReviewTicket() {
-        AmazonListingReview review = AmazonListingReview.findById("B007TR9VRU_AMAZON.CO.UK_A14TVA83T35IG1");
+        AmazonListingReview review = AmazonListingReview
+                .findById("B007TR9VRU_AMAZON.CO.UK_A14TVA83T35IG1");
         review.openTicket(null);
         review.save();
         System.out.println(review.osTicketId);
     }
 
     @Test
-    public void testListingReviewJob() throws ExecutionException, TimeoutException, InterruptedException {
-        new ListingReviewsWork("B005UO263U_amazon.fr").now().get(10, TimeUnit.SECONDS);
+    public void testListingReviewJob() throws Exception {
+        new ListingReviewsWork("B007K4WYMQ_amazon.de").now().get(1, TimeUnit.MINUTES);
     }
 }

@@ -1,5 +1,5 @@
 <h3>运输单 ${shipment.id} 已经送达, 请进入系统进行确认.</h3>
-<a target="_blank" href="@@{Shipments.show()}/${shipment.id}">Elcuk2. ${shipment.id} 运输单</a>
+<a target="_blank" href="@@{Shipments.show(shipment.id)}">Elcuk2. ${shipment.id} 运输单</a>
 <br/>
 <a target="_blank" href="${shipment.internationExpress.trackUrl(shipment.trackNo)}">${shipment.internationExpress} ${shipment.trackNo}</a>
 

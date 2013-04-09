@@ -13,7 +13,6 @@
 #{list items:unitRelateShipments, as:'ship'}
   <tr>
     <td><input type="checkbox" value="${ship.id}"></td>
-
     <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
       <i class="icon-reorder"></i>
       <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
@@ -35,8 +34,6 @@
         ${" 差"+(-diff).format("0.00")}
         #{/if}
     #{/else}
-
-
     </td>
     <td>${ship.items.size()}</td>
     <td>#{if ship.cycle}
@@ -45,8 +42,7 @@
   <tr id="ship_${ship_index}" style="display:none">
     <td colspan="9">
       <div>
-      *{_shipitem页面重用显示items 去掉checkbox和与shipment重复的whouse}*
-                    #{render 'Shipments/_shipitem.html', items: ship.items, checkbox:false /}
+          #{render 'Shipments/_shipitem.html', items: ship.items, checkbox:false /}
       </div>
     </td>
   </tr>

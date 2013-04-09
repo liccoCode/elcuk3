@@ -27,8 +27,7 @@
           </td>
 
           <th>State</th>
-          <td style="color:${'#' + dmt.state.rgb()}">${dmt.state}</td>
-
+          <td style="color:${dmt.state.rgb()}">${dmt.state}</td>
           <th>CreateDate</th>
           <td>
             <input type="text" readonly="" disabled="" class="input-medium" name="dmt.createDate" value="${dmt.createDate.datetime()}">
@@ -50,10 +49,13 @@
           <td>${dmt.cooperator?.fullName}</td>
 
           <th>下单时间</th>
-          <td><input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}"></td>
+          <td>
+            <input type="date" name="dmt.orderTime" value="${dmt.orderTime?.datetime()}">
+          </td>
 
           <th>交货时间</th>
-          <td><input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}">
+          <td>
+            <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.datetime()}">
           </td>
         </tr>
 
@@ -76,12 +78,13 @@
       <div class="input-prepend input-append" style="float:left;">
         <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
         <input type="hidden" name="id" value="${dmt.id}">
-        <button data-confirm="btn" content="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">确认
+        <button data-confirm="btn" content="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
+          确认
         </button>
       </div>
     </form>
   #{/if}
-  #{ck 'deliveryments.cancel'}
+  #{power.ck 'deliveryments.cancel'}
     <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;">
       <input type="hidden" name="id" value="${dmt.id}">
 
@@ -90,7 +93,13 @@
         <button class="btn btn-danger">取消采购单</button>
       </div>
     </form>
-  #{/ck}
+  #{/power.ck}
+  #{if dmt.apply}
+    <div style="float:left;display:inline-block">
+      <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
+        请款单</a>
+    </div>
+  #{/if}
   </div>
 </div>
 
@@ -116,7 +125,7 @@
 </div>
 
 
-#{ck "excels.deliveryment"}
+#{power.ck "excels.deliveryment"}
 <div class="row-fluid">
   <div class="span12 alert">
     <h4 data-toggle="toggle" data-target="#excel">生成采购单信息 <i class="icon-reorder"></i></h4>
@@ -263,7 +272,7 @@
       </div>
     </div>
     #{/else}
-#{/ck}
+#{/power.ck}
 
 
 

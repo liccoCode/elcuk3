@@ -3,7 +3,6 @@ package jobs;
 import jobs.works.ListingReviewsWork;
 import models.Jobex;
 import models.market.Listing;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.List;
  * Date: 9/25/12
  * Time: 9:12 PM
  */
-@Every("5s")
 public class AmazonReviewCrawlJob extends Job {
     @Override
     public void doJob() {

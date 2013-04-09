@@ -3,10 +3,13 @@ package helper;
 import com.google.gson.JsonObject;
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import play.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 
 /**
  * 不同货币单位的枚举类
@@ -41,6 +44,33 @@ public enum Currency {
         public Float toCNY(Float value) {
             return value * GBP_CNY;
         }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return GBP_CNY;
+                case GBP:
+                    return 1;
+                case EUR:
+                    return GBP_EUR;
+                case USD:
+                default:
+                    return GBP_USD;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "£";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 619.71 -> 6.1971
+            return NumberUtils.toFloat(doc.select("tr:eq(1) td:eq(1)").text()) / 100;
+        }
     },
     /**
      * 欧元
@@ -67,6 +97,33 @@ public enum Currency {
         @Override
         public Float toCNY(Float value) {
             return value * EUR_CNY;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return EUR_CNY;
+                case GBP:
+                    return EUR_GBP;
+                case EUR:
+                    return 1;
+                case USD:
+                default:
+                    return EUR_USD;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "€";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 619.71 -> 6.1971
+            return NumberUtils.toFloat(doc.select("tr:eq(12) td:eq(1)").text()) / 100;
         }
     },
     /**
@@ -95,6 +152,31 @@ public enum Currency {
         public Float toGBP(Float value) {
             return value * CNY_GBP; // 1 CNY = 0.1004 GBP
         }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return 1;
+                case GBP:
+                    return CNY_GBP;
+                case EUR:
+                    return CNY_EUR;
+                case USD:
+                default:
+                    return CNY_USD;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "¥";
+        }
+
+        @Override
+        public Float rate(String html) {
+            return 1.0f;
+        }
     },
     /**
      * 美元
@@ -122,6 +204,33 @@ public enum Currency {
         public Float toCNY(Float value) {
             return value * USD_CNY;
         }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return USD_CNY;
+                case GBP:
+                    return USD_GBP;
+                case EUR:
+                    return USD_EUR;
+                case USD:
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "$";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 619.71 -> 6.1971
+            return NumberUtils.toFloat(doc.select("tr:eq(3) td:eq(1)").text()) / 100;
+        }
     };
 
     /**
@@ -136,6 +245,10 @@ public enum Currency {
     public abstract Float toUSD(Float value);
 
     public abstract Float toCNY(Float value);
+
+    public abstract float ratio(Currency currency);
+
+    public abstract String symbol();
 
     //GBP
     private static float GBP_EUR = 1.20175971f;
@@ -246,6 +359,38 @@ public enum Currency {
             default:
                 return USD;
         }
+    }
+
+    /**
+     * 返回中国银行的最新汇率表
+     *
+     * @return
+     */
+    public static String bocRatesHtml() {
+        Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
+        return doc.select("table table table").get(0).outerHtml();
+    }
+
+    /**
+     * 从 Boc 的 汇率 HTML 中解析 Rate
+     *
+     * @param html
+     * @return
+     */
+    public abstract Float rate(String html);
+
+    /**
+     * 解析出当前汇率的时间是什么
+     *
+     * @param html
+     * @return
+     */
+    public static Date rateDateTime(String html) {
+        Document doc = Jsoup.parse(html);
+        return Dates.cn(String.format("%s %s",
+                doc.select("tr:eq(3) td:eq(6)").text(),
+                doc.select("tr:eq(3) td:eq(7)").text()
+        )).toDate();
     }
 }
 

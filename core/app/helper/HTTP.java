@@ -57,7 +57,8 @@ public class HTTP {
         synchronized(HTTP.class) {
             HttpParams params = new BasicHttpParams();
             HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
-            HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
+            HttpProtocolParams
+                    .setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
             // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
             HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
@@ -70,7 +71,8 @@ public class HTTP {
             client = new ContentEncodingHttpClient(multipThread, params);
             client.setRedirectStrategy(new DefaultRedirectStrategy() {
                 @Override
-                public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
+                public boolean isRedirected(HttpRequest request, HttpResponse response,
+                                            HttpContext context) throws ProtocolException {
                     if(response == null) {
                         throw new IllegalArgumentException("HTTP response may not be null");
                     }
@@ -82,7 +84,8 @@ public class HTTP {
                         case HttpStatus.SC_MOVED_TEMPORARILY:
                             return (method.equalsIgnoreCase(HttpGet.METHOD_NAME)
                                     || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
-                                    || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) && locationHeader != null;
+                                    || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
+                                    locationHeader != null;
                         case HttpStatus.SC_MOVED_PERMANENTLY:
                         case HttpStatus.SC_TEMPORARY_REDIRECT:
                             return method.equalsIgnoreCase(HttpGet.METHOD_NAME)
@@ -145,7 +148,9 @@ public class HTTP {
     public static String get(CookieStore cookieStore, String url) {
         try {
             HTTP.clearExpiredCookie();
-            return EntityUtils.toString(cookieStore(cookieStore).execute(new HttpGet(url)).getEntity());
+            return EntityUtils.toString(
+                    cookieStore(cookieStore).execute(new HttpGet(url)).getEntity(),
+                    "UTF-8");
         } catch(IOException e) {
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.E(e));
             return "";
@@ -172,7 +177,8 @@ public class HTTP {
      * @param params
      * @return
      */
-    public static String post(CookieStore cookieStore, String url, Collection<? extends NameValuePair> params) {
+    public static String post(CookieStore cookieStore, String url,
+                              Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
             HTTP.clearExpiredCookie();
@@ -222,7 +228,8 @@ public class HTTP {
      * @param params
      * @return
      */
-    public static byte[] postDown(CookieStore cookieStore, String url, Collection<? extends NameValuePair> params) {
+    public static byte[] postDown(CookieStore cookieStore, String url,
+                                  Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
             HTTP.clearExpiredCookie();
@@ -243,16 +250,20 @@ public class HTTP {
      * @param uploadFiles 上传多个文件的集合(key: fileParamName, Val: File)
      * @return 返回上传的结果
      */
-    public static String upload(CookieStore cookieStore, String url, Collection<? extends NameValuePair> params, Map<String, File> uploadFiles) {
+    public static String upload(CookieStore cookieStore, String url,
+                                Collection<? extends NameValuePair> params,
+                                Map<String, File> uploadFiles) {
         HttpPost post = new HttpPost(url);
         MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
-            for(NameValuePair nv : params)
+            for(NameValuePair nv : params) {
                 multipartEntity.addPart(nv.getName(), new StringBody(nv.getValue()));
+            }
 
             for(String fileParamName : uploadFiles.keySet()) {
                 File file = uploadFiles.get(fileParamName);
-                multipartEntity.addPart(fileParamName, new FileBody(file, MimeTypes.getMimeType(file.getName())));
+                multipartEntity.addPart(fileParamName,
+                        new FileBody(file, MimeTypes.getMimeType(file.getName())));
             }
             post.setEntity(multipartEntity);
             return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());

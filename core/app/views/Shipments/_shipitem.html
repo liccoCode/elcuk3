@@ -70,9 +70,9 @@
   <tr>
     <td colspan="${useCheckbox ? 15 : 13}">
       <input type="hidden" name="id" value="${shipmentId}">
-        #{ck "shipments.cancelship"}
+        #{power.ck "shipments.cancelship"}
           <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
-        #{/ck}
+        #{/power.ck}
     </td>
   </tr>
 #{/if}

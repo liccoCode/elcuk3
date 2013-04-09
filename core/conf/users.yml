@@ -33,7 +33,7 @@ market.Account(easyacc):
   token: 3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf
   accessKey: AKIAI6EBPJLG64HWDBGQ
   merchantId: AJUR3R8UN71M4
-  closeable: false
+  closed: false
   isSaleAcc: true
 
 market.Account(easyacc_de):
@@ -43,7 +43,7 @@ market.Account(easyacc_de):
   token: fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF
   accessKey: AKIAIAEPZK5CZEIVZFCQ
   merchantId: A22H6OV6Q7XBYK
-  closeable: false
+  closed: false
   isSaleAcc: true
 
 market.Account(easyacc_us):
@@ -53,5 +53,5 @@ market.Account(easyacc_us):
   token: 4wruCQj0t7ZY9BPKqZg2qH5qAXdvJBvLRo0h3trD
   accessKey: AKIAIFWFCKKS5EAB3KZA
   merchantId: A3RJNQO8PQ21MT
-  closeable: false
+  closed: false
   isSaleAcc: true

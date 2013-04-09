@@ -139,8 +139,44 @@ public class Privilege extends Model {
 
         // 财务控制器
         privileges.add(new Privilege("finances", "财务模块"));
+        privileges.add(new Privilege("finances.index", "系统内修复"));
+        privileges.add(new Privilege("finances.fixfinance", "修复 Amazon 财务数据"));
+        privileges.add(new Privilege("finances.addselling", "修复系统内上架失败 Selling"));
+        privileges.add(new Privilege("finances.reparseorder", "重新解析订单文件"));
 
-        // Products 控制
+        privileges.add(new Privilege("applys.index", "请款单列表页面"));
+        privileges.add(new Privilege("applys.procure", "采购请款单页面"));
+
+        privileges.add(new Privilege("paymenttargets.index", "支付方式列表页面"));
+        privileges.add(new Privilege("paymenttargets.save", "创建支付方式"));
+        privileges.add(new Privilege("paymenttargets.update", "更新支付方式"));
+        privileges.add(new Privilege("paymenttargets.destroy", "删除支付方式"));
+
+        privileges.add(new Privilege("payments.index", "付款单列表页面"));
+        privileges.add(new Privilege("payments.show", "付款单查看"));
+        privileges.add(new Privilege("payments.paymentunitapproval", "付款单中请款项批准"));
+        privileges.add(new Privilege("payments.payforit", "付款单付款"));
+        privileges.add(new Privilege("payments.shouldpaidupdate", "付款单应付金额更新"));
+        privileges.add(new Privilege("payments.uploads", "付款单凭证上传"));
+
+        privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
+
+        // ProcureUnits
+        privileges.add(new Privilege("procureunits.billingprepay", "采购计划预付款申请"));
+        privileges.add(new Privilege("procureunits.billingtailpay", "采购计划尾款申请"));
+
+        // PaymentUnits
+        privileges.add(new Privilege("paymentunits.destroy", "删除请款项目"));
+        privileges.add(new Privilege("paymentunits.fixvalue", "更新请款项目修正价"));
+        privileges.add(new Privilege("paymentunits.deny", "拒绝请款项目"));
+
+
+        // FeeTypes 控制器
+        privileges.add(new Privilege("feetypes", "费用类型"));
+        privileges.add(new Privilege("feetypes.index", "费用类型页面"));
+        // todo: 到这里都是新的
+
+        // Products 控制器
         privileges.add(new Privilege("products.saleamazonlisting", "Amazon 上架"));
 
         // Excels 的下载控制

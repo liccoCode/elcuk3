@@ -54,7 +54,8 @@ public class Sellings extends Controller {
     public static void selling(String id) {
         Selling s = Selling.findById(id);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling
+                .sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         render(s);
     }

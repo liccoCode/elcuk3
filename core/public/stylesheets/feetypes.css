@@ -1,0 +1,17 @@
+#add_form{
+    display:none;
+}
+
+.types input[type=text]{
+    max-width:500px;
+    min-width:300px;
+}
+
+tr.level_1 td:first-child{
+    padding-left:20px;
+}
+
+tr.level_1 .icon-double-angle-right{
+    color:green;
+    margin-right:5px;
+}

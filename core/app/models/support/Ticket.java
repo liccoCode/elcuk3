@@ -6,7 +6,6 @@ import helper.Dates;
 import helper.OsTicket;
 import jobs.FeedbackInfoFetchJob;
 import jobs.TicketStateSyncJob;
-import models.ElcukRecord;
 import models.User;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
@@ -281,7 +280,7 @@ public class Ticket extends Model {
         if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
         this.state = TicketState.CLOSE;
         this.memo = String.format("Closed By %s At [%s] for [ %s ]\r\n",
-                ElcukRecord.username(),
+                User.username(),
                 Dates.date2DateTime(),
                 reason.trim()) + this.memo;
         StringBuilder note = new StringBuilder(reason).append("\r\n");
