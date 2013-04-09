@@ -11,21 +11,20 @@ $ ->
   #在选择类型时隐藏之前的data-target 绑定对应的target 并取消选中的模板
   $('[name=type]').change(->
     target= $("#tmp").attr("data-target")
-    $(target).toggleClass('collapse')
-    $(target).collapse('hide')
-    $('[name=tmp]').attr('checked', false)
+    $(target).toggleClass('collapse').collapse('hide')
+    $('[name=templates]').attr('checked', false)
     $("#tmp").attr("data-target", '#TMP_' + this.value)
   )
 
   #在target隐藏后取消选中的模板
   $('#TMP_NORMAL').on('hidden', ->
-    $('[name=tmp]').attr('checked', false)
+    $('[name=templates]').attr('checked', false)
   )
   $('#TMP_FBA').on('hidden', ->
-    $('[name=tmp]').attr('checked', false)
+    $('[name=templates]').attr('checked', false)
   )
   $('#TMP_SYSTEM').on('hidden', ->
-    $('[name=tmp]').attr('checked', false)
+    $('[name=templates]').attr('checked', false)
   )
 
   lineOp = (container, yName) ->

@@ -39,12 +39,13 @@ public class FBAMails extends Mailer {
                 fba.shipmentId, oldState, newState));
         mailBase();
         addRecipient("p@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, STATE_CHANGE);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, STATE_CHANGE);
             send(fba, oldState, newState);
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success = false;
             return false;
         } finally {
             mr.save();
@@ -61,15 +62,17 @@ public class FBAMails extends Mailer {
         setSubject("{WARN} FBA %s 签收了,但超过 2 天还没有开始入库.", fba.shipmentId);
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, NOT_RECEING);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, NOT_RECEING);
             send(fba);
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success = false;
             return false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
         return true;
     }
@@ -83,16 +86,17 @@ public class FBAMails extends Mailer {
         setSubject("{WARN} 总共 %s 个 FBA 入库时间过长, 需检查", fbas.size());
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, RECEIVING_CHECK);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, RECEIVING_CHECK);
             send(fbas);
-
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success = false;
             return false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
         return true;
     }

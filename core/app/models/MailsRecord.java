@@ -41,26 +41,10 @@ public class MailsRecord extends Model {
     public String templateName;
 
 
-    //需不需要用枚举呢?????
     public enum T {
-        NORMAL {
-            @Override
-            public String toString() {
-                return "NORMAL";
-            }
-        },
-        FBA {
-            @Override
-            public String toString() {
-                return "FBA";
-            }
-        },
-        SYSTEM {
-            @Override
-            public String toString() {
-                return "SYSTEM";
-            }
-        }
+        NORMAL,
+        FBA,
+        SYSTEM
     }
 
     @Expose
@@ -74,7 +58,7 @@ public class MailsRecord extends Model {
      * 是否发送成功
      */
     @Expose
-    public boolean success = true;
+    public boolean success;
 
     @Expose
     /**
@@ -86,14 +70,13 @@ public class MailsRecord extends Model {
      * 收件人  多个用 ',' 号隔开
      */
     @Expose
-    public String recipients = "";
+    public String recipients;
 
     public MailsRecord(Map<String, Object> infos, T type, String tmpName) {
         this.title = infos.get("subject").toString();
         this.sender = infos.get("from").toString();
         List<String> recipients = (List<String>) infos.get("recipients");
-        for(String recipient : recipients)
-            this.recipients += recipient + ",";
+        this.recipients = StringUtils.join(recipients, ",");
         this.templateName = tmpName;
         this.type = type;
     }
@@ -110,19 +93,19 @@ public class MailsRecord extends Model {
      * @return
      */
     @Cached("5mn")
-    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> tmps, boolean success, String group) {
+    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates, boolean success, String group) {
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to));
 
 
-        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, tmps, success, group);
+        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates, success, group);
         HighChart lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
 
         //初始化不同邮件类型 模板的使用次数
         Map<String, Float> counts = new HashMap<String, Float>();
-        if(tmps != null && tmps.size() != 0)
-            for(String t : tmps)
+        if(templates != null)
+            for(String t : templates)
                 counts.put(t, 0f);
         else {
             if(type.equals(T.NORMAL)) {
@@ -181,29 +164,33 @@ public class MailsRecord extends Model {
      * @param group
      * @return
      */
-    private static List<MailsRecord> getMailsRecords(Date from, Date to, T type, List<String> tmps, boolean success, String group) {
-        String cacheKey = Caches.Q.cacheKey(from, to, type, success, group, tmps);
+    private static List<MailsRecord> getMailsRecords(Date from, Date to, T type, List<String> templates, boolean success, String group) {
+        String cacheKey = Caches.Q.cacheKey(from, to, type, success, group, templates);
         List<MailsRecord> records = Cache.get(cacheKey, List.class);
         if(records != null) return records;
 
         synchronized(MailsRecord.class) {
             StringBuffer querystr = new StringBuffer("type=? and success=? and createdAt between ? and ?");
-
-            if(tmps != null) {
-                querystr.append(" and templateName in ( '" + tmps.get(0));
-                for(int i = 1; i < tmps.size(); i++)
-                    querystr.append("','" + tmps.get(i));
-                querystr.append("')");
+            boolean t_flag = false;
+            boolean g_flag = false;
+            if(!StringUtils.isBlank(group)) {
+                querystr.append(" and recipients like :group");
+                g_flag = true;
             }
 
-            if(!StringUtils.isBlank(group)) {
-                querystr.append(" and recipients like ?");
-                records = MailsRecord.find(querystr.toString(), type, success, from, to, "%" + group + "%").fetch();
-            } else
-                records = MailsRecord.find(querystr.toString(), type, success, from, to).fetch();
-
-            if(records != null)
+            if(templates != null) {
+                querystr.append(" and templateName in (:templates)");
+                t_flag = true;
+            }
+            JPAQuery query = MailsRecord.find(querystr.toString(), type, success, from, to);
+            if(g_flag)
+                query.setParameter("group", "%" + group + "%");
+            if(t_flag)
+                query.setParameter("templates", templates);
+            records = query.fetch();
+            if(records != null) {
                 Cache.add(cacheKey, records);
+            }
         }
 
 

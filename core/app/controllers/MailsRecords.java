@@ -25,16 +25,17 @@ public class MailsRecords extends Controller {
 
     /**
      * 查询邮件日志
+     *
      * @param from
      * @param to
      * @param type
-     * @param tmp
+     * @param templates
      * @param success
      * @param group
      */
-    public static void ajaxRecord(Date from, Date to, MailsRecord.T type, List<String> tmp, boolean success, String group) {
+    public static void ajaxRecord(Date from, Date to, MailsRecord.T type, List<String> templates, boolean success, String group) {
         try {
-            renderJSON(J.json(MailsRecord.ajaxRecordBy(from, to, type, tmp, success, group)));
+            renderJSON(J.json(MailsRecord.ajaxRecordBy(from, to, type, templates, success, group)));
         } catch(Exception e) {
             e.printStackTrace();
             renderJSON(new Ret(Webs.S(e)));

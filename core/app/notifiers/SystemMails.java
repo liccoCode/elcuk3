@@ -40,15 +40,17 @@ public class SystemMails extends Mailer {
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_REVIEW);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_REVIEW);
             send(reviews);
+            mr.success = true;
         } catch(Exception e) {
-            mr.success = false;
             Logger.warn(Webs.E(e));
             return false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
         return true;
     }
@@ -69,15 +71,17 @@ public class SystemMails extends Mailer {
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_FEEDBACK);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_FEEDBACK);
             send(feedbacks);
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success = false;
             return false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
         return true;
     }
@@ -88,15 +92,17 @@ public class SystemMails extends Mailer {
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, SKU_PIC_CHECK);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, SKU_PIC_CHECK);
             send(productAndSellT2s);
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success = false;
             return false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
         return true;
     }

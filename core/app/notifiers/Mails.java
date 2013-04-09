@@ -46,11 +46,12 @@ public class Mails extends Mailer {
             addRecipient("p@easyacceu.com");
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, CLEARANCE);
             send(shipment);
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
-            mr.success = false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
     }
 
@@ -63,11 +64,12 @@ public class Mails extends Mailer {
             addRecipient("p@easyacceu.com");
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, IS_DONE);
             send(shipment);
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(title + ":" + Webs.E(e));
-            mr.success = false;
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
     }
 
@@ -85,11 +87,12 @@ public class Mails extends Mailer {
             addRecipient("alerts@easyacceu.com");
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, MORE_OFFERS);
             send(offers, lst);
+            mr.success = true;
         } catch(Exception e) {
-            mr.success = false;
             Logger.warn(title + ":" + Webs.E(e));
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
     }
 
@@ -138,9 +141,9 @@ public class Mails extends Mailer {
         mailBase();
         if(Play.mode.isProd()) addRecipient(order.email);
         else addRecipient("wppurking@gmail.com");
-
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, tmp);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, tmp);
             final Future<Boolean> future = send(order, title);
             new ReviewMailCheckPromise(order.orderId, future, mr).now();
         } catch(MailException e) {
@@ -161,14 +164,17 @@ public class Mails extends Mailer {
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FEEDBACK_WARN);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FEEDBACK_WARN);
             send(f);
             f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
+            mr.success = true;
         } catch(Exception e) {
-            mr.success = false;
+
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
 
 
@@ -192,14 +198,17 @@ public class Mails extends Mailer {
         setSubject(title);
         mailBase();
         addRecipient("services@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, REVIEW_WARN);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, REVIEW_WARN);
             send(r, title, sbr);
             r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
+            mr.success = true;
         } catch(Exception e) {
-            mr.success = false;
+
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
         // send 方法没有抛出异常则表示邮件发送成功
 
@@ -209,13 +218,16 @@ public class Mails extends Mailer {
         setSubject("{WARN}[FBA] 如下 Selling 在更新 Selling.fnSku 时无法在系统中找到.");
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FNSKU_CHECK);
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FNSKU_CHECK);
             send(unfindSelling);
+            mr.success = true;
         } catch(Exception e) {
-            mr.success = false;
+
         } finally {
-            mr.save();
+            if(mr != null)
+                mr.save();
         }
 
     }
