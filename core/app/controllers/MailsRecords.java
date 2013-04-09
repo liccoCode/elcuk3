@@ -9,6 +9,7 @@ import play.Logger;
 import play.mvc.Controller;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,20 +20,23 @@ import java.util.Date;
 public class MailsRecords extends Controller {
 
     public static void index() {
-        Logger.debug("邮件 log   index --------------");
         render();
     }
 
-
-    public static void ajaxRecord(Date from,Date to,String type,boolean success,String group) {
-
-        Logger.info("开始获取 邮件日志....");
-        Logger.info("from:%s  to %s    type=%s   success: %s   group: %s",from,to,type,success,group);
-        try{
-            HighChart  hc= MailsRecord.ajaxRecordBy(from, to, type, success, group);
-            Logger.info("返回结果");
-            renderJSON(J.json(hc));
+    /**
+     * 查询邮件日志
+     * @param from
+     * @param to
+     * @param type
+     * @param tmp
+     * @param success
+     * @param group
+     */
+    public static void ajaxRecord(Date from, Date to, MailsRecord.T type, List<String> tmp, boolean success, String group) {
+        try {
+            renderJSON(J.json(MailsRecord.ajaxRecordBy(from, to, type, tmp, success, group)));
         } catch(Exception e) {
+            e.printStackTrace();
             renderJSON(new Ret(Webs.S(e)));
         }
 

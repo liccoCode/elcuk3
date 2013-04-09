@@ -1,6 +1,7 @@
 package jobs.promise;
 
 import helper.Webs;
+import models.MailsRecord;
 import models.embedded.ERecordBuilder;
 import models.market.M;
 import models.market.Orderr;
@@ -21,10 +22,12 @@ import java.util.concurrent.TimeUnit;
 public class ReviewMailCheckPromise extends Job {
     private String orderId;
     private Future<Boolean> sendFlag;
+    private MailsRecord mailsRecord;
 
-    public ReviewMailCheckPromise(String orderId, Future<Boolean> sendFlag) {
+    public ReviewMailCheckPromise(String orderId, Future<Boolean> sendFlag,MailsRecord mailsRecord) {
         this.orderId = orderId;
         this.sendFlag = sendFlag;
+        this.mailsRecord=mailsRecord;
     }
 
     @Override
@@ -45,7 +48,10 @@ public class ReviewMailCheckPromise extends Job {
                 Logger.info("Order[%s](%s) email send success!", this.orderId, ord.market);
             }
         } catch(Exception e) {
+            mailsRecord.success=false;
             Logger.warn("Order %s review email failed. [%s]", this.orderId, Webs.E(e));
+        }finally {
+            mailsRecord.save();
         }
     }
 

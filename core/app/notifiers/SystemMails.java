@@ -35,22 +35,19 @@ public class SystemMails extends Mailer {
      * @return
      */
     public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
-        String title=String.format("{INFO} %s Reviews Overview.",
-                        Dates.date2Date(new DateTime().minusDays(1).toDate()));
+        String title = String.format("{INFO} %s Reviews Overview.",
+                Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),
-                   (ArrayList<String>)infos.get().get("recipients"),DAILY_REVIEW,MailsRecord.T.SYSTEM);
+        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_REVIEW);
         try {
             send(reviews);
-
         } catch(Exception e) {
-            mr.success=false;
+            mr.success = false;
             Logger.warn(Webs.E(e));
             return false;
-        }finally {
+        } finally {
             mr.save();
         }
         return true;
@@ -67,41 +64,38 @@ public class SystemMails extends Mailer {
     }
 
     public static boolean dailyFeedbackMail(List<Feedback> feedbacks) {
-        String title=String.format("{INFO} %s Feedback Overview.",
-                        Dates.date2Date(new DateTime().minusDays(1).toDate()));
+        String title = String.format("{INFO} %s Feedback Overview.",
+                Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),
-                       (ArrayList<String>)infos.get().get("recipients"),DAILY_FEEDBACK,MailsRecord.T.SYSTEM);
+        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_FEEDBACK);
         try {
             send(feedbacks);
-
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
+            mr.success = false;
             return false;
+        } finally {
+            mr.save();
         }
         return true;
     }
 
     public static boolean productPicCheckermail(List<F.T2<Product, AnalyzeDTO>> productAndSellT2s) {
-        String title=String.format("{CHECK} %s Product Picture Information Check",
-                        Dates.date2Date());
+        String title = String.format("{CHECK} %s Product Picture Information Check",
+                Dates.date2Date());
         setSubject(title);
         mailBase();
         addRecipient("alerts@easyacceu.com");
-        MailsRecord mr=MailsRecord.findFailedByTitle(title);
-        mr.addParams(infos.get().get("from").toString(),
-                      (ArrayList<String>)infos.get().get("recipients"),SKU_PIC_CHECK,MailsRecord.T.SYSTEM);
+        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, SKU_PIC_CHECK);
         try {
             send(productAndSellT2s);
-
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
-            mr.success=false;
+            mr.success = false;
             return false;
-        }finally {
+        } finally {
             mr.save();
         }
         return true;
