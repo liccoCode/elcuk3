@@ -161,8 +161,7 @@ public class Mails extends Mailer {
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
         addRecipient("services@easyacceu.com");
-        MailsRecord mr = null;
-        mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FEEDBACK_WARN);
+        MailsRecord mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FEEDBACK_WARN);
         try {
             send(f);
             f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
