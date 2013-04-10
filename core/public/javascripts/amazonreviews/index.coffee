@@ -49,27 +49,27 @@ $ ->
     mask = $('#container')
     mask.mask('加载中...')
     $('#reviews').load('/amazonReviews/ajaxMagic', $('#search_form :input').fieldSerialize(),
-      () ->
-        # 如果没有一个元素, 那么则需要重新抓取.
-        mask.unmask()
-        if $('#reviews tr').size() is 1
-          alert('此 Listing 为全新的 Listing, 重新抓取 Listing 中...')
-          mask.mask('重新抓取中...')
-          $.post('/amazonreviews/reCrawl', $('#search_form :input').fieldSerialize(),
-            (r) ->
-              mask.unmask()
-              if r.flag is false
-                alert(r.message)
-              else
-                $('#recrawl_review').click()
-          )
-        else
-          toggle_init()
-          bindTransBtn()
-          bindUpBtn()
-          bindDownBtn()
-          $('#check_left_clicks').button('reset')
-          window.$ui.init()
+    () ->
+      # 如果没有一个元素, 那么则需要重新抓取.
+      mask.unmask()
+      if $('#reviews tr').size() is 1
+        alert('此 Listing 为全新的 Listing, 重新抓取 Listing 中...')
+        mask.mask('重新抓取中...')
+        $.post('/amazonreviews/reCrawl', $('#search_form :input').fieldSerialize(),
+        (r) ->
+          mask.unmask()
+          if r.flag is false
+            alert(r.message)
+          else
+            $('#recrawl_review').click()
+        )
+      else
+        toggle_init()
+        bindTransBtn()
+        bindUpBtn()
+        bindDownBtn()
+        $('#check_left_clicks').button('reset')
+        window.$ui.init()
     )
 
   # 绑定重新抓取事件
@@ -93,12 +93,12 @@ $ ->
     mask = $('#container')
     mask.mask('重新抓取 Listing 信息中...')
     $.get('/listings/reCrawl', $('#search_form :input'),
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          $('#search_form button:eq(0)').click()
-        mask.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        $('#search_form button:eq(0)').click()
+      mask.unmask()
     )
 
   # 绑定点击 Like 按钮
@@ -109,12 +109,12 @@ $ ->
     mask = $('#container')
     mask.mask('点击 Like 中...')
     $.post('/amazonreviews/like', $('#search_form :input').fieldSerialize(),
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          alert(JSON.stringify(r))
-        mask.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        alert(JSON.stringify(r))
+      mask.unmask()
     )
     e.preventDefault()
 
@@ -127,23 +127,22 @@ $ ->
       params["rvIds[#{i}]"] = tr.getAttribute('drop')
     mask.mask('计算中...')
     $.post('/AmazonReviews/checkLeftClicks', params,
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-          o.button('reset')
-        else
-          o.button('loading')
-          for t2 in r
-            $("#accleft_#{t2._1}").html(t2._2)
-        mask.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+        o.button('reset')
+      else
+        o.button('loading')
+        for t2 in r
+          $("#accleft_#{t2._1}").html(t2._2)
+      mask.unmask()
     )
     e.preventDefault()
 
-  $('#search_form button:eq(0)').click (e) ->
-    o = $(@).prev()
-    o.val(o.val().toUpperCase())
+  $('#load_review_btn').click (e) ->
+    loadAsin = $('#load_asin').val(-> @value.toUpperCase())
     #B007LE0UT4
-    return false if o.val().length isnt 10
+    return false if loadAsin.val().length isnt 10
     reviewLoadFun()
     e.preventDefault()
 
@@ -169,9 +168,9 @@ $ ->
 
   # -------- Review 表格
   $('a[href=#review_table]').on('shown',
-    (e) ->
-      if $("#search_form [name=asin]").val() == ""
-        alert("请输入 ASIN")
-        return
-      $('#review_table').load("/AmazonReviews/reviewTable", $('#search_form :input').fieldSerialize())
+  (e) ->
+    if $("#search_form [name=asin]").val() == ""
+      alert("请输入 ASIN")
+      return
+    $('#review_table').load("/AmazonReviews/reviewTable", $('#search_form :input').fieldSerialize())
   )
