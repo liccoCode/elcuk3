@@ -12,43 +12,31 @@ $ ->
   base_html=(value, label)->
     return "<label class=\"checkbox\"><input type=\"checkbox\" name=\"templates\" value=\"#{value}\">#{label}</label>"
 
-  #初始化模板
-  templates_init=->
-    system_htmls=[
-      base_html('daily_review', 'DAILY_REVIEW')
-      base_html('daily_feedback', 'DAILY_FEEDBACK')
-      base_html('product_picture_check', 'SKU_PIC_CHECK')
-    ]
-    systemTemplate=system_htmls.join('')
-    fba_htmls=[
-      base_html('shipment_state_change', 'STATE_CHANGE')
-      base_html('shipment_receipt_not_receiving', 'NOT_RECEING')
-      base_html('shipment_receiving_check', 'RECEIVING_CHECK')
-    ]
-    fbaTempalte=fba_htmls.join('')
-    normal_htmls=[
-      base_html('shipment_clearance', 'CLEARANCE')
-      base_html('shipment_isdone', 'IS_DONE')
-      base_html('more_offers', 'MORE_OFFERS')
-      base_html('amazon_review_uk', 'REVIEW_UK')
-      base_html('amazon_review_de', 'REVIEW_DE')
-      base_html('amazon_review_us', 'REVIEW_US')
-      base_html('feedback_warnning', 'FEEDBACK_WARN')
-      base_html('review_warnning', 'REVIEW_WARN')
-      base_html('fnsku_check_warn', 'FNSKU_CHECK')
-    ]
-    normalTemplate=normal_htmls.join('')
-    return NORMAL: normalTemplate, FBA: fbaTempalte, SYSTEM: systemTemplate
+  type_templates=
+    SYSTEM:
+      daily_review: 'DAILY_REVIEW', daily_feedback: 'DAILY_FEEDBACK', product_picture_check: 'SKU_PIC_CHECK'
 
-  #获得所有的模板
-  target_templates=templates_init()
+    FBA:
+      shipment_state_change: 'STATE_CHANGE', shipment_receipt_not_receiving: 'NOT_RECEING', shipment_receiving_check: 'RECEIVING_CHECK'
+
+    NORMAL:
+      shipment_clearance: 'CLEARANCE', shipment_isdone: 'IS_DONE', more_offers: 'MORE_OFFERS', amazon_review_uk: 'REVIEW_UK'
+      amazon_review_de: 'REVIEW_DE', amazon_review_us: 'REVIEW_US', feedback_warnning: 'FEEDBACK_WARN'
+      review_warnning: 'REVIEW_WARN', fnsku_check_warn: 'FNSKU_CHECK'
+
+
+
+  append_template=(type)->
+    for value,lable of type_templates[type]
+      $('#tmp_target').append(base_html(value, lable))
 
   #初始化target
-  $('#tmp_target').append(target_templates[$('[name=type]').val()])
+  append_template('NORMAL')
 
 
   $('[name=type]').change(->
-    $('#tmp_target').empty().append(target_templates[this.value])
+    $('#tmp_target').empty()
+    append_template(@.value)
   )
 
   #在target隐藏后取消选中的checkbox
@@ -121,7 +109,7 @@ $ ->
 
   $('#search_btn').click (e) ->
     e.preventDefault()
-    $.getJSON(this.getAttribute('url'), $('#params').formToArray(), (r) ->
+    $.getJSON(@.getAttribute('url'), $('#params').formToArray(), (r) ->
       if r.flag is false
         alert(r.message)
       else
@@ -134,6 +122,5 @@ $ ->
         console.log(unitLines)
         $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
     )
-
-  $('#search_btn').click()
+  .click()
 
