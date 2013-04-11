@@ -197,5 +197,15 @@ public class MailsRecord extends Model {
         return records;
     }
 
+    /**
+     * 通过title查找最新的一条记录
+     * @param title
+     * @return
+     */
+    public static MailsRecord getLastMailsRecordByTitle(String title){
+        return MailsRecord.find("title=? order by createdAt").first();
+    }
+
+
 
 }

@@ -7,7 +7,7 @@
 <div class="container">
     <form id="params" class="search_form">
 
-        <div class="span12">
+        <div class="btn-toolbar">
             <div class="input-prepend inline">
                 <span class="add-on">From:</span>
                 <input type="date" id="_from" class="date" name="from">
@@ -26,7 +26,6 @@
                 </select>
             </div>
 
-
             <div class="inline">
 
                 <select name="group" class="inline" style="width:100">
@@ -37,8 +36,7 @@
                     <option value="@easyacceu.com">@easyacceu.com</option>
                 </select>
             </div>
-            <div class="input-prepend inline">
-
+            <div class="inline">
                 <select name="type" class="inline">
                     <option value="NORMAL" selected="selected">NORMAL</option>
                     <option value="FBA">FBA</option>
@@ -46,70 +44,21 @@
                 </select>
             </div>
             <div class="inline">
-                <button type="button" class="btn inline" id="tmp" data-toggle="collapse" data-target="#TMP_NORMAL">
+                <button type="button" class="btn inline" id="tmp" data-toggle="collapse" data-target="#tmp_target">
                     选择模板
                 </button>
-                <div id="TMP_SYSTEM" class="collapse">
-                    <label class="checkbox">
-                        <input type="checkbox" name="templates" value="daily_review"> DAILY_REVIEW
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="daily_feedback"> DAILY_FEEDBACK
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="product_picture_check"> SKU_PIC_CHECK
-                    </label>
-                </div>
-                <div id="TMP_FBA" class="collapse">
-                    <label class="checkbox">
-                        <input type="checkbox" name="templates" value="daily_review"> STATE_CHANGE
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="shipment_receipt_not_receiving"> NOT_RECEING
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="shipment_receiving_check"> RECEIVING_CHECK
-                    </label>
-                </div>
-                <div id="TMP_NORMAL" class="collapse">
-                    <label class="checkbox">
-                        <input type="checkbox" name="templates" value="shipment_clearance"> CLEARANCE
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="shipment_isdone"> IS_DONE
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="more_offers"> MORE_OFFERS
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="amazon_review_uk"> REVIEW_UK
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="amazon_review_de"> REVIEW_DE
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="amazon_review_us"> REVIEW_US
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="feedback_warnning"> FEEDBACK_WARN
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="review_warnning"> REVIEW_WARN
-                    </label>
-                    <label class="checkbox ">
-                        <input type="checkbox" name="templates" value="fnsku_check_warn"> FNSKU_CHECK
-                    </label>
+                <div id="tmp_target" class="collapse">
                 </div>
             </div>
-            <div class="input-prepend inline" style="margin-left:0">
+            <div class="inline" style="margin-left:0">
 
-                <button id="search_btn" class="btn icon-search">搜索</button>
+                <button id="search_btn" url="@{MailsRecords.ajaxRecord()}" class="btn"><i class="icon-search"></i>搜索
+                </button>
             </div>
 
         </div>
-
-
     </form>
+
     <div class="row-fluid">
         <div id="mail_records" class="span10" style="height:280px"></div>
 

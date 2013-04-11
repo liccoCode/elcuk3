@@ -6,6 +6,7 @@ import models.MailsRecord;
 import models.market.*;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
@@ -120,7 +121,7 @@ public class Mails extends Mailer {
      *
      * @param order
      */
-    private static void reviewMailBase(Orderr order, String tmp) {
+    private static void reviewMailBase(Orderr order, String template) {
         if(StringUtils.isBlank(order.email)) {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
@@ -143,7 +144,7 @@ public class Mails extends Mailer {
         else addRecipient("wppurking@gmail.com");
         MailsRecord mr = null;
         try {
-            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, tmp);
+            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, template);
             final Future<Boolean> future = send(order, title);
             new ReviewMailCheckPromise(order.orderId, future, mr).now();
         } catch(MailException e) {
@@ -171,7 +172,7 @@ public class Mails extends Mailer {
             f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
             mr.success = true;
         } catch(Exception e) {
-
+            Logger.warn("Feedback[" + f.feedback + "] Send Error! " + e.getMessage());
         } finally {
             if(mr != null)
                 mr.save();
@@ -205,7 +206,7 @@ public class Mails extends Mailer {
             r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
             mr.success = true;
         } catch(Exception e) {
-
+            Logger.warn("AmazonListingReview[" + r.alrId + "] Send Error! " + e.getMessage());
         } finally {
             if(mr != null)
                 mr.save();
@@ -224,7 +225,7 @@ public class Mails extends Mailer {
             send(unfindSelling);
             mr.success = true;
         } catch(Exception e) {
-
+            Logger.warn("unfindSelling WARN Send Error! " + e.getMessage());
         } finally {
             if(mr != null)
                 mr.save();
