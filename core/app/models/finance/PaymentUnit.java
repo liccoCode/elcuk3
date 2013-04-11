@@ -72,6 +72,16 @@ public class PaymentUnit extends Model {
         this.state = S.APPLY;
     }
 
+    /**
+     * 通过 ProcureUnit 生成一个 PaymentUnit. 包括:
+     * 1. 采购单
+     * 2. 总价(由具体交货数量拿具体交货数量计算, 没有则拿预计数量计算)
+     * 3. 支付单
+     * 4. 请款人
+     * 5. 请款单
+     *
+     * @param procureUnit
+     */
     public PaymentUnit(ProcureUnit procureUnit) {
         this();
         this.procureUnit = procureUnit;
