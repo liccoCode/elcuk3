@@ -11,6 +11,7 @@ import notifiers.SystemMails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
+import play.db.helper.SqlQuery;
 import play.db.jpa.Model;
 
 
@@ -170,6 +171,7 @@ public class MailsRecord extends Model {
         if(records != null) return records;
 
         synchronized(MailsRecord.class) {
+
             StringBuffer querystr = new StringBuffer("type=? and createdAt between ? and ? and success=?");
             List<Object> paras = new ArrayList<Object>();
             paras.add(type);
@@ -181,12 +183,10 @@ public class MailsRecord extends Model {
                 paras.add("%" + group + "%");
             }
             if(templates != null) {
-                querystr.append(" and templateName in (:templates)");
+                querystr.append(" and ");
+                querystr.append(SqlQuery.whereIn("templateName",templates));
             }
-            JPAQuery query = MailsRecord.find(querystr.toString(), paras.toArray());
-            if(templates != null)
-                query.setParameter("templates", templates);
-            records = query.fetch();
+            records = MailsRecord.find(querystr.toString(), paras.toArray()).fetch();
             if(records != null) {
                 Cache.add(cacheKey, records);
             }
