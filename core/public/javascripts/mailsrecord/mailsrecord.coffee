@@ -24,20 +24,14 @@ $ ->
       amazon_review_de: 'REVIEW_DE', amazon_review_us: 'REVIEW_US', feedback_warnning: 'FEEDBACK_WARN'
       review_warnning: 'REVIEW_WARN', fnsku_check_warn: 'FNSKU_CHECK'
 
-
-
   append_template=(type)->
     for value,lable of type_templates[type]
       $('#tmp_target').append(base_html(value, lable))
 
-  #初始化target
-  append_template('NORMAL')
-
-
   $('[name=type]').change(->
     $('#tmp_target').empty()
     append_template(@.value)
-  )
+  ).change()
 
   #在target隐藏后取消选中的checkbox
   $('#tmp_target').on('hidden', ->
@@ -123,4 +117,3 @@ $ ->
         $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
     )
   .click()
-
