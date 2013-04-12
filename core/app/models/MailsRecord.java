@@ -170,22 +170,21 @@ public class MailsRecord extends Model {
         if(records != null) return records;
 
         synchronized(MailsRecord.class) {
-            StringBuffer querystr = new StringBuffer("type=? and success=? and createdAt between ? and ?");
-            boolean t_flag = false;
-            boolean g_flag = false;
-            if(!StringUtils.isBlank(group)) {
-                querystr.append(" and recipients like :group");
-                g_flag = true;
+            StringBuffer querystr = new StringBuffer("type=? and createdAt between ? and ? and success=?");
+            List<Object> paras = new ArrayList<Object>();
+            paras.add(type);
+            paras.add(from);
+            paras.add(to);
+            paras.add(success);
+            if(StringUtils.isNotBlank(group)) {
+                querystr.append(" and recipients like ?");
+                paras.add("%" + group + "%");
             }
-
             if(templates != null) {
                 querystr.append(" and templateName in (:templates)");
-                t_flag = true;
             }
-            JPAQuery query = MailsRecord.find(querystr.toString(), type, success, from, to);
-            if(g_flag)
-                query.setParameter("group", "%" + group + "%");
-            if(t_flag)
+            JPAQuery query = MailsRecord.find(querystr.toString(), paras.toArray());
+            if(templates != null)
                 query.setParameter("templates", templates);
             records = query.fetch();
             if(records != null) {
