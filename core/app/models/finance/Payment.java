@@ -431,7 +431,7 @@ public class Payment extends Model {
         long count = Payment.count("cooperator=? AND createdAt>=? AND createdAt<=?",
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
-                Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
+                Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
         this.paymentNumber = String.format("付款单[%s-%03d-%s]",
                 this.cooperator.name, count, DateTime.now().toString("yy"));
         return this;
