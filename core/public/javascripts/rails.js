@@ -6,6 +6,10 @@
      *
      * Requires jQuery 1.7.0 or later.
      *
+     * 为符合 Playframework 的使用, 做了如下调整:
+     * 1. hack 了 data-method 的处理, 针对 put/delete 调整为 x-http-method-override=DELETE
+     * 2. 对 dataType 默认为 script
+     *
      * Released under the MIT license
      *
      */
@@ -83,7 +87,7 @@
                 elCrossDomain = element.data('cross-domain');
                 crossDomain = elCrossDomain === undefined ? null :elCrossDomain;
                 withCredentials = element.data('with-credentials') || null;
-                dataType = element.data('type') || ($.ajaxSettings && $.ajaxSettings.dataType);
+                dataType = element.data('type') || ($.ajaxSettings && $.ajaxSettings.dataType) || 'script';
 
                 if(element.is('form')){
                     method = element.attr('method');
@@ -149,7 +153,10 @@
         // Handles "data-method" on links such as:
         // <a href="/users/5" data-method="delete" rel="nofollow" data-confirm="Are you sure?">Delete</a>
         handleMethod: function(link){
-            var href = rails.href(link), method = link.data('method'), target = link.attr('target'), csrf_token = $('meta[name=csrf-token]').attr('content'), csrf_param = $('meta[name=csrf-param]').attr('content'), form = $('<form method="post" action="' + href + '"></form>'), metadata_input = '<input name="_method" value="' + method + '" type="hidden" />';
+            var href = rails.href(link), method = link.data('method'), target = link.attr('target'), csrf_token = $('meta[name=csrf-token]').attr('content'), csrf_param = $('meta[name=csrf-param]').attr('content');
+            method = method.toLocaleLowerCase();
+            if(method == 'delete' || method == 'put') href += '?x-http-method-override=' + method.toUpperCase();
+            var form = $('<form method="post" action="' + href + '"></form>'), metadata_input = '<input name="_method" value="' + method + '" type="hidden" />';
 
             if(csrf_param !== undefined && csrf_token !== undefined){
                 metadata_input += '<input name="' + csrf_param + '" value="' + csrf_token + '" type="hidden" />';

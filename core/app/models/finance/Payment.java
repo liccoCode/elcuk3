@@ -60,10 +60,10 @@ public class Payment extends Model {
             }
         },
 
-        CLOSE {
+        CANCEL {
             @Override
             public String label() {
-                return "处理完毕";
+                return "取消";
             }
         };
 
@@ -242,6 +242,23 @@ public class Payment extends Model {
         return paymentUnits;
     }
 
+    /**
+     * 锁定此付款单
+     */
+    public void lockAndUnLock(boolean lock) {
+        if(lock) {
+            if(this.state != S.WAITING)
+                Validation.addError("", "只允许" + S.WAITING.label() + "状态付款单锁定.");
+            if(Validation.hasErrors()) return;
+            this.state = S.LOCKED;
+        } else {
+            if(this.state != S.LOCKED)
+                Validation.addError("", "只允许" + S.LOCKED.label() + "状态付款单解锁.");
+            this.state = S.WAITING;
+        }
+        this.save();
+    }
+
     public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratio_publish_date,
                       Float actualPaid) {
         /**
@@ -406,7 +423,7 @@ public class Payment extends Model {
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
                         "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? AND " +
-                        "p.state=? ORDER BY p.createdAt DESC",
+                        "p.state=? ORDER BY p.createdAt ASC",
                 deliveryment.id, now.minusHours(24).toDate(), now.toDate(), S.WAITING).first();
 
         if(payment == null || payment.totalFees()._1 > 60000) {

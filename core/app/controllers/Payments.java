@@ -64,6 +64,29 @@ public class Payments extends Controller {
     }
 
     /**
+     * 锁定付款单
+     */
+    public static void lockIt(Long id) {
+        Payment payment = Payment.findById(id);
+        payment.lockAndUnLock(true);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("成功锁定, 新请款不会再进入这个付款单.");
+        show(id);
+    }
+
+    public static void unlock(Long id) {
+        Payment payment = Payment.findById(id);
+        payment.lockAndUnLock(false);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("成功解锁, 新请款可以再次进入这个付款单.");
+        show(id);
+    }
+
+    /**
      * 为当前付款单付款
      */
     @Check("payments.payforit")

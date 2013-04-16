@@ -48,6 +48,8 @@ POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnit
 POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
 POST    /payment/{id}/pay                                   Payments.payForIt
 POST    /payment/{id}/shouldPaid                            Payments.shouldPaidUpdate
+POST    /payment/{id}/lock                                  Payments.lockIt
+DELETE  /payment/{id}/lock                                  Payments.unlock
 
 # ProcureUnits
 POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
