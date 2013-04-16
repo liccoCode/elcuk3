@@ -133,9 +133,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         currentDto.day0 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
                         currentDto.day1 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
+                    //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
+                    if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 86400000)
                         currentDto.day7 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
+                    if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 86400000)
                         currentDto.day30 += vo.qty;
                 }
 
