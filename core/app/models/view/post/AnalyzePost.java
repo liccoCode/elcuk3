@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import helper.Promises;
+import models.market.AmazonListingReview;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -165,14 +166,19 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     // review
                     F.T3<Integer, Float, List<String>> reviewT3;
-                    if(isSku) reviewT3 = new AmazonListingReviewQuery().skuRelateReviews(dto.fid);
-                    else reviewT3 = new AmazonListingReviewQuery().sidRelateReviews(dto.fid);
+                    AmazonListingReviewQuery query=new AmazonListingReviewQuery();
+                    if(isSku) reviewT3 = query.skuRelateReviews(dto.fid);
+                    else reviewT3 = query.sidRelateReviews(dto.fid);
                     dto.reviews = reviewT3._1;
                     dto.rating = reviewT3._2;
                     if(dto.reviews > 0)
                         dto.reviewRatio =
                                 dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
                     else dto.reviewRatio = 0;
+
+                    //最新的评分
+                    if(isSku)
+                        dto.lastRating= query.skuLastRating(dto.fid);
                 }
 
                 Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");

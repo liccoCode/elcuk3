@@ -63,4 +63,24 @@ public class AmazonListingReviewQuery {
         );
     }
 
+
+    /**
+     * 查询 SKU 最新的rating
+     *
+     * @param sku
+     * @return
+     */
+    public float skuLastRating(String sku) {
+        SqlSelect sql = new SqlSelect()
+                .select("r.rating as rating")
+                .from("AmazonListingReview r")
+                .leftJoin("Listing l on r.listingId=l.listingId")
+                .where("l.product_sku=?").param(sku)
+                .orderBy("r.createDate desc").limit(1);
+        Map<String, Object> row = DBUtils.row(sql.toString(), sku);
+        if(row.get("rating") == null)
+            return -1;
+        return NumberUtils.toFloat(row.get("rating").toString());
+    }
+
 }

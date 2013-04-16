@@ -110,6 +110,11 @@ public class AnalyzeDTO {
      */
     public float rating = 0;
 
+    /**
+     * 最新的评分
+     */
+    public float lastRating;
+
     public float reviewRatio = 0f;
 
     public float getPs_cal() {
