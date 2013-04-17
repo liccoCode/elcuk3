@@ -3,6 +3,7 @@ package ext;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
+import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.libs.F;
@@ -50,6 +51,23 @@ public class ReviewHelper extends JavaExtensions {
         } else {
             return new F.T3<Boolean, String, String>(false, "", "");
         }
+    }
+
+    /**
+     * 计算 AnalyzeDTO 的 rating 与 lastRating, 比较她们之间的差别
+     *
+     * @param dto
+     * @return T3: _.1是否要用到icon class  _.2 颜色 _.3icon class
+     */
+    public static F.T3<Boolean, String, String> iconRating(AnalyzeDTO dto) {
+        if(dto.lastRating > dto.rating) {
+            return new F.T3<Boolean, String, String>(true, "468847", "icon-arrow-up");
+        } else if(dto.lastRating == dto.rating) {
+            return new F.T3<Boolean, String, String>(false, "0000ff", null);
+        }
+        if(dto.lastRating >= 0 && dto.lastRating < dto.rating)
+            return new F.T3<Boolean, String, String>(true, "B94A48", "icon-arrow-down");
+        return null;
     }
 
 

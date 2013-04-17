@@ -76,11 +76,12 @@ public class AmazonListingReviewQuery {
                 .from("AmazonListingReview r")
                 .leftJoin("Listing l on r.listingId=l.listingId")
                 .where("l.product_sku=?").param(sku)
-                .orderBy("r.createDate desc").limit(1);
-        Map<String, Object> row = DBUtils.row(sql.toString(), sku);
-        if(row.get("rating") == null)
-            return -1;
-        return NumberUtils.toFloat(row.get("rating").toString());
+                .orderBy("r.createDate desc").limit(2);
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sku);
+        float total=0;
+        for (Map<String,Object> row :rows)
+             total+=NumberUtils.toFloat(row.get("rating").toString());
+        return rows.size()==0?-1:total/rows.size();
     }
 
 }
