@@ -35,7 +35,7 @@ public class PaymentHelper extends JavaExtensions {
         switch(payment.state) {
             case PAID:
                 return "#468847";
-            case CLOSE:
+            case CANCEL:
                 return "#999999";
             case WAITING:
             default:
