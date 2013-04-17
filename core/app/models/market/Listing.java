@@ -133,6 +133,12 @@ public class Listing extends GenericModel {
     public Integer warnningTimes = 0;
 
     /**
+     * 此Listing最近被警告的时间
+     */
+    @Expose
+    public Date lastWarnningTime;
+
+    /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
      */
     @Expose
@@ -289,6 +295,10 @@ public class Listing extends GenericModel {
             return;
         }
 
+        //如果距离上次发出警告不到2天,则不检查
+        if(this.lastWarnningTime != null && DateTime.now().minusDays(2).toDate().before(this.lastWarnningTime))
+            return;
+
         int needWarnningOffers = 0;
 
         for(ListingOffer off : this.offers) {
@@ -312,9 +322,11 @@ public class Listing extends GenericModel {
             }
         }
 
-        if(needWarnningOffers >= 1)
+        if(needWarnningOffers >= 1) {
             Mails.moreOfferOneListing(offers, this);
-        else if(needWarnningOffers <= 0) {
+            //发出警告后 更新警告时间
+            this.lastWarnningTime = new Date();
+        } else if(needWarnningOffers <= 0) {
             // 当不需要警告的时候, 将警告次数清零
             this.warnningTimes = 0;
         }
