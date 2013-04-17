@@ -1,12 +1,14 @@
 package notifiers;
 
 import helper.Webs;
+import models.MailsRecord;
 import models.embedded.ERecordBuilder;
 import models.procure.FBAShipment;
 import play.Logger;
 import play.Play;
 import play.mvc.Mailer;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -37,15 +39,16 @@ public class FBAMails extends Mailer {
                 fba.shipmentId, oldState, newState));
         mailBase();
         addRecipient("p@easyacceu.com");
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, STATE_CHANGE);
             send(fba, oldState, newState);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(STATE_CHANGE)
-                    .save();
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
+        } finally {
+            mr.save();
         }
         return true;
     }
@@ -59,15 +62,17 @@ public class FBAMails extends Mailer {
         setSubject("{WARN} FBA %s 签收了,但超过 2 天还没有开始入库.", fba.shipmentId);
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, NOT_RECEING);
             send(fba);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(NOT_RECEING)
-                    .save();
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
+        } finally {
+            if(mr != null)
+                mr.save();
         }
         return true;
     }
@@ -81,15 +86,17 @@ public class FBAMails extends Mailer {
         setSubject("{WARN} 总共 %s 个 FBA 入库时间过长, 需检查", fbas.size());
         mailBase();
         addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
+        MailsRecord mr = null;
         try {
+            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, RECEIVING_CHECK);
             send(fbas);
-            new ERecordBuilder().mail()
-                    .msgArgs(infos.get().get("from").toString(), "p@easyacceu.com")
-                    .fid(RECEIVING_CHECK)
-                    .save();
+            mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
             return false;
+        } finally {
+            if(mr != null)
+                mr.save();
         }
         return true;
     }

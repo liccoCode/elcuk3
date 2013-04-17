@@ -1,6 +1,7 @@
 package jobs.promise;
 
 import helper.Webs;
+import models.MailsRecord;
 import models.embedded.ERecordBuilder;
 import models.market.M;
 import models.market.Orderr;
@@ -22,20 +23,28 @@ import java.util.concurrent.TimeoutException;
 public class ReviewMailCheckPromise extends Job {
     private String orderId;
     private Future<Boolean> sendFlag;
+    private MailsRecord mailsRecord;
 
-    public ReviewMailCheckPromise(String orderId, Future<Boolean> sendFlag) {
+    public ReviewMailCheckPromise(String orderId, Future<Boolean> sendFlag, MailsRecord mailsRecord) {
         this.orderId = orderId;
         this.sendFlag = sendFlag;
+        this.mailsRecord = mailsRecord;
     }
 
     @Override
     public void doJob() {
         try {
             boolean mailSuccess = sendFlag.get(30, TimeUnit.SECONDS);
-
             if(!mailSuccess) {
                 Logger.warn("Order %s review email failed.", this.orderId);
             } else {
+                Orderr ord = Orderr.findById(this.orderId);
+                ord.reviewMailed = true;
+                if(Play.mode.isProd()) {
+                    ord.save();
+                    mailsRecord.success = true;
+                }
+                Logger.info("Order[%s](%s) email send success!", this.orderId, ord.market);
                 this.orderRecordMail(true);
             }
         } catch(TimeoutException e) {
@@ -43,6 +52,9 @@ public class ReviewMailCheckPromise extends Job {
             Logger.warn("Order %s review email maybe send success. [%s]", this.orderId, Webs.E(e));
         } catch(Exception e) {
             Logger.warn("Order %s review email failed. [%s]", this.orderId, Webs.E(e));
+        } finally {
+            if(mailsRecord != null)
+                mailsRecord.save();
         }
     }
 
