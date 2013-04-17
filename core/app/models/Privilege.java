@@ -109,7 +109,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("servers.index", "服务器管理 页面"));
         privileges.add(new Privilege("accounts.index", "账户管理 页面"));
         privileges.add(new Privilege("users.index", "用户管理 页面"));
-        privileges.add(new Privilege("mailsRecords.index","邮件管理 页面"));
+        privileges.add(new Privilege("mailsrecords.index","邮件管理 页面"));
 
         // 首页
         privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
