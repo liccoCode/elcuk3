@@ -15,6 +15,10 @@ $ ->
       $('#costs').text()
     $('#usd_costs').html(usdCosts)
 
+  persistRatioDates = ->
+    $('#ratio').val($('#usd_rates').text())
+    $('#ratio_publish_date').val($('#usd_datetime').text())
+
 
   $('#boc_rate_btn').click((e) ->
     e.preventDefault()
@@ -25,9 +29,10 @@ $ ->
       usdRate = $('#boc_rate tr:eq(3) td:eq(1)').css('color', '#D94E48').text()
       # 除以 100:  619.76 -> 6.1976
       bocRate.data('usdRate', parseFloat(usdRate) / 100)
-      $('#usd_rates').html((parseFloat(usdRate) / 100).toFixed(4))
+      $('#usd_rates').text((parseFloat(usdRate) / 100).toFixed(4))
       $('#usd_datetime').text($('#boc_rate tr:eq(3) td:eq(6)').text() + " " + $('#boc_rate tr:eq(3) td:eq(7)').text())
       calculateUsdCosts()
+      persistRatioDates()
     )
   ).click()
 
