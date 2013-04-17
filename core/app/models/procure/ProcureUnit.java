@@ -553,6 +553,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 2. 申请尾款
          */
         this.billingValid();
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            Validation.addError("", "请确定采购计划的交货数量(交货)");
         if(this.hasTailPay())
             Validation.addError("", "不允许重复申请尾款");
         if(Validation.hasErrors()) return null;
@@ -576,8 +578,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     private void billingValid() {
         if(this.deliveryment.apply == null)
             Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.deliveryment.id));
-        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
-            Validation.addError("", "请确定采购计划的交货数量(交货)");
     }
 
     /**
