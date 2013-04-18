@@ -8,24 +8,6 @@ $ ->
   $('#_from').data('dateinput').setValue(defaultDate)
   $('#_to').data('dateinput').setValue(now)
 
-<<<<<<< HEAD
-  #在选择类型时隐藏之前的data-target 绑定对应的target 并取消选中的模板
-  $('[name=type]').change(->
-    target= $("#tmp").attr("data-target")
-    $(target).toggleClass('collapse').collapse('hide')
-    $('[name=templates]').attr('checked', false)
-    $("#tmp").attr("data-target", '#TMP_' + this.value)
-  )
-
-  #在target隐藏后取消选中的模板
-  $('#TMP_NORMAL').on('hidden', ->
-    $('[name=templates]').attr('checked', false)
-  )
-  $('#TMP_FBA').on('hidden', ->
-    $('[name=templates]').attr('checked', false)
-  )
-  $('#TMP_SYSTEM').on('hidden', ->
-=======
   #checkbox
   base_html=(value, label)->
     return "<label class=\"checkbox\"><input type=\"checkbox\" name=\"templates\" value=\"#{value}\">#{label}</label>"
@@ -53,7 +35,6 @@ $ ->
 
   #在target隐藏后取消选中的checkbox
   $('#tmp_target').on('hidden', ->
->>>>>>> hotfix/#213
     $('[name=templates]').attr('checked', false)
   )
 
@@ -119,15 +100,10 @@ $ ->
 
   mailRecordLines=->lineOp("mail_records", "Mail Records")
 
-<<<<<<< HEAD
-  mailops_line = (params) ->
-    $.getJSON('/mailsrecords/ajaxRecord', params, (r) ->
-=======
 
   $('#search_btn').click (e) ->
     e.preventDefault()
     $.getJSON(@getAttribute('url'), $('#params').formToArray(), (r) ->
->>>>>>> hotfix/#213
       if r.flag is false
         alert(r.message)
       else
@@ -140,16 +116,4 @@ $ ->
         console.log(unitLines)
         $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
     )
-<<<<<<< HEAD
-
-
-  mailops_line($('#params').formToArray())
-
-
-  $('#search_btn').click (e) ->
-    e.preventDefault()
-    mailops_line($('#params').formToArray())
-
-=======
   .click()
->>>>>>> hotfix/#213

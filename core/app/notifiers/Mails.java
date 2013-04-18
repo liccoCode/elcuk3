@@ -121,11 +121,7 @@ public class Mails extends Mailer {
      *
      * @param order
      */
-<<<<<<< HEAD
-    private static void reviewMailBase(Orderr order, String tmp) {
-=======
     private static void reviewMailBase(Orderr order, String template) {
->>>>>>> hotfix/#213
         if(StringUtils.isBlank(order.email)) {
             Logger.warn("Order[" + order.orderId + "] do not have Email Address!");
             return;
@@ -148,11 +144,7 @@ public class Mails extends Mailer {
         else addRecipient("wppurking@gmail.com");
         MailsRecord mr = null;
         try {
-<<<<<<< HEAD
-            mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, tmp);
-=======
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, template);
->>>>>>> hotfix/#213
             final Future<Boolean> future = send(order, title);
             new ReviewMailCheckPromise(order.orderId, future, mr).now();
         } catch(MailException e) {
@@ -180,11 +172,7 @@ public class Mails extends Mailer {
             f.mailedTimes = (f.mailedTimes == null ? 1 : f.mailedTimes + 1);
             mr.success = true;
         } catch(Exception e) {
-<<<<<<< HEAD
-
-=======
             Logger.warn("Feedback[" + f.feedback + "] Send Error! " + e.getMessage());
->>>>>>> hotfix/#213
         } finally {
             if(mr != null)
                 mr.save();
@@ -218,11 +206,7 @@ public class Mails extends Mailer {
             r.mailedTimes = (r.mailedTimes == null ? 1 : r.mailedTimes + 1);
             mr.success = true;
         } catch(Exception e) {
-<<<<<<< HEAD
-
-=======
             Logger.warn("AmazonListingReview[" + r.alrId + "] Send Error! " + e.getMessage());
->>>>>>> hotfix/#213
         } finally {
             if(mr != null)
                 mr.save();
@@ -241,11 +225,7 @@ public class Mails extends Mailer {
             send(unfindSelling);
             mr.success = true;
         } catch(Exception e) {
-<<<<<<< HEAD
-
-=======
             Logger.warn("unfindSelling WARN Send Error! " + e.getMessage());
->>>>>>> hotfix/#213
         } finally {
             if(mr != null)
                 mr.save();

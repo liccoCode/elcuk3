@@ -11,10 +11,7 @@ import notifiers.SystemMails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
-<<<<<<< HEAD
-=======
 import play.db.helper.SqlQuery;
->>>>>>> hotfix/#213
 import play.db.jpa.Model;
 
 
@@ -174,26 +171,6 @@ public class MailsRecord extends Model {
         if(records != null) return records;
 
         synchronized(MailsRecord.class) {
-<<<<<<< HEAD
-            StringBuffer querystr = new StringBuffer("type=? and success=? and createdAt between ? and ?");
-            boolean t_flag = false;
-            boolean g_flag = false;
-            if(!StringUtils.isBlank(group)) {
-                querystr.append(" and recipients like :group");
-                g_flag = true;
-            }
-
-            if(templates != null) {
-                querystr.append(" and templateName in (:templates)");
-                t_flag = true;
-            }
-            JPAQuery query = MailsRecord.find(querystr.toString(), type, success, from, to);
-            if(g_flag)
-                query.setParameter("group", "%" + group + "%");
-            if(t_flag)
-                query.setParameter("templates", templates);
-            records = query.fetch();
-=======
 
             StringBuffer querystr = new StringBuffer("type=? and createdAt between ? and ? and success=?");
             List<Object> paras = new ArrayList<Object>();
@@ -210,7 +187,6 @@ public class MailsRecord extends Model {
                 querystr.append(SqlQuery.whereIn("templateName",templates));
             }
             records = MailsRecord.find(querystr.toString(), paras.toArray()).fetch();
->>>>>>> hotfix/#213
             if(records != null) {
                 Cache.add(cacheKey, records);
             }
@@ -220,8 +196,4 @@ public class MailsRecord extends Model {
         return records;
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> hotfix/#213
 }

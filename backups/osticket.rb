@@ -1,4 +1,4 @@
-# encoding: utf-8
+# -*- encoding : utf-8 -*-
 
 #  
 # 这个是在 OsTicket 所在的服务器上的备份文件, 请首先在 OsTicket 服务器上设置好 ruby backup gem, 

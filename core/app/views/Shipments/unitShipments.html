@@ -11,46 +11,6 @@
     <th>创建者</th>
   </tr>
 #{list items:unitRelateShipments, as:'ship'}
-<<<<<<< HEAD
-    <tr>
-        <td><input type="checkbox" value="${ship.id}"></td>
-
-        <td>
-            <span style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}"> <i class="icon-reorder"></i></span>
-            <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
-        </td>
-        <td>${ship.title}</td>
-        <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
-        <td>${ship.state}</td>
-        <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
-        <td>
-        ${ship.totalWeight().format("0.00")}
-          #{set diff: ship.totalWeight() - ship.minimumTraffic() /}
-          #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
-            #{if diff>0}
-            ${" 超出"+diff.format("0.00")}
-            #{/if}
-        #{/if}
-          #{else }
-            #{if diff<0}
-            ${" 差"+(-diff).format("0.00")}
-            #{/if}
-        #{/else}
-
-
-        </td>
-        <td>${ship.items.size()}</td>
-        <td>#{if ship.cycle}<i style="color:#C09853;" class="icon-star"></i>#{/if} ${ship.creater?.username}</td>
-    </tr>
-    <tr id="ship_${ship_index}" style="display:none">
-        <td colspan="9">
-            <div>
-            *{_shipitem页面重用显示items 去掉checkbox和与shipment重复的whouse}*
-                    #{render 'Shipments/_shipitem.html', items:ship.items,needCheckBoxAndWhouse:false/}
-            </div>
-        </td>
-    </tr>
-=======
   <tr>
     <td><input type="checkbox" value="${ship.id}"></td>
     <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
@@ -86,6 +46,5 @@
       </div>
     </td>
   </tr>
->>>>>>> hotfix/#213
 #{/list}
 </table>
