@@ -17,7 +17,7 @@
 #{/else}
 #{if unit.deliveryment}
     <li>采购单:
-        <a href="@{Deliveryments.show()}/${unit.deliveryment.id}" target="_blank">
+        <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">
             <i class="icon-link"></i> ${unit.deliveryment.id}
         </a>
         #${unit.id}
@@ -26,7 +26,7 @@
 #{if unit.shipItem}
     <li>
         运输单:
-        <a href="@{Shipments.show()}/${unit.shipItem.shipment.id}" target="_blank">
+        <a href="@{Shipments.show(unit.shipItem.shipment.id)}" target="_blank">
             <i class="icon-link"></i> ${unit.shipItem.shipment.id}
         </a>
         <span class="badge badge-info">${unit.shipItem.shipment.fbas.size()}</span> FBAs

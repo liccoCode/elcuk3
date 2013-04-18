@@ -4,7 +4,6 @@ import helper.Webs;
 import models.Jobex;
 import models.market.Listing;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Date: 12/29/11
  * Time: 12:39 AM
  */
-@Every("1mn")
 public class ListingSchedulJob extends Job {
     // 生产者
 
@@ -58,7 +56,8 @@ public class ListingSchedulJob extends Job {
 
         // 如果 WORK_QUEUE 太大了, 则跳过这一次计算, 等待消耗.
         if(WORK_QUEUE.size() > 5000) {
-            Logger.info("Skip Calculate Crawl Listings this time. Queue Size: %s", WORK_QUEUE.size());
+            Logger.info("Skip Calculate Crawl Listings this time. Queue Size: %s",
+                    WORK_QUEUE.size());
             return;
         }
 
@@ -77,7 +76,8 @@ public class ListingSchedulJob extends Job {
                     if(now - lst.lastUpdateTime >= 0) {
                         if(lst.saleRank == null && lst.saleRank <= 0) continue;
                         WORK_QUEUE.add(listingId);
-                        ListingSchedulJob.lastUpdate(listingId, now + ListingSchedulJob.calInterval(lst));
+                        ListingSchedulJob
+                                .lastUpdate(listingId, now + ListingSchedulJob.calInterval(lst));
                     }
                 } catch(Exception e) {
                     Logger.error("Listing %s Error. -> %s", listingId, Webs.E(e));

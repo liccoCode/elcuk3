@@ -11,7 +11,6 @@ import models.product.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 import play.libs.IO;
@@ -33,7 +32,6 @@ import java.util.Map;
  * Date: 2/7/12
  * Time: 11:32 AM
  */
-@Every("5mn")
 public class AmazonFBAQtySyncJob extends Job implements JobRequest.AmazonJob {
 
     @Override

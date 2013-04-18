@@ -8,7 +8,6 @@ import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.IO;
 
@@ -29,7 +28,6 @@ import java.util.Set;
  * Date: 6/11/12
  * Time: 2:44 PM
  */
-@Every("10mn")
 public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() {

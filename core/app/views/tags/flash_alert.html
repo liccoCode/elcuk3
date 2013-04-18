@@ -1,17 +1,17 @@
 #{if flash.success || flash.error}
 <div class="${_row ? 'row' : 'row-fluid'}">
     #{if flash.error}
-        <div class="span12 alert alert-error">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-        ${flash.error}
-        </div>
+      <div class="span12 alert alert-error" style="text-align:center">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+      ${flash.error.raw()}
+      </div>
     #{/if}
 
     #{if flash.success}
-        <div class="span12 alert alert-success">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-        ${flash.success}
-        </div>
+      <div class="span12 alert alert-success" style="text-align:center">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+      ${flash.success}
+      </div>
     #{/if}
 </div>
 #{/if}

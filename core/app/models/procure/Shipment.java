@@ -8,10 +8,9 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
+import models.finance.PaymentUnit;
 import models.product.Whouse;
 import notifiers.Mails;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -38,20 +37,6 @@ import java.util.*;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
-    static class PlanDateEqual implements Predicate {
-        // 期待的日期
-        private Date date;
-
-        PlanDateEqual(Date date) {
-            this.date = date;
-        }
-
-        @Override
-        public boolean evaluate(Object o) {
-            Shipment ship = (Shipment) o;
-            return Dates.morning(ship.planBeginDate).equals(Dates.morning(this.date));
-        }
-    }
 
     public Shipment() {
         this.createDate = new Date();
@@ -193,6 +178,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
     public List<ShipItem> items = new ArrayList<ShipItem>();
+
+    @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     /**
      * 运输合作商
@@ -386,7 +374,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public void updateShipment() {
         this.pype = this.pype();
-        if(this.creater == null) this.creater = User.findByUserName(ElcukRecord.username());
+        if(this.creater == null) this.creater = User.current();
         this.save();
     }
 
@@ -876,23 +864,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
-        // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 4
+        //确定仓库接收的运输单
+        List<Whouse> whs = Whouse.all().fetch();
         DateTime now = new DateTime(Dates.morning(new Date()));
-        for(int i = 0; i < 60; i++) {
-            DateTime tmp = now.plusDays(i);
-            if(tmp.dayOfWeek().get() == 2 || tmp.dayOfWeek().get() == 4) {
-                Object exist = CollectionUtils
-                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
-                if(exist == null)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.EXPRESS);
-                if(exist == null && tmp.dayOfWeek().get() == 4)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.SEA);
-            } else if(tmp.dayOfWeek().get() == 3 || tmp.dayOfWeek().get() == 5) {
-                Object exist = CollectionUtils
-                        .find(planedShipments, new PlanDateEqual(tmp.toDate()));
-                if(exist == null)
-                    Shipment.checkWhouseNewShipment(tmp.toDate(), T.AIR);
-            }
+        for(Whouse whouse : whs) {
+            whouse.checkWhouseNewShipment(planedShipments, now);
         }
 
 
@@ -905,9 +881,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } else {
             where.append("AND whouse.id IS NULL");
         }
+        //当运输方式是 air 或者 express的时候,统一一起查出来
         if(shipType != null) {
-            where.append(" AND type=?");
-            params.add(shipType);
+            if(shipType.equals(T.AIR) || shipType.equals(T.EXPRESS)) {
+                where.append(" AND type in (?,?)");
+                params.add(T.AIR);
+                params.add(T.EXPRESS);
+            } else {
+                where.append(" AND type =?");
+                params.add(shipType);
+            }
+
+
         }
 
         return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray())
@@ -924,37 +909,34 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 判断不同仓库之间是否需要创建 Shipment
+     * 新建运输单
      *
-     * @param planBeginDate 创建 Shipment 的 PlanBeginDate
+     * @param planBeginDate 计划开始时间
+     * @param whouse        接受仓库
+     * @param type          运输方式
+     * @param arriveDate    预计到达时间
+     */
+    public static void create(Date planBeginDate, Whouse whouse, T type, Date arriveDate) {
+        Shipment shipment = new Shipment();
+        shipment.id = Shipment.id();
+        shipment.cycle = true;
+        shipment.planBeginDate = planBeginDate;
+        shipment.planArrivDate = arriveDate;
+        shipment.whouse = whouse;
+        shipment.type = type;
+        shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
+                Dates.date2Date(shipment.planBeginDate));
+        shipment.save();
+    }
+
+    /**
+     * 获得不同运输方式的标准运输量
+     *
      * @return
      */
-    public static List<Shipment> checkWhouseNewShipment(Date planBeginDate, T shipmentType) {
-        List<Shipment> newShipments = new ArrayList<Shipment>();
-        List<Whouse> whs = Whouse.all().fetch();
-        for(Whouse wh : whs) {
-            if(Shipment
-                    .count("planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
-                            planBeginDate, wh, shipmentType, S.PLAN, S.CONFIRM) > 0)
-                continue;
-
-            Shipment shipment = new Shipment();
-            shipment.id = Shipment.id();
-            shipment.cycle = true;
-            shipment.planBeginDate = planBeginDate;
-            if(shipmentType == T.EXPRESS)
-                shipment.planArrivDate = new DateTime(planBeginDate).plusDays(7).toDate();
-            else if(shipmentType == T.AIR)
-                shipment.planArrivDate = new DateTime(planBeginDate).plusDays(14).toDate();
-            else
-                shipment.planArrivDate = new DateTime(planBeginDate).plusDays(45).toDate();
-            shipment.whouse = wh;
-            shipment.type = shipmentType;
-            shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
-                    Dates.date2Date(shipment.planBeginDate));
-
-            newShipments.add(shipment.<Shipment>save());
-        }
-        return newShipments;
+    public float minimumTraffic() {
+        //海运和空运暂时的最小运输量是500 而快递是不能超过500
+        return 500;
     }
+
 }

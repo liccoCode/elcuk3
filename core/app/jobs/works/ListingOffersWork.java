@@ -48,19 +48,11 @@ public class ListingOffersWork extends Job<Listing> {
         if(lst.offers == null) lst.offers = new ArrayList<ListingOffer>();
         else lst.offers.clear();
         for(JsonElement offer : offers) {
-            ListingOffer off = new ListingOffer();
-            JsonObject of = offer.getAsJsonObject();
-            off.name = of.get("name").getAsString();
-            off.offerId = of.get("offerId").getAsString();
-            off.price = of.get("price").getAsFloat();
-            off.shipprice = of.get("shipprice").getAsFloat();
-            off.fba = of.get("fba").getAsBoolean();
-            off.buybox = of.get("buybox").getAsBoolean();
-            off.cond = ListingOffer.C.val(of.get("cond").getAsString());
-            off.listing = this.listing;
-            lst.offers.add(off);
+            ListingOffer off = jsonToOffer(offer);
+            off.listing = lst;
+            off.save();
         }
-        lst.save();
+        lst.checkAndSaveOffers();
     }
 
     /**
@@ -72,18 +64,27 @@ public class ListingOffersWork extends Job<Listing> {
         if(this.listing.offers == null) this.listing.offers = new ArrayList<ListingOffer>();
         else this.listing.offers.clear();
         for(JsonElement offer : offers) {
-            ListingOffer off = new ListingOffer();
-            JsonObject of = offer.getAsJsonObject();
-            off.name = of.get("name").getAsString();
-            off.offerId = of.get("offerId").getAsString();
-            off.price = of.get("price").getAsFloat();
-            off.shipprice = of.get("shipprice").getAsFloat();
-            off.fba = of.get("fba").getAsBoolean();
-            off.buybox = of.get("buybox").getAsBoolean();
-            off.cond = ListingOffer.C.val(of.get("cond").getAsString());
+            ListingOffer off = jsonToOffer(offer);
             off.listing = this.listing;
             this.listing.offers.add(off);
         }
+    }
+
+    public static ListingOffer jsonToOffer(JsonElement offer) {
+        ListingOffer off = new ListingOffer();
+        JsonObject of = offer.getAsJsonObject();
+        off.name = of.get("name").getAsString();
+        off.offerId = of.get("offerId").getAsString();
+        off.price = of.get("price").getAsFloat();
+        off.shipprice = of.get("shipprice").getAsFloat();
+        off.fba = of.get("fba").getAsBoolean();
+        off.buybox = of.get("buybox").getAsBoolean();
+        try {
+            off.cond = ListingOffer.C.val(of.get("cond").getAsString());
+        } catch(Exception e) {
+            off.cond = ListingOffer.C.NEW;
+        }
+        return off;
     }
 
 

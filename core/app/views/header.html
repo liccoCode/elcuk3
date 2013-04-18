@@ -1,135 +1,155 @@
 <div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container">
-            <a class="brand" href="@{Application.index()}">Elcuk2</a>
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="brand" href="@{Application.index()}">Elcuk2</a>
 
-            <div class="nav-collapse">
-                <ul class="nav">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="@{Application.index()}">DashBoard</a></li>
-                            <li><a href="@{Users.home()}">Home</a></li>
-                            <li><a href="@{Secure.logout()}">Logout</a></li>
-                        </ul>
-                    </li>
+      <div class="nav-collapse">
+        <ul class="nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{Application.index()}">DashBoard</a></li>
+              <li><a href="@{Users.home()}">Home</a></li>
+              <li><a href="@{Secure.logout()}">Logout</a></li>
+            </ul>
+          </li>
 
-                #{ck "market"}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            #{ck "listings.index"}
-                                <li><a href="@{Listings.index()}">Listing</a></li>
-                            #{/ck}
-                            #{ck 'orders.index'}
-                                <li><a href="@{Orders.index()}">订单</a></li>
-                            #{/ck}
-                            #{ck "analyzes.index"}
-                                <li><a href="@{Analyzes.index()}">销量分析</a></li>
-                            #{/ck}
-                            #{ck "amazonreviews.index"}
-                                <li><a href="@{AmazonReviews.index()}">Review 点击台</a></li>
-                            #{/ck}
-                        </ul>
-                    </li>
-                #{/ck}
+        #{power.ck "market"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "listings.index"}
+                  <li><a href="@{Listings.index()}">Listing</a></li>
+                #{/power.ck}
+                #{power.ck 'orders.index'}
+                  <li><a href="@{Orders.index()}">订单</a></li>
+                #{/power.ck}
+                #{power.ck "analyzes.index"}
+                  <li><a href="@{Analyzes.index()}">销量分析</a></li>
+                #{/power.ck}
+                #{power.ck "amazonreviews.index"}
+                  <li><a href="@{AmazonReviews.index()}">Review 点击台</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-                #{ck "support"}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            #{ck "tickets.index"}
-                                <li><a href="@{Tickets.index()}">Tickets 工作台</a></li>
-                            #{/ck}
-                            #{ck "ticketanalyzes.index"}
-                                <li><a href="@{TicketAnalyzes.index()}">Tickets 分析</a></li>
-                            #{/ck}
-                        </ul>
-                    </li>
-                #{/ck}
-
-
-                #{ck "product"}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            #{ck "products.index"}
-                                <li><a href="@{Products.index()}">产品</a></li>
-                            #{/ck}
-                            #{ck "whouses.index"}
-                                <li><a href="@{Whouses.index()}">仓库</a></li>
-                            #{/ck}
-                            <li class="divider"></li>
-                            #{ck "categorys.show"}
-                                <li><a href="@{Categorys.show()}">产品类别</a></li>
-                            #{/ck}
-                            #{ck "brands.index"}
-                                <li><a href="@{Brands.index()}">产品品牌</a></li>
-                            #{/ck}
-                            #{ck "familys.index"}
-                                <li><a href="@{Familys.index()}">Family</a></li>
-                            #{/ck}
-                        </ul>
-                    </li>
-                #{/ck}
+        #{power.ck "support"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "tickets.index"}
+                  <li><a href="@{Tickets.index()}">Tickets 工作台</a></li>
+                #{/power.ck}
+                #{power.ck "ticketanalyzes.index"}
+                  <li><a href="@{TicketAnalyzes.index()}">Tickets 分析</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
 
-                #{ck "procure"}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            #{ck "procures.index"}
-                                <li><a href="@{Procures.index()}">采购计划</a></li>
-                            #{/ck}
-                            #{ck "deliveryments.index"}
-                                <li><a href="@{Deliveryments.index()}">采购单</a></li>
-                            #{/ck}
-                            #{ck "shipments.index"}
-                                <li><a href="@{Shipments.index()}">运输单</a></li>
-                            #{/ck}
-                            <li><a href="@{FBAs.index()}">Amazon FBA</a></li>
-                            #{ck "cooperators.index"}
-                                <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
-                            #{/ck}
-                        </ul>
-                    </li>
-                #{/ck}
+        #{power.ck "product"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "products.index"}
+                  <li><a href="@{Products.index()}">产品</a></li>
+                #{/power.ck}
+                #{power.ck "whouses.index"}
+                  <li><a href="@{Whouses.index()}">仓库</a></li>
+                #{/power.ck}
+              <li class="divider"></li>
+                #{power.ck "categorys.show"}
+                  <li><a href="@{Categorys.show()}">产品类别</a></li>
+                #{/power.ck}
+                #{power.ck "brands.index"}
+                  <li><a href="@{Brands.index()}">产品品牌</a></li>
+                #{/power.ck}
+                #{power.ck "familys.index"}
+                  <li><a href="@{Familys.index()}">Family</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
 
-                #{ck 'system'}
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            #{ck "jobs.index"}
-                                <li><a href="@{Jobs.index()}">任务管理</a></li>
-                            #{/ck}
-                            #{ck "servers.index"}
-                                <li><a href="@{Servers.index()}">服务器管理</a></li>
-                            #{/ck}
-                            #{ck "accounts.index"}
-                                <li><a href="@{Accounts.index()}">账户管理</a></li>
-                            #{/ck}
-                            #{ck "users.index"}
-                                <li><a href="@{Users.index()}">用户管理</a></li>
-                            #{/ck}
-                            <li><a href="@{Elcuk.index()}">系统状态</a></li>
-                        </ul>
-                    </li>
-                #{/ck}
-                </ul>
 
-                <ul class="nav pull-right">
-                    <li class="divider-vertical"></li>
-                    <li><a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
-                    </li>
-                    <li>
-                        <a href="#" class="dropdown-toggle" id="notification_btn" data-toggle="dropdown">Notify
-                            <b class="caret"></b></a>
-                        <ul class="dropdown-menu" id="notifications">
-                            <a href="@{Users.home()}" rel="popover">See Notifications</a>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
+        #{power.ck "procure"}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "procures.index"}
+                  <li><a href="@{Procures.index()}">采购计划</a></li>
+                #{/power.ck}
+                #{power.ck "deliveryments.index"}
+                  <li><a href="@{Deliveryments.index()}">采购单</a></li>
+                #{/power.ck}
+                #{power.ck "shipments.index"}
+                  <li><a href="@{Shipments.index()}">运输单</a></li>
+                #{/power.ck}
+              <li><a href="@{FBAs.index()}">Amazon FBA</a></li>
+                #{power.ck "cooperators.index"}
+                  <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
+
+        #{power.ck 'finances'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">财务模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="@{Applys.index()}">请款单列表</a></li>
+              <li><a href="@{Payments.index()}">付款单列表</a></li>
+              <li><a href="@{PaymentTargets.index()}">支付方式</a></li>
+                #{power.ck "finances.index"}
+                  <li><a href="@{Finances.index()}">系统内修复</a></li>
+                #{/power.ck}
+                #{power.ck "feetypes.index"}
+                  <li><a href="@{FeeTypes.index()}">费用类型</a></li>
+                #{/power.ck}
+            </ul>
+          </li>
+        #{/power.ck}
+
+        #{power.ck 'system'}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">系统模块<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                #{power.ck "jobs.index"}
+                  <li><a href="@{Jobs.index()}">任务管理</a></li>
+                #{/power.ck}
+                #{power.ck "servers.index"}
+                  <li><a href="@{Servers.index()}">服务器管理</a></li>
+                #{/power.ck}
+                #{power.ck "accounts.index"}
+                  <li><a href="@{Accounts.index()}">账户管理</a></li>
+                #{/power.ck}
+                #{power.ck "users.index"}
+                  <li><a href="@{Users.index()}">用户管理</a></li>
+                #{/power.ck}
+                #{power.ck "mailsrecords.index"}
+                  <li><a href="@{MailsRecords.index()}">邮件管理</a></li>
+                #{/power.ck}
+              <li><a href="@{Elcuk.index()}">系统状态</a></li>
+            </ul>
+          </li>
+        #{/power.ck}
+        </ul>
+
+        <ul class="nav pull-right">
+          <li class="divider-vertical"></li>
+          <li><a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
+          </li>
+          <li>
+            <a href="#" class="dropdown-toggle" id="notification_btn" data-toggle="dropdown">Notify
+              <b class="caret"></b></a>
+            <ul class="dropdown-menu" id="notifications">
+              <a href="@{Users.home()}" rel="popover">See Notifications</a>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </div>
+  </div>
 </div>

@@ -12,7 +12,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.List;
  * Date: 9/29/12
  * Time: 10:30 AM
  */
-@Every("30mn")
 public class AmazonFBACapaticyWatcherJob extends Job {
     @Override
     public void doJob() {
@@ -31,12 +29,14 @@ public class AmazonFBACapaticyWatcherJob extends Job {
         List<Whouse> whouses = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whouses) {
             if(whouse.account == null) {
-                Logger.warn("Whouse %s[%s] is FBA but do not have an relative accout!", whouse.name(), whouse.id);
+                Logger.warn("Whouse %s[%s] is FBA but do not have an relative accout!",
+                        whouse.name(), whouse.id);
                 continue;
             }
 
             whouse.account.changeRegion(whouse.account.type);
-            String html = HTTP.get(whouse.account.cookieStore(), whouse.account.type.fbaCapacityPage());
+            String html = HTTP
+                    .get(whouse.account.cookieStore(), whouse.account.type.fbaCapacityPage());
             Logger.info("Watch %s FBA.", whouse.name());
             Document doc = Jsoup.parse(html);
             if(!Account.isLoginEnd(doc)) {
@@ -56,11 +56,16 @@ public class AmazonFBACapaticyWatcherJob extends Job {
         Element standardSizeEl = doc.select("#fba-capacity-widget-type-sortable").first();
         Element overSizeEl = doc.select("#fba-capacity-widget-type-non-sortable").first();
 
-        int standardSizeLimit = NumberUtils.toInt(StringUtils.split(standardSizeEl.select(".fba-capacity-widget-limit").text().trim())[0]);
-        int standardSize = NumberUtils.toInt(standardSizeEl.select(".fba-capacity-widget-utilization-integer").text().trim());
+        int standardSizeLimit = NumberUtils.toInt(StringUtils
+                .split(standardSizeEl.select(".fba-capacity-widget-limit").text().trim())[0]);
+        int standardSize = NumberUtils
+                .toInt(standardSizeEl.select(".fba-capacity-widget-utilization-integer").text()
+                        .trim());
 
-        int overSizeLimit = NumberUtils.toInt(StringUtils.split(overSizeEl.select(".fba-capacity-widget-limit").text().trim())[0]);
-        int overSize = NumberUtils.toInt(overSizeEl.select(".fba-capacity-widget-utilization-integer").text().trim());
+        int overSizeLimit = NumberUtils.toInt(StringUtils
+                .split(overSizeEl.select(".fba-capacity-widget-limit").text().trim())[0]);
+        int overSize = NumberUtils
+                .toInt(overSizeEl.select(".fba-capacity-widget-utilization-integer").text().trim());
         return GTs.render("fbaCapacity", GTs.newMap("standardSize", standardSize)
                 .put("standardSizeLimit", standardSizeLimit)
                 .put("overSize", overSize)

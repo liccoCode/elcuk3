@@ -6,30 +6,24 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
+import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
-import models.view.dto.AnalyzeDTO;
-import models.view.dto.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.ProcureUnitQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 每一个采购单元
@@ -134,6 +128,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
     }
+
+    @OneToMany(mappedBy = "procureUnit", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     /**
      * 此采购计划的供应商信息.
@@ -308,23 +305,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
     }
 
-    /**
-     * 是否可以保留采购计划的周期型运输单?
-     *
-     * @return
-     */
-    public boolean isHaveCycleShipment() {
-        return this.isHaveShipment() && this.shipItem.shipment.cycle;
-    }
-
-    public boolean isHaveShipment() {
-        return this.shipItem != null && this.shipItem.shipment != null;
-    }
 
     /**
      * 返回 ProcureUnit 的目标市场
      *
-     * @param unit
      * @return
      */
     public String shipMarket() {
@@ -414,6 +398,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
 
+    /**
+     * 是否可以保留采购计划的周期型运输单?
+     *
+     * @return
+     */
+    public boolean isHaveCycleShipment() {
+        return this.isHaveShipment() && this.shipItem.shipment.cycle;
+    }
+
+    public boolean isHaveShipment() {
+        return this.shipItem != null && this.shipItem.shipment != null;
+    }
+
+
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
@@ -437,25 +435,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if(this == o) return true;
-        if(o == null || getClass() != o.getClass()) return false;
-        if(!super.equals(o)) return false;
-
-        ProcureUnit that = (ProcureUnit) o;
-
-        if(id != null ? !id.equals(that.id) : that.id != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        return result;
-    }
 
     public void remove() {
         if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
@@ -474,10 +453,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public List<Shipment> relateShipment() {
-        F.T2<List<String>, List<String>> unitShippingRelateIds = new ProcureUnitQuery()
-                .procureRelateShippingRelateIds(this.id);
-        if(unitShippingRelateIds._1.size() == 0) return new ArrayList<Shipment>();
-        return Shipment.find("id in " + JpqlSelect.inlineParam(unitShippingRelateIds._1)).fetch();
+        Set<Shipment> shipments = new HashSet<Shipment>();
+        if(this.shipItem != null) {
+            shipments.add(this.shipItem.shipment);
+        }
+        return new ArrayList<Shipment>(shipments);
     }
 
     public int qty() {
@@ -535,6 +515,151 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 预付款申请
+     */
+    public PaymentUnit billingPrePay() {
+        /**
+         * 0. 基本检查
+         * 1. 检查是否此采购计划是否已经存在一个预付款
+         * 2. 申请预付款
+         */
+        this.billingValid();
+        if(this.hasPrePay())
+            Validation.addError("", "不允许重复申请预付款.");
+        if(this.hasTailPay())
+            Validation.addError("", "已经申请了尾款, 不需要再申请预付款.");
+        if(Validation.hasErrors()) return null;
+
+        PaymentUnit fee = new PaymentUnit(this);
+        // 预付款的逻辑在这里实现, 总额的 30% 为预付款
+        fee.feeType = FeeType.cashpledge();
+        fee.amount = (float) (fee.amount * 0.3);
+        fee.save();
+        new ERecordBuilder("procureunit.prepay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
+    }
+
+    /**
+     * 尾款申请
+     */
+    public PaymentUnit billingTailPay() {
+        /**
+         * 0. 基本检查
+         * 1. 检查是否已经存在一个尾款
+         * 2. 申请尾款
+         */
+        this.billingValid();
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            Validation.addError("", "请确定采购计划的交货数量(交货)");
+        if(this.hasTailPay())
+            Validation.addError("", "不允许重复申请尾款");
+        if(Validation.hasErrors()) return null;
+
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.procurement();
+        fee.amount = this.leftAmount();
+        fee.save();
+        new ERecordBuilder("procureunit.tailpay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
+    }
+
+    /**
+     * 1. 采购计划所在的采购单需要拥有一个请款单
+     * 2. 采购计划需要已经交货
+     */
+    private void billingValid() {
+        if(this.deliveryment.apply == null)
+            Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.deliveryment.id));
+    }
+
+    /**
+     * 剩余的请款金额
+     *
+     * @return
+     */
+    public float leftAmount() {
+        return totalAmount() - appliedAmount();
+    }
+
+    /**
+     * 已经申请的金额
+     *
+     * @return
+     */
+    public float appliedAmount() {
+        float appliedAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            appliedAmount += fee.amount();
+        }
+        return appliedAmount;
+    }
+
+    /**
+     * 当前采购计划所有请款的修正总额
+     *
+     * @return
+     */
+    public float fixValueAmount() {
+        float fixValueAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            fixValueAmount += fee.fixValue;
+        }
+        return fixValueAmount;
+    }
+
+    /**
+     * 总共需要申请的金额
+     *
+     * @return
+     */
+    public float totalAmount() {
+        return this.qty() * this.attrs.price;
+    }
+
+    /**
+     * 是否拥有了 预付款
+     *
+     * @return
+     */
+    public boolean hasPrePay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.cashpledge())
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否拥有了尾款
+     *
+     * @return
+     */
+    public boolean hasTailPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.procurement())
+                return true;
+        }
+        return false;
+    }
+
+    public List<PaymentUnit> fees() {
+        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+        for(PaymentUnit fee : this.fees) {
+            if(fee.remove) continue;
+            fees.add(fee);
+        }
+        return fees;
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return
@@ -548,6 +673,26 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public List<ElcukRecord> records() {
         return ElcukRecord.fid(this.id + "").fetch();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        ProcureUnit that = (ProcureUnit) o;
+
+        if(id != null ? !id.equals(that.id) : that.id != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (id != null ? id.hashCode() : 0);
+        return result;
     }
 
     /**
@@ -568,42 +713,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
-    }
-
-    /**
-     * 加载并且返回 Simile Timeline 的 Events
-     * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid
-     */
-    public static TimelineEventSource timelineEvents(String type, String val) {
-        if(StringUtils.isBlank(type)) type = "sid";
-        if("msku".equals(type)) type = "sid"; // 兼容
-        if(!"sku".equals(type) && !"sid".equals(type))
-            throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
-
-        DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit
-                .find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
-                        Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val)
-                .fetch();
-
-
-        // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
-        TimelineEventSource eventSource = new TimelineEventSource();
-        AnalyzeDTO analyzeDTO = AnalyzeDTO.findByValAndType(type, val);
-        for(ProcureUnit unit : units) {
-            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
-            event.startAndEndDate(type)
-                    .titleAndDesc()
-                    .color(unit.stage);
-
-            eventSource.events.add(event);
-        }
-
-
-        // 将当前 Selling 的销售情况展现出来
-        eventSource.events.add(TimelineEventSource.currentQtyEvent(analyzeDTO, type));
-
-        return eventSource;
     }
 
     /**

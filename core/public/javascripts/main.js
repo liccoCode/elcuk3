@@ -7,29 +7,63 @@ Timeline_parameters = 'bundle=true';
 
 var LoadMask = {
     /**
+     * 在页面进入的时候都需要清理带有 _times 的 sessionStorage
+     */
+    clear: function(){
+        console.log('begin clean LoadMask...');
+        for(var key in sessionStorage){
+            if(!sessionStorage.hasOwnProperty(key)) continue;
+            if(key.indexOf('_times') > 0){
+                delete sessionStorage[key];
+                console.log('delete key' + key)
+            }
+        }
+        console.log('end of clean LoadMask.')
+    },
+    /**
      * 锁屏幕
      * @param selector
      */
     mask: function(selector){
         if(!selector) selector = "#container";
-        var times = sessionStorage.getItem(selector + "_times");
+        var times = sessionStorage[selector + "_times"];
         if(!times){
             times = 0;
             $(selector).mask("处理中...");
         }
-        sessionStorage.setItem(selector + "_times", ++times);
+        sessionStorage[selector + "_times"] = ++times;
         console.log(selector + "_times:" + times);
     },
     unmask: function(selector){
         if(!selector) selector = "#container";
-        var times = sessionStorage.getItem(selector + "_times");
+        var times = sessionStorage[selector + "_times"];
         if(--times <= 0){
-            sessionStorage.removeItem(selector + "_times");
+            delete sessionStorage[selector + "_times"];
             $(selector).unmask();
         }else{
-            sessionStorage.setItem(selector + "_times", times)
+            sessionStorage[selector + "_times"] = times;
         }
         console.log(selector + "_times:" + times);
+    }
+};
+
+/**
+ * Effect, 包含几个页面效果
+ */
+var EF = {
+    /**
+     * 滚动到该元素
+     * @param selector
+     */
+    scoll: function(selector){
+        var mao = $(selector);
+        $('body').animate({scrollTop: mao.offset().top - mao.height() - 50}, 1000)
+    },
+
+    colorAnimate: function(selector, from, to){
+        if(from == undefined) from = '#E35651';
+        if(to == undefined) to = '#FFF';
+        $(selector).css('backgroundColor', from).animate({backgroundColor: to}, 3500)
     }
 };
 
@@ -180,5 +214,7 @@ $(function(){
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });
+    if(window.PLAY_MODE == 'DEV') Notify.loopCheck();
+    LoadMask.clear();
 });
 

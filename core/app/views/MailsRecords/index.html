@@ -1,0 +1,152 @@
+#{extends 'main_full.html'/}
+#{set title:'Mail Records'/}
+#{set 'moreScripts'}
+    #{script 'highcharts.js'/}
+    #{script 'mailsrecord/mailsrecord.coffee'/}
+#{/set}
+<div class="container">
+    <form id="params" class="search_form">
+
+<<<<<<< HEAD
+        <div class="span12">
+=======
+        <div class="btn-toolbar">
+>>>>>>> hotfix/#213
+            <div class="input-prepend inline">
+                <span class="add-on">From:</span>
+                <input type="date" id="_from" class="date" name="from">
+            </div>
+
+            <div class="input-prepend input-append inline">
+                <span class="add-on">TO:</span>
+                <input type="date" id="_to" name="to" class="date">
+            </div>
+
+            <div class="input-prepend inline">
+
+                <select name="success" class="inline">
+                    <option value="true">成功</option>
+                    <option value="false" selected="selected">失败</option>
+                </select>
+            </div>
+
+<<<<<<< HEAD
+
+=======
+>>>>>>> hotfix/#213
+            <div class="inline">
+
+                <select name="group" class="inline" style="width:100">
+                    <option value="">选择收件人</option>
+                    <option value="@easya.cc">@easya.cc</option>
+                    <option value="@amazon.de">@amazon.de</option>
+                    <option value="@amazon.com">@amazon.com</option>
+                    <option value="@easyacceu.com">@easyacceu.com</option>
+                </select>
+            </div>
+<<<<<<< HEAD
+            <div class="input-prepend inline">
+
+=======
+            <div class="inline">
+>>>>>>> hotfix/#213
+                <select name="type" class="inline">
+                    <option value="NORMAL" selected="selected">NORMAL</option>
+                    <option value="FBA">FBA</option>
+                    <option value="SYSTEM">SYSTEM</option>
+                </select>
+            </div>
+            <div class="inline">
+<<<<<<< HEAD
+                <button type="button" class="btn inline" id="tmp" data-toggle="collapse" data-target="#TMP_NORMAL">
+                    选择模板
+                </button>
+                <div id="TMP_SYSTEM" class="collapse">
+                    <label class="checkbox">
+                        <input type="checkbox" name="templates" value="daily_review"> DAILY_REVIEW
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="daily_feedback"> DAILY_FEEDBACK
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="product_picture_check"> SKU_PIC_CHECK
+                    </label>
+                </div>
+                <div id="TMP_FBA" class="collapse">
+                    <label class="checkbox">
+                        <input type="checkbox" name="templates" value="daily_review"> STATE_CHANGE
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="shipment_receipt_not_receiving"> NOT_RECEING
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="shipment_receiving_check"> RECEIVING_CHECK
+                    </label>
+                </div>
+                <div id="TMP_NORMAL" class="collapse">
+                    <label class="checkbox">
+                        <input type="checkbox" name="templates" value="shipment_clearance"> CLEARANCE
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="shipment_isdone"> IS_DONE
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="more_offers"> MORE_OFFERS
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="amazon_review_uk"> REVIEW_UK
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="amazon_review_de"> REVIEW_DE
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="amazon_review_us"> REVIEW_US
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="feedback_warnning"> FEEDBACK_WARN
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="review_warnning"> REVIEW_WARN
+                    </label>
+                    <label class="checkbox ">
+                        <input type="checkbox" name="templates" value="fnsku_check_warn"> FNSKU_CHECK
+                    </label>
+                </div>
+            </div>
+            <div class="input-prepend inline" style="margin-left:0">
+
+                <button id="search_btn" class="btn icon-search">搜索</button>
+            </div>
+
+        </div>
+
+
+    </form>
+=======
+                <button type="button" class="btn inline" id="tmp" data-toggle="collapse" data-target="#tmp_target">
+                    选择模板
+                </button>
+                <div id="tmp_target" class="collapse">
+                </div>
+            </div>
+            <div class="inline" style="margin-left:0">
+
+                <button id="search_btn" url="@{MailsRecords.ajaxRecord()}" class="btn"><i class="icon-search"></i>搜索
+                </button>
+            </div>
+
+        </div>
+    </form>
+
+>>>>>>> hotfix/#213
+    <div class="row-fluid">
+        <div id="mail_records" class="span10" style="height:280px"></div>
+
+    </div>
+
+    <div class="row-fluid">
+        <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
+    </div>
+
+</div>
+

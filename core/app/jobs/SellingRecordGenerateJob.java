@@ -8,7 +8,6 @@ import models.market.Orderr;
 import models.market.Selling;
 import models.market.SellingRecord;
 import org.joda.time.DateTime;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -22,7 +21,6 @@ import java.util.List;
  * Date: 11/8/12
  * Time: 4:24 PM
  */
-@Every("1h")
 public class SellingRecordGenerateJob extends Job {
 
     public DateTime fixTime;
@@ -47,14 +45,17 @@ public class SellingRecordGenerateJob extends Job {
             SellingRecord record = new SellingRecord(s, fixTime.toDate());
             if(SellingRecord.count("id=?", record.id) > 0)
                 record = SellingRecord.findById(record.id);
-            record.orderCanceld = (int) Orderr.count("state=? AND createDate=?", Orderr.S.CANCEL, fixTime.toDate());
+            record.orderCanceld = (int) Orderr
+                    .count("state=? AND createDate=?", Orderr.S.CANCEL, fixTime.toDate());
             record.rating = s.avgRating();
             record.reviewSize = s.listing.listingReviews.size();
             record.salePrice = s.aps.salePrice;
             record.save();
         }
         Notification.notifies(User.findByUserName("wyatt"),
-                String.format("SellingRecordGenerateJob 任务完成, 总共耗时: %s s; 总共创建 %s 个 SellingRecord.[%s]",
-                        (System.currentTimeMillis() - begin) / 1000, sellings.size(), Dates.date2DateTime(fixTime.toDate())));
+                String.format(
+                        "SellingRecordGenerateJob 任务完成, 总共耗时: %s s; 总共创建 %s 个 SellingRecord.[%s]",
+                        (System.currentTimeMillis() - begin) / 1000, sellings.size(),
+                        Dates.date2DateTime(fixTime.toDate())));
     }
 }

@@ -102,4 +102,4 @@ $ ->
   $('#orders td[date]').css('cursor', 'pointer').click ->
     drawPies(@getAttribute('date'))
 
-  $.checkNotify()
+  Notify.checkNotify()

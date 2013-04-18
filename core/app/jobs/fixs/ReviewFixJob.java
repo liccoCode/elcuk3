@@ -6,7 +6,6 @@ import models.Jobex;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  * Date: 5/18/12
  * Time: 3:13 PM
  */
-@Every("1mn")
 public class ReviewFixJob extends Job {
     @Override
     public void doJob() {

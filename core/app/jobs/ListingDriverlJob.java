@@ -5,7 +5,6 @@ import models.Jobex;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 
 
@@ -19,7 +18,6 @@ import play.jobs.Job;
  * Date: 2/9/12
  * Time: 7:04 PM
  */
-@Every("1s")
 public class ListingDriverlJob extends Job {
     // 消费者
     private static final Integer THREADS = 2;//一次任务抓取几个 Listing

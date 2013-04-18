@@ -101,7 +101,8 @@ public class Shipments extends Controller {
         checkShowError(ship);
         ship.updateShipment();
         checkShowError(ship);
-        new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
+        new ElcukRecord(Messages.get("shipment.update"),
+                Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
         flash.success("更新成功.");
         redirect("/Shipments/show/" + ship.id);
     }
@@ -151,7 +152,8 @@ public class Shipments extends Controller {
             if(Validation.hasErrors()) render("Shipments/show.html", ship);
         }
         if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        new ElcukRecord(Messages.get("shipment.cancel"), Messages.get("action.base", id), id).save();
+        new ElcukRecord(Messages.get("shipment.cancel"), Messages.get("action.base", id), id)
+                .save();
         flash.success("运输单取消成功.");
         redirect("/Shipments/show/" + id);
     }
@@ -219,7 +221,8 @@ public class Shipments extends Controller {
             Validation.addError("", Webs.E(e));
         }
         checkShowError(ship);
-        new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
+        new ElcukRecord(Messages.get("shipment.beginShip"),
+                Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
         flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", StringUtils.join(ship.fbas, ","));
 
         redirect("/shipments/show/" + id);
@@ -240,9 +243,13 @@ public class Shipments extends Controller {
         checkShowError(ship);
         F.Option<FBAShipment> fbaOpt = ship.deployFBA(shipItemId);
         if(!fbaOpt.isDefined()) checkShowError(Shipment.<Shipment>findById(id));
-        new ElcukRecord(Messages.get("shipment.createFBA"), Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), id).save();
-        Notification.notifies("FBA 创建成功", Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), Notification.PROCURE);
-        flash.success("Amazon FBA %s (with %s items) 创建成功", fbaOpt.get().shipmentId, fbaOpt.get().shipItems.size());
+        new ElcukRecord(Messages.get("shipment.createFBA"),
+                Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), id).save();
+        Notification.notifies("FBA 创建成功",
+                Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId),
+                Notification.PROCURE);
+        flash.success("Amazon FBA %s (with %s items) 创建成功", fbaOpt.get().shipmentId,
+                fbaOpt.get().shipItems.size());
         redirect("/shipments/show/" + id);
     }
 
@@ -284,7 +291,8 @@ public class Shipments extends Controller {
         }
         checkShowError(fba.shipment);
         new ElcukRecord(Messages.get("shipment.updateFBA"),
-                Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", fba.shipmentId, fba.shipItems.size())),
+                Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", fba.shipmentId,
+                        fba.shipItems.size())),
                 fba.shipment.id).save();
         flash.success("更新 Amazon FBA %s 成功.", fba.shipmentId);
         show(fba.shipment.id);
@@ -309,7 +317,8 @@ public class Shipments extends Controller {
             checkShowError(fba.shipment);
         flash.success("FBA %s 删除成功", fba.shipmentId);
         Notification.notifies(String.format("FC`s %s 的 FBA(%s) 被删除", fba.centerId, fba.shipmentId),
-                String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id), Notification.PROCURE);
+                String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id),
+                Notification.PROCURE);
         show(fba.shipment.id);
     }
 
@@ -353,7 +362,8 @@ public class Shipments extends Controller {
      * @param whouseId
      */
     public static void unitShipments(Long whouseId, Shipment.T shipType) {
-        List<Shipment> unitRelateShipments = Shipment.findUnitRelateShipmentByWhouse(whouseId, shipType);
+        List<Shipment> unitRelateShipments = Shipment
+                .findUnitRelateShipmentByWhouse(whouseId, shipType);
         render(unitRelateShipments);
     }
 }

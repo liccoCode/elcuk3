@@ -7,7 +7,6 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -22,7 +21,6 @@ import java.util.List;
  * Date: 2/28/12
  * Time: 10:02 AM
  */
-@Every("10mn")
 public class OrderMailCheck extends Job {
 
     @Override
@@ -119,7 +117,7 @@ public class OrderMailCheck extends Job {
                 Logger.info("Uncatched Region..." + ord.market);
             }
             //使用 Amazon SES 后可以将这个频率调高点, 每秒 5 封
-            Thread.sleep(500);
+            Thread.sleep(400);
         }
         String logInfo = String.format("%s From %s:" +
                 " Send(%s uk| %s de | %s us)," +

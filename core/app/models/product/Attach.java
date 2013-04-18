@@ -1,13 +1,13 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import exception.PaymentException;
 import helper.Constant;
 import helper.J;
+import models.embedded.ERecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
@@ -18,7 +18,9 @@ import javax.persistence.Entity;
 import javax.persistence.PrePersist;
 import javax.persistence.Transient;
 import java.io.File;
+import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.List;
 
 /**
  * 系统中, 可以附加的附件; 这个 Model 存在这里, 其自己不知道自己附属与谁, 但其拥有者知道(单项关系), 但并非使用 DB 的
@@ -52,7 +54,44 @@ public class Attach extends Model {
         /**
          * SHIPMENT
          */
-        SHIPMENT
+        SHIPMENT,
+        /**
+         * 支付信息的凭证
+         */
+        PAYMENTS {
+            /**
+             * Payment 删除方法为软删除.
+             * @param attach
+             */
+            @Override
+            public void delete(Attach attach) {
+                // 1. 标记文件软删除
+                // 2. 将文件挪动到软删除的目录下.
+                attach.remove = true;
+                try {
+                    FileUtils.moveFile(attach.getFile(), new File(attach.softDeleteLocation()));
+                    attach.location = attach.softDeleteLocation();
+                } catch(IOException e) {
+                    throw new PaymentException(PaymentException.MKDIR_ERROR);
+                }
+                attach.save();
+                new ERecordBuilder("payment.uploadDestroy")
+                        .msgArgs(attach.fileName)
+                        .fid(attach.fid)
+                        .save();
+            }
+        };
+
+        /**
+         * 默认的附件删除方法.物理删除
+         *
+         * @param attach
+         */
+        public void delete(Attach attach) {
+            attach.delete();
+            String localtion = attach.location;
+            FileUtils.deleteQuietly(new File(localtion));
+        }
     }
 
     @PrePersist
@@ -96,6 +135,11 @@ public class Attach extends Model {
     @Expose
     public Long fileSize;
 
+    /**
+     * 软删除标记
+     */
+    public boolean remove = false;
+
     @Transient
     public File file;
 
@@ -119,9 +163,7 @@ public class Attach extends Model {
     public void rm() {
         // 1. 删除数据库中存储的文件
         // 2. 删除本地存储的文件
-        String localtion = this.location;
-        this.delete();
-        FileUtils.deleteQuietly(new File(localtion));
+        this.p.delete(this);
     }
 
     public static Attach findAttach(Attach a) {
@@ -148,10 +190,21 @@ public class Attach extends Model {
         long subfix = RandomUtils.nextInt();
         this.fileSize = this.file.length();
         this.originName = URLDecoder.decode(this.file.getName());
-        this.fileName = String.format("%s_%s%s", this.fid, subfix, this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
-        this.location = String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
+        this.fileName = String.format("%s_%s%s", this.fid, subfix,
+                this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
+        this.location = this.location();
         return this;
     }
+
+    public String location() {
+        return String.format("%s/%s/%s", Constant.UPLOAD_PATH, p, this.fileName);
+    }
+
+    public String softDeleteLocation() {
+        return String.format("%s/%s_DELETE/%s", Constant.UPLOAD_PATH, p, this.fileName);
+    }
+
+    // --------------- scopes -------------
 
     public static Attach findByFileName(String fileName) {
         return Attach.find("fileName=?", fileName).first();
@@ -159,5 +212,12 @@ public class Attach extends Model {
 
     public static Attach findByOutName(String outName) {
         return Attach.find("outName=?", outName).first();
+    }
+
+    public static List<Attach> attaches(String fid, String p) {
+        if(StringUtils.isNotBlank(p))
+            return Attach.find("fid=? AND p=? AND remove=false", fid, Attach.P.valueOf(p)).fetch();
+        else
+            return Attach.find("fid=? AND remove=false", fid).fetch();
     }
 }

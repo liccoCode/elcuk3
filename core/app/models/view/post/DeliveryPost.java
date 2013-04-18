@@ -9,6 +9,7 @@ import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,13 +28,19 @@ public class DeliveryPost extends Post<Deliveryment> {
         this.dateType = DateType.delivery;
     }
 
+    /**
+     * 由于在 Action Redirect 的时候, 需要保留参数, 而 Play 并没有保留, 所以只能多写一次
+     */
+    public Date from;
+    public Date to;
+
     public enum DateType {
         /**
          * 创建时间
          */
         create {
             @Override
-            public String toString() {
+            public String label() {
                 return "创建时间";
             }
         },
@@ -42,10 +49,12 @@ public class DeliveryPost extends Post<Deliveryment> {
          */
         delivery {
             @Override
-            public String toString() {
+            public String label() {
                 return "交货时间";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     /**
@@ -62,18 +71,22 @@ public class DeliveryPost extends Post<Deliveryment> {
 
     public DateType dateType;
 
+    public Long cooperId;
+
 
     @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = deliverymentId();
 
         // 针对 Id 的唯一搜索
-        if(specialSearch._1) return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+        if(specialSearch._1)
+            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
 
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
 
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE 1=1 AND");
+        StringBuilder sbd = new StringBuilder(
+                "SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE 1=1 AND");
         List<Object> params = new ArrayList<Object>();
 
         if(this.dateType != null) {
@@ -96,6 +109,11 @@ public class DeliveryPost extends Post<Deliveryment> {
             params.add(this.state);
         }
 
+        if(this.cooperId != null) {
+            sbd.append(" AND d.cooperator.id=?");
+            params.add(this.cooperId);
+        }
+
         if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {
             String word = this.word();
             sbd.append(" AND (")
@@ -110,7 +128,8 @@ public class DeliveryPost extends Post<Deliveryment> {
 
     public List<Deliveryment> query() {
         F.T2<String, List<Object>> params = params();
-        return Deliveryment.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray()).fetch();
+        return Deliveryment.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
+                .fetch();
     }
 
     public F.T3<Boolean, String, List<Object>> multiProcureUnit() {
@@ -119,7 +138,8 @@ public class DeliveryPost extends Post<Deliveryment> {
             Matcher matcher = SIZE.matcher(this.search);
             if(matcher.find()) {
                 int size = NumberUtils.toInt(matcher.group(1));
-                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(d.units)>=?", new ArrayList<Object>(Arrays.asList(size)));
+                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(d.units)>=?",
+                        new ArrayList<Object>(Arrays.asList(size)));
             }
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);
@@ -136,7 +156,9 @@ public class DeliveryPost extends Post<Deliveryment> {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true, "SELECT d FROM Deliveryment d WHERE d.id=?", new ArrayList<Object>(Arrays.asList(deliverymentId)));
+                return new F.T3<Boolean, String, List<Object>>(true,
+                        "SELECT d FROM Deliveryment d WHERE d.id=?",
+                        new ArrayList<Object>(Arrays.asList(deliverymentId)));
             }
         }
         return new F.T3<Boolean, String, List<Object>>(false, null, null);
