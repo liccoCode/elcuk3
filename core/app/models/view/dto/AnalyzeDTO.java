@@ -114,7 +114,7 @@ public class AnalyzeDTO {
     /**
      * 最新的评分与时间
      */
-    public F.T2<Float,String> lastRating;
+    public F.T2<Float,Date> lastRating;
 
     public float reviewRatio = 0f;
 

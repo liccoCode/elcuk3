@@ -72,7 +72,7 @@ public class AmazonListingReviewQuery {
      * @param sku
      * @return
      */
-    public F.T2<Float,String> skuLastRating(String sku) {
+    public F.T2<Float, Date> skuLastRating(String sku) {
         SqlSelect sql = new SqlSelect()
                 .select("r.rating as rating, r.createDate as dt")
                 .from("AmazonListingReview r")
@@ -80,12 +80,10 @@ public class AmazonListingReviewQuery {
                 .where("l.product_sku=?").param(sku)
                 .orderBy("r.createDate desc").limit(1);
         Map<String, Object> row = DBUtils.row(sql.toString(), sku);
-        if(row.get("rating")!=null){
-            //从数据库取出的时间字符串后会多出 '.0'
-            String dt=row.get("dt").toString();
-            return new F.T2(NumberUtils.toFloat(row.get("rating").toString()),dt.substring(0,dt.length()-2));
+        if(row.get("rating") != null) {
+            return new F.T2<Float, Date>(NumberUtils.toFloat(row.get("rating").toString()), (Date) row.get("dt"));
         }
-        return new F.T2(-1f,null);
+        return new F.T2<Float, Date>(-1f, null);
     }
 
 }
