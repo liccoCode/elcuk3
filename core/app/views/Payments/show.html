@@ -7,12 +7,18 @@
 #{/set}
 
 #{flash_alert /}
-#{form @Payments.paymentUnitApproval(payment.id), method:'POST'}
-<div class="row-fluid" xmlns="http://www.w3.org/1999/html">
+#{form @Payments.paymentUnitApproval(payment.id)}
+<div class="row-fluid">
   <div class="btn-toolbar">
       #{power.ck 'payments.paymentunitapproval'}
         <input type="submit" class="btn btn-info" value="批准"/>
       #{/power.ck}
+      #{if payment.state == models.finance.Payment.S.LOCKED}
+        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁付款单</a>
+      #{/if}
+      #{elseif payment.state == models.finance.Payment.S.WAITING}
+        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-danger">锁定付款单</a>
+      #{/elseif}
   </div>
   <table class="table table-bordered table-condensed">
     <tr>
@@ -166,6 +172,8 @@
                 </div>
                 <div class="control-group">
                   <label class="control-label">金额</label>
+                  <input type="hidden" id="ratio" name="ratio" value="-1">
+                  <input type="hidden" id="ratio_publish_date" name="ratio_publish_date">
 
                   <div class="controls">
                     <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
@@ -173,7 +181,8 @@
                 </div>
                 <div class="control-group">
                   <div class="controls">
-                    <input type="submit" value="付款" class="btn btn-primary">
+                    <input type="submit" value="付款" class="btn btn-primary"
+                           data-confirm='请再次确认信息后付款'>
                   </div>
                 </div>
               #{/form}

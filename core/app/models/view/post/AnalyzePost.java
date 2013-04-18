@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import helper.Promises;
+import models.market.AmazonListingReview;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -119,6 +120,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 }));
 
                 // 销量 AnalyzeVO
+                //一天的毫秒数
+                long oneDayMillis = 60 * 60 * 24 * 1000;
                 for(AnalyzeVO vo : vos) {
                     String key = isSku ? vo.sku : vo.sid;
                     AnalyzeDTO currentDto = analyzeMap.get(key);
@@ -133,9 +136,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         currentDto.day0 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
                         currentDto.day1 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
+                    //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
+                    if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
                         currentDto.day7 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
+                    if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
                         currentDto.day30 += vo.qty;
                 }
 
@@ -165,14 +169,19 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     // review
                     F.T3<Integer, Float, List<String>> reviewT3;
-                    if(isSku) reviewT3 = new AmazonListingReviewQuery().skuRelateReviews(dto.fid);
-                    else reviewT3 = new AmazonListingReviewQuery().sidRelateReviews(dto.fid);
+                    AmazonListingReviewQuery query=new AmazonListingReviewQuery();
+                    if(isSku) reviewT3 = query.skuRelateReviews(dto.fid);
+                    else reviewT3 = query.sidRelateReviews(dto.fid);
                     dto.reviews = reviewT3._1;
                     dto.rating = reviewT3._2;
                     if(dto.reviews > 0)
                         dto.reviewRatio =
                                 dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
                     else dto.reviewRatio = 0;
+
+                    //最新的评分
+                    if(isSku)
+                        dto.lastRating= query.skuLastRating(dto.fid);
                 }
 
                 Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");

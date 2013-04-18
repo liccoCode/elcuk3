@@ -42,6 +42,15 @@ public class Payment extends Model {
             }
         },
         /**
+         * 锁定付款单
+         */
+        LOCKED {
+            @Override
+            public String label() {
+                return "锁定准备支付";
+            }
+        },
+        /**
          * 支付完成
          */
         PAID {
@@ -51,10 +60,10 @@ public class Payment extends Model {
             }
         },
 
-        CLOSE {
+        CANCEL {
             @Override
             public String label() {
-                return "处理完毕";
+                return "取消";
             }
         };
 
@@ -233,11 +242,32 @@ public class Payment extends Model {
         return paymentUnits;
     }
 
-    public void payIt(Long paymentTargetId, Currency currency, Float actualPaid) {
+    /**
+     * 锁定此付款单
+     */
+    public void lockAndUnLock(boolean lock) {
+        if(lock) {
+            if(this.state != S.WAITING)
+                Validation.addError("", "只允许" + S.WAITING.label() + "状态付款单锁定.");
+            if(Validation.hasErrors()) return;
+            this.state = S.LOCKED;
+        } else {
+            if(this.state != S.LOCKED)
+                Validation.addError("", "只允许" + S.LOCKED.label() + "状态付款单解锁.");
+            this.state = S.WAITING;
+        }
+        this.save();
+    }
+
+    public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratio_publish_date,
+                      Float actualPaid) {
         /**
          * 0. 验证
          *  - paymentTargetId 必须是当前 Payment 的 Cooperator 的某一个支付方式
          *  - 必须所有请款项通过审核才允许付款
+         *  - 只能是 WAITING 与 LOCKED 状态才可以支付.
+         *  - 汇率必须大于 0
+         *  - 汇率的日期必须是当天的.
          * 1. 重新去 boc 中国银行获取最新的美元汇率 + 时间
          * 2. 计算支付
          */
@@ -254,6 +284,15 @@ public class Payment extends Model {
         if(!Arrays.asList(Currency.CNY, Currency.USD).contains(currency))
             Validation.addError("", "现在只支持美元与人民币两种支付币种");
 
+        if(!Arrays.asList(S.WAITING, S.LOCKED).contains(this.state))
+            Validation.addError("", String.format("%s 状态不允许支付.", this.state.label()));
+
+        if(ratio == null || ratio <= 0)
+            Validation.addError("", "汇率的值不合法.");
+
+        if(!Dates.date2Date().equals(Dates.date2Date(ratio_publish_date)))
+            Validation.addError("", "汇率时间错误, 并非当前支付的汇率时间.");
+
         if(Validation.hasErrors()) return;
 
         for(PaymentUnit unit : this.units()) {
@@ -261,9 +300,8 @@ public class Payment extends Model {
             unit.save();
         }
 
-        String html = Currency.bocRatesHtml();
-        this.rate = currency.rate(html);
-        this.ratePublishDate = Currency.rateDateTime(html);
+        this.rate = ratio;
+        this.ratePublishDate = ratio_publish_date;
         this.paymentDate = new Date();
         // 切换到最后选择的支付账号
         this.target = paymentTarget;
@@ -385,7 +423,7 @@ public class Payment extends Model {
         Payment payment = Payment.find(
                 "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
                         "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? AND " +
-                        "p.state=? ORDER BY p.createdAt DESC",
+                        "p.state=? ORDER BY p.createdAt ASC",
                 deliveryment.id, now.minusHours(24).toDate(), now.toDate(), S.WAITING).first();
 
         if(payment == null || payment.totalFees()._1 > 60000) {
@@ -431,7 +469,7 @@ public class Payment extends Model {
         long count = Payment.count("cooperator=? AND createdAt>=? AND createdAt<=?",
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
-                Dates.cn(String.format("%s-01-01", year)).minusSeconds(1).toDate());
+                Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
         this.paymentNumber = String.format("付款单[%s-%03d-%s]",
                 this.cooperator.name, count, DateTime.now().toString("yy"));
         return this;
