@@ -5,11 +5,9 @@ import org.slf4j.LoggerFactory;
 import play.db.DB;
 import play.utils.FastRuntimeException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * 直接使用 SQL 的工具方法
@@ -54,7 +52,13 @@ public class DBUtils {
                 if(rowSize >= 2) throw new FastRuntimeException("Only Deal one Row!");
 
                 for(int i = 1; i <= mete.getColumnCount(); i++) {
-                    row.put(mete.getColumnLabel(i), rs.getObject(i));
+                    Object value = rs.getObject(i);
+                    if(value.getClass() == Timestamp.class) {
+                        Timestamp dateValue = (Timestamp) value;
+                        row.put(mete.getColumnLabel(i), new Date(dateValue.getTime()));
+                    } else {
+                        row.put(mete.getColumnLabel(i), value);
+                    }
                 }
             }
             rs.close();
