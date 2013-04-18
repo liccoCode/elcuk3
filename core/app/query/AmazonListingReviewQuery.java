@@ -3,10 +3,12 @@ package query;
 import helper.DBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -70,18 +72,20 @@ public class AmazonListingReviewQuery {
      * @param sku
      * @return
      */
-    public float skuLastRating(String sku) {
+    public F.T2<Float,String> skuLastRating(String sku) {
         SqlSelect sql = new SqlSelect()
-                .select("r.rating as rating")
+                .select("r.rating as rating, r.createDate as dt")
                 .from("AmazonListingReview r")
                 .leftJoin("Listing l on r.listingId=l.listingId")
                 .where("l.product_sku=?").param(sku)
-                .orderBy("r.createDate desc").limit(2);
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sku);
-        float total=0;
-        for (Map<String,Object> row :rows)
-             total+=NumberUtils.toFloat(row.get("rating").toString());
-        return rows.size()==0?-1:total/rows.size();
+                .orderBy("r.createDate desc").limit(1);
+        Map<String, Object> row = DBUtils.row(sql.toString(), sku);
+        if(row.get("rating")!=null){
+            //从数据库取出的时间字符串后会多出 '.0'
+            String dt=row.get("dt").toString();
+            return new F.T2(NumberUtils.toFloat(row.get("rating").toString()),dt.substring(0,dt.length()-2));
+        }
+        return new F.T2(-1f,null);
     }
 
 }

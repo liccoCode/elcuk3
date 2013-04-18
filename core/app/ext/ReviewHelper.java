@@ -37,39 +37,6 @@ public class ReviewHelper extends JavaExtensions {
             return feedback.feedback.length() + "";
     }
 
-    /**
-     * 计算 Review 的 rating 与 lastRating, 比较她们之间的差别
-     *
-     * @param review
-     * @return T2: _.1 颜色 #(468847), _.2 icon class
-     */
-    public static F.T3<Boolean, String, String> iconRating(AmazonListingReview review) {
-        if(review.lastRating > review.rating) {
-            return new F.T3<Boolean, String, String>(true, "B94A48", "icon-arrow-down");
-        } else if(review.lastRating < review.rating) {
-            return new F.T3<Boolean, String, String>(true, "468847", "icon-arrow-up");
-        } else {
-            return new F.T3<Boolean, String, String>(false, "", "");
-        }
-    }
-
-    /**
-     * 计算 AnalyzeDTO 的 rating 与 lastRating, 比较她们之间的差别
-     *
-     * @param dto
-     * @return T3: _.1是否要用到icon class  _.2 颜色 _.3icon class
-     */
-    public static F.T3<Boolean, String, String> iconRating(AnalyzeDTO dto) {
-
-        if(dto.lastRating > dto.rating) {
-            return new F.T3<Boolean, String, String>(true, "468847", "icon-arrow-up");
-        } else if(dto.lastRating == dto.rating ||dto.lastRating==-1) {
-            return new F.T3<Boolean, String, String>(false, "0000ff", null);
-        } else
-            return new F.T3<Boolean, String, String>(true, "B94A48", "icon-arrow-down");
-    }
-
-
     public static String color(Feedback feedback) {
         int length = NumberUtils.toInt(length(feedback));
         if(length <= 15)

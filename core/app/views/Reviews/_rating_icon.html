@@ -1,16 +1,20 @@
 #{if dto==null}
-    #{set ratingT3: review.iconRating()/}
-    #{if ratingT3._1}
-    <i rel="tooltip" title="From ${review.lastRating} TO ${review.rating}" style="color:${'#' + ratingT3._2};" class="pull-right ${ratingT3._3}"></i>
+    #{if review.lastRating>review.rating}
+    <i rel="tooltip" title="From ${review.lastRating} TO ${review.rating}" style="color:#B94A48" class="pull-right icon-arrow-down"></i>
     #{/if}
+    #{elseif review.lastRating<review.rating}
+    <i rel="tooltip" title="From ${review.lastRating} TO ${review.rating}" style="color:#468847" class="pull-right icon-arrow-up"></i>
+    #{/elseif}
 #{/if}
 #{else}
-    #{set ratingT3: dto.iconRating()/}
-    #{if ratingT3._1}
-        <i rel="tooltip" title="最近2次平均评分: ${dto.lastRating}" style="color:${'#'+ratingT3._2}" class="text-center ${ratingT3._3}"></i>
+    #{if dto.lastRating._1>dto.rating}
+    <i rel="tooltip" title="${"在"+dto.lastRating._2+" 评分:"+dto.lastRating._1}" style="color:#468847" class="text-center icon-arrow-up"></i>
     #{/if}
+    #{elseif dto.lastRating._1 == dto.rating ||dto.lastRating==-1}
+    <i rel="tooltip" title="持平" style="color:#0000ff">-</i>
+    #{/elseif}
     #{else}
-        <i rel="tooltip" title="持平" style="color:${'#'+ratingT3._2}">-</i>
+    <i rel="tooltip" title="${"在"+dto.lastRating._2+" 评分:"+dto.lastRating._1}" style="color:#B94A48" class="text-center icon-arrow-down"></i>
     #{/else}
 #{/else}
 
