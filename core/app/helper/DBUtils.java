@@ -53,7 +53,7 @@ public class DBUtils {
 
                 for(int i = 1; i <= mete.getColumnCount(); i++) {
                     Object value = rs.getObject(i);
-                    if(value.getClass() == Timestamp.class) {
+                    if(value != null && value.getClass() == Timestamp.class) {
                         Timestamp dateValue = (Timestamp) value;
                         row.put(mete.getColumnLabel(i), new Date(dateValue.getTime()));
                     } else {
