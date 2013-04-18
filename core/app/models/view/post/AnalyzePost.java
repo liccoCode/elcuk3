@@ -119,6 +119,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 }));
 
                 // 销量 AnalyzeVO
+                //一天的毫秒数
+                long oneDayMillis = 60 * 60 * 24 * 1000;
                 for(AnalyzeVO vo : vos) {
                     String key = isSku ? vo.sku : vo.sid;
                     AnalyzeDTO currentDto = analyzeMap.get(key);
@@ -133,9 +135,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         currentDto.day0 += vo.qty;
                     if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
                         currentDto.day1 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= 0)
+                    //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
+                    if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
                         currentDto.day7 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= 0)
+                    if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
                         currentDto.day30 += vo.qty;
                 }
 
