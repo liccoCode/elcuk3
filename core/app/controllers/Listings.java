@@ -103,4 +103,22 @@ public class Listings extends Controller {
         } else renderJSON(new Ret("更新失败."));
     }
 
+    /**
+     * 获取被跟踪的Lisitng列表
+     */
+    public static void trackedListings() {
+        List<Listing> lsts = Listing.trackedListings();
+        render(lsts);
+    }
+
+    /**
+     * 关闭Listing 警告
+     *
+     * @param listingId
+     */
+    public static void closeWarnning(String listingId) {
+        Listing.closeWarnning(listingId);
+        trackedListings();
+    }
+
 }

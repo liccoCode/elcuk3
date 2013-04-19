@@ -31,6 +31,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 public class Listing extends GenericModel {
+
+
     /**
      * Condition
      */
@@ -133,10 +135,16 @@ public class Listing extends GenericModel {
     public Integer warnningTimes = 0;
 
     /**
-     * 此Listing最近被警告的时间
+     * 手动关闭警告时间
      */
     @Expose
-    public Date lastWarnningTime;
+    public Date closeWarnningTime;
+
+    /**
+     * 此Listing是否被跟踪
+     */
+    @Expose
+    public boolean isTracked;
 
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
@@ -295,10 +303,6 @@ public class Listing extends GenericModel {
             return;
         }
 
-        //如果距离上次发出警告不到2天,则不检查
-        if(this.lastWarnningTime != null && DateTime.now().minusDays(2).toDate().before(this.lastWarnningTime))
-            return;
-
         int needWarnningOffers = 0;
 
         for(ListingOffer off : this.offers) {
@@ -323,11 +327,13 @@ public class Listing extends GenericModel {
         }
 
         if(needWarnningOffers >= 1) {
+            //两小时处理时间
+            if(this.closeWarnningTime != null && DateTime.now().minusHours(2).isBefore(this.closeWarnningTime.getTime()))
+                return;
             Mails.moreOfferOneListing(offers, this);
-            //发出警告后 更新警告时间
-            this.lastWarnningTime = new Date();
+            //标记为被跟踪
+            this.isTracked = true;
         } else if(needWarnningOffers <= 0) {
-            // 当不需要警告的时候, 将警告次数清零
             this.warnningTimes = 0;
         }
         this.save();
@@ -554,5 +560,27 @@ public class Listing extends GenericModel {
             }
         }
         return Cache.get(cacheKey, Set.class);
+    }
+
+    /**
+     * 获得被跟踪的Listing
+     *
+     * @return
+     */
+    public static List<Listing> trackedListings() {
+        return Listing.find("istracked = true").fetch();
+    }
+
+    /**
+     * 关闭Listing被跟的警告
+     *
+     * @param listingId
+     */
+    public static void closeWarnning(String listingId) {
+        Listing lst = Listing.find("listingId=?", listingId).first();
+        lst.isTracked = false;
+        //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
+        lst.closeWarnningTime = new Date();
+        lst.save();
     }
 }

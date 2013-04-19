@@ -1,0 +1,55 @@
+#{extends 'main_full.html'/}
+#{set title:'Tracked Listings'/}
+<div class="container">
+    <table class="table table-bordered table-condensed">
+        <tr>
+            <th>Sells</th>
+            <th>ListingId</th>
+            <th>Title</th>
+            <th>TotalOffers</th>
+            <th>Warnning</th>
+        </tr>
+    #{list items:lsts,as:'list'}
+        <tr>
+            <td data-toggle="toggle" data-target="#selling_${list_index}">
+                <i class="icon-reorder"></i> ${list.sellings.size()}
+            </td>
+            <td>
+                <a href="@{Listings.listing(list.listingId)}" target="_blank">${list.listingId}</a>
+            </td>
+            <td>
+                <a href="${list.asinLink()}" target="_blank">${list.title.length() <= 100 ? list.title : (list.title.subSequence(0, 100) + "...")}</a>
+            </td>
+            <td>
+                ${list.totalOffers}
+            </td>
+            <td>
+                <a href="@{Listings.closeWarnning(list.listingId)}" class="btn-link">关闭</a>
+            </td>
+        </tr>
+
+        <tr id="selling_${list_index}" style="display:none;">
+            <td colspan="4" style="padding:0">
+                <table class="table table-bordered table-condensed" style="margin:0">
+                    <tr>
+                        <th>SellingId</th>
+                        <th>Market</th>
+                        <th>Type</th>
+                        <th>State</th>
+                        <th>Acc</th>
+                    </tr>
+                    #{list items:list.sellings, as:'sell'}
+                        <tr>
+                            <td><a target="_blank" href="@{Sellings.selling(sell.sellingId)}">${sell.sellingId}</a></td>
+                            <td>${sell.market}</td>
+                            <td>${sell.type}</td>
+                            <td>${sell.state}</td>
+                            <td>${sell.account.prettyName()}</td>
+                        </tr>
+                    #{/list}
+                </table>
+            </td>
+        </tr>
+    #{/list}
+    </table>
+</div>

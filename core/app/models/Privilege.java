@@ -83,6 +83,7 @@ public class Privilege extends Model {
         // 模块
         privileges.add(new Privilege("market", "市场模块"));
         privileges.add(new Privilege("listings.index", "Listing 页面"));
+        privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
         privileges.add(new Privilege("analyzes.index", "销量分析 页面"));
         privileges.add(new Privilege("amazonReviews.index", "Review点击台 页面"));
