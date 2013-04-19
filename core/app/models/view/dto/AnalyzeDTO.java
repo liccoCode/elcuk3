@@ -5,6 +5,7 @@ import models.market.Selling;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -109,6 +110,11 @@ public class AnalyzeDTO {
      * review 的分数
      */
     public float rating = 0;
+
+    /**
+     * 最新的评分与时间
+     */
+    public F.T2<Float,Date> lastRating;
 
     public float reviewRatio = 0f;
 
