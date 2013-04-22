@@ -42,9 +42,11 @@ public class Deliveryments extends Controller {
     }
 
     @Before(only = {"index", "deliverymentToApply"})
-    public static void beforeIndex() {
+    public static void beforeIndex(DeliveryPost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
+        List<ProcureApply> avaliableApplies = ProcureApply.unPaidApplies(p.cooperId);
         renderArgs.put("suppliers", suppliers);
+        renderArgs.put("avaliableApplies", avaliableApplies);
     }
 
     @Check("deliveryments.index")
@@ -156,14 +158,20 @@ public class Deliveryments extends Controller {
      * 进入采购单请款生成页面
      */
     @Check("deliveryments.deliverymenttoapply")
-    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p) {
+    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
+                                           Long procureApplyId) {
         if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");
             index(p, deliverymentIds);
         }
 
-        ProcureApply apply = ProcureApply.buildProcureApply(deliverymentIds);
+        ProcureApply apply = ProcureApply.findById(procureApplyId);
+        if(apply == null)
+            apply = ProcureApply.buildProcureApply(deliverymentIds);
+        else
+            apply.appendDelivery(deliverymentIds);
+
         if(apply == null || Validation.hasErrors()) {
             for(Error error : Validation.errors()) {
                 flash.error(error.message());

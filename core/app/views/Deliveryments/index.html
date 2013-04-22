@@ -50,6 +50,7 @@
       <tr>
         <th></th>
         <th>#</th>
+        <th>请款单</th>
         <th>Name</th>
         <th>State</th>
         <th>供应商</th>
@@ -74,6 +75,15 @@
             <td>
               <a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a>
             </td>
+            <td>
+                #{if dmt.apply}
+                  <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
+                  <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
+                #{/if}
+                #{else }
+                  没有请款单
+                #{/else}
+            </td>
             <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
               <span><i class="icon-reorder"></i></span>
               <span>${dmt.name}</span>
@@ -96,7 +106,7 @@
             <td>#{time_tooltip time:dmt.createDate/}</td>
           </tr>
           <tr id="dmt_${dmt_index}" style="display:none;">
-            <td colspan="9" style="padding:0;border:none">
+            <td colspan="11" style="padding:0;border:none">
                 #{render 'Procures/_unit_list.html', units:dmt.units/}
             </td>
           </tr>
@@ -104,6 +114,9 @@
     </table>
     <div class="btn-toolbar">
         #{power.ck 'deliveryments.deliverymenttoapply'}
+            #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber'}
+                #{option ''}None#{/option}
+            #{/select}
           <input url='@{Deliveryments.deliverymentToApply()}'
                  type="submit" id="goToDeliverymentApply" class="btn  btn-success" value="采购单请款">
         #{/power.ck}
