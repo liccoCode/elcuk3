@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
+import models.finance.Payment;
 import models.finance.ProcureApply;
 import models.product.Category;
 import org.joda.time.DateTime;
@@ -310,6 +311,20 @@ public class Deliveryment extends GenericModel {
                         .toDate()) + "";
         return String.format("DL|%s|%s", dt.toString("yyyyMM"),
                 count.length() == 1 ? "0" + count : count);
+    }
+
+    /**
+     * 是否可以和采购请款单分离?
+     *
+     * @return
+     */
+    public boolean isDepartFromProcureApplyable() {
+        if(this.apply == null) return true;
+        for(Payment payment : this.apply.payments) {
+            if(payment.state == Payment.S.PAID || payment.state == Payment.S.CANCEL)
+                return false;
+        }
+        return true;
     }
 
     public static List<Deliveryment> openDeliveryments(S state) {

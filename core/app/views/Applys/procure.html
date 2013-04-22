@@ -34,6 +34,11 @@
         #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
       <dt>最后交货时间</dt>
       <dd>${twoDeliveryDate._2}</dd>
+        #{if dmt.isDepartFromProcureApplyable()}
+          <dd>
+            <a href="#" class="btn btn-danger btn-small" data-confirm='确认移除?'>从当前请款单中移除</a>
+          </dd>
+        #{/if}
     </dl>
   </div>
 
