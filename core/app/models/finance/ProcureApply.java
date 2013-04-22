@@ -156,7 +156,6 @@ public class ProcureApply extends Apply {
         /**
          * 0. 检查提交的采购单 ID 数量与加载的采购单数量是否一致
          * 1. 检查请款的供应商是否一致.
-         * 2. 生成请款单编号
          */
         List<Deliveryment> deliveryments = Deliveryment
                 .find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
