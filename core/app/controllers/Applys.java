@@ -30,4 +30,11 @@ public class Applys extends Controller {
         ProcureApply apply = ProcureApply.findById(id);
         render(apply);
     }
+
+    public static void procure_confirm(Long id) {
+        ProcureApply apply = ProcureApply.findById(id);
+        apply.confirm = true;
+        apply.save();
+        render();
+    }
 }

@@ -26,6 +26,7 @@ GET     /helper/                                            staticDir:public/ima
 
 # Applys
 GET     /apply/{id}/procure                                 Applys.procure
+PUT     /apply/{id}/procure/confirm                         Applys.procure_confirm
 
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index

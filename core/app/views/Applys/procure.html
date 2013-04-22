@@ -4,7 +4,16 @@
     #{script 'deliveryments/procure.coffee'/}
 #{/set}
 #{flash_alert /}
-#{info_row title:'采购请款单' /}
+#{info_row title:"采购请款单 ${apply.serialNumber}" /}
+<div class="btn-toolbar">
+#{if apply.confirm}
+  <button class="btn btn-danger" disabled="">请款单已经确认</button>
+#{/if}
+#{else }
+  <a id="confirm_btn" href='@{Applys.procure_confirm(apply.id)}' class="btn btn-success"
+     data-remote='true' data-method='PUT' data-disable-with='确认中...'>确认请款单</a>
+#{/else}
+</div>
 #{list items:apply.deliveryments, as:'dmt'}
 <div class="row-fluid">
   <div class="span3">
