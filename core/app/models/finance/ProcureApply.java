@@ -202,7 +202,6 @@ public class ProcureApply extends Apply {
 
     /**
      * 没有过支付行为请款单
-     * TODO: 需要添加一个确认值进行过滤加载
      *
      * @return
      */
