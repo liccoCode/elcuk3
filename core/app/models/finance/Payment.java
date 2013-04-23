@@ -421,17 +421,21 @@ public class Payment extends Model {
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
      * 3. 处于等待支付状态
-     * 4. 额度上线 6W 美金
+     * 4. 额度上线 6W 美金(以 6.2 换算, 372000 RMB)
      *
      * @return
      */
-    public static Payment buildPayment(Cooperator cooperator, Currency currency) {
+    public static Payment buildPayment(Cooperator cooperator,
+                                       Currency currency, float currentAmount) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
-                "AND state=? ORDER BY createdAt ASC", cooperator, now.minusHours(24).toDate(),
-                now.toDate(), S.WAITING).first();
+                "AND state=? AND currency=?  ORDER BY createdAt ASC",
+                cooperator, now.minusHours(24).toDate(), now.toDate(),
+                S.WAITING, currency).first();
 
-        if(payment == null || payment.totalFees()._1 > 60000) {
+        if(payment == null ||
+                payment.totalFees()._1 + currency.toUSD(currentAmount) > 8 ||
+                payment.totalFees()._2 + currency.toCNY(currentAmount) > 372000) {
             payment = new Payment();
             if(cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
