@@ -19,7 +19,7 @@
   <div class="span3">
     <dl class="dl-horizontal">
       <dt>#</dt>
-      <dd>${dmt.id}</dd>
+      <dd><a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
       <dt>状态</dt>
       <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
       <dt>供应商</dt>
