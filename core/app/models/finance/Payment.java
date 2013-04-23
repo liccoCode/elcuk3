@@ -188,10 +188,7 @@ public class Payment extends Model {
     }
 
     public void cancel() {
-        /**
-         * 1. 拥有
-         */
-        throw new FastRuntimeException("取消付款单的要求是什么?");
+        throw new FastRuntimeException("什么请款下才可以让一个付款单被取消呢? (功能未完成)");
     }
 
     /**
@@ -230,6 +227,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : waitForDeals) {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
+            unit.notifyState();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
             new ERecordBuilder("payment.approval")
                     .msgArgs(unit.procureUnit.qty() + "",
@@ -308,6 +306,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
+            unit.notifyState();
         }
 
         this.rate = ratio;
