@@ -3,6 +3,7 @@ package models.finance;
 import exception.PaymentException;
 import helper.Currency;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.*;
@@ -60,7 +61,7 @@ public class PaymentUnit extends Model {
         PAID {
             @Override
             public String label() {
-                return "已支付";
+                return "支付完成";
             }
         };
 
@@ -211,10 +212,17 @@ public class PaymentUnit extends Model {
         if(Validation.hasErrors()) return;
         this.state = S.DENY;
         this.save();
+        this.notifyState();
         new ERecordBuilder("paymentunit.deny")
                 .msgArgs(reason)
                 .fid(this.id)
                 .save();
+    }
+
+    public void notifyState() {
+        Notification.notifies(this.payee,
+                String.format("已经[%s]了 #%s %s 请款(sku:%s)",
+                        this.state.label(), this.id, this.feeType.nickName, this.procureUnit.sku));
     }
 
     /**

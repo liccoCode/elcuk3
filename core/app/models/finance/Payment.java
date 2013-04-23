@@ -230,6 +230,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : waitForDeals) {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
+            unit.notifyState();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
             new ERecordBuilder("payment.approval")
                     .msgArgs(unit.procureUnit.qty() + "",
@@ -308,6 +309,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
+            unit.notifyState();
         }
 
         this.rate = ratio;
