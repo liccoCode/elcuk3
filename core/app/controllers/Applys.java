@@ -31,7 +31,7 @@ public class Applys extends Controller {
         render(apply);
     }
 
-    public static void procure_confirm(Long id) {
+    public static void procureConfirm(Long id) {
         ProcureApply apply = ProcureApply.findById(id);
         apply.confirm = true;
         apply.save();

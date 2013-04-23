@@ -132,12 +132,9 @@ public class ProcureApply extends Apply {
         if(dmtAndCop._2.iterator().hasNext() &&
                 !dmtAndCop._2.iterator().next().equals(this.cooperator))
             Validation.addError("", "合作伙伴不一样, 无法添加");
-        for(Payment payment : this.payments) {
-            if(payment.state == Payment.S.PAID || payment.state == Payment.S.CANCEL) {
-                Validation.addError("", "只允许向没有支付信息的请款单中添加");
-                return;
-            }
-        }
+        if(this.confirm)
+            Validation.addError("", "已经确认了, 不允许再向中添加请款");
+
         if(Validation.hasErrors()) return;
 
         for(Deliveryment dmt : dmtAndCop._1) {

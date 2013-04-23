@@ -115,7 +115,7 @@
     <div class="btn-toolbar">
         #{power.ck 'deliveryments.deliverymenttoapply'}
             #{select 'procureApplyId', items:avaliableApplies, labelProperty:'serialNumber'}
-                #{option ''}None#{/option}
+                #{option '0'}新请款单#{/option}
             #{/select}
           <input url='@{Deliveryments.deliverymentToApply()}'
                  type="submit" id="goToDeliverymentApply" class="btn  btn-success" value="采购单请款">

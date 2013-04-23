@@ -10,7 +10,7 @@
   <button class="btn btn-danger" disabled="">请款单已经确认</button>
 #{/if}
 #{else }
-  <a id="confirm_btn" href='@{Applys.procure_confirm(apply.id)}' class="btn btn-success"
+  <a id="confirm_btn" href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
      data-remote='true' data-method='PUT' data-disable-with='确认中...'>确认请款单</a>
 #{/else}
 </div>
@@ -33,10 +33,12 @@
       <dd>${dmt.orderTime}</dd>
         #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
       <dt>最后交货时间</dt>
-      <dd>${twoDeliveryDate._2}</dd>
-        #{if dmt.isDepartFromProcureApplyable()}
+      <dd>${twoDeliveryDate._2}&nbsp;</dd>
+        #{if dmt.isProcureApplyDepartable()}
+          <dt>&nbsp;</dt>
           <dd>
-            <a href="#" class="btn btn-danger btn-small" data-confirm='确认移除?'>从当前请款单中移除</a>
+            <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small"
+               data-method='DELETE' data-confirm='确认移除?'>从当前请款单中移除</a>
           </dd>
         #{/if}
     </dl>

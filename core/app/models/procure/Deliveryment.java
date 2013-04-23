@@ -3,7 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
-import models.finance.Payment;
+import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
 import org.joda.time.DateTime;
@@ -315,16 +315,41 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 是否可以和采购请款单分离?
+     * (采购单向请款单中添加与剥离, 都需要保证这个采购单没有付款完成的付款单)
      *
      * @return
      */
-    public boolean isDepartFromProcureApplyable() {
-        if(this.apply == null) return true;
-        for(Payment payment : this.apply.payments) {
-            if(payment.state == Payment.S.PAID || payment.state == Payment.S.CANCEL)
-                return false;
+    public boolean isProcureApplyDepartable() {
+        // 这个采购单的采购计划所拥有的 PaymentUnit(支付信息)没有状态为 PAID 的.
+        for(ProcureUnit unit : this.units) {
+            for(PaymentUnit fee : unit.fees()) {
+                if(fee.state == PaymentUnit.S.PAID)
+                    return false;
+            }
         }
         return true;
+    }
+
+    /**
+     * 将采购单从其所关联的请款单中剥离开
+     */
+    public void departFromProcureApply() {
+        /**
+         * 1. 剥离没有过成功支付的采购单.
+         * 2. 剥离后原有的 PaymentUnit 自动 remove 标记.
+         */
+        if(!isProcureApplyDepartable()) {
+            Validation.addError("", "当前采购单已经拥有成功支付信息, 无法剥离.");
+            return;
+        }
+        for(ProcureUnit unit : this.units) {
+            for(PaymentUnit fee : unit.fees()) {
+                fee.remove(String.format(
+                        "所属采购单 %s 从原有请款单 %s 中剥离.", this.id, this.apply.serialNumber));
+            }
+        }
+        this.apply = null;
+        this.save();
     }
 
     public static List<Deliveryment> openDeliveryments(S state) {

@@ -142,4 +142,17 @@ public class Payments extends Controller {
         renderJSON(J.G(a));
     }
 
+    /**
+     * 取消当前这个请款单
+     */
+    public static void cancel(Long id) {
+        Payment payment = Payment.findById(id);
+        payment.cancel();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("付款单取消成功.");
+        show(id);
+    }
+
 }

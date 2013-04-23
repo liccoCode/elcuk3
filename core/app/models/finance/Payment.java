@@ -16,6 +16,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -185,6 +186,13 @@ public class Payment extends Model {
         } else {
             return PaymentTarget.findAll();
         }
+    }
+
+    public void cancel() {
+        /**
+         * 1. 拥有
+         */
+        throw new FastRuntimeException("取消付款单的要求是什么?");
     }
 
     /**
