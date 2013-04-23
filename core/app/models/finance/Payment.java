@@ -7,7 +7,6 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -426,21 +425,19 @@ public class Payment extends Model {
      *
      * @return
      */
-    public static Payment buildPayment(Deliveryment deliveryment, Currency currency) {
+    public static Payment buildPayment(Cooperator cooperator, Currency currency) {
         DateTime now = DateTime.now();
-        Payment payment = Payment.find(
-                "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
-                        "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? AND " +
-                        "p.state=? ORDER BY p.createdAt ASC",
-                deliveryment.id, now.minusHours(24).toDate(), now.toDate(), S.WAITING).first();
+        Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
+                "AND state=? ORDER BY createdAt ASC", cooperator, now.minusHours(24).toDate(),
+                now.toDate(), S.WAITING).first();
 
         if(payment == null || payment.totalFees()._1 > 60000) {
             payment = new Payment();
-            if(deliveryment.cooperator.paymentMethods.size() <= 0)
+            if(cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
-                        Messages.get("paymenttarget.missing", deliveryment.cooperator.fullName));
-            payment.cooperator = deliveryment.cooperator;
-            payment.target = deliveryment.cooperator.paymentMethods.get(0);
+                        Messages.get("paymenttarget.missing", cooperator.fullName));
+            payment.cooperator = cooperator;
+            payment.target = cooperator.paymentMethods.get(0);
             payment.currency = currency;
             payment.generatePaymentNumber().save();
         }
