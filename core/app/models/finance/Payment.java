@@ -188,10 +188,7 @@ public class Payment extends Model {
     }
 
     public void cancel() {
-        /**
-         * 1. 拥有
-         */
-        throw new FastRuntimeException("取消付款单的要求是什么?");
+        throw new FastRuntimeException("什么请款下才可以让一个付款单被取消呢? (功能未完成)");
     }
 
     /**
