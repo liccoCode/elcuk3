@@ -28,7 +28,7 @@ public class Payments extends Controller {
 
     @Check("payments.index")
     public static void index() {
-        List<Payment> payments = Payment.findAll();
+        List<Payment> payments = Payment.find("ORDER BY createdAt DESC").fetch();
         render(payments);
     }
 
@@ -140,6 +140,19 @@ public class Payments extends Controller {
             renderJSON(new Ret(Webs.E(e)));
         }
         renderJSON(J.G(a));
+    }
+
+    /**
+     * 取消当前这个请款单
+     */
+    public static void cancel(Long id) {
+        Payment payment = Payment.findById(id);
+        payment.cancel();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("付款单取消成功.");
+        show(id);
     }
 
 }

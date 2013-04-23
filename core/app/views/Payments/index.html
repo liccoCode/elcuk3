@@ -22,6 +22,8 @@
       <th class="ten">状态</th>
       <th class="ten">总请款金额</th>
       <th class="ten">总实际支付金额</th>
+      <th>最近更新时间</th>
+      <th>创建时间</th>
     </tr>
   #{list items:payments, as:'pay'}
     <tr>
@@ -44,6 +46,8 @@
         <i class="badge badge-info">${pay.units.size()}</i>
       ${pay.actualPaid}
       </td>
+      <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
+      <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
     </tr>
   #{/list}
   </table>
