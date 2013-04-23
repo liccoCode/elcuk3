@@ -14,10 +14,10 @@
         <input type="submit" class="btn btn-info" value="批准"/>
       #{/power.ck}
       #{if payment.state == models.finance.Payment.S.LOCKED}
-        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁付款单</a>
+        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁可加入新付款项目</a>
       #{/if}
       #{elseif payment.state == models.finance.Payment.S.WAITING}
-        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-danger">锁定付款单</a>
+        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-warning">锁定准备付款</a>
       #{/elseif}
   </div>
   <table class="table table-bordered table-condensed">
@@ -108,10 +108,13 @@
       <button url='@{Payments.rates()}' class="btn" id="boc_rate_btn">
         <i class="icon-refresh"></i> 更新
       </button>
+      <a href="@{Payments.cancel(payment.id)}" data-method='DELETE' class="btn btn-danger">取消付款单</a>
     </div>
     <div class="row-fluid">
-      <div class="span4">
+      <div class="span5">
         <dl class="dl-horizontal" style="margin-top:0">
+          <dt>请款单</dt>
+          <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
           <dt>批准后总金额</dt>
           <dd><span id="currency_label">${payment.currency.symbol()}</span>
             <span id="costs">${payment.approvalAmount()}</span></dd>
@@ -121,9 +124,15 @@
           <dd>$ 1 -> ¥ <span id="usd_rates"></span></dd>
           <dt>汇率时间</dt>
           <dd><span id="usd_datetime"></span></dd>
+          <dt>&nbsp;</dt>
+          <dd>&nbsp;</dd>
+          <dt>最近更新时间</dt>
+          <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
+          <dt>创建时间</dt>
+          <dd>#{time_tooltip time: payment.createdAt, datetime:true/}</dd>
         </dl>
       </div>
-      <div class="span8">
+      <div class="span7">
       #{if payment.state == models.finance.Payment.S.PAID}
         <dl class="dl-horizontal" style="margin-top:0">
           <dt>支付状态</dt>

@@ -176,6 +176,8 @@ deliveryment.cancel.msg=\u53D6\u6D88[\u91C7\u8D2D\u5355] %s \u539F\u56E0\u662F (
 deliveryment.createFromProcures=[\u91C7\u8D2D\u5355\u5143] \u521B\u5EFA [\u91C7\u8D2D\u5355]
 deliveryment.createFromProcures.msg=[\u91C7\u8D2D\u5355\u5143] %s \u521B\u5EFA\u5230 [\u91C7\u8D2D\u5355] %s
 deliveryment.confirm=\u786E\u8BA4[\u91C7\u8D2D\u5355]
+deliveryment.departApply=[\u91C7\u8D2D\u5355]\u4ECE[\u8BF7\u6B3E\u5355]\u5265\u79BB
+deliveryment.departApply.msg=[\u91C7\u8D2D\u5355] %s \u4ECE %s [\u8BF7\u6B3E\u5355] \u4E2D\u5265\u79BB.
 
 shipment.ship=\u4E3A[\u8FD0\u8F93\u5355]\u6DFB\u52A0[\u8FD0\u8F93\u9879\u76EE]
 shipment.ship.msg=\u5C06[\u8FD0\u8F93\u9879\u76EE] %s \u6DFB\u52A0\u5230[\u8FD0\u8F93\u5355] %s
@@ -224,7 +226,7 @@ paymentunit.destroy=\u53D6\u6D88[\u8BF7\u6B3E\u9879\u76EE]
 paymentunit.destroy.msg=\u56E0 %s \u539F\u56E0\u53D6\u6D88\u8BF7\u6B3E
 
 payment.approval=\u8BF7\u6B3E\u6279\u51C6
-payment.approval.msg=\u6279\u51C6 %s \u4E2A %s(%s) \u8BF7\u6B3E, \u91D1\u989D %s
+payment.approval.msg=\u6279\u51C6 %s \u4E2A %s(%s) %s\u8BF7\u6B3E, \u91D1\u989D %s
 payment.payit=\u4ED8\u6B3E\u5355\u4ED8\u6B3E
 payment.payit.msg=\u652F\u4ED8\u7ED9 %s \u603B\u91D1\u989D %s (\u6C47\u7387: %s at %s);
 payment.uploadDestroy=\u5220\u9664\u9644\u4EF6

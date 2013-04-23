@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.i18n.Messages;
+import play.libs.F;
 
 import javax.persistence.*;
 import java.util.*;
@@ -46,8 +47,10 @@ public class ProcureApply extends Apply {
     @ManyToOne
     public User applier;
 
+    public boolean confirm = false;
+
     /**
-     * 已经请款的金额
+     * 已经请款的金额(包含 fixValue)
      *
      * @return
      */
@@ -79,6 +82,10 @@ public class ProcureApply extends Apply {
             }
         }
         return fixValueAmount;
+    }
+
+    public float leftAmount() {
+        return this.totalAmount() - this.appliedAmount();
     }
 
     /**
@@ -115,24 +122,45 @@ public class ProcureApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Messages.get("procureapply.save"));
+        return ElcukRecord.records(this.id + "",
+                Arrays.asList(Messages.get("procureapply.save"),
+                        Messages.get("deliveryment.departApply"))
+        );
     }
 
-
     /**
-     * 通过 DeliverymentIds 生成一份采购请款单
+     * 向采购请款单中 Append 采购单
      *
      * @param deliverymentIds
-     * @return
      */
-    public static ProcureApply buildProcureApply(List<String> deliverymentIds) {
+    public void appendDelivery(List<String> deliverymentIds) {
+        F.T2<List<Deliveryment>, Set<Cooperator>> dmtAndCop = procureAddDeliverymentCheck(
+                deliverymentIds);
+        if(dmtAndCop._2.iterator().hasNext() &&
+                !dmtAndCop._2.iterator().next().equals(this.cooperator))
+            Validation.addError("", "合作伙伴不一样, 无法添加");
+        if(this.confirm)
+            Validation.addError("", "已经确认了, 不允许再向中添加请款");
+
+        if(Validation.hasErrors()) return;
+
+        for(Deliveryment dmt : dmtAndCop._1) {
+            dmt.apply = this;
+            dmt.save();
+        }
+        new ERecordBuilder("procureapply.save")
+                .msgArgs(StringUtils.join(deliverymentIds, ","))
+                .fid(this.id + "")
+                .save();
+    }
+
+    private static F.T2<List<Deliveryment>, Set<Cooperator>> procureAddDeliverymentCheck(
+            List<String>
+                    deliverymentIds) {
         /**
          * 0. 检查提交的采购单 ID 数量与加载的采购单数量是否一致
          * 1. 检查请款的供应商是否一致.
-         * 2. 生成请款单编号
-         * 3. 生成 ProcureApply
          */
-
         List<Deliveryment> deliveryments = Deliveryment
                 .find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
         if(deliverymentIds.size() != deliveryments.size())
@@ -145,13 +173,27 @@ public class ProcureApply extends Apply {
             Validation.addError("", "请仅对同一个工厂创建请款单.");
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的采购单.");
+        return new F.T2<List<Deliveryment>, Set<Cooperator>>(deliveryments, coopers);
+    }
+
+    /**
+     * 通过 DeliverymentIds 生成一份采购请款单
+     *
+     * @param deliverymentIds
+     * @return
+     */
+    public static ProcureApply buildProcureApply(List<String> deliverymentIds) {
+        F.T2<List<Deliveryment>, Set<Cooperator>> dmtAndCop = procureAddDeliverymentCheck(
+                deliverymentIds);
         if(Validation.hasErrors()) return null;
+
+        // 生成 ProcureApply
         ProcureApply apply = new ProcureApply();
-        apply.generateSerialNumber(coopers.iterator().next());
+        apply.generateSerialNumber(dmtAndCop._2.iterator().next());
         apply.createdAt = apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();
-        for(Deliveryment dmt : deliveryments) {
+        for(Deliveryment dmt : dmtAndCop._1) {
             dmt.apply = apply;
             dmt.save();
         }
@@ -160,5 +202,18 @@ public class ProcureApply extends Apply {
                 .fid(apply.id + "")
                 .save();
         return apply;
+    }
+
+    /**
+     * 没有过支付行为请款单
+     *
+     * @return
+     */
+    public static List<ProcureApply> unPaidApplies(Long cooperatorId) {
+        if(cooperatorId == null) {
+            return ProcureApply.find("confirm=false").fetch();
+        } else {
+            return ProcureApply.find("confirm=false AND cooperator.id=?", cooperatorId).fetch();
+        }
     }
 }

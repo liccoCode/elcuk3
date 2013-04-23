@@ -7,7 +7,6 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -16,6 +15,7 @@ import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
@@ -187,6 +187,10 @@ public class Payment extends Model {
         }
     }
 
+    public void cancel() {
+        throw new FastRuntimeException("什么请款下才可以让一个付款单被取消呢? (功能未完成)");
+    }
+
     /**
      * 对付款单所涉及的某些采购计划进行确认操作
      *
@@ -223,10 +227,14 @@ public class Payment extends Model {
         for(PaymentUnit unit : waitForDeals) {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
+            unit.notifyState();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
             new ERecordBuilder("payment.approval")
-                    .msgArgs(unit.procureUnit.qty() + "", unit.procureUnit.sku,
-                            "#" + unit.id, unit.currency.symbol() + " " + unit.amount())
+                    .msgArgs(unit.procureUnit.qty() + "",
+                            unit.procureUnit.sku,
+                            "#" + unit.id,
+                            unit.feeType.nickName,
+                            unit.currency.symbol() + " " + unit.amount())
                     .fid(this.id)
                     .save();
         }
@@ -298,6 +306,7 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
+            unit.notifyState();
         }
 
         this.rate = ratio;
@@ -414,25 +423,27 @@ public class Payment extends Model {
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
      * 3. 处于等待支付状态
-     * 4. 额度上线 6W 美金
+     * 4. 额度上线 6W 美金(以 6.2 换算, 372000 RMB)
      *
      * @return
      */
-    public static Payment buildPayment(Deliveryment deliveryment, Currency currency) {
+    public static Payment buildPayment(Cooperator cooperator,
+                                       Currency currency, float currentAmount) {
         DateTime now = DateTime.now();
-        Payment payment = Payment.find(
-                "SELECT p FROM Payment p LEFT JOIN p.units fee WHERE " +
-                        "fee.deliveryment.id=? AND p.createdAt>=? AND p.createdAt<=? AND " +
-                        "p.state=? ORDER BY p.createdAt ASC",
-                deliveryment.id, now.minusHours(24).toDate(), now.toDate(), S.WAITING).first();
+        Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
+                "AND state=? AND currency=?  ORDER BY createdAt ASC",
+                cooperator, now.minusHours(24).toDate(), now.toDate(),
+                S.WAITING, currency).first();
 
-        if(payment == null || payment.totalFees()._1 > 60000) {
+        if(payment == null ||
+                payment.totalFees()._1 + currency.toUSD(currentAmount) > 8 ||
+                payment.totalFees()._2 + currency.toCNY(currentAmount) > 372000) {
             payment = new Payment();
-            if(deliveryment.cooperator.paymentMethods.size() <= 0)
+            if(cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
-                        Messages.get("paymenttarget.missing", deliveryment.cooperator.fullName));
-            payment.cooperator = deliveryment.cooperator;
-            payment.target = deliveryment.cooperator.paymentMethods.get(0);
+                        Messages.get("paymenttarget.missing", cooperator.fullName));
+            payment.cooperator = cooperator;
+            payment.target = cooperator.paymentMethods.get(0);
             payment.currency = currency;
             payment.generatePaymentNumber().save();
         }
