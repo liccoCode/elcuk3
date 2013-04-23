@@ -50,7 +50,7 @@ public class ProcureApply extends Apply {
     public boolean confirm = false;
 
     /**
-     * 已经请款的金额
+     * 已经请款的金额(包含 fixValue)
      *
      * @return
      */
@@ -82,6 +82,10 @@ public class ProcureApply extends Apply {
             }
         }
         return fixValueAmount;
+    }
+
+    public float leftAmount() {
+        return this.totalAmount() - this.appliedAmount();
     }
 
     /**

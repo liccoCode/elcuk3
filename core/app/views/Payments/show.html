@@ -14,10 +14,10 @@
         <input type="submit" class="btn btn-info" value="批准"/>
       #{/power.ck}
       #{if payment.state == models.finance.Payment.S.LOCKED}
-        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁付款单</a>
+        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁可加入新付款项目</a>
       #{/if}
       #{elseif payment.state == models.finance.Payment.S.WAITING}
-        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-danger">锁定付款单</a>
+        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-warning">锁定准备付款</a>
       #{/elseif}
   </div>
   <table class="table table-bordered table-condensed">

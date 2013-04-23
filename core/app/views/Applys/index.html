@@ -16,6 +16,7 @@
       <th>请款单编号</th>
       <th>合作伙伴</th>
       <th>已经请款金额</th>
+      <th>剩余请款金额</th>
       <th>总需要请款金额</th>
       <th>修正值总额</th>
     </tr>
@@ -26,6 +27,7 @@
       <td>${apply.cooperator.fullName}</td>
         #{set currency:apply.currency()/}
       <td>${currency?.symbol()} ${apply.appliedAmount()}</td>
+      <td>${currency?.symbol()} ${apply.leftAmount()}</td>
       <td>${currency?.symbol()} ${apply.totalAmount()}</td>
       <td>${currency?.symbol()} ${apply.fixValueAmount()}</td>
     </tr>
