@@ -122,7 +122,10 @@ public class ProcureApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Messages.get("procureapply.save"));
+        return ElcukRecord.records(this.id + "",
+                Arrays.asList(Messages.get("procureapply.save"),
+                        Messages.get("deliveryment.departApply"))
+        );
     }
 
     /**

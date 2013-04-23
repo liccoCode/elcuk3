@@ -176,6 +176,8 @@ deliveryment.cancel.msg=\u53D6\u6D88[\u91C7\u8D2D\u5355] %s \u539F\u56E0\u662F (
 deliveryment.createFromProcures=[\u91C7\u8D2D\u5355\u5143] \u521B\u5EFA [\u91C7\u8D2D\u5355]
 deliveryment.createFromProcures.msg=[\u91C7\u8D2D\u5355\u5143] %s \u521B\u5EFA\u5230 [\u91C7\u8D2D\u5355] %s
 deliveryment.confirm=\u786E\u8BA4[\u91C7\u8D2D\u5355]
+deliveryment.departApply=[\u91C7\u8D2D\u5355]\u4ECE[\u8BF7\u6B3E\u5355]\u5265\u79BB
+deliveryment.departApply.msg=[\u91C7\u8D2D\u5355] %s \u4ECE %s [\u8BF7\u6B3E\u5355] \u4E2D\u5265\u79BB.
 
 shipment.ship=\u4E3A[\u8FD0\u8F93\u5355]\u6DFB\u52A0[\u8FD0\u8F93\u9879\u76EE]
 shipment.ship.msg=\u5C06[\u8FD0\u8F93\u9879\u76EE] %s \u6DFB\u52A0\u5230[\u8FD0\u8F93\u5355] %s

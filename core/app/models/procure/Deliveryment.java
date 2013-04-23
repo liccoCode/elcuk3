@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
@@ -348,6 +349,10 @@ public class Deliveryment extends GenericModel {
                         "所属采购单 %s 从原有请款单 %s 中剥离.", this.id, this.apply.serialNumber));
             }
         }
+        new ERecordBuilder("deliveryment.departApply")
+                .msgArgs(this.id, this.apply.serialNumber)
+                .fid(this.apply.id)
+                .save();
         this.apply = null;
         this.save();
     }
