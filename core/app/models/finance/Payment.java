@@ -436,7 +436,7 @@ public class Payment extends Model {
                 S.WAITING, currency).first();
 
         if(payment == null ||
-                payment.totalFees()._1 + currency.toUSD(currentAmount) > 8 ||
+                payment.totalFees()._1 + currency.toUSD(currentAmount) > 60000 ||
                 payment.totalFees()._2 + currency.toCNY(currentAmount) > 372000) {
             payment = new Payment();
             if(cooperator.paymentMethods.size() <= 0)
