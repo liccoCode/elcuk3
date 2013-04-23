@@ -28,7 +28,7 @@ public class Payments extends Controller {
 
     @Check("payments.index")
     public static void index() {
-        List<Payment> payments = Payment.findAll();
+        List<Payment> payments = Payment.find("ORDER BY createdAt DESC").fetch();
         render(payments);
     }
 
