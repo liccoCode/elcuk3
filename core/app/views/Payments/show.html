@@ -111,7 +111,7 @@
       <a href="@{Payments.cancel(payment.id)}" data-method='DELETE' class="btn btn-danger">取消付款单</a>
     </div>
     <div class="row-fluid">
-      <div class="span4">
+      <div class="span5">
         <dl class="dl-horizontal" style="margin-top:0">
           <dt>请款单</dt>
           <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
@@ -124,9 +124,15 @@
           <dd>$ 1 -> ¥ <span id="usd_rates"></span></dd>
           <dt>汇率时间</dt>
           <dd><span id="usd_datetime"></span></dd>
+          <dt>&nbsp;</dt>
+          <dd>&nbsp;</dd>
+          <dt>最近更新时间</dt>
+          <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
+          <dt>创建时间</dt>
+          <dd>#{time_tooltip time: payment.createdAt, datetime:true/}</dd>
         </dl>
       </div>
-      <div class="span8">
+      <div class="span7">
       #{if payment.state == models.finance.Payment.S.PAID}
         <dl class="dl-horizontal" style="margin-top:0">
           <dt>支付状态</dt>

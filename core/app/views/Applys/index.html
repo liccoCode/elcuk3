@@ -19,6 +19,8 @@
       <th>剩余请款金额</th>
       <th>总需要请款金额</th>
       <th>修正值总额</th>
+      <th>最新更新时间</th>
+      <th>创建时间</th>
     </tr>
   #{list items:applyes, as:'apply'}
     <tr>
@@ -30,6 +32,8 @@
       <td>${currency?.symbol()} ${apply.leftAmount()}</td>
       <td>${currency?.symbol()} ${apply.totalAmount()}</td>
       <td>${currency?.symbol()} ${apply.fixValueAmount()}</td>
+      <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
+      <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
     </tr>
   #{/list}
   </table>
