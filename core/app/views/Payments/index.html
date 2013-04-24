@@ -43,7 +43,7 @@
       <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
       <td>${helper.Currency.CNY.symbol()} ${pay.totalFees()._2}</td>
       <td>
-        <i class="badge badge-info">${pay.units.size()}</i>
+        <i class="badge badge-info">${pay.units().size()}</i>
       ${pay.actualPaid}
       </td>
       <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
