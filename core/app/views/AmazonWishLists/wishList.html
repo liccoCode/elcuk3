@@ -1,0 +1,25 @@
+<div class="row-fluid">
+    <div class="span12">
+        <table class="table table-bordered table-condensed">
+            <tr>
+                <th>Market</th>
+                <th>Category</th>
+                <th>Asin</th>
+                <th>已添加数量</th>
+                <th>可添加数量</th>
+                <th>自动添加数量</th>
+                <th>添加</th>
+            </tr>
+            #{set AM: wishlist._1.split('_') /}
+            <tr>
+                <td>${AM[1]}</td>
+                <td>${wishlist._2}</td>
+                <td>${AM[0]}</td>
+                <td>${wishlist._3}</td>
+                <td>${wishlist._5-wishlist._3}</td>
+                <td>${wishlist._4}</td>
+                <td><button class="btn" id="add_wishlist">添加</button></td>
+            </tr>
+        </table>
+    </div>
+</div>

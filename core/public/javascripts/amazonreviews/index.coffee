@@ -143,7 +143,13 @@ $ ->
     loadAsin = $('#load_asin').val(-> @value.toUpperCase())
     #B007LE0UT4
     return false if loadAsin.val().length isnt 10
-    reviewLoadFun()
+    href = $('#tabs li[class=active] a').attr('href')
+    if href is '#review_table'
+      loadReviewTable()
+    else if href is '#wish_list'
+      loadWishList()
+    else 
+      reviewLoadFun()
     e.preventDefault()
 
 
@@ -172,5 +178,38 @@ $ ->
     if $("#search_form [name=asin]").val() == ""
       alert("请输入 ASIN")
       return
-    $('#review_table').load("/AmazonReviews/reviewTable", $('#search_form :input').fieldSerialize())
+    loadReviewTable()
+    
   )
+  loadReviewTable = ->
+    $('#review_table').load("/AmazonReviews/reviewTable", $('#search_form :input').fieldSerialize())
+
+  #---------Wish List列表
+  $('a[href=#wish_list]').on('shown',
+  (e) ->
+    if $("#search_form [name=asin]").val() == ""
+      alert("请输入 ASIN")
+      return
+    loadWishList()
+  )
+  loadWishList = ->
+    params = $('#search_form :input').fieldSerialize()
+    $('#wish_list').load("/AmazonWishLists/wishList",params,
+    ->
+      $('#add_wishlist').unbind('click').bind('click',
+      (e)->
+        mask = $('#container')
+        mask.mask('添加到WishList中...')
+        $.post("/AmazonWishLists/addToWishList",params,
+        (success) ->
+          if success
+            loadWishList()
+          else
+            alert '添加失败'
+          mask.unmask()
+        )
+        e.preventDefault()
+      )
+    )
+
+
