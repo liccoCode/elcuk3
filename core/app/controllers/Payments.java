@@ -145,6 +145,7 @@ public class Payments extends Controller {
     /**
      * 取消当前这个请款单
      */
+    @Check("payments.cancel")
     public static void cancel(Long id, String reason) {
         Payment payment = Payment.findById(id);
         payment.cancel(reason);
