@@ -14,7 +14,6 @@
 <div class="row-fluid">
   <table class="table table-bordered table-condensed">
     <tr>
-      <th>#</th>
       <th class="">请款单编号</th>
       <th class="ten">涉及的请款人</th>
       <th class="ten">支付人</th>
@@ -27,8 +26,7 @@
     </tr>
   #{list items:payments, as:'pay'}
     <tr>
-      <td><a href="@{Payments.show(pay.id)}">${pay.id}</a></td>
-      <td>${pay.paymentNumber}</td>
+      <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
       <td>
           #{list items:pay.applyers(), as:'applyer'}
           ${applyer.username} &nbsp;

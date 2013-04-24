@@ -109,7 +109,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("servers.index", "服务器管理 页面"));
         privileges.add(new Privilege("accounts.index", "账户管理 页面"));
         privileges.add(new Privilege("users.index", "用户管理 页面"));
-        privileges.add(new Privilege("mailsrecords.index","邮件管理 页面"));
+        privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
 
         // 首页
         privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
@@ -159,6 +159,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("payments.payforit", "付款单付款"));
         privileges.add(new Privilege("payments.shouldpaidupdate", "付款单应付金额更新"));
         privileges.add(new Privilege("payments.uploads", "付款单凭证上传"));
+        privileges.add(new Privilege("payments.cancel", "取消付款单"));
 
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
 
