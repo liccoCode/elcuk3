@@ -151,8 +151,14 @@
           <dd>${payment.payer?.username}</dd>
           <dt>(计算)应该支付</dt>
           <dd>${payment.actualCurrency.symbol()} ${payment.shouldPaid}</dd>
+          <dt>&nbsp;</dt>
+          <dd>&nbsp;</dd>
           <dt>实际支付金额</dt>
           <dd>${payment.actualCurrency.symbol()} ${payment.actualPaid}</dd>
+          <dt>对方账号</dt>
+          <dd>${payment.target.accountNumber}</dd>
+          <dt>对方账户</dt>
+          <dd>${payment.target.accountUser}</dd>
         </dl>
       #{/if}
       #{else }
