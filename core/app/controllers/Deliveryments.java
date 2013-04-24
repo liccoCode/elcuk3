@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.finance.ProcureApply;
@@ -42,9 +43,12 @@ public class Deliveryments extends Controller {
     }
 
     @Before(only = {"index", "deliverymentToApply"})
-    public static void beforeIndex() {
+    public static void beforeIndex(DeliveryPost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
+        List<ProcureApply> avaliableApplies = ProcureApply
+                .unPaidApplies(p == null ? null : p.cooperId);
         renderArgs.put("suppliers", suppliers);
+        renderArgs.put("avaliableApplies", avaliableApplies);
     }
 
     @Check("deliveryments.index")
@@ -153,17 +157,23 @@ public class Deliveryments extends Controller {
     }
 
     /**
-     * 进入采购单请款生成页面
+     * 为采购单提交请款单申请
      */
     @Check("deliveryments.deliverymenttoapply")
-    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p) {
+    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
+                                           Long procureApplyId) {
         if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
         if(deliverymentIds.size() <= 0) {
             flash.error("请选择需纳入请款的采购单(相同供应商).");
             index(p, deliverymentIds);
         }
 
-        ProcureApply apply = ProcureApply.buildProcureApply(deliverymentIds);
+        ProcureApply apply = ProcureApply.findById(procureApplyId);
+        if(apply == null)
+            apply = ProcureApply.buildProcureApply(deliverymentIds);
+        else
+            apply.appendDelivery(deliverymentIds);
+
         if(apply == null || Validation.hasErrors()) {
             for(Error error : Validation.errors()) {
                 flash.error(error.message());
@@ -173,5 +183,17 @@ public class Deliveryments extends Controller {
             flash.success("请款单 %s 申请成功.", apply.serialNumber);
             Applys.procure(apply.id);
         }
+    }
+
+    public static void departProcureApply(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        long applyId = dmt.apply.id;
+        dmt.departFromProcureApply();
+
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 剥离成功.", id);
+        Applys.procure(applyId);
     }
 }
