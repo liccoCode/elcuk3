@@ -26,10 +26,12 @@ GET     /helper/                                            staticDir:public/ima
 
 # Applys
 GET     /apply/{id}/procure                                 Applys.procure
+PUT     /apply/{id}/procure/confirm                         Applys.procureConfirm
 
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
+DELETE /deliveryment/{id}/departApply                        Deliveryments.departProcureApply
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
@@ -44,6 +46,7 @@ GET     /payments                                           Payments.index
 GET     /payment/rates                                      Payments.rates
 POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
+DELETE  /payment/{id}                                       Payments.cancel
 POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
 POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
 POST    /payment/{id}/pay                                   Payments.payForIt
