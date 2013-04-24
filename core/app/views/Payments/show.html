@@ -108,7 +108,11 @@
       <button url='@{Payments.rates()}' class="btn" id="boc_rate_btn">
         <i class="icon-refresh"></i> 更新
       </button>
-      <a href="@{Payments.cancel(payment.id)}" data-method='DELETE' class="btn btn-danger">取消付款单</a>
+    #{if payment.cancelable()}
+      <button url="@{Payments.cancel(payment.id)}" id="payment_cancel" class="btn btn-danger">
+        取消付款单
+      </button>
+    #{/if}
     </div>
     <div class="row-fluid">
       <div class="span5">
@@ -225,16 +229,16 @@
 </div>
 #{/power.ck}
 
-<div id="deny_modal" class="modal hide fade">
-  <form action="#" method="post" id="deny_form">
+<div id="reason_model" class="modal hide fade">
+  <form action="#" method="POST" id="model_form">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3><span class="text-info" id="deny_title"></span></h3>
+      <h3><span class="text-info" id="model_title"></span></h3>
     </div>
     <div class="modal-body">
       <div class="row-fluid">
-        <label for="deny_reason">驳回原因</label>
-        <textarea id="deny_reason" rows="3" class="span12" name="reason"></textarea>
+        <label for="model_reason">原因</label>
+        <textarea id="model_reason" rows="3" class="span12" name="reason"></textarea>
       </div>
     </div>
     <div class="modal-footer">

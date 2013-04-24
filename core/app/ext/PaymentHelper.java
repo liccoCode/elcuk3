@@ -68,4 +68,14 @@ public class PaymentHelper extends JavaExtensions {
                 return "";
         }
     }
+
+    /**
+     * 页面上 Payment 是否可以取消
+     *
+     * @param payment
+     * @return
+     */
+    public static boolean cancelable(Payment payment) {
+        return !(payment.state == Payment.S.CANCEL || payment.state == Payment.S.PAID);
+    }
 }
