@@ -171,7 +171,6 @@ public class MailsRecord extends Model {
         if(records != null) return records;
 
         synchronized(MailsRecord.class) {
-
             StringBuffer querystr = new StringBuffer("type=? and createdAt between ? and ? and success=?");
             List<Object> paras = new ArrayList<Object>();
             paras.add(type);
@@ -195,5 +194,6 @@ public class MailsRecord extends Model {
 
         return records;
     }
+
 
 }
