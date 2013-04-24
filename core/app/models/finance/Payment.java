@@ -9,6 +9,7 @@ import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -187,8 +188,24 @@ public class Payment extends Model {
         }
     }
 
-    public void cancel() {
-        throw new FastRuntimeException("什么请款下才可以让一个付款单被取消呢? (功能未完成)");
+    public void cancel(String reason) {
+        /**
+         * 1. 当付款单中没有任何请款项目的时候可以关闭
+         */
+        if(StringUtils.isBlank(reason))
+            Validation.addError("", "必须填写原因才可以关闭");
+        if(Validation.hasErrors()) return;
+
+        if(this.units().size() == 0) {
+            this.state = S.CANCEL;
+            this.save();
+        } else {
+            throw new FastRuntimeException("什么请款下才可以让一个付款单被取消呢? (功能未完成)");
+        }
+        new ERecordBuilder("payment.cancel")
+                .msgArgs(reason)
+                .fid(this.id)
+                .save();
     }
 
     /**
@@ -490,7 +507,8 @@ public class Payment extends Model {
         List<String> actions = Arrays.asList(
                 Messages.get("payment.approval"),
                 Messages.get("payment.payit"),
-                Messages.get("payment.uploadDestroy")
+                Messages.get("payment.uploadDestroy"),
+                Messages.get("payment.cancel")
         );
 
         return ElcukRecord.records(this.id + "", actions);

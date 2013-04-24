@@ -2,9 +2,16 @@ $ ->
   $('.paymentUnitDeny').click (e) ->
     e.preventDefault()
     self = $(@)
-    $('#deny_form').attr('action', self.attr('url'))
-    $('#deny_title').text(self.parents('td').next().text())
-    $('#deny_modal').modal('show')
+    $('#model_form').attr('action', self.attr('url')).attr('method', 'POST')
+    $('#model_title').text(self.parents('td').next().text())
+    $('#reason_model').modal('show')
+
+  $('#payment_cancel').click (e) ->
+    e.preventDefault()
+    self = $(@)
+    $('#model_form').attr('action', self.attr('url')).data('method', 'DELETE')
+    $('#model_title').text("取消 #{window.document.title}")
+    $('#reason_model').modal('show')
 
   # 计算美金金额
   calculateUsdCosts = ->

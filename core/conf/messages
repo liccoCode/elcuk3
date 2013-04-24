@@ -231,6 +231,8 @@ payment.payit=\u4ED8\u6B3E\u5355\u4ED8\u6B3E
 payment.payit.msg=\u652F\u4ED8\u7ED9 %s \u603B\u91D1\u989D %s (\u6C47\u7387: %s at %s);
 payment.uploadDestroy=\u5220\u9664\u9644\u4EF6
 payment.uploadDestroy.msg=\u5220\u9664\u4E86\u9644\u4EF6 %s
+payment.cancel=\u53D6\u6D88\u4ED8\u6B3E\u5355
+payment.cancel.msg=\u56E0 [%s] \u53D6\u6D88\u4ED8\u6B3E\u5355
 
 
 procureapply.save=\u521B\u5EFA[\u91C7\u8D2D\u8BF7\u6B3E\u5355]
