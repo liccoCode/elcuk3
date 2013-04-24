@@ -108,11 +108,13 @@
       <button url='@{Payments.rates()}' class="btn" id="boc_rate_btn">
         <i class="icon-refresh"></i> 更新
       </button>
-    #{if payment.cancelable()}
-      <button url="@{Payments.cancel(payment.id)}" id="payment_cancel" class="btn btn-danger">
-        取消付款单
-      </button>
-    #{/if}
+    #{power.ck 'payments.cancel'}
+        #{if payment.cancelable()}
+          <button url="@{Payments.cancel(payment.id)}" id="payment_cancel" class="btn btn-danger">
+            取消付款单
+          </button>
+        #{/if}
+    #{/power.ck}
     </div>
     <div class="row-fluid">
       <div class="span5">
