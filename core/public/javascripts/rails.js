@@ -7,7 +7,7 @@
      * Requires jQuery 1.7.0 or later.
      *
      * 为符合 Playframework 的使用, 做了如下调整:
-     * 1. hack 了 data-method 的处理, 针对 put/delete 调整为 x-http-method-override=DELETE
+     * 1. hack 了 data-method 的处理(a,form), 针对 put/delete 调整为 x-http-method-override=DELETE
      * 2. 对 dataType 默认为 script
      *
      * Released under the MIT license
@@ -323,6 +323,11 @@
 
         $(document).delegate(rails.formSubmitSelector, 'submit.rails', function(e){
             var form = $(this), remote = form.data('remote') !== undefined, blankRequiredInputs = rails.blankInputs(form, rails.requiredInputSelector), nonBlankFileInputs = rails.nonBlankInputs(form, rails.fileInputSelector);
+            var method = form.data('method'), action = form.attr('action');
+            if(method) method = method.toLowerCase();
+            if(method == 'delete' || method == 'put'){
+                form.attr('action', function(i, val){ return val + "?x-http-method-override=" + method.toUpperCase();})
+            }
 
             if(!rails.allowAction(form)) return rails.stopEverything(e);
 

@@ -4,13 +4,22 @@
     #{script 'deliveryments/procure.coffee'/}
 #{/set}
 #{flash_alert /}
-#{info_row title:'采购请款单' /}
+#{info_row title:"采购请款单 ${apply.serialNumber}" /}
+<div class="btn-toolbar">
+#{if apply.confirm}
+  <button class="btn btn-danger" disabled="">请款单已经确认</button>
+#{/if}
+#{else }
+  <a id="confirm_btn" href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
+     data-remote='true' data-method='PUT' data-disable-with='确认中...'>确认请款单</a>
+#{/else}
+</div>
 #{list items:apply.deliveryments, as:'dmt'}
 <div class="row-fluid">
   <div class="span3">
     <dl class="dl-horizontal">
       <dt>#</dt>
-      <dd>${dmt.id}</dd>
+      <dd><a href="@{Deliveryments.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
       <dt>状态</dt>
       <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
       <dt>供应商</dt>
@@ -24,7 +33,14 @@
       <dd>${dmt.orderTime}</dd>
         #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
       <dt>最后交货时间</dt>
-      <dd>${twoDeliveryDate._2}</dd>
+      <dd>${twoDeliveryDate._2}&nbsp;</dd>
+        #{if dmt.isProcureApplyDepartable()}
+          <dt>&nbsp;</dt>
+          <dd>
+            <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small"
+               data-method='DELETE' data-confirm='确认移除?'>从当前请款单中移除</a>
+          </dd>
+        #{/if}
     </dl>
   </div>
 
