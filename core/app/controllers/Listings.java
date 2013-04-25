@@ -117,7 +117,7 @@ public class Listings extends Controller {
      * @param listingId
      */
     public static void closeWarnning(String listingId) {
-        Listing listing=Listing.findById(listingId);
+        Listing listing = Listing.findById(listingId);
         listing.closeWarnning();
         trackedListings();
     }

@@ -312,7 +312,7 @@ public class Listing extends GenericModel {
             } else if(off.cond != ListingOffer.C.NEW) {
                 Logger.info("Offer %s is sale %s condition.", off.offerId, off.cond);
             } else {
-                    needWarnningOffers++;
+                needWarnningOffers++;
             }
         }
 
@@ -324,7 +324,7 @@ public class Listing extends GenericModel {
             //标记为被跟踪
             this.isTracked = true;
         } else if(needWarnningOffers <= 0) {
-            this.isTracked=false;
+            this.isTracked = false;
         }
         this.save();
     }
@@ -566,7 +566,7 @@ public class Listing extends GenericModel {
      *
      * @param
      */
-    public  void closeWarnning() {
+    public void closeWarnning() {
         this.isTracked = false;
         //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
         this.closeWarnningTime = new Date();
