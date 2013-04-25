@@ -3,16 +3,17 @@
 <div class="container">
     <table class="table table-bordered table-condensed">
         <tr>
-            <th>Sells</th>
+            <th>Offers</th>
             <th>ListingId</th>
             <th>Title</th>
             <th>TotalOffers</th>
+            <th>上次关闭时间</th>
             <th>Warnning</th>
         </tr>
     #{list items:lsts,as:'list'}
         <tr>
-            <td data-toggle="toggle" data-target="#selling_${list_index}">
-                <i class="icon-reorder"></i> ${list.sellings.size()}
+            <td data-toggle="toggle" data-target="#offer_${list_index}">
+                <i class="icon-reorder"></i> ${list.offers.size()}
             </td>
             <td>
                 <a href="@{Listings.listing(list.listingId)}" target="_blank">${list.listingId}</a>
@@ -24,27 +25,30 @@
                 ${list.totalOffers}
             </td>
             <td>
+                ${list.closeWarnningTime.format("yyyy-MM-dd hh:mm:ss")}
+            </td>
+            <td>
                 <a href="@{Listings.closeWarnning(list.listingId)}" class="btn-link">关闭</a>
             </td>
         </tr>
 
-        <tr id="selling_${list_index}" style="display:none;">
-            <td colspan="4" style="padding:0">
+        <tr id="offer_${list_index}" style="display:none;">
+            <td colspan="5" style="padding:0">
                 <table class="table table-bordered table-condensed" style="margin:0">
                     <tr>
-                        <th>SellingId</th>
-                        <th>Market</th>
-                        <th>Type</th>
+                        <th>OfferId</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>FBA</th>
                         <th>State</th>
-                        <th>Acc</th>
                     </tr>
-                    #{list items:list.sellings, as:'sell'}
+                    #{list items:list.offers, as:'sell'}
                         <tr>
-                            <td><a target="_blank" href="@{Sellings.selling(sell.sellingId)}">${sell.sellingId}</a></td>
-                            <td>${sell.market}</td>
-                            <td>${sell.type}</td>
-                            <td>${sell.state}</td>
-                            <td>${sell.account.prettyName()}</td>
+                            <td>${sell.offerId}</td>
+                            <td>${sell.name}</td>
+                            <td>${sell.price}</td>
+                            <td>${sell.fba}</td>
+                            <td>${sell.cond}</td>
                         </tr>
                     #{/list}
                 </table>

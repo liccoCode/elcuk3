@@ -55,7 +55,6 @@ public class Listing extends GenericModel {
         this.displayPrice = selling.aps.salePrice;
         this.market = selling.market;
         this.saleRank = 100000;
-        this.warnningTimes = 0;
         this.totalOffers = 0;
         this.product = prod;
     }
@@ -128,11 +127,6 @@ public class Listing extends GenericModel {
     @Expose
     public String picUrls;
 
-    /**
-     * 此 Listing 是否需要进行警告的的标识, 并且记录警告了多少次.
-     */
-    @Expose
-    public Integer warnningTimes = 0;
 
     /**
      * 手动关闭警告时间
@@ -318,23 +312,19 @@ public class Listing extends GenericModel {
             } else if(off.cond != ListingOffer.C.NEW) {
                 Logger.info("Offer %s is sale %s condition.", off.offerId, off.cond);
             } else {
-                // Mail 警告
-                if(this.warnningTimes == null) this.warnningTimes = 0;
-                this.warnningTimes++;
-                if(this.warnningTimes <= 5)
                     needWarnningOffers++;
             }
         }
 
         if(needWarnningOffers >= 1) {
-            //两小时处理时间
-            if(this.closeWarnningTime != null && DateTime.now().minusHours(2).isBefore(this.closeWarnningTime.getTime()))
+            //两天处理时间
+            if(this.closeWarnningTime != null && DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
                 return;
             Mails.moreOfferOneListing(offers, this);
             //标记为被跟踪
             this.isTracked = true;
         } else if(needWarnningOffers <= 0) {
-            this.warnningTimes = 0;
+            this.isTracked=false;
         }
         this.save();
     }
@@ -574,13 +564,12 @@ public class Listing extends GenericModel {
     /**
      * 关闭Listing被跟的警告
      *
-     * @param listingId
+     * @param
      */
-    public static void closeWarnning(String listingId) {
-        Listing lst = Listing.find("listingId=?", listingId).first();
-        lst.isTracked = false;
+    public  void closeWarnning() {
+        this.isTracked = false;
         //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
-        lst.closeWarnningTime = new Date();
-        lst.save();
+        this.closeWarnningTime = new Date();
+        this.save();
     }
 }
