@@ -24,12 +24,13 @@ public class AmazonWishLists extends Controller {
      */
     public static void wishList(String asin, String m) {
         M market = M.val(m);
-        F.T5<String, String, Long, Long, Long> wishlist=AmazonWishListRecord.WishList(asin, market);
+        F.T5<String, String, String, Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
         render(wishlist);
     }
 
     /**
      * 添加Listing到WishList
+     *
      * @param asin
      * @param m
      */
@@ -40,7 +41,7 @@ public class AmazonWishLists extends Controller {
         if(listing == null)
             throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
         F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToWishList();
-        boolean success=accT2._1.addToWishList(listing);
+        boolean success = accT2._1.addToWishList(listing);
         renderJSON(success);
     }
 

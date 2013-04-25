@@ -396,15 +396,15 @@ public class Account extends Model {
         String sessionId = this.cookie("session-id", listing.market);
         if(sessionId == null) {
             //登陆失败
-            if(!this.loginAmazonSize(listing.market)){
+            if(!this.loginAmazonSize(listing.market)) {
                 return false;
             }
             sessionId = this.cookie("session-id", listing.market);
         }
 
-        String wishlist_body = HTTP.get(this.cookieStore(listing.market), listing.market.amazonWishList());
+        String wishlistBody = HTTP.get(this.cookieStore(listing.market), listing.market.amazonWishList());
         //判断是否存在WishList
-        if(!wishlist_body.contains("listActions")) {
+        if(!wishlistBody.contains("listActions")) {
             HTTP.post(this.cookieStore(listing.market), listing.market.amazonNewWishList(),
                     Arrays.asList(
                             new BasicNameValuePair("manual-create", "Y"),
@@ -438,8 +438,8 @@ public class Account extends Model {
         String result = HTTP.post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
 
         //如果添加成功,或者是账户已经添加该Listing但是系统中无记录.
-        if(result.contains("hucSuccessMsg") || result.contains("appMessageBoxInfo")) {
-            new AmazonWishListRecord(listing, this, false).save();
+        if(result.contains("hucSuccessMsg") | result.contains("appMessageBoxInfo")) {
+            new AmazonWishListRecord(listing, this).save();
             return true;
         }
 

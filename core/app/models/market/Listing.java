@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit;
 public class Listing extends GenericModel {
 
 
-
-
     /**
      * Condition
      */
@@ -136,17 +134,6 @@ public class Listing extends GenericModel {
     @Expose
     public Integer warnningTimes = 0;
 
-    /**
-     * 手动关闭警告时间
-     */
-    @Expose
-    public Date closeWarnningTime;
-
-    /**
-     * 此Listing是否被跟踪
-     */
-    @Expose
-    public boolean isTracked;
 
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
@@ -329,13 +316,9 @@ public class Listing extends GenericModel {
         }
 
         if(needWarnningOffers >= 1) {
-            //两小时处理时间
-            if(this.closeWarnningTime != null && DateTime.now().minusHours(2).isBefore(this.closeWarnningTime.getTime()))
-                return;
             Mails.moreOfferOneListing(offers, this);
-            //标记为被跟踪
-            this.isTracked = true;
         } else if(needWarnningOffers <= 0) {
+            // 当不需要警告的时候, 将警告次数清零
             this.warnningTimes = 0;
         }
         this.save();
@@ -363,17 +346,18 @@ public class Listing extends GenericModel {
 
     /**
      * 挑选一个Account , 来添加Listing到其WishList
+     *
      * @return
      */
-    public F.T2<Account,Integer> pickUpOneAccountToWishList() {
+    public F.T2<Account, Integer> pickUpOneAccountToWishList() {
         List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.market);
         List<Account> nonWishListAccs = AmazonWishListRecord.nonAddWishListAccs(opendAccs, this.listingId);
-        if(nonWishListAccs.size()==0)
+        if(nonWishListAccs.size() == 0)
             throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
         StringBuffer sb = new StringBuffer();
         for(Account acc : nonWishListAccs)
             sb.append(acc.id).append("|").append(acc.prettyName()).append(",");
-        return  new F.T2<Account, Integer>(nonWishListAccs.get(0),nonWishListAccs.size());
+        return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
     }
 
     /**
@@ -577,27 +561,5 @@ public class Listing extends GenericModel {
             }
         }
         return Cache.get(cacheKey, Set.class);
-    }
-
-    /**
-     * 获得被跟踪的Listing
-     *
-     * @return
-     */
-    public static List<Listing> trackedListings() {
-        return Listing.find("istracked = true").fetch();
-    }
-
-    /**
-     * 关闭Listing被跟的警告
-     *
-     * @param listingId
-     */
-    public static void closeWarnning(String listingId) {
-        Listing lst = Listing.find("listingId=?", listingId).first();
-        lst.isTracked = false;
-        //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
-        lst.closeWarnningTime = new Date();
-        lst.save();
     }
 }

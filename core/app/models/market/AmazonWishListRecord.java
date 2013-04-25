@@ -56,21 +56,15 @@ public class AmazonWishListRecord extends Model {
     @Expose
     public Date createAt;
 
-    /**
-     * 是否自动生成
-     */
-    @Expose
-    public boolean auto;
 
-    public AmazonWishListRecord(Listing listing, Account account, boolean auto) {
+    public AmazonWishListRecord(Listing listing, Account account) {
         this.asin = listing.asin;
         this.market = listing.market.toString();
         this.account = account;
         this.category = listing.product.category.name;
         this.createAt = new Date();
-        this.userName=account.username;
-        this.listingId=listing.listingId;
-        this.auto = auto;
+        this.userName = account.username;
+        this.listingId = listing.listingId;
     }
 
 
@@ -98,24 +92,18 @@ public class AmazonWishListRecord extends Model {
      * @param market
      * @return
      */
-    public static F.T5<String, String, Long, Long, Long> WishList(String asin, M market) {
-        String sql="select a.category as cg,a.auto as auto ,count(a.auto) as count from (select category,auto from amazonwishlistrecord where asin=? and market=?) a group by a.auto";
+    public static F.T5<String, String, String, Long, Long> wishList(String asin, M market) {
+        String sql = "select a.category as cg,count(a.category) as count from (select category from amazonwishlistrecord where asin=? and market=?) a";
 
         List<Map<String, Object>> rows = DBUtils.rows(sql, asin, market.toString());
         long addedNumb = 0;
-        long autoAddedNum = 0;
         String category = null;
         for(Map row : rows) {
             category = row.get("cg").toString();
-            long count = (Long)row.get("count");
-            addedNumb += count;
-            if((Boolean) row.get("auto"))
-                autoAddedNum += count;
+            addedNumb += (Long) row.get("count");
         }
         long totalNumb = Account.count("type=?", market);
-        return new F.T5<String, String, Long, Long, Long>(
-                Listing.lid(asin, market), category, addedNumb, autoAddedNum, totalNumb
-        );
+        return new F.T5<String, String, String, Long, Long>(asin, market.toString(), category, addedNumb, totalNumb);
     }
 
 }
