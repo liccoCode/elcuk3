@@ -87,10 +87,9 @@ public class PaymentUnit extends Model {
         this();
         this.procureUnit = procureUnit;
         this.deliveryment = procureUnit.deliveryment;
-        this.amount = procureUnit.attrs.price * procureUnit.qty();
+        this.amount = procureUnit.totalAmount();
         this.currency = procureUnit.attrs.currency;
-        this.payment = Payment
-                .buildPayment(this.deliveryment.cooperator, this.currency, this.amount);
+        this.payment = Payment.buildPayment(procureUnit);
         this.payee = User.current();
         this.payment.pApply = this.deliveryment.apply;
         this.payment.save();
