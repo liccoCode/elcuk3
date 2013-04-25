@@ -194,9 +194,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne(fetch = FetchType.LAZY)
     public User creater;
 
-    @OneToMany(mappedBy = "shipment")
-    public List<FBAShipment> fbas = new ArrayList<FBAShipment>();
-
     /**
      * 这个 Shipment 自己拥有的 title, 会使用在 FBAShipment 上
      */

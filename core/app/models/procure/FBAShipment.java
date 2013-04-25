@@ -147,17 +147,11 @@ public class FBAShipment extends Model {
     @OneToOne
     public Account account;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    public Shipment shipment;
-
-    /**
-     * 与 ShipItem 的关联
-     */
-    @OneToMany(mappedBy = "fba", cascade = CascadeType.PERSIST)
-    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
-
     @Column(unique = true, nullable = false, length = 20)
     public String shipmentId;
+
+    @OneToMany(mappedBy = "fba")
+    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
     /**
      * 每一个 FBAShipment 拥有一个地址

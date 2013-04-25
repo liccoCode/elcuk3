@@ -144,11 +144,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Deliveryment deliveryment;
 
+    @ManyToOne
+    public FBAShipment fba;
+
     /**
      * 所关联的运输出去的 ShipItem.
      */
-    @OneToOne(mappedBy = "unit", cascade = CascadeType.ALL)
-    public ShipItem shipItem;
+    @OneToMany(mappedBy = "unit")
+    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
 
 
     @OneToOne(fetch = FetchType.LAZY)

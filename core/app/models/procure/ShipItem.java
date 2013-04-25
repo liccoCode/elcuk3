@@ -72,14 +72,8 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
-    /**
-     * 如果一个 ShipItem 拥有了 FBA, 那么这个 FBA 所属的 Shipment 应该与 ShipItem 所属的 Shipment 必须一样
-     */
-    @ManyToOne
-    public FBAShipment fba;
-
     @Expose
-    @OneToOne
+    @ManyToOne
     public ProcureUnit unit;
 
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
