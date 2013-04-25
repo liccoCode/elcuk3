@@ -23,4 +23,5 @@ privileges.add(new Privilege("paymentunits.destroy", "删除请款项目"));
 privileges.add(new Privilege("paymentunits.fixvalue", "更新请款项目修正价"));
 privileges.add(new Privilege("paymentunits.deny", "拒绝请款项目"));
 privileges.add(new Privilege("mailsrecords.index","邮件管理 页面"));
+privileges.add(new Privilege("payments.cancel", "取消付款单"));
 privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
