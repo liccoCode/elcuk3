@@ -569,7 +569,7 @@ public class Listing extends GenericModel {
      */
     public void closeWarnning() {
         if(!Listing.isSelfBuildListing(this.title))
-            Validation.addError("", "不属于自建的Listing");
+            Validation.addError("", "不是自建的Listing,不需要处理");
         if(Validation.hasErrors()) return;
         this.isTracked = false;
         //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.

@@ -123,7 +123,7 @@ public class Listings extends Controller {
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
-            flash.success("成功关闭警告");
+            flash.success("暂时关闭警告,两天内没有处理会再次开启");
         trackedListings();
     }
 
