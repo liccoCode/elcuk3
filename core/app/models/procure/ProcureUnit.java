@@ -329,7 +329,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public String shipMarket() {
         if(this.selling == null)
             throw new FastRuntimeException("采购计划没有关联 Selling, 不允许!");
-        return this.selling.market.humanName();
+        return this.selling.market.label();
     }
 
     public String shipType() {

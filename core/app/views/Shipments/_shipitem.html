@@ -37,12 +37,7 @@
       #{/if}
     <td>${itm.id}</td>
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
-    <td>
-    ${itm.unit.sid}
-        #{if itm.fba}
-          <span class="pull-right">${itm.fba.shipmentId}</span>
-        #{/if}
-    </td>
+    <td>${itm.unit.sid}</td>
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>

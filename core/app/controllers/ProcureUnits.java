@@ -3,10 +3,14 @@ package controllers;
 import exception.PaymentException;
 import helper.Webs;
 import models.finance.FeeType;
+import models.market.Selling;
 import models.procure.ProcureUnit;
+import models.product.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,6 +20,18 @@ import play.mvc.With;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ProcureUnits extends Controller {
+
+    public static void blank(String sid) {
+        ProcureUnit unit = new ProcureUnit();
+        unit.selling = Selling.findById(sid);
+        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        if(unit.selling == null) {
+            flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
+            Analyzes.index();
+        }
+        render(unit, whouses);
+    }
+
     /**
      * 预付款申请
      *

@@ -13,21 +13,21 @@
     #{flash_alert row:true /}
 
 <form action="/procures/update" method="post">
-    <table class="table table-condensed table-bordered">
-        #{render 'Procures/_unit_table_trs.html', unit:unit, whouses:whouses/}
-        <tr>
-            <td colspan="4">
-                <input type="hidden" name="unit.id" value="${unit.id}">
-                <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
-                <input type="hidden" name="shipmentId" value="${unit.shipItem?.shipment ? unit.shipItem.shipment.id : ''}">
-                <button type="submit" class="btn btn-primary">更新</button>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4">
-                #{render 'Procures/_shipments.html'/}
-            </td>
-        </tr>
-    </table>
+  <table class="table table-condensed table-bordered">
+      #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses/}
+    <tr>
+      <td colspan="4">
+        <input type="hidden" name="unit.id" value="${unit.id}">
+        <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
+        <input type="hidden" name="shipmentId" value="${unit.shipItem?.shipment ? unit.shipItem.shipment.id : ''}">
+        <button type="submit" class="btn btn-primary">更新</button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4">
+          #{render 'Procures/_shipments.html'/}
+      </td>
+    </tr>
+  </table>
 </form>
 #{/else}

@@ -29,7 +29,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Procures extends Controller {
-    @Before(only = {"blank", "save", "edit", "update"}, priority = 1)
+    @Before(only = {"save", "edit", "update"}, priority = 1)
     public static void whouses() {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
@@ -65,19 +65,11 @@ public class Procures extends Controller {
         render(p, units);
     }
 
-    public static void blank(ProcureUnit unit) {
-        if(unit == null || unit.selling == null) {
-            flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
-            render(unit);
-        }
-        render(unit);
-    }
-
     public static void save(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
         if(Validation.hasErrors()) {
-            render("Procures/blank.html", unit);
+            render("../views/ProcureUnits/blank.html", unit);
         }
         unit.save();
         if(StringUtils.isNotBlank(shipmentId)) {
