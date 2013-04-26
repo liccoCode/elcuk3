@@ -25,7 +25,7 @@ import java.util.Set;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class AmazonOperations extends Controller {
 
-    @Check("amazonReviews.index")
+    @Check("amazonoperations.index")
     public static void index() {
         Set<String> allAsin = Listing.allASIN();
         renderArgs.put("asins", J.json(allAsin));
