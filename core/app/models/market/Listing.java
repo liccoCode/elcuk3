@@ -15,6 +15,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
+import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 public class Listing extends GenericModel {
+
+
     /**
      * Condition
      */
@@ -53,7 +56,6 @@ public class Listing extends GenericModel {
         this.displayPrice = selling.aps.salePrice;
         this.market = selling.market;
         this.saleRank = 100000;
-        this.warnningTimes = 0;
         this.totalOffers = 0;
         this.product = prod;
     }
@@ -126,11 +128,18 @@ public class Listing extends GenericModel {
     @Expose
     public String picUrls;
 
+
     /**
-     * 此 Listing 是否需要进行警告的的标识, 并且记录警告了多少次.
+     * 手动关闭警告时间
      */
     @Expose
-    public Integer warnningTimes = 0;
+    public Date closeWarnningTime;
+
+    /**
+     * 此Listing是否被跟踪
+     */
+    @Expose
+    public boolean isTracked;
 
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
@@ -304,19 +313,19 @@ public class Listing extends GenericModel {
             } else if(off.cond != ListingOffer.C.NEW) {
                 Logger.info("Offer %s is sale %s condition.", off.offerId, off.cond);
             } else {
-                // Mail 警告
-                if(this.warnningTimes == null) this.warnningTimes = 0;
-                this.warnningTimes++;
-                if(this.warnningTimes <= 5)
-                    needWarnningOffers++;
+                needWarnningOffers++;
             }
         }
 
-        if(needWarnningOffers >= 1)
+        if(needWarnningOffers >= 1) {
+            //两天处理时间
+            if(this.closeWarnningTime != null && DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
+                return;
             Mails.moreOfferOneListing(offers, this);
-        else if(needWarnningOffers <= 0) {
-            // 当不需要警告的时候, 将警告次数清零
-            this.warnningTimes = 0;
+            //标记为被跟踪
+            this.isTracked = true;
+        } else if(needWarnningOffers <= 0) {
+            this.isTracked = false;
         }
         this.save();
     }
@@ -542,5 +551,29 @@ public class Listing extends GenericModel {
             }
         }
         return Cache.get(cacheKey, Set.class);
+    }
+
+    /**
+     * 获得被跟踪的Listing
+     *
+     * @return
+     */
+    public static List<Listing> trackedListings() {
+        return Listing.find("isTracked = true").fetch();
+    }
+
+    /**
+     * 关闭Listing被跟的警告
+     *
+     * @param
+     */
+    public void closeWarnning() {
+        if(!Listing.isSelfBuildListing(this.title))
+            Validation.addError("", "不是自建的Listing,不需要处理");
+        if(Validation.hasErrors()) return;
+        this.isTracked = false;
+        //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
+        this.closeWarnningTime = new Date();
+        this.save();
     }
 }
