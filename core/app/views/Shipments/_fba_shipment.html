@@ -28,21 +28,11 @@
 
         <th>CenterId</th>
         <td>${fba.centerId}</td>
-        <th>总重量</th>
-        <td>${fba.totalWeight().format('#.####')}kg</td>
+        <td colspan="2"></td>
         <td colspan="4">
         #{power.ck "shipments.movefba"}
-          <form method="post" action="@{Shipments.moveFba()}" style="margin-bottom:0">
-            <select name="id">
-              <option value="">不更改</option>
-                #{list items:fba.targetShipments(), as:'s'}
-                  <option value="${s.id}">${s.info()}</option>
-                #{/list}
-            </select>
-            <input type="hidden" name="shipmentId" value="${fba.shipmentId}">
-            <input type="hidden" name="lastShipment" value="${fba.shipment.id}">
-            <button class="btn btn-small btn-primary">转移</button>
-          </form>
+        *{TODO effect: shipments.movefba 权限需要删除}*
+          shipments.movefba 权限需要删除
         #{/power.ck}
         </td>
       </tr>

@@ -153,10 +153,11 @@ public class ShipItem extends GenericModel {
      * @param shipment
      */
     public void changeShipment(Shipment shipment) {
-        if(this.fba != null) {
-            this.fba.shipment = shipment;
-            this.fba.save();
-        }
+        //TODO effect: 与 FBA 没有关系, 可以删除. 同时这个方法也可以删除.
+//        if(this.fba != null) {
+//            this.fba.shipment = shipment;
+//            this.fba.save();
+//        }
         this.shipment = shipment;
         this.save();
     }

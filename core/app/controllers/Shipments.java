@@ -223,7 +223,8 @@ public class Shipments extends Controller {
         checkShowError(ship);
         new ElcukRecord(Messages.get("shipment.beginShip"),
                 Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
-        flash.success("运输单已经标记运输, FBA[%s] 已经标记 SHIPPED.", StringUtils.join(ship.fbas, ","));
+        //TODO: effect 开始运输更新 FBA
+        flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
 
         redirect("/shipments/show/" + id);
     }
@@ -248,30 +249,9 @@ public class Shipments extends Controller {
         Notification.notifies("FBA 创建成功",
                 Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId),
                 Notification.PROCURE);
-        flash.success("Amazon FBA %s (with %s items) 创建成功", fbaOpt.get().shipmentId,
-                fbaOpt.get().shipItems.size());
+        // TODO: effect 创建 FBA
+        flash.success("Amazon FBA %s 创建成功", fbaOpt.get().shipmentId, fbaOpt.get());
         redirect("/shipments/show/" + id);
-    }
-
-    /**
-     * 将某一个 FBA 从一个运输单移动到另外一个运输单
-     */
-    @Check("shipments.movefba")
-    public static void moveFba(String shipmentId, String id, String lastShipment) {
-        validation.required(id);
-        if(Validation.hasErrors()) {
-            flash.error("必须选择的一个运输单");
-            show(lastShipment);
-        }
-        FBAShipment fba = FBAShipment.findByShipmentId(shipmentId);
-        Shipment shipment = Shipment.findById(id);
-        fba.moveTo(shipment);
-        if(Validation.hasErrors()) {
-            renderArgs.put("ship", fba.shipment);
-            render("Shipments/show.html");
-        }
-        flash.success("FBA #%s 转移成功.", fba.shipmentId);
-        show(id);
     }
 
 
@@ -289,6 +269,8 @@ public class Shipments extends Controller {
         } catch(Exception e) {
             Validation.addError("", e.getMessage());
         }
+        // TODO: effect 同步 FBA 与 Shipment 无关
+        /*
         checkShowError(fba.shipment);
         new ElcukRecord(Messages.get("shipment.updateFBA"),
                 Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", fba.shipmentId,
@@ -296,7 +278,7 @@ public class Shipments extends Controller {
                 fba.shipment.id).save();
         flash.success("更新 Amazon FBA %s 成功.", fba.shipmentId);
         show(fba.shipment.id);
-        redirect("/shipments/show/" + fba.shipment.id);
+        */
     }
 
     /**
@@ -313,6 +295,8 @@ public class Shipments extends Controller {
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
         }
+        //TODO: effect 删除 FBA 不影响 Shipment
+        /*
         if(Validation.hasErrors())
             checkShowError(fba.shipment);
         flash.success("FBA %s 删除成功", fba.shipmentId);
@@ -320,6 +304,7 @@ public class Shipments extends Controller {
                 String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id),
                 Notification.PROCURE);
         show(fba.shipment.id);
+        */
     }
 
     public static void refreshProcuress(final String id) {

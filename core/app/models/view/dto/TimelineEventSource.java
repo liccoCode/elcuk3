@@ -59,7 +59,8 @@ public class TimelineEventSource {
             this(start, end, description, title, true);
         }
 
-        public Event(String start, String end, String description, String title, boolean durationEvent) {
+        public Event(String start, String end, String description, String title,
+                     boolean durationEvent) {
             this.start = start;
             this.end = end;
             this.description = description;
@@ -166,11 +167,15 @@ public class TimelineEventSource {
          * @return
          */
         public Event startAndEndDate(String type) {
-            DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime(), Dates.timeZone(null));
+            DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime(),
+                    Dates.timeZone(null));
             if(this.unit.stage == ProcureUnit.STAGE.INBOUND)
-                this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.shipItem.recivedQty) / ("sku".equals(type) ? this.skuPS() : this.sidPS()));
+//                this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.shipItem.recivedQty) / ("sku".equals(type) ? this.skuPS() : this.sidPS()));
+                // TODO effect: 计算可持续的天数的算法需要调整
+                this.lastDays = -1.0f;
             else
-                this.lastDays = Webs.scale2PointUp((this.unit.qty() / ("sku".equals(type) ? this.skuPS() : this.sidPS())));
+                this.lastDays = Webs.scale2PointUp(
+                        (this.unit.qty() / ("sku".equals(type) ? this.skuPS() : this.sidPS())));
             this.start = add8Hour(planDt.toDate());
             // 如果不够卖到第二天, 那么就省略
 //            this.end = new DateTime(planDt.plusDays(this.lastDays.intValue()).toDate()).toString();
@@ -308,9 +313,12 @@ public class TimelineEventSource {
         Event currenEvent = new Event();
         currenEvent.start = currenEvent.add8Hour(new Date());
         float validPs = ("sku".equals(type) ? analyzeDTO.getPs_cal() : analyzeDTO.ps);
-        float days = Webs.scale2PointUp(analyzeDTO.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
-        currenEvent.end = currenEvent.add8Hour(DateTime.now().plusHours((int) (days * 24)).toDate());
-        currenEvent.title = String.format("@QTY: %s(%s) 还可卖 %s Days", analyzeDTO.qty, validPs, days);
+        float days = Webs
+                .scale2PointUp(analyzeDTO.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
+        currenEvent.end = currenEvent
+                .add8Hour(DateTime.now().plusHours((int) (days * 24)).toDate());
+        currenEvent.title = String
+                .format("@QTY: %s(%s) 还可卖 %s Days", analyzeDTO.qty, validPs, days);
         currenEvent.description = "No Desc.";
         currenEvent.color("267B2F");
         return currenEvent;

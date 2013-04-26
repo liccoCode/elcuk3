@@ -118,14 +118,12 @@ public class Procures extends Controller {
         unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
         new ElcukRecord(Messages.get("procureunit.update"),
                 Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        //TODO effects: Notification 调整
         if(oldPlanQty != unit.attrs.planQty) {
-            String shipment_id = "";
-            if(unit.shipItem != null)
-                shipment_id = unit.shipItem.shipment.id;
             Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
-                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单 %s",
+                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
                             oldPlanQty, unit.attrs.planQty,
-                            Dates.date2Date(unit.attrs.planDeliveryDate), shipment_id),
+                            Dates.date2Date(unit.attrs.planDeliveryDate)),
                     Notification.PROCURE, Notification.SHIPPER);
         }
         flash.success("ProcureUnit %s update success!", unit.id);
@@ -229,10 +227,14 @@ public class Procures extends Controller {
         newUnit.handler = User.current();
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
+        //TODO effect: 调整采购计划分拆, 取消周期型运输单
+        /*
         if(unit.isHaveCycleShipment())
             flash.success("分拆成功, 并且成功保留对应的周期型运输单.");
         else
             flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
+        */
+        flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
         Deliveryments.show(unit.deliveryment.id);
     }
 

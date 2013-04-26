@@ -427,6 +427,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 从 Shipment 中删除不需要运输的 ShipItem,  数量返回到原有的 ProcureUnit 中
+     * TODO: effect
      *
      * @param shipItemId
      */
@@ -439,18 +440,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : items) {
             if(!itm.shipment.equals(this))
                 throw new FastRuntimeException("取消的运输单项不属于对应运输单");
-            if(itm.fba != null) {
-                switch(itm.fba.state) {
-                    case SHIPPED:
-                    case CHECKED_IN:
-                    case DELIVERED:
-                    case IN_TRANSIT:
-                    case RECEIVING:
-                        throw new FastRuntimeException(
-                                String.format("FBA(%s) 已经无法更改(%s), 所以不允许再修改运输项目.",
-                                        itm.fba.shipmentId, itm.fba.state));
-                }
-            }
         }
 
         List<String> unitsMerchantSKU = new ArrayList<String>();
@@ -465,20 +454,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     this.id
             ).save();
         }
-    }
-
-    /**
-     * 返回还没有 FBA 的 ShipItem
-     *
-     * @return
-     */
-    public List<ShipItem> noFbaItems() {
-        List<ShipItem> noFbaItems = new ArrayList<ShipItem>();
-        for(ShipItem itm : this.items) {
-            if(itm.fba == null)
-                noFbaItems.add(itm);
-        }
-        return noFbaItems;
     }
 
     public void comment(String cmt) {
@@ -528,6 +503,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 根据此 Shipment 创建一个 FBAShipment
      * <p/>
      * ps: 这个方法不允许并发
+     * TODO: effect, FBAShipment 与 Shipment 没有关系, 需要挪到 ProcureUnit 中去创建
      *
      * @return
      */
@@ -539,25 +515,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "向 Amazon 创建 Shipment Plan 错误 " + Webs.E(e));
             return F.Option.None();
         }
-        // 对 FBA 的仓库检查, 同一个运输单不可以运输两个不同的 FBA 地址
-        if(fbaQpt.isDefined() && this.fbas.size() > 0) {
-            if(!fbaQpt.get().centerId.equals(this.fbas.get(0).centerId) && !this.cycle) {
-                Validation.addError("", "新获取的 FBA 仓库为 %s 与当前存在的去往 FBA 仓库不一样, 无法创建.",
-                        fbaQpt.get().centerId);
-                return F.Option.None();
-            }
-        }
         try {
             if(fbaQpt.isDefined()) {
                 // Shipment 与 FBA 由 FBA 自行创建关系
-                fbaQpt.get().shipment = this;
                 fbaQpt.get().state = FBA.create(fbaQpt.get());
                 fbaQpt.get().save();
-                // 需要手动从 ShipItem 建立与 FBA 的关系 - -||
-                for(ShipItem itm : fbaQpt.get().shipItems) {
-                    itm.fba = fbaQpt.get();
-                    itm.save();
-                }
             }
         } catch(Exception e) {
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
@@ -569,6 +531,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 具体的开始运输
      * <p/>
      * ps: 不允许多个人, 对 Shipment 多次 beginShip
+     * TODO: effect
      */
     public synchronized void beginShip() {
         if(this.state != S.CONFIRM)
@@ -585,10 +548,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             item.shipDate = new Date();
             item.unit.stage = ProcureUnit.STAGE.SHIPPING;
         }
-        for(FBAShipment fba : this.fbas) {
-            if(fba.state != FBAShipment.S.WORKING) continue;
-            fba.updateFBAShipment(FBAShipment.S.SHIPPED);
-        }
+        // TODO 开始运输的时候, 需要更新采购计划的 FBA
+//        for(FBAShipment fba : this.fbas) {
+//            if(fba.state != FBAShipment.S.WORKING) continue;
+//            fba.updateFBAShipment(FBAShipment.S.SHIPPED);
+//        }
         for(ShipItem itm : this.items) itm.unit.save();
         this.pype = this.pype();
         this.beginDate = new Date();
@@ -635,10 +599,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
         if(needSplitItems.size() != shipItemIds.size())
             Validation.addError("", "分拆运输单的运输项目数量与数据库中记录的不一致");
-        for(ShipItem itm : needSplitItems) {
-            if(itm.fba != null)
-                Validation.addError("", "运输项目已经附属了 FBA, 请先请 FBA 中删除再进行拆分");
-        }
+        // TODO: effect
+//        for(ShipItem itm : needSplitItems) {
+//            if(itm.fba != null)
+//                Validation.addError("", "运输项目已经附属了 FBA, 请先请 FBA 中删除再进行拆分");
+//        }
         if(Validation.hasErrors()) return F.Option.None();
 
         Shipment newShipment = new Shipment(this);
@@ -750,10 +715,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.shipOver();
         this.state = S.DONE;
         // 为避免 NPE, 对 fba 初始化了集合
-        for(FBAShipment fba : this.fbas) {
-            fba.receiptAt = deliveredDate;
-            fba.save();
-        }
+        // TODO: effect 运输单抵达, 对 FBA 做响应; 需要响应吗?
+//        for(FBAShipment fba : this.fbas) {
+//            fba.receiptAt = deliveredDate;
+//            fba.save();
+//        }
         this.save();
         Mails.shipment_isdone(this);
     }
@@ -763,6 +729,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 如果这个运输单的所有 FBA 都进入签收后状态了, 那么这个运输单才可以进行 DONE
      */
     public void fbaReceviedBeforeShipmentDelivered() {
+        //TODO: effect FBA 与 Shipment 没有关系, 那么 FBA 不要影响 Shipment ?
+        /*
         boolean makeDone = this.fbas.size() > 0;
         for(FBAShipment fba : this.fbas) {
             if(!fba.afterReceving()) {
@@ -775,6 +743,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             this.arriveDate = fbas.get(0).receiptAt;
         }
         this.save();
+        */
     }
 
     public String title() {

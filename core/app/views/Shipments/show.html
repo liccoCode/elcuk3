@@ -249,7 +249,6 @@
     <form action="" method="post">
     #{authenticityToken /}
       <input type="hidden" name="id" value="${ship.id}">
-    #{render 'Shipments/_shipitem.html', items:ship.noFbaItems()/}
 
     #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
       <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">查看运输项目</a>

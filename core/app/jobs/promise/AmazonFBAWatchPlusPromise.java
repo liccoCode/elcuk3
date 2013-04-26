@@ -5,14 +5,12 @@ import helper.GTs;
 import helper.Webs;
 import models.procure.FBAShipment;
 import models.procure.ShipItem;
-import notifiers.FBAMails;
 import play.Logger;
 import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 import play.libs.F;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * FBA Shipment Items 的跟踪
@@ -62,8 +60,9 @@ public class AmazonFBAWatchPlusPromise extends Job {
     private List<FBAShipment> reloadContext() {
         if(this.fbas == null || this.fbas.size() == 0) return new ArrayList<FBAShipment>();
         List<Long> fbaId = new ArrayList<Long>();
-        for(FBAShipment fba : fbas)
+        for(FBAShipment fba : fbas) {
             fbaId.add(fba.id);
+        }
         return FBAShipment.find("id IN " + JpqlSelect.inlineParam(fbaId)).fetch();
     }
 
@@ -81,15 +80,18 @@ public class AmazonFBAWatchPlusPromise extends Job {
              * 3. 比对两份数据并进行处理;
              *  - 如果系统内同一个 msku 为分开的 ShipItem 则取最高的那一个
              */
-            Map<String, F.T2<Integer, Integer>> fbaItems = FBA.listShipmentItems(fbaShipment.shipmentId, fbaShipment.account);
-            fbaShipment.itemsOnAmazonWithHTML = GTs.render("itemsOnAmazonWithHTML", GTs.newMap("fbaItems", fbaItems).build());
+            Map<String, F.T2<Integer, Integer>> fbaItems = FBA
+                    .listShipmentItems(fbaShipment.shipmentId, fbaShipment.account);
+            fbaShipment.itemsOnAmazonWithHTML = GTs
+                    .render("itemsOnAmazonWithHTML", GTs.newMap("fbaItems", fbaItems).build());
             fbaShipment.lastWatchAmazonItemsAt = new Date();
             fbaShipment.save();
 
             List<ShipItem> shipItems = ShipItem.sameFBAShipItems(fbaShipment.shipmentId);
             Collections.sort(shipItems, new SortShipItemQtyDown());
             // 使用 copy 为了在删除 map 中元素的时候不影响原有数据
-            Map<String, F.T2<Integer, Integer>> fbaItemsCopy = new HashMap<String, F.T2<Integer, Integer>>(fbaItems);
+            Map<String, F.T2<Integer, Integer>> fbaItemsCopy = new HashMap<String, F.T2<Integer, Integer>>(
+                    fbaItems);
 
             // 处理 FBA 中一个个 msku , 而系统中拥有多个 运输项目 对应一个 FBA 中的 msku 的情况
             for(ShipItem item : shipItems) {
@@ -105,7 +107,8 @@ public class AmazonFBAWatchPlusPromise extends Job {
                         sameItemList.add(item);
                         // 找到相同的 ShipItems
                         for(ShipItem sameItem : shipItems) {
-                            if(!sameItem.id.equals(item.id) && sameItem.unit.selling.merchantSKU.equals(item.unit.selling.merchantSKU))
+                            if(!sameItem.id.equals(item.id) && sameItem.unit.selling.merchantSKU
+                                    .equals(item.unit.selling.merchantSKU))
                                 sameItemList.add(sameItem);
                         }
                         int fbaQty = fbaItm._1;
@@ -132,27 +135,6 @@ public class AmazonFBAWatchPlusPromise extends Job {
         }
     }
 
-    /**
-     * 入库过程中的检查
-     *
-     * @param fbas 需要检查的 FBA Shipment
-     */
-    public static void receivingCheck(List<FBAShipment> fbas) {
-        Set<FBAShipment> mailWarning = new HashSet<FBAShipment>();
-        for(FBAShipment fba : fbas) {
-            if(fba.state != FBAShipment.S.RECEIVING) continue;
-            if((System.currentTimeMillis() - fba.receivingAt.getTime()) < TimeUnit.DAYS.toMillis(3)) continue;
-            /**
-             * 入库超过 3 天, 并且数量入库输入不一致
-             */
-            for(ShipItem itm : fba.shipItems) {
-                if(!itm.qty.equals(itm.recivedQty))
-                    mailWarning.add(fba);
-            }
-        }
-        if(mailWarning.size() > 0)
-            FBAMails.itemsReceivingCheck(mailWarning);
-    }
 
     public static class SortShipItemQtyDown implements Comparator<ShipItem> {
         @Override
