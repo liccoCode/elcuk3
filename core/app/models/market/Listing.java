@@ -559,7 +559,7 @@ public class Listing extends GenericModel {
      * @return
      */
     public static List<Listing> trackedListings() {
-        return Listing.find("istracked = true").fetch();
+        return Listing.find("isTracked = true").fetch();
     }
 
     /**
