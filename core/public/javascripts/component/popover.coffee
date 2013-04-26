@@ -14,6 +14,7 @@ window.$ui =
       popParam =
         placement: 'top'
         trigger: 'hover'
+        container: 'body'
       for k in ['placement', 'trigger', 'width', 'data-content', 'content', 'title']
         value = $pop.attr(k)
         continue if value is undefined or value is ''
@@ -37,6 +38,7 @@ window.$ui =
       tipParam =
         placement: 'top'
         trigger: 'hover'
+        container: 'body'
       for k in ['placement', 'trigger', 'data-original-title', 'title']
         value = $tip.attr(k)
         continue if value is undefined or value is ''

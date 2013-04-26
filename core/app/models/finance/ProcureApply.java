@@ -117,8 +117,9 @@ public class ProcureApply extends Apply {
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
                 Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
-        this.serialNumber = String
-                .format("%s-%03d-%s", this.cooperator.name, count, DateTime.now().toString("yy"));
+        // count + 1 为新创建的编号
+        this.serialNumber = String.format("QK-%s-%03d-%s",
+                this.cooperator.name, count + 1, DateTime.now().toString("yy"));
     }
 
     public List<ElcukRecord> records() {

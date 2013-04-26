@@ -119,8 +119,6 @@
     <div class="row-fluid">
       <div class="span5">
         <dl class="dl-horizontal" style="margin-top:0">
-          <dt>请款单</dt>
-          <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
           <dt>批准后总金额</dt>
           <dd><span id="currency_label">${payment.currency.symbol()}</span>
             <span id="costs">${payment.approvalAmount()}</span></dd>
@@ -130,9 +128,15 @@
           <dd>$ 1 -> ¥ <span id="usd_rates"></span></dd>
           <dt>汇率时间</dt>
           <dd><span id="usd_datetime"></span></dd>
-          <dt>&nbsp;</dt>
-          <dd>&nbsp;</dd>
-          <dt>最近更新时间</dt>
+        </dl>
+        <dl class="dl-horizontal">
+          <dt>编号</dt>
+          <dd><a href="@{Payments.show(payment.id)}">${payment.paymentNumber}</a></dd>
+          <dt>系统 ID</dt>
+          <dd>${payment.id}</dd>
+          <dt>请款单</dt>
+          <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
+          <dt>最后更新时间</dt>
           <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
           <dt>创建时间</dt>
           <dd>#{time_tooltip time: payment.createdAt, datetime:true/}</dd>
