@@ -106,6 +106,7 @@ public class Listings extends Controller {
     /**
      * 获取被跟踪的Lisitng列表
      */
+    @Check("listings.trackedlistings")
     public static void trackedListings() {
         List<Listing> lsts = Listing.trackedListings();
         render(lsts);
