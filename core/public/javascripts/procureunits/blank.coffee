@@ -48,23 +48,11 @@ $ ->
     return unless (whouseId && shipType)
     mask = $('#container')
     mask.mask("加载关联运输单中...")
-    shipment.load("/shipments/unitShipments", {whouseId: whouseId, shipType: shipType}, ->
-      o = $(@)
-      if $("[name=shipmentId]").val()
-        o.find(":checkbox").each ->
-          $(@).prop('checked', true) if $(@).val() == $("[name=shipmentId]").val()
-
-      o.find(':checkbox').click(->
-        # 保留目标值
-        checked = $(@).prop("checked")
-        o.find(':checkbox').prop("checked", false)
-        $(@).prop('checked', checked)
-        $("[name=shipmentId]").val(checked and $(@).val() or "")
+    $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
+      .done((html) ->
+        shipment.html(html)
+        mask.unmask()
       )
-      mask.unmask()
-      ##初始化加载页面的toggle事件.
-      toggle_init()
-    )
 
   do ->
     shipment = $('#shipments')

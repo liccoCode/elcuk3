@@ -47,7 +47,7 @@
           <form action="@{Shipments.updateFba()}" method="post" class="pull-left" style="margin-bottom:0;">
               #{authenticityToken /}
             <input type="hidden" name="fbaId" value="${fba.id}">
-            <button data-confirm="btn" class="btn btn-small btn-warning" style="margin-right:10px;">
+            <button data-confirm="确认更新?" class="btn btn-small btn-warning" style="margin-right:10px;">
               更新 ${fba.shipmentId}
             </button>
           </form>
@@ -100,7 +100,7 @@
             <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
               <input type="hidden" value="${fba.id}" name="fbaId">
                 #{authenticityToken /}
-              <button class="btn btn-small btn-danger" data-confirm="btn">
+              <button class="btn btn-small btn-danger" data-confirm="确认更新?">
                 删除 ${fba.shipmentId}</button>
             </form>
           #{/power.ck}

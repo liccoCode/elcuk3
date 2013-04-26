@@ -183,22 +183,6 @@ function toggle_init(){
     $('[data-toggle=toggle]').css("cursor", "pointer");
 }
 
-function link_confirm_init(){
-    $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e){
-        var content = "确认执行此操作?";
-        if($(this).attr('content')) content = $(this).attr('content');
-        if(!confirm(content)) e.preventDefault()
-    });
-}
-
-function btn_confirm_init(){
-    $('body').off('click', 'button[data-confirm=btn]').on('click', 'button[data-confirm=btn]', function(e){
-        var content = "确认执行此操作?";
-        if($(this).attr('content')) content = $(this).attr('content');
-        if(!confirm(content)) e.preventDefault();else $(this).button('loading');
-    });
-}
-
 // 为 .btn 添加上 loading , 防止多次提交
 function btn_loading_init(){
     $('body').off('click', '.btn[data-loading]').on('click', '.btn[data-loading]', function(e){
@@ -208,9 +192,7 @@ function btn_loading_init(){
 
 $(function(){
     toggle_init();
-    link_confirm_init();
     btn_loading_init();
-    btn_confirm_init();
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });

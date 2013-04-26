@@ -211,7 +211,7 @@
         <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
           <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-          <button style="margin-right:10px;" data-confirm="btn" class="btn btn-success">
+          <button style="margin-right:10px;" data-confirm="确认开始运输?" class="btn btn-success">
             开始运输
           </button>
         </form>
@@ -222,7 +222,8 @@
         <form action="@{Shipments.cancel()}" method="post">
           <input type="hidden" name="id" value="${ship.id}">
             #{authenticityToken /}
-          <button style="margin-right:10px;" data-confirm="btn" class="btn btn-danger">取消运输单
+          <button style="margin-right:10px;" data-confirm="确认取消运输?" class="btn btn-danger">
+            取消运输单
           </button>
         </form>
       #{/if}
@@ -274,7 +275,7 @@
     <form action="@{Shipments.refreshProcuress()}" method="post" style="margin:0">
       <input type="hidden" name="id" value="${ship.id}">
     #{authenticityToken /}
-      <button data-confirm="btn" class="btn btn-danger"><i class="icon-refresh"></i></button>
+      <button data-confirm="确认操作?" class="btn btn-danger"><i class="icon-refresh"></i></button>
     </form>
   </div>
 </div>

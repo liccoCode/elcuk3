@@ -177,7 +177,7 @@
             <input type="hidden" name="id" value="${unit.id}">
             <a href="@{Deliveryments.show(unit.deliveryment.id)}" class="btn btn-success">回到采购单</a>
           #{power.ck "procures.dosplitunit"}
-            <button data-confirm="btn" content="确认分拆前, 请再确认一次分拆的数量,地址等信息" class="btn btn-primary">
+            <button data-confirm="确认分拆前, 请再确认一次分拆的数量,地址等信息" class="btn btn-primary">
               分拆
             </button>
           #{/power.ck}
