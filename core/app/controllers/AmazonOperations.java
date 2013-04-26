@@ -16,13 +16,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * 获取、记录、自动执行 Amazon 账户对Listing的动作
  * Created by IntelliJ IDEA.
  * User: wyattpan
  * Date: 7/19/12
  * Time: 11:59 AM
  */
 @With({GlobalExceptionHandler.class, Secure.class})
-public class AmazonReviews extends Controller {
+public class AmazonOperations extends Controller {
 
     @Check("amazonReviews.index")
     public static void index() {
@@ -101,6 +102,36 @@ public class AmazonReviews extends Controller {
     public static void checkLeftClicks(List<String> rvIds) {
         List<F.T2<String, Integer>> reviewLeftClicks = AmazonListingReview.reviewLeftClickTimes(rvIds);
         renderJSON(J.json(reviewLeftClicks));
+    }
+
+
+    /**
+     * 获取Listing的wishlist
+     *
+     * @param asin
+     * @param m
+     */
+    public static void wishList(String asin, String m) {
+        M market = M.val(m);
+        F.T5<String, String, String, Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
+        render(wishlist);
+    }
+
+    /**
+     * 添加Listing到WishList
+     *
+     * @param asin
+     * @param m
+     */
+    public static void addToWishList(String asin, String m) {
+        M market = M.val(m);
+        String lid = Listing.lid(asin, market);
+        Listing listing = Listing.findById(lid);
+        if(listing == null)
+            throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
+        F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToWishList();
+        boolean success = accT2._1.addToWishList(listing);
+        renderJSON(success);
     }
 
 }
