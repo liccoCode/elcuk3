@@ -15,6 +15,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
+import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -567,6 +568,9 @@ public class Listing extends GenericModel {
      * @param
      */
     public void closeWarnning() {
+        if(!Listing.isSelfBuildListing(this.title))
+            Validation.addError("", "不属于自建的Listing");
+        if(Validation.hasErrors()) return;
         this.isTracked = false;
         //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
         this.closeWarnningTime = new Date();

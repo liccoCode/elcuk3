@@ -120,6 +120,10 @@ public class Listings extends Controller {
     public static void closeWarnning(String listingId) {
         Listing listing = Listing.findById(listingId);
         listing.closeWarnning();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("成功关闭警告");
         trackedListings();
     }
 
