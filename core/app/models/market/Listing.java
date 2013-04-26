@@ -315,9 +315,9 @@ public class Listing extends GenericModel {
             }
         }
 
-        if(needWarnningOffers >= 1) {
+        if(needWarnningOffers >= 1)
             Mails.moreOfferOneListing(offers, this);
-        } else if(needWarnningOffers <= 0) {
+        else if(needWarnningOffers <= 0) {
             // 当不需要警告的时候, 将警告次数清零
             this.warnningTimes = 0;
         }
