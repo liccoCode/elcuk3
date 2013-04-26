@@ -280,6 +280,7 @@ public class Payment extends Model {
         } else {
             if(this.state != S.LOCKED)
                 Validation.addError("", "只允许" + S.LOCKED.label() + "状态付款单解锁.");
+            if(Validation.hasErrors()) return;
             this.state = S.WAITING;
         }
         this.save();
