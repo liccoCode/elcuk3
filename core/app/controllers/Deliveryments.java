@@ -6,9 +6,11 @@ import models.User;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.product.Category;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
+import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -73,6 +75,31 @@ public class Deliveryments extends Controller {
         dmt.save();
         flash.success("更新成功.");
         show(dmt.id);
+    }
+
+    /**
+     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
+     * TODO effect: 需要调整权限
+     */
+    @Check("procures.createdeliveryment")
+    public static void create(List<Long> pids, String name) {
+        Validation.required("procrues.createDeliveryment.name", name);
+        Validation.required("deliveryments.addunits", pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Procures.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+        }
+
+        Deliveryment deliveryment = Deliveryment
+                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Procures.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+        }
+
+        flash.success("Deliveryment %s 创建成功.", deliveryment.id);
+        Deliveryments.show(deliveryment.id);
     }
 
     /**

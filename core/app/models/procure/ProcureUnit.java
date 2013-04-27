@@ -69,7 +69,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         PLAN {
             @Override
-            public String toString() {
+            public String label() {
                 return "计划中";
             }
         },
@@ -78,7 +78,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         DELIVERY {
             @Override
-            public String toString() {
+            public String label() {
                 return "采购中";
             }
         },
@@ -87,7 +87,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         DONE {
             @Override
-            public String toString() {
+            public String label() {
                 return "已交货";
             }
         },
@@ -96,7 +96,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         SHIPPING {
             @Override
-            public String toString() {
+            public String label() {
                 return "运输中";
             }
         },
@@ -105,7 +105,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         SHIP_OVER {
             @Override
-            public String toString() {
+            public String label() {
                 return "运输完成";
             }
         },
@@ -114,7 +114,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         INBOUND {
             @Override
-            public String toString() {
+            public String label() {
                 return "入库中";
             }
         },
@@ -123,10 +123,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         CLOSE {
             @Override
-            public String toString() {
+            public String label() {
                 return "结束";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     @OneToMany(mappedBy = "procureUnit", orphanRemoval = true, fetch = FetchType.LAZY)

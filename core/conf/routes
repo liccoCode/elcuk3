@@ -32,6 +32,7 @@ PUT     /apply/{id}/procure/confirm                         Applys.procureConfir
 GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
 DELETE /deliveryment/{id}/departApply                        Deliveryments.departProcureApply
+POST   /deliveryment                                         Deliveryments.create
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update

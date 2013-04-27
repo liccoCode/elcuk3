@@ -110,11 +110,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         PLAN {
             @Override
-            public String toString() {
-                return "计划中(c)";
-            }
-
-            @Override
             public String label() {
                 return "计划中";
             }
@@ -123,11 +118,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 确认运输单, 并创建了 FBA Shipment
          */
         CONFIRM {
-            @Override
-            public String toString() {
-                return "准备运输,已创建 FBA(c)";
-            }
-
             @Override
             public String label() {
                 return "准备运输,已创建 FBA";
@@ -138,11 +128,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         SHIPPING {
             @Override
-            public String toString() {
-                return "运输中(c)";
-            }
-
-            @Override
             public String label() {
                 return "运输中";
             }
@@ -151,11 +136,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 清关
          */
         CLEARANCE {
-            @Override
-            public String toString() {
-                return "清关中(c)";
-            }
-
             @Override
             public String label() {
                 return "清关中";
@@ -166,11 +146,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         DONE {
             @Override
-            public String toString() {
-                return "完成(c)";
-            }
-
-            @Override
             public String label() {
                 return "完成";
             }
@@ -180,11 +155,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 取消状态
          */
         CANCEL {
-            @Override
-            public String toString() {
-                return "取消(c)";
-            }
-
             @Override
             public String label() {
                 return "取消";

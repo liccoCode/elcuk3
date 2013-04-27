@@ -7,6 +7,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -401,9 +402,9 @@ public class Deliveryment extends GenericModel {
         }
         deliveryment.save();
 
-        new ElcukRecord(Messages.get("deliveryment.createFromProcures"),
-                Messages.get("deliveryment.createFromProcures.msg", pids, deliveryment.id),
-                deliveryment.id).save();
+        new ERecordBuilder("deliveryment.createFromProcures")
+                .msgArgs(StringUtils.join(pids, ","), deliveryment.id)
+                .fid(deliveryment.id).save();
         return deliveryment;
     }
 

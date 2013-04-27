@@ -177,10 +177,9 @@ function toggle_init(){
     // 为页面添加 data-toggle=toggle 元素事件(类似 bootstrap 的 collapse)
     $('body').off('click', '[data-toggle=toggle]').on('click', '[data-toggle=toggle]', function(e){
         var target = $(this).attr('data-target');
-        $(target).fadeToggle('fast');
+        $(target).fadeToggle('fast').css('cursor', 'pointer');
         e.preventDefault();
     });
-    $('[data-toggle=toggle]').css("cursor", "pointer");
 }
 
 // 为 .btn 添加上 loading , 防止多次提交
@@ -190,9 +189,19 @@ function btn_loading_init(){
     })
 }
 
+/**
+ * 对在 Table 中含有 checkbox.checkall 的元素进行全选处理
+ */
+function tableCheckBoxCheckAll(){
+    $('table').on('change', ':checkbox.checkall', function(){
+        var table = $(this).parents('table').find(':checkbox').prop('checked', $(this).prop('checked'));
+    });
+}
+
 $(function(){
     toggle_init();
     btn_loading_init();
+    tableCheckBoxCheckAll();
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });

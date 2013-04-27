@@ -6,7 +6,6 @@ import models.User;
 import models.embedded.UnitAttrs;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
-import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.product.Whouse;
 import models.view.Ret;
@@ -17,8 +16,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.List;
-
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -27,10 +24,6 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Procures extends Controller {
-    @Before(only = {"save", "edit", "update"}, priority = 1)
-    public static void whouses() {
-        renderArgs.put("whouses", Whouse.<Whouse>findAll());
-    }
 
     @Before(only = {"index", "createDeliveryment", "remove", "splitUnit", "doSplitUnit"})
     public static void index_sets() {
@@ -59,8 +52,7 @@ public class Procures extends Controller {
     public static void index(ProcurePost p) {
         if(p == null)
             p = new ProcurePost();
-        List<ProcureUnit> units = p.query();
-        render(p, units);
+        render(p);
     }
 
 
@@ -76,6 +68,12 @@ public class Procures extends Controller {
     }
 
 
+    /**
+     * 抵达货代
+     * TODO effect?
+     *
+     * @param id
+     */
     public static void markPlace(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         if(unit.cooperator == null || unit.shipType == null) {
@@ -84,34 +82,6 @@ public class Procures extends Controller {
         unit.isPlaced = true;
         unit.save();
         renderJSON(new Ret());
-    }
-
-    /**
-     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
-     *
-     * @param pids
-     * @param name
-     */
-    @Check("procures.createdeliveryment")
-    public static void createDeliveryment(List<Long> pids, String name) {
-        Validation.required("procrues.createDeliveryment.name", name);
-        Validation.required("deliveryments.addunits", pids);
-        if(Validation.hasErrors()) {
-            ProcurePost p = new ProcurePost(ProcureUnit.STAGE.PLAN);
-            renderArgs.put("units", p.query());
-            renderArgs.put("p", p);
-            render("Procures/index.html", name);
-        }
-        Deliveryment deliveryment = Deliveryment
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
-        if(Validation.hasErrors()) {
-            ProcurePost p = new ProcurePost(ProcureUnit.STAGE.PLAN);
-            renderArgs.put("units", p.query());
-            renderArgs.put("p", p);
-            render("Procures/index.html", name);
-        }
-        flash.success("Deliveryment %s 创建成功.", deliveryment.id);
-        Deliveryments.show(deliveryment.id);
     }
 
     /**
