@@ -280,6 +280,7 @@ public class Payment extends Model {
         } else {
             if(this.state != S.LOCKED)
                 Validation.addError("", "只允许" + S.LOCKED.label() + "状态付款单解锁.");
+            if(Validation.hasErrors()) return;
             this.state = S.WAITING;
         }
         this.save();
@@ -448,7 +449,7 @@ public class Payment extends Model {
     public static Payment buildPayment(ProcureUnit unit) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
-                "AND state=? AND currency=?  ORDER BY createdAt ASC",
+                "AND state=? AND currency=?  ORDER BY createdAt DESC",
                 unit.deliveryment.cooperator, now.minusHours(24).toDate(), now.toDate(),
                 S.WAITING, unit.attrs.currency).first();
 
