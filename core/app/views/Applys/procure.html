@@ -4,16 +4,37 @@
     #{script 'deliveryments/procure.coffee'/}
 #{/set}
 #{flash_alert /}
-#{info_row title:"采购请款单 ${apply.serialNumber}" /}
-<div class="btn-toolbar">
-#{if apply.confirm}
-  <button class="btn btn-danger" disabled="">请款单已经确认</button>
-#{/if}
-#{else }
-  <a id="confirm_btn" href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
-     data-remote='true' data-method='PUT' data-disable-with='确认中...'>确认请款单</a>
-#{/else}
+<div class="row-fluid">
+  <div class="span3">
+    <dl class="dl-horizontal">
+      <dt>编号</dt>
+      <dd><a href="@{Applys.procure(apply.id)}">${apply.serialNumber}</a></dd>
+      <dt>系统 ID</dt>
+      <dd>${apply.id}</dd>
+    </dl>
+  </div>
+  <div class="span3">
+    <dl class="dl-horizontal">
+      <dt>最后更新时间</dt>
+      <dd>#{time_tooltip time: apply.updateAt, datetime: true/}</dd>
+      <dt>创建时间</dt>
+      <dd>#{time_tooltip time: apply.createdAt, datetime: true/}</dd>
+    </dl>
+  </div>
+  <div class="span4">
+    <div class="btn-toolbar">
+    #{if apply.confirm}
+      <button class="btn btn-danger" disabled="">请款单已经确认</button>
+    #{/if}
+    #{else }
+      <a id="confirm_btn" href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
+         data-remote='true' data-method='PUT' data-disable-with='确认中...'>确认请款单</a>
+    #{/else}
+    </div>
+  </div>
 </div>
+
+<hr>
 #{list items:apply.deliveryments, as:'dmt'}
 <div class="row-fluid">
   <div class="span3">
@@ -34,14 +55,16 @@
         #{set twoDeliveryDate: dmt.firstAndEndDeliveryDate()/}
       <dt>最后交货时间</dt>
       <dd>${twoDeliveryDate._2}&nbsp;</dd>
-        #{if dmt.isProcureApplyDepartable()}
+    </dl>
+      #{if dmt.isProcureApplyDepartable()}
+        <dl class="dl-horizontal">
           <dt>&nbsp;</dt>
           <dd>
             <a href="@{Deliveryments.departProcureApply(dmt.id)}" class="btn btn-danger btn-small"
                data-method='DELETE' data-confirm='确认移除?'>从当前请款单中移除</a>
           </dd>
-        #{/if}
-    </dl>
+        </dl>
+      #{/if}
   </div>
 
   <div class="span9">
@@ -75,7 +98,7 @@
             </td>
             <td>${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}</td>
             <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
-            <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.qty() * procureUnit.attrs.price}</td>
+            <td class="price">${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount()}</td>
             <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage}</td>
             <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
             <td>
@@ -123,14 +146,14 @@
                           #{list items:procureUnit.fees(), as:'fee'}
                             <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
                               <td>
-                              *{#{power.ck 'paymentunits.destroy'}}*
-                                  #{ifnot fee.remove || fee.isApproval()}
-                                    <button class="paymentUnitCancel btn btn-danger"
-                                            url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>
-                                      取消
-                                    </button>
-                                  #{/ifnot}
-                              *{#{/power.ck}}*
+                                  #{power.ck 'paymentunits.destroy'}
+                                      #{ifnot fee.remove || fee.isApproval()}
+                                        <button class="paymentUnitCancel btn btn-danger"
+                                                url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>
+                                          取消
+                                        </button>
+                                      #{/ifnot}
+                                  #{/power.ck}
                               </td>
                               <td>
                                 <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
@@ -190,6 +213,14 @@
             </td>
           </tr>
         #{/list}
+      <tr class="table_summary">
+        <td colspan="3"></td>
+        <td>总额</td>
+        <td rel='tooltip' title='汇总美金' class="usd"></td>
+        <td rel='tooltip' title="汇总人民币" class="cny"></td>
+        <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
+        <td colspan="2"></td>
+      </tr>
     </table>
   </div>
 </div>
