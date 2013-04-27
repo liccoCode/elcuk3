@@ -420,40 +420,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param unitId
      */
     public synchronized void addToShip(List<Long> unitId) {
-        /**
-         * 运输单业务限制检查
-         * 1. 检查运输单总重量只能在 300kg 以下
-         * 2. 如果运输的是电池, 则需要单独运输
-         */
-        if(this.state != S.PLAN && this.state != S.CONFIRM)
-            throw new FastRuntimeException("只有 PLAN 与 CONFIRM 状态可以添加运输项目");
-
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(unitId))
-                .fetch();
-        List<String> unitsMerchantSKU = new ArrayList<String>();
-        for(ProcureUnit unit : units) {
-            // 如果是完全一个全新的 Shipment 那么则由第一个加入到其他的 ProcureUnit 决定去往仓库
-            if(this.items.size() == 0 && this.whouse == null)
-                this.whouse = unit.whouse;
-
-            if(!unit.whouse.id.equals(this.whouse.id))
-                throw new FastRuntimeException("运往仓库不一致");
-
-            ShipItem shipItem = unit.ship(this);
-            this.items.add(shipItem);
-            unitsMerchantSKU.add(unit.selling.merchantSKU);
-        }
-
-        for(ShipItem itm : this.items) itm.save();
-        this.save();
-        new ElcukRecord(Messages.get("shipment.ship"),
-                Messages.get("shipment.ship.msg", StringUtils.join(unitsMerchantSKU, Webs.SPLIT),
-                        this.id),
-                this.id
-        ).save();
-        if(this.cycle)
-            Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()),
-                    String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), Notification.SHIPPER);
+        //TODO effect: shipment.ship 权限需要删除
+        throw new FastRuntimeException("此方法需要删除!");
     }
 
     /**
@@ -466,6 +434,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
         if(!unit.whouse.equals(this.whouse))
             Validation.addError("", "运输目的地不一样, 无法添加");
+        if(unit.shipType != this.type)
+            Validation.addError("", "运输方式不一样, 无法添加.");
+        if(Validation.hasErrors()) return;
+
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
         shipitem.save();

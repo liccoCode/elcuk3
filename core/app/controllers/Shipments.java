@@ -20,6 +20,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -160,16 +161,22 @@ public class Shipments extends Controller {
 
     @Check("shipments.ship")
     public static void ship(String id, List<Long> unitId) {
-        Validation.required("shipments.ship.unitId", unitId);
+        throw new FastRuntimeException("取消实现!");
+/*        Validation.required("shipments.ship.unitId", unitId);
         Validation.required("shipment.id", id);
         Shipment ship = Shipment.findById(id);
         if(Validation.hasError("shipment.id")) redirect("/shipments/index");
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
-        ship.addToShip(unitId);
+        List<ProcureUnit> units = ProcureUnit
+                .find("id IN " + JpqlSelect.inlineParam(unitId))
+                .fetch();
+        for(ProcureUnit unit : units) {
+            ship.addToShip(unit);
+        }
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-        redirect("/shipments/shipitem/" + id);
+        redirect("/shipments/shipitem/" + id);*/
     }
 
     /**

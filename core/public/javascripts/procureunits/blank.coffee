@@ -47,12 +47,13 @@ $ ->
   loadShipment = ->
     whouseId = $("[name='unit.whouse.id']").val()
     shipType = $('input[name="unit.shipType"]').val()
-    return unless (whouseId && shipType)
+    shipment = $('#shipments')
+    return unless (whouseId && shipType && shipment.size() > 0)
     mask = $('#container')
     mask.mask("加载关联运输单中...")
     $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
       .done((html) ->
-        $('#shipments').html(html)
+        shipment.html(html)
         mask.unmask()
       )
 

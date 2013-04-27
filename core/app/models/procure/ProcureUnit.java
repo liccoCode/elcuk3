@@ -240,23 +240,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
-
-    public void updateWithShipment(Shipment shipment) {
-        //TODO: effect 更新采购计划的运输运输单, 采购计划应该与运输单没有直接关系, 通过 ShipItem 来链接
-        /*
-        if(shipment == null) return;
-        if(this.shipItem == null)
-            shipment.addToShip(Arrays.asList(this.id));
-        this.shipItem.changeShipment(shipment);
-        if(this.shipType != shipment.type) {
-            Shipment.T originType = this.shipType;
-            this.shipType = shipment.type;
-            this.comment(String.format("运输方式从 %s 变为 %s", originType, this.shipType));
-        }
-        this.save();
-        */
-    }
-
     /**
      * <pre>
      *
@@ -323,23 +306,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     /**
-     * 返回 ProcureUnit 的目标市场
-     *
-     * @return
-     */
-    public String shipMarket() {
-        if(this.selling == null)
-            throw new FastRuntimeException("采购计划没有关联 Selling, 不允许!");
-        return this.selling.market.label();
-    }
-
-    public String shipType() {
-        if(this.shipType == null)
-            throw new FastRuntimeException("采购计划不可以没有运输方式!");
-        return this.shipType.toString();
-    }
-
-    /**
      * ProcureUnit 交货
      *
      * @param attrs
@@ -384,32 +350,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return this.attrs.planQty.equals(this.attrs.qty);
     }
 
-
     /**
-     * 为采购计划添加运输项目(全部运输)
-     * TODO: effect 为采购计划添加运输计划
+     * 采购计划的预计日期变更
      *
-     * @param shipment
-     * @return
+     * @param planDeliveryDate 预计交货日期
+     * @param planShipDate     预计发货日期
+     * @param planArrivDate    预计抵达日期
      */
-    public ShipItem ship(Shipment shipment) {
-        ShipItem shipItem = null;
-        for(ShipItem itm : shipment.items) {
-            if(itm.unit.equals(this)) {
-                shipItem = itm;
-                shipItem.qty = this.qty();
-            }
-        }
-        if(shipItem == null) {
-            shipItem = new ShipItem();
-            shipItem.shipment = shipment;
-            shipItem.unit = this;
-            shipItem.qty = this.qty();
-            this.shipItems.add(shipItem);
-        }
-        return shipItem;
+    public void updatePlanDates(Date planDeliveryDate, Date planShipDate, Date planArrivDate) {
+        this.attrs.planDeliveryDate = planDeliveryDate;
+        this.attrs.planShipDate = planShipDate;
+        this.attrs.planArrivDate = planArrivDate;
+        this.attrs.validate();
+        if(Validation.hasErrors()) return;
+        this.save();
     }
-
 
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
