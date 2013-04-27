@@ -2,14 +2,10 @@ package notifiers;
 
 import helper.Webs;
 import models.MailsRecord;
-import models.embedded.ERecordBuilder;
 import models.procure.FBAShipment;
 import play.Logger;
 import play.Play;
 import play.mvc.Mailer;
-
-import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -66,30 +62,6 @@ public class FBAMails extends Mailer {
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, NOT_RECEING);
             send(fba);
-            mr.success = true;
-        } catch(Exception e) {
-            Logger.warn(Webs.E(e));
-            return false;
-        } finally {
-            if(mr != null)
-                mr.save();
-        }
-        return true;
-    }
-
-    /**
-     * FBA 正在入库的检查邮件
-     *
-     * @param fbas
-     */
-    public static boolean itemsReceivingCheck(Set<FBAShipment> fbas) {
-        setSubject("{WARN} 总共 %s 个 FBA 入库时间过长, 需检查", fbas.size());
-        mailBase();
-        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-        MailsRecord mr = null;
-        try {
-            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, RECEIVING_CHECK);
-            send(fbas);
             mr.success = true;
         } catch(Exception e) {
             Logger.warn(Webs.E(e));

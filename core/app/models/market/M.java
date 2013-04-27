@@ -15,48 +15,48 @@ import java.util.Date;
 public enum M {
     AMAZON_UK {
         @Override
-        public String humanName() {
+        public String label() {
             return "英国亚马逊";
         }
     },
     AMAZON_DE {
         @Override
-        public String humanName() {
+        public String label() {
             return "德国亚马逊";
         }
     },
     AMAZON_FR {
         @Override
-        public String humanName() {
+        public String label() {
             return "法国亚马逊";
         }
     },
     AMAZON_IT {
         @Override
-        public String humanName() {
+        public String label() {
             return "意大利亚马逊";
         }
     },
     AMAZON_ES {
         @Override
-        public String humanName() {
+        public String label() {
             return "西班牙亚马逊";
         }
     },
     AMAZON_US {
         @Override
-        public String humanName() {
+        public String label() {
             return "美国亚马逊";
         }
     },
     EBAY_UK {
         @Override
-        public String humanName() {
+        public String label() {
             return "英国 Ebay";
         }
     };
 
-    public abstract String humanName();
+    public abstract String label();
 
     /**
      * 为 Amazon 不同市场的 Id, 与 Market 对应

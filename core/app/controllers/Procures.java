@@ -1,24 +1,22 @@
 package controllers;
 
-import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
-import models.procure.*;
+import models.procure.CooperItem;
+import models.procure.Cooperator;
+import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ProcurePost;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,7 +27,7 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Procures extends Controller {
-    @Before(only = {"blank", "save", "edit", "update"}, priority = 1)
+    @Before(only = {"save", "edit", "update"}, priority = 1)
     public static void whouses() {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
     }
@@ -65,32 +63,6 @@ public class Procures extends Controller {
         render(p, units);
     }
 
-    public static void blank(ProcureUnit unit) {
-        if(unit == null || unit.selling == null) {
-            flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
-            render(unit);
-        }
-        render(unit);
-    }
-
-    public static void save(ProcureUnit unit, String shipmentId) {
-        unit.handler = User.findByUserName(Secure.Security.connected());
-        unit.validate();
-        if(Validation.hasErrors()) {
-            render("Procures/blank.html", unit);
-        }
-        unit.save();
-        if(StringUtils.isNotBlank(shipmentId)) {
-            Shipment ship = Shipment.findById(shipmentId);
-            ship.addToShip(Arrays.asList(unit.id));
-            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-        } else {
-            flash.success("创建成功");
-        }
-        new ElcukRecord(Messages.get("procureunit.save"),
-                Messages.get("action.base", unit.to_log()), unit.id + "").save();
-        redirect("/Shipments/show/" + shipmentId);
-    }
 
     public static void remove(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
@@ -103,34 +75,6 @@ public class Procures extends Controller {
         redirect("/Procures/index");
     }
 
-    public static void edit(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        int oldPlanQty = unit.attrs.planQty;
-        render(unit, oldPlanQty);
-    }
-
-    public static void update(ProcureUnit unit, int oldPlanQty, String shipmentId) {
-        validation.required(oldPlanQty);
-        unit.validate();
-        if(Validation.hasErrors()) {
-            render("Procures/edit.html", unit, oldPlanQty);
-        }
-        unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
-        new ElcukRecord(Messages.get("procureunit.update"),
-                Messages.get("action.base", unit.to_log()), unit.id + "").save();
-        if(oldPlanQty != unit.attrs.planQty) {
-            String shipment_id = "";
-            if(unit.shipItem != null)
-                shipment_id = unit.shipItem.shipment.id;
-            Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
-                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单,运输单 %s",
-                            oldPlanQty, unit.attrs.planQty,
-                            Dates.date2Date(unit.attrs.planDeliveryDate), shipment_id),
-                    Notification.PROCURE, Notification.SHIPPER);
-        }
-        flash.success("ProcureUnit %s update success!", unit.id);
-        redirect("/procures/index?p.search=id:" + unit.id);
-    }
 
     public static void markPlace(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
@@ -229,10 +173,14 @@ public class Procures extends Controller {
         newUnit.handler = User.current();
         unit.split(newUnit);
         if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
+        //TODO effect: 调整采购计划分拆, 取消周期型运输单
+        /*
         if(unit.isHaveCycleShipment())
             flash.success("分拆成功, 并且成功保留对应的周期型运输单.");
         else
             flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
+        */
+        flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
         Deliveryments.show(unit.deliveryment.id);
     }
 

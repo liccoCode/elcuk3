@@ -18,12 +18,9 @@
 #{set copers:product.cooperators() /}
   <th>供应商</th>
   <td>
-    <select name="unit.cooperator.id">
-      <option value="">请选择</option>
-    #{list items:copers, as:'coop'}
-      <option ${coop == unit.cooperator ? 'selected' : ''} value="${coop.id}">${coop.name}</option>
-    #{/list}
-    </select>
+  #{select 'unit.cooperator.id', items: copers, labelProperty: 'name', value: unit.cooperator?.id}
+      #{option ''}请选择#{/option}
+  #{/select}
   </td>
 
   <th>价格</th>
@@ -42,7 +39,6 @@
       <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
       <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
       <span class="add-on">箱</span>
-      <button id="calculate_box" class="btn btn-info"><i class="icon-legal"></i></button>
     </div>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
   </td>
@@ -70,12 +66,9 @@
 <tr>
   <th>去往仓库</th>
   <td>
-    <select name="unit.whouse.id">
-      <option value="">请选择</option>
-    #{list items:whouses, as:'wh'}
-      <option ${wh == unit.whouse ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
-    #{/list}
-    </select>
+  #{select 'unit.whouse.id', items: whouses, labelProperty: 'name', value: unit.whouse?.id}
+      #{option ''}请选择#{/option}
+  #{/select}
   </td>
   <th>阶段</th>
   <td>
@@ -91,14 +84,9 @@
       <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>
     ${t}
     </label>
-
   #{/list}
   </td>
-  <td colspan="2">
-  #{if unit.shipItem?.shipment}
-    <a href="@{Shipments.show(unit.shipItem.shipment.id)}">${unit.shipItem.shipment.id}  ${unit.shipItem.shipment.type}</a>
-  #{/if}
-  </td>
+  <td colspan="2"></td>
 </tr>
 
 <tr>

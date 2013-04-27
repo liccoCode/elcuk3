@@ -214,6 +214,14 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
+        if(this.state != S.PENDING)
+            Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
+        if(this.deliveryTime == null)
+            Validation.addError("", "交货时间必须填写");
+        if(this.orderTime == null)
+            Validation.addError("", "下单时间必须填写");
+        if(Validation.hasErrors()) return;
+
         this.state = Deliveryment.S.CONFIRM;
         this.save();
     }

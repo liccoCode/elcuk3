@@ -63,7 +63,7 @@
           <td colspan="6">
             <h4>Memo:</h4>
             <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
-            <button class="btn btn-primary">更新</button>
+            <button class="btn btn-primary" data-disable-with='更新中...'>更新</button>
           </td>
         </tr>
       </table>
@@ -78,7 +78,7 @@
       <div class="input-prepend input-append" style="float:left;">
         <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
         <input type="hidden" name="id" value="${dmt.id}">
-        <button data-confirm="btn" content="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary">
+        <button data-confirm="确认下单吗? 请再检查一次供应商, 与下单的货物" class="btn btn-primary" data-disable-with='更新中...'>
           确认
         </button>
       </div>

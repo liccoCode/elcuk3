@@ -124,12 +124,6 @@ public class ProcuresHelper extends JavaExtensions {
         else return "ffffff";
     }
 
-    public static String info(Shipment s) {
-        return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
-                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(),
-                s.planBeginDate, s.planArrivDate);
-    }
-
     /**
      * 根据 end - begin 所计算的时间差, 给与 badge-xxx 提示紧急程度
      *
