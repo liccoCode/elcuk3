@@ -118,11 +118,10 @@ public class Deliveryments extends Controller {
      */
     public static void confirm(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        validation.equals(dmt.state, Deliveryment.S.PENDING);
-        validation.required(dmt.deliveryTime);
-        validation.required(dmt.orderTime);
-        if(Validation.hasErrors()) render("Deliveryments/show.html", dmt);
         dmt.confirm();
+        if(Validation.hasErrors())
+            render("Deliveryments/show.html", dmt);
+
         new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
                 .save();
         show(id);
