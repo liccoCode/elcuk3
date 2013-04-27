@@ -7,6 +7,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -279,6 +280,7 @@ public class Payment extends Model {
         } else {
             if(this.state != S.LOCKED)
                 Validation.addError("", "只允许" + S.LOCKED.label() + "状态付款单解锁.");
+            if(Validation.hasErrors()) return;
             this.state = S.WAITING;
         }
         this.save();
@@ -444,25 +446,25 @@ public class Payment extends Model {
      *
      * @return
      */
-    public static Payment buildPayment(Cooperator cooperator,
-                                       Currency currency, float currentAmount) {
+    public static Payment buildPayment(ProcureUnit unit) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
-                "AND state=? AND currency=?  ORDER BY createdAt ASC",
-                cooperator, now.minusHours(24).toDate(), now.toDate(),
-                S.WAITING, currency).first();
+                "AND state=? AND currency=?  ORDER BY createdAt DESC",
+                unit.deliveryment.cooperator, now.minusHours(24).toDate(), now.toDate(),
+                S.WAITING, unit.attrs.currency).first();
 
         if(payment == null ||
-                payment.totalFees()._1 + currency.toUSD(currentAmount) > 60000 ||
-                payment.totalFees()._2 + currency.toCNY(currentAmount) > 372000) {
+                payment.totalFees()._1 + unit.attrs.currency.toUSD(unit.totalAmount()) > 60000 ||
+                payment.totalFees()._2 + unit.attrs.currency.toCNY(unit.totalAmount()) > 372000) {
             payment = new Payment();
-            if(cooperator.paymentMethods.size() <= 0)
+            if(unit.deliveryment.cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
-                        Messages.get("paymenttarget.missing", cooperator.fullName));
-            payment.cooperator = cooperator;
-            payment.target = cooperator.paymentMethods.get(0);
-            payment.currency = currency;
-            payment.generatePaymentNumber().save();
+                        Messages.get("paymenttarget.missing",
+                                unit.deliveryment.cooperator.fullName));
+            payment.cooperator = unit.deliveryment.cooperator;
+            payment.target = unit.deliveryment.cooperator.paymentMethods.get(0);
+            payment.currency = unit.attrs.currency;
+            payment.generatePaymentNumber(unit.deliveryment.apply).save();
         }
         return payment;
     }
@@ -486,7 +488,7 @@ public class Payment extends Model {
      *
      * @return
      */
-    public Payment generatePaymentNumber() {
+    public Payment generatePaymentNumber(ProcureApply procureApply) {
         /**
          * 1. 确定当前的年份
          * 2. 根据年份 + cooperator 确定是今天的第几次请款
@@ -494,12 +496,9 @@ public class Payment extends Model {
          */
         String year = DateTime.now().toString("yyyy");
         // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
-        long count = Payment.count("cooperator=? AND createdAt>=? AND createdAt<=?",
-                this.cooperator,
-                Dates.cn(String.format("%s-01-01", year)).toDate(),
-                Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
-        this.paymentNumber = String.format("付款单[%s-%03d-%s]",
-                this.cooperator.name, count, DateTime.now().toString("yy"));
+        long count = Payment.count("pApply=?", procureApply);
+        // count + 1 为新创建的编号
+        this.paymentNumber = String.format("[%s]-%02d", procureApply.serialNumber, count + 1);
         return this;
     }
 
