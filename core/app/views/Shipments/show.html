@@ -240,9 +240,9 @@
   </li>
 </ul>
 #{/info_row}
-#{list ship.fbas}
-    #{render 'Shipments/_fba_shipment.html', fba:_/}
-#{/list}
+*{#{list ship.fbas}}*
+*{#{render 'Shipments/_fba_shipment.html', fba:_/}}*
+*{#{/list}}*
 
 #{success_row title:'运输项目' /}
 <div class="row-fluid">

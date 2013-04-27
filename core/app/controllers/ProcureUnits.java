@@ -2,11 +2,16 @@ package controllers;
 
 import exception.PaymentException;
 import helper.Webs;
+import models.ElcukRecord;
+import models.User;
 import models.finance.FeeType;
 import models.market.Selling;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import models.product.Whouse;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -30,6 +35,35 @@ public class ProcureUnits extends Controller {
             Analyzes.index();
         }
         render(unit, whouses);
+    }
+
+    public static void create(ProcureUnit unit, String shipmentId) {
+        unit.handler = User.findByUserName(Secure.Security.connected());
+        unit.validate();
+        if(StringUtils.isBlank(shipmentId))
+            Validation.addError("", "必须选择运输单");
+
+        if(Validation.hasErrors()) {
+            List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+            render("ProcureUnits/blank.html", unit, whouses);
+        }
+
+        Shipment ship = Shipment.findById(shipmentId);
+
+        unit.save();
+        ship.addToShip(unit);
+
+        if(Validation.hasErrors()) {
+            List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+            unit.remove();
+            render("ProcureUnits/blank.html", unit, whouses);
+        }
+
+        flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
+        new ElcukRecord(Messages.get("procureunit.save"),
+                Messages.get("action.base", unit.to_log()), unit.id + "").save();
+
+        Shipments.show(shipmentId);
     }
 
     /**

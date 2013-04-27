@@ -45,8 +45,17 @@ public class ShipItem extends GenericModel {
      * @param shipment
      */
     public ShipItem(ProcureUnit unit, Shipment shipment) {
-        this.unit = unit;
+        this(unit);
         this.shipment = shipment;
+    }
+
+    /**
+     * 通过 ProcureUnit 创建 ShipItem
+     *
+     * @param unit
+     */
+    public ShipItem(ProcureUnit unit) {
+        this.unit = unit;
         this.qty = unit.qty();
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
         this.state = S.NORMAL;

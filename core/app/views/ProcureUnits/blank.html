@@ -12,7 +12,7 @@
     #{errorMsgs /}
     #{flash_alert row:true /}
 
-<form action="@{Procures.save()}" method="post">
+<form action="@{ProcureUnits.create()}" method="post">
   <table class="table table-condensed table-bordered">
       #{render './_unit_table_trs.html', unit: unit, whouses: whouses/}
     <tr>
@@ -22,7 +22,6 @@
     </tr>
     <tr>
       <td colspan="4">
-        <input type="hidden" name="shipmentId" value="">
         <button class="btn btn-primary">创建</button>
       </td>
     </tr>

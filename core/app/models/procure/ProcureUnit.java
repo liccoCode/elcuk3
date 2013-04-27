@@ -240,6 +240,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
+
     public void updateWithShipment(Shipment shipment) {
         //TODO: effect 更新采购计划的运输运输单, 采购计划应该与运输单没有直接关系, 通过 ShipItem 来链接
         /*

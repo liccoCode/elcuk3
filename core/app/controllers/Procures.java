@@ -10,7 +10,6 @@ import models.procure.*;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ProcurePost;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -18,7 +17,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -65,24 +63,6 @@ public class Procures extends Controller {
         render(p, units);
     }
 
-    public static void save(ProcureUnit unit, String shipmentId) {
-        unit.handler = User.findByUserName(Secure.Security.connected());
-        unit.validate();
-        if(Validation.hasErrors()) {
-            render("../views/ProcureUnits/blank.html", unit);
-        }
-        unit.save();
-        if(StringUtils.isNotBlank(shipmentId)) {
-            Shipment ship = Shipment.findById(shipmentId);
-            ship.addToShip(Arrays.asList(unit.id));
-            flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
-        } else {
-            flash.success("创建成功");
-        }
-        new ElcukRecord(Messages.get("procureunit.save"),
-                Messages.get("action.base", unit.to_log()), unit.id + "").save();
-        redirect("/Shipments/show/" + shipmentId);
-    }
 
     public static void remove(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);

@@ -12,7 +12,7 @@
   </tr>
 #{list items:unitRelateShipments, as:'ship'}
   <tr>
-    <td><input type="checkbox" value="${ship.id}"></td>
+    <td><input type="radio" name="shipmentId" value="${ship.id}"></td>
     <td>
       <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
     </td>
@@ -21,7 +21,7 @@
     ${ship.title}
     </td>
     <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
-    <td>${ship.state}</td>
+    <td>${ship.state.label()}</td>
     <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
     <td>
     ${ship.totalWeight().format("0.00")}

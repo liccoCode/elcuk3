@@ -111,6 +111,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         PLAN {
             @Override
             public String toString() {
+                return "计划中(c)";
+            }
+
+            @Override
+            public String label() {
                 return "计划中";
             }
         },
@@ -120,6 +125,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         CONFIRM {
             @Override
             public String toString() {
+                return "准备运输,已创建 FBA(c)";
+            }
+
+            @Override
+            public String label() {
                 return "准备运输,已创建 FBA";
             }
         },
@@ -129,6 +139,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         SHIPPING {
             @Override
             public String toString() {
+                return "运输中(c)";
+            }
+
+            @Override
+            public String label() {
                 return "运输中";
             }
         },
@@ -138,6 +153,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         CLEARANCE {
             @Override
             public String toString() {
+                return "清关中(c)";
+            }
+
+            @Override
+            public String label() {
                 return "清关中";
             }
         },
@@ -147,6 +167,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         DONE {
             @Override
             public String toString() {
+                return "完成(c)";
+            }
+
+            @Override
+            public String label() {
                 return "完成";
             }
         },
@@ -157,9 +182,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         CANCEL {
             @Override
             public String toString() {
+                return "取消(c)";
+            }
+
+            @Override
+            public String label() {
                 return "取消";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     public enum P {
@@ -422,6 +454,22 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.cycle)
             Notification.notifies(String.format("周期型运输单 %s 有新货物(%s)", this.id, this.items.size()),
                     String.format("有新的货物添加进入了运输单 %s 记得处理哦.", this.id), Notification.SHIPPER);
+    }
+
+    /**
+     * 向运输单中添加一个采购计划
+     *
+     * @param unit
+     */
+    public synchronized void addToShip(ProcureUnit unit) {
+        if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
+            Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
+        if(!unit.whouse.equals(this.whouse))
+            Validation.addError("", "运输目的地不一样, 无法添加");
+        ShipItem shipitem = new ShipItem(unit);
+        shipitem.shipment = this;
+        shipitem.save();
+        //TODO c: 添加日志
     }
 
 

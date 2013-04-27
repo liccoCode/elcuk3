@@ -59,6 +59,7 @@ POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billing
 POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
+POST    /procureunit                                        ProcureUnits.create
 
 # PaymentUnits
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue

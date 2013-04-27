@@ -44,32 +44,20 @@ $ ->
 
 
   # Ajax 加载 Shipment
-  loadShipment = (shipment, whouseId, shipType) ->
+  loadShipment = ->
+    whouseId = $("[name='unit.whouse.id']").val()
+    shipType = $('input[name="unit.shipType"]').val()
     return unless (whouseId && shipType)
     mask = $('#container')
     mask.mask("加载关联运输单中...")
     $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
       .done((html) ->
-        shipment.html(html)
+        $('#shipments').html(html)
         mask.unmask()
       )
 
   do ->
-    shipment = $('#shipments')
-    whouseSelect = $("[name='unit.whouse.id']")
-    shipTypeSelect = $('input[name="unit.shipType"]')
-
-    whouse = $("[name='unit.selling.sellingId']").val().split("|")[1]
-    whouse = whouse.replace("A", "FBA")
-
-    for value, option of whouseSelect.find("option")
-      if option.text == whouse
-        whouseSelect.val(value)
-        break
-
-    whouseSelect.change ->
-      loadShipment(shipment, whouseSelect.val(), shipTypeSelect.filter(":checked").val())
-
-    shipTypeSelect.change ->
-      loadShipment(shipment, whouseSelect.val(), this.value)
+    $("[name='unit.whouse.id']").change(-> loadShipment())
+    $('input[name="unit.shipType"]').change(-> loadShipment()).change()
+    $('#shipments').on('click', 'input:checked')
 
