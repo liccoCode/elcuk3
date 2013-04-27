@@ -33,7 +33,8 @@ $ ->
     bocRate = $('#boc_rate').html('加载中...')
     bocRate.load(@getAttribute('url'), ->
       LoadMask.unmask()
-      usdRate = $('#boc_rate tr:eq(3) td:eq(1)').css('color', '#D94E48').text()
+      usdRate = $('#boc_rate tr').filter(-> $(@).find('td:eq(0)').text() == '美元')
+        .find('td:eq(1)').css('color', '#D94E48').text()
       # 除以 100:  619.76 -> 6.1976
       bocRate.data('usdRate', parseFloat(usdRate) / 100)
       $('#usd_rates').text((parseFloat(usdRate) / 100).toFixed(4))
