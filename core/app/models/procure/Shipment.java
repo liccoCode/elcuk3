@@ -909,7 +909,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         }
 
-        return Shipment.find(where.append(" ORDER BY planBeginDate").toString(), params.toArray())
+        return Shipment
+                .find(where.append(" ORDER BY planBeginDate").toString(), params.toArray())
                 .fetch();
     }
 

@@ -13,7 +13,6 @@ import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.apache.commons.lang.StringUtils;
-import play.cache.CacheFor;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
@@ -347,7 +346,6 @@ public class Shipments extends Controller {
      *
      * @param whouseId
      */
-    @CacheFor
     public static void unitShipments(Long whouseId, Shipment.T shipType) {
         List<Shipment> unitRelateShipments = Shipment
                 .findUnitRelateShipmentByWhouse(whouseId, shipType);
