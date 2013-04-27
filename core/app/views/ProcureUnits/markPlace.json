@@ -1,0 +1,8 @@
+var errors = '#{js 'tags/errorMsgs.html' /}';
+
+if(errors) {
+$('#actions_${unit.id}').before(errors);
+} else {
+$('#isplaced_${unit.id} img').attr('src', '/img/green.png');
+$('#isplaced_${unit.id}_btn').remove();
+}

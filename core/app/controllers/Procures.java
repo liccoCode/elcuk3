@@ -56,34 +56,6 @@ public class Procures extends Controller {
     }
 
 
-    public static void remove(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        unit.remove();
-        if(Validation.hasErrors()) {
-            renderArgs.put("p", new ProcurePost());
-            render("Procures/index");
-        }
-        flash.success("删除成功");
-        redirect("/Procures/index");
-    }
-
-
-    /**
-     * 抵达货代
-     * TODO effect?
-     *
-     * @param id
-     */
-    public static void markPlace(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        if(unit.cooperator == null || unit.shipType == null) {
-            renderJSON(new Ret(false, "[合作者] 或者 [运输方式] 需要填写完整."));
-        }
-        unit.isPlaced = true;
-        unit.save();
-        renderJSON(new Ret());
-    }
-
     /**
      * 某一个 ProcureUnit 交货
      */

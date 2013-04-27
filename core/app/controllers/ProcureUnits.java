@@ -11,6 +11,7 @@ import models.market.Selling;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
+import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
@@ -76,6 +77,12 @@ public class ProcureUnits extends Controller {
         render(unit, oldPlanQty, whouses);
     }
 
+    /**
+     * TODO 需要调整的采购计划的修改
+     *
+     * @param id
+     * @param oldPlanQty
+     */
     public static void update(Long id, Integer oldPlanQty) {
         String planDeliveryDate = params.get("unit.attrs.planDeliveryDate");
         String planShipDate = params.get("unit.attrs.planShipDate");
@@ -123,6 +130,34 @@ public class ProcureUnits extends Controller {
         flash.success("ProcureUnit %s update success!", unit.id);
         redirect("/procures/index?p.search=id:" + unit.id);
     }
+
+    public static void destroy(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.remove();
+        if(Validation.hasErrors()) {
+            renderArgs.put("p", new ProcurePost());
+            render("Procures/index");
+        }
+        flash.success("删除成功, 所关联的运输项目也成功删除.");
+        Procures.index(null);
+    }
+
+    /**
+     * 抵达货代
+     *
+     * @param id
+     */
+    public static void markPlace(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        if(unit.cooperator == null || unit.shipType == null) {
+            Validation.addError("", "[合作者] 或者 [运输方式] 需要填写完整.");
+        } else {
+            unit.isPlaced = true;
+            unit.save();
+        }
+        render(unit);
+    }
+
 
     /**
      * 预付款申请

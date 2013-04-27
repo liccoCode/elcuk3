@@ -396,6 +396,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
             new ElcukRecord(Messages.get("procureunit.remove"),
                     Messages.get("action.base", this.to_log()), "procures.remove").save();
+            for(ShipItem item : this.shipItems) {
+                item.delete();
+            }
             this.delete();
         } else {
             Validation.addError("",
