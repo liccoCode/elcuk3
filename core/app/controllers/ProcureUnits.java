@@ -1,8 +1,10 @@
 package controllers;
 
 import exception.PaymentException;
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.finance.FeeType;
 import models.market.Selling;
@@ -64,6 +66,34 @@ public class ProcureUnits extends Controller {
                 Messages.get("action.base", unit.to_log()), unit.id + "").save();
 
         Shipments.show(shipmentId);
+    }
+
+    public static void edit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        int oldPlanQty = unit.attrs.planQty;
+        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        render(unit, oldPlanQty, whouses);
+    }
+
+    public static void update(ProcureUnit unit, int oldPlanQty, String shipmentId) {
+        validation.required(oldPlanQty);
+        unit.validate();
+        if(Validation.hasErrors()) {
+            render("../views/ProcureUnits/edit.html", unit, oldPlanQty);
+        }
+        unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
+        new ElcukRecord(Messages.get("procureunit.update"),
+                Messages.get("action.base", unit.to_log()), unit.id + "").save();
+        //TODO effects: Notification 调整
+        if(oldPlanQty != unit.attrs.planQty) {
+            Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
+                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
+                            oldPlanQty, unit.attrs.planQty,
+                            Dates.date2Date(unit.attrs.planDeliveryDate)),
+                    Notification.PROCURE, Notification.SHIPPER);
+        }
+        flash.success("ProcureUnit %s update success!", unit.id);
+        redirect("/procures/index?p.search=id:" + unit.id);
     }
 
     /**

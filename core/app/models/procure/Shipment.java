@@ -815,6 +815,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     @Override
+    public String toString() {
+        return String.format("%s 开往 %s", this.id, this.whouse.name);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;

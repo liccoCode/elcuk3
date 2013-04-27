@@ -1,18 +1,18 @@
 package controllers;
 
-import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
-import models.procure.*;
+import models.procure.CooperItem;
+import models.procure.Cooperator;
+import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -75,32 +75,6 @@ public class Procures extends Controller {
         redirect("/Procures/index");
     }
 
-    public static void edit(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        int oldPlanQty = unit.attrs.planQty;
-        render(unit, oldPlanQty);
-    }
-
-    public static void update(ProcureUnit unit, int oldPlanQty, String shipmentId) {
-        validation.required(oldPlanQty);
-        unit.validate();
-        if(Validation.hasErrors()) {
-            render("Procures/edit.html", unit, oldPlanQty);
-        }
-        unit.updateWithShipment(Shipment.<Shipment>findById(shipmentId));
-        new ElcukRecord(Messages.get("procureunit.update"),
-                Messages.get("action.base", unit.to_log()), unit.id + "").save();
-        //TODO effects: Notification 调整
-        if(oldPlanQty != unit.attrs.planQty) {
-            Notification.notifies(String.format("采购计划 #%s(%s) 变更", unit.id, unit.sku),
-                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
-                            oldPlanQty, unit.attrs.planQty,
-                            Dates.date2Date(unit.attrs.planDeliveryDate)),
-                    Notification.PROCURE, Notification.SHIPPER);
-        }
-        flash.success("ProcureUnit %s update success!", unit.id);
-        redirect("/procures/index?p.search=id:" + unit.id);
-    }
 
     public static void markPlace(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);

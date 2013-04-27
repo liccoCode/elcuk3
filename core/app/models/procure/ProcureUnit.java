@@ -476,44 +476,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 寻找 ProcureUnit 关联的 FBA
-     *
-     * @return
-     */
-    public FBAShipment fba() {
-        //TODO effect: ProcureUnit 与 FBA 拥有直接联系, 需要调整.
-        /*
-        if(this.shipItem != null && this.shipItem.fba != null)
-            return this.shipItem.fba;
-        else
-            return null;
-            */
-        return null;
-    }
-
-    /**
-     * 通过运输计划获取到其运输单的预计开船时间
-     * 1. 如果有运输单则返回运输单的预计开船时间
-     * 2. 没有运输单则返回采购计划预计运输时间
-     *
-     * @return
-     */
-    public Date planShipBeginDate() {
-        //TODO effect: 运输时间会根据运输项目会有多个.
-        return null;
-    }
-
-    /**
-     * 通过运输计划获取到运输单的预计到库时间
-     *
-     * @return
-     */
-    public Date planShipArriveDate() {
-        //TODO effect: 同运输时间
-        return null;
-    }
-
-    /**
      * 预付款申请
      */
     public PaymentUnit billingPrePay() {

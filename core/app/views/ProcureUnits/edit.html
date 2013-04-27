@@ -1,33 +1,30 @@
 #{extends 'main.html' /}
 #{set title:'ProcureUnit #' + unit.id + ' Edit' /}
 #{set 'moreScripts'}
-    #{script 'procures/blank.coffee'/}
+    #{script 'procureunits/blank.coffee'/}
 #{/set}
 
-#{if unit.selling == null}
-    #{flash_alert row:true /}
-#{/if}
-#{else }
+#{errorMsgs /}
+#{flash_alert row:true /}
 
-    #{errorMsgs /}
-    #{flash_alert row:true /}
+#{danger_row ''}
+采购计划的更改会有限制, 需要调整
+#{/danger_row}
 
-<form action="/procures/update" method="post">
+<form action="@{ProcureUnits.update()}" method="post" data-method='PUT'>
   <table class="table table-condensed table-bordered">
-      #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses/}
+  #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
     <tr>
       <td colspan="4">
         <input type="hidden" name="unit.id" value="${unit.id}">
         <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
-        <input type="hidden" name="shipmentId" value="${unit.shipItem?.shipment ? unit.shipItem.shipment.id : ''}">
         <button type="submit" class="btn btn-primary">更新</button>
       </td>
     </tr>
     <tr>
       <td colspan="4">
-          #{render 'Procures/_shipments.html'/}
+      #{render 'Procures/_shipments.html'/}
       </td>
     </tr>
   </table>
 </form>
-#{/else}
