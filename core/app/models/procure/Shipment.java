@@ -725,7 +725,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             return "";
         }
         Logger.info("Shipment sync from [%s]", this.internationExpress.trackUrl(this.trackNo));
-        String html = this.internationExpress.fetchStateHTML(this.trackNo);
+        String html = null;
+        if(this.internationExpress.equals(iExpress.FEDEX))
+            html = this.internationExpress.fetchFedexJson(this.trackNo);
+        else
+            html = this.internationExpress.fetchStateHTML(this.trackNo);
         try {
             this.iExpressHTML = this.internationExpress.parseExpress(html, this.trackNo);
         } catch(Exception e) {
