@@ -1,7 +1,9 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.FBA;
 import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
@@ -366,6 +368,27 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.validate();
         if(Validation.hasErrors()) return;
         this.save();
+    }
+
+    /**
+     * 通过 ProcureUnit 创建 FBA
+     */
+    public synchronized FBAShipment postFbaShipment() {
+        FBAShipment fba = null;
+        try {
+            fba = FBA.plan(this.selling.account, this);
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            return null;
+        }
+        try {
+            fba.state = FBA.create(fba);
+            this.fba = fba.save();
+            this.save();
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
+        }
+        return fba;
     }
 
     public String nickName() {

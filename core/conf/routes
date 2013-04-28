@@ -56,18 +56,24 @@ POST    /payment/{id}/lock                                  Payments.lockIt
 DELETE  /payment/{id}/lock                                  Payments.unlock
 
 # ProcureUnits
-POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
-POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
-DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
+POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
+
+# FBAs
+GET     /fba/{id}/innerlabel                                FBAs.packingSlip
+GET     /fba/{id}/outlabel                                  FBAs.boxLabel
+GET     /code128/{shipmentId}                               FBAs.code128
 
 # PaymentUnits
+DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
+POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
+POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index

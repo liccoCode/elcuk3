@@ -2,7 +2,6 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.FBA;
 import helper.FLog;
 import helper.Webs;
 import models.ElcukRecord;
@@ -24,7 +23,10 @@ import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -449,72 +451,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;
         this.memo = String.format("%s\r\n%s", cmt, this.memo).trim();
-    }
-
-    /**
-     * 确认运输单以后, 向 Amazon 创建 FBAShipment
-     * <p/>
-     */
-    public F.Option<FBAShipment> deployFBA(List<String> shipitemIds) {
-        /**
-         * 1. 将本地的状态修改为 CONFIRM
-         * 2. 向 Amazon 提交 FBA Shipment 的创建
-         * 3. Amazon Shipment 创建成功后再本地更新, 否则不更新,包裹错误.
-         */
-        if(this.items.size() <= 0)
-            Validation.addError("", "运输单为空, 不需要创建 FBA Shipment");
-
-        // 检查提交的是否为当前运输单的 ShipItem, 是的挑出来, 找到一个不是则报告错误
-        Map<String, ShipItem> shipItemsMap = new HashMap<String, ShipItem>();
-        List<ShipItem> deployItems = new ArrayList<ShipItem>();
-        for(ShipItem itm : this.items) {
-            shipItemsMap.put(itm.id.toString(), itm);
-        }
-        for(String id : shipitemIds) {
-            if(!shipItemsMap.containsKey(id)) {
-                Validation.addError("", String.format("ShipItem Id %s 不存在运输单 %s 中", id, this.id));
-            } else {
-                deployItems.add(shipItemsMap.get(id));
-            }
-        }
-        if(Validation.hasErrors()) return F.Option.None();
-
-        F.Option<FBAShipment> fbaQpt = this.postFBAShipment(deployItems);
-        if(Validation.hasErrors()) return fbaQpt;
-        if(fbaQpt.isDefined()) {
-            this.state = S.CONFIRM;
-            this.target = fbaQpt.get().address();
-            this.save();
-        }
-        return fbaQpt;
-    }
-
-    /**
-     * 根据此 Shipment 创建一个 FBAShipment
-     * <p/>
-     * ps: 这个方法不允许并发
-     * TODO: effect, FBAShipment 与 Shipment 没有关系, 需要挪到 ProcureUnit 中去创建
-     *
-     * @return
-     */
-    public synchronized F.Option<FBAShipment> postFBAShipment(List<ShipItem> shipItems) {
-        F.Option<FBAShipment> fbaQpt = null;
-        try {
-            fbaQpt = FBA.plan(this.whouse.account, shipItems);
-        } catch(Exception e) {
-            Validation.addError("", "向 Amazon 创建 Shipment Plan 错误 " + Webs.E(e));
-            return F.Option.None();
-        }
-        try {
-            if(fbaQpt.isDefined()) {
-                // Shipment 与 FBA 由 FBA 自行创建关系
-                fbaQpt.get().state = FBA.create(fbaQpt.get());
-                fbaQpt.get().save();
-            }
-        } catch(Exception e) {
-            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
-        }
-        return fbaQpt;
     }
 
     /**

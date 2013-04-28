@@ -147,17 +147,29 @@
                   #{/power.ck}
                   #{power.ck "procures.dosplitunit"}
                     <!-- 分拆采购单元 -->
-                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger">分拆采购计划</a>
+                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger">分拆</a>
                   #{/power.ck}
                 <!-- 确认到货代处 -->
                   #{ifnot unit.isPlaced}
                     <a data-remote='true' data-method='PUT' class="btn btn-info" id="isplaced_${unit.id}_btn"
                        href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>
-                      抵达货代处
+                      抵达货代
                     </a>
                   #{/ifnot}
               </div>
             #{/if}
+          <div class="btn-toolbar">
+              #{ifnot unit.fba}
+                <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-success"
+                   data-disable-with="创建中...">
+                  创建 FBA
+                </a>
+              #{/ifnot}
+              #{else }
+                <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-success">箱內麦</a>
+                <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-success">箱外麦</a>
+              #{/else}
+          </div>
         </div>
       </div>
         #{ifnot norecord}
