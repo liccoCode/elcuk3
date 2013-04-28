@@ -69,7 +69,7 @@
     <td>${unit.shipType}</td>
     <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
-    <td style="background:${unit.stage.rgb()}">${unit.stage}</td>
+    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
     <td>#{time_tooltip time:unit.createDate/}</td>
   </tr>
@@ -166,6 +166,12 @@
                 </a>
               #{/ifnot}
               #{else }
+                  #{power.ck 'fbas.update'}
+                    <a href="@{FBAs.update(unit.id)}" class="btn btn-warning"
+                       data-method='PUT' data-disable-with='更新中...'>
+                      更新 ${unit.fba.shipmentId}
+                    </a>
+                  #{/power.ck}
                 <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-success">箱內麦</a>
                 <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-success">箱外麦</a>
               #{/else}

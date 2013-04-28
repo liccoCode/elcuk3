@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Constant;
+import helper.Webs;
 import models.Notification;
 import models.embedded.ERecordBuilder;
 import models.market.Account;
@@ -14,6 +15,7 @@ import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.impl.code128.Code128Constants;
 import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.krysalis.barcode4j.tools.MimeTypes;
+import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -61,14 +63,32 @@ public class FBAs extends Controller {
         ProcureUnit unit = ProcureUnit.findById(procureUnitId);
 
         unit.postFbaShipment();
-        new ERecordBuilder("shipment.createFBA")
-                .msgArgs(unit.id + "", unit.sku, unit.fba.shipmentId)
-                .fid(unit.id)
-                .save();
-        Notification.notifies("FBA 创建成功",
-                Messages.get("shipment.createFBA.msg", unit.id, unit.sku, unit.fba.shipmentId),
-                Notification.PROCURE);
-        flash.success("成功在 Amazon 创建 FBA: %s", unit.fba.shipmentId);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+
+        } else {
+            new ERecordBuilder("shipment.createFBA")
+                    .msgArgs(unit.id + "", unit.sku, unit.fba.shipmentId)
+                    .fid(unit.id)
+                    .save();
+            Notification.notifies("FBA 创建成功",
+                    Messages.get("shipment.createFBA.msg", unit.id, unit.sku, unit.fba.shipmentId),
+                    Notification.PROCURE);
+            flash.success("成功在 Amazon 创建 FBA: %s", unit.fba.shipmentId);
+        }
+
+        Deliveryments.show(unit.deliveryment.id);
+    }
+
+    @Check("fbas.update")
+    public static void update(Long procureUnitId) {
+        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
+        unit.fba.updateFBAShipment(null);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("FBA %s 更新成功.", unit.fba.shipmentId);
+        }
         Deliveryments.show(unit.deliveryment.id);
     }
 

@@ -5,20 +5,16 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 import models.market.Account;
 import models.procure.FBACenter;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
-import models.procure.ShipItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Amazon FBA 操作
@@ -160,31 +156,26 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S update(FBAShipment fbaShipment, List<ShipItem> updateitems,
-                                       FBAShipment.S state) throws FBAInboundServiceMWSException {
+    public static FBAShipment.S update(FBAShipment fbaShipment, FBAShipment.S state) throws
+            FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        Monitor monitor = MonitorFactory.start("FBA.update");
-        try {
+        if(fbaShipment.state == FBAShipment.S.PLAN) return fbaShipment.state;
 
-            if(fbaShipment.state == FBAShipment.S.PLAN) return fbaShipment.state;
-            UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
-            update.setSellerId(fbaShipment.account.merchantId);
-            update.setShipmentId(fbaShipment.shipmentId);
-            update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
-                    Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
-                    fbaShipment.labelPrepType));
+        UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
+        update.setSellerId(fbaShipment.account.merchantId);
+        update.setShipmentId(fbaShipment.shipmentId);
+        update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
+                Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
+                fbaShipment.labelPrepType));
 
-            List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(updateitems);
-            update.setInboundShipmentItems(new InboundShipmentItemList(items));
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
+        update.setInboundShipmentItems(new InboundShipmentItemList(items));
 
-            UpdateInboundShipmentResponse response = client(fbaShipment.account)
-                    .updateInboundShipment(update);
-            if(response.isSetUpdateInboundShipmentResult())
-                fbaShipment.state = state;
-        } finally {
-            monitor.stop();
-        }
+        UpdateInboundShipmentResponse response = client(fbaShipment.account)
+                .updateInboundShipment(update);
+        if(response.isSetUpdateInboundShipmentResult())
+            fbaShipment.state = state;
         return fbaShipment.state;
     }
 
@@ -263,7 +254,11 @@ public class FBA {
      */
     public static InboundShipmentPlanRequestItem procureUnitToInboundShipmentPlanItems(
             ProcureUnit unit) {
-        return new InboundShipmentPlanRequestItem(unit.selling.merchantSKU, null, null, unit.qty());
+        return new InboundShipmentPlanRequestItem(
+                fixHistoryMSKU(unit.selling.merchantSKU),
+                null,
+                null,
+                unit.qty());
     }
 
     /**
@@ -277,85 +272,15 @@ public class FBA {
 
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
         for(ProcureUnit unit : units) {
-            items.add(new InboundShipmentItem(null, unit.selling.merchantSKU, null, unit.qty(),
+            items.add(new InboundShipmentItem(null,
+                    fixHistoryMSKU(unit.selling.merchantSKU),
+                    null,
+                    unit.qty(),
                     null));
         }
         return items;
     }
 
-
-    /**
-     * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentItem
-     * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentItem 中
-     * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
-     * <p/>
-     * ps: 创建 FBA, 更新 FBA 时使用
-     *
-     * @param shipitems
-     * @return
-     */
-    private static List<InboundShipmentItem> shipItemsToInboundShipmentItems(
-            List<ShipItem> shipitems) {
-        /**
-         * 1. 根据 ShipItem 的 msku 组成 Map
-         * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
-         */
-        Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
-
-        List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
-        for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
-            // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentItem(null, entry.getKey(), null, entry.getValue().get(),
-                    null));
-        }
-        return items;
-    }
-
-    /**
-     * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentPlanRequestItem
-     * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentPlanRequestItem 中
-     * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
-     * <p/>
-     * ps: 创建计划时时候
-     *
-     * @param shipitems
-     * @return
-     */
-    private static List<InboundShipmentPlanRequestItem> shipItemsToInboundShipmentPlanItems(
-            List<ShipItem> shipitems) {
-        Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
-
-        List<InboundShipmentPlanRequestItem> items = new ArrayList<InboundShipmentPlanRequestItem>();
-        for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
-            // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentPlanRequestItem(entry.getKey(), null, null,
-                    entry.getValue().get()));
-        }
-        return items;
-    }
-
-
-    /**
-     * 将 ShipItem 中由于相同 msku 的数量进行合并, Amazon 不允许分开提交.
-     *
-     * @param shipItems
-     * @return
-     */
-    private static Map<String, AtomicInteger> shipItemMerge(List<ShipItem> shipItems) {
-        /**
-         * 1. 根据 ShipItem 的 msku 组成 Map
-         * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
-         */
-        Map<String, AtomicInteger> shipitemsMap = new HashMap<String, AtomicInteger>();
-        for(ShipItem item : shipItems) {
-            String msku = item.unit.selling.merchantSKU;
-            if(shipitemsMap.containsKey(msku))
-                shipitemsMap.get(msku).addAndGet(item.qty);
-            else
-                shipitemsMap.put(fixHistoryMSKU(msku), new AtomicInteger(item.qty));
-        }
-        return shipitemsMap;
-    }
 
     /**
      * 历史的 msku 的问题兼容
