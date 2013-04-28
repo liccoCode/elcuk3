@@ -6,7 +6,7 @@
 
 #{errorMsgs /}
 
-#{info_row title:'运输单'/}
+#{info_row title:'运输单 TODO: 需要调整的页面'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-bordered">
@@ -115,7 +115,7 @@
           <th>ProcureUnit</th>
         </tr>
       #{list items:units, as:'unit'}
-          #{if unit.shipItem == null}
+          #{if unit.shipItems.size() == 0}
             <tr>
               <td>
                 <label class="checkbox">

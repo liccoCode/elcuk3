@@ -3,7 +3,6 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.FBAShipment;
@@ -233,31 +232,6 @@ public class Shipments extends Controller {
         //TODO: effect 开始运输更新 FBA
         flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
 
-        redirect("/shipments/show/" + id);
-    }
-
-    /**
-     * 对 Shipment 进行 Confirm, Confirm 以后不再允许添加运输项目
-     *
-     * @param id
-     */
-    @Check("shipments.deploytoamazon")
-    public static void deployToAmazon(final String id, final List<String> shipItemId) {
-        validation.required(shipItemId);
-        checkAuthenticity();
-
-        Shipment ship = Shipment.findById(id);
-        Validation.required("shipment.whouse", ship.whouse);
-        checkShowError(ship);
-        F.Option<FBAShipment> fbaOpt = ship.deployFBA(shipItemId);
-        if(!fbaOpt.isDefined()) checkShowError(Shipment.<Shipment>findById(id));
-        new ElcukRecord(Messages.get("shipment.createFBA"),
-                Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId), id).save();
-        Notification.notifies("FBA 创建成功",
-                Messages.get("shipment.createFBA.msg", id, fbaOpt.get().shipmentId),
-                Notification.PROCURE);
-        // TODO: effect 创建 FBA
-        flash.success("Amazon FBA %s 创建成功", fbaOpt.get().shipmentId, fbaOpt.get());
         redirect("/shipments/show/" + id);
     }
 

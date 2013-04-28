@@ -1,7 +1,9 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.FBA;
 import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
@@ -368,6 +370,27 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
     }
 
+    /**
+     * 通过 ProcureUnit 创建 FBA
+     */
+    public synchronized FBAShipment postFbaShipment() {
+        FBAShipment fba = null;
+        try {
+            fba = FBA.plan(this.selling.account, this);
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("", "向 Amazon 创建 Shipment PLAN 因 " + Webs.E(e) + " 原因失败.");
+            return null;
+        }
+        try {
+            fba.state = FBA.create(fba);
+            this.fba = fba.save();
+            this.save();
+        } catch(FBAInboundServiceMWSException e) {
+            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
+        }
+        return fba;
+    }
+
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
     }
@@ -393,9 +416,19 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public void remove() {
-        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
+        /**
+         * TODO: 这里需要理清楚
+         * 1. 什么时候可以删除采购计划?
+         * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?
+         */
+        if(this.fba != null) {
+            Validation.addError("", "拥有 FBA 无法删除采购计划.");
+        } else if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
             new ElcukRecord(Messages.get("procureunit.remove"),
                     Messages.get("action.base", this.to_log()), "procures.remove").save();
+            for(ShipItem item : this.shipItems) {
+                item.delete();
+            }
             this.delete();
         } else {
             Validation.addError("",

@@ -69,22 +69,22 @@
     <td>${unit.shipType}</td>
     <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
-    <td style="background:${unit.stage.rgb()}">${unit.stage}</td>
-    <td>#{yesOrNo f:unit.isPlaced/}</td>
+    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+    <td id="isplaced_${unit.id}">#{yesOrNo f:unit.isPlaced/}</td>
     <td>#{time_tooltip time:unit.createDate/}</td>
   </tr>
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '17' : '16'}">
-      <div class="row-fluid">
+    <td colspan="${checkbox ? '18' : '16'}">
+      <div class="row-fluid" id="actions_${unit.id}">
 
-        <div class="span3" style="float:left;padding-right:10px;">
+        <div class="span3">
           <dl>
             <dt>Comment</dt>
             <dd>${unit.comment}</dd>
           </dl>
 
         </div>
-        <div class="span3" style="float:left">
+        <div class="span3">
           <dl>
             <dt>关联运输单</dt>
             <dd>
@@ -114,7 +114,7 @@
           </dl>
         </div>
 
-        <div class="span3" style="float:left;padding:0 20px;">
+        <div class="span3">
           <table class="table table-condensed table-bordered">
             <tr>
               <td>实际交货量</td>
@@ -127,33 +127,55 @@
           </table>
         </div>
 
-        <div class="span2" style="float:left;">
-          <!-- 普通修改 -->
-          <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-primary">修改</a>
+        <div class="span2">
+          <div class="btn-toolbar">
+            <!-- 普通修改 -->
+            <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-primary">修改</a>
 
-            #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
-              <a href="@{Procures.remove()}/${unit.id}" data-confirm="确认删除?" class="btn btn-danger">删除</a>
-            #{/if}
+              #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
+                <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-danger">
+                  删除
+                </a>
+              #{/if}
+          </div>
 
             #{if delivery}
-                #{power.ck "procures.delivery"}
-                  <!-- 交货页面 -->
-                  <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
-                #{/power.ck}
-                #{power.ck "procures.dosplitunit"}
-                  <!-- 分拆采购单元 -->
-                  <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
-                #{/power.ck}
-              <!-- 确认到货代处 -->
-                #{ifnot unit.isPlaced}
-                  <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
-                    <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
-                    <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">
-                      抵达货代处
-                    </button>
-                  </div>
-                #{/ifnot}
+              <div class="btn-toolbar">
+                  #{power.ck "procures.delivery"}
+                    <!-- 交货页面 -->
+                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning">交货</a>
+                  #{/power.ck}
+                  #{power.ck "procures.dosplitunit"}
+                    <!-- 分拆采购单元 -->
+                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger">分拆</a>
+                  #{/power.ck}
+                <!-- 确认到货代处 -->
+                  #{ifnot unit.isPlaced}
+                    <a data-remote='true' data-method='PUT' class="btn btn-info" id="isplaced_${unit.id}_btn"
+                       href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>
+                      抵达货代
+                    </a>
+                  #{/ifnot}
+              </div>
             #{/if}
+          <div class="btn-toolbar">
+              #{ifnot unit.fba}
+                <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-success"
+                   data-disable-with="创建中...">
+                  创建 FBA
+                </a>
+              #{/ifnot}
+              #{else }
+                  #{power.ck 'fbas.update'}
+                    <a href="@{FBAs.update(unit.id)}" class="btn btn-warning"
+                       data-method='PUT' data-disable-with='更新中...'>
+                      更新 ${unit.fba.shipmentId}
+                    </a>
+                  #{/power.ck}
+                <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-success">箱內麦</a>
+                <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-success">箱外麦</a>
+              #{/else}
+          </div>
         </div>
       </div>
         #{ifnot norecord}
