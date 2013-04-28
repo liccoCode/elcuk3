@@ -1,9 +1,11 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import helper.FBA;
 import helper.Webs;
 import models.market.Account;
 import notifiers.FBAMails;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -307,21 +309,31 @@ public class FBAShipment extends Model {
     }
 
     /**
-     * 删除这个 FBA Shipment
+     * 向 Amazon 提交报告, 对这个 FBA 进行删除标记
      */
     public synchronized void removeFBAShipment() {
-        /* TODO effect: 删除这个 FBA 需要考虑 ProcureUnit 而非运输
-        if(this.state != S.WORKING && this.state != S.PLAN) {
-            throw new FastRuntimeException("已经运输出去, 无法删除.");
-        }
+        if(this.state != S.WORKING && this.state != S.PLAN)
+            Validation.addError("", "已经运输出去了, 无法删除.");
+        if(Validation.hasErrors()) return;
+
         try {
-            this.state = FBA.update(this, this.shipItems, S.DELETED);
-            this.closeAt = new Date();
-            this.save();
+            this.state = FBA.update(this, S.DELETED);
+            if(this.state == S.DELETED) {
+                /**
+                 * 标记删除这个 FBA, 与其有关的采购计划全部清理
+                 */
+                for(ProcureUnit unit : this.units) {
+                    unit.fba = null;
+                    unit.save();
+                }
+                this.closeAt = new Date();
+                this.save();
+            } else {
+                Validation.addError("", String.format("为 FBA %s 标记删除失败.", this.shipmentId));
+            }
         } catch(FBAInboundServiceMWSException e) {
             throw new FastRuntimeException(e);
         }
-        */
     }
 
     /**

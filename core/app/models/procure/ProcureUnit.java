@@ -416,7 +416,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public void remove() {
-        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
+        /**
+         * TODO: 这里需要理清楚
+         * 1. 什么时候可以删除采购计划?
+         * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?
+         */
+        if(this.fba != null) {
+            Validation.addError("", "拥有 FBA 无法删除采购计划.");
+        } else if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
             new ElcukRecord(Messages.get("procureunit.remove"),
                     Messages.get("action.base", this.to_log()), "procures.remove").save();
             for(ShipItem item : this.shipItems) {
