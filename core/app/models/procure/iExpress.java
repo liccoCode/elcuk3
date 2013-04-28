@@ -227,24 +227,18 @@ public enum iExpress {
      * @return
      */
     public String fetchStateHTML(String tracNo) {
-        return HTTP.get(this.trackUrl(tracNo));
+        if(this.equals(FEDEX)) {
+            return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
+                    new BasicNameValuePair("data", String.format("{\"TrackPackagesRequest\":{\"appType\":\"wtrk\",\"processingParameters\":{\"anonymousTransaction\":true," +
+                            "\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,\"returnLocalizedDateTime\":false}," +
+                            "\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\"}}]}}", tracNo)),
+                    new BasicNameValuePair("action", "trackpackages"),
+                    new BasicNameValuePair("locale", "zh_CN"),
+                    new BasicNameValuePair("format", "json"),
+                    new BasicNameValuePair("version", "99")
+            ));
+        } else
+            return HTTP.get(this.trackUrl(tracNo));
     }
 
-    /**
-     * 获取 FEDEX 的Josn数据
-     *
-     * @param tracNo
-     * @return
-     */
-    public String fetchFedexJson(String tracNo) {
-        return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
-                new BasicNameValuePair("data", String.format("{\"TrackPackagesRequest\":{\"appType\":\"wtrk\",\"processingParameters\":{\"anonymousTransaction\":true," +
-                        "\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,\"returnLocalizedDateTime\":false}," +
-                        "\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\"}}]}}", tracNo)),
-                new BasicNameValuePair("action", "trackpackages"),
-                new BasicNameValuePair("locale", "zh_CN"),
-                new BasicNameValuePair("format", "json"),
-                new BasicNameValuePair("version", "99")
-        ));
-    }
 }
