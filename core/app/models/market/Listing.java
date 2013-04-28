@@ -354,9 +354,6 @@ public class Listing extends GenericModel {
         List<Account> nonWishListAccs = AmazonWishListRecord.nonAddWishListAccs(opendAccs, this.listingId);
         if(nonWishListAccs.size() == 0)
             throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
-        StringBuffer sb = new StringBuffer();
-        for(Account acc : nonWishListAccs)
-            sb.append(acc.id).append("|").append(acc.prettyName()).append(",");
         return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
     }
 

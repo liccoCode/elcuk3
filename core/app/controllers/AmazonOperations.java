@@ -134,4 +134,17 @@ public class AmazonOperations extends Controller {
         renderJSON(success);
     }
 
+    /**
+     * 得到 Listing 被添加到的wishlist的账户信息
+     *
+     * @param asin
+     * @param m
+     */
+    public static void ajaxWishListInfos(String asin, String m) {
+        M market = M.val(m);
+        String lid = Listing.lid(asin, market);
+        List<AmazonWishListRecord> records = AmazonWishListRecord.wishListInfos(lid);
+        renderJSON(J.json(records));
+    }
+
 }

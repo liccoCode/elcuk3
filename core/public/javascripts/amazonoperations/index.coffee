@@ -208,7 +208,19 @@ $ ->
         )
         e.preventDefault()
       )
+      $('#addedAcc').on('shown', ->
+        $.post('/AmazonOperations/ajaxWishListInfos', params,
+        (records)->
+          $("#acc_table").empty().append('<tr><th>#</th><th>Add Acc</th><th>Add At</th></tr>')
+          for record in records
+            $("#acc_table").append(tr_html(record))
+        )
+      )
     )
+
+  tr_html = (record)->
+    return "<tr><td>#{record.id}</td><td>#{record.userName}</td><td>#{record.createAt}</td></tr>"
+
 
 
 

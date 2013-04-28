@@ -4,6 +4,7 @@ import helper.Constant;
 import helper.HTTP;
 import helper.Webs;
 import models.market.Account;
+import models.market.Listing;
 import models.market.M;
 import models.market.Selling;
 import org.apache.commons.io.FileUtils;
@@ -12,10 +13,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Before;
 import org.junit.Test;
+import play.Logger;
+import play.libs.F;
 import play.test.UnitTest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -43,7 +48,7 @@ public class AccountTest extends UnitTest {
         if(dbSell != null) sell = dbSell;
     }
 
-    @Test
+   // @Test
     public void readAccount() throws ClassNotFoundException, IOException {
         try {
             // 登陆并且缓存登陆
@@ -62,10 +67,10 @@ public class AccountTest extends UnitTest {
         assertTrue(Account.isLoginEnd(Jsoup.parse(html)));
     }
 
-    //    @Test
+    @Test
     public void testamazonSiteLogin() {
         // 测试登陆 Amazon 前台
-        assertTrue(acc.loginAmazonSize(M.AMAZON_US));
+        assertTrue( acc.loginAmazonSize(M.AMAZON_US));
     }
 
     //    @Test
@@ -124,5 +129,22 @@ public class AccountTest extends UnitTest {
     //    @Test
     public void testsaleSellingPostLink() {
         // 上架 Listing 第二步, 上架
+    }
+    //@Test
+    public void testAddToWishList(){
+        //法国
+        //Listing listing=Listing.findById("B005UO263U_amazon.fr");
+
+        //德国
+        Listing listing=Listing.findById("B00AYSMWF4_amazon.de");
+
+        //英国
+        //Listing listing=Listing.findById("B00ASFHTME_amazon.co.uk");
+
+        //美国 无法登陆.
+        //Listing listing=Listing.findById("B00AS5EW92_amazon.com");
+        F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToWishList();
+        boolean success = accT2._1.addToWishList(listing);
+        assertTrue(success);
     }
 }

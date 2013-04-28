@@ -348,7 +348,6 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                        /*最后的 _cachebust 为随即生成的值*/
                 return String
                         .format("http://www.%s/gp/registry/wishlist", this.toString());
             case EBAY_UK:
@@ -366,7 +365,6 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                                /*最后的 _cachebust 为随即生成的值*/
                 return String
                         .format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list", this.toString());
             case EBAY_UK:
@@ -384,9 +382,8 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                                        /*最后的 _cachebust 为随即生成的值*/
                 return String
-                        .format("http://www.%s/dp/%s", this.toString(),asin);
+                        .format("http://www.%s/dp/%s", this.toString(), asin);
             case EBAY_UK:
                 return "unknow..";
             default:

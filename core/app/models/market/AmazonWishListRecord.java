@@ -2,6 +2,7 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import helper.DBUtils;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.libs.F;
 
@@ -26,7 +27,7 @@ public class AmazonWishListRecord extends Model {
 
 
     @Expose
-    public String market;
+    public M market;
 
 
     /**
@@ -59,7 +60,7 @@ public class AmazonWishListRecord extends Model {
 
     public AmazonWishListRecord(Listing listing, Account account) {
         this.asin = listing.asin;
-        this.market = listing.market.toString();
+        this.market = listing.market;
         this.account = account;
         this.category = listing.product.category.name;
         this.createAt = new Date();
@@ -78,9 +79,11 @@ public class AmazonWishListRecord extends Model {
     public static List<Account> nonAddWishListAccs(List<Account> opendAccs, String lid) {
         F.T2<String, M> lidT2 = Listing.unLid(lid);
         List<Account> nonAddWishListAccs = new ArrayList<Account>();
-        for(Account acc : opendAccs)
-            if(AmazonWishListRecord.count("asin=? and market=? and account=?", lidT2._1, lidT2._2.toString(), acc) == 0)
-                nonAddWishListAccs.add(acc);
+        for(Account acc : opendAccs) {
+            if(AmazonWishListRecord.count("asin=? and market=? and account=?", lidT2._1, lidT2._2.name(), acc) != 0)
+                continue;
+            nonAddWishListAccs.add(acc);
+        }
 
         return nonAddWishListAccs;
     }
@@ -90,12 +93,13 @@ public class AmazonWishListRecord extends Model {
      *
      * @param asin
      * @param market
-     * @return
+     * @return T5<asin,market,category,addedNumber,totalNumb >
      */
     public static F.T5<String, String, String, Long, Long> wishList(String asin, M market) {
-        String sql = "select a.category as cg,count(a.category) as count from (select category from amazonwishlistrecord where asin=? and market=?) a";
-
-        List<Map<String, Object>> rows = DBUtils.rows(sql, asin, market.toString());
+        SqlSelect sqlSelect = new SqlSelect();
+        sqlSelect.select("a.category as cg", "count(a.category) as count")
+                .from("(select category from AmazonWishListRecord where asin=? and market=?) as a");
+        List<Map<String, Object>> rows = DBUtils.rows(sqlSelect.toString(), asin, market.name());
         long addedNumb = 0;
         String category = null;
         for(Map row : rows) {
@@ -103,7 +107,17 @@ public class AmazonWishListRecord extends Model {
             addedNumb += (Long) row.get("count");
         }
         long totalNumb = Account.count("type=?", market);
-        return new F.T5<String, String, String, Long, Long>(asin, market.toString(), category, addedNumb, totalNumb);
+        return new F.T5<String, String, String, Long, Long>(asin, market.name(), category, addedNumb, totalNumb);
     }
 
+    /**
+     * 查询 AmazonWishList的记录
+     *
+     * @param listingId
+     * @return
+     */
+    public static List<AmazonWishListRecord> wishListInfos(String listingId) {
+        List<AmazonWishListRecord> records = AmazonWishListRecord.find("ListingId=? order by createAt desc", listingId).fetch();
+        return records;
+    }
 }

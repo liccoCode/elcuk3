@@ -13,14 +13,20 @@
                 <td>${wishlist._2}</td>
                 <td>${wishlist._3}</td>
                 <td>${wishlist._1}</td>
-                <td>${wishlist._4}</td>
+                <td style="cursor:pointer;" data-toggle="collapse" data-target="#addedAcc">
+                    <span class="badge badge-important">${wishlist._4}</span></td>
                 <td>${wishlist._5-wishlist._4}</td>
                 <td>
                     <button class="btn" id="add_wishlist">添加</button>
                 </td>
             </tr>
             <tr>
-                <td colspan="6"></td>
+                <td colspan="6">
+                    <div id="addedAcc" class="collapse">
+                        <table class="table table-condensed" id="acc_table">
+                        </table>
+                    </div>
+                </td>
             </tr>
         </table>
     </div>
