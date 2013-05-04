@@ -1,8 +1,6 @@
 package models.procure;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,9 +17,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.libs.F;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -82,6 +77,12 @@ public enum iExpress {
         public String trackUrl(String tracNo) {
             return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo.trim());
         }
+
+        @Override
+        public String fetchStateHTML(String tracNo) {
+            return HTTP.get(this.trackUrl(tracNo));
+        }
+
     },
 
 
@@ -145,6 +146,20 @@ public enum iExpress {
         public String trackUrl(String tracNo) {
             return String.format("https://www.fedex.com/trackingCal/track");
         }
+
+        @Override
+        public String fetchStateHTML(String tracNo) {
+            return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
+                    new BasicNameValuePair("data", String.format("{\"TrackPackagesRequest\":{\"appType\":\"wtrk\",\"processingParameters\":{\"anonymousTransaction\":true," +
+                            "\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,\"returnLocalizedDateTime\":false}," +
+                            "\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\"}}]}}", tracNo)),
+                    new BasicNameValuePair("action", "trackpackages"),
+                    new BasicNameValuePair("locale", "zh_CN"),
+                    new BasicNameValuePair("format", "json"),
+                    new BasicNameValuePair("version", "99")
+            ));
+        }
+
     },
 
 
@@ -219,26 +234,12 @@ public enum iExpress {
      */
     public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
 
-
     /**
      * 直接返回抓取的 HTML 代码
      *
      * @param tracNo
      * @return
      */
-    public String fetchStateHTML(String tracNo) {
-        if(this.equals(FEDEX)) {
-            return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
-                    new BasicNameValuePair("data", String.format("{\"TrackPackagesRequest\":{\"appType\":\"wtrk\",\"processingParameters\":{\"anonymousTransaction\":true," +
-                            "\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,\"returnLocalizedDateTime\":false}," +
-                            "\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\"}}]}}", tracNo)),
-                    new BasicNameValuePair("action", "trackpackages"),
-                    new BasicNameValuePair("locale", "zh_CN"),
-                    new BasicNameValuePair("format", "json"),
-                    new BasicNameValuePair("version", "99")
-            ));
-        } else
-            return HTTP.get(this.trackUrl(tracNo));
-    }
+    public abstract String fetchStateHTML(String tracNo);
 
 }
