@@ -82,7 +82,6 @@ public enum iExpress {
         public String fetchStateHTML(String tracNo) {
             return HTTP.get(this.trackUrl(tracNo));
         }
-
     },
 
 
