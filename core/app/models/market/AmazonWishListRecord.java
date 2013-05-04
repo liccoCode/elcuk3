@@ -102,7 +102,7 @@ public class AmazonWishListRecord extends Model {
         List<Map<String, Object>> rows = DBUtils.rows(sqlSelect.toString(), asin, market.name());
         long addedNumb = 0;
         String category = null;
-        for(Map row : rows) {
+        for(Map<String, Object> row : rows) {
             category = row.get("cg").toString();
             addedNumb += (Long) row.get("count");
         }
