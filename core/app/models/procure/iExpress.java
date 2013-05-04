@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import helper.HTTP;
+import helper.J;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -110,7 +111,7 @@ public enum iExpress {
 
         @Override
         public String parseExpress(String html, String trackNo) {
-            html = html.replaceAll("x2d", "/").replaceAll("x3a", ":");
+            html = html.replaceAll("x2d", "-").replaceAll("x3a", ":");
             JsonElement infos = new JsonParser().parse(html);
             JsonArray scanInfos = infos.getAsJsonObject().get("TrackPackagesResponse").getAsJsonObject().get("packageList")
                     .getAsJsonArray().get(0).getAsJsonObject().get("scanEventList").getAsJsonArray();
@@ -148,10 +149,29 @@ public enum iExpress {
 
         @Override
         public String fetchStateHTML(String tracNo) {
+            Map<String, Map> data = new HashMap<String, Map>();
+            Map<String, Object> trackpackgeRequest = new HashMap<String, Object>();
+            List<Map<String, Object>> trackingInfoList = new ArrayList<Map<String, Object>>();
+            Map<String, Object> trackNumberInfo = new HashMap<String, Object>();
+            Map<String, String> trackNumber = new HashMap<String, String>();
+            Map<String, String> processingParameters = new HashMap<String, String>();
+
+            data.put("TrackPackagesRequest", trackpackgeRequest);
+            trackpackgeRequest.put("processingParameters", processingParameters);
+            trackpackgeRequest.put("trackingInfoList", trackingInfoList);
+            trackpackgeRequest.put("appType", "wtrk");
+
+            processingParameters.put("anonymousTransaction", "true");
+            processingParameters.put("clientId", "WTRK");
+            processingParameters.put("returnDetailedErrors", "true");
+            processingParameters.put("returnLocalizedDateTime", "false");
+
+            trackingInfoList.add(trackNumberInfo);
+            trackNumberInfo.put("trackNumberInfo", trackNumber);
+            trackNumber.put("trackingNumber", tracNo);
+
             return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
-                    new BasicNameValuePair("data", String.format("{\"TrackPackagesRequest\":{\"appType\":\"wtrk\",\"processingParameters\":{\"anonymousTransaction\":true," +
-                            "\"clientId\":\"WTRK\",\"returnDetailedErrors\":true,\"returnLocalizedDateTime\":false}," +
-                            "\"trackingInfoList\":[{\"trackNumberInfo\":{\"trackingNumber\":\"%s\"}}]}}", tracNo)),
+                    new BasicNameValuePair("data", J.json(data)),
                     new BasicNameValuePair("action", "trackpackages"),
                     new BasicNameValuePair("locale", "zh_CN"),
                     new BasicNameValuePair("format", "json"),
