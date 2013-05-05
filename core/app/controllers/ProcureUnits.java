@@ -166,11 +166,11 @@ public class ProcureUnits extends Controller {
         checkAuthenticity();
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
-        unit.split(newUnit);
+        ProcureUnit nUnit = unit.split(newUnit);
         if(Validation.hasErrors())
             render("ProcureUnits/splitUnit.html", unit, newUnit);
 
-        flash.success("分拆成功");
+        flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
         Deliveryments.show(unit.deliveryment.id);
     }
 

@@ -253,7 +253,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unit
      */
-    public void split(ProcureUnit unit) {
+    public ProcureUnit split(ProcureUnit unit) {
         int originQty = this.qty();
         if(unit.attrs.planQty >= originQty)
             Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
@@ -273,20 +273,39 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
                             newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
 
-        if(Validation.hasErrors()) return;
+        if(Validation.hasErrors()) return newUnit;
         Shipment shipment = shipments.get(0);
+        // FBA 变更
+        if(this.fba != null)
+            this.fba.updateFBAShipment(null);
 
+        // 原采购计划数量变更
         this.attrs.planQty = originQty - newUnit.attrs.planQty;
         if(this.attrs.qty != null)
             this.attrs.qty = this.attrs.planQty;
         this.save();
 
+        // 原采购计划的运输量变更
+        int average = (int) Math.ceil((float) this.qty() / this.shipItems.size());
+        for(int i = 0; i < this.shipItems.size(); i++) {
+            // 平均化, 包含除不尽的情况
+            if(i == this.shipItems.size() - 1) {
+                this.shipItems.get(i).qty =
+                        this.qty() - (average * this.shipItems.size() - 1);
+            } else {
+                this.shipItems.get(i).qty = average;
+            }
+        }
+
+        // 分拆出的新采购计划变更
         newUnit.save();
         shipment.addToShip(newUnit);
+
         new ERecordBuilder("procureunit.split")
                 .msgArgs(this.id, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id)
                 .save();
+        return newUnit;
     }
 
     /**
