@@ -33,6 +33,9 @@ GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
 DELETE /deliveryment/{id}/departApply                        Deliveryments.departProcureApply
 POST   /deliveryment                                         Deliveryments.create
+DELETE /deliveryment/{id}/units                              Deliveryments.delunits
+POST   /deliveryment/{id}/units                              Deliveryments.addunits
+
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update

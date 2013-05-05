@@ -267,20 +267,20 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
-        if(this.state != S.PENDING) {
-            Validation.addError("deliveryment.units.state", "%s");
+        if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
+            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
+                    " 状态的[采购单]添加[采购单元]");
             return new ArrayList<ProcureUnit>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Cooperator singleCop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit, singleCop))
+            if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
+            }
+            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            unit.save();
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
-        this.units.addAll(units);
-        // 实在无语, 级联保存无效, 只能如此.
-        for(ProcureUnit unit : this.units) unit.save();
 
         new ElcukRecord(Messages.get("deliveryment.addunit"),
                 Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();

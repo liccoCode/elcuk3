@@ -264,6 +264,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         ProcureUnit newUnit = new ProcureUnit(this);
         newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.stage = STAGE.DELIVERY;
         newUnit.validate();
 
         List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
