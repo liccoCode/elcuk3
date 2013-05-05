@@ -310,6 +310,7 @@ public class FBAShipment extends Model {
 
     /**
      * 向 Amazon 提交报告, 对这个 FBA 进行删除标记
+     * 收件减少 FBA 中的数量, 直到数量为 0 了则标记删除
      */
     public synchronized void removeFBAShipment() {
         if(this.state != S.WORKING && this.state != S.PLAN)
@@ -317,19 +318,21 @@ public class FBAShipment extends Model {
         if(Validation.hasErrors()) return;
 
         try {
-            this.state = FBA.update(this, S.DELETED);
-            if(this.state == S.DELETED) {
-                /**
-                 * 标记删除这个 FBA, 与其有关的采购计划全部清理
-                 */
-                for(ProcureUnit unit : this.units) {
-                    unit.fba = null;
-                    unit.save();
-                }
-                this.closeAt = new Date();
-                this.save();
+            if(this.units.size() > 0) {
+                this.updateFBAShipment(null);
             } else {
-                Validation.addError("", String.format("为 FBA %s 标记删除失败.", this.shipmentId));
+                this.state = FBA.update(this, S.DELETED);
+                if(this.state == S.DELETED) {
+                    /**
+                     * 标记删除这个 FBA, 与其有关的采购计划全部清理
+                     */
+                    for(ProcureUnit unit : this.units) {
+                        unit.fba = null;
+                        unit.save();
+                    }
+                    this.closeAt = new Date();
+                }
+                this.save();
             }
         } catch(FBAInboundServiceMWSException e) {
             throw new FastRuntimeException(e);

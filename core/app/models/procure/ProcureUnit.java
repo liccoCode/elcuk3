@@ -430,15 +430,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 1. 什么时候可以删除采购计划?
          * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?
          */
-        if(this.fba != null) {
-            Validation.addError("", "拥有 FBA 无法删除采购计划.");
-        } else if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
-            new ElcukRecord(Messages.get("procureunit.remove"),
-                    Messages.get("action.base", this.to_log()), "procures.remove").save();
+        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
+            // 删除 FBA
+            FBAShipment fba = this.fba;
+            if(fba != null) {
+                fba.units.remove(this);
+                fba.removeFBAShipment();
+            }
+
+            // 删除运输相关
             for(ShipItem item : this.shipItems) {
                 item.delete();
             }
+            new ElcukRecord(Messages.get("procureunit.remove"),
+                    Messages.get("action.base", this.to_log()), "procures.remove").save();
             this.delete();
+
         } else {
             Validation.addError("",
                     String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
