@@ -53,13 +53,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.sku = unit.sku;
         this.handler = unit.handler;
         this.whouse = unit.whouse;
+        this.deliveryment = unit.deliveryment;
         // 刚刚创建 ProcureUnit 为 PLAN 阶段
         this.stage = STAGE.PLAN;
-        this.attrs.planQty = unit.attrs.planQty - unit.qty();
-        if(this.attrs.planQty < 0) this.attrs.planQty = 0;
+        this.shipType = unit.shipType;
+        this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+        this.attrs.planShipDate = unit.attrs.planShipDate;
+        this.attrs.planArrivDate = unit.attrs.planArrivDate;
         this.attrs.price = unit.attrs.price;
         this.attrs.currency = unit.attrs.currency;
-        this.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
     }
 
     /**
@@ -245,69 +247,56 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * <pre>
-     *
-     * 分拆采购计划, 将原来一个采购计划根据 Whouse 与 qty 分拆出两个采购计划;
-     * - 分开去往不同的地方
-     * - 分拆进行先后交货
-     * </pre>
+     * 分拆采购计划: 工厂在原有采购计划基础上全部交货, 只能够部分交货的情况下进行的操作;
+     * 1. 原有的采购计划仅仅数量变化.
+     * 2. 新创建采购计划, 处理数量, FBA, Shipment 相关信息变化, 其他保持不变.
      *
      * @param unit
      */
     public void split(ProcureUnit unit) {
-        /**
-         * 1. Selling 与 SKU 需要一样
-         */
-        int originQty = this.attrs.planQty;
-        // 业务检查
-        Validation.current().valid(this);
-        unit.validate();
-        if(this.stage != STAGE.PLAN && this.stage != STAGE.DELIVERY)
-            Validation.addError(this.stage.toString(), "procureunit.split.state");
-        Validation
-                .equals("procureunit.selling", this.selling.sellingId, "", unit.selling.sellingId);
-        Validation.equals("procureunit.sku", this.sku, "", unit.sku);
-        Validation.max("procureunit.planQty", unit.attrs.planQty, this.attrs.planQty);
-        int leftQty = this.attrs.planQty - unit.attrs.planQty;
-        Validation.min("procureunit.planQty", leftQty, 0);
-        //TODO: effect 分拆采购计划, 所关联的运输项目的数量需要平均分配
-        // 如果 unit 对应的 shipment 已经运输, 不可再拆分
-        /*
-        if(this.shipItem != null && this.shipItem.shipment.state != Shipment.S.CONFIRM &&
-                this.shipItem.shipment.state != Shipment.S.PLAN)
+        int originQty = this.qty();
+        if(unit.attrs.planQty >= originQty)
+            Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
+        if(unit.attrs.planQty <= 0)
+            Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
+        if(!this.isBeforeDONE())
+            Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
+
+        ProcureUnit newUnit = new ProcureUnit(this);
+        newUnit.attrs.planQty = unit.attrs.planQty;
+        newUnit.validate();
+
+        List<Shipment> shipments = Shipment.similarShipments(newUnit.attrs.planShipDate,
+                newUnit.whouse, newUnit.shipType);
+        if(shipments.size() <= 0)
             Validation.addError("",
-                    String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id,
-                            this.shipItem.shipment.state));
-        */
+                    String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
+                            newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
+
         if(Validation.hasErrors()) return;
-        this.attrs.planQty = leftQty;
-        //TODO effect: 如果拥有运输项目, 那么则将运输项目的数量也进行调整
-//        this.casscadeShipItemQty(leftQty);
-        // 如果被分开的 ProcureUnit 已经交货, 那么分开后也应该已经交货, 否则为 PLAN 阶段
-        if(this.stage == STAGE.DELIVERY)
-            unit.stage = this.stage;
-        // 如果是在周期型运输单中, 则保留运输信息, 否则需要重新选择运输单
-        // TODO effect: ??
-        /*
-        if(this.isHaveCycleShipment())
-            unit.shipItem = new ShipItem(unit, this.shipItem.shipment);
-        */
-        unit.save();
-        new ElcukRecord(Messages.get("procureunit.split"),
-                Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "")
-                .save();
-        new ElcukRecord(Messages.get("procureunit.split.target"),
-                Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
-        /* TODO effect 需要调整通知
-        if(this.shipItem != null && this.shipItem.shipment != null)
-            Notification.notifies("采购计划分拆",
-                    String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", this.id,
-                            this.shipItem.shipment.id)
-                    , Notification.PROCURE, Notification.SHIPPER);
-        */
+        Shipment shipment = shipments.get(0);
+
+        this.attrs.planQty = originQty - newUnit.attrs.planQty;
+        if(this.attrs.qty != null)
+            this.attrs.qty = this.attrs.planQty;
         this.save();
+
+        newUnit.save();
+        shipment.addToShip(newUnit);
+        new ERecordBuilder("procureunit.split")
+                .msgArgs(this.id, newUnit.attrs.planQty, newUnit.id)
+                .fid(this.id)
+                .save();
     }
 
+    /**
+     * 是否完成全部交货
+     *
+     * @return
+     */
+    public boolean isBeforeDONE() {
+        return Arrays.asList(STAGE.DELIVERY, STAGE.PLAN).contains(this.stage);
+    }
 
     /**
      * ProcureUnit 交货

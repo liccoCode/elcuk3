@@ -149,10 +149,29 @@ public class ProcureUnits extends Controller {
      */
     public static void splitUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        ProcureUnit newUnit = new ProcureUnit(unit);
-        newUnit.deliveryment = unit.deliveryment;
-        newUnit.product = unit.product;
+        ProcureUnit newUnit = new ProcureUnit();
+        newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
+        newUnit.attrs.qty = 0;
         render(unit, newUnit);
+    }
+
+    /**
+     * 分拆操作
+     *
+     * @param id
+     * @param newUnit
+     */
+    @Check("procures.dosplitunit")
+    public static void doSplitUnit(long id, ProcureUnit newUnit) {
+        checkAuthenticity();
+        ProcureUnit unit = ProcureUnit.findById(id);
+        newUnit.handler = User.current();
+        unit.split(newUnit);
+        if(Validation.hasErrors())
+            render("ProcureUnits/splitUnit.html", unit, newUnit);
+
+        flash.success("分拆成功");
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     /**

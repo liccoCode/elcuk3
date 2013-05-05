@@ -65,6 +65,7 @@ DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
 PUT     /procureunit/{procureUnitId}/fba                    FBAs.update
 GET     /procureunit/{id}/split                             ProcureUnits.splitUnit
+POST    /procureunit/{id}/split                             ProcureUnits.doSplitUnit
 
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip

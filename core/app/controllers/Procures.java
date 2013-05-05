@@ -2,7 +2,6 @@ package controllers;
 
 import helper.Webs;
 import models.ElcukRecord;
-import models.User;
 import models.embedded.UnitAttrs;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
@@ -94,39 +93,13 @@ public class Procures extends Controller {
         Deliveryments.show(unit.deliveryment.id);
     }
 
-    //TODO effect: 需要删除
-    public static void splitUnit(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        ProcureUnit newUnit = new ProcureUnit(unit);
-        newUnit.deliveryment = unit.deliveryment;
-        newUnit.product = unit.product;
-        render(unit, newUnit);
-    }
-
     /**
-     * 分拆操作
+     * 选择供应商
      *
-     * @param id
-     * @param newUnit
+     * @param coperId
+     * @param sku
+     * @param size
      */
-    @Check("procures.dosplitunit")
-    public static void doSplitUnit(long id, ProcureUnit newUnit) {
-        checkAuthenticity();
-        ProcureUnit unit = ProcureUnit.findById(id);
-        newUnit.handler = User.current();
-        unit.split(newUnit);
-        if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
-        //TODO effect: 调整采购计划分拆, 取消周期型运输单
-        /*
-        if(unit.isHaveCycleShipment())
-            flash.success("分拆成功, 并且成功保留对应的周期型运输单.");
-        else
-            flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
-        */
-        flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
-        Deliveryments.show(unit.deliveryment.id);
-    }
-
     public static void calculateBox(long coperId, String sku, int size) {
         validation.required(coperId);
         validation.required(sku);

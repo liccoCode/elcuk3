@@ -248,7 +248,7 @@ public class Payment extends Model {
             unit.notifyState();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
             new ERecordBuilder("payment.approval")
-                    .msgArgs(unit.procureUnit.qty() + "",
+                    .msgArgs(unit.procureUnit.qty(),
                             unit.procureUnit.sku,
                             "#" + unit.id,
                             unit.feeType.nickName,

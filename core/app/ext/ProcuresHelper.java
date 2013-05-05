@@ -20,7 +20,7 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(ProcureUnit.STAGE stage) {
         switch(stage) {
             case PLAN:
-                return "#333333";
+                return "#B0BFD6";
             case DELIVERY:
                 return "#006ACC";
             case DONE:

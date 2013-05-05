@@ -49,9 +49,12 @@ public class ERecordBuilder {
         return this;
     }
 
-    public ERecordBuilder msgArgs(String... args) {
-        if(args != null && args.length > 0)
-            msgArgs.addAll(Arrays.asList(args));
+    public ERecordBuilder msgArgs(Object... args) {
+        if(args != null && args.length > 0) {
+            for(Object obj : args) {
+                msgArgs.add(obj.toString());
+            }
+        }
         return this;
     }
 

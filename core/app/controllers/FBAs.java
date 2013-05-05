@@ -67,7 +67,7 @@ public class FBAs extends Controller {
 
         } else {
             new ERecordBuilder("shipment.createFBA")
-                    .msgArgs(unit.id + "", unit.sku, unit.fba.shipmentId)
+                    .msgArgs(unit.id, unit.sku, unit.fba.shipmentId)
                     .fid(unit.id)
                     .save();
             Notification.notifies("FBA 创建成功",

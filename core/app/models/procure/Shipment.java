@@ -806,6 +806,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return Arrays.asList(iExpress.values());
     }
 
+    public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
+        return Shipment.find("planBeginDate>=? AND whouse=? AND type=? ORDER BY planBeginDate",
+                planBeginDate, whouse, shipType).fetch();
+    }
+
     /**
      * 新建运输单
      *
