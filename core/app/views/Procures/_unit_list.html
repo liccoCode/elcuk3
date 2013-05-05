@@ -74,7 +74,7 @@
     <td>#{time_tooltip time:unit.createDate/}</td>
   </tr>
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '18' : '16'}">
+    <td colspan="${checkbox ? '18' : '17'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
@@ -157,25 +157,27 @@
                     </a>
                   #{/ifnot}
               </div>
+              <div class="btn-toolbar">
+                  #{ifnot unit.fba}
+                      #{power.ck 'fbas.deploytoamazon'}
+                        <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-success"
+                           data-disable-with="创建中...">
+                          创建 FBA
+                        </a>
+                      #{/power.ck}
+                  #{/ifnot}
+                  #{else }
+                      #{power.ck 'fbas.update'}
+                        <a href="@{FBAs.update(unit.id)}" class="btn btn-warning"
+                           data-method='PUT' data-disable-with='更新中...'>
+                          更新 ${unit.fba.shipmentId}
+                        </a>
+                      #{/power.ck}
+                    <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-success">箱內麦</a>
+                    <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-success">箱外麦</a>
+                  #{/else}
+              </div>
             #{/if}
-          <div class="btn-toolbar">
-              #{ifnot unit.fba}
-                <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-success"
-                   data-disable-with="创建中...">
-                  创建 FBA
-                </a>
-              #{/ifnot}
-              #{else }
-                  #{power.ck 'fbas.update'}
-                    <a href="@{FBAs.update(unit.id)}" class="btn btn-warning"
-                       data-method='PUT' data-disable-with='更新中...'>
-                      更新 ${unit.fba.shipmentId}
-                    </a>
-                  #{/power.ck}
-                <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-success">箱內麦</a>
-                <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-success">箱外麦</a>
-              #{/else}
-          </div>
         </div>
       </div>
         #{ifnot norecord}

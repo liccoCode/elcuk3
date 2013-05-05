@@ -130,7 +130,9 @@ public class Privilege extends Model {
         privileges.add(new Privilege("shipments.beginship", "开始运输"));
         privileges.add(new Privilege("shipments.cancelship", "取消运输项目"));
         privileges.add(new Privilege("shipments.ship", "增加运输项目"));
-        privileges.add(new Privilege("shipments.deploytoamazon", "创建 FBA"));
+        // TODO effect: 调整为 fbas.deployToAmazon
+        //privileges.add(new Privilege("shipments.deploytoamazon", "创建 FBA"));
+        privileges.add(new Privilege("fbas.deployToAmazon", "创建 FBA"));
         privileges.add(new Privilege("fbas.update", "更新 FBA"));
         privileges.add(new Privilege("shipments.deployfba", "删除 FBA"));
         privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));

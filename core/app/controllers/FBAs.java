@@ -54,11 +54,10 @@ public class FBAs extends Controller {
 
     /**
      * 通过 ProcureUnit 创建其对应的 FBA
-     * TODO effect: 权限名称需要调整
      *
      * @param procureUnitId 采购计划 ID
      */
-    @Check("shipments.deploytoamazon")
+    @Check("fbas.deploytoamazon")
     public static void deployToAmazon(Long procureUnitId) {
         ProcureUnit unit = ProcureUnit.findById(procureUnitId);
 
