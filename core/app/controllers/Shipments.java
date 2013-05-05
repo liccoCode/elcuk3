@@ -235,59 +235,6 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + id);
     }
 
-
-    /**
-     * 更新某个 FBAShipment
-     *
-     * @param fbaId FBAShipment 的 Id
-     */
-    public static void updateFba(final Long fbaId) {
-//        action 参数是 play! 自己使用的保留字
-        checkAuthenticity();
-        FBAShipment fba = FBAShipment.findById(fbaId);
-        try {
-            fba.updateFBAShipment(null);
-        } catch(Exception e) {
-            Validation.addError("", e.getMessage());
-        }
-        // TODO: effect 同步 FBA 与 Shipment 无关
-        /*
-        checkShowError(fba.shipment);
-        new ElcukRecord(Messages.get("shipment.updateFBA"),
-                Messages.get("action.base", String.format("FBA [%s] 更新了 %s 个 Items", fba.shipmentId,
-                        fba.shipItems.size())),
-                fba.shipment.id).save();
-        flash.success("更新 Amazon FBA %s 成功.", fba.shipmentId);
-        show(fba.shipment.id);
-        */
-    }
-
-    /**
-     * 删除一个 FBAShipment
-     *
-     * @param fbaId FBAShipment.id
-     */
-    @Check("shipments.deployfba")
-    public static void deleteFba(final Long fbaId) {
-        checkAuthenticity();
-        FBAShipment fba = FBAShipment.findById(fbaId);
-        try {
-            fba.removeFBAShipment();
-        } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
-        }
-        //TODO: effect 删除 FBA 不影响 Shipment
-        /*
-        if(Validation.hasErrors())
-            checkShowError(fba.shipment);
-        flash.success("FBA %s 删除成功", fba.shipmentId);
-        Notification.notifies(String.format("FC`s %s 的 FBA(%s) 被删除", fba.centerId, fba.shipmentId),
-                String.format("FBA %s 从系统中删除, 请检查运输单 %s", fba.shipmentId, fba.shipment.id),
-                Notification.PROCURE);
-        show(fba.shipment.id);
-        */
-    }
-
     public static void refreshProcuress(final String id) {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);

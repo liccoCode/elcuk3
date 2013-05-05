@@ -147,7 +147,7 @@
                   #{/power.ck}
                   #{power.ck "procures.dosplitunit"}
                     <!-- 分拆采购单元 -->
-                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger">分拆</a>
+                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-danger">分拆</a>
                   #{/power.ck}
                 <!-- 确认到货代处 -->
                   #{ifnot unit.isPlaced}

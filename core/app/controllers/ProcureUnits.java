@@ -143,6 +143,19 @@ public class ProcureUnits extends Controller {
     }
 
     /**
+     * 分拆采购计划页面
+     *
+     * @param id
+     */
+    public static void splitUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        ProcureUnit newUnit = new ProcureUnit(unit);
+        newUnit.deliveryment = unit.deliveryment;
+        newUnit.product = unit.product;
+        render(unit, newUnit);
+    }
+
+    /**
      * 抵达货代
      *
      * @param id
