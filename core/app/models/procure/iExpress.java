@@ -31,7 +31,8 @@ public enum iExpress {
     DHL {
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
-            if(StringUtils.isBlank(iExpressHTML)) return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            if(StringUtils.isBlank(iExpressHTML))
+                return new F.T2<Boolean, DateTime>(false, DateTime.now());
             /**
              * 只会检查最新的信息, 最上面的记录, 根据最新的信息判断是否已经发货
              */
@@ -40,7 +41,8 @@ public enum iExpress {
             Element tbody = doc.select("tbody").first();
 
             // parse date
-            DateTime dt = DateTime.parse(String.format("%s %s", thead.select("th:eq(0)").text(), tbody.select("td:eq(3)").text()),
+            DateTime dt = DateTime.parse(String.format("%s %s", thead.select("th:eq(0)").text(),
+                    tbody.select("td:eq(3)").text()),
                     DateTimeFormat.forPattern("E, MMM dd, yyyy HH:mm").withLocale(Locale.CHINESE));
 
             // is delivered
@@ -76,12 +78,9 @@ public enum iExpress {
 
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo.trim());
-        }
-
-        @Override
-        public String fetchStateHTML(String tracNo) {
-            return HTTP.get(this.trackUrl(tracNo));
+            return String
+                    .format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s",
+                            tracNo.trim());
         }
     },
 
@@ -89,11 +88,13 @@ public enum iExpress {
     FEDEX {
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
-            if(StringUtils.isBlank(iExpressHTML)) return new F.T2<Boolean, DateTime>(false, DateTime.now());
+            if(StringUtils.isBlank(iExpressHTML))
+                return new F.T2<Boolean, DateTime>(false, DateTime.now());
             Document doc = Jsoup.parse(iExpressHTML);
             Element newestTr = doc.select("tr:eq(1)").first();
 
-            DateTime dt = DateTime.parse(newestTr.select("td:eq(0)").text(), DateTimeFormat.forPattern("MMM dd, yyyy hh:mm a"));
+            DateTime dt = DateTime.parse(newestTr.select("td:eq(0)").text(),
+                    DateTimeFormat.forPattern("MMM dd, yyyy hh:mm a"));
             String text = newestTr.select("td:eq(1)").text();
             boolean isDelivered = this.deliverText(text);
 
@@ -113,8 +114,10 @@ public enum iExpress {
         public String parseExpress(String html, String trackNo) {
             html = html.replaceAll("x2d", "-").replaceAll("x3a", ":");
             JsonElement infos = new JsonParser().parse(html);
-            JsonArray scanInfos = infos.getAsJsonObject().get("TrackPackagesResponse").getAsJsonObject().get("packageList")
-                    .getAsJsonArray().get(0).getAsJsonObject().get("scanEventList").getAsJsonArray();
+            JsonArray scanInfos = infos.getAsJsonObject().get("TrackPackagesResponse")
+                    .getAsJsonObject().get("packageList")
+                    .getAsJsonArray().get(0).getAsJsonObject().get("scanEventList")
+                    .getAsJsonArray();
 
             StringBuilder sbd = new StringBuilder("<table><tr>");
             // header
@@ -123,15 +126,15 @@ public enum iExpress {
             sbd.append("<td>").append("地点").append("</td>");
             sbd.append("<td>").append("详细信息").append("</td>");
             sbd.append("</tr>");
-            Iterator<JsonElement> ite = scanInfos.iterator();
-            while(ite.hasNext()) {
-                JsonObject info = ite.next().getAsJsonObject();
+            for(JsonElement je : scanInfos) {
+                JsonObject info = je.getAsJsonObject();
                 sbd.append("<tr>");
-                sbd.append("<td>").append(getStr(info, "date")).append(" ").append(getStr(info, "time")).append("</td>");
-                sbd.append("<td>").append(getStr(info, "status")).append("</td>");
-                sbd.append("<td>").append(getStr(info, "scanLocation")).append("</td>");
-                sbd.append("<td>").append(getStr(info, "scanDetails")).append("</td>");
-                sbd.append("</tr>");
+                sbd.append("<td>").append(getStr(info, "date")).append(" ")
+                        .append(getStr(info, "time")).append("</td>")
+                        .append("<td>").append(getStr(info, "status")).append("</td>")
+                        .append("<td>").append(getStr(info, "scanLocation")).append("</td>")
+                        .append("<td>").append(getStr(info, "scanDetails")).append("</td>")
+                        .append("</tr>");
             }
             return sbd.append("</table>").toString();
         }
@@ -185,7 +188,9 @@ public enum iExpress {
     UPS {
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", tracNo.trim());
+            return String.format(
+                    "http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome",
+                    tracNo.trim());
         }
 
         @Override
@@ -194,8 +199,9 @@ public enum iExpress {
             Document doc = Jsoup.parse(html);
             Element form = doc.select("#detailFormid").first();
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            for(Element input : form.select("input"))
+            for(Element input : form.select("input")) {
                 params.add(new BasicNameValuePair(input.attr("name"), input.val()));
+            }
             return HTTP.post(form.attr("action"), params);
         }
 
@@ -215,8 +221,10 @@ public enum iExpress {
             Document doc = Jsoup.parse(iExpressHTML);
             for(Element tr : doc.select("tr")) {
                 if(!StringUtils.contains(tr.outerHtml(), "已递送")) continue;
-                String dateStr = String.format("%s %s", tr.select("td:eq(1)").text(), tr.select("td:eq(2)").text());
-                return new F.T2<Boolean, DateTime>(true, DateTime.parse(dateStr, DateTimeFormat.forPattern("yyyy/MM/dd HH:mm")));
+                String dateStr = String.format("%s %s", tr.select("td:eq(1)").text(),
+                        tr.select("td:eq(2)").text());
+                return new F.T2<Boolean, DateTime>(true,
+                        DateTime.parse(dateStr, DateTimeFormat.forPattern("yyyy/MM/dd HH:mm")));
             }
             return new F.T2<Boolean, DateTime>(false, new DateTime());
         }
@@ -259,6 +267,8 @@ public enum iExpress {
      * @param tracNo
      * @return
      */
-    public abstract String fetchStateHTML(String tracNo);
+    public String fetchStateHTML(String tracNo) {
+        return HTTP.get(this.trackUrl(tracNo));
+    }
 
 }
