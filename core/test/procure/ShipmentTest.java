@@ -1,12 +1,25 @@
 package procure;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import models.procure.Shipment;
 import models.procure.iExpress;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
+import play.Logger;
 import play.Play;
 import play.template2.IO;
 import play.test.UnitTest;
+import sun.io.ByteToCharConverter;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -115,5 +128,55 @@ public class ShipmentTest extends UnitTest {
         ship.state = Shipment.S.CLEARANCE;
         ship.save();
     }
+
+    @Test
+    public void testTrackWebSite() {
+        //Shipment shipment = Shipment.findById("SP|201209|09");
+        //String html = shipment.internationExpress.fetchStateHTML("553001690741");
+
+        //html=new String(html.getBytes(Charset.forName("unicode")),Charset.forName("UTF-8"));
+        //JsonArray scanInfos = new JsonParser().parse(html).getAsJsonObject().get("TrackPackagesResponse").getAsJsonObject().get("packageList")
+          //                  .getAsJsonArray().get(0).getAsJsonObject().get("scanEventList").getAsJsonArray();
+
+
+        String str="24\\x2f04\\x2f2013";
+        str=new String(str.getBytes(Charset.forName("ascii")));
+       // String scanStr=AsciiToChineseString(html);
+
+        assertEquals("24/04/2013",str);
+
+
+       /* try {
+            FileUtils.write(new File(System.getProperty("user.home")+"/Desktop/"+new Date().getTime()+".html"),scanStr);
+        } catch(IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }*/
+
+        //assertEquals("", scanStr);
+
+
+    }
+
+    public String AsciiToChineseString(String s) {
+        if ( s == null )
+            return s;
+           char[] orig = s.toCharArray ();
+           byte[] dest = new byte[ orig.length ];
+           for ( int i = 0; i < orig.length; i++ )
+
+            dest[ i ] = ( byte ) ( orig[ i ] & 0xFF );
+           try
+           {
+            ByteToCharConverter toChar = ByteToCharConverter.getConverter("utf-8");
+            return new String ( dest,Charset.forName("utf-8") );
+           }
+           catch ( Exception e )
+           {
+            System.out.println ( e );
+            return s;
+           }
+    }
+
+
 
 }
