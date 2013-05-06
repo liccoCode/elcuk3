@@ -117,11 +117,10 @@ public class ShipmentPost extends Post {
             String word = this.word();
             sbd.append(" AND (")
                     .append("s.trackNo LIKE ?")
-                    .append(" OR s.memo LIKE ?")
                     .append(" OR it.unit.fba.shipmentId LIKE ?")
                     .append(" OR u.sid LIKE ?")
                     .append(")");
-            for(int i = 0; i < 4; i++) params.add(word);
+            for(int i = 0; i < 3; i++) params.add(word);
         }
 
         // 因为需要使用 deliverymentId() 方法, 不能够在 param 的地方添加 fba.centerId 路径
