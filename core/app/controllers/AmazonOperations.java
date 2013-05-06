@@ -23,9 +23,9 @@ import java.util.Set;
  * Time: 11:59 AM
  */
 @With({GlobalExceptionHandler.class, Secure.class})
+@Check("amazonoperations.index")
 public class AmazonOperations extends Controller {
 
-    @Check("amazonoperations.index")
     public static void index() {
         Set<String> allAsin = Listing.allASIN();
         renderArgs.put("asins", J.json(allAsin));
@@ -135,19 +135,6 @@ public class AmazonOperations extends Controller {
         F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToWishList();
         boolean success = accT2._1.addToWishList(listing);
         renderJSON(success);
-    }
-
-    /**
-     * 得到 Listing 被添加到的wishlist的账户信息
-     *
-     * @param asin
-     * @param m
-     */
-    public static void ajaxWishListInfos(String asin, String m) {
-        M market = M.val(m);
-        String lid = Listing.lid(asin, market);
-        List<AmazonWishListRecord> records = AmazonWishListRecord.wishListInfos(lid);
-        renderJSON(J.json(records));
     }
 
 }
