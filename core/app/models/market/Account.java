@@ -387,6 +387,66 @@ public class Account extends Model {
         return new F.T2<AmazonLikeRecord, String>(likeRecord, body);
     }
 
+    public boolean addToWishList(Listing listing) {
+        /**
+         * 1.检查账户是否登陆
+         * 2.抓取wishlist的页面数据,判断账户是否已经创建wishlist 如果没有创建一个新的
+         * 3.抓取listing页面的表单数据添加Listing到 wishlist
+         */
+        String sessionId = this.cookie("session-id", listing.market);
+        if(sessionId == null) {
+            //登陆失败
+            if(!this.loginAmazonSize(listing.market)) {
+                return false;
+            }
+            sessionId = this.cookie("session-id", listing.market);
+        }
+
+        String wishlistBody = HTTP.get(this.cookieStore(listing.market), listing.market.amazonWishList());
+        //判断是否存在WishList
+        if(!wishlistBody.contains("listActions")) {
+            HTTP.post(this.cookieStore(listing.market), listing.market.amazonNewWishList(),
+                    Arrays.asList(
+                            new BasicNameValuePair("manual-create", "Y"),
+                            new BasicNameValuePair("sid", sessionId),
+                            new BasicNameValuePair("submit.movecopy", "1"),
+                            new BasicNameValuePair("isPrivate", "N"),
+                            new BasicNameValuePair("dest-list", "new-wishlist"),
+                            new BasicNameValuePair("isSearchable", "Y"),
+                            new BasicNameValuePair("sourceVendorId", "website.wishlist.intro"),
+                            new BasicNameValuePair("type", "wishlist"),
+                            new BasicNameValuePair("movecopy", "createnew")
+                    ));
+
+        }
+
+        String listing_body = HTTP.get(this.cookieStore(listing.market), listing.market.amazonAsinLink(listing.asin));
+        Document doc = Jsoup.parse(listing_body);
+        Elements inputs = doc.select("#handleBuy input");
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        for(Element el : inputs) {
+            if(StringUtils.isNotBlank(el.val())) {
+                params.add(new BasicNameValuePair(el.attr("name"), el.val()));
+            }
+        }
+        //每次的请求参数会根据listing变化而变化.所以全部加上去
+        params.add(new BasicNameValuePair("asin-redirect", listing.asin));
+        params.add(new BasicNameValuePair("quantity", "1"));
+        //下面两个参数用来避免某些含有参数offerListingId的请求 被添加到 Basket中去
+        params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.x", "-1710"));
+        params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.y", "-357"));
+        String result = HTTP.post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
+
+        //如果添加成功,或者是账户已经添加该Listing但是系统中无记录.
+        if(result.contains("hucSuccessMsg") | result.contains("appMessageBoxInfo")) {
+            new AmazonWishListRecord(listing, this).save();
+            return true;
+        }
+
+        return false;
+
+    }
+
     /**
      * 此账号点击这个 Review, 点击 Up 或者 Down;
      * 由于 Amazon 不会给与是否点击成功的返回, 所以无法确认是否点击成功, 但仅能知道已经点击了, 具体的信息需要更新 Review 来查看
