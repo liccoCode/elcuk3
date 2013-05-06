@@ -218,31 +218,23 @@
 </div>
 
 
-#{info_row title:'FBA 列表区'}
-<ul>
-  <li class="text-error">Amazon 是一次创建, 项目数量不可新创建的(已经创建的数量可更新)</li>
-  <li class="text-error">如果需要取消这份 FBA, 将运输的项目从此 FBA 附属的 Shipment 中剔除即可, 但注意, 剔除了就不可再重新添加回来, <strong>FBA
-    不可修改</strong>
-  </li>
-</ul>
-#{/info_row}
-*{#{list ship.fbas}}*
-*{#{render 'Shipments/_fba_shipment.html', fba:_/}}*
-*{#{/list}}*
-
 #{success_row title:'运输项目' /}
 <div class="row-fluid">
   <div class="span12">
+  #{render './_shipitem.html', items: ship.items/}
+  </div>
+  <div class="btn-toolbar">
+    <button class="btn">ksj</button>
+  </div>
+</div>
+<div class="row-fluid">
+  <div class="span12">
     <form action="" method="post">
-    #{authenticityToken /}
       <input type="hidden" name="id" value="${ship.id}">
 
     #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
       <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">查看运输项目</a>
     #{/if}
-    #{power.ck "shipments.deploytoamazon"}
-      <button id="create_fba" class="btn btn-warning">创建 FBA</button>
-    #{/power.ck}
     #{power.ck "shipments.splitshipment"}
       <button id="split_shipment" class="btn btn-warning">分拆运输项目</button>
     #{/power.ck}

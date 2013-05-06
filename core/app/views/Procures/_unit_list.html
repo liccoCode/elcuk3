@@ -145,19 +145,13 @@
                     <!-- 交货页面 -->
                     <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-small btn-warning">交货</a>
                   #{/power.ck}
-                <div class="btn-group">
-                    #{power.ck "procures.dosplitunit"}
-                      <!-- 分拆采购单元 -->
-                      <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
-                         rel='tooltip' title='因工厂延期交货而分拆'>
-                        分拆
-                      </a>
-                    #{/power.ck}
-                  <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
-                     rel='tooltip' title="因需,紧急挪 N 个货去其他市场">
-                    紧急挪货
-                  </a>
-                </div>
+                  #{power.ck "procures.dosplitunit"}
+                    <!-- 分拆采购单元 -->
+                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
+                       rel='tooltip' title='因工厂延期交货而分拆'>
+                      分拆
+                    </a>
+                  #{/power.ck}
                 <!-- 确认到货代处 -->
                   #{ifnot unit.isPlaced}
                     <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
