@@ -8,7 +8,6 @@ import models.market.Account;
 import models.procure.FBACenter;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
-import models.view.post.FBAPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.krysalis.barcode4j.HumanReadablePlacement;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
@@ -27,8 +26,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -43,13 +40,6 @@ public class FBAs extends Controller {
     @Before
     public static void centerIds() {
         renderArgs.put("centerIds", FBACenter.centerIds());
-    }
-
-    public static void index(FBAPost p) {
-        if(p == null)
-            p = new FBAPost(Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CANCELLED));
-        List<FBAShipment> fbas = p.query();
-        render(fbas, p);
     }
 
     /**
