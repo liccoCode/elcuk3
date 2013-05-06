@@ -23,7 +23,7 @@ import java.util.Set;
  * Time: 11:59 AM
  */
 @With({GlobalExceptionHandler.class, Secure.class})
-@Check("amazonoperations.index")
+@Check("amazonoperations")
 public class AmazonOperations extends Controller {
 
     public static void index() {
