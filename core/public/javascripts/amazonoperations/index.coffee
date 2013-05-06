@@ -12,7 +12,7 @@ $ ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
       mask = $('#container')
       mask.mask('点击中...')
-      $.post('/amazonReviews/click', {reviewId: reviewId, isUp: true}
+      $.post('/amazonOperations/click', {reviewId: reviewId, isUp: true}
         (r) ->
           if r.flag is false
             alert("点击失败. #{r.message}")
@@ -30,7 +30,7 @@ $ ->
       reviewId = $(@).parents('tr').attr('id').split('_')[1]
       mask = $('#container')
       mask.mask('点击中...')
-      $.post('/amazonReviews/click', {reviewId: reviewId, isUp: false}
+      $.post('/amazonOperations/click', {reviewId: reviewId, isUp: false}
         (r) ->
           if r.flag is false
             alert("点击失败. #{r.message}")
@@ -48,14 +48,14 @@ $ ->
   reviewLoadFun = ->
     mask = $('#container')
     mask.mask('加载中...')
-    $('#reviews').load('/amazonReviews/ajaxMagic', $('#search_form :input').fieldSerialize(),
+    $('#reviews').load('/amazonOperations/ajaxMagic', $('#search_form :input').fieldSerialize(),
     () ->
       # 如果没有一个元素, 那么则需要重新抓取.
       mask.unmask()
       if $('#reviews tr').size() is 1
         alert('此 Listing 为全新的 Listing, 重新抓取 Listing 中...')
         mask.mask('重新抓取中...')
-        $.post('/amazonreviews/reCrawl', $('#search_form :input').fieldSerialize(),
+        $.post('/amazonOperations/reCrawl', $('#search_form :input').fieldSerialize(),
         (r) ->
           mask.unmask()
           if r.flag is false
@@ -76,7 +76,7 @@ $ ->
   $('#recrawl_review').click (e) ->
     mask = $('#container')
     mask.mask("重新抓取 Review 信息中...")
-    $.get('/amazonReviews/reCrawl', $('#search_form :input').fieldSerialize(), (r) ->
+    $.get('/amazonOperations/reCrawl', $('#search_form :input').fieldSerialize(), (r) ->
       if r.flag is false
         alert(r.message)
       else
@@ -105,10 +105,11 @@ $ ->
   $('#click_like').click (e) ->
     if $('#search_form [name=asin]').val().length isnt 10
       alert('请先输入正确的 ASIN')
+      $("#search_form [name=asin]").focus()
       return false
     mask = $('#container')
     mask.mask('点击 Like 中...')
-    $.post('/amazonreviews/like', $('#search_form :input').fieldSerialize(),
+    $.post('/amazonOperations/like', $('#search_form :input').fieldSerialize(),
     (r) ->
       if r.flag is false
         alert(r.message)
@@ -126,7 +127,7 @@ $ ->
     for tr, i in $("tr[drop]")
       params["rvIds[#{i}]"] = tr.getAttribute('drop')
     mask.mask('计算中...')
-    $.post('/AmazonReviews/checkLeftClicks', params,
+    $.post('/AmazonOperations/checkLeftClicks', params,
     (r) ->
       if r.flag is false
         alert(r.message)
@@ -143,7 +144,13 @@ $ ->
     loadAsin = $('#load_asin').val(-> @value.toUpperCase())
     #B007LE0UT4
     return false if loadAsin.val().length isnt 10
-    reviewLoadFun()
+    href = $('#tabs li[class=active] a').attr('href')
+    if href is '#review_table'
+      loadReviewTable()
+    else if href is '#wish_list'
+      loadWishList()
+    else
+      reviewLoadFun()
     e.preventDefault()
 
 
@@ -171,6 +178,41 @@ $ ->
   (e) ->
     if $("#search_form [name=asin]").val() == ""
       alert("请输入 ASIN")
+      $("#search_form [name=asin]").focus()
       return
-    $('#review_table').load("/AmazonReviews/reviewTable", $('#search_form :input').fieldSerialize())
+    loadReviewTable()
+
   )
+  loadReviewTable = ->
+    $('#review_table').load("/AmazonOperations/reviewTable", $('#search_form :input').fieldSerialize())
+
+  #---------Wish List列表
+  $('a[href=#wish_list]').on('shown',
+  (e) ->
+    if $("#search_form [name=asin]").val() == ""
+      alert("请输入 ASIN")
+      $("#search_form [name=asin]").focus()
+      return
+    loadWishList()
+  )
+  loadWishList = ->
+    params = $('#search_form :input').fieldSerialize()
+    $('#wish_list').load("/AmazonOperations/wishList", params,
+    ->
+      $('#add_wishlist').unbind('click').bind('click',
+      (e)->
+        mask = $('#container')
+        mask.mask('添加到WishList中...')
+        $.post("/AmazonOperations/addToWishList", params,
+        (success) ->
+          mask.unmask()
+          if success then loadWishList() else alert '添加失败'
+        )
+        e.preventDefault()
+      )
+    )
+
+
+
+
+
