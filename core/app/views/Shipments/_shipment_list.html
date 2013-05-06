@@ -1,67 +1,65 @@
 <table class="table table-condensed table-bordered">
-    <tr>
-        <th>#</th>
-        <th>Track No.</th>
-        <th>运输商</th>
-        <th>国际快递</th>
-        <th>运输方式</th>
-        <th>去往仓库</th>
-        <th>Title</th>
-        <th>目的地</th>
-        <th>状态</th>
-        <th>计价方式</th>
-        <th>开始时间</th>
-        <th>创建时间</th>
-        <th>预计到库时间</th>
-        <th>创建者</th>
-    </tr>
+  <tr>
+    <th>#</th>
+    <th>Track No.</th>
+    <th>运输商</th>
+    <th>国际快递</th>
+    <th>运输方式</th>
+    <th>去往仓库</th>
+    <th>Title</th>
+    <th>目的地</th>
+    <th>状态</th>
+    <th>计价方式</th>
+    <th>预计开始时间</th>
+    <th>创建时间</th>
+    <th>预计到库时间</th>
+    <th>创建者</th>
+  </tr>
 #{list items:shipments, as:'ship'}
-    <tr>
-        <td>
-            <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
-        </td>
-        <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
-            <i class="icon-reorder"></i> ${ship.trackNo}
-            <span class="badge badge-info">${ship.items.size()}</span>
-        </td>
-        <td>${ship.cooper?.name}</td>
-        <td>${ship.internationExpress}</td>
-        <td>${ship.type}</td>
-        <td>${ship.whouse?.name()}</td>
-        <td>
-            #{ifnot ship.creater}
-                <i style="color:#dc143c;" class="icon-warning-sign"></i>
-            #{/ifnot}
-            #{if ship.cycle}
-                <i style="color:#C09853;" class="icon-star"></i>
-            #{/if}
-            #{if ship.fbas.size() > 0}
-                <span class="pull-right" style="word-break:break-all">
-                    <i style="color:#FFA601;" class="icon-amazon"></i>
-                    <strong>${ship.fbas.join(',')}</strong>
-                </span>
-            #{/if}
-        ${ship.title}
-        </td>
-        <td>${ship.target}</td>
-        <td style="color:${ship.state.rgb()}">${ship.state}</td>
-        <td>${ship.pype}</td>
-        <td>#{time_tooltip time:ship.planBeginDate/}</td>
-        <td>#{time_tooltip time:ship.createDate/}</td>
-        <td>#{time_tooltip time:ship.planArrivDate/}</td>
-        <td>${ship.creater?.username}</td>
-    </tr>
-    <tr id="ship_${ship_index}" style="display:none;">
-        <td colspan="14">
-            <div>
-                <h4 class="text-info">Commemt</h4>
-            ${ship.memo.raw()}
-            </div>
-            <hr>
-            <div>
-                #{render 'Shipments/_shipitem.html', items:ship.items/}
-            </div>
-        </td>
-    </tr>
+  <tr>
+    <td>
+      <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
+    </td>
+    <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
+      <i class="icon-reorder"></i> ${ship.trackNo}
+      <span class="badge badge-info">${ship.items.size()}</span>
+    </td>
+    <td>${ship.cooper?.name}</td>
+    <td>${ship.internationExpress}</td>
+    <td>${ship.type}</td>
+    <td>${ship.whouse?.name()}</td>
+    <td>
+        #{ifnot ship.creater}
+          <i style="color:#dc143c;" class="icon-warning-sign"></i>
+        #{/ifnot}
+        #{set fbas: ship.fbas() /}
+        #{if fbas.size() > 0}
+          <span class="pull-right" style="word-break:break-all">
+            <i style="color:#FFA601;" class="icon-amazon"></i>
+            <strong>${fbas.join(',')}</strong>
+          </span>
+        #{/if}
+    ${ship.title}
+    </td>
+    <td>${ship.target}</td>
+    <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
+    <td>${ship.pype}</td>
+    <td>#{time_tooltip time:ship.planBeginDate/}</td>
+    <td>#{time_tooltip time:ship.createDate/}</td>
+    <td>#{time_tooltip time:ship.planArrivDate/}</td>
+    <td>${ship.creater?.username}</td>
+  </tr>
+  <tr id="ship_${ship_index}" style="display:none;">
+    <td colspan="14">
+      <div>
+        <h4 class="text-info">Commemt</h4>
+      ${ship.memo.raw()}
+      </div>
+      <hr>
+      <div>
+          #{render 'Shipments/_shipitem.html', items:ship.items/}
+      </div>
+    </td>
+  </tr>
 #{/list}
 </table>

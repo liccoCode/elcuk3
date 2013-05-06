@@ -325,11 +325,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String target;
 
     /**
-     * 是否为周期任务
-     */
-    public boolean cycle = false;
-
-    /**
      * 国际运输的运输信息的记录
      */
     @Lob
@@ -717,6 +712,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return result;
     }
 
+    public List<FBAShipment> fbas() {
+        List<FBAShipment> fbas = new ArrayList<FBAShipment>();
+        for(ShipItem item : this.items) {
+            if(item.unit.fba == null) continue;
+            if(fbas.contains(item.unit.fba)) continue;
+            fbas.add(item.unit.fba);
+        }
+        return fbas;
+    }
+
     /**
      * 计算 Shipment 的 ID
      *
@@ -822,7 +827,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public static void create(Date planBeginDate, Whouse whouse, T type, Date arriveDate) {
         Shipment shipment = new Shipment();
         shipment.id = Shipment.id();
-        shipment.cycle = true;
         shipment.planBeginDate = planBeginDate;
         shipment.planArrivDate = arriveDate;
         shipment.whouse = whouse;
