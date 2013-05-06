@@ -97,6 +97,7 @@ GET     /selling/{id}/label                                 Sellings.sellingLabe
 # Shipments
 GET     /shipments                                          Shipments.index
 GET     /shipment/{id}                                      Shipments.show
+PUT     /shipment/{id}/process                              Shipments.refreshProcuress
 
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}

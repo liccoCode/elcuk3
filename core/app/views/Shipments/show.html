@@ -119,24 +119,18 @@
           </td>
           <th>国际快递商</th>
           <td>
-            <select name="ship.internationExpress">
-              <option value="">选择快递商</option>
-            #{list items:models.procure.Shipment.Express(), as:'ie'}
-              <option ${ie == ship.internationExpress ? 'selected' : ''} value="${ie}">${ie}</option>
-            #{/list}
-            </select>
+          #{select 'ship.internationExpress', items: models.procure.Shipment.Express(), value: ship.internationExpress}
+              #{option ''}选择快递商#{/option}
+          #{/select}
           </td>
         </tr>
 
         <tr>
           <th>运输商</th>
           <td>
-            <select name="ship.cooper.id">
-              <option value="">选择运输商</option>
-            #{list items:shippers, as:'shiper'}
-              <option ${shiper == ship.cooper ? 'selected' : ''} value="${shiper.id}">${shiper.fullName}</option>
-            #{/list}
-            </select>
+          #{select 'ship.cooper.id', items: shippers, labelProperty: 'fullName', value: ship.cooper}
+              #{option ''}选择运输商#{/option}
+          #{/select}
           </td>
           <th>运输单总重量</th>
           <td>${ship.totalWeight()} kg</td>
@@ -145,20 +139,13 @@
         <tr>
           <th>仓库</th>
           <td>
-            <select name="ship.whouse.id">
-              <option value="">选择仓库</option>
-            #{list items:whouses, as:'whouse'}
-              <option ${whouse == ship.whouse ? "selected" : ""} value="${whouse.id}">${whouse.name()}</option>
-            #{/list}
-            </select>
+          #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse}
+              #{option ''}选择仓库#{/option}
+          #{/select}
           </td>
           <td>计价类型</td>
           <td>
-            <select name="ship.pype">
-            #{list items:models.procure.Shipment.P.values(), as:'p'}
-              <option ${p == ship.pype ? 'selected' : ''} value="${p.name()}">${p}</option>
-            #{/list}
-            </select>
+          #{select 'ship.pype', items: models.procure.Shipment.P.values(), value: ship.pype}#{/select}
           </td>
         </tr>
 
@@ -263,24 +250,32 @@
   </div>
 </div>
 
-#{records records:records/}
-
 <div class="row-fluid">
-  <div class="span12 alert alert-danger">
-    <h4 data-toggle="toggle" data-target="#shipping_details" style="cursor:pointer;" class="span2">
-      运输进程 <i class="icon-reorder"></i>
-    </h4>
-
-    <form action="@{Shipments.refreshProcuress()}" method="post" style="margin:0">
-      <input type="hidden" name="id" value="${ship.id}">
-    #{authenticityToken /}
-      <button data-confirm="确认操作?" class="btn btn-danger"><i class="icon-refresh"></i></button>
-    </form>
+  <div class="span6">
+  #{records records:records/}
   </div>
-</div>
-<div class="row-fluid">
-  <div id="shipping_details" class="span12" style="display:none;padding-left:30px">
-  ${ship.iExpressHTML.raw()}
+
+  <div class="span6">
+    <div class="row-fluid">
+      <div class="span12">
+        <h4 class="text-warning">
+          运输进程
+          <i class="icon-sort-down"></i>
+          &nbsp;
+          <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-mini btn-danger" data-method='PUT'>
+            <i class="icon-refresh"></i>
+          </a>
+        </h4>
+      </div>
+    </div>
+    <div id="shipping_details" class="span12">
+    #{if ship.iExpressHTML.trim().size() > 0}
+    ${ship.iExpressHTML.raw()}
+    #{/if}
+    #{else }
+      还没有运输信息
+    #{/else}
+    </div>
   </div>
 </div>
 

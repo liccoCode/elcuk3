@@ -236,11 +236,13 @@ public class Shipments extends Controller {
     }
 
     public static void refreshProcuress(final String id) {
-        checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.trackNo", ship.trackNo);
         Validation.required("shipment.internationExpress", ship.internationExpress);
-        checkShowError(ship);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(ship.id);
+        }
         // 通过 play status 查看这个方法执行平均在 3s, 所以让其放开 3s 线程时间
         await("3s", new F.Action0() {
             @Override
@@ -249,7 +251,7 @@ public class Shipments extends Controller {
                 Shipment ship = Shipment.findById(id);
                 ship.trackWebSite();
                 ship.monitor();
-                redirect("/shipments/show/" + ship.id);
+                show(ship.id);
             }
         });
     }
