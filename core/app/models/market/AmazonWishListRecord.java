@@ -2,12 +2,12 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import helper.DBUtils;
+import models.User;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.libs.F;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +27,8 @@ public class AmazonWishListRecord extends Model {
 
 
     @Expose
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     public M market;
 
 
@@ -37,16 +39,10 @@ public class AmazonWishListRecord extends Model {
     public Account account;
 
     /**
-     * 用户名
+     * 哪个系统用户添加的
      */
     @Expose
     public String userName;
-
-    /**
-     * 商品 category
-     */
-    public String category;
-
 
     @Expose
     public String listingId;
@@ -62,9 +58,8 @@ public class AmazonWishListRecord extends Model {
         this.asin = listing.asin;
         this.market = listing.market;
         this.account = account;
-        this.category = listing.product.category.name;
         this.createAt = new Date();
-        this.userName = account.username;
+        this.userName = User.username();
         this.listingId = listing.listingId;
     }
 
@@ -80,7 +75,7 @@ public class AmazonWishListRecord extends Model {
         F.T2<String, M> lidT2 = Listing.unLid(lid);
         List<Account> nonAddWishListAccs = new ArrayList<Account>();
         for(Account acc : opendAccs) {
-            if(AmazonWishListRecord.count("asin=? and market=? and account=?", lidT2._1, lidT2._2.name(), acc) != 0)
+            if(AmazonWishListRecord.count("asin=? and market=? and account=?", lidT2._1, lidT2._2, acc) != 0)
                 continue;
             nonAddWishListAccs.add(acc);
         }
@@ -93,21 +88,12 @@ public class AmazonWishListRecord extends Model {
      *
      * @param asin
      * @param market
-     * @return T5<asin,market,category,addedNumber,totalNumb >
+     * @return T2<已经添加的数量,总数量 >
      */
-    public static F.T5<String, String, String, Long, Long> wishList(String asin, M market) {
-        SqlSelect sqlSelect = new SqlSelect();
-        sqlSelect.select("a.category as cg", "count(a.category) as count")
-                .from("(select category from AmazonWishListRecord where asin=? and market=?) as a");
-        List<Map<String, Object>> rows = DBUtils.rows(sqlSelect.toString(), asin, market.name());
-        long addedNumb = 0;
-        String category = null;
-        for(Map<String, Object> row : rows) {
-            category = row.get("cg").toString();
-            addedNumb += (Long) row.get("count");
-        }
+    public static F.T2<Long, Long> wishList(String asin, M market) {
+        long addedNumb = AmazonWishListRecord.count("asin=? and market=?", asin, market);
         long totalNumb = Account.count("type=?", market);
-        return new F.T5<String, String, String, Long, Long>(asin, market.name(), category, addedNumb, totalNumb);
+        return new F.T2<Long, Long>(addedNumb, totalNumb);
     }
 
     /**

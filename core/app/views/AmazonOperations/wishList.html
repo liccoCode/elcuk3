@@ -1,33 +1,60 @@
-<div class="row-fluid">
-    <div class="span12">
-        <table class="table table-bordered table-condensed">
-            <tr>
-                <th>Market</th>
-                <th>Category</th>
-                <th>Asin</th>
-                <th>已添加数量</th>
-                <th>可添加数量</th>
-                <th>添加</th>
-            </tr>
-            <tr>
-                <td>${wishlist._2}</td>
-                <td>${wishlist._3}</td>
-                <td>${wishlist._1}</td>
-                <td style="cursor:pointer;" data-toggle="collapse" data-target="#addedAcc">
-                    <span class="badge badge-important">${wishlist._4}</span></td>
-                <td>${wishlist._5-wishlist._4}</td>
-                <td>
-                    <button class="btn" id="add_wishlist">添加</button>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="6">
-                    <div id="addedAcc" class="collapse">
-                        <table class="table table-condensed" id="acc_table">
-                        </table>
-                    </div>
-                </td>
-            </tr>
-        </table>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span6">
+            <dl class="dl-horizontal">
+                <dt>ListingId:</dt>
+                <dd>${listing.listingId}</dd>
+                <dt>Market:</dt>
+                <dd>${listing.market.name()}</dd>
+                <dt>Asin:</dt>
+                <dd>${listing.asin}</dd>
+                <dt>SKU:</dt>
+                <dd>${listing.product.sku}</dd>
+                <dt>Title:</dt>
+                <dd>${listing.title}</dd>
+                <dt>ByWho:</dt>
+                <dd>${listing.byWho}</dd>
+                <dt>Rating:</dt>
+                <dd>${listing.rating}</dd>
+                <dt>DisplayPrice:</dt>
+                <dd>${helper.Webs.priceLocalCurrencyFormat(listing.market, listing.displayPrice)}</dd>
+                <dt>OurPrice:</dt>
+                <dd>${helper.Webs.priceLocalCurrencyFormat(listing.market, listing.easyacceu()?.price)}</dd>
+                <dt>LowestPrice:</dt>
+                <dd>${helper.Webs.priceLocalCurrencyFormat(listing.market, listing.lowestPrice())}</dd>
+                <dt>已添加数量:</dt>
+                <dd class="text-error">${wishlist._1}</dd>
+                <dt>可添加数量:</dt>
+                <dd>${wishlist._2-wishlist._1}</dd>
+
+
+                <div style="margin-left:70px"><img src="${listing.picUrls}" alt=""></div>
+                <dt></dt>
+                <dd style="padding-top:20px">
+                    <button class="btn btn-primary" id="add_wishlist">添加到WishList</button>
+                </dd>
+            </dl>
+        </div>
+
+        <div class="span6" style="height:665px;overflow-x:hidden;overflow-y:auto">
+        #{if records.size() != 0}
+            <table class="table">
+                <tr>
+                    <th>#</th>
+                    <th>添加的系统账户</th>
+                    <th>添加的Amazon账户</th>
+                    <th>添加时间</th>
+                </tr>
+                #{list items:records, as:'record'}
+                    <tr>
+                        <td>${record.id}</td>
+                        <td>${record.userName}</td>
+                        <td>${record.account.username}</td>
+                        <td>${record.createAt}</td>
+                    </tr>
+                #{/list}
+            </table>
+        #{/if}
+        </div>
     </div>
 </div>

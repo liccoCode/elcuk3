@@ -113,8 +113,11 @@ public class AmazonOperations extends Controller {
      */
     public static void wishList(String asin, String m) {
         M market = M.val(m);
-        F.T5<String, String, String, Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
-        render(wishlist);
+        String lid = Listing.lid(asin, market);
+        F.T2<Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
+        Listing listing = Listing.findById(lid);
+        List<AmazonWishListRecord> records = AmazonWishListRecord.wishListInfos(lid);
+        render(wishlist, listing, records);
     }
 
     /**

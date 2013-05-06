@@ -105,6 +105,7 @@ $ ->
   $('#click_like').click (e) ->
     if $('#search_form [name=asin]').val().length isnt 10
       alert('请先输入正确的 ASIN')
+      $("#search_form [name=asin]").focus()
       return false
     mask = $('#container')
     mask.mask('点击 Like 中...')
@@ -177,6 +178,7 @@ $ ->
   (e) ->
     if $("#search_form [name=asin]").val() == ""
       alert("请输入 ASIN")
+      $("#search_form [name=asin]").focus()
       return
     loadReviewTable()
 
@@ -189,6 +191,7 @@ $ ->
   (e) ->
     if $("#search_form [name=asin]").val() == ""
       alert("请输入 ASIN")
+      $("#search_form [name=asin]").focus()
       return
     loadWishList()
   )
@@ -203,23 +206,11 @@ $ ->
         $.post("/AmazonOperations/addToWishList", params,
         (success) ->
           mask.unmask()
-          alert if success then '添加成功' else '添加失败'
-          loadWishList() if success
+          if success then loadWishList() else alert '添加失败'
         )
         e.preventDefault()
       )
-      $('#addedAcc').on('shown', ->
-        $.post('/AmazonOperations/ajaxWishListInfos', params,
-        (records)->
-          $("#acc_table").empty().append('<tr><th>#</th><th>Add Acc</th><th>Add At</th></tr>')
-          for record in records
-            $("#acc_table").append(tr_html(record))
-        )
-      )
     )
-
-  tr_html = (record)->
-    return "<tr><td>#{record.id}</td><td>#{record.userName}</td><td>#{record.createAt}</td></tr>"
 
 
 
