@@ -1,0 +1,47 @@
+#{extends 'main_full.html' /}
+#{set title: '运输项目列表' /}
+#{set 'moreScripts'}
+#{/set}
+
+
+<div class="row-fluid">
+  <div class="btn-toolbar">
+    <a href="" class="btn">时间</a>
+    <a href="" class="btn">国家</a>
+    <a href="" class="btn">FBA 仓库</a>
+  </div>
+
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th><label><input type="checkbox" class="checkall"></label></th>
+      <th>#</th>
+      <th>运输单</th>
+      <th>SKU</th>
+      <th>计划数量</th>
+      <th>运输数量</th>
+      <th>仓库</th>
+      <th>FBA 仓库</th>
+      <th>FBA</th>
+      <th>Selling</th>
+    </tr>
+  #{list items: items, as:'itm'}
+    <tr>
+      <td><label><input type="checkbox"></label></td>
+      <td>${itm.id}</td>
+      <td><a href="@{Shipments.show(itm.shipment?.id)}">${itm.shipment?.id}</a></td>
+      <td><a href="@{Products.show(itm.unit.sku)}">${itm.unit.sku}</a></td>
+      <td>${itm.unit.qty()}</td>
+      <td>${itm.qty}</td>
+      <td>${itm.unit.whouse.name}</td>
+      <td>${itm.unit.fba?.fbaCenter?.centerId}</td>
+      <td>${itm.unit.fba?.shipmentId}</td>
+      <td>${itm.unit.sid}</td>
+    </tr>
+  #{/list}
+  </table>
+
+  <div class="btn-toolbar">
+    <a href="" class="btn">创建运输单</a>
+  </div>
+</div>
+

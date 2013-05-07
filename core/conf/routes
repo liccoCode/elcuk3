@@ -99,6 +99,9 @@ GET     /shipments                                          Shipments.index
 GET     /shipment/{id}                                      Shipments.show
 PUT     /shipment/{id}/process                              Shipments.refreshProcuress
 
+# ShipItems
+GET     /shipitems                                          ShipItems.index
+
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}
 
