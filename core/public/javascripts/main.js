@@ -7,29 +7,63 @@ Timeline_parameters = 'bundle=true';
 
 var LoadMask = {
     /**
+     * 在页面进入的时候都需要清理带有 _times 的 sessionStorage
+     */
+    clear: function(){
+        console.log('begin clean LoadMask...');
+        for(var key in sessionStorage){
+            if(!sessionStorage.hasOwnProperty(key)) continue;
+            if(key.indexOf('_times') > 0){
+                delete sessionStorage[key];
+                console.log('delete key' + key)
+            }
+        }
+        console.log('end of clean LoadMask.')
+    },
+    /**
      * 锁屏幕
      * @param selector
      */
     mask: function(selector){
         if(!selector) selector = "#container";
-        var times = sessionStorage.getItem(selector + "_times");
+        var times = sessionStorage[selector + "_times"];
         if(!times){
             times = 0;
             $(selector).mask("处理中...");
         }
-        sessionStorage.setItem(selector + "_times", ++times);
+        sessionStorage[selector + "_times"] = ++times;
         console.log(selector + "_times:" + times);
     },
     unmask: function(selector){
         if(!selector) selector = "#container";
-        var times = sessionStorage.getItem(selector + "_times");
+        var times = sessionStorage[selector + "_times"];
         if(--times <= 0){
-            sessionStorage.removeItem(selector + "_times");
+            delete sessionStorage[selector + "_times"];
             $(selector).unmask();
         }else{
-            sessionStorage.setItem(selector + "_times", times)
+            sessionStorage[selector + "_times"] = times;
         }
         console.log(selector + "_times:" + times);
+    }
+};
+
+/**
+ * Effect, 包含几个页面效果
+ */
+var EF = {
+    /**
+     * 滚动到该元素
+     * @param selector
+     */
+    scoll: function(selector){
+        var mao = $(selector);
+        $('body').animate({scrollTop: mao.offset().top - mao.height() - 50}, 1000)
+    },
+
+    colorAnimate: function(selector, from, to){
+        if(from == undefined) from = '#E35651';
+        if(to == undefined) to = '#FFF';
+        $(selector).css('backgroundColor', from).animate({backgroundColor: to}, 3500)
     }
 };
 
@@ -143,25 +177,8 @@ function toggle_init(){
     // 为页面添加 data-toggle=toggle 元素事件(类似 bootstrap 的 collapse)
     $('body').off('click', '[data-toggle=toggle]').on('click', '[data-toggle=toggle]', function(e){
         var target = $(this).attr('data-target');
-        $(target).fadeToggle('fast');
+        $(target).fadeToggle('fast').css('cursor', 'pointer');
         e.preventDefault();
-    });
-    $('[data-toggle=toggle]').css("cursor", "pointer");
-}
-
-function link_confirm_init(){
-    $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e){
-        var content = "确认执行此操作?";
-        if($(this).attr('content')) content = $(this).attr('content');
-        if(!confirm(content)) e.preventDefault()
-    });
-}
-
-function btn_confirm_init(){
-    $('body').off('click', 'button[data-confirm=btn]').on('click', 'button[data-confirm=btn]', function(e){
-        var content = "确认执行此操作?";
-        if($(this).attr('content')) content = $(this).attr('content');
-        if(!confirm(content)) e.preventDefault();else $(this).button('loading');
     });
 }
 
@@ -172,13 +189,23 @@ function btn_loading_init(){
     })
 }
 
+/**
+ * 对在 Table 中含有 checkbox.checkall 的元素进行全选处理
+ */
+function tableCheckBoxCheckAll(){
+    $('table').on('change', ':checkbox.checkall', function(){
+        var table = $(this).parents('table').find(':checkbox').prop('checked', $(this).prop('checked'));
+    });
+}
+
 $(function(){
     toggle_init();
-    link_confirm_init();
     btn_loading_init();
-    btn_confirm_init();
+    tableCheckBoxCheckAll();
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });
+    if(window.PLAY_MODE == 'DEV') Notify.loopCheck();
+    LoadMask.clear();
 });
 

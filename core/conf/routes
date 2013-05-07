@@ -24,7 +24,65 @@ GET     /images/                                            staticDir:public/ima
 GET     /img/                                               staticDir:public/images
 GET     /helper/                                            staticDir:public/images/helper
 
+# Applys
+GET     /apply/{id}/procure                                 Applys.procure
+PUT     /apply/{id}/procure/confirm                         Applys.procureConfirm
+
+# Deliveryments
+GET    /deliveryments                                        Deliveryments.index
+GET    /deliveryment/{id}                                    Deliveryments.show
+DELETE /deliveryment/{id}/departApply                        Deliveryments.departProcureApply
+POST   /deliveryment                                         Deliveryments.create
+
+# FeeTypes
+POST    /feetype/{name}/update                               FeeTypes.update
+POST    /feetype                                             FeeTypes.create
+POST    /feetype/{name}/delete                               FeeTypes.remove
+
+# Orders
 GET     /orders/warnfix                                     Orders.warrningOrders
+
+# Payments
+GET     /payments                                           Payments.index
+GET     /payment/rates                                      Payments.rates
+POST    /payment/files/upload                               Payments.uploads
+GET     /payment/{id}                                       Payments.show
+DELETE  /payment/{id}                                       Payments.cancel
+POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
+POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
+POST    /payment/{id}/pay                                   Payments.payForIt
+POST    /payment/{id}/shouldPaid                            Payments.shouldPaidUpdate
+POST    /payment/{id}/lock                                  Payments.lockIt
+DELETE  /payment/{id}/lock                                  Payments.unlock
+
+# ProcureUnits
+POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
+POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
+DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
+GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
+POST    /procureunit                                        ProcureUnits.create
+GET     /procureunit/{id}/edit                              ProcureUnits.edit
+PUT     /procureunit/{id}                                   ProcureUnits.update
+
+# PaymentUnits
+POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
+
+# PaymentTargets
+GET     /paymenttargets                                     PaymentTargets.index
+POST    /paymenttarget                                      PaymentTargets.save
+POST    /paymenttarget/{targetId}                           PaymentTargets.update
+DELETE  /paymenttarget/{targetId}                           PaymentTargets.destroy
+
+# Products
+GET     /product/{<[0-9]{2,}[-]?[A-Z0-9]+[-][A-Z0-9]+>id}   Products.show
+
+# Sellings
+GET     /selling/{id}                                       Sellings.selling
+GET     /selling/{id}/label                                 Sellings.sellingLabel
+
+# Shipments
+GET     /shipments                                          Shipments.index
+GET     /shipment/{id}                                      Shipments.show
 
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}

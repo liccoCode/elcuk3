@@ -1,5 +1,5 @@
 <h3>运输单 ${shipment.id} 从 PLAN 状态进行 CLEARANCE 状态</h3>
-<a target="_blank" href="@@{Shipments.show()}/${shipment.id}">Elcuk2. ${shipment.id} 运输单</a>
+<a target="_blank" href="@@{Shipments.show(shipment.id)}">Elcuk2. ${shipment.id} 运输单</a>
 <br/>
 <a target="_blank" href="${shipment.internationExpress.trackUrl(shipment.trackNo)}">${shipment.internationExpress} ${shipment.trackNo}</a>
 <hr/>

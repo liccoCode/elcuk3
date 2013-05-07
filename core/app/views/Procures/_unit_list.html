@@ -1,170 +1,165 @@
 #{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered">
-    <tr>
-    #{if checkbox}
-        <th>
-            <label class="checkbox">
-                <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key}">
-            </label>
-        </th>
-    #{/if}
-        <th>#</th>
-        <th>Selling</th>
-        <th>Sku</th>
-        <th>采购单</th>
-        <th>仓库</th>
-        <th>供应商</th>
-        <th>采购数量</th>
-        <th>单价</th>
-        <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
-            <abbr title=" ">总价</abbr>
-        </th>
-        <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="auto">FnSku</th>
-        <th>运输方式</th>
-        <th>预计交货时间</th>
-        <th>实际交货时间</th>
-        <th>预计到库时间</th>
-        <th>预计运输时间</th>
-        <th>阶段</th>
-        <th>抵达货代</th>
-        <th>创建时间</th>
-    </tr>
+  <tr>
+  #{if checkbox}
+    <th>
+      <label class="checkbox">
+        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall">
+      </label>
+    </th>
+  #{/if}
+    <th>#</th>
+    <th>Selling</th>
+    <th>Sku</th>
+    <th>采购单</th>
+    <th>仓库</th>
+    <th>供应商</th>
+    <th>采购数量</th>
+    <th>单价</th>
+    <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
+      <abbr title=" ">总价</abbr>
+    </th>
+    <th>剩余请款金额</th>
+    <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="auto">FnSku</th>
+    <th>运输方式</th>
+    <th>预计交货时间</th>
+    <th>实际交货时间</th>
+    <th>阶段</th>
+    <th>抵达货代</th>
+    <th>创建时间</th>
+  </tr>
 #{list items:units, as:'unit'}
-    <tr style="background:${unit.shipItem ? '' : '#EEE'}">
-        #{if checkbox}
-            <td>
-                <label class="checkbox"><input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"></label>
-            </td>
+  <tr id="procureUnit_${unit.id}">
+      #{if checkbox}
+        <td>
+          <label class="checkbox"><input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"></label>
+        </td>
+      #{/if}
+    <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
+      <i class="icon-reorder"></i> ${unit.id}</td>
+    <td>
+      <a href="@{Sellings.selling(unit.selling.sellingId)}" target="_blank">${unit.selling.sellingId}</a>
+    </td>
+    <td>
+      <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+    </td>
+    <td>
+        #{if unit.deliveryment}
+          <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
         #{/if}
-        <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-            <i class="icon-reorder"></i> ${unit.id}</td>
-        <td>
-            <a href="@{Sellings.selling(unit.selling.sellingId)}" target="_blank">${unit.selling.sellingId}</a>
-        </td>
-        <td>
-            <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
-        </td>
-        <td>
-            #{if unit.deliveryment}
-                <a href="@{Deliveryments.show()}/${unit.deliveryment.id}">${unit.deliveryment.id}</a>
-            #{/if}
-        </td>
-        <td>${unit.whouse.name()}</td>
-        <td>${unit.cooperator?.name}</td>
-        <td>${unit.attrs.planQty}</td>
-        <td>${unit.attrs.price.formatCurrency(unit.attrs.currency.name())}</td>
-        <td>${(unit.qty() * unit.attrs.price).formatCurrency(unit.attrs.currency.name())}</td>
-        <td>
-            <!-- FnSku 下载 Label -->
-            #{if unit.selling.fnSku}
-                <a href="@{Sellings.sellingLabel()}/${unit.sid}" class="btn btn-success btn-block"><i class="icon-download-alt"></i> ${unit.selling.fnSku}
-                </a>
-            #{/if}
-            #{else }
-                <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">补全
-                    FnSku</a>
-            #{/else}
-        </td>
-        <td>${unit.shipType}</td>
-        <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
-        <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
-        <td>#{time_tooltip time:unit.attrs.planArrivDate/}</td>
-        #{if !unit.shipItem}
-            <td rel="popover" content="还没有对应运输单">
-                <i class="icon-question-sign"></i>
-                #{time_tooltip time:unit.attrs.planShipDate/}
-            </td>
+    </td>
+    <td>${unit.whouse.name()}</td>
+    <td>${unit.cooperator?.name}</td>
+    <td>${unit.attrs.planQty}</td>
+    <td>${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
+    <td>${unit.attrs.currency.symbol()} ${(unit.qty() * unit.attrs.price)}</td>
+    <td>${unit.attrs.currency.symbol()} ${unit.leftAmount()}</td>
+    <td>
+      <!-- FnSku 下载 Label -->
+        #{if unit.selling.fnSku}
+          <a href="@{Sellings.sellingLabel(unit.sid)}" class="btn btn-success btn-block">
+            <i class="icon-download-alt"></i> ${unit.selling.fnSku}
+          </a>
         #{/if}
         #{else }
-            <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
+          <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">补全
+            FnSku</a>
         #{/else}
-        <td style="background:${'#' + unit.stage.rgb()}">${unit.stage}</td>
-        <td>#{yesOrNo f:unit.isPlaced/}</td>
-        <td>#{time_tooltip time:unit.createDate/}</td>
-    </tr>
-    <tr id="${tr_key}_${unit.id}" style="display:none;">
-        <td colspan="${checkbox ? '17' : '16'}">
-            <div class="row-fluid">
+    </td>
+    <td>${unit.shipType}</td>
+    <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+    <td style="background:${unit.stage.rgb()}">${unit.stage}</td>
+    <td>#{yesOrNo f:unit.isPlaced/}</td>
+    <td>#{time_tooltip time:unit.createDate/}</td>
+  </tr>
+  <tr id="${tr_key}_${unit.id}" style="display:none;">
+    <td colspan="${checkbox ? '17' : '16'}">
+      <div class="row-fluid">
 
-                <div class="span3" style="float:left;padding-right:10px;">
-                    <dl>
-                        <dt>Comment</dt>
-                        <dd>${unit.comment}</dd>
-                    </dl>
+        <div class="span3" style="float:left;padding-right:10px;">
+          <dl>
+            <dt>Comment</dt>
+            <dd>${unit.comment}</dd>
+          </dl>
 
-                </div>
-                <div class="span3" style="float:left">
-                    <dl>
-                        <dt>关联运输单</dt>
-                        <dd>
-                            #{list items:unit.relateShipment(), as:'sp'}
-                                <a href="@{Shipments.show()}/${sp.id}">#{if sp.cycle}
-                                    <i style="color:#C09853" class="icon-star"></i>#{/if}${sp.title()}
-                                </a>
-                                <br>
-                            #{/list}
-                        </dd>
-                    </dl>
-                    <dl>
-                        <dt>关联 FBA</dt>
-                        <dd>
-                            #{if unit.fba()}
-                                <a href="${unit.fba().fbaLink()}">
-                                    <i class="icon-external-link"></i>
-                                ${unit.fba().shipmentId}
-                                </a>
-                            #{/if}
-                            #{else }
-                                <span class="text-warning">还没有 FBA</span>
-                            #{/else}
-                        </dd>
-                    </dl>
-                </div>
+        </div>
+        <div class="span3" style="float:left">
+          <dl>
+            <dt>关联运输单</dt>
+            <dd>
+              <ul>
+                  #{list items:unit.relateShipment(), as:'sp'}
+                    <li>
+                      <a href="@{Shipments.show(sp.id)}">${sp}</a>
+                      预计 #{time_tooltip time: sp.planBeginDate /} 开船
+                    </li>
+                  #{/list}
+              </ul>
+            </dd>
+          </dl>
+          <dl>
+            <dt>关联 FBA</dt>
+            <dd>
+                #{if unit.fba}
+                  <a href="${unit.fba.fbaLink()}">
+                    <i class="icon-external-link"></i>
+                  ${unit.fba.shipmentId}
+                  </a>
+                #{/if}
+                #{else }
+                  <span class="text-warning">还没有 FBA</span>
+                #{/else}
+            </dd>
+          </dl>
+        </div>
 
-                <div class="span3" style="float:left;padding:0 20px;">
-                    <table class="table table-condensed table-bordered">
-                        <tr>
-                            <td>实际交货量</td>
-                            <td>实际交货日期</td>
-                        </tr>
-                        <tr>
-                            <td>${unit.attrs.qty}</td>
-                            <td>${unit.attrs.deliveryDate.los()}</td>
-                        </tr>
-                    </table>
-                </div>
+        <div class="span3" style="float:left;padding:0 20px;">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <td>实际交货量</td>
+              <td>实际交货日期</td>
+            </tr>
+            <tr>
+              <td>${unit.attrs.qty}</td>
+              <td>${unit.attrs.deliveryDate.los()}</td>
+            </tr>
+          </table>
+        </div>
 
-                <div class="span2" style="float:left;">
-                    <!-- 普通修改 -->
-                    <a href="@{Procures.edit()}/${unit.id}" target="_blank" class="btn btn-primary">修改</a>
+        <div class="span2" style="float:left;">
+          <!-- 普通修改 -->
+          <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-primary">修改</a>
 
-                    #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
-                        <a href="@{Procures.remove()}/${unit.id}" data-confirm="link" class="btn btn-danger">删除</a>
-                    #{/if}
+            #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
+              <a href="@{Procures.remove()}/${unit.id}" data-confirm="确认删除?" class="btn btn-danger">删除</a>
+            #{/if}
 
-                    #{if delivery}
-                        #{ck "procures.delivery"}
-                            <!-- 交货页面 -->
-                            <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
-                        #{/ck}
-                        #{ck "procures.dosplitunit"}
-                            <!-- 分拆采购单元 -->
-                            <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
-                        #{/ck}
-                        <!-- 确认到货代处 -->
-                        #{ifnot unit.isPlaced}
-                            <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
-                                <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
-                                <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">
-                                    抵达货代处
-                                </button>
-                            </div>
-                        #{/ifnot}
-                    #{/if}
-                </div>
-            </div>
+            #{if delivery}
+                #{power.ck "procures.delivery"}
+                  <!-- 交货页面 -->
+                  <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning" style="margin-bottom:3px;">交货</a>
+                #{/power.ck}
+                #{power.ck "procures.dosplitunit"}
+                  <!-- 分拆采购单元 -->
+                  <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger" style="margin-bottom:3px;">分拆采购计划</a>
+                #{/power.ck}
+              <!-- 确认到货代处 -->
+                #{ifnot unit.isPlaced}
+                  <div class="input-prepend input-append pull-left" style="margin-right:5px;margin-bottom:3px;">
+                    <span class="add-on" rel="popover" content="标记这个采购单元已经抵达货代地方, 可以通过货代发货"><i class="icon-question-sign"></i></span>
+                    <button name="unit_isplaced" id="${unit.id}" class="btn btn-info">
+                      抵达货代处
+                    </button>
+                  </div>
+                #{/ifnot}
+            #{/if}
+        </div>
+      </div>
+        #{ifnot norecord}
             #{records notitle:false, records:unit.records()/}
-        </td>
-    </tr>
+        #{/ifnot}
+    </td>
+  </tr>
 #{/list}
 </table>

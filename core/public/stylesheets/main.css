@@ -1,3 +1,7 @@
+#footer{
+    margin-top:60px;
+}
+
 .table .active{
     background:#EEE;
 }
@@ -96,6 +100,31 @@ div .alert{
     background-color:#F4F4F4;
 }
 
+/* 使用在 table tr 控制 td 的宽度 */
+.three{
+    width:3%;
+}
+
+.five{
+    width:5%;
+}
+
+.ten{
+    width:10%;
+}
+
+.fifteen{
+    width:15%;
+}
+
+.twenty{
+    width:20%;
+}
+
 .template{
     display:none;
+}
+
+.table-checkboxk label{
+    padding-left:5px;
 }

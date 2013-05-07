@@ -8,115 +8,115 @@
 #{/set}
 
 <div class="tabbable tabs-left">
-    <ul id="top_tab" class="nav nav-tabs">
-        <li class="active"><a href="#basic" data-toggle="tab">基础</a></li>
-    #{ck 'analyzes.ajaxsales'}
-        <li><a href="#root" data-toggle="tab">Root</a></li>
-    #{/ck}
-    </ul>
+  <ul id="top_tab" class="nav nav-tabs">
+    <li class="active"><a href="#basic" data-toggle="tab">基础</a></li>
+  #{power.ck 'analyzes.ajaxsales'}
+    <li><a href="#root" data-toggle="tab">Root</a></li>
+  #{/power.ck}
+  </ul>
 
 
-    <div id="top_tabContent" class="tab-content">
-        <div class="tab-pane fade in active" id="basic">
-            <div class="row-fluid">
-                <div id="a_units" class="span6" style="height:280px"></div>
-                <div id="a_turn" style="min-height:280px;" class="span3"></div>
-                <div id="a_ss" style="min-height:280px;" class="span3"></div>
-            </div>
+  <div id="top_tabContent" class="tab-content">
+    <div class="tab-pane fade in active" id="basic">
+      <div class="row-fluid">
+        <div id="a_units" class="span6" style="height:280px"></div>
+        <div id="a_turn" style="min-height:280px;" class="span3"></div>
+        <div id="a_ss" style="min-height:280px;" class="span3"></div>
+      </div>
 
-            <div class="row-fluid">
-                <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
-            </div>
-        </div>
-
-    #{ck 'analyzes.ajaxsales'}
-        <div class="tab-pane fade" id="root">
-            <div class="row-fluid">
-                <div id="a_sales" class="span6" style="height:280px"></div>
-                <div class="span6">这个里面的为需要权限控制查看的曲线</div>
-            </div>
-        </div>
-    #{/ck}
-
+      <div class="row-fluid">
+        <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
+      </div>
     </div>
+
+  #{power.ck 'analyzes.ajaxsales'}
+    <div class="tab-pane fade" id="root">
+      <div class="row-fluid">
+        <div id="a_sales" class="span6" style="height:280px"></div>
+        <div class="span6">这个里面的为需要权限控制查看的曲线</div>
+      </div>
+    </div>
+  #{/power.ck}
+
+  </div>
 </div>
 
 
 <!-- 双击产品的时候使用 -->
 <div class="row-fluid" style="margin-top:15px">
-    <div id="a_toolbar" class="row-fluid">
-        <form action="@{Analyzes.analyzes()}" method="get" id="click_param" class="search_form">
-            <div class="span12">
-                <div class="input-prepend inline">
-                    <span class="add-on">From:</span>
-                    <input type="date" id="a_from" name="p.from">
-                </div>
+  <div id="a_toolbar" class="row-fluid">
+    <form action="@{Analyzes.analyzes()}" method="get" id="click_param" class="search_form">
+      <div class="span12">
+        <div class="input-prepend inline">
+          <span class="add-on">From:</span>
+          <input type="date" id="a_from" name="p.from">
+        </div>
 
-                <div class="input-prepend input-append inline">
-                    <span class="add-on">TO:</span>
-                    <input type="date" id="a_to" name="p.to">
-                    <button class="btn" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
-                        Reload
-                    </button>
-                </div>
+        <div class="input-prepend input-append inline">
+          <span class="add-on">TO:</span>
+          <input type="date" id="a_to" name="p.to">
+          <button class="btn" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
+            Reload
+          </button>
+        </div>
 
-                <label class="checkbox inline">
-                    <input type="checkbox" name="p.filterDot2" value="false">
-                    包含 ,2
-                </label>
+        <label class="checkbox inline">
+          <input type="checkbox" name="p.filterDot2" value="false">
+          包含 ,2
+        </label>
 
-                <select name="p.desc" class="inline">
-                    <option value="true">DESC</option>
-                    <option value="false">ASC</option>
-                </select>
+        <select name="p.desc" class="inline">
+          <option value="true">DESC</option>
+          <option value="false">ASC</option>
+        </select>
 
-                <select id="p_aid" name="p.aid" class="inline">
-                    <option value="">ALL</option>
-                #{list items:accs, as:'acc'}
-                    <option value="${acc.id}">${acc.prettyName()}</option>
-                #{/list}
-                </select>
+        <select id="p_aid" name="p.aid" class="inline">
+          <option value="">ALL</option>
+        #{list items:accs, as:'acc'}
+          <option value="${acc.id}">${acc.prettyName()}</option>
+        #{/list}
+        </select>
 
-                <select name="p.categoryId" class="inline">
-                    <option value="">ALL</option>
-                #{list items:categoryIds}
-                    <option value="^${_}">${_}</option>
-                #{/list}
-                </select>
+        <select name="p.categoryId" class="inline">
+          <option value="">ALL</option>
+        #{list items:categoryIds}
+          <option value="^${_}">${_}</option>
+        #{/list}
+        </select>
 
-                <div class="input-append input-prepend inline">
-                    <span class="add-on"><i class="icon-search"></i></span>
-                    <input type="text" name="p.search" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN/^71xx">
-                    <!-- 点击 Search Selling 的时候使用 -->
-                    <button class="btn" id="a_search">搜索</button>
-                </div>
+        <div class="input-append input-prepend inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" name="p.search" id="a_param" placeHolder="搜索 MSKU/SKU/ASIN/^71xx">
+          <!-- 点击 Search Selling 的时候使用 -->
+          <button class="btn" id="a_search">搜索</button>
+        </div>
 
-            #{ck "analyzes.allskucsv"}
-                <button id="skus_csv" class="btn btn-primary pull-right" rel="popover" content="X:SKU, Y:时间, 导出销量表">
-                    SKU CSV
-                </button>
-            #{/ck}
-                <button id="clear_cache" class="btn btn-primary pull-right" style="margin-right:5px;">
-                    Cached At ${models.view.post.AnalyzePost.cachedDate('sid').datetime()}
-                </button>
+      #{power.ck "analyzes.allskucsv"}
+        <button id="skus_csv" class="btn btn-primary pull-right" rel="popover" content="X:SKU, Y:时间, 导出销量表">
+          SKU CSV
+        </button>
+      #{/power.ck}
+        <button id="clear_cache" class="btn btn-primary pull-right" style="margin-right:5px;">
+          Cached At ${models.view.post.AnalyzePost.cachedDate('sid').datetime()}
+        </button>
 
-                <input type="hidden" name="p.page" value="1">
-                <input type="hidden" name="p.type" value="sid">
+        <input type="hidden" name="p.page" value="1">
+        <input type="hidden" name="p.type" value="sid">
 
-                <input type="hidden" name="p.orderBy" value="day7">
-                <input type="hidden" name="p.val" value="all">
-            </div>
-        </form>
-    </div>
+        <input type="hidden" name="p.orderBy" value="day7">
+        <input type="hidden" name="p.val" value="all">
+      </div>
+    </form>
+  </div>
 </div>
 
 <div class="row-fluid">
-    <ul id="below_tab" class="nav nav-tabs">
-        <li class="active"><a href="#sid" data-toggle="tab">SID</a></li>
-        <li class=""><a href="#sku" data-toggle="tab">SKU</a></li>
-    </ul>
-    <div id="below_tabContent" class="tab-content">
-        <div class="tab-pane fade active in" id="sid">wait</div>
-        <div class="tab-pane fade" id="sku">wait</div>
-    </div>
+  <ul id="below_tab" class="nav nav-tabs">
+    <li class="active"><a href="#sid" data-toggle="tab">SID</a></li>
+    <li class=""><a href="#sku" data-toggle="tab">SKU</a></li>
+  </ul>
+  <div id="below_tabContent" class="tab-content">
+    <div class="tab-pane fade active in" id="sid">wait</div>
+    <div class="tab-pane fade" id="sku">wait</div>
+  </div>
 </div>

@@ -10,7 +10,6 @@ import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.helper.JpqlSelect;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import javax.xml.bind.JAXB;
@@ -28,7 +27,6 @@ import java.util.*;
  * Date: 12-1-8
  * Time: 上午5:59
  */
-@Every("5mn")
 public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void doJob() throws Exception {

@@ -41,7 +41,8 @@ public class FBA {
      * @param items   需要上传的 ShipItems
      * @return 成功在 Amazon FC`s plan 好的 FBA Shipment
      */
-    public static F.Option<FBAShipment> plan(Account account, List<ShipItem> items) throws FBAInboundServiceMWSException {
+    public static F.Option<FBAShipment> plan(Account account, List<ShipItem> items)
+            throws FBAInboundServiceMWSException {
         Monitor monitor = MonitorFactory.start("FBA.plan");
         FBAShipment fbaShipment = new FBAShipment();
         try {
@@ -55,9 +56,11 @@ public class FBA {
             plan.setShipFromAddress(Account.address(account.type));
 
             // 要发送的货物
-            plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(FBA.shipItemsToInboundShipmentPlanItems(items)));
+            plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
+                    FBA.shipItemsToInboundShipmentPlanItems(items)));
 
-            CreateInboundShipmentPlanResponse response = client(account).createInboundShipmentPlan(plan);
+            CreateInboundShipmentPlanResponse response = client(account)
+                    .createInboundShipmentPlan(plan);
             CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
 
             if(result.isSetInboundShipmentPlans()) {
@@ -76,15 +79,19 @@ public class FBA {
                 for(InboundShipmentPlan waitCheckPlan : members) {
                     isFind = true;
                     try {
-                        List<InboundShipmentPlanItem> itemMember = waitCheckPlan.getItems().getMember();
+                        List<InboundShipmentPlanItem> itemMember = waitCheckPlan.getItems()
+                                .getMember();
                         Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<String, InboundShipmentPlanItem>();
-                        for(InboundShipmentPlanItem inboundPlanItem : itemMember)
+                        for(InboundShipmentPlanItem inboundPlanItem : itemMember) {
                             inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
+                        }
 
                         for(ShipItem itm : items) {
-                            if(!inboundItemMap.containsKey(fixHistoryMSKU(itm.unit.selling.merchantSKU))) {
+                            if(!inboundItemMap
+                                    .containsKey(fixHistoryMSKU(itm.unit.selling.merchantSKU))) {
                                 msg.append(String.format("%s not in %s FC`s 需要手动重新处理!\r\n",
-                                        itm.unit.selling.merchantSKU, waitCheckPlan.getDestinationFulfillmentCenterId()));
+                                        itm.unit.selling.merchantSKU,
+                                        waitCheckPlan.getDestinationFulfillmentCenterId()));
                                 isFind = false;
                                 break;
                             }
@@ -104,7 +111,6 @@ public class FBA {
                 fbaShipment.account = account;
                 fbaShipment.shipmentId = member.getShipmentId();
                 fbaShipment.labelPrepType = member.getLabelPrepType();
-                fbaShipment.shipItems = items;
 
                 fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
 
@@ -138,7 +144,8 @@ public class FBA {
                     }
                 }
             } else {
-                Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(), "创建 FBAShipment 失败.");
+                Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(),
+                        "创建 FBAShipment 失败.");
                 throw new FBAInboundServiceMWSException("创建 FBA Plan 失败.");
             }
         } finally {
@@ -156,22 +163,27 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S create(FBAShipment fbashipment) throws FBAInboundServiceMWSException {
+    public static FBAShipment.S create(FBAShipment fbashipment)
+            throws FBAInboundServiceMWSException {
         //TODO 测出如果数量与 plan 的不一样, Amazon 运输再创建吗?
         Monitor monitor = MonitorFactory.start("FBA.create");
         try {
             if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
-            String fbaTitle = String.format("%s %s", fbashipment.shipment.title(), Dates.date2DateTime());
+            //TODO effects: 计算 FBA title 算法需要调整
+            String fbaTitle = String.format("%s %s", "FBA Title 需要调整", Dates.date2DateTime());
             CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
             create.setSellerId(fbashipment.account.merchantId);
             create.setShipmentId(fbashipment.shipmentId);
             create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle,
-                    Account.address(fbashipment.account.type), fbashipment.centerId, FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
+                    Account.address(fbashipment.account.type), fbashipment.centerId,
+                    FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
             // 设置 items
-            List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(fbashipment.shipItems);
+            //TODO effect: 创建 FBA 的算法需要调整
+            List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(null);
             create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
-            CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
+            CreateInboundShipmentResponse response = client(fbashipment.account)
+                    .createInboundShipment(create);
             if(response.isSetCreateInboundShipmentResult()) {
                 fbashipment.title = fbaTitle;
                 fbashipment.createAt = new Date();
@@ -193,7 +205,8 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S update(FBAShipment fbaShipment, List<ShipItem> updateitems, FBAShipment.S state) throws FBAInboundServiceMWSException {
+    public static FBAShipment.S update(FBAShipment fbaShipment, List<ShipItem> updateitems,
+                                       FBAShipment.S state) throws FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
         Monitor monitor = MonitorFactory.start("FBA.update");
@@ -204,12 +217,14 @@ public class FBA {
             update.setSellerId(fbaShipment.account.merchantId);
             update.setShipmentId(fbaShipment.shipmentId);
             update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
-                    Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(), fbaShipment.labelPrepType));
+                    Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
+                    fbaShipment.labelPrepType));
 
             List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(updateitems);
             update.setInboundShipmentItems(new InboundShipmentItemList(items));
 
-            UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
+            UpdateInboundShipmentResponse response = client(fbaShipment.account)
+                    .updateInboundShipment(update);
             if(response.isSetUpdateInboundShipmentResult())
                 fbaShipment.state = state;
         } finally {
@@ -225,17 +240,21 @@ public class FBA {
      * @param account     请求的账户
      * @return shipmentId : {._1:state, ._2:centerId, ._3:shipmentName}
      */
-    public static Map<String, F.T3<String, String, String>> listShipments(List<String> shipmentIds, Account account) throws FBAInboundServiceMWSException {
+    public static Map<String, F.T3<String, String, String>> listShipments(List<String> shipmentIds,
+                                                                          Account account)
+            throws FBAInboundServiceMWSException {
         Validate.notNull(shipmentIds);
         Validate.notNull(account);
         // Amazon 提供的这个 API 最多一次查看 50 个 FBA 的状态, 但最多进行 20 个, 避免翻页
-        Validate.isTrue(shipmentIds.size() <= 20, "检查 Shipments 的时候, ShipmentIds 的数量必须小于 20 当前数量 " + shipmentIds.size() + ".");
+        Validate.isTrue(shipmentIds.size() <= 20,
+                "检查 Shipments 的时候, ShipmentIds 的数量必须小于 20 当前数量 " + shipmentIds.size() + ".");
         Validate.isTrue(shipmentIds.size() > 0, "需要至少一个 ShipmentId..");
         ListInboundShipmentsRequest listShipments = new ListInboundShipmentsRequest();
         listShipments.setSellerId(account.merchantId);
         listShipments.setShipmentIdList(new ShipmentIdList(shipmentIds));
         ListInboundShipmentsResponse response = client(account).listInboundShipments(listShipments);
-        List<InboundShipmentInfo> inbounds = response.getListInboundShipmentsResult().getShipmentData().getMember();
+        List<InboundShipmentInfo> inbounds = response.getListInboundShipmentsResult()
+                .getShipmentData().getMember();
 
         Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<String, F.T3<String, String, String>>();
         for(InboundShipmentInfo info : inbounds) {
@@ -243,7 +262,8 @@ public class FBA {
             if(shipmentsT3.containsKey(info.getShipmentId()))
                 continue;
             shipmentsT3.put(info.getShipmentId(),
-                    new F.T3<String, String, String>(info.getShipmentStatus(), info.getDestinationFulfillmentCenterId(), info.getShipmentName()));
+                    new F.T3<String, String, String>(info.getShipmentStatus(),
+                            info.getDestinationFulfillmentCenterId(), info.getShipmentName()));
         }
         return shipmentsT3;
     }
@@ -255,7 +275,9 @@ public class FBA {
      * @param acc
      * @return msku: {._1: qtyReceived, ._2: qtyShiped}
      */
-    public static Map<String, F.T2<Integer, Integer>> listShipmentItems(String shipmentId, Account acc) throws FBAInboundServiceMWSException {
+    public static Map<String, F.T2<Integer, Integer>> listShipmentItems(String shipmentId,
+                                                                        Account acc)
+            throws FBAInboundServiceMWSException {
         /**
          * item.getSellerSKU();
          * item.getQuantityShipped();
@@ -266,11 +288,14 @@ public class FBA {
         request.setShipmentId(shipmentId);
         request.setSellerId(acc.merchantId);
         ListInboundShipmentItemsResponse response = client(acc).listInboundShipmentItems(request);
-        List<InboundShipmentItem> inboundItems = response.getListInboundShipmentItemsResult().getItemData().getMember();
+        List<InboundShipmentItem> inboundItems = response.getListInboundShipmentItemsResult()
+                .getItemData().getMember();
         for(InboundShipmentItem item : inboundItems) {
             // 进入系统内 msku 全变成大写
             if(fetchItems.containsKey(item.getSellerSKU().toUpperCase())) continue;
-            fetchItems.put(item.getSellerSKU().toUpperCase(), new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped()));
+            fetchItems.put(item.getSellerSKU().toUpperCase(),
+                    new F.T2<Integer, Integer>(item.getQuantityReceived(),
+                            item.getQuantityShipped()));
         }
         return fetchItems;
     }
@@ -286,7 +311,8 @@ public class FBA {
      * @param shipitems
      * @return
      */
-    private static List<InboundShipmentItem> shipItemsToInboundShipmentItems(List<ShipItem> shipitems) {
+    private static List<InboundShipmentItem> shipItemsToInboundShipmentItems(
+            List<ShipItem> shipitems) {
         /**
          * 1. 根据 ShipItem 的 msku 组成 Map
          * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
@@ -296,7 +322,8 @@ public class FBA {
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
         for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
             // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentItem(null, entry.getKey(), null, entry.getValue().get(), null));
+            items.add(new InboundShipmentItem(null, entry.getKey(), null, entry.getValue().get(),
+                    null));
         }
         return items;
     }
@@ -311,13 +338,15 @@ public class FBA {
      * @param shipitems
      * @return
      */
-    private static List<InboundShipmentPlanRequestItem> shipItemsToInboundShipmentPlanItems(List<ShipItem> shipitems) {
+    private static List<InboundShipmentPlanRequestItem> shipItemsToInboundShipmentPlanItems(
+            List<ShipItem> shipitems) {
         Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
 
         List<InboundShipmentPlanRequestItem> items = new ArrayList<InboundShipmentPlanRequestItem>();
         for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
             // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentPlanRequestItem(entry.getKey(), null, null, entry.getValue().get()));
+            items.add(new InboundShipmentPlanRequestItem(entry.getKey(), null, null,
+                    entry.getValue().get()));
         }
         return items;
     }
@@ -387,7 +416,8 @@ public class FBA {
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
-                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, "elcuk2", "1.0", config);
+                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, "elcuk2", "1.0",
+                        config);
                 CLIENT_CACHE.put(key, client);
             }
         }

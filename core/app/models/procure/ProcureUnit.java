@@ -6,30 +6,24 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
+import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
-import models.view.dto.AnalyzeDTO;
-import models.view.dto.TimelineEventSource;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.ProcureUnitQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 每一个采购单元
@@ -75,7 +69,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         PLAN {
             @Override
-            public String toString() {
+            public String label() {
                 return "计划中";
             }
         },
@@ -84,7 +78,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         DELIVERY {
             @Override
-            public String toString() {
+            public String label() {
                 return "采购中";
             }
         },
@@ -93,7 +87,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         DONE {
             @Override
-            public String toString() {
+            public String label() {
                 return "已交货";
             }
         },
@@ -102,7 +96,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         SHIPPING {
             @Override
-            public String toString() {
+            public String label() {
                 return "运输中";
             }
         },
@@ -111,7 +105,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         SHIP_OVER {
             @Override
-            public String toString() {
+            public String label() {
                 return "运输完成";
             }
         },
@@ -120,7 +114,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         INBOUND {
             @Override
-            public String toString() {
+            public String label() {
                 return "入库中";
             }
         },
@@ -129,11 +123,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         CLOSE {
             @Override
-            public String toString() {
+            public String label() {
                 return "结束";
             }
-        }
+        };
+
+        public abstract String label();
     }
+
+    @OneToMany(mappedBy = "procureUnit", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     /**
      * 此采购计划的供应商信息.
@@ -147,11 +146,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     public Deliveryment deliveryment;
 
+    @ManyToOne
+    public FBAShipment fba;
+
     /**
      * 所关联的运输出去的 ShipItem.
      */
-    @OneToOne(mappedBy = "unit", cascade = CascadeType.ALL)
-    public ShipItem shipItem;
+    @OneToMany(mappedBy = "unit")
+    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
 
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -240,19 +242,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
     }
 
-    public void updateWithShipment(Shipment shipment) {
-        if(shipment == null) return;
-        if(this.shipItem == null)
-            shipment.addToShip(Arrays.asList(this.id));
-        this.shipItem.changeShipment(shipment);
-        if(this.shipType != shipment.type) {
-            Shipment.T originType = this.shipType;
-            this.shipType = shipment.type;
-            this.comment(String.format("运输方式从 %s 变为 %s", originType, this.shipType));
-        }
-        this.save();
-    }
-
     /**
      * <pre>
      *
@@ -279,65 +268,44 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         Validation.max("procureunit.planQty", unit.attrs.planQty, this.attrs.planQty);
         int leftQty = this.attrs.planQty - unit.attrs.planQty;
         Validation.min("procureunit.planQty", leftQty, 0);
+        //TODO: effect 分拆采购计划, 所关联的运输项目的数量需要平均分配
         // 如果 unit 对应的 shipment 已经运输, 不可再拆分
+        /*
         if(this.shipItem != null && this.shipItem.shipment.state != Shipment.S.CONFIRM &&
                 this.shipItem.shipment.state != Shipment.S.PLAN)
             Validation.addError("",
                     String.format("运输单 %s 已经为 %s 状态, 不运输再分拆已经发货了的采购计划.", this.shipItem.shipment.id,
                             this.shipItem.shipment.state));
+        */
         if(Validation.hasErrors()) return;
         this.attrs.planQty = leftQty;
-        this.casscadeShipItemQty(leftQty);
+        //TODO effect: 如果拥有运输项目, 那么则将运输项目的数量也进行调整
+//        this.casscadeShipItemQty(leftQty);
         // 如果被分开的 ProcureUnit 已经交货, 那么分开后也应该已经交货, 否则为 PLAN 阶段
         if(this.stage == STAGE.DELIVERY)
             unit.stage = this.stage;
         // 如果是在周期型运输单中, 则保留运输信息, 否则需要重新选择运输单
+        // TODO effect: ??
+        /*
         if(this.isHaveCycleShipment())
             unit.shipItem = new ShipItem(unit, this.shipItem.shipment);
+        */
         unit.save();
         new ElcukRecord(Messages.get("procureunit.split"),
                 Messages.get("procureunit.split.source.msg", originQty, leftQty), this.id + "")
                 .save();
         new ElcukRecord(Messages.get("procureunit.split.target"),
                 Messages.get("procureunit.split.target.msg", unit.to_log()), unit.id + "").save();
+        /* TODO effect 需要调整通知
         if(this.shipItem != null && this.shipItem.shipment != null)
             Notification.notifies("采购计划分拆",
                     String.format("采购计划 #%s 被拆分, 请进入运输单 %s 确认并手动更新 FBA", this.id,
                             this.shipItem.shipment.id)
                     , Notification.PROCURE, Notification.SHIPPER);
+        */
         this.save();
     }
 
-    /**
-     * 是否可以保留采购计划的周期型运输单?
-     *
-     * @return
-     */
-    public boolean isHaveCycleShipment() {
-        return this.isHaveShipment() && this.shipItem.shipment.cycle;
-    }
-
-    public boolean isHaveShipment() {
-        return this.shipItem != null && this.shipItem.shipment != null;
-    }
-
-    /**
-     * 返回 ProcureUnit 的目标市场
-     *
-     * @param unit
-     * @return
-     */
-    public String shipMarket() {
-        if(this.selling == null)
-            throw new FastRuntimeException("采购计划没有关联 Selling, 不允许!");
-        return this.selling.market.humanName();
-    }
-
-    public String shipType() {
-        if(this.shipType == null)
-            throw new FastRuntimeException("采购计划不可以没有运输方式!");
-        return this.shipType.toString();
-    }
 
     /**
      * ProcureUnit 交货
@@ -376,43 +344,29 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         new ElcukRecord(Messages.get("procureunit.delivery"),
                 Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
                 , this.id + "").save();
-        // 如果拥有运输项目, 那么则将运输项目的数量也进行调整
-        this.casscadeShipItemQty(this.attrs.planQty);
+        //TODO effect: 如果拥有运输项目, 那么则将运输项目的数量也进行调整
+//        this.casscadeShipItemQty(this.attrs.planQty);
         // 当执行交货操作, ProcureUnit 进入交货完成阶段
         this.stage = STAGE.DONE;
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);
     }
 
-    private void casscadeShipItemQty(Integer qty) {
-        if(this.isHaveShipment())
-            this.shipItem.qty = qty;
-    }
-
     /**
-     * 为采购计划添加运输项目(全部运输)
+     * 采购计划的预计日期变更
      *
-     * @param shipment
-     * @return
+     * @param planDeliveryDate 预计交货日期
+     * @param planShipDate     预计发货日期
+     * @param planArrivDate    预计抵达日期
      */
-    public ShipItem ship(Shipment shipment) {
-        ShipItem shipItem = null;
-        for(ShipItem itm : shipment.items) {
-            if(itm.unit.equals(this)) {
-                shipItem = itm;
-                shipItem.qty = this.qty();
-            }
-        }
-        if(shipItem == null) {
-            shipItem = new ShipItem();
-            shipItem.shipment = shipment;
-            shipItem.unit = this;
-            shipItem.qty = this.qty();
-            this.shipItem = shipItem;
-        }
-        return shipItem;
+    public void updatePlanDates(Date planDeliveryDate, Date planShipDate, Date planArrivDate) {
+        this.attrs.planDeliveryDate = planDeliveryDate;
+        this.attrs.planShipDate = planShipDate;
+        this.attrs.planArrivDate = planArrivDate;
+        this.attrs.validate();
+        if(Validation.hasErrors()) return;
+        this.save();
     }
-
 
     public String nickName() {
         return String.format("ProcureUnit[%s][%s][%s]", this.id, this.sid, this.sku);
@@ -437,6 +391,208 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
     }
 
+
+    public void remove() {
+        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
+            new ElcukRecord(Messages.get("procureunit.remove"),
+                    Messages.get("action.base", this.to_log()), "procures.remove").save();
+            this.delete();
+        } else {
+            Validation.addError("",
+                    String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
+        }
+    }
+
+    /**
+     * 采购单元相关联的运输单
+     *
+     * @return
+     */
+    public List<Shipment> relateShipment() {
+        Set<Shipment> shipments = new HashSet<Shipment>();
+        for(ShipItem shipItem : this.shipItems) {
+            shipments.add(shipItem.shipment);
+        }
+        return new ArrayList<Shipment>(shipments);
+    }
+
+    public int qty() {
+        if(this.attrs.qty != null) return this.attrs.qty;
+        return this.attrs.planQty;
+    }
+
+    /**
+     * 正在入库的数量;
+     *
+     * @return
+     */
+    public int inboundingQty() {
+        //TODO effect: 正在入库数量需要重新计算: 总数量 - 运输项目已经接受的数量
+//        return this.qty() - this.shipItem.recivedQty;
+        return 0;
+    }
+
+    /**
+     * 预付款申请
+     */
+    public PaymentUnit billingPrePay() {
+        /**
+         * 0. 基本检查
+         * 1. 检查是否此采购计划是否已经存在一个预付款
+         * 2. 申请预付款
+         */
+        this.billingValid();
+        if(this.hasPrePay())
+            Validation.addError("", "不允许重复申请预付款.");
+        if(this.hasTailPay())
+            Validation.addError("", "已经申请了尾款, 不需要再申请预付款.");
+        if(Validation.hasErrors()) return null;
+
+        PaymentUnit fee = new PaymentUnit(this);
+        // 预付款的逻辑在这里实现, 总额的 30% 为预付款
+        fee.feeType = FeeType.cashpledge();
+        fee.amount = (float) (fee.amount * 0.3);
+        fee.save();
+        new ERecordBuilder("procureunit.prepay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
+    }
+
+    /**
+     * 尾款申请
+     */
+    public PaymentUnit billingTailPay() {
+        /**
+         * 0. 基本检查
+         * 1. 检查是否已经存在一个尾款
+         * 2. 申请尾款
+         */
+        this.billingValid();
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage))
+            Validation.addError("", "请确定采购计划的交货数量(交货)");
+        if(this.hasTailPay())
+            Validation.addError("", "不允许重复申请尾款");
+        if(Validation.hasErrors()) return null;
+
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.procurement();
+        fee.amount = this.leftAmount();
+        fee.save();
+        new ERecordBuilder("procureunit.tailpay")
+                .msgArgs(this.product.sku,
+                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id)
+                .save();
+        return fee;
+    }
+
+    /**
+     * 1. 采购计划所在的采购单需要拥有一个请款单
+     * 2. 采购计划需要已经交货
+     */
+    private void billingValid() {
+        if(this.deliveryment.apply == null)
+            Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.deliveryment.id));
+    }
+
+    /**
+     * 剩余的请款金额
+     *
+     * @return
+     */
+    public float leftAmount() {
+        return totalAmount() - appliedAmount();
+    }
+
+    /**
+     * 已经申请的金额
+     *
+     * @return
+     */
+    public float appliedAmount() {
+        float appliedAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            appliedAmount += fee.amount();
+        }
+        return appliedAmount;
+    }
+
+    /**
+     * 当前采购计划所有请款的修正总额
+     *
+     * @return
+     */
+    public float fixValueAmount() {
+        float fixValueAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            fixValueAmount += fee.fixValue;
+        }
+        return fixValueAmount;
+    }
+
+    /**
+     * 总共需要申请的金额
+     *
+     * @return
+     */
+    public float totalAmount() {
+        return this.qty() * this.attrs.price;
+    }
+
+    /**
+     * 是否拥有了 预付款
+     *
+     * @return
+     */
+    public boolean hasPrePay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.cashpledge())
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否拥有了尾款
+     *
+     * @return
+     */
+    public boolean hasTailPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.procurement())
+                return true;
+        }
+        return false;
+    }
+
+    public List<PaymentUnit> fees() {
+        List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+        for(PaymentUnit fee : this.fees) {
+            if(fee.remove) continue;
+            fees.add(fee);
+        }
+        return fees;
+    }
+
+    /**
+     * 转换成记录日志的格式
+     *
+     * @return
+     */
+    @Override
+    public String to_log() {
+        return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
+                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
+                Dates.date2Date(this.attrs.planArrivDate), this.shipType);
+    }
+
+    public List<ElcukRecord> records() {
+        return ElcukRecord.fid(this.id + "").fetch();
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -457,99 +613,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return result;
     }
 
-    public void remove() {
-        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
-            new ElcukRecord(Messages.get("procureunit.remove"),
-                    Messages.get("action.base", this.to_log()), "procures.remove").save();
-            this.delete();
-        } else {
-            Validation.addError("",
-                    String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
-        }
-    }
-
-    /**
-     * 采购单元相关联的运输单
-     *
-     * @return
-     */
-    public List<Shipment> relateShipment() {
-        F.T2<List<String>, List<String>> unitShippingRelateIds = new ProcureUnitQuery()
-                .procureRelateShippingRelateIds(this.id);
-        if(unitShippingRelateIds._1.size() == 0) return new ArrayList<Shipment>();
-        return Shipment.find("id in " + JpqlSelect.inlineParam(unitShippingRelateIds._1)).fetch();
-    }
-
-    public int qty() {
-        if(this.attrs.qty != null) return this.attrs.qty;
-        return this.attrs.planQty;
-    }
-
-    /**
-     * 正在入库的数量;
-     *
-     * @return
-     */
-    public int inboundingQty() {
-        return this.qty() - this.shipItem.recivedQty;
-    }
-
-    /**
-     * 寻找 ProcureUnit 关联的 FBA
-     *
-     * @return
-     */
-    public FBAShipment fba() {
-        if(this.shipItem != null && this.shipItem.fba != null)
-            return this.shipItem.fba;
-        else
-            return null;
-    }
-
-    /**
-     * 通过运输计划获取到其运输单的预计开船时间
-     * 1. 如果有运输单则返回运输单的预计开船时间
-     * 2. 没有运输单则返回采购计划预计运输时间
-     *
-     * @return
-     */
-    public Date planShipBeginDate() {
-        if(this.shipItem == null) {
-            return this.attrs.planShipDate;
-        } else {
-            return this.shipItem.shipment.planBeginDate;
-        }
-    }
-
-    /**
-     * 通过运输计划获取到运输单的预计到库时间
-     *
-     * @return
-     */
-    public Date planShipArriveDate() {
-        if(this.shipItem == null) {
-            return this.attrs.planArrivDate;
-        } else {
-            return this.shipItem.shipment.planArrivDate;
-        }
-    }
-
-    /**
-     * 转换成记录日志的格式
-     *
-     * @return
-     */
-    @Override
-    public String to_log() {
-        return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
-                this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
-                Dates.date2Date(this.attrs.planArrivDate), this.shipType);
-    }
-
-    public List<ElcukRecord> records() {
-        return ElcukRecord.fid(this.id + "").fetch();
-    }
-
     /**
      * 根据 sku 或者 msku 加载 PLAN, DELIVERY Stage 的 ProcureUnit.
      *
@@ -568,42 +631,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
-    }
-
-    /**
-     * 加载并且返回 Simile Timeline 的 Events
-     * type 只允许为 sku, sid 两种类型; 如果 type 为空,默认为 sid
-     */
-    public static TimelineEventSource timelineEvents(String type, String val) {
-        if(StringUtils.isBlank(type)) type = "sid";
-        if("msku".equals(type)) type = "sid"; // 兼容
-        if(!"sku".equals(type) && !"sid".equals(type))
-            throw new FastRuntimeException("查看的数据类型(" + type + ")错误! 只允许 sku 与 sid.");
-
-        DateTime dt = DateTime.now();
-        List<ProcureUnit> units = ProcureUnit
-                .find("createDate>=? AND createDate<=? AND " + type/*sid/sku*/ + "=?",
-                        Dates.morning(dt.minusMonths(12).toDate()), Dates.night(dt.toDate()), val)
-                .fetch();
-
-
-        // 将所有与此 SKU/SELLING 关联的 ProcureUnit 展示出来.(前 9 个月~后3个月)
-        TimelineEventSource eventSource = new TimelineEventSource();
-        AnalyzeDTO analyzeDTO = AnalyzeDTO.findByValAndType(type, val);
-        for(ProcureUnit unit : units) {
-            TimelineEventSource.Event event = new TimelineEventSource.Event(analyzeDTO, unit);
-            event.startAndEndDate(type)
-                    .titleAndDesc()
-                    .color(unit.stage);
-
-            eventSource.events.add(event);
-        }
-
-
-        // 将当前 Selling 的销售情况展现出来
-        eventSource.events.add(TimelineEventSource.currentQtyEvent(analyzeDTO, type));
-
-        return eventSource;
     }
 
     /**

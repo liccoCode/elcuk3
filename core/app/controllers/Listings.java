@@ -73,15 +73,19 @@ public class Listings extends Controller {
         validation.required(market);
         validation.required(asin);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market, asin));
+        Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market,
+                asin));
         Listing tobeSave = null;
         try {
             tobeSave = Listing.crawl(asin, M.val(market));
         } catch(Exception e) {
-            renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]", new String[]{}));
+            renderJSON(new Error("Listing", "Listing is not valid[" + e.getMessage() + "]",
+                    new String[]{}));
         }
         if(tobeSave == null)
-            renderJSON(new Error("Listing", "The Crawl Listing(" + asin + "," + market + ") is not exist!", new String[]{}));
+            renderJSON(new Error("Listing",
+                    "The Crawl Listing(" + asin + "," + market + ") is not exist!",
+                    new String[]{}));
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
 
@@ -94,9 +98,33 @@ public class Listings extends Controller {
         JsonElement clst = Crawl.crawlListing(l.market.toString(), l.asin);
         Listing nLst = Listing.parseAndUpdateListingFromCrawl(clst, true);
         if(nLst != null) {
-            nLst.check();
+            nLst.checkAndSaveOffers();
             if(nLst.isPersistent()) renderJSON(new Ret());
         } else renderJSON(new Ret("更新失败."));
+    }
+
+    /**
+     * 获取被跟踪的Lisitng列表
+     */
+    @Check("listings.trackedlistings")
+    public static void trackedListings() {
+        List<Listing> lsts = Listing.trackedListings();
+        render(lsts);
+    }
+
+    /**
+     * 关闭Listing 警告
+     *
+     * @param listingId
+     */
+    public static void closeWarnning(String listingId) {
+        Listing listing = Listing.findById(listingId);
+        listing.closeWarnning();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("暂时关闭警告,两天内没有下架会再次开启");
+        trackedListings();
     }
 
 }

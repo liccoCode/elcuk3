@@ -3,7 +3,6 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import jobs.TicketStateSyncJob;
-import models.ElcukRecord;
 import models.User;
 import models.support.Ticket;
 import models.support.TicketReason;
@@ -115,7 +114,7 @@ public class Tickets extends Controller {
 
     public static void iTakeIt(long tid) {
         Ticket ticket = Ticket.findById(tid);
-        ticket.resolver = User.findByUserName(ElcukRecord.username());
+        ticket.resolver = User.current();
         ticket.save();
         renderJSON(new Ret());
     }

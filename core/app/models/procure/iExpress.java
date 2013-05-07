@@ -1,9 +1,12 @@
 package models.procure;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import helper.HTTP;
+import helper.J;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -15,9 +18,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.libs.F;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * 国际快递商
@@ -77,6 +78,11 @@ public enum iExpress {
         public String trackUrl(String tracNo) {
             return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s", tracNo.trim());
         }
+
+        @Override
+        public String fetchStateHTML(String tracNo) {
+            return HTTP.get(this.trackUrl(tracNo));
+        }
     },
 
 
@@ -105,17 +111,11 @@ public enum iExpress {
 
         @Override
         public String parseExpress(String html, String trackNo) {
-            String jsonObj = StringUtils.substringBetween(html, "detailInfoObject =", "var associatedShipmentsTab =").trim();
-            JSONObject infos = JSON.parseObject(jsonObj.substring(0, jsonObj.length() - 1));
-            JSONArray scans = infos.getJSONArray("scans");
-            /**
-             *{"scanStatus":"Delivered",
-             * "scanLocation":"PETERBOROUGH GB",
-             * "scanTime":"8:11 AM",
-             * "GMTOffset":"+01:00",
-             * "showReturnToShipper":false,
-             * "scanDate":"Jun 25, 2012"}
-             */
+            html = html.replaceAll("x2d", "-").replaceAll("x3a", ":");
+            JsonElement infos = new JsonParser().parse(html);
+            JsonArray scanInfos = infos.getAsJsonObject().get("TrackPackagesResponse").getAsJsonObject().get("packageList")
+                    .getAsJsonArray().get(0).getAsJsonObject().get("scanEventList").getAsJsonArray();
+
             StringBuilder sbd = new StringBuilder("<table><tr>");
             // header
             sbd.append("<td>").append("日期/时间").append("</td>");
@@ -123,27 +123,62 @@ public enum iExpress {
             sbd.append("<td>").append("地点").append("</td>");
             sbd.append("<td>").append("详细信息").append("</td>");
             sbd.append("</tr>");
-            for(JSONObject info : scans.toArray(new JSONObject[scans.size()])) {
+            Iterator<JsonElement> ite = scanInfos.iterator();
+            while(ite.hasNext()) {
+                JsonObject info = ite.next().getAsJsonObject();
                 sbd.append("<tr>");
-                sbd.append("<td>").append(getStr(info, "scanDate")).append(" ").append(getStr(info, "scanTime")).append("</td>");
-                sbd.append("<td>").append(getStr(info, "scanStatus")).append("</td>");
+                sbd.append("<td>").append(getStr(info, "date")).append(" ").append(getStr(info, "time")).append("</td>");
+                sbd.append("<td>").append(getStr(info, "status")).append("</td>");
                 sbd.append("<td>").append(getStr(info, "scanLocation")).append("</td>");
-                sbd.append("<td>").append(getStr(info, "scanComments")).append("</td>");
+                sbd.append("<td>").append(getStr(info, "scanDetails")).append("</td>");
                 sbd.append("</tr>");
             }
             return sbd.append("</table>").toString();
         }
 
-        private String getStr(JSONObject json, String key) {
-            String val = json.getString(key);
+        private String getStr(JsonObject json, String key) {
+            String val = json.get(key).getAsString();
             if(val == null) return "";
             else return val;
         }
 
         @Override
         public String trackUrl(String tracNo) {
-            return String.format("http://www.fedex.com/Tracking?tracknumbers=%s&cntry_code=cn", tracNo.trim());
+            return String.format("https://www.fedex.com/trackingCal/track");
         }
+
+        @Override
+        public String fetchStateHTML(String tracNo) {
+            Map<String, Map> data = new HashMap<String, Map>();
+            Map<String, Object> trackpackgeRequest = new HashMap<String, Object>();
+            List<Map<String, Object>> trackingInfoList = new ArrayList<Map<String, Object>>();
+            Map<String, Object> trackNumberInfo = new HashMap<String, Object>();
+            Map<String, String> trackNumber = new HashMap<String, String>();
+            Map<String, String> processingParameters = new HashMap<String, String>();
+
+            data.put("TrackPackagesRequest", trackpackgeRequest);
+            trackpackgeRequest.put("processingParameters", processingParameters);
+            trackpackgeRequest.put("trackingInfoList", trackingInfoList);
+            trackpackgeRequest.put("appType", "wtrk");
+
+            processingParameters.put("anonymousTransaction", "true");
+            processingParameters.put("clientId", "WTRK");
+            processingParameters.put("returnDetailedErrors", "true");
+            processingParameters.put("returnLocalizedDateTime", "false");
+
+            trackingInfoList.add(trackNumberInfo);
+            trackNumberInfo.put("trackNumberInfo", trackNumber);
+            trackNumber.put("trackingNumber", tracNo);
+
+            return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
+                    new BasicNameValuePair("data", J.json(data)),
+                    new BasicNameValuePair("action", "trackpackages"),
+                    new BasicNameValuePair("locale", "zh_CN"),
+                    new BasicNameValuePair("format", "json"),
+                    new BasicNameValuePair("version", "99")
+            ));
+        }
+
     },
 
 
@@ -218,14 +253,12 @@ public enum iExpress {
      */
     public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
 
-
     /**
      * 直接返回抓取的 HTML 代码
      *
      * @param tracNo
      * @return
      */
-    public String fetchStateHTML(String tracNo) {
-        return HTTP.get(this.trackUrl(tracNo));
-    }
+    public abstract String fetchStateHTML(String tracNo);
+
 }

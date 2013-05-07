@@ -6,119 +6,109 @@
     #{info_row title:fba.account.type.name() + ' FBA ' + fba.shipmentId/}
 #{/else}
 <div class="row-fluid">
-    <div class="span12">
-        <table class="table table-bordered table-condensed" style="margin-bottom:1px;">
-            <tr>
-                <th>ShipmentId</th>
-                <td>
-                    <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}
-                    </a>
-                </td>
+  <div class="span12">
+    <table class="table table-bordered table-condensed" style="margin-bottom:1px;">
+      <tr>
+        <th>ShipmentId</th>
+        <td>
+          <a href="${fba.fbaLink()}" target="_blank"><i class="icon-external-link"></i> ${fba.shipmentId}
+          </a>
+        </td>
 
-                <th colspan="2">状态</th>
-                <td colspan="2">
-                    <a href="javascript:;" rel="popover" content="${fba.state.msg()}" title="解释">${fba.state}</a>
-                </td>
-
-
-                <th>Item Label</th>
-                <td>
-                    <a href="javascript:;" rel="popover" content="SELLER_LABEL: 卖家自行贴标" title="打标方式">${fba.labelPrepType}</a>
-                </td>
-
-                <th>CenterId</th>
-                <td>${fba.centerId}</td>
-                <th>总重量</th>
-                <td>${fba.totalWeight().format('#.####')}kg</td>
-                <td colspan="4">
-                #{ck "shipments.movefba"}
-                    <form method="post" action="@{Shipments.moveFba()}" style="margin-bottom:0">
-                        <select name="id">
-                            <option value="">不更改</option>
-                            #{list items:fba.targetShipments(), as:'s'}
-                                <option value="${s.id}">${s.info()}</option>
-                            #{/list}
-                        </select>
-                        <input type="hidden" name="shipmentId" value="${fba.shipmentId}">
-                        <input type="hidden" name="lastShipment" value="${fba.shipment.id}">
-                        <button class="btn btn-small btn-primary">转移</button>
-                    </form>
-                #{/ck}
-                </td>
-            </tr>
+        <th colspan="2">状态</th>
+        <td colspan="2">
+          <a href="javascript:;" rel="popover" content="${fba.state.msg()}" title="解释">${fba.state}</a>
+        </td>
 
 
-            <tr>
-                <td colspan="8">
-                    <button data-toggle="toggle" data-target="#itemsFromAmazon_${fba.shipmentId}" class="btn btn-small btn-primary pull-left" style="margin-right:10px;">
-                        <i class="icon-reorder"></i> More...
-                    </button>
-                #{if fba.state in [models.procure.FBAShipment.S.WORKING]}
-                    <form action="@{Shipments.updateFba()}" method="post" class="pull-left" style="margin-bottom:0;">
-                        #{authenticityToken /}
-                        <input type="hidden" name="fbaId" value="${fba.id}">
-                        <button data-confirm="btn" class="btn btn-small btn-warning" style="margin-right:10px;">
-                            更新 ${fba.shipmentId}
-                        </button>
-                    </form>
-                #{/if}
-                #{ifnot delete}
-                    <a href="@{PDFs.packingSlip()}/${fba.shipmentId}" class="btn btn-small btn-success">
-                        <i class="icon-download-alt"></i> 箱内麦
-                    </a>
-                    <a href="@{PDFs.boxLabel()}/${fba.shipmentId}" class="btn btn-small btn-success">
-                        <i class="icon-download-alt"></i> 箱外麦
-                    </a>
-                #{/ifnot}
-                </td>
+        <th>Item Label</th>
+        <td>
+          <a href="javascript:;" rel="popover" content="SELLER_LABEL: 卖家自行贴标" title="打标方式">${fba.labelPrepType}</a>
+        </td>
 
-                <th>创建时间</th>
-                <td>#{time_tooltip time:fba.createAt /}</td>
-
-                <th>签收时间</th>
-                <td>#{time_tooltip time:fba.receiptAt/}</td>
-
-                <th>开始入库时间</th>
-                <td>#{time_tooltip time:fba.receivingAt /}</td>
-
-                <th>关闭时间</th>
-                <td>#{time_tooltip time:fba.closeAt /}</td>
-
-            </tr>
+        <th>CenterId</th>
+        <td>${fba.centerId}</td>
+        <td colspan="2"></td>
+        <td colspan="4">
+        #{power.ck "shipments.movefba"}
+        *{TODO effect: shipments.movefba 权限需要删除}*
+          shipments.movefba 权限需要删除
+        #{/power.ck}
+        </td>
+      </tr>
 
 
-            <tr id="itemsFromAmazon_${fba.shipmentId}" style="display:none;">
-                <td colspan="8" style="padding:0;">
-                #{if fba.itemsOnAmazonWithHTML}
-                ${fba.itemsOnAmazonWithHTML.raw()}
-                #{/if}
-                #{else }
-                    等待系统自动更新...
-                #{/else}
-                </td>
-            </tr>
-        </table>
-    </div>
+      <tr>
+        <td colspan="8">
+          <button data-toggle="toggle" data-target="#itemsFromAmazon_${fba.shipmentId}" class="btn btn-small btn-primary pull-left" style="margin-right:10px;">
+            <i class="icon-reorder"></i> More...
+          </button>
+        #{if fba.state in [models.procure.FBAShipment.S.WORKING]}
+          <form action="@{Shipments.updateFba()}" method="post" class="pull-left" style="margin-bottom:0;">
+              #{authenticityToken /}
+            <input type="hidden" name="fbaId" value="${fba.id}">
+            <button data-confirm="确认更新?" class="btn btn-small btn-warning" style="margin-right:10px;">
+              更新 ${fba.shipmentId}
+            </button>
+          </form>
+        #{/if}
+        #{ifnot delete}
+          <a href="@{PDFs.packingSlip()}/${fba.shipmentId}" class="btn btn-small btn-success">
+            <i class="icon-download-alt"></i> 箱内麦
+          </a>
+          <a href="@{PDFs.boxLabel()}/${fba.shipmentId}" class="btn btn-small btn-success">
+            <i class="icon-download-alt"></i> 箱外麦
+          </a>
+        #{/ifnot}
+        </td>
+
+        <th>创建时间</th>
+        <td>#{time_tooltip time:fba.createAt /}</td>
+
+        <th>签收时间</th>
+        <td>#{time_tooltip time:fba.receiptAt/}</td>
+
+        <th>开始入库时间</th>
+        <td>#{time_tooltip time:fba.receivingAt /}</td>
+
+        <th>关闭时间</th>
+        <td>#{time_tooltip time:fba.closeAt /}</td>
+
+      </tr>
+
+
+      <tr id="itemsFromAmazon_${fba.shipmentId}" style="display:none;">
+        <td colspan="8" style="padding:0;">
+        #{if fba.itemsOnAmazonWithHTML}
+        ${fba.itemsOnAmazonWithHTML.raw()}
+        #{/if}
+        #{else }
+          等待系统自动更新...
+        #{/else}
+        </td>
+      </tr>
+    </table>
+  </div>
 </div>
 #{ifnot delete}
 <div class="row-fluid" style="margin-bottom:10px;">
-    <div class="span12">
-        #{if fba.shipItems.size() == 0}
-            <span class="add-on">运输项目已经被移除, 需删除 Amazon 上的 FBA 腾出库存</span>
+  <div class="span12">
+      #{if fba.shipItems.size() == 0}
+        <span class="add-on">运输项目已经被移除, 需删除 Amazon 上的 FBA 腾出库存</span>
 
-            #{ck "shipments.deployfba"}
-                <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
-                    <input type="hidden" value="${fba.id}" name="fbaId">
-                    #{authenticityToken /}
-                    <button class="btn btn-small btn-danger" data-confirm="btn">
-                        删除 ${fba.shipmentId}</button>
-                </form>
-            #{/ck}
-        #{/if}
-        #{else }
-            #{render 'Shipments/_shipitem.html', items:fba.shipItems/}
-        #{/else}
-    </div>
+          #{power.ck "shipments.deployfba"}
+            <form method="post" action="@{Shipments.deleteFba()}" style="display:inline;">
+              <input type="hidden" value="${fba.id}" name="fbaId">
+                #{authenticityToken /}
+              <button class="btn btn-small btn-danger" data-confirm="确认更新?">
+                删除 ${fba.shipmentId}</button>
+            </form>
+          #{/power.ck}
+      #{/if}
+      #{else }
+          #{render 'Shipments/_shipitem.html', items:fba.shipItems/}
+      #{/else}
+  </div>
 </div>
 #{/ifnot}
 

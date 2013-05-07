@@ -19,15 +19,19 @@ import java.util.Map;
  * Date: 6/20/12
  * Time: 4:43 PM
  */
+@FastTags.Namespace("power")
 public class FTags extends FastTags {
 
     /**
      * 自定义的用来在页面上检查是否有权限显示页面内容的 FastTag
      */
-    public static void _ck(Map<?, ?> args, Closure body, PrintWriter out, GroovyTemplate.ExecutableTemplate template, int fromLine) {
+    public static void _ck(Map<?, ?> args, Closure body, PrintWriter out,
+                           GroovyTemplate.ExecutableTemplate template, int fromLine) {
         try {
-            Boolean allow = (Boolean) Java.invokeChildOrStatic(Secure.Security.class, "check", args.get("arg"));
-            if(allow) out.print(JavaExtensions.toString(body));
+            Boolean allow = (Boolean) Java.invokeChildOrStatic(
+                    Secure.Security.class, "check", args.get("arg"));
+            if(allow)
+                out.print(JavaExtensions.toString(body));
             // 否则不允许出现内容
         } catch(TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
@@ -42,7 +46,8 @@ public class FTags extends FastTags {
      * 可使用的参数:
      * value, help, label, edit
      */
-    public static void _text(Map<?, ?> args, Closure body, PrintWriter out, GroovyTemplate.ExecutableTemplate template, int fromLine) {
+    public static void _text(Map<?, ?> args, Closure body, PrintWriter out,
+                             GroovyTemplate.ExecutableTemplate template, int fromLine) {
         /*
                    <div class="control-group">
            <label class="control-label" for="id">运输单号</label>
@@ -68,18 +73,22 @@ public class FTags extends FastTags {
         if(StringUtils.isBlank(type)) type = "text";
 
         StringBuilder sbd = new StringBuilder("<div class='control-group'>")
-                .append("<label class='control-label' for='").append(id).append("'>").append(StringUtils.isBlank(label) ? "" : label).append("</label>")
+                .append("<label class='control-label' for='").append(id).append("'>")
+                .append(StringUtils.isBlank(label) ? "" : label).append("</label>")
                 .append("<div class='controls'>")
                 .append("<div class='input-append'>")
-                .append("<input ").append(edit ? "" : "readonly").append(" id='").append(id).append("' ")
+                .append("<input ").append(edit ? "" : "readonly").append(" id='").append(id)
+                .append("' ")
                 .append("type='").append(type).append("' ")
                 .append("name='").append(name).append("' ")
-                .append(StringUtils.isNotBlank(placeHolder) ? "placeHolder='" + placeHolder + "' " : "")
+                .append(StringUtils.isNotBlank(placeHolder) ?
+                        "placeHolder='" + placeHolder + "' " : "")
                 .append("value='").append(value).append("'>")
                 .append("</div>");
         if(StringUtils.isNotBlank(help))
             sbd.append("<span class='help-inline'>").append(help).append("</span>");
-        out.print(sbd.append("</div>"/*controlls div*/).append("</div>"/*control-group div*/).toString());
+        out.print(sbd.append("</div>"/*controlls div*/).append("</div>"/*control-group div*/)
+                .toString());
     }
 
     public static String Str(Map<?, ?> args, String key) {

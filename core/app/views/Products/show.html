@@ -8,144 +8,144 @@
 
 <div class="row">
 #{if pro == null}
-    读取的 Product 不存在!
+  读取的 Product 不存在!
 #{/if}
 #{else }
     #{errorMsgs /}
     #{flash_alert /}
     #{info_row title:'基本信息'}
-        <ul>
-            <li>长,宽,高的单位为: mm</li>
-            <li>重量的单位为 kg</li>
-        </ul>
+      <ul>
+        <li>长,宽,高的单位为: mm</li>
+        <li>重量的单位为 kg</li>
+      </ul>
     #{/info_row}
-    <div class="row-fluid">
-        <form action="@{Products.update()}" method="post">
-            <table class="table table-bordered" id="prod_basic">
-                <tr>
-                    <td>SKU</td>
-                    <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
-                    <td>长</td>
-                    <td>
-                        <div class="input-append">
-                            <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
-                            <span class="add-on">mm</span>
-                        </div>
-                    </td>
+  <div class="row-fluid">
+    <form action="@{Products.update()}" method="post">
+      <table class="table table-bordered" id="prod_basic">
+        <tr>
+          <td>SKU</td>
+          <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
+          <td>长</td>
+          <td>
+            <div class="input-append">
+              <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
+              <span class="add-on">mm</span>
+            </div>
+          </td>
 
-                </tr>
-                <tr>
-                    <td>宽</td>
-                    <td>
-                        <div class="input-append">
-                            <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
-                            <span class="add-on">mm</span>
-                        </div>
-                    </td>
-                    <td>高</td>
-                    <td>
-                        <div class="input-append">
+        </tr>
+        <tr>
+          <td>宽</td>
+          <td>
+            <div class="input-append">
+              <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
+              <span class="add-on">mm</span>
+            </div>
+          </td>
+          <td>高</td>
+          <td>
+            <div class="input-append">
 
-                            <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
-                            <span class="add-on">mm</span>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>重量</td>
-                    <td>
-                        <div class="input-append">
-                            <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
-                            <span class="add-on">Kg</span>
-                        </div>
-                    </td>
+              <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
+              <span class="add-on">mm</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>重量</td>
+          <td>
+            <div class="input-append">
+              <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
+              <span class="add-on">Kg</span>
+            </div>
+          </td>
 
-                    <th>申报价格</th>
-                    <td>
-                        <div class="input-prepend">
-                            <span class="add-on">$</span>
-                            <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Category</td>
-                    <td>${pro.category}</td>
-                    <td>Brand</td>
-                    <td>${pro.family?.brand}</td>
-                </tr>
-                <tr>
-                    <td>Family</td>
-                    <td>${pro.family?.family}</td>
-                    <td colspan="2"></td>
-                </tr>
-                <tr>
-                    <td>产品名称</td>
-                    <td colspan="3">
-                        <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="10">
-                        <button class="btn btn-primary" data-loading>保存</button>
-                        #{ck "products.saleamazonlisting"}
-                            <a href="@{Products.saleAmazon()}/${pro.sku}" class="btn btn-info">Amazon 上架</a>
-                        #{/ck}
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </div>
+          <th>申报价格</th>
+          <td>
+            <div class="input-prepend">
+              <span class="add-on">$</span>
+              <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Category</td>
+          <td>${pro.category}</td>
+          <td>Brand</td>
+          <td>${pro.family?.brand}</td>
+        </tr>
+        <tr>
+          <td>Family</td>
+          <td>${pro.family?.family}</td>
+          <td colspan="2"></td>
+        </tr>
+        <tr>
+          <td>产品名称</td>
+          <td colspan="3">
+            <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="10">
+            <button class="btn btn-primary" data-loading>保存</button>
+              #{power.ck "products.saleamazonlisting"}
+                <a href="@{Products.saleAmazon()}/${pro.sku}" class="btn btn-info">Amazon 上架</a>
+              #{/power.ck}
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
 
 
     #{info_row title:'Product (Selling)QTY'/}
-    <div>
-        <table class="table table-bordered">
+  <div>
+    <table class="table table-bordered">
+      <tr>
+        <th>Qid</th>
+        <th>Inbound</th>
+        <th>Qty</th>
+        <th>Unsellable</th>
+        <th>Pending</th>
+        <th>ASIN</th>
+        <th>Whouse</th>
+        <th>&nbsp;</th>
+      </tr>
+        #{list items:qtys, as:'qty'}
+          <form method="post" action="@{Products.updateSellingQty()}">
             <tr>
-                <th>Qid</th>
-                <th>Inbound</th>
-                <th>Qty</th>
-                <th>Unsellable</th>
-                <th>Pending</th>
-                <th>ASIN</th>
-                <th>Whouse</th>
-                <th>&nbsp;</th>
+              <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
+              <td>
+                <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
+              </td>
+              <td>
+                <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
+              </td>
+              <td>
+                <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
+              </td>
+              <td>
+                <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
+              </td>
+              <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
+              <td>${qty.whouse.name}</td>
+              <td>
+                <button class="btn btn-primary" data-confirm='确认更新?'>更新</button>
+              </td>
             </tr>
-            #{list items:qtys, as:'qty'}
-                <form method="post" action="@{Products.updateSellingQty()}">
-                    <tr>
-                        <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
-                        <td>
-                            <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
-                        </td>
-                        <td>
-                            <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
-                        </td>
-                        <td>
-                            <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
-                        </td>
-                        <td>
-                            <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
-                        </td>
-                        <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
-                        <td>${qty.whouse.name}</td>
-                        <td>
-                            <button class="btn btn-primary" data-confirm='btn'>更新</button>
-                        </td>
-                    </tr>
-                </form>
-            #{/list}
-        </table>
-        #{records records:records, row:true/}
-    </div>
+          </form>
+        #{/list}
+    </table>
+      #{records records:records, row:true/}
+  </div>
 
 
-    <!-- Product Attrs 这一部分需要重新编写 -->
+  <!-- Product Attrs 这一部分需要重新编写 -->
 
     #{info_row title:"Images"/}
-    <div style="min-height:300px;background:#eee;" id="dropbox">
-        <ul class="thumbnails uploaded"></ul>
-        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-    </div>
+  <div style="min-height:300px;background:#eee;" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  </div>
 #{/else}
 </div>

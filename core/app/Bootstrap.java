@@ -2,6 +2,7 @@ import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
 import helper.S3;
+import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import jobs.loop.OsTicketBeanstalkdCheck;
 import models.Privilege;
@@ -32,22 +33,26 @@ public class Bootstrap extends Job {
             return;
         }
         // 1. 初始化系统内的用户
-       /* long users = User.count();
+        long users = User.count();
         if(users == 0) {
             Fixtures.delete(User.class);
             Fixtures.loadModels("users.yml");
-        }*/
+        }
 
-      /*  long feeTypes = FeeType.count();
+        long feeTypes = FeeType.count();
         if(feeTypes == 0) {
             Fixtures.delete(FeeType.class);
             Fixtures.loadModels("feetypes.yml");
-        }*/
+        }
 
 
         HTTP.init();
         Privilege.init();
-        S3.init();
+        JobsSetup.init();
+        Account.initOfferIds();
+
+        if(Play.mode.isProd())
+            S3.init();
 
         if(Play.mode.isProd() || (Play.mode.isDev() &&
                 "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev")))) {
@@ -56,7 +61,7 @@ public class Bootstrap extends Job {
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
-            Account.init();
+            Account.initLogin();
             new ListingSchedulJob().now();
         }
     }

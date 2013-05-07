@@ -36,14 +36,21 @@ public class OsTicketBeanstalkdCheck implements Runnable {
     public synchronized static void begin() {
         if(!OsTicketBeanstalkdCheck.isBegin) {
             OsTicketBeanstalkdCheck.isBegin = true;
-            T.submit(OsTicketBeanstalkdCheck.INSTANCE);
+            T.submit(OsTicketBeanstalkdCheck.getInstance());
             Logger.info("OsTicketBeanstalkdCheck start...");
         }
     }
 
+    public static OsTicketBeanstalkdCheck getInstance() {
+        if(OsTicketBeanstalkdCheck.instance == null)
+            OsTicketBeanstalkdCheck.instance = new OsTicketBeanstalkdCheck();
+        return OsTicketBeanstalkdCheck.instance;
+    }
+
     public static void stop() {
         T.shutdownNow();
-        INSTANCE.closeClients();
+        if(OsTicketBeanstalkdCheck.instance != null)
+            OsTicketBeanstalkdCheck.instance.closeClients();
     }
 
     public static void deleteJob(BeanstalkJob job) throws BeanstalkException {
@@ -73,7 +80,7 @@ public class OsTicketBeanstalkdCheck implements Runnable {
         }
     }
 
-    private static OsTicketBeanstalkdCheck INSTANCE = new OsTicketBeanstalkdCheck();
+    private static OsTicketBeanstalkdCheck instance;
 
     /**
      * 因 Beanstalkd 的特性, 所以让每一个 tube 拥有一个 Client 去处理

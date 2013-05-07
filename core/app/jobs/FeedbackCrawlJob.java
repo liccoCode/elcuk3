@@ -17,7 +17,6 @@ import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
 import play.data.validation.Validation;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.io.File;
@@ -36,7 +35,6 @@ import java.util.List;
  * Date: 3/15/12
  * Time: 9:34 AM
  */
-@Every("30mn")
 public class FeedbackCrawlJob extends Job {
     /**
      * <pre>

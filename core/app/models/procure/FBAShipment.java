@@ -1,15 +1,10 @@
 package models.procure;
 
-import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import helper.FBA;
 import helper.Webs;
-import models.ElcukRecord;
-import models.Notification;
 import models.market.Account;
 import notifiers.FBAMails;
-import play.data.validation.Validation;
 import play.db.jpa.Model;
-import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.FBAShipmentQuery;
@@ -147,17 +142,11 @@ public class FBAShipment extends Model {
     @OneToOne
     public Account account;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    public Shipment shipment;
-
-    /**
-     * 与 ShipItem 的关联
-     */
-    @OneToMany(mappedBy = "fba", cascade = CascadeType.PERSIST)
-    public List<ShipItem> shipItems = new ArrayList<ShipItem>();
-
     @Column(unique = true, nullable = false, length = 20)
     public String shipmentId;
+
+    @OneToMany(mappedBy = "fba")
+    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
 
     /**
      * 每一个 FBAShipment 拥有一个地址
@@ -215,92 +204,19 @@ public class FBAShipment extends Model {
 
 
     /**
-     * 转移 FBA Shipment
-     *
-     * @param shipment
-     */
-    public void moveTo(Shipment shipment) {
-        /**
-         * FBA 转移的限制:
-         * 1. ShipItem 的数量必须是 1 个
-         * 2. 对应 Shipment 的运输地址必须是相同 FBA 仓库
-         * 3. 运输项目的运输方式需要一样
-         */
-        if(!this.state.isCanModify()) {
-            Validation.addError("", "FBA 已经无法变更状态. " + this.state);
-        }
-        if(this.shipItems.size() != 1) {
-            Validation.addError("", "仅有当 FBA 中只有一个运输项目的时候才可以进行转移");
-        }
-        if(shipment.fbas.size() > 0) {
-            FBAShipment fba = shipment.fbas.get(0);
-            if(!fba.centerId.equals(this.centerId)) {
-                Validation.addError("", "运输单中 FBA 的仓库地址不一样, 无法转移.");
-            }
-        }
-        if(this.shipment.type != shipment.type) {
-            ShipItem itm = this.shipItems.get(0);
-            if(itm.unit.attrs.planArrivDate.getTime() < shipment.planArrivDate.getTime()) {
-                Validation.addError("",
-                        String.format("采购计划延期, 请与 PM 沟通调整计划. 采购计划预计在 %tF 抵达, 而目的运输单在 %tF 抵达.",
-                                itm.unit.attrs.planArrivDate, shipment.planArrivDate));
-            }
-        }
-
-        if(Validation.hasErrors()) return;
-        String oldShipmentId = this.shipment.id;
-
-        // 新 Shipment 的状态修改
-        shipment.state = Shipment.S.CONFIRM;
-
-        // 老 Shipment 的处理
-        if(this.shipment.fbas.size() - 1 <= 0) {
-            this.shipment.state = Shipment.S.PLAN;
-            this.shipment.save();
-        }
-
-        // 仅当 FBA 只有一个运输项目的时候才可以转移
-        ShipItem itm = this.shipItems.get(0);
-        if(itm.unit.shipType != shipment.type) {
-            Notification.notifies("采购计划运输提前",
-                    String.format("采购计划 #%s 因运输单(%s)调整, 到库日期从 %tF 提前到 %tF", itm.unit.id,
-                            shipment.id, itm.unit.attrs.planArrivDate, shipment.planArrivDate),
-                    Notification.PM);
-        }
-        itm.shipment = shipment;
-        itm.unit.attrs.planShipDate = shipment.planBeginDate;
-        itm.unit.attrs.planArrivDate = shipment.planArrivDate;
-        itm.unit.shipType = shipment.type;
-        itm.unit.save();
-        itm.save();
-
-        if(shipment.fbas.size() <= 0) {
-            shipment.target = this.address();
-        }
-        this.shipment = shipment;
-        this.save();
-        new ElcukRecord(Messages.get("shipment.moveFBA"),
-                Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
-                oldShipmentId).save();
-        Notification.notifies("FBA 运输单转移",
-                Messages.get("shipment.moveFBA.msg", this.shipmentId, oldShipmentId, shipment.id),
-                Notification.PM, Notification.SHIPPER);
-    }
-
-    /**
      * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
      *
      * @param state
      */
     public void isNofityState(S state) {
         // 每一次的碰到 RECEIVING 状态都去检查一次的 ShipItem.unit 的阶段
+        /* TODO effect: FBA 状态变化所需要做的变化, 还需要讨论
         if(state == S.RECEIVING) {
             if(this.receivingAt == null)
             // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
             {
                 this.receivingAt = new Date();
             }
-
             // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
             for(ShipItem itm : this.shipItems) {
                 itm.unitStage(ProcureUnit.STAGE.INBOUND);
@@ -315,21 +231,10 @@ public class FBAShipment extends Model {
         if(this.state != state) {
             FBAMails.shipmentStateChange(this, this.state, state);
         }
+        */
         this.state = state;
     }
 
-    /**
-     * 计算的总重量
-     *
-     * @return
-     */
-    public float totalWeight() {
-        float weight = 0f;
-        for(ShipItem itm : this.shipItems) {
-            weight += itm.qty * itm.unit.product.weight;
-        }
-        return weight;
-    }
 
     /**
      * 货物抵达后, FBA Shipment 的签收时间与开始入库时间的检查
@@ -395,11 +300,13 @@ public class FBAShipment extends Model {
     public synchronized void updateFBAShipment(S state) {
         List<ShipItem> toBeUpdateItems = new ArrayList<ShipItem>();
         // 在手动更新 FBA 的时候, 同步 ShipItem, ProcureUnit, FBA
+        /* TODO effect: FBA 的更新需要统计其直接关联的 ProcureUnit 而非运输
         for(ShipItem itm : this.shipItems) {
             itm.qty = itm.unit.qty();
         }
 
         toBeUpdateItems.addAll(this.shipItems);
+        */
         try {
             this.state = FBA.update(this, toBeUpdateItems, state != null ? state : this.state);
         } catch(Exception e) {
@@ -412,9 +319,7 @@ public class FBAShipment extends Model {
      * 删除这个 FBA Shipment
      */
     public synchronized void removeFBAShipment() {
-        if(this.shipItems.size() > 0) {
-            throw new FastRuntimeException("还拥有运输项目, 无法删除");
-        }
+        /* TODO effect: 删除这个 FBA 需要考虑 ProcureUnit 而非运输
         if(this.state != S.WORKING && this.state != S.PLAN) {
             throw new FastRuntimeException("已经运输出去, 无法删除.");
         }
@@ -425,6 +330,7 @@ public class FBAShipment extends Model {
         } catch(FBAInboundServiceMWSException e) {
             throw new FastRuntimeException(e);
         }
+        */
     }
 
     /**
@@ -433,6 +339,7 @@ public class FBAShipment extends Model {
      * @return
      */
     public F.T2<Integer, Integer> progress() {
+        /* TODO FBA 的入库进度计算需要调整
         int recevied = 0;
         int total = 1;
         for(ShipItem itm : this.shipItems) {
@@ -440,6 +347,8 @@ public class FBAShipment extends Model {
             total += itm.qty;
         }
         return new F.T2<Integer, Integer>(recevied, total > 1 ? total - 1 : total);
+        */
+        return new F.T2<Integer, Integer>(-1, -1);
     }
 
 
@@ -459,22 +368,6 @@ public class FBAShipment extends Model {
 
     public static FBAShipment findByShipmentId(String shipmentId) {
         return FBAShipment.find("shipmentId=?", shipmentId).first();
-    }
-
-    /**
-     * 与当前运输单运输地址, FBA 仓库相同的其他运输单;(非周期型)
-     *
-     * @return
-     */
-    public List<Shipment> targetShipments() {
-        if(this.shipment == null) return new ArrayList<Shipment>();
-        return Shipment.find("SELECT DISTINCT(s) FROM Shipment s" +
-                " LEFT JOIN s.fbas f" +
-                " WHERE s.id!=? AND s.whouse=? AND cycle=false AND" +
-                // 类似的 Shipment 有 FBA 则 centerId 需要一样, 或者没有 FBA
-                " (f.centerId=? OR SIZE(s.fbas)=0) AND s.state IN (?,?) ORDER BY planBeginDate",
-                this.shipment.id, this.shipment.whouse, this.centerId, Shipment.S.PLAN,
-                Shipment.S.CONFIRM).fetch();
     }
 
 }

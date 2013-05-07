@@ -1,7 +1,7 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
-import models.ElcukRecord;
+import models.User;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
@@ -31,7 +31,7 @@ public class AmazonLikeRecord extends GenericModel {
         this.aveRating = listing.rating == null ? 0 : listing.rating;
         this.account = acc;
         this.createAt = new Date();
-        this.username = ElcukRecord.username();
+        this.username = User.username();
     }
 
     @Id
@@ -91,7 +91,8 @@ public class AmazonLikeRecord extends GenericModel {
         F.T2<String, M> lidT2 = Listing.unLid(lid);
         List<Account> nonClickAccs = new ArrayList<Account>();
         for(Account acc : opendAccs) {
-            if(AmazonLikeRecord.count("asin=? AND market=? AND account=?", lidT2._1, lidT2._2, acc) == 0)
+            if(AmazonLikeRecord
+                    .count("asin=? AND market=? AND account=?", lidT2._1, lidT2._2, acc) == 0)
                 nonClickAccs.add(acc);
         }
         return nonClickAccs;

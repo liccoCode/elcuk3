@@ -12,7 +12,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.Play;
-import play.jobs.Every;
 import play.jobs.Job;
 
 import java.util.List;
@@ -29,7 +28,6 @@ import java.util.List;
  * Date: 4/20/12
  * Time: 5:17 PM
  */
-@Every("1mn")
 public class OrderInfoFetchJob extends Job {
     @Override
     public void doJob() {
@@ -63,8 +61,9 @@ public class OrderInfoFetchJob extends Job {
          * 3. 从最老的开始处理.
          * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
          */
-        return Orderr.find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null OR address1 is null OR address1='') order by createDate",
-                Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
+        return Orderr
+                .find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null OR address1 is null OR address1='') order by createDate",
+                        Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
     }
 
     public static String fetchOrderDetailHtml(Orderr ord) {
@@ -72,7 +71,8 @@ public class OrderInfoFetchJob extends Job {
         Logger.info("OrderInfo(UserId) [%s].", url);
         String html = HTTP.get(ord.account.cookieStore(), url);
         if(Play.mode.isDev())
-            FLog.fileLog(String.format("order.detail.%s.html", ord.orderId), html, FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("order.detail.%s.html", ord.orderId), html,
+                    FLog.T.HTTP_ERROR);
         return html;
     }
 
@@ -91,8 +91,10 @@ public class OrderInfoFetchJob extends Job {
         if(lin == null) {
             // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
             lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
-            if(StringUtils.contains(lin.text().toLowerCase(), "cancelled") || StringUtils.contains(lin.text().toLowerCase(), "storniert")/*德语*/) {
-                Logger.info("Order %s state from %s to %s", order.orderId, order.state, Orderr.S.CANCEL);
+            if(StringUtils.contains(lin.text().toLowerCase(), "cancelled") ||
+                    StringUtils.contains(lin.text().toLowerCase(), "storniert")/*德语*/) {
+                Logger.info("Order %s state from %s to %s", order.orderId, order.state,
+                        Orderr.S.CANCEL);
                 order.state = Orderr.S.CANCEL;
             }
             order.memo = lin.text();
@@ -100,8 +102,10 @@ public class OrderInfoFetchJob extends Job {
             Elements smallers = doc.select(".smaller");
             for(Element smaller : smallers) {
                 String text = smaller.text().toLowerCase();
-                if(StringUtils.contains(text, "erstattung"/*DE*/) || StringUtils.contains(text, "refund"/*uk*/)) {
-                    Logger.info("Found Order %s is from %s to %s", order.orderId, order.state, Orderr.S.REFUNDED);
+                if(StringUtils.contains(text, "erstattung"/*DE*/) ||
+                        StringUtils.contains(text, "refund"/*uk*/)) {
+                    Logger.info("Found Order %s is from %s to %s", order.orderId, order.state,
+                            Orderr.S.REFUNDED);
                     order.state = Orderr.S.REFUNDED;
                     break;
                 }
@@ -110,7 +114,9 @@ public class OrderInfoFetchJob extends Job {
 
         if(order.state == Orderr.S.SHIPPED || order.state == Orderr.S.REFUNDED) {
             // Email
-            String tmp = StringUtils.remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(), "\"");
+            String tmp = StringUtils
+                    .remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(),
+                            "\"");
             order.email = StringUtils.remove(tmp, ",");
             if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
 

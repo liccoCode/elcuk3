@@ -4,59 +4,59 @@
 #{/set}
 
 <div class="row-fluid" style="margin:10px 0">
-    <div class="span12">
-        <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_wh">添加</a>
+  <div class="span12">
+    <a class="btn btn-primary" data-toggle="modal" href="#add_modal" id="add_wh">添加</a>
 
-        <div id="add_modal" class="modal hide fade">
-            <div class="modal-header">
-                <a class="close" data-dismiss="modal">×</a>
+    <div id="add_modal" class="modal hide fade">
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
 
-                <h3>添加一个 Asynchronous Job</h3>
+        <h3>添加一个 Asynchronous Job</h3>
+      </div>
+      <form action="@{Jobs.create()}" method="post" id="job_add_form" class="form-horizontal">
+        <div class="modal-body">
+          <fieldset>
+            <div class="control-group">
+              <label for="j_className">ClassName</label>
+
+              <div class="controls">
+                <input type="text" id="j_className" name="job.className">
+
+                <p class="help-block">Job 的类限定类名</p>
+              </div>
             </div>
-            <form action="@{Jobs.create()}" method="post" id="job_add_form" class="form-horizontal">
-                <div class="modal-body">
-                    <fieldset>
-                        <div class="control-group">
-                            <label for="j_className">ClassName</label>
 
-                            <div class="controls">
-                                <input type="text" id="j_className" name="job.className">
+            <div class="control-group">
+              <label for="j_duration">Duration</label>
 
-                                <p class="help-block">Job 的类限定类名</p>
-                            </div>
-                        </div>
+              <div class="controls">
+                <input type="text" id="j_duration" name="job.duration">
 
-                        <div class="control-group">
-                            <label for="j_duration">Duration</label>
+                <p class="help-block">Job 的执行周期, 可以使用 1s, 1mn, 1h(不可以填写1.5h) 三个单位时间</p>
 
-                            <div class="controls">
-                                <input type="text" id="j_duration" name="job.duration">
+                <p class="help-block">可使用 Cron 表达式: 0 40 3,23 * * ? (秒 分 时 天 月 ?)</p>
+              </div>
+            </div>
 
-                                <p class="help-block">Job 的执行周期, 可以使用 1s, 1mn, 1h(不可以填写1.5h) 三个单位时间</p>
+            <div class="control-group">
+              <label>Close</label>
 
-                                <p class="help-block">可使用 Cron 表达式: 0 40 3,23 * * ? (秒 分 时 天 月 ?)</p>
-                            </div>
-                        </div>
+              <div class="controls">
+                <input type="checkbox" value="false" onclick="checkbox(this)">
+                <input type="hidden" name="job.close" value="false">
 
-                        <div class="control-group">
-                            <label>Close</label>
-
-                            <div class="controls">
-                                <input type="checkbox" value="false" onclick="checkbox(this)">
-                                <input type="hidden" name="job.close" value="false">
-
-                                <p class="help-block">Job 是否能够关闭, 如果关闭则不会执行</p>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary">Save</button>
-                    <a href="#" class="btn" data-dismiss="modal">Close</a>
-                </div>
-            </form>
+                <p class="help-block">Job 是否能够关闭, 如果关闭则不会执行</p>
+              </div>
+            </div>
+          </fieldset>
         </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary">Save</button>
+          <a href="#" class="btn" data-dismiss="modal">Close</a>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
 #{flash_alert /}
@@ -64,96 +64,100 @@
 #{errorMsgs /}
 
 <div class="row-fluid">
-    <div class="span12">
-    #{if jobs.size() == 0}
-        无任务
-    #{/if}
-    #{else }
-        <table class="table table-condensed">
-            <caption class="label label-info">Jobs</caption>
-            <tr>
-                <th>&nbsp;</th>
-                <th>Id</th>
-                <th>ClassName</th>
-                <th>Duration</th>
-                <th>Memo</th>
-                <th>
-                    <a href="#" rel="tooltip" data-original-title="Now: ${new java.util.Date().format('yyyy-MM-dd HH:mm:ss')}">LastUpdateTime</a>
-                </th>
-                <th>Closed</th>
-                <th>DevRun</th>
+  <div class="span12">
+  #{if jobs.size() == 0}
+    无任务
+  #{/if}
+  #{else }
+    <table class="table table-condensed">
+      <caption class="label label-info">Jobs</caption>
+      <tr>
+        <th>&nbsp;</th>
+        <th>Id</th>
+        <th>ClassName</th>
+        <th>Duration</th>
+        <th>Memo</th>
+        <th>
+          <a href="#" rel="tooltip" data-original-title="Now: ${new java.util.Date().format('yyyy-MM-dd HH:mm:ss')}">LastUpdateTime</a>
+        </th>
+        <th>Closed</th>
+        <th>DevRun</th>
+      </tr>
+        #{list items:jobs, as:'job'}
+          <form action="@{Jobs.update()}" method="post" style="display:inline-block;">
+            <tr class="job_itm" id='job_itm_${job.id}'>
+              <td>
+                <button class="btn btn-small btn-primary">更新</button>
+                <a href="@{Jobs.now()}/${job.id}" data-confirm="确认运行?" class="btn btn-small btn-danger">运行一次</a>
+              </td>
+              <td>
+                <label>${job.id}</label>
+                <input type="hidden" name="job.id" value="${job.id}">
+              </td>
+              <td>
+                <input type="text" class="input input-xlarge" name="job.className" value="${job.className}">
+              </td>
+              <td>
+                <input type="text" class="input input-small" name="job.duration" value="${job.duration}">
+              </td>
+              <td>
+                <input type="text" class="input input-xxlarge" name="job.memo" value="${job.memo}">
+              </td>
+              <td>#{time_tooltip datetime:true, time:new java.util.Date(job.lastUpdateTime)/}</td>
+              <td>
+                <input type="checkbox" ${job.close ? 'checked' : ''} onclick="checkbox(this)" value="${job.close}">
+                <input type="hidden" name="job.close" value="${job.close}">
+              </td>
+              <td>
+                <input type="checkbox" ${job.devRun ? 'checked' : ''} onclick="checkbox(this)" value="${job.devRun}">
+                <input type="hidden" name="job.devRun" value="${job.devRun}">
+              </td>
             </tr>
-            #{list items:jobs, as:'job'}
-                <form action="@{Jobs.update()}" method="post" style="display:inline-block;">
-                    <tr class="job_itm" id='job_itm_${job.id}'>
-                        <td>
-                            <button class="btn btn-small btn-primary">更新</button>
-                            <a href="@{Jobs.now()}/${job.id}" data-confirm="link" class="btn btn-small btn-danger">运行一次</a>
-                        </td>
-                        <td>
-                            <label>${job.id}</label>
-                            <input type="hidden" name="job.id" value="${job.id}">
-                        </td>
-                        <td>
-                            <input type="text" class="input input-xlarge" name="job.className" value="${job.className}">
-                        </td>
-                        <td>
-                            <input type="text" class="input input-small" name="job.duration" value="${job.duration}">
-                        </td>
-                        <td>
-                            <input type="text" class="input input-xxlarge" name="job.memo" value="${job.memo}">
-                        </td>
-                        <td>#{time_tooltip datetime:true, time:new java.util.Date(job.lastUpdateTime)/}</td>
-                        <td>
-                            <input type="checkbox" ${job.close ? 'checked' : ''} onclick="checkbox(this)" value="${job.close}">
-                            <input type="hidden" name="job.close" value="${job.close}">
-                        </td>
-                        <td>
-                            <input type="checkbox" ${job.devRun ? 'checked' : ''} onclick="checkbox(this)" value="${job.devRun}">
-                            <input type="hidden" name="job.devRun" value="${job.devRun}">
-                        </td>
-                    </tr>
-                </form>
-            #{/list}
-        </table>
-    #{/else}
-    </div>
+          </form>
+        #{/list}
+    </table>
+  #{/else}
+  </div>
 </div>
 
 <div class="row-fluid">
-    <div class="span12">
-    #{if jobReqs.size() == 0}
-        没有 JobRequest
-    #{/if}
-    #{else }
-        <table class="table table-striped">
-            <caption class="label label-info">JobRequests</caption>
-            <tr>
-                <th>Id</th>
-                <th>Acc</th>
-                <th>RequestDate</th>
-                <th>RequestId</th>
-                <th>ReportId</th>
-                <th>State</th>
-                <th>Type</th>
-                <th>Path</th>
-            </tr>
-            #{list items:jobReqs, as:'req'}
-                <tr>
-                    <td>${req.id}</td>
-                    <td>
-                        <a href="#" rel="tooltip" data-original-title="${req?.account?.uniqueName}">${req.account.id}</a>
-                    </td>
-                    <td>${req.requestDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
-                    <td>${req.requestId}</td>
-                    <td>${req.reportId}</td>
-                    <td><a href="#" rel="tooltip" data-original-title="${req.procressState}">${req.state}</a></td>
-                    <td>${req.type}</td>
-                    <td><a href="#" rel="tooltip" data-original-title="${req.path}">${req.path?.substring(0, 3)}...</a>
-                    </td>
-                </tr>
-            #{/list}
-        </table>
-    #{/else}
-    </div>
+  <div class="span12">
+  #{if jobReqs.size() == 0}
+    没有 JobRequest
+  #{/if}
+  #{else }
+    <table class="table table-striped">
+      <caption class="label label-info">JobRequests</caption>
+      <tr>
+        <th>Id</th>
+        <th>Acc</th>
+        <th>RequestDate</th>
+        <th>RequestId</th>
+        <th>ReportId</th>
+        <th>State</th>
+        <th>Type</th>
+        <th>Path</th>
+      </tr>
+        #{list items:jobReqs, as:'req'}
+          <tr>
+            <td>${req.id}</td>
+            <td>
+              <a href="#" rel="tooltip" data-original-title="${req?.account?.uniqueName}">${req.account.id}</a>
+            </td>
+            <td>${req.requestDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
+            <td>${req.requestId}</td>
+            <td>${req.reportId}</td>
+            <td>
+              <a href="#" rel="tooltip" data-original-title="${req.procressState}">${req.state}</a>
+            </td>
+            <td>${req.type}</td>
+            <td>
+              <a href="#" rel="tooltip" data-original-title="${req.path}">${req.path?.substring(0, 3)}
+                ...</a>
+            </td>
+          </tr>
+        #{/list}
+    </table>
+  #{/else}
+  </div>
 </div>

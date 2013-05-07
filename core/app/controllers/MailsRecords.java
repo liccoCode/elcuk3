@@ -4,9 +4,8 @@ import helper.J;
 import helper.Webs;
 import models.MailsRecord;
 import models.view.Ret;
-import models.view.dto.HighChart;
-import play.Logger;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.Date;
 import java.util.List;
@@ -17,8 +16,10 @@ import java.util.List;
  * Date: 13-4-3
  * Time: 下午1:48
  */
+@With({GlobalExceptionHandler.class, Secure.class})
 public class MailsRecords extends Controller {
 
+    @Check("mailsRecords.index")
     public static void index() {
         render();
     }

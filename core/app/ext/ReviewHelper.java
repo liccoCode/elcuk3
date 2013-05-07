@@ -3,6 +3,7 @@ package ext;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
+import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.libs.F;
@@ -51,7 +52,6 @@ public class ReviewHelper extends JavaExtensions {
             return new F.T3<Boolean, String, String>(false, "", "");
         }
     }
-
 
     public static String color(Feedback feedback) {
         int length = NumberUtils.toInt(length(feedback));

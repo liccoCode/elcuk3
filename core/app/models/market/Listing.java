@@ -15,6 +15,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
+import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -31,6 +32,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 public class Listing extends GenericModel {
+
+
     /**
      * Condition
      */
@@ -53,7 +56,6 @@ public class Listing extends GenericModel {
         this.displayPrice = selling.aps.salePrice;
         this.market = selling.market;
         this.saleRank = 100000;
-        this.warnningTimes = 0;
         this.totalOffers = 0;
         this.product = prod;
     }
@@ -61,7 +63,9 @@ public class Listing extends GenericModel {
     /**
      * 不能级联删除, 并且删除 Listing 的时候需要保证 Selling 都已经处理了
      */
-    @OneToMany(mappedBy = "listing", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "listing",
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+                    CascadeType.REFRESH})
     public List<Selling> sellings;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
@@ -124,11 +128,19 @@ public class Listing extends GenericModel {
     @Expose
     public String picUrls;
 
+
     /**
-     * 此 Listing 是否需要进行警告的的标识, 并且记录警告了多少次.
+     * 手动关闭警告时间
      */
     @Expose
-    public Integer warnningTimes = 0;
+    public Date closeWarnningTime;
+
+    /**
+     * 此Listing是否被跟踪
+     */
+    @Expose
+    public boolean isTracked;
+
 
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
@@ -173,7 +185,8 @@ public class Listing extends GenericModel {
         if(StringUtils.isNotBlank(newListing.title)) this.title = newListing.title;
         if(newListing.reviews != null) this.reviews = newListing.reviews;
         if(newListing.rating != null) this.rating = newListing.rating;
-        if(StringUtils.isNotBlank(newListing.technicalDetails)) this.technicalDetails = newListing.technicalDetails;
+        if(StringUtils.isNotBlank(newListing.technicalDetails))
+            this.technicalDetails = newListing.technicalDetails;
         if(StringUtils.isNotBlank(newListing.productDescription))
             this.productDescription = newListing.productDescription;
         if(newListing.saleRank != null) this.saleRank = newListing.saleRank;
@@ -271,14 +284,16 @@ public class Listing extends GenericModel {
 
 
     /**
-     * 根据 Listing 的状态, 进行 Listing 的检查;
+     * 根据 Listing 的状态, 进行 Listing 的检查并更新;
      * 1. 如果这个 Listing 是我们自己的, 检查是否被跟.
      */
-    public void check() {
+    public void checkAndSaveOffers() {
         /**
-         *  1. 检查此 Listing 上是否有自己多个店铺上架
-         *  2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
+         * 0. 只检查自建的 Listing
+         * 1. 检查此 Listing 上是否有自己多个店铺上架
+         * 2. 检查此 Listing 是否有被其他卖家上架!(如果是跟着卖的就不需要检查这个了)
          */
+        if(!Listing.isSelfBuildListing(this.title)) return;
         if(this.offers == null || this.offers.size() == 0) {
             Logger.warn("Listing [" + this.listingId + "] have no offers!");
             return;
@@ -288,31 +303,30 @@ public class Listing extends GenericModel {
 
         for(ListingOffer off : this.offers) {
             /**
-             * 1. 检查是不是 Amazon
-             * 2. 检查是不是自建
-             * 3. 对于每一个检查到的都需要警告, 记录警告次数
+             * 1. 检查合法的 OfferId (检查是不是 Amazon 自己卖, 检查是不是自己在卖)
+             * 2. 对于每一个检查到的都需要警告, 记录警告次数
              */
-            if(Account.merchant_id().containsKey(off.offerId)) continue;
-            if(!Listing.isSelfBuildListing(this.title)) continue;
+            if(Account.OFFER_IDS.containsKey(off.offerId)) continue;
 
             if(StringUtils.isBlank(off.offerId)) { //没有 OfferId 的为不可销售的很多原因, 很重要的例如缺货
-                Logger.info("Listing [" + this.listingId + "] current can`t sale. Message[" + off.name + "]");
+                Logger.info("Listing [%s] current can`t asle. Message [%s]",
+                        this.listingId, off.name);
             } else if(off.cond != ListingOffer.C.NEW) {
                 Logger.info("Offer %s is sale %s condition.", off.offerId, off.cond);
             } else {
-                // Mail 警告
-                if(this.warnningTimes == null) this.warnningTimes = 0;
-                this.warnningTimes++;
-                if(this.warnningTimes <= 5)
-                    needWarnningOffers++;
+                needWarnningOffers++;
             }
         }
 
-        if(needWarnningOffers >= 1)
+        if(needWarnningOffers >= 1) {
+            //两天处理时间
+            if(this.closeWarnningTime != null && DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
+                return;
             Mails.moreOfferOneListing(offers, this);
-        else if(needWarnningOffers <= 0) {
-            // 当不需要警告的时候, 将警告次数清零
-            this.warnningTimes = 0;
+            //标记为被跟踪
+            this.isTracked = true;
+        } else if(needWarnningOffers <= 0) {
+            this.isTracked = false;
         }
         this.save();
     }
@@ -325,12 +339,29 @@ public class Listing extends GenericModel {
     public F.T2<Account, Integer> pickUpOneAccountToClikeLike() {
         List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.market);
         List<Account> nonClickAccs = AmazonLikeRecord.nonClickLikeAccs(opendAccs, this.listingId);
-        if(nonClickAccs.size() == 0) throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
-        Logger.info("Listing Like Click %s, hava %s valid accounts.", this.listingId, nonClickAccs.size());
+        if(nonClickAccs.size() == 0)
+            throw new FastRuntimeException("系统内所有的账号都已经点击过这个 Review 了, 请添加新账号再进行点击.");
+        Logger.info("Listing Like Click %s, hava %s valid accounts.", this.listingId,
+                nonClickAccs.size());
         StringBuilder sb = new StringBuilder();
-        for(Account a : nonClickAccs) sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        for(Account a : nonClickAccs) {
+            sb.append(a.id).append("|").append(a.prettyName()).append(",");
+        }
         Logger.info("Account List: %s", sb.toString());
         return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
+    }
+
+    /**
+     * 挑选一个Account , 来添加Listing到其WishList
+     *
+     * @return
+     */
+    public F.T2<Account, Integer> pickUpOneAccountToWishList() {
+        List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.market);
+        List<Account> nonWishListAccs = AmazonWishListRecord.nonAddWishListAccs(opendAccs, this.listingId);
+        if(nonWishListAccs.size() == 0)
+            throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
+        return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
     }
 
     /**
@@ -339,11 +370,15 @@ public class Listing extends GenericModel {
      * @return
      */
     public List<F.T2<Long, Integer>> reviewMonthTable() {
-        List<Map<String, Object>> rows = DBUtils.rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')", this.listingId);
+        List<Map<String, Object>> rows = DBUtils
+                .rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')",
+                        this.listingId);
         List<F.T2<Long, Integer>> monthTable = new ArrayList<F.T2<Long, Integer>>();
         for(Map<String, Object> row : rows) {
             Map<Long, Integer> oneMonth = new HashMap<Long, Integer>();
-            monthTable.add(new F.T2<Long, Integer>(DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
+            monthTable.add(new F.T2<Long, Integer>(
+                    DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM"))
+                            .getMillis(),
                     ((Long) row.get("count")).intValue()));
         }
         return monthTable;
@@ -405,9 +440,10 @@ public class Listing extends GenericModel {
      *
      * @param listingJson
      * @param fullOffer   是否需要抓取全部的 Listing Offers
-     * @return
+     * @return null 这个 Listing 在市场上被删除或者返回系统存在的 Listing
      */
-    public static Listing parseAndUpdateListingFromCrawl(JsonElement listingJson, boolean fullOffer) {
+    public static Listing parseAndUpdateListingFromCrawl(JsonElement listingJson,
+                                                         boolean fullOffer) {
         /**
          * 根据 market 与 asin 先从数据库中加载, 如果存在则更新返回一个持久状态的 Listing 对象,
          * 否则返回一个瞬时状态的 Listing 对象
@@ -449,21 +485,15 @@ public class Listing extends GenericModel {
                 // 通过这个方法抓取的 Offer , 获取完整的 Condition 信息
                 new ListingOffersWork(tobeChangeed).now().get(15, TimeUnit.SECONDS);
             } catch(Exception e) {
-                Logger.warn("Listing(%s) fetch full offers have something wrong.", tobeChangeed.listingId);
+                Logger.warn("Listing(%s) fetch full offers have something wrong.",
+                        tobeChangeed.listingId);
             }
         } else {
             JsonArray offers = lst.get("offers").getAsJsonArray();
             List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
             for(JsonElement offerEl : offers) {
                 JsonObject offer = offerEl.getAsJsonObject();
-                ListingOffer off = new ListingOffer();
-                off.name = offer.get("name").getAsString();
-                off.offerId = offer.get("offerId").getAsString();
-                off.price = offer.get("price").getAsFloat();
-                off.shipprice = offer.get("shipprice").getAsFloat();
-                off.fba = offer.get("fba").getAsBoolean();
-                off.buybox = offer.get("buybox").getAsBoolean();
-                off.cond = ListingOffer.C.NEW; // 默认为 NEW
+                ListingOffer off = ListingOffersWork.jsonToOffer(offer);
                 off.listing = tobeChangeed;
                 newOffers.add(off);
                 // set display price
@@ -472,7 +502,8 @@ public class Listing extends GenericModel {
             }
             tobeChangeed.offers = newOffers;
         }
-        tobeChangeed.lastUpdateTime = System.currentTimeMillis() + ListingSchedulJob.calInterval(tobeChangeed);
+        tobeChangeed.lastUpdateTime =
+                System.currentTimeMillis() + ListingSchedulJob.calInterval(tobeChangeed);
         if(oldListing != null) return tobeChangeed.save();
         return tobeChangeed;
     }
@@ -534,5 +565,29 @@ public class Listing extends GenericModel {
             }
         }
         return Cache.get(cacheKey, Set.class);
+    }
+
+    /**
+     * 获得被跟踪的Listing
+     *
+     * @return
+     */
+    public static List<Listing> trackedListings() {
+        return Listing.find("isTracked = true").fetch();
+    }
+
+    /**
+     * 关闭Listing被跟的警告
+     *
+     * @param
+     */
+    public void closeWarnning() {
+        if(!Listing.isSelfBuildListing(this.title))
+            Validation.addError("", "不是自建的Listing,不需要处理");
+        if(Validation.hasErrors()) return;
+        this.isTracked = false;
+        //由于手动地关闭了邮件提醒,代表Lisitng正在处理中.记录下关闭时间用来在一定的时间内不发送警告邮件.
+        this.closeWarnningTime = new Date();
+        this.save();
     }
 }

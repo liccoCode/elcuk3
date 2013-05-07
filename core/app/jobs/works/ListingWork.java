@@ -2,6 +2,7 @@ package jobs.works;
 
 import com.google.gson.JsonElement;
 import helper.Crawl;
+import helper.Webs;
 import models.market.Listing;
 import play.Logger;
 import play.jobs.Job;
@@ -47,15 +48,15 @@ public class ListingWork extends Job<Listing> {
                 listing.save();
                 return;
             }
-            needCheckListing.check();
-            needCheckListing.save();
-        } catch(Exception e) {
-            Logger.warn("ListingDriverlJob[" + listingId + "]:" + e.getClass().getSimpleName() + "|" + e.getMessage());
-        } finally {
             if(fulloffers) {
                 Logger.info("Listing (%s) fetch offers...", this.listingId);
-                new ListingOffersWork(this.listingId).now(); // 等待 10 s
+                new ListingOffersWork(needCheckListing).now().get(20, TimeUnit.SECONDS); // 等待 20 s
             }
+            // 保存 Offers
+            needCheckListing.save();
+            needCheckListing.checkAndSaveOffers();
+        } catch(Exception e) {
+            Logger.warn("ListingDriverlJob[%s]: %s", this.listingId, Webs.E(e));
         }
     }
 }

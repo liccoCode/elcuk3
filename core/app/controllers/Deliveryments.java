@@ -1,19 +1,25 @@
 package controllers;
 
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.product.Category;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
+import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -31,20 +37,32 @@ public class Deliveryments extends Controller {
         String deliverymentId = request.params.get("id");
         if(StringUtils.isBlank(deliverymentId)) deliverymentId = request.params.get("dmt.id");
         Deliveryment dmt = Deliveryment.findById(deliverymentId);
-        renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
+        if(dmt != null)
+            renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.procurers());
     }
 
-    @Check("deliveryments.index")
-    public static void index(DeliveryPost p) {
-        List<Deliveryment> deliveryments = null;
-        if(p == null) p = new DeliveryPost();
-        deliveryments = p.query();
-        render(deliveryments, p);
+    @Before(only = {"index", "deliverymentToApply"})
+    public static void beforeIndex(DeliveryPost p) {
+        List<Cooperator> suppliers = Cooperator.suppliers();
+        List<ProcureApply> avaliableApplies = ProcureApply
+                .unPaidApplies(p == null ? null : p.cooperId);
+        renderArgs.put("suppliers", suppliers);
+        renderArgs.put("avaliableApplies", avaliableApplies);
     }
 
+    @Check("deliveryments.index")
+    public static void index(DeliveryPost p, List<String> deliverymentIds) {
+        List<Deliveryment> deliveryments = null;
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(p == null) p = new DeliveryPost();
+        deliveryments = p.query();
+        render(deliveryments, p, deliverymentIds);
+    }
+
+    //DL|201301|08
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         render(dmt);
@@ -56,7 +74,32 @@ public class Deliveryments extends Controller {
             render("Deliveryments/show.html", dmt);
         dmt.save();
         flash.success("更新成功.");
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
+    }
+
+    /**
+     * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 Deliveryment
+     * TODO effect: 需要调整权限
+     */
+    @Check("procures.createdeliveryment")
+    public static void create(List<Long> pids, String name) {
+        Validation.required("procrues.createDeliveryment.name", name);
+        Validation.required("deliveryments.addunits", pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Procures.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+        }
+
+        Deliveryment deliveryment = Deliveryment
+                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Procures.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+        }
+
+        flash.success("Deliveryment %s 创建成功.", deliveryment.id);
+        Deliveryments.show(deliveryment.id);
     }
 
     /**
@@ -76,8 +119,7 @@ public class Deliveryments extends Controller {
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
-
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
@@ -95,7 +137,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
 
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
@@ -103,13 +145,13 @@ public class Deliveryments extends Controller {
      */
     public static void confirm(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-        validation.equals(dmt.state, Deliveryment.S.PENDING);
-        validation.required(dmt.deliveryTime);
-        validation.required(dmt.orderTime);
-        if(Validation.hasErrors()) render("Deliveryments/show.html", dmt);
         dmt.confirm();
-        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id).save();
-        redirect("/Deliveryments/show/" + id);
+        if(Validation.hasErrors())
+            render("Deliveryments/show.html", dmt);
+
+        new ElcukRecord(Messages.get("deliveryment.confirm"), String.format("确认[采购单] %s", id), id)
+                .save();
+        show(id);
     }
 
     /**
@@ -123,7 +165,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt, msg);
 
-        redirect("/Deliveryments/show/" + dmt.id);
+        show(dmt.id);
     }
 
     /**
@@ -138,5 +180,46 @@ public class Deliveryments extends Controller {
                 sbd.append(cate.productTerms);
         }
         renderJSON(new Ret(true, sbd.toString()));
+    }
+
+    /**
+     * 为采购单提交请款单申请
+     */
+    @Check("deliveryments.deliverymenttoapply")
+    public static void deliverymentToApply(List<String> deliverymentIds, DeliveryPost p,
+                                           Long procureApplyId) {
+        if(deliverymentIds == null) deliverymentIds = new ArrayList<String>();
+        if(deliverymentIds.size() <= 0) {
+            flash.error("请选择需纳入请款的采购单(相同供应商).");
+            index(p, deliverymentIds);
+        }
+
+        ProcureApply apply = ProcureApply.findById(procureApplyId);
+        if(apply == null)
+            apply = ProcureApply.buildProcureApply(deliverymentIds);
+        else
+            apply.appendDelivery(deliverymentIds);
+
+        if(apply == null || Validation.hasErrors()) {
+            for(Error error : Validation.errors()) {
+                flash.error(error.message());
+            }
+            index(p, deliverymentIds);
+        } else {
+            flash.success("请款单 %s 申请成功.", apply.serialNumber);
+            Applys.procure(apply.id);
+        }
+    }
+
+    public static void departProcureApply(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        long applyId = dmt.apply.id;
+        dmt.departFromProcureApply();
+
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 剥离成功.", id);
+        Applys.procure(applyId);
     }
 }

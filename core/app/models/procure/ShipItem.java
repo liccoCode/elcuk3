@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
@@ -8,6 +9,7 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -43,8 +45,17 @@ public class ShipItem extends GenericModel {
      * @param shipment
      */
     public ShipItem(ProcureUnit unit, Shipment shipment) {
-        this.unit = unit;
+        this(unit);
         this.shipment = shipment;
+    }
+
+    /**
+     * 通过 ProcureUnit 创建 ShipItem
+     *
+     * @param unit
+     */
+    public ShipItem(ProcureUnit unit) {
+        this.unit = unit;
         this.qty = unit.qty();
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
         this.state = S.NORMAL;
@@ -70,15 +81,12 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
-    /**
-     * 如果一个 ShipItem 拥有了 FBA, 那么这个 FBA 所属的 Shipment 应该与 ShipItem 所属的 Shipment 必须一样
-     */
-    @ManyToOne
-    public FBAShipment fba;
-
     @Expose
-    @OneToOne
+    @ManyToOne
     public ProcureUnit unit;
+
+    @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     @Enumerated(EnumType.STRING)
     public S state = S.NORMAL;
@@ -154,10 +162,11 @@ public class ShipItem extends GenericModel {
      * @param shipment
      */
     public void changeShipment(Shipment shipment) {
-        if(this.fba != null) {
-            this.fba.shipment = shipment;
-            this.fba.save();
-        }
+        //TODO effect: 与 FBA 没有关系, 可以删除. 同时这个方法也可以删除.
+//        if(this.fba != null) {
+//            this.fba.shipment = shipment;
+//            this.fba.save();
+//        }
         this.shipment = shipment;
         this.save();
     }
@@ -184,7 +193,8 @@ public class ShipItem extends GenericModel {
 
         float singleVolume = (l * w * h) / 1000000000;
         // 换算成 m3
-        return new F.T3<Float, Float, Float>(singleVolume, this.qty * singleVolume, (this.qty * singleVolume * 1000000) / 5000);
+        return new F.T3<Float, Float, Float>(singleVolume, this.qty * singleVolume,
+                (this.qty * singleVolume * 1000000) / 5000);
     }
 
     /**
@@ -194,7 +204,8 @@ public class ShipItem extends GenericModel {
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
-        if(dtos == null || dtos.size() == 0) return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+        if(dtos == null || dtos.size() == 0)
+            return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
         for(AnalyzeDTO dto : dtos) {
             if(!dto.fid.equals(this.unit.sid)) continue;
             return dto.getTurnOverT4();

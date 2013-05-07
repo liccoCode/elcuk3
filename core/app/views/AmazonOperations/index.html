@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'AmazonReview Click Page'/}
 #{set 'moreScripts'}
-    #{script 'amazonreviews/index.coffee'/}
+    #{script 'amazonoperations/index.coffee'/}
 #{/set}
 
 <div class="row-fluid">
@@ -21,8 +21,10 @@
                 </select>
 
                 <div class="input-append">
-                    <input data-provide="typeahead" data-source="${asins}" name="asin" class="span8" type="text" placeHolder="输入 ASIN">
-                    <button class="btn btn-success"><i class="icon-circle-arrow-right"></i></button>
+                    <input id="load_asin" data-provide="typeahead" data-source="${asins}" name="asin" class="span8" type="text" placeHolder="输入 ASIN">
+                    <button id='load_review_btn' class="btn btn-success">
+                        <i class="icon-circle-arrow-right"></i>
+                    </button>
                 </div>
 
                 <p class="help-block">一个神奇的搜索框框</p>
@@ -49,6 +51,9 @@
             <li>
                 <a href="#review_table" data-toggle="tab">Review 表格</a>
             </li>
+            <li>
+                <a href="#wish_list" data-toggle="tab">WishList 列表</a>
+            </li>
         </ul>
 
         <div id="tab_content" class="tab-content">
@@ -57,7 +62,8 @@
                     <button id="recrawl_review" class="btn btn-primary">Review 重抓</button>
                     <button id="recrawl_listing" class="btn btn-primary">Listing 重抓</button>
                     <button id="click_like" class="btn btn-primary">点击 Like</button>
-                    <button id="check_left_clicks" data-loading-text="可点击数计算完成" class="btn btn-primary">检查 Review 可点击数
+                    <button id="check_left_clicks" data-loading-text="可点击数计算完成" class="btn btn-primary">检查
+                        Review 可点击数
                     </button>
                 </div>
                 <div id="reviews">
@@ -65,6 +71,7 @@
                 </div>
             </div>
             <div id="review_table" class="tab-pane fade in"></div>
+            <div id="wish_list" class="tab-pane fade in"></div>
         </div>
     </div>
 </div>

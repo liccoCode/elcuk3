@@ -3,10 +3,12 @@ package query;
 import helper.DBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +63,27 @@ public class AmazonListingReviewQuery {
                 NumberUtils.toFloat(row.get("rating").toString()),
                 Arrays.asList(StringUtils.split(row.get("reviewIds").toString(), ","))
         );
+    }
+
+
+    /**
+     * 查询 SKU 最新的rating
+     *
+     * @param sku
+     * @return
+     */
+    public F.T2<Float, Date> skuLastRating(String sku) {
+        SqlSelect sql = new SqlSelect()
+                .select("r.rating as rating, r.createDate as dt")
+                .from("AmazonListingReview r")
+                .leftJoin("Listing l on r.listingId=l.listingId")
+                .where("l.product_sku=?").param(sku)
+                .orderBy("r.createDate desc").limit(1);
+        Map<String, Object> row = DBUtils.row(sql.toString(), sku);
+        if(row.get("rating") != null) {
+            return new F.T2<Float, Date>(NumberUtils.toFloat(row.get("rating").toString()), (Date) row.get("dt"));
+        }
+        return new F.T2<Float, Date>(-1f, null);
     }
 
 }

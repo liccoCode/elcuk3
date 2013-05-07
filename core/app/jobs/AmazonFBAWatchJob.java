@@ -8,7 +8,6 @@ import models.market.Account;
 import models.procure.FBAShipment;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.jobs.Every;
 import play.jobs.Job;
 import play.libs.F;
 
@@ -27,7 +26,6 @@ import static models.procure.FBAShipment.S;
  * Date: 10/16/12
  * Time: 11:49 AM
  */
-@Every("5mn")
 public class AmazonFBAWatchJob extends Job {
     @Override
     public void doJob() {
@@ -35,7 +33,9 @@ public class AmazonFBAWatchJob extends Job {
 
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            List<FBAShipment> fbas = FBAShipment.find("account=? AND state NOT IN (?,?,?,?)", acc, S.PLAN, S.CANCELLED, S.CLOSED, S.DELETED).fetch();
+            List<FBAShipment> fbas = FBAShipment
+                    .find("account=? AND state NOT IN (?,?,?,?)", acc, S.PLAN, S.CANCELLED,
+                            S.CLOSED, S.DELETED).fetch();
             AmazonFBAWatchJob.watchFBAs(acc, fbas);
             new AmazonFBAWatchPlusPromise(fbas).now();
         }
@@ -75,10 +75,12 @@ public class AmazonFBAWatchJob extends Job {
      * @param shipments
      * @param shipmentIds
      */
-    private static void amazonFBAState(Account acc, List<FBAShipment> shipments, List<String> shipmentIds) {
+    private static void amazonFBAState(Account acc, List<FBAShipment> shipments,
+                                       List<String> shipmentIds) {
         if(shipmentIds.size() > 0) { // 如果没有, 则不需要检查了
             try {
-                Map<String, F.T3<String, String, String>> shipmentT3 = FBA.listShipments(shipmentIds, acc);
+                Map<String, F.T3<String, String, String>> shipmentT3 = FBA
+                        .listShipments(shipmentIds, acc);
                 for(FBAShipment shipment : shipments) {
                     F.T3<String, String, String> t3 = shipmentT3.get(shipment.shipmentId);
                     if(t3 == null)
@@ -90,12 +92,14 @@ public class AmazonFBAWatchJob extends Job {
 
                         shipment.receiptAndreceivingCheck();
                     } catch(Exception e) {
-                        Logger.warn(String.format("AmazonFBAWatchJob state parse STATE %s error.", t3._1));
+                        Logger.warn(String.format("AmazonFBAWatchJob state parse STATE %s error.",
+                                t3._1));
                     }
                 }
             } catch(Exception e) {
-                Logger.warn(String.format("Update Account %s FBA Shipment failed. ShipmentIds: %s. %s",
-                        acc.prettyName(), StringUtils.join(shipmentIds, ","), Webs.E(e)));
+                Logger.warn(
+                        String.format("Update Account %s FBA Shipment failed. ShipmentIds: %s. %s",
+                                acc.prettyName(), StringUtils.join(shipmentIds, ","), Webs.E(e)));
             }
         }
     }

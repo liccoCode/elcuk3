@@ -42,28 +42,22 @@ import java.util.*;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Account extends Model {
-    private static Map<String, String> MERCHANT_ID;
+    /**
+     * 需要过滤掉的 MerchantId
+     */
+    public final static Map<String, String> OFFER_IDS;
+
+    static {
+        OFFER_IDS = new HashMap<String, String>();
+        OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
+        OFFER_IDS.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
+        OFFER_IDS.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
+    }
 
     /**
      * 必须把每个 Account 对应的 CookieStore 给缓存起来, 否则重新加载的 Account 对象没有登陆过的 CookieStore 了
      */
     private static Map<String, CookieStore> COOKIE_STORE_MAP;
-
-    /**
-     * 当使用 MERCHANT_ID 为 final 的时候, 在 OnStartUP 中的 loadModules 初始化报错...
-     *
-     * @return
-     */
-    public static Map<String, String> merchant_id() {
-        if(MERCHANT_ID == null) {
-            MERCHANT_ID = new HashMap<String, String>();
-            MERCHANT_ID.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
-            MERCHANT_ID.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
-            MERCHANT_ID.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
-        }
-        //TODO 其实市场的以后看到再添加进来
-        return MERCHANT_ID;
-    }
 
     public static Map<String, CookieStore> cookieMap() {
         if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, CookieStore>();
@@ -212,34 +206,44 @@ public class Account extends Model {
                     body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
 
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".homepage.html"), body);
+                        FileUtils.writeStringToFile(new File(
+                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
+                                        this.id + ".homepage.html"), body);
 
                     Document doc = Jsoup.parse(body);
                     Elements inputs = doc.select("form[name=signin] input");
 
                     if(inputs.size() == 0) {
-                        Logger.info("WebSite [" + this.type.toString() + "] Still have the Session with User [" + this.username + "].");
+                        Logger.info("WebSite [" + this.type.toString() +
+                                "] Still have the Session with User [" + this.username + "].");
                         return;
                     }
 
                     List<NameValuePair> params = new ArrayList<NameValuePair>();
                     for(Element el : inputs) {
                         String att = el.attr("name");
-                        if("email".equals(att)) params.add(new BasicNameValuePair(att, this.username));
-                        else if("password".equals(att)) params.add(new BasicNameValuePair(att, this.password));
+                        if("email".equals(att))
+                            params.add(new BasicNameValuePair(att, this.username));
+                        else if("password".equals(att))
+                            params.add(new BasicNameValuePair(att, this.password));
                         else params.add(new BasicNameValuePair(att, el.val()));
                     }
                     body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".afterLogin.html"), body);
+                        FileUtils.writeStringToFile(new File(
+                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
+                                        this.id + ".afterLogin.html"), body);
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
-                    if(navBar != null) Logger.info("%s Seller Central Login Successful!", this.prettyName());
+                    if(navBar != null)
+                        Logger.info("%s Seller Central Login Successful!", this.prettyName());
                     else Logger.warn("%s Seller Central Login Failed!", this.prettyName());
 
                     HTTP.client().getCookieStore().clearExpired(new Date());
                 } catch(Exception e) {
                     try {
-                        FileUtils.writeStringToFile(new File(Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" + this.id + ".error.html"), body);
+                        FileUtils.writeStringToFile(new File(
+                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
+                                        this.id + ".error.html"), body);
                     } catch(IOException e1) {
                         //ignore.
                     }
@@ -247,7 +251,9 @@ public class Account extends Model {
                 }
                 break;
             default:
-                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type + " is not support!");
+                Logger.warn(
+                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
+                                " is not support!");
         }
     }
 
@@ -273,8 +279,10 @@ public class Account extends Model {
                 Elements inputs = doc.select("#ap_signin_form input");
 
                 if(inputs.size() == 0) {
-                    Logger.info("WebSite [" + market.toString() + "] Still have the Session with User [" + this.username + "].");
-                    FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
+                    Logger.info("WebSite [" + market.toString() +
+                            "] Still have the Session with User [" + this.username + "].");
+                    FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body,
+                            FLog.T.HTTP_ERROR);
                     return false;
                 }
 
@@ -282,27 +290,32 @@ public class Account extends Model {
                 for(Element el : inputs) {
                     String att = el.attr("name");
                     if("email".equals(att)) params.add(new BasicNameValuePair(att, this.username));
-                    else if("password".equals(att)) params.add(new BasicNameValuePair(att, this.password));
+                    else if("password".equals(att))
+                        params.add(new BasicNameValuePair(att, this.password));
                     else if("create".equals(att)) params.add(new BasicNameValuePair(att, "0"));//登陆
                     else params.add(new BasicNameValuePair(att, el.val()));
                 }
-                body = HTTP.post(this.cookieStore(market), doc.select("#ap_signin_form").first().attr("action"), params);
+                body = HTTP.post(this.cookieStore(market),
+                        doc.select("#ap_signin_form").first().attr("action"), params);
                 boolean isLogin = Account.isLoginFront(Jsoup.parse(body));
                 if(Play.mode.isDev())
-                    FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
+                    FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body,
+                            FLog.T.HTTP_ERROR);
                 boolean loginSucc = false;
                 if(isLogin) {
                     Logger.info("%s Amazon Site Login Successful!", this.prettyName());
                     loginSucc = true;
                 } else {
                     Logger.warn("%s Amazon Site Login Failed!", this.prettyName());
-                    FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body, FLog.T.HTTP_ERROR);
+                    FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body,
+                            FLog.T.HTTP_ERROR);
                     loginSucc = false;
                 }
                 HTTP.client().getCookieStore().clearExpired(new Date());
                 return loginSucc;
             default:
-                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market + " is not support!");
+                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market +
+                        " is not support!");
         }
         return false;
     }
@@ -320,7 +333,8 @@ public class Account extends Model {
             url = this.type.changeRegion(m.amid().name());
             HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
-            throw new FastRuntimeException(String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
+            throw new FastRuntimeException(
+                    String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
         }
     }
 
@@ -356,19 +370,81 @@ public class Account extends Model {
             this.loginAmazonSize(listing.market);
             sessionId = this.cookie("session-id", listing.market);
         }
-        String body = HTTP.post(this.cookieStore(listing.market), listing.market.amazonLikeLink(), Arrays.asList(
-                new BasicNameValuePair("action", "like"),
-                new BasicNameValuePair("itemId", listing.asin),
-                new BasicNameValuePair("context", "dp"),
-                new BasicNameValuePair("itemType", "asin"),
-                new BasicNameValuePair("sessionId", sessionId)
+        String body = HTTP.post(this.cookieStore(listing.market), listing.market.amazonLikeLink(),
+                Arrays.asList(
+                        new BasicNameValuePair("action", "like"),
+                        new BasicNameValuePair("itemId", listing.asin),
+                        new BasicNameValuePair("context", "dp"),
+                        new BasicNameValuePair("itemType", "asin"),
+                        new BasicNameValuePair("sessionId", sessionId)
 
-        ));
+                ));
         boolean success = StringUtils.contains(body, "\"success\":true");
         AmazonLikeRecord likeRecord = new AmazonLikeRecord(listing, this);
         if(success) likeRecord.save();
-        else Logger.warn("%s Click %s %s Like Failed.", this.prettyName(), listing.market, listing.asin);
+        else Logger.warn("%s Click %s %s Like Failed.", this.prettyName(), listing.market,
+                listing.asin);
         return new F.T2<AmazonLikeRecord, String>(likeRecord, body);
+    }
+
+    public boolean addToWishList(Listing listing) {
+        /**
+         * 1.检查账户是否登陆
+         * 2.抓取wishlist的页面数据,判断账户是否已经创建wishlist 如果没有创建一个新的
+         * 3.抓取listing页面的表单数据添加Listing到 wishlist
+         */
+        String sessionId = this.cookie("session-id", listing.market);
+        if(sessionId == null) {
+            //登陆失败
+            if(!this.loginAmazonSize(listing.market)) {
+                return false;
+            }
+            sessionId = this.cookie("session-id", listing.market);
+        }
+
+        String wishlistBody = HTTP.get(this.cookieStore(listing.market), listing.market.amazonWishList());
+        //判断是否存在WishList
+        if(!wishlistBody.contains("listActions")) {
+            HTTP.post(this.cookieStore(listing.market), listing.market.amazonNewWishList(),
+                    Arrays.asList(
+                            new BasicNameValuePair("manual-create", "Y"),
+                            new BasicNameValuePair("sid", sessionId),
+                            new BasicNameValuePair("submit.movecopy", "1"),
+                            new BasicNameValuePair("isPrivate", "N"),
+                            new BasicNameValuePair("dest-list", "new-wishlist"),
+                            new BasicNameValuePair("isSearchable", "Y"),
+                            new BasicNameValuePair("sourceVendorId", "website.wishlist.intro"),
+                            new BasicNameValuePair("type", "wishlist"),
+                            new BasicNameValuePair("movecopy", "createnew")
+                    ));
+
+        }
+
+        String listing_body = HTTP.get(this.cookieStore(listing.market), listing.market.amazonAsinLink(listing.asin));
+        Document doc = Jsoup.parse(listing_body);
+        Elements inputs = doc.select("#handleBuy input");
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        for(Element el : inputs) {
+            if(StringUtils.isNotBlank(el.val())) {
+                params.add(new BasicNameValuePair(el.attr("name"), el.val()));
+            }
+        }
+        //每次的请求参数会根据listing变化而变化.所以全部加上去
+        params.add(new BasicNameValuePair("asin-redirect", listing.asin));
+        params.add(new BasicNameValuePair("quantity", "1"));
+        //下面两个参数用来避免某些含有参数offerListingId的请求 被添加到 Basket中去
+        params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.x", "-1710"));
+        params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.y", "-357"));
+        String result = HTTP.post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
+
+        //如果添加成功,或者是账户已经添加该Listing但是系统中无记录.
+        if(result.contains("hucSuccessMsg") | result.contains("appMessageBoxInfo")) {
+            new AmazonWishListRecord(listing, this).save();
+            return true;
+        }
+
+        return false;
+
     }
 
     /**
@@ -413,23 +489,27 @@ public class Account extends Model {
      * @return
      */
     private F.T3<Boolean, String, String> checkLoginAndFetchClickLinks(AmazonListingReview review) {
-        String html = HTTP.get(this.cookieStore(review.listing.market), LinkHelper.reviewLink(review));
+        String html = HTTP
+                .get(this.cookieStore(review.listing.market), LinkHelper.reviewLink(review));
         Document doc = Jsoup.parse(html);
         // 账号登陆以后, 链接中才会有 sign-out 字符串
         Elements els = doc.select(".votingButtonReviews");
         String[] upAndDownLink = new String[2];
         for(Element el : els) {
             String link = el.attr("href");
-            if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm"))) upAndDownLink[0] = link;
+            if("1".equals(StringUtils.substringBetween(link, "Helpful/", "/ref=cm")))
+                upAndDownLink[0] = link;
             else upAndDownLink[1] = link;
         }
         boolean isLogin = Account.isLoginFront(doc);
         // 这里检查点击不成功的原因
         if(!isLogin)
-            FLog.fileLog(String.format("%s.clickReiew.%s.%s.Failed.html", this.prettyName(), review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("%s.clickReiew.%s.%s.Failed.html", this.prettyName(),
+                    review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
         // 将另外一个错误分开记录文件
         if(upAndDownLink[0] == null || upAndDownLink[1] == null)
-            FLog.fileLog(String.format("%s.URL_NULL.%s.%s.Failed.html", this.prettyName(), review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("%s.URL_NULL.%s.%s.Failed.html", this.prettyName(),
+                    review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
 
         return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
     }
@@ -482,13 +562,20 @@ public class Account extends Model {
     public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
         switch(market) {
             case AMAZON_UK:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false, true).fetch();
+                return Account
+                        .find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false,
+                                true).fetch();
             case AMAZON_DE:
-                return Account.find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false, false, true).fetch();
+                return Account
+                        .find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false, false,
+                                true).fetch();
             case AMAZON_US:
-                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false, false, true).fetch();
+                return Account
+                        .find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false, false,
+                                true).fetch();
             default:
-                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
+                        .fetch();
         }
     }
 
@@ -522,9 +609,11 @@ public class Account extends Model {
         switch(type) {
             case AMAZON_UK:
             case AMAZON_DE:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null, "London", "LONDON", "UK", "NW6 7HY");
+                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
+                        "London", "LONDON", "UK", "NW6 7HY");
             case AMAZON_US:
-                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null, "London", "LONDON", "UK", "NW6 7HY");
+                return new Address("EasyAcc", "Basement Flat 203 Kilburn high road", null, null,
+                        "London", "LONDON", "UK", "NW6 7HY");
         }
         return null;
     }
@@ -535,14 +624,24 @@ public class Account extends Model {
      * 1. 将 MerchantID 持久在内存中
      * 2. 登陆 Account 账户
      */
-    public static void init() {
+    public static void initLogin() {
         synchronized(Account.class) {
             List<Account> accs = Account.openedSaleAcc();
             for(Account ac : accs) {
-                if(ac.isSaleAcc) merchant_id().put(ac.merchantId, ac.uniqueName);
                 Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
                 ac.loginAmazonSellerCenter();
             }
+        }
+    }
+
+    /**
+     * 初始化加载系统内账户的 OffersId
+     */
+    public static void initOfferIds() {
+        List<Account> accs = Account.openedSaleAcc();
+        for(Account ac : accs) {
+            if(ac.isSaleAcc)
+                OFFER_IDS.put(ac.merchantId, ac.uniqueName);
         }
     }
 
