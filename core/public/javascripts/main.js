@@ -177,25 +177,8 @@ function toggle_init(){
     // 为页面添加 data-toggle=toggle 元素事件(类似 bootstrap 的 collapse)
     $('body').off('click', '[data-toggle=toggle]').on('click', '[data-toggle=toggle]', function(e){
         var target = $(this).attr('data-target');
-        $(target).fadeToggle('fast');
+        $(target).fadeToggle('fast').css('cursor', 'pointer');
         e.preventDefault();
-    });
-    $('[data-toggle=toggle]').css("cursor", "pointer");
-}
-
-function link_confirm_init(){
-    $('body').off('click', 'a[data-confirm=link]').on('click', 'a[data-confirm=link]', function(e){
-        var content = "确认执行此操作?";
-        if($(this).attr('content')) content = $(this).attr('content');
-        if(!confirm(content)) e.preventDefault()
-    });
-}
-
-function btn_confirm_init(){
-    $('body').off('click', 'button[data-confirm=btn]').on('click', 'button[data-confirm=btn]', function(e){
-        var content = "确认执行此操作?";
-        if($(this).attr('content')) content = $(this).attr('content');
-        if(!confirm(content)) e.preventDefault();else $(this).button('loading');
     });
 }
 
@@ -206,11 +189,19 @@ function btn_loading_init(){
     })
 }
 
+/**
+ * 对在 Table 中含有 checkbox.checkall 的元素进行全选处理
+ */
+function tableCheckBoxCheckAll(){
+    $('table').on('change', ':checkbox.checkall', function(){
+        var table = $(this).parents('table').find(':checkbox').prop('checked', $(this).prop('checked'));
+    });
+}
+
 $(function(){
     toggle_init();
-    link_confirm_init();
     btn_loading_init();
-    btn_confirm_init();
+    tableCheckBoxCheckAll();
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });

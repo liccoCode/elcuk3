@@ -15,48 +15,49 @@ import java.util.Date;
 public enum M {
     AMAZON_UK {
         @Override
-        public String humanName() {
+        public String label() {
             return "英国亚马逊";
         }
     },
     AMAZON_DE {
         @Override
-        public String humanName() {
+        public String label() {
             return "德国亚马逊";
         }
     },
     AMAZON_FR {
         @Override
-        public String humanName() {
+        public String label() {
             return "法国亚马逊";
         }
     },
     AMAZON_IT {
         @Override
-        public String humanName() {
+        public String label() {
             return "意大利亚马逊";
         }
     },
     AMAZON_ES {
         @Override
-        public String humanName() {
+        public String label() {
             return "西班牙亚马逊";
         }
     },
     AMAZON_US {
         @Override
-        public String humanName() {
+        public String label() {
             return "美国亚马逊";
         }
     },
     EBAY_UK {
         @Override
-        public String humanName() {
+        public String label() {
             return "英国 Ebay";
         }
     };
 
-    public abstract String humanName();
+    public abstract String label();
+
 
     /**
      * 为 Amazon 不同市场的 Id, 与 Market 对应
@@ -327,6 +328,62 @@ public enum M {
                 return String
                         .format("http://www.%s/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513",
                                 this.toString());
+            case EBAY_UK:
+                return "unknow..";
+            default:
+                return "Not Support.";
+        }
+    }
+
+    /**
+     * 账户 Wishlist的网站抓取地址
+     *
+     * @return
+     */
+    public String amazonWishList() {
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return String
+                        .format("http://www.%s/gp/registry/wishlist", this.toString());
+            case EBAY_UK:
+                return "unknow..";
+            default:
+                return "Not Support.";
+        }
+    }
+
+    public String amazonNewWishList() {
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return String
+                        .format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list", this.toString());
+            case EBAY_UK:
+                return "unknow..";
+            default:
+                return "Not Support.";
+        }
+    }
+
+    public String amazonAsinLink(String asin) {
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_US:
+                return String
+                        .format("http://www.%s/dp/%s", this.toString(), asin);
             case EBAY_UK:
                 return "unknow..";
             default:

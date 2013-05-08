@@ -45,8 +45,17 @@ public class ShipItem extends GenericModel {
      * @param shipment
      */
     public ShipItem(ProcureUnit unit, Shipment shipment) {
-        this.unit = unit;
+        this(unit);
         this.shipment = shipment;
+    }
+
+    /**
+     * 通过 ProcureUnit 创建 ShipItem
+     *
+     * @param unit
+     */
+    public ShipItem(ProcureUnit unit) {
+        this.unit = unit;
         this.qty = unit.qty();
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
         this.state = S.NORMAL;
@@ -72,14 +81,8 @@ public class ShipItem extends GenericModel {
     @Expose
     public Shipment shipment;
 
-    /**
-     * 如果一个 ShipItem 拥有了 FBA, 那么这个 FBA 所属的 Shipment 应该与 ShipItem 所属的 Shipment 必须一样
-     */
-    @ManyToOne
-    public FBAShipment fba;
-
     @Expose
-    @OneToOne
+    @ManyToOne
     public ProcureUnit unit;
 
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
@@ -159,10 +162,11 @@ public class ShipItem extends GenericModel {
      * @param shipment
      */
     public void changeShipment(Shipment shipment) {
-        if(this.fba != null) {
-            this.fba.shipment = shipment;
-            this.fba.save();
-        }
+        //TODO effect: 与 FBA 没有关系, 可以删除. 同时这个方法也可以删除.
+//        if(this.fba != null) {
+//            this.fba.shipment = shipment;
+//            this.fba.save();
+//        }
         this.shipment = shipment;
         this.save();
     }

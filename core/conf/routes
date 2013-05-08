@@ -32,6 +32,7 @@ PUT     /apply/{id}/procure/confirm                         Applys.procureConfir
 GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
 DELETE /deliveryment/{id}/departApply                        Deliveryments.departProcureApply
+POST   /deliveryment                                         Deliveryments.create
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
@@ -58,6 +59,10 @@ DELETE  /payment/{id}/lock                                  Payments.unlock
 POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
 POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
+GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
+POST    /procureunit                                        ProcureUnits.create
+GET     /procureunit/{id}/edit                              ProcureUnits.edit
+PUT     /procureunit/{id}                                   ProcureUnits.update
 
 # PaymentUnits
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue

@@ -7,6 +7,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -214,6 +215,14 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
+        if(this.state != S.PENDING)
+            Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
+        if(this.deliveryTime == null)
+            Validation.addError("", "交货时间必须填写");
+        if(this.orderTime == null)
+            Validation.addError("", "下单时间必须填写");
+        if(Validation.hasErrors()) return;
+
         this.state = Deliveryment.S.CONFIRM;
         this.save();
     }
@@ -393,9 +402,9 @@ public class Deliveryment extends GenericModel {
         }
         deliveryment.save();
 
-        new ElcukRecord(Messages.get("deliveryment.createFromProcures"),
-                Messages.get("deliveryment.createFromProcures.msg", pids, deliveryment.id),
-                deliveryment.id).save();
+        new ERecordBuilder("deliveryment.createFromProcures")
+                .msgArgs(StringUtils.join(pids, ","), deliveryment.id)
+                .fid(deliveryment.id).save();
         return deliveryment;
     }
 

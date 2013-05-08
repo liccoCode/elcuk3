@@ -6,6 +6,7 @@ import jobs.works.ListingReviewsWork;
 import models.market.*;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -15,15 +16,16 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * 获取、记录、自动执行 Amazon 账户对Listing的动作
  * Created by IntelliJ IDEA.
  * User: wyattpan
  * Date: 7/19/12
  * Time: 11:59 AM
  */
 @With({GlobalExceptionHandler.class, Secure.class})
-public class AmazonReviews extends Controller {
+@Check("amazonoperations")
+public class AmazonOperations extends Controller {
 
-    @Check("amazonReviews.index")
     public static void index() {
         Set<String> allAsin = Listing.allASIN();
         renderArgs.put("asins", J.json(allAsin));
@@ -100,6 +102,39 @@ public class AmazonReviews extends Controller {
     public static void checkLeftClicks(List<String> rvIds) {
         List<F.T2<String, Integer>> reviewLeftClicks = AmazonListingReview.reviewLeftClickTimes(rvIds);
         renderJSON(J.json(reviewLeftClicks));
+    }
+
+
+    /**
+     * 获取Listing的wishlist
+     *
+     * @param asin
+     * @param m
+     */
+    public static void wishList(String asin, String m) {
+        M market = M.val(m);
+        String lid = Listing.lid(asin, market);
+        F.T2<Long, Long> wishlist = AmazonWishListRecord.wishList(asin, market);
+        Listing listing = Listing.findById(lid);
+        List<AmazonWishListRecord> records = AmazonWishListRecord.wishListInfos(lid);
+        render(wishlist, listing, records);
+    }
+
+    /**
+     * 添加Listing到WishList
+     *
+     * @param asin
+     * @param m
+     */
+    public static void addToWishList(String asin, String m) {
+        M market = M.val(m);
+        String lid = Listing.lid(asin, market);
+        Listing listing = Listing.findById(lid);
+        if(listing == null)
+            throw new FastRuntimeException("Listing 不存在, 请通过 Amazon Recrawl 来添加.");
+        F.T2<Account, Integer> accT2 = listing.pickUpOneAccountToWishList();
+        boolean success = accT2._1.addToWishList(listing);
+        renderJSON(success);
     }
 
 }
