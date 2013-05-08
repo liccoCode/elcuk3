@@ -133,7 +133,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         CONFIRM {
             @Override
             public String label() {
-                return "准备运输,已创建 FBA";
+                return "锁定准备运输";
             }
         },
         /**
@@ -154,6 +154,35 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 return "清关中";
             }
         },
+
+        PACKAGE {
+            @Override
+            public String label() {
+                return "提货中";
+            }
+        },
+
+        BOOKING {
+            @Override
+            public String label() {
+                return "预约中";
+            }
+        },
+
+        DELIVERYING {
+            @Override
+            public String label() {
+                return "派送中";
+            }
+        },
+
+        RECEIVING {
+            @Override
+            public String label() {
+                return "入库中";
+            }
+        },
+
         /**
          * 完成
          */
