@@ -68,6 +68,28 @@ public class Shipments extends Controller {
         redirect("/shipments/show/" + ship.id);
     }
 
+    /**
+     * 通过采购计划创建运输单
+     *
+     * @param units
+     */
+    public static void procureUnitToShipment(List<Long> units) {
+        if(units == null || units.size() <= 0)
+            Validation.addError("", "必须选择采购计划");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            ShipItems.index(null);
+        }
+
+        Shipment shipment = new Shipment().buildFromProcureUnits(units);
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            ShipItems.index(null);
+        }
+        flash.success("成功为 %s 个采购计划创建运输单 %s", units.size(), shipment.id);
+        show(shipment.id);
+    }
 
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {

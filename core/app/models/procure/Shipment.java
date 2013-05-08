@@ -16,6 +16,7 @@ import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.F;
@@ -42,8 +43,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment() {
         this.createDate = new Date();
-        this.state = S.PLAN;
-        this.pype = P.WEIGHT;
         // 暂时这么写
         this.source = "深圳";
     }
@@ -79,13 +78,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this();
         this.id = Shipment.id();
         this.planBeginDate = planBeginDate;
-        int plusDay = 7;
-        if(type == T.EXPRESS) plusDay = 7;
-        else if(type == T.AIR) plusDay = 15;
-        else if(type == T.SEA) plusDay = 60;
-        this.planArrivDate = new DateTime(planBeginDate).plus(plusDay).toDate();
-        this.whouse = whouse;
         this.type = type;
+        this.calcuPlanArriveDate();
+        this.whouse = whouse;
         this.title = String.format("%s 去往 %s 在 %s", this.id, this.whouse.name(),
                 Dates.date2Date(this.planBeginDate));
     }
@@ -96,7 +91,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         SEA {
             @Override
-            public String toString() {
+            public String label() {
                 return "海运";
             }
         },
@@ -105,7 +100,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         AIR {
             @Override
-            public String toString() {
+            public String label() {
                 return "空运";
             }
         },
@@ -114,10 +109,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         EXPRESS {
             @Override
-            public String toString() {
+            public String label() {
                 return "快递";
             }
-        }
+        };
+
+        public abstract String label();
     }
 
     public enum S {
@@ -234,7 +231,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Column(length = 12)
     @Expose
     @Required
-    public S state;
+    public S state = S.PLAN;
 
     /**
      * 预计发货日期
@@ -275,7 +272,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     @Enumerated(EnumType.STRING)
     @Expose
-    public P pype;
+    public P pype = P.WEIGHT;
 
     /**
      * 体积, 单位立方米
@@ -371,6 +368,75 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(StringUtils.isBlank(this.trackNo)) this.trackNo = null;
     }
 
+    public boolean calcuPlanArriveDate() {
+        if(this.planBeginDate == null || this.type == null)
+            throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
+        int plusDay = 7;
+        if(type == T.EXPRESS) plusDay = 7;
+        else if(type == T.AIR) plusDay = 15;
+        else if(type == T.SEA) plusDay = 60;
+        this.planArrivDate = new DateTime(this.planBeginDate).plusDays(plusDay).toDate();
+        return true;
+    }
+
+    /**
+     * 从采购计划创建运输单
+     *
+     * @param units
+     */
+    public Shipment buildFromProcureUnits(List<Long> units) {
+        /**
+         * 1. 检查采购计划数量是否一致
+         * 2. 检查运输方式是否一致
+         * 3. 检查快递仓库是否一致或者 海运/空运 国家是否一致
+         */
+
+        List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
+        if(procureUnits.size() != units.size())
+            Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
+
+        ProcureUnit firstProcureUnit = procureUnits.get(0);
+        Shipment.T firstShipType = firstProcureUnit.shipType;
+        Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
+
+        for(ProcureUnit unit : procureUnits) {
+            if(firstShipType != unit.shipType) {
+                Validation.addError("", "不同运输方式不可以创建到一个运输单.");
+                break;
+            }
+            earlyPlanBeginDate = new Date(
+                    Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
+        }
+
+        this.type = firstShipType;
+
+        for(ProcureUnit unit : procureUnits) {
+            if(this.type == T.EXPRESS) {
+                if(!firstProcureUnit.whouse.id.equals(unit.whouse.id)) {
+                    Validation.addError("", "快递运输, 仓库不一样不可以创建到一个运输单");
+                    break;
+                }
+            } else {
+                if(!firstProcureUnit.whouse.country.equals(unit.whouse.country)) {
+                    Validation.addError("", "海运/空运, 运往国家不一样不可以创建一个运输单");
+                    break;
+                }
+            }
+        }
+
+        if(Validation.hasErrors()) return this;
+
+        this.id = Shipment.id();
+        this.planBeginDate = earlyPlanBeginDate;
+        this.calcuPlanArriveDate();
+        this.whouse = firstProcureUnit.whouse;
+        this.creater = User.current();
+        this.save();
+        for(ProcureUnit unit : procureUnits) {
+            this.addToShip(unit);
+        }
+        return this;
+    }
 
     public void cancel() {
         List<Integer> shipItemIds = new ArrayList<Integer>();

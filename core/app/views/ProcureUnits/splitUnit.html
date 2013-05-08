@@ -55,7 +55,7 @@
 
       <tr>
         <th>运输方式</th>
-        <td>${unit.shipType}</td>
+        <td>${unit.shipType.label()}</td>
 
         <th>是否到货代</th>
         <td>#{yesOrNo f:unit.isPlaced/}</td>
@@ -130,7 +130,7 @@
 
         <tr>
           <th>运输方式</th>
-          <td>${unit.shipType}</td>
+          <td>${unit.shipType.label()}</td>
 
           <th>是否到货代</th>
           <td>#{yesOrNo f: unit.isPlaced/}</td>

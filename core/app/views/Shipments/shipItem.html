@@ -134,7 +134,7 @@
                   #{if unit.isPlaced}<i class="icon-star" style="color:#FF2200"></i>#{/if}
               ${unit.qty()}
               </td>
-              <td>${unit.shipType}</td>
+              <td>${unit.shipType.label()}</td>
               <td>${unit.whouse.name()}</td>
               <td style="color:${unit.stage.rgb()}">${unit.stage}</td>
               <td>${unit.product.productName.omis(80)}</td>

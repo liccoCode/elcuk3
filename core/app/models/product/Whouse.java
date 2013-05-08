@@ -139,6 +139,7 @@ public class Whouse extends Model {
 
     public static List<Whouse> findByMarket(M market) {
         String country = "UK";
+        //TODO 业务部门将 FR 交由 DE 发货需要处理
         if(Arrays.asList(M.AMAZON_FR, M.AMAZON_ES, M.AMAZON_IT, M.AMAZON_UK).contains(market))
             country = "UK";
         else if(Arrays.asList(M.AMAZON_US).contains(market))

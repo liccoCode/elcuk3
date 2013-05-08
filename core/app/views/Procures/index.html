@@ -50,7 +50,7 @@
       <select name="p.shipType" class="inline">
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
-        <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t}</option>
+        <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
       #{/list}
       </select>
 

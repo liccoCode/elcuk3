@@ -627,6 +627,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 总重量 kg
+     *
+     * @return
+     */
+    public float totalWeight() {
+        return this.qty() * this.product.weight;
+    }
+
+    /**
      * 转换成记录日志的格式
      *
      * @return

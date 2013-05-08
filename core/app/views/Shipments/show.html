@@ -51,7 +51,7 @@
           <th>状态</th>
           <td>${ship.state}</td>
           <th>运输方式</th>
-          <td>${ship.type}</td>
+          <td>${ship.type.label()}</td>
         </tr>
 
         <tr>
@@ -139,7 +139,7 @@
         <tr>
           <th>仓库</th>
           <td>
-          #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse}
+          #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse?.id}
               #{option ''}选择仓库#{/option}
           #{/select}
           </td>

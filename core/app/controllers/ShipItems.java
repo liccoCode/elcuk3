@@ -10,10 +10,10 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ShipItems extends Controller {
 
-    public static void index(ProcureUnitShipPost post) {
-        if(post == null)
-            post = new ProcureUnitShipPost();
-        List<ProcureUnit> items = post.query();
-        render(post, items);
+    public static void index(ProcureUnitShipPost p) {
+        if(p == null)
+            p = new ProcureUnitShipPost();
+        List<ProcureUnit> units = p.query();
+        render(p, units);
     }
 }
