@@ -25,7 +25,7 @@
     <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
     <td>
     ${ship.totalWeight().format("0.00")}
-          #{set diff: ship.totalWeight()-ship.minimumTraffic() /}
+          #{set diff: ship.totalWeight() - ship.minimumTraffic() /}
           #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
         #{if diff>0}
         ${" 超出"+diff.format("0.00")}

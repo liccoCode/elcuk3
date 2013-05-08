@@ -106,7 +106,6 @@ public class ProcuresHelper extends JavaExtensions {
             default:
                 return "#333333";
         }
-
     }
 
     /**

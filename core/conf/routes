@@ -99,6 +99,7 @@ GET     /shipments                                          Shipments.index
 GET     /shipment/{id}                                      Shipments.show
 PUT     /shipment/{id}/process                              Shipments.refreshProcuress
 POST    /procureunits/shipment/new                          Shipments.procureUnitToShipment
+GET     /shipment/{id}/preview                              Shipments.preview
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

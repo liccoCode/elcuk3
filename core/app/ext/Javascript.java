@@ -30,6 +30,10 @@ public class Javascript extends FastTags {
             Template tmpl = TemplateLoader.load(args.get("arg").toString());
             Map<String, Object> newArgs = new HashMap<String, Object>();
             newArgs.putAll(template.getBinding().getVariables());
+            for(Object key : args.keySet()) {
+                if(key.equals("arg")) continue;
+                newArgs.put(key.toString(), args.get(key));
+            }
             newArgs.put("_isInclude", true);
             //dont write to the response.out, need to be escaped before.
             newArgs.remove("out");

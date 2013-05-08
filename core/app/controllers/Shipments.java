@@ -104,6 +104,16 @@ public class Shipments extends Controller {
         render(ship);
     }
 
+    public static void preview(String id) {
+        Shipment ship = Shipment.findById(id);
+        if(ship == null) {
+            Validation.addError("", "ShipmentId 错误");
+            Webs.errorToFlash(flash);
+        }
+
+        render(ship);
+    }
+
     @Util
     public static void checkShowError(Shipment ship) {
         if(Validation.hasErrors()) {

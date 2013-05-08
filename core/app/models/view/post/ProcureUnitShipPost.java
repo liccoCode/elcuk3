@@ -4,9 +4,9 @@ import helper.Dates;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.db.helper.SqlSelect;
 import play.libs.F;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,22 +36,32 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        SqlSelect jpql = new SqlSelect();
-        jpql.select("p").from("ProcureUnit p");
+        StringBuilder sql = new StringBuilder("SELECT p FROM ProcureUnit p")
+                .append(" LEFT JOIN p.fba f").append(" WHERE ");
+        List<Object> params = new ArrayList<Object>();
 
-        jpql.where("p." + this.dateType + ">=?").param(Dates.morning(this.from))
-                .where("p." + this.dateType + "<=?").params(Dates.night(this.to));
+        sql.append("p.").append(this.dateType).append(">=?").append(" AND ")
+                .append("p.").append(this.dateType).append("<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
+
 
         if(!this.isHaveShipItems)
-            jpql.where("SIZE(p.shipItems)=0");
+            sql.append(" AND SIZE(p.shipItems)=0");
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            jpql.where("p.fba.shipmentId LIKE ?").param(word)
-                    .orWhere("p.sku LIKE ?").param(word);
+            sql.append(" AND (f.shipmentId LIKE ?")
+                    .append(" OR p.sku LIKE ?")
+                    .append(" OR p.sid LIKE ?")
+                    .append(")");
+
+            for(int i = 0; i < 3; i++) {
+                params.add(word);
+            }
         }
 
-        return new F.T2<String, List<Object>>(jpql.toString(), jpql.getParams());
+        return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
     @Override

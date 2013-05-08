@@ -26,7 +26,7 @@
     </td>
     <td>${ship.cooper?.name}</td>
     <td>${ship.internationExpress}</td>
-    <td>${ship.type}</td>
+    <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
     <td>${ship.whouse?.name()}</td>
     <td>
         #{ifnot ship.creater}

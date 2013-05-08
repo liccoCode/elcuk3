@@ -407,6 +407,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return true;
     }
 
+    public List<ProcureUnit> multipleUnitValidate(List<Long> units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
+        if(procureUnits.size() != units.size())
+            Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
+
+        return procureUnits;
+    }
+
     /**
      * 从采购计划创建运输单
      *
@@ -419,9 +427,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 3. 检查快递仓库是否一致或者 海运/空运 国家是否一致
          */
 
-        List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
-        if(procureUnits.size() != units.size())
-            Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
+        List<ProcureUnit> procureUnits = multipleUnitValidate(units);
 
         ProcureUnit firstProcureUnit = procureUnits.get(0);
         Shipment.T firstShipType = firstProcureUnit.shipType;
@@ -500,6 +506,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输目的地不一样, 无法添加");
         if(unit.shipType != this.type)
             Validation.addError("", "运输方式不一样, 无法添加.");
+        if(unit.shipItems.size() > 0)
+            Validation.addError("", "采购计划已经拥有运输项目, 不可以再重新创建.");
         if(Validation.hasErrors()) return;
 
         ShipItem shipitem = new ShipItem(unit);
@@ -792,6 +800,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return Shipment.find("state=? ORDER BY createDate", state).fetch();
     }
 
+    /**
+     * 根据 仓库 与 运输类型查找运输单, 在查找的同时, 也会自动检查是否需要创建固定周期的运输单
+     *
+     * @param whouseId
+     * @param shipType
+     * @return
+     */
     public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType) {
         /**
          * 1. 判断是否有过期的周期型运输单, 有的话自动关闭
@@ -850,6 +865,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
         return Shipment.find("planBeginDate>=? AND whouse=? AND type=? ORDER BY planBeginDate",
                 planBeginDate, whouse, shipType).fetch();
+    }
+
+    public static List<Shipment> findByState(S state) {
+        return Shipment.find("state=?", state).fetch();
     }
 
     /**
