@@ -51,19 +51,22 @@
   <div class="span12">
   #{render './_shipitem.html', items: ship.items/}
   </div>
-  <div class="btn-toolbar">
-    <button class="btn"></button>
-  </div>
 </div>
 <div class="row-fluid">
-  <div class="span12">
-    <form action="" method="post">
-      <input type="hidden" name="id" value="${ship.id}">
-    </form>
+  <div class="span3">
+    <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
+
+    <div class="btn-group">
+      <button class="btn" id="previewBtn"><i class="icon-file-alt"></i> 预览</button>
+      <button class="btn btn-success"><i class="icon-adjust"></i> 调整</button>
+    </div>
+  </div>
+
+  <div class="span9" id="preview">
   </div>
 </div>
 
-<div class="row-fluid">
+<div class="row-fluid" style="margin-top:20px">
   <div class="span6">
   #{records records:records/}
   </div>

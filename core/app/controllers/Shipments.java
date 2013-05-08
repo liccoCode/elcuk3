@@ -101,7 +101,11 @@ public class Shipments extends Controller {
 
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
-        render(ship);
+        if(ship.type == Shipment.T.SEA) {
+            render("需要新的模板!", ship);
+        } else {
+            render(ship);
+        }
     }
 
     public static void preview(String id) {

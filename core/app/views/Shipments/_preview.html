@@ -2,7 +2,7 @@
 <div class="span3">
   <dl class="dl-horizontal">
     <dt>ShipmentId</dt>
-    <dd>${ship.id}</dd>
+    <dd><a href="@{Shipments.show(ship.id)}" target="_blank">${ship.id}</a></dd>
     <dt>FBAs</dt>
     <dd>
         #{list ship.fbas()}
@@ -36,7 +36,7 @@
 <div class="span3">
   <dl class="dl-horizontal">
     <dt>状态</dt>
-    <dd>${ship.state.label()}</dd>
+    <dd style="color:${ship.state.rgb()}">${ship.state.label()}</dd>
     <dt>运输商</dt>
     <dd>${ship.cooper?.fullName}&nbsp;</dd>
     <dt>预计抵达时间</dt>

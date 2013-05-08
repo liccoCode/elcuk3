@@ -31,3 +31,15 @@ $ ->
       e.preventDefault()
     else
       $(@).button('loading').parents('form').attr('action', '/Shipments/deployToAmazon').submit()
+
+
+  $('#previewBtn').click (e) ->
+    shipment = $("[name='shipmentId']")
+    unless shipment.val()
+      EF.colorAnimate(shipment)
+    else
+      LoadMask.mask()
+      $.getScript("/shipment/#{shipment.val()}/preview")
+        .done(-> LoadMask.unmask())
+        .fail(-> LoadMask.unmask())
+    e.preventDefault()
