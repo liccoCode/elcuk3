@@ -10,23 +10,7 @@
 
 #{flash_alert /}
 
-#{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw()}
-<ul>
-  <li>运输单只能运往一个仓库, 其运输的货物也需要是同一个仓库的</li>
-  <li>运输单的 Title 处理用来标识系统内的运输单外, 也是 Amazon FBA Shipment 的 Title</li>
-  <li>"开始运输" 之后, 会同步 FBA Shipment 标记 Shipped</li>
-  <li>"开始运输" 时, 需要将数据补全, 并且开始运输以后, 信息不再可以修改</li>
-  <li>在运输单标记开始运输之前, 都可以对信息进行更改,调整</li>
-  <li>Fnsku 会在运输单确认以后, 进行一次同步</li>
-  <li>总体积单位为 m3 ,总重量单位为 kg; 如果发现数据为 0, 请检查 Product 数据是否填充完整.</li>
-  <li>[部分更新] 功能,更新 Comment 与 TrackNo 两部分值</li>
-  <li class="text-error">如果拥有 <i style="color:#C09853;" class="icon-star"></i> 标记, 为周期型运输单, 其不允许创建
-    FBA Shipment,
-    而是用来接收 PM 的采购计划.
-  </li>
-  <li class="text-error">如果是 Create By System, 那么在第一次更新时会设置创建者为更新者</li>
-</ul>
-#{/info_row}
+#{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
 <div class="row-fluid">
   <div class="span12">
     <form action="@{Shipments.update()}" method="post">
@@ -231,13 +215,6 @@
   <div class="span12">
     <form action="" method="post">
       <input type="hidden" name="id" value="${ship.id}">
-
-    #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
-      <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">查看运输项目</a>
-    #{/if}
-    #{power.ck "shipments.splitshipment"}
-      <button id="split_shipment" class="btn btn-warning">分拆运输项目</button>
-    #{/power.ck}
     </form>
   </div>
 </div>
@@ -251,7 +228,7 @@
     <div class="row-fluid">
       <div class="span12">
         <h4 class="text-warning">
-          运输进程
+          运输进度
           <i class="icon-sort-down"></i>
           &nbsp;
           <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-mini btn-danger" data-method='PUT'>
@@ -265,7 +242,7 @@
     ${ship.iExpressHTML.raw()}
     #{/if}
     #{else }
-      还没有运输信息
+      还没有跟踪信息
     #{/else}
     </div>
   </div>

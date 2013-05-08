@@ -5,7 +5,6 @@ import helper.Dates;
 import helper.FLog;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.finance.PaymentUnit;
 import models.product.Whouse;
@@ -467,6 +466,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return this;
     }
 
+    // TODO effect: 取消运输单需要调整
     public void cancel() {
         List<Integer> shipItemIds = new ArrayList<Integer>();
         for(ShipItem item : this.items) shipItemIds.add(item.id.intValue());
@@ -486,18 +486,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void setTrackNo(String trackNo) {
         if(StringUtils.isNotBlank(trackNo)) this.trackNo = trackNo.trim();
         else this.trackNo = null;
-    }
-
-    /**
-     * 向 Shipment 添加需要运输的 ProcureUnit
-     * <p/>
-     * ps: 这个方法不允许并发
-     *
-     * @param unitId
-     */
-    public synchronized void addToShip(List<Long> unitId) {
-        //TODO effect: shipment.ship 权限需要删除
-        throw new FastRuntimeException("此方法需要删除!");
     }
 
     /**
@@ -617,55 +605,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return sbd.toString();
     }
 
-    /**
-     * 对 Shipment 进行分拆, 主要解决的目的为运输单在 PM 处理好以后, 跟单人员需要将运输单根据实际情况分拆成为不同的运输单进行运输.
-     * 每一票运输单对应一个唯一的 tracking number.
-     */
-    public F.Option<Shipment> splitShipment(List<String> shipItemIds) {
-        if(this.state != S.PLAN && this.state != S.CONFIRM)
-            Validation.addError("", "分拆运输单只运输在 \"计划\" 与 \"确认运输\" 状态");
-
-        List<ShipItem> needSplitItems = ShipItem
-                .find("id IN " + JpqlSelect.inlineParam(shipItemIds)).fetch();
-        if(needSplitItems.size() != shipItemIds.size())
-            Validation.addError("", "分拆运输单的运输项目数量与数据库中记录的不一致");
-        // TODO: effect
-//        for(ShipItem itm : needSplitItems) {
-//            if(itm.fba != null)
-//                Validation.addError("", "运输项目已经附属了 FBA, 请先请 FBA 中删除再进行拆分");
-//        }
-        if(Validation.hasErrors()) return F.Option.None();
-
-        Shipment newShipment = new Shipment(this);
-        newShipment
-                .comment(String.format("从运输单 %s 分拆 %s items 而来.", this.id, needSplitItems.size()));
-        newShipment.save();
-        for(ShipItem spitem : needSplitItems) {
-            spitem.shipment = newShipment;
-            spitem.save();
-        }
-        new ElcukRecord(Messages.get("shipment.splitShipment"),
-                Messages.get("shipment.splitShipment.msg",
-                        StringUtils.join(shipItemIds, Webs.SPLIT), newShipment.id),
-                this.id).save();
-        this.notifyWithMuchMoreShipmentCreate();
-        return F.Option.Some(newShipment);
-    }
-
-    /**
-     * 用来检查并且提醒运输者, 系统内运输单创建数量太多
-     */
-    public void notifyWithMuchMoreShipmentCreate() {
-        long count = Shipment.count("createDate>=? AND createDate<=?", Dates.morning(new Date()),
-                Dates.night(new Date()));
-        //创建10 个以上的运输单才提醒
-        if(count % 10 == 0 && count > 11) {
-            long noitemShipments = Shipment.count("SIZE(items)=0 AND state!=?", Shipment.S.CANCEL);
-            Notification.notifies(
-                    String.format("今天已经创建了 %s 个运输单, 并且系统内拥有 %s 个无运输项目的运输单, 请记得处理.", count,
-                            noitemShipments), Notification.SHIPPER);
-        }
-    }
 
     /**
      * 完成运输, 最终的确认

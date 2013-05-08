@@ -368,6 +368,7 @@ public class FBAShipment extends Model {
         return this.fbaCenter.codeToCountry();
     }
 
+    //TODO effect: 需要删除
     public static List<String> uncloseFBAShipmentIds() {
         return new FBAShipmentQuery().uncloseFBAShipmentIds();
     }

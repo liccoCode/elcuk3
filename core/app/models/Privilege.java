@@ -135,7 +135,8 @@ public class Privilege extends Model {
         privileges.add(new Privilege("fbas.deployToAmazon", "创建 FBA"));
         privileges.add(new Privilege("fbas.update", "更新 FBA"));
         privileges.add(new Privilege("shipments.deployfba", "删除 FBA"));
-        privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));
+        //TODO effect: 删除 shipments.splitshipment
+//        privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));
         privileges.add(new Privilege("shipments.movefba", "转移 FBA"));
 
         // Notification

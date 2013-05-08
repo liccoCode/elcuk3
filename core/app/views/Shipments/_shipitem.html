@@ -19,7 +19,6 @@
     <th>Received</th>
     <th>采购单</th>
     <th>预计到库时间</th>
-    <th>TurnOver</th>
     <th>供应商</th>
     <th>总重量(kg)</th>
     <th>总体积(m3)(kg)</th>
@@ -52,7 +51,6 @@
       </a>
     </td>
     <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
-    <td>${itm.getTurnOverT4()._1}</td>
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
       #{set totalVolume:itm.totalVolume()/}

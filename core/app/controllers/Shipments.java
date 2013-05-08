@@ -1,11 +1,9 @@
 package controllers;
 
-import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
-import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
@@ -64,8 +62,7 @@ public class Shipments extends Controller {
             render("Shipments/blank.html", ship);
         }
         ship.save();
-        ship.notifyWithMuchMoreShipmentCreate();
-        redirect("/shipments/show/" + ship.id);
+        show(ship.id);
     }
 
     /**
@@ -95,7 +92,6 @@ public class Shipments extends Controller {
     public static void setUpShowPage() {
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
-        renderArgs.put("fbas", J.json(FBAShipment.uncloseFBAShipmentIds()));
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
@@ -126,7 +122,7 @@ public class Shipments extends Controller {
         new ElcukRecord(Messages.get("shipment.update"),
                 Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
         flash.success("更新成功.");
-        redirect("/Shipments/show/" + ship.id);
+        show(ship.id);
     }
 
     /**
@@ -155,11 +151,6 @@ public class Shipments extends Controller {
         }
     }
 
-    public static void shipItem(String id) {
-        Shipment ship = Shipment.findById(id);
-        render(ship);
-    }
-
     /**
      * 取消运输单
      */
@@ -177,7 +168,7 @@ public class Shipments extends Controller {
         new ElcukRecord(Messages.get("shipment.cancel"), Messages.get("action.base", id), id)
                 .save();
         flash.success("运输单取消成功.");
-        redirect("/Shipments/show/" + id);
+        show(id);
     }
 
     @Check("shipments.ship")
@@ -210,7 +201,7 @@ public class Shipments extends Controller {
     public static void cancelShip(List<Integer> shipItemId, String id) {
         Validation.required("shipments.ship.shipId", shipItemId);
         Validation.required("shipment.id", id);
-        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        if(Validation.hasError("shipment.id")) index(null);
         Shipment ship = Shipment.findById(id);
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
 
@@ -222,7 +213,7 @@ public class Shipments extends Controller {
         }
 
         if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-        redirect("/shipments/shipitem/" + id);
+        show(id);
     }
 
     @Check("shipments.beginship")
@@ -230,7 +221,7 @@ public class Shipments extends Controller {
         checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.id", id);
-        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
+        if(Validation.hasError("shipment.id")) index(null);
         Validation.required("shipment.planArrivDate", ship.planArrivDate);
         Validation.required("shipment.volumn", ship.volumn);
         Validation.required("shipment.weight", ship.weight);
@@ -254,7 +245,7 @@ public class Shipments extends Controller {
         //TODO: effect 开始运输更新 FBA
         flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
 
-        redirect("/shipments/show/" + id);
+        show(id);
     }
 
     public static void refreshProcuress(final String id) {
@@ -276,21 +267,6 @@ public class Shipments extends Controller {
                 show(ship.id);
             }
         });
-    }
-
-    /**
-     * 将 Shipment 进行分拆
-     */
-    @Check("shipments.splitshipment")
-    public static void splitShipment(String id, List<String> shipItemId) {
-        validation.required(shipItemId);
-        Shipment ship = Shipment.findById(id);
-        checkShowError(ship);
-        F.Option<Shipment> newShipmentOpt = ship.splitShipment(shipItemId);
-        checkShowError(ship);
-        if(newShipmentOpt.isDefined())
-            flash.success("成功分拆运输单, 创建了新运输单 %s", newShipmentOpt.get().id);
-        show(newShipmentOpt.get().id);
     }
 
     /**
