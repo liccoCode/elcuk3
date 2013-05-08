@@ -43,6 +43,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public Shipment() {
         this.createDate = new Date();
         this.state = S.PLAN;
+        this.pype = P.WEIGHT;
         // 暂时这么写
         this.source = "深圳";
     }
@@ -70,10 +71,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment(String id) {
         this();
-        this.pype = P.WEIGHT;
-        this.state = S.PLAN;
         this.type = T.EXPRESS;
         this.id = id;
+    }
+
+    public Shipment(Date planBeginDate, T type, Whouse whouse) {
+        this();
+        this.id = Shipment.id();
+        this.planBeginDate = planBeginDate;
+        int plusDay = 7;
+        if(type == T.EXPRESS) plusDay = 7;
+        else if(type == T.AIR) plusDay = 15;
+        else if(type == T.SEA) plusDay = 60;
+        this.planArrivDate = new DateTime(planBeginDate).plus(plusDay).toDate();
+        this.whouse = whouse;
+        this.type = type;
+        this.title = String.format("%s 去往 %s 在 %s", this.id, this.whouse.name(),
+                Dates.date2Date(this.planBeginDate));
     }
 
     public enum T {
@@ -266,12 +280,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     /**
      * 体积, 单位立方米
      */
-    public Float volumn;
+    public Float volumn = 0f;
 
     /**
      * 重量, 单位 kg
      */
-    public Float weight;
+    public Float weight = 0f;
 
     /**
      * 申报价格, 单位为 USD
@@ -763,43 +777,31 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         // 自动创建
         List<Shipment> planedShipments = Shipment
-                .find("cycle=true AND state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
+                .find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
                         S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
                 .fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.all().fetch();
-        DateTime now = new DateTime(Dates.morning(new Date()));
         for(Whouse whouse : whs) {
-            whouse.checkWhouseNewShipment(planedShipments, now);
+            whouse.checkWhouseNewShipment(planedShipments);
         }
 
 
         // 加载
-        StringBuilder where = new StringBuilder("cycle=? AND state IN (?,?)");
-        List<Object> params = new ArrayList<Object>(Arrays.asList(true, S.PLAN, S.CONFIRM));
+        StringBuilder where = new StringBuilder("state IN (?,?)");
+        List<Object> params = new ArrayList<Object>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
             where.append("AND (whouse.id=? OR whouse.id IS NULL)");
             params.add(whouseId);
         } else {
             where.append("AND whouse.id IS NULL");
         }
-        //当运输方式是 air 或者 express的时候,统一一起查出来
-        if(shipType != null) {
-            if(shipType.equals(T.AIR) || shipType.equals(T.EXPRESS)) {
-                where.append(" AND type in (?,?)");
-                params.add(T.AIR);
-                params.add(T.EXPRESS);
-            } else {
-                where.append(" AND type =?");
-                params.add(shipType);
-            }
+        where.append(" AND type =?");
+        params.add(shipType);
 
+        where.append(" ORDER BY planBeginDate");
 
-        }
-
-        return Shipment
-                .find(where.append(" ORDER BY planBeginDate").toString(), params.toArray())
-                .fetch();
+        return Shipment.find(where.toString(), params.toArray()).fetch();
     }
 
     /**
@@ -817,23 +819,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 新建运输单
+     * 检查并且创建运输单
      *
-     * @param planBeginDate 计划开始时间
-     * @param whouse        接受仓库
-     * @param type          运输方式
-     * @param arriveDate    预计到达时间
+     * @param planBeginDate
+     * @param type
      */
-    public static void create(Date planBeginDate, Whouse whouse, T type, Date arriveDate) {
-        Shipment shipment = new Shipment();
-        shipment.id = Shipment.id();
-        shipment.planBeginDate = planBeginDate;
-        shipment.planArrivDate = arriveDate;
-        shipment.whouse = whouse;
-        shipment.type = type;
-        shipment.title = String.format("%s 去往 %s 在 %s", shipment.id, shipment.whouse.name(),
-                Dates.date2Date(shipment.planBeginDate));
-        shipment.save();
+    public static void checkNotExistAndCreate(Date planBeginDate, Shipment.T type, Whouse whouse) {
+        if(Shipment.count("planBeginDate=? AND whouse=? AND type=? AND state IN (?,?)",
+                planBeginDate, whouse, type, S.PLAN, S.CONFIRM) > 0)
+            return;
+        new Shipment(planBeginDate, type, whouse).save();
     }
 
     /**

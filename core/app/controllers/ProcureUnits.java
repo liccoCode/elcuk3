@@ -44,18 +44,21 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
-        if(StringUtils.isBlank(shipmentId))
-            Validation.addError("", "必须选择运输单");
+        if(unit.shipType == Shipment.T.EXPRESS && StringUtils.isNotBlank(shipmentId))
+            Validation.addError("", "快递运输方式, 不需要指定运输单");
 
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
-        Shipment ship = Shipment.findById(shipmentId);
 
         unit.save();
-        ship.addToShip(unit);
+
+        if(unit.shipType != Shipment.T.EXPRESS) {
+            Shipment ship = Shipment.findById(shipmentId);
+            ship.addToShip(unit);
+        }
 
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
@@ -67,7 +70,7 @@ public class ProcureUnits extends Controller {
         new ElcukRecord(Messages.get("procureunit.save"),
                 Messages.get("action.base", unit.to_log()), unit.id + "").save();
 
-        Shipments.show(shipmentId);
+        Analyzes.index();
     }
 
     public static void edit(long id) {
