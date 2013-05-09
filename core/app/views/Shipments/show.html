@@ -18,28 +18,21 @@
 </div>
 
 <div class="row-fluid">
-  <div class="span12" style="margin-bottom:15px;">
-
+  <div class="btn-toolbar">
   #{power.ck "shipments.beginship"}
       #{if isPlanAndConfirm}
-        <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
-          <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-          <button style="margin-right:10px;" data-confirm="确认开始运输?" class="btn btn-success">
-            开始运输
-          </button>
-        </form>
+        <a href="@{Shipments.beginShip(ship.id)}" class="btn btn-success"
+           data-confirm="确认开始运输?" data-method='POST' data-disable-with='更新中...'>
+          开始运输
+        </a>
       #{/if}
   #{/power.ck}
   #{power.ck 'shipments.cancel'}
       #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
-        <form action="@{Shipments.cancel()}" method="post">
-          <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-          <button style="margin-right:10px;" data-confirm="确认取消运输?" class="btn btn-danger">
-            取消运输单
-          </button>
-        </form>
+        <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"
+           data-method="POST" data-disable-with="取消中...">
+          取消运输单(TBD)
+        </a>
       #{/if}
   #{/power.ck}
   </div>

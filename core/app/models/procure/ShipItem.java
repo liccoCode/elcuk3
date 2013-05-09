@@ -60,18 +60,6 @@ public class ShipItem extends GenericModel {
         this.unit = unit;
         this.qty = unit.qty();
         this.fulfillmentNetworkSKU = unit.selling.fnSku;
-        this.state = S.NORMAL;
-    }
-
-    public enum S {
-        /**
-         * 正常状态
-         */
-        NORMAL,
-        /**
-         * 此 ShipItem 已经被取消(对应的 Shipment 被取消导致)
-         */
-        CANCEL
     }
 
     @Id
@@ -90,8 +78,6 @@ public class ShipItem extends GenericModel {
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
-    @Enumerated(EnumType.STRING)
-    public S state = S.NORMAL;
     /**
      * 此次运输的数量; 注意其他与产品有关的信息都从关联的 ProcureUnit 中获取
      */

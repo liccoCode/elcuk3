@@ -295,6 +295,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 计价类型; 根据 体积 与 重量自动判断
+     * TODO effect: 可删除
      */
     @Enumerated(EnumType.STRING)
     @Expose
@@ -312,21 +313,25 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 申报价格, 单位为 USD
+     * TODO effect: 转移到请款
      */
     public Float declaredValue = 0f;
 
     /**
      * 押金, (申报价值的 20%) 单位为 RMB
+     * TODO effect: 转移到请款
      */
     public Float deposit = 0f;
 
     /**
      * 其他费用, 例如(手续费)
+     * TODO effect: 转移到请款
      */
     public Float otherFee = 0f;
 
     /**
      * 运费 (体积/重量 * 单价)
+     * TODO effect: 转移到请款
      */
     public Float shipFee = 0f;
 
@@ -526,26 +531,51 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * TODO: effect
      */
     public synchronized void beginShip() {
+        /**
+         * 0. 检查
+         *  0.1 运输单状态 CONFIRM
+         *  0.2 货物交货/抵达?
+         *  0.3 基础信息
+         * 1. 首先更新 FBA 信息
+         * 2. 触发采购计划阶段, 时间
+         * 3. 触发运输单状态, 时间
+         */
         if(this.state != S.CONFIRM)
-            throw new FastRuntimeException("运输单没有 CONFIRM 无法运输");
+            Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
+        if(this.items.size() <= 0)
+            Validation.addError("", "没有运输项目可以运输.");
         for(ShipItem itm : this.items) {
-            if(itm.unit.stage == ProcureUnit.STAGE.PLAN ||
-                    itm.unit.stage == ProcureUnit.STAGE.DELIVERY)
-                throw new FastRuntimeException(String.format("采购计划 #%s 还没有交货, 无法运输.", itm.unit.id));
+            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
+                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage))
+                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
+
             if(!itm.unit.isPlaced)
-                throw new FastRuntimeException(String.format("采购计划 %s 还没有抵达, 无法运输.", itm.unit.id));
+                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
+        }
+        if(this.internationExpress == null)
+            Validation.addError("", "请填写运输单的国际快递商");
+        if(this.cooper == null)
+            Validation.addError("", "请填写运输单合作伙伴(货代)");
+        if(this.whouse == null)
+            Validation.addError("", "请填写运输单仓库信息");
+        if(StringUtils.isBlank(this.trackNo))
+            Validation.addError("", "请填写运输单的跟踪号");
+
+
+        if(Validation.hasErrors()) return;
+
+        for(ShipItem shipItem : this.items) {
+            if(shipItem.unit.fba != null)
+                shipItem.unit.fba.updateFBAShipmentRetry(3, FBAShipment.S.SHIPPED);
         }
 
-        for(ShipItem item : this.items) {
-            item.shipDate = new Date();
-            item.unit.stage = ProcureUnit.STAGE.SHIPPING;
+        for(ShipItem shipItem : this.items) {
+            shipItem.shipDate = new Date();
+            shipItem.save();
+            shipItem.unit.stage = ProcureUnit.STAGE.SHIPPING;
+            shipItem.unit.save();
         }
-        // TODO 开始运输的时候, 需要更新采购计划的 FBA
-//        for(FBAShipment fba : this.fbas) {
-//            if(fba.state != FBAShipment.S.WORKING) continue;
-//            fba.updateFBAShipment(FBAShipment.S.SHIPPED);
-//        }
-        for(ShipItem itm : this.items) itm.unit.save();
+
         this.pype = this.pype();
         this.beginDate = new Date();
         this.state = S.SHIPPING;

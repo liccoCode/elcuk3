@@ -18,6 +18,12 @@ import java.util.*;
 
 /**
  * Amazon FBA 操作
+ * <pre>
+ * All operations from the Fulfillment Inbound Shipment API section, the Fulfillment Inventory API section, and
+ * the Fulfillment Outbound Shipment API section together share a maximum request quota of 30 and a restore
+ * rate of two requests every second.
+ * </pre>
+ * FBA Inbound/Inventory/Outbond API 共同享有 30 个最高请求, 每秒恢复 2 个请求
  * User: wyattpan
  * Date: 9/11/12
  * Time: 5:46 PM
@@ -160,7 +166,8 @@ public class FBA {
             FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        if(fbaShipment.state == FBAShipment.S.PLAN) return fbaShipment.state;
+        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state))
+            return fbaShipment.state;
 
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(fbaShipment.account.merchantId);

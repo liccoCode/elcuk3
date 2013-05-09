@@ -302,10 +302,28 @@ public class FBAShipment extends Model {
     public synchronized void updateFBAShipment(S state) {
         try {
             this.state = FBA.update(this, state != null ? state : this.state);
+            Thread.sleep(500);
         } catch(Exception e) {
             throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
         }
         this.save();
+    }
+
+    /**
+     * 对更新 FBA 进行重复执行. (因 FBA 更新有 API 速度限制, 这里避免更新失败)
+     *
+     * @param times
+     * @param state
+     */
+    public synchronized void updateFBAShipmentRetry(int times, S state) {
+        try {
+            updateFBAShipment(state);
+        } catch(Exception e) {
+            if(times > 0)
+                updateFBAShipmentRetry(--times, state);
+            else
+                throw new FastRuntimeException(e.getMessage());
+        }
     }
 
     /**

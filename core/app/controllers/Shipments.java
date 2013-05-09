@@ -156,7 +156,6 @@ public class Shipments extends Controller {
      */
     @Check("shipments.cancel")
     public static void cancel(String id) {
-        checkAuthenticity();
         Shipment ship = Shipment.findById(id);
         try {
             ship.cancel();
@@ -174,31 +173,28 @@ public class Shipments extends Controller {
 
     @Check("shipments.beginship")
     public static void beginShip(String id) {
-        checkAuthenticity();
         Shipment ship = Shipment.findById(id);
-        Validation.required("shipment.id", id);
-        if(Validation.hasError("shipment.id")) index(null);
         Validation.required("shipment.planArrivDate", ship.planArrivDate);
         Validation.required("shipment.volumn", ship.volumn);
         Validation.required("shipment.weight", ship.weight);
-        Validation.required("shipment.declaredValue", ship.declaredValue);
-        Validation.required("shipment.deposit", ship.deposit);
-        Validation.required("shipment.otherFee", ship.otherFee);
-        Validation.required("shipment.shipFee", ship.shipFee);
-        Validation.required("shipment.cooper", ship.cooper);
-        Validation.min("shipment.items.size", ship.items.size(), 1);
 
-        checkShowError(ship);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
+        }
 
         try {
             ship.beginShip();
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
         }
-        checkShowError(ship);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
+        }
+
         new ElcukRecord(Messages.get("shipment.beginShip"),
                 Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
-        //TODO: effect 开始运输更新 FBA
         flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
 
         show(id);
