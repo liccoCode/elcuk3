@@ -1,9 +1,6 @@
 package ext;
 
-import models.procure.Deliveryment;
-import models.procure.FBAShipment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import play.templates.JavaExtensions;
 
 import java.util.Date;
@@ -106,6 +103,20 @@ public class ProcuresHelper extends JavaExtensions {
             default:
                 return "#333333";
         }
+    }
+
+    /**
+     * 判断运输项目的预计发货时间是否超过当前运输单
+     *
+     * @param itm
+     * @param shipment
+     * @return
+     */
+    public static String overdue(ShipItem itm) {
+        if(itm.unit.attrs.planShipDate.getTime() < itm.shipment.planBeginDate.getTime())
+            return "#F2DEDE";
+        else
+            return "#FFFFFF";
     }
 
     /**

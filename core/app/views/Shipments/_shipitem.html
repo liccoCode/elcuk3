@@ -18,11 +18,11 @@
     <th>Ship(Plan|Qty)</th>
     <th>Received</th>
     <th>采购单</th>
+    <th>预计发货时间</th>
     <th>预计到库时间</th>
     <th>供应商</th>
     <th>总重量(kg)</th>
     <th>总体积(m3)(kg)</th>
-    <th>总申报价格</th>
     <th>抵达?</th>
   #{if useCheckbox}
     <th>运往仓库</th>
@@ -50,13 +50,15 @@
       ${itm.unit.deliveryment?.id}
       </a>
     </td>
-    <td>#{time_tooltip time:itm.unit.attrs.planArrivDate/}</td>
+    <td style="background:${itm.overdue()}">
+        #{time_tooltip time: itm.unit.attrs.planShipDate/}
+    </td>
+    <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
     <td>${itm.unit.cooperator?.name}</td>
     <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
       #{set totalVolume:itm.totalVolume()/}
     <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')}
       / ${totalVolume._1.format('#.######')}</td>
-    <td>${(itm.qty * itm.unit.product.declaredValue).formatCurrency('USD').raw()}</td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
 
       #{if useCheckbox}

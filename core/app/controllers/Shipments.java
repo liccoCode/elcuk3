@@ -4,7 +4,6 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
-import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.Ret;
@@ -17,7 +16,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -153,18 +151,6 @@ public class Shipments extends Controller {
         renderJSON(new Ret(true, Webs.V(Validation.errors())));
     }
 
-    @Before(only = {"shipItem", "ship", "cancelShip"})
-    public static void setUpShipPage() {
-        String shipmentId = request.params.get("id");
-        Shipment ship = Shipment.findById(shipmentId);
-        try {
-            List<ProcureUnit> units = ProcureUnit.waitToShip(ship.whouse.id, ship.type);
-            renderArgs.put("units", units);
-        } catch(Exception e) {
-            Validation.addError("shipments.setUpShipPage", "%s");
-        }
-    }
-
     /**
      * 取消运输单
      */
@@ -185,50 +171,6 @@ public class Shipments extends Controller {
         show(id);
     }
 
-    @Check("shipments.ship")
-    public static void ship(String id, List<Long> unitId) {
-        throw new FastRuntimeException("取消实现!");
-/*        Validation.required("shipments.ship.unitId", unitId);
-        Validation.required("shipment.id", id);
-        Shipment ship = Shipment.findById(id);
-        if(Validation.hasError("shipment.id")) redirect("/shipments/index");
-        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-
-        List<ProcureUnit> units = ProcureUnit
-                .find("id IN " + JpqlSelect.inlineParam(unitId))
-                .fetch();
-        for(ProcureUnit unit : units) {
-            ship.addToShip(unit);
-        }
-
-        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-        redirect("/shipments/shipitem/" + id);*/
-    }
-
-    /**
-     * 取消运输单项
-     *
-     * @param shipItemId
-     * @param id
-     */
-    @Check("shipments.cancelship")
-    public static void cancelShip(List<Integer> shipItemId, String id) {
-        Validation.required("shipments.ship.shipId", shipItemId);
-        Validation.required("shipment.id", id);
-        if(Validation.hasError("shipment.id")) index(null);
-        Shipment ship = Shipment.findById(id);
-        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-
-        try {
-            ship.cancelShip(shipItemId, true);
-        } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
-            if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-        }
-
-        if(Validation.hasErrors()) render("Shipments/shipItem.html", ship);
-        show(id);
-    }
 
     @Check("shipments.beginship")
     public static void beginShip(String id) {

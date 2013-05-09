@@ -43,3 +43,11 @@ $ ->
         .done(-> LoadMask.unmask())
         .fail(-> LoadMask.unmask())
     e.preventDefault()
+
+  $('#adjust_shipitems').on('click', 'button.adjust', ->
+    shipmentId = $("input[name='shipmentId']").val()
+    if shipmentId
+      $('#adjust_shipitems').attr('action', (i, v) ->
+        "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
+      )
+  )

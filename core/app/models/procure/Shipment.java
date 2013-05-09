@@ -14,10 +14,8 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
-import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
@@ -476,7 +474,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void cancel() {
         List<Integer> shipItemIds = new ArrayList<Integer>();
         for(ShipItem item : this.items) shipItemIds.add(item.id.intValue());
-        this.cancelShip(shipItemIds, true);
         if(Validation.hasErrors()) return;
         this.state = S.CANCEL;
         this.trackNo = null;
@@ -516,37 +513,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         //TODO c: 添加日志
     }
 
-
-    /**
-     * 从 Shipment 中删除不需要运输的 ShipItem,  数量返回到原有的 ProcureUnit 中
-     * TODO: effect
-     *
-     * @param shipItemId
-     */
-    public void cancelShip(List<Integer> shipItemId, boolean log) {
-        if(shipItemId == null) shipItemId = new ArrayList<Integer>();
-        List<ShipItem> items = new ArrayList<ShipItem>();
-        if(shipItemId.size() > 0)
-            items = ShipItem.find("id IN " + JpqlSelect.inlineParam(shipItemId)).fetch();
-
-        for(ShipItem itm : items) {
-            if(!itm.shipment.equals(this))
-                throw new FastRuntimeException("取消的运输单项不属于对应运输单");
-        }
-
-        List<String> unitsMerchantSKU = new ArrayList<String>();
-        for(ShipItem itm : items) {
-            F.T2<ShipItem, ProcureUnit> cancelT2 = itm.cancel();
-            unitsMerchantSKU.add(cancelT2._2.selling.merchantSKU);
-        }
-        if(log && shipItemId.size() > 0) {
-            new ElcukRecord(Messages.get("shipment.cancelShip2"),
-                    Messages.get("shipment.cancelShip2.msg",
-                            StringUtils.join(unitsMerchantSKU, Webs.SPLIT), this.id),
-                    this.id
-            ).save();
-        }
-    }
 
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;

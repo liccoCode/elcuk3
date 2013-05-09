@@ -5,6 +5,8 @@ import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 
@@ -224,5 +226,37 @@ public class ShipItem extends GenericModel {
 
     public static List<ShipItem> sameFBAShipItems(String shipmentId) {
         return ShipItem.find("fba.shipmentId=?", shipmentId).fetch();
+    }
+
+    /**
+     * 将运输项目调整到指定的运输单中
+     *
+     * @param ids
+     * @param shipment
+     * @return
+     */
+    public static void adjustShipment(List<Long> ids, Shipment shipment) {
+        List<ShipItem> items = ShipItem.find(SqlSelect.whereIn("id", ids)).fetch();
+
+        if(ids.size() != items.size())
+            Validation.addError("", "提交的属于与系统中的数据不一致.");
+
+        if(shipment.state != Shipment.S.PLAN)
+            Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
+
+        for(ShipItem itm : items) {
+            if(itm.shipment.equals(shipment))
+                Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
+            if(itm.shipment.state != Shipment.S.PLAN)
+                Validation.addError("", "当前运输项目的运输单已经是不可更改");
+        }
+
+        if(Validation.hasErrors()) return;
+
+        //TODO 日志
+        for(ShipItem itm : items) {
+            itm.shipment = shipment;
+            itm.save();
+        }
     }
 }

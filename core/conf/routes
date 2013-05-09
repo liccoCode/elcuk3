@@ -104,6 +104,7 @@ GET     /shipment/{id}/preview                              Shipments.preview
 # ShipItems
 GET     /shipitems                                          ShipItems.index
 POST    /shipitems                                          ShipItems.index
+POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}
