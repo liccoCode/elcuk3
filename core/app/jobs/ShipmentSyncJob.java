@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
  * 周期:
  * - 轮询周期: 5mn
  * - Duration:  4h
+ * TODO effect: 自动跟踪需要调整
  * User: wyattpan
  * Date: 8/15/12
  * Time: 6:04 PM

@@ -636,13 +636,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 抓取 DHL, FEDEX 网站的运输信息, 更新系统中 SHIPMENT 的状态;
-     * <p/>
-     * 如果此 Shipment 拥有 FBA 会根据具体状态, 更新 FBA 的签收时间
+     * 抓取 DHL, FEDEX, UPS 网站的运输信息, 更新系统中 SHIPMENT 的状态;
+     * PS: 只有快递类型的运输单才可以自动跟踪
      *
      * @return
      */
     public S monitor() {
+        if(this.type != T.EXPRESS) return this.state;
         if(StringUtils.isBlank(this.iExpressHTML)) {
             Logger.warn("Shipment %s do not have iExpressHTML.", this.id);
             return this.state;
