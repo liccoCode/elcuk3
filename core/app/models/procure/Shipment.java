@@ -12,6 +12,7 @@ import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -566,7 +567,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         for(ShipItem shipItem : this.items) {
             if(shipItem.unit.fba != null)
-                shipItem.unit.fba.updateFBAShipmentRetry(3, FBAShipment.S.SHIPPED);
+                shipItem.unit.fba.updateFBAShipmentRetry(
+                        3,
+                        // 在测试环境下也不能标记 SHIPPED
+                        Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
         }
 
         for(ShipItem shipItem : this.items) {

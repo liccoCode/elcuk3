@@ -137,16 +137,8 @@ public class Whouse extends Model {
         return Whouse.find("type=?", type).fetch();
     }
 
-    public static List<Whouse> findByMarket(M market) {
-        String country = "UK";
-        //TODO 业务部门将 FR 交由 DE 发货需要处理
-        if(Arrays.asList(M.AMAZON_FR, M.AMAZON_ES, M.AMAZON_IT, M.AMAZON_UK).contains(market))
-            country = "UK";
-        else if(Arrays.asList(M.AMAZON_US).contains(market))
-            country = "US";
-        else if(Arrays.asList(M.AMAZON_DE).contains(market))
-            country = "DE";
-        return Whouse.find("country=?", country).fetch();
+    public static List<Whouse> findByAccount(Account account) {
+        return Whouse.find("account=?", account).fetch();
     }
 
     /**

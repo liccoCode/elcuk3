@@ -33,7 +33,7 @@ public class ProcureUnits extends Controller {
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
-        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         if(unit.selling == null) {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
@@ -48,7 +48,7 @@ public class ProcureUnits extends Controller {
             Validation.addError("", "快递运输方式, 不需要指定运输单");
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
@@ -61,7 +61,7 @@ public class ProcureUnits extends Controller {
         }
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             unit.remove();
             render("ProcureUnits/blank.html", unit, whouses);
         }
@@ -76,7 +76,7 @@ public class ProcureUnits extends Controller {
     public static void edit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
-        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         render(unit, oldPlanQty, whouses);
     }
 
@@ -99,7 +99,7 @@ public class ProcureUnits extends Controller {
         if(planQty <= 0) Validation.addError("", "预计采购数量输入错误");
 
         ProcureUnit unit = ProcureUnit.findById(id);
-        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         if(Validation.hasErrors()) {
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }

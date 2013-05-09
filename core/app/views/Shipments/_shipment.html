@@ -97,7 +97,7 @@
     <tr>
       <th>运输商</th>
       <td>
-      #{select 'ship.cooper.id', items: shippers, labelProperty: 'fullName', value: ship.cooper}
+      #{select 'ship.cooper.id', items: shippers, labelProperty: 'fullName', value: ship.cooper.id}
           #{option ''}选择运输商#{/option}
       #{/select}
       </td>

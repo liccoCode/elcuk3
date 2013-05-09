@@ -13,7 +13,7 @@
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
 <div class="row-fluid">
   <div class="span12">
-  #{render './_shipment.html', ship: ship, whouses: whouses/}
+  #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
   </div>
 </div>
 
@@ -53,7 +53,10 @@
 
       <div class="btn-group">
         <button class="btn" id="previewBtn"><i class="icon-file-alt"></i> 预览</button>
-        <button class="btn btn-success adjust"><i class="icon-adjust"></i> 调整</button>
+        <button class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
+          <i class="icon-adjust"></i>
+          调整
+        </button>
       </div>
     </div>
 

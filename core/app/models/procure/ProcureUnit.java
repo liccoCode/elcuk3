@@ -238,9 +238,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
-        if(this.selling != null && this.whouse != null && this.whouse.account != null) {
-            if(!this.selling.market.equals(this.whouse.account.type) &&
-                    this.whouse.type == Whouse.T.FBA) {
+        if(this.selling != null && this.whouse != null &&
+                this.whouse.account != null && this.whouse.type == Whouse.T.FBA) {
+            if(!this.selling.account.uniqueName.equals(this.whouse.account.uniqueName)) {
                 Validation.addError("", "procureunit.validate.whouse");
             }
         }
