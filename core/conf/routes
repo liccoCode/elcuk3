@@ -101,6 +101,7 @@ PUT     /shipment/{id}/process                              Shipments.refreshPro
 POST    /procureunits/shipment/new                          Shipments.procureUnitToShipment
 GET     /shipment/{id}/preview                              Shipments.preview
 POST    /shipment/{id}/begin                                Shipments.beginShip
+POST    /shipment/{id}/confirm/{undo}                       Shipments.confirm
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

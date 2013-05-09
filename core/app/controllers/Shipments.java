@@ -116,6 +116,18 @@ public class Shipments extends Controller {
         render(ship);
     }
 
+    public static void confirm(String id, Boolean undo) {
+        if(undo == null) {
+            Validation.addError("", "缺少 undo 参数.");
+            show(id);
+        }
+
+        Shipment shipment = Shipment.findById(id);
+        shipment.state = undo ? Shipment.S.PLAN : Shipment.S.CONFIRM;
+        shipment.save();
+        show(id);
+    }
+
     @Util
     public static void checkShowError(Shipment ship) {
         if(Validation.hasErrors()) {
@@ -124,6 +136,7 @@ public class Shipments extends Controller {
         }
     }
 
+    //TODO effect: 需要调整
     public static void update(Shipment ship) {
         checkAuthenticity();
         validation.valid(ship);

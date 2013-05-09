@@ -19,8 +19,20 @@
 
 <div class="row-fluid">
   <div class="btn-toolbar">
+  #{if ship.state == models.procure.Shipment.S.PLAN}
+    <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"
+       class="btn  btn-warning" data-disable-with="确认中...">
+      确认运输单
+    </a>
+  #{/if}
+  #{if ship.state == models.procure.Shipment.S.CONFIRM}
+    <a href="@{Shipments.confirm(ship.id, true)}" data-confirm="确认操作?" data-method="POST"
+       class="btn  btn-warning" data-disable-with="确认中...">
+      取消确认运输单
+    </a>
+  #{/if}
   #{power.ck "shipments.beginship"}
-      #{if isPlanAndConfirm}
+      #{if ship.state == models.procure.Shipment.S.CONFIRM}
         <a href="@{Shipments.beginShip(ship.id)}" class="btn btn-success"
            data-confirm="确认开始运输?" data-method='POST' data-disable-with='更新中...'>
           开始运输
@@ -28,7 +40,7 @@
       #{/if}
   #{/power.ck}
   #{power.ck 'shipments.cancel'}
-      #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
+      #{if ship.state in [models.procure.Shipment.S.PLAN]}
         <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"
            data-method="POST" data-disable-with="取消中...">
           取消运输单(TBD)
