@@ -244,6 +244,9 @@ public class ShipItem extends GenericModel {
         if(shipment.state != Shipment.S.PLAN)
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
 
+        if(System.currentTimeMillis() > shipment.planBeginDate.getTime())
+            Validation.addError("", "目标运输单 " + shipment.id + " 的预计运输时间已经超时, 其应该处于运输状态.");
+
         for(ShipItem itm : items) {
             if(itm.shipment.equals(shipment))
                 Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
