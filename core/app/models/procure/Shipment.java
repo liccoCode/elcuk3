@@ -193,6 +193,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         /**
          * 取消状态
+         * TODO effect: 需要删除
          */
         CANCEL {
             @Override
@@ -476,14 +477,21 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return this;
     }
 
-    // TODO effect: 取消运输单需要调整
-    public void cancel() {
-        List<Integer> shipItemIds = new ArrayList<Integer>();
-        for(ShipItem item : this.items) shipItemIds.add(item.id.intValue());
+    public void destroy() {
+        /**
+         * 0. 检查状态
+         * 1. 取消掉关联的运输项目的运输单
+         * 2. 删除运输单
+         */
+        if(this.state != S.PLAN)
+            Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
-        this.state = S.CANCEL;
-        this.trackNo = null;
-        this.save();
+
+        for(ShipItem itm : this.items) {
+            itm.shipment = null;
+            itm.save();
+        }
+        this.delete();
     }
 
     public void updateShipment() {

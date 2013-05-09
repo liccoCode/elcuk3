@@ -460,7 +460,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public List<Shipment> relateShipment() {
         Set<Shipment> shipments = new HashSet<Shipment>();
         for(ShipItem shipItem : this.shipItems) {
-            shipments.add(shipItem.shipment);
+            if(shipItem.shipment != null)
+                shipments.add(shipItem.shipment);
         }
         return new ArrayList<Shipment>(shipments);
     }

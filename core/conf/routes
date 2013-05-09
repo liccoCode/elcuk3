@@ -102,6 +102,7 @@ POST    /procureunits/shipment/new                          Shipments.procureUni
 GET     /shipment/{id}/preview                              Shipments.preview
 POST    /shipment/{id}/begin                                Shipments.beginShip
 POST    /shipment/{id}/confirm/{undo}                       Shipments.confirm
+DELETE  /shipment/{id}                                      Shipments.cancel
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

@@ -170,17 +170,14 @@ public class Shipments extends Controller {
     @Check("shipments.cancel")
     public static void cancel(String id) {
         Shipment ship = Shipment.findById(id);
-        try {
-            ship.cancel();
-        } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
-            if(Validation.hasErrors()) render("Shipments/show.html", ship);
+        ship.destroy();
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
+        } else {
+            flash.success("运输单取消成功.");
+            index(null);
         }
-        if(Validation.hasErrors()) render("Shipments/show.html", ship);
-        new ElcukRecord(Messages.get("shipment.cancel"), Messages.get("action.base", id), id)
-                .save();
-        flash.success("运输单取消成功.");
-        show(id);
     }
 
 

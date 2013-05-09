@@ -40,10 +40,10 @@
       #{/if}
   #{/power.ck}
   #{power.ck 'shipments.cancel'}
-      #{if ship.state in [models.procure.Shipment.S.PLAN]}
+      #{if ship.state == models.procure.Shipment.S.PLAN}
         <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"
-           data-method="POST" data-disable-with="取消中...">
-          取消运输单(TBD)
+           data-method="DELETE" data-disable-with="取消中...">
+          取消运输单
         </a>
       #{/if}
   #{/power.ck}

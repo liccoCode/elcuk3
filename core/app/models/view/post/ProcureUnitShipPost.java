@@ -30,14 +30,16 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
             new F.T2<String, String>("attrs.planArrivDate", "预计 [到库] 时间")
     );
 
-    public boolean isHaveShipItems = false;
+    public boolean isHaveShipment = false;
 
     public String dateType = "createDate";
 
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sql = new StringBuilder("SELECT p FROM ProcureUnit p")
-                .append(" LEFT JOIN p.fba f").append(" WHERE ");
+                .append(" LEFT JOIN p.fba f")
+                .append(" LEFT JOIN p.shipItems si")
+                .append(" WHERE ");
         List<Object> params = new ArrayList<Object>();
 
         sql.append("p.").append(this.dateType).append(">=?").append(" AND ")
@@ -46,8 +48,8 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
         params.add(Dates.night(this.to));
 
 
-        if(!this.isHaveShipItems)
-            sql.append(" AND SIZE(p.shipItems)=0");
+        if(!this.isHaveShipment)
+            sql.append(" AND si.shipment IS NULL");
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
