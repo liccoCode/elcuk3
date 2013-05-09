@@ -642,12 +642,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public S monitor() {
+        //TODO effect: 需要调整
         if(this.type != T.EXPRESS) return this.state;
         if(StringUtils.isBlank(this.iExpressHTML)) {
             Logger.warn("Shipment %s do not have iExpressHTML.", this.id);
             return this.state;
         }
-        if(this.state == S.SHIPPING && this.internationExpress.isClearance(this.iExpressHTML)) {
+        if(this.state == S.SHIPPING && this.internationExpress.isClearance(this.iExpressHTML)._1) {
             // 正在运输,需要检查是否运输清关
             this.clearance();
         }
