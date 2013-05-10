@@ -17,6 +17,10 @@
   </div>
 </div>
 
+#{shipmentWorkflow state: ship.state/}
+<div class="row-fluid">
+</div>
+
 <div class="row-fluid">
   <div class="btn-toolbar">
   #{if ship.state == models.procure.Shipment.S.PLAN}

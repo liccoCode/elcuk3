@@ -10,17 +10,11 @@
     <tr>
       <th>运输单号</th>
       <td>
+      ${ship.id}
         <input type="hidden" id="shipmentId" name="ship.id" value="${ship.id}">
       </td>
       <th>创建时间</th>
       <td>${ship.createDate.datetime()}</td>
-    </tr>
-
-    <tr>
-      <th>状态</th>
-      <td>${ship.state}</td>
-      <th>运输方式</th>
-      <td>${ship.type.label()}</td>
     </tr>
 
     <tr>
@@ -34,39 +28,6 @@
       <th>预计到库时间</th>
       <td>
         <input type="date" name="ship.planArrivDate" value="${ship.dates.planArrivDate.date()}">
-      </td>
-    </tr>
-
-    <tr>
-      <th>运输体积(m3)</th>
-      <td>
-        删除
-      </td>
-      <th>运输重量(kg)</th>
-      <td>
-        删除
-      </td>
-    </tr>
-
-    <tr>
-      <th>申报价格(单位 USD)</th>
-      <td>
-        删除
-      </td>
-      <th>押金(例:预付款)</th>
-      <td>
-        删除
-      </td>
-    </tr>
-
-    <tr>
-      <th>其他费用(例:手续费)</th>
-      <td>
-        删除
-      </td>
-      <th>运费</th>
-      <td>
-        删除
       </td>
     </tr>
 
@@ -106,6 +67,8 @@
           #{option ''}选择仓库#{/option}
       #{/select}
       </td>
+      <th>运输方式</th>
+      <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
     </tr>
 
     <tr>
@@ -118,7 +81,7 @@
     <tr>
       <td colspan="4">
         <h4>Comment</h4>
-        <textarea rows="8" id="ship_memo" name="ship.memo" class="span12">${ship.memo}</textarea>
+        <textarea rows="4" id="ship_memo" name="ship.memo" class="span12">${ship.memo}</textarea>
       </td>
     </tr>
 
