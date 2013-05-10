@@ -787,10 +787,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 count.length() == 1 ? "0" + count : count);
     }
 
-    public static List<Shipment> shipmentsByState(S state) {
-        return Shipment.find("state=? ORDER BY createDate", state).fetch();
-    }
-
     /**
      * 根据 仓库 与 运输类型查找运输单, 在查找的同时, 也会自动检查是否需要创建固定周期的运输单
      *
@@ -858,8 +854,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 planBeginDate, whouse, shipType).fetch();
     }
 
-    public static List<Shipment> findByState(S state) {
-        return Shipment.find("state=?", state).fetch();
+    public static List<Shipment> findByState(S... state) {
+        return Shipment.find(SqlSelect.whereIn("state", state) + " ORDER BY createDate").fetch();
+    }
+
+    public static List<Shipment> findByTypeAndStates(T type, S... state) {
+        return Shipment.find(SqlSelect.whereIn("state", state) + " AND type=? ORDER BY " +
+                "createDate", type).fetch();
     }
 
     /**
