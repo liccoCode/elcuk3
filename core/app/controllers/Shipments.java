@@ -17,6 +17,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -203,6 +204,93 @@ public class Shipments extends Controller {
 
         show(id);
     }
+
+    /**
+     * 到港
+     */
+    public static void landPort(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.landPort(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 到港!", shipment.type.label(), id);
+        show(id);
+    }
+
+    /**
+     * 港口提货
+     *
+     * @param id
+     * @param date
+     */
+    public static void pickGoods(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.pickGoods(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 开始提货!", shipment.type.label(), id);
+        show(id);
+    }
+
+    /**
+     * 预约
+     *
+     * @param id
+     */
+    public static void booking(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.booking(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 已经预约!", shipment.type.label(), id);
+        show(id);
+    }
+
+    /**
+     * 派送
+     */
+    public static void deliverying(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.beginDeliver(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 已经派送!", shipment.type.label(), id);
+        show(id);
+    }
+
+    /**
+     * 签收
+     *
+     * @param id
+     * @param date
+     */
+    public static void receipt(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.receipt(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 已经签收!", shipment.type.label(), id);
+        show(id);
+    }
+
+    /**
+     * 入库
+     */
+    public static void inbounding(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.inbounding(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 正在入库!", shipment.type.label(), id);
+        show(id);
+    }
+
 
     public static void refreshProcuress(final String id) {
         Shipment ship = Shipment.findById(id);

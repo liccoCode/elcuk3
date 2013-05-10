@@ -8,8 +8,6 @@
 
 #{errorMsgs /}
 
-#{flash_alert /}
-
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
 <div class="row-fluid">
   <div class="span12">
@@ -17,8 +15,74 @@
   </div>
 </div>
 
+#{flash_alert /}
+
 #{shipmentWorkflow state: ship.state/}
+
+<!-- 时间 -->
 <div class="row-fluid">
+  <div class="span12">
+  #{if ship.dates.atPortDate}
+    <div class="span2">
+      <dl class="dl-horizontal">
+        <dt>平均 运输 天数</dt>
+        <dd>从系统中来</dd>
+        <dt>实际 运输 天数</dt>
+        <dd>${ship.dates.atPortDate - ship.dates.beginDate} 天</dd>
+      </dl>
+    </div>
+  #{/if}
+  #{if ship.dates.pickGoodDate}
+    <div class="span2">
+      <dl class="dl-horizontal">
+        <dt>平均 清关 天数</dt>
+        <dd>从系统中来</dd>
+        <dt>实际 清关 天数</dt>
+        <dd>${ship.dates.pickGoodDate - ship.dates.atPortDate} 天</dd>
+      </dl>
+    </div>
+  #{/if}
+  #{if ship.dates.bookDate}
+    <div class="span2">
+      <dl class="dl-horizontal">
+        <dt>平均 提货 天数</dt>
+        <dd>从系统中来</dd>
+        <dt>实际 提货 天数</dt>
+        <dd>${ship.dates.bookDate - ship.dates.pickGoodDate} 天</dd>
+      </dl>
+    </div>
+  #{/if}
+  #{if ship.dates.deliverDate}
+    <div class="span2">
+      <dl class="dl-horizontal">
+        <dt>平均 预约 天数</dt>
+        <dd>从系统中来</dd>
+        <dt>实际 预约 天数</dt>
+        <dd>${ship.dates.deliverDate - ship.dates.bookDate} 天</dd>
+      </dl>
+    </div>
+  #{/if}
+  #{if ship.dates.receiptDate}
+    <div class="span2">
+      <dl class="dl-horizontal">
+        <dt>平均 派送 天数</dt>
+        <dd>从系统中来</dd>
+        <dt>实际 派送 天数</dt>
+        <dd>${ship.dates.receiptDate - ship.dates.deliverDate} 天</dd>
+      </dl>
+    </div>
+  #{/if}
+  #{if ship.dates.inbondDate}
+    <div class="span2">
+      <dl class="dl-horizontal">
+        <dt>平均 入库等待 天数</dt>
+        <dd>从系统中来</dd>
+        <dt>实际 入库等待 天数</dt>
+        <dd>${ship.dates.inbondDate - ship.dates.receiptDate} 天</dd>
+      </dl>
+    </div>
+  #{/if}
+  </div>
 </div>
 
 <div class="row-fluid">
@@ -43,6 +107,47 @@
         </a>
       #{/if}
   #{/power.ck}
+
+  #{if ship.type != models.procure.Shipment.T.EXPRESS}
+      #{if ship.state == models.procure.Shipment.S.SHIPPING}
+        <a href="@{Shipments.landPort(ship.id)}" class="btn btn-success"
+           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+          运输到港
+        </a>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.CLEARANCE}
+        <a href="@{Shipments.pickGoods(ship.id)}" class="btn btn-success"
+           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+          开始提货
+        </a>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.PACKAGE}
+        <a href="@{Shipments.booking(ship.id)}" class="btn btn-success"
+           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+          与 Amazon 预约
+        </a>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.BOOKED}
+        <a href="@{Shipments.deliverying(ship.id)}" class="btn btn-success"
+           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+          派送
+        </a>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.DELIVERYING}
+        <a href="@{Shipments.receipt(ship.id)}" class="btn btn-success"
+           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+          签收
+        </a>
+      #{/if}
+  #{/if}
+  #{if ship.state == models.procure.Shipment.S.RECEIPTD}
+    <a href="@{Shipments.inbounding(ship.id)}" class="btn btn-success"
+       data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+      入库中
+    </a>
+  #{/if}
+
+
   #{power.ck 'shipments.cancel'}
       #{if ship.state == models.procure.Shipment.S.PLAN}
         <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"

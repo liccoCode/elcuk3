@@ -103,6 +103,12 @@ GET     /shipment/{id}/preview                              Shipments.preview
 POST    /shipment/{id}/begin                                Shipments.beginShip
 POST    /shipment/{id}/confirm/{undo}                       Shipments.confirm
 DELETE  /shipment/{id}                                      Shipments.cancel
+POST    /shipment/{id}/land                                 Shipments.landPort
+POST    /shipment/{id}/pick                                 Shipments.pickGoods
+POST    /shipment/{id}/book                                 Shipments.booking
+POST    /shipment/{id}/delivery                             Shipments.deliverying
+POST    /shipment/{id}/receipt                              Shipments.receipt
+POST    /shipment/{id}/inbounding                           Shipments.inbounding
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

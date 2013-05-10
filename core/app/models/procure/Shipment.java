@@ -160,10 +160,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         },
 
-        BOOKING {
+        BOOKED {
             @Override
             public String label() {
-                return "预约中";
+                return "已预约";
             }
         },
 
@@ -550,6 +550,115 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.save();
     }
 
+    private void noExpressValidate() {
+        if(this.type == T.EXPRESS)
+            Validation.addError("", "快递运输单不需要手动处理");
+    }
+
+    private void shouldSomeStateValidate(S state, String action) {
+        if(this.state != state)
+            Validation.addError("", "运输单应该在 " + state.label() + " 再进行" + action + "操作");
+    }
+
+    /**
+     * 到港 (运输单抵达港口, 就开始进行清关状态)
+     */
+    public void landPort(Date date) {
+        if(this.type == T.EXPRESS) {
+            Mails.shipment_clearance(this);
+        } else {
+            shouldSomeStateValidate(S.SHIPPING, "到港");
+
+            if(Validation.hasErrors()) return;
+
+            if(date == null) date = new Date();
+        }
+        this.state = S.CLEARANCE;
+        this.dates.atPortDate = date;
+        this.save();
+    }
+
+    /**
+     * 提货 (清关完成后, 就开始进行提货中状态)
+     *
+     * @param date
+     */
+    public void pickGoods(Date date) {
+        noExpressValidate();
+        shouldSomeStateValidate(S.CLEARANCE, "提货");
+
+        if(Validation.hasErrors()) return;
+
+        if(date == null) date = new Date();
+        this.state = S.PACKAGE;
+        this.dates.pickGoodDate = date;
+        this.save();
+    }
+
+    /**
+     * 预约 (提货完成, 就开始与 amaozn 预约, 预约中状态)
+     *
+     * @param date
+     */
+    public void booking(Date date) {
+        noExpressValidate();
+        shouldSomeStateValidate(S.PACKAGE, "预约");
+
+        if(Validation.hasErrors()) return;
+
+        if(date == null) date = new Date();
+        this.state = S.BOOKED;
+        this.dates.bookDate = date;
+        this.save();
+    }
+
+    /**
+     * 派送 (预约完成, 就开始进行派送, 派送中状态)
+     *
+     * @param beginDeliverDate
+     */
+    public void beginDeliver(Date beginDeliverDate) {
+        if(this.type != T.EXPRESS) {
+            shouldSomeStateValidate(S.BOOKED, "派送");
+            if(Validation.hasErrors()) return;
+            if(beginDeliverDate == null) beginDeliverDate = new Date();
+        }
+        this.state = S.DELIVERYING;
+        this.dates.deliverDate = beginDeliverDate;
+        this.save();
+    }
+
+    /**
+     * 签收 (派送完成, 接下来签收, 已签收状态)
+     *
+     * @param reciptDate
+     */
+    public void receipt(Date reciptDate) {
+        if(this.type != T.EXPRESS) {
+            shouldSomeStateValidate(S.DELIVERYING, "签收");
+            if(reciptDate == null) reciptDate = new Date();
+            if(Validation.hasErrors()) return;
+        }
+        this.state = S.RECEIPTD;
+        this.dates.receiptDate = reciptDate;
+        this.save();
+    }
+
+    /**
+     * 入库 (签收, 就开始进行入库, 入库中状态)
+     *
+     * @param date
+     */
+    public void inbounding(Date date) {
+        shouldSomeStateValidate(S.RECEIPTD, "入库");
+        if(date == null) date = new Date();
+        if(Validation.hasErrors()) return;
+        this.state = S.RECEIVING;
+        this.dates.inbondDate = date;
+        this.save();
+    }
+
+
     @Override
     public String to_log() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
@@ -574,7 +683,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state == S.SHIPPING) {
             result = this.internationExpress.isClearance(this.iExpressHTML);
             if(result._1)
-                this.beginClearance(result._2.toDate());
+                this.landPort(result._2.toDate());
         } else if(this.state == S.CLEARANCE) {
             result = this.internationExpress.isDelivered(this.iExpressHTML);
             if(result._1)
@@ -582,7 +691,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } else if(this.state == S.DELIVERYING) {
             result = this.internationExpress.isReceipt(this.iExpressHTML);
             if(result._1)
-                this.recipt(result._2.toDate());
+                this.receipt(result._2.toDate());
         }
         return this.state;
     }
@@ -607,38 +716,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
-    }
-
-    /**
-     * 开始清关
-     */
-    private void beginClearance(Date beginClearancedate) {
-        this.state = S.CLEARANCE;
-        this.dates.atPortDate = beginClearancedate;
-        this.save();
-        Mails.shipment_clearance(this);
-    }
-
-    /**
-     * 开始派送
-     *
-     * @param beginDeliverDate
-     */
-    public void beginDeliver(Date beginDeliverDate) {
-        this.state = S.DELIVERYING;
-        this.dates.deliverDate = beginDeliverDate;
-        this.save();
-    }
-
-    /**
-     * 签收时间
-     *
-     * @param reciptDate
-     */
-    public void recipt(Date reciptDate) {
-        this.state = S.RECEIPTD;
-        this.dates.receiptDate = reciptDate;
-        this.save();
     }
 
     /**
