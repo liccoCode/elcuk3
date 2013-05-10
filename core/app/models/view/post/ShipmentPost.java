@@ -42,8 +42,6 @@ public class ShipmentPost extends Post {
     // 默认的搜索排序时间
     public String dateType = "dates.planBeginDate";
 
-    public Shipment.P pype;
-
     public Shipment.T type;
 
     public String state;
@@ -77,11 +75,6 @@ public class ShipmentPost extends Post {
         List<Object> params = new ArrayList<Object>();
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
-
-        if(this.pype != null) {
-            sbd.append(" AND s.pype=?");
-            params.add(this.pype);
-        }
 
         if(this.type != null) {
             sbd.append(" AND s.type=?");

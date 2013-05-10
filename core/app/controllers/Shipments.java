@@ -185,8 +185,6 @@ public class Shipments extends Controller {
     public static void beginShip(String id) {
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.planArrivDate", ship.dates.planArrivDate);
-        Validation.required("shipment.volumn", ship.volumn);
-        Validation.required("shipment.weight", ship.weight);
 
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

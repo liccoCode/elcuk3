@@ -60,7 +60,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.dates.planBeginDate = shipment.dates.planBeginDate;
         this.dates.planArrivDate = shipment.dates.planArrivDate;
         // FBA 不做处理
-        this.pype = shipment.pype;
         this.type = shipment.type;
         this.whouse = shipment.whouse;
         this.source = shipment.source;
@@ -213,17 +212,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         public abstract String label();
     }
 
-    public enum P {
-        /**
-         * 重量计价
-         */
-        WEIGHT,
-        /**
-         * 体积计价
-         */
-        VOLUMN
-    }
-
     /**
      * 此 Shipment 的运输项
      */
@@ -286,46 +274,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public T type;
 
     /**
-     * 计价类型; 根据 体积 与 重量自动判断
-     * TODO effect: 可删除
+     * TODO: alter table Shipment drop column pype;
      */
-    @Enumerated(EnumType.STRING)
-    @Expose
-    public P pype = P.WEIGHT;
 
     /**
-     * 体积, 单位立方米
+     * TODO: alter table Shipment drop column volumn;
      */
-    public Float volumn = 0f;
 
     /**
-     * 重量, 单位 kg
+     * TODO: alter table Shipment drop column weight;
      */
-    public Float weight = 0f;
 
     /**
-     * 申报价格, 单位为 USD
-     * TODO effect: 转移到请款
+     * TODO: alter table Shipment drop column declaredValue;
      */
-    public Float declaredValue = 0f;
 
     /**
-     * 押金, (申报价值的 20%) 单位为 RMB
-     * TODO effect: 转移到请款
+     * TODO: alter table Shipment drop column deposit;
      */
-    public Float deposit = 0f;
 
     /**
-     * 其他费用, 例如(手续费)
-     * TODO effect: 转移到请款
+     * TODO: alter table Shipment drop column otherFee;
      */
-    public Float otherFee = 0f;
 
     /**
-     * 运费 (体积/重量 * 单价)
-     * TODO effect: 转移到请款
+     * TODO: alter table Shipment drop column shipFee;
      */
-    public Float shipFee = 0f;
 
     /**
      * 类似顺风发货单号的类似跟踪单号;
@@ -371,12 +345,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * Shipment 的检查
      */
     public void validate() {
-        if(this.declaredValue != null) Validation.min("ship.declaredValue", this.declaredValue, 0);
-        if(this.deposit != null) Validation.min("ship.deposit", this.deposit, 0);
-        if(this.otherFee != null) Validation.min("ship.otherfee", this.otherFee, 0);
-        if(this.shipFee != null) Validation.min("ship.shipFee", this.shipFee, 0);
-        if(this.volumn != null) Validation.min("ship.volumn", this.volumn, 0);
-        if(this.weight != null) Validation.min("ship.weight", this.weight, 0);
         if(StringUtils.isNotBlank(this.trackNo))
             Validation.required("shipment.internationExpress", this.internationExpress);
 
@@ -486,7 +454,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public void updateShipment() {
-        this.pype = this.pype();
         if(this.creater == null) this.creater = User.current();
         this.save();
     }
@@ -578,17 +545,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             shipItem.unit.save();
         }
 
-        this.pype = this.pype();
         this.dates.beginDate = new Date();
         this.state = S.SHIPPING;
         this.save();
-    }
-
-    public P pype() {
-        // 自动根据 体积与重量的值, 自动计算价格类型
-        if(this.volumn == null || this.weight == null) return this.pype;
-        if(this.volumn > this.weight) return P.VOLUMN;
-        else return P.WEIGHT;
     }
 
     @Override
@@ -596,16 +555,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
         sbd.append("[运输:").append(Dates.date2Date(this.dates.planBeginDate)).append("] ")
                 .append("[到库:").append(Dates.date2Date(this.dates.planArrivDate)).append("] ");
-        if(this.volumn != null && this.volumn != 0)
-            sbd.append("[运输体积:").append(this.volumn).append("] ");
-        if(this.weight != null && this.weight != 0)
-            sbd.append("[运输重量:").append(this.weight).append("]");
-        if(this.declaredValue != null && this.declaredValue != 0)
-            sbd.append("[申报价(USD):").append(this.declaredValue).append("] ");
-        if(this.deposit != null && this.deposit != 0)
-            sbd.append("[押金:").append(this.deposit).append("] ");
-        if(this.otherFee != null && this.otherFee != 0)
-            sbd.append("[其他费用:").append(this.otherFee).append("] ");
         if(this.cooper != null) sbd.append("[货代:").append(this.cooper.name).append("] ");
         if(this.whouse != null) sbd.append("[仓库:").append(this.whouse.name()).append("]");
         return sbd.toString();

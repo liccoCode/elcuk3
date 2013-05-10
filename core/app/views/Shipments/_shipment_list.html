@@ -9,7 +9,6 @@
     <th>Title</th>
     <th>目的地</th>
     <th>状态</th>
-    <th>计价方式</th>
     <th>预计开始时间</th>
     <th>创建时间</th>
     <th>预计到库时间</th>
@@ -43,7 +42,6 @@
     </td>
     <td>${ship.target}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
-    <td>${ship.pype}</td>
     <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
     <td>#{time_tooltip time:ship.createDate/}</td>
     <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>

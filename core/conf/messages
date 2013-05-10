@@ -31,11 +31,6 @@ ship.type=\u8FD0\u8F93\u65B9\u5F0F\u4E0D\u5141\u8BB8\u4E3A\u7A7A
 ship.source=\u8FD0\u8F93\u8D77\u59CB\u5730\u5740
 ship.target=\u8FD0\u8F93\u76EE\u6807\u5730\u5740
 
-ship.declaredValue=\u7533\u62A5\u4EF7\u683C
-ship.deposit=\u62BC\u91D1
-ship.otherfee=\u5176\u4ED6\u8D39\u7528
-ship.shipFee=\u8FD0\u8F93\u8D39\u7528
-ship.volumn=\u8FD0\u8F93\u4F53\u79EF
 ship.weight=\u8FD0\u8F93\u91CD\u91CF
 
 wh.name=\u4ED3\u5E93\u540D\u79F0
@@ -116,12 +111,6 @@ shipment.id=\u8FD0\u8F93\u5355\u7F16\u53F7
 shipment.trackNo=\u5FEB\u9012\u7F16\u53F7
 shipment.internationExpress=\u56FD\u9645\u5FEB\u9012\u5546
 shipment.planArrivDate=\u9884\u8BA1\u5230\u8FBE\u65F6\u95F4
-shipment.volumn=\u8FD0\u8F93\u4F53\u79EF
-shipment.weight=\u8FD0\u8F93\u91CD\u91CF
-shipment.declaredValue=\u7533\u62A5\u4EF7\u683C
-shipment.deposit=\u62BC\u91D1(\u9884\u4ED8\u6B3E)
-shipment.otherFee=\u5176\u4ED6\u8D39\u7528
-shipment.shipFee=\u8FD0\u8F93\u8D39\u7528
 shipment.items.size=\u8FD0\u8F93\u9879\u76EE
 shipment.whouse=\u8FD0\u5F80\u4ED3\u5E93
 shipment.cooper=\u8D27\u4EE3

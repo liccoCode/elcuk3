@@ -40,39 +40,33 @@
     <tr>
       <th>运输体积(m3)</th>
       <td>
-        <input type="text" class="input-mini" name="ship.volumn" value="${ship.volumn}">
+        删除
       </td>
       <th>运输重量(kg)</th>
       <td>
-        <input type="text" class="input-mini" name="ship.weight" value="${ship.weight}">
+        删除
       </td>
     </tr>
 
     <tr>
       <th>申报价格(单位 USD)</th>
       <td>
-        <input type="text" class="input-mini" name="ship.declaredValue" value="${ship.declaredValue}">
+        删除
       </td>
       <th>押金(例:预付款)</th>
       <td>
-        <input type="text" class="input-mini" name="ship.deposit" value="${ship.deposit}">
-      #{if ship.deposit && ship.deposit > 0}
-        <span class="badge badge-success">DDP</span>
-      #{/if}
-      #{else }
-        <span class="badge badge-info">DDU</span>
-      #{/else}
+        删除
       </td>
     </tr>
 
     <tr>
       <th>其他费用(例:手续费)</th>
       <td>
-        <input type="text" class="input-mini" name="ship.otherFee" value="${ship.otherFee}">
+        删除
       </td>
       <th>运费</th>
       <td>
-        <input type="text" class="input-mini" name="ship.shipFee" value="${ship.shipFee}">
+        删除
       </td>
     </tr>
 
@@ -111,10 +105,6 @@
       #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse?.id}
           #{option ''}选择仓库#{/option}
       #{/select}
-      </td>
-      <td>计价类型</td>
-      <td>
-      #{select 'ship.pype', items: models.procure.Shipment.P.values(), value: ship.pype}#{/select}
       </td>
     </tr>
 
