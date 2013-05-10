@@ -32,15 +32,15 @@ public class ShipmentPost extends Post {
 
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("planBeginDate", "预计开始运输时间"));
-        DATE_TYPES.add(new F.T2<String, String>("beginDate", "开始运输时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.planBeginDate", "预计开始运输时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.beginDate", "开始运输时间"));
         DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<String, String>("planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("arriveDate", "实际 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.arriveDate", "实际 [到库] 时间"));
     }
 
     // 默认的搜索排序时间
-    public String dateType = "planBeginDate";
+    public String dateType = "dates.planBeginDate";
 
     public Shipment.P pype;
 

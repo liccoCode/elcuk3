@@ -230,7 +230,7 @@ public class ShipItem extends GenericModel {
         if(shipment.state != Shipment.S.PLAN)
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
 
-        if(System.currentTimeMillis() > shipment.planBeginDate.getTime())
+        if(System.currentTimeMillis() > shipment.dates.planBeginDate.getTime())
             Validation.addError("", "目标运输单 " + shipment.id + " 的预计运输时间已经超时, 其应该处于运输状态.");
 
         for(ShipItem itm : items) {

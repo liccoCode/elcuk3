@@ -61,7 +61,11 @@
         <td>${unit.id}</td>
         <td>
             #{list items:relateShipments, as:'shipment'}
-              <span><a href="@{Shipments.show(shipment.id)}">${shipment.id}</a></span>
+              <span>
+                <a href="@{Shipments.show(shipment.id)}" target="_blank">${shipment.id}
+                  (<span style="color:${shipment.type.rgb()}">${shipment.type.label()}</span>)
+                </a>
+              </span>
             #{/list}
         </td>
         <td><a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a></td>

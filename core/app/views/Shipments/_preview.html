@@ -29,7 +29,7 @@
     <dt>仓库</dt>
     <dd>${ship.whouse.name()}</dd>
     <dt>预计发货时间</dt>
-    <dd>#{time_tooltip time: ship.planBeginDate/}</dd>
+    <dd>#{time_tooltip time: ship.dates.planBeginDate/}</dd>
   </dl>
 </div>
 
@@ -40,7 +40,7 @@
     <dt>运输商</dt>
     <dd>${ship.cooper?.fullName}&nbsp;</dd>
     <dt>预计抵达时间</dt>
-    <dd>#{time_tooltip time: ship.planArrivDate/}</dd>
+    <dd>#{time_tooltip time: ship.dates.planArrivDate/}</dd>
   </dl>
 </div>
 #{/if}

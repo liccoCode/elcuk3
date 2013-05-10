@@ -49,9 +49,9 @@ public class ShipmentSyncJob extends Job {
                      */
                     if(Notification.count("title=? AND createAt<=?", ShipmentSyncJob.NOTIFY_TITLE,
                             Dates.night(new Date())) <= 0) {
-                        Date beginDate = ship.beginDate;
+                        Date beginDate = ship.dates.beginDate;
                         // 做一个兼容...
-                        if(beginDate == null) beginDate = ship.planBeginDate;
+                        if(beginDate == null) beginDate = ship.dates.planBeginDate;
                         long differTime = System.currentTimeMillis() - beginDate.getTime();
                         if(differTime > TimeUnit.DAYS.toMillis(30)) {
                             Notification.notifies(ShipmentSyncJob.NOTIFY_TITLE,

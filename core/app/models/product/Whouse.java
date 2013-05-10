@@ -190,7 +190,7 @@ public class Whouse extends Model {
         @Override
         public boolean evaluate(Object o) {
             Shipment ship = (Shipment) o;
-            return Dates.morning(ship.planBeginDate).equals(Dates.morning(this.date));
+            return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date));
         }
     }
 }

@@ -22,7 +22,7 @@
     </td>
     <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
     <td>${ship.state.label()}</td>
-    <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
+    <td>${ship.dates.planBeginDate.date()} ${ship.dates.planBeginDate.dayOfWeek()}</td>
     <td>
     ${ship.totalWeight().format("0.00")}
           #{set diff: ship.totalWeight() - ship.minimumTraffic() /}

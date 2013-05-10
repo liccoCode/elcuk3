@@ -6,6 +6,7 @@ import helper.FLog;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ShipmentDates;
 import models.finance.PaymentUnit;
 import models.product.Whouse;
 import notifiers.Mails;
@@ -55,9 +56,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.id = Shipment.id();
         this.state = shipment.state;
         this.creater = shipment.creater;
-        this.beginDate = shipment.beginDate;
-        this.planBeginDate = shipment.planBeginDate;
-        this.planArrivDate = shipment.planArrivDate;
+        this.dates.beginDate = shipment.dates.beginDate;
+        this.dates.planBeginDate = shipment.dates.planBeginDate;
+        this.dates.planArrivDate = shipment.dates.planArrivDate;
         // FBA 不做处理
         this.pype = shipment.pype;
         this.type = shipment.type;
@@ -75,12 +76,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public Shipment(Date planBeginDate, T type, Whouse whouse) {
         this();
         this.id = Shipment.id();
-        this.planBeginDate = planBeginDate;
+        this.dates.planBeginDate = planBeginDate;
         this.type = type;
         this.calcuPlanArriveDate();
         this.whouse = whouse;
         this.title = String.format("%s 去往 %s 在 %s", this.id, this.whouse.name(),
-                Dates.date2Date(this.planBeginDate));
+                Dates.date2Date(this.dates.planBeginDate));
     }
 
     public enum T {
@@ -174,6 +175,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         },
 
+        RECEIPTD {
+            @Override
+            public String label() {
+                return "已签收";
+            }
+        },
+
         RECEIVING {
             @Override
             public String label() {
@@ -248,13 +256,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Required
     public String id;
 
-    /**
-     * 此货运单人工创建的时间
-     */
-    @Expose
-    @Required
-    public Date createDate = new Date();
-
     @Enumerated(EnumType.STRING)
     @Column(length = 12)
     @Expose
@@ -262,30 +263,19 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public S state = S.PLAN;
 
     /**
-     * 预计发货日期
+     * 此货运单人工创建的时间
      */
     @Expose
     @Required
-    public Date planBeginDate;
+    public Date createDate = new Date();
 
     /**
-     * 货运开始日期(实际发货日期)
+     * 因 Shipment 需要记录的时间太多, 所以将其分开记录
      */
+    @Embedded
     @Expose
-    public Date beginDate;
+    public ShipmentDates dates = new ShipmentDates();
 
-    /**
-     * 预计货运到达时间
-     */
-    @Expose
-    @Required
-    public Date planArrivDate;
-
-    /**
-     * 实际到达时间
-     */
-    @Expose
-    public Date arriveDate;
 
     /**
      * 货运类型
@@ -402,13 +392,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public boolean calcuPlanArriveDate() {
-        if(this.planBeginDate == null || this.type == null)
+        if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
         int plusDay = 7;
         if(type == T.EXPRESS) plusDay = 7;
         else if(type == T.AIR) plusDay = 15;
         else if(type == T.SEA) plusDay = 60;
-        this.planArrivDate = new DateTime(this.planBeginDate).plusDays(plusDay).toDate();
+        this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
+                .toDate();
         return true;
     }
 
@@ -466,7 +457,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return this;
 
         this.id = Shipment.id();
-        this.planBeginDate = earlyPlanBeginDate;
+        this.dates.planBeginDate = earlyPlanBeginDate;
         this.calcuPlanArriveDate();
         this.whouse = firstProcureUnit.whouse;
         this.creater = User.current();
@@ -537,7 +528,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 具体的开始运输
      * <p/>
      * ps: 不允许多个人, 对 Shipment 多次 beginShip
-     * TODO: effect
      */
     public synchronized void beginShip() {
         /**
@@ -589,7 +579,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         this.pype = this.pype();
-        this.beginDate = new Date();
+        this.dates.beginDate = new Date();
         this.state = S.SHIPPING;
         this.save();
     }
@@ -604,8 +594,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Override
     public String to_log() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
-        sbd.append("[运输:").append(Dates.date2Date(this.planBeginDate)).append("] ")
-                .append("[到库:").append(Dates.date2Date(this.planArrivDate)).append("] ");
+        sbd.append("[运输:").append(Dates.date2Date(this.dates.planBeginDate)).append("] ")
+                .append("[到库:").append(Dates.date2Date(this.dates.planArrivDate)).append("] ");
         if(this.volumn != null && this.volumn != 0)
             sbd.append("[运输体积:").append(this.volumn).append("] ");
         if(this.weight != null && this.weight != 0)
@@ -621,43 +611,29 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return sbd.toString();
     }
 
-
-    /**
-     * 完成运输, 最终的确认
-     */
-    public void shipOver() {
-        this.state = S.DONE;
-        // 当运输单完成运输, ProcureUnit 进入 SHIP_OVER 阶段
-        for(ShipItem item : this.items) {
-            item.arriveDate = this.arriveDate;
-            item.unitStage(ProcureUnit.STAGE.SHIP_OVER);
-        }
-        this.save();
-    }
-
     /**
      * 抓取 DHL, FEDEX, UPS 网站的运输信息, 更新系统中 SHIPMENT 的状态;
      * PS: 只有快递类型的运输单才可以自动跟踪
+     * ([SHIPPING] -> CLEARANCE -> DELIVERYING -> RECEIPTD)
      *
      * @return
      */
     public S monitor() {
-        //TODO effect: 需要调整
+        // 仅仅是 快递 才有自动监控
         if(this.type != T.EXPRESS) return this.state;
-        if(StringUtils.isBlank(this.iExpressHTML)) {
-            Logger.warn("Shipment %s do not have iExpressHTML.", this.id);
-            return this.state;
-        }
-        if(this.state == S.SHIPPING && this.internationExpress.isClearance(this.iExpressHTML)._1) {
-            // 正在运输,需要检查是否运输清关
-            this.clearance();
-        }
-        if(this.state == S.SHIPPING || this.state == S.CLEARANCE) {
-            // 清关, 检查是否送达; 因为有时候会跳过清关信息, 所以也需要将 SHIPPING 包括进来检查是否送达
-            F.T2<Boolean, DateTime> isDelivered = this.internationExpress
-                    .isDelivered(this.iExpressHTML);
-            if(isDelivered._1)
-                this.delivered(isDelivered._2.toDate());
+        F.T2<Boolean, DateTime> result = null;
+        if(this.state == S.SHIPPING) {
+            result = this.internationExpress.isClearance(this.iExpressHTML);
+            if(result._1)
+                this.beginClearance(result._2.toDate());
+        } else if(this.state == S.CLEARANCE) {
+            result = this.internationExpress.isDelivered(this.iExpressHTML);
+            if(result._1)
+                this.beginDeliver(result._2.toDate());
+        } else if(this.state == S.DELIVERYING) {
+            result = this.internationExpress.isReceipt(this.iExpressHTML);
+            if(result._1)
+                this.recipt(result._2.toDate());
         }
         return this.state;
     }
@@ -685,29 +661,35 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 完成清关
+     * 开始清关
      */
-    private void clearance() {
+    private void beginClearance(Date beginClearancedate) {
         this.state = S.CLEARANCE;
+        this.dates.atPortDate = beginClearancedate;
         this.save();
         Mails.shipment_clearance(this);
     }
 
     /**
-     * 送达目的地
+     * 开始派送
+     *
+     * @param beginDeliverDate
      */
-    private void delivered(Date deliveredDate) {
-        this.arriveDate = deliveredDate;
-        this.shipOver();
-        this.state = S.DONE;
-        // 为避免 NPE, 对 fba 初始化了集合
-        // TODO: effect 运输单抵达, 对 FBA 做响应; 需要响应吗?
-//        for(FBAShipment fba : this.fbas) {
-//            fba.receiptAt = deliveredDate;
-//            fba.save();
-//        }
+    public void beginDeliver(Date beginDeliverDate) {
+        this.state = S.DELIVERYING;
+        this.dates.deliverDate = beginDeliverDate;
         this.save();
-        Mails.shipment_isdone(this);
+    }
+
+    /**
+     * 签收时间
+     *
+     * @param reciptDate
+     */
+    public void recipt(Date reciptDate) {
+        this.state = S.RECEIPTD;
+        this.dates.receiptDate = reciptDate;
+        this.save();
     }
 
     /**

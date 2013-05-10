@@ -44,9 +44,9 @@
     <td>${ship.target}</td>
     <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
     <td>${ship.pype}</td>
-    <td>#{time_tooltip time:ship.planBeginDate/}</td>
+    <td>#{time_tooltip time:ship.dates.planBeginDate/}</td>
     <td>#{time_tooltip time:ship.createDate/}</td>
-    <td>#{time_tooltip time:ship.planArrivDate/}</td>
+    <td>#{time_tooltip time:ship.dates.planArrivDate/}</td>
     <td>${ship.creater?.username}</td>
   </tr>
   <tr id="ship_${ship_index}" style="display:none;">
