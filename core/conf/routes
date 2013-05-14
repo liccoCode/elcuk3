@@ -109,6 +109,7 @@ POST    /shipment/{id}/book                                 Shipments.booking
 POST    /shipment/{id}/delivery                             Shipments.deliverying
 POST    /shipment/{id}/receipt                              Shipments.receipt
 POST    /shipment/{id}/inbounding                           Shipments.inbounding
+DELETE  /shipment/{id}/state                                Shipments.revertState
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

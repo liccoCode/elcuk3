@@ -298,17 +298,13 @@ public class Shipments extends Controller {
         show(id);
     }
 
-    /**
-     * 运输完成
-     */
-    public static void endShip(String id, String date, String time) {
+    public static void revertState(String id) {
         Shipment shipment = Shipment.findById(id);
-        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
-        shipment.endShip(datetime);
+        shipment.revertState();
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
-            flash.success("%s 运输单 %s 运输结束!", shipment.type.label(), id);
+            flash.success("%s 运输单 %s 成功返回到上一状态!", shipment.type.label(), id);
         show(id);
     }
 

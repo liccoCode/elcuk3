@@ -659,20 +659,36 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 运输单完成
-     *
-     * @param date
+     * 返回 Shipment 的上一个状态 [PLAN 与 SHIPPING 除外]
      */
-    public void endShip(Date date) {
-        shouldSomeStateValidate(S.RECEIVING, "运输完成");
-        if(date == null) date = new Date();
+    public void revertState() {
+        if(Arrays.asList(S.PLAN, S.SHIPPING).contains(this.state))
+            Validation.addError("", "当前状态是是不允许撤销的.");
         if(Validation.hasErrors()) return;
-        this.state = S.DONE;
-        this.dates.arriveDate = date;
-        for(ShipItem itm : this.items) {
-            itm.arriveDate = date;
-            itm.save();
-        }
+
+        if(this.state == S.DONE) {
+            this.state = S.RECEIVING;
+            this.dates.arriveDate = null;
+        } else if(this.state == S.RECEIVING) {
+            this.state = S.RECEIPTD;
+            this.dates.receiptDate = null;
+        } else if(this.state == S.RECEIPTD) {
+            this.state = S.DELIVERYING;
+            this.dates.deliverDate = null;
+        } else if(this.state == S.DELIVERYING) {
+            this.state = S.BOOKED;
+            this.dates.bookDate = null;
+        } else if(this.state == S.BOOKED) {
+            this.state = S.PACKAGE;
+            this.dates.bookDate = null;
+        } else if(this.state == S.PACKAGE) {
+            this.state = S.CLEARANCE;
+            this.dates.pickGoodDate = null;
+        } else if(this.state == S.CLEARANCE) {
+            this.state = S.SHIPPING;
+            this.dates.atPortDate = null;
+        } else if(this.state == S.CONFIRM)
+            this.state = S.PLAN;
         this.save();
     }
 
