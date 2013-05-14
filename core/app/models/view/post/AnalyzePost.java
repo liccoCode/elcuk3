@@ -23,6 +23,7 @@ import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -132,9 +133,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     long differTime =
                             vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
-                    if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                        currentDto.day0 += vo.qty;
-                    if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
+                    if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= oneDayMillis)
                         currentDto.day1 += vo.qty;
                     //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
                     if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
@@ -169,7 +168,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     // review
                     F.T3<Integer, Float, List<String>> reviewT3;
-                    AmazonListingReviewQuery query=new AmazonListingReviewQuery();
+                    AmazonListingReviewQuery query = new AmazonListingReviewQuery();
                     if(isSku) reviewT3 = query.skuRelateReviews(dto.fid);
                     else reviewT3 = query.sidRelateReviews(dto.fid);
                     dto.reviews = reviewT3._1;
@@ -181,7 +180,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     //最新的评分
                     if(isSku)
-                        dto.lastRating= query.skuLastRating(dto.fid);
+                        dto.lastRating = query.skuLastRating(dto.fid);
+                    //使用BigDecimal求前7天的平均值时可以解决 出现无限循环小数导致在页面无法显示的问题
+                    dto.difference = dto.day1 - BigDecimal.valueOf(dto.day7).divide(BigDecimal.valueOf(7), 2, BigDecimal.ROUND_DOWN).floatValue();
                 }
 
                 Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");
