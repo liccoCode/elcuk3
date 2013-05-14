@@ -291,6 +291,19 @@ public class Shipments extends Controller {
         show(id);
     }
 
+    /**
+     * 运输完成
+     */
+    public static void endShip(String id, Date date) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.endShip(date);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 运输结束!", shipment.type.label(), id);
+        show(id);
+    }
+
 
     public static void refreshProcuress(final String id) {
         Shipment ship = Shipment.findById(id);

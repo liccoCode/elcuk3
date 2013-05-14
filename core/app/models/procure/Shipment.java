@@ -658,6 +658,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.save();
     }
 
+    /**
+     * 运输单完成
+     *
+     * @param date
+     */
+    public void endShip(Date date) {
+        shouldSomeStateValidate(S.RECEIVING, "运输完成");
+        if(date == null) date = new Date();
+        if(Validation.hasErrors()) return;
+        this.state = S.DONE;
+        this.dates.arriveDate = date;
+        for(ShipItem itm : this.items) {
+            itm.arriveDate = date;
+            itm.save();
+        }
+        this.save();
+    }
+
 
     @Override
     public String to_log() {
