@@ -6,6 +6,7 @@ import helper.FLog;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.embedded.ShipmentDates;
 import models.finance.PaymentUnit;
 import models.product.Whouse;
@@ -18,6 +19,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
@@ -690,6 +692,17 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } else if(this.state == S.CONFIRM)
             this.state = S.PLAN;
         this.save();
+    }
+
+    public void logEvent(String msg) {
+        new ERecordBuilder("shipment.logEvent")
+                .msgArgs(this.state.label(), msg)
+                .fid(this.id)
+                .save();
+    }
+
+    public List<ElcukRecord> logEvents() {
+        return ElcukRecord.records(this.id, Messages.get("shipment.logEvent"));
     }
 
 

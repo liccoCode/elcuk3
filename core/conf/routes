@@ -110,6 +110,7 @@ POST    /shipment/{id}/delivery                             Shipments.deliveryin
 POST    /shipment/{id}/receipt                              Shipments.receipt
 POST    /shipment/{id}/inbounding                           Shipments.inbounding
 DELETE  /shipment/{id}/state                                Shipments.revertState
+POST    /shipment/{id}/log                                  Shipments.log
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

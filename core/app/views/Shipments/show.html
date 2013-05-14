@@ -144,26 +144,7 @@
       入库中
     </a>
   #{/if}
-    <div class="modal hide fade" id="funcsForm">
-      <form action="#" method="POST">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">×</button>
-          <h4>设置时间</h4>
-        </div>
-        <div class="modal-body">
-          <label>日期:</label>
-          <input type="date" name="date" date-format='yyyy-MM-dd'>
-          <label>时间:</label>
-          <input type="time" name="time">
-        </div>
-        <div class="modal-footer">
-          <a href="#" class="btn" data-dismiss="modal">Close</a>
-          <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
-            <span id="action">Save Changes</span>
-          </button>
-        </div>
-      </form>
-    </div>
+    <a href="#logForm" class="btn" data-toggle='modal'>记录事件</a>
 
 
   #{power.ck 'shipments.cancel'}
@@ -223,12 +204,14 @@
       </div>
     </div>
     <div id="shipping_details" class="span12">
+    #{set logEvents: ship.logEvents()/}
+    #{records_ul records: ship.logEvents()/}
     #{if ship.iExpressHTML.trim().size() > 0}
     ${ship.iExpressHTML.raw()}
     #{/if}
-    #{else }
+    #{elseif logEvents.size() == 0}
       还没有跟踪信息
-    #{/else}
+    #{/elseif}
     </div>
   </div>
 </div>
@@ -243,4 +226,44 @@
     <ul class="thumbnails uploaded"></ul>
     <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
   </div>
+</div>
+
+<div class="modal hide fade" id="funcsForm">
+  <form action="#" method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>设置时间</h4>
+    </div>
+    <div class="modal-body">
+      <label>日期:</label>
+      <input type="date" name="date" date-format='yyyy-MM-dd'>
+      <label>时间:</label>
+      <input type="time" name="time">
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        <span id="action">Save Changes</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal hide fade" id="logForm">
+  <form action="@{Shipments.log(ship.id)}" method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>记录运输状态原因</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>原因:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        记录
+      </button>
+    </div>
+  </form>
 </div>

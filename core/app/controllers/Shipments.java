@@ -95,6 +95,7 @@ public class Shipments extends Controller {
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
+            //TODO effect 这里需要将所有的 records 修改为执行 action 的
             renderArgs.put("records", ElcukRecord.records(shipmentId));
         }
     }
@@ -305,6 +306,16 @@ public class Shipments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("%s 运输单 %s 成功返回到上一状态!", shipment.type.label(), id);
+        show(id);
+    }
+
+    public static void log(String id, String msg) {
+        Shipment shipment = Shipment.findById(id);
+        shipment.logEvent(msg);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 成功记录一条事件!", shipment.type.label(), id);
         show(id);
     }
 
