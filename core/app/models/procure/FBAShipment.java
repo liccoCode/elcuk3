@@ -3,9 +3,13 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import helper.FBA;
 import helper.Webs;
+import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
 import notifiers.FBAMails;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -13,6 +17,7 @@ import query.FBAShipmentQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -149,6 +154,9 @@ public class FBAShipment extends Model {
 
     @OneToMany(mappedBy = "fba")
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+
+    @Lob
+    public String records;
 
     /**
      * 每一个 FBAShipment 拥有一个地址
@@ -327,6 +335,38 @@ public class FBAShipment extends Model {
     }
 
     /**
+     * 将从 Amazon 解析的 Rows model 数据同步到当前系统中 FBA 的相关数据结构中.
+     *
+     * @param rows
+     */
+    public synchronized void syncFromAmazonInventoryRows(AmazonFBAInventoryReceivedJob.Rows rows) {
+        if(rows == null) {
+            Logger.warn("FBA %s Inventory Rows is empty!", this.shipmentId);
+            return;
+        }
+        /**
+         * 0. 记录 records
+         * 1. 通过 ProcureUnit 向 Rows 中拿数据进行解析
+         * 2. ProcureUnit 的 ShipItem 如果有多个, 优先满足
+         */
+        this.records = StringUtils.join(rows.records, "\n");
+        for(ProcureUnit unit : this.units) {
+            int fbaQty = rows.qty(unit.selling.merchantSKU);
+            for(ShipItem shipItem : unit.shipItems) {
+                if(fbaQty >= shipItem.qty) {
+                    shipItem.recivedQty = shipItem.qty;
+                    fbaQty -= shipItem.qty;
+                } else {
+                    shipItem.recivedQty = fbaQty;
+                    fbaQty = 0;
+                }
+                shipItem.save();
+            }
+        }
+        this.save();
+    }
+
+    /**
      * 向 Amazon 提交报告, 对这个 FBA 进行删除标记
      * 收件减少 FBA 中的数量, 直到数量为 0 了则标记删除
      */
@@ -393,6 +433,10 @@ public class FBAShipment extends Model {
 
     public static FBAShipment findByShipmentId(String shipmentId) {
         return FBAShipment.find("shipmentId=?", shipmentId).first();
+    }
+
+    public static List<FBAShipment> findBySHipmentIds(Collection<String> shipmentids) {
+        return FBAShipment.find(SqlSelect.whereIn("shipmentId", shipmentids)).fetch();
     }
 
 }
