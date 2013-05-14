@@ -1,7 +1,12 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import helper.FBA;
+import models.market.Account;
 import org.junit.Test;
 import play.test.UnitTest;
+
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -10,11 +15,16 @@ import play.test.UnitTest;
  * Time: 11:37 AM
  */
 public class FBAShipmentTest extends UnitTest {
-    @Test
+    //    @Test
     public void testUpdateFBAShipment() {
         ProcureUnit unit = ProcureUnit.findById(827l);
         unit.attrs.planQty += 5;
         unit.fba.updateFBAShipment(null);
+    }
+
+    @Test
+    public void testlistShipments() throws FBAInboundServiceMWSException {
+        FBA.listShipments(Arrays.asList("FBA8F3YC8"), Account.<Account>findById(2l));
     }
 
 }

@@ -85,7 +85,7 @@
   </div>
 </div>
 
-<div class="row-fluid">
+<div class="row-fluid" id="btnFucs">
   <div class="btn-toolbar">
   #{if ship.state == models.procure.Shipment.S.PLAN}
     <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"
@@ -95,49 +95,43 @@
   #{/if}
   #{if ship.state == models.procure.Shipment.S.CONFIRM}
     <a href="@{Shipments.confirm(ship.id, true)}" data-confirm="确认操作?" data-method="POST"
-       class="btn  btn-warning" data-disable-with="确认中...">
+       class="btn btn-warning" data-disable-with="确认中...">
       取消确认运输单
     </a>
   #{/if}
   #{power.ck "shipments.beginship"}
       #{if ship.state == models.procure.Shipment.S.CONFIRM}
-        <a href="@{Shipments.beginShip(ship.id)}" class="btn btn-success"
-           data-confirm="确认开始运输?" data-method='POST' data-disable-with='更新中...'>
+        <button class="btn btn-success func" url="@{Shipments.beginShip(ship.id)}">
           开始运输
-        </a>
+        </button>
       #{/if}
   #{/power.ck}
 
   #{if ship.type != models.procure.Shipment.T.EXPRESS}
       #{if ship.state == models.procure.Shipment.S.SHIPPING}
-        <a href="@{Shipments.landPort(ship.id)}" class="btn btn-success"
-           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+        <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
           运输到港
-        </a>
+        </button>
       #{/if}
       #{if ship.state == models.procure.Shipment.S.CLEARANCE}
-        <a href="@{Shipments.pickGoods(ship.id)}" class="btn btn-success"
-           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+        <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
           开始提货
-        </a>
+        </button>
       #{/if}
       #{if ship.state == models.procure.Shipment.S.PACKAGE}
-        <a href="@{Shipments.booking(ship.id)}" class="btn btn-success"
-           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+        <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
           与 Amazon 预约
-        </a>
+        </button>
       #{/if}
       #{if ship.state == models.procure.Shipment.S.BOOKED}
-        <a href="@{Shipments.deliverying(ship.id)}" class="btn btn-success"
-           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+        <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
           派送
-        </a>
+        </button>
       #{/if}
       #{if ship.state == models.procure.Shipment.S.DELIVERYING}
-        <a href="@{Shipments.receipt(ship.id)}" class="btn btn-success"
-           data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+        <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
           签收
-        </a>
+        </button>
       #{/if}
   #{/if}
   #{if ship.state == models.procure.Shipment.S.RECEIPTD}
@@ -146,6 +140,26 @@
       入库中
     </a>
   #{/if}
+    <div class="modal hide fade" id="funcsForm">
+      <form action="#" method="POST">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">×</button>
+          <h4>设置时间</h4>
+        </div>
+        <div class="modal-body">
+          <label>日期:</label>
+          <input type="date" name="date" date-format='yyyy-MM-dd'>
+          <label>时间:</label>
+          <input type="time" name="time">
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn" data-dismiss="modal">Close</a>
+          <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+            <span id="action">Save Changes</span>
+          </button>
+        </div>
+      </form>
+    </div>
 
 
   #{power.ck 'shipments.cancel'}

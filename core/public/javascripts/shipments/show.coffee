@@ -51,3 +51,11 @@ $ ->
         "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
       )
   )
+
+  # 所有的 btnFucs 下的 button action
+  $('#btnFucs').on('click', '.func', ->
+    funcsForm = $('#funcsForm').find('form').attr('action', @getAttribute('url')).end()
+      .find('#action').text(@textContent).end()
+      .find("input[name=date]").val($.DateUtil.fmt2(new Date())).end()
+      .modal('show');
+  )

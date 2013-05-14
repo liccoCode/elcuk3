@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -208,9 +209,10 @@ public class Shipments extends Controller {
     /**
      * 到港
      */
-    public static void landPort(String id, Date date) {
+    public static void landPort(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.landPort(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.landPort(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -224,9 +226,10 @@ public class Shipments extends Controller {
      * @param id
      * @param date
      */
-    public static void pickGoods(String id, Date date) {
+    public static void pickGoods(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.pickGoods(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.pickGoods(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -239,9 +242,10 @@ public class Shipments extends Controller {
      *
      * @param id
      */
-    public static void booking(String id, Date date) {
+    public static void booking(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.booking(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.booking(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -252,9 +256,10 @@ public class Shipments extends Controller {
     /**
      * 派送
      */
-    public static void deliverying(String id, Date date) {
+    public static void deliverying(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.beginDeliver(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.beginDeliver(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -268,9 +273,10 @@ public class Shipments extends Controller {
      * @param id
      * @param date
      */
-    public static void receipt(String id, Date date) {
+    public static void receipt(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.receipt(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.receipt(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -281,9 +287,10 @@ public class Shipments extends Controller {
     /**
      * 入库
      */
-    public static void inbounding(String id, Date date) {
+    public static void inbounding(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.inbounding(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.inbounding(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -294,9 +301,10 @@ public class Shipments extends Controller {
     /**
      * 运输完成
      */
-    public static void endShip(String id, Date date) {
+    public static void endShip(String id, String date, String time) {
         Shipment shipment = Shipment.findById(id);
-        shipment.endShip(date);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.endShip(datetime);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
