@@ -5,6 +5,7 @@ import helper.Dates;
 import models.market.Feedback;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -167,19 +168,32 @@ public class OrderItemQuery {
      *
      * @return
      */
-    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market) {
+    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market, String categoryId) {
         SqlSelect sql = new SqlSelect()
                 .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
                 .from("OrderItem oi")
-                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
-                .where("oi.createDate>=?").param(from)
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId");
+        if(categoryId != null)
+            sql.leftJoin("Product p ON p.sku=oi.product_sku").where("p.category_categoryId=?")
+                    .param(categoryId);
+        sql.where("oi.createDate>=?").param(from)
                 .where("oi.market=?").param(market.name())
                 .where("oi.createDate<=?").param(to)
                 .where("o.state NOT IN (?,?,?)")
                 .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
                         Orderr.S.RETURNNEW.name());
+
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
+    }
+
+    /**
+     * 所有正常销售的订单的订单项目. 不包括 CANCEL, REFUNDED, RETURNEW 的订单
+     *
+     * @return
+     */
+    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market) {
+        return allNormalSaleOrderItem(from, to, market, null);
     }
 
     /**
@@ -215,7 +229,7 @@ public class OrderItemQuery {
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId");
-        // 如果有 account 就增加过滤
+        // 如果有 account 就过滤
         if(accId != null)
             sql.leftJoin("Account a ON s.account_id=a.id").where("a.id=?").param(accId);
         sql.where("s.merchantSKU=?").param(msku)
