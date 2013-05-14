@@ -5,22 +5,18 @@ import helper.FBA;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
-import notifiers.FBAMails;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
-import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.FBAShipmentQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * User: wyattpan
@@ -130,20 +126,6 @@ public class FBAShipment extends Model {
          * @return
          */
         public abstract String msg();
-
-        /**
-         * 是否处于可更改状态? 如果 FBA 运输出去了, 或者已经取消了, 则不可以进行变更了
-         *
-         * @return
-         */
-        public boolean isCanModify() {
-            if(this == RECEIVING || this == CANCELLED || this == DELETED ||
-                    this == SHIPPED || this == CLOSED) {
-                return false;
-            } else {
-                return true;
-            }
-        }
     }
 
     @OneToOne
@@ -184,79 +166,12 @@ public class FBAShipment extends Model {
      */
     public String title;
 
-    /**
-     * Amazon 上的 Items 的 html 记录
-     */
-    @Column(length = 3000/*没有使用 varchar(3000) 虽然可以支持 65535,直接使用了 longtext*/)
-    public String itemsOnAmazonWithHTML;
-
-    /**
-     * 上次向 Amazon 查看 ShipmentItems 的时间
-     */
-    public Date lastWatchAmazonItemsAt;
-
     public Date createAt;
-
-    /**
-     * 签收时间, 需要通过 Shipment 的跟踪来设置
-     */
-    public Date receiptAt;
-
-    /**
-     * 开始接收的时间
-     */
-    public Date receivingAt;
 
     /**
      * 关闭/取消 时间
      */
     public Date closeAt;
-
-
-    /**
-     * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
-     *
-     * @param state
-     */
-    public void isNofityState(S state) {
-        // 每一次的碰到 RECEIVING 状态都去检查一次的 ShipItem.unit 的阶段
-        /* TODO effect: FBA 状态变化所需要做的变化, 还需要讨论
-        if(state == S.RECEIVING) {
-            if(this.receivingAt == null)
-            // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
-            {
-                this.receivingAt = new Date();
-            }
-            // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
-            for(ShipItem itm : this.shipItems) {
-                itm.unitStage(ProcureUnit.STAGE.INBOUND);
-            }
-            this.shipment.fbaReceviedBeforeShipmentDelivered();
-        } else if(state == S.CLOSED || state == S.DELETED) {
-            this.closeAt = new Date();
-            for(ShipItem itm : this.shipItems) {
-                itm.unitStage(ProcureUnit.STAGE.CLOSE);
-            }
-        }
-        if(this.state != state) {
-            FBAMails.shipmentStateChange(this, this.state, state);
-        }
-        */
-        this.state = state;
-    }
-
-
-    /**
-     * 货物抵达后, FBA Shipment 的签收时间与开始入库时间的检查
-     */
-    public void receiptAndreceivingCheck() {
-        // 已经开始接收的不再进行提醒
-        if(this.state.ordinal() >= S.RECEIVING.ordinal()) return;
-        if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >=
-                TimeUnit.DAYS.toMillis(2))) {
-            FBAMails.receiptButNotReceiving(this);
-        }
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -397,25 +312,6 @@ public class FBAShipment extends Model {
         }
     }
 
-    /**
-     * 入库进度
-     *
-     * @return
-     */
-    public F.T2<Integer, Integer> progress() {
-        /* TODO FBA 的入库进度计算需要调整
-        int recevied = 0;
-        int total = 1;
-        for(ShipItem itm : this.shipItems) {
-            recevied += itm.recivedQty;
-            total += itm.qty;
-        }
-        return new F.T2<Integer, Integer>(recevied, total > 1 ? total - 1 : total);
-        */
-        return new F.T2<Integer, Integer>(-1, -1);
-    }
-
-
     public String address() {
         return String.format("%s %s %s %s (%s)",
                 this.fbaCenter.addressLine1, this.fbaCenter.city,
@@ -424,11 +320,6 @@ public class FBAShipment extends Model {
 
     public String codeToCounrty() {
         return this.fbaCenter.codeToCountry();
-    }
-
-    //TODO effect: 需要删除
-    public static List<String> uncloseFBAShipmentIds() {
-        return new FBAShipmentQuery().uncloseFBAShipmentIds();
     }
 
     public static FBAShipment findByShipmentId(String shipmentId) {

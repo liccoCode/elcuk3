@@ -15,7 +15,6 @@ import play.i18n.Messages;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
-import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.Date;
@@ -102,6 +101,7 @@ public class Shipments extends Controller {
 
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
+        ship.autoCheckDone();
         render(ship);
     }
 
@@ -127,22 +127,20 @@ public class Shipments extends Controller {
         show(id);
     }
 
-    @Util
-    public static void checkShowError(Shipment ship) {
-        if(Validation.hasErrors()) {
-            renderArgs.put("ship", ship);
-            render("Shipments/show.html");
-        }
-    }
-
     //TODO effect: 需要调整
     public static void update(Shipment ship) {
         checkAuthenticity();
         validation.valid(ship);
         ship.validate();
-        checkShowError(ship);
+        if(Validation.hasErrors()) {
+            renderArgs.put("ship", ship);
+            render("Shipments/show.html");
+        }
         ship.updateShipment();
-        checkShowError(ship);
+        if(Validation.hasErrors()) {
+            renderArgs.put("ship", ship);
+            render("Shipments/show.html");
+        }
         new ElcukRecord(Messages.get("shipment.update"),
                 Messages.get("shipment.update.msg", ship.to_log()), ship.id).save();
         flash.success("更新成功.");
@@ -316,6 +314,17 @@ public class Shipments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("%s 运输单 %s 成功记录一条事件!", shipment.type.label(), id);
+        show(id);
+    }
+
+    public static void endShip(String id, String date, String time) {
+        Shipment shipment = Shipment.findById(id);
+        Date datetime = Dates.cn(String.format("%s %s:00", date, time)).toDate();
+        shipment.endShip(datetime);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 运输单 %s 正在入库!", shipment.type.label(), id);
         show(id);
     }
 

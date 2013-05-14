@@ -139,10 +139,14 @@
       #{/if}
   #{/if}
   #{if ship.state == models.procure.Shipment.S.RECEIPTD}
-    <a href="@{Shipments.inbounding(ship.id)}" class="btn btn-success"
-       data-method='POST' data-disable-with='更新中...' data-confirm='确认操作?'>
+    <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
       入库中
-    </a>
+    </button>
+  #{/if}
+  #{if ship.state == models.procure.Shipment.S.RECEIVING}
+    <button class="btn btn-success func" url="@{Shipments.endShip(ship.id)}">
+      完成运输
+    </button>
   #{/if}
     <a href="#logForm" class="btn" data-toggle='modal'>记录事件</a>
 
@@ -185,9 +189,10 @@
   </div>
 </form>
 
-<div class="row-fluid" style="margin-top:20px">
-  <div class="span6">
-  #{records records:records/}
+<div class="row-fluid" style="margin-top:20px;">
+  <div class="span6" style="overflow:auto;height:280px;">
+  #{records_ul records: records/}
+  *{#{records records:records/}}*
   </div>
 
   <div class="span6">
@@ -203,7 +208,8 @@
         </h4>
       </div>
     </div>
-    <div id="shipping_details" class="span12">
+
+    <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
     #{set logEvents: ship.logEvents()/}
     #{records_ul records: ship.logEvents()/}
     #{if ship.iExpressHTML.trim().size() > 0}
@@ -253,10 +259,10 @@
   <form action="@{Shipments.log(ship.id)}" method="POST">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">×</button>
-      <h4>记录运输状态原因</h4>
+      <h4>记录运输状态事件</h4>
     </div>
     <div class="modal-body row-fluid">
-      <label>原因:</label>
+      <label>事件:</label>
       <textarea role="5" name="msg" class="span11"></textarea>
     </div>
     <div class="modal-footer">

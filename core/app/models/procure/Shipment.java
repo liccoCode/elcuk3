@@ -660,6 +660,44 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.save();
     }
 
+
+    /**
+     * 当前运输单中的所有运输项目的 recivedQty == qty 的时候, 运输单完成.
+     */
+    public void autoCheckDone() {
+        if(this.state != S.RECEIVING) return;
+        DateTime now = DateTime.now();
+        if(now.isBefore(this.dates.inbondDate.getTime()))
+            Validation.addError("", "结束时间不可能早于入库事件");
+        if(Validation.hasErrors()) return;
+        int hundredSize = 0;
+        for(ShipItem shipitem : this.items) {
+            if(shipitem.qty.equals(shipitem.recivedQty))
+                hundredSize++;
+        }
+        if(hundredSize == this.items.size()) {
+            this.state = S.DONE;
+            this.dates.arriveDate = now.toDate();
+            this.save();
+        }
+    }
+
+    /**
+     * 手动确认运输单完成
+     *
+     * @param date
+     */
+    public void endShip(Date date) {
+        if(date == null) date = new Date();
+        shouldSomeStateValidate(S.RECEIVING, "完成运输");
+        if(date.getTime() < this.dates.inbondDate.getTime())
+            Validation.addError("", "结束时间不可能早于入库事件");
+        if(Validation.hasErrors()) return;
+        this.state = S.DONE;
+        this.dates.arriveDate = date;
+        this.save();
+    }
+
     /**
      * 返回 Shipment 的上一个状态 [PLAN 与 SHIPPING 除外]
      */
@@ -704,7 +742,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public List<ElcukRecord> logEvents() {
         return ElcukRecord.records(this.id, Messages.get("shipment.logEvent"));
     }
-
 
     @Override
     public String to_log() {
@@ -763,28 +800,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
-    }
-
-    /**
-     * FBA 在运输单的状态跟踪抵达之前就已经签收了, 那么需要对运输单做状态改变;
-     * 如果这个运输单的所有 FBA 都进入签收后状态了, 那么这个运输单才可以进行 DONE
-     */
-    public void fbaReceviedBeforeShipmentDelivered() {
-        //TODO: effect FBA 与 Shipment 没有关系, 那么 FBA 不要影响 Shipment ?
-        /*
-        boolean makeDone = this.fbas.size() > 0;
-        for(FBAShipment fba : this.fbas) {
-            if(!fba.afterReceving()) {
-                makeDone = false;
-                break;
-            }
-        }
-        if(makeDone) {
-            this.state = S.DONE;
-            this.arriveDate = fbas.get(0).receiptAt;
-        }
-        this.save();
-        */
     }
 
     public String title() {

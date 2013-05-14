@@ -16,7 +16,7 @@
     <th>Sku</th>
     <th>Selling</th>
     <th>Ship(Plan|Qty)</th>
-    <th>Received</th>
+    <th class="five">Received</th>
     <th>采购单</th>
     <th>预计发货时间</th>
     <th>预计到库时间</th>
@@ -44,7 +44,9 @@
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
-    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" ${}>${itm.recivedQty}</td>
+    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}">
+      <input type="text" name="recivedQty" value="${itm.recivedQty}" class="input-mini">
+    </td>
     <td>
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
       ${itm.unit.deliveryment?.id}
