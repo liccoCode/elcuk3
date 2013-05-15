@@ -38,16 +38,16 @@
     </td>
     <td>${dto.rating.format('#.##')}</td>
       #{set psDiffer:dto.psDiffer()/}
-    <td style="width:90px;background:${'#'+psDiffer._2}">
+    <td colspan="2" style="text-align:center;width:90px;background:${'#'+psDiffer._2}">
       <div class="input-prepend" style="margin:0;">
-        <span class="add-on">${psDiffer._1.format('#%')}</span>
-        <input type="text" ps sid="${dto.fid}" value="${dto.ps}" style="width:30px;">
+        <span class="add-on" style="width:35px">${psDiffer._1.format('#%')}</span>
+        <input type="text" ps sid="${dto.fid}" value="${dto.ps}" style="width:45px;">
       </div>
     </td>
     <td>${dto.day1}</td>
     <td style="color:${dto.difference.rgb()}">
     ${dto.difference.format('#.##')}
-      (${ dto.difference.percentage(dto.day1 - dto.difference).format('#.##')})
+      (${ dto.percentage().format('#.##')})
     </td>
     <td>${dto.day7} ( ${(dto.day1 - dto.difference).format('#.##')} )</td>
     <td>${dto.day30} ( ${(dto.day30 / 30).format('#.##')} )</td>
@@ -73,7 +73,7 @@
   </tr>
 #{/list}
   <tr>
-    <td colspan="19">
+    <td colspan="20">
     #{bootstrap_pager pi:p, url:'#'/}
     </td>
   </tr>

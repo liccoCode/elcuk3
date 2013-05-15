@@ -182,7 +182,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     if(isSku)
                         dto.lastRating = query.skuLastRating(dto.fid);
                     //使用BigDecimal求前7天的平均值时可以解决 出现无限循环小数导致在页面无法显示的问题
-                    dto.difference = dto.day1 - BigDecimal.valueOf(dto.day7).divide(BigDecimal.valueOf(7), 2, BigDecimal.ROUND_DOWN).floatValue();
+                    dto.difference = dto.day1 - dto.day7 / 7;
                 }
 
                 Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");
