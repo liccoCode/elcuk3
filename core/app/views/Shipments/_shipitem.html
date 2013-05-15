@@ -15,8 +15,8 @@
     <th>#</th>
     <th>Sku</th>
     <th>Selling</th>
-    <th>Ship(Plan|Qty)</th>
-    <th class="five">Received</th>
+    <th><abbr rel='tooltip' title='运输数量 (计划数量 | 交货数量)'>Qty</abbr></th>
+    <th class="five">Receive</th>
     <th>采购单</th>
     <th>预计发货时间</th>
     <th>预计到库时间</th>
@@ -30,7 +30,7 @@
   #{/if}
   </tr>
 #{list items:items, as:'itm'}
-  <tr>
+  <tr id="${itm.id}">
       #{if useCheckbox}
         <td>
           <label class="checkbox">
@@ -44,7 +44,8 @@
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
-    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}">
+    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" rel='popover'
+        content='#{records_ul records: itm.recivedLogs()/}'>
       <input type="text" name="recivedQty" value="${itm.recivedQty}" class="input-mini">
     </td>
     <td>

@@ -1,6 +1,8 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import models.ElcukRecord;
+import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.view.dto.AnalyzeDTO;
@@ -8,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
+import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.*;
@@ -247,5 +250,32 @@ public class ShipItem extends GenericModel {
             itm.shipment = shipment;
             itm.save();
         }
+    }
+
+    /**
+     * 调整接收数量
+     * 入库数量大于 10% 则不允许
+     *
+     * @param qty
+     */
+    public void receviedQty(int recivedQty) {
+        float percent = ((float) Math.abs(recivedQty - this.qty) / this.qty);
+        if(percent > 0.1)
+            Validation.addError("", "入库库存与运输库存差据为 " + (percent * 100) + "百分比 大于 10 百分比 请检查数量.");
+        if(Validation.hasErrors()) return;
+
+        int oldQty = this.recivedQty;
+        if(oldQty != recivedQty) {
+            this.recivedQty = recivedQty;
+            this.save();
+            new ERecordBuilder("shipitem.receviedQty")
+                    .msgArgs(oldQty, recivedQty)
+                    .fid(this.id)
+                    .save();
+        }
+    }
+
+    public List<ElcukRecord> recivedLogs() {
+        return ElcukRecord.records(this.id + "", Messages.get("shipitem.receviedQty"));
     }
 }

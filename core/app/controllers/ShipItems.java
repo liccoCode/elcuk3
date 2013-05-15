@@ -50,4 +50,22 @@ public class ShipItems extends Controller {
 
         Shipments.show(shipmentId);
     }
+
+    /**
+     * 修改运输计划的接收数量
+     *
+     * @param id
+     * @param qty
+     */
+    public static void received(Long id, Integer qty) {
+        if(qty == null) qty = 0;
+        ShipItem itm = ShipItem.findById(id);
+        itm.receviedQty(qty);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("修改成功.");
+
+        render(itm);
+    }
 }
