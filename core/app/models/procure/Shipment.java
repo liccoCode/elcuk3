@@ -624,6 +624,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             shouldSomeStateValidate(S.BOOKED, "派送");
             if(Validation.hasErrors()) return;
             if(beginDeliverDate == null) beginDeliverDate = new Date();
+        } else {
+            // 快递, 需要将这两个时间补上
+            this.dates.pickGoodDate = beginDeliverDate;
+            this.dates.bookDate = beginDeliverDate;
         }
         this.state = S.DELIVERYING;
         this.dates.deliverDate = beginDeliverDate;

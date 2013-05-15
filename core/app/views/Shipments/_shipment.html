@@ -96,15 +96,5 @@
       #{/if}
       </td>
     </tr>
-  #{if ship.dates.arriveDate}
-    <tr class="alert alert-success">
-      <th>运输单到达(Amazon 签收)时间</th>
-      <td>#{time_tooltip time:ship.dates.arriveDate/}</td>
-
-      <td>准点误差</td>
-        #{set diffDays: ship.dates.planArrivDate - ship.dates.arriveDate /}
-      <td style="${diffDays < 0 ? 'color:#B94A48' : ''}">${diffDays} Days</td>
-    </tr>
-  #{/if}
   </table>
 </form>

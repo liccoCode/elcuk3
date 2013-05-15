@@ -28,7 +28,8 @@
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>运输</abbr>天数</label>
-              <span>${ship.config("atport").toInteger()}</span>
+                #{set atport: ship.config("atport") /}
+              <span>${atport.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>运输</abbr>天数</label>
@@ -40,7 +41,8 @@
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>清关</abbr>天数</label>
-              <span>${ship.config("clearance").toInteger()}</span>
+                #{set clearance: ship.config("clearance")/}
+              <span>${clearance.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>清关</abbr>天数</label>
@@ -52,7 +54,8 @@
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>提货</abbr>天数</label>
-              <span>${ship.config("pick").toInteger()}</span>
+                #{set pick: ship.config("pick")/}
+              <span>${pick.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>提货</abbr>天数</label>
@@ -64,7 +67,8 @@
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>预约</abbr>天数</label>
-              <span>${ship.config("book").toInteger()}</span>
+                #{set book: ship.config("book")/}
+              <span>${book.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>预约</abbr>天数</label>
@@ -76,7 +80,8 @@
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>派送</abbr>天数</label>
-              <span>${ship.config("deliver").toInteger()}</span>
+                #{set deliver: ship.config("deliver")/}
+              <span>${deliver.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>派送</abbr>天数</label>
@@ -88,7 +93,8 @@
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>入库</abbr>天数</label>
-              <span>${ship.config("inbound").toInteger()}</span>
+                #{set inbound: ship.config("inbound") /}
+              <span>${inbound.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>入库</abbr>天数</label>
@@ -99,11 +105,13 @@
         #{if ship.state >= models.procure.Shipment.S.DONE}
           <li class="stripe">
             <div class="block">
-              <label>平均<abbr>运输</abbr>天数</label>
-              <span>${ship.config("inbound").toInteger()}</span>
+              <label>平均<abbr>总运输</abbr>天数</label>
+              <span>
+                ${atport.toInteger() + clearance.toInteger() + pick.toInteger() + book.toInteger() + deliver.toInteger() + inbound.toInteger()}
+              </span>
             </div>
             <div class="block">
-              <label>实际<abbr>运输</abbr>天数</label>
+              <label>实际<abbr>总运输</abbr>天数</label>
               <span>${ship.betweenDays("done")}</span>
             </div>
           </li>
