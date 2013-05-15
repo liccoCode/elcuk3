@@ -1,21 +1,14 @@
 package models;
 
-import helper.Dates;
-import notifiers.FBAMails;
-import notifiers.Mails;
-import notifiers.SystemMails;
 import play.data.validation.Required;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
-import query.ElcukRecordQuery;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 系统内的操作日志的记录;
@@ -84,43 +77,6 @@ public class ElcukRecord extends Model {
      */
     @Required
     public Date createAt = new Date();
-
-
-    /**
-     * 邮件发送的情况
-     *
-     * @param from
-     * @param to
-     * @return
-     */
-    public static List<Map<String, List<Integer>>> emailOverView(Date from, Date to) {
-        List<String> lines = new ArrayList<String>();
-        lines.add(Mails.CLEARANCE);
-        lines.add(Mails.REVIEW_US);
-        lines.add(Mails.REVIEW_UK);
-        lines.add(Mails.REVIEW_DE);
-        lines.add(Mails.FEEDBACK_WARN);
-        lines.add(Mails.REVIEW_WARN);
-        lines.add(Mails.IS_DONE);
-        lines.add(Mails.FNSKU_CHECK);
-        lines.add(Mails.MORE_OFFERS);
-
-        lines.add(SystemMails.DAILY_FEEDBACK);
-        lines.add(SystemMails.DAILY_REVIEW);
-        lines.add(SystemMails.SKU_PIC_CHECK);
-
-        lines.add(FBAMails.NOT_RECEING);
-        lines.add(FBAMails.RECEIVING_CHECK);
-        lines.add(FBAMails.STATE_CHANGE);
-
-        List<Map<String, List<Integer>>> mailLines = new ArrayList<Map<String, List<Integer>>>();
-        //TODO 需要对加载出来的数据做处理
-        for(String lineType : lines) {
-            mailLines.add(new ElcukRecordQuery().emails(
-                    Dates.morning(from), Dates.night(to), lineType));
-        }
-        return mailLines;
-    }
 
     public static List<ElcukRecord> records(String fid) {
         return ElcukRecord.find("fid=? ORDER BY createAt DESC", fid).fetch();

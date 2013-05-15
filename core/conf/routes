@@ -118,6 +118,10 @@ POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
 
+# Elcuk
+PUT     /elcuk/config                                       Elcuk.updateConfig
+GET     /elcuk/config/{name}                                Elcuk.config
+
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}
 

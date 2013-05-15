@@ -5,6 +5,62 @@
     #{script 'elcuk/index.coffee'/}
 #{/set}
 
-<div class="row-fluid" id="mail_lines">
-    sdkfj
+#{flash_alert /}
+<div class="row-fluid">
+  <div class="span4 bs-docs-form">
+    <form action="@{Elcuk.updateConfig()}" id="shipConfigForm" class="form-horizontal" data-method="PUT" method="POST">
+      <div class="control-group">
+        <label class="control-label">市场:</label>
+
+        <div class="controls">
+        #{select 'market', items: models.ElcukConfig.MARKETS.entrySet(), labelProperty: 'value', valueProperty:'key' /}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">运输方式:</label>
+
+        <div class="controls">
+        #{select 'shipType', items: models.ElcukConfig.SHIP_TYPES.entrySet(), labelProperty: 'value', valueProperty:'key' /}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">阶段类型:</label>
+
+        <div class="controls">
+        #{select 'dayType', items: models.ElcukConfig.DAY_TYPES.entrySet(), labelProperty: 'value', valueProperty:'key'}
+            #{option ''}请选择#{/option}
+        #{/select}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="days">时长:</label>
+
+        <div class="controls">
+          <input type="text" id="days" name="val" placeholder="平均持续天数">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="days">当前值:</label>
+
+        <div class="controls">
+          <div class="input-append">
+            <input type="text" id="currentVal" class="input-small" readonly="">
+            <span class="add-on">天</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label"></label>
+
+        <div class="controls">
+          <button class="btn">提交</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
