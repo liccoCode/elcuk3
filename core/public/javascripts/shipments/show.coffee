@@ -60,9 +60,9 @@ $ ->
       .modal('show');
   )
 
-  $('#adjust_shipitems').on('dblclick', '[name=recivedQty]', (e) ->
+  $('#adjust_shipitems').on('dblclick', '[name=recivedQty]',(e) ->
     self = $(@)
     $('#origin_qty').text(self.text())
     $('#recivedQtyForm').modal('show').find('form').attr('action', "/shipitem/#{self.parents('tr').attr('id')}/recevied")
     e.stopPropagation()
-  )
+  ).find('[name=recivedQty]').append('<i class="icon-wrench"></i>')

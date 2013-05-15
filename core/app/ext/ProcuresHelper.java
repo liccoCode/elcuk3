@@ -1,9 +1,9 @@
 package ext;
 
 import models.procure.*;
+import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -119,40 +119,34 @@ public class ProcuresHelper extends JavaExtensions {
             return "#FFFFFF";
     }
 
-    /**
-     * 超过或者不足的 ProcureUnit 在页面上的颜色
-     *
-     * @return
-     */
-    public static String leekOrOverRgb(ProcureUnit unit) {
-        Integer qty = unit.attrs.qty;
-        Integer planQty = unit.attrs.planQty;
-        if(qty == null) qty = 0;
-        if(planQty == null) planQty = 0;
-        if(qty - planQty > 0) return "84F000";
-        else if(qty - planQty < 0) return "FF7F1C";
-        else return "ffffff";
-    }
-
-    /**
-     * 根据 end - begin 所计算的时间差, 给与 badge-xxx 提示紧急程度
-     *
-     * @param begin
-     * @param end
-     * @return
-     */
-    public static String badgeSuffix(Date begin, Date end) {
-        if(end == null) end = new Date();
-        if(begin == null) return "";
-        long diffs = end.getTime() - begin.getTime();
-        if(diffs < TimeUnit.DAYS.toMillis(2))
-            return "badge-success";
-        else if(diffs < TimeUnit.DAYS.toMillis(3))
-            return "badge-info";
-        else if(diffs < TimeUnit.DAYS.toMillis(5))
-            return "badge-warning";
-        else {
-            return "badge-important";
+    public static BaseTemplate.RawData betweenDays(Shipment shipment, String dayType) {
+        long diff = 0;
+        String color = "";
+        if("atport".equals(dayType)) {
+            diff = shipment.dates.atPortDate.getTime() - shipment.dates.beginDate.getTime();
+        } else if("clearance".equals(dayType)) {
+            diff = shipment.dates.pickGoodDate.getTime() - shipment.dates.atPortDate.getTime();
+        } else if("pick".equals(dayType)) {
+            diff = shipment.dates.bookDate.getTime() - shipment.dates.pickGoodDate.getTime();
+        } else if("book".equals(dayType)) {
+            diff = shipment.dates.deliverDate.getTime() - shipment.dates.bookDate.getTime();
+        } else if("deliver".equals(dayType)) {
+            diff = shipment.dates.receiptDate.getTime() - shipment.dates.deliverDate.getTime();
+        } else if("inbound".equals(dayType)) {
+            diff = shipment.dates.inbondDate.getTime() - shipment.dates.receiptDate.getTime();
+        } else if("done".equals(dayType)) {
+            diff = shipment.dates.arriveDate.getTime() - shipment.dates.beginDate.getTime();
         }
+
+        if(diff < TimeUnit.DAYS.toMillis(2) && diff > 0) {
+            color = "#F9A42B";
+        } else if(diff < 0) {
+            color = "#BB514C";
+        } else {
+            color = "#333";
+        }
+
+        return raw(String.format("<strong style='color:%s'>%.2f</strong> 天", color,
+                diff / ((float) 24 * 3600 * 1000)));
     }
 }

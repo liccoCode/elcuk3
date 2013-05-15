@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.FLog;
 import helper.Webs;
+import models.ElcukConfig;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -119,6 +120,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public enum S {
         /**
+         * 取消状态
+         * TODO effect: 需要删除
+         */
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消";
+            }
+        },
+        /**
          * 计划中
          */
         PLAN {
@@ -197,17 +208,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             @Override
             public String label() {
                 return "完成";
-            }
-        },
-
-        /**
-         * 取消状态
-         * TODO effect: 需要删除
-         */
-        CANCEL {
-            @Override
-            public String label() {
-                return "取消";
             }
         };
 
@@ -800,6 +800,17 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             throw new FastRuntimeException(Webs.S(e));
         }
         return this.iExpressHTML;
+    }
+
+    /**
+     * 加载运输相关的 Config
+     *
+     * @return
+     */
+    public ElcukConfig config(String dayType) {
+        String market = this.whouse.country.toLowerCase();
+        String name = String.format("%s_%s_%s", market, this.type.name().toLowerCase(), dayType);
+        return ElcukConfig.findByName(name);
     }
 
     public String title() {

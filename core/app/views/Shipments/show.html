@@ -22,67 +22,93 @@
 <!-- 时间 -->
 #{if ship.type != models.procure.Shipment.T.EXPRESS}
 <div class="row-fluid">
-  <div class="span12">
-      #{if ship.dates.atPortDate}
-        <div class="span2">
-          <dl class="dl-horizontal">
-            <dt>平均 运输 天数</dt>
-            <dd>从系统中来</dd>
-            <dt>实际 运输 天数</dt>
-            <dd>${ship.dates.atPortDate - ship.dates.beginDate} 天</dd>
-          </dl>
-        </div>
-      #{/if}
-      #{if ship.dates.pickGoodDate}
-        <div class="span2">
-          <dl class="dl-horizontal">
-            <dt>平均 清关 天数</dt>
-            <dd>从系统中来</dd>
-            <dt>实际 清关 天数</dt>
-            <dd>${ship.dates.pickGoodDate - ship.dates.atPortDate} 天</dd>
-          </dl>
-        </div>
-      #{/if}
-      #{if ship.dates.bookDate}
-        <div class="span2">
-          <dl class="dl-horizontal">
-            <dt>平均 提货 天数</dt>
-            <dd>从系统中来</dd>
-            <dt>实际 提货 天数</dt>
-            <dd>${ship.dates.bookDate - ship.dates.pickGoodDate} 天</dd>
-          </dl>
-        </div>
-      #{/if}
-      #{if ship.dates.deliverDate}
-        <div class="span2">
-          <dl class="dl-horizontal">
-            <dt>平均 预约 天数</dt>
-            <dd>从系统中来</dd>
-            <dt>实际 预约 天数</dt>
-            <dd>${ship.dates.deliverDate - ship.dates.bookDate} 天</dd>
-          </dl>
-        </div>
-      #{/if}
-      #{if ship.dates.receiptDate}
-        <div class="span2">
-          <dl class="dl-horizontal">
-            <dt>平均 派送 天数</dt>
-            <dd>从系统中来</dd>
-            <dt>实际 派送 天数</dt>
-            <dd>${ship.dates.receiptDate - ship.dates.deliverDate} 天</dd>
-          </dl>
-        </div>
-      #{/if}
-      #{if ship.dates.inbondDate}
-        <div class="span2">
-          <dl class="dl-horizontal">
-            <dt>平均 入库等待 天数</dt>
-            <dd>从系统中来</dd>
-            <dt>实际 入库等待 天数</dt>
-            <dd>${ship.dates.inbondDate - ship.dates.receiptDate} 天</dd>
-          </dl>
-        </div>
-      #{/if}
+  <div class="span10 offset2">
+    <ul class="unstyled inline">
+        #{if ship.state >= models.procure.Shipment.S.CLEARANCE}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>运输</abbr>天数</label>
+              <span>${ship.config("atport").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>运输</abbr>天数</label>
+              <span>${ship.betweenDays("atport")}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.PACKAGE}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>清关</abbr>天数</label>
+              <span>${ship.config("clearance").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>清关</abbr>天数</label>
+              <span>${ship.betweenDays("clearance")}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.BOOKED}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>提货</abbr>天数</label>
+              <span>${ship.config("pick").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>提货</abbr>天数</label>
+              <span>${ship.betweenDays("pick")}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.DELIVERYING}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>预约</abbr>天数</label>
+              <span>${ship.config("book").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>预约</abbr>天数</label>
+              <span>${ship.betweenDays("book")}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.RECEIPTD}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>派送</abbr>天数</label>
+              <span>${ship.config("deliver").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>派送</abbr>天数</label>
+              <span>${ship.betweenDays("deliver")}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.RECEIVING}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>入库</abbr>天数</label>
+              <span>${ship.config("inbound").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>入库</abbr>天数</label>
+              <span>${ship.betweenDays("inbound")}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.DONE}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>运输</abbr>天数</label>
+              <span>${ship.config("inbound").toInteger()}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>运输</abbr>天数</label>
+              <span>${ship.betweenDays("done")}</span>
+            </div>
+          </li>
+        #{/if}
+    </ul>
   </div>
 </div>
 #{/if}
