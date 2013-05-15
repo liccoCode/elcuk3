@@ -57,15 +57,14 @@ public class ShipItems extends Controller {
      * @param id
      * @param qty
      */
-    public static void received(Long id, Integer qty) {
+    public static void received(Long id, Integer qty, String msg) {
         if(qty == null) qty = 0;
         ShipItem itm = ShipItem.findById(id);
-        itm.receviedQty(qty);
+        itm.receviedQty(qty, msg);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
             flash.success("修改成功.");
-
-        render(itm);
+        Shipments.show(itm.shipment.id);
     }
 }

@@ -1,3 +1,0 @@
-var infos = '#{js 'tags/flash_alert.html', flash: flash /}';
-
-$('#adjust_shipitems').before(infos);

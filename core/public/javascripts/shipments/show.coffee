@@ -60,19 +60,9 @@ $ ->
       .modal('show');
   )
 
-  $('#adjust_shipitems').on('change keydown', '[name=recivedQty]', (e) ->
+  $('#adjust_shipitems').on('dblclick', '[name=recivedQty]', (e) ->
     self = $(@)
-    if e.type == 'change' or (e.type == 'keydown' and e.keyCode == 13)
-      if not $.isNumeric(self.val())
-        EF.colorAnimate(self)
-      else
-        params = {qty: self.val()}
-        LoadMask.mask()
-        $.ajax(
-          url: "/shipitem/#{self.parents('tr').attr('id')}/recevied"
-          data: params
-          type: 'PUT'
-          dataType: 'script'
-        ).done(-> self.blur(); LoadMask.unmask())
-      e.preventDefault()
+    $('#origin_qty').text(self.text())
+    $('#recivedQtyForm').modal('show').find('form').attr('action', "/shipitem/#{self.parents('tr').attr('id')}/recevied")
+    e.stopPropagation()
   )

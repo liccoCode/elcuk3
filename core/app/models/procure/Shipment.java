@@ -668,7 +668,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.RECEIVING) return;
         DateTime now = DateTime.now();
         if(now.isBefore(this.dates.inbondDate.getTime()))
-            Validation.addError("", "结束时间不可能早于入库事件");
+            Validation.addError("", "结束时间不可能早于入库事件(自动检测运输单完成)");
         if(Validation.hasErrors()) return;
         int hundredSize = 0;
         for(ShipItem shipitem : this.items) {

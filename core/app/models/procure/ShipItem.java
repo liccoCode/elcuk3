@@ -256,9 +256,9 @@ public class ShipItem extends GenericModel {
      * 调整接收数量
      * 入库数量大于 10% 则不允许
      *
-     * @param qty
+     * @param msg
      */
-    public void receviedQty(int recivedQty) {
+    public void receviedQty(int recivedQty, String msg) {
         float percent = ((float) Math.abs(recivedQty - this.qty) / this.qty);
         if(percent > 0.1)
             Validation.addError("", "入库库存与运输库存差据为 " + (percent * 100) + "百分比 大于 10 百分比 请检查数量.");
@@ -269,7 +269,7 @@ public class ShipItem extends GenericModel {
             this.recivedQty = recivedQty;
             this.save();
             new ERecordBuilder("shipitem.receviedQty")
-                    .msgArgs(oldQty, recivedQty)
+                    .msgArgs(msg, oldQty, recivedQty)
                     .fid(this.id)
                     .save();
         }

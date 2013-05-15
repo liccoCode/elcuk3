@@ -20,70 +20,72 @@
 #{shipmentWorkflow state: ship.state/}
 
 <!-- 时间 -->
+#{if ship.type != models.procure.Shipment.T.EXPRESS}
 <div class="row-fluid">
   <div class="span12">
-  #{if ship.dates.atPortDate}
-    <div class="span2">
-      <dl class="dl-horizontal">
-        <dt>平均 运输 天数</dt>
-        <dd>从系统中来</dd>
-        <dt>实际 运输 天数</dt>
-        <dd>${ship.dates.atPortDate - ship.dates.beginDate} 天</dd>
-      </dl>
-    </div>
-  #{/if}
-  #{if ship.dates.pickGoodDate}
-    <div class="span2">
-      <dl class="dl-horizontal">
-        <dt>平均 清关 天数</dt>
-        <dd>从系统中来</dd>
-        <dt>实际 清关 天数</dt>
-        <dd>${ship.dates.pickGoodDate - ship.dates.atPortDate} 天</dd>
-      </dl>
-    </div>
-  #{/if}
-  #{if ship.dates.bookDate}
-    <div class="span2">
-      <dl class="dl-horizontal">
-        <dt>平均 提货 天数</dt>
-        <dd>从系统中来</dd>
-        <dt>实际 提货 天数</dt>
-        <dd>${ship.dates.bookDate - ship.dates.pickGoodDate} 天</dd>
-      </dl>
-    </div>
-  #{/if}
-  #{if ship.dates.deliverDate}
-    <div class="span2">
-      <dl class="dl-horizontal">
-        <dt>平均 预约 天数</dt>
-        <dd>从系统中来</dd>
-        <dt>实际 预约 天数</dt>
-        <dd>${ship.dates.deliverDate - ship.dates.bookDate} 天</dd>
-      </dl>
-    </div>
-  #{/if}
-  #{if ship.dates.receiptDate}
-    <div class="span2">
-      <dl class="dl-horizontal">
-        <dt>平均 派送 天数</dt>
-        <dd>从系统中来</dd>
-        <dt>实际 派送 天数</dt>
-        <dd>${ship.dates.receiptDate - ship.dates.deliverDate} 天</dd>
-      </dl>
-    </div>
-  #{/if}
-  #{if ship.dates.inbondDate}
-    <div class="span2">
-      <dl class="dl-horizontal">
-        <dt>平均 入库等待 天数</dt>
-        <dd>从系统中来</dd>
-        <dt>实际 入库等待 天数</dt>
-        <dd>${ship.dates.inbondDate - ship.dates.receiptDate} 天</dd>
-      </dl>
-    </div>
-  #{/if}
+      #{if ship.dates.atPortDate}
+        <div class="span2">
+          <dl class="dl-horizontal">
+            <dt>平均 运输 天数</dt>
+            <dd>从系统中来</dd>
+            <dt>实际 运输 天数</dt>
+            <dd>${ship.dates.atPortDate - ship.dates.beginDate} 天</dd>
+          </dl>
+        </div>
+      #{/if}
+      #{if ship.dates.pickGoodDate}
+        <div class="span2">
+          <dl class="dl-horizontal">
+            <dt>平均 清关 天数</dt>
+            <dd>从系统中来</dd>
+            <dt>实际 清关 天数</dt>
+            <dd>${ship.dates.pickGoodDate - ship.dates.atPortDate} 天</dd>
+          </dl>
+        </div>
+      #{/if}
+      #{if ship.dates.bookDate}
+        <div class="span2">
+          <dl class="dl-horizontal">
+            <dt>平均 提货 天数</dt>
+            <dd>从系统中来</dd>
+            <dt>实际 提货 天数</dt>
+            <dd>${ship.dates.bookDate - ship.dates.pickGoodDate} 天</dd>
+          </dl>
+        </div>
+      #{/if}
+      #{if ship.dates.deliverDate}
+        <div class="span2">
+          <dl class="dl-horizontal">
+            <dt>平均 预约 天数</dt>
+            <dd>从系统中来</dd>
+            <dt>实际 预约 天数</dt>
+            <dd>${ship.dates.deliverDate - ship.dates.bookDate} 天</dd>
+          </dl>
+        </div>
+      #{/if}
+      #{if ship.dates.receiptDate}
+        <div class="span2">
+          <dl class="dl-horizontal">
+            <dt>平均 派送 天数</dt>
+            <dd>从系统中来</dd>
+            <dt>实际 派送 天数</dt>
+            <dd>${ship.dates.receiptDate - ship.dates.deliverDate} 天</dd>
+          </dl>
+        </div>
+      #{/if}
+      #{if ship.dates.inbondDate}
+        <div class="span2">
+          <dl class="dl-horizontal">
+            <dt>平均 入库等待 天数</dt>
+            <dd>从系统中来</dd>
+            <dt>实际 入库等待 天数</dt>
+            <dd>${ship.dates.inbondDate - ship.dates.receiptDate} 天</dd>
+          </dl>
+        </div>
+      #{/if}
   </div>
 </div>
+#{/if}
 
 <div class="row-fluid" id="btnFucs">
   <div class="btn-toolbar">
@@ -269,6 +271,31 @@
       <a href="#" class="btn" data-dismiss="modal">Close</a>
       <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
         记录
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal hide fade" id="recivedQtyForm">
+  <form action="#" data-method='PUT' method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>手动修改入库数量</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>数量</label>
+
+      <div class="input-append">
+        <input type="text" class="input-mini" name="qty">
+        <span class="add-on">当前入库数量 <span id="origin_qty">0</span></span>
+      </div>
+      <label>原因:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        修改
       </button>
     </div>
   </form>

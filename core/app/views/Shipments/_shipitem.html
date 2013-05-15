@@ -44,9 +44,9 @@
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
-    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" rel='popover'
-        content='#{records_ul records: itm.recivedLogs()/}'>
-      <input type="text" name="recivedQty" value="${itm.recivedQty}" class="input-mini">
+    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" name='recivedQty'
+        placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
+    ${itm.recivedQty}
     </td>
     <td>
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
