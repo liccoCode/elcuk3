@@ -144,8 +144,8 @@ public class OrderItem extends GenericModel {
      * ->
      * 查询 美国 2013-01-01 这天的数据; 系统中记录的是北京时间,所以会进行时间转换
      *
-     * @param skuOrMsku sku 或者 merchantSKU(msku)
-     * @param type      sku/all/msku
+     * @param skuOrMskuOrCategory sku 或者 merchantSKU(msku) 还是 categoryId
+     * @param type                sku/all/msku
      * @param acc
      * @param from
      * @param to
@@ -154,9 +154,9 @@ public class OrderItem extends GenericModel {
     @SuppressWarnings("unchecked")
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
     public static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(
-            final String skuOrMsku, final String type, final Account acc, final Date from,
+            final String skuOrMskuOrCategory, final String type, final Account acc, final Date from,
             final Date to) {
-        String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
+        String cacheKey = Caches.Q.cacheKey(skuOrMskuOrCategory, type, acc, from, to);
         List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
         if(vos != null) return vos;
         synchronized(AnalyzeVO.class) {
@@ -169,15 +169,18 @@ public class OrderItem extends GenericModel {
                 public List<AnalyzeVO> doJobWithResult(M m) {
                     Date _from = m.withTimeZone(from).toDate();
                     Date _to = m.withTimeZone(to).toDate();
-                    if("all".equalsIgnoreCase(skuOrMsku))
+                    //如果skuOrMskuOrCategory是all或者是2位数字(categoryId),就(根据categoryId)查询所有
+                    if("all".equalsIgnoreCase(skuOrMskuOrCategory))
                         return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
-                    else if("sku".equalsIgnoreCase(type))
+                    else if(skuOrMskuOrCategory.matches("^\\d{2}$"))
+                        return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m, skuOrMskuOrCategory);
+                    else if("sku".equalsIgnoreCase(type)) {
                         return new OrderItemQuery()
-                                .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
-                    else if("sid".equalsIgnoreCase(type))
+                                .skuNormalSaleOrderItem(skuOrMskuOrCategory, _from, _to, m);
+                    } else if("sid".equalsIgnoreCase(type)) {
                         return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                                skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
-                    else
+                                skuOrMskuOrCategory, acc == null ? null : acc.id, _from, _to, m);
+                    } else
                         return new ArrayList<AnalyzeVO>();
                 }
 
@@ -276,6 +279,8 @@ public class OrderItem extends GenericModel {
          * 按照天过滤成销量数据
          * 组装成 HightChart 的格式
          */
+
+
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 _from.toDate(), _to.toDate());
 
