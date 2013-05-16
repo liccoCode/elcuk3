@@ -1,6 +1,7 @@
 package models;
 
 import helper.GTs;
+import models.procure.Shipment;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.db.jpa.Model;
@@ -30,7 +31,9 @@ public class ElcukConfig extends Model {
                 GTs.MapBuilder.map("uk", "英国").put("de", "德国").put("us", "美国").build());
 
         SHIP_TYPES = Collections.unmodifiableMap(
-                GTs.MapBuilder.map("sea", "海运").put("air", "空运").put("express", "快递").build());
+                GTs.MapBuilder.map(Shipment.T.SEA.name().toLowerCase(), "海运")
+                        .put(Shipment.T.AIR.name().toLowerCase(), "空运")
+                        .put(Shipment.T.EXPRESS.name().toLowerCase(), "快递").build());
 
         DAY_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map("atport", "运输到港").put("clearance", "清关").put("pick",
@@ -105,7 +108,7 @@ public class ElcukConfig extends Model {
 
     public static ElcukConfig config(String name, String val) {
         ElcukConfig config = new ElcukConfig();
-        config.name = name;
+        config.name = name.toLowerCase();
         //TIP: 原有可以在这里对 fullName 进行自动转译, 可是 Play 不允许这么做,
         // 这样做会打破 Play 对 Class 的增强, 导致程序启动失败
         config.val = val;

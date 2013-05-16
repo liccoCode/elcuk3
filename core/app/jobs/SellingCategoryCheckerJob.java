@@ -15,6 +15,7 @@ import play.jobs.Job;
 import java.util.*;
 
 /**
+ * TODO : 还需要吗?
  * <pre>
  * 对 Selling 所处在的 Amazon Node 进行检测
  * 周期:
