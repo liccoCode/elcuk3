@@ -1,5 +1,7 @@
 package models;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
@@ -18,6 +20,7 @@ import java.util.List;
  * Time: 11:50 AM
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ElcukRecord extends Model {
     /**
      * 用来记录 Model 的 Record

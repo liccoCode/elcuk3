@@ -14,6 +14,7 @@ import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @javax.persistence.Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
 
     public Selling() {
@@ -85,7 +87,9 @@ public class Selling extends GenericModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
-    @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+                    CascadeType.REFRESH})
     public List<SellingQTY> qtys = new ArrayList<SellingQTY>();
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -210,7 +214,8 @@ public class Selling extends GenericModel {
             if(i == 0) fileParamName = "MAIN";
             else fileParamName = "PT0" + i;
             Attach attch = Attach.findByFileName(images[i]);
-            if(attch == null) throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
+            if(attch == null)
+                throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
             if(waterMark) {
                 // TODO 如果需要打水印, 在这里处理
                 throw new UnsupportedOperationException("功能还没实现.");
@@ -221,26 +226,34 @@ public class Selling extends GenericModel {
         }
         synchronized(this.account.cookieStore()) {
             this.account.changeRegion(this.market); // 切换到这个 Selling 的市场
-            Logger.info("Upload Picture to Amazon AND Synchronized[%s].", this.account.prettyName());
-            String body = HTTP.upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params, uploadImages);
+            Logger.info("Upload Picture to Amazon AND Synchronized[%s].",
+                    this.account.prettyName());
+            String body = HTTP
+                    .upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params,
+                            uploadImages);
             if(Play.mode.isDev())
-                FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, FLog.T.IMGUPLOAD);
-            JsonObject imgRsp = new JsonParser().parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
+                FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body,
+                        FLog.T.IMGUPLOAD);
+            JsonObject imgRsp = new JsonParser()
+                    .parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
             //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
             //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
             if("failure".equals(imgRsp.get("status").getAsString())) {
-                Logger.info("Upload Picture to Amazon Failed.(%s)", imgRsp.get("errorMessage").getAsString());
+                Logger.info("Upload Picture to Amazon Failed.(%s)",
+                        imgRsp.get("errorMessage").getAsString());
                 throw new FastRuntimeException(imgRsp.get("errorMessage").getAsString());
             } else {
-                Logger.info("Upload Picture to Amazon Success.(%s)", imgRsp.get("imageUrl").getAsString());
+                Logger.info("Upload Picture to Amazon Success.(%s)",
+                        imgRsp.get("imageUrl").getAsString());
             }
             //https://catalog-sc.amazon.de/abis/image/RemoveImage.ajax?asin=B0083QX8AW&variant=MAIN/PT01/...
             for(String fileName : usedAmazonFileName.keySet()) {
                 if(usedAmazonFileName.get(fileName).get()) continue; // 使用过了就不处理
-                HTTP.post(this.account.cookieStore(), this.account.type.removeImageLink(), Arrays.asList(
-                        new BasicNameValuePair("asin", this.asin),
-                        new BasicNameValuePair("variant", fileName)
-                ));
+                HTTP.post(this.account.cookieStore(), this.account.type.removeImageLink(),
+                        Arrays.asList(
+                                new BasicNameValuePair("asin", this.asin),
+                                new BasicNameValuePair("variant", fileName)
+                        ));
             }
             this.account.changeRegion(this.account.type);
         }
@@ -259,9 +272,12 @@ public class Selling extends GenericModel {
             // 2. 获取修改 Selling 的页面, 获取参数
             html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
             if(StringUtils.isBlank(html))
-                throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+                throw new FastRuntimeException(
+                        String.format("Visit %s page is empty.", M.listingEditPage(this)));
             if(Play.mode.isDev())
-                IO.writeContent(html, new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+                IO.writeContent(html, new File(
+                        String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU,
+                                this.asin)));
             this.account.changeRegion(this.account.type);
         }
         // 3. 将需要的参数同步进来
@@ -274,14 +290,16 @@ public class Selling extends GenericModel {
 
     public byte[] downloadFnSkuLabel() {
         if(StringUtils.isBlank(this.fnSku))
-            throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
+            throw new FastRuntimeException(
+                    "Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
         synchronized(this.account.cookieStore()) {
-            return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(), Arrays.asList(
-                    new BasicNameValuePair("qty.0", "27"), // 一页打 44 个
-                    new BasicNameValuePair("fnSku.0", this.fnSku),
-                    new BasicNameValuePair("mSku.0", this.merchantSKU),
-                    new BasicNameValuePair("labelType", "ItemLabel_A4_27")
-            ));
+            return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
+                    Arrays.asList(
+                            new BasicNameValuePair("qty.0", "27"), // 一页打 44 个
+                            new BasicNameValuePair("fnSku.0", this.fnSku),
+                            new BasicNameValuePair("mSku.0", this.merchantSKU),
+                            new BasicNameValuePair("labelType", "ItemLabel_A4_27")
+                    ));
         }
     }
 
@@ -325,17 +343,24 @@ public class Selling extends GenericModel {
 
                     // 2. 设置需要提交的值
                     String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                    F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps.generateDeployAmazonProps(html, this);
+                    F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps
+                            .generateDeployAmazonProps(html, this);
 
                     // 3. 提交
-                    String[] args = StringUtils.split(paramAndDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
+                    String[] args = StringUtils
+                            .split(paramAndDocTuple._2.select("form[name=productForm]").first()
+                                    .attr("action"), ";");
                     html = HTTP.post(this.account.cookieStore(),
-                            M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/, (args.length >= 2 ? args[1] : "")),
+                            M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
+                                    (args.length >= 2 ? args[1] : "")),
                             paramAndDocTuple._1);
                     if(StringUtils.isBlank(html)) // 这个最先检查
-                        throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+                        throw new FastRuntimeException(
+                                "Selling update is failed! Return Content is Empty!");
                     if(Play.mode.isDev())
-                        IO.writeContent(html, new File(String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+                        IO.writeContent(html, new File(
+                                String.format("%s/%s_%s_posted.html", Constant.E_DATE,
+                                        this.merchantSKU, this.asin)));
                     Document doc = Jsoup.parse(html);
                     Elements error = doc.select(".messageboxerror li");
                     if(error.size() > 0)
@@ -360,7 +385,8 @@ public class Selling extends GenericModel {
      * @return
      */
     public SellingQTY uniqueQTY(Whouse whouse) {
-        return SellingQTY.findById(String.format("%s_%s", this.merchantSKU.toUpperCase(), whouse.id));
+        return SellingQTY
+                .findById(String.format("%s_%s", this.merchantSKU.toUpperCase(), whouse.id));
     }
 
     /**
@@ -382,7 +408,8 @@ public class Selling extends GenericModel {
                 dto.ps = ps;
                 find = true;
             }
-            if(!find) throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
+            if(!find)
+                throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
         }
         return this.save();
     }
@@ -395,13 +422,17 @@ public class Selling extends GenericModel {
      */
     public Selling updateAttr(Selling newSelling) {
         if(StringUtils.isNotBlank(newSelling.aps.title)) this.aps.title = newSelling.aps.title;
-        if(StringUtils.isNotBlank(newSelling.aps.modelNumber)) this.aps.modelNumber = newSelling.aps.modelNumber;
-        if(StringUtils.isNotBlank(newSelling.aps.manufacturer)) this.aps.manufacturer = newSelling.aps.manufacturer;
-        if(StringUtils.isNotBlank(newSelling.aps.keyFetures)) this.aps.keyFetures = newSelling.aps.keyFetures;
+        if(StringUtils.isNotBlank(newSelling.aps.modelNumber))
+            this.aps.modelNumber = newSelling.aps.modelNumber;
+        if(StringUtils.isNotBlank(newSelling.aps.manufacturer))
+            this.aps.manufacturer = newSelling.aps.manufacturer;
+        if(StringUtils.isNotBlank(newSelling.aps.keyFetures))
+            this.aps.keyFetures = newSelling.aps.keyFetures;
         if(StringUtils.isNotBlank(this.aps.RBN)) this.aps.RBN = newSelling.aps.RBN;
         if(StringUtils.isNotBlank(this.aps.manufacturerPartNumber))
             this.aps.manufacturerPartNumber = newSelling.aps.manufacturerPartNumber;
-        if(StringUtils.isNotBlank(this.aps.condition_)) this.aps.condition_ = newSelling.aps.condition_;
+        if(StringUtils.isNotBlank(this.aps.condition_))
+            this.aps.condition_ = newSelling.aps.condition_;
         if(newSelling.aps.standerPrice != null && newSelling.aps.standerPrice > 0)
             this.aps.standerPrice = newSelling.aps.standerPrice;
         if(newSelling.aps.salePrice != null && newSelling.aps.salePrice > 0)
@@ -413,8 +444,10 @@ public class Selling extends GenericModel {
         if(StringUtils.isNotBlank(this.aps.sellerWarrantyDesc))
             this.aps.sellerWarrantyDesc = newSelling.aps.sellerWarrantyDesc;
 
-        if(StringUtils.isNotBlank(this.aps.productDesc)) this.aps.productDesc = newSelling.aps.productDesc;
-        if(StringUtils.isNotBlank(this.aps.searchTerms)) this.aps.searchTerms = newSelling.aps.searchTerms;
+        if(StringUtils.isNotBlank(this.aps.productDesc))
+            this.aps.productDesc = newSelling.aps.productDesc;
+        if(StringUtils.isNotBlank(this.aps.searchTerms))
+            this.aps.searchTerms = newSelling.aps.searchTerms;
         if(StringUtils.isNotBlank(this.aps.platinumKeywords))
             this.aps.platinumKeywords = newSelling.aps.platinumKeywords;
 
@@ -428,7 +461,8 @@ public class Selling extends GenericModel {
      * @return
      */
     public static F.T2<List<Selling>, List<String>> sameFamilySellings(String msku) {
-        List<Selling> sellings = Selling.find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
+        List<Selling> sellings = Selling
+                .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
         List<String> sids = new ArrayList<String>();
         for(Selling s : sellings) sids.add(s.sellingId);
         return new F.T2<List<Selling>, List<String>>(sellings, sids);
@@ -472,7 +506,8 @@ public class Selling extends GenericModel {
                             String[] mskuArr = StringUtils.split(args[0], ",");
                             if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
                                 return false;
-                            else if(StringUtils.contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
+                            else if(StringUtils
+                                    .contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
                                 return false;
                             else if(StringUtils.contains(msg, "A_FR"))
                                 return false;
@@ -496,14 +531,17 @@ public class Selling extends GenericModel {
      * @return
      */
     public Float avgRating() {
-        Double rating = (Double) DBUtils.row("select avg(rating) as avgRating from AmazonListingReview where listing_listingId=?", this.listing.listingId).get("avgRating");
+        Double rating = (Double) DBUtils
+                .row("select avg(rating) as avgRating from AmazonListingReview where listing_listingId=?",
+                        this.listing.listingId).get("avgRating");
         return rating == null ? 0f : Webs.scale2PointUp(rating.floatValue());
     }
 
     /**
      * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
      */
-    public Selling patchASelling(String sku, String upc, String asin, M market, Account acc, Product product) {
+    public Selling patchASelling(String sku, String upc, String asin, M market, Account acc,
+                                 Product product) {
         String sid = Selling.sid(String.format("%s,%s", sku, upc), market, acc);
         if(Selling.findById(sid) != null)
             throw new FastRuntimeException("Selling 已经存在, 不需要再添加!");
@@ -552,7 +590,8 @@ public class Selling extends GenericModel {
 
         Selling selling = (Selling) o;
 
-        if(sellingId != null ? !sellingId.equals(selling.sellingId) : selling.sellingId != null) return false;
+        if(sellingId != null ? !sellingId.equals(selling.sellingId) : selling.sellingId != null)
+            return false;
 
         return true;
     }

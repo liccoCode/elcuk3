@@ -22,18 +22,37 @@
 <!-- 时间 -->
 #{if ship.type != models.procure.Shipment.T.EXPRESS}
 <div class="row-fluid">
-  <div class="span10 offset2">
+  <div class="span10 offset1">
     <ul class="unstyled inline">
+      <li class="stripe">
+        <div class="block">
+          <label>开始运输时间</label>
+          <span>#{time_tooltip time: ship.dates.beginDate/}</span>
+        </div>
+        <div class="block">
+          <label>预计抵达时间</label>
+          <span>#{time_tooltip time: ship.dates.beginDate/}</span>
+        </div>
+        <div class="block">
+          <label>预计下一阶段时间</label>
+          <span>#{time_tooltip time: ship.dates.beginDate/}</span>
+        </div>
+      </li>
         #{if ship.state >= models.procure.Shipment.S.CLEARANCE}
           <li class="stripe">
             <div class="block">
               <label>平均<abbr>运输</abbr>天数</label>
+                #{set atport: ship.config("atport") /}
                 #{set atport: ship.config("atport") /}
               <span>${atport.toInteger()}</span>
             </div>
             <div class="block">
               <label>实际<abbr>运输</abbr>天数</label>
               <span>${ship.betweenDays("atport")}</span>
+            </div>
+            <div class="block">
+              <label>到港时间</label>
+              <span>#{time_tooltip time: ship.dates.atPortDate /}</span>
             </div>
           </li>
         #{/if}
@@ -48,6 +67,10 @@
               <label>实际<abbr>清关</abbr>天数</label>
               <span>${ship.betweenDays("clearance")}</span>
             </div>
+            <div class="block">
+              <label>提货时间</label>
+              <span>#{time_tooltip time: ship.dates.pickGoodDate/}</span>
+            </div>
           </li>
         #{/if}
         #{if ship.state >= models.procure.Shipment.S.BOOKED}
@@ -60,6 +83,10 @@
             <div class="block">
               <label>实际<abbr>提货</abbr>天数</label>
               <span>${ship.betweenDays("pick")}</span>
+            </div>
+            <div class="block">
+              <label>预约时间</label>
+              <span>#{time_tooltip time: ship.dates.bookDate/}</span>
             </div>
           </li>
         #{/if}
@@ -74,6 +101,10 @@
               <label>实际<abbr>预约</abbr>天数</label>
               <span>${ship.betweenDays("book")}</span>
             </div>
+            <div class="block">
+              <label>派送时间</label>
+              <span>#{time_tooltip time: ship.dates.deliverDate/}</span>
+            </div>
           </li>
         #{/if}
         #{if ship.state >= models.procure.Shipment.S.RECEIPTD}
@@ -86,6 +117,10 @@
             <div class="block">
               <label>实际<abbr>派送</abbr>天数</label>
               <span>${ship.betweenDays("deliver")}</span>
+            </div>
+            <div class="block">
+              <label>签收时间</label>
+              <span>#{time_tooltip time: ship.dates.receiptDate/}</span>
             </div>
           </li>
         #{/if}
@@ -100,6 +135,10 @@
               <label>实际<abbr>入库</abbr>天数</label>
               <span>${ship.betweenDays("inbound")}</span>
             </div>
+            <div class="block">
+              <label>入库时间</label>
+              <span>#{time_tooltip time: ship.dates.inbondDate/}</span>
+            </div>
           </li>
         #{/if}
         #{if ship.state >= models.procure.Shipment.S.DONE}
@@ -113,6 +152,10 @@
             <div class="block">
               <label>实际<abbr>总运输</abbr>天数</label>
               <span>${ship.betweenDays("done")}</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>总运输</abbr>天数</label>
+              <span>#{time_tooltip time: ship.dates.arriveDate/}</span>
             </div>
           </li>
         #{/if}

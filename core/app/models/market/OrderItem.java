@@ -4,6 +4,7 @@ import helper.*;
 import models.product.Product;
 import models.view.dto.HighChart;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -23,6 +24,7 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class OrderItem extends GenericModel {
 
     /**

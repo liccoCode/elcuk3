@@ -3,6 +3,8 @@ package models;
 import helper.GTs;
 import models.procure.Shipment;
 import org.apache.commons.lang.math.NumberUtils;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
 import play.db.jpa.Model;
 
@@ -19,6 +21,7 @@ import java.util.Map;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ElcukConfig extends Model {
     public static final Map<String, String> MARKETS;
 

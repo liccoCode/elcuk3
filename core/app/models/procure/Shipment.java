@@ -13,6 +13,8 @@ import models.finance.PaymentUnit;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -40,6 +42,7 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
 
