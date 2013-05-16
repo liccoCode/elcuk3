@@ -17,6 +17,7 @@ public class ShipmentsMonitorJobTest extends UnitTest {
 
     @Test
     public void testDoJob() throws InterruptedException, ExecutionException, TimeoutException {
+
         new ShipmentsMonitorJob().now().get(10, TimeUnit.SECONDS);
     }
 }
