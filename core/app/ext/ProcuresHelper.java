@@ -1,10 +1,7 @@
 package ext;
 
 import models.procure.*;
-import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -117,36 +114,5 @@ public class ProcuresHelper extends JavaExtensions {
             return "#F2DEDE";
         else
             return "#FFFFFF";
-    }
-
-    public static BaseTemplate.RawData betweenDays(Shipment shipment, String dayType) {
-        long diff = 0;
-        String color = "";
-        if("atport".equals(dayType)) {
-            diff = shipment.dates.atPortDate.getTime() - shipment.dates.beginDate.getTime();
-        } else if("clearance".equals(dayType)) {
-            diff = shipment.dates.pickGoodDate.getTime() - shipment.dates.atPortDate.getTime();
-        } else if("pick".equals(dayType)) {
-            diff = shipment.dates.bookDate.getTime() - shipment.dates.pickGoodDate.getTime();
-        } else if("book".equals(dayType)) {
-            diff = shipment.dates.deliverDate.getTime() - shipment.dates.bookDate.getTime();
-        } else if("deliver".equals(dayType)) {
-            diff = shipment.dates.receiptDate.getTime() - shipment.dates.deliverDate.getTime();
-        } else if("inbound".equals(dayType)) {
-            diff = shipment.dates.inbondDate.getTime() - shipment.dates.receiptDate.getTime();
-        } else if("done".equals(dayType)) {
-            diff = shipment.dates.arriveDate.getTime() - shipment.dates.beginDate.getTime();
-        }
-
-        if(diff < TimeUnit.DAYS.toMillis(2) && diff > 0) {
-            color = "#F9A42B";
-        } else if(diff < 0) {
-            color = "#BB514C";
-        } else {
-            color = "#333";
-        }
-
-        return raw(String.format("<strong style='color:%s'>%.2f</strong> 天", color,
-                diff / ((float) 24 * 3600 * 1000)));
     }
 }

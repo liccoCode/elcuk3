@@ -13,6 +13,7 @@ import models.view.dto.DashBoard;
 import play.Play;
 import play.cache.Cache;
 import play.cache.CacheFor;
+import play.db.jpa.JPA;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -53,6 +54,7 @@ public class Application extends Controller {
 
     public static void cc() {
         Cache.clear();
+        JPA.em().getEntityManagerFactory().getCache().evictAll();
         renderJSON(new Ret());
     }
 

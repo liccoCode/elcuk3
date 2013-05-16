@@ -39,8 +39,9 @@ public class ElcukConfig extends Model {
                         .put(Shipment.T.EXPRESS.name().toLowerCase(), "快递").build());
 
         DAY_TYPES = Collections.unmodifiableMap(
-                GTs.MapBuilder.map("atport", "运输到港").put("clearance", "清关").put("pick",
-                        "提货").put("book", "预约").put("deliver", "派送").put("inbound", "入库").build());
+                GTs.MapBuilder.map("atport", "运输到港").put("clearance", "清关").put("pick", "提货")
+                        .put("book", "预约").put("deliver", "派送")
+                        .put("receipt", "签收").put("inbound", "入库").build());
     }
 
     /**

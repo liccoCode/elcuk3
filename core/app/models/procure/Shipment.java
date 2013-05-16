@@ -718,13 +718,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             this.dates.arriveDate = null;
         } else if(this.state == S.RECEIVING) {
             this.state = S.RECEIPTD;
-            this.dates.receiptDate = null;
+            this.dates.inbondDate = null;
         } else if(this.state == S.RECEIPTD) {
             this.state = S.DELIVERYING;
-            this.dates.deliverDate = null;
+            this.dates.receiptDate = null;
         } else if(this.state == S.DELIVERYING) {
             this.state = S.BOOKED;
-            this.dates.bookDate = null;
+            this.dates.deliverDate = null;
         } else if(this.state == S.BOOKED) {
             this.state = S.PACKAGE;
             this.dates.bookDate = null;
