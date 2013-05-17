@@ -11,9 +11,12 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,8 +63,10 @@ public class Procures extends Controller {
      */
     public static void deliveryUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        List<ElcukRecord> records = ElcukRecord
+                .records(unit.id + "", Messages.get("procureunit.delivery"));
         renderArgs.put("attrs", unit.attrs);
-        render(unit);
+        render(unit, records);
     }
 
     /**

@@ -81,6 +81,7 @@ public class CooperItem extends Model {
 
     /**
      * 通过 Box 计算数量
+     *
      * @return
      */
     public int boxToSize(int size) {
@@ -101,7 +102,8 @@ public class CooperItem extends Model {
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
         this.cooperator = cooperator;
         for(CooperItem copitm : this.cooperator.cooperItems) {
-            if(copitm.sku.equals(this.sku)) throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
+            if(copitm.sku.equals(this.sku))
+                throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
         }
         return this.save();
     }
@@ -114,7 +116,8 @@ public class CooperItem extends Model {
         if(this.price <= 0) throw new FastRuntimeException("采购价格能小于 0 ?");
         if(this.lowestOrderNum < 0) throw new FastRuntimeException("最低采货量不允许小于 0 ");
         if(this.period < 0) throw new FastRuntimeException("生产周期不允许小于  0");
-        if(!this.product.sku.equals(this.sku)) throw new FastRuntimeException("不允许使 this.product.sku 与 this.sku 不一样!");
+        if(!this.product.sku.equals(this.sku))
+            throw new FastRuntimeException("不允许使 this.product.sku 与 this.sku 不一样!");
     }
 
     /**

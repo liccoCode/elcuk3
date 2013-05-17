@@ -333,8 +333,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          *  - 交货超额, Notify 提醒
          *
          */
-        if(this.stage == STAGE.CLOSE || this.stage == STAGE.SHIP_OVER)
-            Validation.addError("procureunit.delivery.stage", "%s");
+        if(!Arrays.asList(STAGE.DONE, STAGE.DELIVERY).contains(this.stage))
+            Validation.addError("", "采购计划" + this.stage.label() + "状态不可以交货.");
         if(this.deliveryment == null)
             Validation.addError("", "没有进入采购单, 无法交货.");
         Validation.required("procureunit.attrs.qty", attrs.qty);
@@ -352,9 +352,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     String.format("采购计划 %s 超额交货, 请从采购单 %s 找到产品的运输单进行调整, 避免运输数量不足.", this.id,
                             this.deliveryment.id), Notification.SHIPPER);
 
-        new ElcukRecord(Messages.get("procureunit.delivery"),
-                Messages.get("procureunit.delivery.msg", this.attrs.qty, this.attrs.planQty)
-                , this.id + "").save();
+        new ERecordBuilder("procureunit.delivery")
+                .msgArgs(this.attrs.qty, this.attrs.planQty)
+                .fid(this.id)
+                .save();
         //TODO effect: 如果拥有运输项目, 那么则将运输项目的数量也进行调整
 //        this.casscadeShipItemQty(this.attrs.planQty);
         // 当执行交货操作, ProcureUnit 进入交货完成阶段

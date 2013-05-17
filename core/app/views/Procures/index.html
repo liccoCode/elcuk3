@@ -43,7 +43,7 @@
       <select name="p.stage" class="inline">
         <option value="">阶段</option>
       #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
-        <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage}</option>
+        <option ${stage == p.stage ? 'selected' : ''} value="${stage.name()}">${stage.label()}</option>
       #{/list}
       </select>
 

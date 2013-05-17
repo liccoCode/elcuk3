@@ -6,6 +6,7 @@ import models.embedded.CategorySettings;
 import models.support.TicketReason;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -24,9 +25,11 @@ import java.util.Map;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Category extends GenericModel {
 
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+    @OneToMany(mappedBy = "category",
+            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @OrderBy("sku")
     public List<Product> products;
 
@@ -83,7 +86,9 @@ public class Category extends GenericModel {
         List<Brand> brands = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
         for(Brand brand : brands) {
             if(Family.bcRelateFamily(brand, this).size() > 0) {
-                Validation.addError("", String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", brand.name, this.categoryId));
+                Validation.addError("",
+                        String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", brand.name,
+                                this.categoryId));
                 return;
             }
             this.brands.remove(brand);
@@ -102,7 +107,8 @@ public class Category extends GenericModel {
         if(this.brands.size() > 0)
             Validation.addError("", String.format("拥有 %s brands 关联, 无法删除.", this.brands.size()));
         if(this.reasons.size() > 0)
-            Validation.addError("", String.format("拥有 %s TicketReason 关联, 无法删除.", this.reasons.size()));
+            Validation.addError("",
+                    String.format("拥有 %s TicketReason 关联, 无法删除.", this.reasons.size()));
         if(Validation.hasErrors()) return;
         this.delete();
     }
@@ -127,7 +133,8 @@ public class Category extends GenericModel {
 
         Category category = (Category) o;
 
-        if(categoryId != null ? !categoryId.equals(category.categoryId) : category.categoryId != null) return false;
+        if(categoryId != null ? !categoryId.equals(category.categoryId) :
+                category.categoryId != null) return false;
 
         return true;
     }
@@ -140,10 +147,12 @@ public class Category extends GenericModel {
     }
 
     public static List<String> category_ids() {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT categoryId FROM Category ORDER BY categoryId");
+        List<Map<String, Object>> rows = DBUtils
+                .rows("SELECT categoryId FROM Category ORDER BY categoryId");
         List<String> categoryIds = new ArrayList<String>();
-        for(Map<String, Object> row : rows)
+        for(Map<String, Object> row : rows) {
             categoryIds.add(row.get("categoryId").toString());
+        }
         return categoryIds;
     }
 

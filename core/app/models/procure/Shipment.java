@@ -500,8 +500,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 具体的开始运输
      * <p/>
      * ps: 不允许多个人, 对 Shipment 多次 beginShip
+     *
+     * @param datetime
      */
-    public synchronized void beginShip() {
+    public synchronized void beginShip(Date datetime) {
         /**
          * 0. 检查
          *  0.1 运输单状态 CONFIRM
@@ -534,6 +536,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
 
         if(Validation.hasErrors()) return;
+        if(datetime == null) datetime = new Date();
 
         for(ShipItem shipItem : this.items) {
             if(shipItem.unit.fba != null)
@@ -544,13 +547,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         for(ShipItem shipItem : this.items) {
-            shipItem.shipDate = new Date();
+            shipItem.shipDate = datetime;
             shipItem.save();
             shipItem.unit.stage = ProcureUnit.STAGE.SHIPPING;
             shipItem.unit.save();
         }
 
-        this.dates.beginDate = new Date();
+        this.dates.beginDate = datetime;
         this.state = S.SHIPPING;
         this.save();
     }
@@ -675,7 +678,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.RECEIVING) return;
         DateTime now = DateTime.now();
         if(now.isBefore(this.dates.inbondDate.getTime()))
-            Validation.addError("", "结束时间不可能早于入库事件(自动检测运输单完成)");
+            Validation.addError("", "结束时间不可能早于入库事件(自动检测运输单完成, 可忽略)");
         if(Validation.hasErrors()) return;
         int hundredSize = 0;
         for(ShipItem shipitem : this.items) {
