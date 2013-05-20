@@ -179,6 +179,6 @@ public class ProcuresHelper extends JavaExtensions {
         float mol = dto.day1 - dto.difference;
         if(den == 0 || mol == 0)
             return 0;
-        return Math.abs(den / mol) * 100;
+        return Math.abs(den / mol);
     }
 }

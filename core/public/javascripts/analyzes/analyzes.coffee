@@ -262,7 +262,7 @@ $ ->
     LoadMask.mask();
     type = $("[name=p\\.type]").val()
     target = $("##{type}").load('/Analyzes/analyzes', $("#click_param").formSerialize(),
-    ->
+    ()->
 
       #tooltip
       window.$ui.tooltip()
@@ -278,6 +278,8 @@ $ ->
       # 排序功能
       sortables = $("##{type} th.sortable")
       sortables.click (e) ->
+        desc = $('[name=p\\.desc]')
+        desc.val(if desc.val() == 'false' then true else false)
         $('[name=p\\.orderBy]').val($(@).attr('name'))
         sellRankLoad()
 
