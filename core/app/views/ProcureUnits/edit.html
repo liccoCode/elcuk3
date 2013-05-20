@@ -19,7 +19,7 @@
 </ol>
 #{/danger_row}
 
-<form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT'>
+<form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm">
   <table class="table table-condensed table-bordered">
   #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
     <tr>
