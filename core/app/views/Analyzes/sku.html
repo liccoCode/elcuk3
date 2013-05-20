@@ -13,8 +13,8 @@
     <th name="lastRating">评分趋势</th>
     <th>PS</th>
     <th name="day1" class="sortable">Day1 <i class="icon-sort"></i></th>
-    <th name="difference" class="sortable">
-      <b rel="tooltip" title="Day1与Day7平均值的差值(百分比)">Difference(%)</b><i class="icon-sort"></i></th>
+    <th name="difference" class="sortable" rel="tooltip" title="Day1与Day7平均值的差值(百分比)">
+      Difference(%)<i class="icon-sort"></i></th>
     <th name="day7" class="sortable">Day7(ave)<i class="icon-sort"></i></th>
     <th name="day30" class="sortable">Day30(ave)<i class="icon-sort"></i></th>
     <th colspan="2">_TOR</th>
@@ -37,7 +37,7 @@
     <td>${dto.day1}</td>
     <td style="color:${dto.difference.rgb()}">
     ${dto.difference.format('#.##')}
-      (${ dto.percentage().format('#.##')})
+      (${ dto.percentage().format('#.##%')})
     </td>
     <td>${dto.day7} ( ${(dto.day1 - dto.difference).format('#.##')} )</td>
     <td>${dto.day30} ( ${(dto.day30 / 30).format('#.##')} )</td>

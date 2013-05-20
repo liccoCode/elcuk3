@@ -2,7 +2,6 @@ package models.view.post;
 
 import helper.Dates;
 import helper.Promises;
-import models.market.AmazonListingReview;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -23,7 +22,6 @@ import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -181,7 +179,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     //最新的评分
                     if(isSku)
                         dto.lastRating = query.skuLastRating(dto.fid);
-                    //使用BigDecimal求前7天的平均值时可以解决 出现无限循环小数导致在页面无法显示的问题
+
                     dto.difference = dto.day1 - dto.day7 / 7;
                 }
 
