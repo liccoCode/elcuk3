@@ -170,14 +170,15 @@ public class ProcuresHelper extends JavaExtensions {
 
     /**
      * 计算 AnalyzeDTO.difference的增长/下降百分比
+     *
      * @param dto
      * @return
      */
     public static float percentage(AnalyzeDTO dto) {
-            float den = dto.difference;
-            float mol = dto.day1 - dto.difference;
-            if(den == 0 || mol == 0)
-                return 0;
-            return Math.abs(den / mol) * 100;
-        }
+        float den = dto.difference;
+        float mol = dto.day1 - dto.difference;
+        if(den == 0 || mol == 0)
+            return 0;
+        return Math.abs(den / mol) * 100;
+    }
 }
