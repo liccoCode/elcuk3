@@ -7,6 +7,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -214,6 +215,14 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
+        if(this.state != S.PENDING)
+            Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
+        if(this.deliveryTime == null)
+            Validation.addError("", "交货时间必须填写");
+        if(this.orderTime == null)
+            Validation.addError("", "下单时间必须填写");
+        if(Validation.hasErrors()) return;
+
         this.state = Deliveryment.S.CONFIRM;
         this.save();
     }
@@ -258,20 +267,20 @@ public class Deliveryment extends GenericModel {
      * @return
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
-        if(this.state != S.PENDING) {
-            Validation.addError("deliveryment.units.state", "%s");
+        if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
+            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
+                    " 状态的[采购单]添加[采购单元]");
             return new ArrayList<ProcureUnit>();
         }
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Cooperator singleCop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
-            if(isUnitToDeliverymentValid(unit, singleCop))
+            if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
+            }
+            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            unit.save();
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
-        this.units.addAll(units);
-        // 实在无语, 级联保存无效, 只能如此.
-        for(ProcureUnit unit : this.units) unit.save();
 
         new ElcukRecord(Messages.get("deliveryment.addunit"),
                 Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();
@@ -393,9 +402,9 @@ public class Deliveryment extends GenericModel {
         }
         deliveryment.save();
 
-        new ElcukRecord(Messages.get("deliveryment.createFromProcures"),
-                Messages.get("deliveryment.createFromProcures.msg", pids, deliveryment.id),
-                deliveryment.id).save();
+        new ERecordBuilder("deliveryment.createFromProcures")
+                .msgArgs(StringUtils.join(pids, ","), deliveryment.id)
+                .fid(deliveryment.id).save();
         return deliveryment;
     }
 

@@ -1,13 +1,7 @@
 package ext;
 
-import models.procure.Deliveryment;
-import models.procure.FBAShipment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import play.templates.JavaExtensions;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,7 +14,7 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(ProcureUnit.STAGE stage) {
         switch(stage) {
             case PLAN:
-                return "#333333";
+                return "#B0BFD6";
             case DELIVERY:
                 return "#006ACC";
             case DONE:
@@ -106,49 +100,19 @@ public class ProcuresHelper extends JavaExtensions {
             default:
                 return "#333333";
         }
-
     }
 
     /**
-     * 超过或者不足的 ProcureUnit 在页面上的颜色
+     * 判断运输项目的预计发货时间是否超过当前运输单
      *
+     * @param itm
+     * @param shipment
      * @return
      */
-    public static String leekOrOverRgb(ProcureUnit unit) {
-        Integer qty = unit.attrs.qty;
-        Integer planQty = unit.attrs.planQty;
-        if(qty == null) qty = 0;
-        if(planQty == null) planQty = 0;
-        if(qty - planQty > 0) return "84F000";
-        else if(qty - planQty < 0) return "FF7F1C";
-        else return "ffffff";
-    }
-
-    public static String info(Shipment s) {
-        return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
-                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(),
-                s.planBeginDate, s.planArrivDate);
-    }
-
-    /**
-     * 根据 end - begin 所计算的时间差, 给与 badge-xxx 提示紧急程度
-     *
-     * @param begin
-     * @param end
-     * @return
-     */
-    public static String badgeSuffix(Date begin, Date end) {
-        if(end == null) end = new Date();
-        if(begin == null) return "";
-        long diffs = end.getTime() - begin.getTime();
-        if(diffs < TimeUnit.DAYS.toMillis(2))
-            return "badge-success";
-        else if(diffs < TimeUnit.DAYS.toMillis(3))
-            return "badge-info";
-        else if(diffs < TimeUnit.DAYS.toMillis(5))
-            return "badge-warning";
-        else {
-            return "badge-important";
-        }
+    public static String overdue(ShipItem itm) {
+        if(itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
+            return "#F2DEDE";
+        else
+            return "#FFFFFF";
     }
 }

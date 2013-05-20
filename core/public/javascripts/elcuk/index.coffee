@@ -1,2 +1,16 @@
 $ ->
-  alert "这部分数据显示功能在记录一段时候的 record 之后再进行编写."
+  $('#shipConfigForm').on('change', 'select', (e) ->
+    form = $('#shipConfigForm')
+    market = form.find('[name=market]').val()
+    shipType = form.find('[name=shipType]').val()
+    dayType = form.find('[name=dayType]').val()
+
+    if market and shipType and dayType
+      LoadMask.mask()
+      $.get("/elcuk/config/#{market}_#{shipType}_#{dayType}")
+        .done((config) ->
+          $('#currentVal').val(config.val)
+          LoadMask.unmask()
+        )
+        .fail(-> LoadMask.unmask())
+  )

@@ -1,15 +1,15 @@
 package notifiers;
 
 import helper.Webs;
+import models.ElcukConfig;
 import models.MailsRecord;
-import models.embedded.ERecordBuilder;
 import models.procure.FBAShipment;
+import models.procure.Shipment;
 import play.Logger;
 import play.Play;
 import play.mvc.Mailer;
 
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,7 +21,6 @@ public class FBAMails extends Mailer {
     // 如果有新增加邮件, 需要向 ElcukRecord.emailOverView 注册
 
     public static final String STATE_CHANGE = "shipment_state_change";
-    public static final String NOT_RECEING = "shipment_receipt_not_receiving";
     public static final String RECEIVING_CHECK = "shipment_receiving_check";
 
     /**
@@ -38,7 +37,7 @@ public class FBAMails extends Mailer {
         setSubject(String.format("{INFO} FBA %s state FROM %s To %s",
                 fba.shipmentId, oldState, newState));
         mailBase();
-        addRecipient("p@easyacceu.com");
+        addRecipient("s@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, STATE_CHANGE);
@@ -54,53 +53,25 @@ public class FBAMails extends Mailer {
     }
 
     /**
-     * Amazon 签收了, 但是没有入库邮件提醒
+     * 对传入的运输单进行到港 3 天前警告
      *
+     * @param state
      * @return
      */
-    public static boolean receiptButNotReceiving(FBAShipment fba) {
-        setSubject("{WARN} FBA %s 签收了,但超过 2 天还没有开始入库.", fba.shipmentId);
+    public static boolean shipmentsNotify(List<Shipment> ships, Shipment.S state,
+                                          ElcukConfig cfg) {
+        setSubject("%s 个%s阶段运输单为顺利进行下一阶段提前 3 天提醒",
+                ships.size(), cfg.fullName);
         mailBase();
-        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-        MailsRecord mr = null;
+        addRecipient("s@easya.cc");
         try {
-            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, NOT_RECEING);
-            send(fba);
-            mr.success = true;
+            send(ships, state);
         } catch(Exception e) {
-            Logger.warn(Webs.E(e));
+            Logger.error(Webs.E(e));
             return false;
-        } finally {
-            if(mr != null)
-                mr.save();
         }
         return true;
     }
-
-    /**
-     * FBA 正在入库的检查邮件
-     *
-     * @param fbas
-     */
-    public static boolean itemsReceivingCheck(Set<FBAShipment> fbas) {
-        setSubject("{WARN} 总共 %s 个 FBA 入库时间过长, 需检查", fbas.size());
-        mailBase();
-        addRecipient("alerts@easyacceu.com", "p@easyacceu.com");
-        MailsRecord mr = null;
-        try {
-            mr = new MailsRecord(infos.get(), MailsRecord.T.FBA, RECEIVING_CHECK);
-            send(fbas);
-            mr.success = true;
-        } catch(Exception e) {
-            Logger.warn(Webs.E(e));
-            return false;
-        } finally {
-            if(mr != null)
-                mr.save();
-        }
-        return true;
-    }
-
 
     // ----------------------------------------------
     private static void mailBase() {

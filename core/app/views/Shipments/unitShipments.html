@@ -12,18 +12,17 @@
   </tr>
 #{list items:unitRelateShipments, as:'ship'}
   <tr>
-    <td><input type="checkbox" value="${ship.id}"></td>
-    <td style="cursor:pointer;" data-toggle="toggle" data-target="#ship_${ship_index}">
-      <i class="icon-reorder"></i>
+    <td><input type="radio" name="shipmentId" value="${ship.id}"></td>
+    <td>
       <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
     </td>
     <td>${ship.title}</td>
     <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
-    <td>${ship.state}</td>
-    <td>${ship.planBeginDate.date()} ${ship.planBeginDate.dayOfWeek()}</td>
+    <td>${ship.state.label()}</td>
+    <td>${ship.dates.planBeginDate.date()} ${ship.dates.planBeginDate.dayOfWeek()}</td>
     <td>
     ${ship.totalWeight().format("0.00")}
-          #{set diff: ship.totalWeight()-ship.minimumTraffic() /}
+          #{set diff: ship.totalWeight() - ship.minimumTraffic() /}
           #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
         #{if diff>0}
         ${" 超出"+diff.format("0.00")}
@@ -36,15 +35,7 @@
     #{/else}
     </td>
     <td>${ship.items.size()}</td>
-    <td>#{if ship.cycle}
-      <i style="color:#C09853;" class="icon-star"></i>#{/if} ${ship.creater?.username}</td>
-  </tr>
-  <tr id="ship_${ship_index}" style="display:none">
-    <td colspan="9">
-      <div>
-          #{render 'Shipments/_shipitem.html', items: ship.items, checkbox:false /}
-      </div>
-    </td>
+    <td>${ship.creater?.username}</td>
   </tr>
 #{/list}
 </table>

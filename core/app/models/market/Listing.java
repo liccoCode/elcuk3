@@ -141,6 +141,7 @@ public class Listing extends GenericModel {
     @Expose
     public boolean isTracked;
 
+
     /**
      * 如果搜索不到 salerank, 那么则直接归属到 5001
      */
@@ -348,6 +349,19 @@ public class Listing extends GenericModel {
         }
         Logger.info("Account List: %s", sb.toString());
         return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
+    }
+
+    /**
+     * 挑选一个Account , 来添加Listing到其WishList
+     *
+     * @return
+     */
+    public F.T2<Account, Integer> pickUpOneAccountToWishList() {
+        List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.market);
+        List<Account> nonWishListAccs = AmazonWishListRecord.nonAddWishListAccs(opendAccs, this.listingId);
+        if(nonWishListAccs.size() == 0)
+            throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
+        return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
     }
 
     /**

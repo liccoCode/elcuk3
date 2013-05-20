@@ -1,0 +1,38 @@
+<table style="text-align:center">
+  <tr>
+    <th>#</th>
+    <th>运输类型</th>
+    <th>状态</th>
+  #{if state == models.procure.Shipment.S.SHIPPING}
+    <th>开始时间</th>
+    <th>计算抵达时间</th>
+  #{/if}
+  #{elseif state == models.procure.Shipment.S.CLEARANCE}
+    <th>到港时间</th>
+    <th>计算清关完成时间</th>
+  #{/elseif}
+    <th>当前时间</th>
+    <th>平均时长</th>
+  </tr>
+#{list items: ships, as:'ship'}
+  <tr>
+    <td><a href="@{Shipments.show(ship.id)}" target="_blank">${ship.id}</a></td>
+    <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
+    <td style="color:${ship.state.rgb()}">${ship.state.label()}</td>
+      #{if state == models.procure.Shipment.S.SHIPPING}
+          #{set atPort: ship.config("atport")/}
+        <td>#{time_tooltip time: ship.dates.beginDate, datetime: true/}</td>
+        <td>#{time_tooltip time: ship.dates.beginDate + atPort.toInteger(), datetime: true /}</td>
+        <td>${new Date().format('yyyy-MM-dd HH:mm:ss')}</td>
+        <td>${atPort.toInteger()} 天</td>
+      #{/if}
+      #{elseif state == models.procure.Shipment.S.CLEARANCE}
+          #{set clearance: ship.config("clearance")/}
+        <td>#{time_tooltip time: ship.dates.atPortDate, datetime: true/}</td>
+        <td>#{time_tooltip time: ship.dates.atPortDate + clearance.toInteger(), datetime: true/}</td>
+        <td>${new Date().format('yyyy-MM-dd HH:mm:ss')}</td>
+        <td>${clearance.toInteger()} 天</td>
+      #{/elseif}
+  </tr>
+#{/list}
+</table>

@@ -28,7 +28,7 @@ public class JobsSetup {
             // 手动的将所有的需要的 Job 启动
             every(AmazonFBACapaticyWatcherJob.class, "30mn");
             every(AmazonFBAQtySyncJob.class, "5mn");
-            every(AmazonFBAWatchJob.class, "5mn");
+            //TODO AmazonFBAWatchJob 删除
             every(AmazonOrderFetchJob.class, "5mn");
             every(AmazonOrderUpdateJob.class, "10mn");
             every(AmazonReviewCheckJob.class, "5s");

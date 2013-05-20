@@ -1,12 +1,17 @@
 <ul>
-#{list _records}
-  <li>
-    <p>
-      <span>${_.message}</span>
-        #{if _nobr}&nbsp;#{/if}
-        #{else }<br/>#{/else}
-      <small>- by ${_.username.capFirst()} at ${_.createAt}</small>
-    </p>
-  </li>
-#{/list}
+#{if _records == null || _records.size() == 0}
+  <li>还没有记录</li>
+#{/if}
+#{else }
+    #{list _records}
+      <li>
+        <p>
+          <span>${_.message}</span>
+            #{if _nobr}&nbsp;#{/if}
+            #{else }<br/>#{/else}
+          <small>- by ${_.username.capFirst()} at ${_.createAt}</small>
+        </p>
+      </li>
+    #{/list}
+#{/else}
 </ul>

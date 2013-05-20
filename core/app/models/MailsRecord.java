@@ -14,8 +14,9 @@ import play.cache.Cache;
 import play.db.helper.SqlQuery;
 import play.db.jpa.Model;
 
-
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import java.util.*;
 
 /**
@@ -94,20 +95,23 @@ public class MailsRecord extends Model {
      * @return
      */
     @Cached("5mn")
-    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates, boolean success, String group) {
+    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates,
+                                         boolean success, String group) {
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to));
 
 
-        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates, success, group);
+        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates,
+                success, group);
         HighChart lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
 
         //初始化不同邮件类型 模板的使用次数
         Map<String, Float> counts = new HashMap<String, Float>();
         if(templates != null)
-            for(String t : templates)
+            for(String t : templates) {
                 counts.put(t, 0f);
+            }
         else {
             if(type.equals(T.NORMAL)) {
                 counts.put(Mails.CLEARANCE, 0f);
@@ -120,7 +124,6 @@ public class MailsRecord extends Model {
                 counts.put(Mails.IS_DONE, 0f);
                 counts.put(Mails.REVIEW_WARN, 0f);
             } else if(type.equals(T.FBA)) {
-                counts.put(FBAMails.NOT_RECEING, 0f);
                 counts.put(FBAMails.RECEIVING_CHECK, 0f);
                 counts.put(FBAMails.STATE_CHANGE, 0f);
             } else if(type.equals(T.SYSTEM)) {
@@ -165,14 +168,17 @@ public class MailsRecord extends Model {
      * @param group
      * @return
      */
-    private static List<MailsRecord> getMailsRecords(Date from, Date to, T type, List<String> templates, boolean success, String group) {
+    private static List<MailsRecord> getMailsRecords(Date from, Date to, T type,
+                                                     List<String> templates, boolean success,
+                                                     String group) {
         String cacheKey = Caches.Q.cacheKey(from, to, type, success, group, templates);
         List<MailsRecord> records = Cache.get(cacheKey, List.class);
         if(records != null) return records;
 
         synchronized(MailsRecord.class) {
 
-            StringBuffer querystr = new StringBuffer("type=? and createdAt between ? and ? and success=?");
+            StringBuffer querystr = new StringBuffer(
+                    "type=? and createdAt between ? and ? and success=?");
             List<Object> paras = new ArrayList<Object>();
             paras.add(type);
             paras.add(from);
@@ -184,7 +190,7 @@ public class MailsRecord extends Model {
             }
             if(templates != null) {
                 querystr.append(" and ");
-                querystr.append(SqlQuery.whereIn("templateName",templates));
+                querystr.append(SqlQuery.whereIn("templateName", templates));
             }
             records = MailsRecord.find(querystr.toString(), paras.toArray()).fetch();
             if(records != null) {

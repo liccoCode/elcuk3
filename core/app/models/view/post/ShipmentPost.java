@@ -4,7 +4,6 @@ import helper.Dates;
 import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -23,7 +22,6 @@ import java.util.regex.Pattern;
 public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
-    private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -34,17 +32,15 @@ public class ShipmentPost extends Post {
 
     static {
         DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("planBeginDate", "预计开始运输时间"));
-        DATE_TYPES.add(new F.T2<String, String>("beginDate", "开始运输时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.planBeginDate", "预计开始运输时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.beginDate", "开始运输时间"));
         DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<String, String>("planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("arriveDate", "实际 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<String, String>("dates.arriveDate", "实际 [到库] 时间"));
     }
 
     // 默认的搜索排序时间
-    public String dateType = "planBeginDate";
-
-    public Shipment.P pype;
+    public String dateType = "dates.planBeginDate";
 
     public Shipment.T type;
 
@@ -53,16 +49,6 @@ public class ShipmentPost extends Post {
     public iExpress iExpress;
 
     public Long cooperId;
-
-    /**
-     * 是否为周期型运输单
-     */
-    public Boolean isCycle;
-
-    /**
-     * 是否已经创建了 FBA
-     */
-    public Boolean isHaveFBA;
 
     public long whouseId;
 
@@ -83,17 +69,12 @@ public class ShipmentPost extends Post {
                 // 几个表使用 left join 级联...
                 String.format("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i" +
                         " LEFT JOIN i.unit u" +
-                        " LEFT JOIN s.fbas fba" +
+                        " LEFT JOIN s.items it" +
                         " WHERE s.%s>=? AND s.%s<=?",
                         this.dateType, this.dateType));
         List<Object> params = new ArrayList<Object>();
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
-
-        if(this.pype != null) {
-            sbd.append(" AND s.pype=?");
-            params.add(this.pype);
-        }
 
         if(this.type != null) {
             sbd.append(" AND s.type=?");
@@ -108,18 +89,6 @@ public class ShipmentPost extends Post {
                 sbd.append(" AND s.state=?");
                 params.add(Shipment.S.valueOf(this.state));
             }
-        }
-
-        if(this.isCycle != null) {
-            sbd.append(" AND s.cycle=?");
-            params.add(this.isCycle);
-        }
-
-        if(this.isHaveFBA != null) {
-            if(this.isHaveFBA)
-                sbd.append(" AND fba.shipmentId IS NOT NULL");
-            else
-                sbd.append(" AND fba.shipmentId IS NULL");
         }
 
         if(this.iExpress != null) {
@@ -139,23 +108,16 @@ public class ShipmentPost extends Post {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            Matcher matcher = SHIPITEMS_NUM_PATTERN.matcher(this.search);
-            if(matcher.matches()) {
-                int shipItemSize = NumberUtils.toInt(matcher.group(1), 1);
-                sbd.append(" AND SIZE(s.items)>").append(shipItemSize).append(" ");
-            } else {
-                sbd.append(" AND (")
-                        .append("s.trackNo LIKE ?")
-                        .append(" OR s.memo LIKE ?")
-                        .append(" OR fba.shipmentId LIKE ?")
-                        .append(" OR u.sid LIKE ?")
-                        .append(")");
-                for(int i = 0; i < 4; i++) params.add(word);
-            }
+            sbd.append(" AND (")
+                    .append("s.trackNo LIKE ?")
+                    .append(" OR it.unit.fba.shipmentId LIKE ?")
+                    .append(" OR u.sid LIKE ?")
+                    .append(")");
+            for(int i = 0; i < 3; i++) params.add(word);
         }
 
         // 因为需要使用 deliverymentId() 方法, 不能够在 param 的地方添加 fba.centerId 路径
-        sbd.append(" ORDER BY fba.centerId, s.createDate DESC");
+        sbd.append(" ORDER BY s.createDate DESC");
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 

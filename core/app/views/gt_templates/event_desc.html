@@ -1,40 +1,22 @@
 <ul>
-    <li>预计交货时间: ${unit.attrs.planDeliveryDate}</li>
+  <li>预计交货时间: ${unit.attrs.planDeliveryDate}</li>
 #{if unit.attrs.deliveryDate}
-    <li>实际交货时间: ${unit.attrs.deliveryDate}</li>
+  <li>实际交货时间: ${unit.attrs.deliveryDate}</li>
 #{/if}
-    <li>预计发货时间: ${unit.planShipBeginDate()}</li>
-    <li>实际发货时间: ${unit.shipItem?.shipDate}</li>
-    <li>预计到库时间: ${unit.planShipArriveDate()}</li>
-    <li>实际签收时间: ${unit.shipItem?.fba?.receiptAt?.datetime()}</li>
-    <li>预计采购量: ${unit.attrs.planQty}</li>
-#{if unit.stage == models.procure.ProcureUnit.STAGE.INBOUND}
-    <li>${unit.stage}: ${unit.qty() - unit.shipItem.recivedQty} (进度条逐渐减少)</li>
-    <li>入库进度: ${unit.shipItem.recivedQty} / ${unit.qty()}</li>
-#{/if}
+  <li>预计发货时间: TODO: 采购计划的运输时间, 会根据运输项目拥有多个</li>
+  <li>实际发货时间: 修改</li>
+  <li>预计到库时间: TODO: 同预计发货时间</li>
+  <li>实际签收时间: TODO: 修改</li>
+  <li>预计采购量: ${unit.attrs.planQty}</li>
 #{else }
-    <li>${unit.stage}: ${unit.qty()}</li>
+  <li>${unit.stage}: ${unit.qty()}</li>
 #{/else}
 #{if unit.deliveryment}
-    <li>采购单:
-        <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">
-            <i class="icon-link"></i> ${unit.deliveryment.id}
-        </a>
-        #${unit.id}
-    </li>
+  <li>采购单:
+    <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">
+      <i class="icon-link"></i> ${unit.deliveryment.id}
+    </a>
+    #${unit.id}
+  </li>
 #{/if}
-#{if unit.shipItem}
-    <li>
-        运输单:
-        <a href="@{Shipments.show(unit.shipItem.shipment.id)}" target="_blank">
-            <i class="icon-link"></i> ${unit.shipItem.shipment.id}
-        </a>
-        <span class="badge badge-info">${unit.shipItem.shipment.fbas.size()}</span> FBAs
-        <br/>
-    ${unit.shipItem.shipment.type}
-    </li>
-#{/if}
-    <li>
-        Memo: ${unit.comment.raw()}
-    </li>
 </ul>

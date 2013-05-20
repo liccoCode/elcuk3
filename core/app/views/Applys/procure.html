@@ -102,10 +102,8 @@
             <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage}</td>
             <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
             <td>
-                #{if procureUnit.shipItem.fba}
-                  <a target="_blank" href="@{Shipments.show(procureUnit.shipItem.shipment.id)}#${procureUnit.shipItem.id}">
-                  ${procureUnit.shipItem.fba.shipmentId} #${procureUnit.shipItem.id}
-                  </a>
+                #{if procureUnit.fba}
+                ${procureUnit.fba.shipmentId}
                 #{/if}
                 #{else }
                   暂时还没有 FBA

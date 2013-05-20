@@ -1,0 +1,32 @@
+#{extends 'main.html' /}
+#{set title:'ProcureUnit #' + unit.id + ' Edit' /}
+#{set 'moreScripts'}
+    #{script 'procureunits/blank.coffee'/}
+#{/set}
+
+#{errorMsgs /}
+#{flash_alert row:true /}
+
+#{danger_row ''}
+采购计划的更改会有限制, 需要调整
+<ol>
+  <li>
+    现在仅仅支持采购数量, 预计交货, 预计运输, 预计到库时间的调整
+  </li>
+  <li>
+    暂时先不实现 ProcrueUnit 的 Shipment 的调整. (因为实际上是 ShipItem 的调整, 而 ProcureUnit 会有很多 ShipItem)
+  </li>
+</ol>
+#{/danger_row}
+
+<form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT'>
+  <table class="table table-condensed table-bordered">
+  #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses /}
+    <tr>
+      <td colspan="4">
+        <input type="hidden" name="oldPlanQty" value="${oldPlanQty}">
+        <button type="submit" class="btn btn-primary">更新</button>
+      </td>
+    </tr>
+  </table>
+</form>
