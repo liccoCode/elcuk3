@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Constant;
+import helper.GTs;
 import helper.Webs;
 import models.Notification;
 import models.embedded.ERecordBuilder;
@@ -90,11 +91,11 @@ public class FBAs extends Controller {
         final FBAShipment fba = FBAShipment.findById(id);
         final PDF.Options options = new PDF.Options();
         options.pageSize = IHtmlToPdfTransformer.A4P;
-
-        renderArgs.put("shipmentId", fba.shipmentId);
-        renderArgs.put("fba", fba);
-        renderArgs.put("shipFrom", Account.address(fba.account.type));
-        renderPDF(options);
+        String content = GTs.render("packingSlipWrapper",
+                GTs.newMap("shipmentId", fba.shipmentId)
+                        .put("fba", fba).put("shipFrom", Account.address(fba.account.type))
+                        .build());
+        renderPDF(content, options);
     }
 
     /**
@@ -106,10 +107,11 @@ public class FBAs extends Controller {
         FBAShipment fba = FBAShipment.findById(id);
         PDF.Options options = new PDF.Options();
         options.pageSize = IHtmlToPdfTransformer.A4P;
-        renderArgs.put("shipmentId", fba.shipmentId);
-        renderArgs.put("shipFrom", Account.address(fba.account.type));
-        renderArgs.put("fba", fba);
-        renderPDF(options);
+        String content = GTs.render("boxLabelWrapper",
+                GTs.newMap("shipmentId", fba.shipmentId)
+                        .put("fba", fba).put("shipFrom", Account.address(fba.account.type))
+                        .build());
+        renderPDF(content, options);
     }
 
     /**
