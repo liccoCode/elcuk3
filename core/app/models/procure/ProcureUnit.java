@@ -303,7 +303,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, newUnit.attrs.planQty, newUnit.id)
+                .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id)
                 .save();
         return newUnit;

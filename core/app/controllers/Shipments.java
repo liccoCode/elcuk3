@@ -60,8 +60,8 @@ public class Shipments extends Controller {
         if(Validation.hasErrors()) {
             render("Shipments/blank.html", ship);
         }
-        ship.save();
-        show(ship.id);
+        Shipment shipment = new Shipment(ship).save();
+        show(shipment.id);
     }
 
     /**
