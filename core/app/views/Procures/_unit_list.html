@@ -66,7 +66,7 @@
             FnSku</a>
         #{/else}
     </td>
-    <td>${unit.shipType}</td>
+    <td>${unit.shipType.label()}</td>
     <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
@@ -74,7 +74,7 @@
     <td>#{time_tooltip time:unit.createDate/}</td>
   </tr>
   <tr id="${tr_key}_${unit.id}" style="display:none;">
-    <td colspan="${checkbox ? '18' : '16'}">
+    <td colspan="${checkbox ? '18' : '17'}">
       <div class="row-fluid" id="actions_${unit.id}">
 
         <div class="span3">
@@ -92,7 +92,7 @@
                   #{list items:unit.relateShipment(), as:'sp'}
                     <li>
                       <a href="@{Shipments.show(sp.id)}">${sp}</a>
-                      预计 #{time_tooltip time: sp.planBeginDate /} 开船
+                      预计 #{time_tooltip time: sp.dates.planBeginDate /} 开船
                     </li>
                   #{/list}
               </ul>
@@ -130,10 +130,10 @@
         <div class="span2">
           <div class="btn-toolbar">
             <!-- 普通修改 -->
-            <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-primary">修改</a>
+            <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-small btn-primary">修改</a>
 
               #{if unit.stage in [models.procure.ProcureUnit.STAGE.PLAN, models.procure.ProcureUnit.STAGE.DELIVERY]}
-                <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-danger">
+                <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-small btn-danger">
                   删除
                 </a>
               #{/if}
@@ -143,39 +143,44 @@
               <div class="btn-toolbar">
                   #{power.ck "procures.delivery"}
                     <!-- 交货页面 -->
-                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-warning">交货</a>
+                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-small btn-warning">交货</a>
                   #{/power.ck}
                   #{power.ck "procures.dosplitunit"}
                     <!-- 分拆采购单元 -->
-                    <a href="@{Procures.splitUnit()}/${unit.id}" class="btn btn-danger">分拆</a>
+                    <a href="@{ProcureUnits.splitUnit(unit.id)}" class="btn btn-small btn-danger"
+                       rel='tooltip' title='因工厂延期交货而分拆'>
+                      分拆
+                    </a>
                   #{/power.ck}
                 <!-- 确认到货代处 -->
                   #{ifnot unit.isPlaced}
-                    <a data-remote='true' data-method='PUT' class="btn btn-info" id="isplaced_${unit.id}_btn"
+                    <a data-remote='true' data-method='PUT' class="btn btn-small btn-info" id="isplaced_${unit.id}_btn"
                        href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>
                       抵达货代
                     </a>
                   #{/ifnot}
               </div>
+              <div class="btn-toolbar">
+                  #{ifnot unit.fba}
+                      #{power.ck 'fbas.deploytoamazon'}
+                        <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-small btn-success"
+                           data-disable-with="创建中...">
+                          创建 FBA
+                        </a>
+                      #{/power.ck}
+                  #{/ifnot}
+                  #{else }
+                      #{power.ck 'fbas.update'}
+                        <a href="@{FBAs.update(unit.id)}" class="btn btn-small btn-warning"
+                           data-method='PUT' data-disable-with='更新中...'>
+                          更新 ${unit.fba.shipmentId}
+                        </a>
+                      #{/power.ck}
+                    <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
+                    <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱外麦</a>
+                  #{/else}
+              </div>
             #{/if}
-          <div class="btn-toolbar">
-              #{ifnot unit.fba}
-                <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-success"
-                   data-disable-with="创建中...">
-                  创建 FBA
-                </a>
-              #{/ifnot}
-              #{else }
-                  #{power.ck 'fbas.update'}
-                    <a href="@{FBAs.update(unit.id)}" class="btn btn-warning"
-                       data-method='PUT' data-disable-with='更新中...'>
-                      更新 ${unit.fba.shipmentId}
-                    </a>
-                  #{/power.ck}
-                <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-success">箱內麦</a>
-                <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-success">箱外麦</a>
-              #{/else}
-          </div>
         </div>
       </div>
         #{ifnot norecord}

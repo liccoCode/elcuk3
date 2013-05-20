@@ -5,6 +5,7 @@ import helper.S3;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import jobs.loop.OsTicketBeanstalkdCheck;
+import models.ElcukConfig;
 import models.Privilege;
 import models.User;
 import models.finance.FeeType;
@@ -50,6 +51,7 @@ public class Bootstrap extends Job {
         Privilege.init();
         JobsSetup.init();
         Account.initOfferIds();
+        ElcukConfig.init();
 
         if(Play.mode.isProd())
             S3.init();

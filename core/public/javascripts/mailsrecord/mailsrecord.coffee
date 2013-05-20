@@ -17,7 +17,7 @@ $ ->
       daily_review: 'DAILY_REVIEW', daily_feedback: 'DAILY_FEEDBACK', product_picture_check: 'SKU_PIC_CHECK'
 
     FBA:
-      shipment_state_change: 'STATE_CHANGE', shipment_receipt_not_receiving: 'NOT_RECEING', shipment_receiving_check: 'RECEIVING_CHECK'
+      shipment_state_change: 'STATE_CHANGE', shipment_receiving_check: 'RECEIVING_CHECK'
 
     NORMAL:
       shipment_clearance: 'CLEARANCE', shipment_isdone: 'IS_DONE', more_offers: 'MORE_OFFERS', amazon_review_uk: 'REVIEW_UK'
@@ -116,4 +116,4 @@ $ ->
         console.log(unitLines)
         $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
     )
-  .click()
+    .click()

@@ -15,6 +15,7 @@ window.$ui =
         placement: 'top'
         trigger: 'hover'
         container: 'body'
+        html: true
       for k in ['placement', 'trigger', 'width', 'data-content', 'content', 'title']
         value = $pop.attr(k)
         continue if value is undefined or value is ''

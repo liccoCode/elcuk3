@@ -6,9 +6,7 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import models.market.Account;
-import models.procure.FBACenter;
-import models.procure.FBAShipment;
-import models.procure.ProcureUnit;
+import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.libs.F;
@@ -18,6 +16,12 @@ import java.util.*;
 
 /**
  * Amazon FBA 操作
+ * <pre>
+ * All operations from the Fulfillment Inbound Shipment API section, the Fulfillment Inventory API section, and
+ * the Fulfillment Outbound Shipment API section together share a maximum request quota of 30 and a restore
+ * rate of two requests every second.
+ * </pre>
+ * FBA Inbound/Inventory/Outbond API 共同享有 30 个最高请求, 每秒恢复 2 个请求
  * User: wyattpan
  * Date: 9/11/12
  * Time: 5:46 PM
@@ -65,11 +69,12 @@ public class FBA {
                         inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
                     }
 
-                    if(!inboundItemMap.containsKey(unit.selling.merchantSKU))
+                    if(!inboundItemMap.containsKey(fixHistoryMSKU(unit.selling.merchantSKU))) {
                         msg.append("PLAN 不存在 MSKU ").append(unit.selling.merchantSKU);
-                    else {
+                    } else {
                         if(StringUtils.isBlank(unit.selling.fnSku)) {
-                            unit.selling.fnSku = inboundItemMap.get(unit.selling.merchantSKU)
+                            unit.selling.fnSku = inboundItemMap
+                                    .get(fixHistoryMSKU(unit.selling.merchantSKU))
                                     .getFulfillmentNetworkSKU();
                         }
                         member = planFba;
@@ -124,11 +129,25 @@ public class FBA {
             throws FBAInboundServiceMWSException {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
         //TODO effects: 计算 FBA title 算法需要调整
-        String fbaTitle = String.format("%s %s", "FBA Title 需要调整", Dates.date2DateTime());
+        StringBuilder fbaTitle = new StringBuilder();
+        Set<Shipment> shipments = new HashSet<Shipment>();
+        int qty = 0;
+        for(ProcureUnit unit : fbashipment.units) {
+            for(ShipItem item : unit.shipItems) {
+                shipments.add(item.shipment);
+            }
+            qty += unit.qty();
+        }
+        fbaTitle.append("总共运输数量为 ").append(qty).append(" 并关联 ");
+        for(Shipment shipment : shipments) {
+            fbaTitle.append(shipment.id).append(",");
+        }
+        fbaTitle.append(" 运输单");
+
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);
-        create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle,
+        create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle.toString(),
                 Account.address(fbashipment.account.type), fbashipment.centerId,
                 FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
         // 设置 items
@@ -139,7 +158,7 @@ public class FBA {
         CreateInboundShipmentResponse response = client(fbashipment.account)
                 .createInboundShipment(create);
         if(response.isSetCreateInboundShipmentResult()) {
-            fbashipment.title = fbaTitle;
+            fbashipment.title = fbaTitle.toString();
             fbashipment.createAt = new Date();
             return FBAShipment.S.WORKING;
         }
@@ -151,7 +170,6 @@ public class FBA {
      * 更新 FBA Shipment, 包括 Amazon FBA Shipment 的状态, ShipItem 的数量 ; 指定 InboundShipmentItem
      *
      * @param fbaShipment
-     * @param updateitems
      * @param state
      * @return
      * @throws FBAInboundServiceMWSException
@@ -160,7 +178,8 @@ public class FBA {
             FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        if(fbaShipment.state == FBAShipment.S.PLAN) return fbaShipment.state;
+        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state))
+            return fbaShipment.state;
 
         UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
         update.setSellerId(fbaShipment.account.merchantId);

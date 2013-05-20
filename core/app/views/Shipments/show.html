@@ -8,280 +8,306 @@
 
 #{errorMsgs /}
 
+#{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
+<div class="row-fluid">
+  <div class="span12">
+  #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+  </div>
+</div>
+
 #{flash_alert /}
 
-#{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw()}
-<ul>
-  <li>运输单只能运往一个仓库, 其运输的货物也需要是同一个仓库的</li>
-  <li>运输单的 Title 处理用来标识系统内的运输单外, 也是 Amazon FBA Shipment 的 Title</li>
-  <li>"开始运输" 之后, 会同步 FBA Shipment 标记 Shipped</li>
-  <li>"开始运输" 时, 需要将数据补全, 并且开始运输以后, 信息不再可以修改</li>
-  <li>在运输单标记开始运输之前, 都可以对信息进行更改,调整</li>
-  <li>Fnsku 会在运输单确认以后, 进行一次同步</li>
-  <li>总体积单位为 m3 ,总重量单位为 kg; 如果发现数据为 0, 请检查 Product 数据是否填充完整.</li>
-  <li>[部分更新] 功能,更新 Comment 与 TrackNo 两部分值</li>
-  <li class="text-error">如果拥有 <i style="color:#C09853;" class="icon-star"></i> 标记, 为周期型运输单, 其不允许创建
-    FBA Shipment,
-    而是用来接收 PM 的采购计划.
-  </li>
-  <li class="text-error">如果是 Create By System, 那么在第一次更新时会设置创建者为更新者</li>
-</ul>
-#{/info_row}
+#{shipmentWorkflow state: ship.state/}
+
+<!-- 时间 -->
+#{if ship.type != models.procure.Shipment.T.EXPRESS}
 <div class="row-fluid">
-  <div class="span12">
-    <form action="@{Shipments.update()}" method="post">
-    #{authenticityToken /}
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th>Title (Create By ${ship.creater ? ship.creater.username : "System"})</th>
-          <td colspan="3">
-            <input type="text" name="ship.title" class="span10" value="${ship.title ? ship.title : ship.title()}">
-          </td>
-        </tr>
-        <tr>
-          <th>运输单号</th>
-          <td>
-            <span>${ship.id} ${ship.cycle ? '<i style="color:#C09853;" class="icon-star"></i>'.raw() : ''}</span>
-            <input type="hidden" id="shipmentId" name="ship.id" value="${ship.id}">
-          </td>
-          <th>创建时间</th>
-          <td>${ship.createDate.datetime()}</td>
-        </tr>
-
-        <tr>
-          <th>状态</th>
-          <td>${ship.state}</td>
-          <th>运输方式</th>
-          <td>${ship.type}</td>
-        </tr>
-
-        <tr>
-          <th>预计运输时间</th>
-          <td>
-            <input type="date" name="ship.planBeginDate" value="${ship.planBeginDate.date()}">
-          #{ifnot ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CANCEL, models.procure.Shipment.S.CONFIRM]}
-            <span class="pull-right">运输时间 #{time_tooltip time:ship.beginDate/}</span>
-          #{/ifnot}
-          </td>
-          <th>预计到库时间</th>
-          <td>
-            <input type="date" name="ship.planArrivDate" value="${ship.planArrivDate.date()}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>运输体积(m3)</th>
-          <td>
-            <input type="text" class="input-mini" name="ship.volumn" value="${ship.volumn}">
-          </td>
-          <th>运输重量(kg)</th>
-          <td>
-            <input type="text" class="input-mini" name="ship.weight" value="${ship.weight}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>申报价格(单位 USD)</th>
-          <td>
-            <input type="text" class="input-mini" name="ship.declaredValue" value="${ship.declaredValue}">
-          </td>
-          <th>押金(例:预付款)</th>
-          <td>
-            <input type="text" class="input-mini" name="ship.deposit" value="${ship.deposit}">
-          #{if ship.deposit && ship.deposit > 0}
-            <span class="badge badge-success">DDP</span>
-          #{/if}
-          #{else }
-            <span class="badge badge-info">DDU</span>
-          #{/else}
-          </td>
-        </tr>
-
-        <tr>
-          <th>其他费用(例:手续费)</th>
-          <td>
-            <input type="text" class="input-mini" name="ship.otherFee" value="${ship.otherFee}">
-          </td>
-          <th>运费</th>
-          <td>
-            <input type="text" class="input-mini" name="ship.shipFee" value="${ship.shipFee}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>Track No.</th>
-          <td>
-            <div class="input-append">
-              <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
-            #{if ship.internationExpress && ship.trackNo}
-              <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
-            #{/if}
+  <div class="span11 offset1">
+    <ul class="unstyled inline">
+      <li class="stripe">
+        <div class="block">
+          <label>开始运输时间</label>
+          <span>#{time_tooltip time: ship.dates.beginDate/}</span>
+        </div>
+        <div class="block">
+          <label>预计下一阶段时间</label>
+          <span>#{time_tooltip time: ship.nextStateDate()/}</span>
+        </div>
+        <div class="block">
+          <label>预计结束时间</label>
+          <span>#{time_tooltip time: ship.predictArriveDate()/}</span>
+        </div>
+      </li>
+        #{if ship.state >= models.procure.Shipment.S.CLEARANCE}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>运输</abbr></label>
+                #{set atport: ship.config("atport") /}
+              <span>${atport.toInteger()} 天</span>
             </div>
-          </td>
-          <th>国际快递商</th>
-          <td>
-            <select name="ship.internationExpress">
-              <option value="">选择快递商</option>
-            #{list items:models.procure.Shipment.Express(), as:'ie'}
-              <option ${ie == ship.internationExpress ? 'selected' : ''} value="${ie}">${ie}</option>
-            #{/list}
-            </select>
-          </td>
-        </tr>
-
-        <tr>
-          <th>运输商</th>
-          <td>
-            <select name="ship.cooper.id">
-              <option value="">选择运输商</option>
-            #{list items:shippers, as:'shiper'}
-              <option ${shiper == ship.cooper ? 'selected' : ''} value="${shiper.id}">${shiper.fullName}</option>
-            #{/list}
-            </select>
-          </td>
-          <th>运输单总重量</th>
-          <td>${ship.totalWeight()} kg</td>
-        </tr>
-
-        <tr>
-          <th>仓库</th>
-          <td>
-            <select name="ship.whouse.id">
-              <option value="">选择仓库</option>
-            #{list items:whouses, as:'whouse'}
-              <option ${whouse == ship.whouse ? "selected" : ""} value="${whouse.id}">${whouse.name()}</option>
-            #{/list}
-            </select>
-          </td>
-          <td>计价类型</td>
-          <td>
-            <select name="ship.pype">
-            #{list items:models.procure.Shipment.P.values(), as:'p'}
-              <option ${p == ship.pype ? 'selected' : ''} value="${p.name()}">${p}</option>
-            #{/list}
-            </select>
-          </td>
-        </tr>
-
-        <tr>
-          <th>目的地</th>
-          <td>${ship.target}</td>
-          <th>始发地</th>
-          <td>${ship.source}</td>
-        </tr>
-
-        <tr>
-          <td colspan="4">
-            <h4>Comment</h4>
-            <textarea rows="8" id="ship_memo" name="ship.memo" class="span12">${ship.memo}</textarea>
-          </td>
-        </tr>
-
-        <tr>
-          <td colspan="4">
-          #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM /}
-          #{if isPlanAndConfirm}
-            <button class="btn btn-primary">更新</button>
-          #{/if}
-          #{if !isPlanAndConfirm}
-            <button id="ship_comment" class="btn btn-primary">部分更新</button>
-          #{/if}
-          </td>
-        </tr>
-      #{if ship.arriveDate}
-        <tr class="alert alert-success">
-          <th>运输单到达(Amazon 签收)时间</th>
-          <td>#{time_tooltip time:ship.arriveDate/}</td>
-
-          <td>准点误差</td>
-            #{set diffDays:ship.planArrivDate - ship.arriveDate /}
-          <td style="${diffDays < 0 ? 'color:#B94A48' : ''}">${diffDays} Days</td>
-        </tr>
-      #{/if}
-      </table>
-    </form>
+            <div class="block">
+              <label>实际<abbr>运输</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.CLEARANCE)}</span>
+            </div>
+            <div class="block">
+              <label>到港时间</label>
+              <span>#{time_tooltip time: ship.dates.atPortDate /}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.PACKAGE}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>清关</abbr></label>
+                #{set clearance: ship.config("clearance")/}
+              <span>${clearance.toInteger()} 天</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>清关</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.PACKAGE)}</span>
+            </div>
+            <div class="block">
+              <label>提货时间</label>
+              <span>#{time_tooltip time: ship.dates.pickGoodDate/}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.BOOKED}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>提货</abbr></label>
+                #{set pick: ship.config("pick")/}
+              <span>${pick.toInteger()} 天</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>提货</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.BOOKED)}</span>
+            </div>
+            <div class="block">
+              <label>预约时间</label>
+              <span>#{time_tooltip time: ship.dates.bookDate/}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.DELIVERYING}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>预约</abbr></label>
+                #{set book: ship.config("book")/}
+              <span>${book.toInteger()} 天</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>预约</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.DELIVERYING)}</span>
+            </div>
+            <div class="block">
+              <label>派送时间</label>
+              <span>#{time_tooltip time: ship.dates.deliverDate/}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.RECEIPTD}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>派送</abbr></label>
+                #{set deliver: ship.config("deliver")/}
+              <span>${deliver.toInteger()} 天</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>派送</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.RECEIPTD)}</span>
+            </div>
+            <div class="block">
+              <label>签收时间</label>
+              <span>#{time_tooltip time: ship.dates.receiptDate/}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.RECEIVING}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>签收</abbr></label>
+                #{set receipt: ship.config("receipt") /}
+              <span>${receipt.toInteger()} 天</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>签收</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.RECEIVING)}</span>
+            </div>
+            <div class="block">
+              <label>签收时间</label>
+              <span>#{time_tooltip time: ship.dates.inbondDate/}</span>
+            </div>
+          </li>
+        #{/if}
+        #{if ship.state >= models.procure.Shipment.S.DONE}
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>入库</abbr></label>
+                #{set inbound: ship.config("inbound") /}
+              <span>${inbound.toInteger()} 天</span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>入库</abbr></label>
+              <span>${ship.betweenDays(models.procure.Shipment.S.DONE)}</span>
+            </div>
+            <div class="block">
+              <label>完成时间</label>
+              <span>#{time_tooltip time: ship.dates.arriveDate/}</span>
+            </div>
+          </li>
+          <li class="stripe">
+            <div class="block">
+              <label>平均<abbr>总运输</abbr></label>
+              <span>
+                ${atport.toInteger() + clearance.toInteger() + pick.toInteger() + book.toInteger() + deliver.toInteger() + receipt.toInteger() + inbound.toInteger()}
+              </span>
+            </div>
+            <div class="block">
+              <label>实际<abbr>总运输</abbr></label>
+              <span>${ship.dates.arriveDate - ship.dates.beginDate} 天</span>
+            </div>
+          </li>
+        #{/if}
+    </ul>
   </div>
 </div>
+#{/if}
 
-<div class="row-fluid">
-  <div class="span12" style="margin-bottom:15px;">
-
+<div class="row-fluid" id="btnFucs">
+  <div class="btn-toolbar">
+  #{if ship.state == models.procure.Shipment.S.PLAN}
+    <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"
+       class="btn  btn-warning" data-disable-with="确认中...">
+      确认运输单
+    </a>
+  #{/if}
+  #{if ship.state == models.procure.Shipment.S.CONFIRM}
+    <a href="@{Shipments.confirm(ship.id, true)}" data-confirm="确认操作?" data-method="POST"
+       class="btn btn-warning" data-disable-with="确认中...">
+      取消确认运输单
+    </a>
+  #{/if}
   #{power.ck "shipments.beginship"}
-      #{if isPlanAndConfirm}
-        <form action="@{Shipments.beginShip()}" method="post" class="pull-left">
-          <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-          <button style="margin-right:10px;" data-confirm="确认开始运输?" class="btn btn-success">
-            开始运输
-          </button>
-        </form>
+      #{if ship.state == models.procure.Shipment.S.CONFIRM}
+        <button class="btn btn-success func" url="@{Shipments.beginShip(ship.id)}">
+          开始运输
+        </button>
       #{/if}
   #{/power.ck}
+
+  #{if ship.type != models.procure.Shipment.T.EXPRESS}
+    <a class="btn btn-warning" href="@{Shipments.revertState(ship.id)}" data-method='DELETE'
+       data-confirm='确认操作?' data-disable-with='返回中...'>
+      回到前一个状态
+    </a>
+      #{if ship.state == models.procure.Shipment.S.SHIPPING}
+        <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
+          运输到港
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.CLEARANCE}
+        <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
+          开始提货
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.PACKAGE}
+        <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
+          与 Amazon 预约
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.BOOKED}
+        <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
+          派送
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.DELIVERYING}
+        <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
+          签收
+        </button>
+      #{/if}
+  #{/if}
+  #{if ship.state == models.procure.Shipment.S.RECEIPTD}
+    <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
+      开始入库
+    </button>
+  #{/if}
+  #{if ship.state == models.procure.Shipment.S.RECEIVING}
+    <button class="btn btn-success func" url="@{Shipments.endShip(ship.id)}">
+      完成运输
+    </button>
+  #{/if}
+    <a href="#logForm" class="btn" data-toggle='modal'>记录事件</a>
+
+
   #{power.ck 'shipments.cancel'}
-      #{if ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CONFIRM]}
-        <form action="@{Shipments.cancel()}" method="post">
-          <input type="hidden" name="id" value="${ship.id}">
-            #{authenticityToken /}
-          <button style="margin-right:10px;" data-confirm="确认取消运输?" class="btn btn-danger">
-            取消运输单
-          </button>
-        </form>
+      #{if ship.state == models.procure.Shipment.S.PLAN}
+        <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"
+           data-method="DELETE" data-disable-with="取消中...">
+          取消运输单
+        </a>
       #{/if}
   #{/power.ck}
   </div>
 </div>
 
-
-#{info_row title:'FBA 列表区'}
-<ul>
-  <li class="text-error">Amazon 是一次创建, 项目数量不可新创建的(已经创建的数量可更新)</li>
-  <li class="text-error">如果需要取消这份 FBA, 将运输的项目从此 FBA 附属的 Shipment 中剔除即可, 但注意, 剔除了就不可再重新添加回来, <strong>FBA
-    不可修改</strong>
-  </li>
-</ul>
-#{/info_row}
-*{#{list ship.fbas}}*
-*{#{render 'Shipments/_fba_shipment.html', fba:_/}}*
-*{#{/list}}*
 
 #{success_row title:'运输项目' /}
-<div class="row-fluid">
-  <div class="span12">
-    <form action="" method="post">
-    #{authenticityToken /}
-      <input type="hidden" name="id" value="${ship.id}">
+<form action="@{ShipItems.adjust(ship.id, ship.id)}" method="POST" id="adjust_shipitems">
 
-    #{if ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM}
-      <a href="@{Shipments.shipItem()}/${ship.id}" class="btn btn-primary">查看运输项目</a>
+  <div class="row-fluid">
+    <div class="span12">
+    #{render './_shipitem.html', items: ship.items/}
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span3">
+      <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
+
+      <div class="btn-group">
+        <button class="btn" id="previewBtn"><i class="icon-file-alt"></i> 预览</button>
+        <button class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
+          <i class="icon-adjust"></i>
+          调整
+        </button>
+      </div>
+    </div>
+
+    <div class="span9" id="preview">
+    </div>
+  </div>
+</form>
+
+<div class="row-fluid" style="margin-top:20px;">
+  <div class="span6" style="overflow:auto;height:280px;">
+  #{records_ul records: records/}
+  *{#{records records:records/}}*
+  </div>
+
+  <div class="span6">
+    <div class="row-fluid">
+      <div class="span12">
+        <h4 class="text-warning">
+          运输进度
+          <i class="icon-sort-down"></i>
+          &nbsp;
+          <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-mini btn-danger" data-method='PUT'>
+            <i class="icon-refresh"></i>
+          </a>
+        </h4>
+      </div>
+    </div>
+
+    <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
+    #{set logEvents: ship.logEvents()/}
+    #{records_ul records: ship.logEvents()/}
+    #{if ship.iExpressHTML.trim().size() > 0}
+    ${ship.iExpressHTML.raw()}
     #{/if}
-    #{power.ck "shipments.deploytoamazon"}
-      <button id="create_fba" class="btn btn-warning">创建 FBA</button>
-    #{/power.ck}
-    #{power.ck "shipments.splitshipment"}
-      <button id="split_shipment" class="btn btn-warning">分拆运输项目</button>
-    #{/power.ck}
-    </form>
-  </div>
-</div>
-
-#{records records:records/}
-
-<div class="row-fluid">
-  <div class="span12 alert alert-danger">
-    <h4 data-toggle="toggle" data-target="#shipping_details" style="cursor:pointer;" class="span2">
-      运输进程 <i class="icon-reorder"></i>
-    </h4>
-
-    <form action="@{Shipments.refreshProcuress()}" method="post" style="margin:0">
-      <input type="hidden" name="id" value="${ship.id}">
-    #{authenticityToken /}
-      <button data-confirm="确认操作?" class="btn btn-danger"><i class="icon-refresh"></i></button>
-    </form>
-  </div>
-</div>
-<div class="row-fluid">
-  <div id="shipping_details" class="span12" style="display:none;padding-left:30px">
-  ${ship.iExpressHTML.raw()}
+    #{elseif logEvents.size() == 0}
+      还没有跟踪信息
+    #{/elseif}
+    </div>
   </div>
 </div>
 
@@ -295,4 +321,69 @@
     <ul class="thumbnails uploaded"></ul>
     <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
   </div>
+</div>
+
+<div class="modal hide fade" id="funcsForm">
+  <form action="#" method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>设置时间</h4>
+    </div>
+    <div class="modal-body">
+      <label>日期:</label>
+      <input type="date" name="date" date-format='yyyy-MM-dd'>
+      <label>时间:</label>
+      <input type="time" name="time">
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        <span id="action">Save Changes</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal hide fade" id="logForm">
+  <form action="@{Shipments.log(ship.id)}" method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>记录运输状态事件</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>事件:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        记录
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal hide fade" id="recivedQtyForm">
+  <form action="#" data-method='PUT' method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>手动修改入库数量</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>数量</label>
+
+      <div class="input-append">
+        <input type="text" class="input-mini" name="qty">
+        <span class="add-on">当前入库数量 <span id="origin_qty">0</span></span>
+      </div>
+      <label>原因:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        修改
+      </button>
+    </div>
+  </form>
 </div>

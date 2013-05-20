@@ -1,4 +1,3 @@
-import models.User;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -11,8 +10,9 @@ import play.test.UnitTest;
 public class UserTest extends UnitTest {
 
     @Test
-    public void testLogin(){
-        User usr=new User("rose","123");
-        usr.update();
+    public void testMath() {
+        System.out.println(Math.ceil((float) 50 / 3));
+        int a = (int) Math.ceil((float) 50 / 3);
+        assertEquals(17, a);
     }
 }

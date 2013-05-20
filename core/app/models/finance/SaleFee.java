@@ -10,6 +10,7 @@ import models.market.Orderr;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import play.Logger;
 import play.db.DB;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
  * Time: 10:58 AM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class SaleFee extends GenericModel {
 
     public SaleFee() {

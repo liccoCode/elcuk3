@@ -1,0 +1,15 @@
+<div class="row-fluid workflow">
+  <div class="span8 offset3">
+    <ul>
+    #{list items: models.procure.Shipment.S.values(), as:'s'}
+        #{set stateIsDone: s.label() == '完成'/}
+        #{ifnot s.label() == '取消'}
+          <li class="${s != _state ?
+          (_state.ordinal() > s.ordinal() ? 'enabled' : (stateIsDone ? 'disabled-last' :  'disabled')) : (stateIsDone ?  'selected-last' : 'selected')}">
+            <div>${s.label()}</div>
+          </li>
+        #{/ifnot}
+    #{/list}
+    </ul>
+  </div>
+</div>

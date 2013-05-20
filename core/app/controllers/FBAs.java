@@ -8,7 +8,6 @@ import models.market.Account;
 import models.procure.FBACenter;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
-import models.view.post.FBAPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.krysalis.barcode4j.HumanReadablePlacement;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
@@ -27,8 +26,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -45,20 +42,12 @@ public class FBAs extends Controller {
         renderArgs.put("centerIds", FBACenter.centerIds());
     }
 
-    public static void index(FBAPost p) {
-        if(p == null)
-            p = new FBAPost(Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CANCELLED));
-        List<FBAShipment> fbas = p.query();
-        render(fbas, p);
-    }
-
     /**
      * 通过 ProcureUnit 创建其对应的 FBA
-     * TODO effect: 权限名称需要调整
      *
      * @param procureUnitId 采购计划 ID
      */
-    @Check("shipments.deploytoamazon")
+    @Check("fbas.deploytoamazon")
     public static void deployToAmazon(Long procureUnitId) {
         ProcureUnit unit = ProcureUnit.findById(procureUnitId);
 
@@ -68,7 +57,7 @@ public class FBAs extends Controller {
 
         } else {
             new ERecordBuilder("shipment.createFBA")
-                    .msgArgs(unit.id + "", unit.sku, unit.fba.shipmentId)
+                    .msgArgs(unit.id, unit.sku, unit.fba.shipmentId)
                     .fid(unit.id)
                     .save();
             Notification.notifies("FBA 创建成功",

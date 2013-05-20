@@ -320,7 +320,7 @@ public class PaymentUnit extends Model {
             this.state = S.APPLY;
         this.save();
         new ERecordBuilder("paymentunit.fixValue")
-                .msgArgs(reason, oldFixValue + "", this.fixValue + "")
+                .msgArgs(reason, oldFixValue, this.fixValue)
                 .fid(this.id)
                 .save();
     }

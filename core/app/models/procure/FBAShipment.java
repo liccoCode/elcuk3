@@ -3,19 +3,20 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import helper.FBA;
 import helper.Webs;
+import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
-import notifiers.FBAMails;
+import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
-import play.libs.F;
 import play.utils.FastRuntimeException;
-import query.FBAShipmentQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * User: wyattpan
@@ -125,20 +126,6 @@ public class FBAShipment extends Model {
          * @return
          */
         public abstract String msg();
-
-        /**
-         * 是否处于可更改状态? 如果 FBA 运输出去了, 或者已经取消了, 则不可以进行变更了
-         *
-         * @return
-         */
-        public boolean isCanModify() {
-            if(this == RECEIVING || this == CANCELLED || this == DELETED ||
-                    this == SHIPPED || this == CLOSED) {
-                return false;
-            } else {
-                return true;
-            }
-        }
     }
 
     @OneToOne
@@ -149,6 +136,9 @@ public class FBAShipment extends Model {
 
     @OneToMany(mappedBy = "fba")
     public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+
+    @Lob
+    public String records;
 
     /**
      * 每一个 FBAShipment 拥有一个地址
@@ -176,79 +166,12 @@ public class FBAShipment extends Model {
      */
     public String title;
 
-    /**
-     * Amazon 上的 Items 的 html 记录
-     */
-    @Column(length = 3000/*没有使用 varchar(3000) 虽然可以支持 65535,直接使用了 longtext*/)
-    public String itemsOnAmazonWithHTML;
-
-    /**
-     * 上次向 Amazon 查看 ShipmentItems 的时间
-     */
-    public Date lastWatchAmazonItemsAt;
-
     public Date createAt;
-
-    /**
-     * 签收时间, 需要通过 Shipment 的跟踪来设置
-     */
-    public Date receiptAt;
-
-    /**
-     * 开始接收的时间
-     */
-    public Date receivingAt;
 
     /**
      * 关闭/取消 时间
      */
     public Date closeAt;
-
-
-    /**
-     * 设置 State, 并且根据 state 的变化判断是否需要邮件提醒, 并且根据状态设置 receivingAt 与 closeAt
-     *
-     * @param state
-     */
-    public void isNofityState(S state) {
-        // 每一次的碰到 RECEIVING 状态都去检查一次的 ShipItem.unit 的阶段
-        /* TODO effect: FBA 状态变化所需要做的变化, 还需要讨论
-        if(state == S.RECEIVING) {
-            if(this.receivingAt == null)
-            // 因为 Amazon 的返回值没有, 只能设置为最前检查到的时间
-            {
-                this.receivingAt = new Date();
-            }
-            // 当 FBA 检查到已经签收, ProcureUnit 进入 Inbound 阶段
-            for(ShipItem itm : this.shipItems) {
-                itm.unitStage(ProcureUnit.STAGE.INBOUND);
-            }
-            this.shipment.fbaReceviedBeforeShipmentDelivered();
-        } else if(state == S.CLOSED || state == S.DELETED) {
-            this.closeAt = new Date();
-            for(ShipItem itm : this.shipItems) {
-                itm.unitStage(ProcureUnit.STAGE.CLOSE);
-            }
-        }
-        if(this.state != state) {
-            FBAMails.shipmentStateChange(this, this.state, state);
-        }
-        */
-        this.state = state;
-    }
-
-
-    /**
-     * 货物抵达后, FBA Shipment 的签收时间与开始入库时间的检查
-     */
-    public void receiptAndreceivingCheck() {
-        // 已经开始接收的不再进行提醒
-        if(this.state.ordinal() >= S.RECEIVING.ordinal()) return;
-        if(this.receiptAt != null && (System.currentTimeMillis() - this.receiptAt.getTime() >=
-                TimeUnit.DAYS.toMillis(2))) {
-            FBAMails.receiptButNotReceiving(this);
-        }
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -302,6 +225,7 @@ public class FBAShipment extends Model {
     public synchronized void updateFBAShipment(S state) {
         try {
             this.state = FBA.update(this, state != null ? state : this.state);
+            Thread.sleep(500);
         } catch(Exception e) {
             throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
         }
@@ -309,7 +233,57 @@ public class FBAShipment extends Model {
     }
 
     /**
+     * 对更新 FBA 进行重复执行. (因 FBA 更新有 API 速度限制, 这里避免更新失败)
+     *
+     * @param times
+     * @param state
+     */
+    public synchronized void updateFBAShipmentRetry(int times, S state) {
+        try {
+            updateFBAShipment(state);
+        } catch(Exception e) {
+            if(times > 0)
+                updateFBAShipmentRetry(--times, state);
+            else
+                throw new FastRuntimeException(e.getMessage());
+        }
+    }
+
+    /**
+     * 将从 Amazon 解析的 Rows model 数据同步到当前系统中 FBA 的相关数据结构中.
+     *
+     * @param rows
+     */
+    public synchronized void syncFromAmazonInventoryRows(AmazonFBAInventoryReceivedJob.Rows rows) {
+        if(rows == null) {
+            Logger.warn("FBA %s Inventory Rows is empty!", this.shipmentId);
+            return;
+        }
+        /**
+         * 0. 记录 records
+         * 1. 通过 ProcureUnit 向 Rows 中拿数据进行解析
+         * 2. ProcureUnit 的 ShipItem 如果有多个, 优先满足
+         */
+        this.records = StringUtils.join(rows.records, "\n");
+        for(ProcureUnit unit : this.units) {
+            int fbaQty = rows.qty(unit.selling.merchantSKU);
+            for(ShipItem shipItem : unit.shipItems) {
+                if(fbaQty >= shipItem.qty) {
+                    shipItem.recivedQty = shipItem.qty;
+                    fbaQty -= shipItem.qty;
+                } else {
+                    shipItem.recivedQty = fbaQty;
+                    fbaQty = 0;
+                }
+                shipItem.save();
+            }
+        }
+        this.save();
+    }
+
+    /**
      * 向 Amazon 提交报告, 对这个 FBA 进行删除标记
+     * 收件减少 FBA 中的数量, 直到数量为 0 了则标记删除
      */
     public synchronized void removeFBAShipment() {
         if(this.state != S.WORKING && this.state != S.PLAN)
@@ -317,43 +291,26 @@ public class FBAShipment extends Model {
         if(Validation.hasErrors()) return;
 
         try {
-            this.state = FBA.update(this, S.DELETED);
-            if(this.state == S.DELETED) {
-                /**
-                 * 标记删除这个 FBA, 与其有关的采购计划全部清理
-                 */
-                for(ProcureUnit unit : this.units) {
-                    unit.fba = null;
-                    unit.save();
-                }
-                this.closeAt = new Date();
-                this.save();
+            if(this.units.size() > 0) {
+                this.updateFBAShipment(null);
             } else {
-                Validation.addError("", String.format("为 FBA %s 标记删除失败.", this.shipmentId));
+                this.state = FBA.update(this, S.DELETED);
+                if(this.state == S.DELETED) {
+                    /**
+                     * 标记删除这个 FBA, 与其有关的采购计划全部清理
+                     */
+                    for(ProcureUnit unit : this.units) {
+                        unit.fba = null;
+                        unit.save();
+                    }
+                    this.closeAt = new Date();
+                }
+                this.save();
             }
         } catch(FBAInboundServiceMWSException e) {
             throw new FastRuntimeException(e);
         }
     }
-
-    /**
-     * 入库进度
-     *
-     * @return
-     */
-    public F.T2<Integer, Integer> progress() {
-        /* TODO FBA 的入库进度计算需要调整
-        int recevied = 0;
-        int total = 1;
-        for(ShipItem itm : this.shipItems) {
-            recevied += itm.recivedQty;
-            total += itm.qty;
-        }
-        return new F.T2<Integer, Integer>(recevied, total > 1 ? total - 1 : total);
-        */
-        return new F.T2<Integer, Integer>(-1, -1);
-    }
-
 
     public String address() {
         return String.format("%s %s %s %s (%s)",
@@ -365,12 +322,12 @@ public class FBAShipment extends Model {
         return this.fbaCenter.codeToCountry();
     }
 
-    public static List<String> uncloseFBAShipmentIds() {
-        return new FBAShipmentQuery().uncloseFBAShipmentIds();
-    }
-
     public static FBAShipment findByShipmentId(String shipmentId) {
         return FBAShipment.find("shipmentId=?", shipmentId).first();
+    }
+
+    public static List<FBAShipment> findBySHipmentIds(Collection<String> shipmentids) {
+        return FBAShipment.find(SqlSelect.whereIn("shipmentId", shipmentids)).fetch();
     }
 
 }

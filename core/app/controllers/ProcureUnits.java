@@ -33,7 +33,7 @@ public class ProcureUnits extends Controller {
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
-        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         if(unit.selling == null) {
             flash.error("请通过 SellingId 进行, 没有执行合法的 SellingId 无法创建 ProcureUnit!");
             Analyzes.index();
@@ -44,21 +44,24 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
-        if(StringUtils.isBlank(shipmentId))
-            Validation.addError("", "必须选择运输单");
+        if(unit.shipType == Shipment.T.EXPRESS && StringUtils.isNotBlank(shipmentId))
+            Validation.addError("", "快递运输方式, 不需要指定运输单");
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
-        Shipment ship = Shipment.findById(shipmentId);
 
         unit.save();
-        ship.addToShip(unit);
+
+        if(unit.shipType != Shipment.T.EXPRESS) {
+            Shipment ship = Shipment.findById(shipmentId);
+            ship.addToShip(unit);
+        }
 
         if(Validation.hasErrors()) {
-            List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+            List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             unit.remove();
             render("ProcureUnits/blank.html", unit, whouses);
         }
@@ -67,13 +70,13 @@ public class ProcureUnits extends Controller {
         new ElcukRecord(Messages.get("procureunit.save"),
                 Messages.get("action.base", unit.to_log()), unit.id + "").save();
 
-        Shipments.show(shipmentId);
+        Analyzes.index();
     }
 
     public static void edit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
         int oldPlanQty = unit.attrs.planQty;
-        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         render(unit, oldPlanQty, whouses);
     }
 
@@ -96,7 +99,7 @@ public class ProcureUnits extends Controller {
         if(planQty <= 0) Validation.addError("", "预计采购数量输入错误");
 
         ProcureUnit unit = ProcureUnit.findById(id);
-        List<Whouse> whouses = Whouse.findByMarket(unit.selling.market);
+        List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         if(Validation.hasErrors()) {
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
@@ -140,6 +143,38 @@ public class ProcureUnits extends Controller {
         }
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         Procures.index(null);
+    }
+
+    /**
+     * 分拆采购计划页面
+     *
+     * @param id
+     */
+    public static void splitUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        ProcureUnit newUnit = new ProcureUnit();
+        newUnit.comment(String.format("此采购计划由于 #%s 采购计划分拆创建.", unit.id));
+        newUnit.attrs.qty = 0;
+        render(unit, newUnit);
+    }
+
+    /**
+     * 分拆操作
+     *
+     * @param id
+     * @param newUnit
+     */
+    @Check("procures.dosplitunit")
+    public static void doSplitUnit(long id, ProcureUnit newUnit) {
+        checkAuthenticity();
+        ProcureUnit unit = ProcureUnit.findById(id);
+        newUnit.handler = User.current();
+        ProcureUnit nUnit = unit.split(newUnit);
+        if(Validation.hasErrors())
+            render("ProcureUnits/splitUnit.html", unit, newUnit);
+
+        flash.success("采购计划 #%s 成功分拆出 #%s", id, nUnit.id);
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     /**

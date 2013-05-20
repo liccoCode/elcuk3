@@ -104,11 +104,9 @@ public class Deliveryments extends Controller {
 
     /**
      * 向 Deliveryment 添加 ProcureUnit
-     *
-     * @param pids
-     * @param dmt
      */
-    public static void addunits(List<Long> pids, Deliveryment dmt) {
+    public static void addunits(String id, List<Long> pids) {
+        Deliveryment dmt = Deliveryment.findById(id);
         Validation.required("deliveryments.addunits", pids);
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
@@ -119,16 +117,15 @@ public class Deliveryments extends Controller {
             renderArgs.put("plan_units", dmt.availableInPlanStageProcureUnits());
             render("Deliveryments/show.html", dmt);
         }
+        flash.success("成功将 %s 采购计划添加到当前采购单.", StringUtils.join(pids, ","));
         show(dmt.id);
     }
 
     /**
      * 将 ProcureUnit 从 Deliveryment 中解除
-     *
-     * @param pids
-     * @param dmt
      */
-    public static void delunits(List<Long> pids, Deliveryment dmt) {
+    public static void delunits(String id, List<Long> pids) {
+        Deliveryment dmt = Deliveryment.findById(id);
         Validation.required("deliveryments.delunits", pids);
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
@@ -137,6 +134,7 @@ public class Deliveryments extends Controller {
         if(Validation.hasErrors())
             render("Deliveryments/show.html", dmt);
 
+        flash.success("成功将 %s 采购计划从当前采购单中移除.", StringUtils.join(pids, ","));
         show(dmt.id);
     }
 

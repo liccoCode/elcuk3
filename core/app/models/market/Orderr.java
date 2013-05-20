@@ -7,6 +7,7 @@ import helper.Dates;
 import helper.Promises;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import play.Logger;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Orderr extends GenericModel {
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
     public static final Pattern AMAZON_ORDERID = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
@@ -74,6 +76,7 @@ public class Orderr extends GenericModel {
 
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<OrderItem> items = new ArrayList<OrderItem>();
 
     /**
@@ -94,6 +97,7 @@ public class Orderr extends GenericModel {
 
     @OneToMany(mappedBy = "order")
     @OrderBy("date ASC,cost DESC")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
     public List<SaleFee> fees = new ArrayList<SaleFee>();
     //-------------- Basic ----------------
 

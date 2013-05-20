@@ -1,5 +1,6 @@
 package models;
 
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -18,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 11:44 AM
  */
 @Entity
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Privilege extends Model {
     /**
      * 将用户的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
@@ -128,12 +130,17 @@ public class Privilege extends Model {
         // 运输单页面
         privileges.add(new Privilege("shipments.cancel", "取消运输单"));
         privileges.add(new Privilege("shipments.beginship", "开始运输"));
+        // TODO effect: 删除 shipments.cancelship
         privileges.add(new Privilege("shipments.cancelship", "取消运输项目"));
+        // TODO effect: 删除 shipments.ship
         privileges.add(new Privilege("shipments.ship", "增加运输项目"));
-        privileges.add(new Privilege("shipments.deploytoamazon", "创建 FBA"));
+        // TODO effect: 调整为 fbas.deployToAmazon
+        //privileges.add(new Privilege("shipments.deploytoamazon", "创建 FBA"));
+        privileges.add(new Privilege("fbas.deployToAmazon", "创建 FBA"));
         privileges.add(new Privilege("fbas.update", "更新 FBA"));
         privileges.add(new Privilege("shipments.deployfba", "删除 FBA"));
-        privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));
+        //TODO effect: 删除 shipments.splitshipment
+//        privileges.add(new Privilege("shipments.splitshipment", "分拆运输项目"));
         privileges.add(new Privilege("shipments.movefba", "转移 FBA"));
 
         // Notification

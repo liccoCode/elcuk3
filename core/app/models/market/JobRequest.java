@@ -60,6 +60,11 @@ public class JobRequest extends Model {
         MANAGE_FBA_INVENTORY_ARCHIVED,
 
         /**
+         * Amazon FBA 仓库中的入库记录
+         */
+        GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA,
+
+        /**
          * 在 Amazon 上活动的 Listing, 这份日志用于同步 SKU 与 Amazon 上的 Listing
          */
         ACTIVE_LISTINGS;
@@ -72,6 +77,8 @@ public class JobRequest extends Model {
                     return "_GET_AMAZON_FULFILLED_SHIPMENTS_DATA_";
                 case MANAGE_FBA_INVENTORY_ARCHIVED:
                     return "_GET_FBA_MYI_ALL_INVENTORY_DATA_";
+                case GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA:
+                    return "_GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA_";
                 case ALL_FBA_ORDER_FETCH:
                 default:
                     return "_GET_XML_ALL_ORDERS_DATA_BY_ORDER_DATE_";
@@ -165,7 +172,9 @@ public class JobRequest extends Model {
      * @return
      */
     public static JobRequest newEstJobRequest(T type, Account acc, S state) {
-        return JobRequest.find("account=? AND type=? AND state=? ORDER BY id DESC", acc, type, state).first();
+        return JobRequest
+                .find("account=? AND type=? AND state=? ORDER BY id DESC", acc, type, state)
+                .first();
     }
 
     /**
@@ -178,11 +187,15 @@ public class JobRequest extends Model {
      */
     private static JobRequest newJob(int interval, T type, Account acc, M.MID mid) {
         if(!acc.type.name().startsWith("AMAZON"))
-            throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
-        JobRequest job = JobRequest.find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();
+            throw new FastRuntimeException(
+                    "Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
+        JobRequest job = JobRequest
+                .find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc,
+                        type, mid).first();
 
         //先判断 Job 不为空的情况
-        if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
+        if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) >
+                TimeUnit.HOURS.toMillis(interval)) {
             JobRequest njob = new JobRequest();
             njob.account = acc;
             njob.requestDate = njob.lastUpdateDate = new Date();
@@ -204,6 +217,7 @@ public class JobRequest extends Model {
             case ALL_FBA_ORDER_FETCH:
             case ALL_FBA_ORDER_SHIPPED:
             case MANAGE_FBA_INVENTORY_ARCHIVED:
+            case GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA:
             case ACTIVE_LISTINGS:
                 return true;
             default:
@@ -229,8 +243,9 @@ public class JobRequest extends Model {
      * 更新 Job 状态
      */
     public static void updateState(T type) {
-        List<JobRequest> tobeUpdateState = JobRequest.find("state IN (?,?) AND procressState!='_CANCELLED_' AND type=?",
-                JobRequest.S.REQUEST, JobRequest.S.PROCRESS, type).fetch();
+        List<JobRequest> tobeUpdateState = JobRequest
+                .find("state IN (?,?) AND procressState!='_CANCELLED_' AND type=?",
+                        JobRequest.S.REQUEST, JobRequest.S.PROCRESS, type).fetch();
         for(JobRequest job : tobeUpdateState) {
             if(job.checkAvailableType()) {
                 Logger.debug("(step2)JobRequest request " + job.type + " UPDATE_STATE Job.");
@@ -247,8 +262,9 @@ public class JobRequest extends Model {
      * 获取 ReportId
      */
     public static void updateReportId(T type) {
-        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_' AND type=?",
-                JobRequest.S.DONE, type).fetch();
+        List<JobRequest> tobeFetchReportId = JobRequest
+                .find("state=? AND procressState!='_CANCELLED_' AND type=?",
+                        JobRequest.S.DONE, type).fetch();
         for(JobRequest job : tobeFetchReportId) {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " UPDATE_REPORTID Job.");
@@ -265,7 +281,8 @@ public class JobRequest extends Model {
      * 修在文件
      */
     public static void downLoad(T type) {
-        List<JobRequest> tobeDownload = JobRequest.find("state=? AND type=?", JobRequest.S.DOWN, type).fetch();
+        List<JobRequest> tobeDownload = JobRequest
+                .find("state=? AND type=?", JobRequest.S.DOWN, type).fetch();
         for(JobRequest job : tobeDownload) {
             if(job.state != S.DOWN) return;
             if(job.checkAvailableType()) {
@@ -283,7 +300,8 @@ public class JobRequest extends Model {
      * 处理下载好的文件
      */
     public static void dealWith(T type, AmazonJob amazon) {
-        List<JobRequest> tobeDeal = JobRequest.find("state=? AND type=?", JobRequest.S.END, type).fetch();
+        List<JobRequest> tobeDeal = JobRequest.find("state=? AND type=?", JobRequest.S.END, type)
+                .fetch();
         for(JobRequest job : tobeDeal) {
             try {
                 amazon.callBack(job);

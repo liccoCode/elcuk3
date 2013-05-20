@@ -1,10 +1,10 @@
 package models.procure;
 
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import helper.Dates;
 import helper.HTTP;
 import helper.J;
 import org.apache.commons.lang.StringUtils;
@@ -30,38 +30,10 @@ import java.util.*;
 public enum iExpress {
     DHL {
         @Override
-        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
-            if(StringUtils.isBlank(iExpressHTML))
-                return new F.T2<Boolean, DateTime>(false, DateTime.now());
-            /**
-             * 只会检查最新的信息, 最上面的记录, 根据最新的信息判断是否已经发货
-             */
-            Document doc = Jsoup.parse(iExpressHTML);
-            Element thead = doc.select("thead:eq(1)").first();
-            Element tbody = doc.select("tbody").first();
-
-            // parse date
-            DateTime dt = DateTime.parse(String.format("%s %s", thead.select("th:eq(0)").text(),
-                    tbody.select("td:eq(3)").text()),
-                    DateTimeFormat.forPattern("E, MMM dd, yyyy HH:mm").withLocale(Locale.CHINESE));
-
-            // is delivered
-            String text = tbody.select("td:eq(1)").text();
-            boolean isDelivered = this.deliverText(text);
-
-            return new F.T2<Boolean, DateTime>(isDelivered, dt);
-        }
-
-        private boolean deliverText(String text) {
-            return StringUtils.contains(text, "已派送并签收") ||
-                    (StringUtils.contains(text, "已经签收") && !StringUtils.contains(text, "部分快件已经签收"));
-
-        }
-
-        @Override
-        public boolean isClearance(String content) {
-            // 如果都完成运输了, 那清关也一定完成了.
-            return this.deliverText(content) || StringUtils.contains(content, "已完成清关");
+        public String trackUrl(String tracNo) {
+            return String
+                    .format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s",
+                            tracNo.trim());
         }
 
         @Override
@@ -77,77 +49,50 @@ public enum iExpress {
         }
 
         @Override
-        public String trackUrl(String tracNo) {
-            return String
-                    .format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s",
-                            tracNo.trim());
+        public F.T2<Boolean, DateTime> isClearance(String iExpressHTML) {
+            return isAnyState(iExpressHTML, "已完成清关");
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            return isAnyState(iExpressHTML, "正在派送");
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isReceipt(String iExpressHTML) {
+            return isAnyState(iExpressHTML, "已派送并签收");
+        }
+
+        public F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String text) {
+            if(StringUtils.isNotBlank(iExpressHTML)) {
+                Document doc = Jsoup.parse(iExpressHTML);
+                for(Element element : doc.select("tbody > tr")) {
+                    if(element.text().contains(text)) {
+                        Element thead = element.parent().previousElementSibling();
+                        while(!thead.tagName().equals("thead")) {
+                            thead = thead.previousElementSibling();
+                        }
+                        String date = thead.select("tr:eq(1) th:eq(0)").text() + " "
+                                + element.select("td:eq(3)").text();
+                        return new F.T2<Boolean, DateTime>(true, dateStringParse(date));
+                    }
+                }
+            }
+            return new F.T2<Boolean, DateTime>(false, DateTime.now());
+        }
+
+        private DateTime dateStringParse(String dateString) {
+            return DateTime.parse(dateString,
+                    DateTimeFormat.forPattern("E, MMM dd, yyyy HH:mm").withLocale(Locale.CHINESE));
         }
     },
 
 
     FEDEX {
         @Override
-        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
-            if(StringUtils.isBlank(iExpressHTML))
-                return new F.T2<Boolean, DateTime>(false, DateTime.now());
-            Document doc = Jsoup.parse(iExpressHTML);
-            Element newestTr = doc.select("tr:eq(1)").first();
-
-            DateTime dt = DateTime.parse(newestTr.select("td:eq(0)").text(),
-                    DateTimeFormat.forPattern("MMM dd, yyyy hh:mm a"));
-            String text = newestTr.select("td:eq(1)").text();
-            boolean isDelivered = this.deliverText(text);
-
-            return new F.T2<Boolean, DateTime>(isDelivered, dt);
-        }
-
-        private boolean deliverText(String text) {
-            return StringUtils.contains(text, "已送达");
-        }
-
-        @Override
-        public boolean isClearance(String content) {
-            return this.deliverText(content) || StringUtils.contains(content, "可以向有关国家机构申报本货件");
-        }
-
-        @Override
-        public String parseExpress(String html, String trackNo) {
-            html = html.replaceAll("x2d", "-").replaceAll("x3a", ":");
-            JsonElement infos = new JsonParser().parse(html);
-            JsonArray scanInfos = infos.getAsJsonObject().get("TrackPackagesResponse")
-                    .getAsJsonObject().get("packageList")
-                    .getAsJsonArray().get(0).getAsJsonObject().get("scanEventList")
-                    .getAsJsonArray();
-
-            StringBuilder sbd = new StringBuilder("<table><tr>");
-            // header
-            sbd.append("<td>").append("日期/时间").append("</td>");
-            sbd.append("<td>").append("活动").append("</td>");
-            sbd.append("<td>").append("地点").append("</td>");
-            sbd.append("<td>").append("详细信息").append("</td>");
-            sbd.append("</tr>");
-            for(JsonElement je : scanInfos) {
-                JsonObject info = je.getAsJsonObject();
-                sbd.append("<tr>");
-                sbd.append("<td>").append(getStr(info, "date")).append(" ")
-                        .append(getStr(info, "time")).append("</td>")
-                        .append("<td>").append(getStr(info, "status")).append("</td>")
-                        .append("<td>").append(getStr(info, "scanLocation")).append("</td>")
-                        .append("<td>").append(getStr(info, "scanDetails")).append("</td>")
-                        .append("</tr>");
-            }
-            return sbd.append("</table>").toString();
-        }
-
-        private String getStr(JsonObject json, String key) {
-            String val = json.get(key).getAsString();
-            if(val == null) return "";
-            else return val;
-        }
-
-        @Override
         public String trackUrl(String tracNo) {
-            return String.format("https://www.fedex.com/trackingCal/track");
+            return String.format("https://www.fedex.com/fedextrack/index" +
+                    ".html?tracknumbers=%s&locale=zh_CN&cntry_code=cn", tracNo);
         }
 
         @Override
@@ -173,13 +118,71 @@ public enum iExpress {
             trackNumberInfo.put("trackNumberInfo", trackNumber);
             trackNumber.put("trackingNumber", tracNo);
 
-            return HTTP.post(this.trackUrl(tracNo), Arrays.asList(
-                    new BasicNameValuePair("data", J.json(data)),
-                    new BasicNameValuePair("action", "trackpackages"),
-                    new BasicNameValuePair("locale", "zh_CN"),
-                    new BasicNameValuePair("format", "json"),
-                    new BasicNameValuePair("version", "99")
-            ));
+            // Fedex 的 url 不一样
+            return HTTP.post("https://www.fedex.com/trackingCal/track",
+                    Arrays.asList(
+                            new BasicNameValuePair("data", J.json(data)),
+                            new BasicNameValuePair("action", "trackpackages"),
+                            new BasicNameValuePair("locale", "zh_CN"),
+                            new BasicNameValuePair("format", "json"),
+                            new BasicNameValuePair("version", "99")
+                    ));
+        }
+
+        @Override
+        public String parseExpress(String html, String trackNo) {
+            JSONObject infos = JSON.parseObject(html);
+
+            StringBuilder sbd = new StringBuilder("<table>")
+                    // header
+                    .append("<tr>")
+                    .append("<td>").append("日期/时间").append("</td>")
+                    .append("<td>").append("活动").append("</td>")
+                    .append("<td>").append("地点").append("</td>")
+                    .append("<td>").append("详细信息").append("</td>")
+                    .append("</tr>");
+
+            JSONArray events = infos.getJSONObject("TrackPackagesResponse")
+                    .getJSONArray("packageList").getJSONObject(0).getJSONArray("scanEventList");
+            for(Object obj : events) {
+                JSONObject info = (JSONObject) obj;
+                sbd.append("<tr>");
+                sbd.append("<td>").append(info.getString("date")).append(" ")
+                        .append(info.getString("time")).append("</td>")
+                        .append("<td>").append(info.getString("status")).append("</td>")
+                        .append("<td>").append(info.getString("scanLocation")).append("</td>")
+                        .append("<td>").append(info.getString("scanDetails")).append("</td>")
+                        .append("</tr>");
+            }
+            return sbd.append("</table>").toString();
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isClearance(String iExpressHTML) {
+            return isAnyState(iExpressHTML, "可以向有关国家机构申报本货件");
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            return isAnyState(iExpressHTML, "派送途中");
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isReceipt(String iExpressHTML) {
+            return isAnyState(iExpressHTML, "已送达");
+        }
+
+        private F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String state) {
+            if(StringUtils.isNotBlank(iExpressHTML)) {
+                Document doc = Jsoup.parse(iExpressHTML);
+                for(Element element : doc.select("tr")) {
+                    if(element.text().contains(state)) {
+                        String date = element.select("td:eq(0)").text();
+                        return new F.T2<Boolean, DateTime>(true, Dates.cn(date));
+                    }
+                }
+            }
+            return new F.T2<Boolean, DateTime>(false, DateTime.now());
         }
 
     },
@@ -212,26 +215,43 @@ public enum iExpress {
         }
 
         @Override
-        public boolean isClearance(String content) {
-            return StringUtils.contains(content, "清关机构");
+        public F.T2<Boolean, DateTime> isClearance(String iExpressHTML) {
+            Document doc = Jsoup.parse(iExpressHTML);
+            Elements elements = doc.select("tr:contains(清关机构)");
+            if(elements.size() > 0) {
+                // 由于 UPS 的重复信息太多了, 所以只能按照 "清关机构" 这四个字进行处理
+                return new F.T2<Boolean, DateTime>(true, trToDate(elements.last()));
+            }
+            return new F.T2<Boolean, DateTime>(false, DateTime.now());
         }
 
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            // UPS 没有派送中状态, 直接给签收了, 所以使用与 isReceipt 同样的算法
+            return isReceipt(iExpressHTML);
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isReceipt(String iExpressHTML) {
             Document doc = Jsoup.parse(iExpressHTML);
-            for(Element tr : doc.select("tr")) {
-                if(!StringUtils.contains(tr.outerHtml(), "已递送")) continue;
-                String dateStr = String.format("%s %s", tr.select("td:eq(1)").text(),
-                        tr.select("td:eq(2)").text());
-                return new F.T2<Boolean, DateTime>(true,
-                        DateTime.parse(dateStr, DateTimeFormat.forPattern("yyyy/MM/dd HH:mm")));
+            Elements elements = doc.select("tr:contains(已递送)");
+            if(elements.size() > 0) {
+                return new F.T2<Boolean, DateTime>(true, trToDate(elements.last()));
             }
-            return new F.T2<Boolean, DateTime>(false, new DateTime());
+            return new F.T2<Boolean, DateTime>(false, DateTime.now());
+        }
+
+        private DateTime trToDate(Element trElement) {
+            return DateTime.parse(
+                    String.format("%s %s",
+                            trElement.select("td:eq(1)").text(),
+                            trElement.select("td:eq(2)").text()),
+                    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm"));
         }
     };
 
     /**
-     * 抓取快递单的地址
+     * 0. 抓取快递单的地址
      *
      * @param tracNo
      * @return
@@ -239,30 +259,7 @@ public enum iExpress {
     public abstract String trackUrl(String tracNo);
 
     /**
-     * 解析出需要的部分 HTML
-     *
-     * @param html
-     * @return
-     */
-    public abstract String parseExpress(String html, String trackNo);
-
-    /**
-     * 是否清关完成; 如果已经运输完成, 再调用检查清关完成, 因为已经签收,必定需要经过清关完成状态, 同时也会含有清关完成信息, 所以一定为清关完成.
-     *
-     * @param content
-     * @return
-     */
-    public abstract boolean isClearance(String content);
-
-    /**
-     * 检查是否已经签收, 如果签收了,时间是什么时候
-     *
-     * @return
-     */
-    public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
-
-    /**
-     * 直接返回抓取的 HTML 代码
+     * 1. 直接返回抓取的 HTML 代码
      *
      * @param tracNo
      * @return
@@ -271,4 +268,34 @@ public enum iExpress {
         return HTTP.get(this.trackUrl(tracNo));
     }
 
+    /**
+     * 2. 解析出需要的部分 HTML
+     *
+     * @param html
+     * @return
+     */
+    public abstract String parseExpress(String html, String trackNo);
+
+    /**
+     * 检查快递单是否到满足 清关中 状态
+     *
+     * @param content
+     * @return
+     */
+    public abstract F.T2<Boolean, DateTime> isClearance(String content);
+
+    /**
+     * 检查运输单是否 派送中 状态
+     *
+     * @return
+     */
+    public abstract F.T2<Boolean, DateTime> isDelivered(String iExpressHTML);
+
+    /**
+     * 检查运输单是否 已经签收 状态
+     *
+     * @param iExpressHTML
+     * @return
+     */
+    public abstract F.T2<Boolean, DateTime> isReceipt(String iExpressHTML);
 }

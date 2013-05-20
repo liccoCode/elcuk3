@@ -46,7 +46,6 @@
 
         <tr>
           <th>预计采购数量</th>
-            #{set isDone:unit.stage == models.procure.ProcureUnit.STAGE.DONE/}
           <td>
             <div class="input-append">
               <input type="text" class="input-small" readonly="" name="attrs.planQty" value="${attrs.planQty}">
@@ -55,7 +54,7 @@
           </td>
           <th>实际交货数量</th>
           <td>
-            <input type="text" class="input-small" ${isDone ? 'readonly=""' : ''} name="attrs.qty" value="${attrs.qty}">
+            <input type="text" class="input-small" name="attrs.qty" value="${attrs.qty}">
           </td>
         </tr>
 
@@ -66,7 +65,7 @@
           </td>
           <th>实际交货日期</th>
           <td>
-            <input type="date" ${isDone ? 'readonly=""' : ''} name="attrs.deliveryDate" value="${attrs.deliveryDate.date()}">
+            <input type="date" name="attrs.deliveryDate" value="${attrs.deliveryDate.date()}">
           </td>
         </tr>
 
@@ -89,17 +88,13 @@
         </tr>
         <tr>
           <td colspan="4">
-              #{if isDone}
-                <p class="text-error">此采购订单已经交货, 无法再进行更改</p>
-              #{/if}
-              #{else }
-                <button class="btn btn-warning" data-confirm="确认交货?">交货更新</button>
-              #{/else}
+            <button class="btn btn-warning" data-confirm="确认交货?">交货更新</button>
           </td>
         </tr>
       </table>
     </form>
   </div>
 </div>
+    #{records_ul records: records/}
 #{/else }
 

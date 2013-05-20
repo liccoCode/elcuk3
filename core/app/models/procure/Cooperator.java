@@ -6,6 +6,8 @@ import models.finance.PaymentTarget;
 import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Min;
 import play.data.validation.Phone;
 import play.data.validation.Required;
@@ -25,6 +27,7 @@ import java.util.List;
  * Time: 10:58 AM
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Cooperator extends Model {
 
     public enum T {
@@ -59,6 +62,7 @@ public class Cooperator extends Model {
      * 只有 SUPPLIER 会使用到此字段, 表示这个 SUPPLIER 可以生产的 Item.
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<CooperItem> cooperItems = new ArrayList<CooperItem>();
 
     /**
