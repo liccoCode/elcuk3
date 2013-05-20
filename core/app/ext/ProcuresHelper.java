@@ -4,6 +4,7 @@ import models.procure.Deliveryment;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.view.dto.AnalyzeDTO;
 import play.templates.JavaExtensions;
 
 import java.util.Date;
@@ -124,12 +125,6 @@ public class ProcuresHelper extends JavaExtensions {
         else return "ffffff";
     }
 
-    public static String info(Shipment s) {
-        return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
-                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(),
-                s.planBeginDate, s.planArrivDate);
-    }
-
     /**
      * 根据 end - begin 所计算的时间差, 给与 badge-xxx 提示紧急程度
      *
@@ -150,5 +145,40 @@ public class ProcuresHelper extends JavaExtensions {
         else {
             return "badge-important";
         }
+    }
+
+
+    public static String info(Shipment s) {
+        return String.format("[%s:%s] [%s] [%s items] [%s FBAs] [%s Kg] [预计运输: %tF] [预计到达: %tF]",
+                s.id, s.type, s.state, s.items.size(), s.fbas.size(), s.totalWeight(),
+                s.planBeginDate, s.planArrivDate);
+    }
+
+    /**
+     * 根据差值 返回不同颜色来表示升、降、相等
+     *
+     * @param diff
+     * @return
+     */
+    public static String rgb(Float diff) {
+        if(diff > 0)
+            return "#468847";
+        else if(diff < 0)
+            return "#B94A48";
+        return "#0000ff";
+    }
+
+    /**
+     * 计算 AnalyzeDTO.difference的增长/下降百分比
+     *
+     * @param dto
+     * @return
+     */
+    public static float percentage(AnalyzeDTO dto) {
+        float den = dto.difference;
+        float mol = dto.day1 - dto.difference;
+        if(den == 0 || mol == 0)
+            return 0;
+        return Math.abs(den / mol);
     }
 }
