@@ -161,7 +161,7 @@ public class OrderItem extends GenericModel {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
         List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
         if(vos != null) return vos;
-        synchronized(AnalyzeVO.class) {
+        synchronized(OrderItem.class) {
             vos = Cache.get(cacheKey, List.class);
             if(vos != null) return vos;
             vos = new ArrayList<AnalyzeVO>();
