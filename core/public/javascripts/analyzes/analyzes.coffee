@@ -278,8 +278,9 @@ $ ->
       # 排序功能
       sortables = $("##{type} th.sortable")
       sortables.click (e) ->
-        desc = $('[name=p\\.desc]')
-        desc.val(if desc.val() == 'false' then true else false)
+        $('[name=p\\.desc]').val(->
+          return if $(@).val() == 'false' then true else false
+        )
         $('[name=p\\.orderBy]').val($(@).attr('name'))
         sellRankLoad()
 
