@@ -1,6 +1,5 @@
 package models.procure;
 
-import helper.DBUtils;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 import play.libs.F;
@@ -9,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * FBA 仓库. 每一个 FBAShipment 都会关联的
@@ -24,7 +22,8 @@ public class FBACenter extends Model {
     }
 
     public FBACenter(String centerId, String addressLine1, String addressLine2, String city,
-                     String name, String countryCode, String stateOrProvinceCode, String postalCode) {
+                     String name, String countryCode, String stateOrProvinceCode,
+                     String postalCode) {
         this.centerId = centerId;
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
@@ -82,8 +81,9 @@ public class FBACenter extends Model {
     public F.T2<Long, List<String>> fbas() {
         List<FBAShipment> shipments = FBAShipment.find("fbaCenter=?", this).fetch();
         List<String> shipmentIds = new ArrayList<String>();
-        for(FBAShipment shipment : shipments)
+        for(FBAShipment shipment : shipments) {
             shipmentIds.add(shipment.shipmentId);
+        }
         return new F.T2<Long, List<String>>((long) shipments.size(), shipmentIds);
     }
 
@@ -119,15 +119,6 @@ public class FBACenter extends Model {
 
     public static FBACenter findByCenterId(String centerId) {
         return FBACenter.find("centerId=?", centerId).first();
-    }
-
-    public static List<String> centerIds() {
-        List<Map<String, Object>> rows = DBUtils.rows("SELECT centerId FROM FBACenter");
-        List<String> ids = new ArrayList<String>();
-        for(Map<String, Object> row : rows) {
-            ids.add(row.get("centerId").toString());
-        }
-        return ids;
     }
 
 }

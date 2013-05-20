@@ -73,7 +73,7 @@ POST    /procureunit/{id}/split                             ProcureUnits.doSplit
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip
 GET     /fba/{id}/outlabel                                  FBAs.boxLabel
-GET     /code128/{shipmentId}                               FBAs.code128
+GET     /code128/{shipmentId}                               Login.code128
 
 # PaymentUnits
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
