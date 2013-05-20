@@ -91,6 +91,7 @@ public class ProcureUnits extends Controller {
         String planShipDate = params.get("unit.attrs.planShipDate");
         String planArrivDate = params.get("unit.attrs.planArrivDate");
         Integer planQty = NumberUtils.toInt(params.get("unit.attrs.planQty"), -1);
+        Shipment.T shipType = Shipment.T.valueOf(params.get("unit.shipType"));
 
         if(oldPlanQty == null) Validation.addError("", "历史预计采购数量必须存在");
         if(StringUtils.isBlank(planDeliveryDate)) Validation.addError("", "预计交货时间必须存在");
@@ -114,6 +115,7 @@ public class ProcureUnits extends Controller {
         }
 
         unit.attrs.planQty = planQty;
+        unit.shipType = shipType;
         unit.save();
 
         if(Validation.hasErrors()) {
