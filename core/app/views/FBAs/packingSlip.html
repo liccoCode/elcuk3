@@ -54,7 +54,7 @@
   <tr>
     <td align="center" colspan="3">
       <!-- 需要生成的 Bar Code -->
-      <img src="@{FBAs.code128(shipmentId)}" width="260" height="72" border="0" style="padding-left:30px">
+    #{code128 shipmentId: shipmentId/}
     </td>
   </tr>
   <tr>
