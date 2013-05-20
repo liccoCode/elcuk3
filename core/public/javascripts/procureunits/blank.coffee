@@ -59,3 +59,7 @@ $ ->
           LoadMask.unmask()
         )
   )
+
+  # 关闭一些修改
+  for attr in ["unit.attrs.price", "unit.attrs.currency"]
+    $("#unitEditForm [name='#{attr}']").prop('disabled', true)
