@@ -31,6 +31,7 @@
   #{if useCheckbox}
     <th>运往仓库</th>
   #{/if}
+    <th>采购计划</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr id="${itm.id}">
@@ -74,6 +75,11 @@
       #{if useCheckbox}
         <td>${itm.unit.whouse.name()}</td>
       #{/if}
+    <td>
+      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
+      ${itm.unit.id}
+      </a>
+    </td>
   </tr>
 #{/list}
 #{if shipmentId}
