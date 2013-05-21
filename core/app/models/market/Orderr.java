@@ -621,12 +621,3 @@ public class Orderr extends GenericModel {
                 market.name(), market.withTimeZone(from), market.withTimeZone(to));
     }
 }
-
-/*
-这几条 SQL 语句是用来查询指定时间系统中订单中数量的分布的
-select GROUP_CONCAT(io.orderId), count(io.orderId), io.qty from (
-select o.orderId, sum(i.quantity) as qty from Orderr o left outer join OrderItem i on o.orderId=i.order_orderId where o.state!='CANCEL' and o.createDate>='2012-05-01 00:00:00' and o.createDate<='2012-06-01 00:00:00' group by o.orderId) io where io.qty>=0 group by io.qty;
-
-select * from Orderr where orderId='203-9998841-7832366';
-select * from OrderItem where order_orderId='203-9998841-7832366';
- */
