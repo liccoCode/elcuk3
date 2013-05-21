@@ -95,9 +95,10 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                     orders.size() > 1000 ? 1000 : orders.size());
             // 2. 保存或者更新
             for(int i = 1; i <= part; i++) {
-                Map<String, Orderr> managerOrderMap = Orderr.list2Map(Orderr.find(
-                        "orderId IN " + JpqlSelect.inlineParam(Orderr.ids(subList)))
-                        .<Orderr>fetch());
+                Map<String, Orderr> managerOrderMap = Orderr.list2Map(
+                        Orderr.find(JpqlSelect.whereIn("orderId", Orderr.ids(subList)))
+                                .<Orderr>fetch()
+                );
                 for(Orderr order : subList) {
                     if(Orderr.count("orderId=?", order.orderId) <= 0) { //保存
                         order.save();
