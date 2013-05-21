@@ -94,9 +94,9 @@ public class Orderr extends GenericModel {
     @OneToOne(fetch = FetchType.LAZY)
     public Account account;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @OrderBy("date ASC,cost DESC")
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<SaleFee> fees = new ArrayList<SaleFee>();
     //-------------- Basic ----------------
 
