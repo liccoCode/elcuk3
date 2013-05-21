@@ -3,11 +3,11 @@ package amazon;
 import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import models.market.JobRequest;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import play.test.UnitTest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.GregorianCalendar;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,6 +31,18 @@ public class AmazonOrderFetchJobTest extends UnitTest {
     }
 
     @Test
+    public void testDate() {
+        DateTime time = DateTime.now();
+        time = time.minusDays(7);
+        assertEquals(5, time.getMonthOfYear());
+        assertEquals(14, time.getDayOfMonth());
+        GregorianCalendar gc = new GregorianCalendar(time.getYear(), time.getMonthOfYear(),
+                time.getDayOfMonth());
+        System.out.println(gc);
+        System.out.println(new DateTime(gc.getTime()).toString("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    //    @Test
     public void testParseOrder() {
         JobRequest job = new JobRequest();
         job.path = "/Users/wyatt/Downloads/16061848184.txt";
@@ -38,20 +50,4 @@ public class AmazonOrderFetchJobTest extends UnitTest {
         new AmazonOrderFetchJob().callBack(job);
     }
 
-    @Test
-    public void testFetchOrder() {
-        List<Integer> i = new ArrayList<Integer>();
-        for(int a = 0; a < 1000; a++) i.add(a);
-
-        List<Integer> subList = i.subList(0, 100);
-        System.out.println(subList);
-        subList.clear();
-        subList = i.subList(0, 100);
-        System.out.println(subList);
-        subList.clear();
-        subList = i.subList(0, i.size() > 1000 ? 1000 : i.size());
-        System.out.println(subList);
-        subList.clear();
-        System.out.println(i);
-    }
 }
