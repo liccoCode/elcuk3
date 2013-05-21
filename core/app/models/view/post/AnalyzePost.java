@@ -103,12 +103,16 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                  * 3. OrderItem.skuOrMskuAccountRelateOrderItem
                  */
                 List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+                final Date inerFrom =
+                        this.from == null ? DateTime.now().minusMonths(1).toDate() : this.from;
+                final Date inerTo =
+                        this.to == null ? DateTime.now().minusMonths(1).toDate() : this.to;
                 vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
                     @Override
                     public List<AnalyzeVO> doJobWithResult(M m) {
                         return new OrderItemQuery().analyzeVos(
-                                m.withTimeZone(Dates.morning(from)).toDate(),
-                                m.withTimeZone(Dates.night(to)).toDate(),
+                                m.withTimeZone(Dates.morning(inerFrom)).toDate(),
+                                m.withTimeZone(Dates.night(inerTo)).toDate(),
                                 m);
                     }
 
