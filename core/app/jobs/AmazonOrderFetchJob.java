@@ -115,7 +115,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
             }
         } catch(Exception e) {
-            Logger.warn("AmazonOrderFetchJob.callback error.", Webs.S(e));
+            Logger.warn("AmazonOrderFetchJob.callback error. %s", Webs.S(e));
         }
     }
 
