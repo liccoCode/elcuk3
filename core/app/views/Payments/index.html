@@ -42,12 +42,13 @@
       <td>
         <a href="javascript:;"
            rel="tooltip"
-           title="汇率:${helper.Currency.USD.ratio(helper.Currency.CNY)} CNY:${pay.totalFees()._2}">
-        ${helper.Currency.USD.symbol()}${pay.totalFees()._1.format('#.##')}
+           title="参考汇率: ${helper.Currency.USD.ratio(helper.Currency.CNY)} CNY: ${pay.totalFees()._2}">
+        ${helper.Currency.USD.symbol()} ${pay.totalFees()._1.format('#.##')}
         </a>
       </td>
       <td>
-        <i class="badge badge-info">${pay.units().size()}</i>${pay.actualCurrency?.symbol()}${pay.actualPaid}
+      ${pay.actualCurrency?.symbol()} ${pay.actualPaid}
+        <i class="badge badge-info">${pay.units().size()}</i>
       </td>
       <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
       <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
