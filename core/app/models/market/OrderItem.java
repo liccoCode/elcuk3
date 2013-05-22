@@ -159,36 +159,32 @@ public class OrderItem extends GenericModel {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
         List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
         if(vos != null) return vos;
-        synchronized(OrderItem.class) {
-            vos = Cache.get(cacheKey, List.class);
-            if(vos != null) return vos;
-            vos = new ArrayList<AnalyzeVO>();
+        vos = new ArrayList<AnalyzeVO>();
 
-            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
-                @Override
-                public List<AnalyzeVO> doJobWithResult(M m) {
-                    Date _from = m.withTimeZone(from).toDate();
-                    Date _to = m.withTimeZone(to).toDate();
-                    if("all".equalsIgnoreCase(skuOrMsku))
-                        return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
-                    else if("sku".equalsIgnoreCase(type))
-                        return new OrderItemQuery()
-                                .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
-                    else if("sid".equalsIgnoreCase(type))
-                        return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                                skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
-                    else
-                        return new ArrayList<AnalyzeVO>();
-                }
+        vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+            @Override
+            public List<AnalyzeVO> doJobWithResult(M m) {
+                Date _from = m.withTimeZone(from).toDate();
+                Date _to = m.withTimeZone(to).toDate();
+                if("all".equalsIgnoreCase(skuOrMsku))
+                    return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
+                else if("sku".equalsIgnoreCase(type))
+                    return new OrderItemQuery()
+                            .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
+                else if("sid".equalsIgnoreCase(type))
+                    return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                            skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
+                else
+                    return new ArrayList<AnalyzeVO>();
+            }
 
-                @Override
-                public String id() {
-                    return "OrderItem.skuOrMskuAccountRelateOrderItem";
-                }
-            }));
-            if(vos.size() > 0)
-                Cache.add(cacheKey, vos, "5mn");
-        }
+            @Override
+            public String id() {
+                return "OrderItem.skuOrMskuAccountRelateOrderItem";
+            }
+        }));
+        if(vos.size() > 0)
+            Cache.add(cacheKey, vos, "5mn");
         return vos;
     }
 

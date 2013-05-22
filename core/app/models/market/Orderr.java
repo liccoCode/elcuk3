@@ -464,53 +464,49 @@ public class Orderr extends GenericModel {
         DashBoard dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
         if(dashBoard != null) return dashBoard;
 
-        synchronized(Orderr.class) {
-            dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
-            if(dashBoard != null) return dashBoard;
-            dashBoard = new DashBoard();
-            /**
-             * 1. 将不同市场的 yyyy-MM-dd 日期的订单加载出来
-             * 2. 对订单按照时间进行 group. 由于时间会调整, 不能使用 DB 的 group
-             */
+        dashBoard = new DashBoard();
+        /**
+         * 1. 将不同市场的 yyyy-MM-dd 日期的订单加载出来
+         * 2. 对订单按照时间进行 group. 由于时间会调整, 不能使用 DB 的 group
+         */
 
-            final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-            final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
+        final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
+        final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
-            List<OrderrVO> vos = new ArrayList<OrderrVO>();
-            vos.addAll(Promises.forkJoin(new Promises.Callback<OrderrVO>() {
-                @Override
-                public List<OrderrVO> doJobWithResult(M m) {
-                    return new OrderrQuery().dashBoardOrders(
-                            m.withTimeZone(pre7Day).toDate(),
-                            m.withTimeZone(now.toDate()).toDate(),
-                            m);
-                }
-
-                @Override
-                public String id() {
-                    return "Orderr.frontPageOrderTable";
-                }
-            }));
-
-            for(OrderrVO vo : vos) {
-                String key = Dates.date2Date(vo.market.toTimeZone(vo.createDate));
-                if(vo.state == S.PENDING)
-                    dashBoard.pending(key, vo);
-                else if(vo.state == S.PAYMENT)
-                    dashBoard.payments(key, vo);
-                else if(vo.state == S.CANCEL)
-                    dashBoard.cancels(key, vo);
-                else if(vo.state == S.REFUNDED)
-                    dashBoard.refundeds(key, vo);
-                else if(vo.state == S.RETURNNEW)
-                    dashBoard.returnNews(key, vo);
-                else if(vo.state == S.SHIPPED)
-                    dashBoard.shippeds(key, vo);
+        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        vos.addAll(Promises.forkJoin(new Promises.Callback<OrderrVO>() {
+            @Override
+            public List<OrderrVO> doJobWithResult(M m) {
+                return new OrderrQuery().dashBoardOrders(
+                        m.withTimeZone(pre7Day).toDate(),
+                        m.withTimeZone(now.toDate()).toDate(),
+                        m);
             }
-            dashBoard.sort();
-            Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+
+            @Override
+            public String id() {
+                return "Orderr.frontPageOrderTable";
+            }
+        }));
+
+        for(OrderrVO vo : vos) {
+            String key = Dates.date2Date(vo.market.toTimeZone(vo.createDate));
+            if(vo.state == S.PENDING)
+                dashBoard.pending(key, vo);
+            else if(vo.state == S.PAYMENT)
+                dashBoard.payments(key, vo);
+            else if(vo.state == S.CANCEL)
+                dashBoard.cancels(key, vo);
+            else if(vo.state == S.REFUNDED)
+                dashBoard.refundeds(key, vo);
+            else if(vo.state == S.RETURNNEW)
+                dashBoard.returnNews(key, vo);
+            else if(vo.state == S.SHIPPED)
+                dashBoard.shippeds(key, vo);
         }
-        return Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
+        dashBoard.sort();
+        Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+        return dashBoard;
     }
 
 
