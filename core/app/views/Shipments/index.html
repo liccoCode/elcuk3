@@ -46,7 +46,7 @@
         </option>
         <option ${"" == p.state ? 'selected' : ''} value="">状态</option>
       #{list items:models.procure.Shipment.S.values(), as:'state'}
-        <option ${state.name() == p.state ? 'selected' : ''} value="${state.name()}">${state}</option>
+        <option ${state.name() == p.state ? 'selected' : ''} value="${state.name()}">${state.label()}</option>
       #{/list}
       </select>
 
