@@ -28,7 +28,8 @@ window.$ui =
       container: 'body'
       trigger: 'hover'
       placement: 'top'
-    for key in ['animation', 'html', 'placement', 'selector', 'title', 'trigger', 'delay', 'container']
+      html: 'true'
+    for key in ['animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay', 'container']
       params[key] = tip.attr(key) if tip.attr(key)
     func.call(tip, params)
 

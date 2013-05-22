@@ -326,7 +326,11 @@ public class OrderItem extends GenericModel {
      */
     public static HighChart categoryPercent(String type, final Date from, final Date to,
                                             Account acc) {
-        HighChart pieChart = new HighChart();
+        String key = Caches.Q.cacheKey(type, from, to, acc);
+        HighChart pieChart = Cache.get(key, HighChart.class);
+        if(pieChart != null) return pieChart;
+
+        pieChart = new HighChart();
         List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
         if(acc != null) {
             // 转换成为不同对应市场的时间
@@ -356,6 +360,7 @@ public class OrderItem extends GenericModel {
             else
                 pieChart.pie(vo.sku, vo.qty.floatValue());
         }
+        Cache.add(key, pieChart, "40mn");
         return pieChart;
     }
 

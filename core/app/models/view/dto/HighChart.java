@@ -3,6 +3,7 @@ package models.view.dto;
 import org.apache.commons.lang.StringUtils;
 import play.utils.FastRuntimeException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 1/21/13
  * Time: 10:52 AM
  */
-public class HighChart {
+public class HighChart implements Serializable {
     // 图形的 title
     public String title;
 
