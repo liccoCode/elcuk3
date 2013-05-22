@@ -22,24 +22,24 @@ public class ShipmentsHelper extends JavaExtensions {
             return shipment.dates.arriveDate;
 
         DateTime rightDate = new DateTime(shipment.dates.beginDate);
-        if(shipment.state.ordinal() == Shipment.S.SHIPPING.ordinal())
+        if(shipment.state == Shipment.S.SHIPPING)
             rightDate = rightDate.plusDays(shipment.config("atport").toInteger());
-        else if(shipment.state.ordinal() == Shipment.S.CLEARANCE.ordinal()) {
+        else if(shipment.state == Shipment.S.CLEARANCE) {
             rightDate = new DateTime(shipment.dates.atPortDate)
                     .plusDays(shipment.config("clearance").toInteger());
-        } else if(shipment.state.ordinal() == Shipment.S.PACKAGE.ordinal()) {
+        } else if(shipment.state == Shipment.S.PACKAGE) {
             rightDate = new DateTime(shipment.dates.pickGoodDate)
                     .plusDays(shipment.config("pick").toInteger());
-        } else if(shipment.state.ordinal() == Shipment.S.BOOKED.ordinal()) {
+        } else if(shipment.state == Shipment.S.BOOKED) {
             rightDate = new DateTime(shipment.dates.bookDate)
                     .plusDays(shipment.config("book").toInteger());
-        } else if(shipment.state.ordinal() == Shipment.S.DELIVERYING.ordinal()) {
+        } else if(shipment.state == Shipment.S.DELIVERYING) {
             rightDate = new DateTime(shipment.dates.deliverDate)
                     .plusDays(shipment.config("deliver").toInteger());
-        } else if(shipment.state.ordinal() == Shipment.S.RECEIPTD.ordinal()) {
+        } else if(shipment.state == Shipment.S.RECEIPTD) {
             rightDate = new DateTime(shipment.dates.receiptDate)
                     .plusDays(shipment.config("receipt").toInteger());
-        } else if(shipment.state.ordinal() == Shipment.S.RECEIVING.ordinal()) {
+        } else if(shipment.state == Shipment.S.RECEIVING) {
             rightDate = new DateTime(shipment.dates.inbondDate)
                     .plusDays(shipment.config("inbound").toInteger());
         }
@@ -62,6 +62,7 @@ public class ShipmentsHelper extends JavaExtensions {
         }
 
         Date lastDate = shipment.dates.beginDate;
+        if(lastDate == null) lastDate = shipment.dates.planBeginDate;
 
         if(shipment.state.ordinal() >= Shipment.S.CLEARANCE.ordinal()) {
             totalDays -= shipment.config("atport").toInteger();
@@ -92,7 +93,6 @@ public class ShipmentsHelper extends JavaExtensions {
             totalDays -= shipment.config("receipt").toInteger();
             lastDate = shipment.dates.inbondDate;
         }
-
 
         return new DateTime(lastDate).plusDays(totalDays).toDate();
     }

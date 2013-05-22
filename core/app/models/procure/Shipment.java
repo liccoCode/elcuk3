@@ -280,34 +280,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public T type;
 
     /**
-     * TODO: alter table Shipment drop column pype;
-     */
-
-    /**
-     * TODO: alter table Shipment drop column volumn;
-     */
-
-    /**
-     * TODO: alter table Shipment drop column weight;
-     */
-
-    /**
-     * TODO: alter table Shipment drop column declaredValue;
-     */
-
-    /**
-     * TODO: alter table Shipment drop column deposit;
-     */
-
-    /**
-     * TODO: alter table Shipment drop column otherFee;
-     */
-
-    /**
-     * TODO: alter table Shipment drop column shipFee;
-     */
-
-    /**
      * 类似顺风发货单号的类似跟踪单号;
      * <p/>
      * 不要使用 trackNo 唯一了, 因为业务不允许..
