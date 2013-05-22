@@ -5,6 +5,7 @@
 </head>
 <body>
 <!-- 生成 6 张 -->
+
 #{list items:0..5, as:'i'}
 <table style="border: none;margin:0 0 50px 0;padding:0;display:inline-block;" cellpadding="0" cellspacing="0" align="center" width="49.4%">
   <tr>
@@ -56,7 +57,7 @@
   <tr>
     <td align="center" colspan="3">
       <!-- 需要生成的 Bar Code -->
-      <img src="@{FBAs.code128(shipmentId)}" width="260" height="72" border="0" style="padding-left:30px">
+      <img src="@{Login.code128(shipmentId)}" width="260" height="72" border="0" style="padding-left:30px">
       <!-- 测试用  -->
     *{<img src="https://images-na.ssl-images-amazon.com/images/G/02/barcodes/blank008._ZXcc464241354d465a34436fce,192,0,0,0,advc128d,42,0,0,0_V45455422_.jpg" width="260" height="72" border="0" style="padding-left:30px">}*
     </td>
@@ -82,6 +83,7 @@
   </tr>
 </table>
 #{/list}
+
 </body>
 </html>
 

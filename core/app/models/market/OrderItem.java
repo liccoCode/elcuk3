@@ -4,7 +4,6 @@ import helper.*;
 import models.product.Product;
 import models.view.dto.HighChart;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -24,7 +23,6 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class OrderItem extends GenericModel {
 
     /**
@@ -161,36 +159,32 @@ public class OrderItem extends GenericModel {
         String cacheKey = Caches.Q.cacheKey(skuOrMsku, type, acc, from, to);
         List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
         if(vos != null) return vos;
-        synchronized(AnalyzeVO.class) {
-            vos = Cache.get(cacheKey, List.class);
-            if(vos != null) return vos;
-            vos = new ArrayList<AnalyzeVO>();
+        vos = new ArrayList<AnalyzeVO>();
 
-            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
-                @Override
-                public List<AnalyzeVO> doJobWithResult(M m) {
-                    Date _from = m.withTimeZone(from).toDate();
-                    Date _to = m.withTimeZone(to).toDate();
-                    if("all".equalsIgnoreCase(skuOrMsku))
-                        return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
-                    else if("sku".equalsIgnoreCase(type))
-                        return new OrderItemQuery()
-                                .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
-                    else if("sid".equalsIgnoreCase(type))
-                        return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                                skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
-                    else
-                        return new ArrayList<AnalyzeVO>();
-                }
+        vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+            @Override
+            public List<AnalyzeVO> doJobWithResult(M m) {
+                Date _from = m.withTimeZone(from).toDate();
+                Date _to = m.withTimeZone(to).toDate();
+                if("all".equalsIgnoreCase(skuOrMsku))
+                    return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
+                else if("sku".equalsIgnoreCase(type))
+                    return new OrderItemQuery()
+                            .skuNormalSaleOrderItem(skuOrMsku, _from, _to, m);
+                else if("sid".equalsIgnoreCase(type))
+                    return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
+                            skuOrMsku, acc == null ? null : acc.id, _from, _to, m);
+                else
+                    return new ArrayList<AnalyzeVO>();
+            }
 
-                @Override
-                public String id() {
-                    return "OrderItem.skuOrMskuAccountRelateOrderItem";
-                }
-            }));
-            if(vos.size() > 0)
-                Cache.add(cacheKey, vos, "5mn");
-        }
+            @Override
+            public String id() {
+                return "OrderItem.skuOrMskuAccountRelateOrderItem";
+            }
+        }));
+        if(vos.size() > 0)
+            Cache.add(cacheKey, vos, "5mn");
         return vos;
     }
 
@@ -328,7 +322,11 @@ public class OrderItem extends GenericModel {
      */
     public static HighChart categoryPercent(String type, final Date from, final Date to,
                                             Account acc) {
-        HighChart pieChart = new HighChart();
+        String key = Caches.Q.cacheKey(type, from, to, acc);
+        HighChart pieChart = Cache.get(key, HighChart.class);
+        if(pieChart != null) return pieChart;
+
+        pieChart = new HighChart();
         List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
         if(acc != null) {
             // 转换成为不同对应市场的时间
@@ -358,6 +356,7 @@ public class OrderItem extends GenericModel {
             else
                 pieChart.pie(vo.sku, vo.qty.floatValue());
         }
+        Cache.add(key, pieChart, "40mn");
         return pieChart;
     }
 

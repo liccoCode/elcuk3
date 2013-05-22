@@ -487,42 +487,36 @@ public class Selling extends GenericModel {
     public static List<String> allSid(boolean filter) {
         String cacheKey = "selling.allsid";
         List<String> sids = Cache.get(cacheKey, List.class);
-        if(sids == null) {
-            synchronized(Selling.class) {
-                sids = Cache.get(cacheKey, List.class);
-                if(sids != null) return sids;
+        if(sids != null) return sids;
 
-                sids = new ArrayList<String>();
-                List<Selling> sellings = Selling.all().fetch();
-                for(Selling s : sellings) sids.add(s.sellingId);
+        sids = new ArrayList<String>();
+        List<Selling> sellings = Selling.all().fetch();
+        for(Selling s : sellings) sids.add(s.sellingId);
 
-                // 是否需要过滤掉一些不合法元素
-                if(filter) {
-                    CollectionUtils.filter(sids, new Predicate() {
-                        @Override
-                        public boolean evaluate(Object o) {
-                            String msg = o.toString();
-                            String[] args = StringUtils.split(msg, Webs.S);
-                            String[] mskuArr = StringUtils.split(args[0], ",");
-                            if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
-                                return false;
-                            else if(StringUtils
-                                    .contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
-                                return false;
-                            else if(StringUtils.contains(msg, "A_FR"))
-                                return false;
-                            else if(mskuArr.length >= 2 && mskuArr[1].length() < 3)
-                                return false;
-                            else
-                                return true;
-                        }
-                    });
+        // 是否需要过滤掉一些不合法元素
+        if(filter) {
+            CollectionUtils.filter(sids, new Predicate() {
+                @Override
+                public boolean evaluate(Object o) {
+                    String msg = o.toString();
+                    String[] args = StringUtils.split(msg, Webs.S);
+                    String[] mskuArr = StringUtils.split(args[0], ",");
+                    if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
+                        return false;
+                    else if(StringUtils
+                            .contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
+                        return false;
+                    else if(StringUtils.contains(msg, "A_FR"))
+                        return false;
+                    else if(mskuArr.length >= 2 && mskuArr[1].length() < 3)
+                        return false;
+                    else
+                        return true;
                 }
-                Cache.add(cacheKey, sids, "2h");
-            }
+            });
         }
-
-        return Cache.get(cacheKey, List.class);
+        Cache.add(cacheKey, sids, "2h");
+        return sids;
     }
 
     /**

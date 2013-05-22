@@ -9,6 +9,7 @@ require:
     - play -> coffee 1.0
     - play -> pdf 0.9
     - play -> excel 1.2.3
+    - blockingCache -> blockingCache 0.1
     # jars...
     - com.trendrr -> beanstalk 1.0
     - elcuk -> mws 1.0:
@@ -30,6 +31,11 @@ require:
 
 
 repositories:
+    - blockingCache:
+        type: HTTP
+        artifact: "https://raw.github.com/wppurking/blockingCache/master/dist/[module]-[revision].zip"
+        contains:
+            - blockingCache -> *
     - alibaba Snapshots:
         type: iBiblio
         root: "http://code.alibabatech.com/mvn/releases/"

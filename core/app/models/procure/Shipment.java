@@ -68,6 +68,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // FBA 不做处理
         this.type = shipment.type;
         this.whouse = shipment.whouse;
+        // TODO effect: source 与 target 可以删除.
         this.source = shipment.source;
         this.target = shipment.target;
     }

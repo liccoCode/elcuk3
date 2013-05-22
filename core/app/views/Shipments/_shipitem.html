@@ -17,6 +17,7 @@
     <th>Selling</th>
   #{if useCheckbox}
     <th>FBA</th>
+    <th>CenterId</th>
   #{/if}
     <th><abbr rel='tooltip' title='运输数量 (计划数量 | 交货数量)'>Qty</abbr></th>
     <th class="five">Receive</th>
@@ -30,6 +31,7 @@
   #{if useCheckbox}
     <th>运往仓库</th>
   #{/if}
+    <th>采购计划</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr id="${itm.id}">
@@ -45,6 +47,7 @@
     <td><a href="@{Sellings.selling(itm.unit.sid)}">${itm.unit.sid}</a></td>
       #{if useCheckbox}
         <td>${itm.unit?.fba?.shipmentId}</td>
+        <td>${itm.unit?.fba?.centerId}</td>
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
@@ -72,6 +75,11 @@
       #{if useCheckbox}
         <td>${itm.unit.whouse.name()}</td>
       #{/if}
+    <td>
+      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
+      ${itm.unit.id}
+      </a>
+    </td>
   </tr>
 #{/list}
 #{if shipmentId}

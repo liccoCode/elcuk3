@@ -284,6 +284,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planQty = originQty - newUnit.attrs.planQty;
         if(this.attrs.qty != null)
             this.attrs.qty = this.attrs.planQty;
+        this.shipItemQty(this.qty());
         this.save();
 
         // 原采购计划的运输量变更
@@ -303,7 +304,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         shipment.addToShip(newUnit);
 
         new ERecordBuilder("procureunit.split")
-                .msgArgs(this.id, newUnit.attrs.planQty, newUnit.id)
+                .msgArgs(this.id, originQty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id)
                 .save();
         return newUnit;
@@ -316,6 +317,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isBeforeDONE() {
         return Arrays.asList(STAGE.DELIVERY, STAGE.PLAN).contains(this.stage);
+    }
+
+    /**
+     * 调整运输的数量
+     *
+     * @param qty
+     */
+    public void shipItemQty(int qty) {
+        int leftQty = qty;
+        for(ShipItem itm : this.shipItems) {
+            if(leftQty - itm.qty >= 0) {
+                itm.qty = leftQty;
+                leftQty -= itm.qty;
+            } else {
+                itm.qty = leftQty;
+                leftQty = 0;
+            }
+            itm.save();
+        }
     }
 
     /**
@@ -356,9 +376,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
                 .fid(this.id)
                 .save();
-        //TODO effect: 如果拥有运输项目, 那么则将运输项目的数量也进行调整
-//        this.casscadeShipItemQty(this.attrs.planQty);
-        // 当执行交货操作, ProcureUnit 进入交货完成阶段
+        this.shipItemQty(this.qty());
         this.stage = STAGE.DONE;
         this.save();
         return this.attrs.planQty.equals(this.attrs.qty);

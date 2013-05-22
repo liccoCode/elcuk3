@@ -81,7 +81,7 @@ public class ProcureUnits extends Controller {
     }
 
     /**
-     * TODO 需要调整的采购计划的修改
+     * TODO effect: 需要调整的采购计划的修改
      *
      * @param id
      * @param oldPlanQty
@@ -116,6 +116,7 @@ public class ProcureUnits extends Controller {
 
         unit.attrs.planQty = planQty;
         unit.shipType = shipType;
+        unit.shipItemQty(unit.qty());
         unit.save();
 
         if(Validation.hasErrors()) {

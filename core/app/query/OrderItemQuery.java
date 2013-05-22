@@ -5,6 +5,7 @@ import helper.Dates;
 import models.market.Feedback;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.lang.Validate;
 import org.joda.time.DateTime;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -66,6 +67,9 @@ public class OrderItemQuery {
 
 
     public List<AnalyzeVO> analyzeVos(Date from, Date to, M market) {
+        Validate.notNull(from);
+        Validate.notNull(to);
+        Validate.notNull(market);
         SqlSelect sql = new SqlSelect()
                 .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
                         "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid",

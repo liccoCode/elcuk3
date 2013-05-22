@@ -66,7 +66,8 @@ public class AWS {
                     }
                     DatatypeFactory df = DatatypeFactory.newInstance();
                     res.setStartDate(df.newXMLGregorianCalendar(
-                            new GregorianCalendar(time.getYear(), time.getMonthOfYear(),
+                            new GregorianCalendar(time.getYear(),
+                                    time.getMonthOfYear() - 1/*0~11*/,
                                     time.getDayOfMonth())));
                     RequestReportResponse resp = service.requestReport(res);
                     ReportRequestInfo info = resp.getRequestReportResult().getReportRequestInfo();
