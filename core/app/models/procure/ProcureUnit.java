@@ -491,14 +491,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 正在入库的数量;
+     * 入库中的数量
      *
      * @return
      */
     public int inboundingQty() {
-        //TODO effect: 正在入库数量需要重新计算: 总数量 - 运输项目已经接受的数量
-//        return this.qty() - this.shipItem.recivedQty;
-        return 0;
+        int inboundingQty = 0;
+        for(ShipItem shipItm : this.shipItems) {
+            inboundingQty += shipItm.recivedQty;
+        }
+        return inboundingQty;
     }
 
     /**
