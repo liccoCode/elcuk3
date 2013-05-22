@@ -1,6 +1,7 @@
 *{
 1. checkbox: [true]|false; 是否拥有 checkbox 框框
 2. shipmentId: [null]|<shipmentId>; 是否体现取消运输项目功能
+3. itmRecord: [false]|true; 是否加载 Record
 }*
 #{set useCheckbox: checkbox == null || checkbox /}
 <table class="table table-condensed table-bordered">
@@ -52,10 +53,17 @@
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
     </td>
-    <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" name='recivedQty'
-        placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
-    ${itm.recivedQty}
-    </td>
+      #{if itmRecord}
+        <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" name='recivedQty'
+            placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
+        ${itm.recivedQty}
+        </td>
+      #{/if}
+      #{else }
+        <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}">
+        ${itm.recivedQty}
+        </td>
+      #{/else}
     <td>
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">
       ${itm.unit.deliveryment?.id}
