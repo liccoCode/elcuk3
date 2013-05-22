@@ -9,7 +9,7 @@ require:
     - play -> coffee 1.0
     - play -> pdf 0.9
     - play -> excel 1.2.3
-    #- blockingCache -> blockingCache 0.1
+    - blockingCache -> blockingCache 0.1
     # jars...
     - com.trendrr -> beanstalk 1.0
     - elcuk -> mws 1.0:

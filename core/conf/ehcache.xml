@@ -97,7 +97,6 @@ used with JMX monitors.
     diskExpiryThreadIntervalSeconds="120"
     memoryStoreEvictionPolicy="LRU"
     statistics="false">
-    <cacheDecoratorFactory class="play.modules.blockingCache.BlockingCacheFactory"/>
   </defaultCache>
 
   <!-- 缓存 1 小时
