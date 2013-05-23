@@ -711,6 +711,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state == S.DONE) {
             this.state = S.RECEIVING;
             this.dates.arriveDate = null;
+            this.changeRelateProcureUnitStage(ProcureUnit.STAGE.INBOUND);
         } else if(this.state == S.RECEIVING) {
             this.state = S.RECEIPTD;
             this.dates.inbondDate = null;
