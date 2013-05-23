@@ -33,6 +33,9 @@ GET    /deliveryments                                        Deliveryments.index
 GET    /deliveryment/{id}                                    Deliveryments.show
 DELETE /deliveryment/{id}/departApply                        Deliveryments.departProcureApply
 POST   /deliveryment                                         Deliveryments.create
+DELETE /deliveryment/{id}/units                              Deliveryments.delunits
+POST   /deliveryment/{id}/units                              Deliveryments.addunits
+
 
 # FeeTypes
 POST    /feetype/{name}/update                               FeeTypes.update
@@ -56,16 +59,27 @@ POST    /payment/{id}/lock                                  Payments.lockIt
 DELETE  /payment/{id}/lock                                  Payments.unlock
 
 # ProcureUnits
-POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
-POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
-DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
+PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
+DELETE  /procureunit/{id}                                   ProcureUnits.destroy
+POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
+PUT     /procureunit/{procureUnitId}/fba                    FBAs.update
+GET     /procureunit/{id}/split                             ProcureUnits.splitUnit
+POST    /procureunit/{id}/split                             ProcureUnits.doSplitUnit
+
+# FBAs
+GET     /fba/{id}/innerlabel                                FBAs.packingSlip
+GET     /fba/{id}/outlabel                                  FBAs.boxLabel
+GET     /code128/{shipmentId}                               Login.code128
 
 # PaymentUnits
+DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
+POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
+POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index
@@ -83,6 +97,30 @@ GET     /selling/{id}/label                                 Sellings.sellingLabe
 # Shipments
 GET     /shipments                                          Shipments.index
 GET     /shipment/{id}                                      Shipments.show
+PUT     /shipment/{id}/process                              Shipments.refreshProcuress
+POST    /procureunits/shipment/new                          Shipments.procureUnitToShipment
+GET     /shipment/{id}/preview                              Shipments.preview
+POST    /shipment/{id}/begin                                Shipments.beginShip
+POST    /shipment/{id}/confirm/{undo}                       Shipments.confirm
+DELETE  /shipment/{id}                                      Shipments.cancel
+POST    /shipment/{id}/land                                 Shipments.landPort
+POST    /shipment/{id}/pick                                 Shipments.pickGoods
+POST    /shipment/{id}/book                                 Shipments.booking
+POST    /shipment/{id}/delivery                             Shipments.deliverying
+POST    /shipment/{id}/receipt                              Shipments.receipt
+POST    /shipment/{id}/inbounding                           Shipments.inbounding
+DELETE  /shipment/{id}/state                                Shipments.revertState
+POST    /shipment/{id}/log                                  Shipments.log
+
+# ShipItems
+GET     /shipitems                                          ShipItems.index
+POST    /shipitems                                          ShipItems.index
+POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
+PUT     /shipitem/{id}/recevied                             ShipItems.received
+
+# Elcuk
+PUT     /elcuk/config                                       Elcuk.updateConfig
+GET     /elcuk/config/{name}                                Elcuk.config
 
 # API 的拦截需要放到前面
 *       /api/{controller}/{action}                          api.{controller}.{action}

@@ -9,8 +9,7 @@ $ ->
       $("#unit_price").val('')
       return false
 
-    mask = $('#container')
-    mask.mask()
+    LoadMask.mask()
     $.get('/Cooperators/price', {id: id, sku: $('#unit_sku').val()}, 'json')
       .done((r) ->
         if r.flag is false
@@ -18,7 +17,7 @@ $ ->
         else
           $("#unit_currency option:contains('#{r.currency}')").prop('selected', true)
           $("#unit_price").val(r.price)
-        mask.unmask()
+        LoadMask.unmask()
       )
 
   $('#box_num').change (e) ->
@@ -44,21 +43,23 @@ $ ->
 
 
   # Ajax 加载 Shipment
-  loadShipment = ->
+  $('#new_procureunit').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
     whouseId = $("[name='unit.whouse.id']").val()
-    shipType = $('input[name="unit.shipType"]').val()
+    shipType = $("[name='unit.shipType']:checked").val()
     shipment = $('#shipments')
     return unless (whouseId && shipType && shipment.size() > 0)
-    mask = $('#container')
-    mask.mask("加载关联运输单中...")
-    $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
-      .done((html) ->
-        shipment.html(html)
-        mask.unmask()
-      )
 
-  do ->
-    $("[name='unit.whouse.id']").change(-> loadShipment())
-    $('input[name="unit.shipType"]').change(-> loadShipment()).change()
-    $('#shipments').on('click', 'input:checked')
+    if shipType == 'EXPRESS'
+      $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.')
+    else
+      LoadMask.mask()
+      $.get('/shipments/unitShipments', {whouseId: whouseId, shipType: shipType})
+        .done((html) ->
+          shipment.html(html)
+          LoadMask.unmask()
+        )
+  )
 
+  # 关闭一些修改
+  for attr in ["unit.attrs.price", "unit.attrs.currency"]
+    $("#unitEditForm [name='#{attr}']").prop('disabled', true)

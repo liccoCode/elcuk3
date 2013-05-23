@@ -66,9 +66,7 @@
 <tr>
   <th>去往仓库</th>
   <td>
-  #{select 'unit.whouse.id', items: whouses, labelProperty: 'name', value: unit.whouse?.id}
-      #{option ''}请选择#{/option}
-  #{/select}
+  #{select 'unit.whouse.id', items: whouses, labelProperty: 'name', value: unit.whouse?.id}#{/select}
   </td>
   <th>阶段</th>
   <td>
@@ -82,7 +80,7 @@
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio">
       <input type="radio" name="unit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}>
-    ${t}
+    ${t.label()}
     </label>
   #{/list}
   </td>

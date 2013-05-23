@@ -142,10 +142,12 @@ public class SellingRecord extends GenericModel {
     public Date date;
 
     public void updateAttr(SellingRecord nsrd) {
-        if(!StringUtils.equals(this.id, nsrd.id)) throw new FastRuntimeException("不相同的 SellingReocrd 不能进行更新!");
+        if(!StringUtils.equals(this.id, nsrd.id))
+            throw new FastRuntimeException("不相同的 SellingReocrd 不能进行更新!");
         if(nsrd.units != null && nsrd.units > 0) this.units = nsrd.units;
         if(nsrd.orders != null && nsrd.orders > 0) this.orders = nsrd.orders;
-        if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0) this.orderCanceld = nsrd.orderCanceld;
+        if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0)
+            this.orderCanceld = nsrd.orderCanceld;
         if(nsrd.sales != null && nsrd.sales > 0) this.sales = nsrd.sales;
         if(nsrd.currency != null) this.currency = nsrd.currency;
         if(nsrd.usdSales != null && nsrd.usdSales > 0) this.usdSales = nsrd.usdSales;
@@ -162,7 +164,8 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
+    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market,
+                                                                        Date oneDay) {
         Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
         int curentPage = 0;
@@ -174,22 +177,28 @@ public class SellingRecord extends GenericModel {
                 Logger.info("Fetch SellingRecord [%s]", url);
                 String rtJson = HTTP.get(acc.cookieStore(), url);
                 if(Play.mode.isDev())
-                    FLog.fileLog(String.format("%s.%s.%s.raw.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
+                    FLog.fileLog(String.format("%s.%s.%s.raw.json", acc.prettyName(), market,
+                            Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                 JsonObject data = null;
                 try {
-                    data = new JsonParser().parse(rtJson).getAsJsonObject().get("data").getAsJsonObject();
+                    data = new JsonParser().parse(rtJson).getAsJsonObject().get("data")
+                            .getAsJsonObject();
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
-                    FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
+                    FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market,
+                            Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                     return records;
                 }
                 rows = data.get("rows").getAsJsonArray();
                 if(rows.size() == 0)
-                    FLog.fileLog(String.format("%s.%s.%s.noresult.json", acc.prettyName(), market, Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
+                    FLog.fileLog(String.format("%s.%s.%s.noresult.json", acc.prettyName(), market,
+                            Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
                 for(JsonElement row : rows) {
                     try {
                         JsonArray rowArr = row.getAsJsonArray();
-                        String msku = StringUtils.substringBetween(rowArr.get(3).getAsString(), "\">", "</").toUpperCase();
+                        String msku = StringUtils
+                                .substringBetween(rowArr.get(3).getAsString(), "\">", "</")
+                                .toUpperCase();
                         if(StringUtils.contains(msku, ",2")) continue;
                         String sid = Selling.sid(msku, market, acc);
                         String srid = SellingRecord.id(sid, oneDay);
@@ -214,7 +223,8 @@ public class SellingRecord extends GenericModel {
                          * 3. fr: €44.99
                          * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
                          */
-                        record.sales = Webs.amazonPriceNumber(M.AMAZON_UK/*格式固定*/, rowArr.get(11).getAsString().substring(1));
+                        record.sales = Webs.amazonPriceNumber(M.AMAZON_UK/*格式固定*/,
+                                rowArr.get(11).getAsString().substring(1));
                         switch(market) {
                             case AMAZON_UK:
                                 record.currency = Currency.GBP;
@@ -235,12 +245,17 @@ public class SellingRecord extends GenericModel {
                         if(record.usdSales == null) record.usdSales = 0f;
                         record.orders = rowArr.get(12).getAsInt();
                         // 无论数据库中存在不存在都需要更新下面数据
-                        record.sessions = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
-                        record.pageViews = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
+                        record.sessions = Webs
+                                .amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString())
+                                .intValue();
+                        record.pageViews = Webs
+                                .amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString())
+                                .intValue();
 
                         records.add(record);
                     } catch(Exception e) {
-                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)", Webs.E(e));
+                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
+                                Webs.E(e));
                     }
                 }
 
@@ -263,39 +278,41 @@ public class SellingRecord extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("5mn") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
-    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
+    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from,
+                                                               Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null) return cacheElement;
-        synchronized(SellingRecord.class) {
-            cacheElement = Cache.get(cacheKey, List.class);
-            if(cacheElement != null) return cacheElement;
 
-            if(acc == null) {
-                List<SellingRecord> dateMixRecords = SellingRecord.find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
-                // 需要将相同 Date 不同 Market 的全部累计
-                Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
-                for(SellingRecord rcd : dateMixRecords) {
-                    String key = rcd.date.getTime() + "" + rcd.market;
-                    if(groupByDate.containsKey(key)) {
-                        groupByDate.get(key).sessions += rcd.sessions;
-                        groupByDate.get(key).pageViews += rcd.pageViews;
-                        groupByDate.get(key).orders += rcd.orders;
-                        groupByDate.get(key).orderCanceld += rcd.orderCanceld;
-                        groupByDate.get(key).sales += rcd.sales;
-                        groupByDate.get(key).units += rcd.units;
-                        groupByDate.get(key).usdSales += rcd.usdSales;
-                    } else
-                        groupByDate.put(key, rcd);
-                }
-                cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
-            } else {
-                //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
-                cacheElement = SellingRecord.find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date", msku, acc, from, to).fetch();
+
+        if(acc == null) {
+            List<SellingRecord> dateMixRecords = SellingRecord
+                    .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from,
+                            to).fetch();
+            // 需要将相同 Date 不同 Market 的全部累计
+            Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
+            for(SellingRecord rcd : dateMixRecords) {
+                String key = rcd.date.getTime() + "" + rcd.market;
+                if(groupByDate.containsKey(key)) {
+                    groupByDate.get(key).sessions += rcd.sessions;
+                    groupByDate.get(key).pageViews += rcd.pageViews;
+                    groupByDate.get(key).orders += rcd.orders;
+                    groupByDate.get(key).orderCanceld += rcd.orderCanceld;
+                    groupByDate.get(key).sales += rcd.sales;
+                    groupByDate.get(key).units += rcd.units;
+                    groupByDate.get(key).usdSales += rcd.usdSales;
+                } else
+                    groupByDate.put(key, rcd);
             }
-            Cache.add(cacheKey, cacheElement, "1h");
+            cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
+        } else {
+            //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
+            cacheElement = SellingRecord
+                    .find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date",
+                            msku, acc, from, to).fetch();
         }
-        return Cache.get(cacheKey, List.class);
+        Cache.add(cacheKey, cacheElement, "1h");
+        return cacheElement;
     }
 
     /**
@@ -306,7 +323,10 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
+                                                                                 Account acc,
+                                                                                 Date from,
+                                                                                 Date to) {
         /**
          * 格式 map[lineName, datas]
          * datas -> [
@@ -328,17 +348,25 @@ public class SellingRecord extends GenericModel {
         List<SellingRecord> records = accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
-                highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_uk")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_uk")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_DE) {
-                highCharLines.get("pv_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_de")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_de")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_FR) {
-                highCharLines.get("pv_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_fr")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_fr")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_US) {
-                highCharLines.get("pv_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_us")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_us")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
@@ -352,7 +380,10 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
+                                                                                   Account acc,
+                                                                                   Date from,
+                                                                                   Date to) {
         Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
                 .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_de", new ArrayList<F.T2<Long, Float>>())
@@ -361,16 +392,21 @@ public class SellingRecord extends GenericModel {
                 .build();
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
-            float turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
+            float turnRatio = Webs
+                    .scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
             if(rcd.market == M.AMAZON_UK)
-                highCharLines.get("tn_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_uk")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_DE)
-                highCharLines.get("tn_de").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_de")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_FR)
-                highCharLines.get("tn_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_fr")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_US)
-                highCharLines.get("tn_us").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_us")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }

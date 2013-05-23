@@ -7,12 +7,15 @@ import models.market.M;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +27,7 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Whouse extends Model {
 
     /**
@@ -135,64 +139,46 @@ public class Whouse extends Model {
         return Whouse.find("type=?", type).fetch();
     }
 
-    public static List<Whouse> findByMarket(M market) {
-        return Whouse.find("country=?", market.name().split("_")[1]).fetch();
+    public static List<Whouse> findByAccount(Account account) {
+        return Whouse.find("account=?", account).fetch();
     }
 
     /**
      * 根据星期判断shipmentType来处理运往某仓库的Shipment
      *
-     * @param planShipments 新建的运输单
+     * @param planShipments 用于判断的已经存在的运输单
      * @param now           今天
      * @return 暂时无返回
      */
-    public void checkWhouseNewShipment(List<Shipment> planShipments, DateTime now) {
-        // 处理 60 天内的运输单; 快递 2,4; 空运 3,5; 海运 GB:2 US:2 DE:3
+    public void checkWhouseNewShipment(List<Shipment> planShipments) {
+        /**
+         * 1. 处理 60 天内的运输单;
+         * 2. 规则: 空运每周 4; 海运 UK/US 每周 2, DE 每周 3
+         */
+        DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
-            DateTime tmp = now.plusDays(i);
+            DateTime nextBeginDate = now.plusDays(i);
             Object exist = CollectionUtils
-                    .find(planShipments, new PlanDateEqual(tmp.toDate()));
+                    .find(planShipments, new PlanDateEqual(nextBeginDate.toDate()));
             if(exist != null)
                 continue;
 
             M type = this.account.type;
-            if(tmp.dayOfWeek().get() == 2) {
-                checkWhouseNewShipment(tmp.toDate(), Shipment.T.EXPRESS, tmp.plus(7).toDate());
-                if(type.equals(M.AMAZON_UK) || type.equals(M.AMAZON_US))
-                    checkWhouseNewShipment(tmp.toDate(), Shipment.T.SEA, tmp.plus(45).toDate());
+            if(nextBeginDate.getDayOfWeek() == 2) {
+                if(Arrays.asList(M.AMAZON_UK, M.AMAZON_US).contains(type))
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
-            } else if(tmp.dayOfWeek().get() == 3) {
-                if(type.equals(M.AMAZON_DE))
-                    checkWhouseNewShipment(tmp.toDate(), Shipment.T.SEA, tmp.plus(45).toDate());
-                checkWhouseNewShipment(tmp.toDate(), Shipment.T.AIR, tmp.plus(14).toDate());
+            } else if(nextBeginDate.getDayOfWeek() == 3) {
+                if(Arrays.asList(M.AMAZON_DE).contains(type))
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
 
-            } else if(tmp.dayOfWeek().get() == 4) {
-                checkWhouseNewShipment(tmp.toDate(), Shipment.T.EXPRESS, tmp.plus(7).toDate());
-                //除 GB US DE 创建的时间不同,其他国家的都是周4
-                if(!type.equals(M.AMAZON_DE) && !type.equals(M.AMAZON_UK) &&
-                        !type.equals(M.AMAZON_US))
-                    checkWhouseNewShipment(tmp.toDate(), Shipment.T.SEA, tmp.plus(45).toDate());
-
-            } else if(tmp.dayOfWeek().get() == 5)
-                checkWhouseNewShipment(tmp.toDate(), Shipment.T.AIR, tmp.plus(14).toDate());
+            } else if(nextBeginDate.getDayOfWeek() == 4) {
+                if(Arrays.asList(M.AMAZON_DE, M.AMAZON_UK, M.AMAZON_US).contains(type))
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
+                else
+                    throw new FastRuntimeException("还不支持向 " + type.name() + " 仓库创建运输单");
+            }
         }
-
-    }
-
-    /**
-     * 确定新建运输单的目的地仓库
-     *
-     * @param planBeginDate 计划开始时间
-     * @param shipmentType  运输类型
-     */
-    private void checkWhouseNewShipment(Date planBeginDate, Shipment.T shipmentType,
-                                        Date arriveDate) {
-        if(Shipment.count(
-                "planBeginDate=? AND whouse=? AND type=? AND cycle=true AND state IN (?,?)",
-                planBeginDate, this, shipmentType, Shipment.S.PLAN, Shipment.S.CONFIRM) > 0)
-            return;
-        Shipment.create(planBeginDate, this, shipmentType, arriveDate);
-
     }
 
     class PlanDateEqual implements Predicate {
@@ -206,7 +192,7 @@ public class Whouse extends Model {
         @Override
         public boolean evaluate(Object o) {
             Shipment ship = (Shipment) o;
-            return Dates.morning(ship.planBeginDate).equals(Dates.morning(this.date));
+            return Dates.morning(ship.dates.planBeginDate).equals(Dates.morning(this.date));
         }
     }
 }

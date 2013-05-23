@@ -286,23 +286,19 @@ public class Feedback extends GenericModel {
         Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Cache
                 .get(Feedback.FRONT_TABLE, Map.class);
         if(feedbacksOverView != null) return feedbacksOverView;
-        synchronized(Feedback.class) {
-            feedbacksOverView = Cache.get(Feedback.FRONT_TABLE, Map.class);
-            if(feedbacksOverView != null) return feedbacksOverView;
 
-            List<Account> accs = Account.openedSaleAcc();
-            feedbacksOverView = new LinkedHashMap<String, List<F.T3<Long, Long, Long>>>();
-            for(Account acc : accs) {
-                List<F.T3<Long, Long, Long>> fbk = new ArrayList<F.T3<Long, Long, Long>>();
-                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 1));
-                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 2));
-                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 3));
-                fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 4));
-                feedbacksOverView.put(acc.prettyName(), fbk);
-            }
-            // 避免短时间的重复计算
-            Cache.add(Feedback.FRONT_TABLE, feedbacksOverView, "1h");
+        List<Account> accs = Account.openedSaleAcc();
+        feedbacksOverView = new LinkedHashMap<String, List<F.T3<Long, Long, Long>>>();
+        for(Account acc : accs) {
+            List<F.T3<Long, Long, Long>> fbk = new ArrayList<F.T3<Long, Long, Long>>();
+            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 1));
+            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 2));
+            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 3));
+            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 4));
+            feedbacksOverView.put(acc.prettyName(), fbk);
         }
+        // 避免短时间的重复计算
+        Cache.add(Feedback.FRONT_TABLE, feedbacksOverView, "1h");
         return feedbacksOverView;
     }
 

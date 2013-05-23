@@ -7,6 +7,7 @@ import helper.Dates;
 import helper.Promises;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import play.Logger;
@@ -74,6 +75,7 @@ public class Orderr extends GenericModel {
 
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<OrderItem> items = new ArrayList<OrderItem>();
 
     /**
@@ -92,8 +94,9 @@ public class Orderr extends GenericModel {
     @OneToOne(fetch = FetchType.LAZY)
     public Account account;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @OrderBy("date ASC,cost DESC")
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<SaleFee> fees = new ArrayList<SaleFee>();
     //-------------- Basic ----------------
 
@@ -461,53 +464,49 @@ public class Orderr extends GenericModel {
         DashBoard dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
         if(dashBoard != null) return dashBoard;
 
-        synchronized(Orderr.class) {
-            dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
-            if(dashBoard != null) return dashBoard;
-            dashBoard = new DashBoard();
-            /**
-             * 1. 将不同市场的 yyyy-MM-dd 日期的订单加载出来
-             * 2. 对订单按照时间进行 group. 由于时间会调整, 不能使用 DB 的 group
-             */
+        dashBoard = new DashBoard();
+        /**
+         * 1. 将不同市场的 yyyy-MM-dd 日期的订单加载出来
+         * 2. 对订单按照时间进行 group. 由于时间会调整, 不能使用 DB 的 group
+         */
 
-            final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
-            final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
+        final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
+        final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
-            List<OrderrVO> vos = new ArrayList<OrderrVO>();
-            vos.addAll(Promises.forkJoin(new Promises.Callback<OrderrVO>() {
-                @Override
-                public List<OrderrVO> doJobWithResult(M m) {
-                    return new OrderrQuery().dashBoardOrders(
-                            m.withTimeZone(pre7Day).toDate(),
-                            m.withTimeZone(now.toDate()).toDate(),
-                            m);
-                }
-
-                @Override
-                public String id() {
-                    return "Orderr.frontPageOrderTable";
-                }
-            }));
-
-            for(OrderrVO vo : vos) {
-                String key = Dates.date2Date(vo.market.toTimeZone(vo.createDate));
-                if(vo.state == S.PENDING)
-                    dashBoard.pending(key, vo);
-                else if(vo.state == S.PAYMENT)
-                    dashBoard.payments(key, vo);
-                else if(vo.state == S.CANCEL)
-                    dashBoard.cancels(key, vo);
-                else if(vo.state == S.REFUNDED)
-                    dashBoard.refundeds(key, vo);
-                else if(vo.state == S.RETURNNEW)
-                    dashBoard.returnNews(key, vo);
-                else if(vo.state == S.SHIPPED)
-                    dashBoard.shippeds(key, vo);
+        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        vos.addAll(Promises.forkJoin(new Promises.Callback<OrderrVO>() {
+            @Override
+            public List<OrderrVO> doJobWithResult(M m) {
+                return new OrderrQuery().dashBoardOrders(
+                        m.withTimeZone(pre7Day).toDate(),
+                        m.withTimeZone(now.toDate()).toDate(),
+                        m);
             }
-            dashBoard.sort();
-            Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+
+            @Override
+            public String id() {
+                return "Orderr.frontPageOrderTable";
+            }
+        }));
+
+        for(OrderrVO vo : vos) {
+            String key = Dates.date2Date(vo.market.toTimeZone(vo.createDate));
+            if(vo.state == S.PENDING)
+                dashBoard.pending(key, vo);
+            else if(vo.state == S.PAYMENT)
+                dashBoard.payments(key, vo);
+            else if(vo.state == S.CANCEL)
+                dashBoard.cancels(key, vo);
+            else if(vo.state == S.REFUNDED)
+                dashBoard.refundeds(key, vo);
+            else if(vo.state == S.RETURNNEW)
+                dashBoard.returnNews(key, vo);
+            else if(vo.state == S.SHIPPED)
+                dashBoard.shippeds(key, vo);
         }
-        return Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
+        dashBoard.sort();
+        Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+        return dashBoard;
     }
 
 
@@ -618,12 +617,3 @@ public class Orderr extends GenericModel {
                 market.name(), market.withTimeZone(from), market.withTimeZone(to));
     }
 }
-
-/*
-这几条 SQL 语句是用来查询指定时间系统中订单中数量的分布的
-select GROUP_CONCAT(io.orderId), count(io.orderId), io.qty from (
-select o.orderId, sum(i.quantity) as qty from Orderr o left outer join OrderItem i on o.orderId=i.order_orderId where o.state!='CANCEL' and o.createDate>='2012-05-01 00:00:00' and o.createDate<='2012-06-01 00:00:00' group by o.orderId) io where io.qty>=0 group by io.qty;
-
-select * from Orderr where orderId='203-9998841-7832366';
-select * from OrderItem where order_orderId='203-9998841-7832366';
- */

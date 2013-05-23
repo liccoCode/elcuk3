@@ -1,14 +1,19 @@
 package controllers;
 
-import models.procure.FBACenter;
+import helper.Webs;
+import models.Notification;
+import models.embedded.ERecordBuilder;
+import models.market.Account;
 import models.procure.FBAShipment;
-import models.view.post.FBAPost;
-import play.mvc.Before;
+import models.procure.ProcureUnit;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import play.data.validation.Validation;
+import play.i18n.Messages;
+import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Arrays;
-import java.util.List;
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,14 +23,80 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class FBAs extends Controller {
-    @Before
-    public static void centerIds() {
-        renderArgs.put("centerIds", FBACenter.centerIds());
+    /**
+     * 通过 ProcureUnit 创建其对应的 FBA
+     *
+     * @param procureUnitId 采购计划 ID
+     */
+    @Check("fbas.deploytoamazon")
+    public static void deployToAmazon(Long procureUnitId) {
+        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
+
+        unit.postFbaShipment();
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+
+        } else {
+            new ERecordBuilder("shipment.createFBA")
+                    .msgArgs(unit.id, unit.sku, unit.fba.shipmentId)
+                    .fid(unit.id)
+                    .save();
+            Notification.notifies("FBA 创建成功",
+                    Messages.get("shipment.createFBA.msg", unit.id, unit.sku, unit.fba.shipmentId),
+                    Notification.PROCURE);
+            flash.success("成功在 Amazon 创建 FBA: %s", unit.fba.shipmentId);
+        }
+
+        Deliveryments.show(unit.deliveryment.id);
     }
 
-    public static void index(FBAPost p) {
-        if(p == null) p = new FBAPost(Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CANCELLED));
-        List<FBAShipment> fbas = p.query();
-        render(fbas, p);
+    @Check("fbas.update")
+    public static void update(Long procureUnitId) {
+        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
+        unit.fba.updateFBAShipment(null);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("FBA %s 更新成功.", unit.fba.shipmentId);
+        }
+        Deliveryments.show(unit.deliveryment.id);
+    }
+
+    /**
+     * 箱內麦
+     *
+     * @param id
+     */
+    public static void packingSlip(Long id, boolean html) {
+        final FBAShipment fba = FBAShipment.findById(id);
+        renderArgs.put("shipmentId", fba.shipmentId);
+        renderArgs.put("fba", fba);
+        renderArgs.put("shipFrom", Account.address(fba.account.type));
+        if(html) {
+            render();
+        } else {
+            final PDF.Options options = new PDF.Options();
+            options.pageSize = IHtmlToPdfTransformer.A4P;
+            renderPDF(options);
+        }
+    }
+
+    /**
+     * 箱外麦
+     *
+     * @param id
+     */
+    public static void boxLabel(Long id, boolean html) {
+        FBAShipment fba = FBAShipment.findById(id);
+        renderArgs.put("shipmentId", fba.shipmentId);
+        renderArgs.put("fba", fba);
+        renderArgs.put("shipFrom", Account.address(fba.account.type));
+        if(html) {
+            render();
+        } else {
+            PDF.Options options = new PDF.Options();
+            options.pageSize = IHtmlToPdfTransformer.A4P;
+            renderPDF(options);
+        }
     }
 }

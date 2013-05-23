@@ -51,8 +51,8 @@ public class OrderPOST extends Post<Orderr> {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
 
-        return Orderr.find("SELECT o" + params._1, params._2.toArray())
-                .fetch(this.page, this.perSize);
+        return Orderr.find("SELECT o" + params._1, params._2.toArray()).fetch(this.page,
+                this.perSize);
     }
 
     @Override
@@ -69,17 +69,6 @@ public class OrderPOST extends Post<Orderr> {
             sbd.append("AND o.account.id=? ");
             params.add(this.accountId);
         }
-
-        if(this.market != null) {
-            sbd.append("AND o.market=? ");
-            params.add(this.market);
-        }
-
-        if(this.state != null) {
-            sbd.append("AND o.state=? ");
-            params.add(this.state);
-        }
-
 
         if(this.from != null && this.to != null) {
             sbd.append("AND o.createDate>=? AND o.createDate<=? ");
@@ -98,11 +87,14 @@ public class OrderPOST extends Post<Orderr> {
             }
         }
 
-        if(this.paymentInfo != null) {
-            if(this.paymentInfo)
-                sbd.append("AND SIZE(o.fees)>0 ");
-            else if(!this.paymentInfo)
-                sbd.append("AND SIZE(o.fees)<=0 ");
+        if(this.market != null) {
+            sbd.append("AND o.market=? ");
+            params.add(this.market);
+        }
+
+        if(this.state != null) {
+            sbd.append("AND o.state=? ");
+            params.add(this.state);
         }
 
         if(this.warnning != null) {
@@ -138,6 +130,13 @@ public class OrderPOST extends Post<Orderr> {
                         append("oi.product.sku LIKE ?) ");
                 for(int i = 0; i < 15; i++) params.add(search);
             }
+        }
+
+        if(this.paymentInfo != null) {
+            if(this.paymentInfo)
+                sbd.append("AND SIZE(o.fees)>0 ");
+            else if(!this.paymentInfo)
+                sbd.append("AND SIZE(o.fees)<=0 ");
         }
 
         if(StringUtils.isNotBlank(this.orderBy)) {

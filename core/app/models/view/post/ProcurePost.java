@@ -63,7 +63,8 @@ public class ProcurePost extends Post {
 
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
+        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray())
+                .fetch();
     }
 
     public F.T2<String, List<Object>> params() {
@@ -76,7 +77,8 @@ public class ProcurePost extends Post {
             params.add(procrueId);
         } else {
             if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
-            sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType).append("<=?");
+            sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
+                    .append("<=?");
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));
 

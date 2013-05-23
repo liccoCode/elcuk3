@@ -3,6 +3,7 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -22,6 +23,7 @@ import java.util.List;
 public class Brand extends GenericModel {
 
     @OneToMany(mappedBy = "brand", fetch = FetchType.EAGER)
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<Family> families;
 
     /**
@@ -43,6 +45,7 @@ public class Brand extends GenericModel {
      * Brand 可以附属与很多类别
      */
     @ManyToMany(mappedBy = "brands", cascade = CascadeType.PERSIST)
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<Category> categories;
 
     @PrePersist
@@ -88,7 +91,8 @@ public class Brand extends GenericModel {
      * @param cateIds
      */
     public void bindCategories(List<String> cateIds) {
-        List<Category> categories = Category.find("categoryId IN " + JpqlSelect.inlineParam(cateIds)).fetch();
+        List<Category> categories = Category
+                .find("categoryId IN " + JpqlSelect.inlineParam(cateIds)).fetch();
         CollectionUtils.filter(categories, new FilterUnCategory(this.categories));
         for(Category cat : categories) {
             cat.brands.add(this);
@@ -102,10 +106,13 @@ public class Brand extends GenericModel {
      * @param cateIds
      */
     public void unBindCategories(List<String> cateIds) {
-        List<Category> categories = Category.find("categoryId IN " + JpqlSelect.inlineParam(cateIds)).fetch();
+        List<Category> categories = Category
+                .find("categoryId IN " + JpqlSelect.inlineParam(cateIds)).fetch();
         for(Category cat : categories) {
             if(Family.bcRelateFamily(this, cat).size() > 0) {
-                Validation.addError("", String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", this.name, cat.categoryId));
+                Validation.addError("",
+                        String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", this.name,
+                                cat.categoryId));
                 return;
             }
             cat.brands.remove(this);

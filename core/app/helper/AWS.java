@@ -7,6 +7,7 @@ import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
 import models.market.JobRequest;
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.utils.FastRuntimeException;
 
@@ -16,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <pre>
@@ -47,24 +47,32 @@ public class AWS {
             case ALL_FBA_ORDER_FETCH:
             case ALL_FBA_ORDER_SHIPPED:
             case MANAGE_FBA_INVENTORY_ARCHIVED:
+            case GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA:
             case ACTIVE_LISTINGS:
-                //TODO 需要使用 Monitor 来监控到底有多少次的请求
                 MarketplaceWebService service = client(job);
 
                 RequestReportRequest res = new RequestReportRequest()
                         .withMerchant(job.account.merchantId)
-                        .withMarketplaceIdList(new IdList(Arrays.asList(job.marketplaceId.name()))) // only have the uk MarketplaceId.
+                        .withMarketplaceIdList(new IdList(Arrays.asList(
+                                job.marketplaceId.name()))) // only have the uk MarketplaceId.
                         .withReportType(job.type.toString())
                         .withReportOptions("ShowSalesChannel=true");
                 try {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7))); // 新订单的获取, 捕捉最近 7 天内的
+                    DateTime time = DateTime.now();
+                    if(job.type == JobRequest.T.GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA) {
+                        time = time.minusMonths(3); // 最近 3 个月
+                    } else {
+                        time = time.minusDays(7); // 新订单的获取, 捕捉最近 7 天内的
+                    }
                     DatatypeFactory df = DatatypeFactory.newInstance();
-                    res.setStartDate(df.newXMLGregorianCalendar(new GregorianCalendar(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH))));
+                    res.setStartDate(df.newXMLGregorianCalendar(
+                            new GregorianCalendar(time.getYear(),
+                                    time.getMonthOfYear() - 1/*0~11*/,
+                                    time.getDayOfMonth())));
                     RequestReportResponse resp = service.requestReport(res);
                     ReportRequestInfo info = resp.getRequestReportResult().getReportRequestInfo();
 
-                    job.startDate = cal.getTime();
+                    job.startDate = time.toDate();
                     job.endDate = new Date();
                     job.requestId = info.getReportRequestId();
                     job.procressState = info.getReportProcessingStatus();
@@ -75,7 +83,8 @@ public class AWS {
                     Logger.warn("requestReport_step1 has error:{" + e.getMessage() + "}");
                 } catch(DatatypeConfigurationException e) {
                     // can not be happed.
-                    Logger.warn("DatatypeConfigurationException Can not be happed in AWS.requestReport_step1!");
+                    Logger.warn(
+                            "DatatypeConfigurationException Can not be happed in AWS.requestReport_step1!");
                 }
                 return;
             default:
@@ -87,7 +96,8 @@ public class AWS {
     public static void requestState_step2(JobRequest job) {
         if(job.state != JobRequest.S.REQUEST && job.state != JobRequest.S.PROCRESS) {
             Logger.info("The JobRequest State is wrong! It`s must REQUEST State.");
-            throw new FastRuntimeException("The JobRequest State is wrong! It`s must REQUEST State.");
+            throw new FastRuntimeException(
+                    "The JobRequest State is wrong! It`s must REQUEST State.");
         }
 
         MarketplaceWebService client = client(job);
@@ -98,7 +108,8 @@ public class AWS {
                 .withReportRequestIdList(new IdList(Arrays.asList(job.requestId)));
 
         try {
-            ReportRequestInfo info = client.getReportRequestList(req).getGetReportRequestListResult().getReportRequestInfoList().get(0);
+            ReportRequestInfo info = client.getReportRequestList(req)
+                    .getGetReportRequestListResult().getReportRequestInfoList().get(0);
             job.procressState = info.getReportProcessingStatus();
             if("_DONE_".equals(job.procressState)) {
                 job.state = JobRequest.S.DONE;
@@ -127,7 +138,8 @@ public class AWS {
                 .withReportRequestIdList(new IdList(Arrays.asList(job.requestId)));
 
         try {
-            ReportInfo info = client.getReportList(req).getGetReportListResult().getReportInfoList().get(0);
+            ReportInfo info = client.getReportList(req).getGetReportListResult().getReportInfoList()
+                    .get(0);
             job.reportId = info.getReportId();
             job.state = JobRequest.S.DOWN;
             job.lastUpdateDate = new Date();
@@ -141,7 +153,8 @@ public class AWS {
     public static void requestReportDown_step4(JobRequest job) {
         if(job.state != JobRequest.S.DOWN) {
             Logger.info("The JobRequest State is wrong! It`s must be DOWN State.");
-            throw new FastRuntimeException("The JobRequest State is wrong! It`s must be DOWN State.");
+            throw new FastRuntimeException(
+                    "The JobRequest State is wrong! It`s must be DOWN State.");
         }
         MarketplaceWebService client = client(job);
 
@@ -156,13 +169,15 @@ public class AWS {
             GetReportResponse rep = client.getReport(req);
             Calendar cal = Calendar.getInstance();
             String filename = String.format(REPORT_BASE_PATH,
-                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
+                    cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH),
                     job.reportId);
             switch(job.type) {
                 case ALL_FBA_ORDER_FETCH:
                     filename += ".xml";
                     break;
                 case ACTIVE_LISTINGS:
+                case GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA:
                     filename += ".txt";
                     break;
                 case ALL_FBA_ORDER_SHIPPED:

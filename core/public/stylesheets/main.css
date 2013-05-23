@@ -128,3 +128,163 @@ div .alert{
 .table-checkboxk label{
     padding-left:5px;
 }
+
+#shipping_details{
+    max-height:200px;
+    overflow:auto;
+}
+
+/* amazon workflow */
+.workflow{
+    background-color:#5A7DC8;
+    height:30px;
+    margin-top:20px;
+    margin-bottom:20px;
+}
+
+.workflow .corner_top_right{
+    background:url('http://sellercentral.amazon.com/css/images/fba/wf_nav_rnd_top_right.gif') right top no-repeat;
+    float:right;
+    margin:-1px -1px 0 0;
+    position:relative;
+    width:12px;
+}
+
+.workflow ul{
+    margin:0;
+    padding-left:8px;
+}
+
+.workflow li{
+    background:url('http://sellercentral.amazon.com/css/images/fba/wf_nav_sprite.gif') repeat-x;
+    display:inline;
+    float:left;
+    height:30px;
+    list-style-type:none;
+    margin-right:-17px;
+    padding:0;
+}
+
+.workflow li a:link, .workflow li a:visited, .workflow li div{
+    background:url('http://sellercentral.amazon.com/css/images/fba/wf_nav_sprite.gif') no-repeat;
+    color:#FFF;
+    cursor:pointer;
+    display:block;
+    float:left;
+    font-family:Helvetica, Arial, sans-serif;
+    font-size:13px;
+    font-weight:bold;
+    height:30px;
+    line-height:28px;
+    margin:0;
+    padding:0 25px;
+    position:relative;
+    text-decoration:none;
+    vertical-align:middle;
+    white-space:nowrap;
+}
+
+.workflow li a .wf-locked, .workflow li div .wf-locked{
+    background:url('http://sellercentral.amazon.com/css/images/fba/icon_padlock.gif') 5px center no-repeat;
+    height:14px;
+    padding-left:13px;
+}
+
+.workflow li.enabled,
+.workflow li.enabled-last{
+    background-position:0 0;
+    color:#FFF;
+}
+
+.workflow li.selected,
+.workflow li.selected-last{
+    background-position:0 -32px;
+    color:#000;
+}
+
+.workflow li.disabled,
+.workflow li.disabled-last{
+    background-position:0 -64px;
+    color:#000;
+}
+
+.workflow li.enabled a:link, .workflow li.enabled a:visited, .workflow li.enabled div{
+    background-position:right -96px;
+}
+
+.workflow li.enabled-last a:link, .workflow li.enabled-last a:visited, .workflow li.enabled-last div{
+    background-position:right -192px;
+}
+
+.workflow li.selected a:link, .workflow li.selected a:visited, .workflow li.selected div{
+    background-position:right -128px;
+    color:#000;
+}
+
+.workflow li.selected-last a:link, .workflow li.selected-last a:visited, .workflow li.selected-last div{
+    background-position:right -224px;
+    color:#000;
+}
+
+.workflow li.disabled a:link, .workflow li.disabled a:visited, .workflow li.disabled div{
+    background-position:right -160px;
+    color:#DDD;
+}
+
+.workflow li.disabled-last a:link, .workflow li.disabled-last a:visited, .workflow li.disabled-last div{
+    background-position:right -256px;
+    color:#DDD;
+}
+
+/* docs exapmle */
+/* Base class */
+.bs-docs-form{
+    position:relative;
+    margin:15px 0;
+    padding:39px 19px 14px;
+    background-color:#fff;
+    border:1px solid #ddd;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    border-radius:4px;
+}
+
+/* Echo out a label for the example */
+.bs-docs-form:after{
+    content:"表单";
+    position:absolute;
+    top:-1px;
+    left:-1px;
+    padding:3px 7px;
+    font-size:12px;
+    font-weight:bold;
+    background-color:#f5f5f5;
+    border:1px solid #ddd;
+    color:#9da0a4;
+    -webkit-border-radius:4px 0 4px 0;
+    -moz-border-radius:4px 0 4px 0;
+    border-radius:4px 0 4px 0;
+}
+
+/* shipment.show  */
+ul li.stripe{
+    border-left:3px solid #EEEEEE;
+}
+
+ul .block label{
+    padding-left:10px;
+    float:left;
+    margin:0 10px 5px 0;
+}
+
+ul .block label abbr{
+    color:#569FD3;
+}
+
+ul .block label:after{
+    content:':';
+}
+
+ul .block span{
+    float:right;
+}

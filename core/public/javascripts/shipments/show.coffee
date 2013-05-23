@@ -31,3 +31,38 @@ $ ->
       e.preventDefault()
     else
       $(@).button('loading').parents('form').attr('action', '/Shipments/deployToAmazon').submit()
+
+
+  $('#previewBtn').click (e) ->
+    shipment = $("[name='shipmentId']")
+    unless shipment.val()
+      EF.colorAnimate(shipment)
+    else
+      LoadMask.mask()
+      $.getScript("/shipment/#{shipment.val()}/preview")
+        .done(-> LoadMask.unmask())
+        .fail(-> LoadMask.unmask())
+    e.preventDefault()
+
+  $('#adjust_shipitems').on('click', 'button.adjust', ->
+    shipmentId = $("input[name='shipmentId']").val()
+    if shipmentId
+      $('#adjust_shipitems').attr('action', (i, v) ->
+        "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
+      )
+  )
+
+  # 所有的 btnFucs 下的 button action
+  $('#btnFucs').on('click', '.func', ->
+    funcsForm = $('#funcsForm').find('form').attr('action', @getAttribute('url')).end()
+      .find('#action').text(@textContent).end()
+      .find("input[name=date]").val($.DateUtil.fmt2(new Date())).end()
+      .modal('show');
+  )
+
+  $('#adjust_shipitems').on('dblclick', '[name=recivedQty]',(e) ->
+    self = $(@)
+    $('#origin_qty').text(self.text())
+    $('#recivedQtyForm').modal('show').find('form').attr('action', "/shipitem/#{self.parents('tr').attr('id')}/recevied")
+    e.stopPropagation()
+  ).find('[name=recivedQty]').append('<i class="icon-wrench"></i>')

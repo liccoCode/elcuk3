@@ -2,7 +2,6 @@ package models.view.post;
 
 import helper.Dates;
 import helper.Promises;
-import models.market.AmazonListingReview;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
@@ -104,12 +103,16 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                  * 3. OrderItem.skuOrMskuAccountRelateOrderItem
                  */
                 List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+                final Date inerFrom =
+                        this.from == null ? DateTime.now().minusMonths(1).toDate() : this.from;
+                final Date inerTo =
+                        this.to == null ? DateTime.now().minusMonths(1).toDate() : this.to;
                 vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
                     @Override
                     public List<AnalyzeVO> doJobWithResult(M m) {
                         return new OrderItemQuery().analyzeVos(
-                                m.withTimeZone(Dates.morning(from)).toDate(),
-                                m.withTimeZone(Dates.night(to)).toDate(),
+                                m.withTimeZone(Dates.morning(inerFrom)).toDate(),
+                                m.withTimeZone(Dates.night(inerTo)).toDate(),
                                 m);
                     }
 
@@ -169,7 +172,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     // review
                     F.T3<Integer, Float, List<String>> reviewT3;
-                    AmazonListingReviewQuery query=new AmazonListingReviewQuery();
+                    AmazonListingReviewQuery query = new AmazonListingReviewQuery();
                     if(isSku) reviewT3 = query.skuRelateReviews(dto.fid);
                     else reviewT3 = query.sidRelateReviews(dto.fid);
                     dto.reviews = reviewT3._1;
@@ -181,7 +184,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
                     //最新的评分
                     if(isSku)
-                        dto.lastRating= query.skuLastRating(dto.fid);
+                        dto.lastRating = query.skuLastRating(dto.fid);
                 }
 
                 Cache.set(cacke_key, new ArrayList<AnalyzeDTO>(analyzeMap.values()), "12h");

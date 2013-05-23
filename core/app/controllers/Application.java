@@ -12,7 +12,7 @@ import models.view.Ret;
 import models.view.dto.DashBoard;
 import play.Play;
 import play.cache.Cache;
-import play.cache.CacheFor;
+import play.db.jpa.JPA;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -34,7 +34,6 @@ public class Application extends Controller {
         render(dashborad, fbaWhouse, feedbacksOverView);
     }
 
-    @CacheFor(value = "40mn")
     public static void percent(String type, Date date, long aid) {
         renderJSON(JSON.toJSON(
                 OrderItem.categoryPercent(
@@ -53,6 +52,7 @@ public class Application extends Controller {
 
     public static void cc() {
         Cache.clear();
+        JPA.em().getEntityManagerFactory().getCache().evictAll();
         renderJSON(new Ret());
     }
 

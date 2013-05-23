@@ -29,13 +29,6 @@ baseShipment: &base
   planArrivDate: 2013-01-05
   arriveDate: null
   type: AIR
-  pype: WEIGHT
-  volumn: 0.0
-  weight: 0.0
-  declaredValue: 0.0
-  deposit: 0.0
-  otherFee: 0.0
-  shipFee: 0.0
   trackNo: ''
   internationExpress: DHL
   source: 深证

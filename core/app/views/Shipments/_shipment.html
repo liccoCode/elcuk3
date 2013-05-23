@@ -1,0 +1,100 @@
+<form action="@{Shipments.update()}" method="post">
+#{authenticityToken /}
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <th>Title (Create By ${ship.creater ? ship.creater.username : "System"})</th>
+      <td colspan="3">
+        <input type="text" name="ship.title" class="span10" value="${ship.title ? ship.title : ship.title()}">
+      </td>
+    </tr>
+    <tr>
+      <th>运输单号</th>
+      <td>
+      ${ship.id}
+        <input type="hidden" id="shipmentId" name="ship.id" value="${ship.id}">
+      </td>
+      <th>创建时间</th>
+      <td>${ship.createDate.datetime()}</td>
+    </tr>
+
+    <tr>
+      <th>预计运输时间</th>
+      <td>
+        <input type="date" name="ship.planBeginDate" value="${ship.dates.planBeginDate.date()}">
+      #{ifnot ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CANCEL, models.procure.Shipment.S.CONFIRM]}
+        <span class="pull-right">运输时间 #{time_tooltip time:ship.dates.beginDate/}</span>
+      #{/ifnot}
+      </td>
+      <th>预计到库时间</th>
+      <td>
+        <input type="date" name="ship.planArrivDate" value="${ship.dates.planArrivDate.date()}">
+      </td>
+    </tr>
+
+    <tr>
+      <th>Track No.</th>
+      <td>
+        <div class="input-append">
+          <input type="text" class="input-medium" name="ship.trackNo" value="${ship.trackNo}">
+        #{if ship.internationExpress && ship.trackNo}
+          <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
+        #{/if}
+        </div>
+      </td>
+      <th>国际快递商</th>
+      <td>
+      #{select 'ship.internationExpress', items: models.procure.Shipment.Express(), value: ship.internationExpress}
+          #{option ''}选择快递商#{/option}
+      #{/select}
+      </td>
+    </tr>
+
+    <tr>
+      <th>运输商</th>
+      <td>
+      #{select 'ship.cooper.id', items: shippers, labelProperty: 'fullName',  value: ship.cooper?.id}
+          #{option ''}选择运输商#{/option}
+      #{/select}
+      </td>
+      <th>运输单总重量</th>
+      <td>${ship.totalWeight()} kg</td>
+    </tr>
+
+    <tr>
+      <th>仓库</th>
+      <td>
+      #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse?.id}
+          #{option ''}选择仓库#{/option}
+      #{/select}
+      </td>
+      <th>运输方式</th>
+      <td style="color:${ship.type.rgb()}">${ship.type.label()}</td>
+    </tr>
+
+    <tr>
+      <th>目的地</th>
+      <td>${ship.target}</td>
+      <th>始发地</th>
+      <td>${ship.source}</td>
+    </tr>
+
+    <tr>
+      <td colspan="4">
+        <h4>Comment</h4>
+        <textarea rows="4" id="ship_memo" name="ship.memo" class="span12">${ship.memo}</textarea>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="4">
+      #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM /}
+      #{if isPlanAndConfirm}
+        <button class="btn btn-primary">更新</button>
+      #{/if}
+      #{if !isPlanAndConfirm}
+        <button id="ship_comment" class="btn btn-primary">部分更新</button>
+      #{/if}
+      </td>
+    </tr>
+  </table>
+</form>
