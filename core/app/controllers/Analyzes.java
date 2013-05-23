@@ -97,7 +97,7 @@ public class Analyzes extends Controller {
     /**
      * 加载指定 Selling 的时间段内的销量与销售额数据
      */
-    @CacheFor("30mn")
+    @CacheFor("4h")
     public static void ajaxUnit(AnalyzePost p) {
         try {
             renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val,
@@ -108,7 +108,7 @@ public class Analyzes extends Controller {
     }
 
     @Check("analyzes.ajaxsales")
-    @CacheFor("30mn")
+    @CacheFor("4n")
     public static void ajaxSales(AnalyzePost p) {
         try {
             renderJSON(J.json(OrderItem
@@ -122,7 +122,7 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
-    @CacheFor("30mn")
+    @CacheFor("4h")
     public static void ajaxSellingRecord(AnalyzePost p) {
         try {
             renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
@@ -135,7 +135,7 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的转换率
      */
-    @CacheFor("30mn")
+    @CacheFor("4h")
     public static void ajaxSellingTurn(AnalyzePost p) {
         try {
             renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
@@ -151,8 +151,6 @@ public class Analyzes extends Controller {
      * @param type
      * @param val
      */
-    @CacheFor("30mn")
-// 这个方法提供缓存, 但是前台使用 POST 计算, 不用缓存, 因为此方法在 Hibernate 的二级缓存与系统缓存的支持下, 执行在 0~20 ms 左右
     public static void ajaxProcureUnitTimeline(String type, String val) {
         renderJSON(J.G(AnalyzePost.timelineEvents(type, val)));
     }
