@@ -4,7 +4,6 @@ import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.templates.BaseTemplate;
-
 import play.templates.JavaExtensions;
 
 /**

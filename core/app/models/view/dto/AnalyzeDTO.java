@@ -4,7 +4,6 @@ import helper.Webs;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 

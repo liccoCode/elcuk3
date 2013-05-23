@@ -169,7 +169,8 @@ public class OrderItem extends GenericModel {
                 if("all".equalsIgnoreCase(skuOrMskuOrCategory))
                     return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
                 else if(skuOrMskuOrCategory.matches("^\\d{2}$"))
-                    return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m, skuOrMskuOrCategory);
+                    return new OrderItemQuery()
+                            .allNormalSaleOrderItem(_from, _to, m, skuOrMskuOrCategory);
                 else if("sku".equalsIgnoreCase(type))
                     return new OrderItemQuery()
                             .skuNormalSaleOrderItem(skuOrMskuOrCategory, _from, _to, m);
