@@ -88,10 +88,13 @@ public class ProcureUnits extends Controller {
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-        Shipment shipment = Shipment.findById(shipmentId);
+
 
         managedUnit.update(unit);
-        managedUnit.changeShipItemShipment(shipment);
+        if(StringUtils.isNotBlank(shipmentId)) {
+            Shipment shipment = Shipment.findById(shipmentId);
+            managedUnit.changeShipItemShipment(shipment);
+        }
         if(Validation.hasErrors()) {
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
