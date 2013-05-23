@@ -4,6 +4,7 @@ import helper.Webs;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -74,10 +75,6 @@ public class AnalyzeDTO {
      */
     public float ps = 0;
 
-    /**
-     * 今天的销量
-     */
-    public int day0 = 0;
 
     /**
      * 昨天到今天的销量
@@ -93,6 +90,12 @@ public class AnalyzeDTO {
      * 过去 30 天总销量
      */
     public int day30 = 0;
+
+    /**
+     * day1 与 day7平均值的差值
+     */
+    public float difference = 0;
+
 
     /**
      * Selling Review 的数量
@@ -143,24 +146,6 @@ public class AnalyzeDTO {
                 Webs.scale2PointUp(
                         (this.qty + this.way + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
-    }
-
-    /**
-     * 今天和昨天的销量的差别
-     *
-     * @return ._1 销量差据个数; ._2: 今天是昨天销量的 %; ._3: 颜色; ._4: 上升/下降
-     */
-    public F.T4<Integer, Float, String, Boolean> day1Differ() {
-        /**
-         * ._1: 销量差据个数
-         * ._2: 今天是昨天销量 %
-         * ._3: 颜色
-         */
-        int yesterDaySales = this.day1 - this.day0;
-        int differ = this.day0 - yesterDaySales;
-        float ratio = this.day0 / (float) yesterDaySales;
-        String color = differ >= 0 ? "267B2F" : "E45652";
-        return new F.T4<Integer, Float, String, Boolean>(differ, ratio, color, differ >= 0);
     }
 
     /**
