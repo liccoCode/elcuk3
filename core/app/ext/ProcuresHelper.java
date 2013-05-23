@@ -1,6 +1,8 @@
 package ext;
 
 import models.procure.*;
+import org.apache.commons.lang.StringUtils;
+import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 
 /**
@@ -99,6 +101,29 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#BD4A48";
             default:
                 return "#333333";
+        }
+    }
+
+    public static BaseTemplate.RawData records(FBAShipment fba) {
+        String[] lines = StringUtils.splitByWholeSeparator(fba.records, "\n");
+        if(lines != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<table class='table table-bordered table-condensed'>").append("<tr>")
+                    .append("<th>时间</th>").append("<th>FNSKU</th>").append("<th>SellingId</th>")
+                    .append("<th>数量</th>").append("<th>ShimentId</th>")
+                    .append("<th>CenterId</th>")
+                    .append("</tr>");
+            for(String line : lines) {
+                String[] fields = StringUtils.splitByWholeSeparator(line, "\t");
+                sb.append("<tr>").append("<td>")
+                        .append(StringUtils.join(fields, "</td><td>"))
+                        .append("</td></tr>");
+            }
+            sb.append("</table>");
+            System.out.println(sb.toString());
+            return raw(sb.toString());
+        } else {
+            return raw("");
         }
     }
 

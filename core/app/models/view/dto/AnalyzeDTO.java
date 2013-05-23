@@ -1,7 +1,6 @@
 package models.view.dto;
 
 import helper.Webs;
-import models.market.Selling;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
@@ -20,12 +19,6 @@ public class AnalyzeDTO {
         this.fid = fid;
     }
 
-    public AnalyzeDTO(Selling sell) {
-        this.fid = sell.sellingId;
-        this.asin = sell.asin;
-        if(sell.account != null) this.aid = sell.account.id + "";
-        this.ps = sell.ps;
-    }
 
     /**
      * 用来表示 SKU/Msku
