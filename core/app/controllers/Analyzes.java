@@ -75,8 +75,8 @@ public class Analyzes extends Controller {
     }
 
     public static void clear() {
-        Cache.delete("analyze_post_sid");
-        Cache.delete("analyze_post_sku");
+        Cache.delete(AnalyzePost.AnalyzeDTO_SID_CACHE);
+        Cache.delete(AnalyzePost.AnalyzeDTO_SKU_CACHE);
         renderJSON(new Ret());
     }
 

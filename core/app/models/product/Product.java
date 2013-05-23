@@ -31,6 +31,7 @@ import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.utils.FastRuntimeException;
+import query.ProductQuery;
 
 import javax.persistence.*;
 import java.io.StringWriter;
@@ -696,24 +697,25 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 返回所有的 SKU
      *
-     * @param clearCache 是否清除缓存
+     * @param forceClearCache 是否清除缓存
      * @return
      */
     @SuppressWarnings("unchecked")
     @Cached("lifetime")
-    public static List<String> skus(boolean clearCache) {
+    public static List<String> skus(boolean forceClearCache) {
         List<String> skus = null;
-        if(!clearCache) {
+        if(forceClearCache) {
+            skus = new ProductQuery().skus();
+            Cache.delete(Caches.SKUS);
+            Cache.add(Caches.SKUS, skus, "10h");
+        } else {
             skus = Cache.get(Caches.SKUS, List.class);
             if(skus != null) return skus;
+            skus = new ProductQuery().skus();
+            Cache.add(Caches.SKUS, skus, "10h");
         }
 
-        List<Product> prods = Product.all().fetch();
-        skus = new ArrayList<String>();
-        for(Product prod : prods) skus.add(prod.sku);
-        Cache.delete(Caches.SKUS);
-        Cache.add(Caches.SKUS, skus, null);
-        return Cache.get(Caches.SKUS, List.class);
+        return skus;
     }
 
     @SuppressWarnings("unchecked")
