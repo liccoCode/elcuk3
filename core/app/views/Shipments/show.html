@@ -196,11 +196,11 @@
       #{/if}
   #{/power.ck}
 
-  #{if ship.type != models.procure.Shipment.T.EXPRESS}
     <a class="btn btn-warning" href="@{Shipments.revertState(ship.id)}" data-method='DELETE'
        data-confirm='确认操作?' data-disable-with='返回中...'>
       回到前一个状态
     </a>
+  #{if ship.type != models.procure.Shipment.T.EXPRESS}
       #{if ship.state == models.procure.Shipment.S.SHIPPING}
         <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
           运输到港
