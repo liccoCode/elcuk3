@@ -1,7 +1,6 @@
 package controllers;
 
 import helper.Constant;
-import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.market.*;
@@ -13,8 +12,6 @@ import models.view.post.AnalyzePost;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -24,12 +21,13 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
-import query.OrderItemQuery;
-import query.vo.AnalyzeVO;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -178,31 +176,6 @@ public class Analyzes extends Controller {
         Selling sell = Selling.findById(sid);
         if(sell == null || !sell.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
         renderJSON(J.G(sell.ps(ps)));
-    }
-
-    /**
-     * 日期测试代码, 保留
-     */
-    public static void test() {
-        Date date = new Date();
-        DateTime gmt = DateTime.parse(Dates.date2DateTime(date),
-                DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(DateTimeZone.UTC));
-        DateTime de = Dates.fromDatetime(Dates.date2DateTime(date), M.AMAZON_DE);
-        DateTime uk = Dates.fromDatetime(Dates.date2DateTime(date), M.AMAZON_UK);
-        DateTime us = Dates.fromDatetime(Dates.date2DateTime(date), M.AMAZON_US);
-        renderText("根据当前时间的字符串,加上不同时区,最后统一的 CST(China Standard Time)时间" +
-                "\nTimeZone:%s" +
-                "\nCN:%s\nGMT:%tc\nDE:%s\nUK:%s\nUS:%s",
-                TimeZone.getDefault(),
-                date, gmt.toDate(), de.toDate(), uk.toDate(), us.toDate());
-    }
-
-    public static void test2() {
-        DateTime from = DateTime.parse("2012-11-01");
-        DateTime to = DateTime.parse("2012-11-02");
-        List<AnalyzeVO> vos = new OrderItemQuery()
-                .analyzeVos(from.toDate(), to.toDate(), M.AMAZON_US);
-        renderJSON(vos);
     }
 
 }

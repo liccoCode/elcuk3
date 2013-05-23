@@ -1,40 +1,87 @@
-<ul>
-  <li>预计交货时间: ${unit.attrs.planDeliveryDate}</li>
+<table class="table table-bordered table-condensed">
+  <tr>
+    <td>预计交货时间</td>
+    <td>#{time_tooltip time: unit.attrs.planDeliveryDate /}</td>
+  </tr>
 #{if unit.attrs.deliveryDate}
-  <li>实际交货时间: ${unit.attrs.deliveryDate}</li>
+  <tr>
+    <td>实际交货时间</td>
+    <td>#{time_tooltip time: unit.attrs.deliveryDate/}</td>
+  </tr>
 #{/if}
-  <li>预计发货时间: TODO: 采购计划的运输时间, 会根据运输项目拥有多个</li>
-  <li>实际发货时间: ${unit.shipItem?.shipDate}</li>
-  <li>预计到库时间: TODO: 同预计发货时间</li>
-  <li>实际签收时间: ${unit.shipItem?.fba?.receiptAt?.datetime()}</li>
-  <li>预计采购量: ${unit.attrs.planQty}</li>
-#{if unit.stage == models.procure.ProcureUnit.STAGE.INBOUND}
-  <li>${unit.stage}: ${unit.qty() - unit.shipItem.recivedQty} (进度条逐渐减少)</li>
-  <li>入库进度: ${unit.shipItem.recivedQty} / ${unit.qty()}</li>
+  <tr>
+    <td>预计运输时间</td>
+    <td>#{time_tooltip time: unit.attrs.planShipDate /}</td>
+  </tr>
+  <tr>
+    <td>实际运输时间</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: unit.shipItems, as:'shipItem'}
+        <li>
+            #{time_tooltip time: shipItem.shipDate/}
+          <a href="@{Shipments.show(shipItem.shipment.id)}" target="_blank">${shipItem.shipment.id}</a>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>计算完成时间</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: unit.shipItems, as:'shipItem'}
+        <li>
+            #{time_tooltip time: shipItem.shipment.predictArriveDate()/}
+          <a href="@{Shipments.show(shipItem.shipment.id)}" target="_blank">${shipItem.shipment.id}</a>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>运输方式</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: unit.shipItems, as:'shipItem'}
+        <li>
+          <abbr rel='tooltip' title='${shipItem.shipment.id}' style="color:${shipItem.shipment.type.rgb()}">
+          ${shipItem.shipment.type.label()}
+          </abbr>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>运输状态</td>
+    <td>
+      <ul class="unstyled">
+      #{list items: unit.shipItems, as:'shipItem'}
+        <li>
+          <abbr rel='tooltip' title='${shipItem.shipment.id}' style="color:${shipItem.shipment.state.rgb()}">
+          ${shipItem.shipment.state.label()}
+          </abbr>
+        </li>
+      #{/list}
+      </ul>
+    </td>
+  </tr>
+#{if unit.fba}
+  <tr>
+    <td>入库进度</td>
+    <td>
+      <ul class="unstyled">
+          #{list items: unit.shipItems, as:'shipItem'}
+            <li>
+              <a href="${unit.fba.fbaLink()}" target="_blank">${unit.fba.shipmentId}</a>
+              <abbr rel='tooltip' title='入库数量 / 运输数量'>
+                [${shipItem.recivedQty} / ${shipItem.qty}]
+              </abbr>
+            </li>
+          #{/list}
+      </ul>
+    </td>
+  </tr>
 #{/if}
-#{else }
-  <li>${unit.stage}: ${unit.qty()}</li>
-#{/else}
-#{if unit.deliveryment}
-  <li>采购单:
-    <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">
-      <i class="icon-link"></i> ${unit.deliveryment.id}
-    </a>
-    #${unit.id}
-  </li>
-#{/if}
-#{if unit.shipItem}
-  <li>
-    运输单:
-    <a href="@{Shipments.show(unit.shipItem.shipment.id)}" target="_blank">
-      <i class="icon-link"></i> ${unit.shipItem.shipment.id}
-    </a>
-    <span class="badge badge-info">${unit.shipItem.shipment.fbas.size()}</span> FBAs
-    <br/>
-  ${unit.shipItem.shipment.type}
-  </li>
-#{/if}
-  <li>
-    Memo: ${unit.comment.raw()}
-  </li>
-</ul>
+</table>

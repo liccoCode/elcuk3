@@ -1,16 +1,16 @@
 $ ->
 
-# 为 account table 添加更新事件
+  # 为 account table 添加更新事件
   $(".account_list button[aid]").click (e) ->
     form = $(@).parents('form')
     form.mask('更新中...')
     $.post('/accounts/update', form.find(":input").fieldSerialize(false),
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          alert('更新成功')
-        form.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        alert('更新成功')
+      form.unmask()
     )
     e.preventDefault()
 
@@ -24,12 +24,12 @@ $ ->
     form = $('#newUser_form')
     form.mask('添加中...')
     $.post('/accounts/create', form.find(':input').fieldSerialize(false),
-      (r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          location.reload()
-        form.unmask()
+    (r) ->
+      if r.flag is false
+        alert(r.message)
+      else
+        location.reload()
+      form.unmask()
     )
     e.preventDefault()
 
@@ -40,5 +40,3 @@ $ ->
     $("tr[aid=#{args[0]}]").css('background', '#FF6A78')
 
   activeAccount()
-
-  window.$ui.popover()

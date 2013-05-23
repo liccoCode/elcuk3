@@ -47,8 +47,9 @@ public class Caches {
          */
         public static String cacheKey(Object... params) {
             StringBuilder sbd = new StringBuilder();
-            for(Object obj : params)
+            for(Object obj : params) {
                 sbd.append((obj == null) ? "null" : obj.toString()).append("|");
+            }
             sbd.deleteCharAt(sbd.length() - 1);
             return sbd.toString();
         }
@@ -74,5 +75,4 @@ public class Caches {
             Cache.add(Q.cacheKey(params), element, exprestion);
         }
     }
-
 }

@@ -78,7 +78,7 @@
         <th>Duration</th>
         <th>Memo</th>
         <th>
-          <a href="#" rel="tooltip" data-original-title="Now: ${new java.util.Date().format('yyyy-MM-dd HH:mm:ss')}">LastUpdateTime</a>
+          <a href="#" rel="tooltip" title="Now: ${new java.util.Date().format('yyyy-MM-dd  HH:mm:ss')}">LastUpdateTime</a>
         </th>
         <th>Closed</th>
         <th>DevRun</th>
@@ -142,17 +142,17 @@
           <tr>
             <td>${req.id}</td>
             <td>
-              <a href="#" rel="tooltip" data-original-title="${req?.account?.uniqueName}">${req.account.id}</a>
+              <a href="#" rel="tooltip" title="${req?.account?.uniqueName}">${req.account.id}</a>
             </td>
             <td>${req.requestDate?.format("yyyy-MM-dd HH:mm:ss")}</td>
             <td>${req.requestId}</td>
             <td>${req.reportId}</td>
             <td>
-              <a href="#" rel="tooltip" data-original-title="${req.procressState}">${req.state}</a>
+              <a href="#" rel="tooltip" title="${req.procressState}">${req.state}</a>
             </td>
             <td>${req.type}</td>
             <td>
-              <a href="#" rel="tooltip" data-original-title="${req.path}">${req.path?.substring(0, 3)}
+              <a href="#" rel="tooltip" title="${req.path}">${req.path?.substring(0, 3)}
                 ...</a>
             </td>
           </tr>

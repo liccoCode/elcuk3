@@ -264,9 +264,6 @@ $ ->
     target = $("##{type}").load('/Analyzes/analyzes', $("#click_param").formSerialize(),
     ->
 
-      #tooltip
-      window.$ui.tooltip()
-
       # 翻页
       $("##{type} div.pagination a").click(
         (e) ->

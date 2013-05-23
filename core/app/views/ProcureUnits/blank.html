@@ -12,19 +12,19 @@
     #{errorMsgs /}
     #{flash_alert row:true /}
 
-<form action="@{ProcureUnits.create()}" method="post">
-  <table class="table table-condensed table-bordered">
-      #{render './_unit_table_trs.html', unit: unit, whouses: whouses/}
-    <tr>
-      <td colspan="4">
-          #{render 'Procures/_shipments.html'/}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="4">
-        <button class="btn btn-primary">创建</button>
-      </td>
-    </tr>
-  </table>
-</form>
+    #{form @ProcureUnits.create(), method: 'POST', id: 'new_procureunit'}
+    <table class="table table-condensed table-bordered">
+        #{render './_unit_table_trs.html', unit: unit, whouses: whouses/}
+      <tr>
+        <td colspan="4">
+            #{render 'Procures/_shipments.html'/}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary">创建</button>
+        </td>
+      </tr>
+    </table>
+    #{/form}
 #{/else}

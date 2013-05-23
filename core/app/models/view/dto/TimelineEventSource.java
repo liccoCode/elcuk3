@@ -2,10 +2,11 @@ package models.view.dto;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import helper.Dates;
+import ext.ShipmentsHelper;
 import helper.GTs;
 import helper.Webs;
 import models.procure.ProcureUnit;
+import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.JVMRandom;
 import org.joda.time.DateTime;
@@ -167,19 +168,21 @@ public class TimelineEventSource {
          * @return
          */
         public Event startAndEndDate(String type) {
-            DateTime planDt = new DateTime(this.unit.attrs.planArrivDate.getTime(),
-                    Dates.timeZone(null));
-            if(this.unit.stage == ProcureUnit.STAGE.INBOUND)
-//                this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.shipItem.recivedQty) / ("sku".equals(type) ? this.skuPS() : this.sidPS()));
-                // TODO effect: 计算可持续的天数的算法需要调整
-                this.lastDays = -1.0f;
-            else
-                this.lastDays = Webs.scale2PointUp(
-                        (this.unit.qty() / ("sku".equals(type) ? this.skuPS() : this.sidPS())));
-            this.start = add8Hour(planDt.toDate());
+            Date predictShipFinishDate = null;
+            List<Shipment> relateShipments = this.unit.relateShipment();
+            if(relateShipments.size() > 0)
+                predictShipFinishDate = ShipmentsHelper.predictArriveDate(relateShipments.get(0));
+
+            if(predictShipFinishDate == null)
+                predictShipFinishDate = this.unit.attrs.planArrivDate;
+
+            this.lastDays = Webs.scale2PointUp(
+                    (this.unit.qty() / ("sku".equals(type) ? this.skuPS() : this.sidPS())));
+
+            this.start = add8Hour(predictShipFinishDate);
             // 如果不够卖到第二天, 那么就省略
-//            this.end = new DateTime(planDt.plusDays(this.lastDays.intValue()).toDate()).toString();
-            this.end = add8Hour(planDt.plusDays(this.lastDays.intValue()).toDate());
+            this.end = add8Hour(new DateTime(predictShipFinishDate)
+                    .plusDays(this.lastDays.intValue()).toDate());
             this.durationEvent = true;
             return this;
         }
@@ -215,19 +218,7 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-            this.title = String.format("%s | %s Days, %s(%s) %s(%s)",
-                    this.unit.stage,
-                    this.lastDays, this.unit.cooperator.name,
-                    this.unit.sid,
-                    this.unit.qty(),
-                    (isEnsureQty() ? "Qty" : "PlanQty"));
-            /**
-             * 1. 预计交货时间
-             * 2. 实际交货时间
-             * 3. 预计到库时间
-             * 4. 剩余数量
-             * 5. 运输数量
-             */
+            this.title = String.format("%s状态, 可销售 %s 天", this.unit.stage.label(), this.lastDays);
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procures/index?p.search=id:" + this.unit.id;
             return this;

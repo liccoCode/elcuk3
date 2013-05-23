@@ -81,6 +81,9 @@ used with JMX monitors.
   its not present will throw CacheException
 
   The defaultCache has an implicit name "default" which is a reserved cache name.
+
+  timeToIdleSeconds: 间歇时间为 5 分钟
+  timeToLiveSeconds: 总生命周期 10 分钟
   -->
   <defaultCache
     maxElementsInMemory="10000"
@@ -93,8 +96,8 @@ used with JMX monitors.
     diskPersistent="false"
     diskExpiryThreadIntervalSeconds="120"
     memoryStoreEvictionPolicy="LRU"
-    statistics="false"
-    />
+    statistics="false">
+  </defaultCache>
 
   <!-- 缓存 1 小时
   <cache

@@ -1,0 +1,9 @@
+var errors = '#{js 'tags/errorMsgs.html' /}';
+var preview = $('#preview');
+
+if(errors) {
+preview.html(errors);
+} else {
+preview.html("#{js 'Shipments/_preview.html', ship: ship /}");
+}
+

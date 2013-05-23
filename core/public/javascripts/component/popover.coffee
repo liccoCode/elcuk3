@@ -7,54 +7,7 @@
 #
 # 重新初始化页面上所有的 popover 元素
 window.$ui =
-# 初始化所有 rel=popover
-  popover: ->
-    for aPopover in $('*[rel=popover]')
-      $pop = $(aPopover)
-      popParam =
-        placement: 'top'
-        trigger: 'hover'
-        container: 'body'
-      for k in ['placement', 'trigger', 'width', 'data-content', 'content', 'title']
-        value = $pop.attr(k)
-        continue if value is undefined or value is ''
-        # 如果 trigger 为 toggle 自行转换
-        if k is 'trigger' and value is 'toggle'
-          popParam['trigger'] = 'manual'
-          # 添加 click 时间进行 toggle 开关
-          $pop.click ->
-            $(@).popover('toggle')
-            false
-        else if k is 'data-content'
-          $pop.attr(k, value) #如果是 data-content 直接设置到元素上, 不影响原本的 content 属性
-        else
-          popParam[k] = value
-      $pop.popover(popParam)
-
-  # 初始化所有 rel=tooltip
-  tooltip: ->
-    for aTooltip in $('[rel=tooltip]')
-      $tip = $(aTooltip)
-      tipParam =
-        placement: 'top'
-        trigger: 'hover'
-        container: 'body'
-      for k in ['placement', 'trigger', 'data-original-title', 'title']
-        value = $tip.attr(k)
-        continue if value is undefined or value is ''
-        # 自行添加了 toogle 值的处理
-        if k is 'trigger' and value is 'toggle'
-          tipParam['trigger'] = 'manual'
-          $tip.click ->
-            $(@).tooltip('toggle')
-            false
-        else if k is 'data-original-title'
-          $tip.attr(k, value)
-        else
-          tipParam[k] = value
-      $tip.tooltip(tipParam)
-
-  # 初始化所有 input.type=date
+# 初始化所有 input.type=date
   dateinput: ->
     for input in $('input[type=date]')
       $input = $(input)
@@ -66,10 +19,27 @@ window.$ui =
 
   # 初始化 popover, tooltip, dateinput
   init: ->
-    @popover()
-    @tooltip()
     @dateinput()
 
+  # popover 与 tooltip 的基础方法
+  relBase: (event, func)->
+    tip = $(event.target)
+    params =
+      container: 'body'
+      trigger: 'hover'
+      placement: 'top'
+      html: 'true'
+    for key in ['animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay', 'container']
+      params[key] = tip.attr(key) if tip.attr(key)
+    func.call(tip, params)
+
+$(document).on('mouseover', '[rel=tooltip]', (event) ->
+  window.$ui.relBase(event, (params) -> @tooltip(params).tooltip('show'))
+)
+
+$(document).on('mouseover', '[rel=popover]', (event) ->
+  window.$ui.relBase(event, (params) -> @popover(params).popover('show'))
+)
 
 $ ->
   window.$ui.init()

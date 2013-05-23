@@ -320,7 +320,8 @@ public class Listing extends GenericModel {
 
         if(needWarnningOffers >= 1) {
             //两天处理时间
-            if(this.closeWarnningTime != null && DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
+            if(this.closeWarnningTime != null &&
+                    DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
                 return;
             Mails.moreOfferOneListing(offers, this);
             //标记为被跟踪
@@ -358,7 +359,8 @@ public class Listing extends GenericModel {
      */
     public F.T2<Account, Integer> pickUpOneAccountToWishList() {
         List<Account> opendAccs = Account.openedAmazonClickReviewAndLikeAccs(this.market);
-        List<Account> nonWishListAccs = AmazonWishListRecord.nonAddWishListAccs(opendAccs, this.listingId);
+        List<Account> nonWishListAccs = AmazonWishListRecord
+                .nonAddWishListAccs(opendAccs, this.listingId);
         if(nonWishListAccs.size() == 0)
             throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
         return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
@@ -550,21 +552,14 @@ public class Listing extends GenericModel {
     public static Set<String> allASIN() {
         String cacheKey = "listing.allasin";
         Set<String> asins = Cache.get(cacheKey, Set.class);
-        if(asins == null) {
-            // 加载缓存的时候控制并发
-            synchronized(Listing.class) {
-                // 并发控制后再读取一次, 防止并发重复加载缓存
-                asins = Cache.get(cacheKey, Set.class);
-                if(asins != null) return asins;
+        if(asins != null) return asins;
 
-                asins = new HashSet<String>();
-                List<Listing> listings = Listing.findAll();
-                for(Listing li : listings) asins.add(li.asin);
+        asins = new HashSet<String>();
+        List<Listing> listings = Listing.findAll();
+        for(Listing li : listings) asins.add(li.asin);
 
-                Cache.add(cacheKey, asins, "2h");
-            }
-        }
-        return Cache.get(cacheKey, Set.class);
+        Cache.add(cacheKey, asins, "2h");
+        return asins;
     }
 
     /**

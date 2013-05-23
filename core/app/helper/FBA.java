@@ -5,23 +5,23 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
 import models.market.Account;
-import models.procure.FBACenter;
-import models.procure.FBAShipment;
-import models.procure.ShipItem;
+import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 /**
  * Amazon FBA 操作
+ * <pre>
+ * All operations from the Fulfillment Inbound Shipment API section, the Fulfillment Inventory API section, and
+ * the Fulfillment Outbound Shipment API section together share a maximum request quota of 30 and a restore
+ * rate of two requests every second.
+ * </pre>
+ * FBA Inbound/Inventory/Outbond API 共同享有 30 个最高请求, 每秒恢复 2 个请求
  * User: wyattpan
  * Date: 9/11/12
  * Time: 5:46 PM
@@ -29,130 +29,92 @@ import java.util.regex.Pattern;
 public class FBA {
 
     private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<String, FBAInboundServiceMWSClient>();
-    private static final Pattern pattern = Pattern.compile("将\\[运输项目\\] (.*) 从\\[运输单\\]");
 
-    /**
-     * 根据 Shipment 向 Amazon 创建 FBAShipment plan
-     * <p/>
-     * 会在这里处理 Amazon 的 distribute FC`s 的问题: 确保所有 item 在一个 Shipment 中, 否则抛出异常;
-     * 不会再去修改数量, 尽量保证系统内的数据.
-     *
-     * @param account 上传使用的账户
-     * @param items   需要上传的 ShipItems
-     * @return 成功在 Amazon FC`s plan 好的 FBA Shipment
-     */
-    public static F.Option<FBAShipment> plan(Account account, List<ShipItem> items)
+    public static FBAShipment plan(Account account, ProcureUnit unit)
             throws FBAInboundServiceMWSException {
-        Monitor monitor = MonitorFactory.start("FBA.plan");
         FBAShipment fbaShipment = new FBAShipment();
-        try {
-            CreateInboundShipmentPlanRequest plan = new CreateInboundShipmentPlanRequest();
+        CreateInboundShipmentPlanRequest plan = new CreateInboundShipmentPlanRequest();
 
-            // Merchant Id
-            plan.setSellerId(account.merchantId);
-            // 自贴标
-            plan.setLabelPrepPreference("SELLER_LABEL");
-            // 我们的联系地址
-            plan.setShipFromAddress(Account.address(account.type));
+        // Merchant Id
+        plan.setSellerId(account.merchantId);
+        // 自贴标
+        plan.setLabelPrepPreference("SELLER_LABEL");
+        // 我们的联系地址
+        plan.setShipFromAddress(Account.address(account.type));
 
-            // 要发送的货物
-            plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
-                    FBA.shipItemsToInboundShipmentPlanItems(items)));
+        // 要发送的货物
+        plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
+                Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
+        ));
 
-            CreateInboundShipmentPlanResponse response = client(account)
-                    .createInboundShipmentPlan(plan);
-            CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
+        CreateInboundShipmentPlanResponse response = client(account)
+                .createInboundShipmentPlan(plan);
+        CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
 
-            if(result.isSetInboundShipmentPlans()) {
-                InboundShipmentPlanList planList = result.getInboundShipmentPlans();
-                List<InboundShipmentPlan> members = planList.getMember();
+        if(result.isSetInboundShipmentPlans()) {
+            InboundShipmentPlanList planList = result.getInboundShipmentPlans();
+            List<InboundShipmentPlan> members = planList.getMember();
 
-                InboundShipmentPlan member = null;
-                StringBuilder msg = new StringBuilder();
-                /**
-                 * 选择哪一个 ShipmentPlan? :
-                 * 1. 寻找每一个 ShipmentPlan 确保我们运输的货物在这个 Plan 中都存在.
-                 * 2. 找到都存在的第一个, 否则继续
-                 * 3. 如果最后都没找到, 则报告异常, 把信息抛给前台, 让创建人知道, 让其进行处理.
-                 */
-                boolean isFind;
-                for(InboundShipmentPlan waitCheckPlan : members) {
-                    isFind = true;
-                    try {
-                        List<InboundShipmentPlanItem> itemMember = waitCheckPlan.getItems()
-                                .getMember();
-                        Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<String, InboundShipmentPlanItem>();
-                        for(InboundShipmentPlanItem inboundPlanItem : itemMember) {
-                            inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
-                        }
+            InboundShipmentPlan member = null;
+            StringBuilder msg = new StringBuilder();
 
-                        for(ShipItem itm : items) {
-                            if(!inboundItemMap
-                                    .containsKey(fixHistoryMSKU(itm.unit.selling.merchantSKU))) {
-                                msg.append(String.format("%s not in %s FC`s 需要手动重新处理!\r\n",
-                                        itm.unit.selling.merchantSKU,
-                                        waitCheckPlan.getDestinationFulfillmentCenterId()));
-                                isFind = false;
-                                break;
-                            }
-                        }
-                        if(isFind) {
-                            member = waitCheckPlan;
-                            break;
-                        }
-                    } catch(Exception e) {
-                        // 捕获没有 item 的异常, 不处理这个 member
+            /**
+             * 对产生回来的 PLAN 做检查, 如果所有产生的 PLAN 中没有申请的 MSKU, 则报告异常.
+             */
+            for(InboundShipmentPlan planFba : members) {
+                try {
+                    List<InboundShipmentPlanItem> itemMember = planFba.getItems().getMember();
+                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<String, InboundShipmentPlanItem>();
+                    for(InboundShipmentPlanItem inboundPlanItem : itemMember) {
+                        inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
                     }
-                }
-                if(member == null)
-                    throw new FastRuntimeException(msg.toString());
 
-
-                fbaShipment.account = account;
-                fbaShipment.shipmentId = member.getShipmentId();
-                fbaShipment.labelPrepType = member.getLabelPrepType();
-
-                fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
-
-                // FBA 仓库自适应
-                FBACenter center = FBACenter.findByCenterId(fbaShipment.centerId);
-                if(center == null) {
-                    Address fbaAddress = member.getShipToAddress();
-                    center = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
-                            fbaAddress.getAddressLine2(), fbaAddress.getCity(),
-                            fbaAddress.getName(), fbaAddress.getCountryCode(),
-                            fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
-                    ).save();
-                    Webs.systemMail(String.format("Add a new FC`s %s", center.centerId),
-                            center.toString());
-                }
-                fbaShipment.fbaCenter = center;
-
-                /**
-                 * Items 处理:
-                 * 1. shipitem -> procureunit -> selling.fnsku 的同步检查
-                 * 2. 上传的数量与实际 Amazon 接收的数量, 使用 Amazon 上的, 需要手动重新再添加回去;(体现出 Amazon 的不一样)
-                 */
-                InboundShipmentPlanItemList itemList = member.getItems();
-                List<InboundShipmentPlanItem> itemMembers = itemList.getMember();
-                for(ShipItem spitm : items) {
-                    for(InboundShipmentPlanItem item : itemMembers) {
-                        if(item.getSellerSKU().equals(spitm.unit.selling.merchantSKU)) {
-                            spitm.fulfillmentNetworkSKU = item.getFulfillmentNetworkSKU();
-                            spitm.updateSellingFNSku();
+                    if(!inboundItemMap.containsKey(fixHistoryMSKU(unit.selling.merchantSKU))) {
+                        msg.append("PLAN 不存在 MSKU ").append(unit.selling.merchantSKU);
+                    } else {
+                        if(StringUtils.isBlank(unit.selling.fnSku)) {
+                            unit.selling.fnSku = inboundItemMap
+                                    .get(fixHistoryMSKU(unit.selling.merchantSKU))
+                                    .getFulfillmentNetworkSKU();
                         }
+                        member = planFba;
                     }
+
+                } catch(Exception e) {
+                    //ignore
                 }
-            } else {
-                Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(),
-                        "创建 FBAShipment 失败.");
-                throw new FBAInboundServiceMWSException("创建 FBA Plan 失败.");
             }
-        } finally {
-            monitor.stop();
+            if(member == null)
+                throw new FastRuntimeException(msg.toString());
+
+            fbaShipment.account = account;
+            fbaShipment.shipmentId = member.getShipmentId();
+            fbaShipment.labelPrepType = member.getLabelPrepType();
+            fbaShipment.units.add(unit);
+
+            fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
+
+            // FBA 仓库自适应
+            FBACenter center = FBACenter.findByCenterId(fbaShipment.centerId);
+            if(center == null) {
+                Address fbaAddress = member.getShipToAddress();
+                center = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
+                        fbaAddress.getAddressLine2(), fbaAddress.getCity(),
+                        fbaAddress.getName(), fbaAddress.getCountryCode(),
+                        fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
+                ).save();
+                Webs.systemMail(String.format("Add a new FC`s %s", center.centerId),
+                        center.toString());
+            }
+            fbaShipment.fbaCenter = center;
+        } else {
+            Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(),
+                    "创建 FBAShipment 失败.");
+            throw new FBAInboundServiceMWSException("创建 FBA Plan 失败.");
         }
-        return F.Option.Some(fbaShipment);
+        return fbaShipment;
     }
+
 
     /**
      * 根据 FBAShipment 向 Amazon 创建 FBA Shipment, 如果创建成功则返回 FBA 的 WORKING 状态, 否则返回 PLAN;
@@ -165,32 +127,40 @@ public class FBA {
      */
     public static FBAShipment.S create(FBAShipment fbashipment)
             throws FBAInboundServiceMWSException {
-        //TODO 测出如果数量与 plan 的不一样, Amazon 运输再创建吗?
-        Monitor monitor = MonitorFactory.start("FBA.create");
-        try {
-            if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
-            //TODO effects: 计算 FBA title 算法需要调整
-            String fbaTitle = String.format("%s %s", "FBA Title 需要调整", Dates.date2DateTime());
-            CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
-            create.setSellerId(fbashipment.account.merchantId);
-            create.setShipmentId(fbashipment.shipmentId);
-            create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle,
-                    Account.address(fbashipment.account.type), fbashipment.centerId,
-                    FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
-            // 设置 items
-            //TODO effect: 创建 FBA 的算法需要调整
-            List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(null);
-            create.setInboundShipmentItems(new InboundShipmentItemList(items));
-
-            CreateInboundShipmentResponse response = client(fbashipment.account)
-                    .createInboundShipment(create);
-            if(response.isSetCreateInboundShipmentResult()) {
-                fbashipment.title = fbaTitle;
-                fbashipment.createAt = new Date();
-                return FBAShipment.S.WORKING;
+        if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
+        //TODO effects: 计算 FBA title 算法需要调整
+        StringBuilder fbaTitle = new StringBuilder();
+        Set<Shipment> shipments = new HashSet<Shipment>();
+        int qty = 0;
+        for(ProcureUnit unit : fbashipment.units) {
+            for(ShipItem item : unit.shipItems) {
+                shipments.add(item.shipment);
             }
-        } finally {
-            monitor.stop();
+            qty += unit.qty();
+        }
+        fbaTitle.append("总共运输数量为 ").append(qty).append(" 并关联 ");
+        for(Shipment shipment : shipments) {
+            fbaTitle.append(shipment.id).append(",");
+        }
+        fbaTitle.append(" 运输单");
+
+        CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
+        create.setSellerId(fbashipment.account.merchantId);
+        create.setShipmentId(fbashipment.shipmentId);
+        create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle.toString(),
+                Account.address(fbashipment.account.type), fbashipment.centerId,
+                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
+        // 设置 items
+        //TODO effect: 创建 FBA 的算法需要调整
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbashipment.units);
+        create.setInboundShipmentItems(new InboundShipmentItemList(items));
+
+        CreateInboundShipmentResponse response = client(fbashipment.account)
+                .createInboundShipment(create);
+        if(response.isSetCreateInboundShipmentResult()) {
+            fbashipment.title = fbaTitle.toString();
+            fbashipment.createAt = new Date();
+            return FBAShipment.S.WORKING;
         }
         return FBAShipment.S.PLAN;
     }
@@ -200,36 +170,31 @@ public class FBA {
      * 更新 FBA Shipment, 包括 Amazon FBA Shipment 的状态, ShipItem 的数量 ; 指定 InboundShipmentItem
      *
      * @param fbaShipment
-     * @param updateitems
      * @param state
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S update(FBAShipment fbaShipment, List<ShipItem> updateitems,
-                                       FBAShipment.S state) throws FBAInboundServiceMWSException {
+    public static FBAShipment.S update(FBAShipment fbaShipment, FBAShipment.S state) throws
+            FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        Monitor monitor = MonitorFactory.start("FBA.update");
-        try {
+        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state))
+            return fbaShipment.state;
 
-            if(fbaShipment.state == FBAShipment.S.PLAN) return fbaShipment.state;
-            UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
-            update.setSellerId(fbaShipment.account.merchantId);
-            update.setShipmentId(fbaShipment.shipmentId);
-            update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
-                    Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
-                    fbaShipment.labelPrepType));
+        UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
+        update.setSellerId(fbaShipment.account.merchantId);
+        update.setShipmentId(fbaShipment.shipmentId);
+        update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
+                Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
+                fbaShipment.labelPrepType));
 
-            List<InboundShipmentItem> items = FBA.shipItemsToInboundShipmentItems(updateitems);
-            update.setInboundShipmentItems(new InboundShipmentItemList(items));
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
+        update.setInboundShipmentItems(new InboundShipmentItemList(items));
 
-            UpdateInboundShipmentResponse response = client(fbaShipment.account)
-                    .updateInboundShipment(update);
-            if(response.isSetUpdateInboundShipmentResult())
-                fbaShipment.state = state;
-        } finally {
-            monitor.stop();
-        }
+        UpdateInboundShipmentResponse response = client(fbaShipment.account)
+                .updateInboundShipment(update);
+        if(response.isSetUpdateInboundShipmentResult())
+            fbaShipment.state = state;
         return fbaShipment.state;
     }
 
@@ -300,79 +265,41 @@ public class FBA {
         return fetchItems;
     }
 
-
     /**
-     * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentItem
-     * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentItem 中
-     * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
-     * <p/>
-     * ps: 创建 FBA, 更新 FBA 时使用
+     * 将 采购计划 转换为 FBA 的提交 Request Plan Item
      *
-     * @param shipitems
+     * @param unit
      * @return
      */
-    private static List<InboundShipmentItem> shipItemsToInboundShipmentItems(
-            List<ShipItem> shipitems) {
-        /**
-         * 1. 根据 ShipItem 的 msku 组成 Map
-         * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
-         */
-        Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
+    public static InboundShipmentPlanRequestItem procureUnitToInboundShipmentPlanItems(
+            ProcureUnit unit) {
+        return new InboundShipmentPlanRequestItem(
+                fixHistoryMSKU(unit.selling.merchantSKU),
+                null,
+                null,
+                unit.qty());
+    }
+
+    /**
+     * 将 List 采购计划 转换为 FBA 的提交 Request Create Item
+     *
+     * @param units
+     * @return
+     */
+    private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems
+    (List<ProcureUnit> units) {
 
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
-        for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
-            // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentItem(null, entry.getKey(), null, entry.getValue().get(),
+        for(ProcureUnit unit : units) {
+            items.add(new InboundShipmentItem(null,
+                    fixHistoryMSKU(unit.selling.merchantSKU),
+                    null,
+                    unit.qty(),
                     null));
         }
         return items;
     }
 
-    /**
-     * 将 Shipment 运输的 ShipItems 转换成为 FBA 的 InboundShipmentPlanRequestItem
-     * - 在转换的时候会检查 ShipItem 集合中是否有 msku 一样的, 如果一样, 则数量自动累计到一个 InboundShipmentPlanRequestItem 中
-     * - 数量为 0 原来要删除, 但有存在, 那么数量也累计
-     * <p/>
-     * ps: 创建计划时时候
-     *
-     * @param shipitems
-     * @return
-     */
-    private static List<InboundShipmentPlanRequestItem> shipItemsToInboundShipmentPlanItems(
-            List<ShipItem> shipitems) {
-        Map<String, AtomicInteger> shipitemsMap = shipItemMerge(shipitems);
-
-        List<InboundShipmentPlanRequestItem> items = new ArrayList<InboundShipmentPlanRequestItem>();
-        for(Map.Entry<String, AtomicInteger> entry : shipitemsMap.entrySet()) {
-            // 如果 item.qty 为 0 Amazon 会自动删除这个 InboundItem
-            items.add(new InboundShipmentPlanRequestItem(entry.getKey(), null, null,
-                    entry.getValue().get()));
-        }
-        return items;
-    }
-
-
-    /**
-     * 将 ShipItem 中由于相同 msku 的数量进行合并, Amazon 不允许分开提交.
-     *
-     * @param shipItems
-     * @return
-     */
-    private static Map<String, AtomicInteger> shipItemMerge(List<ShipItem> shipItems) {
-        /**
-         * 1. 根据 ShipItem 的 msku 组成 Map
-         * 2. 遍历 Map 的 key 来生成 InboundShipmentItems
-         */
-        Map<String, AtomicInteger> shipitemsMap = new HashMap<String, AtomicInteger>();
-        for(ShipItem item : shipItems) {
-            String msku = item.unit.selling.merchantSKU;
-            if(shipitemsMap.containsKey(msku))
-                shipitemsMap.get(msku).addAndGet(item.qty);
-            else
-                shipitemsMap.put(fixHistoryMSKU(msku), new AtomicInteger(item.qty));
-        }
-        return shipitemsMap;
-    }
 
     /**
      * 历史的 msku 的问题兼容

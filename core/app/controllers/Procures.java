@@ -2,7 +2,6 @@ package controllers;
 
 import helper.Webs;
 import models.ElcukRecord;
-import models.User;
 import models.embedded.UnitAttrs;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
@@ -12,9 +11,12 @@ import models.view.Ret;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -56,41 +58,15 @@ public class Procures extends Controller {
     }
 
 
-    public static void remove(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        unit.remove();
-        if(Validation.hasErrors()) {
-            renderArgs.put("p", new ProcurePost());
-            render("Procures/index");
-        }
-        flash.success("删除成功");
-        redirect("/Procures/index");
-    }
-
-
-    /**
-     * 抵达货代
-     * TODO effect?
-     *
-     * @param id
-     */
-    public static void markPlace(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        if(unit.cooperator == null || unit.shipType == null) {
-            renderJSON(new Ret(false, "[合作者] 或者 [运输方式] 需要填写完整."));
-        }
-        unit.isPlaced = true;
-        unit.save();
-        renderJSON(new Ret());
-    }
-
     /**
      * 某一个 ProcureUnit 交货
      */
     public static void deliveryUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        List<ElcukRecord> records = ElcukRecord
+                .records(unit.id + "", Messages.get("procureunit.delivery"));
         renderArgs.put("attrs", unit.attrs);
-        render(unit);
+        render(unit, records);
     }
 
     /**
@@ -122,38 +98,13 @@ public class Procures extends Controller {
         Deliveryments.show(unit.deliveryment.id);
     }
 
-    public static void splitUnit(long id) {
-        ProcureUnit unit = ProcureUnit.findById(id);
-        ProcureUnit newUnit = new ProcureUnit(unit);
-        newUnit.deliveryment = unit.deliveryment;
-        newUnit.product = unit.product;
-        render(unit, newUnit);
-    }
-
     /**
-     * 分拆操作
+     * 选择供应商
      *
-     * @param id
-     * @param newUnit
+     * @param coperId
+     * @param sku
+     * @param size
      */
-    @Check("procures.dosplitunit")
-    public static void doSplitUnit(long id, ProcureUnit newUnit) {
-        checkAuthenticity();
-        ProcureUnit unit = ProcureUnit.findById(id);
-        newUnit.handler = User.current();
-        unit.split(newUnit);
-        if(Validation.hasErrors()) render("Procures/splitUnit.html", unit, newUnit);
-        //TODO effect: 调整采购计划分拆, 取消周期型运输单
-        /*
-        if(unit.isHaveCycleShipment())
-            flash.success("分拆成功, 并且成功保留对应的周期型运输单.");
-        else
-            flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
-        */
-        flash.success("分拆成功, 并不处于周期型运输单中, 进入采购计划池中.");
-        Deliveryments.show(unit.deliveryment.id);
-    }
-
     public static void calculateBox(long coperId, String sku, int size) {
         validation.required(coperId);
         validation.required(sku);
