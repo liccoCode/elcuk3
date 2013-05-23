@@ -73,7 +73,7 @@
 #{if unit.fba}
   <tr>
       #{if unit.fba.records}
-        <td rel='popover' trigger='manual' placement='bottom' content="${unit.fba.records()}" full-width='true'>
+        <td rel='popover' trigger='click' placement='bottom' content="${unit.fba.records()}" full-width='true'>
           入库进度 <i class="icon-search"></i>
         </td>
       #{/if}
@@ -95,8 +95,8 @@
   </tr>
 #{/if}
   <tr>
-    <td>备注</td>
-    <td>
+    <td colspan="2">
+      备注<br>:
     ${unit.comment.raw()}
     </td>
   </tr>
