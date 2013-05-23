@@ -383,19 +383,72 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 采购计划的预计日期变更
+     * 采购计划在不同阶段可以修改的信息不一样
      *
-     * @param planDeliveryDate 预计交货日期
-     * @param planShipDate     预计发货日期
-     * @param planArrivDate    预计抵达日期
+     * @param unit
      */
-    public void updatePlanDates(Date planDeliveryDate, Date planShipDate, Date planArrivDate) {
-        this.attrs.planDeliveryDate = planDeliveryDate;
-        this.attrs.planShipDate = planShipDate;
-        this.attrs.planArrivDate = planArrivDate;
-        this.attrs.validate();
-        if(Validation.hasErrors()) return;
+    public void update(ProcureUnit unit) {
+        if(this.stage == STAGE.CLOSE)
+            Validation.addError("", "已经结束, 无法再修改");
+        if(this.stage == STAGE.PLAN) {
+            if(unit.whouse != null) this.whouse = unit.whouse;
+            if(unit.attrs.planDeliveryDate != null)
+                this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+            if(unit.cooperator != null && unit.deliveryment == null)
+                this.cooperator = unit.cooperator;
+            if(unit.shipType != null) this.shipType = unit.shipType;
+            if(unit.attrs.price != null) this.attrs.price = unit.attrs.price;
+            if(unit.attrs.currency != null) this.attrs.currency = unit.attrs.currency;
+            if(unit.attrs.planQty != null) this.attrs.planQty = unit.attrs.planQty;
+            if(unit.attrs.qty != null) this.attrs.qty = unit.attrs.qty;
+            if(unit.attrs.planShipDate != null) this.attrs.planShipDate = unit.attrs.planShipDate;
+            if(unit.attrs.planArrivDate != null)
+                this.attrs.planArrivDate = unit.attrs.planArrivDate;
+        } else if(this.stage == STAGE.DELIVERY) {
+            if(unit.whouse != null) this.whouse = unit.whouse;
+            if(unit.attrs.planDeliveryDate != null)
+                this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
+            if(unit.shipType != null) this.shipType = unit.shipType;
+            if(unit.attrs.price != null) this.attrs.price = unit.attrs.price;
+            if(unit.attrs.currency != null) this.attrs.currency = unit.attrs.currency;
+            if(unit.attrs.planQty != null) this.attrs.planQty = unit.attrs.planQty;
+            if(unit.attrs.qty != null) this.attrs.qty = unit.attrs.qty;
+            if(unit.attrs.planShipDate != null) this.attrs.planShipDate = unit.attrs.planShipDate;
+            if(unit.attrs.planArrivDate != null)
+                this.attrs.planArrivDate = unit.attrs.planArrivDate;
+        } else if(this.stage == STAGE.DONE) {
+            if(unit.attrs.qty != null) this.attrs.qty = unit.attrs.qty;
+            if(unit.attrs.planShipDate != null) this.attrs.planShipDate = unit.attrs.planShipDate;
+            if(unit.attrs.planArrivDate != null)
+                this.attrs.planArrivDate = unit.attrs.planArrivDate;
+        } else {
+            if(unit.attrs.planArrivDate != null)
+                this.attrs.planArrivDate = unit.attrs.planArrivDate;
+        }
+        this.shipItemQty(this.qty());
         this.save();
+    }
+
+    /**
+     * 调整采购计划所产生的运输项目的运输单
+     *
+     * @param shipment
+     */
+    public void changeShipItemShipment(Shipment shipment) {
+        for(ShipItem shipItem : this.shipItems) {
+            if(this.shipType == Shipment.T.EXPRESS) {
+                shipItem.shipment = null;
+                shipItem.save();
+            } else {
+                Shipment originShipment = shipItem.shipment;
+                shipItem.adjustShipment(shipment);
+                if(Validation.hasErrors()) {
+                    shipItem.shipment = originShipment;
+                    shipItem.save();
+                    return;
+                }
+            }
+        }
     }
 
     /**

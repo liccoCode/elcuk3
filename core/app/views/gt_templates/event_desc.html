@@ -1,7 +1,10 @@
 <table class="table table-bordered table-condensed">
   <tr>
     <td>预计交货时间</td>
-    <td>#{time_tooltip time: unit.attrs.planDeliveryDate /}</td>
+    <td>
+    #{time_tooltip time: unit.attrs.planDeliveryDate /}
+      <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-mini pull-right">修改</a>
+    </td>
   </tr>
 #{if unit.attrs.deliveryDate}
   <tr>
