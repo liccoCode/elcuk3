@@ -100,7 +100,7 @@ public class Shipments extends Controller {
 
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
-        ship.autoCheckDone();
+        ship.endShipByComputer();
         render(ship);
     }
 
@@ -312,7 +312,7 @@ public class Shipments extends Controller {
 
     public static void endShip(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
-        shipment.endShip(date);
+        shipment.endShipByHand(date);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else

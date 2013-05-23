@@ -105,12 +105,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         },
         /**
-         * 运输完成; 运输单跟踪到派送;
+         * 抵达港口
          */
         SHIP_OVER {
             @Override
             public String label() {
-                return "运输完成";
+                return "抵达港口";
             }
         },
         /**
