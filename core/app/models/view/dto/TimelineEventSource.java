@@ -218,8 +218,8 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-            this.title = String.format("#%s 计划 %s状态, 可销售 %s 天",
-                    this.unit.id, this.unit.stage.label(), this.lastDays);
+            this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
+                    this.unit.id, this.unit.stage.label(), this.unit.qty(), this.lastDays);
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procures/index?p.search=id:" + this.unit.id;
             return this;
