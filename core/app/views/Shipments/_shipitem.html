@@ -49,7 +49,7 @@
     <td><a href="@{Sellings.selling(itm.unit.sid)}">${itm.unit.sid}</a></td>
       #{if useCheckbox}
           #{if itm.unit.fba?.records}
-            <td rel='popover' trigger='manual' placement='bottom' full-width="true"
+            <td rel='popover' trigger='click' placement='bottom' full-width="true"
                 content="${itm.unit.fba?.records()}">
             ${itm.unit.fba?.shipmentId}
               <i class="icon-search"></i>

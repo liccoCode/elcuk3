@@ -11,7 +11,6 @@ import models.view.post.ShipmentPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -329,17 +328,9 @@ public class Shipments extends Controller {
             Webs.errorToFlash(flash);
             show(ship.id);
         }
-        // 通过 play status 查看这个方法执行平均在 3s, 所以让其放开 3s 线程时间
-        await("3s", new F.Action0() {
-            @Override
-            public void invoke() {
-                // 由于使用 await 后, 就与原来不是同一个线程, 所以无法使用 Validate
-                Shipment ship = Shipment.findById(id);
-                ship.trackWebSite();
-                ship.monitor();
-                show(ship.id);
-            }
-        });
+        ship.trackWebSite();
+        ship.monitor();
+        show(ship.id);
     }
 
     /**
