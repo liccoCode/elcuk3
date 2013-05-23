@@ -1,6 +1,7 @@
 package ext;
 
 import models.procure.*;
+import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
@@ -131,7 +132,6 @@ public class ProcuresHelper extends JavaExtensions {
      * 判断运输项目的预计发货时间是否超过当前运输单
      *
      * @param itm
-     * @param shipment
      * @return
      */
     public static String overdue(ShipItem itm) {
@@ -139,5 +139,33 @@ public class ProcuresHelper extends JavaExtensions {
             return "#F2DEDE";
         else
             return "#FFFFFF";
+    }
+
+    /**
+     * 根据差值 返回不同颜色来表示升、降、相等
+     *
+     * @param diff
+     * @return
+     */
+    public static String rgb(Float diff) {
+        if(diff > 0)
+            return "#468847";
+        else if(diff < 0)
+            return "#B94A48";
+        return "#0000ff";
+    }
+
+    /**
+     * 计算 AnalyzeDTO.difference的增长/下降百分比
+     *
+     * @param dto
+     * @return
+     */
+    public static float percentage(AnalyzeDTO dto) {
+        float den = dto.difference;
+        float mol = dto.day1 - dto.difference;
+        if(den == 0 || mol == 0)
+            return 0;
+        return Math.abs(den / mol);
     }
 }

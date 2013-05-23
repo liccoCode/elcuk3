@@ -30,10 +30,6 @@ import java.util.concurrent.TimeUnit;
 public class AnalyzePost extends Post<AnalyzeDTO> {
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
-    /**
-     * 开启的, 会去搜索的市场
-     */
-    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR};
     public Date from = super.from;
     public Date to = super.to;
 
@@ -129,8 +125,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
             long differTime =
                     vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
-            if(differTime <= TimeUnit.DAYS.toMillis(1) && differTime >= 0)
-                currentDto.day0 += vo.qty;
             if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
                 currentDto.day1 += vo.qty;
             //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天

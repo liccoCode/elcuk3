@@ -131,6 +131,7 @@ public class Payment extends Model {
     /**
      * 最后支付的币种
      */
+    @Enumerated(EnumType.STRING)
     public Currency actualCurrency;
 
     /**

@@ -39,10 +39,16 @@
           #{/list}
       </td>
       <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
-      <td>${helper.Currency.CNY.symbol()} ${pay.totalFees()._2}</td>
       <td>
+        <a href="javascript:;"
+           rel="tooltip"
+           title="参考汇率: ${helper.Currency.USD.ratio(helper.Currency.CNY)} CNY: ${pay.totalFees()._2}">
+        ${helper.Currency.USD.symbol()} ${pay.totalFees()._1.format('#.##')}
+        </a>
+      </td>
+      <td>
+      ${pay.actualCurrency?.symbol()} ${pay.actualPaid}
         <i class="badge badge-info">${pay.units().size()}</i>
-      ${pay.actualPaid}
       </td>
       <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
       <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>

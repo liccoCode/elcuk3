@@ -706,11 +706,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void revertState() {
         if(Arrays.asList(S.PLAN, S.SHIPPING).contains(this.state))
             Validation.addError("", "当前状态是是不允许撤销的.");
+        if(this.type == T.EXPRESS && !Arrays.asList(S.DONE, S.RECEIVING).contains(this.state))
+            Validation.addError("",
+                    "快递方式, 只允许 " + S.DONE.label() + " 与 " + S.RECEIVING.label() + " 状态撤销");
         if(Validation.hasErrors()) return;
 
         if(this.state == S.DONE) {
             this.state = S.RECEIVING;
             this.dates.arriveDate = null;
+            this.changeRelateProcureUnitStage(ProcureUnit.STAGE.INBOUND);
         } else if(this.state == S.RECEIVING) {
             this.state = S.RECEIPTD;
             this.dates.inbondDate = null;
