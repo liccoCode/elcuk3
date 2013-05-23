@@ -173,14 +173,20 @@ $ ->
   # 绘制销量曲线
   unit_line = (params) ->
     LoadMask.mask(BELOWTAb.content_selector())
+
+    if params['p.categoryId'] is ''
+      displayStr = params['p.val']
+    else
+      displayStr = 'Category:' + params['p.categoryId'].substr(1)
+      params['p.val'] = params['p.categoryId'].substr(1)
+
     $.getJSON('/analyzes/ajaxUnit', params, (r) ->
       try
         if r.flag is false
           alert(r.message)
         else
-          display_sku = params['p.val']
           unitLines = newSaleUnitLines()
-          unitLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
+          unitLines.head("Selling [<span style='color:orange'>" + displayStr + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
           names =
             unit_all: 'Unit Order(all)'
             unit_uk: 'Unit Order(uk)'
@@ -257,26 +263,29 @@ $ ->
       #$('#tl').data('timeline').paint()
     )
 
-  # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据.
-  sellRankLoad = () ->
+  # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据. refresh:是否刷新曲线图
+  sellRankLoad = (refresh) ->
     LoadMask.mask();
     type = $("[name=p\\.type]").val()
     target = $("##{type}").load('/Analyzes/analyzes', $("#click_param").formSerialize(),
-    ->
+    ()->
 
       # 翻页
       $("##{type} div.pagination a").click(
         (e) ->
           e.preventDefault()
           $('[name=p\\.page]').val($(@).attr('page'))
-          sellRankLoad()
+          sellRankLoad(false)
       )
 
       # 排序功能
       sortables = $("##{type} th.sortable")
       sortables.click (e) ->
+        $('[name=p\\.desc]').val(->
+          return if $(@).val() == 'false' then true else false
+        )
         $('[name=p\\.orderBy]').val($(@).attr('name'))
-        sellRankLoad()
+        sellRankLoad(false)
 
       # 绑定 sku/sid 的点击事件[unit_line, sales_line, session, turnOver]
       $("##{type} .#{type}").click((e) ->
@@ -291,6 +300,8 @@ $ ->
           when 'root'
             sale_line(params)
           when 'basic'
+          #绘制单个Selling的曲线图时,去掉Category条件
+            params['p.categoryId'] = ''
             unit_line(params)
           else
             console.log('skip')
@@ -306,8 +317,8 @@ $ ->
         bindSIDPsBtn()
       else if type == SKU
         pageViewDefaultContent()
-
-      LoadMask.unmask();
+      LoadMask.unmask()
+      unit_line(paramsObj()) if refresh
     )
 
   pageViewDefaultContent = () ->
@@ -338,7 +349,9 @@ $ ->
   # 给 搜索 按钮添加事件
   $('#a_search').click (e) ->
     e.preventDefault()
-    sellRankLoad()
+    $('[name=p\\.val]').val('all') if $('[name=p\\.categoryId]').val() is ''
+    #重新搜索数据、加载曲线图
+    sellRankLoad(true)
 
   # 重新加载全部的销售线
   $('#all_search').click (e) ->
@@ -350,7 +363,9 @@ $ ->
   BELOWTAb.tabs().find('[data-toggle=tab]').on('shown', (e) ->
     tabId = $(e.target).attr('href').substr(1)
     $('[name=p\\.type]').val(tabId)
-    sellRankLoad() if $("##{tabId}").html() == "wait"
+    if $("##{tabId}").html() is 'wait'
+      $('[name=p\\.val]').val('all') if $('[name=p\\.categoryId]').val() is ''
+      sellRankLoad(true)
   )
 
   # 为页面上访的曲线 Tab 添加切换事件
@@ -386,4 +401,3 @@ $ ->
   unit_line(paramsObj())
   # 默认 PageView 线
   pageViewDefaultContent()
-

@@ -56,6 +56,11 @@ public class Application extends Controller {
         renderJSON(new Ret());
     }
 
+    public static void jc() {
+        JPA.em().getEntityManagerFactory().getCache().evictAll();
+        renderJSON(new Ret());
+    }
+
     /**
      * 清除指定 key 的缓存
      *

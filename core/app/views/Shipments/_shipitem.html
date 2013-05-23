@@ -2,6 +2,7 @@
 1. checkbox: [true]|false; 是否拥有 checkbox 框框
 2. shipmentId: [null]|<shipmentId>; 是否体现取消运输项目功能
 3. itmRecord: [false]|true; 是否加载 Record
+4. fbaRecord: [false]|true; 是否加载 FBA 的入库信息
 }*
 #{set useCheckbox: checkbox == null || checkbox /}
 <table class="table table-condensed table-bordered">
@@ -47,8 +48,19 @@
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
     <td><a href="@{Sellings.selling(itm.unit.sid)}">${itm.unit.sid}</a></td>
       #{if useCheckbox}
-        <td>${itm.unit?.fba?.shipmentId}</td>
-        <td>${itm.unit?.fba?.centerId}</td>
+          #{if itm.unit.fba?.records}
+            <td rel='popover' trigger='click' placement='bottom' full-width="true"
+                content="${itm.unit.fba?.records()}">
+            ${itm.unit.fba?.shipmentId}
+              <i class="icon-search"></i>
+            </td>
+          #{/if}
+          #{else }
+            <td>
+            ${itm.unit.fba?.shipmentId}
+            </td>
+          #{/else}
+        <td>${itm.unit.fba?.centerId}</td>
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.qty} (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})

@@ -43,7 +43,7 @@ $ ->
 
 
   # Ajax 加载 Shipment
-  $('#new_procureunit').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
+  $('#new_procureunit,#unitEditForm').on('change', "[name='unit.shipType'],[name='unit.whouse.id']", ->
     whouseId = $("[name='unit.whouse.id']").val()
     shipType = $("[name='unit.shipType']:checked").val()
     shipment = $('#shipments')
@@ -59,7 +59,3 @@ $ ->
           LoadMask.unmask()
         )
   )
-
-  # 关闭一些修改
-  for attr in ["unit.attrs.price", "unit.attrs.currency"]
-    $("#unitEditForm [name='#{attr}']").prop('disabled', true)

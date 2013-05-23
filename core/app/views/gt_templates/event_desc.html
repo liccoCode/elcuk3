@@ -1,7 +1,10 @@
 <table class="table table-bordered table-condensed">
   <tr>
     <td>预计交货时间</td>
-    <td>#{time_tooltip time: unit.attrs.planDeliveryDate /}</td>
+    <td>
+    #{time_tooltip time: unit.attrs.planDeliveryDate /}
+      <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-mini pull-right">修改</a>
+    </td>
   </tr>
 #{if unit.attrs.deliveryDate}
   <tr>
@@ -69,7 +72,14 @@
   </tr>
 #{if unit.fba}
   <tr>
-    <td>入库进度</td>
+      #{if unit.fba.records}
+        <td rel='popover' trigger='click' placement='bottom' content="${unit.fba.records()}" full-width='true'>
+          入库进度 <i class="icon-search"></i>
+        </td>
+      #{/if}
+      #{else }
+        <td>入库进度</td>
+      #{/else}
     <td>
       <ul class="unstyled">
           #{list items: unit.shipItems, as:'shipItem'}
@@ -84,4 +94,10 @@
     </td>
   </tr>
 #{/if}
+  <tr>
+    <td colspan="2">
+      备注<br>:
+    ${unit.comment.raw()}
+    </td>
+  </tr>
 </table>

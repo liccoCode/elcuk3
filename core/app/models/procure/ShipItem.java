@@ -148,21 +148,6 @@ public class ShipItem extends GenericModel {
     }
 
     /**
-     * 修改这个运输项目的运输单, 与之对应的 FBA 也会随之改变
-     *
-     * @param shipment
-     */
-    public void changeShipment(Shipment shipment) {
-        //TODO effect: 与 FBA 没有关系, 可以删除. 同时这个方法也可以删除.
-//        if(this.fba != null) {
-//            this.fba.shipment = shipment;
-//            this.fba.save();
-//        }
-        this.shipment = shipment;
-        this.save();
-    }
-
-    /**
      * 总重量 (kg)
      *
      * @return
@@ -233,14 +218,11 @@ public class ShipItem extends GenericModel {
         if(shipment.state != Shipment.S.PLAN)
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
 
-        if(System.currentTimeMillis() > shipment.dates.planBeginDate.getTime())
-            Validation.addError("", "目标运输单 " + shipment.id + " 的预计运输时间已经超时, 其应该处于运输状态.");
-
         for(ShipItem itm : items) {
             if(itm.shipment.equals(shipment))
                 Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
             if(itm.shipment.state != Shipment.S.PLAN)
-                Validation.addError("", "当前运输项目的运输单已经是不可更改");
+                Validation.addError("", "当前运输单物流已经确认, 如需调整请联系物流");
         }
 
         if(Validation.hasErrors()) return;
@@ -250,6 +232,18 @@ public class ShipItem extends GenericModel {
             itm.shipment = shipment;
             itm.save();
         }
+    }
+
+    public void adjustShipment(Shipment shipment) {
+        if(shipment.state != Shipment.S.PLAN)
+            Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
+        if(this.shipment.equals(shipment))
+            Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
+        if(this.shipment.state != Shipment.S.PLAN)
+            Validation.addError("", "当前运输项目的运输单已经是不可更改");
+        if(Validation.hasErrors()) return;
+        this.shipment = shipment;
+        this.save();
     }
 
     /**

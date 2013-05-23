@@ -29,7 +29,7 @@ window.$ui =
       trigger: 'hover'
       placement: 'top'
       html: 'true'
-    for key in ['animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay', 'container']
+    for key in ['full-width', 'animation', 'html', 'placement', 'selector', 'title', 'content', 'trigger', 'delay', 'container']
       params[key] = tip.attr(key) if tip.attr(key)
     func.call(tip, params)
 
@@ -38,7 +38,10 @@ $(document).on('mouseover', '[rel=tooltip]', (event) ->
 )
 
 $(document).on('mouseover', '[rel=popover]', (event) ->
-  window.$ui.relBase(event, (params) -> @popover(params).popover('show'))
+  window.$ui.relBase(event, (params) ->
+    @popover(params)
+    @data('popover').$tip.css('max-width', '900px') if 'full-width' of params
+  )
 )
 
 $ ->

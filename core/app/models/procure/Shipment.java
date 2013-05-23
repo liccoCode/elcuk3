@@ -522,9 +522,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem shipItem : this.items) {
             shipItem.shipDate = datetime;
             shipItem.save();
-            shipItem.unit.stage = ProcureUnit.STAGE.SHIPPING;
-            shipItem.unit.save();
         }
+        this.changeRelateProcureUnitStage(ProcureUnit.STAGE.SHIPPING);
 
         this.dates.beginDate = datetime;
         this.state = S.SHIPPING;
@@ -542,7 +541,22 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 到港 (运输单抵达港口, 就开始进行清关状态)
+     * 运输单状态进行中, 相关的采购计划的阶段也需要变化;
+     * 1. beginDate 负责 SHIPPING
+     * 2. landPort 负责 SHIP_OVER
+     * 3. inbounding 负责 INBOUND
+     * 4. endShip 负责 CLOSE
+     *
+     * @param stage
+     */
+    private void changeRelateProcureUnitStage(ProcureUnit.STAGE stage) {
+        for(ShipItem shipItem : this.items) {
+            shipItem.unitStage(stage);
+        }
+    }
+
+    /**
+     * 到港 (运输单抵达港口, 就开始进行清关状态
      */
     public void landPort(Date date) {
         if(this.type == T.EXPRESS) {
@@ -556,6 +570,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.state = S.CLEARANCE;
         this.dates.atPortDate = date;
+        this.changeRelateProcureUnitStage(ProcureUnit.STAGE.SHIP_OVER);
         this.save();
     }
 
@@ -640,6 +655,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
         this.state = S.RECEIVING;
         this.dates.inbondDate = date;
+        this.changeRelateProcureUnitStage(ProcureUnit.STAGE.INBOUND);
         this.save();
     }
 
@@ -647,7 +663,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     /**
      * 当前运输单中的所有运输项目的 recivedQty == qty 的时候, 运输单完成.
      */
-    public void autoCheckDone() {
+    public void endShipByComputer() {
         if(this.state != S.RECEIVING) return;
         DateTime now = DateTime.now();
         if(now.isBefore(this.dates.inbondDate.getTime()))
@@ -659,9 +675,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 hundredSize++;
         }
         if(hundredSize == this.items.size()) {
-            this.state = S.DONE;
-            this.dates.arriveDate = now.toDate();
-            this.save();
+            endShip(now.toDate());
         }
     }
 
@@ -670,14 +684,19 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @param date
      */
-    public void endShip(Date date) {
+    public void endShipByHand(Date date) {
         if(date == null) date = new Date();
         shouldSomeStateValidate(S.RECEIVING, "完成运输");
         if(date.getTime() < this.dates.inbondDate.getTime())
             Validation.addError("", "结束时间不可能早于入库事件");
         if(Validation.hasErrors()) return;
+        endShip(date);
+    }
+
+    private void endShip(Date date) {
         this.state = S.DONE;
         this.dates.arriveDate = date;
+        this.changeRelateProcureUnitStage(ProcureUnit.STAGE.CLOSE);
         this.save();
     }
 
@@ -687,11 +706,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void revertState() {
         if(Arrays.asList(S.PLAN, S.SHIPPING).contains(this.state))
             Validation.addError("", "当前状态是是不允许撤销的.");
+        if(this.type == T.EXPRESS && !Arrays.asList(S.DONE, S.RECEIVING).contains(this.state))
+            Validation.addError("",
+                    "快递方式, 只允许 " + S.DONE.label() + " 与 " + S.RECEIVING.label() + " 状态撤销");
         if(Validation.hasErrors()) return;
 
         if(this.state == S.DONE) {
             this.state = S.RECEIVING;
             this.dates.arriveDate = null;
+            this.changeRelateProcureUnitStage(ProcureUnit.STAGE.INBOUND);
         } else if(this.state == S.RECEIVING) {
             this.state = S.RECEIPTD;
             this.dates.inbondDate = null;
