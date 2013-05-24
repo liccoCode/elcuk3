@@ -26,11 +26,14 @@ public class JobsSetup {
         if(Play.mode.isProd() ||
                 (Play.mode.isDev() && "true".equals(Play.configuration.getProperty("jobs.dev")))) {
             // 手动的将所有的需要的 Job 启动
-            every(AmazonFBACapaticyWatcherJob.class, "30mn");
-            every(AmazonFBAQtySyncJob.class, "5mn");
-            every(AmazonOrderFetchJob.class, "5mn");
             every(AmazonOrderUpdateJob.class, "10mn");
             every(AmazonReviewCheckJob.class, "5s");
+            every(OrderInfoFetchJob.class, "1mn");
+
+            every(OrderMailCheck.class, "10mn");
+            every(AmazonFBACapaticyWatcherJob.class, "30mn");
+            every(AmazonFBAQtySyncJob.class, "5mn");
+            every(AmazonOrderFetchJob.class, "1h");
             every(AmazonReviewCrawlJob.class, "5s");
             every(AmazonSellingSyncJob.class, "1h");
             every(AmazonFBAInventoryReceivedJob.class, "20mn");
@@ -42,8 +45,6 @@ public class JobsSetup {
             every(KeepSessionJob.class, "5mn");
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");
-            every(OrderInfoFetchJob.class, "1mn");
-            every(OrderMailCheck.class, "10mn");
             every(ReviewInfoFetchJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");

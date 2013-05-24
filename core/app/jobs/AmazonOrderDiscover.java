@@ -38,7 +38,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         for(Account acc : accounts) {
             try {
                 List<Orderr> orders = MWSOrders.listOrders(acc, 30);
-                Map<String, Boolean> existOrders = ordersExist(orders);
+                Map<String, Boolean> existOrders = AmazonOrderDiscover.ordersExist(orders);
 
                 List<Orderr> toUpdate = new ArrayList<Orderr>();
                 List<Orderr> toSave = new ArrayList<Orderr>();
@@ -49,8 +49,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                         toSave.add(orderr);
                 }
 
-                this.updateOrders(toUpdate);
-                this.saveOrders(toSave);
+                AmazonOrderDiscover.updateOrders(toUpdate);
+                AmazonOrderDiscover.saveOrders(toSave);
 
             } catch(MarketplaceWebServiceOrdersException e) {
                 Logger.warn("Account %s is not fecth Order because of [%s]",
@@ -59,12 +59,13 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         }
     }
 
-    private void updateOrders(List<Orderr> toUpdateOrders) {
+    public static void updateOrders(List<Orderr> toUpdateOrders) {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
                     "UPDATE Orderr SET state=?, shipLevel=?, paymentDate=?," +
                             " shipDate=?, city=?, country=?, postalCode=?, " +
-                            "phone=?, province=?, reciver=?, address=?"
+                            " phone=?, province=?, reciver=?, address=?" +
+                            " WHERE orderId=?"
             );
             int i = 1;
             for(Orderr orderr : toUpdateOrders) {
@@ -80,7 +81,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 pst.setString(i++, orderr.phone);
                 pst.setString(i++, orderr.province);
                 pst.setString(i++, orderr.reciver);
-                pst.setString(i, orderr.address);
+                pst.setString(i++, orderr.address);
+                pst.setString(i, orderr.orderId);
                 pst.addBatch();
                 i = 1;
             }
@@ -91,7 +93,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         }
     }
 
-    private void saveOrders(List<Orderr> toSaveOrders) {
+    public static void saveOrders(List<Orderr> toSaveOrders) {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
                     "INSERT INTO Orderr(orderId, account_id, state, shipLevel, paymentDate, shipDate, createDate, reviewMailed, warnning)" +
@@ -126,7 +128,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
      * @param orderrs
      * @return
      */
-    private Map<String, Boolean> ordersExist(List<Orderr> orderrs) {
+    public static Map<String, Boolean> ordersExist(List<Orderr> orderrs) {
         List<String> orderIds = new ArrayList<String>();
         Map<String, Boolean> existOrders = new HashMap<String, Boolean>();
         for(Orderr orderr : orderrs) {
@@ -136,7 +138,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         SqlSelect sql = new SqlSelect()
                 .select("orderId", "count(orderId) as cnt")
                 .from("Orderr")
-                .where(SqlSelect.whereIn("orderId", orderIds));
+                .where(SqlSelect.whereIn("orderId", orderIds))
+                .groupBy("orderId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         for(Map<String, Object> row : rows) {
             int cnt = NumberUtils.toInt(row.get("cnt").toString());

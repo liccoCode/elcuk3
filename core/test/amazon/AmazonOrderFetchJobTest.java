@@ -31,19 +31,19 @@ public class AmazonOrderFetchJobTest extends UnitTest {
         JobRequest.updateState(fetchJob.type());
     }
 
-    @Test
+    //    @Test
     public void testAllOrdersXML() {
         Account account = Account.findById(2l);
-        List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(Play.getFile("test/html/21089866544" +
-                ".xml"), account);
+        List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(
+                Play.getFile("test/html/21089866544.xml"), account);
         assertEquals(10, orders.size());
     }
 
 
-    //    @Test
+    @Test
     public void testParseOrder() {
         JobRequest job = new JobRequest();
-        job.path = "/Users/wyatt/Downloads/16061848184.txt";
+        job.path = "/Users/wyatt/Programer/repos/elcuk2/core/test/html/21089866544.xml";
         job.account = Account.findById(2l);
         new AmazonOrderFetchJob().callBack(job);
     }

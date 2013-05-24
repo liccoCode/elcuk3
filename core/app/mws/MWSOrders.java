@@ -197,6 +197,20 @@ public class MWSOrders {
                 item.discountPrice = NumberUtils.toFloat(
                         amzItem.getPromotionDiscount().getAmount());
             }
+            if(amzItem.getPromotionIds() != null) {
+                item.promotionIDs = StringUtils.join(
+                        amzItem.getPromotionIds().getPromotionId(), ","
+                );
+            }
+
+            if(amzItem.getGiftWrapPrice() != null) {
+                item.giftWrap = NumberUtils.toFloat(amzItem.getGiftWrapPrice().getAmount());
+            }
+            if(amzItem.getGiftWrapTax() != null) {
+                if(item.giftWrap == null) item.giftWrap = 0f;
+                item.giftWrap += NumberUtils.toFloat(amzItem.getGiftWrapTax().getAmount());
+            }
+
             item.calUsdCose();
             // 临时使用, 使用后删除.(AmazonOrderItemDiscover)
             item.memo = amzItem.getSellerSKU();

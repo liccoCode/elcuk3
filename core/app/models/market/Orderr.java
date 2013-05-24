@@ -14,7 +14,6 @@ import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Email;
 import play.db.jpa.GenericModel;
-import play.db.jpa.JPA;
 import play.templates.JavaExtensions;
 import query.OrderrQuery;
 import query.vo.OrderrVO;
@@ -239,74 +238,6 @@ public class Orderr extends GenericModel {
      */
     public boolean warnning = false;
 
-
-    /**
-     * 在进行解析的 Order XML 文件的时候, 每次需要将更新的数据记录到数据库, 此方法将从 XML 解析出来的 Order 的信息更新到被托管的对象身上.
-     */
-    public void updateAttrs(Orderr newOrderr) {
-        if(newOrderr.address != null) this.address = newOrderr.address;
-        if(newOrderr.address1 != null) this.address1 = newOrderr.address1;
-        if(newOrderr.arriveDate != null) this.arriveDate = newOrderr.arriveDate;
-        if(newOrderr.buyer != null) this.buyer = newOrderr.buyer;
-        if(newOrderr.city != null) this.city = newOrderr.city;
-        if(newOrderr.country != null) this.country = newOrderr.country;
-        if(newOrderr.createDate != null) this.createDate = newOrderr.createDate;
-        if(newOrderr.email != null) this.email = newOrderr.email;
-        if(newOrderr.market != null) this.market = newOrderr.market;
-        if(newOrderr.memo != null) this.memo = newOrderr.memo;
-        if(newOrderr.paymentDate != null) this.paymentDate = newOrderr.paymentDate;
-        if(newOrderr.phone != null) this.phone = newOrderr.phone;
-        if(newOrderr.postalCode != null) this.postalCode = newOrderr.postalCode;
-        if(newOrderr.province != null) this.province = newOrderr.province;
-        if(newOrderr.reciver != null) this.reciver = newOrderr.reciver;
-        if(newOrderr.shipDate != null) this.shipDate = newOrderr.shipDate;
-        if(newOrderr.shipLevel != null) this.shipLevel = newOrderr.shipLevel;
-        if(newOrderr.shippingAmount != null) this.shippingAmount = newOrderr.shippingAmount;
-        if(newOrderr.shippingService != null) this.shippingService = newOrderr.shippingService;
-        if(newOrderr.totalAmount != null) this.totalAmount = newOrderr.totalAmount;
-        if(newOrderr.trackNo != null) this.trackNo = newOrderr.trackNo;
-        if(newOrderr.state != null) {
-            // 这几个状态是不可逆的, 如果有其他地方将订单更新成这几个状态, 那么此订单的状态不允许再进行更改!
-            if(newOrderr.state == S.REFUNDED || newOrderr.state == S.CANCEL ||
-                    newOrderr.state == S.RETURNNEW) return;
-            this.state = newOrderr.state;
-        }
-
-        if(newOrderr.items.size() > 0) {
-            // 比较两个 OrderItems, 首先将相同的 OrderItems 更新回来, 然后将 New OrderItem 集合中出现的系统中不存在的给添加进来
-            Set<OrderItem> newlyOi = new HashSet<OrderItem>();
-
-            // 如果原始的 Order 中一个 OrderItem 都没有
-            if(this.items.size() == 0) {
-                newlyOi.addAll(newOrderr.items);
-            } else if(this.items.size() != newOrderr.items.size()) { // 如果原始的 Order 中有 OrderItem
-                for(OrderItem noi : newOrderr.items) {
-                    for(OrderItem oi : this.items) {
-                        if(oi.equals(noi)) {
-                            oi.updateAttr(noi);
-                            // 表示一级缓存中没有, 那么才可以进入 newlyOrderItem 添加, 否则应该为更新
-                        } else if(!JPA.em().contains(oi)) {
-                            newlyOi.add(noi);
-                        }
-                    }
-                }
-            }
-            // 如果有两个相同的 object_id 相同的对象添加进入 Orderr.items 进行级联保存或者更新, 那么会在 hibernate 进行保存更新
-            // 检查唯一性的时候发生异常! 所以上面的 JPA.em().contains(oi) 判断很有必要!
-            for(OrderItem noi : newlyOi) {
-                noi.order = this;
-                noi.save();
-                this.items.add(noi);
-            }
-        }
-
-        this.save();
-    }
-
-
-    public void setPostalCode(String postalCode1) {
-        if(postalCode1 != null) this.postalCode = postalCode1.toUpperCase();
-    }
 
     /**
      * 此订单总共卖出的产品数量

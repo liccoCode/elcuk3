@@ -74,19 +74,8 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void callBack(JobRequest jobRequest) {
         /**
-         * 1. 将需要更新的数据从 csv 文件中提取出来
-         * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
+         * TODO 仅仅更新 Orderr 信息
          */
-        Set<Orderr> orderSet = AmazonOrderUpdateJob
-                .updateOrderXML(new File(jobRequest.path), jobRequest.account.type);
-        for(Orderr order : orderSet) {
-            Orderr managed = Orderr.findById(order.orderId);
-            if(managed == null) {
-                Logger.error("Update Order [%s] is not exist.", order.orderId);
-            } else {
-                managed.updateAttrs(order);
-            }
-        }
     }
 
     @Override

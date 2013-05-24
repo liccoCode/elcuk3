@@ -74,9 +74,19 @@ public class OrderItem extends GenericModel {
     public Float discountPrice;
 
     /**
+     * 促销的名称
+     */
+    public String promotionIDs;
+
+    /**
      * 这个商品所承担的运输费用
      */
     public Float shippingPrice;
+
+    /**
+     * GiftWrap 费用
+     */
+    public Float giftWrap;
 
     /**
      * 对不同网站不同情况的 Fee 所产生费用的一个总计(经过 -/+ 计算后的) TODO 暂时没有启用
