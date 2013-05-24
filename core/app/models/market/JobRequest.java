@@ -1,6 +1,6 @@
 package models.market;
 
-import helper.AWS;
+import mws.MWSReports;
 import play.Logger;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
@@ -232,7 +232,7 @@ public class JobRequest extends Model {
         if(checkAvailableType()) {
             Logger.debug("(step1)JobRequest request " + this.type + " REQUEST Job.");
             try {
-                AWS.requestReport_step1(this);
+                MWSReports.requestReport_step1(this);
             } catch(Exception e) {
                 Logger.warn("JobRequest Request Report Error. " + e.getMessage());
             }
@@ -250,7 +250,7 @@ public class JobRequest extends Model {
             if(job.checkAvailableType()) {
                 Logger.debug("(step2)JobRequest request " + job.type + " UPDATE_STATE Job.");
                 try {
-                    AWS.requestState_step2(job);
+                    MWSReports.requestState_step2(job);
                 } catch(Exception e) {
                     Logger.warn("JobRequest Update State Error. " + e.getMessage());
                 }
@@ -269,7 +269,7 @@ public class JobRequest extends Model {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " UPDATE_REPORTID Job.");
                 try {
-                    AWS.requestReportId_step3(job);
+                    MWSReports.requestReportId_step3(job);
                 } catch(Exception e) {
                     Logger.warn("JobRequest Update Report Error. " + e.getMessage());
                 }
@@ -288,7 +288,7 @@ public class JobRequest extends Model {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " DOWNLOAD Job.");
                 try {
-                    AWS.requestReportDown_step4(job);
+                    MWSReports.requestReportDown_step4(job);
                 } catch(Exception e) {
                     Logger.warn("JobRequest DownLoad Error. " + e.getMessage());
                 }

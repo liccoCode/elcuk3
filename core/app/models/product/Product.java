@@ -36,6 +36,7 @@ import query.ProductQuery;
 import javax.persistence.*;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,6 +48,7 @@ import java.util.*;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Product extends GenericModel implements ElcukRecord.Log {
+    public static final Pattern Nub = Pattern.compile("[0-9]*");
     /**
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
@@ -630,7 +632,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             parts = new String[]{part0, parts[0].substring(2), parts[1]};
         }
         if(parts.length != 3) return false;
-        if(!Patterns.Nub.matcher(part0).matches()) return false;
+        if(!Product.Nub.matcher(part0).matches()) return false;
         return true;
     }
 

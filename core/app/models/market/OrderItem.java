@@ -74,9 +74,19 @@ public class OrderItem extends GenericModel {
     public Float discountPrice;
 
     /**
+     * 促销的名称
+     */
+    public String promotionIDs;
+
+    /**
      * 这个商品所承担的运输费用
      */
     public Float shippingPrice;
+
+    /**
+     * GiftWrap 费用
+     */
+    public Float giftWrap;
 
     /**
      * 对不同网站不同情况的 Fee 所产生费用的一个总计(经过 -/+ 计算后的) TODO 暂时没有启用
@@ -114,6 +124,13 @@ public class OrderItem extends GenericModel {
         if(noi.currency != null && this.currency != this.currency) this.currency = noi.currency;
         if(noi.usdCost != null) this.usdCost = noi.usdCost;
         this.save();
+    }
+
+    public void calUsdCose() {
+        if(this.currency != null && this.price != null) {
+            this.usdCost = this.currency
+                    .toUSD(this.price - (this.discountPrice == null ? 0 : this.discountPrice));
+        }
     }
 
     @Override

@@ -1,6 +1,6 @@
 package amazon.S3;
 
-import helper.S3;
+import mws.S3;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
