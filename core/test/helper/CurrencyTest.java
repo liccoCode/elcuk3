@@ -5,6 +5,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import play.test.UnitTest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyatt
@@ -31,5 +34,19 @@ public class CurrencyTest extends UnitTest {
         String actual = Dates.date2Date(Currency.rateDateTime(html));
         String expect = Dates.date2Date(DateTime.now().toDate());
         assertEquals(expect, actual);
+    }
+
+    @Test
+    public void testSubList() {
+        List<String> list = new ArrayList<String>();
+        for(int i = 0; i < 20; i++) {
+            list.add("index: " + i);
+        }
+
+        List<String> subList = list.subList(0, 10);
+        System.out.println(subList);
+        System.out.println(list);
+        subList.clear();
+        System.out.println(list);
     }
 }

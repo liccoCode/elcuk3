@@ -1,10 +1,10 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
-import helper.FBA;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Validation;
