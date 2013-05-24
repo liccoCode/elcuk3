@@ -88,8 +88,6 @@ public class MWSOrders {
 
             if(amzOrder.getPurchaseDate() != null) {
                 orderr.paymentDate = amzOrder.getPurchaseDate().toGregorianCalendar().getTime();
-                // 付款后的最后更新时间才有可能是发货时间
-                orderr.shipDate = amzOrder.getLastUpdateDate().toGregorianCalendar().getTime();
             }
             /* Fee 类型在这里计算?
             if(amzOrder.getOrderTotal() != null) {

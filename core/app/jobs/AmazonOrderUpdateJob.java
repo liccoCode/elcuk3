@@ -8,21 +8,24 @@ import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
+import play.db.DB;
 import play.jobs.Job;
 import play.libs.IO;
 
 import java.io.File;
-import java.util.HashSet;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <pre>
  * 通过 Amazon FBA 来更新订单的信息.
  *  * 周期:
- * - 轮询周期: 10mn
- * - Duration: 30mn
- * - Job Interval: 6h
+ * - 轮询周期: 1h
+ * - Duration: 2h
+ * - Job Interval: 24h
  * </pre>
  * User: wyattpan
  * Date: 6/11/12
@@ -68,14 +71,18 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
      */
     @Override
     public int intervalHours() {
-        return 6;
+        return 24;
     }
 
     @Override
     public void callBack(JobRequest jobRequest) {
         /**
-         * TODO 仅仅更新 Orderr 信息
+         * 补充更新订单信息
          */
+        List<Orderr> orderSet = AmazonOrderUpdateJob.updateOrderXML(
+                new File(jobRequest.path), jobRequest.account.type
+        );
+        AmazonOrderUpdateJob.updateShippedOrder(orderSet);
     }
 
     @Override
@@ -90,9 +97,9 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
      * @param file
      * @return
      */
-    public static Set<Orderr> updateOrderXML(File file, M market) {
+    public static List<Orderr> updateOrderXML(File file, M market) {
         List<String> lines = IO.readLines(file, "UTF-8");
-        Set<Orderr> orderrs = new HashSet<Orderr>();
+        List<Orderr> orderrs = new ArrayList<Orderr>();
         lines.remove(0); //删除第一行标题
         for(String line : lines) {
             // 在解析 csv 文件的时候会发现有重复的项出现, 不过这没关系,
@@ -102,30 +109,34 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                     Logger.info("Skip Self Order[" + vals[0] + "].");
                     continue;
                 }
+                //amazon-order-id	merchant-order-id	shipment-id	shipment-item-id	amazon-order-item-id	merchant-order-item-id	purchase-date	payments-date	shipment-date	reporting-date	buyer-email	buyer-name	buyer-phone-number	sku	product-name	quantity-shipped	currency	item-price	item-tax	shipping-price	shipping-tax	gift-wrap-price	gift-wrap-tax	ship-service-level	recipient-name	ship-address-1	ship-address-2	ship-address-3	ship-city	ship-state	ship-postal-code	ship-country	ship-phone-number	bill-address-1	bill-address-2	bill-address-3	bill-city	bill-state	bill-postal-code	bill-country	item-promotion-discount	ship-promotion-discount	carrier	tracking-number	estimated-arrival-date	fulfillment-center-id	fulfillment-channel	sales-channel
                 // 例子数据
                 //110-2162328-5179422		DmlbKXMtN	Dprp1L4JR	07664457044546		2013-01-15T12:24:57+00e00	2013-01-17T05:51:50+00:00	2013-01-17T05:06:24+00:00	2013-01-17T16:10:00+00:00	blnpdwtsw5npzjr@marketplace.amazon.com	Diana Gil		80DBK12000-AB	EasyAcc 12000mAh 4 x USB Portable External Battery Pack Charger Power Bank for Tablets: iPad 3, iPad mini; Kindle Fire HD, Google Nexus 7, Nexus 10; S	1	USD	40.99	0.00	3.85	0.00	0.00	0.00	Standard	Diana Gil	163 Lloyd Street	2ND Floor		New Haven	CT	06513	US									0.00	-3.85	SMARTPOST	9102901001301798807420	2013-01-24T04:00:00+00:00	LEX1	AFN	Amazon.com
                 Orderr order = new Orderr();
                 order.orderId = vals[0];
-                order.paymentDate = Dates.parseXMLGregorianDate(vals[7]);
                 order.shipDate = Dates.parseXMLGregorianDate(vals[8]);
                 order.shippingService = vals[42];
                 if(StringUtils.isNotBlank(vals[43])) {
                     order.trackNo = vals[43];
                     order.arriveDate = Dates.parseXMLGregorianDate(vals[44]);
                 }
-                /**
-                 * 这里 Amazon 给的数据并不完整, 需要额外从 OrderInfoFetch 中补全.
-                 order.phone = vals[12]; 这个在这份文档中始终没有出现过
-                 */
                 order.email = vals[10];
                 order.buyer = vals[11];
-                order.shipLevel = vals[23];
                 order.reciver = vals[24];
-                order.address = vals[25] + "\r\n" + (vals[26] + " " + vals[27]).trim();
-                order.city = vals[28];
-                order.province = vals[29];
-                order.postalCode = vals[30];
-                order.country = vals[31];
+
+                List<String> address = new ArrayList<String>();
+                for(int i = 25; i <= 27; i++) {
+                    if(StringUtils.isBlank(vals[i])) continue;
+                    address.add(vals[i].trim());
+                }
+                order.address = StringUtils.join(address, ", ");
+
+                List<String> billingAddress = new ArrayList<String>();
+                for(int i = 33; i <= 39; i++) {
+                    if(StringUtils.isBlank(vals[i])) continue;
+                    billingAddress.add(vals[i].trim());
+                }
+                order.address1 = StringUtils.join(billingAddress, ", ");
 
                 orderrs.add(order);
             } catch(Exception e) {
@@ -133,5 +144,35 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
             }
         }
         return orderrs;
+    }
+
+    private static void updateShippedOrder(List<Orderr> fbaShippedOrderrs) {
+        try {
+            PreparedStatement psmt = DB.getConnection().prepareStatement(
+                    "UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
+                            " email=?, buyer=?, reciver=?, address=?, address1=?" +
+                            " WHERE orderId=?"
+            );
+            int i = 1;
+            for(Orderr orderr : fbaShippedOrderrs) {
+                psmt.setDate(i++,
+                        orderr.shipDate == null ? null : new Date(orderr.shipDate.getTime()));
+                psmt.setString(i++, orderr.shippingService);
+                psmt.setString(i++, orderr.trackNo);
+                psmt.setDate(i++,
+                        orderr.arriveDate == null ? null : new Date(orderr.arriveDate.getTime()));
+                psmt.setString(i++, orderr.email);
+                psmt.setString(i++, orderr.buyer);
+                psmt.setString(i++, orderr.reciver);
+                psmt.setString(i++, orderr.address);
+                psmt.setString(i++, orderr.address1);
+                psmt.setString(i, orderr.orderId);
+                psmt.addBatch();
+                i = 1;
+            }
+            psmt.executeBatch();
+        } catch(SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

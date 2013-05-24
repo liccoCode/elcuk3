@@ -63,7 +63,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
                     "UPDATE Orderr SET state=?, shipLevel=?, paymentDate=?," +
-                            " shipDate=?, city=?, country=?, postalCode=?, " +
+                            " city=?, country=?, postalCode=?, " +
                             " phone=?, province=?, reciver=?, address=?" +
                             " WHERE orderId=?"
             );
@@ -73,8 +73,6 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 pst.setString(i++, orderr.shipLevel);
                 pst.setDate(i++,
                         orderr.paymentDate == null ? null : new Date(orderr.paymentDate.getTime()));
-                pst.setDate(i++,
-                        orderr.shipDate == null ? null : new Date(orderr.shipDate.getTime()));
                 pst.setString(i++, orderr.city);
                 pst.setString(i++, orderr.country);
                 pst.setString(i++, orderr.postalCode);
@@ -96,8 +94,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
     public static void saveOrders(List<Orderr> toSaveOrders) {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
-                    "INSERT INTO Orderr(orderId, account_id, state, shipLevel, paymentDate, shipDate, createDate, reviewMailed, warnning)" +
-                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO Orderr(orderId, account_id, state, shipLevel, paymentDate, createDate, reviewMailed, warnning)" +
+                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
             );
             int i = 1;
             for(Orderr orderr : toSaveOrders) {
@@ -107,8 +105,6 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 pst.setString(i++, orderr.shipLevel);
                 pst.setDate(i++,
                         orderr.paymentDate == null ? null : new Date(orderr.paymentDate.getTime()));
-                pst.setDate(i++,
-                        orderr.shipDate == null ? null : new Date(orderr.shipDate.getTime()));
                 pst.setDate(i++, new Date(orderr.createDate.getTime()));
                 pst.setBoolean(i++, orderr.reviewMailed);
                 pst.setBoolean(i, orderr.warnning);
