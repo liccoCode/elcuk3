@@ -1,7 +1,6 @@
 import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
-import helper.S3;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import jobs.loop.OsTicketBeanstalkdCheck;
@@ -10,6 +9,7 @@ import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
+import mws.S3;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
