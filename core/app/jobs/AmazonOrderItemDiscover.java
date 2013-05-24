@@ -2,6 +2,7 @@ package jobs;
 
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersException;
 import helper.Webs;
+import models.Jobex;
 import models.market.Account;
 import models.market.OrderItem;
 import models.market.Orderr;
@@ -23,6 +24,8 @@ import java.util.List;
  * a maximum request quota of 30 and a restore rate of 1 request every 2 seconds.
  * <p/>
  * 每隔 1mn 获取最近 30 个订单. 每 1 分钟 API Quote 会恢复满(30个次)
+ * - 轮询周期: 30s
+ * - Duration: 1mn
  * User: wyatt
  * Date: 5/24/13
  * Time: 12:54 PM
@@ -30,6 +33,7 @@ import java.util.List;
 public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
     @Override
     public void doJob() {
+        if(!Jobex.findByClassName(AmazonOrderItemDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
             List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=?", acc).fetch(30);

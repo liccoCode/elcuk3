@@ -26,6 +26,10 @@ public class JobsSetup {
         if(Play.mode.isProd() ||
                 (Play.mode.isDev() && "true".equals(Play.configuration.getProperty("jobs.dev")))) {
             // 手动的将所有的需要的 Job 启动
+
+            // Order Deal 5 step
+            every(AmazonOrderDiscover.class, "1mn");
+            every(AmazonOrderItemDiscover.class, "30s");
             every(AmazonOrderUpdateJob.class, "1h");
             every(AmazonOrderFetchJob.class, "1h");
             every(OrderInfoFetchJob.class, "1mn");
