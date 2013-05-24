@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import helper.GTs;
 import helper.Webs;
+import models.finance.Payment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
@@ -13,6 +14,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -172,7 +174,8 @@ public class TimelineEventSource {
 
             if(relateShipments.size() > 0){
                 Shipment shipment=relateShipments.get(0);
-                if(shipment.state.ordinal() >= Shipment.S.SHIPPING.ordinal())
+                if(Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN,Shipment.S.SHIPPING)
+                        .contains(shipment.state))
                     predictShipFinishDate = shipment.items.get(0).arriveDate;
             }
 
