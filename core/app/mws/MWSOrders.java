@@ -9,7 +9,10 @@ import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
+import models.market.Selling;
+import models.product.Product;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.libs.F;
@@ -56,6 +59,17 @@ public class MWSOrders {
 
         Logger.info("List Total %s Orders", orders.size());
         return orders;
+    }
+
+    public static F.T2<String, List<Orderr>> listOrdersByNextToken(Account account, String token)
+            throws MarketplaceWebServiceOrdersException {
+        ListOrdersByNextTokenRequest request = new ListOrdersByNextTokenRequest(
+                account.merchantId, token
+        );
+        ListOrdersByNextTokenResponse response = client(account).listOrdersByNextToken(request);
+        ListOrdersByNextTokenResult result = response.getListOrdersByNextTokenResult();
+        return new F.T2<String, List<Orderr>>(result.getNextToken(),
+                responseToOrders(result.getOrders(), account));
     }
 
 
@@ -109,16 +123,90 @@ public class MWSOrders {
         return orders;
     }
 
-    public static F.T2<String, List<Orderr>> listOrdersByNextToken(Account account, String token)
+
+    public static List<models.market.OrderItem> listOrderItems(Account account, String orderId)
             throws MarketplaceWebServiceOrdersException {
-        ListOrdersByNextTokenRequest request = new ListOrdersByNextTokenRequest(
+        ListOrderItemsRequest request = new ListOrderItemsRequest(account.merchantId, orderId);
+        ListOrderItemsResponse response = client(account).listOrderItems(request);
+        ListOrderItemsResult result = response.getListOrderItemsResult();
+
+        String token = result.getNextToken();
+        OrderItemList orderItemList = result.getOrderItems();
+
+        List<models.market.OrderItem> orderItems = responseToOrderItems(
+                orderItemList, orderId, account
+        );
+
+        while(StringUtils.isNotBlank(token)) {
+            F.T2<String, List<models.market.OrderItem>> t2 = listOrderItemsByNextToken(account,
+                    token, orderId);
+            token = t2._1;
+            orderItems.addAll(t2._2);
+        }
+        return orderItems;
+    }
+
+    public static F.T2<String, List<models.market.OrderItem>> listOrderItemsByNextToken(
+            Account account,
+            String token,
+            String orderId)
+            throws MarketplaceWebServiceOrdersException {
+
+        ListOrderItemsByNextTokenRequest request = new ListOrderItemsByNextTokenRequest(
                 account.merchantId, token
         );
-        ListOrdersByNextTokenResponse response = client(account).listOrdersByNextToken(request);
-        ListOrdersByNextTokenResult result = response.getListOrdersByNextTokenResult();
-        return new F.T2<String, List<Orderr>>(result.getNextToken(),
-                responseToOrders(result.getOrders(), account));
+        ListOrderItemsByNextTokenResponse response = client(account)
+                .listOrderItemsByNextToken(request);
+        ListOrderItemsByNextTokenResult result = response.getListOrderItemsByNextTokenResult();
+
+        return new F.T2<String, List<models.market.OrderItem>>(result.getNextToken(),
+                responseToOrderItems(result.getOrderItems(), orderId, account));
     }
+
+    /**
+     * 将 Response 转换为 OrderItem
+     *
+     * @param orderItemList
+     * @return 注意缺失 Selling
+     */
+    private static List<models.market.OrderItem> responseToOrderItems(OrderItemList orderItemList,
+                                                                      String orderId,
+                                                                      Account acc) {
+        List<OrderItem> items = orderItemList.getOrderItem();
+        List<models.market.OrderItem> orderItems = new ArrayList<models.market.OrderItem>();
+
+        for(OrderItem amzItem : items) {
+            models.market.OrderItem item = new models.market.OrderItem();
+
+            item.product = Product.findByMerchantSKU(amzItem.getSellerSKU());
+            // use first-level cache
+            item.order = Orderr.findById(orderId);
+            item.selling = Selling.findById(Selling.sid(amzItem.getSellerSKU(),
+                    item.order.market, acc));
+            item.id = String.format("%s_%s", orderId,
+                    Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
+            item.quantity = amzItem.getQuantityOrdered();
+            item.listingName = amzItem.getTitle();
+            item.createDate = new Date();
+            if(amzItem.getItemPrice() != null) {
+                item.price = NumberUtils.toFloat(amzItem.getItemPrice().getAmount());
+                item.currency = helper.Currency.valueOf(amzItem.getItemPrice().getCurrencyCode());
+            }
+
+            if(amzItem.getPromotionDiscount() != null) {
+                item.discountPrice = NumberUtils.toFloat(
+                        amzItem.getPromotionDiscount().getAmount());
+            }
+            item.calUsdCose();
+            // 临时使用, 使用后删除.(AmazonOrderItemDiscover)
+            item.memo = amzItem.getSellerSKU();
+
+            orderItems.add(item);
+        }
+
+        return orderItems;
+    }
+
 
     private static Orderr.S parseOrderState(OrderStatusEnum orderState) {
         // {"Pending"=>226233, "Shipped"=>1284685, "Cancelled"=>28538, "Shipping"=>1342}, 半年的更新文件

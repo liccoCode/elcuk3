@@ -25,7 +25,7 @@ import java.util.Map;
  * <p/>
  * The GetOrder operation has a maximum request quota of 6 and a restore rate of 1 request every minute.
  * <p/>
- * 每隔 10mn 获取最近 30 mn 的订单. 每 6 分钟 API Quote 会恢复满
+ * 每隔 10mn 获取最近 30 mn 的订单. 每 6 分钟 API Quote 会恢复满(6次)
  * User: wyatt
  * Date: 5/24/13
  * Time: 10:04 AM

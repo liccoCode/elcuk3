@@ -116,6 +116,13 @@ public class OrderItem extends GenericModel {
         this.save();
     }
 
+    public void calUsdCose() {
+        if(this.currency != null && this.price != null) {
+            this.usdCost = this.currency
+                    .toUSD(this.price - (this.discountPrice == null ? 0 : this.discountPrice));
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
