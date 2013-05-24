@@ -199,48 +199,38 @@
       回到前一个状态
     </a>
   #{/power.ck}
-  #{if ship.type != models.procure.Shipment.T.EXPRESS}
-      #{power.ck "shipments.handleprocess"}
+  #{power.ck "shipments.handleprocess"}
+      #{if ship.type != models.procure.Shipment.T.EXPRESS}
           #{if ship.state == models.procure.Shipment.S.SHIPPING}
             <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
               运输到港
             </button>
           #{/if}
-      #{/power.ck }
-      #{power.ck "shipments.handleprocess"}
           #{if ship.state == models.procure.Shipment.S.CLEARANCE}
             <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
               开始提货
             </button>
           #{/if}
-      #{/power.ck }
-      #{power.ck "shipments.handleprocess"}
           #{if ship.state == models.procure.Shipment.S.PACKAGE}
             <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
               与 Amazon 预约
             </button>
           #{/if}
-      #{/power.ck }
-      #{power.ck "shipments.handleprocess"}
           #{if ship.state == models.procure.Shipment.S.BOOKED}
             <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
               派送
             </button>
           #{/if}
-      #{/power.ck}
-      #{power.ck "shipments.handleprocess"}
           #{if ship.state == models.procure.Shipment.S.DELIVERYING}
             <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
               签收
             </button>
           #{/if}
-      #{/power.ck }
-  #{/if}
-  #{power.ck "shipments.handleprocess"}
-      #{if ship.state == models.procure.Shipment.S.RECEIPTD}
-        <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
-          开始入库
-        </button>
+          #{if ship.state == models.procure.Shipment.S.RECEIPTD}
+            <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
+              开始入库
+            </button>
+          #{/if}
       #{/if}
   #{/power.ck }
   #{if ship.state == models.procure.Shipment.S.RECEIVING}
