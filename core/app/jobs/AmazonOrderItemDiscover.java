@@ -13,9 +13,9 @@ import play.Logger;
 import play.db.DB;
 import play.jobs.Job;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,7 +85,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 if(!orderItemValidate(orderItem, errors)) continue;
 
                 psmt.setString(i++, orderItem.id);
-                psmt.setDate(i++, new Date(orderItem.createDate.getTime()));
+                psmt.setTimestamp(i++, new Timestamp(orderItem.createDate.getTime()));
                 psmt.setFloat(i++, orderItem.discountPrice == null ? 0 : orderItem.discountPrice);
                 psmt.setFloat(i++, orderItem.price == null ? 0 : orderItem.price);
                 psmt.setString(i++, orderItem.currency == null ? null : orderItem.currency.name());
