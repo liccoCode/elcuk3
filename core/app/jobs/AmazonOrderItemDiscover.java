@@ -38,9 +38,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         if(!Jobex.findByClassName(AmazonOrderItemDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            // 只搜索 6 个月内的
-            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=? ORDER BY createDate",
-                    acc, DateTime.now().minusMonths(6).toDate()).fetch(30);
+            // 只搜索 1 个月内的
+            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=? AND state!=? ORDER BY createDate",
+                    acc, DateTime.now().minusMonths(1).toDate(), Orderr.S.CANCEL).fetch(30);
 
             List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
             for(Orderr order : orderrs) {
@@ -54,6 +54,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             }
 
             AmazonOrderItemDiscover.saveOrderItem(allOrderItems);
+            Logger.info("Discover %s  %s OrderItems.", acc.uniqueName, allOrderItems.size());
         }
     }
 
@@ -101,7 +102,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 i = 1;
             }
             int[] results = psmt.executeBatch();
-            Logger.info("Batch insert %s OrderItem. %s", orderItems.size(), results);
+            Logger.info("Batch insert %s OrderItem. [%s]", orderItems.size(), results);
             if(errors.length() > 0) {
                 Webs.systemMail("[发现] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
@@ -149,7 +150,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 orderIds.add(orderItem.id);
             }
             int[] results = psmt.executeBatch();
-            Logger.info("Batch inser %s OrderItem. %s", orderItems.size(), results);
+            Logger.info("Batch inser %s OrderItem. [%s]", orderItems.size(), results);
             if(errors.length() > 0) {
                 Webs.systemMail("[更新] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" +
