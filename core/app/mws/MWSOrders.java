@@ -174,6 +174,7 @@ public class MWSOrders {
             item.product = Product.findByMerchantSKU(amzItem.getSellerSKU());
             // use first-level cache
             item.order = Orderr.findById(orderId);
+            item.market = item.order.market;
             if(amzItem.getSellerSKU().contains(",2")) { // 如果包含 ,2 尝试寻找正确的 Selling
                 String likeSellingId = Product.merchantSKUtoSKU(amzItem.getSellerSKU()) +
                         "%|" + item.order.market.nickName() +
