@@ -77,7 +77,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                     "INSERT INTO OrderItem(id, createDate, discountPrice, price, currency," +
                             " listingName, quantity, order_orderId, product_sku, selling_sellingId," +
                             " usdCost, market, promotionIDs, giftWrap)" +
-                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
             );
 
             int i = 1;
