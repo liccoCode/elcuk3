@@ -8,6 +8,7 @@ import models.market.OrderItem;
 import models.market.Orderr;
 import mws.MWSOrders;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.db.DB;
 import play.jobs.Job;
@@ -37,7 +38,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         if(!Jobex.findByClassName(AmazonOrderItemDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=?", acc).fetch(30);
+            // 只搜索 6 个月内的
+            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=",
+                    acc, DateTime.now().minusMonths(6).toDate()).fetch(30);
 
             List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
             for(Orderr order : orderrs) {
