@@ -33,7 +33,9 @@ public class MWSOrdersTest extends UnitTest {
     @Test
     public void testListOrderItems() throws MarketplaceWebServiceOrdersException {
         Orderr orderr = Orderr.findById("002-0038309-3390664");
-        List<OrderItem> orderItems = MWSOrders.listOrderItems(orderr.account, orderr.orderId);
+        Account acc = Account.findById(131l);
+        System.out.println(acc.isSaleAcc);
+        List<OrderItem> orderItems = MWSOrders.listOrderItems(acc, orderr.orderId);
         /*
         ID: 002-0038309-3390664_70EAUB133-CBSPU
         Product: Product[70EAUB133-CBSPU]

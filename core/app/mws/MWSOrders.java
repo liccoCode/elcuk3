@@ -73,6 +73,13 @@ public class MWSOrders {
     }
 
 
+    /**
+     * 将 OrderListType 转换为 List[Order]
+     *
+     * @param orderList
+     * @param account
+     * @return
+     */
     private static List<Orderr> responseToOrders(OrderList orderList, Account account) {
         List<Order> amazonOrders = orderList.getOrder();
         List<Orderr> orders = new ArrayList<Orderr>();
@@ -89,18 +96,6 @@ public class MWSOrders {
             if(amzOrder.getPurchaseDate() != null) {
                 orderr.paymentDate = amzOrder.getPurchaseDate().toGregorianCalendar().getTime();
             }
-            /* Fee 类型在这里计算?
-            if(amzOrder.getOrderTotal() != null) {
-                Money money = amzOrder.getOrderTotal();
-                SaleFee fee = new SaleFee();
-                fee.account = account;
-                fee.cost = NumberUtils.toFloat(money.getAmount());
-                fee.currency = Currency.valueOf(money.getCurrencyCode());
-                fee.usdCost = fee.currency.toUSD(fee.cost);
-                fee.orderId = amzOrder.getAmazonOrderId();
-                fee.type = FeeType.amazon();
-                orderr.fees.add(fee);
-            } */
 
             if(amzOrder.getShippingAddress() != null) {
                 Address address = amzOrder.getShippingAddress();
@@ -179,8 +174,12 @@ public class MWSOrders {
             item.product = Product.findByMerchantSKU(amzItem.getSellerSKU());
             // use first-level cache
             item.order = Orderr.findById(orderId);
-            item.selling = Selling.findById(Selling.sid(amzItem.getSellerSKU(),
-                    item.order.market, acc));
+            item.selling = Selling.findById(
+                    Selling.sid(
+                            amzItem.getSellerSKU(),
+                            item.order.market, acc
+                    )
+            );
             item.id = String.format("%s_%s", orderId,
                     Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
             item.quantity = amzItem.getQuantityOrdered();

@@ -78,12 +78,8 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             int i = 1;
             StringBuilder errors = new StringBuilder("");
             for(OrderItem orderItem : orderItems) {
-                if(orderItem.product == null || orderItem.selling == null) {
-                    errors.append("Order(").append(orderItem.order.orderId)
-                            .append(") have no product or selling [")
-                            .append(orderItem.memo).append("]<br><br>");
-                    continue;
-                }
+                if(!orderItemValidate(orderItem, errors)) continue;
+
                 psmt.setString(i++, orderItem.id);
                 psmt.setDate(i++, new Date(orderItem.createDate.getTime()));
                 psmt.setFloat(i++, orderItem.discountPrice == null ? 0 : orderItem.discountPrice);
@@ -103,7 +99,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             psmt.executeBatch();
             Logger.info("Batch inser %s OrderItem.", orderItems.size());
             if(errors.length() > 0) {
-                Webs.systemMail("发现 OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
+                Webs.systemMail("[发现] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
             }
         } catch(SQLException e) {
@@ -131,12 +127,8 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             int i = 1;
             StringBuilder errors = new StringBuilder("");
             for(OrderItem orderItem : orderItems) {
-                if(orderItem.product == null || orderItem.selling == null) {
-                    errors.append("Order(").append(orderItem.order.orderId)
-                            .append(") have no product or selling [")
-                            .append(orderItem.memo).append("]<br><br>");
-                    continue;
-                }
+                if(!orderItemValidate(orderItem, errors)) continue;
+
                 psmt.setFloat(i++, orderItem.discountPrice == null ? 0 : orderItem.discountPrice);
                 psmt.setFloat(i++, orderItem.price == null ? 0 : orderItem.price);
                 psmt.setString(i++, orderItem.currency == null ? null : orderItem.currency.name());
@@ -152,11 +144,23 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             psmt.executeBatch();
             Logger.info("Batch inser %s OrderItem.", orderItems.size());
             if(errors.length() > 0) {
-                Webs.systemMail("发现 OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
+                Webs.systemMail("[更新] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
             }
         } catch(SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static boolean orderItemValidate(OrderItem orderItem, StringBuilder errors) {
+        if(orderItem.product == null || orderItem.selling == null) {
+            errors.append("Order(").append(orderItem.order.orderId)
+                    .append(") have no product or selling [").append(orderItem.memo).append("]")
+                    .append("Product[").append(orderItem.product).append("]")
+                    .append("Selling[").append(orderItem.selling).append("]")
+                    .append("<br><br>");
+            return false;
+        }
+        return true;
     }
 }
