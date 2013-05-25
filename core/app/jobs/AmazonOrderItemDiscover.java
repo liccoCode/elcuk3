@@ -39,7 +39,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
             // 只搜索 6 个月内的
-            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=?",
+            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=? ORDER BY createDate",
                     acc, DateTime.now().minusMonths(6).toDate()).fetch(30);
 
             List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
@@ -100,8 +100,8 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setFloat(i, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
                 i = 1;
             }
-            psmt.executeBatch();
-            Logger.info("Batch inser %s OrderItem.", orderItems.size());
+            int[] results = psmt.executeBatch();
+            Logger.info("Batch insert %s OrderItem. %s", orderItems.size(), results);
             if(errors.length() > 0) {
                 Webs.systemMail("[发现] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
@@ -148,8 +148,8 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
 
                 orderIds.add(orderItem.id);
             }
-            psmt.executeBatch();
-            Logger.info("Batch inser %s OrderItem.", orderItems.size());
+            int[] results = psmt.executeBatch();
+            Logger.info("Batch inser %s OrderItem. %s", orderItems.size(), results);
             if(errors.length() > 0) {
                 Webs.systemMail("[更新] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" +

@@ -174,12 +174,19 @@ public class MWSOrders {
             item.product = Product.findByMerchantSKU(amzItem.getSellerSKU());
             // use first-level cache
             item.order = Orderr.findById(orderId);
-            item.selling = Selling.findById(
-                    Selling.sid(
-                            amzItem.getSellerSKU(),
-                            item.order.market, acc
-                    )
-            );
+            if(amzItem.getSellerSKU().contains(",2")) { // 如果包含 ,2 尝试寻找正确的 Selling
+                String likeSellingId = Product.merchantSKUtoSKU(amzItem.getSellerSKU()) +
+                        "%|" + item.order.market.nickName() +
+                        "|" + acc.id;
+                item.selling = Selling.find("sellingId like ?", likeSellingId).first();
+            } else {
+                item.selling = Selling.findById(
+                        Selling.sid(
+                                amzItem.getSellerSKU(),
+                                item.order.market, acc
+                        )
+                );
+            }
             item.id = String.format("%s_%s", orderId,
                     Product.merchantSKUtoSKU(amzItem.getSellerSKU()));
             item.quantity = amzItem.getQuantityOrdered();
