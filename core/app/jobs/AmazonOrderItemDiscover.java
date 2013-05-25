@@ -39,7 +39,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
             // 只搜索 6 个月内的
-            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=",
+            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=?",
                     acc, DateTime.now().minusMonths(6).toDate()).fetch(30);
 
             List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
