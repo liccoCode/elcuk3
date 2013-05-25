@@ -209,8 +209,8 @@ public class MWSOrders {
             }
 
             item.calUsdCose();
-            // 临时使用, 使用后删除.(AmazonOrderItemDiscover)
-            item.memo = amzItem.getSellerSKU();
+            // 临时使用(这里知道 SKU, SellingId, 与 Account), 使用后删除.(AmazonOrderItemDiscover)
+            item.memo = Selling.sid(amzItem.getSellerSKU(), item.order.market, acc);
 
             orderItems.add(item);
         }

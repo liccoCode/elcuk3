@@ -7,6 +7,7 @@ import models.market.Account;
 import models.market.OrderItem;
 import models.market.Orderr;
 import mws.MWSOrders;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.db.DB;
 import play.jobs.Job;
@@ -126,6 +127,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
 
             int i = 1;
             StringBuilder errors = new StringBuilder("");
+            List<String> orderIds = new ArrayList<String>();
             for(OrderItem orderItem : orderItems) {
                 if(!orderItemValidate(orderItem, errors)) continue;
 
@@ -140,12 +142,16 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setFloat(i++, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
                 psmt.setString(i, orderItem.id);
                 i = 1;
+
+                orderIds.add(orderItem.id);
             }
             psmt.executeBatch();
             Logger.info("Batch inser %s OrderItem.", orderItems.size());
             if(errors.length() > 0) {
                 Webs.systemMail("[更新] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
-                        "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
+                        "<h4>检查不存在的 Product!</h4> <br>" +
+                                errors.toString() + "<br><br>" +
+                                "All OrderItems: " + StringUtils.join(orderIds, "<br>"));
             }
         } catch(SQLException e) {
             e.printStackTrace();
@@ -156,8 +162,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         if(orderItem.product == null || orderItem.selling == null) {
             errors.append("Order(").append(orderItem.order.orderId)
                     .append(") have no product or selling [").append(orderItem.memo).append("]")
-                    .append("Product[").append(orderItem.product).append("]")
-                    .append("Selling[").append(orderItem.selling).append("]")
+                    .append(" Market[").append(orderItem.market).append("]")
+                    .append(" Product[").append(orderItem.product).append("]")
+                    .append(" Selling[").append(orderItem.selling).append("]")
                     .append("<br><br>");
             return false;
         }
