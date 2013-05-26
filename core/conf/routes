@@ -43,6 +43,8 @@ POST    /feetype                                             FeeTypes.create
 POST    /feetype/{name}/delete                               FeeTypes.remove
 
 # Orders
+GET     /orders                                             Orders.index
+GET     /order/{id}                                         Orders.show
 GET     /orders/warnfix                                     Orders.warrningOrders
 
 # Payments
