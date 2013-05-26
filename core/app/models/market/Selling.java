@@ -535,19 +535,23 @@ public class Selling extends GenericModel {
      * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
      */
     public Selling patchASelling(String sku, String upc, String asin, M market, Account acc,
-                                 Product product) {
+                                 Product product, boolean haveUpc) {
         String sid = Selling.sid(String.format("%s,%s", sku, upc), market, acc);
+        if(!haveUpc) {
+            sid = Selling.sid(sku, market, acc);
+        }
         if(Selling.findById(sid) != null)
             throw new FastRuntimeException("Selling 已经存在, 不需要再添加!");
         this.sellingId = sid;
         this.asin = asin;
-        this.merchantSKU = String.format("%s,%s", sku, upc);
+        this.merchantSKU = StringUtils.split(sid, "|")[0];
         this.save();
 
         Listing lst = Listing.findById(Listing.lid(asin, market));
         if(lst == null) {
             lst = new Listing(this, product);
             lst.listingId = Listing.lid(asin, market);
+            lst.title = "请进行 Listing 页面进行重新抓取.";
             lst.market = market;
             lst.save();
         }

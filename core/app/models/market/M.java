@@ -851,11 +851,14 @@ public enum M {
             msku = "80-qw1a56-be";
         }
         switch(sell.market) {
-            case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
+                return String
+                        .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                                msku, sell.asin);
+            case AMAZON_UK:
                 return String
                         .format("https://catalog-sc.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
                                 sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);
