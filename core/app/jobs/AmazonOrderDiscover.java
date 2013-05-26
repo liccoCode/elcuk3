@@ -90,7 +90,9 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 i = 1;
             }
             int[] results = pst.executeBatch();
-            Logger.info("AmazonOrderDiscover Update %s Orders. [%s]", toUpdateOrders.size(), Webs.intArrayString(results));
+            Logger.info("AmazonOrderDiscover Update %s Orders. [%s](%s)",
+                    toUpdateOrders.size(), Webs.intArrayString(results), results.length
+            );
         } catch(SQLException e) {
             e.printStackTrace();
         }
@@ -118,7 +120,9 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 i = 1;
             }
             int[] results = pst.executeBatch();
-            Logger.info("AmazonOrderDiscover Save %s Orders. [%s]", toSaveOrders.size(), Webs.intArrayString(results));
+            Logger.info("AmazonOrderDiscover Save %s Orders. [%s](%s)",
+                    toSaveOrders.size(), Webs.intArrayString(results), results.length
+            );
         } catch(SQLException e) {
             e.printStackTrace();
         }
