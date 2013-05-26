@@ -121,6 +121,7 @@ POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
 
 # Elcuk
+GET     /elcuks                                             Elcuk.index
 PUT     /elcuk/config                                       Elcuk.updateConfig
 GET     /elcuk/config/{name}                                Elcuk.config
 
