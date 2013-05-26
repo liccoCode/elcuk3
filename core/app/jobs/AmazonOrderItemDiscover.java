@@ -99,13 +99,14 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setString(i++, orderItem.order.market.name());
                 psmt.setString(i++, orderItem.promotionIDs);
                 psmt.setFloat(i, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
+                psmt.addBatch();
                 i = 1;
             }
             int[] results = psmt.executeBatch();
             Logger.info("Batch insert %s OrderItem. [%s]", orderItems.size(), Webs.intArrayString(results));
             if(errors.length() > 0) {
-//                Webs.systemMail("[发现] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
-//                        "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
+                Webs.systemMail("[发现] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
+                        "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
             }
         } catch(SQLException e) {
             e.printStackTrace();
@@ -145,6 +146,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setString(i++, orderItem.promotionIDs);
                 psmt.setFloat(i++, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
                 psmt.setString(i, orderItem.id);
+                psmt.addBatch();
                 i = 1;
 
                 orderIds.add(orderItem.id);
