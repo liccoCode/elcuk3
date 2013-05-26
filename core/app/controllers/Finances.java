@@ -18,10 +18,7 @@ import play.mvc.Util;
 import play.mvc.With;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,7 +88,7 @@ public class Finances extends Controller {
         Account acc = null;
         if(market == M.AMAZON_UK)
             acc = Account.findById(1l);
-        else if(market == M.AMAZON_DE)
+        else if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR, M.AMAZON_IT).contains(market))
             acc = Account.findById(2l);
         else if(market == M.AMAZON_US)
             acc = Account.findById(131l);
