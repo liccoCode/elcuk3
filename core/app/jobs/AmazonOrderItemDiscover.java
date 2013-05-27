@@ -39,8 +39,10 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
             // 只搜索 1 个月内的
-            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=? AND createDate>=? AND state!=? ORDER BY createDate",
-                    acc, DateTime.now().minusMonths(1).toDate(), Orderr.S.CANCEL).fetch(30);
+            List<Orderr> orderrs = Orderr.find(
+                    "SIZE(items)=0 AND account=? AND createDate>=? AND state!=? ORDER BY createDate",
+                    acc, DateTime.now().minusMonths(1).toDate(), Orderr.S.CANCEL
+            ).fetch(30);
 
             List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
             for(Orderr order : orderrs) {
@@ -86,7 +88,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 if(!orderItemValidate(orderItem, errors)) continue;
 
                 psmt.setString(i++, orderItem.id);
-                psmt.setTimestamp(i++, new Timestamp(orderItem.createDate.getTime()));
+                psmt.setTimestamp(i++, new Timestamp(orderItem.order.paymentDate == null ?
+                        orderItem.createDate.getTime() : orderItem.order.paymentDate.getTime())
+                );
                 psmt.setFloat(i++, orderItem.discountPrice == null ? 0 : orderItem.discountPrice);
                 psmt.setFloat(i++, orderItem.price == null ? 0 : orderItem.price);
                 psmt.setString(i++, orderItem.currency == null ? null : orderItem.currency.name());
@@ -128,7 +132,8 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             PreparedStatement psmt = DB.getConnection().prepareStatement(
                     "UPDATE OrderItem SET discountPrice=?, price=?, currency=?," +
                             " listingName=?, quantity=?, usdCost=?," +
-                            " market=?, promotionIDs=?, giftWrap=?" +
+                            " market=?, promotionIDs=?, giftWrap=?," +
+                            " createDate=?" +
                             " WHERE id=?"
             );
 
@@ -147,6 +152,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setString(i++, orderItem.market.name());
                 psmt.setString(i++, orderItem.promotionIDs);
                 psmt.setFloat(i++, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
+                psmt.setTimestamp(i++, new Timestamp(orderItem.order.paymentDate == null ?
+                        orderItem.createDate.getTime() : orderItem.order.paymentDate.getTime())
+                );
                 psmt.setString(i, orderItem.id);
                 psmt.addBatch();
                 i = 1;
