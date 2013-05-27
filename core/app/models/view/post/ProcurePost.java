@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Date: 9/3/12
  * Time: 4:32 PM
  */
-public class ProcurePost extends Post {
+public class ProcurePost extends Post<ProcureUnit> {
     private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
@@ -65,6 +65,13 @@ public class ProcurePost extends Post {
         F.T2<String, List<Object>> params = params();
         return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray())
                 .fetch();
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return ProcureUnit.count("SELECT COUNT(*) FROM ProcureUnit WHERE " + params._1,
+                params._2.toArray()
+        );
     }
 
     public F.T2<String, List<Object>> params() {
