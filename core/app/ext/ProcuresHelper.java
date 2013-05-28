@@ -1,8 +1,10 @@
 package ext;
 
+import helper.Currency;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
+import play.libs.F;
 import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 
@@ -167,5 +169,23 @@ public class ProcuresHelper extends JavaExtensions {
         if(den == 0 || mol == 0)
             return 0;
         return Math.abs(den / mol);
+    }
+
+    /**
+     * 获得 采购单中商品单价、总价的美元形式
+     *
+     * @return t2<单价,总价>
+     */
+    public static F.T2<Float, Float> amountUSD(ProcureUnit unit) {
+        float priceUSD = 0;
+        float amountUSD = 0;
+        if(unit.attrs.currency != Currency.USD) {
+            priceUSD = unit.attrs.currency.toUSD(unit.attrs.price);
+            amountUSD = unit.attrs.currency.toUSD(unit.totalAmount());
+        } else {
+            priceUSD = unit.attrs.price;
+            amountUSD = unit.totalAmount();
+        }
+        return new F.T2<Float, Float>(priceUSD, amountUSD);
     }
 }

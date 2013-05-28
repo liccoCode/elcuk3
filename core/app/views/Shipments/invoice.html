@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Deliveryment Invoice</title>
+  <title>Shipment Invoice</title>
   <style type="text/css">
     table{
       border:1px solid;
@@ -46,8 +46,6 @@
   </style>
 </head>
 <body>
-
-
 #{set country: shipment.whouse.country.toUpperCase() /}
 <table cellpadding="4px" cellspacing="0" align='center'>
   <tr>
@@ -58,55 +56,10 @@
     </td>
   </tr>
 #{if country != 'US'}
-  <tr>
-    <td colspan="3" rowspan="4" class="td1">
-
-      Buyer : Edeer Network Technology CO., LTD <br>
-      VAT No. : GB117317336<br>
-      Attn : Yeping Xie <br>
-      Tel : #{if country == 'DE' }+4915211641438#{/if}
-        #{else }
-          00447466355519
-        #{/else}<br>
-      Email：Jason@easyacceu.com <br>
-      Add : ${shipment.whouse.address}
-    </td>
-    <td>Buyer EORI NO.：</td>
-    <td>GB117317336000</td>
-  </tr>
-  <tr>
-    <td>Buyer VAT No. :</td>
-    <td>GB117317336</td>
-  </tr>
-  <tr>
-    <td>INVOICE NO.:</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>Issue Date :</td>
-    <td>${new java.util.Date().format('yyyy.MM.dd')}</td>
-  </tr>
+    #{render 'Shipments/_europe.html',shipment:shipment,country:country/}
 #{/if}
 #{else }
-  <tr>
-    <td colspan="3" rowspan="3" class="td1">
-      Buyer : Searay LLC <br>
-      Attn : Yeping Xie <br>
-      Tel : 00447466355519 <br>
-      Email：Jason@easyacceu.com <br>
-      Add :${shipment.whouse.address}}
-    </td>
-    <td>Buyer TAX ID.：</td>
-    <td>99-0378641</td>
-  </tr>
-  <tr>
-    <td>INVOICE NO.:</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>Issue Date :</td>
-    <td>${new java.util.Date().format('yyyy.MM.dd')}</td>
-  </tr>
+    #{render 'Shipments/_us.html', shipment:shipment/}
 #{/else}
   <tr>
     <td rowspan="2">Transport By ${shipment.type.name()}</td>
@@ -129,30 +82,18 @@
   </tr>
 #{set totalCount: 0 /}
 #{set totalAmount: 0 /}
-#{set isUSD: shipment.items.get(0).unit.attrs.currency == helper.Currency.USD /}
 #{list items:shipment.items,as : 'item'}
-    #{set totalCount: totalCount+item.unit.qty()/}
-    #{if !isUSD }
-        #{set amount:item.unit.attrs.currency.toUSD(item.unit.totalAmount())/}
-    #{/if}
-    #{else }
-        #{set amount:item.unit.totalAmount()/}
-    #{/else}
-    #{set totalAmount:totalAmount+amount /}
+    #{set amount: item.unit.amountUSD()/}
+    #{set totalCount: totalCount + item.unit.qty()/}
+    #{set totalAmount: totalAmount + amount._2/}
   <tr>
     <td colspan="2" style="height:50px">
     ${item.unit.product.description} Declared Value:${item.unit.product.declaredValue}
     </td>
     <td>${item.unit.qty()}</td>
-    <td>${helper.Currency.USD.symbol()}
-    #{if !isUSD}
-    ${item.unit.attrs.currency.toUSD(item.unit.attrs.price).format('#.##')}
-    #{/if}
-    #{else }
-    ${item.unit.attrs.price}
-    #{/else}
+    <td>${helper.Currency.USD.symbol()} ${amount._1.format('#.##')}
     </td>
-    <td>${helper.Currency.USD.symbol()} ${amount.format('#.##')}</td>
+    <td>${helper.Currency.USD.symbol()} ${amount._2.format('#.##')}</td>
   </tr>
 #{/list}
   <tr class="tr1">
