@@ -136,15 +136,19 @@ public class FBA {
         int qty = 0;
         for(ProcureUnit unit : fbashipment.units) {
             for(ShipItem item : unit.shipItems) {
+                if(item.shipment == null) continue;
                 shipments.add(item.shipment);
             }
             qty += unit.qty();
         }
-        fbaTitle.append("总共运输数量为 ").append(qty).append(" 并关联 ");
-        for(Shipment shipment : shipments) {
-            fbaTitle.append(shipment.id).append(",");
+        fbaTitle.append("总共运输数量为 ").append(qty);
+        if(shipments.size() > 0) {
+            fbaTitle.append(" 并关联 ");
+            for(Shipment shipment : shipments) {
+                fbaTitle.append(shipment.id).append(",");
+            }
+            fbaTitle.append(" 运输单");
         }
-        fbaTitle.append(" 运输单");
 
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);
