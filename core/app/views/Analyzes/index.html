@@ -72,6 +72,13 @@
         #{/list}
         </select>
 
+        <select id="p_market" name="p.market" class="inline">
+          <option value="">Market(ALL)</option>
+        #{list items:models.market.M.values()}
+          <option ${_ == p?.market ? 'selected' : ''} value="${_.name()}">${_}</option>
+        #{/list}
+        </select>
+
         <select name="p.categoryId" class="inline">
           <option value="">ALL</option>
         #{list items:categoryIds}

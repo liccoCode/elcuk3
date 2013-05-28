@@ -1,6 +1,7 @@
 package models.view.dto;
 
 import helper.Webs;
+import models.market.M;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
@@ -112,6 +113,11 @@ public class AnalyzeDTO {
     public F.T2<Float, Date> lastRating;
 
     public float reviewRatio = 0f;
+
+    /**
+     * 市场
+     */
+    public M market;
 
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
