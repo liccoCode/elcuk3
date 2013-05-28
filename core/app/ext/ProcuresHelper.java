@@ -162,10 +162,9 @@ public class ProcuresHelper extends JavaExtensions {
      * @return
      */
     public static float percentage(AnalyzeDTO dto) {
-        float den = dto.difference;
-        float mol = dto.day1 - dto.difference;
-        if(den == 0 || mol == 0)
+        float day7Avg = dto.day7 / 7;
+        if(day7Avg == 0 || dto.day1 == 0)
             return 0;
-        return Math.abs(den / mol);
+        return Math.abs(day7Avg / dto.day1);
     }
 }
