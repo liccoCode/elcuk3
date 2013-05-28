@@ -5,7 +5,7 @@ require "pp"
 action = ARGV[0]
 action ||= 'insert'
 
-conn = Mysql.new('localhost', 'root', 'crater10lake', 'elcuk2_t', 3306)
+conn = Mysql.new('localhost', 'root', 'crater10lake', 'elcuk2_t2', 3306)
 conn.query("SET NAMES UTF8")
 
 st = if action == 'drop'
