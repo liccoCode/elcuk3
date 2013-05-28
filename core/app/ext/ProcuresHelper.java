@@ -121,7 +121,6 @@ public class ProcuresHelper extends JavaExtensions {
                         .append("</td></tr>");
             }
             sb.append("</table>");
-            System.out.println(sb.toString());
             return raw(sb.toString());
         } else {
             return raw("");
