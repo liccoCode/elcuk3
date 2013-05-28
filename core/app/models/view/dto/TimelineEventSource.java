@@ -286,7 +286,7 @@ public class TimelineEventSource {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
         // 需要线程安全, 所以使用 StringBuffer
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         JVMRandom random = new JVMRandom();
         for(int i = 0; i < colorLength; i++) {
             sb.append(codeSequence[random.nextInt(16)]);

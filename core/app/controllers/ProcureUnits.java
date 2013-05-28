@@ -90,11 +90,7 @@ public class ProcureUnits extends Controller {
         ProcureUnit managedUnit = ProcureUnit.findById(id);
 
 
-        managedUnit.update(unit);
-        if(StringUtils.isNotBlank(shipmentId)) {
-            Shipment shipment = Shipment.findById(shipmentId);
-            managedUnit.changeShipItemShipment(shipment);
-        }
+        managedUnit.update(unit, shipmentId);
         if(Validation.hasErrors()) {
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
