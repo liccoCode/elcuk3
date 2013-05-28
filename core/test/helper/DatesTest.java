@@ -44,6 +44,16 @@ public class DatesTest extends UnitTest {
 
     }
 
+    @Test
+    public void testPriceStr() {
+        assertEquals("19.999,189", Webs.priceLocalNumberFormat(M.AMAZON_IT, 19999.190f));
+        assertEquals("19.999,189", Webs.priceLocalNumberFormat(M.AMAZON_ES, 19999.190f));
+        assertEquals("19.999,189", Webs.priceLocalNumberFormat(M.AMAZON_FR, 19999.190f));
+        assertEquals("19.999,189", Webs.priceLocalNumberFormat(M.AMAZON_DE, 19999.190f));
+        assertEquals("19,999.189", Webs.priceLocalNumberFormat(M.AMAZON_UK, 19999.190f));
+        assertEquals("19,999.189", Webs.priceLocalNumberFormat(M.AMAZON_US, 19999.190f));
+    }
+
     /*
         US All Orders
        <PurchaseDate>2013-01-18T05:29:01+00:00</PurchaseDate>

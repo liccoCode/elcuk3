@@ -158,9 +158,9 @@ public class Dates {
             case AMAZON_ES:
                 return new DateTime(date).toString("dd/MM/yyyy");
             case AMAZON_DE:
+            case AMAZON_IT:
                 return new DateTime(date).toString("dd.MM.yyyy");
             case AMAZON_US:
-            case AMAZON_IT:
                 return new DateTime(date).toString("MM/dd/yyyy");
             default:
                 return new DateTime(date).toString("dd/MM/yyyy");
@@ -176,11 +176,11 @@ public class Dates {
                         DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m)))
                         .toDate();
             case AMAZON_DE:
+            case AMAZON_IT:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("dd.MM.yyyy").withZone(Dates.timeZone(m)))
                         .toDate();
             case AMAZON_US:
-            case AMAZON_IT:
                 return DateTime.parse(dateStr,
                         DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m)))
                         .toDate();
