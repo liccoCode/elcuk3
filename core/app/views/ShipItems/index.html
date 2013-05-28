@@ -4,7 +4,6 @@
 #{/set}
 <script type="text/javascript">
   $(document).on('click', '#today', function(e){
-    e.preventDefault();
     $("input[name='p.from']").data('dateinput').setValue(new Date());
     $("input[name='p.to']").data('dateinput').setValue(new Date());
   });
@@ -15,7 +14,7 @@
   <form action="@{ShipItems.index()}" class="search_form" method="POST">
     <div class="span12">
       <div class="inline">
-        <button id="today" class="btn">Today</button>
+        <button id="today" class="btn"><i class="icon-search"></i> Today</button>
       </div>
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
