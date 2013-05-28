@@ -67,6 +67,7 @@ public class Shipments extends Controller {
      *
      * @param units
      */
+    @Check("shipments.procureunittoshipment")
     public static void procureUnitToShipment(List<Long> units) {
         if(units == null || units.size() <= 0)
             Validation.addError("", "必须选择采购计划");
@@ -206,6 +207,7 @@ public class Shipments extends Controller {
     /**
      * 到港
      */
+    @Check("shipments.handleprocess")
     public static void landPort(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
         shipment.landPort(date);
@@ -222,6 +224,7 @@ public class Shipments extends Controller {
      * @param id
      * @param date
      */
+    @Check("shipments.handleprocess")
     public static void pickGoods(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
         shipment.pickGoods(date);
@@ -237,6 +240,7 @@ public class Shipments extends Controller {
      *
      * @param id
      */
+    @Check("shipments.handleprocess")
     public static void booking(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
         shipment.booking(date);
@@ -250,6 +254,7 @@ public class Shipments extends Controller {
     /**
      * 派送
      */
+    @Check("shipments.handleprocess")
     public static void deliverying(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
         shipment.beginDeliver(date);
@@ -266,6 +271,7 @@ public class Shipments extends Controller {
      * @param id
      * @param date
      */
+    @Check("shipments.handleprocess")
     public static void receipt(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
         shipment.receipt(date);
@@ -279,6 +285,7 @@ public class Shipments extends Controller {
     /**
      * 入库
      */
+    @Check("shipments.handleprocess")
     public static void inbounding(String id, Date date) {
         Shipment shipment = Shipment.findById(id);
         shipment.inbounding(date);
@@ -289,6 +296,7 @@ public class Shipments extends Controller {
         show(id);
     }
 
+    @Check("shipments.revertstate")
     public static void revertState(String id) {
         Shipment shipment = Shipment.findById(id);
         shipment.revertState();
