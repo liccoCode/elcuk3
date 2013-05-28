@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import ext.ShipmentsHelper;
 import helper.GTs;
 import helper.Webs;
+import models.finance.Payment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +15,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -170,8 +172,14 @@ public class TimelineEventSource {
         public Event startAndEndDate(String type) {
             Date predictShipFinishDate = null;
             List<Shipment> relateShipments = this.unit.relateShipment();
-            if(relateShipments.size() > 0)
-                predictShipFinishDate = ShipmentsHelper.predictArriveDate(relateShipments.get(0));
+
+            if(relateShipments.size() > 0) {
+                Shipment shipment = relateShipments.get(0);
+                if(Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN).contains(shipment.state))
+                    predictShipFinishDate = shipment.items.get(0).arriveDate;
+                else
+                    predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
+            }
 
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
