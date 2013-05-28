@@ -453,6 +453,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 shipItem.shipment = null;
                 shipItem.save();
             } else {
+                if(shipment == null) return;
                 Shipment originShipment = shipItem.shipment;
                 shipItem.adjustShipment(shipment);
                 if(Validation.hasErrors()) {
