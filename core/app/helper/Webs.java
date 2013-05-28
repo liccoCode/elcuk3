@@ -18,6 +18,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -299,6 +300,15 @@ public class Webs {
         for(Error error : Validation.errors()) {
             flash.error(error.message());
         }
+    }
+
+    public static String intArrayString(int[] results) {
+        if(results == null) return "";
+        List<String> intList = new ArrayList<String>();
+        for(int i : results) {
+            intList.add(i + "");
+        }
+        return StringUtils.join(intList, ", ");
     }
 
     /**

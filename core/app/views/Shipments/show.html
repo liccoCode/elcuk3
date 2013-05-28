@@ -193,43 +193,46 @@
         </button>
       #{/if}
   #{/power.ck}
-
+  #{power.ck "shipments.revertstate"}
     <a class="btn btn-warning" href="@{Shipments.revertState(ship.id)}" data-method='DELETE'
        data-confirm='确认操作?' data-disable-with='返回中...'>
       回到前一个状态
     </a>
-  #{if ship.type != models.procure.Shipment.T.EXPRESS}
-      #{if ship.state == models.procure.Shipment.S.SHIPPING}
-        <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
-          运输到港
-        </button>
+  #{/power.ck}
+  #{power.ck "shipments.handleprocess"}
+      #{if ship.type != models.procure.Shipment.T.EXPRESS}
+          #{if ship.state == models.procure.Shipment.S.SHIPPING}
+            <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
+              运输到港
+            </button>
+          #{/if}
+          #{if ship.state == models.procure.Shipment.S.CLEARANCE}
+            <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
+              开始提货
+            </button>
+          #{/if}
+          #{if ship.state == models.procure.Shipment.S.PACKAGE}
+            <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
+              与 Amazon 预约
+            </button>
+          #{/if}
+          #{if ship.state == models.procure.Shipment.S.BOOKED}
+            <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
+              派送
+            </button>
+          #{/if}
+          #{if ship.state == models.procure.Shipment.S.DELIVERYING}
+            <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
+              签收
+            </button>
+          #{/if}
+          #{if ship.state == models.procure.Shipment.S.RECEIPTD}
+            <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
+              开始入库
+            </button>
+          #{/if}
       #{/if}
-      #{if ship.state == models.procure.Shipment.S.CLEARANCE}
-        <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
-          开始提货
-        </button>
-      #{/if}
-      #{if ship.state == models.procure.Shipment.S.PACKAGE}
-        <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
-          与 Amazon 预约
-        </button>
-      #{/if}
-      #{if ship.state == models.procure.Shipment.S.BOOKED}
-        <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
-          派送
-        </button>
-      #{/if}
-      #{if ship.state == models.procure.Shipment.S.DELIVERYING}
-        <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
-          签收
-        </button>
-      #{/if}
-  #{/if}
-  #{if ship.state == models.procure.Shipment.S.RECEIPTD}
-    <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
-      开始入库
-    </button>
-  #{/if}
+  #{/power.ck }
   #{if ship.state == models.procure.Shipment.S.RECEIVING}
     <button class="btn btn-success func" url="@{Shipments.endShip(ship.id)}">
       完成运输
@@ -258,22 +261,24 @@
     #{render './_shipitem.html', items: ship.items, itmRecord: true/}
     </div>
   </div>
-  <div class="row-fluid">
-    <div class="span3">
-      <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
+#{power.ck 'shipitems.adjust'}
+<div class="row-fluid">
+  <div class="span3">
+    <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
 
-      <div class="btn-group">
-        <button class="btn" id="previewBtn"><i class="icon-file-alt"></i> 预览</button>
-        <button class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
-          <i class="icon-adjust"></i>
-          调整
-        </button>
-      </div>
-    </div>
-
-    <div class="span9" id="preview">
+    <div class="btn-group">
+      <button class="btn" id="previewBtn"><i class="icon-file-alt"></i> 预览</button>
+      <button class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
+        <i class="icon-adjust"></i>
+        调整
+      </button>
     </div>
   </div>
+#{/power.ck}
+
+  <div class="span9" id="preview">
+  </div>
+</div>
 </form>
 
 <div class="row-fluid" style="margin-top:20px;">
@@ -377,9 +382,11 @@
     </div>
     <div class="modal-footer">
       <a href="#" class="btn" data-dismiss="modal">Close</a>
+    #{power.ck "shipitems.received"}
       <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
         修改
       </button>
+    #{/power.ck}
     </div>
   </form>
 </div>

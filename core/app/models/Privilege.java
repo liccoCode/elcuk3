@@ -138,6 +138,13 @@ public class Privilege extends Model {
         // TODO effect: 删除 shipments.deployfba
         privileges.add(new Privilege("shipments.deployfba", "删除 FBA"));
 
+        privileges.add(new Privilege("shipments.revertstate", "运输单状态还原"));
+        privileges.add(new Privilege("shipments.procureUnitToShipment", "通过采购计划创建运输单"));
+        privileges.add(new Privilege("shipments.handleprocess", "运输单货物处理流程"));
+        privileges.add(new Privilege("shipitems.adjust", "运输单项目调整"));
+        privileges.add(new Privilege("shipitems.received", "修改运输计划接收数量"));
+
+
         // Notification
         privileges.add(new Privilege("notifications.notifys", "通知某个用户"));
         privileges.add(new Privilege("notifications.notifysall", "创建所有用户通知"));

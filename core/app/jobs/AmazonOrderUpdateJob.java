@@ -1,6 +1,7 @@
 package jobs;
 
 import helper.Dates;
+import helper.Webs;
 import models.Jobex;
 import models.market.Account;
 import models.market.JobRequest;
@@ -13,9 +14,9 @@ import play.jobs.Job;
 import play.libs.IO;
 
 import java.io.File;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -155,12 +156,12 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
             );
             int i = 1;
             for(Orderr orderr : fbaShippedOrderrs) {
-                psmt.setDate(i++,
-                        orderr.shipDate == null ? null : new Date(orderr.shipDate.getTime()));
+                psmt.setTimestamp(i++,
+                        orderr.shipDate == null ? null : new Timestamp(orderr.shipDate.getTime()));
                 psmt.setString(i++, orderr.shippingService);
                 psmt.setString(i++, orderr.trackNo);
-                psmt.setDate(i++,
-                        orderr.arriveDate == null ? null : new Date(orderr.arriveDate.getTime()));
+                psmt.setTimestamp(i++,
+                        orderr.arriveDate == null ? null : new Timestamp(orderr.arriveDate.getTime()));
                 psmt.setString(i++, orderr.email);
                 psmt.setString(i++, orderr.buyer);
                 psmt.setString(i++, orderr.reciver);
@@ -170,7 +171,10 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 psmt.addBatch();
                 i = 1;
             }
-            psmt.executeBatch();
+            int[] results = psmt.executeBatch();
+            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)",
+                    fbaShippedOrderrs.size(), Webs.intArrayString(results), results.length
+            );
         } catch(SQLException e) {
             e.printStackTrace();
         }

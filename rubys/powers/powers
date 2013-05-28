@@ -27,3 +27,8 @@ privileges.add(new Privilege("payments.cancel", "取消付款单"));
 privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
 privileges.add(new Privilege("fbas.update", "更新 FBA"));
 privileges.add(new Privilege("fbas.deployToAmazon", "创建 FBA"));
+privileges.add(new Privilege("shipments.revertstate", "运输单状态还原"));
+privileges.add(new Privilege("shipments.procureUnitToShipment", "通过采购计划创建运输单"));
+privileges.add(new Privilege("shipments.handleprocess", "运输单货物处理流程"));
+privileges.add(new Privilege("shipitems.adjust", "运输单项目调整"));
+privileges.add(new Privilege("shipitems.received", "修改运输计划接收数量"));

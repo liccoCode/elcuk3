@@ -13,9 +13,9 @@ import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +67,7 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
                     "UPDATE Orderr SET state=?, shipLevel=?, paymentDate=?," +
-                            " city=?, country=?, postalCode=?, " +
+                            " city=?, country=?, postalCode=?, market=?, " +
                             " phone=?, province=?, reciver=?, address=?" +
                             " WHERE orderId=?"
             );
@@ -75,11 +75,12 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
             for(Orderr orderr : toUpdateOrders) {
                 pst.setString(i++, orderr.state.name());
                 pst.setString(i++, orderr.shipLevel);
-                pst.setDate(i++,
-                        orderr.paymentDate == null ? null : new Date(orderr.paymentDate.getTime()));
+                pst.setTimestamp(i++,
+                        orderr.paymentDate == null ? null : new Timestamp(orderr.paymentDate.getTime()));
                 pst.setString(i++, orderr.city);
                 pst.setString(i++, orderr.country);
                 pst.setString(i++, orderr.postalCode);
+                pst.setString(i++, orderr.market.name());
                 pst.setString(i++, orderr.phone);
                 pst.setString(i++, orderr.province);
                 pst.setString(i++, orderr.reciver);
@@ -88,8 +89,10 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                 pst.addBatch();
                 i = 1;
             }
-            pst.executeBatch();
-            Logger.info("AmazonOrderDiscover Update %s Orders.", toUpdateOrders.size());
+            int[] results = pst.executeBatch();
+            Logger.info("AmazonOrderDiscover Update %s Orders. [%s](%s)",
+                    toUpdateOrders.size(), Webs.intArrayString(results), results.length
+            );
         } catch(SQLException e) {
             e.printStackTrace();
         }
@@ -98,25 +101,28 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
     public static void saveOrders(List<Orderr> toSaveOrders) {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
-                    "INSERT INTO Orderr(orderId, account_id, state, shipLevel, paymentDate, createDate, reviewMailed, warnning)" +
-                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO Orderr(orderId, market, account_id, state, shipLevel, paymentDate, createDate, reviewMailed, warnning)" +
+                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             int i = 1;
             for(Orderr orderr : toSaveOrders) {
                 pst.setString(i++, orderr.orderId);
+                pst.setString(i++, orderr.market.name());
                 pst.setLong(i++, orderr.account.id);
                 pst.setString(i++, orderr.state.name());
                 pst.setString(i++, orderr.shipLevel);
-                pst.setDate(i++,
-                        orderr.paymentDate == null ? null : new Date(orderr.paymentDate.getTime()));
-                pst.setDate(i++, new Date(orderr.createDate.getTime()));
+                pst.setTimestamp(i++,
+                        orderr.paymentDate == null ? null : new Timestamp(orderr.paymentDate.getTime()));
+                pst.setTimestamp(i++, new Timestamp(orderr.createDate.getTime()));
                 pst.setBoolean(i++, orderr.reviewMailed);
                 pst.setBoolean(i, orderr.warnning);
                 pst.addBatch();
                 i = 1;
             }
-            pst.executeBatch();
-            Logger.info("AmazonOrderDiscover Save %s Orders.", toSaveOrders.size());
+            int[] results = pst.executeBatch();
+            Logger.info("AmazonOrderDiscover Save %s Orders. [%s](%s)",
+                    toSaveOrders.size(), Webs.intArrayString(results), results.length
+            );
         } catch(SQLException e) {
             e.printStackTrace();
         }

@@ -387,7 +387,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unit
      */
-    public void update(ProcureUnit unit) {
+    public void update(ProcureUnit unit, String shipmentId) {
+        /**
+         * 1. 修改不同阶段可以修改的信息
+         * 2. 根据运输类型修改运输单
+         */
+        // 1
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
         if(this.stage == STAGE.PLAN) {
@@ -425,6 +430,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(unit.attrs.planArrivDate != null)
                 this.attrs.planArrivDate = unit.attrs.planArrivDate;
         }
+
+        // 2
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
+            this.changeShipItemShipment(
+                    StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId)
+            );
+        }
+
         this.shipItemQty(this.qty());
         this.save();
     }
@@ -440,6 +453,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 shipItem.shipment = null;
                 shipItem.save();
             } else {
+                if(shipment == null) return;
                 Shipment originShipment = shipItem.shipment;
                 shipItem.adjustShipment(shipment);
                 if(Validation.hasErrors()) {

@@ -7,13 +7,15 @@ import models.market.Account;
 import models.market.OrderItem;
 import models.market.Orderr;
 import mws.MWSOrders;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.db.DB;
 import play.jobs.Job;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,11 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         if(!Jobex.findByClassName(AmazonOrderItemDiscover.class.getName()).isExcute()) return;
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
-            List<Orderr> orderrs = Orderr.find("SIZE(items)=0 AND account=?", acc).fetch(30);
+            // 只搜索 1 个月内的
+            List<Orderr> orderrs = Orderr.find(
+                    "SIZE(items)=0 AND account=? AND createDate>=? AND state!=? ORDER BY createDate",
+                    acc, DateTime.now().minusMonths(1).toDate(), Orderr.S.CANCEL
+            ).fetch(30);
 
             List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
             for(Orderr order : orderrs) {
@@ -50,6 +56,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             }
 
             AmazonOrderItemDiscover.saveOrderItem(allOrderItems);
+            Logger.info("Discover %s  %s OrderItems.", acc.uniqueName, allOrderItems.size());
         }
     }
 
@@ -72,7 +79,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                     "INSERT INTO OrderItem(id, createDate, discountPrice, price, currency," +
                             " listingName, quantity, order_orderId, product_sku, selling_sellingId," +
                             " usdCost, market, promotionIDs, giftWrap)" +
-                            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                            " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
             );
 
             int i = 1;
@@ -81,7 +88,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 if(!orderItemValidate(orderItem, errors)) continue;
 
                 psmt.setString(i++, orderItem.id);
-                psmt.setDate(i++, new Date(orderItem.createDate.getTime()));
+                psmt.setTimestamp(i++, new Timestamp(orderItem.order.paymentDate == null ?
+                        orderItem.createDate.getTime() : orderItem.order.paymentDate.getTime())
+                );
                 psmt.setFloat(i++, orderItem.discountPrice == null ? 0 : orderItem.discountPrice);
                 psmt.setFloat(i++, orderItem.price == null ? 0 : orderItem.price);
                 psmt.setString(i++, orderItem.currency == null ? null : orderItem.currency.name());
@@ -94,10 +103,13 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setString(i++, orderItem.order.market.name());
                 psmt.setString(i++, orderItem.promotionIDs);
                 psmt.setFloat(i, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
+                psmt.addBatch();
                 i = 1;
             }
-            psmt.executeBatch();
-            Logger.info("Batch inser %s OrderItem.", orderItems.size());
+            int[] results = psmt.executeBatch();
+            Logger.info("Batch insert %s OrderItem. [%s](%s)",
+                    orderItems.size(), Webs.intArrayString(results), results.length
+            );
             if(errors.length() > 0) {
                 Webs.systemMail("[发现] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
                         "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
@@ -120,12 +132,14 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
             PreparedStatement psmt = DB.getConnection().prepareStatement(
                     "UPDATE OrderItem SET discountPrice=?, price=?, currency=?," +
                             " listingName=?, quantity=?, usdCost=?," +
-                            " market=?, promotionIDs=?, giftWrap=?" +
+                            " market=?, promotionIDs=?, giftWrap=?," +
+                            " createDate=?" +
                             " WHERE id=?"
             );
 
             int i = 1;
             StringBuilder errors = new StringBuilder("");
+            List<String> orderIds = new ArrayList<String>();
             for(OrderItem orderItem : orderItems) {
                 if(!orderItemValidate(orderItem, errors)) continue;
 
@@ -138,14 +152,25 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 psmt.setString(i++, orderItem.market.name());
                 psmt.setString(i++, orderItem.promotionIDs);
                 psmt.setFloat(i++, orderItem.giftWrap == null ? 0 : orderItem.giftWrap);
+                psmt.setTimestamp(i++, new Timestamp(orderItem.order.paymentDate == null ?
+                        orderItem.createDate.getTime() : orderItem.order.paymentDate.getTime())
+                );
                 psmt.setString(i, orderItem.id);
+                psmt.addBatch();
                 i = 1;
+
+                orderIds.add(orderItem.id);
             }
-            psmt.executeBatch();
-            Logger.info("Batch inser %s OrderItem.", orderItems.size());
+            int[] results = psmt.executeBatch();
+            Logger.info("Batch inser %s OrderItem. [%s](%s)",
+                    orderItems.size(), Webs.intArrayString(results), results.length
+            );
             if(errors.length() > 0) {
                 Webs.systemMail("[更新] OrderItem 的时候, 有如下 OrderItem 没有正常存入数据库",
-                        "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
+                        "<h4>检查不存在的 Product!</h4> <br>" +
+                                errors.toString() + "<br><br>" +
+                                "All OrderItems: " + StringUtils.join(orderIds, "<br>")
+                );
             }
         } catch(SQLException e) {
             e.printStackTrace();
@@ -156,8 +181,9 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         if(orderItem.product == null || orderItem.selling == null) {
             errors.append("Order(").append(orderItem.order.orderId)
                     .append(") have no product or selling [").append(orderItem.memo).append("]")
-                    .append("Product[").append(orderItem.product).append("]")
-                    .append("Selling[").append(orderItem.selling).append("]")
+                    .append(" Market[").append(orderItem.market).append("]")
+                    .append(" Product[").append(orderItem.product).append("]")
+                    .append(" Selling[").append(orderItem.selling).append("]")
                     .append("<br><br>");
             return false;
         }

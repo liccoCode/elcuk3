@@ -262,8 +262,10 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                 PromotionType promotionType = amzOrderItem.getPromotion();
                 orderItem.promotionIDs = promotionType.getPromotionIDs();
                 orderItem.discountPrice = promotionType.getItemPromotionDiscount();
-                if(promotionType.getShipPromotionDiscount() != null)
+                if(promotionType.getShipPromotionDiscount() != null) {
+                    if(orderItem.discountPrice == null) orderItem.discountPrice = 0f;
                     orderItem.discountPrice += promotionType.getShipPromotionDiscount();
+                }
             }
             addToOrderitems(orderItems, orderItem);
         }

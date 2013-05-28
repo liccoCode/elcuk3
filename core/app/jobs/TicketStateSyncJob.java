@@ -28,6 +28,9 @@ import java.util.*;
  * User: wyattpan
  * Date: 7/30/12
  * Time: 5:05 PM
+ *
+ * @see jobs.loop.OsTicketBeanstalkdCheck
+ * @deprecated 被 OsTicketBeanstalkdCheck 给代替
  */
 public class TicketStateSyncJob extends Job {
 
