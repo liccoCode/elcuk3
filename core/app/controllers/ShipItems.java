@@ -28,6 +28,8 @@ public class ShipItems extends Controller {
      * @param shipmentId 需要调整的运输项目 id
      * @param targetId   目标运输单
      */
+
+    @Check("shipitems.adjust")
     public static void adjust(String shipmentId, String targetId, List<Long> shipItemId) {
         Shipment shipment = Shipment.findById(targetId);
         if(shipment == null)
@@ -57,6 +59,7 @@ public class ShipItems extends Controller {
      * @param id
      * @param qty
      */
+    @Check("shipitems.received")
     public static void received(Long id, Integer qty, String msg) {
         if(qty == null) qty = 0;
         ShipItem itm = ShipItem.findById(id);
