@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deliveryment Invoice</title>
+  <style type="text/css">
+    table{
+      border:1px solid;
+      text-align:center;
+    }
+
+    td{
+      border:1px solid #000000;
+    }
+
+    .tr1{
+      font:18px bold;
+      background-color:#9c9c9c;
+
+    }
+
+    .tr2{
+      height:50px;
+    }
+
+    .td1{
+      width:50%;
+      text-align:left;
+      padding:10px;
+      font:14px bold;
+    }
+
+    .div1{
+      border-bottom:0px;
+      padding-left:0px;
+      width:99.7%;
+      height:100px;
+    }
+
+    .div2{
+      text-align:right;
+      padding-top:20px;
+      width:99.7%;
+    }
+
+
+  </style>
+</head>
+<body>
+
+
+#{set country: shipment.whouse.country.toUpperCase() /}
+<table cellpadding="4px" cellspacing="0" align='center'>
+  <tr>
+    <td colspan="5" class="td1">
+      <div class="div1">
+        <img src="/images/common/LANTO.png" style="height:100%">
+      </div>
+    </td>
+  </tr>
+#{if country != 'US'}
+  <tr>
+    <td colspan="3" rowspan="4" class="td1">
+
+      Buyer : Edeer Network Technology CO., LTD <br>
+      VAT No. : GB117317336<br>
+      Attn : Yeping Xie <br>
+      Tel : #{if country == 'DE' }+4915211641438#{/if}
+        #{else }
+          00447466355519
+        #{/else}<br>
+      Email：Jason@easyacceu.com <br>
+      Add : ${shipment.whouse.address}
+    </td>
+    <td>Buyer EORI NO.：</td>
+    <td>GB117317336000</td>
+  </tr>
+  <tr>
+    <td>Buyer VAT No. :</td>
+    <td>GB117317336</td>
+  </tr>
+  <tr>
+    <td>INVOICE NO.:</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Issue Date :</td>
+    <td>${new java.util.Date().format('yyyy.MM.dd')}</td>
+  </tr>
+#{/if}
+#{else }
+  <tr>
+    <td colspan="3" rowspan="3" class="td1">
+      Buyer : Searay LLC <br>
+      Attn : Yeping Xie <br>
+      Tel : 00447466355519 <br>
+      Email：Jason@easyacceu.com <br>
+      Add :${shipment.whouse.address}}
+    </td>
+    <td>Buyer TAX ID.：</td>
+    <td>99-0378641</td>
+  </tr>
+  <tr>
+    <td>INVOICE NO.:</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Issue Date :</td>
+    <td>${new java.util.Date().format('yyyy.MM.dd')}</td>
+  </tr>
+#{/else}
+  <tr>
+    <td rowspan="2">Transport By ${shipment.type.name()}</td>
+    <td>FROM:SHENZHEN</td>
+    <td>Country of Origin</td>
+    <td>Country of Export</td>
+    <td>Coutry of destination</td>
+  </tr>
+  <tr>
+    <td>TO:${country}</td>
+    <td>CHINA</td>
+    <td>CHINA</td>
+    <td>${country}</td>
+  </tr>
+  <tr class="tr1 tr2">
+    <td colspan="2">Goods of Description</td>
+    <td>Quantity(PCS)</td>
+    <td>Unit Price(USD)</td>
+    <td>Total Amount(USD)</td>
+  </tr>
+#{set totalCount: 0 /}
+#{set totalAmount: 0 /}
+#{set isUSD: shipment.items.get(0).unit.attrs.currency == helper.Currency.USD /}
+#{list items:shipment.items,as : 'item'}
+    #{set totalCount: totalCount+item.unit.qty()/}
+    #{if !isUSD }
+        #{set amount:item.unit.attrs.currency.toUSD(item.unit.totalAmount())/}
+    #{/if}
+    #{else }
+        #{set amount:item.unit.totalAmount()/}
+    #{/else}
+    #{set totalAmount:totalAmount+amount /}
+  <tr>
+    <td colspan="2" style="height:50px">
+    ${item.unit.product.description} Declared Value:${item.unit.product.declaredValue}
+    </td>
+    <td>${item.unit.qty()}</td>
+    <td>${helper.Currency.USD.symbol()}
+    #{if !isUSD}
+    ${item.unit.attrs.currency.toUSD(item.unit.attrs.price).format('#.##')}
+    #{/if}
+    #{else }
+    ${item.unit.attrs.price}
+    #{/else}
+    </td>
+    <td>${helper.Currency.USD.symbol()} ${amount.format('#.##')}</td>
+  </tr>
+#{/list}
+  <tr class="tr1">
+    <td colspan="2">Total :</td>
+    <td>${totalCount}</td>
+    <td></td>
+    <td>${helper.Currency.USD.symbol()} ${totalAmount.format('#.##')}</td>
+  </tr>
+  <tr>
+    <td colspan="5">
+      <div class="div2">
+        <p>LANTO Electronic Commerce Co., Ltd</p>
+
+        <p>SIGNATURE</p>
+        <img src="/images/common/signature.png">
+      </div>
+    </td>
+  </tr>
+</table>
+
+
+</body>
+</html>

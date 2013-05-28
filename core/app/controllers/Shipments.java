@@ -4,19 +4,27 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.procure.Cooperator;
+import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * 货运单的控制器
@@ -342,5 +350,19 @@ public class Shipments extends Controller {
         List<Shipment> unitRelateShipments = Shipment
                 .findUnitRelateShipmentByWhouse(whouseId, shipType);
         render(unitRelateShipments);
+    }
+
+    /**
+     * 生成运输单发票
+     *
+     * @param id
+     */
+    public static void invoice(String id) {
+        Shipment ship = Shipment.findById(id);
+        renderArgs.put("shipment", ship);
+        final PDF.Options options = new PDF.Options();
+        options.filename = id;
+        options.pageSize = IHtmlToPdfTransformer.A3P;
+        renderPDF(options);
     }
 }
