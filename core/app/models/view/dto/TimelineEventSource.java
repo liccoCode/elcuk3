@@ -2,6 +2,7 @@ package models.view.dto;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import ext.ShipmentsHelper;
 import helper.GTs;
 import helper.Webs;
 import models.finance.Payment;
@@ -172,11 +173,12 @@ public class TimelineEventSource {
             Date predictShipFinishDate = null;
             List<Shipment> relateShipments = this.unit.relateShipment();
 
-            if(relateShipments.size() > 0){
-                Shipment shipment=relateShipments.get(0);
-                if(Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN,Shipment.S.SHIPPING)
-                        .contains(shipment.state))
+            if(relateShipments.size() > 0) {
+                Shipment shipment = relateShipments.get(0);
+                if(Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN).contains(shipment.state))
                     predictShipFinishDate = shipment.items.get(0).arriveDate;
+                else
+                    predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
             if(predictShipFinishDate == null)
