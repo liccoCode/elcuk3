@@ -15,7 +15,7 @@
     <th name="ps_cal" class="sortable">_PS <i class="icon-sort"></i></th>
     <th name="day1" class="sortable">Day1 <i class="icon-sort"></i></th>
     <th name="difference" class="sortable">
-      <abbr title="Day1与Day7平均值的差值(百分比)">Difference(%)</abbr>
+      <abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr>
       <i class="icon-sort"></i>
     </th>
     <th name="day7" class="sortable">Day7(ave)<i class="icon-sort"></i></th>
@@ -49,7 +49,7 @@
     <td>${dto.day1}</td>
     <td style="color:${dto.difference.rgb()}">
     ${dto.difference.format('#.##')}
-      (${ dto.percentage().format('#.##%')})
+      (${dto.percentage().format('#.##%')})
     </td>
     <td>${dto.day7} ( ${(dto.day1 - dto.difference).format('#.##')} )</td>
     <td>${dto.day30} ( ${(dto.day30 / 30).format('#.##')} )</td>
