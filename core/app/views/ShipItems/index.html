@@ -15,8 +15,19 @@
         <span class="add-on" style="margin-left:20px;">To:</span>
         <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
       </div>
-    #{select 'p.dateType', items: p.dateTypes, labelProperty:'_2', valueProperty: '_1',value:p.dateType, class:'inline'/}
 
+      <select id="p_dateType" name="p.dateType" class="inline">
+      #{list items:p.dateTypes, as:'dt'}
+        <option ${dt._1 == p.dateType ? 'selected' : ''} value="${dt._1}">${dt._2}</option>
+      #{/list}
+      </select>
+
+      <select id="p_whouse" name="p.whouse" class="inline">
+        <option value="">FBA_ALL</option>
+      #{list items:whosues, as:'whouse'}
+        <option ${whouse == p.whouse ? 'selected' : ''} value="${whouse}">${whouse}</option>
+      #{/list}
+      </select>
       <label class="checkbox inline">
         <input type="checkbox" ${p.isHaveShipment ? 'checked' : ''} value="true" name="p.isHaveShipment">
         包含运输单
@@ -72,7 +83,7 @@
         <td>${unit.qty()}</td>
         <td>${unit.totalWeight()} kg</td>
         <td>${unit.whouse.name}</td>
-        <td style="color:${unit.shipType.rgb()}">${unit.shipType.label()}</td>
+        <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
         <td>${unit.fba?.fbaCenter?.centerId}</td>
         <td>${unit.fba?.shipmentId}</td>
         <td>#{time_tooltip time: unit.attrs.planShipDate/}</td>

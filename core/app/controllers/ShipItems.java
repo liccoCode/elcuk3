@@ -9,6 +9,7 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 @With({GlobalExceptionHandler.class, Secure.class})
@@ -18,7 +19,8 @@ public class ShipItems extends Controller {
         if(p == null)
             p = new ProcureUnitShipPost();
         List<ProcureUnit> units = p.query();
-        render(p, units);
+        List<String> whosues = Arrays.asList("FBA_UK", "FBA_DE", "FBA_US", "FBA_FR");
+        render(p, units, whosues);
     }
 
     /**

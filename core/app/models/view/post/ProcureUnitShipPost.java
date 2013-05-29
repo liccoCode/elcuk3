@@ -34,6 +34,8 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
 
     public String dateType = "createDate";
 
+    public String whouse;
+
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sql = new StringBuilder("SELECT p FROM ProcureUnit p")
@@ -51,14 +53,20 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
         if(!this.isHaveShipment)
             sql.append(" AND si.shipment IS NULL");
 
+        if(StringUtils.isNotBlank(this.whouse)) {
+            sql.append(" AND p.whouse.name=?");
+            params.add(this.whouse);
+        }
+
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sql.append(" AND (f.shipmentId LIKE ?")
                     .append(" OR p.sku LIKE ?")
                     .append(" OR p.sid LIKE ?")
+                    .append(" OR f.centerId LIKE ?")
                     .append(")");
 
-            for(int i = 0; i < 3; i++) {
+            for(int i = 0; i < 4; i++) {
                 params.add(word);
             }
         }
