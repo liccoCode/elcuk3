@@ -1,3 +1,5 @@
+import factory.FactoryBoy;
+import models.market.Orderr;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -7,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.Mockito.*;
 
 /**
@@ -72,6 +75,13 @@ public class MockitoTest extends UnitTest {
         assertThat(mockedList.get(9), is("element"));
 
         verify(mockedList, times(2)).get(anyInt());
+    }
+
+    @Test
+    public void testFactory() {
+        Orderr order = FactoryBoy.build(Orderr.class);
+        assertThat(order, is(notNullValue()));
+        assertThat(order.state, is(Orderr.S.SHIPPED));
     }
 
 }
