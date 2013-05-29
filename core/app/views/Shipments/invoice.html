@@ -88,7 +88,7 @@
     #{set totalAmount: totalAmount + amount._2/}
   <tr>
     <td colspan="2" style="height:50px">
-    ${item.unit.product.description} Declared Value:${item.unit.product.declaredValue}
+    ${item.unit.product.declareName} Declared Value:${item.unit.product.declaredValue}
     </td>
     <td>${item.unit.qty()}</td>
     <td>${helper.Currency.USD.symbol()} ${amount._1.format('#.##')}
