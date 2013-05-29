@@ -28,10 +28,7 @@ import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -659,6 +656,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.save();
     }
 
+    /**
+     * 对海运运输单进行入库中状态的自动计算
+     */
+    public void inboundingByComputor() {
+        if(this.state != S.RECEIPTD) return;
+        List<Date> receivingDates = new ArrayList<Date>();
+        for(FBAShipment fba : this.fbas()) {
+            if(!Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CLOSED).contains(fba.state)) continue;
+            F.Option<Date> earliestDate = fba.getEarliestDate();
+            if(earliestDate.isDefined())
+                receivingDates.add(earliestDate.get());
+        }
+        if(receivingDates.size() > 0) {
+            Collections.sort(receivingDates);
+            this.inbounding(receivingDates.get(0));
+        }
+    }
 
     /**
      * 当前运输单中的所有运输项目的 recivedQty == qty 的时候, 运输单完成.
@@ -782,6 +796,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             result = this.internationExpress.isReceipt(this.iExpressHTML);
             if(result._1)
                 this.receipt(result._2.toDate());
+        } else if(this.state == S.RECEIPTD) {
+            this.inboundingByComputor();
         }
         return this.state;
     }
