@@ -1,5 +1,6 @@
-package helper;
+package mws;
 
+import helper.Constant;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.ServiceException;
@@ -33,7 +34,8 @@ public class S3 {
 
     private S3() {
         try {
-            service = new RestS3Service(AWSCredentials.load(ELCUK2_BUCKET, new File("conf/s3.enc")));
+            service = new RestS3Service(
+                    AWSCredentials.load(ELCUK2_BUCKET, new File("conf/s3.enc")));
         } catch(ServiceException e) {
             Logger.error("!!!!!!! Amazon S3 Can not init !!!!!!!!");
             System.exit(0);
@@ -70,8 +72,9 @@ public class S3 {
             if(!directory.endsWith("/")) directory += "/";
             obj = new S3Object(file);
             obj.setKey(directory + file.getName());
-            for(Map.Entry<String, String> entry : metas.entrySet())
+            for(Map.Entry<String, String> entry : metas.entrySet()) {
                 obj.addMetadata(entry.getKey(), entry.getValue());
+            }
         } catch(Exception e) {
             // can not be happed...
         }

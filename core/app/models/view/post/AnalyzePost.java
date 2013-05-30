@@ -127,7 +127,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
             long differTime =
                     vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
-            if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= 0)
+            if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= oneDayMillis)
                 currentDto.day1 += vo.qty;
             //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
             if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
@@ -180,6 +180,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             //最新的评分
             if(isSku)
                 dto.lastRating = amazonQuery.skuLastRating(dto.fid);
+
+            dto.difference = dto.day1 - dto.day7 / 7;
 
             dtos.add(dto);
         }

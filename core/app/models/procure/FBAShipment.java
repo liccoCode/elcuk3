@@ -1,22 +1,20 @@
 package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
-import helper.FBA;
 import helper.Webs;
 import jobs.AmazonFBAInventoryReceivedJob;
 import models.market.Account;
+import mws.FBA;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * User: wyattpan
@@ -278,7 +276,15 @@ public class FBAShipment extends Model {
                 shipItem.save();
             }
         }
+        F.Option<Date> earliestDate = rows.getEarliestDate();
+        if(earliestDate.isDefined())
+            this.state = S.RECEIVING;
         this.save();
+    }
+
+    public F.Option<Date> getEarliestDate() {
+        List<String> records = Arrays.asList(StringUtils.split(this.records, "\n"));
+        return AmazonFBAInventoryReceivedJob.Rows.getEarliestDate(records);
     }
 
     /**

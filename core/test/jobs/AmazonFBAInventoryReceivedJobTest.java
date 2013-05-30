@@ -1,12 +1,16 @@
 package jobs;
 
+import helper.Dates;
 import models.market.Account;
 import models.market.JobRequest;
 import org.junit.Test;
 import play.Play;
+import play.libs.F;
 import play.test.UnitTest;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -46,7 +50,7 @@ public class AmazonFBAInventoryReceivedJobTest extends UnitTest {
         assertEquals(3, rowsMap.size());
     }
 
-    @Test
+    //    @Test
     public void testOneJob() {
         AmazonFBAInventoryReceivedJob worker = new AmazonFBAInventoryReceivedJob();
         Account acc = Account.findById(2l);
@@ -62,6 +66,27 @@ public class AmazonFBAInventoryReceivedJobTest extends UnitTest {
     }
 
     @Test
+    public void testEarliestDate() {
+        AmazonFBAInventoryReceivedJob.Rows rows = new AmazonFBAInventoryReceivedJob.Rows();
+        rows.records = Arrays.asList(
+                "2013-05-25T22:00:00+00:00\tX0005LTYP9\t80DBK10000-B,652862208225\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-24T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-24T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t36\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n",
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1"
+        );
+
+        F.Option<Date> earliestDate = rows.getEarliestDate();
+        assertEquals(true, earliestDate.isDefined());
+        assertEquals("2013-05-24 06:00:00", Dates.date2DateTime(earliestDate.get()));
+    }
+
+    //    @Test
     public void testParseJob() {
         AmazonFBAInventoryReceivedJob worker = new AmazonFBAInventoryReceivedJob();
         worker.callBack(JobRequest.<JobRequest>findById(26240l));

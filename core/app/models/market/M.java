@@ -450,12 +450,14 @@ public enum M {
         //https://sellercentral.amazon.co.uk/gp/orders-v2/details?orderID=203-5364157-2572327
         switch(this) {
             case AMAZON_UK:
+            case AMAZON_US:
+                return "https://sellercentral." + this.toString() +
+                        "/gp/orders-v2/details?orderID=" + oid;
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                return "https://sellercentral." + this.toString() +
+                return "https://sellercentral.amazon.de" +
                         "/gp/orders-v2/details?orderID=" + oid;
             case EBAY_UK:
             default:
@@ -849,11 +851,14 @@ public enum M {
             msku = "80-qw1a56-be";
         }
         switch(sell.market) {
-            case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
+                return String
+                        .format("https://catalog-sc.amazon.de/abis/product/DisplayEditProduct?sku=%s&asin=%s",
+                                msku, sell.asin);
+            case AMAZON_UK:
                 return String
                         .format("https://catalog-sc.%s/abis/product/DisplayEditProduct?sku=%s&asin=%s",
                                 sell.account.type.toString()/*更新的链接需要账号所在地的 URL*/, msku, sell.asin);

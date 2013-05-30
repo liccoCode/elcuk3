@@ -6,8 +6,10 @@ import models.market.JobRequest;
 import models.procure.FBAShipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.jobs.Job;
+import play.libs.F;
 import play.libs.IO;
 
 import java.io.File;
@@ -122,6 +124,26 @@ public class AmazonFBAInventoryReceivedJob extends Job implements JobRequest.Ama
             } else {
                 return mskus.get(msku).get();
             }
+        }
+
+        /**
+         * 获取 Records 中的最早时间
+         *
+         * @return
+         */
+        public F.Option<Date> getEarliestDate() {
+            return getEarliestDate(this.records);
+        }
+
+        public static F.Option<Date> getEarliestDate(List<String> records) {
+            if(records == null || records.size() == 0) return F.Option.None();
+            List<Date> dates = new ArrayList<Date>();
+            for(String record : records) {
+                String dateStr = record.split("\t")[0];
+                dates.add(DateTime.parse(dateStr).toDate());
+            }
+            Collections.sort(dates);
+            return F.Option.Some(dates.get(0));
         }
     }
 }

@@ -9,20 +9,22 @@ import models.market.*;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.db.helper.JpqlSelect;
 import play.jobs.Job;
 
 import javax.xml.bind.JAXB;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 每隔一段时间到 Amazon 上进行订单的抓取
- * //TODO 在处理好 Product, Listing, Selling 的数据以后再编写
+ * 第三步, 补全遗漏信息;
+ * <p/>
  * * 周期:
- * - 轮询周期: 5mn
- * - Duration: 10mn
- * - Job Interval: 1h
+ * - 轮询周期: 1h
+ * - Duration: 2h
+ * - Job Interval: 24h
  * User: Wyatt
  * Date: 12-1-8
  * Time: 上午5:59
@@ -66,11 +68,11 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     }
 
     /**
-     * 每小时发现一次新订单
+     * 每 24 小时一次
      */
     @Override
     public int intervalHours() {
-        return 1;
+        return 24;
     }
 
     /**
@@ -81,39 +83,40 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
     @Override
     public void callBack(final JobRequest jobRequest) {
         try {
+
             /**
-             * 1. 解析出文件中的所有 Orders.
-             * 2. 遍历所有的订单, 利用 hibernate 的二级缓存, 加载 Orderr 进行保存或者更新
+             * 1. 对所有订单(大概 1w 个订单), 将订单分解成 1000 个一组依次进行
+             * 2. 首先查找不存在的订单, 将新订单抓取回来
+             * 3. 更新订单, 同时更新订单项目
              */
-            // 1. 解析出订单
             List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(
-                    new File(jobRequest.path), jobRequest.account);
-            // 通过 subList 后, orders List 会变空
-            // 分几个部分处理? 每个部分最多处理 1000 个订单
-            int part = new Double(Math.ceil(orders.size() / 1000f)).intValue();
-            List<Orderr> subList = orders.subList(0,
-                    orders.size() > 1000 ? 1000 : orders.size());
-            // 2. 保存或者更新
-            for(int i = 1; i <= part; i++) {
-                Map<String, Orderr> managerOrderMap = Orderr.list2Map(
-                        Orderr.find(JpqlSelect.whereIn("orderId", Orderr.ids(subList)))
-                                .<Orderr>fetch()
-                );
-                for(Orderr order : subList) {
-                    if(Orderr.count("orderId=?", order.orderId) <= 0) { //保存
-                        order.save();
-                        Logger.info("Save Order: " + order.orderId);
-                    } else { //更新
-                        Orderr managed = managerOrderMap.get(order.orderId);
-                        // 如果订单已经为 CANCEL 了, 则不更新了
-                        if(managed.state == Orderr.S.CANCEL) continue;
-                        managed.updateAttrs(order);
-                        Logger.info("Update Order: " + order.orderId);
-                    }
+                    new File(jobRequest.path), jobRequest.account
+            );
+            List<Orderr> partOrders = orders.subList(
+                    0, orders.size() > 1000 ? 1000 : orders.size()
+            );
+            while(orders.size() > 0) {
+                Map<String, Boolean> existOrders = AmazonOrderDiscover.ordersExist(partOrders);
+
+                List<Orderr> toUpdate = new ArrayList<Orderr>();
+                List<Orderr> toSave = new ArrayList<Orderr>();
+                for(Orderr orderr : partOrders) {
+                    if(existOrders.containsKey(orderr.orderId))
+                        toUpdate.add(orderr);
+                    else
+                        toSave.add(orderr);
                 }
-                // 查看 Java Doc, 将原始 List 中的这部分子 List 清除
-                subList.clear();
-                subList = orders.subList(0, orders.size() > 1000 ? 1000 : orders.size());
+
+                AmazonOrderDiscover.updateOrders(toUpdate);
+                AmazonOrderItemDiscover.updateOrderItemByOrders(toUpdate);
+                AmazonOrderDiscover.saveOrders(toSave);
+                AmazonOrderItemDiscover.saveOrderItemByOrders(toSave);
+
+
+                // 清理掉已经处理完成的 1000 个订单
+                partOrders.clear();
+                partOrders = orders.subList(0, (orders.size() > 1000 ? 1000 : orders.size()));
+                Logger.info("Deal %s orders....", partOrders.size());
             }
         } catch(Exception e) {
             Logger.warn("AmazonOrderFetchJob.callback error. %s", Webs.S(e));
@@ -139,183 +142,172 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
         for(MessageType message : envelopeType.getMessage()) {
             OrderType odt = message.getOrder();
             try {
-
-                String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
-                if(StringUtils.startsWith(amazonOrderId, "S02") ||
-                        StringUtils.startsWith(amazonOrderId, "S01")) {
-                    Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
-                    continue;
-                }
-
-                Orderr orderr = new Orderr();
-                orderr.account = acc;
-                orderr.orderId = amazonOrderId;
-                orderr.market = M.val(odt.getSalesChannel());
-                // ALl Orders 中的时间是 UTC 的, 使用 GregorianCalendar 就是正确的, 会自动转换为 JVM Default TimeZone
-                orderr.createDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
-
-                if(orderr.state != Orderr.S.CANCEL)
-                    orderr.state = parseOrderState(odt.getOrderStatus());
-
-                if(orderr.state.ordinal() >= Orderr.S.PAYMENT.ordinal()) {
-                    Date lastUpdateTime = odt.getLastUpdatedDate().toGregorianCalendar().getTime();
-
-                    orderr.paymentDate = orderr.createDate;
-                    orderr.shipDate = lastUpdateTime;
-
-
-                    FulfillmentDataType ffdt = odt.getFulfillmentData();
-                    orderr.shipLevel = ffdt.getShipServiceLevel();
-
-                    AddressType addtype = ffdt.getAddress();
-                    // 在国外, 一般情况下只需要 City, State(Province), PostalCode 就可以定位具体地址了
-                    orderr.city = addtype.getCity();
-                    orderr.province = addtype.getState();
-                    orderr.postalCode = addtype.getPostalCode();
-                    orderr.country = addtype.getCountry();
-                }
-
-                List<OrderItemType> oits = odt.getOrderItem();
-                List<OrderItem> orderitems = new ArrayList<OrderItem>();
-
-                Float totalAmount = 0f;
-                Float shippingAmount = 0f;
-                Map<String, Boolean> mailed = new HashMap<String, Boolean>();
-                for(OrderItemType oid : oits) {
-                    /**
-                     * 0. 检查这个 order 是否需要进行补充 orderitem
-                     * 1. 将 orderitem 的基本信息补充完全
-                     * 2. 检查 orderitems List 中时候已经存在相同的产品了, 如果有这修改已经存在的产品的数量否则才添加新的
-                     */
-                    if(oid.getQuantity() < 0) continue;//只有数量为 0 这没必要记录, 但如果订单为 Cancel 还是有必要记录的
-
-                    OrderItem oi = new OrderItem();
-                    oi.market = orderr.market;
-                    oi.order = orderr;
-                    oi.listingName = oid.getProductName();
-                    oi.quantity = oid.getQuantity();
-                    oi.createDate = orderr.createDate; // 这个字段是从 Order 转移到 OrderItem 上的一个冗余字段, 方便统计使用
-
-
-                    // 如果属于 UnUsedSKU 那么则跳过这个解析
-                    if(Product.unUsedSKU(oid.getSKU())) continue;
-
-                    String sku = Product.merchantSKUtoSKU(oid.getSKU());
-                    Product product = Product.findById(sku);
-                    Selling selling = Selling.findById(
-                            Selling.sid(oid.getSKU().toUpperCase(), orderr.market/*市场使用的是 Orderr 而非 Account*/,
-                                    acc));
-                    if(product != null) oi.product = product;
-                    else {
-                        String title = String
-                                .format("SKU[%s] is not in PRODUCT, it can not be happed!!", sku);
-                        Logger.error(title);
-                        if(!mailed.containsKey(sku)) {
-                            Webs.systemMail(title, title);
-                            mailed.put(sku, true);
-                        }
-                        continue; // 发生了这个错误, 这跳过这个 orderitem
-                    }
-                    if(selling != null) oi.selling = selling;
-                    else {
-                        String sid = Selling.sid(oid.getSKU().toUpperCase(), orderr.market, acc);
-                        String title = String
-                                .format("Selling[%s] is not in SELLING, it can not be happed!",
-                                        sid);
-                        Logger.warn(title);
-                        if(mailed.containsKey(sid)) {
-                            Webs.systemMail(title, title);
-                            mailed.put(sid, true);
-                        }
-                        continue;
-                    }
-                    oi.id = String.format("%s_%s", orderr.orderId, product.sku);
-
-                    // price calculate
-                    oi.price = oi.discountPrice = oi.feesAmaount = oi.shippingPrice = 0f; // 初始化值
-                    if(orderr.state == Orderr.S.CANCEL) { //基本信息完成后, 如果订单是取消的, 那么价格等都设置为 0 , 不计入计算并
-                        addIntoOrderItemList(orderitems, oi);
-                        continue;
-                    }
-
-                    ItemPriceType ipt = oid.getItemPrice();
-                    if(ipt == null) { //如果价格还没有出来, 表示在 Amazon 上数据还没有及时到位, 暂时不记录价格数据
-                        Logger.warn("Order[%s] orderitem don`t have price yet.", orderr.orderId);
-                    } else {
-                        List<ComponentType> costs = oid.getItemPrice().getComponent();
-                        for(ComponentType ct : costs) { // 价格在这个都要统一成为 GBP (英镑), 注意不是 EUR 欧元
-                            AmountType at = ct.getAmount();
-                            String compType = ct.getType().toLowerCase();
-                            oi.currency = helper.Currency.valueOf(at.getCurrency());
-                            if(oi.currency == null)
-                                oi.currency = Currency.USD;// 如果 Currency 为 null,则修补为 USD
-                            if("principal".equals(compType)) {
-                                oi.price = at.getValue();
-                                totalAmount += oi.price;
-                                oi.usdCost = oi.currency.toUSD(oi.price);
-                            } else if("shipping".equals(compType)) {
-                                oi.shippingPrice = at.getValue();
-                                shippingAmount += oi.shippingPrice;
-                            } else if("giftwrap".equals(compType)) {
-                                oi.memo += String.format("\nGiftWrap: %s %s.", at.getValue(),
-                                        oi.currency); //这个价格暂时不知道如何处理, 所以就直接记录到中性字段中
-                            }
-                        }
-
-                        // 计算折扣了多少钱
-                        PromotionType promotionType = oid.getPromotion();
-                        if(promotionType != null) {
-                            if(promotionType.getShipPromotionDiscount() != null) {
-                                oi.shippingPrice =
-                                        oi.shippingPrice - promotionType.getShipPromotionDiscount();
-                            }
-                            if(promotionType.getItemPromotionDiscount() != null) {
-                                oi.discountPrice = promotionType.getItemPromotionDiscount();
-                            }
-                        }
-                    }
-
-                    addIntoOrderItemList(orderitems, oi);
-                }
-
-                orderr.totalAmount = totalAmount;
-                orderr.shippingAmount = shippingAmount;
-                orderr.items = orderitems;
+                Orderr orderr = amzOrderToOrderr(odt, acc);
+                if(orderr == null) continue;
+                orderr.items = amzOrderItemsToOrderItems(
+                        odt.getOrderItem(), orderr, acc
+                );
                 orders.add(orderr);
             } catch(Exception e) {
-                errors.append(Webs.E(e)).append("\r\n").append(J.json(odt));
+                errors.append(Webs.E(e)).append("<br><br>").append(J.json(odt)).append("<br><br>");
             }
         }
-        if(StringUtils.isNotBlank(errors.toString()))
-            Webs.systemMail(String.format("解析 %s 订单文件的错误.", file.getAbsolutePath()),
-                    errors.toString());
+
+        if(errors.length() > 0)
+            Webs.systemMail(
+                    String.format("解析 %s 订单文件的错误.", file.getAbsolutePath()),
+                    errors.toString()
+            );
+
         return orders;
     }
 
-
     /**
-     * 判断将 OrderItem 是否能够添加如已经存在的 List[OrderItem]
+     * Amazon 订单类型变为  Orderr
      *
-     * @param list
-     * @param oi
+     * @param odt
+     * @param acc
      * @return
      */
-    private static boolean addIntoOrderItemList(List<OrderItem> list, OrderItem oi) {
-        if(list.contains(oi)) {
-            for(OrderItem item : list) {
-                if(!item.equals(oi)) continue;
-                item.quantity = item.quantity + oi.quantity;
-                Logger.info("merge one orderItem[%s] belong to order %s, see the details goto %s",
-                        oi.product.sku,
-                        oi.order.orderId,
-                        "https://sellercentral.amazon.co.uk/gp/orders-v2/details?ie=UTF8&orderID=" +
-                                oi.order.orderId
-                );
+    private static Orderr amzOrderToOrderr(OrderType odt, Account acc) {
+        String amazonOrderId = odt.getAmazonOrderID().toUpperCase();
+        if(StringUtils.startsWith(amazonOrderId, "S02") ||
+                StringUtils.startsWith(amazonOrderId, "S01")) {
+            Logger.info("OrderId {%s} Can Not Be Add to Normal Order", amazonOrderId);
+            return null;
+        }
+
+        Orderr orderr = new Orderr();
+        orderr.account = acc;
+        orderr.orderId = amazonOrderId;
+        if(odt.getSalesChannel().contains("WebStore"))
+            orderr.market = M.AMAZON_DE;
+        else
+            orderr.market = M.val(odt.getSalesChannel());
+        orderr.paymentDate = odt.getPurchaseDate().toGregorianCalendar().getTime();
+        orderr.createDate = orderr.paymentDate;
+
+        orderr.state = parseOrderState(odt.getOrderStatus());
+
+        if(!Arrays.asList(Orderr.S.CANCEL, Orderr.S.PENDING).contains(orderr.state))
+            orderr.shipDate = odt.getLastUpdatedDate().toGregorianCalendar().getTime();
+
+        if(odt.getFulfillmentData() != null) {
+            FulfillmentDataType ffdt = odt.getFulfillmentData();
+            orderr.shipLevel = ffdt.getShipServiceLevel();
+
+            if(ffdt.getAddress() != null) {
+                AddressType addtype = ffdt.getAddress();
+                orderr.city = addtype.getCity();
+                orderr.province = addtype.getState();
+                orderr.postalCode = addtype.getPostalCode();
+                orderr.country = addtype.getCountry();
             }
-            return false;
+        }
+        return orderr;
+    }
+
+    /**
+     * Amazon OrderItemType 变为 OrderItem
+     *
+     * @param orderItemTypes
+     * @param orderr
+     * @param acc
+     * @return
+     */
+    private static List<OrderItem> amzOrderItemsToOrderItems(List<OrderItemType> orderItemTypes,
+                                                             Orderr orderr,
+                                                             Account acc) {
+        List<OrderItem> orderItems = new ArrayList<OrderItem>();
+        for(OrderItemType amzOrderItem : orderItemTypes) {
+            OrderItem orderItem = new OrderItem();
+
+            orderItem.id = String.format("%s_%s",
+                    orderr.orderId, Product.merchantSKUtoSKU(amzOrderItem.getSKU()));
+
+            orderItem.createDate = orderr.paymentDate;
+            orderItem.order = orderr;
+            orderItem.market = orderr.market;
+            orderItem.listingName = amzOrderItem.getProductName();
+            orderItem.quantity = amzOrderItem.getQuantity();
+
+            orderItem.selling = Selling.findById(
+                    Selling.sid(amzOrderItem.getSKU().toUpperCase(), orderr.market, acc));
+            orderItem.product = Product.findByMerchantSKU(amzOrderItem.getSKU());
+            orderItem.quantity = amzOrderItem.getQuantity();
+
+            // ItemPrice
+            if(amzOrderItem.getItemPrice() != null) {
+                ItemPriceType priceType = amzOrderItem.getItemPrice();
+                for(ComponentType component : priceType.getComponent()) {
+                    /**
+                     * 1. Principal
+                     * 2. Shipping
+                     * 3. GiftWrap
+                     */
+                    String type = component.getType();
+                    if("Principal".equalsIgnoreCase(type)) {
+                        orderItem.price = component.getAmount().getValue();
+                        orderItem.currency = Currency.valueOf(component.getAmount().getCurrency());
+                    } else if("Shipping".equalsIgnoreCase(type)) {
+                        orderItem.shippingPrice = component.getAmount().getValue();
+                    } else if("GiftWrap".equalsIgnoreCase(type)) {
+                        orderItem.giftWrap = component.getAmount().getValue();
+                    }
+                }
+            }
+
+            // Promotion
+            if(amzOrderItem.getPromotion() != null) {
+                PromotionType promotionType = amzOrderItem.getPromotion();
+                orderItem.promotionIDs = promotionType.getPromotionIDs();
+                orderItem.discountPrice = promotionType.getItemPromotionDiscount();
+                if(promotionType.getShipPromotionDiscount() != null) {
+                    if(orderItem.discountPrice == null) orderItem.discountPrice = 0f;
+                    orderItem.discountPrice += promotionType.getShipPromotionDiscount();
+                }
+            }
+            addToOrderitems(orderItems, orderItem);
+        }
+        return orderItems;
+    }
+
+    /**
+     * 因为 Amazon 会将 Gift Wrap 与非 GiftWrap 分开, 所以这里我们需要合并
+     *
+     * @param items
+     * @param newItem
+     */
+    private static void addToOrderitems(List<OrderItem> items, OrderItem newItem) {
+        if(!items.contains(newItem)) {
+            items.add(newItem);
         } else {
-            list.add(oi);
-            return true;
+            for(OrderItem itm : items) {
+                if(!itm.equals(newItem)) continue;
+                Logger.info("Merge one OrderItem[%s], see details goto: %s",
+                        itm.order.orderId,
+                        itm.market.orderDetail(itm.order.orderId));
+                if(newItem.discountPrice != null) {
+                    if(itm.discountPrice == null) itm.discountPrice = 0f;
+                    itm.discountPrice += newItem.discountPrice;
+                }
+                if(newItem.price != null) {
+                    if(itm.price == null) itm.price = 0f;
+                    itm.price += newItem.price;
+                }
+                if(newItem.usdCost != null) {
+                    if(itm.usdCost == null) itm.usdCost = 0f;
+                    itm.usdCost += newItem.usdCost;
+                }
+                if(newItem.giftWrap != null) {
+                    if(itm.giftWrap == null) itm.giftWrap = 0f;
+                    itm.giftWrap += newItem.giftWrap;
+                }
+                itm.quantity += newItem.quantity;
+                if(StringUtils.isNotBlank(newItem.promotionIDs)) {
+                    itm.promotionIDs += "," + newItem.promotionIDs;
+                }
+            }
         }
     }
 

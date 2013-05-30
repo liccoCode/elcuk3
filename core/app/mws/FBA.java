@@ -1,10 +1,12 @@
-package helper;
+package mws;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSClient;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSConfig;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
+import helper.Dates;
+import helper.Webs;
 import models.market.Account;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
@@ -134,15 +136,19 @@ public class FBA {
         int qty = 0;
         for(ProcureUnit unit : fbashipment.units) {
             for(ShipItem item : unit.shipItems) {
+                if(item.shipment == null) continue;
                 shipments.add(item.shipment);
             }
             qty += unit.qty();
         }
-        fbaTitle.append("总共运输数量为 ").append(qty).append(" 并关联 ");
-        for(Shipment shipment : shipments) {
-            fbaTitle.append(shipment.id).append(",");
+        fbaTitle.append("总共运输数量为 ").append(qty);
+        if(shipments.size() > 0) {
+            fbaTitle.append(" 并关联 ");
+            for(Shipment shipment : shipments) {
+                fbaTitle.append(shipment.id).append(",");
+            }
+            fbaTitle.append(" 运输单");
         }
-        fbaTitle.append(" 运输单");
 
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);

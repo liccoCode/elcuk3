@@ -62,7 +62,7 @@ public class OrderInfoFetchJob extends Job {
          * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
          */
         return Orderr
-                .find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null OR address1 is null OR address1='') order by createDate",
+                .find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null) order by createDate",
                         Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
     }
 
@@ -114,11 +114,15 @@ public class OrderInfoFetchJob extends Job {
 
         if(order.state == Orderr.S.SHIPPED || order.state == Orderr.S.REFUNDED) {
             // Email
-            String tmp = StringUtils
-                    .remove(StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(),
-                            "\"");
-            order.email = StringUtils.remove(tmp, ",");
-            if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
+            if(StringUtils.isBlank(order.email)) {
+                String tmp = StringUtils.remove(
+                        StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(),
+                        "\""
+                );
+
+                order.email = StringUtils.remove(tmp, ",");
+                if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
+            }
 
             // buyerId
             String url = lin.parent().select("a").attr("href");
@@ -130,18 +134,10 @@ public class OrderInfoFetchJob extends Job {
             }
 
             // Phone
-            order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
-            if(StringUtils.isNotBlank(order.phone)) order.phone = order.phone.trim();
-
-            // Address1 (重复地址, 作为参数)
-            order.address1 = StringUtils.substringBetween(html, "Shipping Address", "Phone");
-            if(StringUtils.isNotBlank(order.address1)) {
-                order.address1 = StringUtils.replace(order.address1, "<br />", "\r\n").trim();
-                order.address1 = StringUtils.replace(order.address1, "<br>", "\r\n").trim();
-                order.address1 = StringUtils.remove(order.address1, "</strong>");
-                order.address1 = StringUtils.remove(order.address1, ":");
+            if(StringUtils.isBlank(order.phone)) {
+                order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
+                if(StringUtils.isNotBlank(order.phone)) order.phone = order.phone.trim();
             }
-
         }
         return order;
     }

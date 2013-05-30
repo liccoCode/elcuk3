@@ -70,7 +70,7 @@
   </td>
   <th>阶段</th>
   <td>
-    <input type="text" readonly="" value="${unit.stage.name()}">
+    <span style="color:${unit.stage.rgb()}">${unit.stage.label()}</span>
   </td>
 </tr>
 
@@ -84,7 +84,11 @@
     </label>
   #{/list}
   </td>
-  <td colspan="2"></td>
+  <td colspan="2">
+  #{list items: unit.relateShipment()}
+    <div><a href="@{Shipments.show(_.id)}" target="_blank">${_.id}</a></div>
+  #{/list}
+  </td>
 </tr>
 
 <tr>

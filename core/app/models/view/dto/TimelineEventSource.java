@@ -14,6 +14,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.Transient;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -170,8 +171,15 @@ public class TimelineEventSource {
         public Event startAndEndDate(String type) {
             Date predictShipFinishDate = null;
             List<Shipment> relateShipments = this.unit.relateShipment();
-            if(relateShipments.size() > 0)
-                predictShipFinishDate = ShipmentsHelper.predictArriveDate(relateShipments.get(0));
+
+            // 检查运输单的是否可以从签收进入入库状态
+            for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
+
+            if(relateShipments.size() > 0) {
+                Shipment shipment = relateShipments.get(0);
+                if(!Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
+                    predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
+            }
 
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
@@ -286,7 +294,7 @@ public class TimelineEventSource {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
         // 需要线程安全, 所以使用 StringBuffer
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         JVMRandom random = new JVMRandom();
         for(int i = 0; i < colorLength; i++) {
             sb.append(codeSequence[random.nextInt(16)]);

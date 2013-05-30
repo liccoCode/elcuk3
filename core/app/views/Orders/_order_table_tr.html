@@ -32,7 +32,7 @@
     <td>${ord.address1}</td>
     <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
     <td>
-        <a target="_blank" href="@{Orders.show}/${ord.orderId}">
+        <a target="_blank" href="@{Orders.show(ord.orderId)}">
         ${ord.orderId} (${ord.crawlUpdateTimes} | ${ord.itemCount()} | ${ord.fees.size()})
         </a>
     </td>

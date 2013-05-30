@@ -3,11 +3,12 @@ package amazon;
 import jobs.AmazonOrderFetchJob;
 import models.market.Account;
 import models.market.JobRequest;
-import org.joda.time.DateTime;
+import models.market.Orderr;
 import org.junit.Test;
+import play.Play;
 import play.test.UnitTest;
 
-import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,27 +26,24 @@ public class AmazonOrderFetchJobTest extends UnitTest {
         job.request();
     }
 
-    //    @Test
+    //        @Test
     public void testUpdateState() {
         JobRequest.updateState(fetchJob.type());
     }
 
-    @Test
-    public void testDate() {
-        DateTime time = DateTime.now();
-        time = time.minusDays(7);
-        assertEquals(5, time.getMonthOfYear());
-        assertEquals(14, time.getDayOfMonth());
-        GregorianCalendar gc = new GregorianCalendar(time.getYear(), time.getMonthOfYear(),
-                time.getDayOfMonth());
-        System.out.println(gc);
-        System.out.println(new DateTime(gc.getTime()).toString("yyyy-MM-dd HH:mm:ss"));
+    //    @Test
+    public void testAllOrdersXML() {
+        Account account = Account.findById(2l);
+        List<Orderr> orders = AmazonOrderFetchJob.allOrderXML(
+                Play.getFile("test/html/21089866544.xml"), account);
+        assertEquals(10, orders.size());
     }
 
-    //    @Test
+
+    @Test
     public void testParseOrder() {
         JobRequest job = new JobRequest();
-        job.path = "/Users/wyatt/Downloads/16061848184.txt";
+        job.path = "/Users/wyatt/Programer/repos/elcuk2/core/test/html/21089866544.xml";
         job.account = Account.findById(2l);
         new AmazonOrderFetchJob().callBack(job);
     }

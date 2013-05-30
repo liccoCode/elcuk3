@@ -1,10 +1,11 @@
-package helper;
+package mws;
 
 import com.amazonaws.mws.MarketplaceWebService;
 import com.amazonaws.mws.MarketplaceWebServiceClient;
 import com.amazonaws.mws.MarketplaceWebServiceConfig;
 import com.amazonaws.mws.MarketplaceWebServiceException;
 import com.amazonaws.mws.model.*;
+import helper.Constant;
 import models.market.JobRequest;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -20,7 +21,7 @@ import java.util.*;
 
 /**
  * <pre>
- * 对 Amazon AWS 的 report 的请求 API
+ * 对 Amazon MWSReports 的 report 的请求 API
  * 1. 发出 Report Request 请求, 获得 ReportRequestId
  * 2. 根据 ReportRequestId 请求, 查询状态, 直到这个请求被处理结束;
  * 3. 当 ReportRequestId 的任务执行完成后, 获取 ReportId , 用来下载 report 文件;
@@ -31,7 +32,7 @@ import java.util.*;
  * Date: 1/23/12
  * Time: 6:10 PM
  */
-public class AWS {
+public class MWSReports {
 
     /**
      * 年/月/日/文件名
@@ -84,7 +85,7 @@ public class AWS {
                 } catch(DatatypeConfigurationException e) {
                     // can not be happed.
                     Logger.warn(
-                            "DatatypeConfigurationException Can not be happed in AWS.requestReport_step1!");
+                            "DatatypeConfigurationException Can not be happed in MWSReports.requestReport_step1!");
                 }
                 return;
             default:
