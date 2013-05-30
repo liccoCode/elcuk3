@@ -25,17 +25,16 @@
         <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select id="p_dateType" name="p.dateType" class="inline">
-      #{list items:p.dateTypes, as:'dt'}
-        <option ${dt._1 == p.dateType ? 'selected' : ''} value="${dt._1}">${dt._2}</option>
-      #{/list}
-      </select>
+    #{select 'p.dateType', items: p.dateTypes, labelProperty: '_2', valueProperty: '_1', value: p.dateType, class: 'inline' /}
 
-      <select id="p_whouse" name="p.whouse" class="inline">
-        <option value="">FBA_ALL</option>
-      #{list items:whosues, as:'whouse'}
-        <option ${whouse == p.whouse ? 'selected' : ''} value="${whouse}">${whouse}</option>
-      #{/list}
+    #{select 'p.whouseId', items: whouses, labelProperty: 'name', valueProperty: 'id', value:p.whouseId,class:'inline'}
+        #{option ''}FBA_ALL#{/option}
+    #{/select}
+
+    #{select 'p.centerId', items: centers, labelProperty: 'centerId', valueProperty: 'centerId', value: p.centerId, class:'inline'}
+        #{option ''}FBA Center#{/option}
+    #{/select}
+
       </select>
       <label class="checkbox inline">
         <input type="checkbox" ${p.isHaveShipment ? 'checked' : ''} value="true" name="p.isHaveShipment">
@@ -78,7 +77,9 @@
               <label><input type="checkbox" name="units" value="${unit.id}"></label>
             #{/ifnot}
         </td>
-        <td><a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a></td>
+        <td>
+          <a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a>
+        </td>
         <td>
         ${unit.shipItems}
             #{list items:relateShipments, as:'shipment'}

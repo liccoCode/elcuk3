@@ -34,7 +34,9 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
 
     public String dateType = "attrs.planShipDate";
 
-    public String whouse;
+    public Long whouseId;
+
+    public String centerId;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -53,9 +55,14 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
         if(!this.isHaveShipment)
             sql.append(" AND si.shipment IS NULL");
 
-        if(StringUtils.isNotBlank(this.whouse)) {
-            sql.append(" AND p.whouse.name=?");
-            params.add(this.whouse);
+        if(this.whouseId != null) {
+            sql.append(" AND p.whouse.id=?");
+            params.add(this.whouseId);
+        }
+
+        if(StringUtils.isNotBlank(this.centerId)) {
+            sql.append(" AND f.centerId=?");
+            params.add(this.centerId);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
@@ -63,7 +70,6 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
             sql.append(" AND (f.shipmentId LIKE ?")
                     .append(" OR p.sku LIKE ?")
                     .append(" OR p.sid LIKE ?")
-                    .append(" OR f.centerId LIKE ?")
                     .append(")");
 
             for(int i = 0; i < 4; i++) {
