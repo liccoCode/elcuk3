@@ -105,6 +105,7 @@ public class CooperItem extends Model {
             if(copitm.sku.equals(this.sku))
                 throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
         }
+        cooperator.cooperItems.add(this);
         return this.save();
     }
 

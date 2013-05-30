@@ -32,7 +32,7 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
 
     public boolean isHaveShipment = false;
 
-    public String dateType = "createDate";
+    public String dateType = "attrs.planShipDate";
 
     @Override
     public F.T2<String, List<Object>> params() {

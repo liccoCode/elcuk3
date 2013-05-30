@@ -226,11 +226,11 @@
               签收
             </button>
           #{/if}
-          #{if ship.state == models.procure.Shipment.S.RECEIPTD}
-            <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
-              开始入库
-            </button>
-          #{/if}
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.RECEIPTD}
+        <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
+          开始入库
+        </button>
       #{/if}
   #{/power.ck }
   #{if ship.state == models.procure.Shipment.S.RECEIVING}

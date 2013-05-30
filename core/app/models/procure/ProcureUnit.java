@@ -450,8 +450,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void changeShipItemShipment(Shipment shipment) {
         for(ShipItem shipItem : this.shipItems) {
             if(this.shipType == Shipment.T.EXPRESS) {
-                shipItem.shipment = null;
-                shipItem.save();
+                // 快递运输单调整, 运输项目全部删除, 重新设计.
+                shipItem.delete();
             } else {
                 if(shipment == null) return;
                 Shipment originShipment = shipItem.shipment;
