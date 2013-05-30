@@ -184,13 +184,18 @@ public class TimelineEventSource {
             if(predictShipFinishDate == null)
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
 
-            this.lastDays = Webs.scale2PointUp(
-                    (this.unit.qty() / ("sku".equals(type) ? this.skuPS() : this.sidPS())));
+            this.lastDays = Webs.scale2PointUp(this.unit.qty() / this.ps(type));
 
+            Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
+
+            if(this.unit.stage == ProcureUnit.STAGE.INBOUND) {
+                // 如果在入库中, 进度条自动缩短
+                timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
+            }
             // 如果不够卖到第二天, 那么就省略
             this.end = add8Hour(new DateTime(predictShipFinishDate)
-                    .plusDays(this.lastDays.intValue()).toDate());
+                    .plusDays(timeLineDays.intValue()).toDate());
             this.durationEvent = true;
             return this;
         }
@@ -198,6 +203,10 @@ public class TimelineEventSource {
 
         private boolean isEnsureQty() {
             return (this.unit.attrs != null && this.unit.attrs.qty != null);
+        }
+
+        public Float ps(String type) {
+            return "sku".equals(type) ? this.skuPS() : this.sidPS();
         }
 
         private Float skuPS() {
