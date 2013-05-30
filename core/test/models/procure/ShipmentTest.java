@@ -1,25 +1,35 @@
-package procure;
+package models.procure;
 
+import factory.FactoryBoy;
 import helper.Dates;
-import models.procure.Shipment;
-import models.procure.iExpress;
 import org.joda.time.DateTime;
+import org.junit.Before;
 import org.junit.Test;
 import play.Play;
 import play.libs.F;
-import play.template2.IO;
+import play.libs.IO;
 import play.test.UnitTest;
+
+import java.util.Arrays;
+
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by IntelliJ IDEA.
- * User: wyattpan
- * Date: 6/18/12
- * Time: 5:00 PM
+ * User: wyatt
+ * Date: 5/29/13
+ * Time: 6:37 PM
  */
 public class ShipmentTest extends UnitTest {
     String dhlFile = IO.readContentAsString(Play.getFile("test/html/track.dhl.html"));
     String fedexFile = IO.readContentAsString(Play.getFile("test/html/track.fedex.html"));
     String upsFile = IO.readContentAsString(Play.getFile("test/html/track.ups.html"));
+
+    @Before
+    public void setUp() {
+        FactoryBoy.deleteAll();
+    }
 
     @Test
     public void testDHLisClearance() {
@@ -104,9 +114,11 @@ public class ShipmentTest extends UnitTest {
         assertEquals("2013-01-03 10:02:00", Dates.date2DateTime(flag._2));
     }
 
+
     @Test
     public void testDHLMonitor() {
-        Shipment shipment = Shipment.findById("SP|201207|00");
+        Shipment shipment = FactoryBoy.create(Shipment.class);
+        shipment.internationExpress = iExpress.DHL;
 
         shipment.state = Shipment.S.SHIPPING;
         shipment.iExpressHTML = shipment.internationExpress.parseExpress(dhlFile, "8259536213");
@@ -127,7 +139,8 @@ public class ShipmentTest extends UnitTest {
 
     @Test
     public void testFedexMonitor() {
-        Shipment shipment = Shipment.findById("SP|201301|44");
+        Shipment shipment = FactoryBoy.create(Shipment.class);
+        shipment.internationExpress = iExpress.FEDEX;
 
         shipment.state = Shipment.S.SHIPPING;
         shipment.iExpressHTML = shipment.internationExpress.parseExpress(fedexFile, "802100421382");
@@ -148,7 +161,8 @@ public class ShipmentTest extends UnitTest {
 
     @Test
     public void testUPSMonitor() {
-        Shipment shipment = Shipment.findById("SP|201301|45");
+        Shipment shipment = FactoryBoy.create(Shipment.class);
+        shipment.internationExpress = iExpress.UPS;
 
         shipment.state = Shipment.S.SHIPPING;
         shipment.iExpressHTML = shipment.internationExpress.parseExpress(upsFile,
@@ -166,5 +180,24 @@ public class ShipmentTest extends UnitTest {
         shipment.monitor();
         assertEquals(Shipment.S.RECEIPTD, shipment.state);
         assertEquals("2013-01-03 10:02:00", Dates.date2DateTime(shipment.dates.receiptDate));
+
+        FBAShipment fbaShipment = new FBAShipment();
+        fbaShipment.state = FBAShipment.S.RECEIVING;
+        fbaShipment.records = "2013-05-25T22:00:00+00:00\tX0005LTYP9\t80DBK10000-B,652862208225\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-24T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-24T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t36\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1\n" +
+                "2013-05-23T22:00:00+00:00\tX0004J3JDP\t80DBK12000-AB,669974689736\t18\tFBA8Q0ZXS\tLEJ1";
+        shipment = spy(shipment);
+        when(shipment.fbas()).thenReturn(Arrays.asList(fbaShipment));
+        doNothing().when(shipment)._save();
+        shipment.monitor();
+        assertThat(shipment.state, is(Shipment.S.RECEIVING));
+        assertThat(shipment.dates.inbondDate, is(fbaShipment.getEarliestDate().get()));
     }
 }

@@ -172,6 +172,9 @@ public class TimelineEventSource {
             Date predictShipFinishDate = null;
             List<Shipment> relateShipments = this.unit.relateShipment();
 
+            // 检查运输单的是否可以从签收进入入库状态
+            for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
+
             if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
                 if(!Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))

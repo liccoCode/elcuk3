@@ -9,7 +9,11 @@ require:
     - play -> coffee 1.0
     - play -> pdf 0.9
     - play -> excel 1.2.3
+    - play -> mockito 0.1:
+        id: test
     - blockingCache -> blockingCache 0.1
+    - factoryBoy -> factory-boy 1.0:
+        id: test
     # jars...
     - com.trendrr -> beanstalk 1.0
     - elcuk -> mws 1.0:
@@ -31,6 +35,11 @@ require:
 
 
 repositories:
+    - factoryBoy:
+        type: HTTP
+        artifact: "https://github.com/wppurking/play-factory-boy/raw/master/factory-boy/dist/[module]-[revision].zip"
+        contains:
+            - factoryBoy -> *
     - blockingCache:
         type: HTTP
         artifact: "https://raw.github.com/wppurking/blockingCache/master/dist/[module]-[revision].zip"
