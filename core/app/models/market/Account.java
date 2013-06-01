@@ -211,7 +211,7 @@ public class Account extends Model {
                                         this.id + ".homepage.html"), body);
 
                     Document doc = Jsoup.parse(body);
-                    Elements inputs = doc.select("form[name=signin] input");
+                    Elements inputs = doc.select("#ap_signin_form input");
 
                     if(inputs.size() == 0) {
                         Logger.info("WebSite [" + this.type.toString() +
