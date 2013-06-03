@@ -7,7 +7,6 @@ import helper.Constant;
 import helper.FLog;
 import helper.HTTP;
 import helper.Webs;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -26,11 +25,11 @@ import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
+import play.libs.IO;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -205,10 +204,11 @@ public class Account extends Model {
                     body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
 
 
-                    FileUtils.writeStringToFile(
-                            new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
-                            body
-                    );
+                    if(Play.mode.isDev()) {
+                        IO.writeContent(body,
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html")
+                        );
+                    }
 
                     Document doc = Jsoup.parse(body);
                     Elements inputs = doc.select("form:eq(0) input");
@@ -232,9 +232,10 @@ public class Account extends Model {
                     }
                     body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                        this.id + ".afterLogin.html"), body);
+                        IO.writeContent(body,
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
+                                        ".afterLogin.html")
+                        );
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
                     if(navBar != null) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
@@ -243,13 +244,9 @@ public class Account extends Model {
                         Logger.warn("%s Seller Central Login Failed!", this.prettyName());
                     }
                 } catch(Exception e) {
-                    try {
-                        FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                        this.id + ".error.html"), body);
-                    } catch(IOException e1) {
-                        //ignore.
-                    }
+                    IO.writeContent(body,
+                            new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html")
+                    );
                     Logger.warn(Webs.E(e));
                 }
                 break;
