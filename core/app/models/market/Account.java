@@ -204,9 +204,10 @@ public class Account extends Model {
                      */
                     body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
 
-                    FileUtils.writeStringToFile(new File(
-                            Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                    this.id + ".homepage.html"), body
+
+                    FileUtils.writeStringToFile(
+                            new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+                            body
                     );
 
                     Document doc = Jsoup.parse(body);
@@ -263,7 +264,7 @@ public class Account extends Model {
      * 非销售账号在 Amazon 的前台登陆,<br>
      * 支持同账户登陆多个市场, 例如: 一个账户登陆 Uk/DE
      */
-    public boolean loginAmazonSize(M market) {
+    public boolean loginAmazonSite(M market) {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -303,7 +304,7 @@ public class Account extends Model {
                 if(Play.mode.isDev())
                     FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body,
                             FLog.T.HTTP_ERROR);
-                boolean loginSucc = false;
+                boolean loginSucc;
                 if(isLogin) {
                     Logger.info("%s Amazon Site Login Successful!", this.prettyName());
                     loginSucc = true;
@@ -369,7 +370,7 @@ public class Account extends Model {
     public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
         String sessionId = this.cookie("session-id", listing.market);
         if(sessionId == null) {// 没有 session-id, 即没有登陆, 则尝试登陆一次..
-            this.loginAmazonSize(listing.market);
+            this.loginAmazonSite(listing.market);
             sessionId = this.cookie("session-id", listing.market);
         }
         String body = HTTP.post(this.cookieStore(listing.market), listing.market.amazonLikeLink(),
@@ -398,7 +399,7 @@ public class Account extends Model {
         String sessionId = this.cookie("session-id", listing.market);
         if(sessionId == null) {
             //登陆失败
-            if(!this.loginAmazonSize(listing.market)) {
+            if(!this.loginAmazonSite(listing.market)) {
                 return false;
             }
             sessionId = this.cookie("session-id", listing.market);
@@ -466,7 +467,7 @@ public class Account extends Model {
         F.T3<Boolean, String, String> loginAndClicks = checkLoginAndFetchClickLinks(review);
         if(!loginAndClicks._1) { // 没有登陆则登陆, 只尝试一次登陆!
             synchronized(this.cookieStore(review.listing.market)) {
-                this.loginAmazonSize(review.listing.market);
+                this.loginAmazonSite(review.listing.market);
             }
             loginAndClicks = checkLoginAndFetchClickLinks(review);
         }
