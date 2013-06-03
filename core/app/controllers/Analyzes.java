@@ -108,7 +108,7 @@ public class Analyzes extends Controller {
     }
 
     @Check("analyzes.ajaxsales")
-    @CacheFor("4n")
+    @CacheFor("4h")
     public static void ajaxSales(AnalyzePost p) {
         try {
             renderJSON(J.json(OrderItem
