@@ -7,6 +7,7 @@ import helper.Constant;
 import helper.FLog;
 import helper.HTTP;
 import helper.Webs;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -25,11 +26,11 @@ import play.data.validation.Equals;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
-import play.libs.IO;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -205,8 +206,9 @@ public class Account extends Model {
 
 
                     if(Play.mode.isDev()) {
-                        IO.writeContent(body,
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html")
+                        FileUtils.writeStringToFile(new File(
+                                Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+                                body
                         );
                     }
 
@@ -232,9 +234,10 @@ public class Account extends Model {
                     }
                     body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
                     if(Play.mode.isDev())
-                        IO.writeContent(body,
+                        FileUtils.writeStringToFile(
                                 new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
-                                        ".afterLogin.html")
+                                        ".afterLogin.html"),
+                                body
                         );
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
                     if(navBar != null) {
@@ -244,9 +247,14 @@ public class Account extends Model {
                         Logger.warn("%s Seller Central Login Failed!", this.prettyName());
                     }
                 } catch(Exception e) {
-                    IO.writeContent(body,
-                            new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html")
-                    );
+                    try {
+                        FileUtils.writeStringToFile(
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html"),
+                                body
+                        );
+                    } catch(IOException e1) {
+                        //ignore
+                    }
                     Logger.warn(Webs.E(e));
                 }
                 break;
@@ -326,15 +334,13 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
-        if(this.type == M.AMAZON_US ||
-                this.type == M.EBAY_UK) return;
+        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK).contains(this.type)) return;
         String url = "Account.changeRegion.";
         try {
             url = this.type.changeRegion(m.amid().name());
             HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
-            throw new FastRuntimeException(
-                    String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
+            throw new FastRuntimeException(String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
         }
     }
 

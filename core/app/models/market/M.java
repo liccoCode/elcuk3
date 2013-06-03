@@ -88,7 +88,7 @@ public enum M {
         /**
          * IT
          */
-        APJ6JRA9NG5V4T,
+        APJ6JRA9NG5V4,
         /**
          * ES
          */
@@ -105,7 +105,7 @@ public enum M {
                     return AMAZON_FR;
                 case ATVPDKIKX0DER:
                     return AMAZON_US;
-                case APJ6JRA9NG5V4T:
+                case APJ6JRA9NG5V4:
                     return AMAZON_IT;
                 case A1RKKUPIHCS9HS:
                     return AMAZON_ES;
@@ -132,7 +132,7 @@ public enum M {
             case AMAZON_FR:
                 return MID.A13V1IB3VIYZZH;
             case AMAZON_IT:
-                return MID.APJ6JRA9NG5V4T;
+                return MID.APJ6JRA9NG5V4;
             case AMAZON_ES:
                 return MID.A1RKKUPIHCS9HS;
             case AMAZON_US:

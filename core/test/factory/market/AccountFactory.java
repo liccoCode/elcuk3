@@ -1,6 +1,7 @@
 package factory.market;
 
 import factory.ModelFactory;
+import factory.annotation.Factory;
 import models.market.Account;
 import models.market.M;
 
@@ -16,7 +17,20 @@ public class AccountFactory extends ModelFactory<Account> {
         Account acc = new Account();
         acc.type = M.AMAZON_DE;
         acc.id = 2l;
+        acc.accessKey = "accessKey";
+        acc.merchantId = "merchantId";
+        acc.username = "username";
+        acc.password = "password";
+        acc.token = "token";
+        return acc;
+    }
 
+
+    @Factory(name = "de")
+    public Account de() {
+        Account acc = new Account();
+        acc.type = M.AMAZON_DE;
+        acc.id = 2l;
         acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";

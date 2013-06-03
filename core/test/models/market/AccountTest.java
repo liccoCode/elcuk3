@@ -17,7 +17,7 @@ public class AccountTest extends UnitTest {
 
     @Test
     public void testLoginAmazonSellerCenter() {
-        Account acc = FactoryBoy.build(Account.class);
+        Account acc = FactoryBoy.build(Account.class, "de");
         acc.cookieStore().clear();
         acc.loginAmazonSellerCenter();
 
