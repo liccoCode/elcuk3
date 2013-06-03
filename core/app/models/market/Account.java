@@ -195,7 +195,6 @@ public class Account extends Model {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
-            case AMAZON_FR:
             case AMAZON_US:
                 String body = "";
                 try {
@@ -205,17 +204,18 @@ public class Account extends Model {
                      */
                     body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
 
-                    if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                        this.id + ".homepage.html"), body);
+                    FileUtils.writeStringToFile(new File(
+                            Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
+                                    this.id + ".homepage.html"), body
+                    );
 
                     Document doc = Jsoup.parse(body);
-                    Elements inputs = doc.select("form[name=signin] input");
+                    Elements inputs = doc.select("form:eq(0) input");
 
                     if(inputs.size() == 0) {
-                        Logger.info("WebSite [" + this.type.toString() +
-                                "] Still have the Session with User [" + this.username + "].");
+                        Logger.info("WebSite [%s] Still have the Session with User [%s].",
+                                this.type.toString(), this.username
+                        );
                         return;
                     }
 
@@ -226,7 +226,8 @@ public class Account extends Model {
                             params.add(new BasicNameValuePair(att, this.username));
                         else if("password".equals(att))
                             params.add(new BasicNameValuePair(att, this.password));
-                        else params.add(new BasicNameValuePair(att, el.val()));
+                        else
+                            params.add(new BasicNameValuePair(att, el.val()));
                     }
                     body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
                     if(Play.mode.isDev())
@@ -234,11 +235,12 @@ public class Account extends Model {
                                 Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
                                         this.id + ".afterLogin.html"), body);
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
-                    if(navBar != null)
+                    if(navBar != null) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
-                    else Logger.warn("%s Seller Central Login Failed!", this.prettyName());
-
-                    HTTP.client().getCookieStore().clearExpired(new Date());
+                        HTTP.client().getCookieStore().clearExpired(new Date());
+                    } else {
+                        Logger.warn("%s Seller Central Login Failed!", this.prettyName());
+                    }
                 } catch(Exception e) {
                     try {
                         FileUtils.writeStringToFile(new File(
@@ -435,7 +437,8 @@ public class Account extends Model {
         //下面两个参数用来避免某些含有参数offerListingId的请求 被添加到 Basket中去
         params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.x", "-1710"));
         params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.y", "-357"));
-        String result = HTTP.post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
+        String result = HTTP
+                .post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
 
         //如果添加成功,或者是账户已经添加该Listing但是系统中无记录.
         if(result.contains("hucSuccessMsg") | result.contains("appMessageBoxInfo")) {

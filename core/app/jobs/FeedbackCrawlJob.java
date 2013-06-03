@@ -150,12 +150,11 @@ public class FeedbackCrawlJob extends Job {
                                         acc.id + "feedback_p" + page + ".html"), body);
                     return FeedbackCrawlJob.parseFeedBackFromHTML(body);
                 } catch(Exception e) {
-                    Logger.warn("[" + acc.type +
-                            "] Feedback page can not found Or the session is invalid!");
+                    Logger.warn("[%s] Feedback page can not found Or the session is invalid!", acc.type);
                 }
                 break;
             default:
-                Logger.warn("Not support fetch [" + acc.type + "] Feedback.");
+                Logger.warn("Not support fetch [%s] Feedback.", acc.type);
         }
         return new ArrayList<Feedback>();
     }
