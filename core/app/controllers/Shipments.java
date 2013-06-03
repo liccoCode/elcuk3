@@ -3,10 +3,7 @@ package controllers;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
-import models.procure.Cooperator;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
@@ -20,9 +17,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -359,7 +354,15 @@ public class Shipments extends Controller {
      */
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
-        renderArgs.put("shipment", ship);
+        Map<String, List<ProcureUnit>> units = new HashMap<String, List<ProcureUnit>>();
+        for(ShipItem item : ship.items) {
+            Logger.info(item.unit.fba.centerId);
+            String centerId = item.unit.fba.centerId;
+            if(!units.containsKey(centerId))
+                units.put(centerId, new ArrayList<ProcureUnit>());
+            units.get(centerId).add(item.unit);
+        }
+        renderArgs.put("procureUnits", units);
         final PDF.Options options = new PDF.Options();
         options.filename = id;
         options.pageSize = IHtmlToPdfTransformer.A3P;

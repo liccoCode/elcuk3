@@ -181,7 +181,7 @@ public class ProcuresHelper extends JavaExtensions {
         float amountUSD = 0;
         if(unit.attrs.currency != Currency.USD) {
             priceUSD = unit.attrs.currency.toUSD(unit.attrs.price);
-            amountUSD = unit.attrs.currency.toUSD(unit.totalAmount());
+            amountUSD = priceUSD * unit.qty();
         } else {
             priceUSD = unit.attrs.price;
             amountUSD = unit.totalAmount();
