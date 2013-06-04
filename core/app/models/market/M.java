@@ -366,7 +366,8 @@ public enum M {
             case AMAZON_IT:
             case AMAZON_US:
                 return String
-                        .format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list", this.toString());
+                        .format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list",
+                                this.toString());
             case EBAY_UK:
                 return "unknow..";
             default:
@@ -895,6 +896,7 @@ public enum M {
     }
 
     public static M val(String str) {
+        if(StringUtils.isBlank(str)) return null;
         String s = str.toLowerCase();
         if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") ||
                 s.equals("www.amazon.co.uk")) {

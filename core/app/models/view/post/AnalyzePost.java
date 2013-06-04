@@ -210,7 +210,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.aid) && "sid".equalsIgnoreCase(this.type))
             CollectionUtils.filter(dtos, new AccountIdPredicate(this.aid));
         if(this.filterDot2) CollectionUtils.filter(dtos, new UnContainsPredicate(",2"));
-        if(this.market != null) CollectionUtils.filter(dtos, new MarketPredicate(this.market));
+        if(StringUtils.isNotBlank(this.market))
+            CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
 
         this.count = dtos.size();
         List<AnalyzeDTO> afterPager = new ArrayList<AnalyzeDTO>();
@@ -311,19 +312,16 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     }
 
     private static class MarketPredicate implements Predicate {
-        private String market;
+        private M market;
 
-        public MarketPredicate(String market) {
+        public MarketPredicate(M market) {
             this.market = market;
         }
 
         @Override
         public boolean evaluate(Object o) {
             AnalyzeDTO dto = (AnalyzeDTO) o;
-            if(StringUtils.isNotBlank(this.market)) {
-                return (dto.market != null && dto.market.toString().equals(this.market));
-            }
-            return true;
+            return this.market.equals(dto.market);
         }
 
     }

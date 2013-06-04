@@ -45,7 +45,7 @@ public class Analyzes extends Controller {
         List<Account> accs = Account.openedSaleAcc();
         List<String> categoryIds = Category.category_ids();
         AnalyzePost p = new AnalyzePost();
-        render(accs, categoryIds,p);
+        render(accs, categoryIds, p);
     }
 
     // 开发用

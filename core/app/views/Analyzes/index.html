@@ -69,11 +69,11 @@
           #{option ''}Account#{/option}
       #{/select}
 
-      #{select 'p.market', items: models.market.M.values(), labelProperty: _, valueProperty: _, value: p.market, class: 'inline'}
+      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'inline'}
           #{option ''}Market#{/option}
       #{/select}
 
-      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'inline', valueProperty: '_', labelProperty: '_'}
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'inline'}
           #{option ''}Category#{/option}
       #{/select}
 
