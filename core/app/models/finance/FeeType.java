@@ -132,4 +132,11 @@ public class FeeType extends GenericModel {
         return FeeType.findById("procurement");
     }
 
+    public static FeeType productCharger() {
+        return FeeType.findById("productcharges");
+    }
+
+    public static FeeType shipping() {
+        return FeeType.findById("shipping");
+    }
 }

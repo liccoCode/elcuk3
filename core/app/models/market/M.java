@@ -753,14 +753,17 @@ public enum M {
         //https://sellercentral.amazon.com/gp/payments-account/view-transactions.html?orderId=110-6815187-8483453&view=search&range=all
         switch(this) {
             case AMAZON_UK:
+            case AMAZON_US:
+                return String.format(
+                        "https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
+                        this.toString(), orderId);
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                return String
-                        .format("https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
-                                this.toString(), orderId);
+                return String.format(
+                        "https://sellercentral.amazon.de/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
+                        this.toString(), orderId);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -776,14 +779,17 @@ public enum M {
         //https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments
         switch(this) {
             case AMAZON_UK:
+            case AMAZON_US:
+                return String.format(
+                        "https://sellercentral.%s/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
+                        this.toString());
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                return String
-                        .format("https://sellercentral.%s/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
-                                this.toString());
+                return String.format(
+                        "https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
+                        this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

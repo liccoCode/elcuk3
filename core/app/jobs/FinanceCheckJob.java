@@ -41,8 +41,6 @@ import java.util.List;
  * Time: 12:01 PM
  */
 public class FinanceCheckJob extends Job {
-    //https://sellercentral.amazon.de/gp/reports/documents/_GET_V2_SETTLEMENT_REPORT_DATA__15836299764.txt?ie=UTF8&contentType=text%2Fxls
-    //https://sellercentral.amazon.de/gp/reports/documents/_GET_V2_SETTLEMENT_REPORT_DATA__15522920744.txt?ie=UTF8&contentType=text%2Fxls
 
     @Override
     public void doJob() {
