@@ -763,7 +763,7 @@ public enum M {
             case AMAZON_IT:
                 return String.format(
                         "https://sellercentral.amazon.de/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
-                        this.toString(), orderId);
+                        orderId);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

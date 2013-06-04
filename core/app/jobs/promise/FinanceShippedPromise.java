@@ -9,14 +9,19 @@ import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import play.Logger;
+import play.Play;
 import play.jobs.Job;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,19 +48,38 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     public List<SaleFee> doJobWithResult() {
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
-        return null;
+        List<SaleFee> fees = new ArrayList<SaleFee>();
+        try {
+            this.account.changeRegion(this.market);
+            for(Orderr order : orders) {
+                List<String> urls = this.transactionURLs(order.orderId);
+                for(String url : urls) {
+                    fees.addAll(this.saleFees(url));
+                }
+            }
+        } finally {
+            this.account.changeRegion(this.account.type);
+        }
+        return fees;
     }
 
     public String transactionView(String orderId) {
-        return HTTP.get(this.account.cookieStore(this.market), this.account.type.oneTransactionFees(orderId));
+        return HTTP.get(this.account.cookieStore(), this.account.type.oneTransactionFees(orderId));
     }
 
     public String transactionDetail(String url) {
-        return HTTP.get(this.account.cookieStore(this.market), url);
+        return HTTP.get(this.account.cookieStore(), url);
     }
 
     public List<SaleFee> saleFees(String url) {
         String html = this.transactionDetail(url);
+        if(Play.mode.isDev()) {
+            try {
+                FileUtils.writeStringToFile(new File("./" + System.currentTimeMillis() + ".html"), html);
+            } catch(IOException e) {
+                //ignore
+            }
+        }
         Document doc = Jsoup.parse(html);
         /**
          * 1. Product charges
@@ -66,13 +90,15 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
         fees.addAll(productCharges(doc, url));
         fees.addAll(otherFee(doc, url));
+        fees.addAll(amazonFee(doc, url));
         return fees;
     }
 
     public List<SaleFee> amazonFee(Document doc, String url) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        Element others = doc.select("#breakdown_data_Amazon_fees").first();
-        Element nextElement = others.nextElementSibling();
+        Element amazons = doc.select("#breakdown_data_Amazon_fees").first();
+        if(amazons == null) return fees;
+        Element nextElement = amazons.nextElementSibling();
         while(nextElement != null) {
             if(nextElement.children().size() < 3)
                 nextElement = nextElement.nextElementSibling();
@@ -132,6 +158,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     public List<SaleFee> otherFee(Document doc, String url) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
         Element others = doc.select("#breakdown_data_Other").first();
+        if(others == null) return fees;
         Element nextElement = others.nextElementSibling();
 
         while(nextElement != null) {
@@ -162,6 +189,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     public List<SaleFee> productCharges(Document doc, String url) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
         Element productCharge = doc.select("#breakdown_data_Product_charges").first();
+        if(productCharge == null) return fees;
         Element nextElement = productCharge.nextElementSibling();
 
         while(nextElement != null) {
@@ -200,7 +228,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 去除第一行 title
         rows.remove(0);
         for(Element row : rows) {
-            urls.add(row.select("td").last().select("a").attr("href"));
+            String url = row.select("td").last().select("a").attr("href");
+            urls.add(url);
+            Logger.info("FinanceShippedPromise URL: %s", url);
         }
         return urls;
     }

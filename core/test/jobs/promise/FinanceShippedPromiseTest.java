@@ -5,17 +5,23 @@ import helper.Dates;
 import models.finance.FeeType;
 import models.finance.SaleFee;
 import models.market.Account;
+import models.market.M;
 import models.market.Orderr;
 import org.jsoup.Jsoup;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import play.Play;
+import play.libs.F;
 import play.libs.IO;
 import play.test.UnitTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -117,6 +123,28 @@ public class FinanceShippedPromiseTest extends UnitTest {
         assertThat(fees.get(0).cost, is(-3.12f));
         assertThat(fees.get(1).cost, is(-2.70f));
         assertThat(fees.get(2).cost, is(-0.90f));
+    }
+
+    @Ignore("选择性测试, 直接访问到真是网络环境了")
+    @Test
+    public void testDoJobWithResult() throws InterruptedException, ExecutionException, TimeoutException {
+        Account account = FactoryBoy.build(Account.class, "de");
+        account.cookieStore().clear();
+        account.loginAmazonSellerCenter();
+        List<Orderr> orders = new ArrayList<Orderr>();
+        List<String> orderIds = Arrays
+                .asList("402-0706151-5920331", "402-1383255-2095546", "403-2469984-5780354", "403-3852686-2505963");
+//                .asList("402-0706151-5920331");
+        for(String orderId : orderIds) {
+            Orderr o = new Orderr();
+            o.orderId = orderId;
+            orders.add(o);
+        }
+        FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_FR, orders);
+        F.Promise<List<SaleFee>> feesPromise = promise.now();
+        List<SaleFee> fees = feesPromise.get(3, TimeUnit.MINUTES);
+        assertThat(fees.size(), is(5 + 7 + 5 + 5));
+//        assertThat(fees.size(), is(5));
     }
 
 }
