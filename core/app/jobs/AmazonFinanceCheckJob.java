@@ -51,7 +51,8 @@ public class AmazonFinanceCheckJob extends Job {
                 acc = accMap.get(m.name());
             }
 
-            List<Orderr> orders = Orderr.find("account=? AND market=? ORDER BY createDate", acc, m).fetch(orderSize);
+            List<Orderr> orders = Orderr.find("account=? AND market=? AND state IN (?,?) ORDER BY createDate",
+                    acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
             List<SaleFee> fees = new FinanceShippedPromise(acc, m, orders).now().get(1, TimeUnit.HOURS);
 
             AmazonFinanceCheckJob.deleteSaleFees(orders);
