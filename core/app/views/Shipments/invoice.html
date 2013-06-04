@@ -49,7 +49,7 @@
 #{list items:procureUnits.keySet() ,as: 'key'}
     #{set aUnit: procureUnits.get(key).get(0)/}
     #{set country: aUnit.fba.fbaCenter.countryCode /}
-    #{set address: aUnit.fba.fbaCenter.addressLine1/}
+    #{set address: aUnit.fba.address()/}
 <table cellpadding="4px" cellspacing="0" align='center'>
   <tr>
     <td colspan="5" class="td1">
@@ -59,10 +59,10 @@
     </td>
   </tr>
     #{if country != 'US'}
-        #{render 'Shipments/_europe.html',address:address,country:country/}
+        #{render 'Shipments/_europe.html',address: address, country: country/}
     #{/if}
     #{else }
-        #{render 'Shipments/_us.html', address:address/}
+        #{render 'Shipments/_us.html', address: address/}
     #{/else}
   <tr>
     <td rowspan="2">Transport By ${aUnit.shipType.name()}</td>

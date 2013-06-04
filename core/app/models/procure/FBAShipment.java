@@ -313,9 +313,9 @@ public class FBAShipment extends Model {
     }
 
     public String address() {
-        return String.format("%s %s %s %s (%s)",
-                this.fbaCenter.addressLine1, this.fbaCenter.city,
-                this.fbaCenter.stateOrProvinceCode, this.fbaCenter.postalCode, this.centerId);
+        return String.format("%s %s %s %s %s",
+                this.fbaCenter.name, this.fbaCenter.addressLine1,
+                this.fbaCenter.postalCode, this.fbaCenter.city, codeToCounrty());
     }
 
     public String codeToCounrty() {
