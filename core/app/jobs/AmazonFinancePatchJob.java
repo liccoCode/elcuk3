@@ -1,4 +1,4 @@
-package jobs.promise;
+package jobs;
 
 import helper.Dates;
 import helper.HTTP;
@@ -23,14 +23,14 @@ import java.util.*;
  * Date: 11/24/12
  * Time: 7:50 PM
  */
-public class FinanceCrawlPromise extends Job<List<Error>> {
+public class AmazonFinancePatchJob extends Job<List<Error>> {
 
     private Account account;
     private Date date;
 
     private String url = "";
 
-    public FinanceCrawlPromise(Account account, Date date) {
+    public AmazonFinancePatchJob(Account account, Date date) {
         this.account = account;
         this.date = date;
     }
