@@ -65,15 +65,15 @@
           包含 ,2
         </label>
 
-      #{select 'p.aid', items: accs, labelProperty: 'prettyName', valueProperty: 'id', value: p?.aid, class: 'inline'}
+      #{select 'p.aid', items: accs, labelProperty: 'prettyName', valueProperty: 'id', value: p.aid, class: 'inline'}
           #{option ''}Account#{/option}
       #{/select}
 
-      #{select 'p.market', items: models.market.M.values(), labelProperty: 'name', valueProperty: p, value: p?.market, class: 'inline'}
+      #{select 'p.market', items: models.market.M.values(), labelProperty: _, valueProperty: _, value: p.market, class: 'inline'}
           #{option ''}Market#{/option}
       #{/select}
 
-      #{select 'p.categoryId', items:categoryIds, value: p?.categoryId, class: 'inline', valueProperty: '_', labelProperty: '_'}
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'inline', valueProperty: '_', labelProperty: '_'}
           #{option ''}Category#{/option}
       #{/select}
 

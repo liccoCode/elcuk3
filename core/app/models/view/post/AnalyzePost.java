@@ -56,7 +56,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      */
     public String val;
 
-    public M market;
+    public String market;
 
     /**
      * 根据 type(sku/msku(sid)) 进行数据的分析计算
@@ -311,16 +311,19 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     }
 
     private static class MarketPredicate implements Predicate {
-        private M market;
+        private String market;
 
-        public MarketPredicate(M market) {
+        public MarketPredicate(String market) {
             this.market = market;
         }
 
         @Override
         public boolean evaluate(Object o) {
             AnalyzeDTO dto = (AnalyzeDTO) o;
-            return this.market.equals(dto.market);
+            if(StringUtils.isNotBlank(this.market)) {
+                return (dto.market != null && dto.market.toString().equals(this.market));
+            }
+            return true;
         }
 
     }
