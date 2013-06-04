@@ -256,10 +256,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     }
 
     public Date date(String text) {
-        if(this.market == M.AMAZON_DE) {
-            return Dates.transactionDate(this.market, text);
-        } else {
-            return null;
-        }
+        return Dates.transactionDate(this.market, text);
     }
 }

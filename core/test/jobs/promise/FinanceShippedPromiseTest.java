@@ -132,9 +132,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         account.cookieStore().clear();
         account.loginAmazonSellerCenter();
         List<Orderr> orders = new ArrayList<Orderr>();
-        List<String> orderIds = Arrays
-                .asList("402-0706151-5920331", "402-1383255-2095546", "403-2469984-5780354", "403-3852686-2505963");
-//                .asList("402-0706151-5920331");
+        List<String> orderIds = Arrays.asList("402-0706151-5920331");
         for(String orderId : orderIds) {
             Orderr o = new Orderr();
             o.orderId = orderId;
@@ -143,8 +141,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_FR, orders);
         F.Promise<List<SaleFee>> feesPromise = promise.now();
         List<SaleFee> fees = feesPromise.get(3, TimeUnit.MINUTES);
-        assertThat(fees.size(), is(5 + 7 + 5 + 5));
-//        assertThat(fees.size(), is(5));
+        assertThat(fees.size(), is(5));
     }
 
 }
