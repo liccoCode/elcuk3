@@ -54,9 +54,14 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                 this.account.changeRegion(this.market);
                 for(Orderr order : orders) {
                     List<String> urls = this.transactionURLs(order.orderId);
+                    List<SaleFee> orderFees = new ArrayList<SaleFee>();
                     for(String url : urls) {
-                        fees.addAll(this.saleFees(url));
+                        orderFees.addAll(this.saleFees(url));
                     }
+                    fees.addAll(orderFees);
+                    Orderr changeOrderr = Orderr.findById(order.orderId);
+                    changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
+                    changeOrderr.save();
                 }
             } finally {
                 this.account.changeRegion(this.account.type);
@@ -285,5 +290,25 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public List<Orderr> getOrders() {
         return this.orders;
+    }
+
+    /**
+     * 判断订单是否需要警告 (收取的费用占 30% 以上)
+     *
+     * @param fees
+     * @return
+     */
+    public static boolean isWarnning(List<SaleFee> fees) {
+        float totalSales = 0;
+        float totalMarketFees = 0;
+        for(SaleFee fee : fees) {
+            if(fee.type.parent != null && !"amazon".equals(fee.type.parent.name)) continue;
+            if("principal".equals(fee.type.name) || "productcharges".equals(fee.type.name)) {
+                totalSales += fee.usdCost;
+            } else {
+                totalMarketFees += fee.usdCost;
+            }
+        }
+        return (totalSales > 0) && (totalMarketFees / totalSales) > 0.3;
     }
 }

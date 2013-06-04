@@ -1,6 +1,7 @@
 package jobs;
 
 import jobs.promise.FinanceShippedPromise;
+import models.Jobex;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
@@ -20,6 +21,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * Amazon 中用于检查 Finance 信息的任务
  * <p/>
+ * 周期:
+ * - 轮询周期: 1mn
+ * - Duration: 2mn
  * User: wyatt
  * Date: 6/4/13
  * Time: 10:39 AM
@@ -30,6 +34,7 @@ public class AmazonFinanceCheckJob extends Job {
     public void doJob() throws InterruptedException, ExecutionException, TimeoutException {
         // 1. 寻找需要处理的订单, 并且按照 market 进行分组
         // 2. 派发给 Promise Job 进行出来.
+        if(!Jobex.findByClassName(AmazonFinanceCheckJob.class.getName()).isExcute()) return;
         int orderSize = 20;
         List<Account> accounts = Account.openedSaleAcc();
         Map<String, Account> accMap = new HashMap<String, Account>();

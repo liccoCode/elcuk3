@@ -1,6 +1,7 @@
 package jobs.promise;
 
 import factory.FactoryBoy;
+import factory.callback.BuildCallback;
 import factory.finance.FeeTypeFactory;
 import helper.Dates;
 import models.finance.SaleFee;
@@ -17,7 +18,6 @@ import play.libs.IO;
 import play.test.UnitTest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -123,15 +123,17 @@ public class FinanceShippedPromiseTest extends UnitTest {
     @Test
     public void testDoJobWithResult() throws InterruptedException, ExecutionException, TimeoutException {
         Account account = FactoryBoy.build(Account.class, "de");
+        Orderr orderr = FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
+            @Override
+            public void build(Orderr target) {
+                target.orderId = "402-0706151-5920331";
+            }
+        });
+
         account.cookieStore().clear();
         account.loginAmazonSellerCenter();
         List<Orderr> orders = new ArrayList<Orderr>();
-        List<String> orderIds = Arrays.asList("402-0706151-5920331");
-        for(String orderId : orderIds) {
-            Orderr o = new Orderr();
-            o.orderId = orderId;
-            orders.add(o);
-        }
+        orders.add(orderr);
         FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_FR, orders);
         F.Promise<List<SaleFee>> feesPromise = promise.now();
         List<SaleFee> fees = feesPromise.get(3, TimeUnit.MINUTES);
