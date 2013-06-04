@@ -1,8 +1,11 @@
 package factory.finance;
 
+import factory.FactoryBoy;
 import factory.ModelFactory;
 import factory.annotation.Factory;
 import models.finance.FeeType;
+
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -128,5 +131,20 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         type.name = "shipping";
         type.parent = FeeType.amazon();
         return type;
+    }
+
+
+    /**
+     * FeeType 的初始化
+     */
+    public static void feeTypeInit() {
+        FactoryBoy.create(FeeType.class);
+        for(String fee : Arrays.asList("commission", "crossborderfulfilmentfee", "disposalcomplete",
+                "productcharges", "fbaperorderfulfillmentfee", "fbaperunitfulfillmentfee",
+                "fbapickpackfeeperunit",
+                "fbastoragefee", "fbaweightbasedfee", "fbaweighthandlingfee", "giftwrap", "giftwrapchargeback",
+                "shipping", "shippingchargeback")) {
+            FactoryBoy.create(FeeType.class, fee);
+        }
     }
 }

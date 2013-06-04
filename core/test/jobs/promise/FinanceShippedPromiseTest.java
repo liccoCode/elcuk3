@@ -1,8 +1,8 @@
 package jobs.promise;
 
 import factory.FactoryBoy;
+import factory.finance.FeeTypeFactory;
 import helper.Dates;
-import models.finance.FeeType;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
@@ -43,13 +43,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
     @Before
     public void setUP() {
         FactoryBoy.deleteAll();
-        FactoryBoy.create(FeeType.class);
-        for(String fee : Arrays.asList("commission", "crossborderfulfilmentfee", "disposalcomplete",
-                "productcharges", "fbaperorderfulfillmentfee", "fbaperunitfulfillmentfee", "fbapickpackfeeperunit",
-                "fbastoragefee", "fbaweightbasedfee", "fbaweighthandlingfee", "giftwrap", "giftwrapchargeback",
-                "shipping", "shippingchargeback")) {
-            FactoryBoy.create(FeeType.class, fee);
-        }
+        FeeTypeFactory.feeTypeInit();
     }
 
     @Test

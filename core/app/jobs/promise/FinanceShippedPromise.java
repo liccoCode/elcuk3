@@ -49,16 +49,18 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        try {
-            this.account.changeRegion(this.market);
-            for(Orderr order : orders) {
-                List<String> urls = this.transactionURLs(order.orderId);
-                for(String url : urls) {
-                    fees.addAll(this.saleFees(url));
+        synchronized(this.account.cookieStore()) {
+            try {
+                this.account.changeRegion(this.market);
+                for(Orderr order : orders) {
+                    List<String> urls = this.transactionURLs(order.orderId);
+                    for(String url : urls) {
+                        fees.addAll(this.saleFees(url));
+                    }
                 }
+            } finally {
+                this.account.changeRegion(this.account.type);
             }
-        } finally {
-            this.account.changeRegion(this.account.type);
         }
         return fees;
     }
@@ -115,27 +117,40 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
             fee.qty = 1;
             fee.type = this.amazonFeeType(nextElement.select("td:eq(0)").text());
-            feeTypeCheck(fee, nextElement, url);
-
-            fees.add(fee);
+            if(feeTypeCheck(fee, nextElement, url))
+                fees.add(fee);
             nextElement = nextElement.nextElementSibling();
         }
         return fees;
     }
 
-    private void feeTypeCheck(SaleFee fee, Element nextElement, String url) {
+    /**
+     * 检查是否有新的 FeeType, 只有当检查通过才可以将 fee 添加到系统中.
+     *
+     * @param fee
+     * @param nextElement
+     * @param url
+     * @return
+     */
+    private boolean feeTypeCheck(SaleFee fee, Element nextElement, String url) {
         if(fee.type == null) {
             String text = nextElement.select("td:eq(0)").text();
+            StringBuilder sb = new StringBuilder();
+            sb.append("请删除当前订单的 SaleFee 让其重新抓取<br><br>")
+                    .append("<a href='").append(url).append("'>").append(text).append("</a><br><br>")
+                    .append(nextElement.outerHtml());
             Webs.systemMail(
                     "New Fee Type: " + text,
-                    "<a href='" + url + "'>" + text + "</a><br><br>" + nextElement.outerHtml()
+                    sb.toString()
             );
             try {
                 Thread.sleep(500);
             } catch(InterruptedException e) {
                 //ignore
             }
+            return false;
         }
+        return true;
     }
 
     public FeeType amazonFeeType(String text) {
@@ -177,9 +192,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
             fee.qty = 1;
             fee.type = FeeType.shipping();
-            feeTypeCheck(fee, nextElement, url);
-
-            fees.add(fee);
+            if(feeTypeCheck(fee, nextElement, url))
+                fees.add(fee);
 
             nextElement = nextElement.nextElementSibling();
         }
@@ -208,9 +222,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
             fee.qty = NumberUtils.toInt(nextElement.select("td:eq(2)").text().split(":")[1], 1);
             fee.type = FeeType.productCharger();
-            feeTypeCheck(fee, nextElement, url);
-
-            fees.add(fee);
+            if(feeTypeCheck(fee, nextElement, url))
+                fees.add(fee);
 
             nextElement = nextElement.nextElementSibling();
         }
@@ -237,10 +250,13 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public Float fee(String text) {
         if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR, M.AMAZON_IT).contains(this.market)) {
-            return NumberUtils.toFloat(StringUtils.remove(text, "€"));
-        } else {
-            return null;
+            return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "€"), ","));
+        } else if(M.AMAZON_UK == this.market) {
+            return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "£"), ","));
+        } else if(M.AMAZON_US == this.market) {
+            return NumberUtils.toFloat(StringUtils.remove(StringUtils.remove(text, "$"), ","));
         }
+        return 0f;
     }
 
     public Currency currency(String text) {
@@ -257,5 +273,17 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public Date date(String text) {
         return Dates.transactionDate(this.market, text);
+    }
+
+    public Account getAccount() {
+        return this.account;
+    }
+
+    public M getMarket() {
+        return this.market;
+    }
+
+    public List<Orderr> getOrders() {
+        return this.orders;
     }
 }

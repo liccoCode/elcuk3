@@ -11,10 +11,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import play.Logger;
 import play.db.DB;
-import play.db.jpa.GenericModel;
+import play.db.jpa.Model;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -35,7 +34,7 @@ import java.util.regex.Pattern;
  */
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-public class SaleFee extends GenericModel {
+public class SaleFee extends Model {
 
     public SaleFee() {
     }
@@ -57,12 +56,6 @@ public class SaleFee extends GenericModel {
 
     @OneToOne
     public FeeType type;
-
-
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
-    public String id;
 
     /**
      * 费用的状态
