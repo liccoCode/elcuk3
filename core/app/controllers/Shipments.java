@@ -9,7 +9,6 @@ import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
@@ -356,7 +355,6 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         Map<String, List<ProcureUnit>> units = new HashMap<String, List<ProcureUnit>>();
         for(ShipItem item : ship.items) {
-            Logger.info(item.unit.fba.centerId);
             String centerId = item.unit.fba.centerId;
             if(!units.containsKey(centerId))
                 units.put(centerId, new ArrayList<ProcureUnit>());
