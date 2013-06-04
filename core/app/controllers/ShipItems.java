@@ -1,18 +1,28 @@
 package controllers;
 
 import helper.Webs;
+import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.product.Whouse;
 import models.view.post.ProcureUnitShipPost;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ShipItems extends Controller {
+
+    @Before(only = "index")
+    public static void setIndex() {
+        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("centers", FBACenter.findAll());
+    }
 
     public static void index(ProcureUnitShipPost p) {
         if(p == null)
