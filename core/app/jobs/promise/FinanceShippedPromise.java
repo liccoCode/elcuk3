@@ -143,6 +143,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             StringBuilder sb = new StringBuilder();
             sb.append("请删除当前订单的 SaleFee 让其重新抓取<br><br>")
                     .append("<a href='").append(url).append("'>").append(text).append("</a><br><br>")
+                    .append("OrderId:")
+                    .append(StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0])
+                    .append("<br><br>")
                     .append(nextElement.outerHtml());
             Webs.systemMail(
                     "New Fee Type: " + text,
