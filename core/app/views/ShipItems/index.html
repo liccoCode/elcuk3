@@ -81,7 +81,6 @@
           <a href="@{Deliveryments.show(unit.deliveryment?.id)}#${unit.id}" target="_blank">${unit.id}</a>
         </td>
         <td>
-        ${unit.shipItems}
             #{list items:relateShipments, as:'shipment'}
               <span>
                 <a href="@{Shipments.show(shipment.id)}" target="_blank">${shipment.id}
