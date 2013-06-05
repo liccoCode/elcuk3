@@ -202,43 +202,17 @@ public class Account extends Model {
                      * 1. Visit the website, fetch the new Cookie.
                      * 2. With the website params and user/password to login.
                      */
-                    body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
+                    F.T2<List<NameValuePair>, String> params = loginAmazonSellerCenterStep1();
 
-
+                    body = HTTP.post(this.cookieStore(), params._2, params._1);
                     if(Play.mode.isDev()) {
-                        FileUtils.writeStringToFile(new File(
-                                Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
-                                body
-                        );
-                    }
-
-                    Document doc = Jsoup.parse(body);
-                    Elements inputs = doc.select("form:eq(0) input");
-
-                    if(inputs.size() == 0) {
-                        Logger.info("WebSite [%s] Still have the Session with User [%s].",
-                                this.type.toString(), this.username
-                        );
-                        return;
-                    }
-
-                    List<NameValuePair> params = new ArrayList<NameValuePair>();
-                    for(Element el : inputs) {
-                        String att = el.attr("name");
-                        if("email".equals(att))
-                            params.add(new BasicNameValuePair(att, this.username));
-                        else if("password".equals(att))
-                            params.add(new BasicNameValuePair(att, this.password));
-                        else
-                            params.add(new BasicNameValuePair(att, el.val()));
-                    }
-                    body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
-                    if(Play.mode.isDev())
                         FileUtils.writeStringToFile(
                                 new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
                                         ".afterLogin.html"),
                                 body
                         );
+                    }
+
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
                     if(navBar != null) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
@@ -263,6 +237,40 @@ public class Account extends Model {
                         "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
                                 " is not support!");
         }
+    }
+
+    public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
+        String body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+
+        if(Play.mode.isDev()) {
+            FileUtils.writeStringToFile(new File(
+                    Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+                    body
+            );
+        }
+
+        Document doc = Jsoup.parse(body);
+        Elements inputs = doc.select("form:eq(0) input");
+
+        if(inputs.size() == 0) {
+            Logger.info("WebSite [%s] Still have the Session with User [%s].",
+                    this.type.toString(), this.username
+            );
+            return new F.T2<List<NameValuePair>, String>(params, "");
+        }
+
+        for(Element el : inputs) {
+            String att = el.attr("name");
+            if("email".equals(att))
+                params.add(new BasicNameValuePair(att, this.username));
+            else if("password".equals(att))
+                params.add(new BasicNameValuePair(att, this.password));
+            else
+                params.add(new BasicNameValuePair(att, el.val()));
+        }
+        return new F.T2<List<NameValuePair>, String>(params, doc.select("form:eq(0)").attr("action"));
     }
 
     /**
@@ -569,20 +577,13 @@ public class Account extends Model {
     public static List<Account> openedAmazonClickReviewAndLikeAccs(M market) {
         switch(market) {
             case AMAZON_UK:
-                return Account
-                        .find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false,
-                                true).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUK=? ORDER BY id", false, false, true).fetch();
             case AMAZON_DE:
-                return Account
-                        .find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false, false,
-                                true).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? AND isADE=? ORDER BY id", false, false, true).fetch();
             case AMAZON_US:
-                return Account
-                        .find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false, false,
-                                true).fetch();
+                return Account.find("closeable=? AND isSaleAcc=? AND isAUS=? ORDER BY id", false, false, true).fetch();
             default:
-                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false)
-                        .fetch();
+                return Account.find("closeable=? AND isSaleAcc=? ORDER BY id", false, false).fetch();
         }
     }
 
