@@ -1,6 +1,6 @@
 package ext;
 
-import helper.Currency;
+import helper.Webs;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
@@ -172,18 +172,11 @@ public class ProcuresHelper extends JavaExtensions {
     /**
      * 获得 采购单中商品单价、总价的美元形式
      *
-     * @return t2<单价,总价>
+     * @return t2[申报价, 总申报价]
      */
     public static F.T2<Float, Float> amountUSD(ProcureUnit unit) {
-        float priceUSD = 0;
-        float amountUSD = 0;
-        if(unit.attrs.currency != Currency.USD) {
-            priceUSD = unit.attrs.currency.toUSD(unit.attrs.price);
-            amountUSD = priceUSD * unit.qty();
-        } else {
-            priceUSD = unit.attrs.price;
-            amountUSD = unit.totalAmount();
-        }
+        float priceUSD = Webs.scale2PointUp(unit.product.declaredValue);
+        float amountUSD = priceUSD * unit.qty();
         return new F.T2<Float, Float>(priceUSD, amountUSD);
     }
 }

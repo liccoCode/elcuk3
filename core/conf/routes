@@ -90,7 +90,8 @@ POST    /paymenttarget/{targetId}                           PaymentTargets.updat
 DELETE  /paymenttarget/{targetId}                           PaymentTargets.destroy
 
 # Products
-GET     /product/{<[0-9]{2,}[-]?[A-Z0-9]+[-][A-Z0-9]+>id}   Products.show
+GET     /product/{id}                                       Products.show
+GET     /product/{id}/amazon                                Products.saleAmazon
 
 # Sellings
 GET     /selling/{id}                                       Sellings.selling
@@ -113,6 +114,7 @@ POST    /shipment/{id}/receipt                              Shipments.receipt
 POST    /shipment/{id}/inbounding                           Shipments.inbounding
 DELETE  /shipment/{id}/state                                Shipments.revertState
 POST    /shipment/{id}/log                                  Shipments.log
+GET     /shipment/{id}/invoice                              Shipments.invoice
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
