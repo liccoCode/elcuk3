@@ -62,7 +62,7 @@ public class AmazonFinanceCheckJob extends Job {
                 Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees.",
                         acc.prettyName(), m.name(), orders.size(), fees.size());
             } else {
-                Logger.info("AmazonFinanceCheckJob No Fees founded.");
+                Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", acc.prettyName(), m);
             }
         }
 
