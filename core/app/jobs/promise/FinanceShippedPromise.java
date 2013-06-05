@@ -160,7 +160,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public FeeType amazonFeeType(String text) {
         text = text.toLowerCase();
-        if(text.equals("commission")) {
+        if(text.equals("commission:")) {
             return FeeType.findById("commission");
         } else if(text.contains("refund commission")) {
             return FeeType.findById("refundcommission");
@@ -170,7 +170,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return FeeType.findById("fbapickpackfeeperunit");
         } else if(text.contains("weight handling")) {
             return FeeType.findById("fbaweighthandlingfee");
-        } else if(text.equals("shipping")) {
+        } else if(text.equals("shipping:")) {
             return FeeType.findById("shipping");
         } else if(text.contains("shipping chargeback")) {
             return FeeType.findById("shippingchargeback");
@@ -178,9 +178,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return FeeType.findById("fbaorderhandlingfeeperorder");
         } else if(text.contains("giftwrap chargeback")) {
             return FeeType.findById("giftwrapchargeback");
-        } else if(text.equals("giftwrap")) {
+        } else if(text.equals("giftwrap:")) {
             return FeeType.findById("giftwrap");
-        } else if(text.equals("promorebates")) {
+        } else if(text.equals("promorebates:")) {
             return FeeType.findById("promorebates");
         } else {
             return null;
