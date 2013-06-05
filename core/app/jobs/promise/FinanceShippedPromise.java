@@ -205,6 +205,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return FeeType.findById("fbaperorderfulfilmentfee");
         } else if(text.contains("variable closing")) {
             return FeeType.findById("variableclosingfee");
+        } else if(text.contains("shipping holdback")) {
+            return FeeType.findById("shippingholdback");
         } else {
             return null;
         }
