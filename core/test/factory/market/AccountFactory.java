@@ -16,7 +16,6 @@ public class AccountFactory extends ModelFactory<Account> {
     public Account define() {
         Account acc = new Account();
         acc.type = M.AMAZON_DE;
-        acc.id = 2l;
         acc.accessKey = "accessKey";
         acc.merchantId = "merchantId";
         acc.username = "username";
@@ -35,7 +34,23 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
         acc.password = "pw5165688104";
+        acc.closeable = false;
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.isSaleAcc = true;
+        return acc;
+    }
+
+    @Factory(name = "ide")
+    public Account deNoId() {
+        Account acc = new Account();
+        acc.type = M.AMAZON_DE;
+        acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
+        acc.merchantId = "A22H6OV6Q7XBYK";
+        acc.username = "wyatt@easyacceu.com";
+        acc.password = "pw5165688104";
+        acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.closeable = false;
+        acc.isSaleAcc = true;
         return acc;
     }
 }

@@ -45,7 +45,8 @@ public class JobsSetup {
             every(FAndRNotificationJob.class, "1h");
             every(FeedbackCrawlJob.class, "30mn");
             every(FeedbackInfoFetchJob.class, "5mn");
-            every(FinanceCheckJob.class, "1mn");
+            // TODO FinanceCheckJob 需要删除
+            every(AmazonFinanceCheckJob.class, "1mn");
             every(KeepSessionJob.class, "5mn");
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");

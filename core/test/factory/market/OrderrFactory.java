@@ -1,6 +1,7 @@
 package factory.market;
 
 import factory.ModelFactory;
+import models.market.M;
 import models.market.Orderr;
 
 import java.util.Date;
@@ -15,7 +16,8 @@ public class OrderrFactory extends ModelFactory<Orderr> {
     @Override
     public Orderr define() {
         Orderr orderr = new Orderr();
-        orderr.orderId = "sdfjksdjfksdjfksjdkfj";
+        orderr.orderId = "403-3852686-2505963";
+        orderr.market = M.AMAZON_FR;
         orderr.paymentDate = new Date();
         orderr.address = "Kdfdsj";
         orderr.state = Orderr.S.SHIPPED;

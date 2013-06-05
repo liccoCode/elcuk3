@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
+<script type="text/javascript">var ue_t0 = ue_t0 || +new Date();</script>
+<script type='text/javascript'>
+  var ue_csm = window;
+  ue_csm.ue_hob = ue_csm.ue_hob || +new Date();
+  (function(a){
+    a.ue_err = {ec: 0, pec: 0, ts: 0, erl: [], mxe: 50, startTimer: function(){
+      a.ue_err.ts++;
+      setInterval(function(){
+        a.ue && (a.ue_err.pec < a.ue_err.ec) && a.uex("at");
+        a.ue_err.pec = a.ue_err.ec
+      }, 10000)
+    }};
+    a.ueLogError = (function(){
+      function b(c, e, d){
+        if(a.ue_err.ec > a.ue_err.mxe){return}
+        a.ue_err.ec++;
+        a.ue.log({m: c, f: e, l: d, s: ""}, "jserr");
+        return false
+      }
+
+      window.onerror = b;
+      return function(c){
+        if(a.ue_err.ec > a.ue_err.mxe){return}
+        a.ue_err.ec++;
+        a.ue_err.erl.push(c)
+      }
+    })()
+  })(ue_csm);
+  ue_csm.ue_hoe = +new Date();
+
+</script>
+<script type='text/javascript'>
+  var ue_id = '13QB79DWRFZCY9PGRGFJ', ue_sid = '276-0551000-5892946', ue_mid = 'A13V1IB3VIYZZH', ue_sn = 'sellercentral.amazon.de', ue_url = '/gp/uedata/unsticky/276-0551000-5892946/NoPageType/ntpoffrw', ue_furl = 'fls-eu.amazon.com', ue_pr = 0, ue_navtiming = 1, ue_tofc = 0, ue_log_idx = 0, ue_tsinc = 0, ue_fcsn = 1, ue_pageviz = 0;
+  if(!window.ue_csm){var ue_csm = window;}
+  ue_csm.ue_hob = ue_csm.ue_hob || +new Date();
+  (function(f, a){
+    f.ueinit = (f.ueinit || 0) + 1;
+    f.ue = {t0: a.aPageStart || f.ue_t0, id: f.ue_id, url: f.ue_url, a: "", b: "", h: {}, r: {ld: 0, oe: 0, ul: 0}, s: 1, t: {}, sc: {}, iel: [], ielf: [], fc_idx: {}, viz: [], v: 26};
+    f.ue.tagC = function(){
+      var h = [];
+      return function(i){
+        if(i){h.push(i)}
+        return h.slice(0)
+      }
+    };
+    f.ue.tag = f.ue.tagC();
+    f.ue.ifr = ((a.top !== a.self) || (a.frameElement)) ? 1 :0;
+    function c(j, m, o, l){
+      var n = l || (new Date()).getTime();
+      var h = !m && typeof o != "undefined";
+      if(h){return}
+      if(j){
+        var k = m ? e("t", m) || e("t", m, {}) :f.ue.t;
+        k[j] = n;
+        for(var i in o){e(i, m, o[i])}
+      }
+      return n
+    }
+
+    function e(i, j, k){
+      var l, h;
+      if(i){
+        l = h = f.ue;
+        if(j && j != l.id){
+          h = l.sc[j];
+          if(!h){
+            h = {};
+            k ? (l.sc[j] = h) :h
+          }
+        }
+        l = k ? (h[i] = k) :h[i]
+      }
+      return l
+    }
+
+    function d(l, m, k, i, h){
+      var j = "on" + k;
+      var n = m[j];
+      if(typeof(n) == "function"){if(l){f.ue.h[l] = n}}else{n = function(){}}
+      m[j] = h ? function(o){
+        i(o);
+        n(o)
+      } :function(o){
+        n(o);
+        i(o)
+      };
+      m[j].isUeh = 1
+    }
+
+    function g(o, k, n){
+      function j(L, J){
+        var H = [L], C = 0, I = {};
+        if(J){
+          H.push("m=1");
+          I[J] = 1
+        }else{I = f.ue.sc}
+        var A;
+        for(var B in I){
+          var D = e("wb", B), G = e("t", B) || {}, F = e("t0", B) || f.ue.t0;
+          if(J || D == 2){
+            var K = D ? C++ :"";
+            H.push("sc" + K + "=" + B);
+            for(var E in G){if(E.length <= 3 && G[E]){H.push(E + K + "=" + (G[E] - F))}}
+            H.push("t" + K + "=" + G[o]);
+            if(e("ctb", B) || e("wb", B)){A = 1}
+          }
+        }
+        if(!l && A){H.push("ctb=1")}
+        return H.join("&")
+      }
+
+      function r(C, B, E, A){
+        if(C == ""){return}
+        var D = new Image();
+        if(f.ue.b){
+          D.onload = function(){
+            if(f.ue.b == ""){return}
+            var G = f.ue.b;
+            f.ue.b = "";
+            r(G, B, E, 1)
+          }
+        }
+        var F = !f.ue_tofc || (f.ue_tofc == 1 && !A) || !f.ue.log || !window.amznJQ || (!A && !E);
+        if(F){
+          f.ue.iel.push(D);
+          D.src = C
+        }
+        if(f.ue_tofc && f.ue.log && (E || A)){
+          f.ue.log(C, "uedata", {n: 1});
+          f.ue.ielf.push(C)
+        }
+        if(f.ue_err && !f.ue_err.ts){f.ue_err.startTimer()}
+      }
+
+      function x(A){
+        if(!ue.collected){
+          var C = A.timing;
+          if(C){
+            f.ue.t.na_ = C.navigationStart;
+            f.ue.t.ul_ = C.unloadEventStart;
+            f.ue.t._ul = C.unloadEventEnd;
+            f.ue.t.rd_ = C.redirectStart;
+            f.ue.t._rd = C.redirectEnd;
+            f.ue.t.fe_ = C.fetchStart;
+            f.ue.t.lk_ = C.domainLookupStart;
+            f.ue.t._lk = C.domainLookupEnd;
+            f.ue.t.co_ = C.connectStart;
+            f.ue.t._co = C.connectEnd;
+            f.ue.t.sc_ = C.secureConnectionStart;
+            f.ue.t.rq_ = C.requestStart;
+            f.ue.t.rs_ = C.responseStart;
+            f.ue.t._rs = C.responseEnd;
+            f.ue.t.dl_ = C.domLoading;
+            f.ue.t.di_ = C.domInteractive;
+            f.ue.t.de_ = C.domContentLoadedEventStart;
+            f.ue.t._de = C.domContentLoadedEventEnd;
+            f.ue.t._dc = C.domComplete;
+            f.ue.t.ld_ = C.loadEventStart;
+            f.ue.t._ld = C.loadEventEnd
+          }
+          var B = A.navigation;
+          if(B){
+            f.ue.t.ty = B.type + f.ue.t0;
+            f.ue.t.rc = B.redirectCount + f.ue.t0;
+            if(f.ue.tag){f.ue.tag(B.redirectCount ? "redirect" :"nonredirect")}
+          }
+          f.ue.collected = 1
+        }
+      }
+
+      var z = !k && typeof n != "undefined";
+      if(z){return}
+      for(var h in n){e(h, k, n[h])}
+      c("pc", k, n);
+      var t = e("id", k) || f.ue.id;
+      var m = f.ue.url + "?" + o + "&v=" + f.ue.v + "&id=" + t;
+      var l = e("ctb", k) || e("wb", k);
+      if(l){m += "&ctb=" + l}
+      if(f.ueinit > 1){m += "&ic=" + f.ueinit}
+      var w = a.performance || a.webkitPerformance;
+      var u = f.ue.bfini;
+      if(u && u > 1){m += "&bft=" + (u - 1)}else{if(w && w.navigation && w.navigation.type == 2){m += "&bft=1"}}
+      if(f.ue._fi && o == "at" && (!k || k == t)){m += f.ue._fi()}
+      var i;
+      if((o == "ld" || o == "ul") && (!k || k == t)){
+        if(o == "ld"){
+          if(a.onbeforeunload && a.onbeforeunload.isUeh){a.onbeforeunload = null}
+          if(document.ue_backdetect && document.ue_backdetect.ue_back){document.ue_backdetect.ue_back.value++}
+          if(f._uess){i = f._uess()}
+          if(f.ue_navtiming && w && w.timing){
+            e("ctb", t, "1");
+            if(f.ue_navtiming == 1){f.ue.t.tc = w.timing.navigationStart}
+          }
+        }
+        if(w){x(w)}
+        if(f.ue_hob && f.ue_hoe){
+          f.ue.t.hob = f.ue_hob;
+          f.ue.t.hoe = f.ue_hoe
+        }
+        if(f.ue.ifr){m += "&ifr=1"}
+      }
+      c(o, k, n);
+      var s = (o == "ld" && k && e("wb", k));
+      if(s){e("wb", k, 2)}
+      var v = 1;
+      for(var q in f.ue.sc){
+        if(e("wb", q) == 1){
+          v = 0;
+          break
+        }
+      }
+      if(s){
+        if(f.ue.s != 0 || !v){return}
+        m = j(m, null)
+      }else{
+        if(v){
+          var y = j(m, null);
+          if(y != m){f.ue.b = y}
+        }
+        if(i){m += i}
+        m = j(m, k || f.ue.id)
+      }
+      if(f.ue.b || s){for(var q in f.ue.sc){if(e("wb", q) == 2){delete f.ue.sc[q]}}}
+      var p = 0;
+      if(!s){
+        f.ue.s = 0;
+        if(f.ue_err && f.ue_err.ec > 0){m += "&ec=" + f.ue_err.ec}
+        p = e("ctb", k);
+        e("t", k, {})
+      }
+      if(f.ue_tofc && f.ue.tag && p){f.ue.tag("ue_tofc")}
+      if(!window.amznJQ && f.ue.tag){f.ue.tag("noAmznJQ")}
+      if(m && f.ue.tag && f.ue.tag().length > 0){
+        m += "&csmtags=" + f.ue.tag().join("|");
+        f.ue.tag = f.ue.tagC()
+      }
+      if(m && f.ue_pageviz && f.ue.viz.length > 0){
+        m += "&viz=" + f.ue.viz.join("|");
+        f.ue.viz = []
+      }
+      f.ue.a = m;
+      r(m, o, p, s)
+    }
+
+    function b(){
+      var j = f.ue.r;
+
+      function i(l){
+        return function(){
+          if(!j[l]){
+            j[l] = 1;
+            g(l)
+          }
+        }
+      }
+
+      f.onLd = i("ld");
+      f.onLdEnd = i("ld");
+      var h = {beforeunload: i("ul"), stop: function(){g("os")}};
+      for(var k in h){d(0, window, k, h[k])}
+      if(f.ue_pageviz){ue_viz && ue_viz()}
+      if(a.addEventListener){a.addEventListener("load", f.onLd, false)}else{if(a.attachEvent){a.attachEvent("onload", f.onLd)}}
+      f.ue._uep = function(){new Image().src = (f.ue_md ? f.ue_md :"http://uedata.amazon.com/uedata/?tp=") + (+new Date)};
+      if(f.ue_pr && (f.ue_pr == 2 || f.ue_pr == 4)){f.ue._uep()}
+      if(f.queue){
+        f.queue.replay = function(){while((nextArr = f.queue.remove("ue"))){nextArr[0].apply(this, nextArr.slice(1))}};
+        f.queue.replay()
+      }
+      c("ue")
+    }
+
+    ue.reset = function(i, h){
+      if(!i){return}
+      f.ue_cel && f.ue_cel.reset();
+      f.ue.t0 = +new Date();
+      f.ue.rid = i;
+      f.ue.id = i;
+      f.ue.fc_idx = {};
+      f.ue.viz = []
+    };
+    f.uei = b;
+    f.ueh = d;
+    f.ues = e;
+    f.uet = c;
+    f.uex = g;
+    b()
+  })(ue_csm, window);
+  ue_csm.ue_hoe = +new Date();
+
+  ue_csm.ue_hob = ue_csm.ue_hob || +new Date();
+  (function(b){
+    var a = b.ue;
+    a.rid = b.ue_id;
+    a.sid = b.ue_sid;
+    a.mid = b.ue_mid;
+    a.furl = b.ue_furl;
+    a.sn = b.ue_sn;
+    a.lr = [];
+    a.log = function(e, d, c){
+      if(a.lr.length == 500){return}
+      a.lr.push(["l", e, d, c, a.d(), a.rid])
+    };
+    a.d = function(c){return +new Date - (c ? 0 :a.t0)}
+  })(ue_csm);
+  ue_csm.ue_hoe = +new Date();
+</script>
+
+<title>Payments - Amazon Seller Central</title>
+
+
+<script type="text/javascript">
+  window.name = "rainierWindow";
+
+  var logoImage = new Image();
+  logoImage.onload = function(){
+    if(typeof uet === 'function'){uet('cf');}
+  }
+
+  logoImage.src = 'https://images-na.ssl-images-amazon.com/images/G/02/rainier/nav/as_sc_logo_small._V167929780_.gif';
+</script>
+
+
+<link type="text/css" href="https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/rainier-jquery-ui/rainier-jquery-ui-919871222.css._V167510883_.css" rel="stylesheet">
+
+
+<link type="text/css" href="https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/rainier-core/rainier-core-1420779247.css._V385766325_.css" rel="stylesheet">
+<link type="text/css" href="https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/rainier-legacy-popover/rainier-legacy-popover-3956514592.css._V167510231_.css" rel="stylesheet">
+
+
+<script type="text/javascript" src="
+
+
+
+https://images-na.ssl-images-amazon.com/images/G/01/javascripts/lib/jquery/jquery-1.4.2.min._V184876073_.js"></script>
+
+<script type="text/javascript">
+  var $ = jQuery;
+</script>
+
+
+<script type="text/javascript" src="https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/rainier-jquery-ui/rainier-jquery-ui-3158266336.js._V167510881_.js"></script>
+
+
+<script type="text/javascript" src="https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/rainier-core/rainier-core-1378642696.js._V385766331_.js"></script>
+
+
+<style type="text/css"><!--
+
+BODY{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:small;
+  background-color:#FFFFFF;
+  color:#000000;
+  margin-top:0px;
+}
+
+TD, TH{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:small;
+}
+
+.serif{
+  font-family:times, serif;
+  font-size:medium;
+}
+
+.sans{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:medium;
+}
+
+.small{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:small;
+}
+
+.h1{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#E47911;
+  font-size:medium;
+}
+
+.h3color{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#E47911;
+  font-size:small;
+}
+
+h2.small{
+  margin-bottom:0em;
+}
+
+h2.h1{
+  margin-bottom:0em;
+}
+
+h2.h3color{
+  margin-bottom:0em;
+}
+
+.tiny{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:x-small;
+}
+
+.tinyprice{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#990000;
+  font-size:x-small;
+}
+
+.highlight{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#990000;
+  font-size:small;
+}
+
+.listprice{
+  font-family:arial, verdana, helvetica, sans-serif;
+  text-decoration:line-through;
+}
+
+.price{
+  font-family:arial, verdana, helvetica, sans-serif;
+  color:#990000;
+}
+
+.popover-tiny{
+  font-size:x-small;
+  font-family:verdana, arial, helvetica, sans-serif;
+}
+
+.horizontal-search{
+  font-weight:bold;
+  font-size:small;
+  color:#FFFFFF;
+  font-family:verdana, arial, helvetica, sans-serif;
+}
+
+.horizontal-websearch{
+  font-size:x-small;
+  font-family:verdana, arial, helvetica, sans-serif;
+  padding-left:12px;
+}
+
+.big{
+  font-size:xx-large;
+  font-family:verdana, arial, helvetica, sans-serif;
+}
+
+.amabot_widget .headline{
+  color:#E47911;
+  font-size:medium;
+  display:block;
+  font-weight:bold;
+}
+
+div.unified_widget .headline{
+  color:#E47911;
+  font-size:medium;
+  display:block;
+  font-weight:bold;
+}
+
+div#page-wrap{
+  min-width:980px;
+}
+
+* html div#page-wrap{
+  border-right:980px solid #fff;
+  width:100%;
+  margin-right:25px;
+}
+
+* html div#content{
+  float:left;
+  position:relative;
+  margin-right:-980px;
+}
+
+div#leftcol, div#leftcolhidden{
+  float:left;
+  width:180px;
+  margin:5px 0px 0px 5px;
+  display:inline;
+}
+
+div#rightcol, div#rightcolhidden{
+  float:right;
+  width:300px;
+  margin-top:5px;
+}
+
+div#leftcolhidden{
+  clear:left;
+}
+
+div#rightcolhidden{
+  clear:right;
+}
+
+div#center1, div#centercol, div#centerrightspancol{
+  overflow:hidden;
+}
+
+* html div#center1{
+  width:100%
+}
+
+* html div#centercol{
+  width:100%;
+}
+
+* html div#centerrightspancol{
+  width:100%;
+}
+
+div#page-footer{
+  clear:both;
+}
+
+a:link{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#004B91;
+}
+
+a:visited{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#996633;
+}
+
+a:active{
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#FF9933;
+}
+
+a.dynamic, a.dynamic:visited{
+  color:#004B91;
+  text-decoration:none;
+  border-bottom:1px dashed;
+}
+
+a.noclick, a.noclick:visited{
+  color:#000000;
+  text-decoration:none;
+  border-bottom:1px dashed;
+}
+
+.noLinkDecoration a{
+  text-decoration:none;
+  border-bottom:none;
+}
+
+.noLinkDecoration a:hover{
+  text-decoration:underline;
+}
+
+.noLinkDecoration a.dynamic:hover{
+  text-decoration:none;
+  border-bottom:1px dashed;
+}
+
+.noLinkDecoration a.noclick:hover{
+  color:#000000;
+  text-decoration:none;
+  border-bottom:1px dashed;
+}
+
+.attention{
+  background-color:#FFFFD5;
+}
+
+.alertgreen{
+  color:#009900;
+  font-weight:bold;
+}
+
+.alert{
+  color:#FF0000;
+  font-weight:bold;
+}
+
+.topnav{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:12px;
+  text-decoration:none;
+}
+
+.topnav a:link, .topnav a:visited{
+  text-decoration:none;
+  color:#003399;
+}
+
+.topnav a:hover{
+  text-decoration:none;
+  color:#E47911;
+}
+
+.topnav-active a:link, .topnav-active a:visited{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:12px;
+  color:#E47911;
+  text-decoration:none;
+}
+
+.eyebrow{
+  font-family:verdana, arial, helvetica, sans-serif;
+  font-size:10px;
+  font-weight:bold;
+  text-transform:uppercase;
+  text-decoration:none;
+  color:#FFFFFF;
+}
+
+.eyebrow a:link{
+  text-decoration:none;
+}
+
+.popover-tiny a, .popover-tiny a:visited{
+  text-decoration:none;
+  color:#003399;
+}
+
+.popover-tiny a:hover{
+  text-decoration:none;
+  color:#E47911;
+}
+
+.tabon a:hover, .taboff a:hover{
+  text-decoration:underline;
+}
+
+.tabon div, .taboff div{
+  margin-top:7px;
+  margin-left:9px;
+  margin-bottom:5px;
+}
+
+.tabon a, .tabon a:visited{
+  font-size:10px;
+  color:#FFCC66;
+  font-family:verdana, arial, helvetica, sans-serif;
+  text-decoration:none;
+  text-transform:uppercase;
+  font-weight:bold;
+  line-height:10px;
+}
+
+.taboff a, .taboff a:visited{
+  font-size:10px;
+  color:#000000;
+  font-family:verdana, arial, helvetica, sans-serif;
+  text-decoration:none;
+  text-transform:uppercase;
+  font-weight:bold;
+  line-height:10px;
+}
+
+.indent{
+  margin-left:1em;
+}
+
+.half{
+  font-size:.5em;
+}
+
+.list div{
+  margin-bottom:0.25em;
+  text-decoration:none;
+}
+
+.hr-center{
+  margin:15px;
+  border-top-width:1px;
+  border-right-width:1px;
+  border-bottom-width:1px;
+  border-left-width:1px;
+  border-top-style:dotted;
+  border-right-style:none;
+  border-bottom-style:none;
+  border-left-style:none;
+  border-top-color:#999999;
+  border-right-color:#999999;
+  border-bottom-color:#999999;
+  border-left-color:#999999;
+}
+
+.amabot_right .h1{
+  color:#E47911;
+  font-size:.92em;
+}
+
+.amabot_right .amabot_widget .headline, .amabot_left .amabot_widget .headline{
+  color:#E47911;
+  font-size:.92em;
+  display:block;
+  font-weight:bold;
+}
+
+.amabot_left .h1{
+  color:#E47911;
+  font-size:.92em;
+}
+
+.amabot_left .amabot_widget, .amabot_right .amabot_widget, .tigerbox{
+  padding-top:8px;
+  padding-bottom:8px;
+  padding-left:8px;
+  padding-right:8px;
+  border-bottom:1px solid #C9E1F4;
+  border-left:1px solid #C9E1F4;
+  border-right:1px solid #C9E1F4;
+  border-top:1px solid #C9E1F4;
+}
+
+.amabot_center div.unified_widget, .amabot_center .amabot_widget{
+  font-size:12px;
+}
+
+.amabot_right div.unified_widget, .amabot_right .amabot_widget{
+  font-size:12px;
+}
+
+.amabot_left div.unified_widget, .amabot_left .amabot_widget{
+  font-size:12px;
+}
+
+.rightArrow{
+  color:#E47911;
+  font-weight:bold;
+  padding-right:6px;
+}
+
+.nobullet{
+  list-style-type:none
+}
+
+.homepageTitle{
+  font-size:28pt;
+  font-family:'Arial Bold', Arial;
+  font-weight:800;
+  font-variant:normal;
+  color:#80B6CE;
+  line-height:1em;
+}
+
+div.unified_widget p{
+  margin:0 0 0.5em 0;
+  line-height:1.4em;
+}
+
+div.unified_widget h2{
+  color:#E47911;
+  padding:0;
+}
+
+.amabot_right div.unified_widget .headline, .amabot_left div.unified_widget .headline{
+  color:#E47911;
+  font-size:.92em;
+  display:block;
+  font-weight:bold;
+}
+
+div.unified_widget sup{
+  font-weight:normal;
+  font-size:75%;
+}
+
+div.unified_widget h2 sup{
+  font-size:50%;
+}
+
+td.amabot_left div.unified_widget h2, td.amabot_right div.unified_widget h2, div.amabot_left div.unified_widget h2, div.amabot_right div.unified_widget h2{
+  font-size:100%;
+  margin:0 0 0.5em 0;
+}
+
+td.amabot_center div.unified_widget h2, div.amabot_center div.unified_widget h2{
+  font-size:135%;
+  font-weight:bold;
+  margin:0 0 0.35em 0px;
+}
+
+td.amabot_center div.unified_widget, div.amabot_center div.unified_widget{
+  margin-left:10px;
+}
+
+td.amabot_center, div.amabot_center{
+  padding:5px;
+}
+
+div.unified_widget ul{
+  margin:1em 0;
+  padding:0 0 0 15px;
+  list-style-position:inside;
+}
+
+div.unified_widget ol{
+  margin:0;
+  padding:0 0 0 2.5em;
+}
+
+div.unified_widget a:link, div.unified_widget a:visited{
+  text-decoration:underline;
+}
+
+div.unified_widget a:hover{
+  text-decoration:underline;
+}
+
+div.unified_widget p.seeMore{
+  clear:both;
+  font-family:verdana, arial, helvetica, sans-serif;
+  margin:0;
+  padding-left:1.15em;
+  text-indent:-1.15em;
+  font-size:100%;
+  font-weight:normal;
+}
+
+div.unified_widget p.seeMore a:link, div.unified_widget p.seeMore a:visited{
+  text-decoration:underline;
+}
+
+div.unified_widget p.seeMore a:hover{
+  text-decoration:underline;
+}
+
+div.unified_widget .carat, div.left_nav .carat{
+  font-weight:bold;
+  font-size:120%;
+  font-family:verdana, arial, helvetica, sans-serif;
+  color:#E47911;
+  margin-right:0.20em;
+}
+
+div.unified_widget a img{
+  border:0;
+}
+
+div.h_rule{
+  clear:both;
+}
+
+div#centerrightspancol div.h_rule{
+  clear:right;
+}
+
+div.unified_widget{
+  margin-bottom:2em;
+  clear:both;
+}
+
+div.unified_widget div.col1{
+  width:100%;
+}
+
+div.unified_widget div.col2{
+  width:49%;
+}
+
+div.unified_widget div.col3{
+  width:32%;
+}
+
+div.unified_widget div.col4{
+  width:24%;
+}
+
+div.unified_widget div.col5{
+  width:19%;
+}
+
+div.unified_widget table{
+  border:0;
+  border-collapse:collapse;
+  width:100%;
+}
+
+div.unified_widget td{
+  padding:0 8px 8px 0;
+  vertical-align:top;
+}
+
+div.unified_widget table.col1 td{
+  width:100%;
+}
+
+div.unified_widget table.col2 td{
+  width:49%;
+}
+
+div.unified_widget table.col3 td{
+  width:32%;
+}
+
+div.unified_widget table.col4 td{
+  width:24%;
+}
+
+div.unified_widget table.col5 td{
+  width:19%;
+}
+
+div.unified_widget td.bottom{
+  vertical-align:baseline;
+}
+
+div.unified_widget table h4, div.unified_widget h4{
+  color:#000;
+  font-size:100%;
+  font-weight:normal;
+  margin:0;
+  padding:0;
+}
+
+div.rcmBody div.prodImage, amabot_widget div.prodImage{
+  float:left;
+  margin:0px 0.5em 0.25em 0px;
+}
+
+td.amabot_right div.unified_widget, td.amabot_left div.unified_widget, div.amabot_right div.unified_widget, div.amabot_left div.unified_widget{
+  border:1px solid #C9E1F4;
+  padding:8px;
+  margin-bottom:20px;
+}
+
+* html td.amabot_right div.unified_widget, * html div.amabot_right div.unified_widget{
+  height:100%;
+}
+
+* html td.amabot_left div.unified_widget, * html div.amabot_left div.unified_widget{
+  height:100%;
+}
+
+div.rcmBody, amabot_widget div.rcmBody{
+  line-height:1.4em;
+}
+
+div.rcmBody a:link, div.rcmBody a:visited{
+  text-decoration:underline;
+}
+
+div.rcmBody p.seeMore, amabot_widget div.rcmBody p.seeMore{
+  margin-top:0.5em;
+}
+
+div.rcmBody div.bannerImage{
+  text-align:center;
+}
+
+div.rcmBody h2 span.homepageTitle{
+  display:block;
+  margin-bottom:-0.3em;
+  margin-top:-0.12em;
+  line-height:1em;
+}
+
+div.rcmBody h2 img{
+  float:none;
+}
+
+table.coopTable div.rcmBody .headline{
+  font-size:110%;
+}
+
+table.coopTable div.rcmBody h2{
+  font-size:110%;
+  font-weight:bold;
+}
+
+table.promo div.rcmBody h2{
+  font-size:100%;
+  font-weight:bold;
+}
+
+div.left_nav{
+  font-family:Arial, sans-serif;
+  font-size:100%;
+  margin:0;
+  line-height:1.05em;
+  width:100%;
+  border:1px solid #C9E1F4;
+  padding-bottom:10px;
+}
+
+div.left_nav h2{
+  margin:0 0 0 0;
+  color:#000000;
+  font-weight:bold;
+  line-height:1.25em;
+  font-size:100%;
+  font-family:verdana, arial, helvetica, sans-serif;
+  padding:3px 6px;
+  background-color:#EAF3FE;
+}
+
+div.left_nav h3{
+  font-family:verdana, arial, helvetica, sans-serif;
+  margin:0.5em 0 0.4em 0.5em;
+  color:#E47911;
+  font-weight:bold;
+  line-height:1em;
+  font-size:100%;
+  padding-right:0.5em;
+}
+
+div.left_nav ul{
+  margin:0;
+  padding:0;
+}
+
+div.left_nav li, div.left_nav p{
+  list-style:none;
+  margin:0.5em 0.5em 0 1em;
+  line-height:1.2em;
+}
+
+div.left_nav hr{
+  margin:1em 0.5em;
+  border-top:0;
+  border-left:0;
+  border-right:0;
+  border-bottom:1px dashed #cccccc;
+}
+
+div.left_nav a:link, div.left_nav a:visited{
+  color:#003399;
+  text-decoration:none;
+  font-family:Arial, sans-serif;
+}
+
+div.left_nav a:hover{
+  color:#2a70fc;
+  text-decoration:underline;
+}
+
+div.left_nav p.seeMore{
+  padding-left:0.9em;
+  text-indent:-0.9em;
+  margin-top:0.35em;
+  margin-bottom:1em;
+}
+
+div.left_nav p.seeMore a:link, div.left_nav p.seeMore a:visited{
+  text-decoration:none;
+}
+
+div.left_nav p.seeMore a:hover{
+  text-decoration:underline;
+}
+
+div.seller_central li{
+  font-size:95%;
+}
+
+div.leftnav_popover{
+  width:35em;
+  border:3px solid #ededd3;
+  padding:10px;
+}
+
+div.leftnav_popover li{
+  font-size:100%;
+}
+
+div.leftnav_popover h2{
+  font-family:verdana, arial, helvetica, sans-serif;
+  margin:0 0 0.5em 0;
+  color:#E47911;
+  line-height:1em;
+  font-size:100%;
+  padding-right:0.5em;
+  background-color:#FFFFFF;
+  padding-left:0;
+}
+
+div.leftnav_popover ul.popover_col{
+  float:left;
+  width:33%;
+  margin:0;
+  padding:0;
+}
+
+div.leftnav_popover ul.popover_col li{
+  list-style:none;
+  font-size:90%;
+  line-height:1.5em;
+  line-height:1.2em;
+  margin:0 5px 0.7em 0
+}
+
+div.leftnav_popover ul.popover_col li a{
+  text-decoration:none;
+}
+
+div.leftnav_popover ul.popover_col li a:hover{
+  text-decoration:underline;
+}
+
+div.leftnav_popover p.seeMore{
+  margin-left:0;
+}
+
+div.leftnav_popover div.h_rule_popup{
+  clear:left;
+  margin-bottom:5px;
+  border-bottom:1px dashed #cccccc;
+}
+
+div.asinItem{
+  float:left;
+  margin-bottom:1em;
+  width:32%;
+}
+
+div.asinTextBlock{
+  padding:0 8px 8px 0;
+}
+
+div.asinItem div.prodImage{
+  height:121px;
+  display:table-cell;
+  vertical-align:bottom;
+}
+
+div.asinItem div.localImage{
+  display:table-cell;
+  vertical-align:bottom;
+}
+
+div.asinItem span{
+  margin:0.5em 0 0.25em 0;
+}
+
+div.asinItem ul{
+  margin:0;
+  padding:0 0 0.5em 1.3em;
+  text-indent:-1.3em;
+  font-size:90%;
+}
+
+div.asinTitle{
+  padding-top:3px;
+  padding-bottom:2px;
+}
+
+div.row{
+  clear:both;
+}
+
+body.dp{
+}
+
+body.dp div.h_rule{
+  clear:none;
+}
+
+body.dp div.unified_widget{
+  clear:none;
+}
+
+div.asinCoop div.asinItem{
+  float:none;
+  width:100%;
+}
+
+div.asinCoop_header{
+}
+
+div.asinCoop_footer{
+}
+
+div.newAndFuture div.asinItem ul{
+  font-size:100%;
+}
+
+div.newAndFuture div.asinItem li{
+  list-style-position:outside;
+  margin:0 0 0.35em 20px;
+  padding:0;
+  text-indent:0;
+}
+
+div.newAndFuture h3{
+  font-size:100%;
+  margin:1em 0;
+}
+
+div.newAndFuture a:link, div.newAndFuture a:visited{
+  text-decoration:underline;
+}
+
+div.newAndFuture a:hover{
+  text-decoration:underline;
+}
+
+div.newAndFuture p.seeMore{
+  margin:-0.75em 0 0 35px;
+}
+
+div.unified_widget ol.topList{
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+div.unified_widget ol.topList li{
+  list-style:none;
+  clear:both;
+  display:list-item;
+  padding-top:6px;
+}
+
+div.unified_widget ol.topList .productImage{
+  display:block;
+  float:left;
+  vertical-align:top;
+  text-align:center;
+  width:60px;
+}
+
+div.unified_widget ol.topList .productText{
+  display:block;
+  float:left;
+  padding-left:10px;
+  vertical-align:top;
+}
+
+:root div.unified_widget span.productImage{
+  display:table-cell;
+  float:none;
+}
+
+:root div.unified_widget span.productText{
+  display:table-cell;
+  float:none;
+}
+
+div.unified_widget dl.priceBlock{
+  margin:0 0 0.45em 0;
+}
+
+div.unified_widget dl.priceBlock dt{
+  clear:left;
+  font-weight:bold;
+  float:left;
+  margin:0 0.3em 0 0;
+}
+
+div.unified_widget dl.priceBlock dd{
+  margin:0 0 0.2em 0;
+}
+
+div.unified_widget .bold{
+  font-weight:bold;
+}
+
+div.unified_widget .byline{
+  font-size:95%;
+  font-weight:normal;
+}
+
+table.thirdLvlNavContent div.blurb{
+  margin:10px;
+}
+
+div.pageBanner h1{
+  font-family:Arial, Helvetica, sans-serif;
+  font-weight:normal;
+  font-size:225%;
+  color:#e47911;
+  letter-spacing:-0.03em;
+  margin:0;
+}
+
+div.pageBanner p{
+  font-size:90%;
+  color:#888888;
+  margin:0;
+}
+
+div.pageBanner h1.bkgnd{
+  background-repeat:no-repeat;
+  background-color:#FFFFFF;
+  overflow:hidden;
+  text-indent:-100em;
+}
+
+div.blurb div.title{
+  font-weight:bold;
+  padding-top:5px;
+  padding-bottom:2px;
+}
+
+--></style>
+<style type="text/css"><!--
+H1{
+  margin-bottom:0;
+}
+
+P{
+  margin-top:0;
+}
+
+TABLE.data_display_module_body{
+  width:95%;
+  min-width:100%;
+}
+
+TABLE.data_display_module_header{
+  width:95%;
+  min-width:100%;
+  background-color:#E7EBF7;
+  border-left:thin solid #DDDDDD;
+  border-top:thin solid #DDDDDD;
+  border-right:thin solid #DDDDDD;
+}
+
+.negative{
+  color:#990000;
+}
+
+.double-bar-box{
+  border:thin solid #DDDDDD;
+  padding:0 0 0 0;
+  width:95%;
+  min-width:100%;
+  spacing:0 0 0 0;
+}
+
+TR.box-widget{
+  padding:0 0 0 0;
+  spacing:0 0 0 0;
+}
+
+.box-column{
+  width:40%;
+  padding-left:10px;
+  padding-right:10px;
+  vertical-align:top;
+}
+
+.header-bar{
+  background-color:#E7EBF7;
+  height:2em;
+  border-bottom:thin solid #DDDDDD;
+  text-align:left;
+}
+
+.footer-bar{
+  background-color:#E7EBF7;
+  border-top:thin solid #DDDDDD;
+  height:1.5em;
+  background-color:#E7EBF7;
+  text-align:center;
+}
+
+.footer-bar a{
+  color:#CC6600;
+}
+
+.form-row{
+  border-right:thin solid #DDDDDD;
+  border-bottom:thin solid #DDDDDD;
+  border-left:thin solid #DDDDDD;
+  background-color:#F4F4F4;
+  width:100%;
+  clear:both;
+}
+
+.form-label{
+  width:30%;
+  background-color:#f4f4f4;
+  font-weight:bold;
+  text-align:right;
+  float:left;
+  padding:.3em 0 .3em .6em;
+}
+
+.form-value{
+  margin-left:33%;
+  border-left:thin solid #DDDDDD;
+  padding:.3em .6em .3em .6em;
+}
+
+.box-label{
+  /*  width: 30%;*/
+  font-weight:bold;
+  text-align:left;
+  vertical-align:top;
+  padding-right:.5em;
+}
+
+.box-value{
+  /*  width: 70%;*/
+  vertical-align:top;
+}
+
+.summation{
+  font-weight:bold;
+}
+
+.box-item{
+  padding:0 0 0 0;
+}
+
+TD.heading{
+  margin-top:2em;
+}
+
+TD.space{
+  width:10%;
+}
+
+TD.title{
+  width:60%;
+}
+
+TD.quantity{
+  width:10%;
+}
+
+TD.amount{
+  width:10%;
+  text-align:right;
+}
+
+.pagination_form{
+  margin:0;
+}
+
+#page{
+  margin-left:2.5%;
+  margin-right:2.5%;
+  padding:0 0 0 0;
+}
+
+TR.transaction-type td{
+  border-bottom:thin solid #DDDDDD;
+}
+
+TR.transaction-type td td{
+  border-bottom:none;
+}
+
+#transactions-nav{
+  text-align:center;
+  vertical-align:middle;
+  height:1.8em;
+  background-color:#F4F4F4;
+  border:thin solid #DDDDDD;
+}
+
+FORM#searchTransactions{
+  display:block;
+  margin-bottom:0;
+}
+
+#orderNumber{
+  display:inline;
+}
+
+#sub-header{
+  margin-bottom:0;
+}
+
+#transactionSearch button{
+  margin-left:33%;
+  margin-top:.3em;
+}
+
+#transactionSearch{
+  border-top:thin solid #DDDDDD;
+}
+
+#search_type{
+  display:inline;
+}
+
+HR{
+  border:1px;
+  width:100%;
+  color:#DDDDDD;
+  background-color:#DDDDDD;
+  height:1px;
+}
+
+INPUT{
+  font-size:xx-small;
+  display:inline;
+}
+
+-->
+</style>
+
+
+<script type='text/javascript'>
+  if(window.amznJQ){
+    amznJQ.addLogical('jserrors', [ "https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/jserrors/jserrors-min-3087103079._V389527819_.js" ]);
+    amznJQ.available('jserrors', function(){});
+  }
+
+</script>
+<script type='text/javascript'>
+  if(window.amznJQ){
+    amznJQ.addLogical('forester-client', [ "https://images-na.ssl-images-amazon.com/images/G/01/browser-scripts/forester-client/forester-client-min-2419658749._V395894290_.js" ]);
+    amznJQ.available('forester-client', function(){});
+  }
+
+</script>
+</head>
+<body>
+
+
+<script type='text/javascript'>if(typeof uet == 'function'){ uet('ns'); }</script>
+
+
+<script>
+  var sc_pwm_image_width = 189, sc_pwm_image_height = 102;
+</script>
+<script type="text/javascript" src="https://images-na.ssl-images-amazon.com/images/G/01/nav2/prod/rainierCoreJS/rainierCoreJS-please_wait_mask-14596._V213241101_.js"></script>
+
+<div id="pleasewaitmask" style="position:absolute; top:0; left:0; width:100%; background:#fff; visibility:hidden; filter:alpha(opacity=80); opacity:.8; -ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=80); filter:alpha(opacity=80)'; z-index: 1999;"></div>
+<div id="pleasewaitmsg" style="position: absolute; top:0; left:0; width: 189px; height: 102px; visibility:hidden; z-index: 2000;">
+  <img src="https://images-na.ssl-images-amazon.com/images/G/02/rainier/misc/loading-please-wait-sc._V192262202_.jpg" width="189" id="sc-wait-image" height="102" border="0"/>
+</div>
+
+
+<script type="text/javascript">
+
+
+  function merchChanged(merchantID, customerID, merchantName, marketplaceID){
+    // show the please wait message
+    showPleaseWait();
+
+    if(merchantID != 0){
+      document.location = "https://sellercentral.amazon.de/gp/utilities/set-rainier-prefs.html?ie=UTF8&url=https%3A%2F%2Fsellercentral.amazon.de%2Fgp%2Fpayments-account%2Fsettlement-summary.html%2Fref%3Dag_payments_dmer_pymtdetail" + '&merchantID=' + merchantID;
+    }else{
+      document.location = "https://sellercentral.amazon.de/gp/utilities/set-rainier-prefs.html?ie=UTF8&url=https%3A%2F%2Fsellercentral.amazon.de%2Fgp%2Fpayments-account%2Fsettlement-summary.html%2Fref%3Dag_payments_dmer_pymtdetail" + '&merchantCustomerID=' + customerID + '&marketplaceID=' + marketplaceID;
+    }
+  }
+
+  function returnHome(){
+    document.location = "https://sellercentral.amazon.de/gp/homepage.html";
+  }
+</script>
+
+
+<style type="text/css">
+  a.navActiveLink, a.navInactiveLink:visited, a.navInactiveLink:hover{
+    color:#5A7DC8;
+  }
+
+  #subnav_container{
+    background-color:#5A7DC8;
+    height:5px;
+    font-size:5px;
+  }
+
+  a.navInactiveLink, a.navInactiveLink:visited, a.navInactiveLink:hover{
+    color:#000;
+  }
+
+  #logoandmore{
+    padding-top:3px;
+  }
+
+  .navBadge{
+    color:#c60;
+    font-size:10px;
+    font-family:arial, verdana;
+    margin-left:4px;
+    text-transform:uppercase
+  }
+
+  .active .tabBadge{
+    color:#FFD685;
+  }
+
+  #sc_logo_top{
+    width:auto;
+  }
+
+  #market_switch{
+    float:left;
+    line-height:22px;
+    padding:3px 0 0 30px;
+  }
+
+  .merch-site-span{
+    color:#696969;
+    font-size:10px;
+    font-weight:bold;
+  }
+
+    /* merchant bar styling */
+  #merchant-bar-container{
+    border:0;
+    border-bottom:1px solid #25353D;
+    height:30px;
+    margin:0;
+    padding:0;
+    width:100%;
+  }
+
+  #merchant-bar{
+    color:#000;
+    height:18px;
+    line-height:18px;
+    padding:6px 2.5%;
+    white-space:nowrap;
+    width:95%
+  }
+
+  .emphatic{
+    color:#003399;
+  }
+
+  .image-container{
+    float:left;
+    height:16px;
+    padding:1px 12px 1px 6px;
+    width:16px;
+  }
+
+  #merchant-name{
+    float:left;
+    height:18px;
+    line-height:18px;
+    margin-right:22px;
+  }
+
+  #merchant-website{
+    float:left;
+    height:18px;
+    line-height:18px;
+  }
+
+  .merch-website, .merch-label, .merch-release{
+    padding-right:4px;
+  }
+
+  #merchant-release{
+    float:left;
+    height:18px;
+    line-height:18px
+  }
+
+  #marketplaceSelect, #releaseSelect{
+    height:18px;
+    padding:2px;
+  }
+</style>
+
+<div id="logoandmore" class="clearable">
+<div id="sc_logo_top">
+  <a href="https://sellercentral.amazon.de/gp/homepage.html/ref=ag_home_logo_pymtdetail"><img src="https://images-na.ssl-images-amazon.com/images/G/02/rainier/nav/as_sc_logo_small._V167929780_.gif" id="sc_logo_top_image" border="0"/></a>
+</div>
+<div id="market_switch">
+
+
+<script>
+  if(typeof SCUI === 'undefined'){
+    window.SCUI = {};
+  }
+
+  if(!SCUI.hasOwnProperty('marketSwitcherScits')){
+    SCUI.marketSwitcherScits = {};
+  }
+
+  SCUI.changeMarketplace = function(marketplaceURL, marketplaceID){
+
+    showPleaseWait();
+    document.location = marketplaceURL + "&marketplaceID=" + marketplaceID;
+  };
+
+  function switchMarketplace(marketplaceID){
+    SCUI.changeMarketplace("https://sellercentral.amazon.de/gp/utilities/set-rainier-prefs.html?ie=UTF8&url=https%3A%2F%2Fsellercentral.amazon.de%2Fgp%2Fpayments-account%2Fsettlement-summary.html%2Fref%3Dag_payments_dmar_pymtdetail%3Fie%3DUTF8%26_mpc%3D1", marketplaceID);
+  }
+
+  function marketplaceChanged(marketplaceID){
+    if(!marketplaceID){return;}
+
+    switchMarketplace(marketplaceID);
+  }
+
+  function marketplaceChangedIWS(marketplaceID){
+    if(!marketplaceID){return;}
+    SCUI.changeMarketplace("https://sellercentral.amazon.de/gp/utilities/set-rainier-prefs.html?ie=UTF8&url=https%3A%2F%2Fsellercentral.amazon.de%2Fgp%2Fpayments-account%2Fsettlement-summary.html%2Fref%3Dag_payments_dmar_pymtdetail%3Fie%3DUTF8%26_mpc%3D1", marketplaceID);
+  }
+
+</script>
+
+
+<div id="merchant-website">
+  <select id="marketplaceSelect" class="tiny" name="marketplaceID" onchange="javascript:marketplaceChanged( this.value )">
+
+
+    <option value="A1F83G8C2ARO7P">www.amazon.co.uk</option>
+
+
+    <option value="A1PA6795UKMFR9">www.amazon.de</option>
+
+
+    <option value="A1RKKUPIHCS9HS">www.amazon.es</option>
+
+
+    <option value="A13V1IB3VIYZZH" selected="selected">www.amazon.fr</option>
+
+
+    <option value="APJ6JRA9NG5V4">www.amazon.it</option>
+
+
+  </select>
+</div>
+
+<div class="image-container">
+  <img src="https://images-na.ssl-images-amazon.com/images/G/02/rainier/nav/FRAmazon._V171509991_.png"/></div>
+</div>
+<div id="sc_quicklinks_top">
+
+
+  <span id='homeID'><a class="sc_quicklink navInactiveLink" href="https://sellercentral.amazon.de/gp/homepage.html/ref=ag_home_head_pymtdetail">HOME</a></span>
+  |
+
+
+  <span id='messagesID'><a class="sc_quicklink navInactiveLink" href="https://sellercentral.amazon.de/gp/communication-manager/inbox.html/ref=ag_cmin_head_pymtdetail">MESSAGES</a></span>
+  |
+
+
+  <span id='helpMenuID'><a id="helpMenuID" class="sc_quicklink navInactiveLink" href="https://sellercentral.amazon.de/gp/help/help-home.html/ref=ag_help_head_pymtdetail">HELP</a></span>
+  |
+
+
+  <a class="sc_quicklink navInactiveLink" href="https://sellercentral.amazon.de/gp/sign-in/logout.html/ref=ag_logout_head_pymtdetail">LOGOUT</a>
+
+
+</div>
+</div>
+
+<div id="topNavContainer">
+<div id="globalSearchForm">
+
+
+  <form class="global-search-form" action="https://sellercentral.amazon.de/gp/search/search-results.html/ref=ag_helpsearch_bnav_pymtdetail" method="GET">
+    <input id="search-field" class="global-search-text" name="keywords" type="text" size="20" value="Search" onclick="clickclear(this,'Search')" onblur="clickrestore(this,'Search')" style="vertical-align:middle;"/>
+    <input type="image" src="https://images-na.ssl-images-amazon.com/images/G/02/abis-ui/buttons/go._V184537766_.gif" width="21" alt="Go" style="vertical-align:middle" height="21" border="0"/>
+  </form>
+
+
+  <script type="text/javascript">
+    function clickclear(thisfield, defaulttext){
+      thisfield.style.color = "#000000";
+      if(thisfield.value == defaulttext){
+        thisfield.value = "";
+      }
+    }
+
+    function clickrestore(thisfield, defaulttext){
+      if(thisfield.value == ""){
+        thisfield.style.color = "#808080";
+        thisfield.value = defaulttext;
+      }
+    }
+  </script>
+
+</div>
+<ul id="topNav">
+
+
+  <li class="level1 inactive">
+    <a href="https://sellercentral.amazon.de/myi/search/DefaultView.amzn/ref=ag_invmgr_tnav_pymtdetail_">INVENTORY
+
+    </a>
+    <ul class="subNav">
+
+
+      <li><a href="https://sellercentral.amazon.de/myi/search/DefaultView.amzn/ref=ag_invmgr_dnav_pymtdetail_">Manage
+        Inventory
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/ssof/manage-afn-inventory.html/ref=ag_fbamnginv_dnav_pymtdetail_">Manage
+        FBA Inventory
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/ezdpc-gui/start.html/ref=ag_addlisting_dnav_pymtdetail_">Add a
+        Product
+      </a></li>
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/item-manager/ezdpc/uploadInventory.html/ref=ag_invfile_dnav_pymtdetail_">Add
+          Products via Upload
+        </a></li>
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/item-manager/ezdpc/openPickup.html/ref=ag_invreport_dnav_pymtdetail_">Inventory
+          Reports
+        </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/mn/promotions/promotionHome/ref=ag_promomgr_dnav_pymtdetail_">Manage
+        Promotions
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/ssof/shipping-queue.html/ref=ag_fbashipq_dnav_pymtdetail_">Manage
+        FBA Shipments
+      </a></li>
+    </ul>
+  </li>
+
+
+  <li class="level1 inactive">
+    <a href="https://sellercentral.amazon.de/gp/orders-v2/list/ref=ag_myo_tnav_pymtdetail_">ORDERS
+
+    </a>
+    <ul class="subNav">
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/orders-v2/list/ref=ag_myo_dnav_pymtdetail_">Manage Orders
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/transactions/orderPickup.html/ref=ag_orderrpt_dnav_pymtdetail_">Order
+        Reports
+      </a></li>
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/transactions/uploadShippingConfirmation.html/ref=ag_ordrelfile_dnav_pymtdetail_">Upload
+          Order Related Files
+        </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/returns/list/ref=ag_myr_dnav_pymtdetail_">Manage Returns
+      </a></li>
+    </ul>
+  </li>
+
+
+  <li class="level1 active">
+    <a href="https://sellercentral.amazon.de/gp/payments-account/settlement-summary.html/ref=ag_payments_tnav_pymtdetail_">REPORTS
+
+    </a>
+    <ul class="subNav">
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/payments-account/settlement-summary.html/ref=ag_payments_dnav_pymtdetail_">Payments
+        </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/sellercoach/dashboard/ref=ag_coach_dnav_pymtdetail_">Amazon Selling
+        Coach
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/site-metrics/home.html/ref=ag_sitemetric_dnav_pymtdetail_">Business
+        Reports
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/ssof/reports.html/ref=ag_fbareports_dnav_pymtdetail_">Fulfilment by
+        Amazon
+      </a></li>
+    </ul>
+  </li>
+
+
+  <li class="level1 inactive">
+    <a href="https://sellercentral.amazon.de/gp/customer-experience/summary.html/ref=ag_custmetric_tnav_pymtdetail_">PERFORMANCE
+
+    </a>
+    <ul class="subNav">
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/customer-experience/summary.html/ref=ag_custmetric_dnav_pymtdetail_">Customer
+          Metrics
+        </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/feedback-manager/home.html/ref=ag_feedback_dnav_pymtdetail_">Feedback
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/guarantee-claims/home.html/ref=ag_azclaims_dnav_pymtdetail_">A-to-z
+        Guarantee Claims
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/chargebacks/home.html/ref=ag_chrgbck_dnav_pymtdetail_">Chargeback
+        Claims
+      </a></li>
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/customer-experience/perf-notifications.html/ref=ag_cxperform_dnav_pymtdetail_">Performance
+          Notifications
+        </a></li>
+    </ul>
+  </li>
+
+
+  <li class="level1 inactive">
+    <a href="https://sellercentral.amazon.de/gp/seller/configuration/account-info-page.html/ref=ag_acctinfo_tnav_pymtdetail_">SETTINGS
+
+    </a>
+    <ul class="subNav">
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/seller/configuration/account-info-page.html/ref=ag_acctinfo_dnav_pymtdetail_">Account
+          Info
+        </a></li>
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/seller/configuration/notificationPreferences.html/ref=ag_notifpref_dnav_pymtdetail_">Notification
+          Preferences
+        </a></li>
+
+
+      <li>
+        <a href="https://sellercentral.amazon.de/gp/seller/configuration/login-settings.html/ref=ag_loginsett_dnav_pymtdetail_">Login
+          Settings
+        </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/returns/settings/ref=ag_myr_dnav_pymtdetail_">Return Settings
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/gift-services/dispatch.html/ref=ag_giftops_dnav_pymtdetail_">Gift
+        Options
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/shipping/dispatch.html/ref=ag_shipset_dnav_pymtdetail_">Shipping
+        Settings
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/account-manager/home.html/ref=ag_userperms_dnav_pymtdetail_">User
+        Permissions
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/help-content/home.html/ref=ag_infopol_dnav_pymtdetail_">Your Info &
+        Policies
+      </a></li>
+
+
+      <li><a href="https://sellercentral.amazon.de/gp/ssof/configuration/index.html/ref=ag_fbasettings_dnav_pymtdetail_">Fulfilment
+        by Amazon
+      </a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+<div id="subnav_container" class="clear clearable"></div>
+
+
+<script type="text/javascript">
+  var gNavbarHeight = 97;
+</script>
+
+
+<script type='text/javascript'>if(typeof uet == 'function'){ uet('ne'); }</script>
+
+
+<div id="page">
+<h1 class="header-orange">Transaction Details</h1>
+
+<p>
+
+
+</p>
+
+
+<div class="tiny">
+
+
+<table class="double-bar-box" cellspacing="0" cellpadding="0">
+<tbody>
+<tr class="box-widget">
+  <td colspan="0" class="header-bar header-orange small">Order Payment for Order 403-2580115-3776367
+    (<a href="https://sellercentral.amazon.de/gp/orders-v2/details?ie=UTF8&amp;orderID=403-2580115-3776367">view details
+      of this order</a>)
+  </td>
+</tr>
+<tr class="inner-box">
+<td class="box-column">
+
+
+<table class="list_of_lists" width="100%" cellspacing='0' cellpadding='2'>
+  <tbody>
+  <tr>
+    <td colspan="5" height="25px">&nbsp;</td>
+  </tr>
+  <tr id="transaction_date">
+    <td colspan="3" class="heading small"><strong>Transaction date: 3 Jun 2013</strong></td>
+  </tr>
+  </tbody>
+</table>
+
+
+<table width="100%">
+  <tr>
+    <td width="50%" style="padding-right: 20px;" valign="top">
+
+
+      <table class="list_of_lists" width="100%" cellspacing='0' cellpadding='2'>
+        <tbody>
+        <tr>
+          <td colspan="5" height="25px">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="3" class="heading small"><strong>Shipping
+            Address<img src="https://images-na.ssl-images-amazon.com/images/G/02/abis-ui/buttons/small-minus._V192196385_.gif" width="14" align="absmiddle" alt="collapse" onclick="expand_collapse_address(this)" id="address_minus_button" height="14" border="0"/><img src="https://images-na.ssl-images-amazon.com/images/G/02/abis-ui/buttons/small-plus._V192196357_.gif" width="14" align="absmiddle" alt="expand" style="display:none;" onclick="expand_collapse_address(this)" id="address_plus_button" height="14" border="0"/></strong>
+          </td>
+        </tr>
+        <tr class="">
+          <td colspan="3" class="small">
+            <div id="shipping_address">Sarah Hudson<br>295 route des moranches<br>Les Contamines Montjoie<br>74170<br>France<br>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+
+    </td>
+    <td width="50%" style="padding-left: 20px;" valign="top">
+
+
+    </td>
+  </tr>
+</table>
+
+
+<table class="list_of_lists" width="100%" cellspacing='0' cellpadding='2'>
+  <tbody>
+  <tr>
+    <td colspan="5" height="25px">&nbsp;</td>
+  </tr>
+  <tr id="breakdown_data_Product_charges">
+    <td colspan="3" class="heading small"><strong>Product charges</strong></td>
+  </tr>
+  <tr>
+    <td class="title small">EasyAcc Étui Housse Cuir pour Google Nexus 7 16Gb 32 Gb avec Multi Stand et fonctions Smart
+      Cover (Noir, PU Cuir, Ultra Slim)
+    </td>
+    <td class="space">&nbsp;</td>
+    <td class="quantity small">Qty: 1</td>
+    <td class="small"></td>
+    <td class="amount small">€11.99</td>
+  </tr>
+  <tr>
+    <td colspan="5" height="25px">&nbsp;</td>
+  </tr>
+  <tr id="breakdown_data_Other">
+    <td colspan="3" class="heading small"><strong>Other</strong></td>
+  </tr>
+  <tr class="">
+    <td colspan="3" class="small">Shipping:</td>
+    <td class="small"></td>
+    <td class="amount small">€2.79</td>
+  </tr>
+  <tr>
+    <td colspan="5" height="25px">
+      <hr/>
+    </td>
+  </tr>
+  <tr id="display_section_transaction_total">
+    <td colspan="3" class="heading small"><strong>Buyer Pays</strong></td>
+    <td class="small"></td>
+    <td class="amount small">€14.78</td>
+  </tr>
+  </tbody>
+</table>
+
+
+<div style="height: 25px;"></div>
+
+
+<table class="list_of_lists" width="100%" cellspacing='0' cellpadding='2'>
+  <tbody>
+  <tr>
+    <td colspan="5" height="25px">&nbsp;</td>
+  </tr>
+  <tr id="breakdown_data_Amazon_fees">
+    <td colspan="3" class="heading small"><strong>Amazon fees</strong></td>
+  </tr>
+  <tr class="">
+    <td colspan="3" class="small">Commission:</td>
+    <td class="small"></td>
+    <td class="amount small"><span class="negative">-€0.60</span></td>
+  </tr>
+  <tr class="">
+    <td colspan="3" class="small">Cross-border fulfilment fee:</td>
+    <td class="small"></td>
+    <td class="amount small"><span class="negative">-€2.70</span></td>
+  </tr>
+  <tr class="">
+    <td colspan="3" class="small">FBA Pick & Pack fee per unit:</td>
+    <td class="small"></td>
+    <td class="amount small"><span class="negative">-€1.25</span></td>
+  </tr>
+  <tr class="">
+    <td colspan="3" class="small">FBA weight handling fee:</td>
+    <td class="small"></td>
+    <td class="amount small"><span class="negative">-€2.20</span></td>
+  </tr>
+  <tr class="">
+    <td colspan="3" class="small">Shipping chargeback:</td>
+    <td class="small"></td>
+    <td class="amount small"><span class="negative">-€2.35</span></td>
+  </tr>
+  <tr>
+    <td colspan="5" height="25px">
+      <hr/>
+    </td>
+  </tr>
+  <tr id="display_section_transaction_total">
+    <td colspan="3" class="heading small"><strong>Change to your seller account balance</strong></td>
+    <td class="small"></td>
+    <td class="amount small">€5.68</td>
+  </tr>
+  </tbody>
+</table>
+
+</td>
+</tr>
+</table>
+</div>
+<br/>
+
+
+<img src="https://images-na.ssl-images-amazon.com/images/G/01/x-locale/common/transparent-pixel._V42752373_.gif" style="position: absolute" width="1" alt="" onload="if (typeof uet == 'function') { uet('cf'); }" height="1" border="0"/>
+
+
+<center>
+  <a href="https://sellercentral.amazon.de/gp/payments-account/view-transactions.html?ie=UTF8&amp;pageSize=Ten&amp;transaction_id=2013154JN1dVmcbRKeKMsWCKF_9xg&amp;subview=&amp;mostRecentLast=0&amp;view=search&amp;orderId=403-2580115-3776367">Return
+    to View Transactions</a></center>
+
+<script language="JavaScript">
+  <!--
+  function expand_collapse_address(button){
+    if(document.getElementById('address_minus_button') == button){
+      document.getElementById('shipping_address').style.display = 'none';
+      document.getElementById('address_plus_button').style.display = '';
+      button.style.display = 'none';
+    }else{
+      document.getElementById('shipping_address').style.display = '';
+      document.getElementById('address_minus_button').style.display = '';
+      button.style.display = 'none';
+    }
+  }
+
+  -->
+</script>
+
+</div>
+
+
+<br style="clear:both">
+
+<form id="feedbackForm" action="/gp/contact-amazon.html" method="post">
+  <input type="hidden" id="debugInformation" value=""></form>
+
+<script language="javascript" type="text/javascript">
+  function loadContactUs(){
+    window.location.href = 'https://sellercentral.amazon.de/gp/contact-us/contact-amazon.html/ref=ag_contactus_foot_pymtdetail';
+  }
+</script>
+
+<style type="text/css">
+  #sc_footer_container{
+    border:0;
+    border-top:1px solid #ddd;
+    margin:7em 2.5% 0;
+    padding:0;
+  }
+
+  #sc_footer{
+    background:#fff;
+    border:0;
+    line-height:21px;
+    margin:0;
+    padding:10px 0;
+  }
+
+  #sc_footer_lang{
+    float:left;
+    padding-left:4px
+  }
+
+  #sc_footer_links{
+    padding-left:4px;
+    text-align:right;
+    float:right;
+  }
+
+  #sc_footer_merchant{
+    margin-right:25px;
+  }
+
+  .scf_link, .scf_link:visited{
+    color:#004b91;
+    text-decoration:none;
+  }
+
+  .scf_link:hover, .scf_link:active{
+    color:#e47911;
+    text-decoration:underline;
+  }
+</style>
+
+<div id="sc_footer_container">
+  <div id="sc_footer" class="footer smaller clearable">
+
+    <div id="sc_footer_lang">
+      <a class="scf_link" href="javascript:openModalDialog('https://sellercentral.amazon.de/gp/satisfaction/survey-form.html/ref=ag_ratepage_foot_pymtdetail?ie=UTF8&fromUrl=%2Fgp%2Fpayments-account%2Ftransaction-details.html&refRID=13QB79DWRFZCY9PGRGFJ%20', 350, 530, 'scrollbars=yes')"><strong class="small">Rate
+        this page</strong></a>
+
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <a class="scf_link" href="https://sellercentral.amazon.de/gp/contact-us/contact-amazon-form.html/ref=ag_contactus_foot_pymtdetail?ie=UTF8&urlStr=%2Fgp%2Fpayments-account%2Ftransaction-details.html">Contact
+        Seller Support</a>
+
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+
+
+      <script type="text/javascript">
+        function changeLanguage(list){
+          var language = list.options[list.selectedIndex].value, location = encodeURIComponent(window.location.href);
+
+          if(language){
+            window.location.href = "/gp/switch-language.html?formSubmitted=true&language=" + language + "&location=" + location;
+          }
+        }
+      </script>
+
+      <form name="switchLanguage" style="display:inline">
+        <select onchange="changeLanguage(this.form.elements[0])">
+          <option value="fr_FR">Français</option>
+          <option value="en_FR" selected="selected">English</option>
+        </select>
+      </form>
+
+    </div>
+
+    <div id="sc_footer_links" class="grey">
+<span id="sc_footer_merchant">
+EasyAcc.D Store
+</span>
+<span>
+© 1996-2013, Amazon.com, Inc.
+</span>
+    </div>
+  </div>
+</div>
+
+
+<script>try{fixButtonWidths();}catch(e){}</script>
+
+
+<div id='be' style='display:none;visibility:hidden;'>
+  <form name='ue_backdetect'><input name='ue_back' value='1' type='hidden'></form>
+  <script type="text/javascript">
+    (function(a){
+      if(document.ue_backdetect && document.ue_backdetect.ue_back){a.ue.bfini = document.ue_backdetect.ue_back.value}
+      if(a.uet){a.uet("be")}
+      if(a.onLdEnd){if(window.addEventListener){window.addEventListener("load", a.onLdEnd, false)}else{if(window.attachEvent){window.attachEvent("onload", a.onLdEnd)}}}
+      if(a.ueh){a.ueh(0, window, "load", a.onLd, 1)}
+      if(a.ue_pr && (a.ue_pr == 3 || a.ue_pr == 4)){a.ue._uep()}
+    })(ue_csm);
+  </script>
+
+
+  <noscript><img src='/gp/uedata/276-0551000-5892946?noscript&amp;id=13QB79DWRFZCY9PGRGFJ'/></noscript>
+</div>
+<script type='text/javascript'>
+  (function(a){
+    a._uec = function(d){
+      var h = window, b = h.performance, f = b ? b.navigation.type :0;
+      if(f == 0){
+        var e = "; expires=" + new Date(+new Date + 604800000).toGMTString(), c = +new Date - ue_t0;
+        if(c > 0){
+          var g = a.ue_tsinc ? "|" + +new Date :"|";
+          document.cookie = "csm-hit=" + (d / c).toFixed(2) + g + e + "; path=/"
+        }
+      }
+    }
+  })(ue_csm);
+  _uec(50872);
+</script>
+</body>
+</html>

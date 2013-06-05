@@ -279,10 +279,6 @@ public class Orderr extends GenericModel {
         }
     }
 
-    public boolean isHaveFeedback() {
-        return Feedback.count("orderr=?", this) > 0;
-    }
-
     /**
      * 这个订单的销售额.
      *
@@ -479,31 +475,6 @@ public class Orderr extends GenericModel {
         return rtMap;
     }
 
-
-    /**
-     * 此订单所关联的所有 OrderItem 的 SKU
-     *
-     * @return
-     */
-    public static String itemSkus(Orderr ord) {
-        StringBuilder sbd = new StringBuilder();
-        if(ord == null) return sbd.toString();
-        for(OrderItem itm : ord.items) {
-            sbd.append(itm.product.sku).append(" ");
-        }
-        return sbd.toString();
-    }
-
-    /**
-     * 查找到此 userid 对应的所有订单
-     *
-     * @param userId
-     * @return
-     */
-    public static List<Orderr> findByUserId(String userId) {
-        return Orderr.find("userid=?", userId).fetch();
-    }
-
     /**
      * 简单抽取常用的根据时间加载订单的方法
      *
@@ -526,20 +497,6 @@ public class Orderr extends GenericModel {
         List<String> orderIds = new ArrayList<String>();
         for(Orderr o : orderrs) orderIds.add(o.orderId);
         return orderIds;
-    }
-
-    /**
-     * 将 Orders 集合映射成为 Map, 方便遍历(减少两层循环的多次遍历循环)
-     *
-     * @param orderrs
-     * @return
-     */
-    public static Map<String, Orderr> list2Map(List<Orderr> orderrs) {
-        Map<String, Orderr> orderMap = new HashMap<String, Orderr>();
-        for(Orderr or : orderrs) {
-            orderMap.put(or.orderId, or);
-        }
-        return orderMap;
     }
 
     public static void warnningToDeal(Date from, Date to, M market) {
