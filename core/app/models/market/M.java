@@ -236,28 +236,6 @@ public enum M {
     }
 
     /**
-     * 账户对应的网站的后台登陆 URL
-     *
-     * @return
-     */
-    public String sellerCentralLogIn() {
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return "https://sellercentral." + this.toString() +
-                        "/gp/sign-in/sign-in.html/ref=xx_login_lgin_home";
-            case EBAY_UK:
-                return "unknow..";
-            default:
-                return "Not Support.";
-        }
-    }
-
-    /**
      * 访问 Amazon 的普通账户的登陆页面(需要使用 openId)
      * PS: 普通账户的登陆地址 Amazon 会自动生成, 需要通过抓取获得
      *
@@ -297,23 +275,6 @@ public enum M {
                 return String.format(baseUrl, this.toString(), "it");
             case AMAZON_US:
                 return String.format(baseUrl, this.toString(), "us");
-            case EBAY_UK:
-                return "unknow..";
-            default:
-                return "Not Support.";
-        }
-    }
-
-    public String amazonSiteHome() {
-        //https://www.amazon.de/gp/yourstore/home
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return String.format("https://www.%s/gp/yourstore/home", this.toString());
             case EBAY_UK:
                 return "unknow..";
             default:

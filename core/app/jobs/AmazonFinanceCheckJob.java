@@ -6,6 +6,7 @@ import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
+import play.Logger;
 import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
@@ -57,6 +58,10 @@ public class AmazonFinanceCheckJob extends Job {
                 List<SaleFee> fees = new FinanceShippedPromise(acc, m, orders).now().get(1, TimeUnit.HOURS);
                 AmazonFinanceCheckJob.deleteSaleFees(orders);
                 AmazonFinanceCheckJob.saveFees(fees);
+                Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees.",
+                        acc.prettyName(), m.name(), orders.size(), fees.size());
+            } else {
+                Logger.info("AmazonFinanceCheckJob No Fees founded.");
             }
         }
 
