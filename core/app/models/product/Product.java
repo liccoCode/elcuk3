@@ -115,6 +115,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public Float declaredValue = 0f;
 
+    /**
+     * 产品品名
+     */
+    @Required
+    public String declareName;
+
     public Product() {
     }
 
@@ -166,6 +172,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                     "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(this.declaredValue == null)
             Validation.addError("", "申报价值必须填写");
+        if(this.declareName == null)
+            Validation.addError("", "产品品名必须填写");
+
         if(Validation.hasErrors()) return;
 
         this.category = this.family.category;

@@ -3,20 +3,22 @@ package controllers;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
-import models.procure.Cooperator;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+import static play.modules.pdf.PDF.renderPDF;
 
 /**
  * 货运单的控制器
@@ -350,5 +352,26 @@ public class Shipments extends Controller {
         List<Shipment> unitRelateShipments = Shipment
                 .findUnitRelateShipmentByWhouse(whouseId, shipType);
         render(unitRelateShipments);
+    }
+
+    /**
+     * 生成运输单发票
+     *
+     * @param id
+     */
+    public static void invoice(String id) {
+        Shipment ship = Shipment.findById(id);
+        Map<String, List<ProcureUnit>> units = new HashMap<String, List<ProcureUnit>>();
+        for(ShipItem item : ship.items) {
+            String centerId = item.unit.fba.centerId;
+            if(!units.containsKey(centerId))
+                units.put(centerId, new ArrayList<ProcureUnit>());
+            units.get(centerId).add(item.unit);
+        }
+        renderArgs.put("procureUnits", units);
+        final PDF.Options options = new PDF.Options();
+        options.filename = id;
+        options.pageSize = IHtmlToPdfTransformer.A3P;
+        renderPDF(options);
     }
 }

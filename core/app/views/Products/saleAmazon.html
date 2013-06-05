@@ -40,7 +40,7 @@
 <tr>
   <td colspan="4">
     <a href="@{Products.show()}/${pro.sku}" class="btn btn-success">回退</a>
-    <button class="btn btn-danger" data-confirm='确认上架?'>
+    <button class="btn btn-danger" data-confirm='确认上架?' data-disable-with='上架中...'>
       上架销售
     </button>
     <input type="hidden" name="s.state" value="${s.state.name()}">

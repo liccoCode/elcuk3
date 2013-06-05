@@ -1,8 +1,10 @@
 package ext;
 
+import helper.Webs;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
+import play.libs.F;
 import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 
@@ -165,5 +167,16 @@ public class ProcuresHelper extends JavaExtensions {
         if(day7Avg == 0 || dto.day1 == 0)
             return 0;
         return Math.abs(day7Avg / dto.day1);
+    }
+
+    /**
+     * 获得 采购单中商品单价、总价的美元形式
+     *
+     * @return t2[申报价, 总申报价]
+     */
+    public static F.T2<Float, Float> amountUSD(ProcureUnit unit) {
+        float priceUSD = Webs.scale2PointUp(unit.product.declaredValue);
+        float amountUSD = priceUSD * unit.qty();
+        return new F.T2<Float, Float>(priceUSD, amountUSD);
     }
 }

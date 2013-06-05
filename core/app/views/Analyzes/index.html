@@ -65,19 +65,18 @@
           包含 ,2
         </label>
 
-        <select id="p_aid" name="p.aid" class="inline">
-          <option value="">ALL</option>
-        #{list items:accs, as:'acc'}
-          <option value="${acc.id}">${acc.prettyName()}</option>
-        #{/list}
-        </select>
+      #{select 'p.aid', items: accs, labelProperty: 'prettyName', valueProperty: 'id', value: p.aid, class: 'inline'}
+          #{option ''}Account#{/option}
+      #{/select}
 
-        <select name="p.categoryId" class="inline">
-          <option value="">ALL</option>
-        #{list items:categoryIds}
-          <option value="^${_}">${_}</option>
-        #{/list}
-        </select>
+      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'inline'}
+          #{option ''}Market#{/option}
+      #{/select}
+
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'inline'}
+          #{option ''}Category#{/option}
+      #{/select}
+
 
         <div class="input-append input-prepend inline">
           <span class="add-on"><i class="icon-search"></i></span>

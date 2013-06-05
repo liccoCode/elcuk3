@@ -77,7 +77,10 @@
         <tr>
           <td>Family</td>
           <td>${pro.family?.family}</td>
-          <td colspan="2"></td>
+          <td>产品品名(运输)</td>
+          <td>
+            <input type="text" name="pro.declareName" value="${pro.declareName}">
+          </td>
         </tr>
         <tr>
           <td>产品名称</td>
@@ -89,7 +92,7 @@
           <td colspan="10">
             <button class="btn btn-primary" data-loading>保存</button>
               #{power.ck "products.saleamazonlisting"}
-                <a href="@{Products.saleAmazon()}/${pro.sku}" class="btn btn-info">Amazon 上架</a>
+                <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
               #{/power.ck}
           </td>
         </tr>
