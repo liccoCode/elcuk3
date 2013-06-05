@@ -1,8 +1,8 @@
 package controllers;
 
+import jobs.AmazonFinancePatchJob;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
-import jobs.promise.FinanceCrawlPromise;
 import models.Notification;
 import models.finance.SaleFee;
 import models.market.Account;
@@ -40,7 +40,7 @@ public class Finances extends Controller {
         if(acc == null)
             error("Error Account Id");
 
-        FinanceCrawlPromise worker = new FinanceCrawlPromise(acc, new Date());
+        AmazonFinancePatchJob worker = new AmazonFinancePatchJob(acc, new Date());
         Map<String, List<SaleFee>> feeMap = SaleFee.flatFileFinanceParse(file, acc);
         worker.parseToDB(feeMap);
         renderText("Deals %s Orders.", feeMap.keySet().size());
@@ -48,7 +48,7 @@ public class Finances extends Controller {
 
     public static void settlement(long accId) {
         Account acc = Account.findById(accId);
-        FinanceCrawlPromise worker = new FinanceCrawlPromise(acc, new Date());
+        AmazonFinancePatchJob worker = new AmazonFinancePatchJob(acc, new Date());
         List<Error> errors = await(worker.now());
         if(errors.size() > 0) {
             Notification

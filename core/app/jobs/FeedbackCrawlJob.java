@@ -20,7 +20,9 @@ import play.data.validation.Validation;
 import play.jobs.Job;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -53,18 +55,12 @@ public class FeedbackCrawlJob extends Job {
 
         List<Account> accs = Account.openedSaleAcc();
         for(Account acc : accs) {
-            switch(acc.type) {
-                case AMAZON_DE:
-                case AMAZON_US:
-                case AMAZON_UK:
-                    FeedbackCrawlJob.fetchAccountFeedback(acc, acc.type, 5);
-                    break;
-                //  现在 FR 是 UK 的账号, 不处理 FR 的.
-                case AMAZON_FR:
-                case AMAZON_ES:
-                case AMAZON_IT:
-                    Logger.warn("Not Support Right Now!");
-                    break;
+            if(acc.type == M.AMAZON_DE) {
+                for(M market : Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_IT, M.AMAZON_FR)) {
+                    FeedbackCrawlJob.fetchAccountFeedback(acc, market, 5);
+                }
+            } else {
+                FeedbackCrawlJob.fetchAccountFeedback(acc, acc.type, 5);
             }
         }
 
@@ -78,6 +74,10 @@ public class FeedbackCrawlJob extends Job {
      * @param pages
      */
     public static void fetchAccountFeedback(Account acc, M market, int pages) {
+        if(market == null || Arrays.asList(M.EBAY_UK).contains(market)) {
+            Logger.warn("不支持市场 [%s] 的 Feedback 抓取", market);
+            return;
+        }
         if(pages <= 0) pages = 5;
         try {
             synchronized(acc.cookieStore()) { // 将 CookieStore 锁住, 防止更改了 Region 以后有其他的地方进行操作.
@@ -103,7 +103,8 @@ public class FeedbackCrawlJob extends Job {
      * @return
      */
     public static List<Feedback> fetchAccountFeedbackOnePage(Account acc, M market, int i) {
-        List<Feedback> feedbacks = FeedbackCrawlJob.fetchFeedback(acc, i);
+        String feedbackHtml = FeedbackCrawlJob.fetchFeedback(acc, i);
+        List<Feedback> feedbacks = FeedbackCrawlJob.parseFeedBackFromHTML(feedbackHtml);
         if(feedbacks.size() == 0) {
             Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username,
                     market, i));
@@ -137,27 +138,19 @@ public class FeedbackCrawlJob extends Job {
      * @param page amazon 网站上第 N 页的 Feedback
      * @return
      */
-    public static List<Feedback> fetchFeedback(Account acc, int page) {
-        switch(acc.type) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_US:
-                try {
-                    String body = HTTP.get(acc.cookieStore(), acc.type.feedbackPage(page));
-                    if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + acc.type.name() + ".id_" +
-                                        acc.id + "feedback_p" + page + ".html"), body);
-                    return FeedbackCrawlJob.parseFeedBackFromHTML(body);
-                } catch(Exception e) {
-                    Logger.warn("[" + acc.type +
-                            "] Feedback page can not found Or the session is invalid!");
-                }
-                break;
-            default:
-                Logger.warn("Not support fetch [" + acc.type + "] Feedback.");
+    public static String fetchFeedback(Account acc, int page) {
+        String body = HTTP.get(acc.cookieStore(), acc.type.feedbackPage(page));
+        if(Play.mode.isDev()) {
+            try {
+                FileUtils.writeStringToFile(new File(
+                        Constant.E_LOGS + "/" + acc.type.name() + ".id_" + acc.id + "feedback_p" + page + ".html"),
+                        body);
+            } catch(IOException e) {
+                //ignore
+            }
         }
-        return new ArrayList<Feedback>();
+
+        return body;
     }
 
     /**
@@ -191,16 +184,14 @@ public class FeedbackCrawlJob extends Job {
             Elements tds = feb.select("td");
             //time
             if(market == M.AMAZON_US)
-                feedback.createDate = DateTime
-                        .parse(tds.get(0).text(), DateTimeFormat.forPattern("MM/dd/yy")).toDate();
+                feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("MM/dd/yy")).toDate();
             else
-                feedback.createDate = DateTime
-                        .parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy")).toDate();
+                feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy"))
+                        .toDate();
             //score
-            feedback.score = NumberUtils
-                    .toFloat(StringUtils.replace(tds.get(1).select("b").html(), "&nbsp;", ""));
+            feedback.score = NumberUtils.toFloat(StringUtils.replace(tds.get(1).select("b").html(), "&nbsp;", ""));
             //comments
-            feedback.feedback = tds.get(2).childNode(0).toString();
+            feedback.feedback = StringUtils.trim(tds.get(2).childNode(0).toString());
             Element b = tds.get(2).select("b").first();
             if(b != null) {
                 // de Dieser Artikel wurde durch Amazon versendet. Amazon übernimmt die Verantwortung für den geleisteten Service

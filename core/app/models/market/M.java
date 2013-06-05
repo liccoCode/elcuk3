@@ -11,6 +11,12 @@ import java.util.Date;
 
 /**
  * 不同的 Market place
+ * ps:
+ * 添加一个新市场需要:
+ * 1. M 中的 Market Type
+ * 2. FeedbackCrawlJob Feedback 抓取
+ * 3. KeepSessionJob 保持网站登陆的任务
+ * 4. 订单抓取
  */
 public enum M {
     AMAZON_UK {
@@ -82,7 +88,7 @@ public enum M {
         /**
          * IT
          */
-        APJ6JRA9NG5V4T,
+        APJ6JRA9NG5V4,
         /**
          * ES
          */
@@ -99,7 +105,7 @@ public enum M {
                     return AMAZON_FR;
                 case ATVPDKIKX0DER:
                     return AMAZON_US;
-                case APJ6JRA9NG5V4T:
+                case APJ6JRA9NG5V4:
                     return AMAZON_IT;
                 case A1RKKUPIHCS9HS:
                     return AMAZON_ES;
@@ -126,7 +132,7 @@ public enum M {
             case AMAZON_FR:
                 return MID.A13V1IB3VIYZZH;
             case AMAZON_IT:
-                return MID.APJ6JRA9NG5V4T;
+                return MID.APJ6JRA9NG5V4;
             case AMAZON_ES:
                 return MID.A1RKKUPIHCS9HS;
             case AMAZON_US:
@@ -747,14 +753,17 @@ public enum M {
         //https://sellercentral.amazon.com/gp/payments-account/view-transactions.html?orderId=110-6815187-8483453&view=search&range=all
         switch(this) {
             case AMAZON_UK:
+            case AMAZON_US:
+                return String.format(
+                        "https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
+                        this.toString(), orderId);
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                return String
-                        .format("https://sellercentral.%s/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
-                                this.toString(), orderId);
+                return String.format(
+                        "https://sellercentral.amazon.de/gp/payments-account/view-transactions.html?orderId=%s&view=search&range=all",
+                        orderId);
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -770,14 +779,17 @@ public enum M {
         //https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments
         switch(this) {
             case AMAZON_UK:
+            case AMAZON_US:
+                return String.format(
+                        "https://sellercentral.%s/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
+                        this.toString());
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                return String
-                        .format("https://sellercentral.%s/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
-                                this.toString());
+                return String.format(
+                        "https://sellercentral.amazon.de/gp/payments-account/past-settlements.html/ref=ag_xx_cont_payments",
+                        this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

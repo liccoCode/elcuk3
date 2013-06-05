@@ -195,7 +195,6 @@ public class Account extends Model {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
-            case AMAZON_FR:
             case AMAZON_US:
                 String body = "";
                 try {
@@ -205,17 +204,21 @@ public class Account extends Model {
                      */
                     body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
 
-                    if(Play.mode.isDev())
+
+                    if(Play.mode.isDev()) {
                         FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                        this.id + ".homepage.html"), body);
+                                Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".homepage.html"),
+                                body
+                        );
+                    }
 
                     Document doc = Jsoup.parse(body);
-                    Elements inputs = doc.select("form[name=signin] input");
+                    Elements inputs = doc.select("form:eq(0) input");
 
                     if(inputs.size() == 0) {
-                        Logger.info("WebSite [" + this.type.toString() +
-                                "] Still have the Session with User [" + this.username + "].");
+                        Logger.info("WebSite [%s] Still have the Session with User [%s].",
+                                this.type.toString(), this.username
+                        );
                         return;
                     }
 
@@ -226,26 +229,31 @@ public class Account extends Model {
                             params.add(new BasicNameValuePair(att, this.username));
                         else if("password".equals(att))
                             params.add(new BasicNameValuePair(att, this.password));
-                        else params.add(new BasicNameValuePair(att, el.val()));
+                        else
+                            params.add(new BasicNameValuePair(att, el.val()));
                     }
                     body = HTTP.post(this.cookieStore(), this.type.sellerCentralLogIn(), params);
                     if(Play.mode.isDev())
-                        FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                        this.id + ".afterLogin.html"), body);
+                        FileUtils.writeStringToFile(
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
+                                        ".afterLogin.html"),
+                                body
+                        );
                     Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
-                    if(navBar != null)
+                    if(navBar != null) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
-                    else Logger.warn("%s Seller Central Login Failed!", this.prettyName());
-
-                    HTTP.client().getCookieStore().clearExpired(new Date());
+                        HTTP.client().getCookieStore().clearExpired(new Date());
+                    } else {
+                        Logger.warn("%s Seller Central Login Failed!", this.prettyName());
+                    }
                 } catch(Exception e) {
                     try {
-                        FileUtils.writeStringToFile(new File(
-                                Constant.HOME + "/elcuk2-logs/" + this.type.name() + ".id_" +
-                                        this.id + ".error.html"), body);
+                        FileUtils.writeStringToFile(
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html"),
+                                body
+                        );
                     } catch(IOException e1) {
-                        //ignore.
+                        //ignore
                     }
                     Logger.warn(Webs.E(e));
                 }
@@ -261,7 +269,7 @@ public class Account extends Model {
      * 非销售账号在 Amazon 的前台登陆,<br>
      * 支持同账户登陆多个市场, 例如: 一个账户登陆 Uk/DE
      */
-    public boolean loginAmazonSize(M market) {
+    public boolean loginAmazonSite(M market) {
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -301,7 +309,7 @@ public class Account extends Model {
                 if(Play.mode.isDev())
                     FLog.fileLog(String.format("%s.afterLogin.html", this.prettyName()), body,
                             FLog.T.HTTP_ERROR);
-                boolean loginSucc = false;
+                boolean loginSucc;
                 if(isLogin) {
                     Logger.info("%s Amazon Site Login Successful!", this.prettyName());
                     loginSucc = true;
@@ -326,15 +334,13 @@ public class Account extends Model {
      * @param m
      */
     public void changeRegion(M m) {
-        if(this.type == M.AMAZON_US ||
-                this.type == M.EBAY_UK) return;
+        if(Arrays.asList(M.AMAZON_US, M.EBAY_UK).contains(this.type)) return;
         String url = "Account.changeRegion.";
         try {
             url = this.type.changeRegion(m.amid().name());
             HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
-            throw new FastRuntimeException(
-                    String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
+            throw new FastRuntimeException(String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
         }
     }
 
@@ -367,7 +373,7 @@ public class Account extends Model {
     public F.T2<AmazonLikeRecord, String> clickLike(Listing listing) {
         String sessionId = this.cookie("session-id", listing.market);
         if(sessionId == null) {// 没有 session-id, 即没有登陆, 则尝试登陆一次..
-            this.loginAmazonSize(listing.market);
+            this.loginAmazonSite(listing.market);
             sessionId = this.cookie("session-id", listing.market);
         }
         String body = HTTP.post(this.cookieStore(listing.market), listing.market.amazonLikeLink(),
@@ -396,7 +402,7 @@ public class Account extends Model {
         String sessionId = this.cookie("session-id", listing.market);
         if(sessionId == null) {
             //登陆失败
-            if(!this.loginAmazonSize(listing.market)) {
+            if(!this.loginAmazonSite(listing.market)) {
                 return false;
             }
             sessionId = this.cookie("session-id", listing.market);
@@ -435,7 +441,8 @@ public class Account extends Model {
         //下面两个参数用来避免某些含有参数offerListingId的请求 被添加到 Basket中去
         params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.x", "-1710"));
         params.add(new BasicNameValuePair("submit.add-to-registry.wishlist.y", "-357"));
-        String result = HTTP.post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
+        String result = HTTP
+                .post(this.cookieStore(listing.market), doc.select("#handleBuy").first().attr("action"), params);
 
         //如果添加成功,或者是账户已经添加该Listing但是系统中无记录.
         if(result.contains("hucSuccessMsg") | result.contains("appMessageBoxInfo")) {
@@ -463,7 +470,7 @@ public class Account extends Model {
         F.T3<Boolean, String, String> loginAndClicks = checkLoginAndFetchClickLinks(review);
         if(!loginAndClicks._1) { // 没有登陆则登陆, 只尝试一次登陆!
             synchronized(this.cookieStore(review.listing.market)) {
-                this.loginAmazonSize(review.listing.market);
+                this.loginAmazonSite(review.listing.market);
             }
             loginAndClicks = checkLoginAndFetchClickLinks(review);
         }
