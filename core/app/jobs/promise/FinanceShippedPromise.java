@@ -193,9 +193,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return FeeType.findById("shippingchargeback");
         } else if(text.contains("order handling")) {
             return FeeType.findById("fbaorderhandlingfeeperorder");
-        } else if(text.contains("giftwrap chargeback")) {
+        } else if(text.contains("gift wrap chargeback")) {
             return FeeType.findById("giftwrapchargeback");
-        } else if(text.equals("giftwrap:")) {
+        } else if(text.equals("gift wrap:")) {
             return FeeType.findById("giftwrap");
         } else if(text.equals("promorebates:")) {
             return FeeType.findById("promorebates");
