@@ -37,6 +37,7 @@ public class AccountTest extends UnitTest {
     @Test
     public void testLoginAmazonSellerCenterStep1() throws IOException {
         Account acc = FactoryBoy.build(Account.class, "de");
+        acc.cookieStore().clear();
         F.T2<List<NameValuePair>, String> params = acc.loginAmazonSellerCenterStep1();
         Map<String, String> pairs = new HashMap<String, String>();
         for(NameValuePair pair : params._1) {

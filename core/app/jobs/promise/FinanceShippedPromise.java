@@ -37,6 +37,9 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     private Account account;
     private M market;
     private List<Orderr> orders;
+    private List<String> missingFeeType = new ArrayList<String>();
+    private List<String> warnningOrders = new ArrayList<String>();
+    private List<String> errorMsg = new ArrayList<String>();
 
     public FinanceShippedPromise(Account account, M market, List<Orderr> orders) {
         this.account = account;
@@ -65,6 +68,19 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                 }
             } finally {
                 this.account.changeRegion(this.account.type);
+                if(warnningOrders.size() > 0 || errorMsg.size() > 0) {
+                    Webs.systemMail(
+                            "New Fee Type: " + StringUtils.join(this.missingFeeType, ","),
+                            StringUtils.join(this.warnningOrders, ",") +
+                                    "<br><br><br>" +
+                                    StringUtils.join(this.errorMsg, "<br>")
+                    );
+                    try {
+                        Thread.sleep(500);
+                    } catch(InterruptedException e) {
+                        //ignore
+                    }
+                }
             }
         }
         return fees;
@@ -139,23 +155,19 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
      */
     private boolean feeTypeCheck(SaleFee fee, Element nextElement, String url) {
         if(fee.type == null) {
+            String orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
             String text = nextElement.select("td:eq(0)").text();
             StringBuilder sb = new StringBuilder();
             sb.append("请删除当前订单的 SaleFee 让其重新抓取<br><br>")
                     .append("<a href='").append(url).append("'>").append(text).append("</a><br><br>")
                     .append("OrderId:")
-                    .append(StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0])
+                    .append(orderId)
                     .append("<br><br>")
-                    .append(nextElement.outerHtml());
-            Webs.systemMail(
-                    "New Fee Type: " + text,
-                    sb.toString()
-            );
-            try {
-                Thread.sleep(500);
-            } catch(InterruptedException e) {
-                //ignore
-            }
+                    .append(nextElement.outerHtml())
+                    .append("<br><br><br>");
+            this.missingFeeType.add(text);
+            this.warnningOrders.add(orderId);
+            this.errorMsg.add(sb.toString());
             return false;
         }
         return true;
@@ -173,18 +185,26 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return FeeType.findById("fbapickpackfeeperunit");
         } else if(text.contains("weight handling")) {
             return FeeType.findById("fbaweighthandlingfee");
+        } else if(text.contains("weight based")) {
+            return FeeType.findById("fbaweightbasedfee");
         } else if(text.equals("shipping:")) {
             return FeeType.findById("shipping");
         } else if(text.contains("shipping chargeback")) {
             return FeeType.findById("shippingchargeback");
         } else if(text.contains("order handling")) {
             return FeeType.findById("fbaorderhandlingfeeperorder");
-        } else if(text.contains("giftwrap chargeback")) {
+        } else if(text.contains("gift wrap chargeback")) {
             return FeeType.findById("giftwrapchargeback");
-        } else if(text.equals("giftwrap:")) {
+        } else if(text.equals("gift wrap:")) {
             return FeeType.findById("giftwrap");
         } else if(text.equals("promorebates:")) {
             return FeeType.findById("promorebates");
+        } else if(text.contains("per unit fulfillment")) {
+            return FeeType.findById("fbaperunitfulfillmentfee");
+        } else if(text.contains("per order fulfillment")) {
+            return FeeType.findById("fbaperorderfulfilmentfee");
+        } else if(text.contains("variable closing")) {
+            return FeeType.findById("variableclosingfee");
         } else {
             return null;
         }
