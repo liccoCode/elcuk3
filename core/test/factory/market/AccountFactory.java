@@ -34,7 +34,9 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
         acc.password = "pw5165688104";
+        acc.closeable = false;
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.isSaleAcc = true;
         return acc;
     }
 
@@ -47,6 +49,8 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.username = "wyatt@easyacceu.com";
         acc.password = "pw5165688104";
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.closeable = false;
+        acc.isSaleAcc = true;
         return acc;
     }
 }

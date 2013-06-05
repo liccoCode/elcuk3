@@ -3,15 +3,19 @@ package jobs;
 import factory.FactoryBoy;
 import factory.callback.BuildCallback;
 import factory.finance.FeeTypeFactory;
+import models.Jobex;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.Orderr;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import play.test.UnitTest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.core.Is.is;
 
@@ -28,12 +32,22 @@ public class AmazonFinanceCheckJobTest extends UnitTest {
         FeeTypeFactory.feeTypeInit();
     }
 
-    //    @Ignore
+    @Ignore("选择性测试, 需要访问真实网络")
     @Test
-    public void testDoJob() {
-        AmazonFinanceCheckJob job = new AmazonFinanceCheckJob();
+    public void testDoJob() throws InterruptedException, ExecutionException, TimeoutException {
+        FactoryBoy.create(Jobex.class, "financeCheck");
+
         final Account acc = FactoryBoy.create(Account.class, "ide");
-        job.now();
+        acc.loginAmazonSellerCenter();
+        FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
+            @Override
+            public void build(Orderr target) {
+                target.account = acc;
+            }
+        });
+        AmazonFinanceCheckJob job = new AmazonFinanceCheckJob();
+        job.doJob();
+        assertThat(SaleFee.count(), is(5l));
     }
 
     @Test
@@ -49,6 +63,7 @@ public class AmazonFinanceCheckJobTest extends UnitTest {
                 }
             }));
         }
+
         AmazonFinanceCheckJob.saveFees(fees);
 
         assertThat(SaleFee.count(), is(5l));
