@@ -37,6 +37,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     private Account account;
     private M market;
     private List<Orderr> orders;
+    private List<String> missingFeeType = new ArrayList<String>();
     private List<String> warnningOrders = new ArrayList<String>();
     private List<String> errorMsg = new ArrayList<String>();
 
@@ -69,7 +70,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                 this.account.changeRegion(this.account.type);
                 if(warnningOrders.size() > 0 || errorMsg.size() > 0) {
                     Webs.systemMail(
-                            "New Fee Type on " + this.account.prettyName() + ": " + this.market,
+                            "New Fee Type: " + StringUtils.join(this.missingFeeType, ","),
                             StringUtils.join(this.warnningOrders, ",") +
                                     "<br><br><br>" +
                                     StringUtils.join(this.errorMsg, "<br>")
@@ -164,6 +165,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
                     .append("<br><br>")
                     .append(nextElement.outerHtml())
                     .append("<br><br><br>");
+            this.missingFeeType.add(text);
             this.warnningOrders.add(orderId);
             this.errorMsg.add(sb.toString());
             return false;
