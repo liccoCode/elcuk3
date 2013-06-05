@@ -221,11 +221,11 @@
               派送
             </button>
           #{/if}
-          #{if ship.state == models.procure.Shipment.S.DELIVERYING}
-            <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
-              签收
-            </button>
-          #{/if}
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.DELIVERYING}
+        <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
+          签收
+        </button>
       #{/if}
       #{if ship.state == models.procure.Shipment.S.RECEIPTD}
         <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
