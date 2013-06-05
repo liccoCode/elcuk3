@@ -56,6 +56,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      */
     public String val;
 
+    public String market;
+
     /**
      * 根据 type(sku/msku(sid)) 进行数据的分析计算
      *
@@ -132,6 +134,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 currentDto.day7 += vo.qty;
             if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
                 currentDto.day30 += vo.qty;
+
+            currentDto.market = vo.market;
         }
 
         // ProcureUnit
@@ -206,6 +210,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.aid) && "sid".equalsIgnoreCase(this.type))
             CollectionUtils.filter(dtos, new AccountIdPredicate(this.aid));
         if(this.filterDot2) CollectionUtils.filter(dtos, new UnContainsPredicate(",2"));
+        if(StringUtils.isNotBlank(this.market))
+            CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
 
         this.count = dtos.size();
         List<AnalyzeDTO> afterPager = new ArrayList<AnalyzeDTO>();
@@ -303,6 +309,21 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             AnalyzeDTO dto = (AnalyzeDTO) o;
             return this.aid.equals(dto.aid);
         }
+    }
+
+    private static class MarketPredicate implements Predicate {
+        private M market;
+
+        public MarketPredicate(M market) {
+            this.market = market;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            AnalyzeDTO dto = (AnalyzeDTO) o;
+            return this.market.equals(dto.market);
+        }
+
     }
 
     // ---------------- TimeLine ------------------------

@@ -249,6 +249,12 @@
         </a>
       #{/if}
   #{/power.ck}
+
+  #{if !(ship.state in [models.procure.Shipment.S.CANCEL ,models.procure.Shipment.S.PLAN ])}
+    <a href="@{Shipments.invoice(ship.id)}" class="btn btn-success" target="_blank">
+      运输单发票 <i class="icon-download-alt"></i>
+    </a>
+  #{/if}
   </div>
 </div>
 
