@@ -323,6 +323,7 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
+    @Cached("4h")
     public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
                                                                                  Account acc,
                                                                                  Date from,
@@ -334,7 +335,11 @@ public class SellingRecord extends GenericModel {
          * [1282304000000, 99.9]
          * ]
          */
-        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
+        String cacheKey = Caches.Q.cacheKey("pvAndSS", msku, acc, from, to);
+        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = Cache.get(cacheKey, Map.class);
+        if(highCharLines != null) return highCharLines;
+
+        highCharLines = GTs.MapBuilder
                 .map("pv_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("ss_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("pv_de", new ArrayList<F.T2<Long, Float>>())
@@ -348,29 +353,22 @@ public class SellingRecord extends GenericModel {
         List<SellingRecord> records = accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
-                highCharLines.get("pv_uk")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_uk")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_DE) {
-                highCharLines.get("pv_de")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_de")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_FR) {
-                highCharLines.get("pv_fr")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_fr")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_US) {
-                highCharLines.get("pv_us")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_us")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
         }
+        Cache.add(cacheKey, highCharLines, "4h");
         return highCharLines;
     }
 
@@ -380,11 +378,15 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
+    @Cached("4h")
     public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
                                                                                    Account acc,
                                                                                    Date from,
                                                                                    Date to) {
-        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
+        String cacheKey = Caches.Q.cacheKey("turnRatio", msku, acc, from, to);
+        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = Cache.get(cacheKey, Map.class);
+        if(highCharLines != null) return highCharLines;
+        highCharLines = GTs.MapBuilder
                 .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_de", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_fr", new ArrayList<F.T2<Long, Float>>())
@@ -410,6 +412,7 @@ public class SellingRecord extends GenericModel {
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }
+        Cache.add(cacheKey, highCharLines, "4h");
         return highCharLines;
     }
 

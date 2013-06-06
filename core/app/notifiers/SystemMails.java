@@ -3,7 +3,6 @@ package notifiers;
 import helper.Dates;
 import helper.Webs;
 import models.MailsRecord;
-import models.embedded.ERecordBuilder;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.product.Product;
@@ -14,7 +13,6 @@ import play.Play;
 import play.libs.F;
 import play.mvc.Mailer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,7 +37,7 @@ public class SystemMails extends Mailer {
                 Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
-        addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
+        addRecipient("alerts@easya.cc", "m@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_REVIEW);
@@ -70,7 +68,7 @@ public class SystemMails extends Mailer {
                 Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
-        addRecipient("alerts@easyacceu.com", "m@easyacceu.com");
+        addRecipient("alerts@easya.cc", "m@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, DAILY_FEEDBACK);
@@ -91,7 +89,7 @@ public class SystemMails extends Mailer {
                 Dates.date2Date());
         setSubject(title);
         mailBase();
-        addRecipient("alerts@easyacceu.com");
+        addRecipient("alerts@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.SYSTEM, SKU_PIC_CHECK);

@@ -6,14 +6,12 @@ import models.MailsRecord;
 import models.market.*;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.exceptions.MailException;
 import play.libs.F;
 import play.mvc.Mailer;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -44,7 +42,7 @@ public class Mails extends Mailer {
         try {
             setSubject(title);
             mailBase();
-            addRecipient("p@easyacceu.com");
+            addRecipient("p@easya.cc");
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, CLEARANCE);
             send(shipment);
             mr.success = true;
@@ -62,7 +60,7 @@ public class Mails extends Mailer {
         try {
             setSubject(title);
             mailBase();
-            addRecipient("p@easyacceu.com");
+            addRecipient("p@easya.cc");
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, IS_DONE);
             send(shipment);
             mr.success = true;
@@ -85,7 +83,7 @@ public class Mails extends Mailer {
         try {
             setSubject(title);
             mailBase();
-            addRecipient("alerts@easyacceu.com");
+            addRecipient("alerts@easya.cc");
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, MORE_OFFERS);
             send(offers, lst);
             mr.success = true;
@@ -164,7 +162,7 @@ public class Mails extends Mailer {
 
         setSubject("{WARN}[Feedback] S:%s (Order: %s)", f.score, f.orderId);
         mailBase();
-        addRecipient("services@easyacceu.com");
+        addRecipient("service@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FEEDBACK_WARN);
@@ -198,7 +196,7 @@ public class Mails extends Mailer {
         String title = String.format("{WARN}[Review] R:%s A:%s M:%s", r.rating, args[0], args[1]);
         setSubject(title);
         mailBase();
-        addRecipient("services@easyacceu.com");
+        addRecipient("service@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, REVIEW_WARN);
@@ -218,7 +216,7 @@ public class Mails extends Mailer {
     public static void fnSkuCheckWarn(List<F.T4<String, String, String, String>> unfindSelling) {
         setSubject("{WARN}[FBA] 如下 Selling 在更新 Selling.fnSku 时无法在系统中找到.");
         mailBase();
-        addRecipient("alerts@easyacceu.com");
+        addRecipient("alerts@easya.cc");
         MailsRecord mr = null;
         try {
             mr = new MailsRecord(infos.get(), MailsRecord.T.NORMAL, FNSKU_CHECK);
