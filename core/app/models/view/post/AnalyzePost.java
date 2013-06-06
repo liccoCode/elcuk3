@@ -202,7 +202,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>(this.analyzes());
         // 过滤 Category
         if(StringUtils.isNotBlank(this.categoryId))
-            CollectionUtils.filter(dtos, new SearchPredicate(this.categoryId));
+            CollectionUtils.filter(dtos, new SearchPredicate("^" + this.categoryId));
         if(StringUtils.isNotBlank(this.search))
             CollectionUtils.filter(dtos, new SearchPredicate(this.search));
         if(StringUtils.isNotBlank(this.orderBy))
@@ -362,5 +362,11 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         eventSource.events.add(TimelineEventSource.currentQtyEvent(analyzeDTO, type));
 
         return eventSource;
+    }
+
+    public void setVal(String val) {
+        if(StringUtils.isNotBlank(val))
+            val = StringUtils.split(val, "|")[0];
+        this.val = val;
     }
 }

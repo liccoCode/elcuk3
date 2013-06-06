@@ -119,7 +119,7 @@ public class Privilege extends Model {
 
         // Analyzes 页面
         privileges.add(new Privilege("analyzes.ajaxsales", "查看销售额"));
-        privileges.add(new Privilege("analyzes.allskucsv", "下载 SKU CSV 文件"));
+        //TODO 删除 analyzes.allskucsv
 
         // 采购单页面
         privileges.add(new Privilege("deliveryments.cancel", "取消采购单"));
@@ -132,11 +132,9 @@ public class Privilege extends Model {
         privileges.add(new Privilege("shipments.beginship", "开始运输"));
         privileges.add(new Privilege("shipments.cancelship", "取消运输项目"));
         // TODO effect: 删除 shipments.ship
-        privileges.add(new Privilege("shipments.ship", "增加运输项目"));
         privileges.add(new Privilege("fbas.deployToAmazon", "创建 FBA"));
         privileges.add(new Privilege("fbas.update", "更新 FBA"));
         // TODO effect: 删除 shipments.deployfba
-        privileges.add(new Privilege("shipments.deployfba", "删除 FBA"));
 
         privileges.add(new Privilege("shipments.revertstate", "运输单状态还原"));
         privileges.add(new Privilege("shipments.procureUnitToShipment", "通过采购计划创建运输单"));
