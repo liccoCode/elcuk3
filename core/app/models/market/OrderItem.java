@@ -218,17 +218,21 @@ public class OrderItem extends GenericModel {
      * @param to
      * @return
      */
+    @Cached("4h")
     public static HighChart ajaxHighChartSales(String skuOrMsku,
                                                Account acc,
                                                String type,
                                                Date from, Date to) {
+        String cached_key = Caches.Q.cacheKey("sales", skuOrMsku, acc, type, from, to);
+        HighChart lines = Cache.get(cached_key, HighChart.class);
+        if(lines != null) return lines;
         // 做内部参数的容错
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 _from.toDate(), _to.toDate());
 
-        HighChart lines = new HighChart().startAt(_from.getMillis());
+        lines = new HighChart().startAt(_from.getMillis());
         // 从开始时间起, 以 1 天的时间间隔去 group 数据, 没有的设置为 0
         DateTime travel = _from.plusDays(0); // copy 一个新的
         while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
@@ -265,6 +269,7 @@ public class OrderItem extends GenericModel {
             travel = travel.plusDays(1);
         }
 
+        Cache.add(cached_key, lines, "4h");
         return lines;
     }
 
@@ -279,11 +284,15 @@ public class OrderItem extends GenericModel {
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
+    @Cached("4h")
     public static HighChart ajaxHighChartUnitOrder(String skuOrMsku,
                                                    Account acc,
                                                    String type,
                                                    Date from,
                                                    Date to) {
+        String cacked_key = Caches.Q.cacheKey("unit", skuOrMsku, acc, type, from, to);
+        HighChart lines = Cache.get(cacked_key, HighChart.class);
+        if(lines != null) return lines;
         // 做内部参数的容错
         DateTime _from = new DateTime(Dates.date2JDate(from));
         DateTime _to = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
@@ -297,7 +306,7 @@ public class OrderItem extends GenericModel {
         List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
                 _from.toDate(), _to.toDate());
 
-        HighChart lines = new HighChart().startAt(_from.getMillis());
+        lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
         while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
             String travelStr = travel.toString("yyyy-MM-dd");
@@ -330,6 +339,7 @@ public class OrderItem extends GenericModel {
             lines.line("unit_de").add(unit_de);
             travel = travel.plusDays(1);
         }
+        Cache.add(cacked_key, lines, "4h");
         return lines;
     }
 

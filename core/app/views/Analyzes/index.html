@@ -85,11 +85,6 @@
           <button class="btn" id="a_search">搜索</button>
         </div>
 
-      #{power.ck "analyzes.allskucsv"}
-        <button id="skus_csv" class="btn btn-primary pull-right" rel="popover" content="X:SKU, Y:时间, 导出销量表">
-          SKU CSV
-        </button>
-      #{/power.ck}
         <button id="clear_cache" class="btn btn-primary pull-right" style="margin-right:5px;">
           Cached At ${models.view.post.AnalyzePost.cachedDate('sid').datetime()}
         </button>
