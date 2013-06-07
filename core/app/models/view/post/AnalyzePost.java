@@ -134,8 +134,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 currentDto.day7 += vo.qty;
             if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
                 currentDto.day30 += vo.qty;
-
-            currentDto.market = vo.market;
         }
 
         // ProcureUnit

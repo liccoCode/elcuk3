@@ -303,13 +303,13 @@ $ ->
   $('#below_tabContent').on('click', 'th.sortable', (e) ->
     $('[name=p\\.desc]').val(-> return if $(@).val() == 'false' then true else false)
     $('[name=p\\.orderBy]').val($(@).attr('name'))
-    unit_line(paramsObj())
+    sellRankLoad(paramsObj())
   )
 
   # 为 SKU | SID 添加分页事件
   $('#below_tabContent').on('click', 'div.pagination a', (e) ->
     $('[name=p\\.page]').val($(@).attr('page'))
-    unit_line(paramsObj())
+    sellRankLoad(paramsObj())
   )
 
   # init
