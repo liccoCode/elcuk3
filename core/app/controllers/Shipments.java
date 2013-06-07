@@ -1,5 +1,7 @@
 package controllers;
 
+import ext.ShipmentsHelper;
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -375,5 +377,13 @@ public class Shipments extends Controller {
         options.filename = id;
         options.pageSize = IHtmlToPdfTransformer.A3P;
         renderPDF(options, fbaGroupUnits);
+    }
+
+    public static void dates(String id) {
+        Shipment shipment = Shipment.findById(id);
+        Map<String, String> dates = new HashMap<String, String>();
+        dates.put("begin", Dates.date2Date(shipment.dates.planBeginDate));
+        dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
+        renderJSON(dates);
     }
 }

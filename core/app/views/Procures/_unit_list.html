@@ -186,7 +186,9 @@
         </div>
       </div>
         #{ifnot norecord}
-            #{records notitle:false, records:unit.records()/}
+          <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+              #{records_ul  records: unit.records()/}
+          </div>
         #{/ifnot}
     </td>
   </tr>

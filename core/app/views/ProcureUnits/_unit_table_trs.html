@@ -86,7 +86,11 @@
   </td>
   <td colspan="2">
   #{list items: unit.relateShipment()}
-    <div><a href="@{Shipments.show(_.id)}" target="_blank">${_.id}</a></div>
+    <div>
+      <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>
+      <span><i class="icon-calendar"></i> #{time_tooltip time: _.dates.planBeginDate/}</span>
+      <span><i class="icon-calendar"></i> #{time_tooltip time: _.predictArriveDate()/}</span>
+    </div>
   #{/list}
   </td>
 </tr>
