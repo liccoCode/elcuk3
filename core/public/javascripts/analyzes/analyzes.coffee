@@ -357,8 +357,7 @@ $ ->
   ).find('a:first').trigger('shown')
 
   # 为页面上访的曲线 Tab 添加切换事件
-  TOPTAB.tabs().find('[data-toggle=tab]').on('shown',
-  (e) ->
+  TOPTAB.tabs().find('[data-toggle=tab]').on('shown', (e) ->
     tabId = $(e.target).attr('href').substr(1)
     if tabId is 'basic'
       # tab[basic] 中所存在的需要重新绘制的 div 元素 id
