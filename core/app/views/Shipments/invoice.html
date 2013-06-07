@@ -46,10 +46,10 @@
   </style>
 </head>
 <body>
-#{list items:procureUnits.keySet() ,as: 'key'}
-    #{set unit: procureUnits.get(key).get(0)/}
-    #{set country: unit.fba.fbaCenter.countryCode /}
-    #{set address: unit.fba.address()/}
+#{list items: fbaGroupUnits.keySet() ,as: 'centerId'}
+    #{set firstUnit: fbaGroupUnits.get(centerId).get(0)/}
+    #{set country: firstUnit.fba.fbaCenter.countryCode /}
+    #{set address: firstUnit.fba.address()/}
 <table cellpadding="4px" cellspacing="0" align='center'>
   <tr>
     <td colspan="5" class="td1">
@@ -65,7 +65,7 @@
         #{render 'Shipments/_us.html', address: address/}
     #{/else}
   <tr>
-    <td rowspan="2">Transport By ${unit.shipType.name()}</td>
+    <td rowspan="2">Transport By ${firstUnit.shipType.name()}</td>
     <td>FROM:SHENZHEN</td>
     <td>Country of Origin</td>
     <td>Country of Export</td>
@@ -85,7 +85,7 @@
   </tr>
     #{set totalCount: 0 /}
     #{set totalAmount: 0 /}
-    #{list items:procureUnits.get(key),as : 'unit'}
+    #{list items: fbaGroupUnits.get(centerId),as : 'unit'}
         #{set amount: unit.amountUSD()/}
         #{set totalCount: totalCount + unit.qty()/}
         #{set totalAmount: totalAmount + amount._2/}

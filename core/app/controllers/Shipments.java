@@ -3,7 +3,10 @@ package controllers;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
-import models.procure.*;
+import models.procure.Cooperator;
+import models.procure.ProcureUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
@@ -361,17 +364,16 @@ public class Shipments extends Controller {
      */
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
-        Map<String, List<ProcureUnit>> units = new HashMap<String, List<ProcureUnit>>();
+        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
         for(ShipItem item : ship.items) {
             String centerId = item.unit.fba.centerId;
-            if(!units.containsKey(centerId))
-                units.put(centerId, new ArrayList<ProcureUnit>());
-            units.get(centerId).add(item.unit);
+            if(!fbaGroupUnits.containsKey(centerId))
+                fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
+            fbaGroupUnits.get(centerId).add(item.unit);
         }
-        renderArgs.put("procureUnits", units);
         final PDF.Options options = new PDF.Options();
         options.filename = id;
         options.pageSize = IHtmlToPdfTransformer.A3P;
-        renderPDF(options);
+        renderPDF(options, fbaGroupUnits);
     }
 }
