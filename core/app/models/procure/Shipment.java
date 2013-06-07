@@ -495,7 +495,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             if(!itm.unit.isPlaced)
                 Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
         }
-        if(this.internationExpress == null)
+        if(this.type == T.EXPRESS && this.internationExpress == null)
             Validation.addError("", "请填写运输单的国际快递商");
         if(this.cooper == null)
             Validation.addError("", "请填写运输单合作伙伴(货代)");

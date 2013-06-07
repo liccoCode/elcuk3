@@ -1,6 +1,7 @@
 package query;
 
 import helper.DBUtils;
+import models.market.M;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
@@ -24,7 +25,7 @@ public class SellingQuery {
      */
     public List<AnalyzeDTO> analyzePostDTO() {
         SqlSelect sql = new SqlSelect()
-                .select("s.sellingId", "s.asin", "s.ps", "s.account_id")
+                .select("s.sellingId", "s.asin", "s.ps", "s.account_id", "s.market")
                 .from("Selling s");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>();
@@ -33,6 +34,7 @@ public class SellingQuery {
             AnalyzeDTO dto = new AnalyzeDTO(row.get("sellingId").toString());
             dto.asin = row.get("asin").toString();
             dto.aid = row.get("account_id").toString();
+            dto.market = M.val(row.get("market").toString());
             dto.ps = NumberUtils.toFloat(row.get("ps").toString());
             dtos.add(dto);
         }

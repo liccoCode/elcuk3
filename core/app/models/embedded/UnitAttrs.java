@@ -2,9 +2,7 @@ package models.embedded;
 
 import com.google.gson.annotations.Expose;
 import helper.Currency;
-import helper.J;
 import helper.Webs;
-import play.data.validation.InFuture;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -94,8 +92,10 @@ public class UnitAttrs {
     public void validate() {
         // 两个计划的时间
         if(this.planDeliveryDate != null && this.planShipDate != null)
-            Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate, new Date(this.planShipDate.getTime() + 1));
+            Validation.past("procureunit.planDeliveryDate", this.planDeliveryDate,
+                    new Date(this.planShipDate.getTime() + 1));
         if(this.planShipDate != null && this.planArrivDate != null)
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
     }
+
 }

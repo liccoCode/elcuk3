@@ -272,4 +272,24 @@ public class ShipItem extends GenericModel {
     public List<ElcukRecord> recivedLogs() {
         return ElcukRecord.records(this.id + "", Messages.get("shipitem.receviedQty"));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this == o) return true;
+        if(o == null || getClass() != o.getClass()) return false;
+        if(!super.equals(o)) return false;
+
+        ShipItem shipItem = (ShipItem) o;
+
+        if(!id.equals(shipItem.id)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + id.hashCode();
+        return result;
+    }
 }

@@ -3,6 +3,7 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
 import models.Notification;
@@ -25,6 +26,7 @@ import play.i18n.Messages;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -395,40 +397,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 1
         if(this.stage == STAGE.CLOSE)
             Validation.addError("", "已经结束, 无法再修改");
-        if(this.stage == STAGE.PLAN) {
-            if(unit.whouse != null) this.whouse = unit.whouse;
-            if(unit.attrs.planDeliveryDate != null)
-                this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
-            if(unit.cooperator != null && unit.deliveryment == null)
-                this.cooperator = unit.cooperator;
-            if(unit.shipType != null) this.shipType = unit.shipType;
-            if(unit.attrs.price != null) this.attrs.price = unit.attrs.price;
-            if(unit.attrs.currency != null) this.attrs.currency = unit.attrs.currency;
-            if(unit.attrs.planQty != null) this.attrs.planQty = unit.attrs.planQty;
-            if(unit.attrs.qty != null) this.attrs.qty = unit.attrs.qty;
-            if(unit.attrs.planShipDate != null) this.attrs.planShipDate = unit.attrs.planShipDate;
-            if(unit.attrs.planArrivDate != null)
-                this.attrs.planArrivDate = unit.attrs.planArrivDate;
-        } else if(this.stage == STAGE.DELIVERY) {
-            if(unit.whouse != null) this.whouse = unit.whouse;
-            if(unit.attrs.planDeliveryDate != null)
-                this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
-            if(unit.shipType != null) this.shipType = unit.shipType;
-            if(unit.attrs.price != null) this.attrs.price = unit.attrs.price;
-            if(unit.attrs.currency != null) this.attrs.currency = unit.attrs.currency;
-            if(unit.attrs.planQty != null) this.attrs.planQty = unit.attrs.planQty;
-            if(unit.attrs.qty != null) this.attrs.qty = unit.attrs.qty;
-            if(unit.attrs.planShipDate != null) this.attrs.planShipDate = unit.attrs.planShipDate;
-            if(unit.attrs.planArrivDate != null)
-                this.attrs.planArrivDate = unit.attrs.planArrivDate;
+
+        List<String> logs = new ArrayList<String>();
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            logs.addAll(this.beforeDoneUpdate(unit));
         } else if(this.stage == STAGE.DONE) {
-            if(unit.attrs.qty != null) this.attrs.qty = unit.attrs.qty;
-            if(unit.attrs.planShipDate != null) this.attrs.planShipDate = unit.attrs.planShipDate;
-            if(unit.attrs.planArrivDate != null)
-                this.attrs.planArrivDate = unit.attrs.planArrivDate;
-        } else {
-            if(unit.attrs.planArrivDate != null)
-                this.attrs.planArrivDate = unit.attrs.planArrivDate;
+            logs.addAll(this.doneUpdate(unit));
+        }
+        this.comment = unit.comment;
+        if(logs.size() > 0) {
+            new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
         }
 
         // 2
@@ -443,6 +421,57 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 在采购计划交货前的状态, 可以修改采购计划的:
+     * 数量, 价格, 币种, 预计交货日期, 预计运输日期, 预计到库日期, 运输单
+     *
+     * @param unit
+     */
+    public List<String> beforeDoneUpdate(ProcureUnit unit) {
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(this.updateAndLogChanges("attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
+        logs.addAll(this.updateAndLogChanges("attrs.planShipDate", unit.attrs.planShipDate));
+        logs.addAll(this.updateAndLogChanges("attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(this.updateAndLogChanges("attrs.planQty", unit.attrs.planQty));
+        logs.addAll(this.updateAndLogChanges("attrs.price", unit.attrs.price));
+        logs.addAll(this.updateAndLogChanges("attrs.currency", unit.attrs.currency));
+        logs.addAll(this.updateAndLogChanges("attrs.qty", unit.attrs.qty));
+        logs.addAll(this.updateAndLogChanges("shipType", unit.shipType));
+        return logs;
+    }
+
+    private List<String> doneUpdate(ProcureUnit unit) {
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(this.updateAndLogChanges("attrs.qty", unit.attrs.qty));
+        logs.addAll(this.updateAndLogChanges("attrs.planShipDate", unit.attrs.planShipDate));
+        logs.addAll(this.updateAndLogChanges("attrs.planArrivDate", unit.attrs.planArrivDate));
+        return logs;
+    }
+
+    /**
+     * 当采购计划的值变更, 同时记录下变更记录
+     *
+     * @param attr
+     * @param value
+     * @return
+     */
+    private List<String> updateAndLogChanges(String attr, Object value) {
+        try {
+            Field field = null;
+            if(attr.contains(".")) {
+                String[] attrs = StringUtils.split(attr, ".");
+                field = this.getClass().getField(attrs[0]);
+                return Reflects.updateAndLogChanges(field.get(this), attrs[1], value);
+            } else {
+                field = this.getClass().getField(attr);
+                return Reflects.updateAndLogChanges(this, attr, value);
+            }
+        } catch(Exception e) {
+            throw new FastRuntimeException(Webs.E(e));
+        }
+    }
+
+
+    /**
      * 调整采购计划所产生的运输项目的运输单
      *
      * @param shipment
@@ -452,6 +481,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(this.shipType == Shipment.T.EXPRESS) {
                 // 快递运输单调整, 运输项目全部删除, 重新设计.
                 shipItem.delete();
+                this.shipItems.remove(shipItem);
             } else {
                 if(shipment == null) return;
                 Shipment originShipment = shipItem.shipment;

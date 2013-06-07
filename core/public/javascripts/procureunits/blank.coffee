@@ -7,7 +7,7 @@ $ ->
       # 恢复默认
       $("#unit_currency option:contains('CNY')").prop('selected', true)
       $("#unit_price").val('')
-      return false
+    return false
 
     LoadMask.mask()
     $.get('/Cooperators/price', {id: id, sku: $('#unit_sku').val()}, 'json')
@@ -25,7 +25,7 @@ $ ->
     coperId = $("select[name='unit.cooperator.id']").val()
     if not coperId
       alert('请先选择 供应商')
-      return false
+    return false
     $.post('/procures/calculateBox', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()})
       .done((r) ->
         if r.flag is false
@@ -58,4 +58,14 @@ $ ->
           shipment.html(html)
           LoadMask.unmask()
         )
+  )
+
+  $('#shipments').on('change', '[name=shipmentId]', (e) ->
+    LoadMask.mask()
+    $.get("/shipment/#{@getAttribute('value')}/dates")
+      .done((r) ->
+        $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin'])
+        $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end'])
+        LoadMask.unmask()
+      )
   )
