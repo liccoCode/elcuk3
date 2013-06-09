@@ -329,6 +329,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public void shipItemQty(int qty) {
         int leftQty = qty;
         for(ShipItem itm : this.shipItems) {
+            if(!itm.isPersistent()) continue;
             if(leftQty - itm.qty >= 0) {
                 itm.qty = leftQty;
                 leftQty -= itm.qty;
@@ -481,7 +482,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(this.shipType == Shipment.T.EXPRESS) {
                 // 快递运输单调整, 运输项目全部删除, 重新设计.
                 shipItem.delete();
-                this.shipItems.remove(shipItem);
             } else {
                 if(shipment == null) return;
                 Shipment originShipment = shipItem.shipment;
