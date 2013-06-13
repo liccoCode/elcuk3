@@ -324,10 +324,10 @@ public class SellingRecord extends GenericModel {
      * @return
      */
     @Cached("4h")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
-                                                                                 Account acc,
-                                                                                 Date from,
-                                                                                 Date to) {
+    public synchronized static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
+                                                                                              Account acc,
+                                                                                              Date from,
+                                                                                              Date to) {
         /**
          * 格式 map[lineName, datas]
          * datas -> [
@@ -379,10 +379,10 @@ public class SellingRecord extends GenericModel {
      * @return
      */
     @Cached("4h")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
-                                                                                   Account acc,
-                                                                                   Date from,
-                                                                                   Date to) {
+    public synchronized static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
+                                                                                                Account acc,
+                                                                                                Date from,
+                                                                                                Date to) {
         String cacheKey = Caches.Q.cacheKey("turnRatio", msku, acc, from, to);
         Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = Cache.get(cacheKey, Map.class);
         if(highCharLines != null) return highCharLines;
