@@ -29,7 +29,8 @@ public class SellingQTYQuery {
         SqlSelect sql = new SqlSelect()
                 .select("sum(qty) as qty", column + " as k")
                 .from("SellingQTY")
-                .where(column + " IN " + SqlSelect.inlineParam(columnValues));
+                .where(column + " IN " + SqlSelect.inlineParam(columnValues))
+                .groupBy("k");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> qtyMap = new HashMap<String, Integer>();
         for(Map<String, Object> row : rows) {
