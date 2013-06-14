@@ -71,108 +71,113 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
         if(dtos != null) return dtos;
 
-        dtos = new ArrayList<AnalyzeDTO>();
-        boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
+        synchronized(AnalyzeDTO.class) {
+            dtos = Cache.get(cacke_key, List.class);
+            if(dtos != null) return dtos;
 
-        // 从北京时间?
-        Date startOfDay = Dates.night(this.to);
+            dtos = new ArrayList<AnalyzeDTO>();
+            boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
 
-        // 准备计算用的数据容器?
-        Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
-        if(isSku) {
-            for(String sku : new ProductQuery().skus()) {
-                analyzeMap.put(sku, new AnalyzeDTO(sku));
+            // 从北京时间?
+            Date startOfDay = Dates.night(this.to);
+
+            // 准备计算用的数据容器?
+            Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
+            if(isSku) {
+                for(String sku : new ProductQuery().skus()) {
+                    analyzeMap.put(sku, new AnalyzeDTO(sku));
+                }
+            } else {
+                for(AnalyzeDTO dto : new SellingQuery().analyzePostDTO()) {
+                    analyzeMap.put(dto.fid, dto);
+                }
             }
-        } else {
-            for(AnalyzeDTO dto : new SellingQuery().analyzePostDTO()) {
-                analyzeMap.put(dto.fid, dto);
+
+            // 通过 Job 异步 fork 加载不同时段的数据
+            /**
+             * 1. 此处
+             * 2. OrderItem.categoryPercent
+             * 3. OrderItem.skuOrMskuAccountRelateOrderItem
+             */
+            List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+            final Date inerFrom =
+                    this.from == null ? DateTime.now().minusMonths(1).toDate() : this.from;
+            final Date inerTo =
+                    this.to == null ? DateTime.now().minusMonths(1).toDate() : this.to;
+            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+                @Override
+                public List<AnalyzeVO> doJobWithResult(M m) {
+                    return new OrderItemQuery().analyzeVos(
+                            m.withTimeZone(Dates.morning(inerFrom)).toDate(),
+                            m.withTimeZone(Dates.night(inerTo)).toDate(),
+                            m);
+                }
+
+                @Override
+                public String id() {
+                    return "AnalyzePost.analyzes";
+                }
+            }));
+
+            // 销量 AnalyzeVO
+            //一天的毫秒数
+            long oneDayMillis = 60 * 60 * 24 * 1000;
+            for(AnalyzeVO vo : vos) {
+                String key = isSku ? vo.sku : vo.sid;
+                AnalyzeDTO currentDto = analyzeMap.get(key);
+                if(currentDto == null) {
+                    Logger.warn("AnalyzeVO: %s, DTO is not exist. Key[%s]", vo, key);
+                    continue;
+                }
+
+                long differTime =
+                        vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
+                if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= oneDayMillis)
+                    currentDto.day1 += vo.qty;
+                //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
+                if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
+                    currentDto.day7 += vo.qty;
+                if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
+                    currentDto.day30 += vo.qty;
             }
+
+
+            // ProcureUnit
+            AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
+            for(AnalyzeDTO dto : analyzeMap.values()) {
+                // 切换 ProcureUnit 的 sku/sid 的参数?
+                // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
+                List<ProcureUnit> untis = ProcureUnit.find(
+                        (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage NOT IN (?,?)",
+                        dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER)
+                        .fetch();
+
+                // plan, working, worked, way
+                for(ProcureUnit unit : untis) {
+                    if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
+                    else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
+                    else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
+                    else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
+                    else if(unit.stage == ProcureUnit.STAGE.INBOUND)
+                        dto.inbound += (unit.qty() - unit.inboundingQty());
+                }
+                dto.difference = dto.day1 - dto.day7 / 7;
+                //最新的评分
+                if(isSku)
+                    dto.lastRating = amazonQuery.skuLastRating(dto.fid);
+
+                dtos.add(dto);
+            }
+
+            // qty cal
+            pullQtyToDTO(isSku, analyzeMap);
+
+            // review
+            pullReviewToDTO(isSku, analyzeMap);
+
+            Cache.add(cacke_key, dtos, "12h");
+            Cache.set(cacke_key + ".time", new Date(), "12h");
         }
-
-        // 通过 Job 异步 fork 加载不同时段的数据
-        /**
-         * 1. 此处
-         * 2. OrderItem.categoryPercent
-         * 3. OrderItem.skuOrMskuAccountRelateOrderItem
-         */
-        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-        final Date inerFrom =
-                this.from == null ? DateTime.now().minusMonths(1).toDate() : this.from;
-        final Date inerTo =
-                this.to == null ? DateTime.now().minusMonths(1).toDate() : this.to;
-        vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
-            @Override
-            public List<AnalyzeVO> doJobWithResult(M m) {
-                return new OrderItemQuery().analyzeVos(
-                        m.withTimeZone(Dates.morning(inerFrom)).toDate(),
-                        m.withTimeZone(Dates.night(inerTo)).toDate(),
-                        m);
-            }
-
-            @Override
-            public String id() {
-                return "AnalyzePost.analyzes";
-            }
-        }));
-
-        // 销量 AnalyzeVO
-        //一天的毫秒数
-        long oneDayMillis = 60 * 60 * 24 * 1000;
-        for(AnalyzeVO vo : vos) {
-            String key = isSku ? vo.sku : vo.sid;
-            AnalyzeDTO currentDto = analyzeMap.get(key);
-            if(currentDto == null) {
-                Logger.warn("AnalyzeVO: %s, DTO is not exist. Key[%s]", vo, key);
-                continue;
-            }
-
-            long differTime =
-                    vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
-            if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= oneDayMillis)
-                currentDto.day1 += vo.qty;
-            //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
-            if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
-                currentDto.day7 += vo.qty;
-            if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
-                currentDto.day30 += vo.qty;
-        }
-
-
-        // ProcureUnit
-        AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
-        for(AnalyzeDTO dto : analyzeMap.values()) {
-            // 切换 ProcureUnit 的 sku/sid 的参数?
-            // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
-            List<ProcureUnit> untis = ProcureUnit.find(
-                    (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage NOT IN (?,?)",
-                    dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER)
-                    .fetch();
-
-            // plan, working, worked, way
-            for(ProcureUnit unit : untis) {
-                if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
-                else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
-                else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
-                else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
-                else if(unit.stage == ProcureUnit.STAGE.INBOUND)
-                    dto.inbound += (unit.qty() - unit.inboundingQty());
-            }
-            dto.difference = dto.day1 - dto.day7 / 7;
-            //最新的评分
-            if(isSku)
-                dto.lastRating = amazonQuery.skuLastRating(dto.fid);
-
-            dtos.add(dto);
-        }
-
-        // qty cal
-        pullQtyToDTO(isSku, analyzeMap);
-
-        // review
-        pullReviewToDTO(isSku, analyzeMap);
-
-        Cache.add(cacke_key, dtos, "12h");
-        Cache.set(cacke_key + ".time", new Date(), "12h");
 
         return dtos;
     }
