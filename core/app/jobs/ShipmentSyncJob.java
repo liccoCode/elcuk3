@@ -26,7 +26,7 @@ public class ShipmentSyncJob extends Job {
         if(!Jobex.findByClassName(ShipmentSyncJob.class.getName()).isExcute()) return;
         List<Shipment> shipments = Shipment.findByTypeAndStates(Shipment.T.EXPRESS,
                 Shipment.S.SHIPPING, Shipment.S.CLEARANCE, Shipment.S.PACKAGE,
-                Shipment.S.BOOKED, Shipment.S.DELIVERYING);
+                Shipment.S.BOOKED, Shipment.S.DELIVERYING, Shipment.S.RECEIPTD);
 
         Logger.info("Fetch Shipments: %s", shipments.size());
         for(Shipment ship : shipments) {
