@@ -170,7 +170,7 @@ public class OrderItem extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
-    public static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(
+    public synchronized static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(
             final String skuOrMskuOrCategory, final String type, final Account acc, final Date from,
             final Date to) {
         String cacheKey = Caches.Q.cacheKey(skuOrMskuOrCategory, type, acc, from, to);
@@ -284,7 +284,7 @@ public class OrderItem extends GenericModel {
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
-    @Cached("1h")
+    @Cached("2h")
     public static HighChart ajaxHighChartUnitOrder(String skuOrMsku,
                                                    Account acc,
                                                    String type,
@@ -339,7 +339,7 @@ public class OrderItem extends GenericModel {
             lines.line("unit_de").add(unit_de);
             travel = travel.plusDays(1);
         }
-        Cache.add(cacked_key, lines, "1h");
+        Cache.add(cacked_key, lines, "2h");
         return lines;
     }
 
