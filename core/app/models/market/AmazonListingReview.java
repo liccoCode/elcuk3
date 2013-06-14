@@ -558,7 +558,7 @@ public class AmazonListingReview extends GenericModel {
     public static List<AmazonListingReview> listingReviews(String listingId, String orderBy,
                                                            String desc) {
         return AmazonListingReview
-                .find(String.format("listingId=? ORDER BY %s %s", orderBy, desc), listingId)
+                .find(String.format("listing.listingId=? ORDER BY %s %s", orderBy, desc), listingId)
                 .fetch();
     }
 
@@ -569,7 +569,7 @@ public class AmazonListingReview extends GenericModel {
      * @return
      */
     public static long countListingReview(String lid) {
-        return AmazonListingReview.count("listingId=?", lid);
+        return AmazonListingReview.count("listing.listingId=?", lid);
     }
 
     /**

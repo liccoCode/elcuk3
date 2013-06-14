@@ -277,41 +277,44 @@ public class SellingRecord extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("5mn") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
+    @Cached("4h") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
     public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from,
                                                                Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null) return cacheElement;
+        synchronized(SellingRecord.class) {
+            cacheElement = Cache.get(cacheKey, List.class);
+            if(cacheElement != null) return cacheElement;
 
-
-        if(acc == null) {
-            List<SellingRecord> dateMixRecords = SellingRecord
-                    .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from,
-                            to).fetch();
-            // 需要将相同 Date 不同 Market 的全部累计
-            Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
-            for(SellingRecord rcd : dateMixRecords) {
-                String key = rcd.date.getTime() + "" + rcd.market;
-                if(groupByDate.containsKey(key)) {
-                    groupByDate.get(key).sessions += rcd.sessions;
-                    groupByDate.get(key).pageViews += rcd.pageViews;
-                    groupByDate.get(key).orders += rcd.orders;
-                    groupByDate.get(key).orderCanceld += rcd.orderCanceld;
-                    groupByDate.get(key).sales += rcd.sales;
-                    groupByDate.get(key).units += rcd.units;
-                    groupByDate.get(key).usdSales += rcd.usdSales;
-                } else
-                    groupByDate.put(key, rcd);
+            if(acc == null) {
+                List<SellingRecord> dateMixRecords = SellingRecord
+                        .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from,
+                                to).fetch();
+                // 需要将相同 Date 不同 Market 的全部累计
+                Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
+                for(SellingRecord rcd : dateMixRecords) {
+                    String key = rcd.date.getTime() + "" + rcd.market;
+                    if(groupByDate.containsKey(key)) {
+                        groupByDate.get(key).sessions += rcd.sessions;
+                        groupByDate.get(key).pageViews += rcd.pageViews;
+                        groupByDate.get(key).orders += rcd.orders;
+                        groupByDate.get(key).orderCanceld += rcd.orderCanceld;
+                        groupByDate.get(key).sales += rcd.sales;
+                        groupByDate.get(key).units += rcd.units;
+                        groupByDate.get(key).usdSales += rcd.usdSales;
+                    } else
+                        groupByDate.put(key, rcd);
+                }
+                cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
+            } else {
+                //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
+                cacheElement = SellingRecord
+                        .find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date",
+                                msku, acc, from, to).fetch();
             }
-            cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
-        } else {
-            //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
-            cacheElement = SellingRecord
-                    .find("selling.merchantSKU=? AND account=? AND date>=? AND date<=? ORDER BY date",
-                            msku, acc, from, to).fetch();
+            Cache.add(cacheKey, cacheElement, "4h");
         }
-        Cache.add(cacheKey, cacheElement, "1h");
         return cacheElement;
     }
 
@@ -323,11 +326,10 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
-    @Cached("4h")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
-                                                                                 Account acc,
-                                                                                 Date from,
-                                                                                 Date to) {
+    public synchronized static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
+                                                                                              Account acc,
+                                                                                              Date from,
+                                                                                              Date to) {
         /**
          * 格式 map[lineName, datas]
          * datas -> [
@@ -335,11 +337,7 @@ public class SellingRecord extends GenericModel {
          * [1282304000000, 99.9]
          * ]
          */
-        String cacheKey = Caches.Q.cacheKey("pvAndSS", msku, acc, from, to);
-        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = Cache.get(cacheKey, Map.class);
-        if(highCharLines != null) return highCharLines;
-
-        highCharLines = GTs.MapBuilder
+        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
                 .map("pv_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("ss_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("pv_de", new ArrayList<F.T2<Long, Float>>())
@@ -368,7 +366,6 @@ public class SellingRecord extends GenericModel {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
         }
-        Cache.add(cacheKey, highCharLines, "4h");
         return highCharLines;
     }
 
@@ -378,15 +375,11 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    @Cached("4h")
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
-                                                                                   Account acc,
-                                                                                   Date from,
-                                                                                   Date to) {
-        String cacheKey = Caches.Q.cacheKey("turnRatio", msku, acc, from, to);
-        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = Cache.get(cacheKey, Map.class);
-        if(highCharLines != null) return highCharLines;
-        highCharLines = GTs.MapBuilder
+    public synchronized static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
+                                                                                                Account acc,
+                                                                                                Date from,
+                                                                                                Date to) {
+        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
                 .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_de", new ArrayList<F.T2<Long, Float>>())
                 .put("tn_fr", new ArrayList<F.T2<Long, Float>>())
@@ -412,7 +405,6 @@ public class SellingRecord extends GenericModel {
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }
-        Cache.add(cacheKey, highCharLines, "4h");
         return highCharLines;
     }
 

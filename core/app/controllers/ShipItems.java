@@ -12,7 +12,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Arrays;
 import java.util.List;
 
 @With({GlobalExceptionHandler.class, Secure.class})
