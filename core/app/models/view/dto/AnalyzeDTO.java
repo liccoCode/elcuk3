@@ -56,7 +56,7 @@ public class AnalyzeDTO {
     public int way = 0;
 
     /**
-     * 入库中的数量
+     * 剩余入库中的数量
      */
     public int inbound = 0;
 

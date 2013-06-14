@@ -158,7 +158,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
                     else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
                     else if(unit.stage == ProcureUnit.STAGE.INBOUND)
-                        dto.inbound += unit.inboundingQty();
+                        dto.inbound += (unit.qty() - unit.inboundingQty());
                 }
 
                 // ps cal
