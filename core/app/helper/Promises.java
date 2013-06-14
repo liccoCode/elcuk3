@@ -39,7 +39,7 @@ public class Promises {
          */
         List<F.Promise<List<T>>> voPromises = new ArrayList<F.Promise<List<T>>>();
         long begin = System.currentTimeMillis();
-        Logger.info("[%s] Start Fork to fetch Analyzes Sellings.", callback.id());
+        Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
                 voPromises.add(new Job<List<T>>() {
@@ -56,8 +56,9 @@ public class Promises {
             throw new FastRuntimeException(
                     String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
         } finally {
-            Logger.info("[%s] End of Fork Fetch. Passed: %s ms",
+            Logger.info("[%s:#%s] End of Fork fetch. Passed: %s ms",
                     callback.id(),
+                    begin,
                     (System.currentTimeMillis() - begin));
         }
         return vos;

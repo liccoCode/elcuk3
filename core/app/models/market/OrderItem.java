@@ -352,43 +352,46 @@ public class OrderItem extends GenericModel {
      * @param acc  de/uk/us/all
      * @return
      */
-    public static HighChart categoryPercent(String type, final Date from, final Date to,
-                                            Account acc) {
+    public static HighChart categoryPercent(String type, final Date from, final Date to, Account acc) {
         String key = Caches.Q.cacheKey(type, from, to, acc);
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
+        synchronized(HighChart.class) {
+            pieChart = Cache.get(key, HighChart.class);
+            if(pieChart != null) return pieChart;
 
-        pieChart = new HighChart();
-        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-        if(acc != null) {
-            // 转换成为不同对应市场的时间
-            vos = new OrderItemQuery().groupCategory(
-                    acc.type.withTimeZone(from).toDate(),
-                    acc.type.withTimeZone(to).toDate(),
-                    acc.id);
-        } else {
-            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
-                @Override
-                public List<AnalyzeVO> doJobWithResult(M m) {
-                    return new OrderItemQuery().groupCategory(
-                            m.withTimeZone(from).toDate(),
-                            m.withTimeZone(to).toDate(),
-                            m);
-                }
+            pieChart = new HighChart();
+            List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+            if(acc != null) {
+                // 转换成为不同对应市场的时间
+                vos = new OrderItemQuery().groupCategory(
+                        acc.type.withTimeZone(from).toDate(),
+                        acc.type.withTimeZone(to).toDate(),
+                        acc.id);
+            } else {
+                vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+                    @Override
+                    public List<AnalyzeVO> doJobWithResult(M m) {
+                        return new OrderItemQuery().groupCategory(
+                                m.withTimeZone(from).toDate(),
+                                m.withTimeZone(to).toDate(),
+                                m);
+                    }
 
-                @Override
-                public String id() {
-                    return "OrderItem.categoryPercent";
-                }
-            }));
+                    @Override
+                    public String id() {
+                        return "OrderItem.categoryPercent";
+                    }
+                }));
+            }
+            for(AnalyzeVO vo : vos) {
+                if(StringUtils.equals(type, "sales"))
+                    pieChart.pie(vo.sku, vo.usdCost);
+                else
+                    pieChart.pie(vo.sku, vo.qty.floatValue());
+            }
+            Cache.add(key, pieChart, "12h");
         }
-        for(AnalyzeVO vo : vos) {
-            if(StringUtils.equals(type, "sales"))
-                pieChart.pie(vo.sku, vo.usdCost);
-            else
-                pieChart.pie(vo.sku, vo.qty.floatValue());
-        }
-        Cache.add(key, pieChart, "40mn");
         return pieChart;
     }
 
