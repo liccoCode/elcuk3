@@ -32,8 +32,7 @@ public class FBA {
 
     private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<String, FBAInboundServiceMWSClient>();
 
-    public static FBAShipment plan(Account account, ProcureUnit unit)
-            throws FBAInboundServiceMWSException {
+    public static FBAShipment plan(Account account, ProcureUnit unit) throws FBAInboundServiceMWSException {
         FBAShipment fbaShipment = new FBAShipment();
         CreateInboundShipmentPlanRequest plan = new CreateInboundShipmentPlanRequest();
 
@@ -49,8 +48,7 @@ public class FBA {
                 Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
 
-        CreateInboundShipmentPlanResponse response = client(account)
-                .createInboundShipmentPlan(plan);
+        CreateInboundShipmentPlanResponse response = client(account).createInboundShipmentPlan(plan);
         CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
 
         if(result.isSetInboundShipmentPlans()) {
@@ -161,8 +159,7 @@ public class FBA {
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbashipment.units);
         create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
-        CreateInboundShipmentResponse response = client(fbashipment.account)
-                .createInboundShipment(create);
+        CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
         if(response.isSetCreateInboundShipmentResult()) {
             fbashipment.title = fbaTitle.toString();
             fbashipment.createAt = new Date();
@@ -197,8 +194,7 @@ public class FBA {
         List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
         update.setInboundShipmentItems(new InboundShipmentItemList(items));
 
-        UpdateInboundShipmentResponse response = client(fbaShipment.account)
-                .updateInboundShipment(update);
+        UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
         if(response.isSetUpdateInboundShipmentResult())
             fbaShipment.state = state;
         return fbaShipment.state;
@@ -232,9 +228,9 @@ public class FBA {
             // Amazon 对于重复提交的 FBA ShipmentId 不会做限制, 所以有过的信息不需要再记录
             if(shipmentsT3.containsKey(info.getShipmentId()))
                 continue;
-            shipmentsT3.put(info.getShipmentId(),
-                    new F.T3<String, String, String>(info.getShipmentStatus(),
-                            info.getDestinationFulfillmentCenterId(), info.getShipmentName()));
+            shipmentsT3.put(info.getShipmentId(), new F.T3<String, String, String>(
+                    info.getShipmentStatus(), info.getDestinationFulfillmentCenterId(), info.getShipmentName())
+            );
         }
         return shipmentsT3;
     }
@@ -246,8 +242,7 @@ public class FBA {
      * @param acc
      * @return msku: {._1: qtyReceived, ._2: qtyShiped}
      */
-    public static Map<String, F.T2<Integer, Integer>> listShipmentItems(String shipmentId,
-                                                                        Account acc)
+    public static Map<String, F.T2<Integer, Integer>> listShipmentItems(String shipmentId, Account acc)
             throws FBAInboundServiceMWSException {
         /**
          * item.getSellerSKU();
@@ -259,14 +254,13 @@ public class FBA {
         request.setShipmentId(shipmentId);
         request.setSellerId(acc.merchantId);
         ListInboundShipmentItemsResponse response = client(acc).listInboundShipmentItems(request);
-        List<InboundShipmentItem> inboundItems = response.getListInboundShipmentItemsResult()
-                .getItemData().getMember();
+        List<InboundShipmentItem> inboundItems = response.getListInboundShipmentItemsResult().getItemData().getMember();
         for(InboundShipmentItem item : inboundItems) {
             // 进入系统内 msku 全变成大写
             if(fetchItems.containsKey(item.getSellerSKU().toUpperCase())) continue;
             fetchItems.put(item.getSellerSKU().toUpperCase(),
-                    new F.T2<Integer, Integer>(item.getQuantityReceived(),
-                            item.getQuantityShipped()));
+                    new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped())
+            );
         }
         return fetchItems;
     }
@@ -277,8 +271,7 @@ public class FBA {
      * @param unit
      * @return
      */
-    public static InboundShipmentPlanRequestItem procureUnitToInboundShipmentPlanItems(
-            ProcureUnit unit) {
+    public static InboundShipmentPlanRequestItem procureUnitToInboundShipmentPlanItems(ProcureUnit unit) {
         return new InboundShipmentPlanRequestItem(
                 fixHistoryMSKU(unit.selling.merchantSKU),
                 null,
@@ -292,8 +285,7 @@ public class FBA {
      * @param units
      * @return
      */
-    private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems
-    (List<ProcureUnit> units) {
+    private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems(List<ProcureUnit> units) {
 
         List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
         for(ProcureUnit unit : units) {
@@ -330,8 +322,9 @@ public class FBA {
         if(!acc.isSaleAcc) throw new IllegalArgumentException("需要销售账户!");
         String key = String.format("%s_%s", acc.type, acc.id);
         FBAInboundServiceMWSClient client;
-        if(CLIENT_CACHE.containsKey(key)) client = CLIENT_CACHE.get(key);
-        else {
+        if(CLIENT_CACHE.containsKey(key)) {
+            client = CLIENT_CACHE.get(key);
+        } else {
             synchronized(CLIENT_CACHE) {
                 if(CLIENT_CACHE.containsKey(key)) return CLIENT_CACHE.get(key);
                 FBAInboundServiceMWSConfig config = new FBAInboundServiceMWSConfig();

@@ -174,6 +174,7 @@ public class TimelineEventSource {
 
             // 检查运输单的是否可以从签收进入入库状态
             for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
+            for(Shipment shipment : relateShipments) shipment.endShipByComputer();
 
             if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);

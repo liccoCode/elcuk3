@@ -648,8 +648,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void inbounding(Date date) {
         shouldSomeStateValidate(S.RECEIPTD, "入库");
-        if(date == null) date = new Date();
         if(Validation.hasErrors()) return;
+        if(date == null) date = new Date();
         this.state = S.RECEIVING;
         this.dates.inbondDate = date;
         this.changeRelateProcureUnitStage(ProcureUnit.STAGE.INBOUND);
