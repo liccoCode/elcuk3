@@ -22,21 +22,16 @@ public class Promises {
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
      * ps:
-     * M:market 就没有进行抽象为 Context 了, 有需要再重构
+     * 1. M:market 就没有进行抽象为 Context 了, 有需要再重构
+     * 2. 这个方法进行线程同步控制, 不可以多线程调用 fork, 否则会造成 N*M 的多线程问题.
      *
      * @param callback
      * @param <T>
      * @return
      */
-    public static <T> List<T> forkJoin(final Callback<T> callback) {
+    public synchronized static <T> List<T> forkJoin(final Callback<T> callback) {
         List<T> vos = new ArrayList<T>();
         // 通过 Job 异步 fork 加载不同时段的数据
-        /**
-         * FIXME 这类型的代码在下面, 这些需要进行重构到一起
-         * 1. 此处
-         * 2. OrderItem.categoryPercent
-         * 3. OrderItem.skuOrMskuAccountRelateOrderItem
-         */
         List<F.Promise<List<T>>> voPromises = new ArrayList<F.Promise<List<T>>>();
         long begin = System.currentTimeMillis();
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
