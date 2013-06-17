@@ -4,6 +4,11 @@ import helper.DBUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by IntelliJ IDEA.
  * User: wyatt
@@ -12,22 +17,26 @@ import play.db.helper.SqlSelect;
  */
 public class SellingQTYQuery {
 
-    public int sumQtyWithSKU(String sku) {
-        return sumQtyWithColumn("product_sku", sku);
+    public Map<String, Integer> sumQtyWithSKU(Collection<String> skus) {
+        return sumQtyWithColumn("product_sku", skus);
     }
 
-    public int sumQtyWithSellingId(String sellingId) {
-        return sumQtyWithColumn("selling_sellingId", sellingId);
+    public Map<String, Integer> sumQtyWithSellingId(Collection<String> sellingIds) {
+        return sumQtyWithColumn("selling_sellingId", sellingIds);
     }
 
-    private int sumQtyWithColumn(String column, String columnValue) {
+    private Map<String, Integer> sumQtyWithColumn(String column, Collection<String> columnValues) {
         SqlSelect sql = new SqlSelect()
-                .select("sum(qty) as qty")
+                .select("sum(qty) as qty", column + " as k")
                 .from("SellingQTY")
-                .where(column + "=?").param(columnValue);
-        Object qtyObj = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("qty");
-        return NumberUtils.toInt(
-                qtyObj == null ? "0" : qtyObj.toString()
-        );
+                .where(column + " IN " + SqlSelect.inlineParam(columnValues))
+                .groupBy("k");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        Map<String, Integer> qtyMap = new HashMap<String, Integer>();
+        for(Map<String, Object> row : rows) {
+            if(row.get("k") == null) continue;
+            qtyMap.put(row.get("k").toString(), NumberUtils.toInt(row.get("qty").toString()));
+        }
+        return qtyMap;
     }
 }

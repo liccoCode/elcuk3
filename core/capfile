@@ -19,6 +19,10 @@ namespace :play do
     `git push bit`
     # 最后多查看两次 logs
     look = "sleep 3;tail logs/elcuk2.log;"
-    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;sleep 2;play start --%prod;#{look * 3}"
+    run "cd ~/elcuk2/core;git checkout master;git pull;play deps --sync;play stop;sleep 2;#{play_start};#{look * 3}"
+  end
+
+  def play_start
+    'play start --%prod -javaagent:/root/elcuk2/core/newrelic/newrelic.jar'
   end
 end

@@ -70,7 +70,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
         List<AnalyzeDTO> dtos = Cache.get(cacke_key, List.class);
         if(dtos != null) return dtos;
-        synchronized(AnalyzePost.class) {
+
+        synchronized(AnalyzeDTO.class) {
             dtos = Cache.get(cacke_key, List.class);
             if(dtos != null) return dtos;
 
@@ -140,8 +141,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     currentDto.day30 += vo.qty;
             }
 
+
             // ProcureUnit
-            SellingQTYQuery sellingQTYQuery = new SellingQTYQuery();
             AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
             for(AnalyzeDTO dto : analyzeMap.values()) {
                 // 切换 ProcureUnit 的 sku/sid 的参数?
@@ -158,40 +159,77 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
                     else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
                     else if(unit.stage == ProcureUnit.STAGE.INBOUND)
-                        dto.inbound += unit.inboundingQty();
+                        dto.inbound += (unit.qty() - unit.inboundingQty());
                 }
-
-                // ps cal
-                if(isSku) {
-                    dto.qty = sellingQTYQuery.sumQtyWithSKU(dto.fid);
-                } else {
-                    dto.qty = sellingQTYQuery.sumQtyWithSellingId(dto.fid);
-                }
-
-                // review
-                F.T3<Integer, Float, List<String>> reviewT3;
-                if(isSku) reviewT3 = amazonQuery.skuRelateReviews(dto.fid);
-                else reviewT3 = amazonQuery.sidRelateReviews(dto.fid);
-                dto.reviews = reviewT3._1;
-                dto.rating = reviewT3._2;
-                if(dto.reviews > 0)
-                    dto.reviewRatio =
-                            dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
-                else dto.reviewRatio = 0;
-
+                dto.difference = dto.day1 - dto.day7 / 7;
                 //最新的评分
                 if(isSku)
                     dto.lastRating = amazonQuery.skuLastRating(dto.fid);
 
-                dto.difference = dto.day1 - dto.day7 / 7;
-
                 dtos.add(dto);
             }
+
+            // qty cal
+            pullQtyToDTO(isSku, analyzeMap);
+
+            // review
+            pullReviewToDTO(isSku, analyzeMap);
+
             Cache.add(cacke_key, dtos, "12h");
             Cache.set(cacke_key + ".time", new Date(), "12h");
         }
 
         return dtos;
+    }
+
+    /**
+     * 拽出 qty 给 Dto
+     *
+     * @param sku
+     * @param analyzeMap
+     */
+    private void pullQtyToDTO(boolean sku, Map<String, AnalyzeDTO> analyzeMap) {
+        SellingQTYQuery sellingQTYQuery = new SellingQTYQuery();
+        Map<String, Integer> qtyMap;
+        if(sku) {
+            qtyMap = sellingQTYQuery.sumQtyWithSKU(analyzeMap.keySet());
+        } else {
+            qtyMap = sellingQTYQuery.sumQtyWithSellingId(analyzeMap.keySet());
+        }
+
+        for(AnalyzeDTO dto : analyzeMap.values()) {
+            dto.qty = qtyMap.get(dto.fid) == null ? 0 : qtyMap.get(dto.fid);
+        }
+    }
+
+    /**
+     * 拽出 Review 的信息给 DTO
+     *
+     * @param sku
+     * @param analyzeMap
+     */
+    private void pullReviewToDTO(boolean sku, Map<String, AnalyzeDTO> analyzeMap) {
+        AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
+        Map<String, F.T2<Integer, Float>> reviewMap;
+        if(sku) {
+            reviewMap = amazonQuery.skuRelateReviews(analyzeMap.keySet());
+        } else {
+            reviewMap = amazonQuery.sidRelateReviews(analyzeMap.keySet());
+        }
+        for(AnalyzeDTO dto : analyzeMap.values()) {
+            F.T2<Integer, Float> reviewT2 = reviewMap.get(dto.fid);
+            if(reviewT2 == null) {
+                dto.reviews = 0;
+                dto.rating = 0;
+            } else {
+                dto.reviews = reviewT2._1;
+                dto.rating = reviewT2._2;
+            }
+            if(dto.reviews > 0)
+                dto.reviewRatio = dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
+            else
+                dto.reviewRatio = 0;
+        }
     }
 
     @Override

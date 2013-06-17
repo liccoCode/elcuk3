@@ -1,16 +1,11 @@
 package query;
 
 import helper.DBUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -20,51 +15,43 @@ import java.util.Map;
  */
 public class AmazonListingReviewQuery {
 
-    /**
-     * 查询 Selling 关联的 Review
-     *
-     * @return ._1: review 数量; ._2: reivew 分数; ._3: reviewId
-     */
-    public F.T3<Integer, Float, List<String>> sidRelateReviews(String sid) {
+    public Map<String, F.T2<Integer, Float>> sidRelateReviews(Collection<String> sids) {
         SqlSelect sql = new SqlSelect()
                 .select("count(r.alrId) as c", "avg(r.rating) as rating",
-                        "group_concat(r.reviewId) as reviewIds")
+                        "s.sellingId as sellingId")
                 .from("AmazonListingReview r")
                 .leftJoin("Selling s USING(listing_listingId)")
-                .where("s.sellingId=?").param(sid);
-        Map<String, Object> row = DBUtils.row(sql.toString(), sql.getParams().toArray());
-        if(NumberUtils.toInt(row.get("c").toString()) <= 0)
-            return new F.T3<Integer, Float, List<String>>(0, 0f, Arrays.asList(""));
-
-        return new F.T3<Integer, Float, List<String>>(
-                NumberUtils.toInt(row.get("c").toString()),
-                NumberUtils.toFloat(row.get("rating").toString()),
-                Arrays.asList(StringUtils.split(row.get("reviewIds").toString(), ","))
-        );
+                .where("s.sellingId IN " + SqlSelect.inlineParam(sids));
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        Map<String, F.T2<Integer, Float>> reviewT2Map = new HashMap<String, F.T2<Integer, Float>>();
+        for(Map<String, Object> row : rows) {
+            reviewT2Map.put(row.get("sellingId").toString(),
+                    new F.T2<Integer, Float>(
+                            NumberUtils.toInt(row.get("c").toString()),
+                            NumberUtils.toFloat(row.get("rating").toString()))
+            );
+        }
+        return reviewT2Map;
     }
 
-    /**
-     * 查询 SKU 关联的 Review
-     *
-     * @return ._1: review 数量; ._2: reivew 分数; ._3: reviewId
-     */
-    public F.T3<Integer, Float, List<String>> skuRelateReviews(String sku) {
+    public Map<String, F.T2<Integer, Float>> skuRelateReviews(Collection<String> skus) {
         SqlSelect sql = new SqlSelect()
                 .select("count(r.alrId) as c", "avg(r.rating) as rating",
-                        "group_concat(r.reviewId) as reviewIds")
+                        "l.product_sku as sku")
                 .from("AmazonListingReview r")
                 .leftJoin("Listing l ON r.listing_listingId=l.listingId")
-                .where("l.product_sku=?").param(sku);
-        Map<String, Object> row = DBUtils.row(sql.toString(), sql.getParams().toArray());
-        if(NumberUtils.toInt(row.get("c").toString()) <= 0)
-            return new F.T3<Integer, Float, List<String>>(0, 0f, Arrays.asList(""));
-        return new F.T3<Integer, Float, List<String>>(
-                NumberUtils.toInt(row.get("c").toString()),
-                NumberUtils.toFloat(row.get("rating").toString()),
-                Arrays.asList(StringUtils.split(row.get("reviewIds").toString(), ","))
-        );
+                .where("l.product_sku IN " + SqlSelect.inlineParam(skus));
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        Map<String, F.T2<Integer, Float>> reviewT2Map = new HashMap<String, F.T2<Integer, Float>>();
+        for(Map<String, Object> row : rows) {
+            reviewT2Map.put(row.get("sku").toString(),
+                    new F.T2<Integer, Float>(
+                            NumberUtils.toInt(row.get("c").toString()),
+                            NumberUtils.toFloat(row.get("rating").toString()))
+            );
+        }
+        return reviewT2Map;
     }
-
 
     /**
      * 查询 SKU 最新的rating

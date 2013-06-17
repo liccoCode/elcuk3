@@ -11,6 +11,7 @@ require:
     - play -> excel 1.2.3
     - play -> mockito 0.1:
         id: test
+    - blockingCache -> blockingCache 0.2
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...

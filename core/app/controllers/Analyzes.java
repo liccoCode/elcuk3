@@ -66,6 +66,7 @@ public class Analyzes extends Controller {
      */
     public static void analyzes(AnalyzePost p) {
         List<AnalyzeDTO> dtos = p.query();
+        response.cacheFor("10mn");
         render("Analyzes/" + p.type + ".html", dtos, p);
     }
 
@@ -80,6 +81,7 @@ public class Analyzes extends Controller {
      */
     public static void ajaxUnit(AnalyzePost p) {
         try {
+            response.cacheFor("10mn");
             renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val,
                     Account.<Account>findById(NumberUtils.toLong(p.aid)), p.type, p.from, p.to)));
         } catch(Exception e) {
@@ -90,6 +92,7 @@ public class Analyzes extends Controller {
     @Check("analyzes.ajaxsales")
     public static void ajaxSales(AnalyzePost p) {
         try {
+            response.cacheFor("10mn");
             renderJSON(J.json(OrderItem
                     .ajaxHighChartSales(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)),
                             p.type, p.from, p.to)));
@@ -103,6 +106,7 @@ public class Analyzes extends Controller {
      */
     public static void ajaxSellingRecord(AnalyzePost p) {
         try {
+            response.cacheFor("10mn");
             renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
                     Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
@@ -115,6 +119,7 @@ public class Analyzes extends Controller {
      */
     public static void ajaxSellingTurn(AnalyzePost p) {
         try {
+            response.cacheFor("10mn");
             renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
                     Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
@@ -144,6 +149,7 @@ public class Analyzes extends Controller {
             datax.add("'" + new DateTime(Long.parseLong(key)).toString("HH:mm:ss") + "'");
         }
         List<AtomicInteger> datay = new ArrayList<AtomicInteger>(dataMap.values());
+        response.cacheFor("10mn");
         render(datax, datay, date);
     }
 
