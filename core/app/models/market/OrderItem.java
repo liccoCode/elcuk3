@@ -284,7 +284,7 @@ public class OrderItem extends GenericModel {
      * @param from
      * @param to        @return {series_size, days, series_n}
      */
-    @Cached("2h")
+    @Cached("8h")
     public static HighChart ajaxHighChartUnitOrder(String skuOrMsku,
                                                    Account acc,
                                                    String type,
@@ -339,7 +339,7 @@ public class OrderItem extends GenericModel {
             lines.line("unit_de").add(unit_de);
             travel = travel.plusDays(1);
         }
-        Cache.add(cacked_key, lines, "2h");
+        Cache.add(cacked_key, lines, "8h");
         return lines;
     }
 

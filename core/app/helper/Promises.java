@@ -36,19 +36,18 @@ public class Promises {
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
-                voPromises.add(new Job<List<T>>() {
-                    @Override
-                    public List<T> doJobWithResult() throws Exception {
-                        return callback.doJobWithResult(m);
-                    }
-                }.now());
+                try {
+                    vos.addAll(new Job<List<T>>() {
+                        @Override
+                        public List<T> doJobWithResult() throws Exception {
+                            return callback.doJobWithResult(m);
+                        }
+                    }.now().get(5, TimeUnit.MINUTES));
+                } catch(Exception e) {
+                    throw new FastRuntimeException(
+                            String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
+                }
             }
-            for(F.Promise<List<T>> voP : voPromises) {
-                vos.addAll(voP.get(5, TimeUnit.MINUTES));
-            }
-        } catch(Exception e) {
-            throw new FastRuntimeException(
-                    String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
         } finally {
             Logger.info("[%s:#%s] End of Fork fetch. Passed: %s ms",
                     callback.id(),
