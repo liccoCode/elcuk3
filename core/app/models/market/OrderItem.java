@@ -4,7 +4,6 @@ import helper.*;
 import models.product.Product;
 import models.view.dto.HighChart;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
@@ -170,10 +169,10 @@ public class OrderItem extends GenericModel {
         HighChart lines = Cache.get(cached_key, HighChart.class);
         if(lines != null) return lines;
         // 做内部参数的容错
-        DateTime _from = new DateTime(Dates.morning(from));
-        DateTime _to = new DateTime(Dates.night(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        Date _from = Dates.morning(from);
+        Date _to = Dates.night(to);
 
-        lines = new HighChart().startAt(_from.getMillis());
+        lines = new HighChart().startAt(_from.getTime());
         List<AnalyzeVO> lineVos;
         for(M market : Promises.MARKETS) {
             lineVos = getAnalyzeVOs(market, val, type, _from, _to);
@@ -202,8 +201,8 @@ public class OrderItem extends GenericModel {
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
         // 做内部参数的容错
-        DateTime _from = new DateTime(Dates.date2JDate(from));
-        DateTime _to = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
+        Date _from = Dates.morning(from);
+        Date _to = Dates.night(to);
         lines = new HighChart();
         List<AnalyzeVO> lineVos;
         for(M market : Promises.MARKETS) {
@@ -218,17 +217,17 @@ public class OrderItem extends GenericModel {
         return lines;
     }
 
-    private static List<AnalyzeVO> getAnalyzeVOs(M market, String val, String type, DateTime _from, DateTime _to) {
-        List<AnalyzeVO> lineVos = new ArrayList<AnalyzeVO>();
+    private static List<AnalyzeVO> getAnalyzeVOs(M market, String val, String type, Date from, Date to) {
+        List<AnalyzeVO> lineVos;
         OrderItemQuery query = new OrderItemQuery();
         if("all".equals(val)) {
-            lineVos = query.allSalesAndUnits(_from.toDate(), _to.toDate(), market);
+            lineVos = query.allSalesAndUnits(from, to, market);
         } else if(val.matches("^\\d{2}$")) {
-            lineVos = query.categorySalesAndUnits(_from.toDate(), _to.toDate(), market, val);
+            lineVos = query.categorySalesAndUnits(from, to, market, val);
         } else if("sid".equals(type)) {
-            lineVos = query.sidSalesAndUnits(_from.toDate(), _to.toDate(), market, val);
+            lineVos = query.sidSalesAndUnits(from, to, market, val);
         } else if("sku".equals(type)) {
-            lineVos = query.skuSalesAndUnits(_from.toDate(), _to.toDate(), market, val);
+            lineVos = query.skuSalesAndUnits(from, to, market, val);
         } else {
             throw new FastRuntimeException("不支持的类型!");
         }

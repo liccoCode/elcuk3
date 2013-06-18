@@ -2,8 +2,9 @@ $ ->
   Highcharts.setOptions(global: {useUTC: false})
   SKU = 'sku'
   SID = 'sid'
-  defaultDate = $.DateUtil.addDay(-30)
-  now = $.DateUtil.addDay(30, defaultDate)
+  # 这里的 31 天是与 sku/sid 的分析数据中的 day30 所计算的数据保持一致
+  defaultDate = $.DateUtil.addDay(-31)
+  now = $.DateUtil.addDay(31, defaultDate)
 
   class Tabs
     constructor: (name) ->

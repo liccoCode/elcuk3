@@ -385,17 +385,13 @@ public class SellingRecord extends GenericModel {
                     .scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
             if(rcd.market == M.AMAZON_UK)
-                highCharLines.get("tn_uk")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_DE)
-                highCharLines.get("tn_de")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_de").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_FR)
-                highCharLines.get("tn_fr")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_US)
-                highCharLines.get("tn_us")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_us").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }
