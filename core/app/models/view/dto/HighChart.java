@@ -4,8 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import play.utils.FastRuntimeException;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,6 +60,27 @@ public class HighChart implements Serializable {
         return line;
     }
 
+    /**
+     * 所有 serise 的名称
+     *
+     * @return
+     */
+    public List<String> lineNames() {
+        List<String> names = new ArrayList<String>();
+        for(Object obj : this.series) {
+            Line line = (Line) obj;
+            names.add(line.name);
+        }
+        return names;
+    }
+
+    public void sort() {
+        for(Object obj : this.series) {
+            Line line = (Line) obj;
+            line.sort();
+        }
+    }
+
 
     /**
      * 为 HighChart 增加一个 Pie 数据;
@@ -98,10 +118,28 @@ public class HighChart implements Serializable {
 
         // line name
         public String name;
-        public List<Float> data = new ArrayList<Float>();
+        public List<Object[]> data = new ArrayList<Object[]>();
 
-        public Line add(Float y) {
-            this.data.add(y);
+        public Line add(Date date, Float y) {
+            boolean add = true;
+            for(Object[] d : this.data) {
+                if(d[0].equals(date.getTime())) {
+                    d[1] = (Float) d[1] + y;
+                    add = false;
+                }
+            }
+            if(add)
+                this.data.add(new Object[]{date.getTime(), y});
+            return this;
+        }
+
+        public Line sort() {
+            Collections.sort(this.data, new Comparator<Object[]>() {
+                @Override
+                public int compare(Object[] o1, Object[] o2) {
+                    return (int) ((Long) o1[0] - (Long) o2[0]);
+                }
+            });
             return this;
         }
     }

@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
@@ -154,122 +155,35 @@ public class OrderItem extends GenericModel {
     }
 
     /**
-     * 根据 sku 或者 msku 从 OrderItem 中查询对应 Account 的 OrderItem
-     * ps: 结果缓存 5mn (缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存)
-     * 将时间语义转换为对应市场的, 例:
-     * 查询 2013-01-01 这天的数据
-     * ->
-     * 查询 美国 2013-01-01 这天的数据; 系统中记录的是北京时间,所以会进行时间转换
-     *
-     * @param skuOrMskuOrCategory sku 或者 merchantSKU(msku) 还是 categoryId
-     * @param type                sku/all/msku
-     * @param acc
-     * @param from
-     * @param to
-     * @return 返回需要用到 createDate, quantity, usdCost, market
-     */
-    @SuppressWarnings("unchecked")
-    @Cached("5mn") //缓存是为了防止两次访问此方法, 此数据最终的缓存放置在了页面内容缓存
-    public synchronized static List<AnalyzeVO> skuOrMskuAccountRelateOrderItem(
-            final String skuOrMskuOrCategory, final String type, final Account acc, final Date from,
-            final Date to) {
-        String cacheKey = Caches.Q.cacheKey(skuOrMskuOrCategory, type, acc, from, to);
-        List<AnalyzeVO> vos = Cache.get(cacheKey, List.class);
-        if(vos != null) return vos;
-        vos = new ArrayList<AnalyzeVO>();
-
-        vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
-            @Override
-            public List<AnalyzeVO> doJobWithResult(M m) {
-                Date _from = m.withTimeZone(from).toDate();
-                Date _to = m.withTimeZone(to).toDate();
-                if("all".equalsIgnoreCase(skuOrMskuOrCategory))
-                    return new OrderItemQuery().allNormalSaleOrderItem(_from, _to, m);
-                else if(skuOrMskuOrCategory.matches("^\\d{2}$"))
-                    return new OrderItemQuery()
-                            .allNormalSaleOrderItem(_from, _to, m, skuOrMskuOrCategory);
-                else if("sku".equalsIgnoreCase(type))
-                    return new OrderItemQuery()
-                            .skuNormalSaleOrderItem(skuOrMskuOrCategory, _from, _to, m);
-                else if("sid".equalsIgnoreCase(type))
-                    return new OrderItemQuery().mskuWithAccountNormalSaleOrderItem(
-                            skuOrMskuOrCategory, acc == null ? null : acc.id, _from, _to, m);
-                else
-                    return new ArrayList<AnalyzeVO>();
-            }
-
-            @Override
-            public String id() {
-                return "OrderItem.skuOrMskuAccountRelateOrderItem";
-            }
-        }));
-        if(vos.size() > 0)
-            Cache.add(cacheKey, vos, "5mn");
-        return vos;
-    }
-
-    /**
      * 销量的图形图表
      *
-     * @param skuOrMsku
+     * @param val
      * @param acc
      * @param type
      * @param from
      * @param to
      * @return
      */
-    @Cached("4h")
-    public static HighChart ajaxHighChartSales(String skuOrMsku,
-                                               Account acc,
-                                               String type,
-                                               Date from, Date to) {
-        String cached_key = Caches.Q.cacheKey("sales", skuOrMsku, acc, type, from, to);
+    @Cached("8h")
+    public static HighChart ajaxHighChartSales(String val, Account acc, String type, Date from, Date to) {
+        String cached_key = Caches.Q.cacheKey("sales", val, acc, type, from, to);
         HighChart lines = Cache.get(cached_key, HighChart.class);
         if(lines != null) return lines;
         // 做内部参数的容错
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
-        List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
-                _from.toDate(), _to.toDate());
 
         lines = new HighChart().startAt(_from.getMillis());
-        // 从开始时间起, 以 1 天的时间间隔去 group 数据, 没有的设置为 0
-        DateTime travel = _from.plusDays(0); // copy 一个新的
-        while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
-            String travelStr = travel.toString("yyyy-MM-dd");
-            // 销售额
-            float sale_all = 0;
-            float sale_uk = 0;
-            float sale_de = 0;
-            float sale_fr = 0;
-            float sale_us = 0;
-
-            for(AnalyzeVO vo : vos) {
-                DateTime marketLocalTime = new DateTime(vo.date, Dates.timeZone(vo.market));
-                if(marketLocalTime.toString("yyyy-MM-dd").equals(travelStr)) {
-                    try {
-                        float usdCost = vo.usdCost == null ? 0 : vo.usdCost;
-                        sale_all += usdCost;
-                        if(vo.market == M.AMAZON_UK) sale_uk += usdCost;
-                        else if(vo.market == M.AMAZON_DE) sale_de += usdCost;
-                        else if(vo.market == M.AMAZON_FR) sale_fr += usdCost;
-                        else if(vo.market == M.AMAZON_US) sale_us += usdCost;
-                    } catch(Exception e) {
-                        e.printStackTrace();
-                    }
-                    // 其他市场暂时先不统计
-                }
+        List<AnalyzeVO> lineVos;
+        for(M market : Promises.MARKETS) {
+            lineVos = getAnalyzeVOs(market, val, type, _from, _to);
+            for(AnalyzeVO vo : lineVos) {
+                lines.line("sale_all").add(vo.date, vo.usdCost);
+                lines.line("sale_" + market.name().toLowerCase()).add(vo.date, vo.usdCost);
             }
-            // 当天所有市场的销售额数据
-            lines.line("sale_all").add(sale_all);
-            lines.line("sale_fr").add(sale_fr);
-            lines.line("sale_uk").add(sale_uk);
-            lines.line("sale_us").add(sale_us);
-            lines.line("sale_de").add(sale_de);
-            travel = travel.plusDays(1);
         }
-
-        Cache.add(cached_key, lines, "4h");
+        lines.sort();
+        Cache.add(cached_key, lines, "8h");
         return lines;
     }
 
@@ -279,68 +193,46 @@ public class OrderItem extends GenericModel {
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
      * </pre>
      *
-     * @param skuOrMsku 需要查询的 SKU 或者对应 Selling 的 sid
-     * @param acc
-     * @param from
-     * @param to        @return {series_size, days, series_n}
+     * @param val 需要查询的 all, categoryId, sku, sid
+     * @param to  @return {series_size, days, series_n}
      */
     @Cached("8h")
-    public static HighChart ajaxHighChartUnitOrder(String skuOrMsku,
-                                                   Account acc,
-                                                   String type,
-                                                   Date from,
-                                                   Date to) {
-        String cacked_key = Caches.Q.cacheKey("unit", skuOrMsku, acc, type, from, to);
+    public static HighChart ajaxHighChartUnitOrder(String val, Account acc, String type, Date from, Date to) {
+        String cacked_key = Caches.Q.cacheKey("unit", val, acc, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
         // 做内部参数的容错
         DateTime _from = new DateTime(Dates.date2JDate(from));
         DateTime _to = new DateTime(Dates.date2JDate(to)).plusDays(1); // "到" 的时间参数, 期望的是这一天的结束
-        /**
-         * 加载出限定时间内的指定 Msku 的 OrderItem
-         * 按照天过滤成销量数据
-         * 组装成 HightChart 的格式
-         */
-
-
-        List<AnalyzeVO> vos = skuOrMskuAccountRelateOrderItem(skuOrMsku, type, acc,
-                _from.toDate(), _to.toDate());
-
-        lines = new HighChart().startAt(_from.getMillis());
-        DateTime travel = _from.plusDays(0); // copy 一个新的
-        while(travel.getMillis() < _to.getMillis()) { // 开始计算每一天的数据
-            String travelStr = travel.toString("yyyy-MM-dd");
-            // 销量
-            float unit_all = 0;
-            float unit_uk = 0;
-            float unit_de = 0;
-            float unit_fr = 0;
-            float unit_us = 0;
-            for(AnalyzeVO vo : vos) {
-                /**
-                 * 将北京时间换成对应市场的本地时间, 因为加载出了对应市场时间的数据后,
-                 * 需要再将时间还原到对应市场, 然后进行市场当天数据的 group
-                 */
-                DateTime marketLocalTime = new DateTime(vo.date, Dates.timeZone(vo.market));
-                if(marketLocalTime.toString("yyyy-MM-dd").equalsIgnoreCase(travelStr)) {
-                    unit_all += vo.qty;
-                    if(vo.market == M.AMAZON_UK) unit_uk += vo.qty;
-                    else if(vo.market == M.AMAZON_DE) unit_de += vo.qty;
-                    else if(vo.market == M.AMAZON_FR) unit_fr += vo.qty;
-                    else if(vo.market == M.AMAZON_US) unit_us += vo.qty;
-                    // 其他市场暂时先不统计
-                }
+        lines = new HighChart();
+        List<AnalyzeVO> lineVos;
+        for(M market : Promises.MARKETS) {
+            lineVos = getAnalyzeVOs(market, val, type, _from, _to);
+            for(AnalyzeVO vo : lineVos) {
+                lines.line("unit_all").add(vo.date, vo.qty.floatValue());
+                lines.line("unit_" + market.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
             }
-            // 当天所有市场的销售订单数据
-            lines.line("unit_all").add(unit_all);
-            lines.line("unit_fr").add(unit_fr);
-            lines.line("unit_uk").add(unit_uk);
-            lines.line("unit_us").add(unit_us);
-            lines.line("unit_de").add(unit_de);
-            travel = travel.plusDays(1);
         }
+        lines.sort();
         Cache.add(cacked_key, lines, "8h");
         return lines;
+    }
+
+    private static List<AnalyzeVO> getAnalyzeVOs(M market, String val, String type, DateTime _from, DateTime _to) {
+        List<AnalyzeVO> lineVos = new ArrayList<AnalyzeVO>();
+        OrderItemQuery query = new OrderItemQuery();
+        if("all".equals(val)) {
+            lineVos = query.allSalesAndUnits(_from.toDate(), _to.toDate(), market);
+        } else if(val.matches("^\\d{2}$")) {
+            lineVos = query.categorySalesAndUnits(_from.toDate(), _to.toDate(), market, val);
+        } else if("sid".equals(type)) {
+            lineVos = query.sidSalesAndUnits(_from.toDate(), _to.toDate(), market, val);
+        } else if("sku".equals(type)) {
+            lineVos = query.skuSalesAndUnits(_from.toDate(), _to.toDate(), market, val);
+        } else {
+            throw new FastRuntimeException("不支持的类型!");
+        }
+        return lineVos;
     }
 
     /**

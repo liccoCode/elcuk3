@@ -146,11 +146,11 @@ public class MailsRecord extends Model {
                     counts.put(record.templateName, counts.get(record.templateName) + 1);
                 }
             }
-            lines.line("all_records").add(totalCount);
+            lines.line("all_records").add(travel.toDate(), totalCount);
             Iterator<String> ite = counts.keySet().iterator();
             while(ite.hasNext()) {
                 String key = ite.next();
-                lines.line(key).add(counts.get(key));
+                lines.line(key).add(travel.toDate(), counts.get(key));
                 counts.put(key, 0f);
             }
             travel = travel.plusDays(1);
