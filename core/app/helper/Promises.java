@@ -2,7 +2,6 @@ package helper;
 
 import models.market.M;
 import play.Logger;
-import play.db.DB;
 import play.jobs.Job;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -40,13 +39,12 @@ public class Promises {
                 voPromises.add(new Job<List<T>>() {
                     @Override
                     public List<T> doJobWithResult() throws Exception {
-                        DB.execute("SET net_write_timeout=180;");
                         return callback.doJobWithResult(m);
                     }
                 }.now());
             }
             for(F.Promise<List<T>> voP : voPromises) {
-                vos.addAll(voP.get(1, TimeUnit.MINUTES));
+                vos.addAll(voP.get(5, TimeUnit.MINUTES));
             }
         } catch(Exception e) {
             throw new FastRuntimeException(

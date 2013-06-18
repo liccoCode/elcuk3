@@ -130,8 +130,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                     continue;
                 }
 
-                long differTime =
-                        vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
+                long differTime = vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
                 if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= oneDayMillis)
                     currentDto.day1 += vo.qty;
                 //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天

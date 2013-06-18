@@ -80,8 +80,7 @@ public class OrderItemQuery {
                 .where("oi.product_sku IS NOT NULL")
                 .where("oi.market=?").param(market.name())
                 .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to)
-                .orderBy("oi.createDate DESC");
+                .where("oi.createDate<=?").param(to);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
     }
