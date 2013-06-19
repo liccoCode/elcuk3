@@ -168,32 +168,37 @@ public class OrderItem extends GenericModel {
         String cached_key = Caches.Q.cacheKey("sales", val, acc, type, from, to);
         HighChart lines = Cache.get(cached_key, HighChart.class);
         if(lines != null) return lines;
-        // 做内部参数的容错
-        final Date _from = Dates.morning(from);
-        final Date _to = Dates.night(to);
+        synchronized(cached_key.intern()) {
+            lines = Cache.get(cached_key, HighChart.class);
+            if(lines != null) return lines;
 
-        final HighChart finalLines = new HighChart().startAt(_from.getTime());
-        Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
-            @Override
-            public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
-                List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
-                synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
-                    for(AnalyzeVO vo : lineVos) {
-                        finalLines.line("sale_all").add(vo.date, vo.qty.floatValue());
-                        finalLines.line("sale_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            final HighChart finalLines = new HighChart().startAt(_from.getTime());
+            Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
+                @Override
+                public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
+                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
+                        for(AnalyzeVO vo : lineVos) {
+                            finalLines.line("sale_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.line("sale_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+                        }
                     }
+                    return null;
                 }
-                return null;
-            }
 
-            @Override
-            public String id() {
-                return "OrderItem.ajaxHighChartUnitOrder";
-            }
-        });
+                @Override
+                public String id() {
+                    return "OrderItem.ajaxHighChartUnitOrder";
+                }
+            });
 
-        finalLines.sort();
-        Cache.add(cached_key, finalLines, "8h");
+            finalLines.sort();
+            Cache.add(cached_key, finalLines, "8h");
+        }
         return Cache.get(cached_key, HighChart.class);
     }
 
@@ -211,32 +216,37 @@ public class OrderItem extends GenericModel {
         String cacked_key = Caches.Q.cacheKey("unit", val, acc, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
-        // 做内部参数的容错
-        final Date _from = Dates.morning(from);
-        final Date _to = Dates.night(to);
+        synchronized(cacked_key.intern()) { // 使用 cacked_key 在 String pool 中的对象
+            lines = Cache.get(cacked_key, HighChart.class);
+            if(lines != null) return lines;
 
-        final HighChart finalLines = new HighChart();
-        Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
-            @Override
-            public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
-                List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
-                synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
-                    for(AnalyzeVO vo : lineVos) {
-                        finalLines.line("unit_all").add(vo.date, vo.qty.floatValue());
-                        finalLines.line("unit_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            final HighChart finalLines = new HighChart();
+            Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
+                @Override
+                public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
+                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
+                        for(AnalyzeVO vo : lineVos) {
+                            finalLines.line("unit_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.line("unit_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+                        }
                     }
+                    return null;
                 }
-                return null;
-            }
 
-            @Override
-            public String id() {
-                return "OrderItem.ajaxHighChartUnitOrder";
-            }
-        });
+                @Override
+                public String id() {
+                    return "OrderItem.ajaxHighChartUnitOrder";
+                }
+            });
 
-        finalLines.sort();
-        Cache.add(cacked_key, finalLines, "8h");
+            finalLines.sort();
+            Cache.add(cacked_key, finalLines, "8h");
+        }
 
         return Cache.get(cacked_key, HighChart.class);
     }
