@@ -9,10 +9,7 @@ import models.view.dto.AnalyzeDTO;
 import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.cache.Cache;
-import play.mvc.After;
-import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -39,18 +36,6 @@ public class Analyzes extends Controller {
         List<String> categoryIds = Category.category_ids();
         AnalyzePost p = new AnalyzePost();
         render(accs, categoryIds, p);
-    }
-
-    @Before(only = {"analyzes", "ajaxUnit"})
-    public static void countTime() {
-        request.args.put("begin", System.currentTimeMillis() + "");
-    }
-
-    //
-    @After(only = {"analyzes", "ajaxUnit"})
-    public static void countAfter() {
-        Object begin = request.args.get("begin");
-        Logger.info("%s past %s ms", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
     }
 
     /**
