@@ -257,7 +257,7 @@ public class OrderItem extends GenericModel {
                     acc.type.withTimeZone(to).toDate(),
                     acc.id);
         } else {
-            vos.addAll(Promises.forkJoin(new Promises.DBCallback<AnalyzeVO>() {
+            List<List<AnalyzeVO>> results = Promises.forkJoin(new Promises.DBCallback<List<AnalyzeVO>>() {
                 @Override
                 public List<AnalyzeVO> doJobWithResult(M m) {
                     return new OrderItemQuery().groupCategory(
@@ -271,7 +271,10 @@ public class OrderItem extends GenericModel {
                 public String id() {
                     return "OrderItem.categoryPercent";
                 }
-            }));
+            });
+            for(List<AnalyzeVO> result : results) {
+                vos.addAll(result);
+            }
         }
         for(AnalyzeVO vo : vos) {
             if(StringUtils.equals(type, "sales"))

@@ -34,15 +34,15 @@ public class Promises {
     public static <T> List<T> forkJoin(final Callback<T> callback) {
         List<T> vos = new ArrayList<T>();
         // 通过 Job 异步 fork 加载不同时段的数据
-        List<FutureTask<List<T>>> futures = new ArrayList<FutureTask<List<T>>>();
+        List<FutureTask<T>> futures = new ArrayList<FutureTask<T>>();
         long begin = System.currentTimeMillis();
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
-                FutureTask<List<T>> task = new FutureTask<List<T>>(new Callable<List<T>>() {
+                FutureTask<T> task = new FutureTask<T>(new Callable<T>() {
                     @Override
-                    public List<T> call() throws Exception {
-                        List<T> result = callback.doJobWithResult(m);
+                    public T call() throws Exception {
+                        T result = callback.doJobWithResult(m);
                         if(callback instanceof DBCallback<?>) {
                             ((DBCallback) callback).close();
                         }
@@ -53,8 +53,8 @@ public class Promises {
                 futures.add(task);
             }
             try {
-                for(FutureTask<List<T>> task : futures) {
-                    vos.addAll(task.get(5, TimeUnit.MINUTES));
+                for(FutureTask<T> task : futures) {
+                    vos.add(task.get(5, TimeUnit.MINUTES));
                 }
 
             } catch(Exception e) {
@@ -76,7 +76,7 @@ public class Promises {
      * @param <T>
      */
     public interface Callback<T> {
-        public List<T> doJobWithResult(M m);
+        public T doJobWithResult(M m);
 
         /**
          * 用来标记执行线程的
