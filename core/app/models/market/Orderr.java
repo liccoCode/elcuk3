@@ -401,13 +401,14 @@ public class Orderr extends GenericModel {
         final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
         List<OrderrVO> vos = new ArrayList<OrderrVO>();
-        vos.addAll(Promises.forkJoin(new Promises.Callback<OrderrVO>() {
+        vos.addAll(Promises.forkJoin(new Promises.DBCallback<OrderrVO>() {
             @Override
             public List<OrderrVO> doJobWithResult(M m) {
                 return new OrderrQuery().dashBoardOrders(
                         m.withTimeZone(pre7Day).toDate(),
                         m.withTimeZone(now.toDate()).toDate(),
-                        m);
+                        m,
+                        getConnection());
             }
 
             @Override

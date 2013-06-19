@@ -48,7 +48,7 @@ public class OrderItemQuery {
         return rows2Vo(rows);
     }
 
-    public List<AnalyzeVO> groupCategory(Date from, Date to, M market) {
+    public List<AnalyzeVO> groupCategory(Date from, Date to, M market, Connection conn) {
         SqlSelect sql = new SqlSelect()
                 // tip: just a hack
                 .select("p.category_categoryId as sku",
@@ -62,7 +62,7 @@ public class OrderItemQuery {
                 .where("oi.product_sku IS NOT NULL")
                 .where("oi.quantity>0")
                 .groupBy("p.category_categoryId");
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<Map<String, Object>> rows = DBUtils.rows(conn, sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
     }
 

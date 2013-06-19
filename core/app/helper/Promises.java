@@ -2,13 +2,14 @@ package helper;
 
 import models.market.M;
 import play.Logger;
-import play.jobs.Job;
-import play.libs.F;
+import play.db.DB;
 import play.utils.FastRuntimeException;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,9 +19,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class Promises {
     public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR};
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
     /**
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
+     * 如果需要访问 DB, 则请使用 DBCallback 进行.
      * ps:
      * 1. M:market 就没有进行抽象为 Context 了, 有需要再重构
      *
@@ -31,22 +34,32 @@ public class Promises {
     public static <T> List<T> forkJoin(final Callback<T> callback) {
         List<T> vos = new ArrayList<T>();
         // 通过 Job 异步 fork 加载不同时段的数据
-        List<F.Promise<List<T>>> voPromises = new ArrayList<F.Promise<List<T>>>();
+        List<FutureTask<List<T>>> futures = new ArrayList<FutureTask<List<T>>>();
         long begin = System.currentTimeMillis();
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
-                try {
-                    vos.addAll(new Job<List<T>>() {
-                        @Override
-                        public List<T> doJobWithResult() throws Exception {
-                            return callback.doJobWithResult(m);
+                FutureTask<List<T>> task = new FutureTask<List<T>>(new Callable<List<T>>() {
+                    @Override
+                    public List<T> call() throws Exception {
+                        List<T> result = callback.doJobWithResult(m);
+                        if(callback instanceof DBCallback<?>) {
+                            ((DBCallback) callback).close();
                         }
-                    }.now().get(5, TimeUnit.MINUTES));
-                } catch(Exception e) {
-                    throw new FastRuntimeException(
-                            String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
+                        return result;
+                    }
+                });
+                threadPool.submit(task);
+                futures.add(task);
+            }
+            try {
+                for(FutureTask<List<T>> task : futures) {
+                    vos.addAll(task.get(5, TimeUnit.MINUTES));
                 }
+
+            } catch(Exception e) {
+                throw new FastRuntimeException(
+                        String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
             }
         } finally {
             Logger.info("[%s:#%s] End of Fork fetch. Passed: %s ms",
@@ -57,6 +70,11 @@ public class Promises {
         return vos;
     }
 
+    /**
+     * 非 DB 的 Fork 计算
+     *
+     * @param <T>
+     */
     public interface Callback<T> {
         public List<T> doJobWithResult(M m);
 
@@ -66,5 +84,37 @@ public class Promises {
          * @return
          */
         public String id();
+    }
+
+    /**
+     * 带有 Connection 链接的 Callback;
+     * 利用 DBPlugin, 从 DB 的 datasource 中直接获取新的 db 链接.
+     *
+     * @param <T>
+     */
+    public static abstract class DBCallback<T> implements Callback<T> {
+
+        private static ThreadLocal<Connection> connHolder = new ThreadLocal<Connection>();
+
+
+        public Connection getConnection() {
+            if(connHolder.get() == null) {
+                try {
+                    connHolder.set(DB.datasource.getConnection());
+                } catch(SQLException e) {
+                    throw new FastRuntimeException(e);
+                }
+            }
+            return connHolder.get();
+        }
+
+        public void close() {
+            try {
+                connHolder.get().close();
+                connHolder.set(null);
+            } catch(SQLException e) {
+                throw new FastRuntimeException(e);
+            }
+        }
     }
 }
