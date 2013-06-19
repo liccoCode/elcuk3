@@ -2,8 +2,9 @@ $ ->
   Highcharts.setOptions(global: {useUTC: false})
   SKU = 'sku'
   SID = 'sid'
-  defaultDate = $.DateUtil.addDay(-30)
-  now = $.DateUtil.addDay(30, defaultDate)
+  # 这里的 31 天是与 sku/sid 的分析数据中的 day30 所计算的数据保持一致
+  defaultDate = $.DateUtil.addDay(-31)
+  now = $.DateUtil.addDay(31, defaultDate)
 
   class Tabs
     constructor: (name) ->
@@ -37,18 +38,12 @@ $ ->
       text: 'Chart Title'
     xAxis:
       type: 'datetime'
-      dateTimeLabelFormats:
-        day: '%Y-%m-%d %e'
-      tickInterval: 5 * (24 * 3600 * 1000)
     yAxis:
       title:
         text: yName
       min: 0
     plotOptions:
       series: # 需要从服务器获取开始时间
-        pointStart: new Date().getTime()
-      # 1day
-        pointInterval: 24 * 3600 * 1000
         cursor: 'pointer'
         point:
           events: {}
@@ -64,7 +59,7 @@ $ ->
         )
         s
       crosshairs: true
-      xDateFormat: '%Y-%m-%d %A'
+      xDateFormat: '%Y-%m-%d'
     series: []
     # 设置这条线的'标题'
     head: (title) ->
@@ -184,20 +179,24 @@ $ ->
           alert(r.message)
         else
           unitLines = newSaleUnitLines()
-          unitLines.head("Selling [<span style='color:orange'>" + displayStr + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
-          names =
-            unit_all: 'Unit Order(all)'
-            unit_uk: 'Unit Order(uk)'
-            unit_de: 'Unit Order(de)'
-            unit_fr: 'Unit Order(fr)'
-            unit_us: 'Unit Order(us)'
-          # 将曲线的名字更换为可读性更强的
-          r['series'].map((l) ->
-            l.name = names[l.name])
-          for line in r['series']
-            unitLines.series.push(line)
-          unitLines.xStart(r['pointStart'])
-          $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
+          if r['series'].length == 0
+            $('#' + unitLines.id()).html('没有数据, 无法绘制曲线...')
+          else
+            unitLines.head("Selling [<span style='color:orange'>" + displayStr + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
+            names =
+              unit_all: 'Unit Order(all)'
+              unit_amazon_uk: 'Unit Order(uk)'
+              unit_amazon_de: 'Unit Order(de)'
+              unit_amazon_fr: 'Unit Order(fr)'
+              unit_amazon_us: 'Unit Order(us)'
+              unit_amazon_it: 'Unit Order(it)'
+              unit_amazon_es: 'Unit Order(es)'
+            # 将曲线的名字更换为可读性更强的
+            r['series'].map((l) ->
+              l.name = names[l.name])
+            for line in r['series']
+              unitLines.series.push(line)
+            $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
       finally
         LoadMask.unmask()
     )
@@ -216,15 +215,17 @@ $ ->
           salesLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Sales(USD)")
           names =
             sale_all: 'Sales(all)'
-            sale_uk: 'Sales(uk)'
-            sale_de: 'Sales(de)'
-            sale_fr: 'Sales(fr)'
-            sale_us: 'Sales(us)'
+            sale_amazon_uk: 'Sales(uk)'
+            sale_amazon_de: 'Sales(de)'
+            sale_amazon_fr: 'Sales(fr)'
+            sale_amazon_us: 'Sales(us)'
+            sale_amazon_es: 'Sales(es)'
+            sale_amazon_it: 'Sales(it)'
           r['series'].map((l) ->
             l.name = names[l.name])
           for line in r['series']
             salesLines.series.push(line)
-          salesLines.xStart(r['pointStart'])
+          #          salesLines.xStart(r['pointStart'])
           $('#' + salesLines.id()).data('char', new Highcharts.Chart(salesLines))
       finally
         LoadMask.unmask()

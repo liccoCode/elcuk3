@@ -10,7 +10,6 @@ import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.Play;
 import play.cache.Cache;
 import play.mvc.After;
 import play.mvc.Before;
@@ -42,21 +41,16 @@ public class Analyzes extends Controller {
         render(accs, categoryIds, p);
     }
 
-    // 开发用
-    @Before
+    @Before(only = {"analyzes", "ajaxUnit"})
     public static void countTime() {
-        if(Play.mode.isDev())
-            request.args.put("begin", System.currentTimeMillis() + "");
+        request.args.put("begin", System.currentTimeMillis() + "");
     }
 
     //
-    @After
+    @After(only = {"analyzes", "ajaxUnit"})
     public static void countAfter() {
-        if(Play.mode.isDev()) {
-            Object begin = request.args.get("begin");
-            Logger.info("%s past %s", request.action,
-                    System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
-        }
+        Object begin = request.args.get("begin");
+        Logger.info("%s past %s ms", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
     }
 
     /**

@@ -5,7 +5,8 @@ import helper.Dates;
 import models.market.Feedback;
 import models.market.M;
 import models.market.Orderr;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -65,26 +66,38 @@ public class OrderItemQuery {
         return rows2Vo(rows);
     }
 
-
-    public List<AnalyzeVO> analyzeVos(Date from, Date to, M market) {
-        Validate.notNull(from);
-        Validate.notNull(to);
-        Validate.notNull(market);
+    /**
+     * 分析页面一段时间内的销量数据
+     *
+     * @param from
+     * @param to
+     * @param market
+     * @param isSku  key 为 sku 或者 sid
+     * @return
+     */
+    public Map<String, Integer> analyzeDaySale(Date from, Date to, M market, boolean isSku) {
+        Map<String, Integer> saleMap = new HashMap<String, Integer>();
         SqlSelect sql = new SqlSelect()
-                .select("oi.product_sku as sku", "oi.selling_sellingId as sid", "s.asin as asin",
-                        "oi.quantity as qty", "oi.createDate as _date", "o.account_id as aid",
-                        "oi.market")
-                .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
-                .leftJoin("Selling s ON s.sellingId=oi.selling_sellingId")
+                .select("sum(oi.quantity) qty", "oi.selling_sellingId sid")
                 .from("OrderItem oi")
-                .where("oi.product_sku IS NOT NULL")
-                .where("oi.market=?").param(market.name())
-                .where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to)
-                .orderBy("oi.createDate DESC");
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .where("o.createDate>=?").param(market.withTimeZone(from).toDate())
+                .where("o.createDate<=?").param(market.withTimeZone(to).toDate())
+                .where("o.market=?").param(market.name())
+                .where("o.state IN (?,?,?)")
+                .params(Orderr.S.PAYMENT.name(), Orderr.S.PENDING.name(), Orderr.S.SHIPPED.name());
+        if(isSku) {
+            sql.groupBy("oi.product_sku");
+        } else {
+            sql.groupBy("oi.selling_sellingId");
+        }
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        return rows2Vo(rows);
+        for(Map<String, Object> row : rows) {
+            saleMap.put(row.get("sid").toString(), NumberUtils.toInt(row.get("qty").toString()));
+        }
+        return saleMap;
     }
+
 
     public String feedbackSKU(Feedback feedback) {
         Connection conn = DB.getConnection();
@@ -167,83 +180,100 @@ public class OrderItemQuery {
     }
 
     /**
-     * 所有正常销售的订单的订单项目. 不包括 CANCEL, REFUNDED, RETURNEW 的订单
+     * sid 的销量曲线
      *
+     * @param from
+     * @param to
+     * @param market
+     * @param sid
      * @return
      */
-    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market, String categoryId) {
+    public List<AnalyzeVO> sidSalesAndUnits(Date from, Date to, M market, String sid) {
         SqlSelect sql = new SqlSelect()
-                .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
+                .select("sum(oi.quantity) qty", "sum(oi.usdCost) usdCost",
+                        "DATE_FORMAT(DATE_ADD(oi.createDate, INTERVAL " + market.timeZoneOffset() +
+                                " HOUR), '%Y-%m-%d') as _date")
                 .from("OrderItem oi")
-                .leftJoin("Orderr o ON oi.order_orderId=o.orderId");
-        if(categoryId != null)
-            sql.leftJoin("Product p ON p.sku=oi.product_sku").where("p.category_categoryId=?")
-                    .param(categoryId);
-        sql.where("oi.createDate>=?").param(from)
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
+                .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId")
+                .where("s.merchantSKU=?").param(sid)
+                .where("oi.createDate>=?").param(market.withTimeZone(from).toDate())
+                .where("oi.createDate<=?").param(market.withTimeZone(to).toDate())
                 .where("oi.market=?").param(market.name())
-                .where("oi.createDate<=?").param(to)
                 .where("o.state NOT IN (?,?,?)")
-                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
-                        Orderr.S.RETURNNEW.name());
-
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(), Orderr.S.RETURNNEW.name())
+                .groupBy("_date");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
     }
 
     /**
-     * 所有正常销售的订单的订单项目. 不包括 CANCEL, REFUNDED, RETURNEW 的订单
+     * sku 的销量曲线
      *
-     * @return
-     */
-    public List<AnalyzeVO> allNormalSaleOrderItem(Date from, Date to, M market) {
-        return allNormalSaleOrderItem(from, to, market, null);
-    }
-
-    /**
-     * 加载某一个 SKU 的所有正常销售的 OrderItem. 不包括 CANCEL, REFUNDED, RETURNEW 的订单
-     *
-     * @param sku
      * @param from
      * @param to
+     * @param market
+     * @param sku
      * @return
      */
-    public List<AnalyzeVO> skuNormalSaleOrderItem(String sku, Date from, Date to, M market) {
+    public List<AnalyzeVO> skuSalesAndUnits(Date from, Date to, M market, String sku) {
         SqlSelect sql = new SqlSelect()
-                .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
+                .select("sum(oi.quantity) as qty", "sum(oi.usdCost) usdCost",
+                        "DATE_FORMAT(DATE_ADD(oi.createDate, INTERVAL " + market.timeZoneOffset() +
+                                " HOUR), '%Y-%m-%d') as _date")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .leftJoin("Product p ON p.sku=oi.product_sku")
                 .where("p.sku=?").param(sku)
-                .where("oi.createDate>=?").param(from)
+                .where("oi.createDate>=?").param(market.withTimeZone(from).toDate())
+                .where("oi.createDate<=?").param(market.withTimeZone(to).toDate())
                 .where("oi.market=?").param(market.name())
-                .where("oi.createDate<=?").param(to)
-                .where("oi.createDate<=?").param(to)
                 .where("o.state NOT IN (?,?,?)")
-                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
-                        Orderr.S.RETURNNEW.name());
+                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(), Orderr.S.RETURNNEW.name())
+                .groupBy("_date");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
     }
 
-    public List<AnalyzeVO> mskuWithAccountNormalSaleOrderItem(String msku, Long accId,
-                                                              Date from, Date to, M market) {
+    /**
+     * Cateogyr 的销量曲线
+     *
+     * @param from
+     * @param to
+     * @param market
+     * @param categoryId
+     * @return
+     */
+    public List<AnalyzeVO> categorySalesAndUnits(Date from, Date to, M market, String categoryId) {
         SqlSelect sql = new SqlSelect()
-                .select("oi.createDate as _date", "oi.quantity as qty", "oi.usdCost", "oi.market")
+                .select("sum(oi.quantity) qty", "sum(oi.usdCost) usdCost",
+                        "DATE_FORMAT(DATE_ADD(oi.createDate, INTERVAL " + market.timeZoneOffset() +
+                                " HOUR), '%Y-%m-%d') as _date")
                 .from("OrderItem oi")
-                .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
-                .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId");
-        // 如果有 account 就过滤
-        if(accId != null)
-            sql.leftJoin("Account a ON s.account_id=a.id").where("a.id=?").param(accId);
-        sql.where("s.merchantSKU=?").param(msku)
-                .where("oi.createDate>=?").param(from)
+                .leftJoin("Orderr o ON oi.order_orderId=o.orderId");
+        if(StringUtils.isNotBlank(categoryId))
+            sql.leftJoin("Product p ON p.sku=oi.product_sku").where("p.category_categoryId=?").param(categoryId);
+        sql.where("o.createDate>=?").param(market.withTimeZone(from).toDate())
+                .where("o.createDate<=?").param(market.withTimeZone(to).toDate())
                 .where("oi.market=?").param(market.name())
-                .where("oi.createDate<=?").param(to)
-                .where("o.state NOT IN (?,?,?)")
-                .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(),
-                        Orderr.S.RETURNNEW.name());
+                .where("o.state IN (?,?,?)")
+                .params(Orderr.S.PAYMENT.name(), Orderr.S.PENDING.name(), Orderr.S.SHIPPED.name())
+                .groupBy("_date");
+
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         return rows2Vo(rows);
+    }
+
+    /**
+     * 所有产品的销量曲线
+     *
+     * @param from
+     * @param to
+     * @param market
+     * @return
+     */
+    public List<AnalyzeVO> allSalesAndUnits(Date from, Date to, M market) {
+        return categorySalesAndUnits(from, to, market, null);
     }
 
     private List<AnalyzeVO> rows2Vo(List<Map<String, Object>> rows) {

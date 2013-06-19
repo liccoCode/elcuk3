@@ -10,16 +10,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.*;
-import query.vo.AnalyzeVO;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 分析页面的 Post 请求
@@ -78,10 +75,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             dtos = new ArrayList<AnalyzeDTO>();
             boolean isSku = StringUtils.equalsIgnoreCase("sku", this.type);
 
-            // 从北京时间?
-            Date startOfDay = Dates.night(this.to);
-
-            // 准备计算用的数据容器?
+            // 准备计算用的数据容器
             Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
             if(isSku) {
                 for(String sku : new ProductQuery().skus()) {
@@ -93,54 +87,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 }
             }
 
-            // 通过 Job 异步 fork 加载不同时段的数据
-            /**
-             * 1. 此处
-             * 2. OrderItem.categoryPercent
-             * 3. OrderItem.skuOrMskuAccountRelateOrderItem
-             */
-            List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-            final Date inerFrom =
-                    this.from == null ? DateTime.now().minusMonths(1).toDate() : this.from;
-            final Date inerTo =
-                    this.to == null ? DateTime.now().minusMonths(1).toDate() : this.to;
-            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
-                @Override
-                public List<AnalyzeVO> doJobWithResult(M m) {
-                    return new OrderItemQuery().analyzeVos(
-                            m.withTimeZone(Dates.morning(inerFrom)).toDate(),
-                            m.withTimeZone(Dates.night(inerTo)).toDate(),
-                            m);
-                }
-
-                @Override
-                public String id() {
-                    return "AnalyzePost.analyzes";
-                }
-            }));
-
             // 销量 AnalyzeVO
-            //一天的毫秒数
-            long oneDayMillis = 60 * 60 * 24 * 1000;
-            for(AnalyzeVO vo : vos) {
-                String key = isSku ? vo.sku : vo.sid;
-                AnalyzeDTO currentDto = analyzeMap.get(key);
-                if(currentDto == null) {
-                    Logger.warn("AnalyzeVO: %s, DTO is not exist. Key[%s]", vo, key);
-                    continue;
-                }
-
-                long differTime =
-                        vo.market.withTimeZone(startOfDay).getMillis() - vo.date.getTime();
-                if(differTime <= TimeUnit.DAYS.toMillis(2) && differTime >= oneDayMillis)
-                    currentDto.day1 += vo.qty;
-                //Day7(ave) Day30(ave) 的数据收集时去掉Day 0那天
-                if(differTime <= TimeUnit.DAYS.toMillis(7) && differTime >= oneDayMillis)
-                    currentDto.day7 += vo.qty;
-                if(differTime <= TimeUnit.DAYS.toMillis(30) && differTime >= oneDayMillis)
-                    currentDto.day30 += vo.qty;
-            }
-
+            pullDaySales(isSku, analyzeMap);
 
             // ProcureUnit
             AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
@@ -180,6 +128,86 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         }
 
         return dtos;
+    }
+
+    private void pullDaySales(boolean isSku, Map<String, AnalyzeDTO> analyzeMap) {
+        DateTime now = DateTime.now();
+        OrderItemQuery query = new OrderItemQuery();
+        pullDay1(isSku, analyzeMap, now, query);
+        pullDay7(isSku, analyzeMap, now, query);
+        pullDay30(isSku, analyzeMap, now, query);
+    }
+
+    /**
+     * 昨天
+     *
+     * @param isSku
+     * @param analyzeMap
+     * @param now
+     * @param query
+     */
+    private void pullDay1(boolean isSku, Map<String, AnalyzeDTO> analyzeMap, DateTime now, OrderItemQuery query) {
+        for(M market : Promises.MARKETS) {
+            Map<String, Integer> saleMap = query.analyzeDaySale(
+                    Dates.morning(now.minusDays(1).toDate()),
+                    Dates.night(now.minusDays(1).toDate()),
+                    market, isSku);
+            for(String key : saleMap.keySet()) {
+                try {
+                    analyzeMap.get(key).day1 = saleMap.get(key) == null ? 0 : saleMap.get(key);
+                } catch(NullPointerException e) {
+                    //ignore 如果不存在就不需要计算了
+                }
+            }
+        }
+    }
+
+    /**
+     * Day7 不包括今天的前 7 天
+     *
+     * @param isSku
+     * @param analyzeMap
+     * @param now
+     * @param query
+     */
+    private void pullDay7(boolean isSku, Map<String, AnalyzeDTO> analyzeMap, DateTime now, OrderItemQuery query) {
+        for(M market : Promises.MARKETS) {
+            Map<String, Integer> saleMap = query.analyzeDaySale(
+                    Dates.morning(now.minusDays(8).toDate()),
+                    Dates.night(now.minusDays(1).toDate()),
+                    market, isSku);
+            for(String key : saleMap.keySet()) {
+                try {
+                    analyzeMap.get(key).day7 = saleMap.get(key) == null ? 0 : saleMap.get(key);
+                } catch(NullPointerException e) {
+                    //ignore 如果不存在就不需要计算了
+                }
+            }
+        }
+    }
+
+    /**
+     * Day30 不包括今天的前 30 天
+     *
+     * @param isSku
+     * @param analyzeMap
+     * @param now
+     * @param query
+     */
+    private void pullDay30(boolean isSku, Map<String, AnalyzeDTO> analyzeMap, DateTime now, OrderItemQuery query) {
+        for(M market : Promises.MARKETS) {
+            Map<String, Integer> saleMap = query.analyzeDaySale(
+                    Dates.morning(now.minusDays(31).toDate()),
+                    Dates.night(now.minusDays(1).toDate()),
+                    market, isSku);
+            for(String key : saleMap.keySet()) {
+                try {
+                    analyzeMap.get(key).day30 = saleMap.get(key) == null ? 0 : saleMap.get(key);
+                } catch(NullPointerException e) {
+                    //ignore 如果不存在就不需要计算了
+                }
+            }
+        }
     }
 
     /**

@@ -114,6 +114,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         fees.addAll(productCharges(doc, url));
         fees.addAll(otherFee(doc, url));
         fees.addAll(amazonFee(doc, url));
+        Logger.info("Shipped Order SaleFee(%s): %s", fees.size(), url);
         return fees;
     }
 

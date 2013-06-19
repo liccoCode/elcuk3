@@ -23,13 +23,12 @@ public class Promises {
      * Fork 多个 Job 根据 Callback.doJobWithResult(m) 去执行计算;
      * ps:
      * 1. M:market 就没有进行抽象为 Context 了, 有需要再重构
-     * 2. 这个方法进行线程同步控制, 不可以多线程调用 fork, 否则会造成 N*M 的多线程问题.
      *
      * @param callback
      * @param <T>
      * @return
      */
-    public synchronized static <T> List<T> forkJoin(final Callback<T> callback) {
+    public static <T> List<T> forkJoin(final Callback<T> callback) {
         List<T> vos = new ArrayList<T>();
         // 通过 Job 异步 fork 加载不同时段的数据
         List<F.Promise<List<T>>> voPromises = new ArrayList<F.Promise<List<T>>>();
@@ -37,19 +36,18 @@ public class Promises {
         Logger.info("[%s:#%s] Start Fork to fetch Analyzes Sellings.", callback.id(), begin);
         try {
             for(final M m : Promises.MARKETS) {
-                voPromises.add(new Job<List<T>>() {
-                    @Override
-                    public List<T> doJobWithResult() throws Exception {
-                        return callback.doJobWithResult(m);
-                    }
-                }.now());
+                try {
+                    vos.addAll(new Job<List<T>>() {
+                        @Override
+                        public List<T> doJobWithResult() throws Exception {
+                            return callback.doJobWithResult(m);
+                        }
+                    }.now().get(5, TimeUnit.MINUTES));
+                } catch(Exception e) {
+                    throw new FastRuntimeException(
+                            String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
+                }
             }
-            for(F.Promise<List<T>> voP : voPromises) {
-                vos.addAll(voP.get(1, TimeUnit.MINUTES));
-            }
-        } catch(Exception e) {
-            throw new FastRuntimeException(
-                    String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
         } finally {
             Logger.info("[%s:#%s] End of Fork fetch. Passed: %s ms",
                     callback.id(),
