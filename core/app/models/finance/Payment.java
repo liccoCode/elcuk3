@@ -443,7 +443,7 @@ public class Payment extends Model {
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
      * 3. 处于等待支付状态
-     * 4. 额度上线 5W 美金(以 6 换算, 300000 RMB)
+     * 4. 额度上线 200w HKB, 折算成(23w USD 与 140W CNY)
      *
      * @return
      */
@@ -455,8 +455,8 @@ public class Payment extends Model {
                 S.WAITING, unit.attrs.currency).first();
 
         if(payment == null ||
-                payment.totalFees()._1 + unit.attrs.currency.toUSD(unit.totalAmount()) > 50000 ||
-                payment.totalFees()._2 + unit.attrs.currency.toCNY(unit.totalAmount()) > 300000) {
+                payment.totalFees()._1 + unit.attrs.currency.toUSD(unit.totalAmount()) > 230000 ||
+                payment.totalFees()._2 + unit.attrs.currency.toCNY(unit.totalAmount()) > 1400000) {
             payment = new Payment();
             if(unit.deliveryment.cooperator.paymentMethods.size() <= 0)
                 throw new PaymentException(
