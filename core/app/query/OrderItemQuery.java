@@ -191,7 +191,8 @@ public class OrderItemQuery {
     public List<AnalyzeVO> sidSalesAndUnits(Date from, Date to, M market, String sid) {
         SqlSelect sql = new SqlSelect()
                 .select("sum(oi.quantity) qty", "sum(oi.usdCost) usdCost",
-                        "DATE_FORMAT(oi.createDate, '%Y-%m-%d') as _date")
+                        "DATE_FORMAT(DATE_ADD(oi.createDate, INTERVAL " + market.timeZoneOffset() +
+                                " HOUR), '%Y-%m-%d') as _date")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId")
@@ -218,7 +219,8 @@ public class OrderItemQuery {
     public List<AnalyzeVO> skuSalesAndUnits(Date from, Date to, M market, String sku) {
         SqlSelect sql = new SqlSelect()
                 .select("sum(oi.quantity) as qty", "sum(oi.usdCost) usdCost",
-                        "DATE_FORMAT(oi.createDate, '%Y-%m-%d') as _date")
+                        "DATE_FORMAT(DATE_ADD(oi.createDate, INTERVAL " + market.timeZoneOffset() +
+                                " HOUR), '%Y-%m-%d') as _date")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .leftJoin("Product p ON p.sku=oi.product_sku")
@@ -245,7 +247,8 @@ public class OrderItemQuery {
     public List<AnalyzeVO> categorySalesAndUnits(Date from, Date to, M market, String categoryId) {
         SqlSelect sql = new SqlSelect()
                 .select("sum(oi.quantity) qty", "sum(oi.usdCost) usdCost",
-                        "DATE_FORMAT(oi.createDate, '%Y-%m-%d') as _date")
+                        "DATE_FORMAT(DATE_ADD(oi.createDate, INTERVAL " + market.timeZoneOffset() +
+                                " HOUR), '%Y-%m-%d') as _date")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId");
         if(StringUtils.isNotBlank(categoryId))

@@ -809,6 +809,30 @@ public enum M {
     }
 
     /**
+     * 根据市场返回相对于北京时间的时差;
+     * 例如:
+     * DE: +2,  CN: +8 , -> 2 - 8 = -6
+     * US: -7,  CN: +8 , -> -7 - 8 = -15
+     *
+     * @return
+     */
+    public int timeZoneOffset() {
+        switch(this) {
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+                return -6;
+            case AMAZON_UK:
+                return -7;
+            case AMAZON_US:
+                return -15;
+            default:
+                return 0;
+        }
+    }
+
+    /**
      * 模拟人工方式修改 Listing 信息的地址
      *
      * @return

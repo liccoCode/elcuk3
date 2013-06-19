@@ -91,11 +91,13 @@ public class MWSOrders {
             orderr.state = parseOrderState(amzOrder.getOrderStatus());
             orderr.shipLevel = amzOrder.getShipServiceLevel();
             orderr.market = M.val(amzOrder.getSalesChannel());
-            orderr.createDate = new Date();
 
             if(amzOrder.getPurchaseDate() != null) {
-                orderr.paymentDate = amzOrder.getPurchaseDate().toGregorianCalendar().getTime();
+                orderr.createDate = amzOrder.getPurchaseDate().toGregorianCalendar().getTime();
+            } else {
+                orderr.createDate = new Date();
             }
+            orderr.paymentDate = orderr.createDate;
 
             if(amzOrder.getShippingAddress() != null) {
                 Address address = amzOrder.getShippingAddress();
