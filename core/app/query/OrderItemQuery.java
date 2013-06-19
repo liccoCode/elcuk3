@@ -75,10 +75,10 @@ public class OrderItemQuery {
      * @param isSku  key 为 sku 或者 sid
      * @return
      */
-    public Map<String, Integer> analyzeDaySale(Date from, Date to, M market, boolean isSku) {
+    public Map<String, Integer> analyzeDaySale(Date from, Date to, M market, boolean isSku, Connection conn) {
         Map<String, Integer> saleMap = new HashMap<String, Integer>();
         SqlSelect sql = new SqlSelect()
-                .select("sum(oi.quantity) qty", "oi.selling_sellingId sid")
+                .select("sum(oi.quantity) qty", isSku ? "oi.product_sku" : "oi.selling_sellingId sid")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .where("o.createDate>=?").param(market.withTimeZone(from).toDate())
@@ -91,11 +91,15 @@ public class OrderItemQuery {
         } else {
             sql.groupBy("oi.selling_sellingId");
         }
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<Map<String, Object>> rows = DBUtils.rows(conn, sql.toString(), sql.getParams().toArray());
         for(Map<String, Object> row : rows) {
             saleMap.put(row.get("sid").toString(), NumberUtils.toInt(row.get("qty").toString()));
         }
         return saleMap;
+    }
+
+    public Map<String, Integer> analyzeDaySale(Date from, Date to, M market, boolean isSku) {
+        return analyzeDaySale(from, to, market, isSku, DB.getConnection());
     }
 
 
