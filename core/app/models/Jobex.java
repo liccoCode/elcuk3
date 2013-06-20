@@ -1,7 +1,5 @@
 package models;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -21,7 +19,6 @@ import javax.persistence.Entity;
  * Time: 1:05 AM
  */
 @Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)//添加缓存, 因为经常加载
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Jobex extends Model {
 

@@ -3,7 +3,6 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -19,11 +18,9 @@ import java.util.List;
  * Time: 3:21 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Brand extends GenericModel {
 
     @OneToMany(mappedBy = "brand", fetch = FetchType.EAGER)
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<Family> families;
 
     /**
@@ -45,7 +42,6 @@ public class Brand extends GenericModel {
      * Brand 可以附属与很多类别
      */
     @ManyToMany(mappedBy = "brands", cascade = CascadeType.PERSIST)
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<Category> categories;
 
     @PrePersist

@@ -6,7 +6,6 @@ import models.embedded.CategorySettings;
 import models.support.TicketReason;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -25,7 +24,6 @@ import java.util.Map;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Category extends GenericModel {
 
     @OneToMany(mappedBy = "category",

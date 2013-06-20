@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -43,7 +42,6 @@ import java.util.regex.Pattern;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Product extends GenericModel implements ElcukRecord.Log {
     public static final Pattern Nub = Pattern.compile("[0-9]*");
     /**
