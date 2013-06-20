@@ -5,6 +5,7 @@ import models.market.M;
 import models.view.post.AnalyzePost;
 import play.libs.F;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * Date: 8/31/12
  * Time: 6:03 PM
  */
-public class AnalyzeDTO {
+public class AnalyzeDTO implements Serializable {
 
     public AnalyzeDTO(String fid) {
         this.fid = fid;

@@ -111,7 +111,7 @@ public class HighChart implements Serializable {
     /**
      * 线图的数据, 线的名称 + 线的数据, x 轴用时间代替了.
      */
-    public class Line {
+    public class Line implements Serializable {
         Line(String name) {
             this.name = name;
         }

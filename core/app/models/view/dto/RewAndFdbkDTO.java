@@ -12,6 +12,7 @@ import play.cache.Cache;
 import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Date: 8/9/12
  * Time: 10:28 AM
  */
-public class RewAndFdbkDTO {
+public class RewAndFdbkDTO implements Serializable {
 
     public RewAndFdbkDTO() {
     }

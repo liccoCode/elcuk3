@@ -123,8 +123,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             // review
             pullReviewToDTO(isSku, analyzeMap);
 
-            Cache.add(cacke_key, dtos, "12h");
-            Cache.set(cacke_key + ".time", new Date(), "12h");
+            Cache.add(cacke_key, dtos, "16h");
+            Cache.set(cacke_key + ".time", new Date(), "16h");
         }
 
         return dtos;
@@ -146,7 +146,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      * @param now
      * @param query
      */
-    private void pullDay1(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now, final OrderItemQuery query) {
+    private void pullDay1(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now,
+                          final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
             public Map<String, Integer> doJobWithResult(M m) {
@@ -182,7 +183,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      * @param now
      * @param query
      */
-    private void pullDay7(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now, final OrderItemQuery query) {
+    private void pullDay7(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now,
+                          final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
             public Map<String, Integer> doJobWithResult(M m) {
@@ -218,7 +220,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      * @param now
      * @param query
      */
-    private void pullDay30(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now, final OrderItemQuery query) {
+    private void pullDay30(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now,
+                           final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
             public Map<String, Integer> doJobWithResult(M m) {

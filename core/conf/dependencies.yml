@@ -12,6 +12,7 @@ require:
     - play -> mockito 0.1:
         id: test
     #- blockingCache -> blockingCache 0.2
+    - redis -> redis 0.4
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
@@ -45,6 +46,11 @@ repositories:
         artifact: "https://raw.github.com/wppurking/blockingCache/master/dist/[module]-[revision].zip"
         contains:
             - blockingCache -> *
+    - redis:
+        type: HTTP
+        artifact: "https://raw.github.com/wppurking/play-redis/master/dist/[module]-[revision].zip"
+        contains:
+            - redis -> *
     - alibaba Snapshots:
         type: iBiblio
         root: "http://code.alibabatech.com/mvn/releases/"
