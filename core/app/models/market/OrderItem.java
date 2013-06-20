@@ -6,7 +6,6 @@ import models.view.dto.HighChart;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
-import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
@@ -14,6 +13,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单的具体订单项
@@ -164,26 +164,42 @@ public class OrderItem extends GenericModel {
      * @return
      */
     @Cached("8h")
-    public static HighChart ajaxHighChartSales(String val, Account acc, String type, Date from, Date to) {
+    public static HighChart ajaxHighChartSales(final String val, Account acc, final String type, Date from, Date to) {
         String cached_key = Caches.Q.cacheKey("sales", val, acc, type, from, to);
         HighChart lines = Cache.get(cached_key, HighChart.class);
         if(lines != null) return lines;
-        // 做内部参数的容错
-        Date _from = Dates.morning(from);
-        Date _to = Dates.night(to);
+        synchronized(cached_key.intern()) {
+            lines = Cache.get(cached_key, HighChart.class);
+            if(lines != null) return lines;
 
-        lines = new HighChart().startAt(_from.getTime());
-        List<AnalyzeVO> lineVos;
-        for(M market : Promises.MARKETS) {
-            lineVos = getAnalyzeVOs(market, val, type, _from, _to);
-            for(AnalyzeVO vo : lineVos) {
-                lines.line("sale_all").add(vo.date, vo.usdCost);
-                lines.line("sale_" + market.name().toLowerCase()).add(vo.date, vo.usdCost);
-            }
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            final HighChart finalLines = new HighChart().startAt(_from.getTime());
+            Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
+                @Override
+                public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
+                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
+                        for(AnalyzeVO vo : lineVos) {
+                            finalLines.line("sale_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.line("sale_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                public String id() {
+                    return "OrderItem.ajaxHighChartUnitOrder";
+                }
+            });
+
+            finalLines.sort();
+            Cache.add(cached_key, finalLines, "8h");
         }
-        lines.sort();
-        Cache.add(cached_key, lines, "8h");
-        return lines;
+        return Cache.get(cached_key, HighChart.class);
     }
 
     /**
@@ -196,42 +212,43 @@ public class OrderItem extends GenericModel {
      * @param to  @return {series_size, days, series_n}
      */
     @Cached("8h")
-    public static HighChart ajaxHighChartUnitOrder(String val, Account acc, String type, Date from, Date to) {
+    public static HighChart ajaxHighChartUnitOrder(final String val, Account acc, final String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, acc, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
-        // 做内部参数的容错
-        Date _from = Dates.morning(from);
-        Date _to = Dates.night(to);
-        lines = new HighChart();
-        List<AnalyzeVO> lineVos;
-        for(M market : Promises.MARKETS) {
-            lineVos = getAnalyzeVOs(market, val, type, _from, _to);
-            for(AnalyzeVO vo : lineVos) {
-                lines.line("unit_all").add(vo.date, vo.qty.floatValue());
-                lines.line("unit_" + market.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
-            }
-        }
-        lines.sort();
-        Cache.add(cacked_key, lines, "8h");
-        return lines;
-    }
+        synchronized(cacked_key.intern()) { // 使用 cacked_key 在 String pool 中的对象
+            lines = Cache.get(cacked_key, HighChart.class);
+            if(lines != null) return lines;
 
-    private static List<AnalyzeVO> getAnalyzeVOs(M market, String val, String type, Date from, Date to) {
-        List<AnalyzeVO> lineVos;
-        OrderItemQuery query = new OrderItemQuery();
-        if("all".equals(val)) {
-            lineVos = query.allSalesAndUnits(from, to, market);
-        } else if(val.matches("^\\d{2}$")) {
-            lineVos = query.categorySalesAndUnits(from, to, market, val);
-        } else if("sid".equals(type)) {
-            lineVos = query.sidSalesAndUnits(from, to, market, val);
-        } else if("sku".equals(type)) {
-            lineVos = query.skuSalesAndUnits(from, to, market, val);
-        } else {
-            throw new FastRuntimeException("不支持的类型!");
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            final HighChart finalLines = new HighChart();
+            Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
+                @Override
+                public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
+                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
+                        for(AnalyzeVO vo : lineVos) {
+                            finalLines.line("unit_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.line("unit_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+                        }
+                    }
+                    return null;
+                }
+
+                @Override
+                public String id() {
+                    return "OrderItem.ajaxHighChartUnitOrder";
+                }
+            });
+
+            finalLines.sort();
+            Cache.add(cacked_key, finalLines, "8h");
         }
-        return lineVos;
+
+        return Cache.get(cacked_key, HighChart.class);
     }
 
     /**
@@ -257,20 +274,24 @@ public class OrderItem extends GenericModel {
                     acc.type.withTimeZone(to).toDate(),
                     acc.id);
         } else {
-            vos.addAll(Promises.forkJoin(new Promises.Callback<AnalyzeVO>() {
+            List<List<AnalyzeVO>> results = Promises.forkJoin(new Promises.DBCallback<List<AnalyzeVO>>() {
                 @Override
                 public List<AnalyzeVO> doJobWithResult(M m) {
                     return new OrderItemQuery().groupCategory(
                             m.withTimeZone(from).toDate(),
                             m.withTimeZone(to).toDate(),
-                            m);
+                            m,
+                            getConnection());
                 }
 
                 @Override
                 public String id() {
                     return "OrderItem.categoryPercent";
                 }
-            }));
+            });
+            for(List<AnalyzeVO> result : results) {
+                vos.addAll(result);
+            }
         }
         for(AnalyzeVO vo : vos) {
             if(StringUtils.equals(type, "sales"))

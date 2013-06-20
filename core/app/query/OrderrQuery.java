@@ -6,6 +6,7 @@ import models.market.Orderr;
 import play.db.helper.SqlSelect;
 import query.vo.OrderrVO;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,14 +25,14 @@ public class OrderrQuery {
      * @param from
      * @return
      */
-    public List<OrderrVO> dashBoardOrders(Date from, Date to, M market) {
+    public List<OrderrVO> dashBoardOrders(Date from, Date to, M market, Connection conn) {
         SqlSelect sql = new SqlSelect()
                 .select("o.createDate", "o.market", "o.orderId", "o.account_id", "o.state")
                 .from("Orderr o")
                 .where("o.market=?").param(market.name())
                 .where("o.createDate>=?").param(from)
                 .where("o.createDate<=?").param(to);
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<Map<String, Object>> rows = DBUtils.rows(conn, sql.toString(), sql.getParams().toArray());
         List<OrderrVO> vos = new ArrayList<OrderrVO>();
         for(Map<String, Object> row : rows) {
             OrderrVO vo = new OrderrVO();

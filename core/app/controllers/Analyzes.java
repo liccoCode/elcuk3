@@ -10,6 +10,7 @@ import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import play.mvc.After;
 import play.mvc.Before;
@@ -43,15 +44,18 @@ public class Analyzes extends Controller {
 
     @Before(only = {"analyzes", "ajaxUnit"})
     public static void countTime() {
+        if(Play.mode.isProd()) return;
         request.args.put("begin", System.currentTimeMillis() + "");
     }
 
     //
     @After(only = {"analyzes", "ajaxUnit"})
     public static void countAfter() {
+        if(Play.mode.isProd()) return;
         Object begin = request.args.get("begin");
         Logger.info("%s past %s ms", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
     }
+
 
     /**
      * 分析页面下方的 sku/sid table
