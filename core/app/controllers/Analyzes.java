@@ -81,8 +81,7 @@ public class Analyzes extends Controller {
     public static void ajaxUnit(AnalyzePost p) {
         try {
             response.cacheFor("10mn");
-            renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val,
-                    Account.<Account>findById(NumberUtils.toLong(p.aid)), p.type, p.from, p.to)));
+            renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -93,8 +92,7 @@ public class Analyzes extends Controller {
         try {
             response.cacheFor("10mn");
             renderJSON(J.json(OrderItem
-                    .ajaxHighChartSales(p.val, Account.<Account>findById(NumberUtils.toLong(p.aid)),
-                            p.type, p.from, p.to)));
+                    .ajaxHighChartSales(p.val, p.type, p.from, p.to)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
