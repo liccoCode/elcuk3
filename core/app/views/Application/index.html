@@ -16,7 +16,9 @@ ${fba.capaticyContent.raw()}
 </div>
 #{/list}
 
-#{render 'Application/feedbackOverView.html', feedbacksOverView:feedbacksOverView/}
+#{cache 'feedbacksOverView'}
+    #{render 'Application/feedbackOverView.html', feedbacksOverView: models.market.Feedback.frontPageTable()/}
+#{/cache}
 #{render 'Application/_orderTable.html', dashborad: dashborad /}
 
 <div class="row-fluid">

@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.cache.CacheFor;
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -102,9 +103,9 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
+    @CacheFor("30mn")
     public static void ajaxSellingRecord(AnalyzePost p) {
         try {
-            response.cacheFor("10mn");
             renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
                     Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
@@ -115,9 +116,9 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的转换率
      */
+    @CacheFor("30mn")
     public static void ajaxSellingTurn(AnalyzePost p) {
         try {
-            response.cacheFor("10mn");
             renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
                     Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
         } catch(Exception e) {
