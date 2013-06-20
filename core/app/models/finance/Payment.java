@@ -440,6 +440,7 @@ public class Payment extends Model {
 
     /**
      * 制作一个 Deliveryment 的支付单;(自己为自己的工厂方法)
+     * 0. 同一个请款单
      * 1. 时间(24h 之内)
      * 2. 同一个工厂
      * 3. 处于等待支付状态
@@ -450,9 +451,9 @@ public class Payment extends Model {
     public static Payment buildPayment(ProcureUnit unit) {
         DateTime now = DateTime.now();
         Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
-                "AND state=? AND currency=?  ORDER BY createdAt DESC",
+                "AND state=? AND currency=? AND pApply=? ORDER BY createdAt DESC",
                 unit.deliveryment.cooperator, now.minusHours(24).toDate(), now.toDate(),
-                S.WAITING, unit.attrs.currency).first();
+                S.WAITING, unit.attrs.currency, unit.deliveryment.apply).first();
 
         if(payment == null ||
                 payment.totalFees()._1 + unit.attrs.currency.toUSD(unit.totalAmount()) > 230000 ||
