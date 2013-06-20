@@ -111,7 +111,7 @@ public class HighChart implements Serializable {
     /**
      * 线图的数据, 线的名称 + 线的数据, x 轴用时间代替了.
      */
-    public class Line {
+    public class Line implements Serializable {
         Line(String name) {
             this.name = name;
         }
@@ -137,7 +137,11 @@ public class HighChart implements Serializable {
             Collections.sort(this.data, new Comparator<Object[]>() {
                 @Override
                 public int compare(Object[] o1, Object[] o2) {
-                    return (int) ((Long) o1[0] - (Long) o2[0]);
+                    long diff = (Long) o1[0] - (Long) o2[0];
+                    // 避免 long 差值大于 Integer 的上限而因类型强转导致排序失败
+                    if(diff >= Integer.MAX_VALUE || diff <= Integer.MIN_VALUE)
+                        diff /= 1000;
+                    return (int) diff;
                 }
             });
             return this;

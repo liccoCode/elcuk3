@@ -123,8 +123,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             // review
             pullReviewToDTO(isSku, analyzeMap);
 
-            Cache.add(cacke_key, dtos, "12h");
-            Cache.set(cacke_key + ".time", new Date(), "12h");
+            Cache.add(cacke_key, dtos, "16h");
+            Cache.set(cacke_key + ".time", new Date(), "16h");
         }
 
         return dtos;
@@ -146,15 +146,28 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      * @param now
      * @param query
      */
-    private void pullDay1(boolean isSku, Map<String, AnalyzeDTO> analyzeMap, DateTime now, OrderItemQuery query) {
-        for(M market : Promises.MARKETS) {
-            Map<String, Integer> saleMap = query.analyzeDaySale(
-                    Dates.morning(now.minusDays(1).toDate()),
-                    Dates.night(now.minusDays(1).toDate()),
-                    market, isSku);
-            for(String key : saleMap.keySet()) {
+    private void pullDay1(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now,
+                          final OrderItemQuery query) {
+        List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
+            @Override
+            public Map<String, Integer> doJobWithResult(M m) {
+                return query.analyzeDaySale(
+                        Dates.morning(now.minusDays(1).toDate()),
+                        Dates.night(now.minusDays(1).toDate()),
+                        m,
+                        isSku,
+                        getConnection());
+            }
+
+            @Override
+            public String id() {
+                return "AnalyzePost.pullDay1";
+            }
+        });
+        for(Map<String, Integer> result : results) {
+            for(String key : result.keySet()) {
                 try {
-                    analyzeMap.get(key).day1 = saleMap.get(key) == null ? 0 : saleMap.get(key);
+                    analyzeMap.get(key).day1 += result.get(key) == null ? 0 : result.get(key);
                 } catch(NullPointerException e) {
                     //ignore 如果不存在就不需要计算了
                 }
@@ -170,15 +183,28 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      * @param now
      * @param query
      */
-    private void pullDay7(boolean isSku, Map<String, AnalyzeDTO> analyzeMap, DateTime now, OrderItemQuery query) {
-        for(M market : Promises.MARKETS) {
-            Map<String, Integer> saleMap = query.analyzeDaySale(
-                    Dates.morning(now.minusDays(8).toDate()),
-                    Dates.night(now.minusDays(1).toDate()),
-                    market, isSku);
-            for(String key : saleMap.keySet()) {
+    private void pullDay7(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now,
+                          final OrderItemQuery query) {
+        List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
+            @Override
+            public Map<String, Integer> doJobWithResult(M m) {
+                return query.analyzeDaySale(
+                        Dates.morning(now.minusDays(8).toDate()),
+                        Dates.night(now.minusDays(1).toDate()),
+                        m,
+                        isSku,
+                        getConnection());
+            }
+
+            @Override
+            public String id() {
+                return "AnalyzePost.pullDay7";
+            }
+        });
+        for(Map<String, Integer> result : results) {
+            for(String key : result.keySet()) {
                 try {
-                    analyzeMap.get(key).day7 = saleMap.get(key) == null ? 0 : saleMap.get(key);
+                    analyzeMap.get(key).day7 += result.get(key) == null ? 0 : result.get(key);
                 } catch(NullPointerException e) {
                     //ignore 如果不存在就不需要计算了
                 }
@@ -194,15 +220,28 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
      * @param now
      * @param query
      */
-    private void pullDay30(boolean isSku, Map<String, AnalyzeDTO> analyzeMap, DateTime now, OrderItemQuery query) {
-        for(M market : Promises.MARKETS) {
-            Map<String, Integer> saleMap = query.analyzeDaySale(
-                    Dates.morning(now.minusDays(31).toDate()),
-                    Dates.night(now.minusDays(1).toDate()),
-                    market, isSku);
-            for(String key : saleMap.keySet()) {
+    private void pullDay30(final boolean isSku, Map<String, AnalyzeDTO> analyzeMap, final DateTime now,
+                           final OrderItemQuery query) {
+        List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
+            @Override
+            public Map<String, Integer> doJobWithResult(M m) {
+                return query.analyzeDaySale(
+                        Dates.morning(now.minusDays(31).toDate()),
+                        Dates.night(now.minusDays(1).toDate()),
+                        m,
+                        isSku,
+                        getConnection());
+            }
+
+            @Override
+            public String id() {
+                return "AnalyzePost.pullDay30";
+            }
+        });
+        for(Map<String, Integer> result : results) {
+            for(String key : result.keySet()) {
                 try {
-                    analyzeMap.get(key).day30 = saleMap.get(key) == null ? 0 : saleMap.get(key);
+                    analyzeMap.get(key).day30 += result.get(key) == null ? 0 : result.get(key);
                 } catch(NullPointerException e) {
                     //ignore 如果不存在就不需要计算了
                 }

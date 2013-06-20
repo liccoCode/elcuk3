@@ -80,9 +80,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
         /**
          * 补充更新订单信息
          */
-        List<Orderr> orderSet = AmazonOrderUpdateJob.updateOrderXML(
-                new File(jobRequest.path), jobRequest.account.type
-        );
+        List<Orderr> orderSet = AmazonOrderUpdateJob.updateOrderXML(new File(jobRequest.path), jobRequest.account.type);
         AmazonOrderUpdateJob.updateShippedOrder(orderSet);
     }
 
@@ -149,19 +147,15 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
 
     private static void updateShippedOrder(List<Orderr> fbaShippedOrderrs) {
         try {
-            PreparedStatement psmt = DB.getConnection().prepareStatement(
-                    "UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
-                            " email=?, buyer=?, reciver=?, address=?, address1=?" +
-                            " WHERE orderId=?"
-            );
+            PreparedStatement psmt = DB.getConnection().prepareStatement("UPDATE Orderr SET shipDate=?, shippingService=?, trackNo=?, arriveDate=?," +
+                    " email=?, buyer=?, reciver=?, address=?, address1=?" +
+                    " WHERE orderId=?");
             int i = 1;
             for(Orderr orderr : fbaShippedOrderrs) {
-                psmt.setTimestamp(i++,
-                        orderr.shipDate == null ? null : new Timestamp(orderr.shipDate.getTime()));
+                psmt.setTimestamp(i++, orderr.shipDate == null ? null : new Timestamp(orderr.shipDate.getTime()));
                 psmt.setString(i++, orderr.shippingService);
                 psmt.setString(i++, orderr.trackNo);
-                psmt.setTimestamp(i++,
-                        orderr.arriveDate == null ? null : new Timestamp(orderr.arriveDate.getTime()));
+                psmt.setTimestamp(i++, orderr.arriveDate == null ? null : new Timestamp(orderr.arriveDate.getTime()));
                 psmt.setString(i++, orderr.email);
                 psmt.setString(i++, orderr.buyer);
                 psmt.setString(i++, orderr.reciver);
@@ -172,9 +166,7 @@ public class AmazonOrderUpdateJob extends Job implements JobRequest.AmazonJob {
                 i = 1;
             }
             int[] results = psmt.executeBatch();
-            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)",
-                    fbaShippedOrderrs.size(), Webs.intArrayString(results), results.length
-            );
+            Logger.info("UpdateShippedOrderrs %s. Results: [%s](%s)", fbaShippedOrderrs.size(), Webs.intArrayString(results), results.length);
         } catch(SQLException e) {
             e.printStackTrace();
         }

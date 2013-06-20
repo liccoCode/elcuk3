@@ -1,68 +1,65 @@
 <html>
 <head>
 #{script 'jquery.1.7.2.min.js'/}
-#{script 'highcharts.js'/}
-    <script type="text/javascript" src="/public/javascripts/main.js"></script>
+#{script 'highstock.js'/}
+  <script type="text/javascript" src="/public/javascripts/main.js"></script>
 </head>
 </html>
 <div style="width:500px;height:600px;" id='pie_chart'></div>
 
 <script type="text/javascript">
-    var order_pie = {
-        chart:{
-            renderTo:'pie_chart',
-            type:'bar',
-            marginBottom:50
-        },
-        title:{
-            text:'Order Bar'
-        },
-        xAxis:{
-            categories:${datax}
-        },
+  var order_pie = {
+    chart: {
+      renderTo: 'pie_chart',
+      type: 'bar',
+      marginBottom: 50
+    },
+    title: {
+      text: 'Order Bar'
+    },
+    xAxis: {
+      categories:${datax}
+    },
 
-        legend:{
-            layout:'vertical',
-            floating:true,
-            align:'right',
-            verticalAlign:'top',
-            y:60,
-            x:-60
-        },
-        plotOptions:{
-            series:{
-                cursor:'pointer',
-                point:{
-                    events:{
-                        click:function(){
-                            alert('没有实现');
-                        }
-                    }
-                }
+    legend: {
+      layout: 'vertical',
+      floating: true,
+      align: 'right',
+      verticalAlign: 'top',
+      y: 60,
+      x: -60
+    },
+    plotOptions: {
+      series: {
+        cursor: 'pointer',
+        point: {
+          events: {
+            click: function(){
+              alert('没有实现');
             }
-        },
-        tooltip:{
-            formatter:function(){
-                return '<strong>' + this.series.name + '</strong><br/>' +
-                        'Day: ${date.format('yyyy-MM-dd')} <br/>' +
-                        'Time:' + this.x + '<br/>' +
-                        'Orders: ' + this.y;
-            }
-        },
+          }
+        }
+      }
+    },
+    tooltip: {
+      formatter: function(){
+        return '<strong>' + this.series.name + '</strong><br/>' + 'Day: ${date.format('yyyy-MM-dd')} <br/>' + 'Time:' + this.x + '<br/>' + 'Orders: ' + this.y;
+      }
+    },
 
-        yAxis:{
-            title:{
-                text:'Sales'
-            },
-            min:0
-        },
+    yAxis: {
+      title: {
+        text: 'Sales'
+      },
+      min: 0
+    },
 
-        series:[
-            {
-                data:${datay}
-            }
-        ]
-    };
+    series: [
+      {
+        data:${datay}
+      }
+    ]
+  };
 
-    new Highcharts.Chart(order_pie);
+  new Highcharts.Chart(order_pie);
 </script>

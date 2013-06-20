@@ -13,7 +13,6 @@ import models.view.dto.DashBoard;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -21,7 +20,6 @@ import play.utils.FastRuntimeException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Application extends Controller {
@@ -29,9 +27,8 @@ public class Application extends Controller {
     public static void index() {
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         // Feedback 信息
-        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Feedback.frontPageTable();
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render(dashborad, fbaWhouse, feedbacksOverView);
+        render(dashborad, fbaWhouse);
     }
 
     public static void percent(String type, Date date, long aid) {

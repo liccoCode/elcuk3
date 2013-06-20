@@ -7,7 +7,6 @@ import models.market.M;
 import models.procure.Shipment;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -27,7 +26,6 @@ import java.util.List;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Whouse extends Model {
 
     /**

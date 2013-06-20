@@ -1,6 +1,5 @@
 package models;
 
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
@@ -19,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 11:44 AM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Privilege extends Model {
     /**
      * 将用户的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)

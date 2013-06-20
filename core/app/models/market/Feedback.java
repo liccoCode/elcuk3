@@ -13,7 +13,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import play.Logger;
-import play.cache.Cache;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -283,12 +282,8 @@ public class Feedback extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, List<F.T3<Long, Long, Long>>> frontPageTable() {
-        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = Cache
-                .get(Feedback.FRONT_TABLE, Map.class);
-        if(feedbacksOverView != null) return feedbacksOverView;
-
+        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = new LinkedHashMap<String, List<F.T3<Long, Long, Long>>>();
         List<Account> accs = Account.openedSaleAcc();
-        feedbacksOverView = new LinkedHashMap<String, List<F.T3<Long, Long, Long>>>();
         for(Account acc : accs) {
             List<F.T3<Long, Long, Long>> fbk = new ArrayList<F.T3<Long, Long, Long>>();
             fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 1));
@@ -298,7 +293,6 @@ public class Feedback extends GenericModel {
             feedbacksOverView.put(acc.prettyName(), fbk);
         }
         // 避免短时间的重复计算
-        Cache.add(Feedback.FRONT_TABLE, feedbacksOverView, "1h");
         return feedbacksOverView;
     }
 
