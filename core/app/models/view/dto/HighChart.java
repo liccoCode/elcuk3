@@ -151,7 +151,7 @@ public class HighChart implements Serializable {
     /**
      * 饼图的数据; 数据 + 名称; 百分比会由 HighChart 自行计算
      */
-    public class Pie {
+    public class Pie implements Serializable {
         public String name;
         public Float data;
     }
