@@ -348,6 +348,12 @@ public class Shipments extends Controller {
         show(ship.id);
     }
 
+    public static void track(String id, String track) {
+        Shipment ship = Shipment.findById(id);
+        if(StringUtils.isNotBlank(track)) ship.trackNo = track;
+        renderText(ship.trackWebSite());
+    }
+
     /**
      * 加载出来 Whouse 相关的可使用的运输单
      *
