@@ -60,7 +60,7 @@ public enum iExpress {
 
         @Override
         public F.T2<Boolean, DateTime> isReceipt(String iExpressHTML) {
-            return isAnyState(iExpressHTML, "已派送并签收");
+            return isAnyState(iExpressHTML, "签收");
         }
 
         public F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String text) {
