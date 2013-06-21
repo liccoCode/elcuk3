@@ -40,8 +40,8 @@ public class OrderItemQuery {
             sql.leftJoin("Orderr o ON o.orderId=oi.order_orderId")
                     .where("o.account_id=?").param(accId);
         }
-        sql.where("oi.createDate>=?").param(from)
-                .where("oi.createDate<=?").param(to)
+        sql.where("o.createDate>=?").param(from)
+                .where("o.createDate<=?").param(to)
                 .where("oi.product_sku IS NOT NULL")
                 .where("oi.quantity>0")
                 .groupBy("p.category_categoryId");
@@ -194,7 +194,8 @@ public class OrderItemQuery {
      * @param to
      * @return
      */
-    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to, Connection conn) {
+    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to,
+                                                      Connection conn) {
         List<AnalyzeVO> lineVos;
         OrderItemQuery query = new OrderItemQuery();
         if("all".equals(val)) {

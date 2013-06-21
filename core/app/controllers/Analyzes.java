@@ -65,7 +65,6 @@ public class Analyzes extends Controller {
      */
     public static void analyzes(AnalyzePost p) {
         List<AnalyzeDTO> dtos = p.query();
-        response.cacheFor("10mn");
         render("Analyzes/" + p.type + ".html", dtos, p);
     }
 
