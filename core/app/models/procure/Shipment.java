@@ -792,7 +792,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             result = this.internationExpress.isDelivered(this.iExpressHTML);
             if(result._1)
                 this.beginDeliver(result._2.toDate());
-        } else if(this.state == S.DELIVERYING) {
+        } else if(Arrays.asList(S.PACKAGE, S.BOOKED, S.DELIVERYING).contains(this.state)) {
             result = this.internationExpress.isReceipt(this.iExpressHTML);
             if(result._1)
                 this.receipt(result._2.toDate());

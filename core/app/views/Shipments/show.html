@@ -200,27 +200,25 @@
     </a>
   #{/power.ck}
   #{power.ck "shipments.handleprocess"}
-      #{if ship.type != models.procure.Shipment.T.EXPRESS}
-          #{if ship.state == models.procure.Shipment.S.SHIPPING}
-            <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
-              运输到港
-            </button>
-          #{/if}
-          #{if ship.state == models.procure.Shipment.S.CLEARANCE}
-            <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
-              开始提货
-            </button>
-          #{/if}
-          #{if ship.state == models.procure.Shipment.S.PACKAGE}
-            <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
-              与 Amazon 预约
-            </button>
-          #{/if}
-          #{if ship.state == models.procure.Shipment.S.BOOKED}
-            <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
-              派送
-            </button>
-          #{/if}
+      #{if ship.state == models.procure.Shipment.S.SHIPPING}
+        <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
+          运输到港
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.CLEARANCE}
+        <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
+          开始提货
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.PACKAGE}
+        <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
+          与 Amazon 预约
+        </button>
+      #{/if}
+      #{if ship.state == models.procure.Shipment.S.BOOKED}
+        <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
+          派送
+        </button>
       #{/if}
       #{if ship.state == models.procure.Shipment.S.DELIVERYING}
         <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
@@ -290,7 +288,6 @@
 <div class="row-fluid" style="margin-top:20px;">
   <div class="span6" style="overflow:auto;height:280px;">
   #{records_ul records: records/}
-  *{#{records records:records/}}*
   </div>
 
   <div class="span6">
