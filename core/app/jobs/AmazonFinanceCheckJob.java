@@ -36,7 +36,14 @@ public class AmazonFinanceCheckJob extends Job {
         // 1. 寻找需要处理的订单, 并且按照 market 进行分组
         // 2. 派发给 Promise Job 进行出来.
         if(!Jobex.findByClassName(AmazonFinanceCheckJob.class.getName()).isExcute()) return;
-        int orderSize = 20;
+        /**
+         * 这里设置 6 的原因为:
+         * 1. 模拟抓取 Fee 需要借用登陆的 Cookie, 同时需要 changeRegion, 这个是肯定需要锁定.
+         * 2. 这里锁定的时间不能够太长, 不然会导致前端 Selling 更新失败.
+         * 3. 平均每个订单需要 10s 时间处理完成;
+         * 4. 6 个处理时间为 1min, 此任务每个 2min 执行一次, 空闲一分钟给前台使用.(最长阻塞 1 min)
+         */
+        int orderSize = 6;
         List<Account> accounts = Account.openedSaleAcc();
         Map<String, Account> accMap = new HashMap<String, Account>();
         for(Account acc : accounts) {
@@ -52,15 +59,16 @@ public class AmazonFinanceCheckJob extends Job {
                 acc = accMap.get(m.name());
             }
 
+            String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate";
             List<Orderr> orders = Orderr
-                    .find("account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate",
-                            acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
+                    .find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
+            long leftOrders = Orderr.count(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
             if(orders.size() > 0) {
                 List<SaleFee> fees = new FinanceShippedPromise(acc, m, orders).now().get(1, TimeUnit.HOURS);
                 AmazonFinanceCheckJob.deleteSaleFees(orders);
                 AmazonFinanceCheckJob.saveFees(fees);
-                Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees.",
-                        acc.prettyName(), m.name(), orders.size(), fees.size());
+                Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees, left %s Orders to fetch.",
+                        acc.prettyName(), m.name(), orders.size(), fees.size(), leftOrders);
             } else {
                 Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", acc.prettyName(), m);
             }
