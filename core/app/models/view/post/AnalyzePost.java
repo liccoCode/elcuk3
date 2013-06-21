@@ -124,7 +124,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             pullReviewToDTO(isSku, analyzeMap);
 
             Cache.add(cacke_key, dtos, "8h");
-            Cache.set(cacke_key + ".time", new Date(), "8h");
+            Cache.set(cacke_key + ".time", DateTime.now().plusHours(8).toDate(), "8h");
         }
 
         return dtos;

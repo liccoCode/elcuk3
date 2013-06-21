@@ -9,6 +9,7 @@ import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
+import models.view.post.AnalyzePost;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -407,8 +408,13 @@ public class Selling extends GenericModel {
                 dto.ps = ps;
                 find = true;
             }
-            if(!find)
+            if(!find) {
                 throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
+            } else {
+                Date expireTime = Cache.get(AnalyzePost.AnalyzeDTO_SID_CACHE + ".time", Date.class);
+                long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
+                Cache.set(AnalyzePost.AnalyzeDTO_SID_CACHE, dtos, diffSecond + "s");
+            }
         }
         return this.save();
     }
