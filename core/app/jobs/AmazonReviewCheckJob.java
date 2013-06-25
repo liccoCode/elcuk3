@@ -28,8 +28,7 @@ public class AmazonReviewCheckJob extends Job {
         List<AmazonListingReview> reviewsToBeCheck = AmazonListingReview
                 .find("isRemove=false ORDER BY updateAt ASC").fetch(20);
         for(AmazonListingReview review : reviewsToBeCheck) {
-            JsonElement rvObj = Crawl
-                    .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
+            JsonElement rvObj = Crawl.crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
             JsonObject obj = rvObj.getAsJsonObject();
             if(obj.get("isRemove").getAsBoolean()) {
                 review.isRemove = true;

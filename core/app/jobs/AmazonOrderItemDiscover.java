@@ -44,19 +44,22 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                     acc, DateTime.now().minusMonths(1).toDate(), Orderr.S.CANCEL
             ).fetch(30);
 
-            List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
-            for(Orderr order : orderrs) {
-                try {
-                    List<OrderItem> orderItems = MWSOrders.listOrderItems(acc, order.orderId);
-                    allOrderItems.addAll(orderItems);
-                } catch(MarketplaceWebServiceOrdersException e) {
-                    Logger.warn("Order %s OrderItem Discover Failed because of [%s]",
-                            order.orderId, Webs.S(e));
+            if(orderrs.size() <= 0) {
+                Logger.info("%s orderItem clear.", acc.uniqueName);
+            } else {
+                List<OrderItem> allOrderItems = new ArrayList<OrderItem>();
+                for(Orderr order : orderrs) {
+                    try {
+                        List<OrderItem> orderItems = MWSOrders.listOrderItems(acc, order.orderId);
+                        allOrderItems.addAll(orderItems);
+                    } catch(MarketplaceWebServiceOrdersException e) {
+                        Logger.warn("Order %s OrderItem Discover Failed because of [%s]",
+                                order.orderId, Webs.S(e));
+                    }
                 }
+                AmazonOrderItemDiscover.saveOrderItem(allOrderItems);
+                Logger.info("Discover %s  %s OrderItems.", acc.uniqueName, allOrderItems.size());
             }
-
-            AmazonOrderItemDiscover.saveOrderItem(allOrderItems);
-            Logger.info("Discover %s  %s OrderItems.", acc.uniqueName, allOrderItems.size());
         }
     }
 
