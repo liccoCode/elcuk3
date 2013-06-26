@@ -65,19 +65,14 @@ public class Analyzes extends Controller {
      *
      * @param p
      */
-    public static void analyzes(AnalyzePost p) {
-        try {
-            final AnalyzePost copy = p.clone();
-            List<AnalyzeDTO> dtos = await(new Job<List<AnalyzeDTO>>() {
-                @Override
-                public List<AnalyzeDTO> doJobWithResult() throws Exception {
-                    return copy.query();
-                }
-            }.now());
-            render("Analyzes/" + p.type + ".html", dtos, p);
-        } catch(CloneNotSupportedException e) {
-            throw new FastRuntimeException(e);
-        }
+    public static void analyzes(final AnalyzePost p) {
+        List<AnalyzeDTO> dtos = await(new Job<List<AnalyzeDTO>>() {
+            @Override
+            public List<AnalyzeDTO> doJobWithResult() throws Exception {
+                return p.query();
+            }
+        }.now());
+        render("Analyzes/" + p.type + ".html", dtos, p);
     }
 
     public static void clear() {
@@ -89,14 +84,13 @@ public class Analyzes extends Controller {
     /**
      * 加载指定 Selling 的时间段内的销量与销售额数据
      */
-    public static void ajaxUnit(AnalyzePost p) {
+    public static void ajaxUnit(final AnalyzePost p) {
         try {
             response.cacheFor("10mn");
-            final AnalyzePost copy = p.clone();
             HighChart chart = await(new Job<HighChart>() {
                 @Override
                 public HighChart doJobWithResult() throws Exception {
-                    return OrderItem.ajaxHighChartUnitOrder(copy.val, copy.type, copy.from, copy.to);
+                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
                 }
             }.now());
             renderJSON(J.json(chart));
@@ -106,14 +100,13 @@ public class Analyzes extends Controller {
     }
 
     @Check("analyzes.ajaxsales")
-    public static void ajaxSales(AnalyzePost p) {
+    public static void ajaxSales(final AnalyzePost p) {
         try {
             response.cacheFor("10mn");
-            final AnalyzePost copy = p.clone();
             HighChart chart = await(new Job<HighChart>() {
                 @Override
                 public HighChart doJobWithResult() throws Exception {
-                    return OrderItem.ajaxHighChartSales(copy.val, copy.type, copy.from, copy.to);
+                    return OrderItem.ajaxHighChartSales(p.val, p.type, p.from, p.to);
                 }
             }.now());
             renderJSON(J.json(chart));
@@ -126,14 +119,13 @@ public class Analyzes extends Controller {
      * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
     @CacheFor("30mn")
-    public static void ajaxSellingRecord(AnalyzePost p) {
+    public static void ajaxSellingRecord(final AnalyzePost p) {
         try {
-            final AnalyzePost copy = p.clone();
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    return J.json(SellingRecord.ajaxHighChartPVAndSS(copy.val,
-                            Account.<Account>findById(NumberUtils.toLong(copy.aid)), copy.from, copy.to));
+                    return J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
+                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
                 }
             }.now());
             renderJSON(json);
@@ -146,14 +138,13 @@ public class Analyzes extends Controller {
      * 查看某一个 Selling 在一段时间内的转换率
      */
     @CacheFor("30mn")
-    public static void ajaxSellingTurn(AnalyzePost p) {
+    public static void ajaxSellingTurn(final AnalyzePost p) {
         try {
-            final AnalyzePost copy = p.clone();
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    return J.json(SellingRecord.ajaxHighChartTurnRatio(copy.val,
-                            Account.<Account>findById(NumberUtils.toLong(copy.aid)), copy.from, copy.to));
+                    return J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
+                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
                 }
             }.now());
             renderJSON(json);
