@@ -54,8 +54,7 @@ public class Sellings extends Controller {
     public static void selling(String id) {
         Selling s = Selling.findById(id);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
-        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling
-                .sameFamilySellings(s.merchantSKU);
+        F.T2<List<Selling>, List<String>> sellingAndSellingIds = Selling.sameFamilySellings(s.merchantSKU);
         renderArgs.put("sids", J.json(sellingAndSellingIds._2));
         render(s);
     }
@@ -77,7 +76,7 @@ public class Sellings extends Controller {
         if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
         List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
             @Override
-            public List<Error> doJobWithResult() throws Exception {
+            public List<Error> doJobWithResult() {
                 List<Error> errors = new ArrayList<Error>();
                 Selling s = Selling.findById(sid);
                 try {
@@ -118,7 +117,7 @@ public class Sellings extends Controller {
         // play status 检查平均耗时 2.5s , 开放线程时间 3s 后回掉
         await(new Job<Selling>() {
             @Override
-            public Selling doJobWithResult() throws Exception {
+            public Selling doJobWithResult() {
                 Selling selling = Selling.findById(sid);
                 selling.syncFromAmazon();
                 return selling;
@@ -133,17 +132,23 @@ public class Sellings extends Controller {
      *
      * @param id sellingId
      */
-    public static void sellingLabel(String id) {
-        Selling selling = Selling.findById(id);
-        byte[] bytes = selling.downloadFnSkuLabel();
-        String fileName = String.format("%s.pdf", id);
-        File file = new File(Constant.LABEL_PATH, fileName);
-        file.delete(); // 删除原来的, 再写新的
-        try {
-            FileUtils.writeByteArrayToFile(file, bytes);
-        } catch(IOException e) {
-            // ignore
-        }
+    public static void sellingLabel(final String id) {
+        File file = await(new Job<File>() {
+            @Override
+            public File doJobWithResult() {
+                Selling selling = Selling.findById(id);
+                byte[] bytes = selling.downloadFnSkuLabel();
+                String fileName = String.format("%s.pdf", id);
+                File file = new File(Constant.LABEL_PATH, fileName);
+                file.delete(); // 删除原来的, 再写新的
+                try {
+                    FileUtils.writeByteArrayToFile(file, bytes);
+                } catch(IOException e) {
+                    // ignore
+                }
+                return file;
+            }
+        }.now());
         renderBinary(file, id + ".pdf");
     }
 

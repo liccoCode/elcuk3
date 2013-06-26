@@ -82,4 +82,9 @@ public abstract class Post<T> implements Serializable, Cloneable {
     public int getTotalPage() {
         return totalPage();
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

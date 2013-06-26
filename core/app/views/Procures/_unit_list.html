@@ -63,8 +63,9 @@
           </a>
         #{/if}
         #{else }
-          <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">补全
-            FnSku</a>
+          <a class="btn btn-warning btn-block" href="@{Sellings.selling()}/${unit.selling.sellingId}">
+            补全 FnSku
+          </a>
         #{/else}
     </td>
     <td style="color:${unit.shipType.rgb()}">${unit.shipType.label()}</td>
