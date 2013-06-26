@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +23,7 @@ import java.util.List;
  * Date: 9/4/12
  * Time: 5:10 PM
  */
-public abstract class Post<T> {
+public abstract class Post<T> implements Serializable, Cloneable {
     public Date from = DateTime.now().minusMonths(2).toDate();
     public Date to = new Date();
     public String search;

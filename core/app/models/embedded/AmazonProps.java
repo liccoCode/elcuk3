@@ -382,11 +382,11 @@ public class AmazonProps {
      * @param sell
      * @return
      */
-    public F.T2<Collection<NameValuePair>, Document> generateDeployAmazonProps(String html,
-                                                                               Selling sell) {
+    public F.T2<Collection<NameValuePair>, Document> generateDeployProps(String html, Selling sell) {
         if(Play.mode.isDev())
-            IO.writeContent(html, new File(
-                    String.format("%s/%s_%s.html", Constant.E_DATE, sell.merchantSKU, sell.asin)));
+            IO.writeContent(html,
+                    new File(String.format("%s/%s_%s.html", Constant.E_DATE, sell.merchantSKU, sell.asin)));
+
         Document doc = Jsoup.parse(html);
         // ----- Input 框框
         Elements inputs = doc.select("form[name=productForm] input");
@@ -430,8 +430,8 @@ public class AmazonProps {
                         this.salePrice != null && this.salePrice > 0 &&
                         this.endDate.getTime() > this.startDate.getTime()) {
                     params.add(new BasicNameValuePair("discounted_price",
-                            Webs.priceLocalNumberFormat(our_price._1/*our_price*/,
-                                    this.salePrice)));
+                            /*our_price*/
+                            Webs.priceLocalNumberFormat(our_price._1, this.salePrice)));
                     params.add(new BasicNameValuePair("discounted_price_start_date",
                             Dates.listingUpdateFmt(sell.market, this.startDate)));
                     params.add(new BasicNameValuePair("discounted_price_end_date",
@@ -440,8 +440,7 @@ public class AmazonProps {
             } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
                 if(this.rbns != null && this.rbns.size() >= 1) {
                     for(int i = 0; i < this.rbns.size(); i++) {
-                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]",
-                                this.rbns.get(i)));
+                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns.get(i)));
                     }
                 }
             } else if("activeClientTimeOnTask".equals(name)) {

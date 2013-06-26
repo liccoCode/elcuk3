@@ -33,11 +33,13 @@ public class OrderMailCheck extends Job {
          * Check 需要发送邀请 Review 的邮件的订单
          */
         List<Orderr> needReview = Orderr
-                .find("state=? AND reviewMailed=false AND createDate<=? AND createDate>=? ORDER BY createDate",
+                .find("state=? AND reviewMailed=false AND createDate<=? AND createDate>=? AND market IN (?,?,?) " +
+                        "ORDER BY createDate",
                         Orderr.S.SHIPPED,
                         // 只在 46 天前到 12 天前的订单中寻找需要发送 Review 的
                         dt.plusDays(-12).toDate(),
-                        dt.plusDays(-46).toDate()
+                        dt.plusDays(-46).toDate(),
+                        M.AMAZON_DE, M.AMAZON_UK, M.AMAZON_US
                 ).fetch(150); // 不能一次性太多了...
         Logger.info(String.format("Load %s Orders From %s To %s.",
                 needReview.size(),

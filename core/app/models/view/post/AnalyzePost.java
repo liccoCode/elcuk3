@@ -123,8 +123,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             // review
             pullReviewToDTO(isSku, analyzeMap);
 
-            Cache.add(cacke_key, dtos, "16h");
-            Cache.set(cacke_key + ".time", new Date(), "16h");
+            Cache.add(cacke_key, dtos, "8h");
+            Cache.set(cacke_key + ".time", DateTime.now().plusHours(8).toDate(), "8h");
         }
 
         return dtos;
@@ -476,5 +476,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(val))
             val = StringUtils.split(val, "|")[0];
         this.val = val;
+    }
+
+    @Override
+    public AnalyzePost clone() throws CloneNotSupportedException {
+        return (AnalyzePost) super.clone();
     }
 }

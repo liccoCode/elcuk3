@@ -164,8 +164,8 @@ public class OrderItem extends GenericModel {
      * @return
      */
     @Cached("8h")
-    public static HighChart ajaxHighChartSales(final String val, Account acc, final String type, Date from, Date to) {
-        String cached_key = Caches.Q.cacheKey("sales", val, acc, type, from, to);
+    public static HighChart ajaxHighChartSales(final String val, final String type, Date from, Date to) {
+        String cached_key = Caches.Q.cacheKey("sales", val, type, from, to);
         HighChart lines = Cache.get(cached_key, HighChart.class);
         if(lines != null) return lines;
         synchronized(cached_key.intern()) {
@@ -180,7 +180,8 @@ public class OrderItem extends GenericModel {
             Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
                 @Override
                 public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
-                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    List<AnalyzeVO> lineVos = OrderItemQuery
+                            .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
                     synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
                         for(AnalyzeVO vo : lineVos) {
                             finalLines.line("sale_all").add(vo.date, vo.qty.floatValue());
@@ -212,8 +213,8 @@ public class OrderItem extends GenericModel {
      * @param to  @return {series_size, days, series_n}
      */
     @Cached("8h")
-    public static HighChart ajaxHighChartUnitOrder(final String val, Account acc, final String type, Date from, Date to) {
-        String cacked_key = Caches.Q.cacheKey("unit", val, acc, type, from, to);
+    public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
+        String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
         synchronized(cacked_key.intern()) { // 使用 cacked_key 在 String pool 中的对象
@@ -228,7 +229,8 @@ public class OrderItem extends GenericModel {
             Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
                 @Override
                 public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
-                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    List<AnalyzeVO> lineVos = OrderItemQuery
+                            .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
                     synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
                         for(AnalyzeVO vo : lineVos) {
                             finalLines.line("unit_all").add(vo.date, vo.qty.floatValue());
@@ -265,41 +267,46 @@ public class OrderItem extends GenericModel {
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
 
-        pieChart = new HighChart();
-        List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-        if(acc != null) {
-            // 转换成为不同对应市场的时间
-            vos = new OrderItemQuery().groupCategory(
-                    acc.type.withTimeZone(from).toDate(),
-                    acc.type.withTimeZone(to).toDate(),
-                    acc.id);
-        } else {
-            List<List<AnalyzeVO>> results = Promises.forkJoin(new Promises.DBCallback<List<AnalyzeVO>>() {
-                @Override
-                public List<AnalyzeVO> doJobWithResult(M m) {
-                    return new OrderItemQuery().groupCategory(
-                            m.withTimeZone(from).toDate(),
-                            m.withTimeZone(to).toDate(),
-                            m,
-                            getConnection());
-                }
+        synchronized(key.intern()) {
+            pieChart = Cache.get(key, HighChart.class);
+            if(pieChart != null) return pieChart;
 
-                @Override
-                public String id() {
-                    return "OrderItem.categoryPercent";
+            pieChart = new HighChart();
+            List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
+            if(acc != null) {
+                // 转换成为不同对应市场的时间
+                vos = new OrderItemQuery().groupCategory(
+                        acc.type.withTimeZone(from).toDate(),
+                        acc.type.withTimeZone(to).toDate(),
+                        acc.id);
+            } else {
+                List<List<AnalyzeVO>> results = Promises.forkJoin(new Promises.DBCallback<List<AnalyzeVO>>() {
+                    @Override
+                    public List<AnalyzeVO> doJobWithResult(M m) {
+                        return new OrderItemQuery().groupCategory(
+                                m.withTimeZone(from).toDate(),
+                                m.withTimeZone(to).toDate(),
+                                m,
+                                getConnection());
+                    }
+
+                    @Override
+                    public String id() {
+                        return "OrderItem.categoryPercent";
+                    }
+                });
+                for(List<AnalyzeVO> result : results) {
+                    vos.addAll(result);
                 }
-            });
-            for(List<AnalyzeVO> result : results) {
-                vos.addAll(result);
             }
+            for(AnalyzeVO vo : vos) {
+                if(StringUtils.equals(type, "sales"))
+                    pieChart.pie(vo.sku, vo.usdCost);
+                else
+                    pieChart.pie(vo.sku, vo.qty.floatValue());
+            }
+            Cache.add(key, pieChart, "12h");
         }
-        for(AnalyzeVO vo : vos) {
-            if(StringUtils.equals(type, "sales"))
-                pieChart.pie(vo.sku, vo.usdCost);
-            else
-                pieChart.pie(vo.sku, vo.qty.floatValue());
-        }
-        Cache.add(key, pieChart, "12h");
         return pieChart;
     }
 

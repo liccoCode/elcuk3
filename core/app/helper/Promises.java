@@ -42,11 +42,13 @@ public class Promises {
                 FutureTask<T> task = new FutureTask<T>(new Callable<T>() {
                     @Override
                     public T call() throws Exception {
-                        T result = callback.doJobWithResult(m);
-                        if(callback instanceof DBCallback<?>) {
-                            ((DBCallback) callback).close();
+                        try {
+                            return callback.doJobWithResult(m);
+                        } finally {
+                            if(callback instanceof DBCallback<?>) {
+                                ((DBCallback) callback).close();
+                            }
                         }
-                        return result;
                     }
                 });
                 threadPool.submit(task);

@@ -478,18 +478,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param shipment
      */
     public void changeShipItemShipment(Shipment shipment) {
-        for(ShipItem shipItem : this.shipItems) {
-            if(this.shipType == Shipment.T.EXPRESS) {
-                // 快递运输单调整, 运输项目全部删除, 重新设计.
-                shipItem.delete();
-            } else {
-                if(shipment == null) return;
-                Shipment originShipment = shipItem.shipment;
-                shipItem.adjustShipment(shipment);
-                if(Validation.hasErrors()) {
-                    shipItem.shipment = originShipment;
-                    shipItem.save();
-                    return;
+        if(this.shipItems.size() == 0) {
+            // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
+            shipment.addToShip(this);
+        } else {
+            for(ShipItem shipItem : this.shipItems) {
+                if(this.shipType == Shipment.T.EXPRESS) {
+                    // 快递运输单调整, 运输项目全部删除, 重新设计.
+                    shipItem.delete();
+                } else {
+                    if(shipment == null) return;
+                    Shipment originShipment = shipItem.shipment;
+                    shipItem.adjustShipment(shipment);
+                    if(Validation.hasErrors()) {
+                        shipItem.shipment = originShipment;
+                        shipItem.save();
+                        return;
+                    }
                 }
             }
         }

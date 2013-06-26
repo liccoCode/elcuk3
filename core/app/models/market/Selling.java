@@ -9,6 +9,7 @@ import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
+import models.view.post.AnalyzePost;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -343,24 +344,23 @@ public class Selling extends GenericModel {
 
                     // 2. 设置需要提交的值
                     String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                    F.T2<Collection<NameValuePair>, Document> paramAndDocTuple = this.aps
-                            .generateDeployAmazonProps(html, this);
+                    F.T2<Collection<NameValuePair>, Document> paramDocTuple = this.aps.generateDeployProps(html, this);
 
                     // 3. 提交
-                    String[] args = StringUtils
-                            .split(paramAndDocTuple._2.select("form[name=productForm]").first()
-                                    .attr("action"), ";");
+                    String[] args = StringUtils.split(
+                            paramDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
                     html = HTTP.post(this.account.cookieStore(),
-                            M.listingPostPage(this.account.type/*更新的链接需要账号所在地的 URL*/,
-                                    (args.length >= 2 ? args[1] : "")),
-                            paramAndDocTuple._1);
+                            // 更新的链接需要账号所在地的 URL
+                            M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
+                            paramDocTuple._1
+                    );
                     if(StringUtils.isBlank(html)) // 这个最先检查
-                        throw new FastRuntimeException(
-                                "Selling update is failed! Return Content is Empty!");
+                        throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+
                     if(Play.mode.isDev())
                         IO.writeContent(html, new File(
-                                String.format("%s/%s_%s_posted.html", Constant.E_DATE,
-                                        this.merchantSKU, this.asin)));
+                                String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+
                     Document doc = Jsoup.parse(html);
                     Elements error = doc.select(".messageboxerror li");
                     if(error.size() > 0)
@@ -408,8 +408,13 @@ public class Selling extends GenericModel {
                 dto.ps = ps;
                 find = true;
             }
-            if(!find)
+            if(!find) {
                 throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
+            } else {
+                Date expireTime = Cache.get(AnalyzePost.AnalyzeDTO_SID_CACHE + ".time", Date.class);
+                long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
+                Cache.set(AnalyzePost.AnalyzeDTO_SID_CACHE, dtos, diffSecond + "s");
+            }
         }
         return this.save();
     }
