@@ -110,10 +110,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                         dto.inbound += (unit.qty() - unit.inboundingQty());
                 }
                 dto.difference = dto.day1 - dto.day7 / 7;
-                //最新的评分
-                if(isSku)
-                    dto.lastRating = amazonQuery.skuLastRating(dto.fid);
-
                 dtos.add(dto);
             }
 
@@ -278,8 +274,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     private void pullReviewToDTO(boolean sku, Map<String, AnalyzeDTO> analyzeMap) {
         AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
         Map<String, F.T2<Integer, Float>> reviewMap;
+        Map<String, F.T2<Float, Date>> latestReviewMap = new HashMap<String, F.T2<Float, Date>>();
         if(sku) {
             reviewMap = amazonQuery.skuRelateReviews(analyzeMap.keySet());
+            latestReviewMap = amazonQuery.skusLastRating(analyzeMap.keySet());
         } else {
             reviewMap = amazonQuery.sidRelateReviews(analyzeMap.keySet());
         }
@@ -292,10 +290,20 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
                 dto.reviews = reviewT2._1;
                 dto.rating = reviewT2._2;
             }
-            if(dto.reviews > 0)
+            if(dto.reviews > 0) {
                 dto.reviewRatio = dto.reviews / ((5 - dto.rating) == 0 ? 0.1f : (5 - dto.rating));
-            else
+            } else {
                 dto.reviewRatio = 0;
+            }
+
+            //最新的评分
+            if(sku) {
+                F.T2<Float, Date> t2 = latestReviewMap.get(dto.fid);
+                if(t2 != null) {
+                    dto.lastRating = t2._1;
+                    dto.lastRatingDate = t2._2;
+                }
+            }
         }
     }
 

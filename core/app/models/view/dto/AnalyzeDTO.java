@@ -111,7 +111,8 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 最新的评分与时间
      */
-    public F.T2<Float, Date> lastRating;
+    public Float lastRating = 0f;
+    public Date lastRatingDate;
 
     public float reviewRatio = 0f;
 
