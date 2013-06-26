@@ -1,7 +1,7 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import helper.Dates;
+import helper.J;
 import helper.Webs;
 import models.market.Account;
 import models.market.Feedback;
@@ -13,6 +13,7 @@ import models.view.dto.DashBoard;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -31,14 +32,18 @@ public class Application extends Controller {
         render(dashborad, fbaWhouse);
     }
 
-    public static void percent(String type, Date date, long aid) {
-        renderJSON(JSON.toJSON(
-                OrderItem.categoryPercent(
-                        type,
-                        Dates.morning(date),
-                        Dates.night(date),
-                        Account.<Account>findById(aid)))
-        );
+    public static void percent(final String type, final Date date, final long aid) {
+        String json = await(new Job<String>() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return J.json(
+                        OrderItem.categoryPercent(
+                                type, Dates.morning(date), Dates.night(date),
+                                Account.<Account>findById(aid))
+                );
+            }
+        }.now());
+        renderJSON(json);
     }
 
     public static void clearCache() {

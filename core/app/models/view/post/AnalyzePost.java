@@ -477,4 +477,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             val = StringUtils.split(val, "|")[0];
         this.val = val;
     }
+
+    @Override
+    public AnalyzePost clone() throws CloneNotSupportedException {
+        return (AnalyzePost) super.clone();
+    }
 }

@@ -6,6 +6,7 @@ import models.market.*;
 import models.product.Category;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
+import models.view.dto.HighChart;
 import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -13,6 +14,7 @@ import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.cache.CacheFor;
+import play.jobs.Job;
 import play.mvc.After;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -64,8 +66,18 @@ public class Analyzes extends Controller {
      * @param p
      */
     public static void analyzes(AnalyzePost p) {
-        List<AnalyzeDTO> dtos = p.query();
-        render("Analyzes/" + p.type + ".html", dtos, p);
+        try {
+            final AnalyzePost copy = p.clone();
+            List<AnalyzeDTO> dtos = await(new Job<List<AnalyzeDTO>>() {
+                @Override
+                public List<AnalyzeDTO> doJobWithResult() throws Exception {
+                    return copy.query();
+                }
+            }.now());
+            render("Analyzes/" + p.type + ".html", dtos, p);
+        } catch(CloneNotSupportedException e) {
+            throw new FastRuntimeException(e);
+        }
     }
 
     public static void clear() {
@@ -80,7 +92,14 @@ public class Analyzes extends Controller {
     public static void ajaxUnit(AnalyzePost p) {
         try {
             response.cacheFor("10mn");
-            renderJSON(J.json(OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to)));
+            final AnalyzePost copy = p.clone();
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartUnitOrder(copy.val, copy.type, copy.from, copy.to);
+                }
+            }.now());
+            renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -90,8 +109,14 @@ public class Analyzes extends Controller {
     public static void ajaxSales(AnalyzePost p) {
         try {
             response.cacheFor("10mn");
-            renderJSON(J.json(OrderItem
-                    .ajaxHighChartSales(p.val, p.type, p.from, p.to)));
+            final AnalyzePost copy = p.clone();
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartSales(copy.val, copy.type, copy.from, copy.to);
+                }
+            }.now());
+            renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -103,8 +128,15 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingRecord(AnalyzePost p) {
         try {
-            renderJSON(J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
-                    Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
+            final AnalyzePost copy = p.clone();
+            String json = await(new Job<String>() {
+                @Override
+                public String doJobWithResult() throws Exception {
+                    return J.json(SellingRecord.ajaxHighChartPVAndSS(copy.val,
+                            Account.<Account>findById(NumberUtils.toLong(copy.aid)), copy.from, copy.to));
+                }
+            }.now());
+            renderJSON(json);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.S(e)));
         }
@@ -116,8 +148,15 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingTurn(AnalyzePost p) {
         try {
-            renderJSON(J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
-                    Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to)));
+            final AnalyzePost copy = p.clone();
+            String json = await(new Job<String>() {
+                @Override
+                public String doJobWithResult() throws Exception {
+                    return J.json(SellingRecord.ajaxHighChartTurnRatio(copy.val,
+                            Account.<Account>findById(NumberUtils.toLong(copy.aid)), copy.from, copy.to));
+                }
+            }.now());
+            renderJSON(json);
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
