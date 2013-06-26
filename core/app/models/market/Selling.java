@@ -291,8 +291,8 @@ public class Selling extends GenericModel {
 
     public byte[] downloadFnSkuLabel() {
         if(StringUtils.isBlank(this.fnSku))
-            throw new FastRuntimeException(
-                    "Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
+            throw new FastRuntimeException("Selling " + this.sellingId + " 没有 FnSku 无法下载最新的 Label.");
+
         synchronized(this.account.cookieStore()) {
             return HTTP.postDown(this.account.cookieStore(), this.account.type.fnSkuDownloadLink(),
                     Arrays.asList(
