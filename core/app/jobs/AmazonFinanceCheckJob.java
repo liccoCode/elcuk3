@@ -43,7 +43,7 @@ public class AmazonFinanceCheckJob extends Job {
          * 2. 这里锁定的时间不能够太长, 不然会导致前端 Selling 更新失败.
          * 3. 平均每个订单需要 10s 时间处理完成;
          */
-        int orderSize = 12;
+        int orderSize = 8;
         int hourOfDay = DateTime.now().getHourOfDay();
         // 如果是晚上, 则加大抓去量
         if(hourOfDay >= 20 && hourOfDay <= 8) orderSize = 24;
