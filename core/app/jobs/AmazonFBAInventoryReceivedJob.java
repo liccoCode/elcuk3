@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 周期:
  * - 轮询周期: 20mn
  * - Duration: 30mn
- * - Job Interval: 12h
+ * - Job Interval: 1h
  * User: wyatt
  * Date: 5/14/13
  * Time: 4:20 PM
@@ -111,7 +111,7 @@ public class AmazonFBAInventoryReceivedJob extends Job implements JobRequest.Ama
 
     @Override
     public int intervalHours() {
-        return 12;
+        return 1;
     }
 
     public static class Rows {

@@ -1,12 +1,12 @@
-#{set iconTitle:"在" + dto.lastRating._2.format("yyyy-MM-dd hh:mm:ss") + " 评分:" + dto.lastRating._1 /}
-#{if dto.lastRating._1 > dto.rating}
-    <i rel="tooltip" title="${iconTitle}" style="color:#468847" class="text-center icon-arrow-up"></i>
+#{set iconTitle:"在" + dto.lastRatingDate.format("yyyy-MM-dd hh:mm:ss") + " 评分:" + dto.lastRating /}
+#{if dto.lastRating > dto.rating}
+<i rel="tooltip" title="${iconTitle}" style="color:#468847" class="text-center icon-arrow-up"></i>
 #{/if}
-#{elseif dto.lastRating._1 == dto.rating || dto.lastRating == -1}
-    <i rel="tooltip" title="持平" style="color:#0000ff">-</i>
+#{elseif dto.lastRating == dto.rating || dto.lastRating == -1}
+<i rel="tooltip" title="持平" style="color:#0000ff">-</i>
 #{/elseif}
 #{else}
-    <i rel="tooltip" title="${iconTitle}" style="color:#B94A48" class="text-center icon-arrow-down"></i>
+<i rel="tooltip" title="${iconTitle}" style="color:#B94A48" class="text-center icon-arrow-down"></i>
 #{/else}
 
 

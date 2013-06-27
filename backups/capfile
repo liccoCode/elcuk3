@@ -3,7 +3,7 @@
 
 base = "easya.cc"
 h_r="root@r.#{base}"
-h_e="root@e.#{base}"
+h_e="root@db.#{base}"
 h_t="root@t.#{base}"
 
 lobal_backups="/Volumes/wyatt/backups"

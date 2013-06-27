@@ -6,6 +6,7 @@ import models.finance.SaleFee;
 import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
+import org.joda.time.DateTime;
 import play.Logger;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -41,9 +42,11 @@ public class AmazonFinanceCheckJob extends Job {
          * 1. 模拟抓取 Fee 需要借用登陆的 Cookie, 同时需要 changeRegion, 这个是肯定需要锁定.
          * 2. 这里锁定的时间不能够太长, 不然会导致前端 Selling 更新失败.
          * 3. 平均每个订单需要 10s 时间处理完成;
-         * 4. 6 个处理时间为 1min, 此任务每个 2min 执行一次, 空闲一分钟给前台使用.(最长阻塞 1 min)
          */
-        int orderSize = 6;
+        int orderSize = 8;
+        int hourOfDay = DateTime.now().getHourOfDay();
+        // 如果是晚上, 则加大抓去量
+        if(hourOfDay >= 20 && hourOfDay <= 8) orderSize = 24;
         List<Account> accounts = Account.openedSaleAcc();
         Map<String, Account> accMap = new HashMap<String, Account>();
         for(Account acc : accounts) {

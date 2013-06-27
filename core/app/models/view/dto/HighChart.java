@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
  * Time: 10:52 AM
  */
 public class HighChart implements Serializable {
+    private static final long serialVersionUID = 8112933425792176924L;
+
     // 图形的 title
     public String title;
 
