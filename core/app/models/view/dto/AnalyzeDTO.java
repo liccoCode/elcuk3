@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class AnalyzeDTO implements Serializable {
 
+    private static final long serialVersionUID = -6922565933590728789L;
+
     public AnalyzeDTO(String fid) {
         this.fid = fid;
     }
