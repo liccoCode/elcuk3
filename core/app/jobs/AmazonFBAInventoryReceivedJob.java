@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 下载最近 90 天的入库记录, 用于进行入库跟踪
  * 周期:
  * - 轮询周期: 20mn
- * - Duration: 30mn
+ * - Duration: 20mn
  * - Job Interval: 1h
  * User: wyatt
  * Date: 5/14/13
