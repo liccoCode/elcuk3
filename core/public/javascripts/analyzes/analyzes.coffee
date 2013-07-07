@@ -1,5 +1,6 @@
 $ ->
-  Highcharts.setOptions(global: {useUTC: false})
+  Highcharts.setOptions(global:
+    {useUTC: false})
   SKU = 'sku'
   SID = 'sid'
   # 这里的 31 天是与 sku/sid 的分析数据中的 day30 所计算的数据保持一致
@@ -46,7 +47,8 @@ $ ->
       series: # 需要从服务器获取开始时间
         cursor: 'pointer'
         point:
-          events: {}
+          events:
+            {}
     tooltip:
       shared: true
       formatter: ->
@@ -91,8 +93,8 @@ $ ->
     lineOp('a_units', 'Units').click(->
       val = paramsObj()['p.val']
       window.open('/analyzes/pie?msku=' + val + '&date=' + $.DateUtil.fmt2(new Date(@x)),
-        val,
-        'width=520,height=620,location=yes,status=yes'
+      val,
+      'width=520,height=620,location=yes,status=yes'
       )
     )
 
@@ -121,14 +123,22 @@ $ ->
           alert(r.message)
         else
           lines =
-            pv_uk: {name: 'PageView(uk)', data: []}
-            pv_de: {name: 'PageView(de)', data: []}
-            pv_fr: {name: 'PageView(fr)', data: []}
-            pv_us: {name: 'PageView(us)', data: []}
-            ss_uk: {name: 'Session(uk)', data: []}
-            ss_de: {name: 'Session(de)', data: []}
-            ss_fr: {name: 'Session(fr)', data: []}
-            ss_us: {name: 'Session(us)', data: []}
+            pv_uk:
+              {name: 'PageView(uk)', data: []}
+            pv_de:
+              {name: 'PageView(de)', data: []}
+            pv_fr:
+              {name: 'PageView(fr)', data: []}
+            pv_us:
+              {name: 'PageView(us)', data: []}
+            ss_uk:
+              {name: 'Session(uk)', data: []}
+            ss_de:
+              {name: 'Session(de)', data: []}
+            ss_fr:
+              {name: 'Session(fr)', data: []}
+            ss_us:
+              {name: 'Session(us)', data: []}
           sessionLine.head('Selling[' + params['p.val'] + '] SS')
           sessionLine.clearLines()
           for k,v of r
@@ -148,10 +158,14 @@ $ ->
           alert(r.message)
         else
           lines =
-            tn_uk: {name: 'TurnRatio(uk)', data: []}
-            tn_de: {name: 'TurnRatio(de)', data: []}
-            tn_fr: {name: 'TurnRatio(fr)', data: []}
-            tn_us: {name: 'TurnRatio(us)', data: []}
+            tn_uk:
+              {name: 'TurnRatio(uk)', data: []}
+            tn_de:
+              {name: 'TurnRatio(de)', data: []}
+            tn_fr:
+              {name: 'TurnRatio(fr)', data: []}
+            tn_us:
+              {name: 'TurnRatio(us)', data: []}
           turnOverLine.head('Selling[' + params['p.val'] + '] 转化率')
           turnOverLine.clearLines()
           for k, v of r
@@ -268,13 +282,13 @@ $ ->
   sellRankLoad = (params)->
     LoadMask.mask(BELOWTAB.contentSelector())
     $("##{params['p.type']}").load('/Analyzes/analyzes', $.param(params),
-      LoadMask.unmask(BELOWTAB.contentSelector())
+    LoadMask.unmask(BELOWTAB.contentSelector())
     )
 
   # SKU | SID 项目的详细查看事件
   $('#below_tabContent').on('click', '.sid,.sku', (e) ->
-    self = $(@)
-    sidOrSku = self.text().trim()
+    $self = $(@)
+    sidOrSku = $self.text().trim()
     params = paramsObj()
     params['p.val'] = sidOrSku
 
@@ -298,6 +312,10 @@ $ ->
       turn_line(params)
     else
       pageViewDefaultContent()
+
+    # 选中
+    $self.parents('table').find('tr').removeClass('selected')
+    $self.parents('tr').addClass('selected')
   )
 
   # 为 SKU | SID 项目添加排序事件
