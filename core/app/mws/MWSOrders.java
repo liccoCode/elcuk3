@@ -173,6 +173,11 @@ public class MWSOrders {
         for(OrderItem amzItem : items) {
             models.market.OrderItem item = new models.market.OrderItem();
 
+            if(!Product.validSKU(Product.merchantSKUtoSKU(amzItem.getSellerSKU()))) {
+                Logger.warn("MSku %s is not valid sku format.", amzItem.getSellerSKU());
+                continue;
+            }
+
             item.product = Product.findByMerchantSKU(amzItem.getSellerSKU());
             // use first-level cache
             item.order = Orderr.findById(orderId);
