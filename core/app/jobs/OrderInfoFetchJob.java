@@ -47,8 +47,6 @@ public class OrderInfoFetchJob extends Job {
                 String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
                 OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html).save();
             } catch(Exception e) {
-                ord.crawlUpdateTimes++;
-                ord.save();
                 Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
             }
         }
