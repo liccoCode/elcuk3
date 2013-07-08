@@ -22,7 +22,6 @@ import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
-import play.i18n.Messages;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -137,7 +136,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public abstract String label();
     }
 
-    @OneToMany(mappedBy = "procureUnit", orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "procureUnit", fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
 
     /**
@@ -552,7 +551,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          * 1. 什么时候可以删除采购计划?
          * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?
          */
-        if(this.stage == STAGE.PLAN || this.stage == STAGE.DELIVERY) {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.state == PaymentUnit.S.PAID) {
+                Validation.addError("", "采购计划" + this.id + "已经拥有成功的支付信息, 不可以删除.");
+            } else if(fee.state == PaymentUnit.S.APPROVAL) {
+                Validation.addError("", "采购计划" + this.id + "已经被批准, 准备付款, 请联系审核人.");
+            }
+            if(Validation.hasErrors()) return;
+        }
+        if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            for(PaymentUnit fee : this.fees) {
+                fee.permanentRemove();
+            }
             // 删除 FBA
             FBAShipment fba = this.fba;
             if(fba != null) {
@@ -564,10 +574,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             for(ShipItem item : this.shipItems) {
                 item.delete();
             }
-            new ElcukRecord(Messages.get("procureunit.remove"),
-                    Messages.get("action.base", this.to_log()), "procures.remove").save();
             this.delete();
-
         } else {
             Validation.addError("",
                     String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
