@@ -23,7 +23,7 @@ namespace :bak do
   desc "对 Elcuk2 的数据库"
   task :db, hosts: h_db  do
     # 这里备份了图片文件, 本地自行备份图片
-    #run "backup perform -t elcuk"
+    run "backup perform -t elcuk"
     # 备份的是数据库文件, 将数据弄成完全与服务器一样,多余的删除
     system("rsync -axzv --progress --delete #{h_db}:~/backups/elcuk #{lobal_backups}/")
   end
@@ -31,7 +31,7 @@ namespace :bak do
   desc "备份 Elcuk2 的图片文件"
   task :e, hosts: h_e  do
     # 这里备份了图片文件, 本地自行备份图片
-    #run "rsync -axzv --progress ~/elcuk2-data/uploads ~/backups/elcuk/"
+    run "rsync -axzv --progress ~/elcuk2-data/uploads ~/backups/elcuk/"
     # 备份的是数据库文件, 将数据弄成完全与服务器一样,多余的删除
     system("rsync -axzv --progress --delete #{h_e}:~/backups/elcuk/uploads/ #{lobal_backups}/elcuk_uploads/")
   end
