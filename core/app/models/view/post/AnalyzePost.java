@@ -91,7 +91,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             pullDaySales(isSku, analyzeMap);
 
             // ProcureUnit
-            AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
             for(AnalyzeDTO dto : analyzeMap.values()) {
                 // 切换 ProcureUnit 的 sku/sid 的参数?
                 // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?

@@ -164,12 +164,6 @@ public class PaymentUnit extends Model {
         this.createdAt = new Date();
     }
 
-    @PreRemove
-    public void softDelete() {
-        // 防止错误使用 Model.delete 删除
-        throw new PaymentException("只允许软删除.");
-    }
-
     public PaymentUnit remove(String reason) {
         if(StringUtils.isBlank(reason))
             Validation.addError("", "必须填写取消的理由.");
@@ -187,6 +181,16 @@ public class PaymentUnit extends Model {
                 .fid(this.procureUnit.id) // 取消的操作, 记录在 ProcureUnit 身上, 因为是对采购计划取消请款
                 .save();
         return this;
+    }
+
+    /**
+     * 永久删除
+     */
+    public void permanentRemove() {
+        if(Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(this.state)) {
+            ElcukRecord.delete("action=? AND fid=?", "paymentunit.destroy", this.procureUnit.id.toString());
+            PaymentUnit.delete("id=?", this.id);
+        }
     }
 
 
