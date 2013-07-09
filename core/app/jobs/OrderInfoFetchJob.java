@@ -40,10 +40,6 @@ public class OrderInfoFetchJob extends Job {
         List<Orderr> orders = OrderInfoFetchJob.needCompleteInfoOrders(size);
         for(Orderr ord : orders) {
             try {
-                if(ord.crawlUpdateTimes > 4) {
-                    Logger.warn("Order|%s| crawl more then 4 times.", ord.orderId);
-                    continue;
-                }
                 String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
                 OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html).save();
             } catch(Exception e) {
@@ -59,18 +55,18 @@ public class OrderInfoFetchJob extends Job {
          * 3. 从最老的开始处理.
          * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
          */
-        return Orderr
-                .find("crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null) order by createDate",
-                        Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
+        String sql = "crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null)";
+        List<Orderr> orders = Orderr.find(sql + " order by createDate", Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
+        long counts = Orderr.count(sql, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
+        Logger.info("OrderInfoFetchJob fetch %s / %s orders.", orders.size(), counts);
+        return orders;
     }
 
     public static String fetchOrderDetailHtml(Orderr ord) {
         String url = ord.account.type.orderDetail(ord.orderId);
-        Logger.info("OrderInfo(UserId) [%s].", url);
         String html = HTTP.get(ord.account.cookieStore(), url);
         if(Play.mode.isDev())
-            FLog.fileLog(String.format("order.detail.%s.html", ord.orderId), html,
-                    FLog.T.HTTP_ERROR);
+            FLog.fileLog(String.format("order.detail.%s.html", ord.orderId), html, FLog.T.HTTP_ERROR);
         return html;
     }
 
@@ -90,8 +86,7 @@ public class OrderInfoFetchJob extends Job {
             lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
             if(StringUtils.contains(lin.text().toLowerCase(), "cancelled") ||
                     StringUtils.contains(lin.text().toLowerCase(), "storniert")/*德语*/) {
-                Logger.info("Order %s state from %s to %s", order.orderId, order.state,
-                        Orderr.S.CANCEL);
+                Logger.info("Order %s state from %s to %s", order.orderId, order.state, Orderr.S.CANCEL);
                 order.state = Orderr.S.CANCEL;
             }
             order.memo = lin.text();
