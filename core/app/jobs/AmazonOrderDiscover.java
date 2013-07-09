@@ -101,8 +101,9 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
     public static void saveOrders(List<Orderr> toSaveOrders) {
         try {
             PreparedStatement pst = DB.getConnection().prepareStatement(
-                    "INSERT INTO Orderr(orderId, market, account_id, state, shipLevel, paymentDate, createDate, reviewMailed, warnning)" +
-                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO Orderr(orderId, market, account_id, state, shipLevel, " +
+                            "paymentDate, createDate, reviewMailed, warnning, crawlUpdateTimes)" +
+                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             int i = 1;
             for(Orderr orderr : toSaveOrders) {
@@ -115,7 +116,8 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
                         orderr.paymentDate == null ? null : new Timestamp(orderr.paymentDate.getTime()));
                 pst.setTimestamp(i++, new Timestamp(orderr.createDate.getTime()));
                 pst.setBoolean(i++, orderr.reviewMailed);
-                pst.setBoolean(i, orderr.warnning);
+                pst.setBoolean(i++, orderr.warnning);
+                pst.setInt(i, 0);
                 pst.addBatch();
                 i = 1;
             }
