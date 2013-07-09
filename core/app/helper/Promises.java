@@ -18,7 +18,7 @@ import java.util.concurrent.*;
  * Time: 10:24 AM
  */
 public class Promises {
-    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR};
+    public static final M[] MARKETS = {M.AMAZON_DE, M.AMAZON_US, M.AMAZON_UK, M.AMAZON_FR, M.AMAZON_ES, M.AMAZON_IT};
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
     /**

@@ -3,7 +3,11 @@
 }
 
 .table .active{
-    background:#EEE;
+    background:hsl(100, 96%, 96%);
+}
+
+.table tr.selected{
+    background-color:hsl(100, 96%, 96%);
 }
 
 form.cmxform label.error, label.error{
@@ -97,7 +101,7 @@ div .alert{
 
 /* table 的行 hover*/
 .table tr:hover{
-    background-color:#F4F4F4;
+    background-color:hsl(100, 96%, 96%);
 }
 
 /* 使用在 table tr 控制 td 的宽度 */

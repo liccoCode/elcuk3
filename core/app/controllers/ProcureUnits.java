@@ -114,8 +114,10 @@ public class ProcureUnits extends Controller {
         ProcureUnit unit = ProcureUnit.findById(id);
         unit.remove();
         if(Validation.hasErrors()) {
-            renderArgs.put("p", new ProcurePost());
-            render("Procures/index");
+            Webs.errorToFlash(flash);
+            ProcurePost p = new ProcurePost();
+            p.search = "id:" + id;
+            Procures.index(p);
         }
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         Procures.index(null);
