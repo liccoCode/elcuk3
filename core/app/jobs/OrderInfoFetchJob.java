@@ -47,8 +47,6 @@ public class OrderInfoFetchJob extends Job {
                 String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
                 OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html).save();
             } catch(Exception e) {
-                ord.crawlUpdateTimes++;
-                ord.save();
                 Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
             }
         }
@@ -56,7 +54,7 @@ public class OrderInfoFetchJob extends Job {
 
     public static List<Orderr> needCompleteInfoOrders(int size) {
         /**
-         * 1. userid, email, phone, address1 的检查
+         * 1. userid, email, phone 的检查
          * 2. crawlUpdateTimes 抓取次数不能太多的检查
          * 3. 从最老的开始处理.
          * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
@@ -82,7 +80,6 @@ public class OrderInfoFetchJob extends Job {
      * 2. userId
      * 3. email
      * 4. phone
-     * 5. address1
      */
     public static Orderr orderDetailUserIdAndEmailAndPhone(Orderr order, String html) {
         Document doc = Jsoup.parse(html);
@@ -115,17 +112,12 @@ public class OrderInfoFetchJob extends Job {
         if(order.state == Orderr.S.SHIPPED || order.state == Orderr.S.REFUNDED) {
             // Email
             if(StringUtils.isBlank(order.email)) {
-                String tmp = StringUtils.remove(
-                        StringUtils.substringBetween(html, "buyerEmail:", "targetID:").trim(),
-                        "\""
-                );
-
-                order.email = StringUtils.remove(tmp, ",");
-                if(StringUtils.isNotBlank(order.email)) order.email = order.email.trim();
+                String email = StringUtils.substringBetween(html, "buyerEmail:", "\",");
+                if(StringUtils.isNotBlank(email)) order.email = email.replace("\"", "").trim();
             }
 
             // buyerId
-            String url = lin.parent().select("a").attr("href");
+            String url = doc.select("tr.list-row table[class=data-display] a").attr("href");
             String[] args = StringUtils.split(url, "&");
             for(String pa : args) {
                 if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
