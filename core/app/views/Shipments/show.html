@@ -279,12 +279,12 @@
     </div>
   </div>
 #{/power.ck}
-
   <div class="span9" id="preview">
   </div>
 </div>
 </form>
 
+<!-- 运输单记录信息 -->
 <div class="row-fluid" style="margin-top:20px;">
   <div class="span6" style="overflow:auto;height:280px;">
   #{records_ul records: records/}
@@ -317,6 +317,79 @@
   </div>
 </div>
 
+
+<!-- 请款信息 -->
+<div id='paymentInfo'>
+  <div class="row-fluid" style="min-height:300px">
+    <div class="span8">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <th>#</th>
+          <th>费用类型</th>
+          <th>币种</th>
+          <th>金额</th>
+          <th>备注</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>运费</td>
+          <td>RMB</td>
+          <td>10000</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>运费</td>
+          <td>RMB</td>
+          <td>10000</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>托运费</td>
+          <td>RMB</td>
+          <td>280</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>手续费</td>
+          <td>RMB</td>
+          <td>180</td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="span4">
+      <form>
+        <div style="float: left;">
+          <label>费用类型</label>
+          <select>
+            <option>运费</option>
+            <option>手续费</option>
+          </select>
+          <label>币种</label>
+          <select>
+            <option>RMB</option>
+            <option>USD</option>
+          </select>
+          <label>金额</label>
+          <input type="text">
+        </div>
+
+        <div style="margin-left:240px">
+          <label>备注</label>
+          <textarea style="display:block;margin-bottom:10px"></textarea>
+          <button class="btn">添加</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- 附件信息 -->
 <div class="row-fluid">
   <div class="span12">
     <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
@@ -329,6 +402,8 @@
   </div>
 </div>
 
+
+<!-- 隐藏表格 -->
 <div class="modal hide fade" id="funcsForm">
   <form action="#" method="POST">
     <div class="modal-header">
