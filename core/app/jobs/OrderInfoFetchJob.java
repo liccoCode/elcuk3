@@ -64,6 +64,7 @@ public class OrderInfoFetchJob extends Job {
 
     public static String fetchOrderDetailHtml(Orderr ord) {
         String url = ord.account.type.orderDetail(ord.orderId);
+        Logger.info("OrderInfo(UserId) [%s].", url);
         String html = HTTP.get(ord.account.cookieStore(), url);
         if(Play.mode.isDev())
             FLog.fileLog(String.format("order.detail.%s.html", ord.orderId), html, FLog.T.HTTP_ERROR);
