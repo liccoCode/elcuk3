@@ -164,7 +164,9 @@ public enum iExpress {
 
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
-            return isAnyState(iExpressHTML, "派送途中");
+            F.T2<Boolean, DateTime> state = isAnyState(iExpressHTML, "派送途中");
+            if(state._1) return state;
+            return isAnyState(iExpressHTML, "递送");
         }
 
         @Override
