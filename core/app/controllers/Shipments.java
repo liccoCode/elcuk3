@@ -5,6 +5,7 @@ import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -95,12 +96,12 @@ public class Shipments extends Controller {
 
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
+        //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
-            //TODO effect 这里需要将所有的 records 修改为执行 action 的
             renderArgs.put("records", ElcukRecord.records(shipmentId));
         }
     }
@@ -391,5 +392,13 @@ public class Shipments extends Controller {
         dates.put("begin", Dates.date2Date(shipment.dates.planBeginDate));
         dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
         renderJSON(dates);
+    }
+
+    public static void billingOne(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        ship.produceFee(fee);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render(fee);
     }
 }

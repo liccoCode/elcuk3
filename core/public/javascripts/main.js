@@ -205,7 +205,6 @@ $(function(){
     $(':input').change(function(e){
         $(this).val($(this).val().trim())
     });
-    if(window.PLAY_MODE == 'DEV') Notify.loopCheck();
     LoadMask.clear();
 });
 

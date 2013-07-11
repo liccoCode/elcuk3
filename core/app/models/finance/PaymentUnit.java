@@ -137,7 +137,7 @@ public class PaymentUnit extends Model {
     public boolean remove = false;
 
     /**
-     * 申请的金额
+     * 申请的金额 (unitPrice * unitQty)
      */
     public float amount = 0;
     /**
@@ -145,6 +145,16 @@ public class PaymentUnit extends Model {
      */
     @Enumerated(EnumType.STRING)
     public Currency currency = Currency.CNY;
+
+    /**
+     * 费用单价
+     */
+    public float unitPrice = 0;
+
+    /**
+     * 费用数量
+     */
+    public int unitQty = 1;
 
     @OneToOne
     public FeeType feeType;

@@ -1,0 +1,74 @@
+<!-- 运输项目部分 -->
+#{success_row title:'运输项目' /}
+<form action="@{ShipItems.adjust(ship.id, ship.id)}" method="POST" id="adjust_shipitems">
+
+  <div class="row-fluid">
+    <div class="span12">
+    #{render './_shipitem.html', items: ship.items, itmRecord: true/}
+    </div>
+  </div>
+#{power.ck 'shipitems.adjust'}
+<div class="row-fluid">
+  <div class="span3">
+    <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
+
+    <div class="btn-group">
+      <button class="btn" id="previewBtn"><i class="icon-file-alt"></i> 预览</button>
+      <button class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
+        <i class="icon-adjust"></i>
+        调整
+      </button>
+    </div>
+  </div>
+#{/power.ck}
+  <div class="span9" id="preview">
+  </div>
+</div>
+</form>
+
+<!-- 隐藏 Model -->
+<div class="modal hide fade" id="logForm">
+  <form action="@{Shipments.log(ship.id)}" method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>记录运输状态事件</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>事件:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        记录
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal hide fade" id="recivedQtyForm">
+  <form action="#" data-method='PUT' method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>手动修改入库数量</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>数量</label>
+
+      <div class="input-append">
+        <input type="text" class="input-mini" name="qty">
+        <span class="add-on">当前入库数量 <span id="origin_qty">0</span></span>
+      </div>
+      <label>原因:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+    #{power.ck "shipitems.received"}
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        修改
+      </button>
+    #{/power.ck}
+    </div>
+  </form>
+</div>

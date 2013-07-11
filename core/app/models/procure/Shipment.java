@@ -825,6 +825,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 记录 Shipment 产生的费用条目
+     *
+     * @param fee
+     */
+    public void produceFee(PaymentUnit fee) {
+        if(fee.currency == null) Validation.addError("", "币种必须存在");
+        if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
+        if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+
+        if(Validation.hasErrors()) return;
+        fee.shipment = this;
+        fee.payee = User.current();
+        fee.amount = fee.unitQty * fee.unitPrice;
+        fee.save();
+    }
+
+    /**
      * 加载运输相关的 Config
      *
      * @return
@@ -888,6 +905,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             fbas.add(item.unit.fba);
         }
         return fbas;
+    }
+
+    /**
+     * 当前运输单与运输项目的所有费用
+     *
+     * @return
+     */
+    public List<PaymentUnit> allFees() {
+        List<PaymentUnit> allFees = new ArrayList<PaymentUnit>();
+        for(ShipItem item : this.items) {
+            allFees.addAll(item.fees);
+        }
+        allFees.addAll(this.fees);
+        return allFees;
     }
 
     /**

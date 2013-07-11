@@ -1,0 +1,12 @@
+{
+    "id": "${fee.id}",
+    "amount": "${fee.amount}",
+    "currency": "${fee.currency}",
+    "feeType": {
+        "nickName": "${fee.feeType.nickName}"
+    },
+    "unitPrice": "${fee.unitPrice}",
+    "unitQty": "${fee.unitQty}",
+    "memo": "${fee.memo}",
+    "username": "${fee.payee.username}"
+}

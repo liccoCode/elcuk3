@@ -4,7 +4,8 @@ $ ->
     o = $(@)
     mask = $('#container')
     mask.mask('更新 Comment')
-    $.post('/shipments/comment', {id: $("input[name=ship\\.id]").val(), cmt: $("#ship_memo").val().trim(), track: $("[name=ship\\.trackNo]").val()},
+    $.post('/shipments/comment',
+    {id: $("input[name=ship\\.id]").val(), cmt: $("#ship_memo").val().trim(), track: $("[name=ship\\.trackNo]").val()},
     (r) ->
       if r.flag is false
         alert(r.message)
@@ -40,8 +41,12 @@ $ ->
     else
       LoadMask.mask()
       $.getScript("/shipment/#{shipment.val()}/preview")
-        .done(-> LoadMask.unmask())
-        .fail(-> LoadMask.unmask())
+        .done(->
+          LoadMask.unmask()
+        )
+        .fail(->
+          LoadMask.unmask()
+        )
     e.preventDefault()
 
   $('#adjust_shipitems').on('click', 'button.adjust', ->
@@ -66,3 +71,32 @@ $ ->
     $('#recivedQtyForm').modal('show').find('form').attr('action', "/shipitem/#{self.parents('tr').attr('id')}/recevied")
     e.stopPropagation()
   ).find('[name=recivedQty]').append('<i class="icon-wrench"></i>')
+
+  $('#add_payment').on('click', '.btn', (e) ->
+    e.preventDefault()
+    $form = $('#add_payment')
+    LoadMask.mask()
+    $.post($form.attr('action'), $form.serialize(), (r) ->
+      if r.flag == false
+        errors = JSON.parse(r.message).map((err) ->
+          err.message
+        ).join(', ')
+        $form.find('label span').html(errors).show()
+      else
+        $form.find('label span').html('').hide()
+        $('#paymentInfo tr:last').after(_.template(paymentUnitTRTemplate, {fee: r}))
+      LoadMask.unmask()
+    , 'json')
+  )
+
+
+paymentUnitTRTemplate = '<tr>
+    <td><%= fee.id %></td>
+    <td><%= fee.feeType.nickName %></td>
+    <td><%= fee.currency %></td>
+    <td><%= fee.unitPrice %></td>
+    <td><%= fee.unitQty %></td>
+    <td><%= fee.amount %></td>
+    <td><%= fee.memo %></td>
+    <td><%= fee.username %></td>
+  </tr>'

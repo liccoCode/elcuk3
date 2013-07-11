@@ -136,6 +136,11 @@ public class FeeType extends GenericModel {
         return FeeType.findById("productcharges");
     }
 
+    /**
+     * Amazon 的 Shipping 费用
+     *
+     * @return
+     */
     public static FeeType shipping() {
         return FeeType.findById("shipping");
     }

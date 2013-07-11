@@ -34,14 +34,16 @@ window.Notify =
     @notify(title, text, timeout, '/img/ok.png')
 
 
-  # 是否发开可以提示消息?
-  isOn: () -> window.webkitNotifications and webkitNotifications.checkPermission() is 0
+# 是否发开可以提示消息?
+  isOn: () ->
+    window.webkitNotifications and webkitNotifications.checkPermission() is 0
 
-  # 轮询检查系统是否有消息发出
+# 轮询检查系统是否有消息发出
   loopCheck: (interval = 15) ->
     self = @
     if self.isOn()
       setInterval(->
+        console.log(Date.now())
         $.get("/Notifications/nextNotification", {}, (r) ->
           if r['title']
             self.notify("#{r.title} #{r.createAt}", r['content'])
