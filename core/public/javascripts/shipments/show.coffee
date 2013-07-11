@@ -72,7 +72,7 @@ $ ->
     e.stopPropagation()
   ).find('[name=recivedQty]').append('<i class="icon-wrench"></i>')
 
-  $('#add_payment').on('click', '.btn', (e) ->
+  $('#add_payment').on('click', '.btn',(e) ->
     e.preventDefault()
     $form = $('#add_payment')
     LoadMask.mask()
@@ -84,13 +84,15 @@ $ ->
         $form.find('label span').html(errors).show()
       else
         $form.find('label span').html('').hide()
-        $('#paymentInfo tr:last').after(_.template(paymentUnitTRTemplate, {fee: r}))
+        $('#paymentInfo tr:last').after(_.template(unitTrTemplate, {fee: r}))
       LoadMask.unmask()
     , 'json')
+  ).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
+    $('#amount').val($("[name='fee.unitPrice']").val() * $("[name='fee.unitQty']").val());
   )
 
 
-paymentUnitTRTemplate = '<tr>
+unitTrTemplate = '<tr>
     <td><%= fee.id %></td>
     <td><%= fee.feeType.nickName %></td>
     <td><%= fee.currency %></td>

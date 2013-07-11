@@ -104,11 +104,15 @@
         </label>
 
         <label>单价
-          <input name="fee.unitPrice" type="text" class="input-small" value="0">
+          <input name="fee.unitPrice" type="number" step="any" class="input-mini" value="0">
         </label>
 
         <label>数量
-          <input name="fee.unitQty" type="text" class="input-small" value="1">
+          <input name="fee.unitQty" type="number" step="any" class="input-mini" value="1">
+        </label>
+
+        <label>总价
+          <input id='amount' type="number" readonly="" class="input-mini">
         </label>
 
         <label>备注
