@@ -124,6 +124,7 @@ GET     /shipitems                                          ShipItems.index
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
+POST    /shipitem/{id}/billing                              ShipItems.billingOne
 
 # Elcuk
 GET     /elcuks                                             Elcuk.index

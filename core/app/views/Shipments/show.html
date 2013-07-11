@@ -112,11 +112,11 @@
         </label>
 
         <label>总价
-          <input id='amount' type="number" readonly="" class="input-mini">
+          <input type="number" readonly="" class="input-mini amount">
         </label>
 
         <label>备注
-          <textarea name="memo" class="input"></textarea>
+          <textarea name="fee.memo" class="input"></textarea>
         </label>
 
         <label>
@@ -130,6 +130,8 @@
     </div>
   </div>
 </div>
+
+<div class="modal hide fade" id="logFeeModel"></div>
 
 
 <!-- 附件信息 -->
@@ -145,3 +147,72 @@
   </div>
 </div>
 
+
+<script type="text/template" id='logFeeModelTpl'>
+  <form action="<%= url %>" method="POST" class="form-horizontal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>添加运输项目 <%= itm.id %> 费用</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <div class="control-group">
+        <label class="control-label">币种</label>
+
+        <div class="controls">
+        #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">单价</label>
+
+        <div class="controls">
+          <input name="fee.unitPrice" type="number" step="any" class="input-mini" value="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">数量</label>
+
+        <div class="controls">
+          <input name="fee.unitQty" type="number" step="any" class="input-mini" value="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">总价</label>
+
+        <div class="controls">
+          <input type="number" step="any" class="input-mini amount" value="0" readonly>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">备注</label>
+
+        <div class="controls">
+          <textarea role="5" name="msg" class="span11"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        添加
+      </button>
+    </div>
+  </form>
+</script>
+
+<script type="text/template" id='unitTrTemplate'>
+  <tr>
+    <td><%= fee.id %></td>
+    <td><%= fee.feeType.nickName %></td>
+    <td><%= fee.currency %></td>
+    <td><%= fee.unitPrice %></td>
+    <td><%= fee.unitQty %></td>
+    <td><%= fee.amount %></td>
+    <td><%= fee.memo %></td>
+    <td><%= fee.username %></td>
+  </tr>
+</script>

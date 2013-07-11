@@ -1,11 +1,13 @@
 package controllers;
 
 import helper.Webs;
+import models.finance.PaymentUnit;
 import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Whouse;
+import models.view.Ret;
 import models.view.post.ProcureUnitShipPost;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -78,5 +80,13 @@ public class ShipItems extends Controller {
         else
             flash.success("修改成功.");
         Shipments.show(itm.shipment.id);
+    }
+
+    public static void billingOne(Long id, PaymentUnit fee) {
+        ShipItem itm = ShipItem.findById(id);
+        itm.produceFee(fee);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render(fee);
     }
 }

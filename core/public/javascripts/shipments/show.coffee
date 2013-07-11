@@ -1,7 +1,6 @@
 $ ->
   $('#ship_comment').click (e) ->
     e.preventDefault()
-    o = $(@)
     mask = $('#container')
     mask.mask('更新 Comment')
     $.post('/shipments/comment',
@@ -20,7 +19,6 @@ $ ->
   window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
 
-
   $("#split_shipment").click (e) ->
     if !confirm('确认提交?')
       e.preventDefault()
@@ -32,7 +30,6 @@ $ ->
       e.preventDefault()
     else
       $(@).button('loading').parents('form').attr('action', '/Shipments/deployToAmazon').submit()
-
 
   $('#previewBtn').click (e) ->
     shipment = $("[name='shipmentId']")
@@ -72,6 +69,22 @@ $ ->
     e.stopPropagation()
   ).find('[name=recivedQty]').append('<i class="icon-wrench"></i>')
 
+  $('#adjust_shipitems').on('click', 'button[data-url]', (e) ->
+    e.preventDefault()
+    $i = $(@)
+    params =
+      url: $i.data('url')
+      select_currency: $("[name='fee.currency']")[0].outerHTML
+      itm:
+        id: $i.parents('tr').attr('id')
+    $('#logFeeModel').html(_.template($('#logFeeModelTpl').html(), params)).modal('show')
+  )
+
+  $('#logFeeModel').on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
+    $context = $(@).parents('div')
+    $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
+  )
+
   $('#add_payment').on('click', '.btn',(e) ->
     e.preventDefault()
     $form = $('#add_payment')
@@ -84,21 +97,12 @@ $ ->
         $form.find('label span').html(errors).show()
       else
         $form.find('label span').html('').hide()
-        $('#paymentInfo tr:last').after(_.template(unitTrTemplate, {fee: r}))
+        $('#paymentInfo tr:last').after(_.template($('#unitTrTemplate').html(), {fee: r}))
+        $form.trigger('reset')
       LoadMask.unmask()
     , 'json')
   ).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
-    $('#amount').val($("[name='fee.unitPrice']").val() * $("[name='fee.unitQty']").val());
+    $context = $(@).parents('form')
+    $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val());
   )
 
-
-unitTrTemplate = '<tr>
-    <td><%= fee.id %></td>
-    <td><%= fee.feeType.nickName %></td>
-    <td><%= fee.currency %></td>
-    <td><%= fee.unitPrice %></td>
-    <td><%= fee.unitQty %></td>
-    <td><%= fee.amount %></td>
-    <td><%= fee.memo %></td>
-    <td><%= fee.username %></td>
-  </tr>'
