@@ -403,9 +403,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             logs.addAll(this.doneUpdate(unit));
         }
         this.comment = unit.comment;
-        if(logs.size() > 0) {
-            new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
-        }
 
         // 2
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE).contains(this.stage)) {
@@ -413,7 +410,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     StringUtils.isBlank(shipmentId) ? null : Shipment.<Shipment>findById(shipmentId)
             );
         }
+        if(Validation.hasErrors()) return;
 
+        if(logs.size() > 0) {
+            new ERecordBuilder("procureunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
+        }
         this.shipItemQty(this.qty());
         this.save();
     }
@@ -475,6 +476,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param shipment
      */
     public void changeShipItemShipment(Shipment shipment) {
+        if(shipment != null && shipment.state != Shipment.S.PLAN) {
+            Validation.addError("", "涉及的运输单已经为" + shipment.state.label() + "状态, 只有"
+                    + Shipment.S.PLAN.label() + "状态的运输单才可调整.");
+            return;
+        }
         if(this.shipItems.size() == 0) {
             // 采购计划没有运输项目, 调整运输单的时候, 需要创建运输项目
             if(shipment == null) return;
@@ -482,8 +488,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             for(ShipItem shipItem : this.shipItems) {
                 if(this.shipType == Shipment.T.EXPRESS) {
-                    // 快递运输单调整, 运输项目全部删除, 重新设计.
-                    shipItem.delete();
+                    if(shipItem.shipment.state == Shipment.S.PLAN) {
+                        // 快递运输单调整, 运输项目全部删除, 重新设计.
+                        shipItem.delete();
+                    }
                 } else {
                     if(shipment == null) return;
                     Shipment originShipment = shipItem.shipment;
