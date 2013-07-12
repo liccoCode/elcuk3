@@ -114,7 +114,9 @@ $ ->
     LoadMask.mask()
     $.get("/paymentunit/#{id}.json")
       .done((r) ->
-        $tr.replaceWith(_.template($('#tr-edit-paymentunit-template').html(), {fee: r}))
+        trDom = $(_.template($('#tr-edit-paymentunit-template').html(), {fee: r}))
+          .find("[name='fee.currency']").val(r.currency).end()
+        $tr.replaceWith(trDom)
         sessionStorage["tr-edit-paymentunit-template-#{id}"] = JSON.stringify(r)
         LoadMask.unmask()
       )
@@ -164,8 +166,10 @@ $ ->
         type: 'DELETE'
       }).done((r) ->
         if r.flag is false
-          noty({text: _.map(JSON.parse(r.message),(err) ->
-            err.message).join('<br>'), type: 'warning'})
+          noty({text: _.map(JSON.parse(r.message),
+          (err) ->
+            err.message
+          ).join('<br>'), type: 'warning'})
         else
           noty({text: r.message, type: 'success', timeout: 3000})
       ).fail(->
