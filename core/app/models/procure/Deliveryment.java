@@ -353,7 +353,7 @@ public class Deliveryment extends GenericModel {
         }
         for(ProcureUnit unit : this.units) {
             for(PaymentUnit fee : unit.fees()) {
-                fee.remove(String.format(
+                fee.procureFeeRemove(String.format(
                         "所属采购单 %s 从原有请款单 %s 中剥离.", this.id, this.apply.serialNumber));
             }
         }

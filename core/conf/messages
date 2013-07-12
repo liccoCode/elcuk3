@@ -210,7 +210,8 @@ paymentunit.fixValue.msg=\u56E0 [%s] \u539F\u56E0\u5C06\u4FEE\u6B63\u503C\u4ECE 
 paymentunit.deny=\u9A73\u56DE[\u8BF7\u6B3E]
 paymentunit.deny.msg=\u56E0 [%s] \u539F\u56E0\u9A73\u56DE\u8BF7\u6B3E
 paymentunit.destroy=\u53D6\u6D88[\u8BF7\u6B3E\u9879\u76EE]
-paymentunit.destroy.msg=\u56E0 %s \u539F\u56E0\u53D6\u6D88\u8BF7\u6B3E
+# reason currency amount feetype
+paymentunit.destroy.msg=\u56E0 %s \u539F\u56E0\u53D6\u6D88 %s %s %s \u8BF7\u6B3E
 paymentunit.update=\u66F4\u65B0[\u652F\u4ED8\u5355\u5143]
 paymentunit.update.msg=%s
 

@@ -176,11 +176,15 @@ public class PaymentUnit extends Model {
         this.createdAt = new Date();
     }
 
-    public PaymentUnit remove(String reason) {
+    public void basicRemoveValidate(String reason) {
         if(StringUtils.isBlank(reason))
             Validation.addError("", "必须填写取消的理由.");
         if(this.isApproval())
             Validation.addError("", "请款已经被批准, 不允许删除记录, 请与财务交流调整.");
+    }
+
+    public PaymentUnit procureFeeRemove(String reason) {
+        basicRemoveValidate(reason);
         if(this.remove)
             Validation.addError("", "已经删除了");
 
@@ -189,8 +193,23 @@ public class PaymentUnit extends Model {
         this.remove = true;
         this.save();
         new ERecordBuilder("paymentunit.destroy")
-                .msgArgs(reason)
+                .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
                 .fid(this.procureUnit.id) // 取消的操作, 记录在 ProcureUnit 身上, 因为是对采购计划取消请款
+                .save();
+        return this;
+    }
+
+    public PaymentUnit transportFeeRemove(String reason) {
+        basicRemoveValidate(reason);
+        if(Validation.hasErrors()) return this;
+        this.delete();
+        String fid;
+        if(this.shipment != null) fid = this.shipment.id;
+        else fid = this.shipItem.shipment.id;
+        this.clearRecords();
+        new ERecordBuilder("paymentunit.destroy")
+                .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
+                .fid(fid)
                 .save();
         return this;
     }
@@ -200,7 +219,7 @@ public class PaymentUnit extends Model {
      */
     public void permanentRemove() {
         if(Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(this.state)) {
-            ElcukRecord.delete("action=? AND fid=?", "paymentunit.destroy", this.procureUnit.id.toString());
+            this.clearRecords();
             PaymentUnit.delete("id=?", this.id);
         }
     }
@@ -312,6 +331,15 @@ public class PaymentUnit extends Model {
 
     public List<ElcukRecord> updateRecords() {
         return ElcukRecord.records(this.id + "", Messages.get("paymentunit.update"));
+    }
+
+    /**
+     * 永久删除 PaymentUnit 的时候, 需要将其关联的 Records 一起删除.
+     */
+    public void clearRecords() {
+        for(String action : Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update")) {
+            ElcukRecord.delete("action=? AND fid=?", Messages.get(action), this.id.toString());
+        }
     }
 
     /**

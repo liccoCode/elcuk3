@@ -293,6 +293,12 @@ public class Webs {
         return sbd.toString();
     }
 
+    /**
+     * json: [{key:xxx, message: xxx}, {key: yyy, message: yyy}]
+     *
+     * @param errors
+     * @return
+     */
     public static String VJson(List<Error> errors) {
         List<Map<String, String>> errorList = new ArrayList<Map<String, String>>();
         for(Error err : errors) {

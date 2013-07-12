@@ -86,6 +86,7 @@
           <td>${fee.payee.username}</td>
           <td>
             <button class="btn btn-info"><i class="icon-edit"></i></button>
+            <button class="btn btn-warning"><i class="icon-trash"></i></button>
           </td>
         </tr>
       #{/list}
@@ -135,7 +136,7 @@
   </div>
 </div>
 
-<div class="modal hide fade" id="logFeeModel"></div>
+<div class="modal hide fade" id="popModel"></div>
 
 
 <!-- 附件信息 -->
@@ -208,6 +209,25 @@
   </form>
 </script>
 
+<script type="text/template" id='form-destroyfee-model-template'>
+  <form action="<%= fee.url %>" method="POST" data-method='DELETE'>
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3>删除 <%= fee.id %></h3>
+    </div>
+
+    <div class="modal-body">
+      <label>原因</label>
+      <textarea name="reason"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <a href="#" data-dismiss="modal" class="btn">取消</a>
+      <button class="btn btn-primary">删除</button>
+    </div>
+  </form>
+</script>
+
 <script type="text/template" id='tr-paymentunit-template'>
   <tr>
     <td><%= fee.id %></td>
@@ -220,6 +240,7 @@
     <td><%= fee.payee.username %></td>
     <td>
       <button class="btn btn-info"><i class="icon-edit"></i></button>
+      <button class="btn btn-warning"><i class="icon-trash"></i></button>
     </td>
   </tr>
 </script>

@@ -77,10 +77,10 @@ $ ->
       select_currency: $("[name='fee.currency']")[0].outerHTML
       itm:
         id: $i.parents('tr').attr('id')
-    $('#logFeeModel').html(_.template($('#form-logfee-model-template').html(), params)).modal('show')
+    $('#popModel').html(_.template($('#form-logfee-model-template').html(), params)).modal('show')
   )
 
-  $('#logFeeModel').on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
+  $('#popModel').on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
     $context = $(@).parents('div')
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
   )
@@ -106,6 +106,7 @@ $ ->
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val());
   )
 
+  # 请款信息相关的功能
   $('#paymentInfo').on('click', 'button.btn-info',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
@@ -117,6 +118,8 @@ $ ->
         sessionStorage["tr-edit-paymentunit-template-#{id}"] = JSON.stringify(r)
         LoadMask.unmask()
       )
+
+    # 取消更新
   ).on('click', 'button.btn-danger',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
@@ -126,7 +129,9 @@ $ ->
     )
     $tr.replaceWith(trHtml)
     delete sessionStorage["tr-edit-paymentunit-template-#{id}"]
-  ).on('click', 'button.btn-success', (e) ->
+
+    # 更新
+  ).on('click', 'button.btn-success',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -143,5 +148,30 @@ $ ->
     ).fail((r) ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
     )
+  ).on('click', 'button.btn-warning',(e) ->
+    id = $(@).parents('tr').find('td:eq(0)').text().trim();
+    params =
+      id: id
+      url: "/shipment/#{fidCallBack()['fid']}/paymentunit/#{id}",
+
+    $('#popModel').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
+  ).on('click', 'button.btn-warning9', (e) ->
+    e.preventDefault()
+    if confirm('确认删除此请款计划?')
+      id = $(@).parents('tr').find('td:eq(0)').text().trim()
+      $.ajax({
+        url: "/paymentunit/#{id}.json",
+        type: 'DELETE'
+      }).done((r) ->
+        if r.flag is false
+          noty({text: _.map(JSON.parse(r.message),(err) ->
+            err.message).join('<br>'), type: 'warning'})
+        else
+          noty({text: r.message, type: 'success', timeout: 3000})
+      ).fail(->
+        noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+      )
+    else
+      false
   )
 

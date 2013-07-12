@@ -24,12 +24,23 @@ public class PaymentUnits extends Controller {
     @Check("paymentunits.destroy")
     public static void destroy(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
-        payUnit.remove(reason);
+        payUnit.procureFeeRemove(reason);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
             flash.success("删除成功");
         Applys.procure(payUnit.deliveryment.apply.id);
+    }
+
+    @Check("paymentunits.destroy")
+    public static void destroyByShipment(Long id, String reason, String shipmentId) {
+        PaymentUnit payUnit = PaymentUnit.findById(id);
+        payUnit.transportFeeRemove(reason);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("删除成功");
+        Shipments.show(shipmentId);
     }
 
     @Check("paymentunits.fixvalue")
