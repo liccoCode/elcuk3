@@ -2,7 +2,9 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.ERecordBuilder;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.view.dto.AnalyzeDTO;
@@ -275,7 +277,26 @@ public class ShipItem extends GenericModel {
         return result;
     }
 
+    /**
+     * 对运输项目进行请款
+     *
+     * @param fee
+     */
     public void produceFee(PaymentUnit fee) {
-
+        /**
+         * 1. 检查是否拥有运输运费
+         * 2. 选择运输运费类型
+         * 3. 记录数量, 请款人...
+         */
+        FeeType transportShipping = FeeType.transportShipping();
+        if(transportShipping == null)
+            Validation.addError("", "运输运费类型不存在, 请添加");
+        if(fee.currency == null) Validation.addError("", "币种必须存在");
+        if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        fee.shipItem = this;
+        fee.feeType = transportShipping;
+        fee.payee = User.current();
+        fee.amount = fee.unitPrice * fee.unitQty;
+        fee.save();
     }
 }

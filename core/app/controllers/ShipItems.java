@@ -7,7 +7,6 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Whouse;
-import models.view.Ret;
 import models.view.post.ProcureUnitShipPost;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -86,7 +85,9 @@ public class ShipItems extends Controller {
         ShipItem itm = ShipItem.findById(id);
         itm.produceFee(fee);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        render(fee);
+            Webs.errorToFlash(flash);
+        else
+            flash.success("运输项目 #%s 费用添加成功.", itm.id);
+        Shipments.show(itm.shipment.id);
     }
 }

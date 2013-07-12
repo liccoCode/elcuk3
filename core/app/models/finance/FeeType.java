@@ -144,4 +144,13 @@ public class FeeType extends GenericModel {
     public static FeeType shipping() {
         return FeeType.findById("shipping");
     }
+
+    /**
+     * 运输运费
+     *
+     * @return
+     */
+    public static FeeType transportShipping() {
+        return FeeType.findById("transportshipping");
+    }
 }
