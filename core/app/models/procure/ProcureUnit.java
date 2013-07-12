@@ -25,7 +25,6 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -427,46 +426,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public List<String> beforeDoneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<String>();
-        logs.addAll(this.updateAndLogChanges("attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
-        logs.addAll(this.updateAndLogChanges("attrs.planShipDate", unit.attrs.planShipDate));
-        logs.addAll(this.updateAndLogChanges("attrs.planArrivDate", unit.attrs.planArrivDate));
-        logs.addAll(this.updateAndLogChanges("attrs.planQty", unit.attrs.planQty));
-        logs.addAll(this.updateAndLogChanges("attrs.price", unit.attrs.price));
-        logs.addAll(this.updateAndLogChanges("attrs.currency", unit.attrs.currency));
-        logs.addAll(this.updateAndLogChanges("attrs.qty", unit.attrs.qty));
-        logs.addAll(this.updateAndLogChanges("shipType", unit.shipType));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planDeliveryDate", unit.attrs.planDeliveryDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planQty", unit.attrs.planQty));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.price", unit.attrs.price));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.currency", unit.attrs.currency));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
+        logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         return logs;
     }
 
     private List<String> doneUpdate(ProcureUnit unit) {
         List<String> logs = new ArrayList<String>();
-        logs.addAll(this.updateAndLogChanges("attrs.qty", unit.attrs.qty));
-        logs.addAll(this.updateAndLogChanges("attrs.planShipDate", unit.attrs.planShipDate));
-        logs.addAll(this.updateAndLogChanges("attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
+        logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
         return logs;
-    }
-
-    /**
-     * 当采购计划的值变更, 同时记录下变更记录
-     *
-     * @param attr
-     * @param value
-     * @return
-     */
-    private List<String> updateAndLogChanges(String attr, Object value) {
-        try {
-            Field field = null;
-            if(attr.contains(".")) {
-                String[] attrs = StringUtils.split(attr, ".");
-                field = this.getClass().getField(attrs[0]);
-                return Reflects.updateAndLogChanges(field.get(this), attrs[1], value);
-            } else {
-                field = this.getClass().getField(attr);
-                return Reflects.updateAndLogChanges(this, attr, value);
-            }
-        } catch(Exception e) {
-            throw new FastRuntimeException(Webs.E(e));
-        }
     }
 
 

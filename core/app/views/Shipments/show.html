@@ -65,13 +65,14 @@
         <caption class="alert alert-success" style="text-align:left"><h4>运输单费用信息</h4></caption>
         <tr>
           <th>#</th>
-          <th>费用类型</th>
-          <th>币种</th>
+          <th class="span2">费用类型</th>
+          <th class="span2">币种</th>
           <th>单价</th>
           <th>数量</th>
           <th>总价</th>
           <th>备注</th>
           <th>申请人</th>
+          <th class="span2"></th>
         </tr>
       #{list items:ship.allFees(), as:'fee'}
         <tr>
@@ -83,6 +84,9 @@
           <td>${fee.amount}</td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
+          <td>
+            <button class="btn btn-info"><i class="icon-edit"></i></button>
+          </td>
         </tr>
       #{/list}
       </table>
@@ -148,7 +152,7 @@
 </div>
 
 
-<script type="text/template" id='logFeeModelTpl'>
+<script type="text/template" id='form-logfee-model-template'>
   <form action="<%= url %>" method="POST" class="form-horizontal">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">×</button>
@@ -204,7 +208,7 @@
   </form>
 </script>
 
-<script type="text/template" id='unitTrTemplate'>
+<script type="text/template" id='tr-paymentunit-template'>
   <tr>
     <td><%= fee.id %></td>
     <td><%= fee.feeType.nickName %></td>
@@ -213,6 +217,36 @@
     <td><%= fee.unitQty %></td>
     <td><%= fee.amount %></td>
     <td><%= fee.memo %></td>
-    <td><%= fee.username %></td>
+    <td><%= fee.payee.username %></td>
+    <td>
+      <button class="btn btn-info"><i class="icon-edit"></i></button>
+    </td>
+  </tr>
+</script>
+
+<script type='text/template' id='tr-edit-paymentunit-template'>
+  <tr>
+    <td><%= fee.id %></td>
+    <td><%= fee.feeType.nickName %></td>
+    <td>
+    #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small'}#{/select}
+    </td>
+    <td>
+      <input type="number" step='any' name='fee.unitPrice' value="<%= fee.unitPrice %>"
+    </td>
+    <td>
+      <input type="number" step='any' name="fee.unitQty" value="<%= fee.unitQty %>">
+    </td>
+    <td>
+      <input type="number" readonly="" value="<%= fee.amount %>">
+    </td>
+    <td>
+      <textarea name="fee.memo"><%= fee.memo %></textarea>
+    </td>
+    <td><%= fee.payee.username %></td>
+    <td>
+      <button class="btn btn-success"><i class="icon-ok"></i></button>
+      <button class="btn btn-danger"><i class="icon-remove"></i></button>
+    </td>
   </tr>
 </script>

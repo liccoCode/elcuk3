@@ -1,11 +1,16 @@
 package controllers;
 
+import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.finance.PaymentUnit;
 import models.view.Ret;
 import play.data.validation.Validation;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -53,6 +58,32 @@ public class PaymentUnits extends Controller {
         else
             flash.success("成功驳回");
         Payments.show(paymentId);
+    }
+
+    public static void show(Long id) {
+        PaymentUnit fee = PaymentUnit.findById(id);
+        render(fee);
+    }
+
+    public static void update(Long id, PaymentUnit fee) {
+        PaymentUnit feeUnit = PaymentUnit.findById(id);
+        feeUnit.update(fee);
+        if(Validation.hasErrors()) {
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        }
+        renderArgs.put("fee", feeUnit);
+        render("PaymentUnits/show.json");
+    }
+
+    public static void records(final Long id) {
+        List<ElcukRecord> records = await(new Job<List<ElcukRecord>>() {
+            @Override
+            public List<ElcukRecord> doJobWithResult() {
+                PaymentUnit feeUnit = PaymentUnit.findById(id);
+                return feeUnit.updateRecords();
+            }
+        }.now());
+        renderJSON(J.json(records));
     }
 
 }

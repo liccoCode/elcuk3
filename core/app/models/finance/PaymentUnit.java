@@ -2,6 +2,7 @@ package models.finance;
 
 import exception.PaymentException;
 import helper.Currency;
+import helper.Reflects;
 import models.ElcukRecord;
 import models.Notification;
 import models.User;
@@ -14,6 +15,7 @@ import play.db.jpa.Model;
 import play.i18n.Messages;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -308,6 +310,10 @@ public class PaymentUnit extends Model {
         return ElcukRecord.records(this.id + "", Messages.get("paymentunit.deny"));
     }
 
+    public List<ElcukRecord> updateRecords() {
+        return ElcukRecord.records(this.id + "", Messages.get("paymentunit.update"));
+    }
+
     /**
      * 修改修正价格;
      * 1. 如果属于驳回状态, 那么自动变为已申请状态
@@ -337,6 +343,26 @@ public class PaymentUnit extends Model {
                 .msgArgs(reason, oldFixValue, this.fixValue)
                 .fid(this.id)
                 .save();
+    }
+
+    /**
+     * 更新 Paymentunit, 限制允许更新的值
+     *
+     * @param fee
+     */
+    public PaymentUnit update(PaymentUnit fee) {
+        fee.amount = fee.unitPrice * fee.unitQty;
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
+        logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
+        logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
+        logs.addAll(Reflects.logFieldFade(this, "currency", fee.currency));
+        logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
+
+        if(logs.size() > 0) {
+            new ERecordBuilder("paymentunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
+        }
+        return this.save();
     }
 }
 
