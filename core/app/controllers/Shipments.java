@@ -5,6 +5,7 @@ import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -99,6 +100,7 @@ public class Shipments extends Controller {
         //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
+        renderArgs.put("feeTypes", FeeType.transports());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
@@ -400,5 +402,9 @@ public class Shipments extends Controller {
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
         render(fee);
+    }
+
+    public static void calDuty(String id) {
+        Shipment ship = Shipment.findById(id);
     }
 }

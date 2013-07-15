@@ -838,7 +838,17 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.shipment = this;
         fee.payee = User.current();
         fee.amount = fee.unitQty * fee.unitPrice;
+        // TODO 请款日志
         fee.save();
+    }
+
+    /**
+     * 根据输入的最终关税金额, 计算还需支付的关税金额
+     */
+    public void calculateDuty(helper.Currency crcy, Float amount) {
+        /**
+         * 1. 检查已经存在的关税币种是否一致, 不一致提示需要对关税进行处理
+         */
     }
 
     /**

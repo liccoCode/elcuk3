@@ -58,10 +58,10 @@
 
 
 <!-- 请款信息 -->
-<div id='paymentInfo'>
+<div>
   <div class="row-fluid">
     <div class="span12">
-      <table class="table table-bordered table-condensed">
+      <table class="table table-bordered table-condensed" id='paymentInfo'>
         <caption class="alert alert-success" style="text-align:left"><h4>运输单费用信息</h4></caption>
         <tr>
           <th>#</th>
@@ -96,12 +96,9 @@
 
   <div class="row-fluid">
     <div class="span12">
-      <form id='add_payment' class="form-inline" action="@{Shipments.billingOne(ship.id)}" method="POST">
+      <form id='add_payment' class="form-inline" method="GET">
         <label>费用类型
-          <select name="fee.feeType.name" class="input-small">
-            <option value="shipping">运费</option>
-            <option value="labelfee">手续费</option>
-          </select>
+        #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
         </label>
 
         <label>币种
@@ -125,7 +122,10 @@
         </label>
 
         <label>
-          <button type="submit" class="btn">添加</button>
+          <button type="submit" class="btn btn-success" data-url='@{Shipments.billingOne(ship.id)}'>添加费用</button>
+        </label>
+        <label>
+          <button type="submit" class="btn btn-info" data-url='@{Shipments.billingOne(ship.id)}'>计算剩余关税</button>
         </label>
 
         <label>

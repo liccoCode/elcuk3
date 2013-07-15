@@ -36,6 +36,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toHKD(Float value) {
+            return value * GBP_HKD;
+        }
+
+        @Override
         public Float toUSD(Float value) {
             return value * GBP_USD;
         }
@@ -50,13 +55,14 @@ public enum Currency {
             switch(currency) {
                 case CNY:
                     return GBP_CNY;
-                case GBP:
-                    return 1;
                 case EUR:
                     return GBP_EUR;
                 case USD:
-                default:
                     return GBP_USD;
+                case HKD:
+                    return GBP_HKD;
+                default:
+                    return 1f;
             }
         }
 
@@ -69,7 +75,7 @@ public enum Currency {
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
             // 619.71 -> 6.1971
-            return NumberUtils.toFloat(doc.select("tr:eq(1) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(英镑) td:eq(1)").text()) / 100;
         }
     },
     /**
@@ -90,6 +96,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toHKD(Float value) {
+            return value * EUR_HKD;
+        }
+
+        @Override
         public Float toUSD(Float value) {
             return value * EUR_USD;
         }
@@ -106,11 +117,12 @@ public enum Currency {
                     return EUR_CNY;
                 case GBP:
                     return EUR_GBP;
-                case EUR:
-                    return 1;
+                case HKD:
+                    return EUR_HKD;
                 case USD:
-                default:
                     return EUR_USD;
+                default:
+                    return 1f;
             }
         }
 
@@ -123,7 +135,7 @@ public enum Currency {
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
             // 619.71 -> 6.1971
-            return NumberUtils.toFloat(doc.select("tr:eq(12) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(欧元) td:eq(1)").text()) / 100;
         }
     },
     /**
@@ -133,6 +145,11 @@ public enum Currency {
         @Override
         public Float toEUR(Float value) {
             return value * CNY_EUR;
+        }
+
+        @Override
+        public Float toHKD(Float value) {
+            return value * CNY_HKD;
         }
 
         @Override
@@ -156,15 +173,16 @@ public enum Currency {
         @Override
         public float ratio(Currency currency) {
             switch(currency) {
-                case CNY:
-                    return 1;
                 case GBP:
                     return CNY_GBP;
                 case EUR:
                     return CNY_EUR;
+                case HKD:
+                    return CNY_HKD;
                 case USD:
-                default:
                     return CNY_USD;
+                default:
+                    return 1f;
             }
         }
 
@@ -196,6 +214,11 @@ public enum Currency {
         }
 
         @Override
+        public Float toHKD(Float value) {
+            return value * USD_HKD;
+        }
+
+        @Override
         public Float toUSD(Float value) {
             return value;
         }
@@ -214,6 +237,8 @@ public enum Currency {
                     return USD_GBP;
                 case EUR:
                     return USD_EUR;
+                case HKD:
+                    return USD_HKD;
                 case USD:
                 default:
                     return 1;
@@ -229,7 +254,61 @@ public enum Currency {
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
             // 619.71 -> 6.1971
-            return NumberUtils.toFloat(doc.select("tr:eq(3) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(美元) td:eq(1)").text()) / 100;
+        }
+    },
+    HKD {
+        @Override
+        public Float toGBP(Float value) {
+            return value * HKD_GBP;
+        }
+
+        @Override
+        public Float toEUR(Float value) {
+            return value * HKD_EUR;
+        }
+
+        @Override
+        public Float toHKD(Float value) {
+            return value;
+        }
+
+        @Override
+        public Float toUSD(Float value) {
+            return value * HKD_USD;
+        }
+
+        @Override
+        public Float toCNY(Float value) {
+            return value * HKD_CNY;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return HKD_CNY;
+                case GBP:
+                    return HKD_GBP;
+                case EUR:
+                    return HKD_EUR;
+                case USD:
+                    return HKD_USD;
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return null;
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            // 78.309 -> 0.78309
+            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
         }
     };
 
@@ -242,6 +321,8 @@ public enum Currency {
 
     public abstract Float toEUR(Float value);
 
+    public abstract Float toHKD(Float value);
+
     public abstract Float toUSD(Float value);
 
     public abstract Float toCNY(Float value);
@@ -250,25 +331,36 @@ public enum Currency {
 
     public abstract String symbol();
 
-    //GBP
-    private static float GBP_EUR = 1.20175971f;
-    private static float GBP_CNY = 10.008345f;
-    private static float GBP_USD = 1.5831f;
+    //CNY
+    private static float CNY_EUR = 0.124664933f;
+    private static float CNY_GBP = 0.107829021f;
+    private static float CNY_HKD = 1.26433964f;
+    private static float CNY_USD = 0.162962f;
 
     //EUR
-    private static float EUR_GBP = 0.831975238f;
-    private static float EUR_CNY = 8.32669524f;
-    private static float EUR_USD = 1.3171f;
+    private static float EUR_CNY = 7.99469721f;
+    private static float EUR_GBP = 0.864950705f;
+    private static float EUR_HKD = 10.1419028f;
+    private static float EUR_USD = 1.3072f;
 
-    //CNY
-    private static float CNY_GBP = 0.0999166193f;
-    private static float CNY_EUR = 0.120095665f;
-    private static float CNY_USD = 0.158165f;
+    //GBP
+    private static float GBP_CNY = 9.27394116f;
+    private static float GBP_EUR = 1.15613525f;
+    private static float GBP_HKD = 11.7254114f;
+    private static float GBP_USD = 1.5113f;
+
+    //HKD
+    private static float HKD_CNY = 0.790926719f;
+    private static float HKD_EUR = 0.0986008262f;
+    private static float HKD_GBP = 0.0852848541f;
+    private static float HKD_USD = 0.128891f;
 
     //USD
-    private static float USD_GBP = 0.631672036f;
-    private static float USD_CNY = 6.3225113f;
-    private static float USD_EUR = 0.758495146f;
+    private static float USD_CNY = 6.1363999f;
+    private static float USD_EUR = 0.76499388f;
+    private static float USD_GBP = 0.661681996f;
+    private static float USD_HKD = 7.75849361f;
+
 
     public static void updateCRY() {
         synchronized(Currency.class) { // 与 Google 同步汇率的时候阻塞所有与 Currency 有关的操作.
@@ -281,6 +373,8 @@ public enum Currency {
             GBP_CNY = tmp > 0 ? tmp : GBP_CNY;
             tmp = ratio("GBP", "USD");
             GBP_USD = tmp > 0 ? tmp : GBP_USD;
+            tmp = ratio("GBP", "HKD");
+            GBP_HKD = tmp > 0 ? tmp : GBP_HKD;
 
             // EUR
             tmp = ratio("EUR", "GBP");
@@ -289,6 +383,8 @@ public enum Currency {
             EUR_CNY = tmp > 0 ? tmp : EUR_CNY;
             tmp = ratio("EUR", "USD");
             EUR_USD = tmp > 0 ? tmp : EUR_USD;
+            tmp = ratio("EUR", "HKD");
+            EUR_HKD = tmp > 0 ? tmp : EUR_HKD;
 
             // CNY
             tmp = ratio("CNY", "GBP");
@@ -297,6 +393,8 @@ public enum Currency {
             CNY_EUR = tmp > 0 ? tmp : CNY_EUR;
             tmp = ratio("CNY", "USD");
             CNY_USD = tmp > 0 ? tmp : CNY_USD;
+            tmp = ratio("CNY", "HKD");
+            CNY_HKD = tmp > 0 ? tmp : CNY_HKD;
 
             // USD
             tmp = ratio("USD", "GBP");
@@ -305,6 +403,19 @@ public enum Currency {
             USD_CNY = tmp > 0 ? tmp : USD_CNY;
             tmp = ratio("USD", "EUR");
             USD_EUR = tmp > 0 ? tmp : USD_EUR;
+            tmp = ratio("USD", "HKD");
+            USD_HKD = tmp > 0 ? tmp : USD_HKD;
+
+
+            // HKD
+            tmp = ratio("HKD", "CNY");
+            HKD_CNY = tmp > 0 ? tmp : HKD_CNY;
+            tmp = ratio("HKD", "EUR");
+            HKD_EUR = tmp > 0 ? tmp : HKD_EUR;
+            tmp = ratio("HKD", "GBP");
+            HKD_GBP = tmp > 0 ? tmp : HKD_GBP;
+            tmp = ratio("HKD", "USD");
+            HKD_USD = tmp > 0 ? tmp : HKD_USD;
         }
     }
 

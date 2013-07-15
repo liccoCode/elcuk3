@@ -106,6 +106,15 @@ public class FeeType extends GenericModel {
     }
 
     /**
+     * 与物流相关的费用
+     *
+     * @return
+     */
+    public static List<FeeType> transports() {
+        return FeeType.find("parent.name=?", "transport").fetch();
+    }
+
+    /**
      * 最顶层的节点
      *
      * @return
