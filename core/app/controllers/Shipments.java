@@ -404,7 +404,11 @@ public class Shipments extends Controller {
         render(fee);
     }
 
-    public static void calDuty(String id) {
+    public static void calDuty(String id, PaymentUnit fee) {
         Shipment ship = Shipment.findById(id);
+        fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("Shipments/billingOne.json", fee);
     }
 }

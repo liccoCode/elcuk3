@@ -85,7 +85,7 @@ $ ->
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
   )
 
-  $('#add_payment').on('click', '.btn-success',(e) ->
+  $('#add_payment').on('click', '.btn',(e) ->
     e.preventDefault()
     $form = $('#add_payment')
     LoadMask.mask()
@@ -102,15 +102,9 @@ $ ->
         $form.trigger('reset')
       LoadMask.unmask()
     , 'json')
-  ).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']",->
+  ).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
     $context = $(@).parents('form')
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val());
-  ).on('click', '.btn-info', (e) ->
-    # 计算剩余关税
-    e.preventDefault()
-    $form = $('#add_payment')
-    LoadMask.mask()
-    console.log($(@).data('url'))
   )
 
   # 请款信息相关的功能

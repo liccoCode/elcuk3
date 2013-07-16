@@ -162,4 +162,13 @@ public class FeeType extends GenericModel {
     public static FeeType transportShipping() {
         return FeeType.findById("transportshipping");
     }
+
+    /**
+     * 运输关税
+     *
+     * @return
+     */
+    public static FeeType transportDuty() {
+        return FeeType.findById("transportduty");
+    }
 }

@@ -9,6 +9,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.ShipmentDates;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.product.Whouse;
 import notifiers.Mails;
@@ -845,10 +846,46 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     /**
      * 根据输入的最终关税金额, 计算还需支付的关税金额
      */
-    public void calculateDuty(helper.Currency crcy, Float amount) {
+    public PaymentUnit calculateDuty(helper.Currency crcy, Float amount) {
+        if(crcy == null) Validation.addError("", "币种必须确定.");
         /**
          * 1. 检查已经存在的关税币种是否一致, 不一致提示需要对关税进行处理
+         * 2. 统计所有已经支付的关税金额
+         * 3. 计算出关税差额
          */
+        List<PaymentUnit> fees = this.allFees();
+        FeeType duty = FeeType.transportDuty();
+        if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
+        for(PaymentUnit fee : fees) {
+            if(fee.feeType.equals(duty)) {
+                if(!fee.currency.equals(crcy))
+                    Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息.");
+            }
+        }
+
+        if(Validation.hasErrors()) return null;
+
+        float paidAmount = 0;
+        List<String> lines = new ArrayList<String>();
+        // TODO 把 Comment 更换为 record?
+        lines.add(String.format("总关税 %s %s 减去 ", crcy, amount));
+        for(PaymentUnit fee : fees) {
+            if(!fee.feeType.equals(duty)) continue;
+            lines.add(String.format("#%s %s %s %s", fee.id, fee.currency, fee.amount(), fee.feeType.nickName));
+            paidAmount += fee.amount();
+        }
+
+        PaymentUnit leftDuty = new PaymentUnit();
+        leftDuty.feeType = duty;
+        leftDuty.amount = amount - paidAmount;
+        leftDuty.unitPrice = leftDuty.amount;
+        leftDuty.unitQty = 1;
+        leftDuty.currency = crcy;
+        leftDuty.payee = User.current();
+        leftDuty.shipment = this;
+        leftDuty.state = PaymentUnit.S.APPLY;
+        leftDuty.memo = StringUtils.join(lines, ", ");
+        return leftDuty.save();
     }
 
     /**

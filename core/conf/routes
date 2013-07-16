@@ -122,6 +122,7 @@ POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
 POST    /shipment/{id}/billing.json                         Shipments.billingOne
 DELETE  /shipment/{shipmentId}/paymentunit/{id}             PaymentUnits.destroyByShipment
+POST    /shipment/{id}/calDuty.json                         Shipments.calDuty
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
