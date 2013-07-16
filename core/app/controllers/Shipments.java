@@ -7,6 +7,7 @@ import models.ElcukRecord;
 import models.User;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.finance.TransportApply;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -35,7 +36,7 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Shipments extends Controller {
-    @Before(only = {"index", "blank", "save"})
+    @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
         List<Whouse> whouses = Whouse.findAll();
         List<Cooperator> cooperators = Cooperator.shippers();
@@ -410,5 +411,21 @@ public class Shipments extends Controller {
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
         render("Shipments/billingOne.json", fee);
+    }
+
+    public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
+        if(shipmentId == null || shipmentId.size() == 0)
+            Validation.addError("", "请选择需要创建请款单的运输单");
+
+        if(!Validation.hasErrors())
+            TransportApply.buildTransportApply(shipmentId);
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(p);
+        } else {
+            //TODO 跳转到运输请款单中
+            index(p);
+        }
     }
 }

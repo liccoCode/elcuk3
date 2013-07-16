@@ -111,15 +111,15 @@ public class ProcureApply extends Apply {
          * 3. 生成 PaymentNumber
          */
         this.cooperator = cooperator;
-        String year = DateTime.now().toString("yyyy");
+        DateTime now = DateTime.now();
+        String year = now.toString("yyyy");
         // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
         long count = ProcureApply.count("cooperator=? AND createdAt>=? AND createdAt<=?",
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
                 Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
         // count + 1 为新创建的编号
-        this.serialNumber = String.format("QK-%s-%03d-%s",
-                this.cooperator.name, count + 1, DateTime.now().toString("yy"));
+        this.serialNumber = String.format("QK-%s-%03d-%s", this.cooperator.name, count + 1, now.toString("yy"));
     }
 
     public List<ElcukRecord> records() {
@@ -155,20 +155,17 @@ public class ProcureApply extends Apply {
                 .save();
     }
 
-    private static F.T2<List<Deliveryment>, Set<Cooperator>> procureAddDeliverymentCheck(
-            List<String>
-                    deliverymentIds) {
+    private static F.T2<List<Deliveryment>, Set<Cooperator>> procureAddDeliverymentCheck(List<String> deliverymentIds) {
         /**
          * 0. 检查提交的采购单 ID 数量与加载的采购单数量是否一致
          * 1. 检查请款的供应商是否一致.
          */
-        List<Deliveryment> deliveryments = Deliveryment
-                .find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
+        List<Deliveryment> deliveryments = Deliveryment.find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
         if(deliverymentIds.size() != deliveryments.size())
             Validation.addError("", "提交的采购单参数与系统内不符.");
         Set<Cooperator> coopers = new HashSet<Cooperator>();
         for(Deliveryment dmt : deliveryments) {
-            coopers.add(dmt.cooperator);
+            if(dmt.cooperator != null) coopers.add(dmt.cooperator);
         }
         if(coopers.size() > 1)
             Validation.addError("", "请仅对同一个工厂创建请款单.");
@@ -184,8 +181,7 @@ public class ProcureApply extends Apply {
      * @return
      */
     public static ProcureApply buildProcureApply(List<String> deliverymentIds) {
-        F.T2<List<Deliveryment>, Set<Cooperator>> dmtAndCop = procureAddDeliverymentCheck(
-                deliverymentIds);
+        F.T2<List<Deliveryment>, Set<Cooperator>> dmtAndCop = procureAddDeliverymentCheck(deliverymentIds);
         if(Validation.hasErrors()) return null;
 
         // 生成 ProcureApply
@@ -200,7 +196,7 @@ public class ProcureApply extends Apply {
         }
         new ERecordBuilder("procureapply.save")
                 .msgArgs(StringUtils.join(deliverymentIds, ","))
-                .fid(apply.id + "")
+                .fid(apply.id)
                 .save();
         return apply;
     }

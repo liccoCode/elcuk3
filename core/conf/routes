@@ -103,6 +103,7 @@ GET     /selling/{id}/label                                 Sellings.sellingLabe
 
 # Shipments
 GET     /shipments                                          Shipments.index
+POST    /shipments                                          Shipments.index
 GET     /shipment/{id}                                      Shipments.show
 GET     /shipment/{id}/dates                                Shipments.dates
 PUT     /shipment/{id}/process                              Shipments.refreshProcuress
@@ -123,6 +124,7 @@ GET     /shipment/{id}/invoice                              Shipments.invoice
 POST    /shipment/{id}/billing.json                         Shipments.billingOne
 DELETE  /shipment/{shipmentId}/paymentunit/{id}             PaymentUnits.destroyByShipment
 POST    /shipment/{id}/calDuty.json                         Shipments.calDuty
+POST    /shipment/apply                                     Shipments.shipmentToApply
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

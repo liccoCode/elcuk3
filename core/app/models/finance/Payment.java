@@ -85,6 +85,12 @@ public class Payment extends Model {
     @ManyToOne
     public ProcureApply pApply;
 
+    /**
+     * 与运输请款单相关联
+     */
+    @ManyToOne
+    public ProcureApply tApply;
+
     @ManyToOne
     public Cooperator cooperator;
 

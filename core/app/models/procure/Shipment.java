@@ -11,6 +11,7 @@ import models.embedded.ERecordBuilder;
 import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.finance.TransportApply;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -224,6 +225,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+
+    @ManyToOne
+    public TransportApply apply;
 
     /**
      * 运输合作商

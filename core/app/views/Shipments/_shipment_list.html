@@ -1,5 +1,6 @@
 <table class="table table-condensed table-bordered">
   <tr>
+    <th></th>
     <th>#</th>
     <th>Track No.</th>
     <th>运输商</th>
@@ -16,6 +17,9 @@
   </tr>
 #{list items:shipments, as:'ship'}
   <tr>
+    <td>
+      <input type="checkbox" name="shipmentId" value="${ship.id}">
+    </td>
     <td>
       <a target="_blank" href="@{Shipments.show(ship.id)}">${ship.id}</a>
     </td>
