@@ -69,8 +69,8 @@ public class TransportApply extends Apply {
             ship.apply = apply;
             ship.save();
         }
-        new ERecordBuilder("")
-                .msgArgs(StringUtils.join(shipmentId, ","))
+        new ERecordBuilder("transportapply.save")
+                .msgArgs(StringUtils.join(shipmentId, ","), apply.serialNumber)
                 .fid(apply.id)
                 .save();
         return apply;

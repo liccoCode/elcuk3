@@ -195,7 +195,7 @@ public class ProcureApply extends Apply {
             dmt.save();
         }
         new ERecordBuilder("procureapply.save")
-                .msgArgs(StringUtils.join(deliverymentIds, ","))
+                .msgArgs(StringUtils.join(deliverymentIds, ","), apply.serialNumber)
                 .fid(apply.id)
                 .save();
         return apply;
