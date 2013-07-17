@@ -9,16 +9,16 @@
 #{list items:apply.shipments, as:'ship'}
 <div class="row-fluid">
   <div class="span4">
-    <div>
+    <div style="max-height:100px">
     ${ship.id}
     </div>
-    <div>
-      logs..
+    <div style="max-height:200px;overflow:auto">
+        #{records_ul records: ship.allRecords(), nobr: true /}
     </div>
   </div>
   <div class="span8">
       #{render 'Shipments/_paymentunits.html', ship: ship, feeTypes: feeTypes/}
   </div>
 </div>
-
+<hr style="border-top: 1px dashed;">
 #{/list}

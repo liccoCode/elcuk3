@@ -25,8 +25,8 @@
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
           <td>
-            <button class="btn btn-info"><i class="icon-edit"></i></button>
-            <button class="btn btn-warning"><i class="icon-trash"></i></button>
+            <button class="btn btn-small btn-info"><i class="icon-edit"></i></button>
+            <button class="btn btn-small btn-warning"><i class="icon-trash"></i></button>
           </td>
         </tr>
       #{/list}
@@ -108,8 +108,8 @@
     <td><%= fee.memo %></td>
     <td><%= fee.payee.username %></td>
     <td>
-      <button class="btn btn-info"><i class="icon-edit"></i></button>
-      <button class="btn btn-warning"><i class="icon-trash"></i></button>
+      <button class="btn btn-small btn-info"><i class="icon-edit"></i></button>
+      <button class="btn btn-small btn-warning"><i class="icon-trash"></i></button>
     </td>
   </tr>
 </script>
@@ -122,21 +122,21 @@
     #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small'}#{/select}
     </td>
     <td>
-      <input type="number" step='any' name='fee.unitPrice' value="<%= fee.unitPrice %>"
+      <input type="number" step='any' class="input-mini" name='fee.unitPrice' value="<%= fee.unitPrice %>"
     </td>
     <td>
-      <input type="number" step='any' name="fee.unitQty" value="<%= fee.unitQty %>">
+      <input type="number" step='any' class="input-mini" name="fee.unitQty" value="<%= fee.unitQty %>">
     </td>
     <td>
-      <input type="number" readonly="" class="amount" value="<%= fee.amount %>">
+      <input type="number" readonly="" class="input-mini" class="amount" value="<%= fee.amount %>">
     </td>
     <td>
       <textarea name="fee.memo"><%= fee.memo %></textarea>
     </td>
     <td><%= fee.payee.username %></td>
     <td>
-      <button class="btn btn-success"><i class="icon-ok"></i></button>
-      <button class="btn btn-danger"><i class="icon-remove"></i></button>
+      <button class="btn btn-small btn-success"><i class="icon-ok"></i></button>
+      <button class="btn btn-small btn-danger"><i class="icon-remove"></i></button>
     </td>
   </tr>
 </script>

@@ -768,6 +768,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return ElcukRecord.records(this.id, Messages.get("shipment.logEvent"));
     }
 
+    /**
+     * 对于运输单可以通过其特殊格式的 id 来获取所有 Records
+     *
+     * @return
+     */
+    public List<ElcukRecord> allRecords() {
+        return ElcukRecord.records(this.id);
+    }
+
     @Override
     public String to_log() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
