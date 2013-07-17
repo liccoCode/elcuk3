@@ -37,6 +37,11 @@ public class Applys extends Controller {
         render(apply);
     }
 
+    public static void transport(Long id) {
+        TransportApply apply = TransportApply.findById(id);
+        render(apply);
+    }
+
     public static void procureConfirm(Long id) {
         ProcureApply apply = ProcureApply.findById(id);
         apply.confirm = true;

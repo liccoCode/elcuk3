@@ -36,7 +36,7 @@
     <th>记录运费</th>
   </tr>
 #{list items:items, as:'itm'}
-  <tr id="${itm.id}">
+  <tr id="${itm.id}" data-url='@{ShipItems.received(itm.id)}'>
       #{if useCheckbox}
         <td>
           <label class="checkbox">

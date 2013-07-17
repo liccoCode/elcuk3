@@ -46,8 +46,9 @@
   </form>
 </div>
 
-<div class="modal hide fade" id="recivedQtyForm">
-  <form action="#" data-method='PUT' method="POST">
+<div class="modal hide fade" id="popLogModel"></div>
+<script type="text/template" id='form-logreceive-qty-model-template'>
+  <form action="<%= url %>" data-method='PUT' method="POST">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">×</button>
       <h4>手动修改入库数量</h4>
@@ -57,7 +58,7 @@
 
       <div class="input-append">
         <input type="text" class="input-mini" name="qty">
-        <span class="add-on">当前入库数量 <span id="origin_qty">0</span></span>
+        <span class="add-on">当前入库数量 <%= qty %></span>
       </div>
       <label>原因:</label>
       <textarea role="5" name="msg" class="span11"></textarea>
@@ -71,4 +72,60 @@
     #{/power.ck}
     </div>
   </form>
-</div>
+</script>
+
+<script type="text/template" id='form-logfee-model-template'>
+  <form action="<%= url %>" method="POST" class="form-horizontal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>添加运输项目 <%= itm.id %> 费用</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <div class="control-group">
+        <label class="control-label">币种</label>
+
+        <div class="controls">
+        #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">单价</label>
+
+        <div class="controls">
+          <input name="fee.unitPrice" type="number" step="any" class="input-mini" value="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">数量</label>
+
+        <div class="controls">
+          <input name="fee.unitQty" type="number" step="any" class="input-mini" value="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">总价</label>
+
+        <div class="controls">
+          <input type="number" step="any" class="input-mini amount" value="0" readonly>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">备注</label>
+
+        <div class="controls">
+          <textarea role="5" name="fee.memo" class="span11"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        添加
+      </button>
+    </div>
+  </form>
+</script>

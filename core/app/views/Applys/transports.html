@@ -21,7 +21,7 @@
   #{list items:applyes, as:'apply'}
     <tr>
       <td>${apply.id}</td>
-      <td>#{apply_id_link apply:apply/}</td>
+      <td><a href="@{Applys.transport(apply.id)}">${apply.serialNumber}</a></td>
       <td>${apply.cooperator.fullName}</td>
       <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
       <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
