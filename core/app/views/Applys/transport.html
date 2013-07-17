@@ -2,6 +2,7 @@
 #{set title:"请款单 ${apply.serialNumber}" /}
 #{set 'moreScripts'}
     #{script 'deliveryments/procure.coffee'/}
+    #{script 'shipments/paymentunits.coffee'/}
 #{/set}
 #{flash_alert /}
 
@@ -9,19 +10,14 @@
 <div class="row-fluid">
   <div class="span4">
     <div>
+    ${ship.id}
     </div>
     <div>
+      logs..
     </div>
   </div>
   <div class="span8">
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <th>#</th>
-        <th></th>
-      </tr>
-        #{list items:ship.allFees(), as:'fee'}
-        #{/list}
-    </table>
+      #{render 'Shipments/_paymentunits.html', ship: ship, feeTypes: feeTypes/}
   </div>
 </div>
 

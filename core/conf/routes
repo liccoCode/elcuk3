@@ -82,6 +82,7 @@ GET     /code128/{shipmentId}                               Login.code128
 
 # PaymentUnits
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
+DELETE  /paymentunit/{id}/shipment                          PaymentUnits.destroyByShipment
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
 GET     /paymentunit/{id}.json                              PaymentUnits.show(format:'json')
 GET     /paymentunit/{id}/records.json                      PaymentUnits.records(format:'json')
@@ -124,7 +125,6 @@ DELETE  /shipment/{id}/state                                Shipments.revertStat
 POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
 POST    /shipment/{id}/billing.json                         Shipments.billingOne
-DELETE  /shipment/{shipmentId}/paymentunit/{id}             PaymentUnits.destroyByShipment
 POST    /shipment/{id}/calDuty.json                         Shipments.calDuty
 POST    /shipment/apply                                     Shipments.shipmentToApply
 

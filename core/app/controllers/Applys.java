@@ -1,6 +1,7 @@
 package controllers;
 
 import models.finance.Apply;
+import models.finance.FeeType;
 import models.finance.ProcureApply;
 import models.finance.TransportApply;
 import play.mvc.Controller;
@@ -38,8 +39,9 @@ public class Applys extends Controller {
     }
 
     public static void transport(Long id) {
+        List<FeeType> feeTypes = FeeType.transports();
         TransportApply apply = TransportApply.findById(id);
-        render(apply);
+        render(apply, feeTypes);
     }
 
     public static void procureConfirm(Long id) {

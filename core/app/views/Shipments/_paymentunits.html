@@ -1,7 +1,7 @@
-<div>
+<div class="top">
   <div class="row-fluid">
     <div class="span12">
-      <table class="table table-bordered table-condensed" id='paymentInfo'>
+      <table class="table table-bordered table-condensed paymentInfo">
         <caption class="alert alert-success" style="text-align:left"><h4>运输单费用信息</h4></caption>
         <tr>
           <th>#</th>
@@ -15,7 +15,7 @@
           <th class="span2"></th>
         </tr>
       #{list items:ship.allFees(), as:'fee'}
-        <tr>
+        <tr id='fee_${fee.id}'>
           <td>${fee.id}</td>
           <td>${fee.feeType.nickName}</td>
           <td>${fee.currency}</td>
@@ -36,7 +36,7 @@
 
   <div class="row-fluid">
     <div class="span12">
-      <form id='add_payment' class="form-inline" method="GET">
+      <form class="form-inline add_payment" method="GET">
         <label>费用类型
         #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
         </label>
@@ -92,7 +92,7 @@
 
     <div class="modal-footer">
       <a href="#" data-dismiss="modal" class="btn">取消</a>
-      <button class="btn btn-primary" data-disable-with='删除中...'>删除</button>
+      <button class="btn btn-primary" data-id='<%= fee.id %>' data-disable-with='删除中...'>删除</button>
     </div>
   </form>
 </script>
@@ -128,7 +128,7 @@
       <input type="number" step='any' name="fee.unitQty" value="<%= fee.unitQty %>">
     </td>
     <td>
-      <input type="number" readonly="" value="<%= fee.amount %>">
+      <input type="number" readonly="" class="amount" value="<%= fee.amount %>">
     </td>
     <td>
       <textarea name="fee.memo"><%= fee.memo %></textarea>

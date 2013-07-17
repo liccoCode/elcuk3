@@ -33,14 +33,13 @@ public class PaymentUnits extends Controller {
     }
 
     @Check("paymentunits.destroy")
-    public static void destroyByShipment(Long id, String reason, String shipmentId) {
+    public static void destroyByShipment(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.transportFeeRemove(reason);
         if(Validation.hasErrors())
-            Webs.errorToFlash(flash);
+            renderJSON(Webs.VJson(Validation.errors()));
         else
-            flash.success("删除成功");
-        Shipments.show(shipmentId);
+            renderJSON(new Ret(true, "#" + id + " 请款项删除成功"));
     }
 
     @Check("paymentunits.fixvalue")

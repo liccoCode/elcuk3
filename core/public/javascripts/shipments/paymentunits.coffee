@@ -1,12 +1,32 @@
 $ ->
-  $('#popModel').on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
-    $context = $(@).parents('div')
+  $(document).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
+    $context = $(@).parents('div[class!=controls][class!=control-group]:eq(0)')
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
   )
-
-  $('#add_payment').on('click', '.btn',(e) ->
+  $('#popModel').on('click', '.btn:contains(删除)', (e) ->
     e.preventDefault()
-    $form = $('#add_payment')
+    $btn = $(@)
+    $form = $btn.parents('form')
+    $.ajax({
+      url: $form.attr('action'),
+      type: 'DELETE',
+      data: $form.serialize()
+    }).done((r) ->
+      if r.flag == true
+        $("#fee_#{$btn.data('id')}").remove()
+        noty({text: r.message, type: 'success', timeout: 3000})
+      else
+        text = _.map(r,(err)->
+          err.message
+        ).join('<br>')
+        noty({text: text, type: 'error'})
+      $('#popModel').modal('hide')
+    )
+  )
+
+  $('form.add_payment').on('click', '.btn', (e) ->
+    e.preventDefault()
+    $form = $(@).parents('form')
     LoadMask.mask()
     $.post($(@).data('url'), $form.serialize(), (r) ->
       if r.flag == false
@@ -16,18 +36,16 @@ $ ->
         $form.find('label span').html(errors).show()
       else
         $form.find('label span').html('').hide()
-        $('#paymentInfo tr:last').after(_.template($('#tr-paymentunit-template').html(), {fee: r}))
+        $form.parents('div.top').find('.paymentInfo tr:last').after(_.template($('#tr-paymentunit-template').html(),
+        {fee: r}))
         noty({text: "成功添加 #{r['currency']} #{r['amount']} #{r.feeType.nickName}", type: 'success', timeout: 3000})
         $form.trigger('reset')
       LoadMask.unmask()
     , 'json')
-  ).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
-    $context = $(@).parents('form')
-    $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val());
   )
 
   # 请款信息相关的功能
-  $('#paymentInfo').on('click', 'table button.btn-info',(e) ->
+  $('table.paymentInfo').on('click', 'table button.btn-info',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -74,6 +92,6 @@ $ ->
     id = $(@).parents('tr').find('td:eq(0)').text().trim();
     params =
       id: id
-      url: "/shipment/#{fidCallBack()['fid']}/paymentunit/#{id}",
+      url: "/paymentunit/#{id}/shipment",
     $('#popModel').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
   )
