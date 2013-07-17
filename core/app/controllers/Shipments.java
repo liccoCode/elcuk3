@@ -417,8 +417,9 @@ public class Shipments extends Controller {
         if(shipmentId == null || shipmentId.size() == 0)
             Validation.addError("", "请选择需要创建请款单的运输单");
 
+        TransportApply apply = null;
         if(!Validation.hasErrors())
-            TransportApply.buildTransportApply(shipmentId);
+            apply = TransportApply.buildTransportApply(shipmentId);
 
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

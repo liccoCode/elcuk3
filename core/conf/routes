@@ -26,6 +26,7 @@ GET     /img/                                               staticDir:public/ima
 GET     /helper/                                            staticDir:public/images/helper
 
 # Applys
+GET     /apply/transports                                   Applys.transports
 GET     /apply/{id}/procure                                 Applys.procure
 PUT     /apply/{id}/procure/confirm                         Applys.procureConfirm
 

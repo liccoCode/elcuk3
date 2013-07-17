@@ -3,6 +3,7 @@ package factory.procure;
 import factory.FactoryBoy;
 import factory.ModelFactory;
 import models.User;
+import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.procure.iExpress;
 import org.joda.time.DateTime;
@@ -21,6 +22,7 @@ public class ShipmentFactory extends ModelFactory<Shipment> {
         shipment.type = Shipment.T.EXPRESS;
         shipment.internationExpress = iExpress.DHL;
         shipment.trackNo = "this_is_trackNo";
+        shipment.cooper = FactoryBoy.lastOrCreate(Cooperator.class);
         DateTime now = DateTime.now();
         shipment.dates.planBeginDate = now.minusDays(45).toDate();
         shipment.dates.beginDate = shipment.dates.planBeginDate;

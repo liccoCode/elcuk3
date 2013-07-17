@@ -1,0 +1,31 @@
+#{extends 'main_full.html'/}
+#{set title:"请款单列表" /}
+#{set 'moreScripts'}
+#{/set}
+
+#{warning_row}
+<ul>
+  <li>在编写采购请款时将此页面完善</li>
+</ul>
+#{/warning_row}
+
+<div class="row-fluid">
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th>#</th>
+      <th>请款单编号</th>
+      <th>合作伙伴</th>
+      <th>最新更新时间</th>
+      <th>创建时间</th>
+    </tr>
+  #{list items:applyes, as:'apply'}
+    <tr>
+      <td>${apply.id}</td>
+      <td>#{apply_id_link apply:apply/}</td>
+      <td>${apply.cooperator.fullName}</td>
+      <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
+      <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
+    </tr>
+  #{/list}
+  </table>
+</div>

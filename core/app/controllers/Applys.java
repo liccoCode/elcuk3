@@ -2,6 +2,7 @@ package controllers;
 
 import models.finance.Apply;
 import models.finance.ProcureApply;
+import models.finance.TransportApply;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -19,6 +20,11 @@ public class Applys extends Controller {
     @Check("applys.index")
     public static void index() {
         List<Apply> applyes = ProcureApply.find("ORDER BY createdAt DESC").fetch();
+        render(applyes);
+    }
+
+    public static void transports() {
+        List<Apply> applyes = TransportApply.find("ORDER BY createdAt DESC").fetch();
         render(applyes);
     }
 
