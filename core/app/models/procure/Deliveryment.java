@@ -347,6 +347,8 @@ public class Deliveryment extends GenericModel {
          * 1. 剥离没有过成功支付的采购单.
          * 2. 剥离后原有的 PaymentUnit 自动 remove 标记.
          */
+        if(this.apply == null)
+            Validation.addError("", "运输单没有添加进入请款单, 不需要剥离");
         if(!isProcureApplyDepartable()) {
             Validation.addError("", "当前采购单已经拥有成功支付信息, 无法剥离.");
             return;

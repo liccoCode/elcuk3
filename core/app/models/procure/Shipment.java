@@ -932,6 +932,26 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return weight;
     }
 
+    /**
+     * 将运输单从其存在的运输请款单中剥离
+     */
+    public void departFromApply() {
+        if(this.apply == null)
+            Validation.addError("", "运输单没有添加进入请款单, 不需要剥离");
+        for(PaymentUnit fee : this.allFees()) {
+            if(Arrays.asList(PaymentUnit.S.PAID, PaymentUnit.S.APPROVAL).contains(fee.state)) {
+                Validation.addError("", "运输但中已经有运输请款项目被批准或付款, 无法剥离");
+                break;
+            }
+        }
+        if(Validation.hasErrors()) return;
+        new ERecordBuilder("shipment.departFromApply")
+                .msgArgs(this.id, this.apply.serialNumber)
+                .fid(this.apply.id).save();
+        this.apply = null;
+        this.save();
+    }
+
     @Override
     public String toString() {
         return String.format("%s 开往 %s", this.id, this.whouse.name);

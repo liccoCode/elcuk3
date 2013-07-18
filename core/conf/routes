@@ -28,6 +28,7 @@ GET     /helper/                                            staticDir:public/ima
 # Applys
 GET     /apply/transports                                   Applys.transports
 GET     /apply/transport/{id}                               Applys.transport
+POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
 GET     /apply/procure/{id}                                 Applys.procure
 PUT     /apply/procure/{id}/confirm                         Applys.procureConfirm
 
@@ -127,6 +128,7 @@ GET     /shipment/{id}/invoice                              Shipments.invoice
 POST    /shipment/{id}/billing.json                         Shipments.billingOne
 POST    /shipment/{id}/calDuty.json                         Shipments.calDuty
 POST    /shipment/apply                                     Shipments.shipmentToApply
+DELETE  /shipment/{id}/departApply                          Shipments.departFromApply(format:'json')
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

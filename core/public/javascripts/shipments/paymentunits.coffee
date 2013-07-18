@@ -3,7 +3,7 @@ $ ->
     $context = $(@).parents('div[class!=controls][class!=control-group]:eq(0)')
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
   )
-  $('#popModel').on('click', '.btn:contains(删除)', (e) ->
+  $('#popModal').on('click', '.btn:contains(删除)', (e) ->
     e.preventDefault()
     $btn = $(@)
     $form = $btn.parents('form')
@@ -20,7 +20,7 @@ $ ->
           err.message
         ).join('<br>')
         noty({text: text, type: 'error'})
-      $('#popModel').modal('hide')
+      $('#popModal').modal('hide')
     )
   )
 
@@ -93,5 +93,5 @@ $ ->
     params =
       id: id
       url: "/paymentunit/#{id}/shipment",
-    $('#popModel').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
+    $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
   )

@@ -201,6 +201,8 @@ shipment.ensureDone=\u8FD0\u8F93\u5355\u5B8C\u6210
 shipment.ensureDone.msg=\u8FD0\u8F93\u5355 %s \u786E\u8BA4\u5B8C\u6210
 shipment.logEvent=\u8FD0\u8F93\u4E8B\u4EF6
 shipment.logEvent.msg=\u8FD0\u8F93\u5355\u5728 %s \u53D1\u751F [%s]
+shipment.departFromApply=[\u8FD0\u8F93\u5355]\u4ECE\u8BF7\u6B3E\u5355\u4E2D\u5265\u79BB
+shipment.departFromApply.msg=\u5C06 %s \u8FD0\u8F93\u5355\u4ECE %s \u4E2D\u5265\u79BB
 
 shipitem.receviedQty=\u4FEE\u6539\u5165\u5E93\u6570\u91CF
 shipitem.receviedQty.msg=\u5165\u5E93\u6570\u91CF\u56E0 [%s] \u4ECE %s \u4FEE\u6539\u4E3A %s
@@ -228,5 +230,5 @@ payment.cancel.msg=\u56E0 [%s] \u53D6\u6D88\u4ED8\u6B3E\u5355
 procureapply.save=\u521B\u5EFA[\u91C7\u8D2D\u8BF7\u6B3E\u5355]
 procureapply.save.msg=\u6DFB\u52A0 %s \u5230\u91C7\u8D2D\u8BF7\u6B3E\u5355 %s
 
-transportapply.save=\u521B\u5EFA[\u8FD0\u8F93\u8BF7\u6B3E\u5355]
+transportapply.save=[\u8FD0\u8F93\u5355]\u8BF7\u6B3E
 transportapply.save.msg=\u6DFB\u52A0 %s \u5230\u8FD0\u8F93\u8BF7\u6B3E\u5355 %s

@@ -1,12 +1,16 @@
 package controllers;
 
+import helper.Webs;
 import models.finance.Apply;
 import models.finance.FeeType;
 import models.finance.ProcureApply;
 import models.finance.TransportApply;
+import models.procure.Shipment;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -49,5 +53,14 @@ public class Applys extends Controller {
         apply.confirm = true;
         apply.save();
         render();
+    }
+
+    public static void transportAddShipment(Long id, String shipmentId) {
+        TransportApply apply = TransportApply.findById(id);
+        Shipment ship = Shipment.findById(shipmentId);
+        apply.appendShipment(Arrays.asList(ship.id));
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        transport(id);
     }
 }
