@@ -26,7 +26,7 @@
   <div class="row-fluid" id="shipment_${ship.id}">
     <div class="span4">
       <div style="max-height:100px">
-      ${ship.id}
+        <a href="@{Shipments.show(ship.id)}" target="_blank">${ship.id}</a>
         <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
           从当前请款单中剔除
         </button>
