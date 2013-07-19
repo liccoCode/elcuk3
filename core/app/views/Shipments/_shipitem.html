@@ -36,7 +36,7 @@
     <th>记录运费</th>
   </tr>
 #{list items:items, as:'itm'}
-  <tr id="${itm.id}" data-url='@{ShipItems.received(itm.id)}'>
+  <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}' data-weight-url='@{ShipItems.weight(itm.id)}'>
       #{if useCheckbox}
         <td>
           <label class="checkbox">
@@ -69,6 +69,7 @@
         <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" name='recivedQty'
             placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
         ${itm.recivedQty}
+          <i class="icon-wrench"></i>
         </td>
       #{/if}
       #{else }
@@ -86,7 +87,10 @@
     </td>
     <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
     <td>${itm.unit.cooperator?.name}</td>
-    <td>${itm.totalWeight()}</td>
+    <td>
+      <input type="number" step="any" class="input-mini ${itm.weight > 0 ? 'logged' : 'unlogged'}"
+             value="${itm.weight > 0 ? itm.weight : itm.totalWeight()}">
+    </td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
 
       #{if useCheckbox}
@@ -98,7 +102,7 @@
       </a>
     </td>
     <td>
-      <button class="btn btn-mini" data-url='@{ShipItems.billingOne(itm.id)}'>L</button>
+      <a class="btn btn-mini" data-url='@{ShipItems.billingOne(itm.id)}'>L</a>
     </td>
   </tr>
 #{/list}

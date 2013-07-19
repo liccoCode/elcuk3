@@ -31,7 +31,39 @@ $ ->
     else
       $(@).button('loading').parents('form').attr('action', '/Shipments/deployToAmazon').submit()
 
-  $('#previewBtn').click (e) ->
+  $('#previewBtn')
+
+  # 所有的 btnFucs 下的 button action
+  $('#btnFucs').on('click', '.func', ->
+    funcsForm = $('#funcsForm').find('form').attr('action', @getAttribute('url')).end()
+      .find('#action').text(@textContent).end()
+      .find("input[name=date]").val($.DateUtil.fmt2(new Date())).end()
+      .modal('show');
+  )
+
+  $('#adjust_shipitems').on('keyup change', 'input.logged,input.unlogged',(e) ->
+    if e.which == 13
+      $input = $(@)
+      LoadMask.mask()
+      $.ajax($input.parents('tr').data('weight-url'), {type: 'PUT', dataType: 'json', data: {wt: $input.val()}})
+        .done((r) ->
+          if r.flag == false
+            noty({text: r.message, type: 'error'})
+          else
+            noty({text: "运输项目 ##{r.id} 重量记录成功", type: 'success', timeout: 3000})
+            $input.removeClass('unlogged').addClass('logged') if r.weight > 0
+          LoadMask.unmask()
+        )
+      console.log "input.logged #{e.which}"
+    false
+  ).on('click', '.btn.adjust',->
+    shipmentId = $("input[name='shipmentId']").val()
+    if shipmentId
+      $('#adjust_shipitems').attr('action',(i, v) ->
+        "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
+      ).submit()
+    false
+  ).on('click', '.btn.preview',(e) ->
     shipment = $("[name='shipmentId']")
     unless shipment.val()
       EF.colorAnimate(shipment)
@@ -44,26 +76,8 @@ $ ->
         .fail(->
           LoadMask.unmask()
         )
-    e.preventDefault()
-
-  $('#adjust_shipitems').on('click', 'button.adjust', ->
-    shipmentId = $("input[name='shipmentId']").val()
-    if shipmentId
-      $('#adjust_shipitems').attr('action', (i, v) ->
-        "#{v[0...v.lastIndexOf('/')]}/#{shipmentId}"
-      )
-  )
-
-  # 所有的 btnFucs 下的 button action
-  $('#btnFucs').on('click', '.func', ->
-    funcsForm = $('#funcsForm').find('form').attr('action', @getAttribute('url')).end()
-      .find('#action').text(@textContent).end()
-      .find("input[name=date]").val($.DateUtil.fmt2(new Date())).end()
-      .modal('show');
-  )
-
-  $('#adjust_shipitems').on('click', 'button[data-url]',(e) ->
-    e.preventDefault()
+    false
+  ).on('click', '.btn[data-url]:contains(L)',(e) ->
     $i = $(@)
     params =
       url: $i.data('url')
@@ -71,12 +85,13 @@ $ ->
       itm:
         id: $i.parents('tr').attr('id')
     $('#popLogModel').html(_.template($('#form-logfee-model-template').html(), params)).modal('show')
-  ).on('dblclick', '[name=recivedQty]',(e) ->
-    e.preventDefault()
+    false
+  ).on('dblclick', '[name=recivedQty]', (e) ->
     self = $(@)
     params =
-      url: self.parents('tr').data('url')
+      url: self.parents('tr').data('received-url')
       qty: self.text()
     $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html(), params)).modal('show')
-  ).find('[name=recivedQty]').append('<i class="icon-wrench"></i>')
+    false
+  )
 

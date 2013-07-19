@@ -1,0 +1,9 @@
+{
+    "id": "${itm.id}",
+    "qty": "${itm.qty}",
+    "recivedQty": "${itm.recivedQty}",
+    "shipDate": "${itm.shipDate}",
+    "arriveDate": "${itm.arriveDate}",
+    "weight": "${itm.weight}",
+    "fulfillmentNetworkSKU": "${itm.fulfillmentNetworkSKU}"
+}

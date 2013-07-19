@@ -135,6 +135,7 @@ GET     /shipitems                                          ShipItems.index
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
+PUT     /shipitem/{id}/weight                               ShipItems.weight(format:'json')
 POST    /shipitem/{id}/billing                              ShipItems.billingOne
 
 # Elcuk
