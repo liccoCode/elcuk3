@@ -11,6 +11,7 @@
     "unitQty": "${fee.unitQty}",
     "memo": "${fee.memo}",
     "averagePrice": "${fee.averagePrice()}",
+    "state": "${fee.state}",
     "shipItem": {
         "id": "${fee.shipItem?.id}",
         "weight": "${fee.shipItem?.weight?:0}"

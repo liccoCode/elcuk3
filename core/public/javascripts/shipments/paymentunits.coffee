@@ -1,4 +1,14 @@
 $ ->
+  feeStateLabel = (state) ->
+    label = if state == 'APPLY'
+      'inverse'
+    else if state == 'DENY'
+      'danger'
+    else if state == 'APPROVAL'
+      'info'
+    else if state == 'PAID'
+      'success'
+
   $(document).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
     $context = $(@).parents('div[class!=controls][class!=control-group]:eq(0)')
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
@@ -65,8 +75,10 @@ $ ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
+    fee = JSON.parse(sessionStorage["tr-edit-paymentunit-template-#{id}"])
+    label = feeStateLabel(fee['state'])
     trHtml = _.template(
-      $('#tr-paymentunit-template').html(), {fee: JSON.parse(sessionStorage["tr-edit-paymentunit-template-#{id}"])}
+      $('#tr-paymentunit-template').html(), {fee: fee, label: label}
     )
     $tr.replaceWith(trHtml)
     delete sessionStorage["tr-edit-paymentunit-template-#{id}"]
@@ -102,7 +114,8 @@ $ ->
     $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
   ).on('click', 'button.btn-success:has(i.icon-eye-open)', (e) ->
     $btn = $(@)
-    id = $btn.parents('tr').find('td:eq(0)').text().trim();
+    $tr = $btn.parents('tr')
+    id = $tr.find('td:eq(0)').text().trim();
     LoadMask.mask()
     $.ajax("/paymentunit/#{id}/approve.json", {type: 'POST', dataType: 'json'})
       .done((r) ->
@@ -116,7 +129,9 @@ $ ->
           noty({text: text, type: 'error'})
         else
           noty({text: "请款项目 ##{r['id']} 通过审核.", type: 'success', timeout: 3000})
-          $btn.remove()
+          label = feeStateLabel(r['state'])
+          nickName = $tr.find('td:eq(1)').text()
+          $tr.find('td:eq(1)').html("<span class='label label-#{label}'>#{nickName}</span>")
         LoadMask.unmask()
       )
       .fail((r) ->

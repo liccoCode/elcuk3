@@ -245,7 +245,10 @@ public class PaymentUnit extends Model {
         this.save();
 //        this.notifyState();
         new ERecordBuilder("payment.approval")
-                .msgArgs(this.unitQty, this.shipItem.unit.sku, this.id, this.feeType.nickName,
+                .msgArgs(this.unitQty,
+                        this.shipItem == null ? "" : this.shipItem.unit.sku,
+                        this.id,
+                        this.feeType.nickName,
                         this.currency.symbol() + " " + this.amount())
                 .fid(this.payment.id)
                 .save();

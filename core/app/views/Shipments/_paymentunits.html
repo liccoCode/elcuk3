@@ -18,7 +18,7 @@
       #{list items:ship.allFees(), as:'fee'}
         <tr id='fee_${fee.id}'>
           <td>${fee.id}</td>
-          <td>${fee.feeType.nickName}</td>
+          <td><span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span></td>
           <td>${fee.currency}</td>
           <td>${fee.unitPrice}</td>
           <td>${fee.unitQty}</td>
@@ -107,7 +107,7 @@
 <script type="text/template" id='tr-paymentunit-template'>
   <tr id='fee_<%= fee.id %>'>
     <td><%= fee.id %></td>
-    <td><%= fee.feeType.nickName %></td>
+    <td><span class='label label-<%= label %>'><%= fee.feeType.nickName %></span></td>
     <td><%= fee.currency %></td>
     <td><%= fee.unitPrice %></td>
     <td><%= fee.unitQty %></td>
@@ -120,6 +120,7 @@
     <td>
       <button class="btn btn-small btn-info"><i class="icon-edit"></i></button>
       <button class="btn btn-small btn-warning"><i class="icon-trash"></i></button>
+      <button class="btn btn-small btn-success"><i class="icon-eye-open"></i></button>
     </td>
   </tr>
 </script>
