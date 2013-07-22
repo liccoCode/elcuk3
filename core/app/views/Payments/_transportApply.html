@@ -1,0 +1,24 @@
+<div class="row-fluid">
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th></th>
+      <th>运输项目</th>
+      <th>币种</th>
+      <th>单价</th>
+      <th>数量</th>
+      <th>均价</th>
+      <th>总价</th>
+    </tr>
+  #{list items:payment.units(), as:'fee'}
+    <tr>
+      <td></td>
+      <td>#${fee.shipItem?.id}</td>
+      <td>${fee.currency}</td>
+      <td>${fee.unitPrice}</td>
+      <td>${fee.unitQty}</td>
+       <td>${fee.averagePrice()}</td>
+      <td>${fee.amount()}</td>
+    </tr>
+  #{/list}
+  </table>
+</div>

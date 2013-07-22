@@ -7,93 +7,14 @@
 #{/set}
 
 #{flash_alert /}
-#{form @Payments.paymentUnitApproval(payment.id)}
-<div class="row-fluid">
-  <div class="btn-toolbar">
-      #{power.ck 'payments.paymentunitapproval'}
-        <input type="submit" class="btn btn-info" value="批准"/>
-      #{/power.ck}
-      #{if payment.state == models.finance.Payment.S.LOCKED}
-        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁可加入新付款项目</a>
-      #{/if}
-      #{elseif payment.state == models.finance.Payment.S.WAITING}
-        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-warning">锁定准备付款</a>
-      #{/elseif}
-  </div>
-  <table class="table table-bordered table-condensed">
-    <tr>
-      <th></th>
-      <th>采购计划</th>
-      <th>交货日期</th>
-      <th>SKU</th>
-      <th>单价</th>
-      <th>数量</th>
-      <th>付款类型</th>
-      <th>总额修正价</th>
-      <th>付款金额</th>
-      <th>请款人</th>
-      <th>状态</th>
-      <th>#</th>
-    </tr>
-      #{list items:payment.units(), as:'paymentUnit'}
-        <tr id="paymentUnit_${paymentUnit.id}">
-            #{set punit: paymentUnit.procureUnit/}
-            #{set records:paymentUnit.fixValueRecords()/}
-            #{set denyRecords: paymentUnit.denyRecords()/}
-          <td>
-            <label>
-              <input type="checkbox" name="paymentUnitIds" value="${paymentUnit.id}">
-            </label>
-          </td>
-          <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${paymentUnit.id}'>
-              #{if (records.size() + denyRecords.size()) > 0}
-                <i class="icon-reorder"></i>
-              #{/if}
-            <a href="@{Deliveryments.show(paymentUnit.deliveryment.id)}#${punit.id}">
-            ${paymentUnit.deliveryment.id} #${punit.id}
-            </a>
-          </td>
-          <td>${punit.attrs.deliveryDate}</td>
-          <td>${punit.sku}</td>
-          <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
-          <td>${punit.qty()}</td>
-          <td>${paymentUnit.feeType.nickName}</td>
-          <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
-          <td>${payment.currency.symbol()} ${paymentUnit.amount()}</td>
-          <td>${paymentUnit.payee.username}</td>
-          <td>
-            <span class="label ${paymentUnit.stateLabel()}">${paymentUnit.state.label()}</span>
-              #{power.ck 'paymentunits.deny'}
-                  #{if paymentUnit.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
-                    <button url='@{PaymentUnits.deny(payment.id, paymentUnit.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
-                      驳回
-                    </button>
-                  #{/if}
-              #{/power.ck}
-          </td>
-          <td>
-            <a href="@{Applys.procure(payment.pApply.id)}#${paymentUnit.id}" target="_blank">
-            ${payment.pApply.serialNumber} #${paymentUnit.id}
-            </a>
-          </td>
-        </tr>
-        <tr id="unit_${paymentUnit.id}" style="display:none">
-          <td colspan="4"></td>
-          <td colspan="3">
-              #{if records.size() > 0}
-                  #{records_ul records: records/}
-              #{/if}
-          </td>
-          <td colspan="5">
-              #{if denyRecords.size() > 0}
-                  #{records_ul records: denyRecords/}
-              #{/if}
-          </td>
-        </tr>
-      #{/list}
-  </table>
-</div>
-#{/form}
+
+#{if payment.pApply}
+    #{render './_procreApply.html', payment: payment/}
+#{/if}
+
+#{if payment.tApply}
+    #{render './_transportApply.html', payment: payment/}
+#{/if}
 
 <div class="row-fluid">
 
@@ -135,7 +56,12 @@
           <dt>系统 ID</dt>
           <dd>${payment.id}</dd>
           <dt>请款单</dt>
+        #{if payment.pApply}
           <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
+        #{/if}
+        #{elseif payment.tApply}
+          <dd><a href="@{Applys.procure(payment.tApply.id)}">${payment.tApply.serialNumber}</a></dd>
+        #{/elseif}
           <dt>最后更新时间</dt>
           <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
           <dt>创建时间</dt>
