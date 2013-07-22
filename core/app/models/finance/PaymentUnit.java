@@ -269,6 +269,17 @@ public class PaymentUnit extends Model {
     }
 
     /**
+     * 均价, 在计算运输项目的时候的均价, 如果没有运输项目, 则为单价
+     *
+     * @return
+     */
+    public float averagePrice() {
+        if(this.shipItem == null) return this.unitPrice;
+        if(this.shipItem.weight == 0) return this.unitPrice;
+        return this.amount() / this.shipItem.weight;
+    }
+
+    /**
      * 在 APPROVAL 之前的状态都被认为是没有批准
      *
      * @return

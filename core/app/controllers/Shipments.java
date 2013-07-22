@@ -16,12 +16,15 @@ import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.*;
@@ -101,12 +104,24 @@ public class Shipments extends Controller {
         //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
-        renderArgs.put("feeTypes", FeeType.transports());
+        renderArgs.put("feeTypes", feeTypes());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
             renderArgs.put("records", ElcukRecord.records(shipmentId));
         }
+    }
+
+    @Util
+    public static List<FeeType> feeTypes() {
+        List<FeeType> feeTypes = FeeType.transports();
+        CollectionUtils.filter(feeTypes, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                return !((FeeType) o).name.equals("transportshipping");
+            }
+        });
+        return feeTypes;
     }
 
     public static void show(String id) {

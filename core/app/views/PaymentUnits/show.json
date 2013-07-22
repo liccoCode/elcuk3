@@ -10,6 +10,11 @@
     "unitPrice": "${fee.unitPrice}",
     "unitQty": "${fee.unitQty}",
     "memo": "${fee.memo}",
+    "averagePrice": "${fee.averagePrice()}",
+    "shipItem": {
+        "id": "${fee.shipItem?.id}",
+        "weight": "${fee.shipItem?.weight?:0}"
+    },
     "payee": {
         "username": "${fee.payee.username}"
     }

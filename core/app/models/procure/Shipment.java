@@ -847,6 +847,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
         if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        if(FeeType.transportShipping().equals(fee.feeType)) Validation.addError("", "运输费用需要关联运输项目");
 
         if(Validation.hasErrors()) return;
         fee.shipment = this;

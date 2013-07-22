@@ -9,6 +9,7 @@
           <th class="span2">币种</th>
           <th>单价</th>
           <th>数量</th>
+          <th>平均价</th>
           <th>总价</th>
           <th>备注</th>
           <th>申请人</th>
@@ -21,6 +22,11 @@
           <td>${fee.currency}</td>
           <td>${fee.unitPrice}</td>
           <td>${fee.unitQty}</td>
+          <td>
+            <abbr rel='tooltip' title='#${fee.shipItem?.id} ${fee.shipItem?.weight?:0} kg'>
+            ${fee.averagePrice()}
+            </abbr>
+          </td>
           <td>${fee.amount}</td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
@@ -104,6 +110,9 @@
     <td><%= fee.currency %></td>
     <td><%= fee.unitPrice %></td>
     <td><%= fee.unitQty %></td>
+    <td>
+      <abbr rel='tooltip' title='<%= fee.shipItem.id%> <%= fee.shipItem.weight %> kg'><%= fee.averagePrice %></abbr>
+    </td>
     <td><%= fee.amount %></td>
     <td><%= fee.memo %></td>
     <td><%= fee.payee.username %></td>
@@ -127,6 +136,7 @@
     <td>
       <input type="number" step='any' class="input-mini" name="fee.unitQty" value="<%= fee.unitQty %>">
     </td>
+    <td>系统计算得出</td>
     <td>
       <input type="number" readonly="" class="input-mini" class="amount" value="<%= fee.amount %>">
     </td>

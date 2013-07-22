@@ -43,7 +43,7 @@ public class Applys extends Controller {
     }
 
     public static void transport(Long id) {
-        List<FeeType> feeTypes = FeeType.transports();
+        List<FeeType> feeTypes = Shipments.feeTypes();
         TransportApply apply = TransportApply.findById(id);
         render(apply, feeTypes);
     }
