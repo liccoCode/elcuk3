@@ -96,4 +96,17 @@ public class PaymentUnits extends Controller {
         renderJSON(J.json(records));
     }
 
+    /**
+     * 批准运输单请款
+     *
+     * @param id
+     */
+    public static void approve(Long id) {
+        PaymentUnit fee = PaymentUnit.findById(id);
+        fee.transportApprove();
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
+
 }

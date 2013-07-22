@@ -867,10 +867,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 统计所有已经支付的关税金额
          * 3. 计算出关税差额
          */
-        List<PaymentUnit> fees = this.allFees();
         FeeType duty = FeeType.transportDuty();
         if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
-        for(PaymentUnit fee : fees) {
+        for(PaymentUnit fee : this.fees) {
             if(fee.feeType.equals(duty)) {
                 if(!fee.currency.equals(crcy))
                     Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息.");
@@ -883,7 +882,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         List<String> lines = new ArrayList<String>();
         // TODO 把 Comment 更换为 record?
         lines.add(String.format("总关税 %s %s 减去 ", crcy, amount));
-        for(PaymentUnit fee : fees) {
+        for(PaymentUnit fee : this.fees) {
             if(!fee.feeType.equals(duty)) continue;
             lines.add(String.format("#%s %s %s %s", fee.id, fee.currency, fee.amount(), fee.feeType.nickName));
             paidAmount += fee.amount();
@@ -939,7 +938,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void departFromApply() {
         if(this.apply == null)
             Validation.addError("", "运输单没有添加进入请款单, 不需要剥离");
-        for(PaymentUnit fee : this.allFees()) {
+        for(PaymentUnit fee : this.fees) {
             if(Arrays.asList(PaymentUnit.S.PAID, PaymentUnit.S.APPROVAL).contains(fee.state)) {
                 Validation.addError("", "运输但中已经有运输请款项目被批准或付款, 无法剥离");
                 break;
@@ -994,12 +993,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public List<PaymentUnit> allFees() {
-        List<PaymentUnit> allFees = new ArrayList<PaymentUnit>();
-        for(ShipItem item : this.items) {
-            allFees.addAll(item.fees);
-        }
-        allFees.addAll(this.fees);
-        return allFees;
+        return this.fees;
     }
 
     /**

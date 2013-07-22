@@ -85,6 +85,7 @@ GET     /code128/{shipmentId}                               Login.code128
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 DELETE  /paymentunit/{id}/shipment                          PaymentUnits.destroyByShipment
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
+POST    /paymentunit/{id}/approve.json                      PaymentUnits.approve
 GET     /paymentunit/{id}.json                              PaymentUnits.show(format:'json')
 GET     /paymentunit/{id}/records.json                      PaymentUnits.records(format:'json')
 PUT     /paymentunit/{id}.json                              PaymentUnits.update(format:'json')

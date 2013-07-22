@@ -60,7 +60,7 @@ public class ShipmentFinanceTest extends UnitTest {
         JPA.em().clear();
         assertThat(PaymentUnit.count(), is(4l));
         Shipment shipmet = Shipment.findById(ship.id);
-        assertThat(shipmet.allFees().size(), is(4));
+        assertThat(shipmet.fees.size(), is(4));
 
         PaymentUnit unit = shipmet.calculateDuty(Currency.CNY, 10000f);
         assertThat(unit.currency, is(Currency.CNY));

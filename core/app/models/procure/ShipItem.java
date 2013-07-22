@@ -309,6 +309,7 @@ public class ShipItem extends GenericModel {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
         fee.shipItem = this;
+        fee.shipment = this.shipment;
         fee.feeType = transportShipping;
         fee.payee = User.current();
         fee.amount = fee.unitPrice * fee.unitQty;

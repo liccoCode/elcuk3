@@ -91,9 +91,9 @@ public class PaymentUnit extends Model {
         this.deliveryment = procureUnit.deliveryment;
         this.amount = procureUnit.totalAmount();
         this.currency = procureUnit.attrs.currency;
-        this.payment = Payment.buildPayment(procureUnit);
+        this.payment = Payment.buildPayment(procureUnit.cooperator, procureUnit.attrs.currency,
+                procureUnit.totalAmount(), procureUnit.deliveryment.apply);
         this.payee = User.current();
-        this.payment.pApply = this.deliveryment.apply;
         this.payment.save();
     }
 
@@ -222,6 +222,33 @@ public class PaymentUnit extends Model {
             this.clearRecords();
             PaymentUnit.delete("id=?", this.id);
         }
+    }
+
+    /**
+     * 批准运输单请款项目
+     */
+    public void transportApprove() {
+        /**
+         * 1. 判断是否拥有请款单
+         * 2. 判断状态是否软删除, 软删除不允许处理
+         * 3. 判断状态是否允许
+         */
+        if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
+        if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
+        if(S.APPLY != this.state) Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
+        if(Validation.hasErrors()) return;
+        if(this.payment == null) {
+            this.payment = Payment.buildPayment(this.shipment.cooper, this.currency, this.amount(), this.shipment.apply)
+                    .save();
+        }
+        this.state = S.APPROVAL;
+        this.save();
+//        this.notifyState();
+        new ERecordBuilder("payment.approval")
+                .msgArgs(this.unitQty, this.shipItem.unit.sku, this.id, this.feeType.nickName,
+                        this.currency.symbol() + " " + this.amount())
+                .fid(this.payment.id)
+                .save();
     }
 
 

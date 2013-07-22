@@ -33,6 +33,7 @@
           <td>
             <button class="btn btn-small btn-info"><i class="icon-edit"></i></button>
             <button class="btn btn-small btn-warning"><i class="icon-trash"></i></button>
+            <button class="btn btn-small btn-success"><i class="icon-eye-open"></i></button>
           </td>
         </tr>
       #{/list}
@@ -131,7 +132,7 @@
     #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small'}#{/select}
     </td>
     <td>
-      <input type="number" step='any' class="input-mini" name='fee.unitPrice' value="<%= fee.unitPrice %>"
+      <input type="number" step='any' class="input-mini" name='fee.unitPrice' value="<%= fee.unitPrice %>">
     </td>
     <td>
       <input type="number" step='any' class="input-mini" name="fee.unitQty" value="<%= fee.unitQty %>">

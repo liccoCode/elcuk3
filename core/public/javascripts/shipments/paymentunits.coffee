@@ -45,7 +45,8 @@ $ ->
   )
 
   # 请款信息相关的功能
-  $('table.paymentInfo').on('click', 'table button.btn-info',(e) ->
+  # 编辑
+  $('table.paymentInfo').on('click', 'button.btn-info:has(i.icon-edit)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -59,8 +60,8 @@ $ ->
         LoadMask.unmask()
       )
 
-    # 取消更新
-  ).on('click', 'button.btn-danger',(e) ->
+    # 取消编辑
+  ).on('click', 'button.btn-danger:has(i.icon-remove)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -71,10 +72,11 @@ $ ->
     delete sessionStorage["tr-edit-paymentunit-template-#{id}"]
 
     # 更新
-  ).on('click', 'button.btn-success',(e) ->
+  ).on('click', 'button.btn-success:has(i.icon-ok)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
+    LoadMask.mask()
     $.ajax({
       url: "/paymentunit/#{id}.json",
       type: 'PUT',
@@ -85,13 +87,41 @@ $ ->
       else
         $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r}))
         noty({text: '更新成功', type: 'success', timeout: 3000})
+      LoadMask.unmask()
     ).fail((r) ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+      LoadMask.unmask()
     )
-  ).on('click', 'button.btn-warning', (e) ->
+
+    # 删除
+  ).on('click', 'button.btn-warning:has(i.icon-trash)',(e) ->
     id = $(@).parents('tr').find('td:eq(0)').text().trim();
     params =
       id: id
       url: "/paymentunit/#{id}/shipment",
     $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
+  ).on('click', 'button.btn-success:has(i.icon-eye-open)', (e) ->
+    $btn = $(@)
+    id = $btn.parents('tr').find('td:eq(0)').text().trim();
+    LoadMask.mask()
+    $.ajax("/paymentunit/#{id}/approve.json", {type: 'POST', dataType: 'json'})
+      .done((r) ->
+        if r.flag == false
+          try
+            text = _.map(JSON.parse(r.message),(err)->
+              err.message
+            ).join('<br>')
+          catch e
+            text = r.message
+          noty({text: text, type: 'error'})
+        else
+          noty({text: "请款项目 ##{r['id']} 通过审核.", type: 'success', timeout: 3000})
+          $btn.remove()
+        LoadMask.unmask()
+      )
+      .fail((r) ->
+        noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+        LoadMask.unmask()
+      )
+    false
   )

@@ -7,13 +7,13 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.ProcureUnit;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
@@ -89,7 +89,7 @@ public class Payment extends Model {
      * 与运输请款单相关联
      */
     @ManyToOne
-    public ProcureApply tApply;
+    public TransportApply tApply;
 
     @ManyToOne
     public Cooperator cooperator;
@@ -454,27 +454,55 @@ public class Payment extends Model {
      *
      * @return
      */
-    public static Payment buildPayment(ProcureUnit unit) {
+    public static <T extends Apply> Payment buildPayment(Cooperator cooper, Currency currency, Float amount, T apply) {
         DateTime now = DateTime.now();
-        Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
-                "AND state=? AND currency=? AND pApply=? ORDER BY createdAt DESC",
-                unit.deliveryment.cooperator, now.minusHours(24).toDate(), now.toDate(),
-                S.WAITING, unit.attrs.currency, unit.deliveryment.apply).first();
+        JpqlSelect jpql = new JpqlSelect();
+        jpql.from("Payment")
+                .where("cooperator=?").param(cooper)
+                .where("createdAt>=?").param(now.minusHours(24).toDate())
+                .where("createdAt<=?").param(now.toDate())
+                .where("state=?").param(S.WAITING)
+                .where("currency=?").param(currency);
+        if(apply instanceof TransportApply)
+            jpql.where("tApply=?").param(apply);
+        else if(apply instanceof ProcureApply)
+            jpql.where("pApply=?").param(apply);
+        jpql.orderBy("createdAt DESC");
+
+        Payment payment = Payment.find(jpql.toString(), jpql.getParams().toArray()).first();
 
         if(payment == null ||
-                payment.totalFees()._1 + unit.attrs.currency.toUSD(unit.totalAmount()) > 230000 ||
-                payment.totalFees()._2 + unit.attrs.currency.toCNY(unit.totalAmount()) > 1400000) {
+                payment.totalFees()._1 + currency.toUSD(amount) > 230000 ||
+                payment.totalFees()._2 + currency.toCNY(amount) > 1400000) {
             payment = new Payment();
-            if(unit.deliveryment.cooperator.paymentMethods.size() <= 0)
-                throw new PaymentException(
-                        Messages.get("paymenttarget.missing",
-                                unit.deliveryment.cooperator.fullName));
-            payment.cooperator = unit.deliveryment.cooperator;
-            payment.target = unit.deliveryment.cooperator.paymentMethods.get(0);
-            payment.currency = unit.attrs.currency;
-            payment.generatePaymentNumber(unit.deliveryment.apply).save();
+            if(cooper.paymentMethods.size() <= 0)
+                throw new PaymentException(Messages.get("paymenttarget.missing", cooper.fullName));
+            payment.cooperator = cooper;
+            payment.target = cooper.paymentMethods.get(0);
+            payment.currency = currency;
+            payment.generatePaymentNumber(apply).save();
         }
         return payment;
+    }
+
+    public <T extends Apply> Payment generatePaymentNumber(T apply) {
+        /**
+         * 1. 确定当前的年份
+         * 2. 根据年份 + cooperator 确定是今天的第几次请款
+         * 3. 生成 PaymentNumber
+         */
+        String year = DateTime.now().toString("yyyy");
+        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
+        long count = 0;
+        if(apply instanceof TransportApply) {
+            count = Payment.count("tApply=?", apply);
+            this.tApply = (TransportApply) apply;
+        } else if(apply instanceof ProcureApply) {
+            count = Payment.count("pApply=?", apply);
+            this.pApply = (ProcureApply) apply;
+        }
+        this.paymentNumber = String.format("[%s]-%02d", apply.serialNumber, count + 1);
+        return this;
     }
 
     /**
@@ -489,25 +517,6 @@ public class Payment extends Model {
         if(this.state != S.WAITING) return;
         this.shouldPaid = shouldPaid;
         this.save();
-    }
-
-    /**
-     * 计算需要的 PaymentNumber 数据
-     *
-     * @return
-     */
-    public Payment generatePaymentNumber(ProcureApply procureApply) {
-        /**
-         * 1. 确定当前的年份
-         * 2. 根据年份 + cooperator 确定是今天的第几次请款
-         * 3. 生成 PaymentNumber
-         */
-        String year = DateTime.now().toString("yyyy");
-        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
-        long count = Payment.count("pApply=?", procureApply);
-        // count + 1 为新创建的编号
-        this.paymentNumber = String.format("[%s]-%02d", procureApply.serialNumber, count + 1);
-        return this;
     }
 
     public List<ElcukRecord> records() {
