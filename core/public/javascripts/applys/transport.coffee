@@ -17,3 +17,14 @@ $ ->
         noty({text: '服务器错误', type: 'error'})
       )
   )
+
+
+  # 处理 hash
+  do ->
+    paymentUnitId = window.location.hash[1..-1]
+    targetTr = $("#fee_#{paymentUnitId}")
+    if targetTr.size() > 0
+      targetTr.parents('tr').prev().find('td[data-toggle]').click()
+      EF.scoll(targetTr)
+      EF.colorAnimate(targetTr)
+

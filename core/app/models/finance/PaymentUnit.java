@@ -4,7 +4,6 @@ import exception.PaymentException;
 import helper.Currency;
 import helper.Reflects;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.*;
@@ -235,7 +234,8 @@ public class PaymentUnit extends Model {
          */
         if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
         if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
-        if(S.APPLY != this.state) Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
+        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state))
+            Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
         if(Validation.hasErrors()) return;
         if(this.payment == null) {
             this.payment = Payment.buildPayment(this.shipment.cooper, this.currency, this.amount(), this.shipment.apply)
@@ -243,7 +243,6 @@ public class PaymentUnit extends Model {
         }
         this.state = S.APPROVAL;
         this.save();
-//        this.notifyState();
         new ERecordBuilder("payment.approval")
                 .msgArgs(this.unitQty,
                         this.shipItem == null ? "" : this.shipItem.unit.sku,
@@ -276,17 +275,10 @@ public class PaymentUnit extends Model {
         if(Validation.hasErrors()) return;
         this.state = S.DENY;
         this.save();
-        this.notifyState();
         new ERecordBuilder("paymentunit.deny")
                 .msgArgs(reason)
                 .fid(this.id)
                 .save();
-    }
-
-    public void notifyState() {
-        Notification.notifies(this.payee,
-                String.format("已经[%s]了 #%s %s 请款(sku:%s)",
-                        this.state.label(), this.id, this.feeType.nickName, this.procureUnit.sku));
     }
 
     /**
@@ -372,6 +364,15 @@ public class PaymentUnit extends Model {
 
     public List<ElcukRecord> updateRecords() {
         return ElcukRecord.records(this.id + "", Messages.get("paymentunit.update"));
+    }
+
+    public List<ElcukRecord> records() {
+        List<String> actions = Arrays.asList(
+                Messages.get("paymentunit.fixValue"),
+                Messages.get("paymentunit.deny"),
+                Messages.get("paymentunit.update")
+        );
+        return ElcukRecord.records(this.id + "", actions);
     }
 
     /**

@@ -20,7 +20,7 @@
 
   <div class="span6" style="max-height:300px">
     <div id="payment_records" style="margin-bottom:15px;height:130px;overflow-y:auto">
-    #{records_ul records: payment.records(), nobr:true /}
+    #{records_ul records: payment.includesItemsRecords(), nobr:true /}
     </div>
     <div id="boc_rate" style="max-height:150px;overflow-y:auto"></div>
   </div>

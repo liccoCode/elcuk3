@@ -252,7 +252,6 @@ public class Payment extends Model {
         for(PaymentUnit unit : waitForDeals) {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
-            unit.notifyState();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
             new ERecordBuilder("payment.approval")
                     .msgArgs(unit.procureUnit.qty(),
@@ -332,7 +331,6 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
-            unit.notifyState();
         }
 
         this.rate = ratio;
@@ -528,6 +526,21 @@ public class Payment extends Model {
         );
 
         return ElcukRecord.records(this.id + "", actions);
+    }
+
+
+    public List<ElcukRecord> includesItemsRecords() {
+        List<ElcukRecord> all = this.records();
+        for(PaymentUnit fee : this.units) {
+            all.addAll(fee.records());
+        }
+        Collections.sort(all, new Comparator<ElcukRecord>() {
+            @Override
+            public int compare(ElcukRecord e1, ElcukRecord e2) {
+                return (int) (e2.createAt.getTime() - e1.createAt.getTime());
+            }
+        });
+        return all;
     }
 
     @Override

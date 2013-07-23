@@ -56,7 +56,7 @@ $ ->
 
   # 请款信息相关的功能
   # 编辑
-  $('table.paymentInfo').on('click', 'button.btn-info:has(i.icon-edit)',(e) ->
+  $('table.paymentInfo').on('click', 'button.btn-info:contains(编辑)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -71,7 +71,7 @@ $ ->
       )
 
     # 取消编辑
-  ).on('click', 'button.btn-danger:has(i.icon-remove)',(e) ->
+  ).on('click', 'button.btn-danger:contains(取消)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -84,7 +84,7 @@ $ ->
     delete sessionStorage["tr-edit-paymentunit-template-#{id}"]
 
     # 更新
-  ).on('click', 'button.btn-success:has(i.icon-ok)',(e) ->
+  ).on('click', 'button.btn-success:contains(更新)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
     id = $tr.find('td:eq(0)').text().trim()
@@ -97,7 +97,8 @@ $ ->
       if r.flag is false
         noty({text: r.message, type: 'warning'})
       else
-        $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r}))
+        label = feeStateLabel(r['state'])
+        $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
         noty({text: '更新成功', type: 'success', timeout: 3000})
       LoadMask.unmask()
     ).fail((r) ->
@@ -106,13 +107,15 @@ $ ->
     )
 
     # 删除
-  ).on('click', 'button.btn-warning:has(i.icon-trash)',(e) ->
+  ).on('click', 'button.btn-warning:contains(删除)',(e) ->
     id = $(@).parents('tr').find('td:eq(0)').text().trim();
     params =
       id: id
       url: "/paymentunit/#{id}/shipment",
     $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
-  ).on('click', 'button.btn-success:has(i.icon-eye-open)', (e) ->
+
+    # 批准
+  ).on('click', 'button.btn-success:contains(批准)', (e) ->
     $btn = $(@)
     $tr = $btn.parents('tr')
     id = $tr.find('td:eq(0)').text().trim();
