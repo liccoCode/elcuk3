@@ -26,12 +26,12 @@
   <div class="row-fluid" id="shipment_${ship.id}">
     <div class="span4">
       <div style="max-height:100px">
-        <a href="@{Shipments.show(ship.id)}" target="_blank">${ship.id}</a>
-        <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
+        <a href="@{Shipments.show(ship.id)}" class="btn btn-success">${ship.id}</a>
+        <button data-id='${ship.id}' class="btn btn-small btn-danger delete">
           从当前请款单中剔除
         </button>
       </div>
-      <div style="max-height:200px;overflow:auto">
+      <div>
           #{records_ul records: ship.allRecords(), nobr: true /}
       </div>
     </div>
