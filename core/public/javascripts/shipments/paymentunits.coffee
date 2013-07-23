@@ -40,14 +40,14 @@ $ ->
     LoadMask.mask()
     $.post($(@).data('url'), $form.serialize(), (r) ->
       if r.flag == false
-        errors = JSON.parse(r.message).map((err) ->
+        text = JSON.parse(r.message).map((err) ->
           err.message
         ).join(', ')
-        $form.find('label span').html(errors).show()
+        noty({text: text, type: 'error'})
       else
-        $form.find('label span').html('').hide()
-        $form.parents('div.top').find('.paymentInfo tr:last').after(_.template($('#tr-paymentunit-template').html(),
-        {fee: r}))
+        label = feeStateLabel(r['state'])
+        $form.parents('div.top').find('.paymentInfo tr:last')
+          .after(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
         noty({text: "成功添加 #{r['currency']} #{r['amount']} #{r.feeType.nickName}", type: 'success', timeout: 3000})
         $form.trigger('reset')
       LoadMask.unmask()

@@ -296,3 +296,8 @@ ul .block span{
 input.logged{
     background:greenyellow;
 }
+.records{
+    max-height:260px;
+    overflow-y:auto;
+    margin:10px 0;
+}

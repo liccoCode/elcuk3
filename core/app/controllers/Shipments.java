@@ -417,7 +417,7 @@ public class Shipments extends Controller {
         ship.produceFee(fee);
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        render(fee);
+        render("PaymentUnits/show.json", fee);
     }
 
     public static void calDuty(String id, PaymentUnit fee) {
@@ -425,7 +425,7 @@ public class Shipments extends Controller {
         fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        render("Shipments/billingOne.json", fee);
+        render("PaymentUnits/show.json", fee);
     }
 
     public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
