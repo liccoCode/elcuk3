@@ -20,6 +20,9 @@
         #{elseif payment.currency == helper.Currency.USD}
           <td>${payment.currency.symbol()} ${payment.totalFees()._1}</td>
         #{/elseif}
+        #{else }
+          <td>??</td>
+        #{/else}
         #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
           <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>
         #{/list}
