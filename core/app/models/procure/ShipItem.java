@@ -259,14 +259,12 @@ public class ShipItem extends GenericModel {
         if(Validation.hasErrors()) return;
 
         int oldQty = this.recivedQty;
-        if(oldQty != recivedQty) {
-            this.recivedQty = recivedQty;
-            this.save();
-            new ERecordBuilder("shipitem.receviedQty")
-                    .msgArgs(msg, oldQty, recivedQty)
-                    .fid(this.id)
-                    .save();
-        }
+        this.recivedQty = recivedQty;
+        this.save();
+        new ERecordBuilder("shipitem.receviedQty")
+                .msgArgs(msg, oldQty, recivedQty)
+                .fid(this.id)
+                .save();
     }
 
     public List<ElcukRecord> recivedLogs() {
