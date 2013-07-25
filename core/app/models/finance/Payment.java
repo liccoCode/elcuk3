@@ -366,8 +366,8 @@ public class Payment extends Model {
                 cny += unit.amount();
             else if(unit.currency == Currency.USD)
                 usd += unit.amount();
-            else
-                throw new PaymentException(PaymentException.INVALID_CURRENCY);
+//            else
+//                throw new PaymentException(PaymentException.INVALID_CURRENCY);
         }
         if(usd == 0) usd = Currency.CNY.toUSD(cny);
         if(cny == 0) cny = Currency.USD.toCNY(usd);
