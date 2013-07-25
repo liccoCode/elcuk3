@@ -339,7 +339,7 @@ public class PaymentUnit extends Model {
         if(fk.startsWith("DL")) {
             return Deliveryment.<Deliveryment>findById(fk).cooperator;
         } else if(fk.startsWith("SP")) {
-            return Shipment.<Deliveryment>findById(fk).cooperator;
+            return Shipment.<Shipment>findById(fk).cooper;
         }
         return null;
     }

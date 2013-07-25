@@ -25,11 +25,42 @@
 #{list items:apply.shipments, as:'ship'}
   <div class="row-fluid" id="shipment_${ship.id}">
     <div class="span4">
-      <div style="max-height:100px">
-        <a href="@{Shipments.show(ship.id)}" class="btn btn-success">${ship.id}</a>
-        <button data-id='${ship.id}' class="btn btn-small btn-danger delete">
-          从当前请款单中剔除
-        </button>
+      <div class="row-fluid">
+        <div class="span7">
+          <dl class="dl-horizontal">
+            <dt>运输单</dt>
+            <dd>
+              <a href="@{Shipments.show(ship.id)}">${ship.id}</a>
+            </dd>
+            <dt>运输方式</dt>
+            <dd>${ship.type.label()}</dd>
+            <dt>国际快递</dt>
+            <dd>${ship.internationExpress}</dd>
+            <dt>TrackNo:</dt>
+            <dd>${ship.trackNo}
+              <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank">
+                <i class="icon-external-link"></i>
+              </a>
+            </dd>
+            <dt>FBAs:</dt>
+            <dd>
+                #{list items:ship.fbas(), as:'fba'}
+                  <span>${fba.shipmentId} ${fba.centerId}</span>
+                #{/list}
+            </dd>
+          </dl>
+        </div>
+
+        <div class="span5">
+          <dl class="dl-horizontal">
+            <dt>
+              <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
+                从当前请款单中剔除
+              </button>
+            </dt>
+            <dd>&nbsp;</dd>
+          </dl>
+        </div>
       </div>
       <div>
           #{records_ul records: ship.allRecords(), nobr: true /}

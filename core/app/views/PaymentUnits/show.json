@@ -12,6 +12,7 @@
     "memo": "${fee.memo}",
     "averagePrice": "${fee.averagePrice()}",
     "state": "${fee.state}",
+    "createdAt": "${fee.createdAt.format('yyyy-MM-dd HH:mm:ss')}",
     "shipItem": {
         "id": "${fee.shipItem?.id}",
         "weight": "${fee.shipItem?.weight?:0}"

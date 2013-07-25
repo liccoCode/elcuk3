@@ -15,6 +15,7 @@
           <th>总价</th>
           <th>备注</th>
           <th>申请人</th>
+          <th class="span3">申请时间</th>
           <th class="span2"></th>
         </tr>
       #{list items:ship.allFees(), as:'fee'}
@@ -32,6 +33,7 @@
           <td>${fee.amount}</td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
+          <td>${fee.createdAt}</td>
           <td>
             <button class="btn btn-mini btn-info">编辑</button>
             <button class="btn btn-mini btn-warning">删除</button>
@@ -115,6 +117,7 @@
     <td><%= fee.amount %></td>
     <td><%= fee.memo %></td>
     <td><%= fee.payee.username %></td>
+    <td><%= fee.createdAt %></td>
     <td>
       <button class="btn btn-mini btn-info">编辑</button>
       <button class="btn btn-mini btn-warning">删除</button>
@@ -144,6 +147,7 @@
       <textarea name="fee.memo"><%= fee.memo %></textarea>
     </td>
     <td><%= fee.payee.username %></td>
+    <td><%= fee.createdAt %></td>
     <td>
       <button class="btn btn-mini btn-success">更新</button>
       <button class="btn btn-mini btn-danger">取消</button>

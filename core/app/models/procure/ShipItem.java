@@ -112,7 +112,7 @@ public class ShipItem extends GenericModel {
     /**
      * 用来记录运输的货物的实际重量
      */
-    @Column(nullable = false, columnDefinition = "INT(11) DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "FLOAT DEFAULT 0")
     public float weight = 0;
 
     /**

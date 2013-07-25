@@ -440,8 +440,12 @@ public class Shipments extends Controller {
             Webs.errorToFlash(flash);
             index(p);
         } else {
-            //TODO 跳转到运输请款单中
-            index(p);
+            if(apply != null) {
+                Applys.transport(apply.id);
+            } else {
+                flash.error("请款单创建失败.");
+                index(p);
+            }
         }
     }
 
