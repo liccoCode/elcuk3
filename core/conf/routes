@@ -53,7 +53,8 @@ GET     /orders/warnfix                                     Orders.warrningOrder
 
 # Payments
 GET     /payments                                           Payments.index
-GET     /payment/rates                                      Payments.rates
+GET     /payment/boc                                        Payments.bocRates
+GET     /payment/xe                                         Payments.xeRates
 POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
 DELETE  /payment/{id}                                       Payments.cancel

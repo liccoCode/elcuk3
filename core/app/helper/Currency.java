@@ -5,6 +5,8 @@ import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import play.Logger;
 
 import java.math.BigDecimal;
@@ -301,7 +303,7 @@ public enum Currency {
 
         @Override
         public String symbol() {
-            return null;
+            return "HK$";
         }
 
         @Override
@@ -479,6 +481,16 @@ public enum Currency {
      */
     public static String bocRatesHtml() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
+        Elements trs = doc.select("table table table:eq(0) tr");
+        String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元"};
+        for(Element tr : trs.subList(1, trs.size() - 1)) {
+            boolean find = false;
+            for(String c : currencies) {
+                if(!tr.select("td:eq(0):contains(" + c + ")").isEmpty())
+                    find = true;
+            }
+            if(!find) tr.remove();
+        }
         return doc.select("table table table").get(0).outerHtml();
     }
 
@@ -502,6 +514,26 @@ public enum Currency {
                 doc.select("tr:eq(3) td:eq(6)").text(),
                 doc.select("tr:eq(3) td:eq(7)").text()
         )).toDate();
+    }
+
+    /**
+     * 返回 Xe.com 市场的汇率 Table
+     *
+     * @return
+     */
+    public static String xeRatesHtml(Currency from) {
+        String html = HTTP.get("http://www.xe.com/zh-CN/currencytables/?from=" + from.name());
+        Document doc = Jsoup.parse(html);
+        Elements trs = doc.select("#historicalRateTbl tr");
+        for(Element tr : trs.subList(1, trs.size() - 1)) {
+            boolean find = false;
+            for(Currency c : Currency.values()) {
+                if(!tr.select("td:eq(0):contains(" + c.name() + ")").isEmpty())
+                    find = true;
+            }
+            if(!find) tr.remove();
+        }
+        return doc.select("#historicalRateTbl").outerHtml();
     }
 }
 

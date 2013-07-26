@@ -33,8 +33,13 @@ public class Payments extends Controller {
     }
 
     @CacheFor("5mn")
-    public static void rates() {
-        renderText(Currency.bocRatesHtml());
+    public static void bocRates() {
+        renderHtml(Currency.bocRatesHtml());
+    }
+
+    @CacheFor("5mn")
+    public static void xeRates(Currency currency) {
+        renderHtml(Currency.xeRatesHtml(currency));
     }
 
     @Check("payments.show")

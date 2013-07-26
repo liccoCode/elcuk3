@@ -159,7 +159,14 @@ $.DateUtil = {
      * @param date
      */
     fmt3: function(date){
-        return this.fmt2(date) + " " + date.getHours() + ':' + date.getMinutes() + ":" + date.getSeconds();
+        return this.fmt2(date) + " " + this.time(date);
+    },
+
+    time: function(date){
+        var hour = date.getHours();
+        var minu = date.getMinutes();
+        var sencods = date.getSeconds();
+        return (hour < 10 ? '0' + hour : hour) + ':' + (minu < 10 ? '0' + minu : minu) + ":" + (sencods < 10 ? '0' + sencods : sencods);
     }
 
 };
