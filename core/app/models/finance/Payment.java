@@ -366,23 +366,23 @@ public class Payment extends Model {
     /**
      * 分别计算 USD 与 CNY 的总金额
      *
-     * @return _.1: USD; _.2: CNY
+     * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
-    public F.T2<Float, Float> totalFees() {
+    public F.T3<Float, Float, Float> totalFees() {
         // todo: 将付款的金额限制在 USD 与 CNY
+        float currenctCurrencyAmount = 0;
         float usd = 0;
         float cny = 0;
+        Currency lastCurrency = this.currency;
         for(PaymentUnit unit : this.units()) {
-            if(unit.currency == Currency.CNY)
-                cny += unit.amount();
-            else if(unit.currency == Currency.USD)
-                usd += unit.amount();
-//            else
-//                throw new PaymentException(PaymentException.INVALID_CURRENCY);
+            if(lastCurrency != this.currency)
+                throw new FastRuntimeException("付款单中的币种不可能不一样, 数据有错误, 请联系开发人员.");
+            currenctCurrencyAmount += unit.amount();
         }
-        if(usd == 0) usd = Currency.CNY.toUSD(cny);
-        if(cny == 0) cny = Currency.USD.toCNY(usd);
-        return new F.T2<Float, Float>(usd, cny);
+        return new F.T3<Float, Float, Float>(
+                currency.toUSD(currenctCurrencyAmount),
+                currency.toCNY(currenctCurrencyAmount),
+                currenctCurrencyAmount);
     }
 
     /**

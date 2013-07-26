@@ -58,7 +58,7 @@
 
       <div class="span5">
       #{if payment.state == models.finance.Payment.S.PAID}
-        <dl class="dl-horizontal" style="margin-top:0">
+        <dl class="dl-horizontal">
           <dt>支付状态</dt>
           <dd style="color:${payment.stateColor()}">${payment.state.label()}</dd>
           <dt>支付时间</dt>

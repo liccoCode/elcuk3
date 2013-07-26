@@ -14,15 +14,13 @@
     <tr>
       <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
       <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
-        #{if payment.currency == helper.Currency.CNY}
-          <td>${payment.currency.symbol()} ${payment.totalFees()._2}</td>
-        #{/if}
-        #{elseif payment.currency == helper.Currency.USD}
-          <td>${payment.currency.symbol()} ${payment.totalFees()._1}</td>
-        #{/elseif}
-        #{else }
-          <td>??</td>
-        #{/else}
+      <td>
+          #{set totalFees: payment.totalFees()/}
+        <a href="#" rel='tooltip'
+           title="USD: ${totalFees._1};  CNY: ${totalFees._2};  ${payment.currency}: ${totalFees._3}">
+        ${payment.currency.symbol()} ${totalFees._3.format('#.##')}
+        </a>
+      </td>
         #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
           <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>
         #{/list}
