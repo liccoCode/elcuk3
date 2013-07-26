@@ -7,9 +7,22 @@ $ ->
     USD: '美元'
   }
 
-  $('#pay_form').on('change', 'select[name=currency]', (e) ->
+  $('#pay_form').on('change', 'select[name=currency]',(e) ->
     $slt = $(@)
-    updateMainInfo($slt.val()) if $slt.val()
+    if $slt.val()
+      updateMainInfo($slt.val())
+    else
+      $('#ratioInput').val(-1)
+      $('#ratioDateTimeInput').val('')
+    false
+  ).on('change', 'select[name=paymentTargetId]', (e) ->
+    $slt = $(@)
+    text = $slt.find(':selected').text()
+    name = text.split(']')[1]
+    [username, account] = text.split(']')[0][1..-1].split(' ')
+    $('#paymentTargetInfo').html(
+      "账户: #{username}<br>账号: #{account}<br>名称: #{name}"
+    )
     false
   )
 
@@ -18,7 +31,7 @@ $ ->
     ratio = extraRatio(target)
     # 汇率
     $('#currencyFromTo').text($('#request_currency').text() + " -> " + target)
-    $('#ratio').text(ratio)
+    $('#ratioInfo').text(ratio)
 
     # 需要支付的 币种/金额
     $('#paidCurrency').text(target)
@@ -31,20 +44,24 @@ $ ->
 
   # 抽取两个挂牌价中的汇率
   extraRatio = (target) ->
-    if 'CNY' == target
+    ratio = if 'CNY' == target
       tr = $("#boc_rate tr td:contains(#{currencyMap[$('#request_currency').text()]})").parents('tr')
       (parseFloat(tr.find('td:eq(1)').css('color', 'red').text()) / 100).toFixed(4)
     else
       tr = $("#ex_rate tr td:contains(#{target})").parents('tr')
       (parseFloat(tr.find('td:eq(2)').css('color', 'red').text())).toFixed(4)
+    $('#ratioInput').val(ratio)
+    ratio
 
   # 抽取挂牌价时间
   extraRatioTime = (target) ->
-    if 'CNY' == target
+    date = if 'CNY' == target
       tr = $('#boc_rate tr:eq(1)')
       new Date("#{tr.find('td:eq(6)').text()} #{tr.find('td:eq(7)').text()}")
     else
       new Date()
+    $('#ratioDateTimeInput').val($.DateUtil.fmt3(date))
+    date
 
   ajaxBocRate = ->
     LoadMask.mask()
