@@ -49,7 +49,6 @@ $ ->
     $input = $(@)
     val = $input.val()
     $next = $input.next().text(amount - val).removeClass('text-error text-success')
-    console.log(amount - val)
     if (amount - val) > 0
       $next.addClass('text-error')
     else
