@@ -83,10 +83,10 @@
           <dd>&nbsp;</dd>
           <dt>实际支付金额</dt>
           <dd>${payment.actualCurrency.symbol()} ${payment.actualPaid}</dd>
-          <dt>对方账号</dt>
-          <dd>${payment.target.accountNumber}</dd>
-          <dt>对方账户</dt>
-          <dd>${payment.target.accountUser}</dd>
+          <dt>实际支付对方账号</dt>
+          <dd>${payment.actualUser}</dd>
+          <dt>实际支付对方账户</dt>
+          <dd>${payment.actualAccountNumber}</dd>
         </dl>
       #{/if}
       #{else }

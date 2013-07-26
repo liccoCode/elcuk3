@@ -153,11 +153,20 @@ public class Payment extends Model {
     public S state = S.WAITING;
 
     /**
-     * TODO 支付完成, 需要记录下当前的实际支付账号, target 信息可变, 但实际支付信息不可变
      * 支付账号信息
      */
     @ManyToOne(cascade = CascadeType.PERSIST)
     public PaymentTarget target;
+
+    /**
+     * 实际支付账户
+     */
+    public String actualUser = "";
+
+    /**
+     * 实际支付账号
+     */
+    public String actualAccountNumber = "";
 
     @PrePersist
     public void beforeSave() {
@@ -341,6 +350,8 @@ public class Payment extends Model {
         this.target = paymentTarget;
         this.actualCurrency = currency;
         this.actualPaid = actualPaid;
+        this.actualUser = target.accountUser;
+        this.actualAccountNumber = target.accountNumber;
         this.payer = User.current();
         this.state = S.PAID;
         this.save();
@@ -543,6 +554,28 @@ public class Payment extends Model {
             }
         });
         return all;
+    }
+
+    /**
+     * TODO 这里的两个 Get 方法一段时候之后可以删除.
+     * (所有 Payment 访问一次后)
+     *
+     * @return
+     */
+    public String getActualUser() {
+        if(this.state == S.PAID && StringUtils.isBlank(this.actualUser)) {
+            this.actualUser = this.target.accountUser;
+            this.save();
+        }
+        return this.actualUser;
+    }
+
+    public String getActualAccountNumber() {
+        if(this.state == S.PAID && StringUtils.isBlank(this.actualAccountNumber)) {
+            this.actualAccountNumber = this.target.accountNumber;
+            this.save();
+        }
+        return actualAccountNumber;
     }
 
     @Override
