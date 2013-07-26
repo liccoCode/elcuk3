@@ -512,6 +512,7 @@ public class Payment extends Model {
     public void shouldPaid(Float shouldPaid) {
         if(shouldPaid == null)
             Validation.addError("", "应付金额必须填写");
+        if(Validation.hasErrors()) return;
         // 非 WATING 状态不允许修改
         if(this.state != S.WAITING) return;
         this.shouldPaid = shouldPaid;

@@ -25,6 +25,36 @@ $ ->
     )
     false
   )
+  $('#shouldPaid').change((e) ->
+    $input = $(@)
+    if $('#currency').val() is ''
+      $input.val('')
+      noty({text: '请选择支付币种再继续', type: 'warning', timeout: 3000})
+    else
+      LoadMask.mask()
+      $.ajax($input.data('url'), {type: 'POST', data: $input.parents('form').serialize()})
+        .done((r) ->
+          if r.flag is false
+            text = _.map(JSON.parse(r.message),(err) ->
+              err.message
+            ).join('<br>')
+            noty({text: text, type: 'error', timeoout: 3000})
+          else
+            noty({text: '应付金额更新成功', type: 'success', timeout: 1000})
+          LoadMask.unmask()
+        )
+    false
+  ).keyup((e) ->
+    amount = $('#paidCurrencyAmount').text()
+    $input = $(@)
+    val = $input.val()
+    $next = $input.next().text(amount - val).removeClass('text-error text-success')
+    console.log(amount - val)
+    if (amount - val) > 0
+      $next.addClass('text-error')
+    else
+      $next.addClass('text-success')
+  )
 
   updateMainInfo = (target) ->
     $mainInfo = $('#mainInfo')
