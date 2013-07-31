@@ -147,6 +147,7 @@ public class Payment extends Model {
     public S state = S.WAITING;
 
     /**
+     * TODO 支付完成, 需要记录下当前的实际支付账号, target 信息可变, 但实际支付信息不可变
      * 支付账号信息
      */
     @ManyToOne(cascade = CascadeType.PERSIST)

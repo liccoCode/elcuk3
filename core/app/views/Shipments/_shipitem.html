@@ -48,17 +48,18 @@
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
     <td><a href="@{Sellings.selling(itm.unit.sid)}">${itm.unit.sid}</a></td>
       #{if useCheckbox}
-          #{if itm.unit.fba?.records}
-            <td rel='popover' trigger='click' placement='bottom' full-width="true"
-                content="${itm.unit.fba?.records()}">
-            ${itm.unit.fba?.shipmentId}
-              <i class="icon-search"></i>
+          #{if itm.unit.fba}
+            <td>
+              <a href="${itm.unit.fba.fbaLink()}" target="_blank">${itm.unit.fba.shipmentId}</a>
+                #{if itm.unit.fba.records}
+                  <span rel='popover' trigger='click' placement='bottom' full-width="true" content="${itm.unit.fba?.records()}">
+                    <i class="icon-search"></i>
+                  </span>
+                #{/if}
             </td>
           #{/if}
           #{else }
-            <td>
-            ${itm.unit.fba?.shipmentId}
-            </td>
+            <td>&nbsp;</td>
           #{/else}
         <td>${itm.unit.fba?.centerId}</td>
       #{/if}
