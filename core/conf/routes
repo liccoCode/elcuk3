@@ -135,6 +135,7 @@ DELETE  /shipment/{id}/departApply                          Shipments.departFrom
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
+GET     /shipitem/{id}.json                                 ShipItems.showJson(format:'json')
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received

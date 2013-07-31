@@ -1,0 +1,19 @@
+{
+    "id": "${itm.id}",
+    "qty": "${itm.qty}",
+    "recivedQty": "${itm.recivedQty}",
+    "shipDate": "${itm.shipDate.format('yyyy-MM-dd HH:mm:ss')}",
+    "arriveDate": "${itm.arriveDate.format('yyyy-MM-dd HH:mm:ss')}",
+    "weight": "${itm.weight}",
+    "fulfillmentNetworkSKU": "${itm.fulfillmentNetworkSKU}",
+    "unit": {
+        "sid": "${itm.unit?.sid}",
+        "sku": "${itm.unit?.sku}",
+        "stage": "${itm.unit?.stage?.label()}",
+        "shipType": "${itm.unit?.shipType}",
+        "fba": {
+            "shipmentId": "${itm.unit?.fba?.shipmentId}",
+            "centerId": "${itm.unit?.fba?.centerId}"
+        }
+    }
+}

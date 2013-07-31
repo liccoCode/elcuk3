@@ -12,7 +12,7 @@
           <th>单价</th>
           <th>数量</th>
           <th>平均价</th>
-          <th>总价</th>
+          <th class="span2">总价</th>
           <th>备注</th>
           <th>申请人</th>
           <th class="span3">申请时间</th>
@@ -30,7 +30,12 @@
             ${fee.averagePrice()}
             </abbr>
           </td>
-          <td>${fee.amount}</td>
+          <td data-shipitemid='${fee.shipItem?.id}'>
+          ${fee.amount()}
+              #{if fee.shipItem}
+                <i class="icon-search"></i>
+              #{/if}
+          </td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
           <td>${fee.createdAt}</td>
@@ -113,7 +118,12 @@
     <td>
       <abbr rel='tooltip' title='<%= fee.shipItem.id%> <%= fee.shipItem.weight %> kg'><%= fee.averagePrice %></abbr>
     </td>
-    <td><%= fee.amount %></td>
+    <td data-shipitemid='<%= fee.shipItem.id %>'>
+      <%= fee.amount %>
+      <% if(fee.shipItem) { %>
+      <i class="icon-search"></i>
+      <% } %>
+    </td>
     <td><%= fee.memo %></td>
     <td><%= fee.payee.username %></td>
     <td><%= fee.createdAt %></td>
@@ -153,4 +163,12 @@
       <button class="btn btn-mini btn-danger">取消</button>
     </td>
   </tr>
+</script>
+
+<script type="text/template" id="shipItem-template">
+  <label>SKU: <%= itm.unit.sku %></label>
+  <label>FBA: <%= itm.unit.fba.shipmentId %></label>
+  <label>Qty: <%= itm.qty %></label>
+  <label>Recived: <%= itm.recivedQty %></label>
+  <label>ShipDate: <%= itm.shipDate %></label>
 </script>

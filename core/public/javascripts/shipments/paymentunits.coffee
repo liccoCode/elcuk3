@@ -115,7 +115,7 @@ $ ->
     $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
 
     # 批准
-  ).on('click', 'button.btn-success:contains(批准)', (e) ->
+  ).on('click', 'button.btn-success:contains(批准)',(e) ->
     $btn = $(@)
     $tr = $btn.parents('tr')
     id = $tr.find('td:eq(0)').text().trim();
@@ -141,5 +141,22 @@ $ ->
         noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
         LoadMask.unmask()
       )
+    false
+  ).on('mouseenter', 'td:has(.icon-search)',(e) ->
+    $td = $(@)
+    if $td.data('shipitemid')
+      if $td.data('shipItem')
+        text = _.template($('#shipItem-template').html(), {itm: $td.data('shipItem')})
+        $td.popover({content: text, container: 'body', trigger: 'hover', placement: 'top', html: true}).popover('show')
+      else
+        $.ajax("/shipitem/#{$td.data('shipitemid')}.json", {dataType: 'json', type: 'GET'})
+          .done((r) ->
+            $td.data('shipItem', r)
+            text = _.template($('#shipItem-template').html(), {itm: r})
+            $td.popover({content: text, container: 'body', trigger: 'hover', placement: 'top', html: true}).popover('show')
+          )
+    false
+  ).on('mouseleave', 'td:has(.icon-search)', (e) ->
+    $(@).popover('hide');
     false
   )
