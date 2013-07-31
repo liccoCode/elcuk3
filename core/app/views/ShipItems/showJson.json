@@ -4,7 +4,6 @@
     "recivedQty": "${itm.recivedQty}",
     "shipDate": "${itm.shipDate.format('yyyy-MM-dd HH:mm:ss')}",
     "arriveDate": "${itm.arriveDate.format('yyyy-MM-dd HH:mm:ss')}",
-    "weight": "${itm.weight}",
     "fulfillmentNetworkSKU": "${itm.fulfillmentNetworkSKU}",
     "unit": {
         "sid": "${itm.unit?.sid}",

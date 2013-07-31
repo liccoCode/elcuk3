@@ -25,11 +25,7 @@
           <td>${fee.currency}</td>
           <td>${fee.unitPrice}</td>
           <td>${fee.unitQty}</td>
-          <td>
-            <abbr rel='tooltip' title='#${fee.shipItem?.id} ${fee.shipItem?.weight?:0} kg'>
-            ${fee.averagePrice()}
-            </abbr>
-          </td>
+          <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice()}</td>
           <td data-shipitemid='${fee.shipItem?.id}'>
           ${fee.amount()}
               #{if fee.shipItem}
@@ -115,9 +111,7 @@
     <td><%= fee.currency %></td>
     <td><%= fee.unitPrice %></td>
     <td><%= fee.unitQty %></td>
-    <td>
-      <abbr rel='tooltip' title='<%= fee.shipItem.id%> <%= fee.shipItem.weight %> kg'><%= fee.averagePrice %></abbr>
-    </td>
+    <td><%= fee.averagePrice %></td>
     <td data-shipitemid='<%= fee.shipItem.id %>'>
       <%= fee.amount %>
       <% if(fee.shipItem) { %>

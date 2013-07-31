@@ -1,7 +1,6 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
-import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -108,12 +107,6 @@ public class ShipItem extends GenericModel {
     @Expose
     @Temporal(TemporalType.DATE)
     public Date arriveDate;
-
-    /**
-     * 用来记录运输的货物的实际重量
-     */
-    @Column(nullable = false, columnDefinition = "FLOAT DEFAULT 0")
-    public float weight = 0;
 
     /**
      * 这个创建 ShipItem 的时候默认填充 Selling 中的 FNSKU, 在创建好了 FBA 以后, 将 FBA 返回的值同步在这.
@@ -258,14 +251,6 @@ public class ShipItem extends GenericModel {
                 .msgArgs(msg, oldQty, recivedQty)
                 .fid(this.id)
                 .save();
-    }
-
-    public void weight(float weight) {
-        List<String> logs = Reflects.logFieldFade(this, "weight", weight);
-        if(logs.size() > 0)
-            new ERecordBuilder("shipitem.patch").msgArgs(StringUtils.join(logs, "<br>"))
-                    .fid(this.shipment.id).save();
-        this.save();
     }
 
     public List<ElcukRecord> recivedLogs() {

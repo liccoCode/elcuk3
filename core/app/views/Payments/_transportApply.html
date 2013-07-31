@@ -29,7 +29,7 @@
       <td>${fee.currency}</td>
       <td>${fee.unitPrice}</td>
       <td>${fee.unitQty}</td>
-      <td>${fee.averagePrice()}</td>
+      <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice()}</td>
       <td>${fee.amount()}</td>
       <td>
         <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>

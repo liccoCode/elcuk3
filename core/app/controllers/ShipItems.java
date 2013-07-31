@@ -86,12 +86,6 @@ public class ShipItems extends Controller {
         Shipments.show(itm.shipment.id);
     }
 
-    public static void weight(Long id, float wt) {
-        ShipItem itm = ShipItem.findById(id);
-        itm.weight(wt);
-        render(itm);
-    }
-
     public static void billingOne(Long id, PaymentUnit fee) {
         ShipItem itm = ShipItem.findById(id);
         itm.produceFee(fee);

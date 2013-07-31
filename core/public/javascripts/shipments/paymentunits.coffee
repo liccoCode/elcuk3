@@ -147,16 +147,16 @@ $ ->
     if $td.data('shipitemid')
       if $td.data('shipItem')
         text = _.template($('#shipItem-template').html(), {itm: $td.data('shipItem')})
-        $td.popover({content: text, container: 'body', trigger: 'hover', placement: 'top', html: true}).popover('show')
+        $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
       else
         $.ajax("/shipitem/#{$td.data('shipitemid')}.json", {dataType: 'json', type: 'GET'})
           .done((r) ->
             $td.data('shipItem', r)
             text = _.template($('#shipItem-template').html(), {itm: r})
-            $td.popover({content: text, container: 'body', trigger: 'hover', placement: 'top', html: true}).popover('show')
+            $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
           )
     false
   ).on('mouseleave', 'td:has(.icon-search)', (e) ->
-    $(@).popover('hide');
+#    $(@).popover('hide');
     false
   )

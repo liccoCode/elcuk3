@@ -41,22 +41,7 @@ $ ->
       .modal('show');
   )
 
-  $('#adjust_shipitems').on('keyup change', 'input.logged,input.unlogged',(e) ->
-    if e.which == 13
-      $input = $(@)
-      LoadMask.mask()
-      $.ajax($input.parents('tr').data('weight-url'), {type: 'PUT', dataType: 'json', data: {wt: $input.val()}})
-        .done((r) ->
-          if r.flag == false
-            noty({text: r.message, type: 'error'})
-          else
-            noty({text: "运输项目 ##{r.id} 重量记录成功", type: 'success', timeout: 3000})
-            $input.removeClass('unlogged').addClass('logged') if r.weight > 0
-          LoadMask.unmask()
-        )
-      console.log "input.logged #{e.which}"
-    false
-  ).on('click', '.btn.adjust',->
+  $('#adjust_shipitems').on('click', '.btn.adjust',->
     shipmentId = $("input[name='shipmentId']").val()
     if shipmentId
       $('#adjust_shipitems').attr('action',(i, v) ->
@@ -94,7 +79,6 @@ $ ->
     $('#popLogModel').html(_.template($('#form-logreceive-qty-model-template').html(), params)).modal('show')
     false
   )
-
 
   do ->
     paymentUnitId = window.location.hash[1..-1]

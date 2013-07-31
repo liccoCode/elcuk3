@@ -139,7 +139,6 @@ GET     /shipitem/{id}.json                                 ShipItems.showJson(f
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
-PUT     /shipitem/{id}/weight                               ShipItems.weight(format:'json')
 POST    /shipitem/{id}/billing                              ShipItems.billingOne
 
 # Elcuk

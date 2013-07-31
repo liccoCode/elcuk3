@@ -12,6 +12,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
+import query.PaymentUnitQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -291,14 +292,19 @@ public class PaymentUnit extends Model {
     }
 
     /**
-     * 均价, 在计算运输项目的时候的均价, 如果没有运输项目, 则为单价
+     * 运输费用的均价, 没有运输项目. 统一币种为 CNY 则为单价(unitPrice)
      *
      * @return
      */
     public float averagePrice() {
-        if(this.shipItem == null) return this.unitPrice;
-        if(this.shipItem.weight == 0) return this.unitPrice;
-        return this.amount() / this.shipItem.weight;
+        if(this.shipItem == null) return this.currency.toCNY(this.unitPrice);
+        // 寻找最近
+        /**
+         * 1. 找到 SKU
+         * 2. 拿着 SKU 去 PaymentUnit 中找费用
+         */
+        String sku = this.shipItem.unit.sku;
+        return new PaymentUnitQuery().avgSkuTransportshippingFee(sku).get(sku);
     }
 
     /**
