@@ -47,7 +47,7 @@
 
   <div class="row-fluid">
     <div class="span12">
-      <form class="form-inline add_payment" method="GET">
+      <form class="form-inline span6 add_payment" method="GET">
         <label>费用类型
         #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
         </label>
@@ -72,13 +72,12 @@
           <textarea name="fee.memo" class="input"></textarea>
         </label>
 
-        <label>
-          <button type="submit" class="btn btn-success" data-url='@{Shipments.billingOne(ship.id)}'>添加费用</button>
-        </label>
-        <label>
-          <button type="submit" class="btn btn-info" data-url='@{Shipments.calDuty(ship.id)}'>计算剩余关税</button>
-        </label>
+        <button type="submit" class="btn btn-success" data-url='@{Shipments.billingOne(ship.id)}'>添加费用</button>
+        <button type="submit" class="btn btn-inverse" data-url='@{Shipments.calDuty(ship.id)}'>计算剩余关税</button>
       </form>
+      <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{Shipments.applyDuty(ship.id)}'>
+        计算预交关税
+      </a>
     </div>
   </div>
 </div>
@@ -141,12 +140,13 @@
     </td>
     <td>系统计算得出</td>
     <td>
-      <input type="number" readonly="" class="input-mini" class="amount" value="<%= fee.amount %>">
+      <input type="number" readonly="" class="input-mini" class="amount" value="<%= fee.amount%>">
     </td>
     <td>
       <textarea name="fee.memo"><%= fee.memo %></textarea>
     </td>
     <td><%= fee.payee.username %></td>
+    g
     <td><%= fee.createdAt %></td>
     <td>
       <button class="btn btn-mini btn-success">更新</button>

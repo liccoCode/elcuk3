@@ -420,6 +420,21 @@ public class Shipments extends Controller {
         render("PaymentUnits/show.json", fee);
     }
 
+    /**
+     * 为当前运输单的所有项目申请预付关税
+     *
+     * @param id
+     */
+    public static void applyDuty(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.applyShipItemDuty();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("为运输单 %s 成功申请预付关税", id);
+        Shipments.show(id);
+    }
+
     public static void calDuty(String id, PaymentUnit fee) {
         Shipment ship = Shipment.findById(id);
         fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);

@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Currency;
 import helper.Dates;
 import helper.FLog;
 import helper.Webs;
@@ -855,6 +856,27 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.amount = fee.unitQty * fee.unitPrice;
         // TODO 请款日志
         fee.save();
+    }
+
+    /**
+     * 计算当前运输单所有项目的预计关税.
+     * 当前的自动关税计算, 仅仅产生一项关税, 多次创建则被忽略
+     */
+    public void applyShipItemDuty() {
+        FeeType transportShipping = FeeType.transportShipping();
+        for(ShipItem itm : this.items) {
+            if(PaymentUnit.count("feeType=? AND shipItem=?", transportShipping, itm) > 0) continue;
+            PaymentUnit fee = new PaymentUnit();
+            //TODO 这里本应该为 HKD 但现在业务为 CNY 所以暂时以 CNY 存在
+            fee.currency = Currency.CNY;
+            fee.unitPrice = Webs.scalePointUp(4, (float) (itm.unit.product.declaredValue * 6.35 * 0.2));
+            fee.unitQty = itm.qty;
+            itm.produceFee(fee);
+            fee.memo = String.format("%s %s = %s(申报价) * 6.35 * 0.2 * %s(运输数量)",
+                    fee.currency.symbol(), fee.amount(), itm.unit.product.declaredValue, itm.qty);
+            fee.save();
+            if(Validation.hasErrors()) return;
+        }
     }
 
     /**

@@ -128,6 +128,7 @@ DELETE  /shipment/{id}/state                                Shipments.revertStat
 POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
 POST    /shipment/{id}/billing.json                         Shipments.billingOne
+POST    /shipment/{id}/applyDuty                            Shipments.applyDuty
 POST    /shipment/{id}/calDuty.json                         Shipments.calDuty
 POST    /shipment/apply                                     Shipments.shipmentToApply
 DELETE  /shipment/{id}/departApply                          Shipments.departFromApply(format:'json')
