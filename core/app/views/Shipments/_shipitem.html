@@ -50,12 +50,17 @@
       #{if useCheckbox}
           #{if itm.unit.fba}
             <td>
-              <a href="${itm.unit.fba.fbaLink()}" target="_blank">${itm.unit.fba.shipmentId}</a>
                 #{if itm.unit.fba.records}
-                  <span rel='popover' trigger='click' placement='bottom' full-width="true" content="${itm.unit.fba?.records()}">
-                    <i class="icon-search"></i>
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">
+                  <span rel='popover' placement='bottom' full-width="true" content="${itm.unit.fba?.records()}">
+                  ${itm.unit.fba.shipmentId}
                   </span>
+                  </a>
+                  <i class="icon-search"></i>
                 #{/if}
+                #{else }
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">${itm.unit.fba.shipmentId}</a>
+                #{/else}
             </td>
           #{/if}
           #{else }
