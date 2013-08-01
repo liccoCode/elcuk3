@@ -509,11 +509,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(datetime == null) datetime = new Date();
 
         for(ShipItem shipItem : this.items) {
-            if(shipItem.unit.fba != null)
-                shipItem.unit.fba.updateFBAShipmentRetry(
-                        3,
-                        // 在测试环境下也不能标记 SHIPPED
-                        Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+            try {
+                if(shipItem.unit.fba != null) {
+                    shipItem.unit.fba.updateFBAShipmentRetry(
+                            3,
+                            // 在测试环境下也不能标记 SHIPPED
+                            Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+                }
+            } catch(FastRuntimeException e) {
+                if(e.getMessage().contains("Shipment is locked. No updates allowed")) {
+                    Logger.warn("FBA update failed.(%s) because of: %s", shipItem.unit.fba.shipmentId, e.getMessage());
+                } else {
+                    throw e;
+                }
+            }
         }
 
         for(ShipItem shipItem : this.items) {
