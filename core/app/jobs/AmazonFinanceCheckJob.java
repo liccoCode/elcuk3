@@ -46,7 +46,7 @@ public class AmazonFinanceCheckJob extends Job {
         int orderSize = 8;
         int hourOfDay = DateTime.now().getHourOfDay();
         // 如果是晚上, 则加大抓去量
-        if(hourOfDay >= 20 && hourOfDay <= 8) orderSize = 24;
+        if(hourOfDay >= 19 || hourOfDay <= 9) orderSize = 24;
         List<Account> accounts = Account.openedSaleAcc();
         Map<String, Account> accMap = new HashMap<String, Account>();
         for(Account acc : accounts) {
