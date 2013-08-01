@@ -225,7 +225,18 @@ public class FBAShipment extends Model {
             this.state = FBA.update(this, state != null ? state : this.state);
             Thread.sleep(500);
         } catch(Exception e) {
-            throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
+            if(e.getMessage().contains("Shipment is locked. No updates allowed")) {
+                this.state = FBAShipment.S.RECEIVING;
+                this.save();
+                Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
+            } else if(e.getMessage().contains("FBA31004")) {
+                //fbaErrorCode=FBA31004, description=updates to status SHIPPED not allowed
+                this.state = FBAShipment.S.IN_TRANSIT;
+                this.save();
+                Logger.warn("FBA update failed.(%s) because of: %s", this.shipmentId, e.getMessage());
+            } else {
+                throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.E(e));
+            }
         }
         this.save();
     }
