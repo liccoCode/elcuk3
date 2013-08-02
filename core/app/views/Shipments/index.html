@@ -38,14 +38,12 @@
       #{/list}
       </select>
 
-      <select name="p.state" class="inline">
-        <option ${"NOCANCEL" == p.state ? 'selected' : ''} value="NOCANCEL">非 Cancel
-        </option>
-        <option ${"" == p.state ? 'selected' : ''} value="">状态</option>
+      <select name="p.states" class="inline" multiple="multiple" size="6">
       #{list items:models.procure.Shipment.S.values(), as:'state'}
-        <option ${state.name() == p.state ? 'selected' : ''} value="${state.name()}">${state.label()}</option>
+        <option ${p.states.contains(state) ? 'selected' : ''} value="${state.name()}">${state.label()}</option>
       #{/list}
       </select>
+
 
       <select name="p.iExpress" class="inline">
         <option value="">国际快递商</option>

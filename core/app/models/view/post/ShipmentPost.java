@@ -5,6 +5,7 @@ import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class ShipmentPost extends Post {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(7).toDate();
         this.to = now.plusDays(7).toDate();
-        this.state = "NOCANCEL";
+        this.states = Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM, Shipment.S.SHIPPING);
     }
 
     static {
@@ -44,7 +45,7 @@ public class ShipmentPost extends Post {
 
     public Shipment.T type;
 
-    public String state;
+    public List<Shipment.S> states = new ArrayList<Shipment.S>();
 
     public iExpress iExpress;
 
@@ -81,14 +82,12 @@ public class ShipmentPost extends Post {
             params.add(this.type);
         }
 
-        if(StringUtils.isNotBlank(this.state)) {
-            if(StringUtils.equals(this.state, "NOCANCEL")) {
-                sbd.append(" AND s.state!=?");
-                params.add(Shipment.S.CANCEL);
-            } else {
-                sbd.append(" AND s.state=?");
-                params.add(Shipment.S.valueOf(this.state));
+        if(this.states != null && this.states.size() > 0) {
+            List<String> states = new ArrayList<String>();
+            for(Shipment.S state : this.states) {
+                states.add(state.name());
             }
+            sbd.append(" AND ").append(SqlSelect.whereIn("s.state", states));
         }
 
         if(this.iExpress != null) {
