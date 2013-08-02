@@ -63,8 +63,7 @@ public class Procures extends Controller {
      */
     public static void deliveryUnit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-        List<ElcukRecord> records = ElcukRecord
-                .records(unit.id + "", Messages.get("procureunit.delivery"));
+        List<ElcukRecord> records = ElcukRecord.records(unit.id + "", Messages.get("procureunit.delivery"));
         renderArgs.put("attrs", unit.attrs);
         render(unit, records);
     }

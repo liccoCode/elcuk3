@@ -1,0 +1,30 @@
+#{warning_row title: '相关支付单' /}
+<div class="row-fluid">
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th>支付单编号</th>
+      <th>状态</th>
+      <th>总金额</th>
+      <th>已申请</th>
+      <th>驳回</th>
+      <th>批准</th>
+      <th>已支付</th>
+    </tr>
+  #{list items:payments, as:'payment'}
+    <tr>
+      <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
+      <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
+      <td>
+          #{set totalFees: payment.totalFees()/}
+        <a href="#" rel='tooltip'
+           title="USD: ${totalFees._1};  CNY: ${totalFees._2};  ${payment.currency}: ${totalFees._3}">
+        ${payment.currency.symbol()} ${totalFees._3.format('#.##')}
+        </a>
+      </td>
+        #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
+          <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>
+        #{/list}
+    </tr>
+  #{/list}
+  </table>
+</div>

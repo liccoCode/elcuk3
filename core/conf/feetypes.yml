@@ -19,7 +19,7 @@ finance.FeeType(fbaweightbasedfee):
 
 finance.FeeType(shippingchargeback):
   name: 'shippingchargeback'
-  memo: '???'
+  memo: 'Amazon 运费退回'
   parent: amazon
 
 finance.FeeType(shippingholdback):
@@ -64,7 +64,7 @@ finance.FeeType(commission):
 
 finance.FeeType(promorebates):
   name: 'promorebates'
-  memo: '促销费用??'
+  memo: '促销费用?'
   parent: amazon
 
 finance.FeeType(cross-borderfulfilmentfee):
@@ -125,4 +125,10 @@ finance.FeeType(procurement):
 
 finance.FeeType(transport):
   name: 'transport'
-  memo: '运输方面所设计的费用类型'
+  memo: '运输方面所涉及的费用类型'
+
+finance.FeeType(transportshipping):
+  name: 'transportshipping'
+  memo: '运输运费'
+  parent: transport
+

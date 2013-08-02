@@ -7,144 +7,58 @@
 #{/set}
 
 #{flash_alert /}
-#{form @Payments.paymentUnitApproval(payment.id)}
-<div class="row-fluid">
-  <div class="btn-toolbar">
-      #{power.ck 'payments.paymentunitapproval'}
-        <input type="submit" class="btn btn-info" value="批准"/>
-      #{/power.ck}
-      #{if payment.state == models.finance.Payment.S.LOCKED}
-        <a href="@{Payments.unlock(payment.id)}" data-method='delete' class="btn btn-success">解锁可加入新付款项目</a>
-      #{/if}
-      #{elseif payment.state == models.finance.Payment.S.WAITING}
-        <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-warning">锁定准备付款</a>
-      #{/elseif}
-  </div>
-  <table class="table table-bordered table-condensed">
-    <tr>
-      <th></th>
-      <th>采购计划</th>
-      <th>交货日期</th>
-      <th>SKU</th>
-      <th>单价</th>
-      <th>数量</th>
-      <th>付款类型</th>
-      <th>总额修正价</th>
-      <th>付款金额</th>
-      <th>请款人</th>
-      <th>状态</th>
-      <th>#</th>
-    </tr>
-      #{list items:payment.units(), as:'paymentUnit'}
-        <tr id="paymentUnit_${paymentUnit.id}">
-            #{set punit: paymentUnit.procureUnit/}
-            #{set records:paymentUnit.fixValueRecords()/}
-            #{set denyRecords: paymentUnit.denyRecords()/}
-          <td>
-            <label>
-              <input type="checkbox" name="paymentUnitIds" value="${paymentUnit.id}">
-            </label>
-          </td>
-          <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${paymentUnit.id}'>
-              #{if (records.size() + denyRecords.size()) > 0}
-                <i class="icon-reorder"></i>
-              #{/if}
-            <a href="@{Deliveryments.show(paymentUnit.deliveryment.id)}#${punit.id}">
-            ${paymentUnit.deliveryment.id} #${punit.id}
-            </a>
-          </td>
-          <td>${punit.attrs.deliveryDate}</td>
-          <td>${punit.sku}</td>
-          <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
-          <td>${punit.qty()}</td>
-          <td>${paymentUnit.feeType.nickName}</td>
-          <td>${payment.currency.symbol()} ${paymentUnit.fixValue}</td>
-          <td>${payment.currency.symbol()} ${paymentUnit.amount()}</td>
-          <td>${paymentUnit.payee.username}</td>
-          <td>
-            <span class="label ${paymentUnit.stateLabel()}">${paymentUnit.state.label()}</span>
-              #{power.ck 'paymentunits.deny'}
-                  #{if paymentUnit.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
-                    <button url='@{PaymentUnits.deny(payment.id, paymentUnit.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
-                      驳回
-                    </button>
-                  #{/if}
-              #{/power.ck}
-          </td>
-          <td>
-            <a href="@{Applys.procure(payment.pApply.id)}#${paymentUnit.id}" target="_blank">
-            ${payment.pApply.serialNumber} #${paymentUnit.id}
-            </a>
-          </td>
-        </tr>
-        <tr id="unit_${paymentUnit.id}" style="display:none">
-          <td colspan="4"></td>
-          <td colspan="3">
-              #{if records.size() > 0}
-                  #{records_ul records: records/}
-              #{/if}
-          </td>
-          <td colspan="5">
-              #{if denyRecords.size() > 0}
-                  #{records_ul records: denyRecords/}
-              #{/if}
-          </td>
-        </tr>
-      #{/list}
-  </table>
-</div>
-#{/form}
+
+#{if payment.pApply}
+    #{render './_procreApply.html', payment: payment/}
+#{/if}
+
+#{if payment.tApply}
+    #{render './_transportApply.html', payment: payment/}
+#{/if}
 
 <div class="row-fluid">
-
-  <div class="span6" style="max-height:300px">
-    <div id="payment_records" style="margin-bottom:15px;height:130px;overflow-y:auto">
-    #{records_ul records: payment.records(), nobr:true /}
-    </div>
-    <div id="boc_rate" style="max-height:150px;overflow-y:auto"></div>
+  <div class="span4">
+  #{records_ul records: payment.includesItemsRecords(), nobr:true /}
   </div>
-  <div class="span6">
-    <div class="btn-toolbar">
-      <button url='@{Payments.rates()}' class="btn" id="boc_rate_btn">
-        <i class="icon-refresh"></i> 更新
-      </button>
-    #{power.ck 'payments.cancel'}
-        #{if payment.cancelable()}
-          <button url="@{Payments.cancel(payment.id)}" id="payment_cancel" class="btn btn-danger">
-            取消付款单
-          </button>
-        #{/if}
-    #{/power.ck}
-    </div>
+
+  <div class="span8">
     <div class="row-fluid">
       <div class="span5">
-        <dl class="dl-horizontal" style="margin-top:0">
+        <dl class="dl-horizontal" id='mainInfo'>
+          <dt>请款币种</dt>
+          <dd id="request_currency">${payment.currency}</dd>
           <dt>批准后总金额</dt>
-          <dd><span id="currency_label">${payment.currency.symbol()}</span>
-            <span id="costs">${payment.approvalAmount()}</span></dd>
-          <dt>需要支付的美金</dt>
-          <dd>$ <span id="usd_costs"></span></dd>
-          <dt>美元 -> 人民币</dt>
-          <dd>$ 1 -> ¥ <span id="usd_rates"></span></dd>
+          <dd>${payment.currency.symbol()}<span id='finalAppied'>${payment.approvalAmount()}</span></dd>
+          <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> CNY</span></dt>
+          <dd id='ratioInfo'>0</dd>
+          <dt>需要支付的 <span id='paidCurrency'>CNY</span></dt>
+          <dd><span id='paidCurrencyAmount'>0</span></dd>
           <dt>汇率时间</dt>
-          <dd><span id="usd_datetime"></span></dd>
+          <dd id="ratioTime">&nbsp;</dd>
         </dl>
+
         <dl class="dl-horizontal">
           <dt>编号</dt>
           <dd><a href="@{Payments.show(payment.id)}">${payment.paymentNumber}</a></dd>
           <dt>系统 ID</dt>
           <dd>${payment.id}</dd>
           <dt>请款单</dt>
+        #{if payment.pApply}
           <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
+        #{/if}
+        #{elseif payment.tApply}
+          <dd><a href="@{Applys.procure(payment.tApply.id)}">${payment.tApply.serialNumber}</a></dd>
+        #{/elseif}
           <dt>最后更新时间</dt>
           <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>
           <dt>创建时间</dt>
           <dd>#{time_tooltip time: payment.createdAt, datetime:true/}</dd>
         </dl>
       </div>
-      <div class="span7">
+
+      <div class="span5">
       #{if payment.state == models.finance.Payment.S.PAID}
-        <dl class="dl-horizontal" style="margin-top:0">
+        <dl class="dl-horizontal">
           <dt>支付状态</dt>
           <dd style="color:${payment.stateColor()}">${payment.state.label()}</dd>
           <dt>支付时间</dt>
@@ -161,10 +75,10 @@
           <dd>&nbsp;</dd>
           <dt>实际支付金额</dt>
           <dd>${payment.actualCurrency.symbol()} ${payment.actualPaid}</dd>
-          <dt>对方账号</dt>
-          <dd>${payment.target.accountNumber}</dd>
-          <dt>对方账户</dt>
-          <dd>${payment.target.accountUser}</dd>
+          <dt>实际支付对方账号</dt>
+          <dd>${payment.actualUser}</dd>
+          <dt>实际支付对方账户</dt>
+          <dd>${payment.actualAccountNumber}</dd>
         </dl>
       #{/if}
       #{else }
@@ -185,20 +99,18 @@
                   </div>
                 </div>
                 <div class="control-group">
-                  <label class="control-label">币种</label>
+                  <label class="control-label">支付币种</label>
 
                   <div class="controls">
-                    <select id='currency' name="currency">
-                        #{list items:[helper.Currency.CNY, helper.Currency.USD], as:'cr'}
-                          <option ${cr == payment.currency ? 'selected' : ''} value="${cr}">${cr}</option>
-                        #{/list}
-                    </select>
+                      #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD], value:payment.currency}
+                          #{option ''}选择币种#{/option}
+                      #{/select}
                   </div>
                 </div>
                 <div class="control-group">
                   <label class="control-label">金额</label>
-                  <input type="hidden" id="ratio" name="ratio" value="-1">
-                  <input type="hidden" id="ratio_publish_date" name="ratio_publish_date">
+                  <input type="hidden" id="ratioInput" name="ratio" value="-1">
+                  <input type="hidden" id="ratioDateTimeInput" name="ratio_publish_date">
 
                   <div class="controls">
                     <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
@@ -217,9 +129,8 @@
 
                 <div class="controls">
                   <div class="input-append">
-                    <input type="text" class="input-small"
-                           url='@{Payments.shouldPaidUpdate (payment.id)}'
-                           placeholder="手动输入确认" name="actualPaid" id="shouldPaid">
+                    <input type="text" class="input-small" data-url='@{Payments.shouldPaidUpdate (payment.id)}'
+                           placeholder="手动输入确认" name="shouldPaid" id="shouldPaid">
                     <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
                   </div>
                 </div>
@@ -228,7 +139,39 @@
           #{/power.ck}
       #{/else}
       </div>
+
+      <div class="span2" id='paymentTargetInfo'>
+        账户: ${payment.target.accountUser}
+        <br>
+        账号: ${payment.target.accountNumber}
+        <br>
+        名称: ${payment.target.name}
+      </div>
     </div>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span6">
+    <div class="alert alert-info">
+      <h4>
+        <a href="http://www.boc.cn/sourcedb/whpj/" target="_blank">
+          中国银行挂牌汇率 <i class="icon-external-link"></i>
+        </a>
+      </h4>
+    </div>
+    <div id="boc_rate">正在加载...</div>
+  </div>
+
+  <div class="span6">
+    <div class="alert alert-info">
+      <h4>
+        <a href="http://www.xe.com/zh-CN/currencytables/?from=CNY" target="_blank">
+          Xe.com 实时汇率 <i class="icon-external-link"></i>
+        </a>
+      </h4>
+    </div>
+    <div id="ex_rate">正在加载...</div>
   </div>
 </div>
 

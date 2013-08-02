@@ -1,5 +1,6 @@
 package models.finance;
 
+import models.procure.Cooperator;
 import play.db.jpa.Model;
 
 import javax.persistence.Column;
@@ -37,4 +38,6 @@ public abstract class Apply extends Model {
      * 由于 Hibernate 限制, 无法在 MappedSuperclass 中处理关系, 所以只能
      * 在每个子类中自行设置
      */
+
+    public abstract void generateSerialNumber(Cooperator cooper);
 }

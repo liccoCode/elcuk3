@@ -18,10 +18,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -294,6 +291,20 @@ public class Webs {
             sbd.append(err.getKey()).append("=>").append(err.message()).append("<br>");
         }
         return sbd.toString();
+    }
+
+    /**
+     * json: [{key:xxx, message: xxx}, {key: yyy, message: yyy}]
+     *
+     * @param errors
+     * @return
+     */
+    public static String VJson(List<Error> errors) {
+        List<Map<String, String>> errorList = new ArrayList<Map<String, String>>();
+        for(Error err : errors) {
+            errorList.add(GTs.MapBuilder.map("key", err.getKey()).put("message", err.message()).build());
+        }
+        return J.json(errorList);
     }
 
     public static void errorToFlash(Scope.Flash flash) {

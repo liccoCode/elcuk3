@@ -292,3 +292,13 @@ ul .block label:after{
 ul .block span{
     float:right;
 }
+
+input.logged{
+    background:greenyellow;
+}
+
+.records{
+    max-height:200px;
+    overflow-y:auto;
+    margin:10px 0;
+}
