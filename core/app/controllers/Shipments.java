@@ -104,23 +104,28 @@ public class Shipments extends Controller {
         //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
-        renderArgs.put("feeTypes", feeTypes());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
             renderArgs.put("records", ElcukRecord.records(shipmentId));
+            Shipment ship = Shipment.findById(shipmentId);
+            renderArgs.put("feeTypes", feeTypes(ship.type));
+        } else {
+            renderArgs.put("feeTypes", feeTypes(null));
         }
     }
 
     @Util
-    public static List<FeeType> feeTypes() {
+    public static List<FeeType> feeTypes(Shipment.T shipType) {
         List<FeeType> feeTypes = FeeType.transports();
-        CollectionUtils.filter(feeTypes, new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                return !((FeeType) o).name.equals("transportshipping");
-            }
-        });
+        if(shipType == Shipment.T.EXPRESS) {
+            CollectionUtils.filter(feeTypes, new Predicate() {
+                @Override
+                public boolean evaluate(Object o) {
+                    return !((FeeType) o).name.equals("transportshipping");
+                }
+            });
+        }
         return feeTypes;
     }
 

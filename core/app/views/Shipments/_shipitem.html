@@ -33,7 +33,9 @@
     <th>运往仓库</th>
   #{/if}
     <th>采购计划</th>
+  #{if isExpress}
     <th>记录运费</th>
+  #{/if}
   </tr>
 #{list items:items, as:'itm'}
   <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'>
@@ -104,9 +106,11 @@
       ${itm.unit.id}
       </a>
     </td>
-    <td>
-      <a class="btn btn-mini" data-url='@{ShipItems.billingOne(itm.id)}'>L</a>
-    </td>
+      #{if isExpress}
+        <td>
+          <a class="btn btn-mini" data-url='@{ShipItems.billingOne(itm.id)}'>L</a>
+        </td>
+      #{/if}
   </tr>
 #{/list}
 #{if shipmentId}
