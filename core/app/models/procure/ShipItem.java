@@ -2,7 +2,9 @@ package models.procure;
 
 import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.ERecordBuilder;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
 import models.view.dto.AnalyzeDTO;
@@ -156,22 +158,6 @@ public class ShipItem extends GenericModel {
         return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
     }
 
-    /**
-     * 总体积
-     *
-     * @return ._1: 单个体积(m3), ._2:总体积(m3), ._3:总体积(cm3), ._4:体积换算重量(cm3/5000)
-     */
-    public F.T3<Float, Float, Float> totalVolume() {
-        // 单位是 mm
-        float l = this.unit.product.lengths;
-        float w = this.unit.product.width;
-        float h = this.unit.product.heigh;
-
-        float singleVolume = (l * w * h) / 1000000000;
-        // 换算成 m3
-        return new F.T3<Float, Float, Float>(singleVolume, this.qty * singleVolume,
-                (this.qty * singleVolume * 1000000) / 5000);
-    }
 
     /**
      * 根据运输项目关联的采购计划, 从缓存的 AnalyzeDTO 中获取 TurnOver
@@ -290,4 +276,29 @@ public class ShipItem extends GenericModel {
         result = 31 * result + id.hashCode();
         return result;
     }
+
+    /**
+     * 对运输项目进行请款
+     *
+     * @param fee
+     */
+    public void produceFee(PaymentUnit fee, FeeType feeType) {
+        /**
+         * 1. 检查是否拥有运输运费
+         * 2. 选择运输运费类型
+         * 3. 记录数量, 请款人...
+         */
+        if(feeType == null)
+            Validation.addError("", "运输运费类型不存在, 请添加");
+        if(fee.currency == null) Validation.addError("", "币种必须存在");
+        if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        if(Validation.hasErrors()) return;
+        fee.shipItem = this;
+        fee.shipment = this.shipment;
+        fee.feeType = feeType;
+        fee.payee = User.current();
+        fee.amount = fee.unitPrice * fee.unitQty;
+        fee.save();
+    }
+
 }

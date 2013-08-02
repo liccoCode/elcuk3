@@ -1,6 +1,8 @@
 package controllers;
 
 import helper.Webs;
+import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -28,6 +30,11 @@ public class ShipItems extends Controller {
             p = new ProcureUnitShipPost();
         List<ProcureUnit> units = p.query();
         render(p, units);
+    }
+
+    public static void showJson(Long id) {
+        ShipItem itm = ShipItem.findById(id);
+        render(itm);
     }
 
     /**
@@ -77,6 +84,16 @@ public class ShipItems extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("修改成功.");
+        Shipments.show(itm.shipment.id);
+    }
+
+    public static void billingOne(Long id, PaymentUnit fee) {
+        ShipItem itm = ShipItem.findById(id);
+        itm.produceFee(fee, FeeType.transportShipping());
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("运输项目 #%s 费用添加成功.", itm.id);
         Shipments.show(itm.shipment.id);
     }
 }

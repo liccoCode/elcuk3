@@ -7,13 +7,13 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.ProcureUnit;
 import models.product.Attach;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
@@ -85,6 +85,12 @@ public class Payment extends Model {
     @ManyToOne
     public ProcureApply pApply;
 
+    /**
+     * 与运输请款单相关联
+     */
+    @ManyToOne
+    public TransportApply tApply;
+
     @ManyToOne
     public Cooperator cooperator;
 
@@ -151,6 +157,16 @@ public class Payment extends Model {
      */
     @ManyToOne(cascade = CascadeType.PERSIST)
     public PaymentTarget target;
+
+    /**
+     * 实际支付账户
+     */
+    public String actualUser = "";
+
+    /**
+     * 实际支付账号
+     */
+    public String actualAccountNumber = "";
 
     @PrePersist
     public void beforeSave() {
@@ -246,7 +262,6 @@ public class Payment extends Model {
         for(PaymentUnit unit : waitForDeals) {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
-            unit.notifyState();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
             new ERecordBuilder("payment.approval")
                     .msgArgs(unit.procureUnit.qty(),
@@ -326,7 +341,6 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
-            unit.notifyState();
         }
 
         this.rate = ratio;
@@ -336,6 +350,8 @@ public class Payment extends Model {
         this.target = paymentTarget;
         this.actualCurrency = currency;
         this.actualPaid = actualPaid;
+        this.actualUser = target.accountUser;
+        this.actualAccountNumber = target.accountNumber;
         this.payer = User.current();
         this.state = S.PAID;
         this.save();
@@ -350,23 +366,23 @@ public class Payment extends Model {
     /**
      * 分别计算 USD 与 CNY 的总金额
      *
-     * @return _.1: USD; _.2: CNY
+     * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
-    public F.T2<Float, Float> totalFees() {
+    public F.T3<Float, Float, Float> totalFees() {
         // todo: 将付款的金额限制在 USD 与 CNY
+        float currenctCurrencyAmount = 0;
         float usd = 0;
         float cny = 0;
+        Currency lastCurrency = this.currency;
         for(PaymentUnit unit : this.units()) {
-            if(unit.currency == Currency.CNY)
-                cny += unit.amount();
-            else if(unit.currency == Currency.USD)
-                usd += unit.amount();
-            else
-                throw new PaymentException(PaymentException.INVALID_CURRENCY);
+            if(lastCurrency != this.currency)
+                throw new FastRuntimeException("付款单中的币种不可能不一样, 数据有错误, 请联系开发人员.");
+            currenctCurrencyAmount += unit.amount();
         }
-        if(usd == 0) usd = Currency.CNY.toUSD(cny);
-        if(cny == 0) cny = Currency.USD.toCNY(usd);
-        return new F.T2<Float, Float>(usd, cny);
+        return new F.T3<Float, Float, Float>(
+                currency.toUSD(currenctCurrencyAmount),
+                currency.toCNY(currenctCurrencyAmount),
+                currenctCurrencyAmount);
     }
 
     /**
@@ -448,27 +464,55 @@ public class Payment extends Model {
      *
      * @return
      */
-    public static Payment buildPayment(ProcureUnit unit) {
+    public static <T extends Apply> Payment buildPayment(Cooperator cooper, Currency currency, Float amount, T apply) {
         DateTime now = DateTime.now();
-        Payment payment = Payment.find("cooperator=? AND createdAt>=? AND createdAt<=? " +
-                "AND state=? AND currency=? AND pApply=? ORDER BY createdAt DESC",
-                unit.deliveryment.cooperator, now.minusHours(24).toDate(), now.toDate(),
-                S.WAITING, unit.attrs.currency, unit.deliveryment.apply).first();
+        JpqlSelect jpql = new JpqlSelect();
+        jpql.from("Payment")
+                .where("cooperator=?").param(cooper)
+                .where("createdAt>=?").param(now.minusHours(24).toDate())
+                .where("createdAt<=?").param(now.toDate())
+                .where("state=?").param(S.WAITING)
+                .where("currency=?").param(currency);
+        if(apply instanceof TransportApply)
+            jpql.where("tApply=?").param(apply);
+        else if(apply instanceof ProcureApply)
+            jpql.where("pApply=?").param(apply);
+        jpql.orderBy("createdAt DESC");
+
+        Payment payment = Payment.find(jpql.toString(), jpql.getParams().toArray()).first();
 
         if(payment == null ||
-                payment.totalFees()._1 + unit.attrs.currency.toUSD(unit.totalAmount()) > 230000 ||
-                payment.totalFees()._2 + unit.attrs.currency.toCNY(unit.totalAmount()) > 1400000) {
+                payment.totalFees()._1 + currency.toUSD(amount) > 230000 ||
+                payment.totalFees()._2 + currency.toCNY(amount) > 1400000) {
             payment = new Payment();
-            if(unit.deliveryment.cooperator.paymentMethods.size() <= 0)
-                throw new PaymentException(
-                        Messages.get("paymenttarget.missing",
-                                unit.deliveryment.cooperator.fullName));
-            payment.cooperator = unit.deliveryment.cooperator;
-            payment.target = unit.deliveryment.cooperator.paymentMethods.get(0);
-            payment.currency = unit.attrs.currency;
-            payment.generatePaymentNumber(unit.deliveryment.apply).save();
+            if(cooper.paymentMethods.size() <= 0)
+                throw new PaymentException(Messages.get("paymenttarget.missing", cooper.fullName));
+            payment.cooperator = cooper;
+            payment.target = cooper.paymentMethods.get(0);
+            payment.currency = currency;
+            payment.generatePaymentNumber(apply).save();
         }
         return payment;
+    }
+
+    public <T extends Apply> Payment generatePaymentNumber(T apply) {
+        /**
+         * 1. 确定当前的年份
+         * 2. 根据年份 + cooperator 确定是今天的第几次请款
+         * 3. 生成 PaymentNumber
+         */
+        String year = DateTime.now().toString("yyyy");
+        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
+        long count = 0;
+        if(apply instanceof TransportApply) {
+            count = Payment.count("tApply=?", apply);
+            this.tApply = (TransportApply) apply;
+        } else if(apply instanceof ProcureApply) {
+            count = Payment.count("pApply=?", apply);
+            this.pApply = (ProcureApply) apply;
+        }
+        this.paymentNumber = String.format("[%s]-%02d", apply.serialNumber, count + 1);
+        return this;
     }
 
     /**
@@ -479,29 +523,11 @@ public class Payment extends Model {
     public void shouldPaid(Float shouldPaid) {
         if(shouldPaid == null)
             Validation.addError("", "应付金额必须填写");
+        if(Validation.hasErrors()) return;
         // 非 WATING 状态不允许修改
         if(this.state != S.WAITING) return;
         this.shouldPaid = shouldPaid;
         this.save();
-    }
-
-    /**
-     * 计算需要的 PaymentNumber 数据
-     *
-     * @return
-     */
-    public Payment generatePaymentNumber(ProcureApply procureApply) {
-        /**
-         * 1. 确定当前的年份
-         * 2. 根据年份 + cooperator 确定是今天的第几次请款
-         * 3. 生成 PaymentNumber
-         */
-        String year = DateTime.now().toString("yyyy");
-        // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
-        long count = Payment.count("pApply=?", procureApply);
-        // count + 1 为新创建的编号
-        this.paymentNumber = String.format("[%s]-%02d", procureApply.serialNumber, count + 1);
-        return this;
     }
 
     public List<ElcukRecord> records() {
@@ -513,6 +539,43 @@ public class Payment extends Model {
         );
 
         return ElcukRecord.records(this.id + "", actions);
+    }
+
+
+    public List<ElcukRecord> includesItemsRecords() {
+        List<ElcukRecord> all = this.records();
+        for(PaymentUnit fee : this.units) {
+            all.addAll(fee.records());
+        }
+        Collections.sort(all, new Comparator<ElcukRecord>() {
+            @Override
+            public int compare(ElcukRecord e1, ElcukRecord e2) {
+                return (int) (e2.createAt.getTime() - e1.createAt.getTime());
+            }
+        });
+        return all;
+    }
+
+    /**
+     * TODO 这里的两个 Get 方法一段时候之后可以删除.
+     * (所有 Payment 访问一次后)
+     *
+     * @return
+     */
+    public String getActualUser() {
+        if(this.state == S.PAID && StringUtils.isBlank(this.actualUser)) {
+            this.actualUser = this.target.accountUser;
+            this.save();
+        }
+        return this.actualUser;
+    }
+
+    public String getActualAccountNumber() {
+        if(this.state == S.PAID && StringUtils.isBlank(this.actualAccountNumber)) {
+            this.actualAccountNumber = this.target.accountNumber;
+            this.save();
+        }
+        return actualAccountNumber;
     }
 
     @Override

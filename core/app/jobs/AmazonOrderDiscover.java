@@ -7,7 +7,6 @@ import models.Jobex;
 import models.market.Account;
 import models.market.Orderr;
 import mws.MWSOrders;
-import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -42,23 +41,10 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         for(Account acc : accounts) {
             try {
                 List<Orderr> orders = MWSOrders.listOrders(acc, 30);
-                Map<String, Boolean> existOrders = AmazonOrderDiscover.ordersExist(orders);
-
-                List<Orderr> toUpdate = new ArrayList<Orderr>();
-                List<Orderr> toSave = new ArrayList<Orderr>();
-                for(Orderr orderr : orders) {
-                    if(existOrders.containsKey(orderr.orderId))
-                        toUpdate.add(orderr);
-                    else
-                        toSave.add(orderr);
-                }
-
-                AmazonOrderDiscover.updateOrders(toUpdate);
-                AmazonOrderDiscover.saveOrders(toSave);
+                saveOrUpdateOrders(orders, false);
 
             } catch(MarketplaceWebServiceOrdersException e) {
-                Logger.warn("Account %s is not fecth Order because of [%s]",
-                        acc.username, Webs.S(e));
+                Logger.warn("Account %s is not fecth Order because of [%s]", acc.username, Webs.S(e));
             }
         }
     }
@@ -136,24 +122,55 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
      * @param orderrs
      * @return
      */
-    public static Map<String, Boolean> ordersExist(List<Orderr> orderrs) {
+    public static Map<String, Orderr.S> ordersExist(List<Orderr> orderrs) {
         List<String> orderIds = new ArrayList<String>();
-        Map<String, Boolean> existOrders = new HashMap<String, Boolean>();
+        Map<String, Orderr.S> existOrders = new HashMap<String, Orderr.S>();
         for(Orderr orderr : orderrs) {
             orderIds.add(orderr.orderId);
         }
 
         SqlSelect sql = new SqlSelect()
-                .select("orderId", "count(orderId) as cnt")
+                .select("orderId", "state")
                 .from("Orderr")
-                .where(SqlSelect.whereIn("orderId", orderIds))
-                .groupBy("orderId");
+                .where(SqlSelect.whereIn("orderId", orderIds));
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
         for(Map<String, Object> row : rows) {
-            int cnt = NumberUtils.toInt(row.get("cnt").toString());
-            if(cnt > 0)
-                existOrders.put(row.get("orderId").toString(), true);
+            Orderr.S state;
+            try {
+                state = Orderr.S.valueOf(row.get("state").toString());
+            } catch(Exception e) {
+                state = Orderr.S.PENDING;
+            }
+            existOrders.put(row.get("orderId").toString(), state);
         }
         return existOrders;
+    }
+
+    /**
+     * 抓取或者更新订单
+     *
+     * @param partOrders
+     * @param isIncludeOrderItems
+     */
+    public static void saveOrUpdateOrders(List<Orderr> partOrders, boolean isIncludeOrderItems) {
+        Map<String, Orderr.S> existOrders = AmazonOrderDiscover.ordersExist(partOrders);
+
+        List<Orderr> toUpdate = new ArrayList<Orderr>();
+        List<Orderr> toSave = new ArrayList<Orderr>();
+        for(Orderr orderr : partOrders) {
+            if(existOrders.containsKey(orderr.orderId) && existOrders.get(orderr.orderId) != Orderr.S.CANCEL) {
+                toUpdate.add(orderr);
+            } else {
+                toSave.add(orderr);
+            }
+        }
+
+        AmazonOrderDiscover.updateOrders(toUpdate);
+        AmazonOrderDiscover.saveOrders(toSave);
+
+        if(isIncludeOrderItems) {
+            AmazonOrderItemDiscover.updateOrderItemByOrders(toUpdate);
+            AmazonOrderItemDiscover.saveOrderItemByOrders(toSave);
+        }
     }
 }

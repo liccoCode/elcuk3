@@ -5,6 +5,9 @@ import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.finance.FeeType;
+import models.finance.PaymentUnit;
+import models.finance.TransportApply;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -13,12 +16,15 @@ import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.*;
@@ -33,7 +39,7 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Shipments extends Controller {
-    @Before(only = {"index", "blank", "save"})
+    @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
         List<Whouse> whouses = Whouse.findAll();
         List<Cooperator> cooperators = Cooperator.shippers();
@@ -95,14 +101,27 @@ public class Shipments extends Controller {
 
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
+        //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
+        renderArgs.put("feeTypes", feeTypes());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
-            //TODO effect 这里需要将所有的 records 修改为执行 action 的
             renderArgs.put("records", ElcukRecord.records(shipmentId));
         }
+    }
+
+    @Util
+    public static List<FeeType> feeTypes() {
+        List<FeeType> feeTypes = FeeType.transports();
+        CollectionUtils.filter(feeTypes, new Predicate() {
+            @Override
+            public boolean evaluate(Object o) {
+                return !((FeeType) o).name.equals("transportshipping");
+            }
+        });
+        return feeTypes;
     }
 
     public static void show(String id) {
@@ -391,5 +410,65 @@ public class Shipments extends Controller {
         dates.put("begin", Dates.date2Date(shipment.dates.planBeginDate));
         dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
         renderJSON(dates);
+    }
+
+    public static void billingOne(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        ship.produceFee(fee);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
+
+    /**
+     * 为当前运输单的所有项目申请预付关税
+     *
+     * @param id
+     */
+    public static void applyDuty(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.applyShipItemDuty();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("为运输单 %s 成功申请预付关税", id);
+        Shipments.show(id);
+    }
+
+    public static void calDuty(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
+
+    public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
+        if(shipmentId == null || shipmentId.size() == 0)
+            Validation.addError("", "请选择需要创建请款单的运输单");
+
+        TransportApply apply = null;
+        if(!Validation.hasErrors())
+            apply = TransportApply.buildTransportApply(shipmentId);
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(p);
+        } else {
+            if(apply != null) {
+                Applys.transport(apply.id);
+            } else {
+                flash.error("请款单创建失败.");
+                index(p);
+            }
+        }
+    }
+
+    public static void departFromApply(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.departFromApply();
+        if(Validation.hasErrors())
+            renderJSON(Webs.VJson(Validation.errors()));
+        renderJSON(new Ret(true, "运输单剥离成功"));
     }
 }

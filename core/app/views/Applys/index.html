@@ -25,7 +25,7 @@
   #{list items:applyes, as:'apply'}
     <tr>
       <td>${apply.id}</td>
-      <td>#{apply_id_link apply:apply/}</td>
+      <td><a href="@{Applys.procure(apply.id)}">${apply.serialNumber}</a></td>
       <td>${apply.cooperator.fullName}</td>
         #{set currency:apply.currency()/}
       <td>${currency?.symbol()} ${apply.appliedAmount()}</td>

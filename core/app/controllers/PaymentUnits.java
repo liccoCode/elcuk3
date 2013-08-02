@@ -1,11 +1,16 @@
 package controllers;
 
+import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.finance.PaymentUnit;
 import models.view.Ret;
 import play.data.validation.Validation;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,12 +24,22 @@ public class PaymentUnits extends Controller {
     @Check("paymentunits.destroy")
     public static void destroy(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
-        payUnit.remove(reason);
+        payUnit.procureFeeRemove(reason);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
             flash.success("删除成功");
         Applys.procure(payUnit.deliveryment.apply.id);
+    }
+
+    @Check("paymentunits.destroy")
+    public static void destroyByShipment(Long id, String reason) {
+        PaymentUnit payUnit = PaymentUnit.findById(id);
+        payUnit.transportFeeRemove(reason);
+        if(Validation.hasErrors())
+            renderJSON(Webs.VJson(Validation.errors()));
+        else
+            renderJSON(new Ret(true, "#" + id + " 请款项删除成功"));
     }
 
     @Check("paymentunits.fixvalue")
@@ -53,6 +68,45 @@ public class PaymentUnits extends Controller {
         else
             flash.success("成功驳回");
         Payments.show(paymentId);
+    }
+
+    public static void show(Long id) {
+        PaymentUnit fee = PaymentUnit.findById(id);
+        render(fee);
+    }
+
+    public static void update(Long id, PaymentUnit fee) {
+        PaymentUnit feeUnit = PaymentUnit.findById(id);
+        feeUnit.update(fee);
+        if(Validation.hasErrors()) {
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        }
+        renderArgs.put("fee", feeUnit);
+        render("PaymentUnits/show.json");
+    }
+
+    public static void records(final Long id) {
+        List<ElcukRecord> records = await(new Job<List<ElcukRecord>>() {
+            @Override
+            public List<ElcukRecord> doJobWithResult() {
+                PaymentUnit feeUnit = PaymentUnit.findById(id);
+                return feeUnit.updateRecords();
+            }
+        }.now());
+        renderJSON(J.json(records));
+    }
+
+    /**
+     * 批准运输单请款
+     *
+     * @param id
+     */
+    public static void approve(Long id) {
+        PaymentUnit fee = PaymentUnit.findById(id);
+        fee.transportApprove();
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
     }
 
 }

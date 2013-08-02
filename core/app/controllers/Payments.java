@@ -33,8 +33,13 @@ public class Payments extends Controller {
     }
 
     @CacheFor("5mn")
-    public static void rates() {
-        renderText(Currency.bocRatesHtml());
+    public static void bocRates() {
+        renderHtml(Currency.bocRatesHtml());
+    }
+
+    @CacheFor("5mn")
+    public static void xeRates(Currency currency) {
+        renderHtml(Currency.xeRatesHtml(currency));
     }
 
     @Check("payments.show")
@@ -121,7 +126,7 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(false, J.json(Validation.errors())));
+            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
         } else {
             renderJSON(new Ret(true, "更新成功"));
         }
