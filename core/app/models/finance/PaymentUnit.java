@@ -304,7 +304,8 @@ public class PaymentUnit extends Model {
          * 2. 拿着 SKU 去 PaymentUnit 中找费用
          */
         String sku = this.shipItem.unit.sku;
-        return new PaymentUnitQuery().avgSkuTransportshippingFee(sku).get(sku);
+        Float price = new PaymentUnitQuery().avgSkuTransportshippingFee(sku).get(sku);
+        return price == null ? 0 : price;
     }
 
     /**

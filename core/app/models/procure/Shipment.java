@@ -864,19 +864,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 当前的自动关税计算, 仅仅产生一项关税, 多次创建则被忽略
      */
     public void applyShipItemDuty() {
-        FeeType transportShipping = FeeType.transportShipping();
+        FeeType transportDuty = FeeType.transportDuty();
         for(ShipItem itm : this.items) {
-            if(PaymentUnit.count("feeType=? AND shipItem=?", transportShipping, itm) > 0) continue;
+            if(PaymentUnit.count("feeType=? AND shipItem=?", transportDuty, itm) > 0) continue;
             PaymentUnit fee = new PaymentUnit();
             //TODO 这里本应该为 HKD 但现在业务为 CNY 所以暂时以 CNY 存在
             fee.currency = Currency.CNY;
             fee.unitPrice = Webs.scalePointUp(4, (float) (itm.unit.product.declaredValue * 6.35 * 0.2));
             fee.unitQty = itm.qty;
-            itm.produceFee(fee);
+            itm.produceFee(fee, transportDuty);
+            if(Validation.hasErrors()) return;
+
             fee.memo = String.format("%s %s = %s(申报价) * 6.35 * 0.2 * %s(运输数量)",
                     fee.currency.symbol(), fee.amount(), itm.unit.product.declaredValue, itm.qty);
             fee.save();
-            if(Validation.hasErrors()) return;
         }
     }
 

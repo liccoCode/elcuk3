@@ -74,8 +74,11 @@ $ ->
   # 抽取两个挂牌价中的汇率
   extraRatio = (target) ->
     ratio = if 'CNY' == target
-      tr = $("#boc_rate tr td:contains(#{currencyMap[$('#request_currency').text()]})").parents('tr')
-      (parseFloat(tr.find('td:eq(1)').css('color', 'red').text()) / 100).toFixed(4)
+      if target == $('#request_currency').text()
+        1
+      else
+        tr = $("#boc_rate tr td:contains(#{currencyMap[$('#request_currency').text()]})").parents('tr')
+        (parseFloat(tr.find('td:eq(1)').css('color', 'red').text()) / 100).toFixed(4)
     else
       tr = $("#ex_rate tr td:contains(#{target})").parents('tr')
       (parseFloat(tr.find('td:eq(2)').css('color', 'red').text())).toFixed(4)

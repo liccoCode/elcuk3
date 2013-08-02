@@ -282,22 +282,23 @@ public class ShipItem extends GenericModel {
      *
      * @param fee
      */
-    public void produceFee(PaymentUnit fee) {
+    public void produceFee(PaymentUnit fee, FeeType feeType) {
         /**
          * 1. 检查是否拥有运输运费
          * 2. 选择运输运费类型
          * 3. 记录数量, 请款人...
          */
-        FeeType transportShipping = FeeType.transportShipping();
-        if(transportShipping == null)
+        if(feeType == null)
             Validation.addError("", "运输运费类型不存在, 请添加");
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        if(Validation.hasErrors()) return;
         fee.shipItem = this;
         fee.shipment = this.shipment;
-        fee.feeType = transportShipping;
+        fee.feeType = feeType;
         fee.payee = User.current();
         fee.amount = fee.unitPrice * fee.unitQty;
         fee.save();
     }
+
 }

@@ -114,7 +114,7 @@
     <td><%= fee.averagePrice %></td>
     <td data-shipitemid='<%= fee.shipItem.id %>'>
       <%= fee.amount %>
-      <% if(fee.shipItem) { %>
+      <% if(fee.shipItem.id) { %>
       <i class="icon-search"></i>
       <% } %>
     </td>

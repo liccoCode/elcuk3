@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.procure.FBACenter;
 import models.procure.ProcureUnit;
@@ -88,7 +89,7 @@ public class ShipItems extends Controller {
 
     public static void billingOne(Long id, PaymentUnit fee) {
         ShipItem itm = ShipItem.findById(id);
-        itm.produceFee(fee);
+        itm.produceFee(fee, FeeType.transportShipping());
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
