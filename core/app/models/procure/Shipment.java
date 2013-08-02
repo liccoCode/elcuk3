@@ -515,11 +515,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(datetime == null) datetime = new Date();
 
         for(ShipItem shipItem : this.items) {
-            if(shipItem.unit.fba != null)
+            if(shipItem.unit.fba != null) {
                 shipItem.unit.fba.updateFBAShipmentRetry(
                         3,
                         // 在测试环境下也不能标记 SHIPPED
                         Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+            }
         }
 
         for(ShipItem shipItem : this.items) {
