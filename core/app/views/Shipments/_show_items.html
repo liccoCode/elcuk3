@@ -1,0 +1,131 @@
+<!-- 运输项目部分 -->
+#{success_row title:'运输项目' /}
+<form action="@{ShipItems.adjust(ship.id, ship.id)}" method="POST" id="adjust_shipitems">
+
+  <div class="row-fluid">
+    <div class="span12">
+    #{render './_shipitem.html', items: ship.items, itmRecord: true/}
+    </div>
+  </div>
+#{power.ck 'shipitems.adjust'}
+<div class="row-fluid">
+  <div class="span3">
+    <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
+
+    <div class="btn-group">
+      <a class="btn preview"><i class="icon-file-alt"></i> 预览</a>
+      <a class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
+        <i class="icon-adjust"></i>
+        调整
+      </a>
+    </div>
+  </div>
+#{/power.ck}
+  <div class="span9" id="preview">
+  </div>
+</div>
+</form>
+
+<!-- 隐藏 Model -->
+<div class="modal hide fade" id="logForm">
+  <form action="@{Shipments.log(ship.id)}" method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>记录运输状态事件</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>事件:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        记录
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="modal hide fade" id="popLogModel"></div>
+<script type="text/template" id='form-logreceive-qty-model-template'>
+  <form action="<%= url %>" data-method='PUT' method="POST">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>手动修改入库数量</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <label>数量</label>
+
+      <div class="input-append">
+        <input type="text" class="input-mini" name="qty">
+        <span class="add-on">当前入库数量 <%= qty %></span>
+      </div>
+      <label>原因:</label>
+      <textarea role="5" name="msg" class="span11"></textarea>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+    #{power.ck "shipitems.received"}
+      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        修改
+      </button>
+    #{/power.ck}
+    </div>
+  </form>
+</script>
+
+<script type="text/template" id='form-logfee-model-template'>
+  <form action="<%= url %>" method="POST" class="form-horizontal">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal">×</button>
+      <h4>添加运输项目 <%= itm.id %> 费用</h4>
+    </div>
+    <div class="modal-body row-fluid">
+      <div class="control-group">
+        <label class="control-label">币种</label>
+
+        <div class="controls">
+        #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">单价</label>
+
+        <div class="controls">
+          <input name="fee.unitPrice" type="number" step="any" class="input-mini" value="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">数量</label>
+
+        <div class="controls">
+          <input name="fee.unitQty" type="number" step="any" class="input-mini" value="1">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">总价</label>
+
+        <div class="controls">
+          <input type="number" step="any" class="input-mini amount" value="0" readonly>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">备注</label>
+
+        <div class="controls">
+          <textarea role="5" name="fee.memo" class="span11"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#" class="btn" data-dismiss="modal">Close</a>
+      <button class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+        添加
+      </button>
+    </div>
+  </form>
+</script>

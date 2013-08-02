@@ -7,7 +7,6 @@ import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.db.DB;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
@@ -17,7 +16,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -46,7 +44,7 @@ public class AmazonFinanceCheckJob extends Job {
         int orderSize = 8;
         int hourOfDay = DateTime.now().getHourOfDay();
         // 如果是晚上, 则加大抓去量
-        if(hourOfDay >= 20 && hourOfDay <= 8) orderSize = 24;
+        if(hourOfDay >= 19 || hourOfDay <= 9) orderSize = 24;
         List<Account> accounts = Account.openedSaleAcc();
         Map<String, Account> accMap = new HashMap<String, Account>();
         for(Account acc : accounts) {
@@ -62,18 +60,7 @@ public class AmazonFinanceCheckJob extends Job {
                 acc = accMap.get(m.name());
             }
 
-            String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate";
-            List<Orderr> orders = Orderr.find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
-            long leftOrders = Orderr.count(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
-            if(orders.size() > 0) {
-                List<SaleFee> fees = new FinanceShippedPromise(acc, m, orders).now().get(1, TimeUnit.HOURS);
-                AmazonFinanceCheckJob.deleteSaleFees(orders);
-                AmazonFinanceCheckJob.saveFees(fees);
-                Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees, left %s Orders to fetch.",
-                        acc.prettyName(), m.name(), orders.size(), fees.size(), leftOrders);
-            } else {
-                Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", acc.prettyName(), m);
-            }
+            new FinanceShippedPromise(acc, m, orderSize).now();
         }
 
     }

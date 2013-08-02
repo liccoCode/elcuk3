@@ -116,6 +116,8 @@ public class MWSReports {
                 job.state = JobRequest.S.DONE;
             } else if("_DONE_NO_DATA_".equals(job.procressState)) {
                 job.state = JobRequest.S.CLOSE;
+            } else if("_CANCELLED_".equals(job.procressState)) {
+                job.state = JobRequest.S.CANCEL;
             } else {
                 job.state = JobRequest.S.PROCRESS;
             }
@@ -222,14 +224,14 @@ public class MWSReports {
                         break;
                     case AMAZON_UK:
                         // 无法使用这个地址, 因为 toString() 使用了 FulfillmentInventory
-//                        config.setServiceURL(MWSEndpoint.UK.toString());
+                        //                        config.setServiceURL(MWSEndpoint.UK.toString());
                         config.setServiceURL("https://mws.amazonservices.co.uk");
                         break;
                     case AMAZON_DE:
                         config.setServiceURL("https://mws.amazonservices.de");
                         break;
-//                    case AMAZON_ES: // not right now..
-//                        break;
+                    //                    case AMAZON_ES: // not right now..
+                    //                        break;
                     case AMAZON_FR:
                         config.setServiceURL("https://mws.amazonservices.fr");
                         break;

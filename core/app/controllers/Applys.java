@@ -1,10 +1,16 @@
 package controllers;
 
+import helper.Webs;
 import models.finance.Apply;
+import models.finance.FeeType;
 import models.finance.ProcureApply;
+import models.finance.TransportApply;
+import models.procure.Shipment;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +28,11 @@ public class Applys extends Controller {
         render(applyes);
     }
 
+    public static void transports() {
+        List<Apply> applyes = TransportApply.find("ORDER BY createdAt DESC").fetch();
+        render(applyes);
+    }
+
     /**
      * 采购请款单
      */
@@ -31,10 +42,25 @@ public class Applys extends Controller {
         render(apply);
     }
 
+    public static void transport(Long id) {
+        List<FeeType> feeTypes = Shipments.feeTypes();
+        TransportApply apply = TransportApply.findById(id);
+        render(apply, feeTypes);
+    }
+
     public static void procureConfirm(Long id) {
         ProcureApply apply = ProcureApply.findById(id);
         apply.confirm = true;
         apply.save();
         render();
+    }
+
+    public static void transportAddShipment(Long id, String shipmentId) {
+        TransportApply apply = TransportApply.findById(id);
+        Shipment ship = Shipment.findById(shipmentId);
+        apply.appendShipment(Arrays.asList(ship.id));
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        transport(id);
     }
 }

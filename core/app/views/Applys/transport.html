@@ -1,0 +1,79 @@
+#{extends 'main_full.html'/}
+#{set title:"请款单 ${apply.serialNumber}" /}
+#{set 'moreScripts'}
+    #{script 'applys/transport.coffee'/}
+    #{script 'shipments/paymentunits.coffee'/}
+#{/set}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <div class="span4">
+    <form action='@{Applys.transportAddShipment(apply.id)}' class="form-inline" id='addShipment' method="POST">
+      <label>运输单 ID
+        <input type="text" required="" name='shipmentId' class="input-small">
+      </label>
+      <button class="btn btn-success preview" data-disable-with='添加中...'>添加运输单</button>
+    </form>
+  </div>
+  <div class="span4">
+  ${apply.serialNumber}
+  </div>
+</div>
+
+<hr style="border-top: 1px dashed;">
+<div id='shipments'>
+#{list items:apply.shipments, as:'ship'}
+  <div class="row-fluid" id="shipment_${ship.id}">
+    <div class="span4">
+      <div class="row-fluid">
+        <div class="span7">
+          <dl class="dl-horizontal">
+            <dt>运输单</dt>
+            <dd>
+              <a href="@{Shipments.show(ship.id)}">${ship.id}</a>
+            </dd>
+            <dt>运输方式</dt>
+            <dd>${ship.type.label()}</dd>
+            <dt>国际快递</dt>
+            <dd>${ship.internationExpress}</dd>
+            <dt>TrackNo:</dt>
+            <dd>${ship.trackNo}
+              <a href="${ship.internationExpress.trackUrl(ship.trackNo)}" target="_blank">
+                <i class="icon-external-link"></i>
+              </a>
+            </dd>
+            <dt>FBAs:</dt>
+            <dd>
+                #{list items:ship.fbas(), as:'fba'}
+                  <span>${fba.shipmentId} ${fba.centerId}</span>
+                #{/list}
+            </dd>
+          </dl>
+        </div>
+
+        <div class="span5">
+          <dl class="dl-horizontal">
+            <dt>
+              <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
+                从当前请款单中剔除
+              </button>
+            </dt>
+            <dd>&nbsp;</dd>
+          </dl>
+        </div>
+      </div>
+      <div>
+          #{records_ul records: ship.allRecords(), nobr: true /}
+      </div>
+    </div>
+    <div class="span8">
+        #{render 'Shipments/_paymentunits.html', ship: ship, feeTypes: feeTypes/}
+    </div>
+  </div>
+  <hr style="border-top: 1px dashed;">
+#{/list}
+</div>
+
+#{render './_relate_payments.html', payments: apply.payments/}
+
+#{records records: apply.records()/}

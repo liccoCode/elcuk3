@@ -1,6 +1,7 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Currency;
 import helper.Dates;
 import helper.FLog;
 import helper.Webs;
@@ -9,7 +10,9 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.ShipmentDates;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.finance.TransportApply;
 import models.product.Whouse;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
@@ -223,6 +226,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
     public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+
+    @ManyToOne
+    public TransportApply apply;
 
     /**
      * 运输合作商
@@ -509,11 +515,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(datetime == null) datetime = new Date();
 
         for(ShipItem shipItem : this.items) {
-            if(shipItem.unit.fba != null)
+            if(shipItem.unit.fba != null) {
                 shipItem.unit.fba.updateFBAShipmentRetry(
                         3,
                         // 在测试环境下也不能标记 SHIPPED
                         Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+            }
         }
 
         for(ShipItem shipItem : this.items) {
@@ -763,6 +770,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return ElcukRecord.records(this.id, Messages.get("shipment.logEvent"));
     }
 
+    /**
+     * 对于运输单可以通过其特殊格式的 id 来获取所有 Records
+     *
+     * @return
+     */
+    public List<ElcukRecord> allRecords() {
+        return ElcukRecord.records(this.id);
+    }
+
     @Override
     public String to_log() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
@@ -825,6 +841,91 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 记录 Shipment 产生的费用条目
+     *
+     * @param fee
+     */
+    public void produceFee(PaymentUnit fee) {
+        if(fee.currency == null) Validation.addError("", "币种必须存在");
+        if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
+        if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        if(FeeType.transportShipping().equals(fee.feeType)) Validation.addError("", "运输费用需要关联运输项目");
+
+        if(Validation.hasErrors()) return;
+        fee.shipment = this;
+        fee.payee = User.current();
+        fee.amount = fee.unitQty * fee.unitPrice;
+        // TODO 请款日志
+        fee.save();
+    }
+
+    /**
+     * 计算当前运输单所有项目的预计关税.
+     * 当前的自动关税计算, 仅仅产生一项关税, 多次创建则被忽略
+     */
+    public void applyShipItemDuty() {
+        FeeType transportDuty = FeeType.transportDuty();
+        for(ShipItem itm : this.items) {
+            if(PaymentUnit.count("feeType=? AND shipItem=?", transportDuty, itm) > 0) continue;
+            PaymentUnit fee = new PaymentUnit();
+            //TODO 这里本应该为 HKD 但现在业务为 CNY 所以暂时以 CNY 存在
+            fee.currency = Currency.CNY;
+            fee.unitPrice = Webs.scalePointUp(4, (float) (itm.unit.product.declaredValue * 6.35 * 0.2));
+            fee.unitQty = itm.qty;
+            itm.produceFee(fee, transportDuty);
+            if(Validation.hasErrors()) return;
+
+            fee.memo = String.format("%s %s = %s(申报价) * 6.35 * 0.2 * %s(运输数量)",
+                    fee.currency.symbol(), fee.amount(), itm.unit.product.declaredValue, itm.qty);
+            fee.save();
+        }
+    }
+
+    /**
+     * 根据输入的最终关税金额, 计算还需支付的关税金额
+     */
+    public PaymentUnit calculateDuty(helper.Currency crcy, Float amount) {
+        if(crcy == null) Validation.addError("", "币种必须确定.");
+        /**
+         * 1. 检查已经存在的关税币种是否一致, 不一致提示需要对关税进行处理
+         * 2. 统计所有已经支付的关税金额
+         * 3. 计算出关税差额
+         */
+        FeeType duty = FeeType.transportDuty();
+        if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
+        for(PaymentUnit fee : this.fees) {
+            if(fee.feeType.equals(duty)) {
+                if(!fee.currency.equals(crcy))
+                    Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息.");
+            }
+        }
+
+        if(Validation.hasErrors()) return null;
+
+        float paidAmount = 0;
+        List<String> lines = new ArrayList<String>();
+        // TODO 把 Comment 更换为 record?
+        lines.add(String.format("总关税 %s %s 减去 ", crcy, amount));
+        for(PaymentUnit fee : this.fees) {
+            if(!fee.feeType.equals(duty)) continue;
+            lines.add(String.format("#%s %s %s %s", fee.id, fee.currency, fee.amount(), fee.feeType.nickName));
+            paidAmount += fee.amount();
+        }
+
+        PaymentUnit leftDuty = new PaymentUnit();
+        leftDuty.feeType = duty;
+        leftDuty.amount = amount - paidAmount;
+        leftDuty.unitPrice = leftDuty.amount;
+        leftDuty.unitQty = 1;
+        leftDuty.currency = crcy;
+        leftDuty.payee = User.current();
+        leftDuty.shipment = this;
+        leftDuty.state = PaymentUnit.S.APPLY;
+        leftDuty.memo = StringUtils.join(lines, ", ");
+        return leftDuty.save();
+    }
+
+    /**
      * 加载运输相关的 Config
      *
      * @return
@@ -853,6 +954,26 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             weight += itm.qty * itm.unit.product.weight;
         }
         return weight;
+    }
+
+    /**
+     * 将运输单从其存在的运输请款单中剥离
+     */
+    public void departFromApply() {
+        if(this.apply == null)
+            Validation.addError("", "运输单没有添加进入请款单, 不需要剥离");
+        for(PaymentUnit fee : this.fees) {
+            if(Arrays.asList(PaymentUnit.S.PAID, PaymentUnit.S.APPROVAL).contains(fee.state)) {
+                Validation.addError("", "运输但中已经有运输请款项目被批准或付款, 无法剥离");
+                break;
+            }
+        }
+        if(Validation.hasErrors()) return;
+        new ERecordBuilder("shipment.departFromApply")
+                .msgArgs(this.id, this.apply.serialNumber)
+                .fid(this.apply.id).save();
+        this.apply = null;
+        this.save();
     }
 
     @Override
@@ -888,6 +1009,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             fbas.add(item.unit.fba);
         }
         return fbas;
+    }
+
+    /**
+     * 当前运输单与运输项目的所有费用
+     *
+     * @return
+     */
+    public List<PaymentUnit> allFees() {
+        return this.fees;
     }
 
     /**
