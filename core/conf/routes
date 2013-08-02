@@ -59,7 +59,6 @@ POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
 DELETE  /payment/{id}                                       Payments.cancel
 POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
-POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
 POST    /payment/{id}/pay                                   Payments.payForIt
 POST    /payment/{id}/shouldPaid                            Payments.shouldPaidUpdate
 POST    /payment/{id}/lock                                  Payments.lockIt
@@ -92,6 +91,7 @@ GET     /paymentunit/{id}/records.json                      PaymentUnits.records
 PUT     /paymentunit/{id}.json                              PaymentUnits.update(format:'json')
 POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
 POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
+POST    /paymentunit/{id}/deny                              PaymentUnits.deny
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index

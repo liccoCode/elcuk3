@@ -7,6 +7,14 @@ $ ->
     USD: '美元'
   }
 
+  $(document).on('click', 'button.paymentUnitDeny', (e) ->
+    $btn = $(@)
+    $('#reason_model').modal('show')
+    $('#model_title').text("驳回 #{$btn.parents('tr').find('td:eq(6)').text()} 请款项目")
+    $('#model_form').attr('action', $btn.data('url'))
+    false
+  )
+
   $('#pay_form').on('change', 'select[name=currency]',(e) ->
     $slt = $(@)
     if $slt.val()

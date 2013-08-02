@@ -60,14 +60,21 @@ public class PaymentUnits extends Controller {
     }
 
     @Check("paymentunits.deny")
-    public static void deny(Long paymentId, Long id, String reason) {
+    public static void deny(Long id, String reason) {
         PaymentUnit paymentUnit = PaymentUnit.findById(id);
         paymentUnit.deny(reason);
-        if(Validation.hasErrors())
-            Webs.errorToFlash(flash);
-        else
-            flash.success("成功驳回");
-        Payments.show(paymentId);
+        if(request.isAjax()) {
+            if(Validation.hasErrors())
+                renderJSON(Webs.VJson(Validation.errors()));
+            else
+                renderJSON(new Ret(true, "成功驳回"));
+        } else {
+            if(Validation.hasErrors())
+                Webs.errorToFlash(flash);
+            else
+                flash.success("成功驳回");
+            Payments.show(paymentUnit.payment.id);
+        }
     }
 
     public static void show(Long id) {

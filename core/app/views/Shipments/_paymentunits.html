@@ -8,7 +8,7 @@
           <th class="span2">
             <abbr rel='tooltip' title="黑色: 申请状态; 蓝色: 批准状态; 红色: 驳回状态; 绿色: 支付完成状态">费用类型</abbr>
           </th>
-          <th class="span2">币种</th>
+          <th class="span1">币种</th>
           <th>单价</th>
           <th>数量</th>
           <th>平均价</th>
@@ -16,7 +16,7 @@
           <th>备注</th>
           <th>申请人</th>
           <th class="span3">申请时间</th>
-          <th class="span2"></th>
+          <th class="span3"></th>
         </tr>
       #{list items:ship.allFees(), as:'fee'}
         <tr id='fee_${fee.id}'>
@@ -39,6 +39,7 @@
             <button class="btn btn-mini btn-info">编辑</button>
             <button class="btn btn-mini btn-warning">删除</button>
             <button class="btn btn-mini btn-success">批准</button>
+            <button class="btn btn-mini btn-danger">驳回</button>
           </td>
         </tr>
       #{/list}
@@ -125,6 +126,7 @@
       <button class="btn btn-mini btn-info">编辑</button>
       <button class="btn btn-mini btn-warning">删除</button>
       <button class="btn btn-mini btn-success">批准</button>
+      <button class="btn btn-mini btn-danger">驳回</button>
     </td>
   </tr>
 </script>
@@ -150,13 +152,30 @@
       <textarea name="fee.memo"><%= fee.memo %></textarea>
     </td>
     <td><%= fee.payee.username %></td>
-    g
     <td><%= fee.createdAt %></td>
     <td>
       <button class="btn btn-mini btn-success">更新</button>
       <button class="btn btn-mini btn-danger">取消</button>
     </td>
   </tr>
+</script>
+
+<script type="text/template" id="form-deny-paymentunit-template">
+  <form action="<%= form.url %>" method="POST" data-feeid="<%= form.id %>">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3><span class="text-info"><%= form.title %></span></h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <label for="model_reason">原因</label>
+        <textarea rows="3" class="span12" name="reason"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <input type="submit" class="btn btn-danger deny-paymentunit" data-disable-with='提交中...' value="驳回">
+    </div>
+  </form>
 </script>
 
 <script type="text/template" id="shipItem-template">

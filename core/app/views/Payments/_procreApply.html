@@ -56,7 +56,7 @@
             <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
               #{power.ck 'paymentunits.deny'}
                   #{if fee.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
-                    <button url='@{PaymentUnits.deny(payment.id, fee.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
+                    <button data-url='@{PaymentUnits.deny(fee.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
                       驳回
                     </button>
                   #{/if}
