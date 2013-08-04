@@ -158,8 +158,9 @@ public class AmazonOrderDiscover extends Job<List<Orderr>> {
         List<Orderr> toUpdate = new ArrayList<Orderr>();
         List<Orderr> toSave = new ArrayList<Orderr>();
         for(Orderr orderr : partOrders) {
-            if(existOrders.containsKey(orderr.orderId) && existOrders.get(orderr.orderId) != Orderr.S.CANCEL) {
-                toUpdate.add(orderr);
+            if(existOrders.containsKey(orderr.orderId)) {
+                if(existOrders.get(orderr.orderId) != Orderr.S.CANCEL)
+                    toUpdate.add(orderr);
             } else {
                 toSave.add(orderr);
             }
