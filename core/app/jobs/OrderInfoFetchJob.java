@@ -125,8 +125,17 @@ public class OrderInfoFetchJob extends Job {
 
             // Phone
             if(StringUtils.isBlank(order.phone)) {
-                order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
-                if(StringUtils.isNotBlank(order.phone)) order.phone = order.phone.trim();
+                Elements tables = doc.select("table.data-display");
+                if(tables.size() >= 2) {
+                    String tableHtml = tables.get(1).outerHtml();
+                    if(StringUtils.contains(tableHtml, "Phone:")) {
+                        String phone = StringUtils.substringBetween(tableHtml, "Phone:", "</td>");
+                        if(StringUtils.isNotBlank(phone)) order.phone = phone.trim();
+                    } else {
+                        // amazon 没有提供 phone,  那么不再一直抓取 phone
+                        order.phone = "";
+                    }
+                }
             }
         }
         return order;
