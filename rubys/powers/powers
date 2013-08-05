@@ -32,3 +32,4 @@ privileges.add(new Privilege("shipments.procureunittoshipment", "通过采购计
 privileges.add(new Privilege("shipments.handleprocess", "运输单货物处理流程"));
 privileges.add(new Privilege("shipitems.adjust", "运输单项目调整"));
 privileges.add(new Privilege("shipitems.received", "修改运输计划接收数量"));
+privileges.add(new Privilege("applys.shipmenttoapply", "创建运输请款单"));
