@@ -44,7 +44,8 @@ public class OrderInfoFetchJob extends Job {
                 OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html);
                 ord.save();
             } catch(Exception e) {
-                Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.S(e));
+                Logger.warn("Parse Order(%s) Info Error! email:%s, userId:%s, email:%s. [%s]",
+                        ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
     }
