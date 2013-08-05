@@ -181,6 +181,8 @@ public class Privilege extends Model {
         privileges.add(new Privilege("paymentunits.destroy", "删除请款项目"));
         privileges.add(new Privilege("paymentunits.fixvalue", "更新请款项目修正价"));
         privileges.add(new Privilege("paymentunits.deny", "拒绝请款项目"));
+        //TODO to be add
+        privileges.add(new Privilege("paymentunits.postfromtransport", "通过运输添加请款项目"));
 
 
         // FeeTypes 控制器

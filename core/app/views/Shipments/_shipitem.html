@@ -33,9 +33,11 @@
     <th>运往仓库</th>
   #{/if}
     <th>采购计划</th>
-  #{if isExpress}
-    <th>记录运费</th>
-  #{/if}
+  #{power.ck 'paymentunits.postfromtransport'}
+      #{if isExpress}
+        <th>记录运费</th>
+      #{/if}
+  #{/power.ck}
   </tr>
 #{list items:items, as:'itm'}
   <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'>
@@ -106,11 +108,13 @@
       ${itm.unit.id}
       </a>
     </td>
-      #{if isExpress}
-        <td>
-          <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
-        </td>
-      #{/if}
+      #{power.ck 'paymentunits.postfromtransport'}
+          #{if isExpress}
+            <td>
+              <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
+            </td>
+          #{/if}
+      #{/power.ck}
   </tr>
 #{/list}
 #{if shipmentId}

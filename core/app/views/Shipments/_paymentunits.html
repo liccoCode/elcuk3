@@ -47,15 +47,16 @@
     </div>
   </div>
 
+#{power.ck 'paymentunits.postfromtransport'}
   <div class="row-fluid">
     <div class="span12">
       <form class="form-inline span6 add_payment" method="GET">
         <label>费用类型
-        #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
+            #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
         </label>
 
         <label>币种
-        #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+            #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
         </label>
 
         <label>单价
@@ -75,13 +76,16 @@
         </label>
 
         <button type="submit" class="btn btn-success" data-url='@{PaymentUnits.fromShipment(ship.id)}'>添加费用</button>
-        <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'>计算剩余关税</button>
+        <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'>
+          计算剩余关税
+        </button>
       </form>
       <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}'>
         计算预交关税
       </a>
     </div>
   </div>
+#{/power.ck}
 </div>
 
 <div class="modal hide fade" id="popModal"></div>

@@ -125,6 +125,7 @@ public class PaymentUnits extends Controller {
      * @param id
      * @param fee
      */
+    @Check("paymentunits.postfromtransport")
     public static void fromShipItem(Long id, PaymentUnit fee) {
         ShipItem itm = ShipItem.findById(id);
         itm.produceFee(fee, FeeType.transportShipping());
@@ -141,6 +142,7 @@ public class PaymentUnits extends Controller {
      * @param id
      * @param fee
      */
+    @Check("paymentunits.postfromtransport")
     public static void fromShipment(String id, PaymentUnit fee) {
         Shipment ship = Shipment.findById(id);
         ship.produceFee(fee);
@@ -154,6 +156,7 @@ public class PaymentUnits extends Controller {
      *
      * @param id
      */
+    @Check("paymentunits.postfromtransport")
     public static void applyDutyFromShipment(String id) {
         Shipment ship = Shipment.findById(id);
         ship.applyShipItemDuty();
@@ -170,6 +173,7 @@ public class PaymentUnits extends Controller {
      * @param id
      * @param fee
      */
+    @Check("paymentunits.postfromtransport")
     public static void calShipmentLeftDuty(String id, PaymentUnit fee) {
         Shipment ship = Shipment.findById(id);
         fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
