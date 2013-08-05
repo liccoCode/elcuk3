@@ -386,7 +386,7 @@ public class PaymentUnit extends Model {
      * 永久删除 PaymentUnit 的时候, 需要将其关联的 Records 一起删除.
      */
     public void clearRecords() {
-        for(String action : Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update")) {
+        for(String action : Arrays.asList("paymentunit.fixValue", "paymentunit.deny")) {
             ElcukRecord.delete("action=? AND fid=?", Messages.get(action), this.id.toString());
         }
     }
@@ -436,7 +436,9 @@ public class PaymentUnit extends Model {
         logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
 
         if(logs.size() > 0) {
-            new ERecordBuilder("paymentunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
+            new ERecordBuilder("paymentunit.update")
+                    .msgArgs(StringUtils.join(logs, ";\r\n"))
+                    .fid(this.shipment.id).save();
         }
         return this.save();
     }
