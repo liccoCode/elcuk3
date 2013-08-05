@@ -22,7 +22,7 @@ import java.util.List;
  * 每隔 10 分钟执行一次;
  * 周期:
  * - 轮询周期: 1mn
- * - Duration: 10mn
+ * - Duration: 2mn
  * </pre>
  * User: wyattpan
  * Date: 4/20/12
@@ -41,9 +41,10 @@ public class OrderInfoFetchJob extends Job {
         for(Orderr ord : orders) {
             try {
                 String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
-                OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html).save();
+                OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html);
+                ord.save();
             } catch(Exception e) {
-                Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
+                Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.S(e));
             }
         }
     }
