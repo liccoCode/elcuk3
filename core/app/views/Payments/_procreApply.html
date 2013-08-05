@@ -1,7 +1,7 @@
-#{form @Payments.paymentUnitApproval(payment.id)}
+#{form @PaymentUnits.approveFromDeliveryment(payment.id)}
 <div class="row-fluid">
   <div class="btn-toolbar">
-      #{power.ck 'payments.paymentunitapproval'}
+      #{power.ck 'paymentunits.approve'}
         <input type="submit" class="btn btn-info" value="批准"/>
       #{/power.ck}
       #{if payment.state == models.finance.Payment.S.LOCKED}

@@ -4,6 +4,7 @@ import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
 import models.finance.FeeType;
+import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
@@ -105,6 +106,26 @@ public class PaymentUnits extends Controller {
             }
         }.now());
         renderJSON(J.json(records));
+    }
+
+    @Check("paymentunits.approve")
+    public static void approveFromDeliveryment(Long id, List<Long> paymentUnitIds) {
+        checkAuthenticity();
+        Payment payment = Payment.findById(id);
+        if(paymentUnitIds == null || paymentUnitIds.size() <= 0)
+            Validation.addError("", "请选择需要批准的请款");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Payments.show(id);
+        }
+
+        payment.unitsApproval(paymentUnitIds);
+
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("批复成功");
+        Payments.show(id);
     }
 
     /**

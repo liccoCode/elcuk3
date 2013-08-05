@@ -60,7 +60,6 @@ GET     /payment/xe                                         Payments.xeRates
 POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
 DELETE  /payment/{id}                                       Payments.cancel
-POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
 POST    /payment/{id}/pay                                   Payments.payForIt
 POST    /payment/{id}/shouldPaid                            Payments.shouldPaidUpdate
 POST    /payment/{id}/lock                                  Payments.lockIt
@@ -92,6 +91,7 @@ DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 DELETE  /paymentunit/{id}/shipment                          PaymentUnits.destroyByShipment
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
 POST    /paymentunit/{id}/approve.json                      PaymentUnits.approveFromShipment
+POST    /paymentunit/payment/{id}/approval                  PaymentUnits.approveFromDeliveryment
 GET     /paymentunit/{id}.json                              PaymentUnits.show(format:'json')
 GET     /paymentunit/{id}/records.json                      PaymentUnits.records(format:'json')
 PUT     /paymentunit/{id}.json                              PaymentUnits.update(format:'json')

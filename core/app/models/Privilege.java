@@ -165,7 +165,8 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("payments.index", "付款单列表页面"));
         privileges.add(new Privilege("payments.show", "付款单查看"));
-        privileges.add(new Privilege("payments.paymentunitapproval", "付款单中请款项批准"));
+        //TODO delete
+//        privileges.add(new Privilege("payments.paymentunitapproval", "付款单中请款项批准"));
         privileges.add(new Privilege("payments.payforit", "付款单付款"));
         privileges.add(new Privilege("payments.shouldpaidupdate", "付款单应付金额更新"));
         privileges.add(new Privilege("payments.uploads", "付款单凭证上传"));
