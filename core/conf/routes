@@ -29,6 +29,7 @@ GET     /helper/                                            staticDir:public/ima
 GET     /apply/transports                                   Applys.transports
 GET     /apply/transport/{id}                               Applys.transport
 POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
+DELETE  /apply/transport/{id}/shipment                      Applys.departShipmentFromApply(format:'json')
 GET     /apply/procure/{id}                                 Applys.procure
 PUT     /apply/procure/{id}/confirm                         Applys.procureConfirm
 POST    /apply/transport                                    Applys.shipmentToApply
@@ -132,7 +133,6 @@ POST    /shipment/{id}/inbounding                           Shipments.inbounding
 DELETE  /shipment/{id}/state                                Shipments.revertState
 POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
-DELETE  /shipment/{id}/departApply                          Shipments.departFromApply(format:'json')
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index

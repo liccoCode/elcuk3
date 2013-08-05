@@ -415,12 +415,4 @@ public class Shipments extends Controller {
         renderJSON(dates);
     }
 
-
-    public static void departFromApply(String id) {
-        Shipment ship = Shipment.findById(id);
-        ship.departFromApply();
-        if(Validation.hasErrors())
-            renderJSON(Webs.VJson(Validation.errors()));
-        renderJSON(new Ret(true, "运输单剥离成功"));
-    }
 }

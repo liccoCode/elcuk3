@@ -154,6 +154,9 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("applys.index", "请款单列表页面"));
         privileges.add(new Privilege("applys.procure", "采购请款单页面"));
+        //TODO to be add
+        privileges.add(new Privilege("applys.shipmenttoapply", "创建运输请款单"));
+        privileges.add(new Privilege("applys.handlshipment", "运输单在请款单中添加删除"));
 
         privileges.add(new Privilege("paymenttargets.index", "支付方式列表页面"));
         privileges.add(new Privilege("paymenttargets.save", "创建支付方式"));
@@ -170,9 +173,6 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
 
-        //TODO to be add
-        privileges.add(new Privilege("applys.shipmenttoapply", "创建运输请款单"));
-
         // ProcureUnits
         privileges.add(new Privilege("procureunits.billingprepay", "采购计划预付款申请"));
         privileges.add(new Privilege("procureunits.billingtailpay", "采购计划尾款申请"));
@@ -182,7 +182,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("paymentunits.fixvalue", "更新请款项目修正价"));
         privileges.add(new Privilege("paymentunits.deny", "拒绝请款项目"));
         //TODO to be add
-        privileges.add(new Privilege("paymentunits.postfromtransport", "通过运输添加请款项目"));
+        privileges.add(new Privilege("paymentunits.postfromtransport", "添加运输相关请款项目"));
 
 
         // FeeTypes 控制器

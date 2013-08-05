@@ -2,7 +2,7 @@ $ ->
   $('#shipments').on('click', '.delete', (e) ->
     e.stopPropagation()
     id = $(@).data('id')
-    $.ajax("/shipment/#{id}/departApply", {type: 'DELETE', dataType: 'json'})
+    $.ajax("/apply/transport/#{id}/shipment", {type: 'DELETE', dataType: 'json'})
       .done((r) ->
         if r.flag == true
           noty({text: "##{id} #{r.message}", type: 'success', timeout: 3000})

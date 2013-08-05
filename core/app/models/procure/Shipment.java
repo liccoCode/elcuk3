@@ -973,6 +973,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .msgArgs(this.id, this.apply.serialNumber)
                 .fid(this.apply.id).save();
         this.apply = null;
+        for(PaymentUnit fee : this.fees) {
+            fee.delete();
+        }
         this.save();
     }
 

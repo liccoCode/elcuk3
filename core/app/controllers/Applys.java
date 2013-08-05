@@ -6,6 +6,7 @@ import models.finance.FeeType;
 import models.finance.ProcureApply;
 import models.finance.TransportApply;
 import models.procure.Shipment;
+import models.view.Ret;
 import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -56,6 +57,13 @@ public class Applys extends Controller {
         render();
     }
 
+    /**
+     * 想运输请款单中添加运输单
+     *
+     * @param id
+     * @param shipmentId
+     */
+    @Check("applys.handlshipment")
     public static void transportAddShipment(Long id, String shipmentId) {
         TransportApply apply = TransportApply.findById(id);
         Shipment ship = Shipment.findById(shipmentId);
@@ -63,6 +71,20 @@ public class Applys extends Controller {
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         transport(id);
+    }
+
+    /**
+     * 将运输单从请款单中剥离
+     *
+     * @param id
+     */
+    @Check("applys.handlshipment")
+    public static void departShipmentFromApply(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.departFromApply();
+        if(Validation.hasErrors())
+            renderJSON(Webs.VJson(Validation.errors()));
+        renderJSON(new Ret(true, "运输单剥离成功"));
     }
 
     /**

@@ -8,12 +8,14 @@
 
 <div class="row-fluid">
   <div class="span4">
+  #{power.ck 'applys.handlshipment'}
     <form action='@{Applys.transportAddShipment(apply.id)}' class="form-inline" id='addShipment' method="POST">
       <label>运输单 ID
         <input type="text" required="" name='shipmentId' class="input-small">
       </label>
       <button class="btn btn-success preview" data-disable-with='添加中...'>添加运输单</button>
     </form>
+  #{/power.ck}
   </div>
   <div class="span4">
   ${apply.serialNumber}
@@ -54,9 +56,11 @@
         <div class="span5">
           <dl class="dl-horizontal">
             <dt>
-              <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
-                从当前请款单中剔除
-              </button>
+                #{power.ck 'applys.handlshipment'}
+                  <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
+                    从当前请款单中剔除
+                  </button>
+                #{/power.ck}
             </dt>
             <dd>&nbsp;</dd>
           </dl>
