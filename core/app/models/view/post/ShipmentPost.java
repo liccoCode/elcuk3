@@ -4,7 +4,9 @@ import helper.Dates;
 import models.procure.Shipment;
 import models.procure.iExpress;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -22,12 +24,15 @@ import java.util.regex.Pattern;
 public class ShipmentPost extends Post {
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d{2})$");
+    private static Pattern SHIPITEMS_NUM_PATTERN = Pattern.compile("^\\+(\\d+)$");
 
     public ShipmentPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(7).toDate();
         this.to = now.plusDays(7).toDate();
-        this.state = "NOCANCEL";
+        this.states = Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM, Shipment.S.SHIPPING,
+                Shipment.S.CLEARANCE, Shipment.S.PACKAGE, Shipment.S.BOOKED, Shipment.S.DELIVERYING,
+                Shipment.S.RECEIPTD, Shipment.S.RECEIVING, Shipment.S.DONE);
     }
 
     static {
@@ -44,7 +49,7 @@ public class ShipmentPost extends Post {
 
     public Shipment.T type;
 
-    public String state;
+    public List<Shipment.S> states = new ArrayList<Shipment.S>();
 
     public iExpress iExpress;
 
@@ -81,14 +86,12 @@ public class ShipmentPost extends Post {
             params.add(this.type);
         }
 
-        if(StringUtils.isNotBlank(this.state)) {
-            if(StringUtils.equals(this.state, "NOCANCEL")) {
-                sbd.append(" AND s.state!=?");
-                params.add(Shipment.S.CANCEL);
-            } else {
-                sbd.append(" AND s.state=?");
-                params.add(Shipment.S.valueOf(this.state));
+        if(this.states != null && this.states.size() > 0) {
+            List<String> states = new ArrayList<String>();
+            for(Shipment.S state : this.states) {
+                states.add(state.name());
             }
+            sbd.append(" AND ").append(SqlSelect.whereIn("s.state", states));
         }
 
         if(this.iExpress != null) {
@@ -108,12 +111,18 @@ public class ShipmentPost extends Post {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sbd.append(" AND (")
-                    .append("s.trackNo LIKE ?")
-                    .append(" OR it.unit.fba.shipmentId LIKE ?")
-                    .append(" OR u.sid LIKE ?")
-                    .append(")");
-            for(int i = 0; i < 3; i++) params.add(word);
+            Matcher matcher = SHIPITEMS_NUM_PATTERN.matcher(this.search);
+            if(matcher.matches()) {
+                int shipItemSize = NumberUtils.toInt(matcher.group(1), 1);
+                sbd.append(" AND SIZE(s.items)>").append(shipItemSize).append(" ");
+            } else {
+                sbd.append(" AND (")
+                        .append("s.trackNo LIKE ?")
+                        .append(" OR it.unit.fba.shipmentId LIKE ?")
+                        .append(" OR u.sid LIKE ?")
+                        .append(")");
+                for(int i = 0; i < 3; i++) params.add(word);
+            }
         }
 
         // 因为需要使用 deliverymentId() 方法, 不能够在 param 的地方添加 fba.centerId 路径

@@ -87,10 +87,10 @@ public class TransportApply extends Apply {
     /**
      * 创建一个新的运输请款单
      *
-     * @param shipmentId
+     * @param shipmentIds
      */
-    public static TransportApply buildTransportApply(List<String> shipmentId) {
-        F.T2<List<Shipment>, Set<Cooperator>> shipCoperPair = shipmentApplyCheck(shipmentId);
+    public static TransportApply buildTransportApply(List<String> shipmentIds) {
+        F.T2<List<Shipment>, Set<Cooperator>> shipCoperPair = shipmentApplyCheck(shipmentIds);
 
         if(Validation.hasErrors()) return null;
         TransportApply apply = new TransportApply();
@@ -98,7 +98,7 @@ public class TransportApply extends Apply {
         apply.createdAt = apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();
-        apply.appendShipment(shipmentId);
+        apply.appendShipment(shipmentIds);
         return apply;
     }
 

@@ -51,7 +51,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         Account account = FactoryBoy.build(Account.class, "de");
         String orderId = "403-2580115-3776367";
         String html = IO.readContentAsString(Play.getFile("test/html/jobs/promise/" + orderId + ".html"));
-        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, new ArrayList<Orderr>()));
+        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, 8));
 
         doReturn(html).when(promise).transactionView(anyString());
         List<String> urls = promise.transactionURLs(orderId);
@@ -65,7 +65,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         String orderId = "304-9007836-6625937";
         String url = "http://baidu.com?ie=UTF8&orderId=" + orderId + "&view=search";
         String html = IO.readContentAsString(Play.getFile("test/html/jobs/promise/" + orderId + "_fee.html"));
-        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, new ArrayList<Orderr>()));
+        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, 8));
 
         List<SaleFee> fees = promise.productCharges(Jsoup.parse(html), url);
         assertThat(fees.size(), is(2));
@@ -85,7 +85,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         String orderId = "403-2580115-3776367";
         String url = "http://baidu.com?ie=UTF8&orderId=" + orderId + "&view=search";
         String html = IO.readContentAsString(Play.getFile("test/html/jobs/promise/" + orderId + "_fee.html"));
-        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, new ArrayList<Orderr>()));
+        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, 8));
 
         List<SaleFee> fees = promise.otherFee(Jsoup.parse(html), url);
         assertThat(fees.size(), is(1));
@@ -105,7 +105,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         String orderId = "304-9007836-6625937";
         String url = "http://baidu.com?ie=UTF8&orderId=" + orderId + "&view=search";
         String html = IO.readContentAsString(Play.getFile("test/html/jobs/promise/" + orderId + "_fee.html"));
-        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, new ArrayList<Orderr>()));
+        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, 8));
 
         List<SaleFee> fees = promise.amazonFee(Jsoup.parse(html), url);
         assertThat(fees.size(), is(3));
@@ -134,7 +134,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         account.loginAmazonSellerCenter();
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);
-        FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_FR, orders);
+        FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_FR, 8);
         F.Promise<List<SaleFee>> feesPromise = promise.now();
         List<SaleFee> fees = feesPromise.get(3, TimeUnit.MINUTES);
         assertThat(fees.size(), is(5));

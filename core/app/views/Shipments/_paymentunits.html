@@ -8,7 +8,7 @@
           <th class="span2">
             <abbr rel='tooltip' title="黑色: 申请状态; 蓝色: 批准状态; 红色: 驳回状态; 绿色: 支付完成状态">费用类型</abbr>
           </th>
-          <th class="span2">币种</th>
+          <th class="span1">币种</th>
           <th>单价</th>
           <th>数量</th>
           <th>平均价</th>
@@ -16,7 +16,7 @@
           <th>备注</th>
           <th>申请人</th>
           <th class="span3">申请时间</th>
-          <th class="span2"></th>
+          <th class="span3"></th>
         </tr>
       #{list items:ship.allFees(), as:'fee'}
         <tr id='fee_${fee.id}'>
@@ -36,9 +36,18 @@
           <td>${fee.payee.username}</td>
           <td>${fee.createdAt}</td>
           <td>
-            <button class="btn btn-mini btn-info">编辑</button>
-            <button class="btn btn-mini btn-warning">删除</button>
-            <button class="btn btn-mini btn-success">批准</button>
+              #{power.ck 'paymentunits.fixunitvalue'}
+                <button class="btn btn-mini btn-info">编辑</button>
+              #{/power.ck}
+              #{power.ck 'paymentunits.destroy'}
+                <button class="btn btn-mini btn-warning">删除</button>
+              #{/power.ck}
+              #{power.ck 'paymentunits.approve'}
+                <button class="btn btn-mini btn-success">批准</button>
+              #{/power.ck}
+              #{power.ck 'paymentunits.deny'}
+                <button class="btn btn-mini btn-danger">驳回</button>
+              #{/power.ck}
           </td>
         </tr>
       #{/list}
@@ -46,15 +55,16 @@
     </div>
   </div>
 
+#{power.ck 'paymentunits.postfromtransport'}
   <div class="row-fluid">
     <div class="span12">
       <form class="form-inline span6 add_payment" method="GET">
         <label>费用类型
-        #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
+            #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
         </label>
 
         <label>币种
-        #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+            #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
         </label>
 
         <label>单价
@@ -73,14 +83,17 @@
           <textarea name="fee.memo" class="input"></textarea>
         </label>
 
-        <button type="submit" class="btn btn-success" data-url='@{Shipments.billingOne(ship.id)}'>添加费用</button>
-        <button type="submit" class="btn btn-inverse" data-url='@{Shipments.calDuty(ship.id)}'>计算剩余关税</button>
+        <button type="submit" class="btn btn-success" data-url='@{PaymentUnits.fromShipment(ship.id)}'>添加费用</button>
+        <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'>
+          计算剩余关税
+        </button>
       </form>
-      <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{Shipments.applyDuty(ship.id)}'>
+      <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}'>
         计算预交关税
       </a>
     </div>
   </div>
+#{/power.ck}
 </div>
 
 <div class="modal hide fade" id="popModal"></div>
@@ -122,9 +135,18 @@
     <td><%= fee.payee.username %></td>
     <td><%= fee.createdAt %></td>
     <td>
+    #{power.ck 'paymentunits.fixunitvalue'}
       <button class="btn btn-mini btn-info">编辑</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.destroy'}
       <button class="btn btn-mini btn-warning">删除</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.approve'}
       <button class="btn btn-mini btn-success">批准</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.deny'}
+      <button class="btn btn-mini btn-danger">驳回</button>
+    #{/power.ck}
     </td>
   </tr>
 </script>
@@ -150,7 +172,6 @@
       <textarea name="fee.memo"><%= fee.memo %></textarea>
     </td>
     <td><%= fee.payee.username %></td>
-    g
     <td><%= fee.createdAt %></td>
     <td>
       <button class="btn btn-mini btn-success">更新</button>
@@ -159,7 +180,26 @@
   </tr>
 </script>
 
+<script type="text/template" id="form-deny-paymentunit-template">
+  <form action="<%= form.url %>" method="POST" data-feeid="<%= form.id %>">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3><span class="text-info"><%= form.title %></span></h3>
+    </div>
+    <div class="modal-body">
+      <div class="row-fluid">
+        <label for="model_reason">原因</label>
+        <textarea rows="3" class="span12" name="reason"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <input type="submit" class="btn btn-danger deny-paymentunit" data-disable-with='提交中...' value="驳回">
+    </div>
+  </form>
+</script>
+
 <script type="text/template" id="shipItem-template">
+  <label>#: <%= itm.id %></label>
   <label>SKU: <%= itm.unit.sku %></label>
   <label>FBA: <%= itm.unit.fba.shipmentId %></label>
   <label>Qty: <%= itm.qty %></label>

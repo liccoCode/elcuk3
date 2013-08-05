@@ -34,17 +34,11 @@ public class Tickets extends Controller {
     public static void ticketState() {
         Ticket.T type = ticketType();
         renderArgs.put("new_count", Ticket.count("state=? and type=?", TicketState.NEW, type));
-        renderArgs.put("twice_count",
-                Ticket.count("state=? and type=?", TicketState.TWO_MAIL, type));
-        renderArgs.put("mailed_count",
-                Ticket.count("state=? and type=?", TicketState.MAILED, type));
-        renderArgs.put("new_mail_count",
-                Ticket.count("state=? and type=?", TicketState.NEW_MSG, type
-                ));
-        renderArgs.put("no_resp_count",
-                Ticket.count("state=? and type=?", TicketState.NO_RESP, type));
-        renderArgs.put("pre_close_count",
-                Ticket.count("state=? and type=?", TicketState.PRE_CLOSE, type));
+        renderArgs.put("twice_count", Ticket.count("state=? and type=?", TicketState.TWO_MAIL, type));
+        renderArgs.put("mailed_count", Ticket.count("state=? and type=?", TicketState.MAILED, type));
+        renderArgs.put("new_mail_count", Ticket.count("state=? and type=?", TicketState.NEW_MSG, type));
+        renderArgs.put("no_resp_count", Ticket.count("state=? and type=?", TicketState.NO_RESP, type));
+        renderArgs.put("pre_close_count", Ticket.count("state=? and type=?", TicketState.PRE_CLOSE, type));
         renderArgs.put("userIds", User.userIds());
     }
 

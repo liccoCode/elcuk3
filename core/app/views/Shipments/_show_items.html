@@ -4,7 +4,7 @@
 
   <div class="row-fluid">
     <div class="span12">
-    #{render './_shipitem.html', items: ship.items, itmRecord: true/}
+    #{render './_shipitem.html', items: ship.items, itmRecord: true, isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
     </div>
   </div>
 #{power.ck 'shipitems.adjust'}
