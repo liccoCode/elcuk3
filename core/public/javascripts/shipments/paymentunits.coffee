@@ -175,7 +175,7 @@ $ ->
     $('#popModal')
       .html(_.template($('#form-deny-paymentunit-template').html(), {form: formParam}))
       .modal('show')
-  ).on('mouseenter', 'td:has(.icon-search)',(e) ->
+  ).on('mouseenter', 'td:has(.icon-search)', (e) ->
     $td = $(@)
     if $td.data('shipitemid')
       if $td.data('shipItem')

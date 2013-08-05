@@ -36,10 +36,18 @@
           <td>${fee.payee.username}</td>
           <td>${fee.createdAt}</td>
           <td>
-            <button class="btn btn-mini btn-info">编辑</button>
-            <button class="btn btn-mini btn-warning">删除</button>
-            <button class="btn btn-mini btn-success">批准</button>
-            <button class="btn btn-mini btn-danger">驳回</button>
+              #{power.ck 'paymentunits.fixunitvalue'}
+                <button class="btn btn-mini btn-info">编辑</button>
+              #{/power.ck}
+              #{power.ck 'paymentunits.destroy'}
+                <button class="btn btn-mini btn-warning">删除</button>
+              #{/power.ck}
+              #{power.ck 'paymentunits.approve'}
+                <button class="btn btn-mini btn-success">批准</button>
+              #{/power.ck}
+              #{power.ck 'paymentunits.deny'}
+                <button class="btn btn-mini btn-danger">驳回</button>
+              #{/power.ck}
           </td>
         </tr>
       #{/list}
@@ -127,10 +135,18 @@
     <td><%= fee.payee.username %></td>
     <td><%= fee.createdAt %></td>
     <td>
+    #{power.ck 'paymentunits.fixunitvalue'}
       <button class="btn btn-mini btn-info">编辑</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.destroy'}
       <button class="btn btn-mini btn-warning">删除</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.approve'}
       <button class="btn btn-mini btn-success">批准</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.deny'}
       <button class="btn btn-mini btn-danger">驳回</button>
+    #{/power.ck}
     </td>
   </tr>
 </script>

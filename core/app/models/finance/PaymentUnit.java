@@ -423,17 +423,16 @@ public class PaymentUnit extends Model {
     }
 
     /**
-     * 更新 Paymentunit, 限制允许更新的值
+     * 更新 Paymentunit 中的单价与数量
      *
      * @param fee
      */
-    public PaymentUnit update(PaymentUnit fee) {
+    public PaymentUnit fixUnitValue(PaymentUnit fee) {
         fee.amount = fee.unitPrice * fee.unitQty;
         List<String> logs = new ArrayList<String>();
         logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
-        logs.addAll(Reflects.logFieldFade(this, "currency", fee.currency));
         logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
 
         if(logs.size() > 0) {

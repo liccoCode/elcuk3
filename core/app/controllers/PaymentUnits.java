@@ -85,9 +85,10 @@ public class PaymentUnits extends Controller {
         render(fee);
     }
 
+    @Check("paymentunits.fixunitvalue")
     public static void update(Long id, PaymentUnit fee) {
         PaymentUnit feeUnit = PaymentUnit.findById(id);
-        feeUnit.update(fee);
+        feeUnit.fixUnitValue(fee);
         if(Validation.hasErrors()) {
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
         }
@@ -111,7 +112,8 @@ public class PaymentUnits extends Controller {
      *
      * @param id
      */
-    public static void approve(Long id) {
+    @Check("paymentunits.approve")
+    public static void approveFromShipment(Long id) {
         PaymentUnit fee = PaymentUnit.findById(id);
         fee.transportApprove();
         if(Validation.hasErrors())
