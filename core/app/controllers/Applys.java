@@ -6,6 +6,7 @@ import models.finance.FeeType;
 import models.finance.ProcureApply;
 import models.finance.TransportApply;
 import models.procure.Shipment;
+import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -62,5 +63,33 @@ public class Applys extends Controller {
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         transport(id);
+    }
+
+    /**
+     * 通过运输单 创建 运输请款单 资源
+     *
+     * @param shipmentId
+     * @param p
+     */
+    @Check("applys.shipmenttoapply")
+    public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
+        if(shipmentId == null || shipmentId.size() == 0)
+            Validation.addError("", "请选择需要创建请款单的运输单");
+
+        TransportApply apply = null;
+        if(!Validation.hasErrors())
+            apply = TransportApply.buildTransportApply(shipmentId);
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Shipments.index(p);
+        } else {
+            if(apply != null) {
+                Applys.transport(apply.id);
+            } else {
+                flash.error("请款单创建失败.");
+                Shipments.index(p);
+            }
+        }
     }
 }

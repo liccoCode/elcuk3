@@ -108,7 +108,7 @@
     </td>
       #{if isExpress}
         <td>
-          <a class="btn btn-mini" data-url='@{ShipItems.billingOne(itm.id)}'>L</a>
+          <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
         </td>
       #{/if}
   </tr>

@@ -3,7 +3,10 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.view.Ret;
 import play.data.validation.Validation;
 import play.jobs.Job;
@@ -116,4 +119,62 @@ public class PaymentUnits extends Controller {
         render("PaymentUnits/show.json", fee);
     }
 
+    /**
+     * 从运输项目创建请款项目资源
+     *
+     * @param id
+     * @param fee
+     */
+    public static void fromShipItem(Long id, PaymentUnit fee) {
+        ShipItem itm = ShipItem.findById(id);
+        itm.produceFee(fee, FeeType.transportShipping());
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("运输项目 #%s 费用添加成功.", itm.id);
+        Shipments.show(itm.shipment.id);
+    }
+
+    /**
+     * 从运输单创建请款项目资源
+     *
+     * @param id
+     * @param fee
+     */
+    public static void fromShipment(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        ship.produceFee(fee);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
+
+    /**
+     * 为当前运输单的所有项目申请预付关税
+     *
+     * @param id
+     */
+    public static void applyDutyFromShipment(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.applyShipItemDuty();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("为运输单 %s 成功申请预付关税", id);
+        Shipments.show(id);
+    }
+
+    /**
+     * 为运输单计算关税, 创建请款项资源
+     *
+     * @param id
+     * @param fee
+     */
+    public static void calShipmentLeftDuty(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
 }

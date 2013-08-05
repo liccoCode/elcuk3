@@ -81,10 +81,12 @@
     <div class="span12">
     #{render 'Shipments/_shipment_list.html', shipments:shipments/}
     </div>
+  #{power.ck 'applys.shipmenttoapply'}
     <div class="btn-toolbar">
-      <button class="btn btn-success" data-url='@{Shipments.shipmentToApply()}' data-disable-with='创建请款单中...'>
+      <button class="btn btn-success" data-url='@{Applys.shipmentToApply()}' data-disable-with='创建请款单中...'>
         创建运输请款单
       </button>
     </div>
+  #{/power.ck}
   </div>
 </form>

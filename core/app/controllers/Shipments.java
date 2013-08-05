@@ -6,8 +6,6 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.finance.FeeType;
-import models.finance.PaymentUnit;
-import models.finance.TransportApply;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -417,57 +415,6 @@ public class Shipments extends Controller {
         renderJSON(dates);
     }
 
-    public static void billingOne(String id, PaymentUnit fee) {
-        Shipment ship = Shipment.findById(id);
-        ship.produceFee(fee);
-        if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        render("PaymentUnits/show.json", fee);
-    }
-
-    /**
-     * 为当前运输单的所有项目申请预付关税
-     *
-     * @param id
-     */
-    public static void applyDuty(String id) {
-        Shipment ship = Shipment.findById(id);
-        ship.applyShipItemDuty();
-        if(Validation.hasErrors())
-            Webs.errorToFlash(flash);
-        else
-            flash.success("为运输单 %s 成功申请预付关税", id);
-        Shipments.show(id);
-    }
-
-    public static void calDuty(String id, PaymentUnit fee) {
-        Shipment ship = Shipment.findById(id);
-        fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
-        if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        render("PaymentUnits/show.json", fee);
-    }
-
-    public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
-        if(shipmentId == null || shipmentId.size() == 0)
-            Validation.addError("", "请选择需要创建请款单的运输单");
-
-        TransportApply apply = null;
-        if(!Validation.hasErrors())
-            apply = TransportApply.buildTransportApply(shipmentId);
-
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            index(p);
-        } else {
-            if(apply != null) {
-                Applys.transport(apply.id);
-            } else {
-                flash.error("请款单创建失败.");
-                index(p);
-            }
-        }
-    }
 
     public static void departFromApply(String id) {
         Shipment ship = Shipment.findById(id);

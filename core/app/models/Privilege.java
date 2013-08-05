@@ -170,6 +170,9 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
 
+        //TODO to be add
+        privileges.add(new Privilege("applys.shipmenttoapply", "创建运输请款单"));
+
         // ProcureUnits
         privileges.add(new Privilege("procureunits.billingprepay", "采购计划预付款申请"));
         privileges.add(new Privilege("procureunits.billingtailpay", "采购计划尾款申请"));

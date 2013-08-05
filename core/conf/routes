@@ -31,6 +31,7 @@ GET     /apply/transport/{id}                               Applys.transport
 POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
 GET     /apply/procure/{id}                                 Applys.procure
 PUT     /apply/procure/{id}/confirm                         Applys.procureConfirm
+POST    /apply/transport                                    Applys.shipmentToApply
 
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
@@ -82,6 +83,10 @@ GET     /fba/{id}/outlabel                                  FBAs.boxLabel
 GET     /code128/{shipmentId}                               Login.code128
 
 # PaymentUnits
+POST    /paymentunit/shipitem/{id}                          PaymentUnits.fromShipItem
+POST    /paymentunit/shipment/{id}                          PaymentUnits.fromShipment(format:'json')
+POST    /paymentunit/shipment/{id}/applyDuty                PaymentUnits.applyDutyFromShipment
+POST    /paymentunit/shipment/{id}/calDuty                  PaymentUnits.calShipmentLeftDuty(format:'json')
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 DELETE  /paymentunit/{id}/shipment                          PaymentUnits.destroyByShipment
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
@@ -127,10 +132,6 @@ POST    /shipment/{id}/inbounding                           Shipments.inbounding
 DELETE  /shipment/{id}/state                                Shipments.revertState
 POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
-POST    /shipment/{id}/billing.json                         Shipments.billingOne
-POST    /shipment/{id}/applyDuty                            Shipments.applyDuty
-POST    /shipment/{id}/calDuty.json                         Shipments.calDuty
-POST    /shipment/apply                                     Shipments.shipmentToApply
 DELETE  /shipment/{id}/departApply                          Shipments.departFromApply(format:'json')
 
 # ShipItems
@@ -139,7 +140,6 @@ GET     /shipitem/{id}.json                                 ShipItems.showJson(f
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
-POST    /shipitem/{id}/billing                              ShipItems.billingOne
 
 # Elcuk
 GET     /elcuks                                             Elcuk.index
