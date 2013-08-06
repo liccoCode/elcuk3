@@ -53,4 +53,19 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.isSaleAcc = true;
         return acc;
     }
+
+    @Factory(name = "us")
+    public Account us() {
+        Account acc = new Account();
+        acc.type = M.AMAZON_US;
+        acc.id = 131l;
+        acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
+        acc.merchantId = "A22H6OV6Q7XBYK";
+        acc.username = "wyatt@easyacceu.com";
+        acc.password = "pw5165688104";
+        acc.closeable = false;
+        acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.isSaleAcc = true;
+        return acc;
+    }
 }

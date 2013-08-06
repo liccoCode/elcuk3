@@ -386,7 +386,7 @@ public class PaymentUnit extends Model {
      * 永久删除 PaymentUnit 的时候, 需要将其关联的 Records 一起删除.
      */
     public void clearRecords() {
-        for(String action : Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update")) {
+        for(String action : Arrays.asList("paymentunit.fixValue", "paymentunit.deny")) {
             ElcukRecord.delete("action=? AND fid=?", Messages.get(action), this.id.toString());
         }
     }
@@ -423,21 +423,22 @@ public class PaymentUnit extends Model {
     }
 
     /**
-     * 更新 Paymentunit, 限制允许更新的值
+     * 更新 Paymentunit 中的单价与数量
      *
      * @param fee
      */
-    public PaymentUnit update(PaymentUnit fee) {
+    public PaymentUnit fixUnitValue(PaymentUnit fee) {
         fee.amount = fee.unitPrice * fee.unitQty;
         List<String> logs = new ArrayList<String>();
         logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
-        logs.addAll(Reflects.logFieldFade(this, "currency", fee.currency));
         logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
 
         if(logs.size() > 0) {
-            new ERecordBuilder("paymentunit.update").msgArgs(StringUtils.join(logs, "<br>")).fid(this.id).save();
+            new ERecordBuilder("paymentunit.update")
+                    .msgArgs(StringUtils.join(logs, ";\r\n"))
+                    .fid(this.shipment.id).save();
         }
         return this.save();
     }

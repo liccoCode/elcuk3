@@ -855,8 +855,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.shipment = this;
         fee.payee = User.current();
         fee.amount = fee.unitQty * fee.unitPrice;
-        // TODO 请款日志
         fee.save();
+        new ERecordBuilder("paymentunit.applynew")
+                .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
+                .fid(fee.shipment.id)
+                .save();
     }
 
     /**
@@ -922,6 +925,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         leftDuty.shipment = this;
         leftDuty.state = PaymentUnit.S.APPLY;
         leftDuty.memo = StringUtils.join(lines, ", ");
+        new ERecordBuilder("paymentunit.applynew")
+                .msgArgs(leftDuty.currency, leftDuty.amount(), leftDuty.feeType.nickName)
+                .fid(leftDuty.shipment.id)
+                .save();
         return leftDuty.save();
     }
 
@@ -973,6 +980,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 .msgArgs(this.id, this.apply.serialNumber)
                 .fid(this.apply.id).save();
         this.apply = null;
+        for(PaymentUnit fee : this.fees) {
+            fee.delete();
+        }
         this.save();
     }
 

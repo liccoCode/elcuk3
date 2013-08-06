@@ -33,9 +33,6 @@
       <td>${fee.amount()}</td>
       <td>
         <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
-        <button url='@{PaymentUnits.deny(payment.id, fee.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
-          驳回
-        </button>
       </td>
       <td>
         <a href="@{Applys.transport(payment.tApply.id)}#${fee.id}" target="_blank">

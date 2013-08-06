@@ -9,10 +9,31 @@ $ ->
     else if state == 'PAID'
       'success'
 
-  $(document).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']", ->
+  $(document).on('keyup change', "[name='fee.unitPrice'],[name='fee.unitQty']",->
     $context = $(@).parents('div[class!=controls][class!=control-group]:eq(0)')
     $context.find('.amount').val($context.find("[name='fee.unitPrice']").val() * $context.find("[name='fee.unitQty']").val())
+  ).on('click', 'form .deny-paymentunit', (e) ->
+    e.preventDefault()
+    $form = $(@).parents('form')
+
+    $('#popModal').modal('hide')
+    LoadMask.mask()
+    $.ajax($form.attr('action'), {type: 'POST', dataType: 'json', data: $form.serialize()})
+      .done((r) ->
+        if r.flag is true
+          $("#fee_#{$form.data('feeid')}").find('td:eq(1) span').attr('class', 'label label-important')
+          noty({text: r.message, type: 'success', timeout: 3000})
+        else
+          text = _.map(r,(err)->
+            err.message
+          ).join('<br>')
+          noty({text: text, type: 'error'})
+
+        LoadMask.unmask()
+        false
+      )
   )
+
   $('#popModal').on('click', '.btn:contains(删除)', (e) ->
     e.preventDefault()
     $btn = $(@)
@@ -142,21 +163,32 @@ $ ->
         LoadMask.unmask()
       )
     false
-  ).on('mouseenter', 'td:has(.icon-search)',(e) ->
+  ).on('click', 'button.btn-danger:contains(驳回)',(e) ->
+    $btn = $(@)
+    $tr = $btn.parents('tr')
+    id = $tr.find('td:eq(0)').text().trim()
+    formParam =
+      url: "/paymentunit/#{id}/deny"
+      title: "驳回 #{$btn.parents('tr').find('td:eq(1)').text()} 请款项目"
+      id: id
+
+    $('#popModal')
+      .html(_.template($('#form-deny-paymentunit-template').html(), {form: formParam}))
+      .modal('show')
+  ).on('mouseenter', 'td:has(.icon-search)', (e) ->
     $td = $(@)
     if $td.data('shipitemid')
       if $td.data('shipItem')
         text = _.template($('#shipItem-template').html(), {itm: $td.data('shipItem')})
         $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
       else
+        LoadMask.mask()
         $.ajax("/shipitem/#{$td.data('shipitemid')}.json", {dataType: 'json', type: 'GET'})
           .done((r) ->
             $td.data('shipItem', r)
             text = _.template($('#shipItem-template').html(), {itm: r})
             $td.popover({content: text, container: 'body', trigger: 'click', placement: 'top', html: true})
+            LoadMask.unmask()
           )
-    false
-  ).on('mouseleave', 'td:has(.icon-search)', (e) ->
-#    $(@).popover('hide');
     false
   )

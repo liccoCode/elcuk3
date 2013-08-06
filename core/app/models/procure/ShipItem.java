@@ -299,6 +299,11 @@ public class ShipItem extends GenericModel {
         fee.payee = User.current();
         fee.amount = fee.unitPrice * fee.unitQty;
         fee.save();
+
+        new ERecordBuilder("paymentunit.applynew")
+                .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
+                .fid(fee.shipment.id)
+                .save();
     }
 
 }

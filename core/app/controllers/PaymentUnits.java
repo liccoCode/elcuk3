@@ -3,7 +3,11 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.finance.FeeType;
+import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.procure.ShipItem;
+import models.procure.Shipment;
 import models.view.Ret;
 import play.data.validation.Validation;
 import play.jobs.Job;
@@ -60,14 +64,21 @@ public class PaymentUnits extends Controller {
     }
 
     @Check("paymentunits.deny")
-    public static void deny(Long paymentId, Long id, String reason) {
+    public static void deny(Long id, String reason) {
         PaymentUnit paymentUnit = PaymentUnit.findById(id);
         paymentUnit.deny(reason);
-        if(Validation.hasErrors())
-            Webs.errorToFlash(flash);
-        else
-            flash.success("成功驳回");
-        Payments.show(paymentId);
+        if(request.isAjax()) {
+            if(Validation.hasErrors())
+                renderJSON(Webs.VJson(Validation.errors()));
+            else
+                renderJSON(new Ret(true, "成功驳回"));
+        } else {
+            if(Validation.hasErrors())
+                Webs.errorToFlash(flash);
+            else
+                flash.success("成功驳回");
+            Payments.show(paymentUnit.payment.id);
+        }
     }
 
     public static void show(Long id) {
@@ -75,9 +86,10 @@ public class PaymentUnits extends Controller {
         render(fee);
     }
 
+    @Check("paymentunits.fixunitvalue")
     public static void update(Long id, PaymentUnit fee) {
         PaymentUnit feeUnit = PaymentUnit.findById(id);
-        feeUnit.update(fee);
+        feeUnit.fixUnitValue(fee);
         if(Validation.hasErrors()) {
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
         }
@@ -96,12 +108,33 @@ public class PaymentUnits extends Controller {
         renderJSON(J.json(records));
     }
 
+    @Check("paymentunits.approve")
+    public static void approveFromDeliveryment(Long id, List<Long> paymentUnitIds) {
+        checkAuthenticity();
+        Payment payment = Payment.findById(id);
+        if(paymentUnitIds == null || paymentUnitIds.size() <= 0)
+            Validation.addError("", "请选择需要批准的请款");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Payments.show(id);
+        }
+
+        payment.unitsApproval(paymentUnitIds);
+
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("批复成功");
+        Payments.show(id);
+    }
+
     /**
      * 批准运输单请款
      *
      * @param id
      */
-    public static void approve(Long id) {
+    @Check("paymentunits.approve")
+    public static void approveFromShipment(Long id) {
         PaymentUnit fee = PaymentUnit.findById(id);
         fee.transportApprove();
         if(Validation.hasErrors())
@@ -109,4 +142,66 @@ public class PaymentUnits extends Controller {
         render("PaymentUnits/show.json", fee);
     }
 
+    /**
+     * 从运输项目创建请款项目资源
+     *
+     * @param id
+     * @param fee
+     */
+    @Check("paymentunits.postfromtransport")
+    public static void fromShipItem(Long id, PaymentUnit fee) {
+        ShipItem itm = ShipItem.findById(id);
+        itm.produceFee(fee, FeeType.transportShipping());
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("运输项目 #%s 费用添加成功.", itm.id);
+        Shipments.show(itm.shipment.id);
+    }
+
+    /**
+     * 从运输单创建请款项目资源
+     *
+     * @param id
+     * @param fee
+     */
+    @Check("paymentunits.postfromtransport")
+    public static void fromShipment(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        ship.produceFee(fee);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
+
+    /**
+     * 为当前运输单的所有项目申请预付关税
+     *
+     * @param id
+     */
+    @Check("paymentunits.postfromtransport")
+    public static void applyDutyFromShipment(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.applyShipItemDuty();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("为运输单 %s 成功申请预付关税", id);
+        Shipments.show(id);
+    }
+
+    /**
+     * 为运输单计算关税, 创建请款项资源
+     *
+     * @param id
+     * @param fee
+     */
+    @Check("paymentunits.postfromtransport")
+    public static void calShipmentLeftDuty(String id, PaymentUnit fee) {
+        Shipment ship = Shipment.findById(id);
+        fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
 }
