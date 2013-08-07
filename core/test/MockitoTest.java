@@ -51,7 +51,7 @@ public class MockitoTest extends UnitTest {
         when(mockedList.get(1)).thenThrow(new RuntimeException());
 
         // 对 stub 的状态测试
-//        assertEquals("first", mockedList.get(0));
+        assertEquals("first", mockedList.get(0));
         assertThat(mockedList.get(0), is("first"));
         assertEquals(null, mockedList.get(999));
 
