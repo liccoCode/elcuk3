@@ -77,32 +77,31 @@ public class PaymentsPost extends Post<Payment>{
 
         if( this.dateType != null ){
              if( this.dateType == DateType.CREATE ){
-                 sql.append(" AND createdAt >=?  AND createdAt <=? ");
-             }
-             else{
-                 sql.append(" AND updateAt >=? AND updateAt <=? ");
+                 sql.append(" AND createdAt>=? AND createdAt<=?");
+             }else{
+                 sql.append(" AND updateAt>=? AND updateAt<=?");
              }
             params.add( Dates.morning(this.from) );
             params.add( Dates.night(this.to) );
         }
 
         if( this.state != null ){
-            sql.append(" AND state =?");
+            sql.append(" AND state = ?");
             params.add(this.state);
         }
 
         if( this.cooperId != null ){
-            sql.append(" AND cooperator.id =? ");
+            sql.append(" AND cooperator.id = ? ");
             params.add(this.cooperId);
         }
 
         if( this.paymentDate != null ){
-            sql.append("AND paymentDate =?");
+            sql.append("AND paymentDate = ?");
             params.add( this.paymentDate );
         }
 
         if( this.actualCurrency != null ){
-            sql.append("AND actualCurrency =?");
+            sql.append("AND actualCurrency = ?");
             params.add(this.actualCurrency);
         }
 
