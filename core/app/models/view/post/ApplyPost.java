@@ -63,10 +63,10 @@ public class ApplyPost extends Post<Apply> {
 
        if( this.dateType != null ){
            if( this.dateType == DateType.CREATE ){
-               sql.append(" AND createdAt >=?  AND createdAt <=? ");
+               sql.append(" AND createdAt>=?  AND createdAt <=?");
            }
            else{
-               sql.append(" AND updateAt >=? AND updateAt <=? ");
+               sql.append(" AND updateAt>=? AND updateAt<=?");
            }
            params.add( Dates.morning(this.from) );
            params.add( Dates.night(this.to) );
