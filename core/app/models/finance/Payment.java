@@ -3,6 +3,7 @@ package models.finance;
 import exception.PaymentException;
 import helper.Currency;
 import helper.Dates;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -354,6 +355,7 @@ public class Payment extends Model {
         this.actualAccountNumber = target.accountNumber;
         this.payer = User.current();
         this.state = S.PAID;
+        this.shouldPaid = Webs.scalePointUp(4, this.approvalAmount() * this.rate);
         this.save();
         new ERecordBuilder("payment.payit")
                 .msgArgs(this.target.toString(),

@@ -486,7 +486,7 @@ public class AmazonListingReview extends GenericModel {
 
         if(StringUtils.isBlank(subject)) {
             if(this.listing.market == M.AMAZON_DE) {
-                subject = "Du hinterließ einen negativen Testbericht, können wir eine Chance haben, zu korrigieren?";
+                subject = "Sie haben einen negativen Kommentar bei Amazon hinterlassen, geben Sie uns eine Chance dies zu korrigieren?";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
                 subject = "You left a negative product review, may we have a chance to make up?";
             }

@@ -53,12 +53,12 @@ public class OrderInfoFetchJob extends Job {
     public static List<Orderr> needCompleteInfoOrders(int size) {
         /**
          * 1. userid, email, phone 的检查
-         * 2. crawlUpdateTimes 抓取次数不能太多的检查
-         * 3. 从最老的开始处理.
-         * 4. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
+         * 2. 从最老的开始处理.
+         * 3. 只需要抓取 SHIPPED 与 REFUNDED 的订单, 因为只有这两个状态才有这些数据
          */
-        String sql = "crawlUpdateTimes<4 AND state IN (?,?) AND (userid is null OR email is null OR phone is null)";
-        List<Orderr> orders = Orderr.find(sql + " order by createDate", Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
+        String sql = "state IN (?,?) AND (userid is null OR email is null OR phone is null)";
+        List<Orderr> orders = Orderr.find(sql + " ORDER BY createDate DESC",
+                Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
         long counts = Orderr.count(sql, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
         Logger.info("OrderInfoFetchJob fetch %s / %s orders.", orders.size(), counts);
         return orders;
@@ -82,7 +82,6 @@ public class OrderInfoFetchJob extends Job {
      */
     public static Orderr orderDetailUserIdAndEmailAndPhone(Orderr order, String html) {
         Document doc = Jsoup.parse(html);
-        order.crawlUpdateTimes++;
         Element lin = doc.select("#_myo_buyerEmail_progressIndicator").first();
         if(lin == null) {
             // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
@@ -110,31 +109,43 @@ public class OrderInfoFetchJob extends Job {
         if(order.state == Orderr.S.SHIPPED || order.state == Orderr.S.REFUNDED) {
             // Email
             if(StringUtils.isBlank(order.email)) {
-                String email = StringUtils.substringBetween(html, "buyerEmail:", "\",");
-                if(StringUtils.isNotBlank(email)) order.email = email.replace("\"", "").trim();
+                try {
+                    String email = StringUtils.substringBetween(html, "buyerEmail:", "\",");
+                    if(StringUtils.isNotBlank(email)) order.email = email.replace("\"", "").trim();
+                } catch(NullPointerException e) {
+                    // 避免 email 解析出现 null point
+                }
             }
 
             // buyerId
             String url = doc.select("tr.list-row table[class=data-display] a").attr("href");
             String[] args = StringUtils.split(url, "&");
             for(String pa : args) {
-                if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
-                order.userid = StringUtils.split(pa, "=")[1].trim();
+                try {
+                    if(!StringUtils.containsIgnoreCase(pa, "buyerID")) continue;
+                    order.userid = StringUtils.split(pa, "=")[1].trim();
+                } catch(NullPointerException e) {
+                    // 避免 userid 解析出 null point
+                }
                 break;
             }
 
             // Phone
             if(StringUtils.isBlank(order.phone)) {
-                Elements tables = doc.select("table.data-display");
-                if(tables.size() >= 2) {
-                    String tableHtml = tables.get(1).outerHtml();
-                    if(StringUtils.contains(tableHtml, "Phone:")) {
-                        String phone = StringUtils.substringBetween(tableHtml, "Phone:", "</td>");
-                        if(StringUtils.isNotBlank(phone)) order.phone = phone.trim();
-                    } else {
-                        // amazon 没有提供 phone,  那么不再一直抓取 phone
-                        order.phone = "";
+                try {
+                    Elements tables = doc.select("table.data-display");
+                    if(tables.size() >= 2) {
+                        String tableHtml = tables.get(1).outerHtml();
+                        if(StringUtils.contains(tableHtml, "Phone:")) {
+                            String phone = StringUtils.substringBetween(tableHtml, "Phone:", "</td>");
+                            if(StringUtils.isNotBlank(phone)) order.phone = phone.trim();
+                        } else {
+                            // amazon 没有提供 phone,  那么不再一直抓取 phone
+                            order.phone = "";
+                        }
                     }
+                } catch(NullPointerException e) {
+                    // 避免 phone 解析出 null pint
                 }
             }
         }
