@@ -229,11 +229,6 @@ public class Orderr extends GenericModel {
     public String memo;
 
     /**
-     * 用来记录此订单使用抓取更新的次数
-     */
-    public Integer crawlUpdateTimes = 0;
-
-    /**
      * 是否为有问题的订单.
      */
     public boolean warnning = false;
