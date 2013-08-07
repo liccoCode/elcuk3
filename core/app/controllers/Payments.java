@@ -29,21 +29,21 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Payments extends Controller {
 
-    @Before(only = {"index"} )
-    public static void beforIndex(){
+    @Before(only = {"index"})
+    public static void beforIndex() {
         List<Cooperator> cooperator = Cooperator.findAll();
 
-        renderArgs.put("cooperator",cooperator);
+        renderArgs.put("cooperator", cooperator);
     }
 
 
     @Check("payments.index")
     public static void index(PaymentsPost p) {
-       List<Payment> payments  =null;
-       if( p == null ) p = new PaymentsPost();
-       payments  = p.query();
+        List<Payment> payments = null;
+        if(p == null) p = new PaymentsPost();
+        payments = p.query();
 
-       render(payments,p);
+        render(payments, p);
     }
 
     @CacheFor("5mn")

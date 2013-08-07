@@ -15,17 +15,17 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend input-append inline">
-          <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="${p.from.date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${p.to.date()}">
+      <span class="add-on">From:</span>
+      <input type="date" name="p.from" value="${p.from.date()}">
+      <span class="add-on">To:</span>
+      <input type="date" name="p.to" value="${p.to.date()}">
     </div>
 
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.PaymentsPost.DateType.values() , value: p.dateType /}
 
         #{select_enum name:'p.state', items:models.finance.Payment.S.values() , value: p.state }
-                  <option value="">状态</option>
+          <option value="">状态</option>
         #{/select_enum}
 
         #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
@@ -37,15 +37,15 @@
         #{/select}
 
       <span class="add-on">付款时间:</span>
-       <input type="date" name="p.paymentDate" value="${p.paymentDate.date()}">
+      <input type="date" name="p.paymentDate" value="${p.paymentDate.date()}">
 
       <span class="add-on">支付账号:</span>
-       <input type="text" name="p.actualAccountNumber" value="${p.actualAccountNumber}">
+      <input type="text" name="p.actualAccountNumber" value="${p.actualAccountNumber}">
     </div>
 
     <div class="input-prepend input-append inline">
-         <span class="add-on"><i class="icon-search"></i></span>
-         <button class="btn btn-primary" data-loading>搜索</button>
+      <span class="add-on"><i class="icon-search"></i></span>
+      <button class="btn btn-primary" data-loading>搜索</button>
     </div>
 
   </div>
@@ -64,36 +64,36 @@
       <th>最近更新时间</th>
       <th>创建时间</th>
     </tr>
-  #{list items:payments, as:'pay'}
-    <tr>
-      <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
-      <td>
-          #{list items:pay.applyers(), as:'applyer'}
-          ${applyer.username} &nbsp;
-          #{/list}
-      </td>
-      <td>${pay.payer?.username}</td>
-      <td>
-          #{list items:pay.cooperators(), as:'cop'}
+      #{list items:payments, as:'pay'}
+        <tr>
+          <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
+          <td>
+              #{list items:pay.applyers(), as:'applyer'}
+              ${applyer.username} &nbsp;
+              #{/list}
+          </td>
+          <td>${pay.payer?.username}</td>
+          <td>
+              #{list items:pay.cooperators(), as:'cop'}
             ${cop.fullName}
           #{/list}
-      </td>
-      <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
-      <td>
-        <a href="javascript:;"
-           rel="tooltip"
-           title="参考汇率: ${helper.Currency.USD.ratio(helper.Currency.CNY)} CNY: ${pay.totalFees()._2}">
-        ${helper.Currency.USD.symbol()} ${pay.totalFees()._1.format('#.##')}
-        </a>
-      </td>
-      <td>
-      ${pay.actualCurrency?.symbol()} ${pay.actualPaid}
-        <i class="badge badge-info">${pay.units().size()}</i>
-      </td>
-      <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
-      <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
-    </tr>
-  #{/list}
+          </td>
+          <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
+          <td>
+            <a href="javascript:;"
+               rel="tooltip"
+               title="参考汇率: ${helper.Currency.USD.ratio(helper.Currency.CNY)} CNY: ${pay.totalFees()._2}">
+            ${helper.Currency.USD.symbol()} ${pay.totalFees()._1.format('#.##')}
+            </a>
+          </td>
+          <td>
+          ${pay.actualCurrency?.symbol()} ${pay.actualPaid}
+            <i class="badge badge-info">${pay.units().size()}</i>
+          </td>
+          <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
+          <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
+        </tr>
+      #{/list}
   </table>
 </div>
 #{/form}

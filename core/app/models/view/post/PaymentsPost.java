@@ -9,6 +9,7 @@ import helper.Dates;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import models.finance.Payment;
 
 
@@ -18,24 +19,23 @@ import models.finance.Payment;
  * Date: 13-8-5
  * Time: 上午10:09
  */
-public class PaymentsPost extends Post<Payment>{
+public class PaymentsPost extends Post<Payment> {
 
     public PaymentsPost() {
-           DateTime now = DateTime.now(Dates.timeZone(null));
-           this.from = now.minusDays(5).toDate();
-           this.to = now.toDate();
-           this.dateType = DateType.UPDATE;
-     }
-
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        this.from = now.minusDays(5).toDate();
+        this.to = now.toDate();
+        this.dateType = DateType.UPDATE;
+    }
 
 
     /**
-      * 由于在 Action Redirect 的时候, 需要保留参数, 而 Play 并没有保留, 所以只能多写一次
-      */
-     public Date from;
-     public Date to;
+     * 由于在 Action Redirect 的时候, 需要保留参数, 而 Play 并没有保留, 所以只能多写一次
+     */
+    public Date from;
+    public Date to;
 
-     public DateType dateType;
+    public DateType dateType;
 
     public Payment.S state;
 
@@ -50,22 +50,21 @@ public class PaymentsPost extends Post<Payment>{
     public enum DateType {
 
         CREATE {
-          @Override
-          public String label(){
-              return "创建时间";
-             }
+            @Override
+            public String label() {
+                return "创建时间";
+            }
         },
         UPDATE {
-          @Override
-          public String label(){
-              return "更新时间";
-          }
+            @Override
+            public String label() {
+                return "更新时间";
+            }
         };
 
         public abstract String label();
 
     }
-
 
 
     @Override
@@ -75,37 +74,37 @@ public class PaymentsPost extends Post<Payment>{
         StringBuffer sql = new StringBuffer(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
-        if( this.dateType != null ){
-             if( this.dateType == DateType.CREATE ){
-                 sql.append(" AND createdAt>=? AND createdAt<=?");
-             }else{
-                 sql.append(" AND updateAt>=? AND updateAt<=?");
-             }
-            params.add( Dates.morning(this.from) );
-            params.add( Dates.night(this.to) );
+        if(this.dateType != null) {
+            if(this.dateType == DateType.CREATE) {
+                sql.append(" AND createdAt>=? AND createdAt<=?");
+            } else {
+                sql.append(" AND updateAt>=? AND updateAt<=?");
+            }
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
         }
 
-        if( this.state != null ){
+        if(this.state != null) {
             sql.append(" AND state = ?");
             params.add(this.state);
         }
 
-        if( this.cooperId != null ){
+        if(this.cooperId != null) {
             sql.append(" AND cooperator.id = ? ");
             params.add(this.cooperId);
         }
 
-        if( this.paymentDate != null ){
+        if(this.paymentDate != null) {
             sql.append("AND paymentDate = ?");
-            params.add( this.paymentDate );
+            params.add(this.paymentDate);
         }
 
-        if( this.actualCurrency != null ){
+        if(this.actualCurrency != null) {
             sql.append("AND actualCurrency = ?");
             params.add(this.actualCurrency);
         }
 
-        if( !actualAccountNumber.equals("") )        {
+        if(!actualAccountNumber.equals("")) {
             sql.append(" AND actualAccountNumber = ?");
             params.add(this.actualAccountNumber);
         }
@@ -115,8 +114,8 @@ public class PaymentsPost extends Post<Payment>{
     }
 
     public List<Payment> query() {
-           F.T2<String, List<Object>> params = params();
-           return Payment.find( params._1 + " ORDER BY createdAt DESC", params._2.toArray() ).fetch();
-       }
+        F.T2<String, List<Object>> params = params();
+        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch();
+    }
 
 }
