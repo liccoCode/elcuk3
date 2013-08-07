@@ -77,13 +77,13 @@
               #{list items:pay.cooperators(), as:'cop'}
             ${cop.fullName}
           #{/list}
+
           </td>
           <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
           <td>
-            <a href="javascript:;"
-               rel="tooltip"
-               title="参考汇率: ${helper.Currency.USD.ratio(helper.Currency.CNY)} CNY: ${pay.totalFees()._2}">
-            ${helper.Currency.USD.symbol()} ${pay.totalFees()._1.format('#.##')}
+              #{set totalFees: pay.totalFees()/}
+            <a href="#" rel='tooltip' title="USD: ${totalFees._1};  CNY: ${totalFees._2};  ${pay.currency}: ${totalFees._3}">
+            ${helper.Currency.USD.symbol()} ${totalFees._1.format('#.##')}
             </a>
           </td>
           <td>
@@ -94,6 +94,7 @@
           <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
         </tr>
       #{/list}
+
   </table>
 </div>
 #{/form}

@@ -129,10 +129,8 @@ public class Privilege extends Model {
         privileges.add(new Privilege("shipments.cancel", "取消运输单"));
         privileges.add(new Privilege("shipments.beginship", "开始运输"));
         privileges.add(new Privilege("shipments.cancelship", "取消运输项目"));
-        // TODO effect: 删除 shipments.ship
         privileges.add(new Privilege("fbas.deployToAmazon", "创建 FBA"));
         privileges.add(new Privilege("fbas.update", "更新 FBA"));
-        // TODO effect: 删除 shipments.deployfba
 
         privileges.add(new Privilege("shipments.revertstate", "运输单状态还原"));
         privileges.add(new Privilege("shipments.procureUnitToShipment", "通过采购计划创建运输单"));
@@ -154,6 +152,8 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("applys.index", "请款单列表页面"));
         privileges.add(new Privilege("applys.procure", "采购请款单页面"));
+        privileges.add(new Privilege("applys.shipmenttoapply", "创建运输请款单"));
+        privileges.add(new Privilege("applys.handlshipment", "运输单在请款单中添加删除"));
 
         privileges.add(new Privilege("paymenttargets.index", "支付方式列表页面"));
         privileges.add(new Privilege("paymenttargets.save", "创建支付方式"));
@@ -162,7 +162,6 @@ public class Privilege extends Model {
 
         privileges.add(new Privilege("payments.index", "付款单列表页面"));
         privileges.add(new Privilege("payments.show", "付款单查看"));
-        privileges.add(new Privilege("payments.paymentunitapproval", "付款单中请款项批准"));
         privileges.add(new Privilege("payments.payforit", "付款单付款"));
         privileges.add(new Privilege("payments.shouldpaidupdate", "付款单应付金额更新"));
         privileges.add(new Privilege("payments.uploads", "付款单凭证上传"));
@@ -178,12 +177,14 @@ public class Privilege extends Model {
         privileges.add(new Privilege("paymentunits.destroy", "删除请款项目"));
         privileges.add(new Privilege("paymentunits.fixvalue", "更新请款项目修正价"));
         privileges.add(new Privilege("paymentunits.deny", "拒绝请款项目"));
+        privileges.add(new Privilege("paymentunits.fixunitvalue", "更新请款项目单价与数量"));
+        privileges.add(new Privilege("paymentunits.postfromtransport", "添加运输相关请款项目"));
+        privileges.add(new Privilege("paymentunits.approve", "批准请款项目"));
 
 
         // FeeTypes 控制器
         privileges.add(new Privilege("feetypes", "费用类型"));
         privileges.add(new Privilege("feetypes.index", "费用类型页面"));
-        // todo: 到这里都是新的
 
         // Products 控制器
         privileges.add(new Privilege("products.saleamazonlisting", "Amazon 上架"));

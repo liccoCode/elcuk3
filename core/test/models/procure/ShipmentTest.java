@@ -1,6 +1,7 @@
 package models.procure;
 
 import factory.FactoryBoy;
+import factory.callback.BuildCallback;
 import helper.Dates;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -199,5 +200,20 @@ public class ShipmentTest extends UnitTest {
         shipment.monitor();
         assertThat(shipment.state, is(Shipment.S.RECEIVING));
         assertThat(shipment.dates.inbondDate, is(fbaShipment.getEarliestDate().get()));
+    }
+
+    @Test
+    public void refreshShipmentProcess() {
+        Shipment ship = FactoryBoy.build(Shipment.class, new BuildCallback<Shipment>() {
+            @Override
+            public void build(Shipment target) {
+                target.internationExpress = iExpress.UPS;
+                target.state = Shipment.S.CLEARANCE;
+                target.trackNo = "1Z8837000443500220";
+            }
+        });
+        ship.trackWebSite();
+        ship.monitor();
+        assertThat(ship.state, is(Shipment.S.DELIVERYING));
     }
 }

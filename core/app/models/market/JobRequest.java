@@ -118,7 +118,11 @@ public class JobRequest extends Model {
         /**
          * 这个任务接受了进行关闭
          */
-        CLOSE
+        CLOSE,
+        /**
+         * 任务被 Amazon 取消了
+         */
+        CANCEL
     }
 
     @OneToOne

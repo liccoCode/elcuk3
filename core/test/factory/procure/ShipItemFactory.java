@@ -1,6 +1,8 @@
 package factory.procure;
 
+import factory.FactoryBoy;
 import factory.ModelFactory;
+import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 
 /**
@@ -14,6 +16,9 @@ public class ShipItemFactory extends ModelFactory<ShipItem> {
     @Override
     public ShipItem define() {
         ShipItem shipItem = new ShipItem();
+        shipItem.qty = 200;
+        shipItem.unit = FactoryBoy.lastOrCreate(ProcureUnit.class);
+        shipItem.recivedQty = 100;
         return shipItem;
     }
 }

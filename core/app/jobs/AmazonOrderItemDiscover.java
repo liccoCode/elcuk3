@@ -118,7 +118,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                         "<h4>检查不存在的 Product!</h4> <br>" + errors.toString());
             }
         } catch(SQLException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
     }
 
@@ -176,7 +176,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
                 );
             }
         } catch(SQLException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
     }
 
