@@ -1,7 +1,12 @@
 package controllers;
 
+
+
 import models.finance.Apply;
 import models.finance.ProcureApply;
+import models.procure.Cooperator;
+import models.view.post.ApplyPost;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -16,11 +21,24 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Applys extends Controller {
 
-    @Check("applys.index")
-    public static void index() {
-        List<Apply> applyes = ProcureApply.find("ORDER BY createdAt DESC").fetch();
-        render(applyes);
+    @Before(only = { "index" } )
+    public static void beforIndex(){
+        List<Cooperator> suppliers = Cooperator.suppliers();
+
+       renderArgs.put("suppliers",suppliers);
     }
+
+
+    @Check("applys.index")
+    public static void index (ApplyPost p ) {
+        List<Apply> applyes = null;
+        if ( p == null )  p = new ApplyPost();
+        applyes = p.query();
+
+        render( applyes, p );
+    }
+
+
 
     /**
      * 采购请款单
