@@ -1,7 +1,6 @@
 package controllers;
 
 
-
 import models.finance.Apply;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
@@ -21,23 +20,22 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Applys extends Controller {
 
-    @Before(only = { "index" } )
-    public static void beforIndex(){
+    @Before(only = {"index"})
+    public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
 
-       renderArgs.put("suppliers",suppliers);
+        renderArgs.put("suppliers", suppliers);
     }
 
 
     @Check("applys.index")
-    public static void index (ApplyPost p ) {
+    public static void index(ApplyPost p) {
         List<Apply> applyes = null;
-        if ( p == null )  p = new ApplyPost();
+        if(p == null) p = new ApplyPost();
         applyes = p.query();
 
-        render( applyes, p );
+        render(applyes, p);
     }
-
 
 
     /**

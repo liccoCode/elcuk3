@@ -14,21 +14,21 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend input-append inline">
-         <span class="add-on">From:</span>
-         <input type="date" name="p.from" value="${p.from.date()}">
-         <span class="add-on">To:</span>
-         <input type="date" name="p.to" value="${p.to.date()}">
-       </div>
+      <span class="add-on">From:</span>
+      <input type="date" name="p.from" value="${p.from.date()}">
+      <span class="add-on">To:</span>
+      <input type="date" name="p.to" value="${p.to.date()}">
+    </div>
 
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.ApplyPost.DateType.values(), values:p.dateType /}
 
         #{select 'p.suppliers', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.suppliers}
-                   #{option ''}供应商#{/option}
+            #{option ''}供应商#{/option}
         #{/select}
 
-       <span class="add-on">请款单编号:</span>
-       <input type="text" name="p.search" value="${p.search}">
+      <span class="add-on">请款单编号:</span>
+      <input type="text" name="p.search" value="${p.search}">
     </div>
 
     <div class="input-prepend input-append inline">
@@ -51,20 +51,20 @@
       <th>最新更新时间</th>
       <th>创建时间</th>
     </tr>
-  #{list items:applyes, as:'apply'}
-    <tr>
-      <td>${apply.id}</td>
-      <td>#{apply_id_link apply:apply/}</td>
-      <td>${apply.cooperator.fullName}</td>
-        #{set currency:apply.currency()/}
-      <td>${currency?.symbol()} ${apply.appliedAmount()}</td>
-      <td>${currency?.symbol()} ${apply.leftAmount()}</td>
-      <td>${currency?.symbol()} ${apply.totalAmount()}</td>
-      <td>${currency?.symbol()} ${apply.fixValueAmount()}</td>
-      <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
-      <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
-    </tr>
-  #{/list}
+      #{list items:applyes, as:'apply'}
+        <tr>
+          <td>${apply.id}</td>
+          <td>#{apply_id_link apply:apply/}</td>
+          <td>${apply.cooperator.fullName}</td>
+            #{set currency:apply.currency()/}
+          <td>${currency?.symbol()} ${apply.appliedAmount()}</td>
+          <td>${currency?.symbol()} ${apply.leftAmount()}</td>
+          <td>${currency?.symbol()} ${apply.totalAmount()}</td>
+          <td>${currency?.symbol()} ${apply.fixValueAmount()}</td>
+          <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
+          <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
+        </tr>
+      #{/list}
   </table>
 </div>
 #{/form}
