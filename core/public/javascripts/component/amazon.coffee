@@ -65,9 +65,17 @@ $ ->
         html.find('#t').html(json['t'].join('<br/><br/>'))
         html.find('#s').html(json['s'].join('<br/><br/>'))
         html.find('#p').html(json['p'][0])
-        $('#sid_preview_popover').attr('data-content', html.html()).data('tsp', json).click()
+        $('#sid_preview_popover').attr('data-content', html.html()).data('tsp', json).mouseover().click();
         toolBar.unmask()
     )
+
+  #预览按钮事件
+  $('#sid_preview_popover').click(
+    (e) ->
+     e.preventDefault()
+     o = $(@)
+     o.popover('toggle')
+  )
 
   # 加载 tsp 数据的按钮
   $('#sid_helper + button').click(
