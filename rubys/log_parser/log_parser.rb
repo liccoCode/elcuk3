@@ -124,7 +124,7 @@ end
 
 # ------------------------------------------------
 
-#`scp -C root@e.easya.cc:/root/elcuk2/core/logs/elcuk2.log ./`
+`scp -C root@e.easya.cc:/root/elcuk2/core/logs/elcuk2.log ./`
 
 p = P.new
 p.file.each do |line|
