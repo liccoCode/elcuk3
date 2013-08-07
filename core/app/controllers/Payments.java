@@ -29,7 +29,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Payments extends Controller {
 
-    @Before(only ={"index"})
+    @Before(only = {"index"} )
     public static void beforIndex(){
         List<Cooperator> cooperator = Cooperator.findAll();
 

@@ -24,7 +24,7 @@ public class PaymentsPost extends Post<Payment>{
            DateTime now = DateTime.now(Dates.timeZone(null));
            this.from = now.minusDays(5).toDate();
            this.to = now.toDate();
-           this.dateType = DateType.update;
+           this.dateType = DateType.UPDATE;
      }
 
 
@@ -49,13 +49,13 @@ public class PaymentsPost extends Post<Payment>{
 
     public enum DateType {
 
-        create {
+        CREATE {
           @Override
           public String label(){
               return "创建时间";
              }
         },
-        update {
+        UPDATE {
           @Override
           public String label(){
               return "更新时间";
@@ -75,46 +75,38 @@ public class PaymentsPost extends Post<Payment>{
         StringBuffer sql = new StringBuffer(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
-        if( this.dateType != null )
-        {
-             if( this.dateType == DateType.create )
-             {
+        if( this.dateType != null ){
+             if( this.dateType == DateType.CREATE ){
                  sql.append(" AND createdAt >=?  AND createdAt <=? ");
              }
-             else
-             {
+             else{
                  sql.append(" AND updateAt >=? AND updateAt <=? ");
              }
             params.add( Dates.morning(this.from) );
             params.add( Dates.night(this.to) );
         }
 
-        if( this.state != null )
-        {
+        if( this.state != null ){
             sql.append(" AND state =?");
             params.add(this.state);
         }
 
-        if( this.cooperId != null )
-        {
+        if( this.cooperId != null ){
             sql.append(" AND cooperator.id =? ");
             params.add(this.cooperId);
         }
 
-        if( this.paymentDate != null )
-        {
+        if( this.paymentDate != null ){
             sql.append("AND paymentDate =?");
             params.add( this.paymentDate );
         }
 
-        if( this.actualCurrency != null )
-        {
+        if( this.actualCurrency != null ){
             sql.append("AND actualCurrency =?");
             params.add(this.actualCurrency);
         }
 
-        if( !actualAccountNumber.equals(""))
-        {
+        if( !actualAccountNumber.equals("") )        {
             sql.append(" AND actualAccountNumber = ?");
             params.add(this.actualAccountNumber);
         }
