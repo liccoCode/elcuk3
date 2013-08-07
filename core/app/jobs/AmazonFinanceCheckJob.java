@@ -42,9 +42,13 @@ public class AmazonFinanceCheckJob extends Job {
          * 3. 平均每个订单需要 10s 时间处理完成;
          */
         int orderSize = 8;
-        int hourOfDay = DateTime.now().getHourOfDay();
+        DateTime now = DateTime.now();
+        int hourOfDay = now.getHourOfDay();
+        int dayOfWeek = now.getDayOfWeek();
         // 如果是晚上, 则加大抓去量
         if(hourOfDay >= 19 || hourOfDay <= 9) orderSize = 24;
+        if(Arrays.asList(6, 7).contains(dayOfWeek)) orderSize = 24;
+
         List<Account> accounts = Account.openedSaleAcc();
         Map<String, Account> accMap = new HashMap<String, Account>();
         for(Account acc : accounts) {
