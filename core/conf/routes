@@ -26,8 +26,13 @@ GET     /img/                                               staticDir:public/ima
 GET     /helper/                                            staticDir:public/images/helper
 
 # Applys
-GET     /apply/{id}/procure                                 Applys.procure
-PUT     /apply/{id}/procure/confirm                         Applys.procureConfirm
+GET     /apply/transports                                   Applys.transports
+GET     /apply/transport/{id}                               Applys.transport
+POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
+DELETE  /apply/transport/{id}/shipment                      Applys.departShipmentFromApply(format:'json')
+GET     /apply/procure/{id}                                 Applys.procure
+PUT     /apply/procure/{id}/confirm                         Applys.procureConfirm
+POST    /apply/transport                                    Applys.shipmentToApply
 
 # Deliveryments
 GET    /deliveryments                                        Deliveryments.index
@@ -50,12 +55,11 @@ GET     /orders/warnfix                                     Orders.warrningOrder
 
 # Payments
 GET     /payments                                           Payments.index
-GET     /payment/rates                                      Payments.rates
+GET     /payment/boc                                        Payments.bocRates
+GET     /payment/xe                                         Payments.xeRates
 POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
 DELETE  /payment/{id}                                       Payments.cancel
-POST    /payment/{id}/paymentunits/approval                 Payments.paymentUnitApproval
-POST    /payment/{paymentId}/paymentunit/{id}/deny          PaymentUnits.deny
 POST    /payment/{id}/pay                                   Payments.payForIt
 POST    /payment/{id}/shouldPaid                            Payments.shouldPaidUpdate
 POST    /payment/{id}/lock                                  Payments.lockIt
@@ -79,10 +83,21 @@ GET     /fba/{id}/outlabel                                  FBAs.boxLabel
 GET     /code128/{shipmentId}                               Login.code128
 
 # PaymentUnits
+POST    /paymentunit/shipitem/{id}                          PaymentUnits.fromShipItem
+POST    /paymentunit/shipment/{id}                          PaymentUnits.fromShipment(format:'json')
+POST    /paymentunit/shipment/{id}/applyDuty                PaymentUnits.applyDutyFromShipment
+POST    /paymentunit/shipment/{id}/calDuty                  PaymentUnits.calShipmentLeftDuty(format:'json')
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
+DELETE  /paymentunit/{id}/shipment                          PaymentUnits.destroyByShipment
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
+POST    /paymentunit/{id}/approve.json                      PaymentUnits.approveFromShipment
+POST    /paymentunit/payment/{id}/approval                  PaymentUnits.approveFromDeliveryment
+GET     /paymentunit/{id}.json                              PaymentUnits.show(format:'json')
+GET     /paymentunit/{id}/records.json                      PaymentUnits.records(format:'json')
+PUT     /paymentunit/{id}.json                              PaymentUnits.update(format:'json')
 POST    /paymentunit/{id}/prepay/{applyId}                  ProcureUnits.billingPrePay
 POST    /paymentunit/{id}/tailpay/{applyId}                 ProcureUnits.billingTailPay
+POST    /paymentunit/{id}/deny                              PaymentUnits.deny
 
 # PaymentTargets
 GET     /paymenttargets                                     PaymentTargets.index
@@ -100,6 +115,7 @@ GET     /selling/{id}/label                                 Sellings.sellingLabe
 
 # Shipments
 GET     /shipments                                          Shipments.index
+POST    /shipments                                          Shipments.index
 GET     /shipment/{id}                                      Shipments.show
 GET     /shipment/{id}/dates                                Shipments.dates
 PUT     /shipment/{id}/process                              Shipments.refreshProcuress
@@ -120,6 +136,7 @@ GET     /shipment/{id}/invoice                              Shipments.invoice
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
+GET     /shipitem/{id}.json                                 ShipItems.showJson(format:'json')
 POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received

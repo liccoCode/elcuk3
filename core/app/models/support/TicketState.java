@@ -226,8 +226,7 @@ public enum TicketState {
                         ticket.review
                                 .comment(String.format("Success Change Review at %s from %s to %s",
                                         Dates.date2DateTime(),
-                                        ticket.review.lastRating ==
-                                                null ? 0 : ticket.review.lastRating,
+                                        ticket.review.lastRating,
                                         ticket.review.rating == null ? 0 : ticket.review.rating));
                     }
                 } else if(ticket.type == Ticket.T.FEEDBACK) {

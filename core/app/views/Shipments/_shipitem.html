@@ -28,15 +28,19 @@
     <th>预计到库时间</th>
     <th>供应商</th>
     <th>总重量(kg)</th>
-    <th>总体积(m3)(kg)</th>
     <th>抵达?</th>
   #{if useCheckbox}
     <th>运往仓库</th>
   #{/if}
     <th>采购计划</th>
+  #{power.ck 'paymentunits.postfromtransport'}
+      #{if isExpress}
+        <th>记录运费</th>
+      #{/if}
+  #{/power.ck}
   </tr>
 #{list items:items, as:'itm'}
-  <tr id="${itm.id}">
+  <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'>
       #{if useCheckbox}
         <td>
           <label class="checkbox">
@@ -48,17 +52,23 @@
     <td><a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a></td>
     <td><a href="@{Sellings.selling(itm.unit.sid)}">${itm.unit.sid}</a></td>
       #{if useCheckbox}
-          #{if itm.unit.fba?.records}
-            <td rel='popover' trigger='click' placement='bottom' full-width="true"
-                content="${itm.unit.fba?.records()}">
-            ${itm.unit.fba?.shipmentId}
-              <i class="icon-search"></i>
+          #{if itm.unit.fba}
+            <td>
+                #{if itm.unit.fba.records}
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">
+                  <span rel='popover' placement='bottom' full-width="true" content="${itm.unit.fba?.records()}">
+                  ${itm.unit.fba.shipmentId}
+                  </span>
+                  </a>
+                  <i class="icon-search"></i>
+                #{/if}
+                #{else }
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">${itm.unit.fba.shipmentId}</a>
+                #{/else}
             </td>
           #{/if}
           #{else }
-            <td>
-            ${itm.unit.fba?.shipmentId}
-            </td>
+            <td>&nbsp;</td>
           #{/else}
         <td>${itm.unit.fba?.centerId}</td>
       #{/if}
@@ -69,6 +79,7 @@
         <td style="${itm.recivedQty != itm.qty ? 'background:#F2DEDE' : ''}" name='recivedQty'
             placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
         ${itm.recivedQty}
+          <i class="icon-wrench"></i>
         </td>
       #{/if}
       #{else }
@@ -86,10 +97,7 @@
     </td>
     <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
     <td>${itm.unit.cooperator?.name}</td>
-    <td>${itm.totalWeight()} / ${itm.unit.product.weight}</td>
-      #{set totalVolume:itm.totalVolume()/}
-    <td>${totalVolume._2.format('#.######')} ${totalVolume._3.format('#.#')}
-      / ${totalVolume._1.format('#.######')}</td>
+    <td>${itm.totalWeight()}</td>
     <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
 
       #{if useCheckbox}
@@ -100,6 +108,13 @@
       ${itm.unit.id}
       </a>
     </td>
+      #{power.ck 'paymentunits.postfromtransport'}
+          #{if isExpress}
+            <td>
+              <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
+            </td>
+          #{/if}
+      #{/power.ck}
   </tr>
 #{/list}
 #{if shipmentId}

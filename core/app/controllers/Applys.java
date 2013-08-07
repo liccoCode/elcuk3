@@ -1,10 +1,18 @@
 package controllers;
 
+import helper.Webs;
 import models.finance.Apply;
+import models.finance.FeeType;
 import models.finance.ProcureApply;
+import models.finance.TransportApply;
+import models.procure.Shipment;
+import models.view.Ret;
+import models.view.post.ShipmentPost;
+import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,6 +30,11 @@ public class Applys extends Controller {
         render(applyes);
     }
 
+    public static void transports() {
+        List<Apply> applyes = TransportApply.find("ORDER BY createdAt DESC").fetch();
+        render(applyes);
+    }
+
     /**
      * 采购请款单
      */
@@ -31,10 +44,74 @@ public class Applys extends Controller {
         render(apply);
     }
 
+    public static void transport(Long id) {
+        List<FeeType> feeTypes = Shipments.feeTypes(null);
+        TransportApply apply = TransportApply.findById(id);
+        render(apply, feeTypes);
+    }
+
     public static void procureConfirm(Long id) {
         ProcureApply apply = ProcureApply.findById(id);
         apply.confirm = true;
         apply.save();
         render();
+    }
+
+    /**
+     * 想运输请款单中添加运输单
+     *
+     * @param id
+     * @param shipmentId
+     */
+    @Check("applys.handlshipment")
+    public static void transportAddShipment(Long id, String shipmentId) {
+        TransportApply apply = TransportApply.findById(id);
+        Shipment ship = Shipment.findById(shipmentId);
+        apply.appendShipment(Arrays.asList(ship.id));
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        transport(id);
+    }
+
+    /**
+     * 将运输单从请款单中剥离
+     *
+     * @param id
+     */
+    @Check("applys.handlshipment")
+    public static void departShipmentFromApply(String id) {
+        Shipment ship = Shipment.findById(id);
+        ship.departFromApply();
+        if(Validation.hasErrors())
+            renderJSON(Webs.VJson(Validation.errors()));
+        renderJSON(new Ret(true, "运输单剥离成功"));
+    }
+
+    /**
+     * 通过运输单 创建 运输请款单 资源
+     *
+     * @param shipmentId
+     * @param p
+     */
+    @Check("applys.shipmenttoapply")
+    public static void shipmentToApply(List<String> shipmentId, ShipmentPost p) {
+        if(shipmentId == null || shipmentId.size() == 0)
+            Validation.addError("", "请选择需要创建请款单的运输单");
+
+        TransportApply apply = null;
+        if(!Validation.hasErrors())
+            apply = TransportApply.buildTransportApply(shipmentId);
+
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Shipments.index(p);
+        } else {
+            if(apply != null) {
+                Applys.transport(apply.id);
+            } else {
+                flash.error("请款单创建失败.");
+                Shipments.index(p);
+            }
+        }
     }
 }

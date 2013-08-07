@@ -1,100 +1,131 @@
 $ ->
-  $('.paymentUnitDeny').click (e) ->
-    e.preventDefault()
-    self = $(@)
-    $('#model_form').attr('action', self.attr('url')).attr('method', 'POST')
-    $('#model_title').text(self.parents('td').next().text())
-    $('#reason_model').modal('show')
+  currencyMap = {
+    CNY: '人民币',
+    EUR: '欧元',
+    GBP: '英镑',
+    HKD: '港币',
+    USD: '美元'
+  }
 
-  $('#payment_cancel').click (e) ->
-    e.preventDefault()
-    self = $(@)
-    $('#model_form').attr('action', self.attr('url')).data('method', 'DELETE')
-    $('#model_title').text("取消 #{window.document.title}")
+  $(document).on('click', 'button.paymentUnitDeny', (e) ->
+    $btn = $(@)
     $('#reason_model').modal('show')
+    $('#model_title').text("驳回 #{$btn.parents('tr').find('td:eq(6)').text()} 请款项目")
+    $('#model_form').attr('action', $btn.data('url'))
+    false
+  )
 
-  # 计算美金金额
-  calculateUsdCosts = ->
-    # 如果本身支付的币种为 USD, 则不需要计算, 直接替换即可
-    usdCosts = if $('#currency_label').text() == '¥'
-      (parseFloat($('#costs').text()) / $('#boc_rate').data('usdRate')).toFixed(4)
+  $('#pay_form').on('change', 'select[name=currency]',(e) ->
+    $slt = $(@)
+    if $slt.val()
+      updateMainInfo($slt.val())
     else
-      $('#costs').text()
-    $('#usd_costs').html(usdCosts)
-
-  persistRatioDates = ->
-    $('#ratio').val($('#usd_rates').text())
-    $('#ratio_publish_date').val($('#usd_datetime').text())
-
-
-  $('#boc_rate_btn').click((e) ->
-    e.preventDefault()
-    LoadMask.mask()
-    bocRate = $('#boc_rate').html('加载中...')
-    bocRate.load(@getAttribute('url'), ->
-      LoadMask.unmask()
-      usdRate = $('#boc_rate tr').filter(-> $(@).find('td:eq(0)').text() == '美元')
-        .find('td:eq(1)').css('color', '#D94E48').text()
-      # 除以 100:  619.76 -> 6.1976
-      bocRate.data('usdRate', parseFloat(usdRate) / 100)
-      $('#usd_rates').text((parseFloat(usdRate) / 100).toFixed(4))
-      $('#usd_datetime').text($('#boc_rate tr:eq(3) td:eq(6)').text() + " " + $('#boc_rate tr:eq(3) td:eq(7)').text())
-      calculateUsdCosts()
-      persistRatioDates()
+      $('#ratioInput').val(-1)
+      $('#ratioDateTimeInput').val('')
+    false
+  ).on('change', 'select[name=paymentTargetId]', (e) ->
+    $slt = $(@)
+    text = $slt.find(':selected').text()
+    name = text.split(']')[1]
+    [username, account] = text.split(']')[0][1..-1].split(' ')
+    $('#paymentTargetInfo').html(
+      "账户: #{username}<br>账号: #{account}<br>名称: #{name}"
     )
-  ).click()
-
-  $('#shouldPaid').keyup((e) ->
-    e.preventDefault()
-    if e.keyCode == 13
-      ajaxUpdateShouldPaid()
+    false
+  )
+  $('#shouldPaid').change((e) ->
+    $input = $(@)
+    if $('#currency').val() is ''
+      $input.val('')
+      noty({text: '请选择支付币种再继续', type: 'warning', timeout: 3000})
     else
-      if $.isNumeric(@value)
-        checkShouldPaidChange(@value)
-      else
-        @value = @value[0...-1] if e.keyCode != 8
-        $('#shouldPaidChanges').removeClass('text-success').addClass('text-error').text('请输入数字')
-  ).blur(-> ajaxUpdateShouldPaid())
-
-  ajaxUpdateShouldPaid = ->
-    shouldPaid = $('#shouldPaid')
-    if $.isNumeric(shouldPaid.val())
       LoadMask.mask()
-      $.post(shouldPaid.attr('url'), {shouldPaid: shouldPaid.val()})
+      $.ajax($input.data('url'), {type: 'POST', data: $input.parents('form').serialize()})
         .done((r) ->
-          if r.flag
-            console.log('更新成功.')
+          if r.flag is false
+            text = _.map(JSON.parse(r.message),(err) ->
+              err.message
+            ).join('<br>')
+            noty({text: text, type: 'error', timeoout: 3000})
           else
-            alert('应付金额更新失败.[' + r.message + ']')
+            noty({text: '应付金额更新成功', type: 'success', timeout: 1000})
           LoadMask.unmask()
         )
+    false
+  ).keyup((e) ->
+    amount = $('#paidCurrencyAmount').text()
+    $input = $(@)
+    val = $input.val()
+    $next = $input.next().text(amount - val).removeClass('text-error text-success')
+    if (amount - val) > 0
+      $next.addClass('text-error')
     else
-      shouldPaid.focus()
-      $('#shouldPaidChanges').removeClass('text-success').addClass('text-error').text('应付金额应该为数字')
+      $next.addClass('text-success')
+  )
 
-  checkShouldPaidChange = (val)->
-    changes =  switch $('#currency').val()
-      when 'CNY'
-        parseFloat($('#costs').text()) - val
-      when 'USD'
-        parseFloat($('#usd_costs').text()) - val
+  updateMainInfo = (target) ->
+    $mainInfo = $('#mainInfo')
+    ratio = extraRatio(target)
+    # 汇率
+    $('#currencyFromTo').text($('#request_currency').text() + " -> " + target)
+    $('#ratioInfo').text(ratio)
+
+    # 需要支付的 币种/金额
+    $('#paidCurrency').text(target)
+    $('#paidCurrencyAmount').text(($('#finalAppied').text() * ratio).toFixed(4))
+
+    # 汇率时间
+    $('#ratioTime').text($.DateUtil.fmt3(extraRatioTime(target)))
+
+    $mainInfo.data('ratio', ratio)
+
+  # 抽取两个挂牌价中的汇率
+  extraRatio = (target) ->
+    ratio = if 'CNY' == target
+      if target == $('#request_currency').text()
+        1
       else
-        alert('暂时只支持 USD, CNY 币种计算')
-        0
-    if changes > 0
-      $('#shouldPaidChanges').removeClass('text-success').addClass('text-error')
+        tr = $("#boc_rate tr td:contains(#{currencyMap[$('#request_currency').text()]})").parents('tr')
+        (parseFloat(tr.find('td:eq(1)').css('color', 'red').text()) / 100).toFixed(4)
     else
-      $('#shouldPaidChanges').removeClass('text-error').addClass('text-success')
-    $('#shouldPaidChanges').text(changes.toFixed(4))
+      tr = $("#ex_rate tr td:contains(#{target})").parents('tr')
+      (parseFloat(tr.find('td:eq(2)').css('color', 'red').text())).toFixed(4)
+    $('#ratioInput').val(ratio)
+    ratio
 
+  # 抽取挂牌价时间
+  extraRatioTime = (target) ->
+    date = if 'CNY' == target
+      tr = $('#boc_rate tr:eq(1)')
+      new Date("#{tr.find('td:eq(6)').text()} #{tr.find('td:eq(7)').text()}")
+    else
+      new Date()
+    $('#ratioDateTimeInput').val($.DateUtil.fmt3(date))
+    date
+
+  ajaxBocRate = ->
+    LoadMask.mask()
+    $('#boc_rate').load('/payment/boc', ->
+      LoadMask.unmask()
+    )
+
+  ajaxExRate = (from = $('#request_currency').text()) ->
+    LoadMask.mask()
+    $('#ex_rate').load("/payment/xe?currency=#{from}", ->
+      LoadMask.unmask()
+    )
+
+  ajaxExRate()
+  ajaxBocRate()
 
   # 初始化上传图片
   # 1. 首先初始化 dropbox
   # 2. Load 图片
-  window.dropUpload.iniDropbox(->
+  fid = ->
     fid: $('#dropbox').attr('paymentId')
     p: 'PAYMENTS'
-  , $('#dropbox'), '/payment/files/upload')
+
+  window.dropUpload.iniDropbox(fid, $('#dropbox'), '/payment/files/upload')
   window.dropUpload.loadImages($('#dropbox').attr('paymentId'), $('#dropbox'), 'PAYMENTS')
 
   do ->

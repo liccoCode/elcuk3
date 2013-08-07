@@ -17,11 +17,11 @@ window.$ui =
       else
         $input.dateinput(format: $input.attr('format'))
 
-  # 初始化 popover, tooltip, dateinput
+# 初始化 popover, tooltip, dateinput
   init: ->
     @dateinput()
 
-  # popover 与 tooltip 的基础方法
+# popover 与 tooltip 的基础方法
   relBase: (event, func)->
     tip = $(event.target)
     params =
@@ -34,12 +34,13 @@ window.$ui =
     func.call(tip, params)
 
 $(document).on('mouseover', '[rel=tooltip]', (event) ->
-  window.$ui.relBase(event, (params) -> @tooltip(params).tooltip('show'))
+  window.$ui.relBase(event, (params) ->
+    @tooltip(params).tooltip('show'))
 )
 
 $(document).on('mouseover', '[rel=popover]', (event) ->
   window.$ui.relBase(event, (params) ->
-    @popover(params)
+    @popover(params).popover('show')
     @data('popover').$tip.css('max-width', '900px') if 'full-width' of params
   )
 )
