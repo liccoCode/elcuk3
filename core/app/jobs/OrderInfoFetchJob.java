@@ -22,7 +22,7 @@ import java.util.List;
  * 每隔 10 分钟执行一次;
  * 周期:
  * - 轮询周期: 1mn
- * - Duration: 10mn
+ * - Duration: 2mn
  * </pre>
  * User: wyattpan
  * Date: 4/20/12
@@ -41,9 +41,11 @@ public class OrderInfoFetchJob extends Job {
         for(Orderr ord : orders) {
             try {
                 String html = OrderInfoFetchJob.fetchOrderDetailHtml(ord);
-                OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html).save();
+                OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html);
+                ord.save();
             } catch(Exception e) {
-                Logger.warn("Parse Order(%s) Info Error! [%s]", ord.orderId, Webs.E(e));
+                Logger.warn("Parse Order(%s) Info Error! email:%s, userId:%s, email:%s. [%s]",
+                        ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
     }
@@ -123,8 +125,17 @@ public class OrderInfoFetchJob extends Job {
 
             // Phone
             if(StringUtils.isBlank(order.phone)) {
-                order.phone = StringUtils.substringBetween(html, "Phone:", "</td>");
-                if(StringUtils.isNotBlank(order.phone)) order.phone = order.phone.trim();
+                Elements tables = doc.select("table.data-display");
+                if(tables.size() >= 2) {
+                    String tableHtml = tables.get(1).outerHtml();
+                    if(StringUtils.contains(tableHtml, "Phone:")) {
+                        String phone = StringUtils.substringBetween(tableHtml, "Phone:", "</td>");
+                        if(StringUtils.isNotBlank(phone)) order.phone = phone.trim();
+                    } else {
+                        // amazon 没有提供 phone,  那么不再一直抓取 phone
+                        order.phone = "";
+                    }
+                }
             }
         }
         return order;

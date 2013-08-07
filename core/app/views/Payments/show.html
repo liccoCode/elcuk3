@@ -47,7 +47,7 @@
           <dd><a href="@{Applys.procure(payment.pApply.id)}">${payment.pApply.serialNumber}</a></dd>
         #{/if}
         #{elseif payment.tApply}
-          <dd><a href="@{Applys.procure(payment.tApply.id)}">${payment.tApply.serialNumber}</a></dd>
+          <dd><a href="@{Applys.transport(payment.tApply.id)}">${payment.tApply.serialNumber}</a></dd>
         #{/elseif}
           <dt>最后更新时间</dt>
           <dd>#{time_tooltip time: payment.updateAt, datetime:true/}</dd>

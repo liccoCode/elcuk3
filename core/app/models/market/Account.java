@@ -215,7 +215,8 @@ public class Account extends Model {
 
 
                     if(StringUtils.isNotBlank(this.cookie("at-acbde")) ||
-                            StringUtils.isNotBlank(this.cookie("at-main"))) {
+                            StringUtils.isNotBlank(this.cookie("at-main")) ||
+                            StringUtils.isNotBlank(this.cookie("at-acbuk"))) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
                         HTTP.client().getCookieStore().clearExpired(new Date());
                     } else {

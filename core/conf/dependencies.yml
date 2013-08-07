@@ -11,6 +11,8 @@ require:
     - play -> excel 1.2.3
     - play -> mockito 0.1:
         id: test
+    - org.hamcrest -> hamcrest-library 1.3:
+        id: test
     #- blockingCache -> blockingCache 0.2
     - redis -> redis 0.4
     - factoryBoy -> factory-boy 1.0:
