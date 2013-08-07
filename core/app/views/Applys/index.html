@@ -51,10 +51,11 @@
       <th>最新更新时间</th>
       <th>创建时间</th>
     </tr>
+
       #{list items:applyes, as:'apply'}
         <tr>
           <td>${apply.id}</td>
-          <td>#{apply_id_link apply:apply/}</td>
+          <td><a href="@{Applys.procure(apply.id)}">${apply.serialNumber}</a></td>
           <td>${apply.cooperator.fullName}</td>
             #{set currency:apply.currency()/}
           <td>${currency?.symbol()} ${apply.appliedAmount()}</td>
@@ -65,6 +66,7 @@
           <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
         </tr>
       #{/list}
+
   </table>
 </div>
 #{/form}

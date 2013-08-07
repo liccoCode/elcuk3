@@ -4,6 +4,7 @@ import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
 import helper.Webs;
+import jobs.AmazonFinanceCheckJob;
 import models.finance.FeeType;
 import models.finance.SaleFee;
 import models.market.Account;
@@ -36,15 +37,15 @@ import java.util.List;
 public class FinanceShippedPromise extends Job<List<SaleFee>> {
     private Account account;
     private M market;
-    private List<Orderr> orders;
+    private int orderSize = 8;
     private List<String> missingFeeType = new ArrayList<String>();
     private List<String> warnningOrders = new ArrayList<String>();
     private List<String> errorMsg = new ArrayList<String>();
 
-    public FinanceShippedPromise(Account account, M market, List<Orderr> orders) {
+    public FinanceShippedPromise(Account account, M market, int orderSize) {
         this.account = account;
         this.market = market;
-        this.orders = orders;
+        this.orderSize = orderSize;
     }
 
     @Override
@@ -52,38 +53,57 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        synchronized(this.account.cookieStore()) {
-            try {
-                this.account.changeRegion(this.market);
-                for(Orderr order : orders) {
-                    List<String> urls = this.transactionURLs(order.orderId);
-                    List<SaleFee> orderFees = new ArrayList<SaleFee>();
-                    for(String url : urls) {
-                        orderFees.addAll(this.saleFees(url));
+        String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate";
+        List<Orderr> orders = Orderr.find(jpql, this.account, this.market, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
+        long leftOrders = Orderr.count(jpql, this.account, this.market, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
+        if(orders.size() > 0) {
+            // 这里会让同账户, 不同市场的请求 block 住
+            synchronized(this.account.cookieStore()) {
+                try {
+                    this.account.changeRegion(this.market);
+                    for(Orderr order : orders) {
+                        List<String> urls = this.transactionURLs(order.orderId);
+                        List<SaleFee> orderFees = new ArrayList<SaleFee>();
+                        for(String url : urls) {
+                            orderFees.addAll(this.saleFees(url));
+                        }
+                        fees.addAll(orderFees);
+                        Orderr changeOrderr = Orderr.findById(order.orderId);
+                        changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
+                        changeOrderr.save();
                     }
-                    fees.addAll(orderFees);
-                    Orderr changeOrderr = Orderr.findById(order.orderId);
-                    changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
-                    changeOrderr.save();
-                }
-            } finally {
-                this.account.changeRegion(this.account.type);
-                if(warnningOrders.size() > 0 || errorMsg.size() > 0) {
-                    Webs.systemMail(
-                            "New Fee Type: " + StringUtils.join(this.missingFeeType, ","),
-                            StringUtils.join(this.warnningOrders, ",") +
-                                    "<br><br><br>" +
-                                    StringUtils.join(this.errorMsg, "<br>")
-                    );
-                    try {
-                        Thread.sleep(500);
-                    } catch(InterruptedException e) {
-                        //ignore
-                    }
+                } finally {
+                    this.account.changeRegion(this.account.type);
+                    emailWarnningCheck();
                 }
             }
+            AmazonFinanceCheckJob.deleteSaleFees(orders);
+            AmazonFinanceCheckJob.saveFees(fees);
+            Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees, left %s Orders to fetch.",
+                    this.account.prettyName(), this.market.name(), orders.size(), fees.size(), leftOrders);
+        } else {
+            Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", this.account.prettyName(), this.market);
         }
         return fees;
+    }
+
+    /**
+     * 邮件警告检查
+     */
+    private void emailWarnningCheck() {
+        if(warnningOrders.size() > 0 || errorMsg.size() > 0) {
+            Webs.systemMail(
+                    "New Fee Type: " + StringUtils.join(this.missingFeeType, ","),
+                    StringUtils.join(this.warnningOrders, ",") +
+                            "<br><br><br>" +
+                            StringUtils.join(this.errorMsg, "<br>")
+            );
+            try {
+                Thread.sleep(500);
+            } catch(InterruptedException e) {
+                //ignore
+            }
+        }
     }
 
     public String transactionView(String orderId) {
@@ -324,10 +344,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
 
     public M getMarket() {
         return this.market;
-    }
-
-    public List<Orderr> getOrders() {
-        return this.orders;
     }
 
     /**

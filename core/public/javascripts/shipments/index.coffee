@@ -1,11 +1,4 @@
 $ ->
-  titles = {}
-  $('a[rel=tooltip]:has(.icon-amazon)').each(
-    (e) ->
-      if $(e).attr('title') not in titles
-        titles[$(e).attr('title')] = [e]
-      else
-        titles[$(e).attr('title')].push(e)
+  $('#search_form').on('click', '.btn', (e) ->
+    $('#search_form').attr('action', $(@).data('url'))
   )
-
-  alert JSON.stringify(titles)

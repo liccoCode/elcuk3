@@ -229,7 +229,12 @@ public enum iExpress {
 
         @Override
         public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
-            // UPS 没有派送中状态, 直接给签收了, 所以使用与 isReceipt 同样的算法
+            // UPS 先检查是否有外出递送, 没有则检查已递送
+            Document doc = Jsoup.parse(iExpressHTML);
+            Elements elements = doc.select("tr:contains(外出递送)");
+            if(elements.size() > 0) {
+                return new F.T2<Boolean, DateTime>(true, trToDate(elements.last()));
+            }
             return isReceipt(iExpressHTML);
         }
 

@@ -4,8 +4,8 @@ require "gmail"
 
 # 这里的 agent_name 调整后可有可无
 clnt = HTTPClient.new(:agent_name => '77CD3A807B88CD0093940310D1FC4103')
-#res = clnt.get('http://t.easya.cc/api/cron.php')
-res = clnt.get('http://osticket.local/api/cron.php')
+res = clnt.get('http://t.easya.cc/api/cron.php')
+#res = clnt.get('http://osticket.local/api/cron.php')
 clnt.receive_timeout = 60000
 
 exit if res.status == 200

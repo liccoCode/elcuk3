@@ -106,6 +106,15 @@ public class FeeType extends GenericModel {
     }
 
     /**
+     * 与物流相关的费用
+     *
+     * @return
+     */
+    public static List<FeeType> transports() {
+        return FeeType.find("parent.name=?", "transport").fetch();
+    }
+
+    /**
      * 最顶层的节点
      *
      * @return
@@ -136,7 +145,30 @@ public class FeeType extends GenericModel {
         return FeeType.findById("productcharges");
     }
 
+    /**
+     * Amazon 的 Shipping 费用
+     *
+     * @return
+     */
     public static FeeType shipping() {
         return FeeType.findById("shipping");
+    }
+
+    /**
+     * 运输运费
+     *
+     * @return
+     */
+    public static FeeType transportShipping() {
+        return FeeType.findById("transportshipping");
+    }
+
+    /**
+     * 运输关税
+     *
+     * @return
+     */
+    public static FeeType transportDuty() {
+        return FeeType.findById("transportduty");
     }
 }

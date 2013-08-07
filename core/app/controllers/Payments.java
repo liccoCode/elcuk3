@@ -33,34 +33,19 @@ public class Payments extends Controller {
     }
 
     @CacheFor("5mn")
-    public static void rates() {
-        renderText(Currency.bocRatesHtml());
+    public static void bocRates() {
+        renderHtml(Currency.bocRatesHtml());
+    }
+
+    @CacheFor("5mn")
+    public static void xeRates(Currency currency) {
+        renderHtml(Currency.xeRatesHtml(currency));
     }
 
     @Check("payments.show")
     public static void show(Long id) {
         Payment payment = Payment.findById(id);
         render(payment);
-    }
-
-    @Check("payments.paymentunitapproval")
-    public static void paymentUnitApproval(Long id, List<Long> paymentUnitIds) {
-        checkAuthenticity();
-        Payment payment = Payment.findById(id);
-        if(paymentUnitIds == null || paymentUnitIds.size() <= 0)
-            Validation.addError("", "请选择需要批准的请款");
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            show(id);
-        }
-
-        payment.unitsApproval(paymentUnitIds);
-
-        if(Validation.hasErrors())
-            Webs.errorToFlash(flash);
-        else
-            flash.success("批复成功");
-        show(id);
     }
 
     /**
@@ -121,7 +106,7 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(false, J.json(Validation.errors())));
+            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
         } else {
             renderJSON(new Ret(true, "更新成功"));
         }
