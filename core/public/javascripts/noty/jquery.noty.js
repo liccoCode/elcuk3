@@ -166,7 +166,7 @@ if(typeof Object.create !== 'function'){
                 self.options.callback.onClose.apply(self);
             }
 
-            self.$bar.clearQueue().stop().animate(self.options.animation.close, self.options.animation.speed, self.options.animation.easing, function(){
+            self.$bar.clearQueue().stop().animate(self.options.animation.close, self.options.animation.speed, self.options.animation.easing,function(){
                 if(self.options.callback.afterClose) self.options.callback.afterClose.apply(self);
             }).promise().done(function(){
 

@@ -190,7 +190,8 @@ public class JobRequest extends Model {
     private static JobRequest newJob(int interval, T type, Account acc, M.MID mid) {
         if(!acc.type.name().startsWith("AMAZON"))
             throw new FastRuntimeException("Only Amazon Account can have ALL_FBA_ORDER_SHIPPED JOB!");
-        JobRequest job = JobRequest.find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();
+        JobRequest job = JobRequest
+                .find("account=? AND type=? AND marketplaceId=? ORDER BY requestDate DESC", acc, type, mid).first();
 
         //先判断 Job 不为空的情况
         if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
@@ -259,7 +260,8 @@ public class JobRequest extends Model {
      * 获取 ReportId
      */
     public static void updateReportId(T type) {
-        List<JobRequest> tobeFetchReportId = JobRequest.find("state=? AND procressState!='_CANCELLED_' AND type=?", JobRequest.S.DONE, type).fetch();
+        List<JobRequest> tobeFetchReportId = JobRequest
+                .find("state=? AND procressState!='_CANCELLED_' AND type=?", JobRequest.S.DONE, type).fetch();
         for(JobRequest job : tobeFetchReportId) {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " UPDATE_REPORTID Job.");
