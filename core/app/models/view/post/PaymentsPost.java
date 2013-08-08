@@ -2,15 +2,14 @@ package models.view.post;
 
 
 import helper.Currency;
-import play.libs.F;
-import org.joda.time.DateTime;
 import helper.Dates;
+import models.finance.Payment;
+import org.joda.time.DateTime;
+import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import models.finance.Payment;
 
 
 /**
@@ -25,9 +24,13 @@ public class PaymentsPost extends Post<Payment> {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
-        this.dateType = DateType.UPDATE;
+        this.dateType = DateType.CREATE;
+        this.perSize = 25;
     }
 
+    public PaymentsPost(int perSize) {
+        this.perSize = perSize;
+    }
 
     /**
      * 由于在 Action Redirect 的时候, 需要保留参数, 而 Play 并没有保留, 所以只能多写一次
@@ -41,11 +44,8 @@ public class PaymentsPost extends Post<Payment> {
 
     public Long cooperId;
 
-    public Date paymentDate;
-
     public Currency actualCurrency;
 
-    public String actualAccountNumber = "";
 
     public enum DateType {
 
@@ -59,6 +59,12 @@ public class PaymentsPost extends Post<Payment> {
             @Override
             public String label() {
                 return "更新时间";
+            }
+        },
+        PAYMENTDATE {
+            @Override
+            public String label() {
+                return "付款时间";
             }
         };
 
@@ -77,6 +83,8 @@ public class PaymentsPost extends Post<Payment> {
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
                 sql.append(" AND createdAt>=? AND createdAt<=?");
+            } else if(this.dateType == DateType.PAYMENTDATE) {
+                sql.append(" AND paymentDate>=? AND paymentDate<=?");
             } else {
                 sql.append(" AND updateAt>=? AND updateAt<=?");
             }
@@ -94,19 +102,14 @@ public class PaymentsPost extends Post<Payment> {
             params.add(this.cooperId);
         }
 
-        if(this.paymentDate != null) {
-            sql.append("AND paymentDate = ?");
-            params.add(this.paymentDate);
-        }
-
         if(this.actualCurrency != null) {
             sql.append("AND actualCurrency = ?");
             params.add(this.actualCurrency);
         }
 
-        if(!actualAccountNumber.equals("")) {
-            sql.append(" AND actualAccountNumber = ?");
-            params.add(this.actualAccountNumber);
+        if(this.search != null && !"".equals(this.search.trim())) {
+            sql.append(" AND target.name LIKE ?");
+            params.add(this.word());
         }
 
 
@@ -115,7 +118,12 @@ public class PaymentsPost extends Post<Payment> {
 
     public List<Payment> query() {
         F.T2<String, List<Object>> params = params();
-        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch();
+        this.count = count(params);
+        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,this.perSize);
     }
 
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return Payment.count("select count(paymentNumber) from Payment where "+params._1, params._2.toArray());
+    }
 }
