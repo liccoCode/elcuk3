@@ -1,11 +1,10 @@
 package models.view.post;
 
-import helper.Currency;
 import helper.Dates;
 import models.finance.Apply;
+import models.finance.ProcureApply;
 import org.joda.time.DateTime;
 import play.libs.F;
-import models.finance.ProcureApply;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,7 +23,12 @@ public class ApplyPost extends Post<Apply> {
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
         this.dateType = DateType.UPDATE;
+        this.perSize = 25;
     }
+
+    public ApplyPost(int perSize) {
+           this.perSize = perSize;
+   }
 
     public Date from;
     public Date to;
@@ -84,6 +88,12 @@ public class ApplyPost extends Post<Apply> {
 
     public List<Apply> query() {
         F.T2<String, List<Object>> params = params();
-        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch();
+        this.count = this.count(params);
+        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,this.perSize);
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+            return ProcureApply.count( params._1, params._2.toArray());
     }
 }
