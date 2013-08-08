@@ -166,7 +166,7 @@ $.DateUtil = {
         var hour = date.getHours();
         var minu = date.getMinutes();
         var sencods = date.getSeconds();
-        return (hour < 10 ? '0' + hour :hour) + ':' + (minu < 10 ? '0' + minu :minu) + ":" + (sencods < 10 ? '0' + sencods :sencods);
+        return (hour < 10 ? '0' + hour : hour) + ':' + (minu < 10 ? '0' + minu : minu) + ":" + (sencods < 10 ? '0' + sencods : sencods);
     }
 
 };

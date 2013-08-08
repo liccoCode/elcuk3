@@ -154,7 +154,7 @@
 <div class="row-fluid" id="btnFucs">
   <div class="btn-toolbar">
   #{if ship.apply}
-    <a href="@{Applys.transport(ship.apply.id)}" class="btn btn-success">${ship.apply.serialNumber}</a>
+  <a href="@{Applys.transport(ship.apply.id)}" class="btn btn-success">${ship.apply.serialNumber}</a>
   #{/if}
   #{if ship.state == models.procure.Shipment.S.PLAN}
     <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"

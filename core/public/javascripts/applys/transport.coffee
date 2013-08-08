@@ -18,6 +18,7 @@ $ ->
       )
   )
 
+
   # 处理 hash
   do ->
     paymentUnitId = window.location.hash[1..-1]
