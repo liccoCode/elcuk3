@@ -40,8 +40,10 @@ $(document).on('mouseover', '[rel=tooltip]', (event) ->
 
 $(document).on('mouseover', '[rel=popover]', (event) ->
   window.$ui.relBase(event, (params) ->
+
     @popover(params)
     @data('popover').tip().css('max-width', '900px') if 'full-width' of params
+
   )
 )
 
