@@ -2,8 +2,8 @@ package models.finance;
 
 import exception.PaymentException;
 import helper.Currency;
+import helper.Reflects;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.*;
@@ -12,8 +12,10 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
+import query.PaymentUnitQuery;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -89,9 +91,9 @@ public class PaymentUnit extends Model {
         this.deliveryment = procureUnit.deliveryment;
         this.amount = procureUnit.totalAmount();
         this.currency = procureUnit.attrs.currency;
-        this.payment = Payment.buildPayment(procureUnit);
+        this.payment = Payment.buildPayment(procureUnit.cooperator, procureUnit.attrs.currency,
+                procureUnit.totalAmount(), procureUnit.deliveryment.apply);
         this.payee = User.current();
-        this.payment.pApply = this.deliveryment.apply;
         this.payment.save();
     }
 
@@ -137,7 +139,7 @@ public class PaymentUnit extends Model {
     public boolean remove = false;
 
     /**
-     * 申请的金额
+     * 申请的金额 (unitPrice * unitQty)
      */
     public float amount = 0;
     /**
@@ -145,6 +147,16 @@ public class PaymentUnit extends Model {
      */
     @Enumerated(EnumType.STRING)
     public Currency currency = Currency.CNY;
+
+    /**
+     * 费用单价
+     */
+    public float unitPrice = 0;
+
+    /**
+     * 费用数量
+     */
+    public int unitQty = 1;
 
     @OneToOne
     public FeeType feeType;
@@ -164,11 +176,15 @@ public class PaymentUnit extends Model {
         this.createdAt = new Date();
     }
 
-    public PaymentUnit remove(String reason) {
+    public void basicRemoveValidate(String reason) {
         if(StringUtils.isBlank(reason))
             Validation.addError("", "必须填写取消的理由.");
         if(this.isApproval())
             Validation.addError("", "请款已经被批准, 不允许删除记录, 请与财务交流调整.");
+    }
+
+    public PaymentUnit procureFeeRemove(String reason) {
+        basicRemoveValidate(reason);
         if(this.remove)
             Validation.addError("", "已经删除了");
 
@@ -177,8 +193,23 @@ public class PaymentUnit extends Model {
         this.remove = true;
         this.save();
         new ERecordBuilder("paymentunit.destroy")
-                .msgArgs(reason)
+                .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
                 .fid(this.procureUnit.id) // 取消的操作, 记录在 ProcureUnit 身上, 因为是对采购计划取消请款
+                .save();
+        return this;
+    }
+
+    public PaymentUnit transportFeeRemove(String reason) {
+        basicRemoveValidate(reason);
+        if(Validation.hasErrors()) return this;
+        this.delete();
+        String fid;
+        if(this.shipment != null) fid = this.shipment.id;
+        else fid = this.shipItem.shipment.id;
+        this.clearRecords();
+        new ERecordBuilder("paymentunit.destroy")
+                .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
+                .fid(fid)
                 .save();
         return this;
     }
@@ -188,9 +219,39 @@ public class PaymentUnit extends Model {
      */
     public void permanentRemove() {
         if(Arrays.asList(PaymentUnit.S.APPLY, PaymentUnit.S.DENY).contains(this.state)) {
-            ElcukRecord.delete("action=? AND fid=?", "paymentunit.destroy", this.procureUnit.id.toString());
+            this.clearRecords();
             PaymentUnit.delete("id=?", this.id);
         }
+    }
+
+    /**
+     * 批准运输单请款项目
+     */
+    public void transportApprove() {
+        /**
+         * 1. 判断是否拥有请款单
+         * 2. 判断状态是否软删除, 软删除不允许处理
+         * 3. 判断状态是否允许
+         */
+        if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
+        if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
+        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state))
+            Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
+        if(Validation.hasErrors()) return;
+        if(this.payment == null) {
+            this.payment = Payment.buildPayment(this.shipment.cooper, this.currency, this.amount(), this.shipment.apply)
+                    .save();
+        }
+        this.state = S.APPROVAL;
+        this.save();
+        new ERecordBuilder("payment.approval")
+                .msgArgs(this.unitQty,
+                        this.shipItem == null ? "" : this.shipItem.unit.sku,
+                        this.id,
+                        this.feeType.nickName,
+                        this.currency.symbol() + " " + this.amount())
+                .fid(this.payment.id)
+                .save();
     }
 
 
@@ -215,17 +276,10 @@ public class PaymentUnit extends Model {
         if(Validation.hasErrors()) return;
         this.state = S.DENY;
         this.save();
-        this.notifyState();
         new ERecordBuilder("paymentunit.deny")
                 .msgArgs(reason)
                 .fid(this.id)
                 .save();
-    }
-
-    public void notifyState() {
-        Notification.notifies(this.payee,
-                String.format("已经[%s]了 #%s %s 请款(sku:%s)",
-                        this.state.label(), this.id, this.feeType.nickName, this.procureUnit.sku));
     }
 
     /**
@@ -235,6 +289,23 @@ public class PaymentUnit extends Model {
      */
     public float amount() {
         return this.amount + this.fixValue;
+    }
+
+    /**
+     * 运输费用的均价, 没有运输项目. 统一币种为 CNY 则为单价(unitPrice)
+     *
+     * @return
+     */
+    public float averagePrice() {
+        if(this.shipItem == null) return this.currency.toCNY(this.unitPrice);
+        // 寻找最近
+        /**
+         * 1. 找到 SKU
+         * 2. 拿着 SKU 去 PaymentUnit 中找费用
+         */
+        String sku = this.shipItem.unit.sku;
+        Float price = new PaymentUnitQuery().avgSkuTransportshippingFee(sku).get(sku);
+        return price == null ? 0 : price;
     }
 
     /**
@@ -275,7 +346,7 @@ public class PaymentUnit extends Model {
         if(fk.startsWith("DL")) {
             return Deliveryment.<Deliveryment>findById(fk).cooperator;
         } else if(fk.startsWith("SP")) {
-            return Shipment.<Deliveryment>findById(fk).cooperator;
+            return Shipment.<Shipment>findById(fk).cooper;
         }
         return null;
     }
@@ -296,6 +367,28 @@ public class PaymentUnit extends Model {
      */
     public List<ElcukRecord> denyRecords() {
         return ElcukRecord.records(this.id + "", Messages.get("paymentunit.deny"));
+    }
+
+    public List<ElcukRecord> updateRecords() {
+        return ElcukRecord.records(this.id + "", Messages.get("paymentunit.update"));
+    }
+
+    public List<ElcukRecord> records() {
+        List<String> actions = Arrays.asList(
+                Messages.get("paymentunit.fixValue"),
+                Messages.get("paymentunit.deny"),
+                Messages.get("paymentunit.update")
+        );
+        return ElcukRecord.records(this.id + "", actions);
+    }
+
+    /**
+     * 永久删除 PaymentUnit 的时候, 需要将其关联的 Records 一起删除.
+     */
+    public void clearRecords() {
+        for(String action : Arrays.asList("paymentunit.fixValue", "paymentunit.deny")) {
+            ElcukRecord.delete("action=? AND fid=?", Messages.get(action), this.id.toString());
+        }
     }
 
     /**
@@ -327,6 +420,27 @@ public class PaymentUnit extends Model {
                 .msgArgs(reason, oldFixValue, this.fixValue)
                 .fid(this.id)
                 .save();
+    }
+
+    /**
+     * 更新 Paymentunit 中的单价与数量
+     *
+     * @param fee
+     */
+    public PaymentUnit fixUnitValue(PaymentUnit fee) {
+        fee.amount = fee.unitPrice * fee.unitQty;
+        List<String> logs = new ArrayList<String>();
+        logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
+        logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
+        logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
+        logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
+
+        if(logs.size() > 0) {
+            new ERecordBuilder("paymentunit.update")
+                    .msgArgs(StringUtils.join(logs, ";\r\n"))
+                    .fid(this.shipment.id).save();
+        }
+        return this.save();
     }
 }
 

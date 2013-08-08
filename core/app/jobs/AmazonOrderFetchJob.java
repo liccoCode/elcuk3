@@ -16,7 +16,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 第三步, 补全遗漏信息;
@@ -96,22 +95,7 @@ public class AmazonOrderFetchJob extends Job implements JobRequest.AmazonJob {
                     0, orders.size() > 1000 ? 1000 : orders.size()
             );
             while(orders.size() > 0) {
-                Map<String, Boolean> existOrders = AmazonOrderDiscover.ordersExist(partOrders);
-
-                List<Orderr> toUpdate = new ArrayList<Orderr>();
-                List<Orderr> toSave = new ArrayList<Orderr>();
-                for(Orderr orderr : partOrders) {
-                    if(existOrders.containsKey(orderr.orderId))
-                        toUpdate.add(orderr);
-                    else
-                        toSave.add(orderr);
-                }
-
-                AmazonOrderDiscover.updateOrders(toUpdate);
-                AmazonOrderItemDiscover.updateOrderItemByOrders(toUpdate);
-                AmazonOrderDiscover.saveOrders(toSave);
-                AmazonOrderItemDiscover.saveOrderItemByOrders(toSave);
-
+                AmazonOrderDiscover.saveOrUpdateOrders(partOrders, true);
 
                 // 清理掉已经处理完成的 1000 个订单
                 partOrders.clear();

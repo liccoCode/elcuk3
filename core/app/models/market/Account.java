@@ -213,8 +213,10 @@ public class Account extends Model {
                         );
                     }
 
-                    Element navBar = Jsoup.parse(body).select("#topNavContainer").first();
-                    if(navBar != null) {
+
+                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) ||
+                            StringUtils.isNotBlank(this.cookie("at-main")) ||
+                            StringUtils.isNotBlank(this.cookie("at-acbuk"))) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
                         HTTP.client().getCookieStore().clearExpired(new Date());
                     } else {

@@ -30,6 +30,11 @@ public class ShipItems extends Controller {
         render(p, units);
     }
 
+    public static void showJson(Long id) {
+        ShipItem itm = ShipItem.findById(id);
+        render(itm);
+    }
+
     /**
      * 将运输项目从一个运输单调整到另外一个运输单
      *

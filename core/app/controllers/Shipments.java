@@ -5,6 +5,7 @@ import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.finance.FeeType;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -13,12 +14,15 @@ import models.product.Whouse;
 import models.view.Ret;
 import models.view.post.ShipmentPost;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.*;
@@ -33,7 +37,7 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Shipments extends Controller {
-    @Before(only = {"index", "blank", "save"})
+    @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
         List<Whouse> whouses = Whouse.findAll();
         List<Cooperator> cooperators = Cooperator.shippers();
@@ -95,14 +99,32 @@ public class Shipments extends Controller {
 
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
+        //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.findAll());
         renderArgs.put("shippers", Cooperator.shippers());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
         if(StringUtils.isNotBlank(shipmentId)) {
-            //TODO effect 这里需要将所有的 records 修改为执行 action 的
             renderArgs.put("records", ElcukRecord.records(shipmentId));
+            Shipment ship = Shipment.findById(shipmentId);
+            renderArgs.put("feeTypes", feeTypes(ship.type));
+        } else {
+            renderArgs.put("feeTypes", feeTypes(null));
         }
+    }
+
+    @Util
+    public static List<FeeType> feeTypes(Shipment.T shipType) {
+        List<FeeType> feeTypes = FeeType.transports();
+        if(shipType == Shipment.T.EXPRESS) {
+            CollectionUtils.filter(feeTypes, new Predicate() {
+                @Override
+                public boolean evaluate(Object o) {
+                    return !((FeeType) o).name.equals("transportshipping");
+                }
+            });
+        }
+        return feeTypes;
     }
 
     public static void show(String id) {
@@ -392,4 +414,5 @@ public class Shipments extends Controller {
         dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
         renderJSON(dates);
     }
+
 }

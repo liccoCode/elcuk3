@@ -1,6 +1,8 @@
 package helper;
 
+import org.apache.commons.lang.StringUtils;
 import play.i18n.Messages;
+import play.utils.FastRuntimeException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -43,5 +45,29 @@ public class Reflects {
 
     public static boolean isType(Object instance, Class type) {
         return instance.getClass().equals(type);
+    }
+
+    /**
+     * 用来记录参数变化的门面方法, 注: 仅仅实现了一级子参数, 还未利用递归实现 N 级子参数, 所以只能处理:
+     * attrs.price 这一级别, 无法处理 attrs.address.name 这些级别
+     *
+     * @param instance
+     * @param attr
+     * @param value
+     * @return
+     */
+    public static List<String> logFieldFade(Object instance, String attr, Object value) {
+        try {
+            Field field = null;
+            if(attr.contains(".")) {
+                String[] attrs = StringUtils.split(attr, ".");
+                field = instance.getClass().getField(attrs[0]);
+                return Reflects.updateAndLogChanges(field.get(instance), attrs[1], value);
+            } else {
+                return Reflects.updateAndLogChanges(instance, attr, value);
+            }
+        } catch(Exception e) {
+            throw new FastRuntimeException(Webs.E(e));
+        }
     }
 }

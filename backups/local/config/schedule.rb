@@ -20,5 +20,5 @@
 
 # Learn more: http://github.com/javan/whenever
 every :day, at: '17:00' do
-  command 'cd /Users/wyatt/Programer/repos/elcuk2/backups;cap bak:t;cap bak:r;cap bak:e'
+  command 'cd /Users/wyatt/Programer/repos/elcuk2/backups;cap bak:t;cap bak:r;cap bak:e;cap bak:db'
 end

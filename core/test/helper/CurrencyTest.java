@@ -27,6 +27,7 @@ public class CurrencyTest extends UnitTest {
         assertEquals(6.1976, Currency.USD.rate(html), 0.2);
         assertEquals(9.3984, Currency.GBP.rate(html), 0.2);
         assertEquals(7.9309, Currency.EUR.rate(html), 0.2);
+        assertEquals(0.78309, Currency.HKD.rate(html), 0.2);
     }
 
     @Test
