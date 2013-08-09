@@ -70,29 +70,26 @@ $ ->
     )
 
   #预览按钮事件
-  $('#sid_preview_popover').click(
-    (e) ->
-     e.preventDefault()
-     o = $(@)
-     o.popover('toggle')
+  $('#sid_preview_popover').click((e) ->
+    e.preventDefault()
+    $(@).popover('toggle')
   )
 
   # 加载 tsp 数据的按钮
-  $('#sid_helper + button').click(
-    (e) ->
-      e.preventDefault()
-      json = $('#sid_preview_popover').data('tsp')
-      if json is undefined
-        alert('还没有数据, 请先预览!')
-        return false
-      # product Desc
-      $('[name=s\\.aps\\.productDesc]').val(json['p'][0]).blur()
-      # technical
-      for t, i in json['t']
-        $('[name=s\\.aps\\.keyFeturess\\[' + i + '\\]]').val(t).blur()
-      # searchTerms
-      for s, i in json['s']
-        $('[name=s\\.aps\\.searchTermss\\[' + i + '\\]]').val(s).blur()
+  $('#sid_helper + button').click((e) ->
+    e.preventDefault()
+    json = $('#sid_preview_popover').data('tsp')
+    if json is undefined
+      alert('还没有数据, 请先预览!')
+      return false
+    # product Desc
+    $('[name=s\\.aps\\.productDesc]').val(json['p'][0]).blur()
+    # technical
+    for t, i in json['t']
+      $('[name=s\\.aps\\.keyFeturess\\[' + i + '\\]]').val(t).blur()
+    # searchTerms
+    for s, i in json['s']
+      $('[name=s\\.aps\\.searchTermss\\[' + i + '\\]]').val(s).blur()
   )
 
   # 显示 Selling 上架信息的 Modal 窗口
