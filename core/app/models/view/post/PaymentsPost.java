@@ -5,9 +5,11 @@ import helper.Currency;
 import helper.Dates;
 import models.finance.Payment;
 import org.joda.time.DateTime;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -22,8 +24,9 @@ public class PaymentsPost extends Post<Payment> {
 
     public PaymentsPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
-        this.from = now.minusDays(5).toDate();
+        this.from = now.minusMonths(2).toDate();
         this.to = now.toDate();
+        this.states = Arrays.asList(Payment.S.LOCKED, Payment.S.WAITING);
         this.dateType = DateType.CREATE;
         this.perSize = 25;
     }
@@ -40,7 +43,7 @@ public class PaymentsPost extends Post<Payment> {
 
     public DateType dateType;
 
-    public Payment.S state;
+    public List<Payment.S> states = new ArrayList<Payment.S>();
 
     public Long cooperId;
 
@@ -92,9 +95,13 @@ public class PaymentsPost extends Post<Payment> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.state != null) {
-            sql.append(" AND state = ?");
-            params.add(this.state);
+        if(this.states != null) {
+            List<String> states = new ArrayList<String>();
+            for(Payment.S state : this.states) {
+                if(state == null) continue;
+                states.add(state.name());
+            }
+            if(states.size() > 0) sql.append(" AND ").append(SqlSelect.whereIn("state", states));
         }
 
         if(this.cooperId != null) {
@@ -119,11 +126,16 @@ public class PaymentsPost extends Post<Payment> {
     public List<Payment> query() {
         F.T2<String, List<Object>> params = params();
         this.count = count(params);
-        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,this.perSize);
+        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return Payment.count("select count(paymentNumber) from Payment where "+params._1, params._2.toArray());
+        return Payment.count("select count(paymentNumber) from Payment where " + params._1, params._2.toArray());
+    }
+
+    @Override
+    public Long getTotalCount() {
+        return Payment.count();
     }
 }

@@ -88,7 +88,7 @@ $ ->
     from = $('#request_currency').text()
     ratio = if 'CNY' == from
       if from == target
-        1
+        1.toFixed(8)
       else
         tr = $("#boc_rate tr td:contains(#{currencyMap[target]})").parents('tr')
         (100 / parseFloat(tr.find('td:eq(1)').css('color', 'red').text())).toFixed(8)

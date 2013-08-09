@@ -61,6 +61,11 @@ public class OrderPOST extends Post<Orderr> {
     }
 
     @Override
+    public Long getTotalCount() {
+        return Orderr.count();
+    }
+
+    @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder(" FROM Orderr o");
         sbd.append(" LEFT JOIN o.items oi WHERE 1=1 ");
