@@ -12,7 +12,7 @@
   <li class="text-warning">分页与搜索后续补上</li>
 </ul>
 #{/info_row}
-#{form @Payments.index(), class:'search_form', id:'payments_form'}
+#{form @Payments.index(), class:'search_form', id:'payments_form', method:'POST'}
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend input-append inline">
@@ -25,7 +25,7 @@
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.PaymentsPost.DateType.values() , value: p.dateType /}
 
-        #{select_enum name:'p.state', items:models.finance.Payment.S.values() , value: p.state }
+        #{select_enum name:'p.states', items:models.finance.Payment.S.values()}
           <option value="">状态</option>
         #{/select_enum}
 

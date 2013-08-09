@@ -8,7 +8,7 @@ import models.finance.TransportApply;
 import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.view.Ret;
-import models.view.post.ApplyPost;
+import models.view.post.ProcreApplyPost;
 import models.view.post.ShipmentPost;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -27,7 +27,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Applys extends Controller {
 
-    @Before(only = {"index"})
+    @Before(only = {"procures"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
 
@@ -36,9 +36,9 @@ public class Applys extends Controller {
 
 
     @Check("applys.index")
-    public static void index(ApplyPost p) {
+    public static void procures(ProcreApplyPost p) {
         List<Apply> applyes = null;
-        if(p == null) p = new ApplyPost();
+        if(p == null) p = new ProcreApplyPost();
         applyes = p.query();
 
         render(applyes, p);

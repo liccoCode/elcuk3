@@ -16,19 +16,19 @@ import java.util.List;
  * Date: 4/2/13
  * Time: 3:25 PM
  */
-public class ApplyPost extends Post<Apply> {
+public class ProcreApplyPost extends Post<Apply> {
 
-    public ApplyPost() {
+    public ProcreApplyPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
-        this.from = now.minusDays(5).toDate();
+        this.from = now.minusMonths(2).toDate();
         this.to = now.toDate();
         this.dateType = DateType.CREATE;
         this.perSize = 25;
     }
 
-    public ApplyPost(int perSize) {
-           this.perSize = perSize;
-   }
+    public ProcreApplyPost(int perSize) {
+        this.perSize = perSize;
+    }
 
     public Date from;
     public Date to;
@@ -40,13 +40,13 @@ public class ApplyPost extends Post<Apply> {
 
     public enum DateType {
 
-        CREATE{
+        CREATE {
             @Override
             public String label() {
                 return "创建时间";
             }
         },
-        UPDATE{
+        UPDATE {
             @Override
             public String label() {
                 return "更新时间";
@@ -89,11 +89,17 @@ public class ApplyPost extends Post<Apply> {
     public List<Apply> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
-        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,this.perSize);
+        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,
+                this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-            return ProcureApply.count( params._1, params._2.toArray());
+        return ProcureApply.count(params._1, params._2.toArray());
+    }
+
+    @Override
+    public Long getTotalCount() {
+        return ProcureApply.count();
     }
 }
