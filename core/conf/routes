@@ -53,8 +53,8 @@ POST    /feetype/{name}/delete                               FeeTypes.remove
 
 # Orders
 GET     /orders                                             Orders.index
+POST    /orders                                             Orders.index
 GET     /order/{id}                                         Orders.show
-GET     /orders/warnfix                                     Orders.warrningOrders
 
 # Payments
 GET     /payments                                           Payments.index

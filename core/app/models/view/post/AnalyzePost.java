@@ -339,6 +339,11 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         return afterPager;
     }
 
+    @Override
+    public Long getTotalCount() {
+        return (long) this.analyzes().size();
+    }
+
     public static Date cachedDate(String type) {
         String cacke_key = "sid".equals(type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
         return Cache.get(cacke_key + ".time", Date.class);
