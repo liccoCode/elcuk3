@@ -150,7 +150,7 @@ public class ProcureApply extends Apply {
             dmt.save();
         }
         new ERecordBuilder("procureapply.save")
-                .msgArgs(StringUtils.join(deliverymentIds, ","))
+                .msgArgs(StringUtils.join(deliverymentIds, ","), this.id)
                 .fid(this.id + "")
                 .save();
     }
