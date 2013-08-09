@@ -1,8 +1,9 @@
 package models.view.post;
 
+
+import helper.Currency;
 import helper.Dates;
-import models.finance.Apply;
-import models.finance.ProcureApply;
+import models.finance.Payment;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -10,15 +11,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 /**
  * Created by IntelliJ IDEA.
- * User: wyatt
- * Date: 4/2/13
- * Time: 3:25 PM
+ * User: DyLanM
+ * Date: 13-8-5
+ * Time: 上午10:09
  */
-public class ApplyPost extends Post<Apply> {
+public class PaymentsPost extends Post<Payment> {
 
-    public ApplyPost() {
+    public PaymentsPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
@@ -26,46 +28,63 @@ public class ApplyPost extends Post<Apply> {
         this.perSize = 25;
     }
 
-    public ApplyPost(int perSize) {
-           this.perSize = perSize;
-   }
+    public PaymentsPost(int perSize) {
+        this.perSize = perSize;
+    }
 
+    /**
+     * 由于在 Action Redirect 的时候, 需要保留参数, 而 Play 并没有保留, 所以只能多写一次
+     */
     public Date from;
     public Date to;
 
     public DateType dateType;
 
-    public Long suppliers;
+    public Payment.S state;
+
+    public Long cooperId;
+
+    public Currency actualCurrency;
 
 
     public enum DateType {
 
-        CREATE{
+        CREATE {
             @Override
             public String label() {
                 return "创建时间";
             }
         },
-        UPDATE{
+        UPDATE {
             @Override
             public String label() {
                 return "更新时间";
             }
+        },
+        PAYMENTDATE {
+            @Override
+            public String label() {
+                return "付款时间";
+            }
         };
 
         public abstract String label();
+
     }
 
 
     @Override
     public F.T2<String, List<Object>> params() {
 
+
         StringBuffer sql = new StringBuffer(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
-                sql.append(" AND createdAt>=?  AND createdAt <=?");
+                sql.append(" AND createdAt>=? AND createdAt<=?");
+            } else if(this.dateType == DateType.PAYMENTDATE) {
+                sql.append(" AND paymentDate>=? AND paymentDate<=?");
             } else {
                 sql.append(" AND updateAt>=? AND updateAt<=?");
             }
@@ -73,27 +92,38 @@ public class ApplyPost extends Post<Apply> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.suppliers != null) {
-            sql.append(" AND cooperator.id =? ");
-            params.add(this.suppliers);
+        if(this.state != null) {
+            sql.append(" AND state = ?");
+            params.add(this.state);
+        }
+
+        if(this.cooperId != null) {
+            sql.append(" AND cooperator.id = ? ");
+            params.add(this.cooperId);
+        }
+
+        if(this.actualCurrency != null) {
+            sql.append("AND actualCurrency = ?");
+            params.add(this.actualCurrency);
         }
 
         if(this.search != null && !"".equals(this.search.trim())) {
-            sql.append(" AND serialNumber like ?");
+            sql.append(" AND target.name LIKE ?");
             params.add(this.word());
         }
+
 
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
-    public List<Apply> query() {
+    public List<Payment> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = this.count(params);
-        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,this.perSize);
+        this.count = count(params);
+        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-            return ProcureApply.count( params._1, params._2.toArray());
+        return Payment.count("select count(paymentNumber) from Payment where "+params._1, params._2.toArray());
     }
 }
