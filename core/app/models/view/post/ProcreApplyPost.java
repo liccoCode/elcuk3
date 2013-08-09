@@ -35,7 +35,7 @@ public class ProcreApplyPost extends Post<Apply> {
 
     public DateType dateType;
 
-    public Long suppliers;
+    public Long supplierId;
 
 
     public enum DateType {
@@ -73,9 +73,9 @@ public class ProcreApplyPost extends Post<Apply> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.suppliers != null) {
-            sql.append(" AND cooperator.id =? ");
-            params.add(this.suppliers);
+        if(this.supplierId != null) {
+            sql.append(" AND cooperator.id=? ");
+            params.add(this.supplierId);
         }
 
         if(this.search != null && !"".equals(this.search.trim())) {

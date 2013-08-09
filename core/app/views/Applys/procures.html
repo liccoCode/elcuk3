@@ -18,7 +18,7 @@
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.ProcreApplyPost.DateType.values(), value:p.dateType/}
 
-        #{select 'p.suppliers', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.suppliers}
+        #{select 'p.supplierId', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.supplierId}
             #{option ''}供应商#{/option}
         #{/select}
     </div>
