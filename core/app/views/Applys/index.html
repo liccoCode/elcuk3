@@ -23,7 +23,7 @@
     </div>
 
     <div class="inline">
-        #{select_enum name:'p.dateType', items:models.view.post.ApplyPost.DateType.values(), values:p.dateType /}
+        #{select_enum name:'p.dateType',items:models.view.post.ApplyPost.DateType.values(),value:p.dateType/}
 
         #{select 'p.suppliers', items:suppliers, labelProperty:'name', valueProperty:'id', value:p.suppliers}
             #{option ''}供应商#{/option}

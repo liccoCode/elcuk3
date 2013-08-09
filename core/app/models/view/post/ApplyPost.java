@@ -22,7 +22,7 @@ public class ApplyPost extends Post<Apply> {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
-        this.dateType = DateType.UPDATE;
+        this.dateType = DateType.CREATE;
         this.perSize = 25;
     }
 
@@ -40,13 +40,13 @@ public class ApplyPost extends Post<Apply> {
 
     public enum DateType {
 
-        CREATE {
+        CREATE{
             @Override
             public String label() {
                 return "创建时间";
             }
         },
-        UPDATE {
+        UPDATE{
             @Override
             public String label() {
                 return "更新时间";
