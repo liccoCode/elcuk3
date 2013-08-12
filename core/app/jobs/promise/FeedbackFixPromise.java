@@ -1,8 +1,7 @@
 package jobs.promise;
 
-import controllers.Notifications;
+
 import jobs.FeedbackCrawlJob;
-import models.Notification;
 import models.market.Account;
 import models.market.Feedback;
 import play.jobs.Job;
@@ -29,9 +28,6 @@ public class FeedbackFixPromise extends Job<List<Feedback>> {
         long begin = System.currentTimeMillis();
         Account acc = Account.findById(this.aid);
         List<Feedback> feedbacks = FeedbackCrawlJob.fetchAccountFeedbackOnePage(acc, acc.type, this.page);
-        Notification.notifies(String.format("更新 Account %s 的第 %s 页,共 %s 个 Feedback, 耗时: %s s",
-                acc.prettyName(), page, feedbacks.size(), (System.currentTimeMillis() - begin) / 1000),
-                Notification.SERVICE);
         return feedbacks;
     }
 }

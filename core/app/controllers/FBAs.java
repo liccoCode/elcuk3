@@ -1,14 +1,12 @@
 package controllers;
 
 import helper.Webs;
-import models.Notification;
 import models.embedded.ERecordBuilder;
 import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -41,9 +39,6 @@ public class FBAs extends Controller {
                     .msgArgs(unit.id, unit.sku, unit.fba.shipmentId)
                     .fid(unit.id)
                     .save();
-            Notification.notifies("FBA 创建成功",
-                    Messages.get("shipment.createFBA.msg", unit.id, unit.sku, unit.fba.shipmentId),
-                    Notification.PROCURE);
             flash.success("成功在 Amazon 创建 FBA: %s", unit.fba.shipmentId);
         }
 

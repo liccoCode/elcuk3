@@ -3,7 +3,6 @@ package controllers;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
@@ -104,9 +103,6 @@ public class Products extends Controller {
         try {
             Selling se = pro.saleAmazon(s);
             flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
-            Notification.notifies(String.format("新上架 %s %s", se.asin, se.market),
-                    String.format("MSKU: %s, 价格: %s, Title: %s", se.merchantSKU, se.aps.salePrice,
-                            se.aps.title), Notification.PM);
             redirect("/Sellings/selling/" + se.sellingId);
         } catch(Exception e) {
             Validation.addError("", e.getMessage());
