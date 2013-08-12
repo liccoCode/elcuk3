@@ -159,7 +159,9 @@ public enum iExpress {
 
         @Override
         public F.T2<Boolean, DateTime> isClearance(String iExpressHTML) {
-            return isAnyState(iExpressHTML, "可以向有关国家机构申报本货件");
+            F.T2<Boolean, DateTime> t2 = isAnyState(iExpressHTML, "可以向有关国家机构申报本货件");
+            if(t2._1) return t2;
+            return isAnyState(iExpressHTML, "进口");
         }
 
         @Override
