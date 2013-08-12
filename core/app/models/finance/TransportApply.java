@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
-import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.Entity;
@@ -77,10 +76,7 @@ public class TransportApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "",
-                Arrays.asList(Messages.get("transportapply.save"),
-                        Messages.get("shipment.departFromApply"))
-        );
+        return ElcukRecord.records(this.id + "", Arrays.asList("transportapply.save", "shipment.departFromApply"));
     }
 
 
