@@ -141,4 +141,22 @@ public class Cooperators extends Controller {
         CooperItem copItem = CooperItem.find("sku=? AND cooperator.id=?", sku, id).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true).build());
     }
+
+    /**
+     * 选择供应商
+     *
+     * @param coperId
+     * @param sku
+     * @param size
+     */
+    public static void boxSize(long coperId, String sku, int size) {
+        validation.required(coperId);
+        validation.required(sku);
+        validation.required(size);
+
+        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
+
+        CooperItem copi = CooperItem.find("cooperator.id=? AND product.sku=?", coperId, sku).first();
+        renderJSON(new Ret(true, copi.boxToSize(size) + ""));
+    }
 }

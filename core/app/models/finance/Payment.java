@@ -533,14 +533,8 @@ public class Payment extends Model {
     }
 
     public List<ElcukRecord> records() {
-        List<String> actions = Arrays.asList(
-                Messages.get("payment.approval"),
-                Messages.get("payment.payit"),
-                Messages.get("payment.uploadDestroy"),
-                Messages.get("payment.cancel")
-        );
-
-        return ElcukRecord.records(this.id + "", actions);
+        return ElcukRecord.records(this.id + "",
+                Arrays.asList("payment.approval", "payment.payit", "payment.uploadDestroy", "payment.cancel"));
     }
 
 

@@ -9,9 +9,9 @@
             <abbr rel='tooltip' title="黑色: 申请状态; 蓝色: 批准状态; 红色: 驳回状态; 绿色: 支付完成状态">费用类型</abbr>
           </th>
           <th class="span1">币种</th>
-          <th>单价</th>
+          <th class="span2">单价</th>
           <th>数量</th>
-          <th>平均价</th>
+          <th class="span2">平均价</th>
           <th class="span2">总价</th>
           <th>备注</th>
           <th>申请人</th>
@@ -23,11 +23,11 @@
           <td>${fee.id}</td>
           <td><span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span></td>
           <td>${fee.currency}</td>
-          <td>${fee.unitPrice}</td>
+          <td>${fee.currency.symbol()} ${fee.unitPrice}</td>
           <td>${fee.unitQty}</td>
-          <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice()}</td>
+          <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}</td>
           <td data-shipitemid='${fee.shipItem?.id}'>
-          ${fee.amount()}
+          ${fee.currency.symbol()} ${fee.amount()}
               #{if fee.shipItem}
                 <i class="icon-search"></i>
               #{/if}
@@ -122,11 +122,11 @@
     <td><%= fee.id %></td>
     <td><span class='label label-<%= label %>'><%= fee.feeType.nickName %></span></td>
     <td><%= fee.currency %></td>
-    <td><%= fee.unitPrice %></td>
+    <td><%= fee.symbol %> <%= fee.unitPrice %></td>
     <td><%= fee.unitQty %></td>
     <td><%= fee.averagePrice %></td>
     <td data-shipitemid='<%= fee.shipItem.id %>'>
-      <%= fee.amount %>
+      <%= fee.symbol %> <%= fee.amount %>
       <% if(fee.shipItem.id) { %>
       <i class="icon-search"></i>
       <% } %>

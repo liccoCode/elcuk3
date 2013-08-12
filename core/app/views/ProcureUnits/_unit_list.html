@@ -146,7 +146,7 @@
               <div class="btn-toolbar">
                   #{power.ck "procures.delivery"}
                     <!-- 交货页面 -->
-                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-small btn-warning">交货</a>
+                    <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
                   #{/power.ck}
                   #{power.ck "procures.dosplitunit"}
                     <!-- 分拆采购单元 -->
