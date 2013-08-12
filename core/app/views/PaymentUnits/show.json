@@ -7,6 +7,7 @@
     },
     "amount": "${fee.amount}",
     "currency": "${fee.currency}",
+    "symbol": "${fee.currency.symbol()}",
     "unitPrice": "${fee.unitPrice}",
     "unitQty": "${fee.unitQty}",
     "memo": "${fee.memo}",

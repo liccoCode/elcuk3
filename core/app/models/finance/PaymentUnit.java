@@ -8,6 +8,7 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
@@ -297,15 +298,26 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float averagePrice() {
-        if(this.shipItem == null) return this.currency.toCNY(this.unitPrice);
-        // 寻找最近
-        /**
-         * 1. 找到 SKU
-         * 2. 拿着 SKU 去 PaymentUnit 中找费用
-         */
-        String sku = this.shipItem.unit.sku;
-        Float price = new PaymentUnitQuery().avgSkuTransportshippingFee(sku).get(sku);
-        return price == null ? 0 : price;
+        if(this.shipment != null) {
+            Shipment.T shipType = this.shipment.type;
+            PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
+            DateTime now = DateTime.now();
+            DateTime threeMonthAgo = now.minusMonths(3);
+
+            if(this.shipItem != null && shipType == Shipment.T.EXPRESS) {
+                String sku = this.shipItem.unit.sku;
+                Float price = aveFeeQuery.avgSkuExpressTransportshippingFee(threeMonthAgo.toDate(), now.toDate(), sku)
+                        .get(sku);
+                return price == null ? 0 : price;
+            } else if(shipType == Shipment.T.SEA) {
+                return aveFeeQuery.avgSkuSEATransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+            } else if(shipType == Shipment.T.AIR) {
+                return aveFeeQuery.avgSkuAIRTransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+            } else {
+                return this.currency.toCNY(this.unitPrice);
+            }
+        }
+        return this.currency.toCNY(this.unitPrice);
     }
 
     /**
@@ -430,6 +442,9 @@ public class PaymentUnit extends Model {
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
         logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
+        if(this.payment == null) {
+            logs.addAll(Reflects.logFieldFade(this, "currency", fee.currency));
+        }
 
         if(logs.size() > 0) {
             new ERecordBuilder("paymentunit.update")
