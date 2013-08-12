@@ -1031,6 +1031,26 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 当前运输单与运输项目的相同币种的所有费用
+     *
+     * @return
+    */
+    public Map<Currency,Float> groupFees(){
+
+        Map<Currency,Float> fees = new HashMap<Currency, Float>();
+
+        for(PaymentUnit paymentUnit : this.fees ){
+            if( fees.containsKey(paymentUnit.currency) ){
+                fees.put( paymentUnit.currency, fees.get(paymentUnit.currency) + paymentUnit.amount() );
+            }else{
+                fees.put(paymentUnit.currency,paymentUnit.amount());
+            }
+        }
+
+       return fees;
+    }
+
+    /**
      * 计算 Shipment 的 ID
      *
      * @return
