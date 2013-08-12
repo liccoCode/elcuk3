@@ -11,7 +11,7 @@
 #{/info_row}
 
 <div class="row-fluid">
-  <form action="@{Procures.index()}" method="get" class="search_form">
+  <form action="@{ProcureUnits.index()}" method="get" class="search_form">
     <div class="span12">
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
@@ -70,7 +70,7 @@
 <form method="post" id="create_deliveryment" action="@{Deliveryments.create()}">
   <div class="row-fluid">
     <div class="span12">
-    #{render 'Procures/_unit_list.html', units: p.query(), checkbox:true/}
+    #{render 'ProcureUnits/_unit_list.html', units: p.query(), checkbox:true/}
     </div>
   </div>
 

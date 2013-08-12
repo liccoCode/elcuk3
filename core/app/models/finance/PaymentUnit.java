@@ -374,12 +374,8 @@ public class PaymentUnit extends Model {
     }
 
     public List<ElcukRecord> records() {
-        List<String> actions = Arrays.asList(
-                Messages.get("paymentunit.fixValue"),
-                Messages.get("paymentunit.deny"),
-                Messages.get("paymentunit.update")
-        );
-        return ElcukRecord.records(this.id + "", actions);
+        return ElcukRecord.records(this.id + "",
+                Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update"));
     }
 
     /**

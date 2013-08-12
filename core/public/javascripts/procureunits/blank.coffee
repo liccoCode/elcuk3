@@ -23,7 +23,7 @@ $ ->
     e.preventDefault()
     coperId = $("select[name='unit.cooperator.id']").val()
     if coperId
-      $.post('/procures/calculateBox', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()})
+      $.post('/cooperators/boxSize', {size: $('#box_num').val(), coperId: coperId, sku: $('#unit_sku').val()})
         .done((r) ->
           if r.flag is false
             alert(r.message)
