@@ -442,6 +442,9 @@ public class PaymentUnit extends Model {
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));
         logs.addAll(Reflects.logFieldFade(this, "memo", fee.memo));
+        if(this.payment == null) {
+            logs.addAll(Reflects.logFieldFade(this, "currency", fee.currency));
+        }
 
         if(logs.size() > 0) {
             new ERecordBuilder("paymentunit.update")
