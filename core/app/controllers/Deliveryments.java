@@ -87,7 +87,7 @@ public class Deliveryments extends Controller {
         Validation.required("deliveryments.addunits", pids);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            Procures.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
 
         Deliveryment deliveryment = Deliveryment
@@ -95,7 +95,7 @@ public class Deliveryments extends Controller {
 
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            Procures.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
+            ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
 
         flash.success("Deliveryment %s 创建成功.", deliveryment.id);

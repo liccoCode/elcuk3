@@ -70,6 +70,8 @@ POST    /payment/{id}/lock                                  Payments.lockIt
 DELETE  /payment/{id}/lock                                  Payments.unlock
 
 # ProcureUnits
+GET     /procureunits                                       ProcureUnits.index
+POST    /procureunits                                       ProcureUnits.index
 GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
@@ -80,6 +82,8 @@ POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
 PUT     /procureunit/{procureUnitId}/fba                    FBAs.update
 GET     /procureunit/{id}/split                             ProcureUnits.splitUnit
 POST    /procureunit/{id}/split                             ProcureUnits.doSplitUnit
+GET     /procureunit/{id}/delivery                          ProcureUnits.deliveryunit
+DELETE  /procureunit/{id}/delivery                          ProcureUnits.reverDelivery
 
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip
