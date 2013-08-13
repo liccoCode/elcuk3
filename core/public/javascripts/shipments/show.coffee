@@ -25,14 +25,6 @@ $ ->
     else
       $(@).parents('form').attr('action', '/Shipments/splitShipment').submit()
 
-  $('#create_fba').click (e) ->
-    if !confirm('确认提交?')
-      e.preventDefault()
-    else
-      $(@).button('loading').parents('form').attr('action', '/Shipments/deployToAmazon').submit()
-
-  $('#previewBtn')
-
   # 所有的 btnFucs 下的 button action
   $('#btnFucs').on('click', '.func', ->
     funcsForm = $('#funcsForm').find('form').attr('action', @getAttribute('url')).end()
