@@ -9,6 +9,7 @@ import models.User;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.market.Selling;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
@@ -16,6 +17,7 @@ import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -29,6 +31,12 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ProcureUnits extends Controller {
+
+    @Before(only = {"index"})
+    public static void beforeIndex() {
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        renderArgs.put("cooperators", cooperators);
+    }
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
