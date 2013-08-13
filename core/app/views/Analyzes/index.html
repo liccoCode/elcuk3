@@ -85,9 +85,9 @@
           <button class="btn" id="a_search">搜索</button>
         </div>
 
-        <button id="clear_cache" class="btn btn-primary pull-right" style="margin-right:5px;">
-          Cached At ${models.view.post.AnalyzePost.cachedDate('sid').datetime()}
-        </button>
+        <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;">
+          Next Refrech At ${models.view.post.AnalyzePost.cachedDate(p.type).datetime()}
+        </a>
 
         <input type="hidden" name="p.page" value="1">
         <input type="hidden" name="p.type" value="sid">
