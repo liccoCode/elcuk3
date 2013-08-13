@@ -27,10 +27,12 @@ import java.util.*;
 public class AnalyzePost extends Post<AnalyzeDTO> {
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
+    public static final String ANALYZE_RUNNING = "analyze_running";
     public Date from = super.from;
     public Date to = super.to;
 
     public AnalyzePost() {
+        this.from = DateTime.now().minusMonths(1).toDate();
         this.perSize = 20;
     }
 
@@ -56,12 +58,23 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public String market;
 
     /**
+     * 确保同一时间只有一个 analyzes 正在计算
+     *
+     * @return
+     */
+    private boolean isAnalyzesRnning() {
+        return StringUtils.isNotBlank(Cache.get(ANALYZE_RUNNING, String.class));
+    }
+
+    /**
      * 根据 type(sku/msku(sid)) 进行数据的分析计算
      *
      * @return
      */
     @SuppressWarnings("unchecked")
     public List<AnalyzeDTO> analyzes() {
+        if(isAnalyzesRnning()) return null;
+
         if(StringUtils.isNotBlank(this.type)) this.type = this.type.toLowerCase();
         String cacke_key = "sid".equals(this.type) ? AnalyzeDTO_SID_CACHE : AnalyzeDTO_SKU_CACHE;
         // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
@@ -69,6 +82,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(dtos != null) return dtos;
 
         synchronized(AnalyzeDTO.class) {
+            Cache.add(ANALYZE_RUNNING, true);
             dtos = Cache.get(cacke_key, List.class);
             if(dtos != null) return dtos;
 
@@ -120,6 +134,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
             Cache.add(cacke_key, dtos, "8h");
             Cache.set(cacke_key + ".time", DateTime.now().plusHours(8).toDate(), "8h");
+            Cache.delete(ANALYZE_RUNNING);
         }
 
         return dtos;
@@ -314,8 +329,12 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     @Override
     public List<AnalyzeDTO> query() {
-        List<AnalyzeDTO> dtos = new ArrayList<AnalyzeDTO>(this.analyzes());
-        // 过滤 Category
+        List<AnalyzeDTO> dtos = this.analyzes();
+        // 用于提示后台正在运行计算
+        if(dtos == null) return null;
+
+
+        // 过滤各种条件
         if(StringUtils.isNotBlank(this.categoryId))
             CollectionUtils.filter(dtos, new SearchPredicate("^" + this.categoryId));
         if(StringUtils.isNotBlank(this.search))
