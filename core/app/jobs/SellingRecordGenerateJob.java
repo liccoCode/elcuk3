@@ -1,9 +1,6 @@
 package jobs;
 
-import helper.Dates;
 import models.Jobex;
-import models.Notification;
-import models.User;
 import models.market.Orderr;
 import models.market.Selling;
 import models.market.SellingRecord;
@@ -52,10 +49,6 @@ public class SellingRecordGenerateJob extends Job {
             record.salePrice = s.aps.salePrice;
             record.save();
         }
-        Notification.notifies(User.findByUserName("wyatt"),
-                String.format(
-                        "SellingRecordGenerateJob 任务完成, 总共耗时: %s s; 总共创建 %s 个 SellingRecord.[%s]",
-                        (System.currentTimeMillis() - begin) / 1000, sellings.size(),
-                        Dates.date2DateTime(fixTime.toDate())));
+
     }
 }
