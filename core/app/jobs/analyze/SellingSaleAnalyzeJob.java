@@ -4,16 +4,18 @@ import models.view.post.AnalyzePost;
 import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
+import play.jobs.On;
 
 /**
  * 周期:
- * 轮询: 每个 8h 一次
+ * 轮询: 0, 7, 15 三个时间点执行三次
  * 为系统后台任务
  * <p/>
  * User: wyatt
  * Date: 8/13/13
  * Time: 3:06 PM
  */
+@On("0 0 0,7,15 * * ?")
 public class SellingSaleAnalyzeJob extends Job {
     @Override
     public void doJob() {
