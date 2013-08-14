@@ -395,6 +395,8 @@ public class SellingRecord extends GenericModel {
             if(selling == null)
                 throw new FastRuntimeException("系统中无 Selling: " + sid);
             record = new SellingRecord(selling, oneDay);
+            record.selling = selling;
+            record.account = selling.account;
             record.orderCanceld = (int) Orderr.count("state=? AND createDate=?", Orderr.S.CANCEL, record.date);
             record.save();
         }
