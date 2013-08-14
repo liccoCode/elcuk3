@@ -12,7 +12,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.cache.CacheFor;
 import play.jobs.Job;
 import play.mvc.After;
@@ -72,13 +71,11 @@ public class Analyzes extends Controller {
                 return p.query();
             }
         }.now());
-        render("Analyzes/" + p.type + ".html", dtos, p);
-    }
-
-    public static void clear() {
-        Cache.delete(AnalyzePost.AnalyzeDTO_SID_CACHE);
-        Cache.delete(AnalyzePost.AnalyzeDTO_SKU_CACHE);
-        renderJSON(new Ret());
+        if(dtos == null) {
+            renderHtml("<h3>正在后台计算中, 请 10 mn 后再尝试</h3>");
+        } else {
+            render("Analyzes/" + p.type + ".html", dtos, p);
+        }
     }
 
     /**

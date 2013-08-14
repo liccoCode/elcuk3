@@ -3,6 +3,7 @@ package controllers;
 import helper.Dates;
 import helper.J;
 import helper.Webs;
+import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.OrderItem;
@@ -100,4 +101,8 @@ public class Application extends Controller {
         renderJSON(Orderr.frontPageOrderTable(9));
     }
 
+    public static void aaa() {
+        new SellingSaleAnalyzeJob().now();
+        renderText("成功执行, 请看后台 Command Line");
+    }
 }
