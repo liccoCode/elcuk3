@@ -7,10 +7,7 @@ import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
 
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
+import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,6 +68,29 @@ public class Notification extends Model {
      * 什么是否被通知了
      */
     public Date notifyAt;
+
+    @Enumerated(EnumType.STRING)
+    public S state = S.UNCHECKED;
+
+    public enum S{
+            /**
+             *                */
+            CHECKED{
+                @Override
+                public String label() {
+                    return "已阅";
+                }
+            },
+            UNCHECKED{
+                @Override
+                public String label() {
+                    return "未查看";
+                }
+            };
+
+            public abstract String label();
+
+        }
 
     @PrePersist
     public void prePersist() {
@@ -203,4 +223,6 @@ public class Notification extends Model {
     public static void clearUserNotificationQueue(User user) {
         USER_QUEUE_CACHE.remove(user.username);
     }
+
+
 }

@@ -4,10 +4,11 @@ import helper.J;
 import models.Notification;
 import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Validation;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * 每个用户的 Notification
@@ -49,4 +50,41 @@ public class Notifications extends Controller {
         else
             renderJSON(new Ret(false));
     }
+
+    /**
+     * 当前用户的通知信息列表
+     */
+    public static void index(){
+
+        renderArgs.put("notifications", Login.current().notificationFeeds(1));
+
+        render();
+    }
+
+    /**
+     * 计算当前用户的通知信息的数量
+    */
+    public static void amount(){
+
+        renderText(  Notification.count("user=? and state = 'UNCHECKED' ",Login.current() ) );
+    }
+
+    /**
+     *
+     * 修改通知状态为 已阅
+     */
+    public static void  updateState(List<Long> noteIDs){
+
+       if( noteIDs != null ){
+         for( Long tempNoteID : noteIDs ) {
+
+            Notification temp = Notification.findById( tempNoteID );
+            temp.state = Notification.S.CHECKED;
+            temp.save();
+         }
+       }
+
+       index();
+    }
+
 }
