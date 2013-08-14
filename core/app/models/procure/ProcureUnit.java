@@ -21,6 +21,7 @@ import play.data.validation.Check;
 import play.data.validation.CheckWith;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -515,6 +516,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             fba.state = FBA.create(fba);
             this.fba = fba.save();
             this.save();
+            new ERecordBuilder("shipment.createFBA")
+                    .msgArgs(this.id, this.sku, this.fba.shipmentId)
+                    .fid(this.id)
+                    .save();
         } catch(FBAInboundServiceMWSException e) {
             Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
         }
@@ -823,6 +828,25 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public static List<ProcureUnit> unitsFilterByStage(STAGE stage) {
         return ProcureUnit.find("stage=?", stage).fetch();
+    }
+
+    public static void postFbaShipments(List<Long> unitIds) {
+        List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
+        if(units.size() != unitIds.size())
+            Validation.addError("", "加载的数量");
+        if(Validation.hasErrors()) return;
+
+        for(ProcureUnit unit : units) {
+            try {
+                if(unit.fba != null) {
+                    Validation.addError("", String.format("#%s 已经有 FBA 不需要再创建", unit.id));
+                } else {
+                    unit.postFbaShipment();
+                }
+            } catch(Exception e) {
+                Validation.addError("", Webs.E(e));
+            }
+        }
     }
 
 
