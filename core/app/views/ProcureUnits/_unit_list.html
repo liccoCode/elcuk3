@@ -11,7 +11,7 @@
     <th>#</th>
     <th>Selling</th>
     <th>Sku</th>
-    <th>shipmentId</th>
+    <th>FBA-ShipmentId</th>
     <th>采购单</th>
     <th>仓库</th>
     <th>供应商</th>
@@ -46,13 +46,7 @@
       <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
     </td>
     <td>
-      <ul>
-         #{list items:unit.relateShipment(), as:'sp'}
-            <li>
-            ${sp.id}
-            </li>
-         #{/list}
-      </ul>
+       ${unit.fba.shipmentId}
     </td>
     <td>
         #{if unit.deliveryment}
