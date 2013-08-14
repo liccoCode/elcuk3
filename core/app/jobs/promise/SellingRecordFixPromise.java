@@ -1,14 +1,10 @@
 package jobs.promise;
 
-import helper.Dates;
 import jobs.SellingRecordCheckJob;
-import models.Notification;
-import models.market.Selling;
 import org.joda.time.DateTime;
 import play.jobs.Job;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,7 +27,5 @@ public class SellingRecordFixPromise extends Job {
         for(int i = 0; i <= this.days; i++) {
             SellingRecordCheckJob.amazonNewestRecords(dt.plusDays(i));
         }
-        Notification.notifies("Session/PageView 数据",
-                String.format("从 %s 开始向后 %s 天的 Session 与 PageView 数据更新完毕.", Dates.date2Date(this.begin), this.days), Notification.PM);
     }
 }

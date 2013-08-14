@@ -37,6 +37,7 @@ public class FBAs extends Controller {
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
+
             flash.success("选择的采购计划全部成功创建 FBA");
         }
         Deliveryments.show(deliveryId);

@@ -1,10 +1,8 @@
 package controllers;
 
 import exception.PaymentException;
-import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
@@ -166,14 +164,7 @@ public class ProcureUnits extends Controller {
 
         new ElcukRecord(Messages.get("procureunit.update"),
                 Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
-        //TODO effects: Notification 调整
-        if(!oldPlanQty.equals(managedUnit.attrs.planQty)) {
-            Notification.notifies(String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
-                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
-                            oldPlanQty, managedUnit.attrs.planQty,
-                            Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
-                    Notification.PROCURE, Notification.SHIPPER);
-        }
+
         flash.success("成功修改采购计划!", id);
         edit(id);
     }
