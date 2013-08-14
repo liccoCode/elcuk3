@@ -164,15 +164,7 @@
                   #{/ifnot}
               </div>
               <div class="btn-toolbar">
-                  #{ifnot unit.fba}
-                      #{power.ck 'fbas.deploytoamazon'}
-                        <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-small btn-success"
-                           data-disable-with="创建中...">
-                          创建 FBA
-                        </a>
-                      #{/power.ck}
-                  #{/ifnot}
-                  #{else }
+                  #{if unit.fba}
                       #{power.ck 'fbas.update'}
                         <a href="@{FBAs.update(unit.id)}" class="btn btn-small btn-warning"
                            data-method='PUT' data-disable-with='更新中...'>
@@ -181,7 +173,7 @@
                       #{/power.ck}
                     <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
                     <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱外麦</a>
-                  #{/else}
+                  #{/if}
               </div>
             #{/if}
         </div>
