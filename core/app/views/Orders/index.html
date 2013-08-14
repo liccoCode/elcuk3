@@ -6,84 +6,79 @@
 #{/set}
 
 <div class="row-fluid">
-    <form id="search_form" class="search_form" action="@{Orders.index()}" method="get">
-        <div class="span12">
-            <div class="input-prepend inline">
-                <span class="add-on">From:</span>
-                <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
-            </div>
+  <form id="search_form" class="search_form" action="@{Orders.index()}" method="POST">
+    <div class="span12">
+      <div class="input-prepend inline">
+        <span class="add-on">From:</span>
+        <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
+      </div>
 
-            <div class="input-prepend inline">
-                <span class="add-on">To:</span>
-                <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
-            </div>
+      <div class="input-prepend inline">
+        <span class="add-on">To:</span>
+        <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
+      </div>
 
-            <select id="o_market" name="p.market" class="inline">
-                <option value="">Market(ALL)</option>
-            #{list items:models.market.M.values()}
-                <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
-            #{/list}
-            </select>
-            <select id="o_acc" name="p.accountId" class="inline">
-                <option value="">Account</option>
-            #{list items:accs}
-                <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
-            #{/list}
-            </select>
-            <select id="o_state" name="p.state" class="inline">
-                <option value="">State(ALL)</option>
-            #{list items:models.market.Orderr.S.values()}
-                <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
-            #{/list}
-            </select>
+      <select id="o_market" name="p.market" class="inline">
+        <option value="">Market(ALL)</option>
+      #{list items:models.market.M.values()}
+        <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
+      #{/list}
+      </select>
+      <select id="o_acc" name="p.accountId" class="inline">
+        <option value="">Account</option>
+      #{list items:accs}
+        <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
+      #{/list}
+      </select>
+      <select id="o_state" name="p.state" class="inline">
+        <option value="">State(ALL)</option>
+      #{list items:models.market.Orderr.S.values()}
+        <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
+      #{/list}
+      </select>
 
-            <input type="hidden" name="p.orderBy" id="orderBy" value="createDate">
-            <select name="p.desc" class="inline">
-                <option value="DESC">DESC</option>
-                <option value="ASC">ASC</option>
-            </select>
+      <input type="hidden" name="p.orderBy" id="orderBy" value="createDate">
+      <select name="p.desc" class="inline">
+        <option value="DESC">DESC</option>
+        <option value="ASC">ASC</option>
+      </select>
 
-            <select name="p.paymentInfo" class="inline">
-                <option value="">支付信息</option>
-                <option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>
-                <option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息
-                </option>
-            </select>
+      <select name="p.paymentInfo" class="inline">
+        <option value="">支付信息</option>
+        <option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>
+        <option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息
+        </option>
+      </select>
 
-            <select name="p.warnning" class="inline">
-                <option value="">全部订单</option>
-                <option ${p.warnning == true ? 'selected' : ''} value="true">过滤出警告订单</option>
-                <option ${p.warnning == false ? 'selected' : ''} value="false">正常的订单</option>
-            </select>
+      <select name="p.warnning" class="inline">
+        <option value="">全部订单</option>
+        <option ${p.warnning == true ? 'selected' : ''} value="true">过滤出警告订单</option>
+        <option ${p.warnning == false ? 'selected' : ''} value="false">正常的订单</option>
+      </select>
 
-            <div class="inline input-append" id="search_btns">
-                <input type="hidden" name="p.page" value="${p.page}">
-                <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">
-                <button class="btn btn-primary" data-loading>Search</button>
-            </div>
-        </div>
-    </form>
+      <div class="inline input-append" id="search_btns">
+        <input type="hidden" name="p.page" value="${p.page}">
+        <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+    </div>
+  </form>
 </div>
-
-<div class="btn-toolbar">
-    <a id="fix_warnning_orders" class="btn btn-mini btn-primary">手动修复时间段内的警告订单</a>
-</div>
-<hr>
 
 <div class="row-fluid" id="order_list">
-    <div class="span12">
-    #{if orders.size() == 0}
-        暂时还没有订单
-    #{/if}
-    #{else }
-        <table class="table table-condensed table-bordered">
-            #{render 'Orders/_order_table_tr.html', items:orders/}
-            <tr class="tb_footer">
-                <td colspan="10">
-                    #{bootstrap_pager pi:p, url:'' /}
-                </td>
-            </tr>
-        </table>
-    #{/else}
-    </div>
+  <div class="span12">
+  #{if orders.size() == 0}
+    暂时还没有订单
+  #{/if}
+  #{else }
+    <table class="table table-condensed table-bordered">
+        #{render 'Orders/_order_table_tr.html', items:orders/}
+      <tr class="tb_footer">
+        <td colspan="10">
+            #{bootstrap_pager pi:p, url:'' /}
+        </td>
+      </tr>
+    </table>
+  #{/else}
+  </div>
 </div>

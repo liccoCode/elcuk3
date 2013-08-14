@@ -49,7 +49,7 @@ public abstract class Post<T> implements Serializable, Cloneable {
     }
 
     /**
-     * 计算总行数
+     * 计算总行数(带搜索条件的)
      *
      * @return
      */
@@ -81,6 +81,14 @@ public abstract class Post<T> implements Serializable, Cloneable {
 
     public int getTotalPage() {
         return totalPage();
+    }
+
+    /**
+     * 当前这个 Model 的所有数据
+     * @return
+     */
+    public Long getTotalCount() {
+        throw new UnsupportedOperationException("请自行实现");
     }
 
     @Override

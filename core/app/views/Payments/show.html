@@ -29,8 +29,10 @@
           <dd id="request_currency">${payment.currency}</dd>
           <dt>批准后总金额</dt>
           <dd>${payment.currency.symbol()}<span id='finalAppied'>${payment.approvalAmount()}</span></dd>
-          <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> CNY</span></dt>
-          <dd id='ratioInfo'>0</dd>
+          <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> ?</span></dt>
+          <dd id='ratioTo'>0</dd>
+          <dt>汇率 <span id='currencyToFrom'>? -> ${payment.currency}</span></dt>
+          <dd id='reverRatioTo'>0</dd>
           <dt>需要支付的 <span id='paidCurrency'>CNY</span></dt>
           <dd><span id='paidCurrencyAmount'>0</span></dd>
           <dt>汇率时间</dt>

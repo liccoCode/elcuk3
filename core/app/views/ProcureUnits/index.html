@@ -11,7 +11,7 @@
 #{/info_row}
 
 <div class="row-fluid">
-  <form action="@{Procures.index()}" method="get" class="search_form">
+  <form action="@{ProcureUnits.index()}" method="get" class="search_form">
     <div class="span12">
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
@@ -19,7 +19,7 @@
         <span class="add-on" style="margin-left:20px;">To:</span>
         <input type="date" style="width:90px;" name="p.to" value="${p.to.date()}">
         <select name="p.dateType" style="width:130px;margin-left:20px;">
-        #{list items:dateTypes, as:'t'}
+        #{list items:models.view.post.ProcurePost.DATE_TYPES, as:'t'}
           <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
         #{/list}
         </select>
@@ -70,7 +70,7 @@
 <form method="post" id="create_deliveryment" action="@{Deliveryments.create()}">
   <div class="row-fluid">
     <div class="span12">
-    #{render 'Procures/_unit_list.html', units: p.query(), checkbox:true/}
+    #{render 'ProcureUnits/_unit_list.html', units: p.query(), checkbox:true/}
     </div>
   </div>
 

@@ -161,19 +161,18 @@ public class FeedbackCrawlJob extends Job {
      */
     public static List<Feedback> parseFeedBackFromHTML(String html) {
         Document doc = Jsoup.parse(html);
-
-        Element marketEl = doc.select("#merchant-website").first();
         M market = null;
-        if(marketEl == null) {
-            Webs.systemMail("Feedback Market parse Error!", html);
-            return new ArrayList<Feedback>();
+
+        Element marketEl = doc.select("#sc-mkt-switcher-form").first();
+        if(marketEl != null) {
+            market = M.AMAZON_US;
         } else {
-            // us/ de
-            if(StringUtils.contains(marketEl.select(".merch-site-span").text(), "amazon.com"))
-                market = M.AMAZON_US;
-            else {
-                market = M.val(doc.select("#marketplaceSelect option[selected]").first().text()
-                        .trim());
+            marketEl = doc.select("#merchant-website").first();
+            if(marketEl == null) {
+                Webs.systemMail("Feedback Market parse Error!", html);
+                return new ArrayList<Feedback>();
+            } else {
+                market = M.val(doc.select("#marketplaceSelect option[selected]").first().text().trim());
             }
         }
         Elements feedbacks = doc.select("td[valign=center][align=middle] tr[valign=center]");
