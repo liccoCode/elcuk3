@@ -88,20 +88,6 @@ public class SellingRecord extends GenericModel {
     public Float salePrice = 0f;
 
     /**
-     * 当天的 Review 评分
-     * TODO: delete
-     */
-    @Expose
-    public Float rating = 0f;
-
-    /**
-     * 当天的 Review 的个数
-     * TODO: delete
-     */
-    @Expose
-    public Integer reviewSize = 0;
-
-    /**
      * 当天产生的销量产品数量(计算系统数据)
      */
     @Expose
@@ -169,7 +155,6 @@ public class SellingRecord extends GenericModel {
         if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0)
             this.orderCanceld = nsrd.orderCanceld;
         if(nsrd.sales > 0) this.sales = nsrd.sales;
-        if(nsrd.rating != null && nsrd.rating > 0) this.rating = nsrd.rating;
         if(nsrd.salePrice != null && nsrd.salePrice > 0) this.salePrice = nsrd.salePrice;
         if(nsrd.pageViews != null && nsrd.pageViews > 0) this.pageViews = nsrd.pageViews;
         if(nsrd.sessions != null && nsrd.sessions > 0) this.sessions = nsrd.sessions;
@@ -219,20 +204,8 @@ public class SellingRecord extends GenericModel {
                                 .toUpperCase();
                         if(StringUtils.contains(msku, ",2")) continue;
                         String sid = Selling.sid(msku, market, acc);
-                        String srid = SellingRecord.id(sid, oneDay);
 
-                        SellingRecord record = SellingRecord.findById(srid);
-                        // 这里的创建是以 Amazon 的文档为准, 可能会存在系统内拥有 Amazon 文档没有的情况
-                        // 所以正常的 SellingRecord 的产生, 由 SellingRecordGenerteJob 每天运行一次, 这里负责补漏与更新
-                        if(record == null) { // 数据库中不存在的时候, 进行如下数据更新
-                            Selling sell = Selling.<Selling>findById(sid);
-                            if(sell == null) {
-                                Logger.error("SellingRecord has no selling (%s) !", sid);
-                                continue;
-                            }
-                            record = new SellingRecord(sell, oneDay);
-                        }
-
+                        SellingRecord record = SellingRecord.oneDay(sid, oneDay);
                         // 无论数据库中存在不存在都需要更新下面数据
                         record.sessions = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
                         record.pageViews = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
@@ -395,6 +368,37 @@ public class SellingRecord extends GenericModel {
      */
     public static String id(String sid, Date time) {
         return DigestUtils.md5Hex(String.format("%s|%s", sid, Dates.date2Date(time)));
+    }
+
+    /**
+     * 返回今天的 SellingRecord, 有则加载没有则创建
+     *
+     * @param sid
+     * @return
+     */
+    public static SellingRecord today(String sid) {
+        return oneDay(sid, new Date());
+    }
+
+    /**
+     * 返回某一天的 SellingRecord, 有则加载, 没有则创建
+     *
+     * @param sid
+     * @param oneDay
+     * @return
+     */
+    public static SellingRecord oneDay(String sid, Date oneDay) {
+        String srid = id(sid, oneDay);
+        SellingRecord record = SellingRecord.findById(srid);
+        if(record == null) {
+            Selling selling = Selling.findById(sid);
+            if(selling == null)
+                throw new FastRuntimeException("系统中无 Selling: " + sid);
+            record = new SellingRecord(selling, oneDay);
+            record.orderCanceld = (int) Orderr.count("state=? AND createDate=?", Orderr.S.CANCEL, record.date);
+            record.save();
+        }
+        return record;
     }
 
     @Override
