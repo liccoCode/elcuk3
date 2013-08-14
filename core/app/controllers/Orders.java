@@ -2,13 +2,11 @@ package controllers;
 
 import models.market.Account;
 import models.market.Feedback;
-import models.market.M;
 import models.market.Orderr;
 import models.view.post.OrderPOST;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,16 +33,5 @@ public class Orders extends Controller {
             Orderr ord = Orderr.findById(id);
             render(ord);
         }
-    }
-
-    public static void warrningOrders(Date from, Date to, String market) {
-        try {
-            M m = M.val(market);
-            Orderr.warnningToDeal(from, to, m);
-            flash.success("更新成功");
-        } catch(Exception e) {
-            flash.error("发生错误.%s", e.getMessage());
-        }
-        index(null);
     }
 }

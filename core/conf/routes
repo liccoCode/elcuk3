@@ -26,7 +26,10 @@ GET     /img/                                               staticDir:public/ima
 GET     /helper/                                            staticDir:public/images/helper
 
 # Applys
+GET     /apply/procures                                     Applys.procures
+POST    /apply/procures                                     Applys.procures
 GET     /apply/transports                                   Applys.transports
+POST    /apply/transports                                   Applys.transports
 GET     /apply/transport/{id}                               Applys.transport
 POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
 DELETE  /apply/transport/{id}/shipment                      Applys.departShipmentFromApply(format:'json')
@@ -50,11 +53,12 @@ POST    /feetype/{name}/delete                               FeeTypes.remove
 
 # Orders
 GET     /orders                                             Orders.index
+POST    /orders                                             Orders.index
 GET     /order/{id}                                         Orders.show
-GET     /orders/warnfix                                     Orders.warrningOrders
 
 # Payments
 GET     /payments                                           Payments.index
+POST    /payments                                           Payments.index
 GET     /payment/boc                                        Payments.bocRates
 GET     /payment/xe                                         Payments.xeRates
 POST    /payment/files/upload                               Payments.uploads
@@ -66,6 +70,8 @@ POST    /payment/{id}/lock                                  Payments.lockIt
 DELETE  /payment/{id}/lock                                  Payments.unlock
 
 # ProcureUnits
+GET     /procureunits                                       ProcureUnits.index
+POST    /procureunits                                       ProcureUnits.index
 GET     /sellings/{sid}/procureunit/new/                    ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
@@ -76,6 +82,8 @@ POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
 PUT     /procureunit/{procureUnitId}/fba                    FBAs.update
 GET     /procureunit/{id}/split                             ProcureUnits.splitUnit
 POST    /procureunit/{id}/split                             ProcureUnits.doSplitUnit
+GET     /procureunit/{id}/delivery                          ProcureUnits.deliveryunit
+DELETE  /procureunit/{id}/delivery                          ProcureUnits.reverDelivery
 
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip

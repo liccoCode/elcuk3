@@ -378,6 +378,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 取消交货
+     */
+    public void revertDelivery(String msg) {
+        if(this.stage != STAGE.DONE)
+            Validation.addError("", "不是" + STAGE.DONE.label() + "状态, 无法返回" + STAGE.DELIVERY.label());
+        if(StringUtils.isBlank(msg))
+            Validation.addError("", "请填写取消交货的原因.");
+        if(Validation.hasErrors()) return;
+
+        this.stage = STAGE.DELIVERY;
+        this.save();
+        new ERecordBuilder("procureunit.revertdelivery")
+                .msgArgs(msg)
+                .fid(this.id)
+                .save();
+    }
+
+    /**
      * 采购计划在不同阶段可以修改的信息不一样
      *
      * @param unit
@@ -758,7 +776,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.fid(this.id + "").fetch();
+        return ElcukRecord.records(this.id + "",
+                Arrays.asList("procureunit.save", "procureunit.update", "procureunit.remove", "procureunit.delivery",
+                        "procureunit.revertdelivery", "procureunit.split", "procureunit.prepay", "procureunit.tailpay"));
     }
 
     @Override

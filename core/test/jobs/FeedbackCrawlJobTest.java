@@ -118,4 +118,19 @@ public class FeedbackCrawlJobTest extends UnitTest {
         assertThat(feedback.email, is("fxv72ykv1r041x8@marketplace.amazon.es"));
         assertThat(Dates.date2Date(feedback.createDate), is("2013-05-26"));
     }
+
+    @Test
+    public void testParseFeedBackFromHTMLUS() {
+        String html = IO.readContentAsString(Play.getFile("test/html/AMAZON_DE.id_131feedback_p1_us.html"));
+        List<Feedback> feedbacks = FeedbackCrawlJob.parseFeedBackFromHTML(html);
+        assertThat(feedbacks.size(), is(50));
+
+        Feedback feedback = feedbacks.get(9);
+
+        assertThat(feedback.market, is(M.AMAZON_US));
+        assertThat(feedback.score, is(3f));
+        assertThat(feedback.orderId, is("106-7585647-6925053"));
+        assertThat(feedback.email, is("1g5b1cgnl90lkg0@marketplace.amazon.com"));
+        assertThat(Dates.date2Date(feedback.createDate), is("2013-08-11"));
+    }
 }
