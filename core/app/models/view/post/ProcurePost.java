@@ -109,10 +109,9 @@ public class ProcurePost extends Post<ProcureUnit> {
                 params.add(this.shipType);
             }
 
-            if(this.isPlaced) {
-                sbd.append(" AND isPlaced=? ");
-                params.add(this.isPlaced);
-            }
+            sbd.append(" AND isPlaced=? ");
+            params.add(this.isPlaced);
+
 
             if(StringUtils.isNotBlank(this.search)) {
                 String word = this.word();

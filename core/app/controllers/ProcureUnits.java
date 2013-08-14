@@ -38,6 +38,11 @@ public class ProcureUnits extends Controller {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
         renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
         renderArgs.put("cooperators", cooperators);
+
+        //为视图提供日期
+        renderArgs.put("tomorrow1",Dates.futureDate(1));
+        renderArgs.put("tomorrow2",Dates.futureDate(2));
+        renderArgs.put("tomorrow3",Dates.futureDate(3));
     }
 
     @Check("procures.index")

@@ -50,6 +50,7 @@
         <option value="">运输方式</option>
       #{list items:models.procure.Shipment.T.values(), as:'t'}
         <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+        format
       #{/list}
       </select>
 
@@ -62,7 +63,15 @@
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" class="input-medium" name="p.search" value="${p.search}">
         <button class="btn btn-primary" data-loading>搜索</button>
+
       </div>
+      <div class="input-prepend input-append inline">
+        <a href="/procureunits?p.dateType=attrs.planDeliveryDate&p.from=${tomorrow1}&p.to=${tomorrow1}&p.stage=${models.procure.ProcureUnit.STAGE.DELIVERY}" class="btn btn-primary">明天计划</a>
+        <a href="/procureunits?p.dateType=attrs.planDeliveryDate&p.from=${tomorrow2}&p.to=${tomorrow2}&p.stage=${models.procure.ProcureUnit.STAGE.DELIVERY}" class="btn btn-primary">后天计划</a>
+        <a href="/procureunits?p.dateType=attrs.planDeliveryDate&p.from=${tomorrow3}&p.to=${tomorrow3}&p.stage=${models.procure.ProcureUnit.STAGE.DELIVERY}" class="btn btn-primary">大后天计划</a>
+        <a href="/procureunits?p.dateType=attrs.planArrivDate&p.from=${new Date().format('yyyy-MM-dd')}&p.to=${new Date().format('yyyy-MM-dd')}&p.isPlaced=false" class="btn btn-primary">当天还未抵达</a>
+      </div>
+
     </div>
   </form>
 </div>
