@@ -82,7 +82,7 @@
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">采购模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
                 #{power.ck "procures.index"}
-                  <li><a href="@{Procures.index()}">采购计划</a></li>
+                  <li><a href="@{ProcureUnits.index()}">采购计划</a></li>
                 #{/power.ck}
                 #{power.ck "deliveryments.index"}
                   <li><a href="@{Deliveryments.index()}">采购单</a></li>
@@ -102,7 +102,7 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">财务模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="@{Applys.index()}">采购请款单列表</a></li>
+              <li><a href="@{Applys.procures()}">采购请款单列表</a></li>
               <li><a href="@{Applys.transports()}">物流请款单列表</a></li>
               <li><a href="@{Payments.index()}">付款单列表</a></li>
               <li><a href="@{PaymentTargets.index()}">支付方式</a></li>

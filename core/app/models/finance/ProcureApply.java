@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
-import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.*;
@@ -123,10 +122,7 @@ public class ProcureApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "",
-                Arrays.asList(Messages.get("procureapply.save"),
-                        Messages.get("deliveryment.departApply"))
-        );
+        return ElcukRecord.records(this.id + "", Arrays.asList("procureapply.save", "deliveryment.departApply"));
     }
 
     /**
@@ -150,7 +146,7 @@ public class ProcureApply extends Apply {
             dmt.save();
         }
         new ERecordBuilder("procureapply.save")
-                .msgArgs(StringUtils.join(deliverymentIds, ","))
+                .msgArgs(StringUtils.join(deliverymentIds, ","), this.id)
                 .fid(this.id + "")
                 .save();
     }
