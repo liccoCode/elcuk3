@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import helper.Currency;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -30,25 +29,9 @@ import java.util.*;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class SellingRecord extends GenericModel {
 
-    /**
-     * 默认构造函数, 初始化数值
-     */
-    public SellingRecord() {
-        this.pageViews = 0;
-        this.sessions = 0;
-        this.sales = 0f;
-        this.units = 0;
-        this.orders = 0;
-        this.orderCanceld = 0;
-        this.rating = 0f;
-        this.reviewSize = 0;
-        this.salePrice = 0f;
-        this.usdSales = 0f;
-        this.date = new Date();
-    }
+    private static final long serialVersionUID = 897305328219999830L;
 
     public SellingRecord(Selling sell, Date date) {
-        this();
         this.id = SellingRecord.id(sell.sellingId, date);
         this.selling = sell;
         this.account = sell.account;
@@ -74,72 +57,109 @@ public class SellingRecord extends GenericModel {
     public String id;
 
     /**
-     * 每天访问的 Session 数量
+     * 每天访问的 Session 数量(通过访问 Amazon 解析)
      */
     @Expose
-    public Integer sessions;
+    public Integer sessions = 0;
 
     /**
-     * 每天的页面访问数量
+     * 每天的页面访问数量(通过访问 Amazon 解析)
      */
     @Expose
-    public Integer pageViews;
+    public Integer pageViews = 0;
 
 
     /**
-     * 当天产生的销量产品数量
+     * 当天产生的订单数量(计算系统数据)
      */
     @Expose
-    public Integer units;
+    public Integer orders = 0;
 
     /**
-     * 当天产生的订单数量
+     * 当天产生的 Cancel 的订单数量(计算系统数据)
      */
     @Expose
-    public Integer orders;
+    public Integer orderCanceld = 0;
 
     /**
-     * 当天产生的 Cancel 的订单数量
+     * 当天的销售价格(通过 Amazon 解析)
      */
     @Expose
-    public Integer orderCanceld;
-
-    /**
-     * 当天的销售价格
-     */
-    @Expose
-    public Float salePrice;
+    public Float salePrice = 0f;
 
     /**
      * 当天的 Review 评分
+     * TODO: delete
      */
     @Expose
-    public Float rating;
+    public Float rating = 0f;
 
     /**
      * 当天的 Review 的个数
+     * TODO: delete
      */
     @Expose
-    public Integer reviewSize;
+    public Integer reviewSize = 0;
 
     /**
-     * 销售额
+     * 当天产生的销量产品数量(计算系统数据)
      */
-    public Float sales;
-    @Enumerated(EnumType.STRING)
-    public Currency currency;
+    @Expose
+    public Integer units = 0;
+
+    // TODO: 所有与金钱相关的, 币种统一为 USD (按照当天计算时的 google 财经汇率计算)
 
     /**
-     * 换算成美元的销售
+     * 销售额(通过系统计算)
      */
-    public Float usdSales;
+    public float sales = 0;
+
+    /**
+     * 实际收入 = 销售额(包括 shipping fee) - amazon 扣费 (包括 shipping refuned)
+     */
+    public float income = 0;
+
+    /**
+     * 采购成本
+     */
+    public float procureCost = 0;
+
+    /**
+     * 运输成本
+     */
+    public float shipCost = 0;
+
+    /**
+     * 利润 = 销售额 - 采购成本 - 运输成本
+     */
+    public float profit = 0;
+
+    /**
+     * 成本利润率 = 利润 / (采购成本 + 运输成本)
+     */
+    public float costProfitRatio = 0;
+
+    /**
+     * 销售利润率 = 利润 / 销售额
+     */
+    public float saleProfitRatio = 0;
+
+    /**
+     * 历史总销售额
+     */
+    public float totalSales = 0;
+
+    /**
+     * 历史总利润
+     */
+    public float totalProfit = 0;
 
     /**
      * 记录的时间
      */
     @Temporal(TemporalType.DATE)
     @Expose
-    public Date date;
+    public Date date = new Date();
 
     public void updateAttr(SellingRecord nsrd) {
         if(!StringUtils.equals(this.id, nsrd.id))
@@ -148,9 +168,7 @@ public class SellingRecord extends GenericModel {
         if(nsrd.orders != null && nsrd.orders > 0) this.orders = nsrd.orders;
         if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0)
             this.orderCanceld = nsrd.orderCanceld;
-        if(nsrd.sales != null && nsrd.sales > 0) this.sales = nsrd.sales;
-        if(nsrd.currency != null) this.currency = nsrd.currency;
-        if(nsrd.usdSales != null && nsrd.usdSales > 0) this.usdSales = nsrd.usdSales;
+        if(nsrd.sales > 0) this.sales = nsrd.sales;
         if(nsrd.rating != null && nsrd.rating > 0) this.rating = nsrd.rating;
         if(nsrd.salePrice != null && nsrd.salePrice > 0) this.salePrice = nsrd.salePrice;
         if(nsrd.pageViews != null && nsrd.pageViews > 0) this.pageViews = nsrd.pageViews;
@@ -159,13 +177,13 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录; 返回的 Selling 如果数据库中有则是持久化的, 数据库中没有则是新的
+     * 记录 Selling 的 Price, Session, PageView
      * <p/>
      * 拥有自己的 market 参数是因为为了兼容原来的 Amazon UK 账号在 DE 销售, 而 UK/DE 的数据是分开的
      *
      * @return
      */
-    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market,
-                                                                        Date oneDay) {
+    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
         Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
         int curentPage = 0;
@@ -215,51 +233,15 @@ public class SellingRecord extends GenericModel {
                             record = new SellingRecord(sell, oneDay);
                         }
 
-                        // Amazon 的订单数据也抓取回来, 但还是会重新计算
-                        record.units = rowArr.get(9).getAsInt();
-                        /**
-                         * 1. de: €2,699.37
-                         * 2. uk: £2,121.30
-                         * 3. fr: €44.99
-                         * fr, de 都是使用的 xx.xx 的格式, 而没有 ,
-                         */
-                        record.sales = Webs.amazonPriceNumber(M.AMAZON_UK/*格式固定*/,
-                                rowArr.get(11).getAsString().substring(1));
-                        switch(market) {
-                            case AMAZON_UK:
-                                record.currency = Currency.GBP;
-                                break;
-                            case AMAZON_DE:
-                            case AMAZON_FR:
-                            case AMAZON_IT:
-                            case AMAZON_ES:
-                                record.currency = Currency.EUR;
-                                break;
-                            case AMAZON_US:
-                                record.currency = Currency.USD;
-                                break;
-                            default:
-                                record.currency = Currency.GBP;
-                        }
-                        record.usdSales = record.currency.toUSD(record.sales);
-                        if(record.usdSales == null) record.usdSales = 0f;
-                        record.orders = rowArr.get(12).getAsInt();
                         // 无论数据库中存在不存在都需要更新下面数据
-                        record.sessions = Webs
-                                .amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString())
-                                .intValue();
-                        record.pageViews = Webs
-                                .amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString())
-                                .intValue();
+                        record.sessions = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
+                        record.pageViews = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
 
                         records.add(record);
                     } catch(Exception e) {
-                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
-                                Webs.E(e));
+                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)", Webs.E(e));
                     }
                 }
-
-
             } while(hasNext);
             acc.changeRegion(acc.type);
         }
@@ -278,8 +260,7 @@ public class SellingRecord extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("4h") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
-    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from,
-                                                               Date to) {
+    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null) return cacheElement;
@@ -299,7 +280,6 @@ public class SellingRecord extends GenericModel {
                     groupByDate.get(key).orderCanceld += rcd.orderCanceld;
                     groupByDate.get(key).sales += rcd.sales;
                     groupByDate.get(key).units += rcd.units;
-                    groupByDate.get(key).usdSales += rcd.usdSales;
                 } else
                     groupByDate.put(key, rcd);
             }
@@ -369,9 +349,7 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
-                                                                                   Account acc,
-                                                                                   Date from,
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku, Account acc, Date from,
                                                                                    Date to) {
         Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
                 .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
