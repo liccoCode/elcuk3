@@ -29,6 +29,11 @@ public class ProductPost extends Post<Product> {
     }
 
     @Override
+    public Long getTotalCount() {
+        return Product.count();
+    }
+
+    @Override
     public F.T2<String, List<Object>> params() {
         F.T3<Boolean, String, List<Object>> specialSearch = skuSearch();
         if(specialSearch._1)

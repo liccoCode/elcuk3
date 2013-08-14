@@ -335,15 +335,6 @@ $ ->
   $('#a_from').data('dateinput').setValue(defaultDate)
   $('#a_to').data('dateinput').setValue(now)
 
-  # 清理缓存
-  $('#clear_cache').click (e) ->
-    return false if !confirm('确认需要清楚缓存?')
-    $.post('/analyzes/clear', (r) ->
-      if r.flag is true
-        window.location.reload()
-    )
-    e.preventDefault()
-
   # 给 搜索 按钮添加事件
   $('#a_search').click (e) ->
     e.preventDefault()

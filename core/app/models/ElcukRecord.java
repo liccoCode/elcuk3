@@ -3,10 +3,12 @@ package models;
 import play.data.validation.Required;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -87,8 +89,12 @@ public class ElcukRecord extends Model {
     }
 
     public static List<ElcukRecord> records(String fid, List<String> actions) {
+        List<String> actionMsgs = new ArrayList<String>();
+        for(String action : actions) {
+            actionMsgs.add(Messages.get(action));
+        }
         return ElcukRecord.find("fid=? AND " +
-                JpqlSelect.whereIn("action", actions) +
+                JpqlSelect.whereIn("action", actionMsgs) +
                 " ORDER BY createAt DESC", fid).fetch();
     }
 

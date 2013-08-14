@@ -4,13 +4,16 @@ import helper.Currency;
 import helper.J;
 import helper.Webs;
 import models.finance.Payment;
+import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.Ret;
+import models.view.post.PaymentsPost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.cache.CacheFor;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -26,10 +29,21 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Payments extends Controller {
 
+    @Before(only = {"index"})
+    public static void beforIndex() {
+        List<Cooperator> cooperator = Cooperator.findAll();
+
+        renderArgs.put("cooperator", cooperator);
+    }
+
+
     @Check("payments.index")
-    public static void index() {
-        List<Payment> payments = Payment.find("ORDER BY createdAt DESC").fetch();
-        render(payments);
+    public static void index(PaymentsPost p) {
+        List<Payment> payments = null;
+        if(p == null) p = new PaymentsPost();
+        payments = p.query();
+
+        render(payments, p);
     }
 
     @CacheFor("5mn")

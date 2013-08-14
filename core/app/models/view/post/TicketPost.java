@@ -184,6 +184,11 @@ public class TicketPost extends Post<Ticket> {
     }
 
     @Override
+    public Long getTotalCount() {
+        return Ticket.count();
+    }
+
+    @Override
     public List<Ticket> query() {
         F.T2<String, List<Object>> t2 = this.params();
         this.count = this.count(t2);

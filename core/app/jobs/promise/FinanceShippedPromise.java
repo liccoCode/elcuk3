@@ -53,7 +53,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate";
+        String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate DESC";
         List<Orderr> orders = Orderr.find(jpql, this.account, this.market, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
         long leftOrders = Orderr.count(jpql, this.account, this.market, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
         if(orders.size() > 0) {
