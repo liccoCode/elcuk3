@@ -79,6 +79,7 @@ PUT     /procureunit/{id}                                   ProcureUnits.update
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
+POST    /procureunit/{deliveryId}/fbas                      FBAs.deploysToAmazon
 PUT     /procureunit/{procureUnitId}/fba                    FBAs.update
 GET     /procureunit/{id}/split                             ProcureUnits.splitUnit
 POST    /procureunit/{id}/split                             ProcureUnits.doSplitUnit

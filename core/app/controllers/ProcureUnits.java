@@ -1,14 +1,13 @@
 package controllers;
 
 import exception.PaymentException;
-import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.market.Selling;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
@@ -16,6 +15,7 @@ import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -29,6 +29,14 @@ import java.util.List;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ProcureUnits extends Controller {
+
+    @Before(only = {"index"})
+    public static void beforeIndex() {
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        renderArgs.put("whouses", Whouse.<Whouse>findAll());
+        renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
+        renderArgs.put("cooperators", cooperators);
+    }
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
@@ -156,14 +164,7 @@ public class ProcureUnits extends Controller {
 
         new ElcukRecord(Messages.get("procureunit.update"),
                 Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
-        //TODO effects: Notification 调整
-        if(!oldPlanQty.equals(managedUnit.attrs.planQty)) {
-            Notification.notifies(String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
-                    String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
-                            oldPlanQty, managedUnit.attrs.planQty,
-                            Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
-                    Notification.PROCURE, Notification.SHIPPER);
-        }
+
         flash.success("成功修改采购计划!", id);
         edit(id);
     }
