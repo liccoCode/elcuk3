@@ -1,7 +1,7 @@
 #显示用户有多少未读的信息
 $(document).ready ->
- htmlobj=$.ajax({url:"/Notifications/amount",async:false})
- $("#Notify_number").html(htmlobj.responseText);
+  htmlobj = $.ajax({url: "/Notifications/amount" , async: false})
+  $("#Notify_number").html(htmlobj.responseText);
 
 window.Notify =
 # 检查浏览器是否开启了 Notification 功能, 没有则提示打开

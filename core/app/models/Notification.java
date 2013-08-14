@@ -72,25 +72,25 @@ public class Notification extends Model {
     @Enumerated(EnumType.STRING)
     public S state = S.UNCHECKED;
 
-    public enum S{
-            /**
-             *                */
-            CHECKED{
-                @Override
-                public String label() {
-                    return "已阅";
-                }
-            },
-            UNCHECKED{
-                @Override
-                public String label() {
-                    return "未查看";
-                }
-            };
+    public enum S {
+        /**
+         *                */
+        CHECKED {
+            @Override
+            public String label() {
+                return "已阅";
+            }
+        },
+        UNCHECKED {
+            @Override
+            public String label() {
+                return "未查看";
+            }
+        };
 
-            public abstract String label();
+        public abstract String label();
 
-        }
+    }
 
     @PrePersist
     public void prePersist() {
@@ -213,8 +213,9 @@ public class Notification extends Model {
 
                 BlockingQueue<Notification> blockingQueue = new LinkedBlockingQueue<Notification>();
                 List<Notification> notifications = user.unNotifiedNotification();
-                for(Notification note : notifications)
+                for(Notification note : notifications) {
                     blockingQueue.add(note);
+                }
                 USER_QUEUE_CACHE.put(user.username, /*不限制 Notification Queue 容量*/blockingQueue);
             }
         }

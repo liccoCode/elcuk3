@@ -22,22 +22,22 @@
         <th>创建时间</th>
         <th>通知时间</th>
       </tr>
-    #{list items:notifications, as:'note'}
-      <tr>
-        <td>
-           <label>
-             #{if note.state.label() =='未查看'}
-             <input type="checkbox" name="noteIDs" value="${note.id}">
-             #{/if}
-           </label>
-        </td>
-        <td>${note.id}</td>
-        <td>${note.title}</td>
-        <td>${note.content}</td>
-        <td>#{time_tooltip time:note.createAt, datetime:true/}</td>
-        <td>#{time_tooltip time:note.notifyAt, datetime:true/}</td>
-      </tr>
-    #{/list}
+        #{list items:notifications, as:'note'}
+          <tr>
+            <td>
+              <label>
+                  #{if note.state.label() == '未查看'}
+                    <input type="checkbox" name="noteIDs" value="${note.id}">
+                  #{/if}
+              </label>
+            </td>
+            <td>${note.id}</td>
+            <td>${note.title}</td>
+            <td>${note.content}</td>
+            <td>#{time_tooltip time:note.createAt, datetime:true/}</td>
+            <td>#{time_tooltip time:note.notifyAt, datetime:true/}</td>
+          </tr>
+        #{/list}
     </table>
   </div>
 </div>
