@@ -58,4 +58,8 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         assertThat((double) costAndQty._1, is(0d));
         assertThat((double) costAndQty._2, is(0d));
     }
+
+    @Test
+    public void testSellingShipCost() {
+    }
 }
