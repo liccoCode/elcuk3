@@ -1,5 +1,6 @@
 package jobs.analyze;
 
+import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.FeeType;
@@ -10,6 +11,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
+import play.libs.F;
 
 import java.util.*;
 
@@ -27,10 +29,12 @@ public class SellingRecordCaculateJob extends Job {
     @Override
     public void doJob() {
         DateTime now = DateTime.now();
+        // 当天产生的数据
         Map<String, Integer> sellingUnits = sellingUnits(now.toDate());
         Map<String, Float> sellingSales = sellingSales(now.toDate());
         Map<String, Float> sellingIncome = sellingIncome(now.toDate());
 
+        // 需要计算的所有数据
         List<Selling> sellings = Selling.findAll();
         for(Selling selling : sellings) {
             String sid = selling.sellingId;
@@ -39,8 +43,8 @@ public class SellingRecordCaculateJob extends Job {
              * 1. 销量
              * 2. 销售额
              * 3. 实际收入
-             *
              * 4. 采购成本
+             *
              * 5. 运输成本
              * 6. 利润
              * 7. 销售利润率
@@ -50,7 +54,11 @@ public class SellingRecordCaculateJob extends Job {
             record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
             record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
             record.income = sellingIncome.get(sid) == null ? 0 : sellingIncome.get(sid);
+            F.T2<Float, Integer> costAndQty = sellingProcreCost(selling, now.toDate());
+            record.procureCost = costAndQty._1;
+            record.procureNumberSum = costAndQty._2;
 
+            record.shipCost = 0;
         }
     }
 
@@ -154,5 +162,49 @@ public class SellingRecordCaculateJob extends Job {
             sellingOrders.put(sellingId, Arrays.asList(StringUtils.split(row.get("orderIds").toString(), ",")));
         }
         return sellingOrders;
+    }
+
+    /**
+     * 某一个 Selling 的采购成本; 币种统一为 USD
+     *
+     * @param selling
+     * @return
+     */
+    public F.T2<Float, Integer> sellingProcreCost(Selling selling, Date date) {
+        /**
+         * 1. 确定昨天的操作成本与到昨天为之的所有采购数量
+         * 2. 从今天的所有采购单中寻找, 找出今天 selling 采购的所有数量与各自的单价(统一币种为 USD)
+         * 3. 根据 1, 2 通过计算出 总价格 / 总数量 得出今天的平均单价
+         */
+        DateTime oneDay = new DateTime(date);
+        SellingRecord record = SellingRecord.oneDay(selling.sellingId, oneDay.minusDays(1).toDate());
+
+        SqlSelect sql = new SqlSelect()
+                .select("currency", "sum(qty) as qty", "sum(price * qty) as cost")
+                .from("ProcureUnit")
+                .where("selling_sellingId=?").param(selling.sellingId)
+                .where("deliveryDate>=?").param(Dates.morning(date))
+                .where("deliveryDate<=?").param(Dates.night(date))
+                .groupBy("currency");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+
+        float toDayTotalProcureCost = 0;
+        int toDayProcureNumberSum = 0;
+        for(Map<String, Object> row : rows) {
+            Currency currency = Currency.valueOf(row.get("currency").toString());
+            toDayTotalProcureCost += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
+            toDayProcureNumberSum += NumberUtils.toInt(row.get("qty").toString());
+        }
+
+        float toDayProcureCost = 0;
+        int procureNumberSum = record.procureNumberSum + toDayProcureNumberSum;
+        if(procureNumberSum != 0) {
+            toDayProcureCost = (record.procureCost * record.procureNumberSum + toDayTotalProcureCost) / procureNumberSum;
+        }
+        return new F.T2<Float, Integer>(toDayProcureCost, procureNumberSum);
+    }
+
+    public F.T2<Float, Integer> sellingShipCost(Selling selling, Date date) {
+        return null;
     }
 }

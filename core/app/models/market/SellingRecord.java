@@ -111,9 +111,19 @@ public class SellingRecord extends GenericModel {
     public float procureCost = 0;
 
     /**
+     * 采购到目前为止, 总共采购的数量
+     */
+    public int procureNumberSum = 0;
+
+    /**
      * 运输成本
      */
     public float shipCost = 0;
+
+    /**
+     * 运输到目前为之, 总共运输的数量
+     */
+    public int shipNumberSum = 0;
 
     /**
      * 利润 = 销售额 - 采购成本 - 运输成本
