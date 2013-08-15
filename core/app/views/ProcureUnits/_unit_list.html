@@ -46,7 +46,7 @@
       <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
     </td>
     <td>
-       ${unit.fba.shipmentId}
+       ${unit.fba?.shipmentId}
     </td>
     <td>
         #{if unit.deliveryment}
