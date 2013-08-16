@@ -112,4 +112,8 @@ public class DBUtils {
         }
         return rows;
     }
+
+    public static boolean execute(String sql) {
+        return DB.execute(sql);
+    }
 }

@@ -1,0 +1,70 @@
+#{extends 'main_full.html' /}
+#{set title:"销售财务分析"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'payments.css'/}
+#{/set}
+#{set 'moreScripts'}
+#{/set}
+
+<div class="row-fluid">
+  页面上访两个图
+</div>
+
+<div class="row-fluid">
+  <div class="span12">
+    <form class="search_form">
+      <div class="input-prepend inline">
+        <span class="add-on">From:</span>
+        <input type="date" id="a_from" class="input input-small" name="p.from">
+      </div>
+
+      <div class="input-prepend inline">
+        <span class="add-on">TO:</span>
+        <input type="date" id="a_to" name="p.to">
+      </div>
+      <select name="market" class="input-small inline">
+        <option value="">Market</option>
+      #{list items:models.market.M.values()}
+        <option value="${_.name()}">${_.toString()}</option>
+      #{/list}
+      </select>
+    </form>
+  </div>
+</div>
+
+<!-- TODO 下面这部分是需要变为 Ajax Load, 转移到另外一个页面的 -->
+<div class="row-fluid">
+  <div class="span12">
+  #{if msg}
+  ${msg}
+  #{/if}
+  #{else }
+    <table class="table table-bordered table-condensed">
+      <tr>
+        <td class="span2">SellingID</td>
+        <td>销量</td>
+        <td>销售额</td>
+        <td>实际收入</td>
+        <td>采购成本</td>
+        <td>运输成本</td>
+        <td>利润</td>
+        <td>成本利润率</td>
+        <td>销售利润率</td>
+      </tr>
+        #{list items:records, as: 'record'}
+          <tr>
+            <td>${record.selling.sellingId}</td>
+            <td>${record.units}</td>
+            <td>${record.sales}</td>
+            <td>${record.income}</td>
+            <td>${record.procureCost}</td>
+            <td>${record.shipCost}</td>
+            <td>${record.profit}</td>
+            <td>${record.costProfitRatio.format('#.####')}</td>
+            <td>${record.saleProfitRatio.format('#.####')}</td>
+          </tr>
+        #{/list}
+    </table>
+  #{/else}
+  </div>
+</div>

@@ -10,6 +10,8 @@ import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.Play;
+import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.libs.F;
@@ -27,46 +29,67 @@ import java.util.*;
  * Time: 4:54 PM
  */
 public class SellingRecordCaculateJob extends Job {
+    private DateTime dateTime = DateTime.now();
+
+    public SellingRecordCaculateJob() {
+    }
+
+    public SellingRecordCaculateJob(DateTime dateTime) {
+        this.dateTime = dateTime;
+    }
+
     @Override
     public void doJob() {
-        DateTime now = DateTime.now();
-        // 当天产生的数据
-        Map<String, Integer> sellingUnits = sellingUnits(now.toDate());
-        Map<String, Float> sellingSales = sellingSales(now.toDate());
-        Map<String, Float> sellingAmzFee = sellingAmazonFee(now.toDate());
+        try {
+            Cache.add("sellingRecordCaculateJobRunning", "running");
+            // 当天产生的数据
+            Map<String, Integer> sellingUnits = sellingUnits(dateTime.toDate());
+            Map<String, Float> sellingSales = sellingSales(dateTime.toDate());
+            Map<String, Float> sellingAmzFee = sellingAmazonFee(dateTime.toDate());
 
-        // 需要计算的所有数据
-        List<Selling> sellings = Selling.findAll();
-        for(Selling selling : sellings) {
-            String sid = selling.sellingId;
-            SellingRecord record = SellingRecord.today(sid);
-            // amz 扣费
-            float amzfee = sellingAmzFee.get(sid) == null ? 0 : sellingAmzFee.get(sid);
-            // 销量
-            record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
-            // 销售额
-            record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
-            // 实际收入 = 销量 - amazon 扣费
-            record.income = record.sales - amzfee;
+            List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
+            // 需要计算的所有数据
+            List<Selling> sellings = null;
+            if(Play.mode.isProd()) sellings = Selling.findAll();
+            else sellings = Selling.find("sellingId like '80%'").fetch();
 
-            F.T2<Float, Integer> procureCostAndQty = sellingProcreCost(selling, now.toDate());
-            // 采购成本
-            record.procureCost = procureCostAndQty._1;
-            record.procureNumberSum = procureCostAndQty._2;
+            for(Selling selling : sellings) {
+                String sid = selling.sellingId;
+                SellingRecord record = SellingRecord.today(sid);
+                // amz 扣费
+                float amzfee = sellingAmzFee.get(sid) == null ? 0 : sellingAmzFee.get(sid);
+                // 销量
+                record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
+                // 销售额
+                record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
+                // 实际收入 = 销量 - amazon 扣费
+                record.income = record.sales - amzfee;
 
-            F.T2<Float, Integer> shipCostAndQty = sellingShipCost(selling, now.toDate());
-            // 运输成本
-            record.shipCost = shipCostAndQty._1;
-            record.shipNumberSum = shipCostAndQty._2;
+                F.T2<Float, Integer> procureCostAndQty = sellingProcreCost(selling, dateTime.toDate());
+                // 采购成本
+                record.procureCost = procureCostAndQty._1;
+                record.procureNumberSum = procureCostAndQty._2;
 
-            // 利润 = 实际收入 - 采购成本 - 运输成本
-            record.profit = record.income - record.shipCost - record.procureCost;
-            // 成本利润率 = 利润 / (采购成本 + 运输成本)
-            record.costProfitRatio = record.profit / (record.shipCost + record.procureCost);
-            // 销售利润率 = 利润 / 销售额
-            record.saleProfitRatio = record.profit / record.sales;
+                F.T2<Float, Integer> shipCostAndQty = sellingShipCost(selling, dateTime.toDate());
+                // 运输成本
+                record.shipCost = shipCostAndQty._1;
+                record.shipNumberSum = shipCostAndQty._2;
 
-            // TODO: 还有总销售额和总利润
+                // 利润 = 实际收入 - 采购成本 - 运输成本
+                record.profit = record.income - record.shipCost - record.procureCost;
+                // 成本利润率 = 利润 / (采购成本 + 运输成本)
+                record.costProfitRatio = (record.shipCost + record.procureCost) == 0 ?
+                        0 : (record.profit / (record.shipCost + record.procureCost));
+                // 销售利润率 = 利润 / 销售额
+                record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
+                record.save();
+
+                // TODO: 还有总销售额和总利润
+                sellingRecords.add(record);
+            }
+            Cache.add("sellingRecordCaculateJob", sellingRecords);
+        } finally {
+            Cache.delete("sellingRecordCaculateJobRunning");
         }
     }
 
@@ -140,9 +163,10 @@ public class SellingRecordCaculateJob extends Job {
         Map<String, Float> sellingSales = new HashMap<String, Float>();
         for(String sellingId : sellingOrders.keySet()) {
             SqlSelect sellFees = new SqlSelect(sellFeesTemplate)
-                    .where(SqlSelect.whereIn("orderId", sellingOrders.get(sellingId)));
+                    .where(SqlSelect.whereIn("order_orderId", sellingOrders.get(sellingId)));
             Map<String, Object> row = DBUtils.row(sellFees.toString());
-            sellingSales.put(sellingId, NumberUtils.toFloat(row.get("cost").toString()));
+            Object costObj = row.get("cost");
+            sellingSales.put(sellingId, costObj == null ? 0 : NumberUtils.toFloat(costObj.toString()));
         }
         return sellingSales;
     }
@@ -154,7 +178,7 @@ public class SellingRecordCaculateJob extends Job {
      */
     public Map<String, List<String>> oneDaySellingOrderIds(Date date) {
         // 设置 group_concat_max_len 最大为 20M
-        DBUtils.row("set group_concat_max_len=20971520");
+        DBUtils.execute("set group_concat_max_len=20971520");
         SqlSelect sellingOdsSql = new SqlSelect()
                 .select("selling_sellingId as sellingId", "group_concat(order_orderId) as orderIds")
                 .from("OrderItem")
@@ -200,6 +224,7 @@ public class SellingRecordCaculateJob extends Job {
         float toDayTotalProcureCost = 0;
         int toDayProcureNumberSum = 0;
         for(Map<String, Object> row : rows) {
+            if(row.get("currency") == null) continue;
             Currency currency = Currency.valueOf(row.get("currency").toString());
             toDayTotalProcureCost += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
             toDayProcureNumberSum += NumberUtils.toInt(row.get("qty").toString());
@@ -261,6 +286,7 @@ public class SellingRecordCaculateJob extends Job {
         List<Map<String, Object>> rows = DBUtils.rows(sellingTransportShippingFeeSql.toString(),
                 sellingTransportShippingFeeSql.getParams().toArray());
         for(Map<String, Object> row : rows) {
+            if(row.get("currency") == null) continue;
             Currency currency = Currency.valueOf(row.get("currency").toString());
             expressShipCost += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
             expressShipNumberSum += NumberUtils.toInt(row.get("qty").toString());

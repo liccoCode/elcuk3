@@ -29,6 +29,7 @@ import java.util.*;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class SellingRecord extends GenericModel {
 
+    @Transient
     private static final long serialVersionUID = 897305328219999830L;
 
     public SellingRecord(Selling sell, Date date) {
