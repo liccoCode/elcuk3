@@ -2,10 +2,12 @@ package factory.procure;
 
 import factory.FactoryBoy;
 import factory.ModelFactory;
+import factory.annotation.Factory;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.procure.iExpress;
+import models.product.Whouse;
 import org.joda.time.DateTime;
 
 /**
@@ -17,14 +19,16 @@ import org.joda.time.DateTime;
 public class ShipmentFactory extends ModelFactory<Shipment> {
     @Override
     public Shipment define() {
+        DateTime now = DateTime.now();
         Shipment shipment = new Shipment();
-        shipment.id = "SP|201207|00";
+        shipment.id = Shipment.id();
         shipment.type = Shipment.T.EXPRESS;
+        shipment.dates.planBeginDate = now.minusDays(45).toDate();
+        shipment.calcuPlanArriveDate();
         shipment.internationExpress = iExpress.DHL;
         shipment.trackNo = "this_is_trackNo";
+        shipment.whouse = FactoryBoy.lastOrCreate(Whouse.class);
         shipment.cooper = FactoryBoy.lastOrCreate(Cooperator.class);
-        DateTime now = DateTime.now();
-        shipment.dates.planBeginDate = now.minusDays(45).toDate();
         shipment.dates.beginDate = shipment.dates.planBeginDate;
         shipment.dates.atPortDate = now.minusDays(15).toDate();
         shipment.dates.bookDate = now.minusDays(14).toDate();
@@ -34,6 +38,22 @@ public class ShipmentFactory extends ModelFactory<Shipment> {
         shipment.dates.receiptDate = now.minusDays(10).toDate();
 
         shipment.creater = FactoryBoy.lastOrCreate(User.class);
+        return shipment;
+    }
+
+    @Factory(name = "sea")
+    public Shipment sea() {
+        Shipment shipment = define();
+        shipment.type = Shipment.T.SEA;
+        shipment.calcuPlanArriveDate();
+        return shipment;
+    }
+
+    @Factory(name = "air")
+    public Shipment air() {
+        Shipment shipment = define();
+        shipment.type = Shipment.T.AIR;
+        shipment.calcuPlanArriveDate();
         return shipment;
     }
 }
