@@ -33,35 +33,40 @@ public class SellingRecordCaculateJob extends Job {
         // 当天产生的数据
         Map<String, Integer> sellingUnits = sellingUnits(now.toDate());
         Map<String, Float> sellingSales = sellingSales(now.toDate());
-        Map<String, Float> sellingIncome = sellingIncome(now.toDate());
+        Map<String, Float> sellingAmzFee = sellingAmazonFee(now.toDate());
 
         // 需要计算的所有数据
         List<Selling> sellings = Selling.findAll();
         for(Selling selling : sellings) {
             String sid = selling.sellingId;
             SellingRecord record = SellingRecord.today(sid);
-            /**
-             * 1. 销量
-             * 2. 销售额
-             * 3. 实际收入
-             * 4. 采购成本
-             *
-             * 5. 运输成本
-             * 6. 利润
-             * 7. 销售利润率
-             * 8. 历史总销售额
-             * 9. 历史总利润
-             */
+            // amz 扣费
+            float amzfee = sellingAmzFee.get(sid) == null ? 0 : sellingAmzFee.get(sid);
+            // 销量
             record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
+            // 销售额
             record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
-            record.income = sellingIncome.get(sid) == null ? 0 : sellingIncome.get(sid);
+            // 实际收入 = 销量 - amazon 扣费
+            record.income = record.sales - amzfee;
+
             F.T2<Float, Integer> procureCostAndQty = sellingProcreCost(selling, now.toDate());
+            // 采购成本
             record.procureCost = procureCostAndQty._1;
             record.procureNumberSum = procureCostAndQty._2;
 
             F.T2<Float, Integer> shipCostAndQty = sellingShipCost(selling, now.toDate());
+            // 运输成本
             record.shipCost = shipCostAndQty._1;
             record.shipNumberSum = shipCostAndQty._2;
+
+            // 利润 = 实际收入 - 采购成本 - 运输成本
+            record.profit = record.income - record.shipCost - record.procureCost;
+            // 成本利润率 = 利润 / (采购成本 + 运输成本)
+            record.costProfitRatio = record.profit / (record.shipCost + record.procureCost);
+            // 销售利润率 = 利润 / 销售额
+            record.saleProfitRatio = record.profit / record.sales;
+
+            // TODO: 还有总销售额和总利润
         }
     }
 
@@ -90,7 +95,7 @@ public class SellingRecordCaculateJob extends Job {
     }
 
     /**
-     * Selling 的销售额数据
+     * Selling 的销售额数据;
      *
      * @return
      */
@@ -103,12 +108,12 @@ public class SellingRecordCaculateJob extends Job {
     }
 
     /**
-     * Selling 的实际收入
+     * Selling 的 Amazon 消耗的费用;
      *
      * @param date
      * @return
      */
-    public Map<String, Float> sellingIncome(Date date) {
+    public Map<String, Float> sellingAmazonFee(Date date) {
         List<FeeType> fees = FeeType.amazon().children;
         List<String> feesTypeName = new ArrayList<String>();
         for(FeeType fee : fees) {
