@@ -1,6 +1,7 @@
 package controllers;
 
 import helper.Webs;
+import models.User;
 import models.finance.Apply;
 import models.finance.FeeType;
 import models.finance.ProcureApply;
@@ -10,6 +11,7 @@ import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.ProcreApplyPost;
 import models.view.post.ShipmentPost;
+import models.view.post.TransportApplyPost;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -27,7 +29,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Applys extends Controller {
 
-    @Before(only = {"procures"})
+    @Before(only = {"procures","transports"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
 
@@ -45,9 +47,12 @@ public class Applys extends Controller {
     }
 
 
-    public static void transports() {
-        List<Apply> applyes = TransportApply.find("ORDER BY createdAt DESC").fetch();
-        render(applyes);
+    public static void transports(TransportApplyPost p) {
+        List<User>  users = User.findAll();
+        List<TransportApply> applyes = null;
+        if(p == null) p = new TransportApplyPost();
+        applyes = p.query();
+        render(applyes,p,users);
     }
 
 
