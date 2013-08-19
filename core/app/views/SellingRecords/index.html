@@ -55,11 +55,11 @@
           <tr>
             <td>${record.selling.sellingId}</td>
             <td>${record.units}</td>
-            <td>${record.sales}</td>
-            <td>${record.income}</td>
-            <td>${record.procureCost}</td>
-            <td>${record.shipCost}</td>
-            <td>${record.profit}</td>
+            <td>${record.sales.format('#.####')}</td>
+            <td>${record.income.format('#.####')}</td>
+            <td>${record.procureCost.format('#.####')}</td>
+            <td>${record.shipCost.format('#.####')}</td>
+            <td>${record.profit.format('#.####')}</td>
             <td>${record.costProfitRatio.format('#.####')}</td>
             <td>${record.saleProfitRatio.format('#.####')}</td>
           </tr>

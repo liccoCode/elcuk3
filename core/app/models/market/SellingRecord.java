@@ -107,7 +107,7 @@ public class SellingRecord extends GenericModel {
     public float income = 0;
 
     /**
-     * 采购成本
+     * (单个产品)采购成本
      */
     public float procureCost = 0;
 
@@ -117,7 +117,7 @@ public class SellingRecord extends GenericModel {
     public int procureNumberSum = 0;
 
     /**
-     * 运输成本
+     * (单个产品)运输成本
      */
     public float shipCost = 0;
 
@@ -127,12 +127,12 @@ public class SellingRecord extends GenericModel {
     public int shipNumberSum = 0;
 
     /**
-     * 利润 = 销售额 - 采购成本 - 运输成本
+     * 利润 = 销售额 - (总)采购成本 - (总)运输成本
      */
     public float profit = 0;
 
     /**
-     * 成本利润率 = 利润 / (采购成本 + 运输成本)
+     * 成本利润率 = 利润 / ((总)采购成本 + (总)运输成本)
      */
     public float costProfitRatio = 0;
 

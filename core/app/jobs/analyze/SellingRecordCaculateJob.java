@@ -55,7 +55,7 @@ public class SellingRecordCaculateJob extends Job {
 
             for(Selling selling : sellings) {
                 String sid = selling.sellingId;
-                SellingRecord record = SellingRecord.today(sid);
+                SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 // amz 扣费
                 float amzfee = sellingAmzFee.get(sid) == null ? 0 : sellingAmzFee.get(sid);
                 // 销量
@@ -63,7 +63,7 @@ public class SellingRecordCaculateJob extends Job {
                 // 销售额
                 record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
                 // 实际收入 = 销量 - amazon 扣费
-                record.income = record.sales - amzfee;
+                record.income = record.sales - Math.abs(amzfee);
 
                 F.T2<Float, Integer> procureCostAndQty = sellingProcreCost(selling, dateTime.toDate());
                 // 采购成本
@@ -75,12 +75,12 @@ public class SellingRecordCaculateJob extends Job {
                 record.shipCost = shipCostAndQty._1;
                 record.shipNumberSum = shipCostAndQty._2;
 
+                float procureAndShipCost = (record.shipCost * record.units) + (record.procureCost * record.units);
                 // 利润 = 实际收入 - 采购成本 - 运输成本
-                record.profit = record.income - record.shipCost - record.procureCost;
+                record.profit = record.income - procureAndShipCost;
                 // 成本利润率 = 利润 / (采购成本 + 运输成本)
-                record.costProfitRatio = (record.shipCost + record.procureCost) == 0 ?
-                        0 : (record.profit / (record.shipCost + record.procureCost));
-                // 销售利润率 = 利润 / 销售额
+                record.costProfitRatio = procureAndShipCost == 0 ? 0 : (record.profit / procureAndShipCost);
+                // 销售利润率 = 利润 / 销售
                 record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
                 record.save();
 
@@ -311,8 +311,8 @@ public class SellingRecordCaculateJob extends Job {
                 oneDay.toDate(), transportshippingTypeFees, Shipment.T.AIR, Shipment.T.SEA);
 
         F.T3<Float, Float, Integer> t3 = avgFee(
-                Arrays.asList(record.procureCost * record.procureNumberSum, expressShipCost, airAndSeaCostAndNumber._1),
-                Arrays.asList(record.procureNumberSum, expressShipNumberSum, airAndSeaCostAndNumber._2));
+                Arrays.asList(record.shipCost * record.shipNumberSum, expressShipCost, airAndSeaCostAndNumber._1),
+                Arrays.asList(record.shipNumberSum, expressShipNumberSum, airAndSeaCostAndNumber._2));
 
         return new F.T2<Float, Integer>(t3._1, t3._3);
     }
@@ -372,14 +372,16 @@ public class SellingRecordCaculateJob extends Job {
             }
         }
 
-        SqlSelect airAndSeaShipNumberSumSql = new SqlSelect()
-                .select("sum(qty) as qty")
-                .from("ShipItem")
-                .where(SqlSelect.whereIn("shipment_id", shipmentIds));
+        if(shipmentIds.size() > 0) {
+            SqlSelect airAndSeaShipNumberSumSql = new SqlSelect()
+                    .select("sum(qty) as qty")
+                    .from("ShipItem")
+                    .where(SqlSelect.whereIn("shipment_id", shipmentIds));
 
-        Map<String, Object> row = DBUtils.row(airAndSeaShipNumberSumSql.toString());
-        if(StringUtils.isNotBlank(row.get("qty").toString()))
-            totalNumberSum = NumberUtils.toInt(row.get("qty").toString());
+            Map<String, Object> row = DBUtils.row(airAndSeaShipNumberSumSql.toString());
+            if(StringUtils.isNotBlank(row.get("qty").toString()))
+                totalNumberSum = NumberUtils.toInt(row.get("qty").toString());
+        }
 
         return new F.T2<Float, Integer>(totalCost, totalNumberSum);
     }

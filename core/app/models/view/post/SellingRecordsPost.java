@@ -8,7 +8,6 @@ import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -36,7 +35,8 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         if(records == null || records.size() == 0) {
             String running = Cache.get("sellingRecordCaculateJobRunning", String.class);
             if(StringUtils.isNotBlank(running)) throw new FastRuntimeException("正在计算中, 请等待 10 分钟后重试.");
-            new SellingRecordCaculateJob(new DateTime(2013, 7, 2, 0, 0)).now();
+            DateTime dateBegin = new DateTime(2013, 7, 3, 0, 0);
+            new SellingRecordCaculateJob(dateBegin).now();
         }
         return records;
     }
@@ -45,6 +45,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
     public List<SellingRecord> query() {
         List<SellingRecord> records = records();
 
+        /*
         this.count = records.size();
         List<SellingRecord> afterPager = new ArrayList<SellingRecord>();
         int index = (this.page - 1) * this.perSize;
@@ -54,5 +55,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             afterPager.add(records.get(index));
         }
         return afterPager;
+        */
+        return records;
     }
 }
