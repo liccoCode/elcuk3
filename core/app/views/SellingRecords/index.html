@@ -4,6 +4,7 @@
     #{stylesheet 'payments.css'/}
 #{/set}
 #{set 'moreScripts'}
+    #{script 'sellingrecords/index.coffee'/}
 #{/set}
 
 <div class="row-fluid">
@@ -15,56 +16,24 @@
     <form class="search_form">
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
-        <input type="date" id="a_from" class="input input-small" name="p.from">
+        <input type="date" id="a_from" class="input input-small" name="p.from" value="${p.from.date()}">
       </div>
 
       <div class="input-prepend inline">
         <span class="add-on">TO:</span>
-        <input type="date" id="a_to" name="p.to">
+        <input type="date" id="a_to" name="p.to" value="${p.to.date()}">
       </div>
-      <select name="market" class="input-small inline">
+      <select name="p.market" class="input-small inline">
         <option value="">Market</option>
       #{list items:models.market.M.values()}
         <option value="${_.name()}">${_.toString()}</option>
       #{/list}
       </select>
+
+      <input type="hidden" id="post_page" name="p.page" value="1">
     </form>
   </div>
 </div>
 
 <!-- TODO 下面这部分是需要变为 Ajax Load, 转移到另外一个页面的 -->
-<div class="row-fluid">
-  <div class="span12">
-  #{if msg}
-  ${msg}
-  #{/if}
-  #{else }
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <td class="span2">SellingID</td>
-        <td>销量</td>
-        <td>销售额</td>
-        <td>实际收入</td>
-        <td>采购成本</td>
-        <td>运输成本</td>
-        <td>利润</td>
-        <td>成本利润率</td>
-        <td>销售利润率</td>
-      </tr>
-        #{list items:records, as: 'record'}
-          <tr>
-            <td>${record.selling.sellingId}</td>
-            <td>${record.units}</td>
-            <td>${record.sales.format('#.####')}</td>
-            <td>${record.income.format('#.####')}</td>
-            <td>${record.procureCost.format('#.####')}</td>
-            <td>${record.shipCost.format('#.####')}</td>
-            <td>${record.profit.format('#.####')}</td>
-            <td>${record.costProfitRatio.format('#.####')}</td>
-            <td>${record.saleProfitRatio.format('#.####')}</td>
-          </tr>
-        #{/list}
-    </table>
-  #{/else}
-  </div>
-</div>
+<div class="row-fluid" id="sid"></div>

@@ -1,7 +1,10 @@
 package models.view.post;
 
 import jobs.analyze.SellingRecordCaculateJob;
+import models.market.M;
 import models.market.SellingRecord;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
@@ -19,14 +22,22 @@ import java.util.List;
  */
 public class SellingRecordsPost extends Post<SellingRecord> {
     public SellingRecordsPost() {
+        this.from = new DateTime(this.to).minusMonths(1).toDate();
         this.perSize = 20;
     }
 
     public Date dateTime = new Date();
 
+    public String market;
+
     @Override
     public F.T2<String, List<Object>> params() {
         return new F.T2<String, List<Object>>("", null);
+    }
+
+    @Override
+    public Long getTotalCount() {
+        return (long) this.records().size();
     }
 
     @SuppressWarnings("unchecked")
@@ -45,17 +56,24 @@ public class SellingRecordsPost extends Post<SellingRecord> {
     public List<SellingRecord> query() {
         List<SellingRecord> records = records();
 
-        /*
-        this.count = records.size();
-        List<SellingRecord> afterPager = new ArrayList<SellingRecord>();
-        int index = (this.page - 1) * this.perSize;
-        int end = index + this.perSize;
-        for(; index < end; index++) {
-            if(index >= this.count) break;
-            afterPager.add(records.get(index));
+        if(StringUtils.isNotBlank(this.market)) {
+            CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
         }
-        return afterPager;
-        */
-        return records;
+        return this.programPager(records);
+    }
+
+    private static class MarketPredicate implements Predicate {
+        private M market;
+
+        public MarketPredicate(M market) {
+            this.market = market;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            SellingRecord dto = (SellingRecord) o;
+            return this.market.equals(dto.market);
+        }
+
     }
 }

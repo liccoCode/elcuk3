@@ -20,14 +20,19 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class SellingRecords extends Controller {
 
-    public static void index(SellingRecordsPost post) {
-        if(post == null) post = new SellingRecordsPost();
+    public static void index() {
+        SellingRecordsPost p = new SellingRecordsPost();
+        render(p);
+    }
+
+    public static void sid(SellingRecordsPost p) {
+        if(p == null) p = new SellingRecordsPost();
         try {
-            List<SellingRecord> records = post.query();
-            render(records, post);
+            List<SellingRecord> records = p.query();
+            render(records, p);
         } catch(Exception e) {
             renderArgs.put("msg", e.getMessage());
-            render(post);
+            render(p);
         }
     }
 

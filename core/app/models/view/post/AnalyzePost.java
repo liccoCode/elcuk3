@@ -347,15 +347,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.market))
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
 
-        this.count = dtos.size();
-        List<AnalyzeDTO> afterPager = new ArrayList<AnalyzeDTO>();
-        int index = (this.page - 1) * this.perSize;
-        int end = index + this.perSize;
-        for(; index < end; index++) {
-            if(index >= this.count) break;
-            afterPager.add(dtos.get(index));
-        }
-        return afterPager;
+        return this.programPager(dtos);
     }
 
     @Override
