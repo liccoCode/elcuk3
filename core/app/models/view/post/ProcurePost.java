@@ -40,7 +40,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public ProcureUnit.STAGE stage;
 
-    public boolean isPlaced = false;
+    public PLACEDSTATE isPlaced;
 
     public Shipment.T shipType;
 
@@ -48,6 +48,25 @@ public class ProcurePost extends Post<ProcureUnit> {
      * 选择过滤的日期类型
      */
     public String dateType;
+
+
+    public enum PLACEDSTATE {
+        ARRIVE {
+            @Override
+            public String label() {
+                return "抵达货代处";
+            }
+        },
+        NOARRIVE {
+            @Override
+            public String label() {
+                return "未抵达货代处";
+            }
+
+        };
+        public abstract String label();
+    }
+
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -109,9 +128,13 @@ public class ProcurePost extends Post<ProcureUnit> {
                 params.add(this.shipType);
             }
 
-            sbd.append(" AND isPlaced=? ");
-            params.add(this.isPlaced);
-
+            if(this.isPlaced != null) {
+                sbd.append(" AND isPlaced=? ");
+                if(this.isPlaced == PLACEDSTATE.ARRIVE)
+                   params.add(true);
+                else
+                   params.add(false);
+            }
 
             if(StringUtils.isNotBlank(this.search)) {
                 String word = this.word();

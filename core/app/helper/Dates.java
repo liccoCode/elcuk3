@@ -7,9 +7,7 @@ import org.joda.time.format.DateTimeFormat;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 /**
  * Created by IntelliJ IDEA.
@@ -252,14 +250,4 @@ public class Dates {
         return cn(Dates.date2DateTime(time));
     }
 
-    /**
-     * 获取几天的日期
-     * @param day
-     */
-    public static String futureDate(int day){
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.add(Calendar.DATE, day);
-
-     return date2Date(new DateTime(gc.getTime()));
-   }
 }
