@@ -8,7 +8,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
@@ -97,13 +96,10 @@ public class SellingRecordsPost extends Post<SellingRecord> {
      */
     public List<SellingRecord> recordsToSKU(List<SellingRecord> records) {
         Map<String, SellingRecord> skuRecordsMap = new HashMap<String, SellingRecord>();
+        M market = M.val(this.market);
         for(SellingRecord rcd : records) {
+            if(market != null && rcd.market != market) continue;
             String sku = Product.merchantSKUtoSKU(rcd.selling.merchantSKU);
-            if("80DBK12000-AB".equals(sku)) {
-                Logger.info("SKU %s --- %s %s ; units: %s, sales: %s",
-                        sku, rcd.selling.merchantSKU, rcd.selling.sellingId,
-                        rcd.units, rcd.sales);
-            }
             SellingRecord record;
             if(skuRecordsMap.containsKey(sku)) {
                 record = skuRecordsMap.get(sku);
