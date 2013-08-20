@@ -1,41 +1,39 @@
-<div class="span12">
 #{if msg}
 ${msg}
 #{/if}
 #{elseif records == null || records.size() == 0}
-  还在计算中, 请等待 10 分钟后再试
+还在计算中, 请等待 10 分钟后再试
 #{/elseif}
 #{else }
-  <table class="table table-bordered table-condensed">
-    <tr>
-      <td class="span2">SellingID</td>
-      <td>销量</td>
-      <td>销售额</td>
-      <td>实际收入</td>
-      <td>采购成本</td>
-      <td>运输成本</td>
-      <td>利润</td>
-      <td>成本利润率</td>
-      <td>销售利润率</td>
-    </tr>
-      #{list items:records, as: 'record'}
-        <tr>
-          <td>${record.selling.sellingId}</td>
-          <td>${record.units}</td>
-          <td>${record.sales.format('#.####')}</td>
-          <td>${record.income.format('#.####')}</td>
-          <td>${record.procureCost.format('#.####')}</td>
-          <td>${record.shipCost.format('#.####')}</td>
-          <td>${record.profit.format('#.####')}</td>
-          <td>${record.costProfitRatio.format('#.####')}</td>
-          <td>${record.saleProfitRatio.format('#.####')}</td>
-        </tr>
-      #{/list}
-    <tr class="tb_footer">
-      <td colspan="9">
-          #{bootstrap_pager pi:p, url:'' /}
-      </td>
-    </tr>
-  </table>
+<table class="table table-bordered table-condensed">
+  <tr>
+    <td class="span2">SellingID</td>
+    <td>销量</td>
+    <td>销售额</td>
+    <td>实际收入</td>
+    <td>采购成本</td>
+    <td>运输成本</td>
+    <td>利润</td>
+    <td>成本利润率</td>
+    <td>销售利润率</td>
+  </tr>
+    #{list items:records, as: 'record'}
+      <tr>
+        <td>${record.selling.sellingId}</td>
+        <td>${record.units}</td>
+        <td>${record.sales.format('#.####')}</td>
+        <td>${record.income.format('#.####')}</td>
+        <td>${record.procureCost.format('#.####')}</td>
+        <td>${record.shipCost.format('#.####')}</td>
+        <td>${record.profit.format('#.####')}</td>
+        <td>${record.costProfitRatio.format('#.####')}</td>
+        <td>${record.saleProfitRatio.format('#.####')}</td>
+      </tr>
+    #{/list}
+  <tr class="tb_footer">
+    <td colspan="9">
+        #{bootstrap_pager pi:p, url:'' /}
+    </td>
+  </tr>
+</table>
 #{/else}
-</div>

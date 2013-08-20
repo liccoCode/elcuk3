@@ -31,9 +31,20 @@
       </select>
 
       <input type="hidden" id="post_page" name="p.page" value="1">
+      <input type="hidden" id="post_type" name="p.type" value="selling">
     </form>
   </div>
 </div>
 
-<!-- TODO 下面这部分是需要变为 Ajax Load, 转移到另外一个页面的 -->
-<div class="row-fluid" id="sid"></div>
+<ul id="divTabs" class='nav nav-tabs'>
+  <li>
+    <a href="#selling" data-toggle="tab">Selling</a>
+  </li>
+  <li>
+    <a href="#sku" data-toggle="tab">SKU</a>
+  </li>
+</ul>
+<div id="sellingSkuCategoryDivs" class="tab-content">
+  <div class="tab-pane" id="selling"></div>
+  <div class="tab-pane" id="sku"></div>
+</div>

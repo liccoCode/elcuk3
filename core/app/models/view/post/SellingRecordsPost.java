@@ -3,16 +3,17 @@ package models.view.post;
 import jobs.analyze.SellingRecordCaculateJob;
 import models.market.M;
 import models.market.SellingRecord;
+import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,6 +31,11 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     public String market;
 
+    /**
+     * Selling, SKU, Category 三个种类
+     */
+    public String type = "selling";
+
     @Override
     public F.T2<String, List<Object>> params() {
         return new F.T2<String, List<Object>>("", null);
@@ -37,7 +43,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     @Override
     public Long getTotalCount() {
-        return (long) this.records().size();
+        return this.count;
     }
 
     @SuppressWarnings("unchecked")
@@ -55,6 +61,12 @@ public class SellingRecordsPost extends Post<SellingRecord> {
     @Override
     public List<SellingRecord> query() {
         List<SellingRecord> records = records();
+        if(StringUtils.isNotBlank(this.type)) {
+            if("sku".equals(this.type)) {
+                records = recordsToSKU(records);
+            } else if("category".equals(this.type)) {
+            }
+        }
 
         if(StringUtils.isNotBlank(this.market)) {
             CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
@@ -75,5 +87,44 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             return this.market.equals(dto.market);
         }
 
+    }
+
+    /**
+     * 把 Records 中的内容统计为 SKU 级别
+     *
+     * @param records
+     * @return
+     */
+    public List<SellingRecord> recordsToSKU(List<SellingRecord> records) {
+        Map<String, SellingRecord> skuRecordsMap = new HashMap<String, SellingRecord>();
+        for(SellingRecord rcd : records) {
+            String sku = Product.merchantSKUtoSKU(rcd.selling.merchantSKU);
+            if("80DBK12000-AB".equals(sku)) {
+                Logger.info("SKU %s --- %s %s ; units: %s, sales: %s",
+                        sku, rcd.selling.merchantSKU, rcd.selling.sellingId,
+                        rcd.units, rcd.sales);
+            }
+            SellingRecord record;
+            if(skuRecordsMap.containsKey(sku)) {
+                record = skuRecordsMap.get(sku);
+            } else {
+                record = new SellingRecord(rcd.selling, rcd.date);
+                record.selling.sellingId = sku;
+                skuRecordsMap.put(sku, record);
+            }
+            record.units += rcd.units;
+            record.sales += rcd.sales;
+            record.income += rcd.income;
+            record.procureCost += rcd.procureCost;
+            record.procureNumberSum += rcd.procureNumberSum;
+            record.shipCost += rcd.shipCost;
+            record.shipNumberSum += rcd.shipNumberSum;
+            record.profit += rcd.profit;
+        }
+        for(SellingRecord record : skuRecordsMap.values()) {
+            record.costProfitRatio = record.profit / (record.shipCost + record.procureCost);
+            record.saleProfitRatio = record.profit / record.sales;
+        }
+        return new ArrayList<SellingRecord>(skuRecordsMap.values());
     }
 }
