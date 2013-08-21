@@ -366,7 +366,7 @@ public class Payment extends Model {
     }
 
     /**
-     * 分别计算 USD 与 CNY 的总金额
+     * 分别计算 USD 与 CNY 的总金额   （不含驳回）
      *
      * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
@@ -379,7 +379,8 @@ public class Payment extends Model {
         for(PaymentUnit unit : this.units()) {
             if(lastCurrency != this.currency)
                 throw new FastRuntimeException("付款单中的币种不可能不一样, 数据有错误, 请联系开发人员.");
-            currenctCurrencyAmount += unit.amount();
+            if(PaymentUnit.S.DENY != unit.state)
+                currenctCurrencyAmount += unit.amount();
         }
         return new F.T3<Float, Float, Float>(
                 currency.toUSD(currenctCurrencyAmount),
