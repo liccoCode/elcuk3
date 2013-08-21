@@ -131,9 +131,7 @@ public class ProcurePost extends Post<ProcureUnit> {
             if(this.isPlaced != null) {
                 sbd.append(" AND isPlaced=? ");
                 if(this.isPlaced == PLACEDSTATE.ARRIVE)
-                   params.add(true);
-                else
-                   params.add(false);
+                 params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
             }
 
             if(StringUtils.isNotBlank(this.search)) {
