@@ -111,7 +111,7 @@ public class TransportApplyPost extends Post<TransportApply> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return TransportApply.count("select count(id) from TransportApply where " + params._1, params._2.toArray());
+        return TransportApply.count(params._1, params._2.toArray());
     }
 
     @Override

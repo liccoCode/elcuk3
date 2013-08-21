@@ -29,7 +29,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Applys extends Controller {
 
-    @Before(only = {"procures","transports"})
+    @Before(only = {"procures", "transports"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
 
@@ -46,13 +46,15 @@ public class Applys extends Controller {
         render(applyes, p);
     }
 
-
+    /**
+     * 物流请款  列表
+     */
     public static void transports(TransportApplyPost p) {
-        List<User>  users = User.findAll();
+        List<User> users = User.findAll();
         List<TransportApply> applyes = null;
         if(p == null) p = new TransportApplyPost();
         applyes = p.query();
-        render(applyes,p,users);
+        render(applyes, p, users);
     }
 
 
