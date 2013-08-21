@@ -66,6 +66,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             if("sku".equals(this.type)) {
                 records = recordsToSKU(records);
             } else if("category".equals(this.type)) {
+                records = recordToCategory(records);
             }
         }
 

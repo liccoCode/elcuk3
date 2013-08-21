@@ -1,5 +1,5 @@
 $ ->
-  $('#selling, #sku').on('ajaxLoad',() ->
+  $('#selling, #sku, #category').on('ajaxLoad',() ->
     # 1. 收集 Market 的参数
     # 2. 加载数据
     $div = $(@)
