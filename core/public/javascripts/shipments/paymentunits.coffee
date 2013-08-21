@@ -206,8 +206,15 @@ statistic_data = (table) ->
     #根据币种的不同 统计总金额
     amountArray = new Array();
     $table.find('tr:gt(0)').each((index,element)->
-        currency = $(element).find("td:eq(2)").text();
-        total = $(element).find("td:eq(6)").text().trim().substr(1)
+        #获取是否有子元素 有子元素证明该行变成了编辑状态
+        currency_children = $(element).find("td:eq(2)").children(":first").length;
+        if currency_children == 0
+          currency = $(element).find("td:eq(2)").text();
+          total = $(element).find("td:eq(6)").text().trim().substr(1)
+        else
+          currency = $(element).find("td:eq(2)").children(":first").val();
+          total = $(element).find("td:eq(6)").children(":first").val();
+
         if amountArray[currency] == undefined
           amountArray[currency] = total;
         else
