@@ -4,14 +4,10 @@ import jobs.analyze.SellingRecordCaculateJob;
 import models.market.SellingRecord;
 import models.view.post.SellingRecordsPost;
 import org.joda.time.DateTime;
-import play.cache.Cache;
 import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -45,13 +41,4 @@ public class SellingRecords extends Controller {
         renderHtml("<h3>SellingRecordCaculateJob 开始执行</h3>");
     }
 
-    public static void ttt() throws IOException {
-        List<SellingRecord> records = Cache.get("sellingRecordCaculateJob", List.class);
-        FileOutputStream fileout = new FileOutputStream(
-                "/Users/wyatt/Programer/repo/elcuk2/core/sellings");
-        ObjectOutputStream out = new ObjectOutputStream(fileout);
-        out.writeObject(records);
-        out.close();
-        renderText("写入成功.");
-    }
 }
