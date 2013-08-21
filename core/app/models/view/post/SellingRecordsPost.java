@@ -3,6 +3,7 @@ package models.view.post;
 import jobs.analyze.SellingRecordCaculateJob;
 import models.market.M;
 import models.market.SellingRecord;
+import models.product.Category;
 import models.product.Product;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -50,7 +51,8 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         List<SellingRecord> records = Cache.get("sellingRecordCaculateJob", List.class);
         if(records == null || records.size() == 0) {
             String running = Cache.get("sellingRecordCaculateJobRunning", String.class);
-            if(StringUtils.isNotBlank(running)) throw new FastRuntimeException("正在计算中, 请等待 10 分钟后重试.");
+            if(StringUtils.isNotBlank(running))
+                throw new FastRuntimeException("正在计算中, 请等待 10 分钟后重试.");
             DateTime dateBegin = new DateTime(2013, 7, 3, 0, 0);
             new SellingRecordCaculateJob(dateBegin).now();
         }
@@ -95,18 +97,37 @@ public class SellingRecordsPost extends Post<SellingRecord> {
      * @return
      */
     public List<SellingRecord> recordsToSKU(List<SellingRecord> records) {
+        return recordToWithCallback(records, new Callback() {
+            @Override
+            public String key(SellingRecord rcd) {
+                return Product.merchantSKUtoSKU(rcd.selling.merchantSKU);
+            }
+        });
+    }
+
+    public List<SellingRecord> recordToCategory(List<SellingRecord> records) {
+        return recordToWithCallback(records, new Callback() {
+            @Override
+            public String key(SellingRecord rcd) {
+                return Category.skuToCategoryId(Product.merchantSKUtoSKU(rcd.selling.merchantSKU));
+            }
+        });
+    }
+
+    public List<SellingRecord> recordToWithCallback(List<SellingRecord> records,
+                                                    Callback callback) {
         Map<String, SellingRecord> skuRecordsMap = new HashMap<String, SellingRecord>();
         M market = M.val(this.market);
         for(SellingRecord rcd : records) {
             if(market != null && rcd.market != market) continue;
-            String sku = Product.merchantSKUtoSKU(rcd.selling.merchantSKU);
+            String key = callback.key(rcd);
             SellingRecord record;
-            if(skuRecordsMap.containsKey(sku)) {
-                record = skuRecordsMap.get(sku);
+            if(skuRecordsMap.containsKey(key)) {
+                record = skuRecordsMap.get(key);
             } else {
                 record = new SellingRecord(rcd.selling, rcd.date);
-                record.selling.sellingId = sku;
-                skuRecordsMap.put(sku, record);
+                record.selling.sellingId = key;
+                skuRecordsMap.put(key, record);
             }
             record.units += rcd.units;
             record.sales += rcd.sales;
@@ -122,5 +143,12 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             record.saleProfitRatio = record.profit / record.sales;
         }
         return new ArrayList<SellingRecord>(skuRecordsMap.values());
+    }
+
+    /**
+     * 计算返回的 key
+     */
+    public interface Callback {
+        public String key(SellingRecord rcd);
     }
 }

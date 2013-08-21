@@ -179,7 +179,8 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
+    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market,
+                                                                        Date oneDay) {
         Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
         int curentPage = 0;
@@ -218,12 +219,17 @@ public class SellingRecord extends GenericModel {
 
                         SellingRecord record = SellingRecord.oneDay(sid, oneDay);
                         // 无论数据库中存在不存在都需要更新下面数据
-                        record.sessions = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString()).intValue();
-                        record.pageViews = Webs.amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString()).intValue();
+                        record.sessions = Webs
+                                .amazonPriceNumber(M.AMAZON_UK, rowArr.get(4).getAsString())
+                                .intValue();
+                        record.pageViews = Webs
+                                .amazonPriceNumber(M.AMAZON_UK, rowArr.get(6).getAsString())
+                                .intValue();
 
                         records.add(record);
                     } catch(Exception e) {
-                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)", Webs.E(e));
+                        Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
+                                Webs.E(e));
                     }
                 }
             } while(hasNext);
@@ -244,7 +250,8 @@ public class SellingRecord extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("4h") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
-    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
+    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from,
+                                                               Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null) return cacheElement;
@@ -286,7 +293,9 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku, Account acc, Date from,
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
+                                                                                 Account acc,
+                                                                                 Date from,
                                                                                  Date to) {
         /**
          * 格式 map[lineName, datas]
@@ -309,17 +318,25 @@ public class SellingRecord extends GenericModel {
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
-                highCharLines.get("pv_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_uk")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_uk")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_DE) {
-                highCharLines.get("pv_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_de").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_de")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_de")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_FR) {
-                highCharLines.get("pv_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_fr")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_fr")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else if(rcd.market == M.AMAZON_US) {
-                highCharLines.get("pv_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_us").add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                highCharLines.get("pv_us")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
+                highCharLines.get("ss_us")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
@@ -333,7 +350,9 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku, Account acc, Date from,
+    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
+                                                                                   Account acc,
+                                                                                   Date from,
                                                                                    Date to) {
         Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
                 .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
@@ -347,13 +366,17 @@ public class SellingRecord extends GenericModel {
                     .scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
             if(rcd.market == M.AMAZON_UK)
-                highCharLines.get("tn_uk").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_uk")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_DE)
-                highCharLines.get("tn_de").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_de")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_FR)
-                highCharLines.get("tn_fr").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_fr")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else if(rcd.market == M.AMAZON_US)
-                highCharLines.get("tn_us").add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                highCharLines.get("tn_us")
+                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }
@@ -408,7 +431,8 @@ public class SellingRecord extends GenericModel {
             record = new SellingRecord(selling, oneDay);
             record.selling = selling;
             record.account = selling.account;
-            record.orderCanceld = (int) Orderr.count("state=? AND createDate=?", Orderr.S.CANCEL, record.date);
+            record.orderCanceld = (int) Orderr
+                    .count("state=? AND createDate=?", Orderr.S.CANCEL, record.date);
             record.save();
         }
         return record;
@@ -432,5 +456,30 @@ public class SellingRecord extends GenericModel {
         int result = super.hashCode();
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
+    }
+
+
+    @Override
+    public String toString() {
+        return "SellingRecord{" +
+                "sessions=" + sessions +
+                ", pageViews=" + pageViews +
+                ", orders=" + orders +
+                ", orderCanceld=" + orderCanceld +
+                ", salePrice=" + salePrice +
+                ", units=" + units +
+                ", sales=" + sales +
+                ", income=" + income +
+                ", procureCost=" + procureCost +
+                ", procureNumberSum=" + procureNumberSum +
+                ", shipCost=" + shipCost +
+                ", shipNumberSum=" + shipNumberSum +
+                ", profit=" + profit +
+                ", costProfitRatio=" + costProfitRatio +
+                ", saleProfitRatio=" + saleProfitRatio +
+                ", totalSales=" + totalSales +
+                ", totalProfit=" + totalProfit +
+                ", date=" + date +
+                '}';
     }
 }
