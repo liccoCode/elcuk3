@@ -121,6 +121,8 @@ $ ->
         label = feeStateLabel(r['state'])
         $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
         noty({text: '更新成功', type: 'success', timeout: 3000})
+      #计算各币种的总费用
+      $(@).trigger("statistic_data");
       LoadMask.unmask()
     ).fail((r) ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
@@ -135,6 +137,8 @@ $ ->
       url: "/paymentunit/#{id}/shipment",
     $('#popModal').html(_.template($('#form-destroyfee-model-template').html(), {fee: params})).modal('show')
 
+    #计算各币种的总费用
+    $(@).trigger("statistic_data");
     # 批准
   ).on('click', 'button.btn-success:contains(批准)',(e) ->
     $btn = $(@)
@@ -192,3 +196,50 @@ $ ->
           )
     false
   )
+
+  # 传入运输单费用信息 table 对象 计算 各币种的总费用
+statistic_data = (table) ->
+    $table = table
+    #删除生成的TR 防止统计错误
+    if $table.find("tr:last").attr("id") == "_show_amount"
+       $table.find("tr:last").remove();$table.find("tr:last").remove();
+    #根据币种的不同 统计总金额
+    amountArray = new Array();
+    $table.find('tr:gt(0)').each((index,element)->
+        currency = $(element).find("td:eq(2)").text();
+        total = $(element).find("td:eq(6)").text().trim().substr(1)
+        if amountArray[currency] == undefined
+          amountArray[currency] = total;
+        else
+          amountArray[currency] = parseFloat(amountArray[currency]) + parseFloat(total);
+    )
+    #展示 统计结果
+    $table.find("tr:last-child").after('<tr class="alert alert-success" style="text-align:left"><td colspan="12"><h4>运输单费用统计</h4></td></tr>');
+    message=""
+    message +="&nbsp;&nbsp; #{key} : #{value}" for key, value of amountArray
+    $table.find("tr:last-child").after("<tr id='_show_amount'><td colspan='11'>"+message+"</td></tr>");
+
+#为运输单费用信息的TABLE中所有删除按钮，更新按钮，增加计算方法
+initialize = ->
+  $('table.paymentInfo').on('statistic_data', 'button.btn-warning:contains(删除)',(e) ->
+    e.preventDefault()
+    $btn = $(@)
+    $table = $btn.parents('table')
+    statistic_data($table)
+  ).on('statistic_data', 'button.btn-success:contains(更新)',(e) ->
+    e.preventDefault()
+    $btn = $(@)
+    $table = $btn.parents('table')
+    statistic_data($table)
+  )
+
+
+#计算页面所有运输单费用信息的各种币种的总和
+trigger_statistic_data = ->
+  $('table.paymentInfo').each((index,table)->
+      $(table).find("button.btn-warning:contains(删除)").trigger("statistic_data")
+   )
+
+$(document).ready ->
+   initialize();
+   trigger_statistic_data();
