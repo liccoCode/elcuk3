@@ -33,17 +33,16 @@ public class TransportApplyPost extends Post<TransportApply> {
         this.perSize = perSize;
     }
 
-
     public Date from;
+
     public Date to;
 
     public DateType dateType;
 
-
     public Long cooperId;
 
     /**
-     *请款人 ID
+     * 请款人 ID
      */
     public Long userId;
 
@@ -68,7 +67,6 @@ public class TransportApplyPost extends Post<TransportApply> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-
 
         StringBuffer sql = new StringBuffer(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
@@ -97,7 +95,6 @@ public class TransportApplyPost extends Post<TransportApply> {
             sql.append(" AND serialNumber like ?");
             params.add(this.word());
         }
-
 
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
