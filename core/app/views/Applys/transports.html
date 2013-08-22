@@ -3,18 +3,14 @@
 #{set 'moreScripts'}
 #{/set}
 
-#{warning_row}
-<ul>
-  <li>在编写采购请款时将此页面完善</li>
-</ul>
-#{/warning_row}
-
 #{form @Applys.transports(), class:'search_form', id:'transports_form', method:'POST'}
 <div class="row-fluid">
   <div class="span12">
-    <div class="input-prepend input-append inline">
+    <div class="input-prepend inline">
       <span class="add-on">From:</span>
       <input type="date" name="p.from" value="${p.from.date()}">
+    </div>
+    <div class="input-prepend inline">
       <span class="add-on">To:</span>
       <input type="date" name="p.to" value="${p.to.date()}">
     </div>
