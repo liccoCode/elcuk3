@@ -7,17 +7,14 @@
  #{script 'component/pagination.coffee'/}
 #{/set}
 
-#{info_row title: "请款项目"}
-<ul>
-  <li class="text-warning">分页与搜索后续补上</li>
-</ul>
-#{/info_row}
 #{form @Payments.index(), class:'search_form', id:'payments_form', method:'POST'}
 <div class="row-fluid">
   <div class="span12">
-    <div class="input-prepend input-append inline">
+    <div class="input-prepend inline">
       <span class="add-on">From:</span>
       <input type="date" name="p.from" value="${p.from.date()}">
+    </div>
+    <div class="input-prepend inline">
       <span class="add-on">To:</span>
       <input type="date" name="p.to" value="${p.to.date()}">
     </div>
