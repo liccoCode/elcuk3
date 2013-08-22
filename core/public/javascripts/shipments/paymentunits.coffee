@@ -47,8 +47,8 @@ $ ->
         $("#fee_#{$btn.data('id')}").remove()
         noty({text: r.message, type: 'success', timeout: 3000})
         #计算各币种的总费用
-        id = $btn.attr("data-id");
-        $("table.paymentInfo tr[id=fee_" + id + "]").parents('table').trigger("statistic_data");
+        id = $btn.data('data-id');
+        $("table.paymentInfo tr[id=fee_#{id}]").parents('table').trigger("statistic_data");
       else
         text = _.map(r,(err)->
           err.message
