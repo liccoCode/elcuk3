@@ -43,9 +43,9 @@ public class ProcureUnits extends Controller {
 
         //为视图提供日期
         DateTime dateTime = new DateTime();
-        renderArgs.put("tomorrow1",dateTime.plusDays(1).toString("yyyy-MM-dd"));
-        renderArgs.put("tomorrow2",dateTime.plusDays(2).toString("yyyy-MM-dd"));
-        renderArgs.put("tomorrow3",dateTime.plusDays(3).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow1", dateTime.plusDays(1).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow2", dateTime.plusDays(2).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
     }
 
     @Check("procures.index")
@@ -55,9 +55,9 @@ public class ProcureUnits extends Controller {
     }
 
     /**
-     *明天 后天 大后天 计划视图
+     * 明天 后天 大后天 计划视图
      */
-    public static void planView(Date date){
+    public static void planView(Date date) {
         ProcurePost p = new ProcurePost(ProcureUnit.STAGE.DELIVERY);
         p.dateType = "attrs.planDeliveryDate";
         p.from = date;
@@ -67,9 +67,9 @@ public class ProcureUnits extends Controller {
     }
 
     /**
-      * 发货时间为当天, 同时货物还没有抵达货代的采购计划
+     * 发货时间为当天, 同时货物还没有抵达货代的采购计划
      */
-    public static void noPlaced(){
+    public static void noPlaced() {
         ProcurePost p = new ProcurePost();
         p.dateType = "attrs.planArrivDate";
         p.from = new Date();
@@ -78,7 +78,6 @@ public class ProcureUnits extends Controller {
 
         ProcureUnits.index(p);
     }
-
 
 
     public static void blank(String sid) {

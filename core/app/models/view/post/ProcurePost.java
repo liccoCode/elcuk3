@@ -33,6 +33,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         DATE_TYPES.add(new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"));
     }
 
+    /**
+     * 在 ProcureUnits中，planView 和noPlaced 方法 需要调用 index，必须重写，否则总是构造方法中的时间
+     */
+    public Date from;
+    public Date to;
 
     public long whouseId;
 
@@ -64,6 +69,7 @@ public class ProcurePost extends Post<ProcureUnit> {
             }
 
         };
+
         public abstract String label();
     }
 
@@ -130,8 +136,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
             if(this.isPlaced != null) {
                 sbd.append(" AND isPlaced=? ");
-                if(this.isPlaced == PLACEDSTATE.ARRIVE)
-                 params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
+                params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
             }
 
             if(StringUtils.isNotBlank(this.search)) {
