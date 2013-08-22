@@ -13,12 +13,14 @@ import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,14 +38,43 @@ public class ProcureUnits extends Controller {
         renderArgs.put("whouses", Whouse.<Whouse>findAll());
         renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
         renderArgs.put("cooperators", cooperators);
+
+        //为视图提供日期
+        DateTime dateTime = new DateTime();
+        renderArgs.put("tomorrow1", dateTime.plusDays(1).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow2", dateTime.plusDays(2).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
     }
 
     @Check("procures.index")
     public static void index(ProcurePost p) {
-        if(p == null)
-            p = new ProcurePost();
+        if(p == null) p = new ProcurePost();
         render(p);
     }
+
+    /**
+     * 明天 后天 大后天 计划视图
+     */
+    public static void planView(Date date) {
+        ProcurePost p = new ProcurePost(ProcureUnit.STAGE.DELIVERY);
+        p.dateType = "attrs.planDeliveryDate";
+        p.from = date;
+        p.to = date;
+        ProcureUnits.index(p);
+    }
+
+    /**
+     * 发货时间为当天, 同时货物还没有抵达货代的采购计划
+     */
+    public static void noPlaced() {
+        ProcurePost p = new ProcurePost();
+        p.dateType = "attrs.planArrivDate";
+        p.from = new Date();
+        p.to = new Date();
+        p.isPlaced = ProcurePost.PLACEDSTATE.NOARRIVE;
+        ProcureUnits.index(p);
+    }
+
 
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
