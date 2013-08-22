@@ -2,7 +2,7 @@ $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
   # tables
-  $('#selling, #sku, #category').on('ajaxFresh',() ->
+  $('#sellingSkuCategoryDivs').on('ajaxFresh', '#selling, #sku, #category',() ->
     # 1. 收集 Market 的参数
     # 2. 加载数据
     $div = $(@)
@@ -16,16 +16,21 @@ $ ->
     $('#post_page').val($a.attr('page'))
     $a.parents('table').parent().trigger('ajaxFresh')
     false
+  ).on('click', '.point', (e) ->
+    $td = $(@)
+    $('#post_val').val($td.text().trim())
+    $('#lines').trigger('ajaxFresh')
   )
 
   # lines
   $('#lines').on('ajaxFresh', () ->
     $div = $(@)
+    LoadMask.mask()
     $.ajax('/sellingrecords/lines', {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
       .done((r) ->
         $div.highcharts('StockChart', {
           title:
-            text: '曲线图'
+            text: "#{$('#post_val').val()} 曲线图"
           legend:
             enabled: true
           navigator:
@@ -34,9 +39,10 @@ $ ->
             enabled: false
           rangeSelector:
             enabled: false
-          yAxis: [{}, {labels: {format: '{value}'}, opposite: true}]
+          yAxis: [{},{labels: {format: '{value}'}, opposite: true}]
           series: r['series']
         })
+        LoadMask.unmask()
       )
   )
 

@@ -99,6 +99,10 @@ public class SellingRecordLinePost extends Post<HighChart> {
         this.profitLine(chart, rows);
         this.costProfitRatioLine(chart, rows);
         this.saleProfitRatioLine(chart, rows);
+        this.incomeLine(chart, rows);
+        this.shipCostLine(chart, rows);
+        this.procureCostLine(chart, rows);
+        this.amazonFeeLine(chart, rows);
         return Arrays.asList(chart);
     }
 
@@ -171,6 +175,40 @@ public class SellingRecordLinePost extends Post<HighChart> {
             float profit = NumberUtils.toFloat(row.get("profit").toString());
             float sales = NumberUtils.toInt(row.get("sales").toString());
             highChart.line("销售利润率").yAxis(1).add(date, (sales == 0) ? 0 : (profit / sales));
+        }
+        return highChart;
+    }
+
+    private HighChart incomeLine(HighChart highChart, List<Map<String, Object>> rows) {
+        for(Map<String, Object> row : rows) {
+            Date date = (Date) row.get("date");
+            highChart.line("实际收入").add(date, NumberUtils.toFloat(row.get("income").toString()));
+        }
+        return highChart;
+    }
+
+    private HighChart procureCostLine(HighChart highChart, List<Map<String, Object>> rows) {
+        for(Map<String, Object> row : rows) {
+            Date date = (Date) row.get("date");
+            highChart.line("采购成本").add(date, NumberUtils.toFloat(row.get("procureCost").toString()));
+        }
+        return highChart;
+    }
+
+    private HighChart shipCostLine(HighChart highChart, List<Map<String, Object>> rows) {
+        for(Map<String, Object> row : rows) {
+            Date date = (Date) row.get("date");
+            highChart.line("运输成本").add(date, NumberUtils.toFloat(row.get("shipCost").toString()));
+        }
+        return highChart;
+    }
+
+    private HighChart amazonFeeLine(HighChart highChart, List<Map<String, Object>> rows) {
+        for(Map<String, Object> row : rows) {
+            Date date = (Date) row.get("date");
+            float sales = NumberUtils.toFloat(row.get("sales").toString());
+            float income = NumberUtils.toFloat(row.get("income").toString());
+            highChart.line("Amazon 收费").add(date, sales - income);
         }
         return highChart;
     }

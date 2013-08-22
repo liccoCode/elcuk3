@@ -19,7 +19,7 @@ ${msg}
   </tr>
     #{list items:records, as: 'record'}
       <tr>
-        <td>${record.selling.sellingId}</td>
+        <td class="point" style="cursor:pointer">${record.selling.sellingId}</td>
         <td>${record.units}</td>
         <td>${record.sales.format('#.####')}</td>
         <td>${record.income.format('#.####')}</td>
