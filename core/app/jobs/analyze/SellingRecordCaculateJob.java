@@ -80,7 +80,7 @@ public class SellingRecordCaculateJob extends Job {
                 record.profit = record.income - procureAndShipCost;
                 // 成本利润率 = 利润 / (采购成本 + 运输成本)
                 record.costProfitRatio = procureAndShipCost == 0 ? 0 : (record.profit / procureAndShipCost);
-                // 销售利润率 = 利润 / 销售
+                // 销售利润率 = 利润 / 销售额
                 record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
                 record.save();
 

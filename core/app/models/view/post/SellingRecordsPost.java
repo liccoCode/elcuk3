@@ -38,7 +38,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        return new F.T2<String, List<Object>>("", null);
+        throw new UnsupportedOperationException("SellingRecordsPost 不需要 params()");
     }
 
     @Override

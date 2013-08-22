@@ -2,6 +2,8 @@ package controllers;
 
 import jobs.analyze.SellingRecordCaculateJob;
 import models.market.SellingRecord;
+import models.view.dto.HighChart;
+import models.view.post.SellingRecordLinePost;
 import models.view.post.SellingRecordsPost;
 import org.joda.time.DateTime;
 import play.data.binding.As;
@@ -25,7 +27,12 @@ public class SellingRecords extends Controller {
         render(p);
     }
 
-    public static void sid(SellingRecordsPost p) {
+    /**
+     * 页面下方的表格
+     *
+     * @param p
+     */
+    public static void table(SellingRecordsPost p) {
         if(p == null) p = new SellingRecordsPost();
         try {
             List<SellingRecord> records = p.query();
@@ -34,6 +41,17 @@ public class SellingRecords extends Controller {
             renderArgs.put("msg", e.getMessage());
             render(p);
         }
+    }
+
+    /**
+     * 页面左上访的曲线
+     *
+     * @param p
+     */
+    public static void lines(SellingRecordLinePost p) {
+        if(p == null) p = new SellingRecordLinePost();
+        HighChart chart = p.query().get(0);
+        renderJSON(chart);
     }
 
     public static void job(@As("yyyy-MM-dd") Date date) {

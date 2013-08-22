@@ -114,6 +114,8 @@ public class HighChart implements Serializable {
      * 线图的数据, 线的名称 + 线的数据, x 轴用时间代替了.
      */
     public class Line implements Serializable {
+        private static final long serialVersionUID = 27276048153447664L;
+
         Line(String name) {
             this.name = name;
         }
@@ -121,6 +123,8 @@ public class HighChart implements Serializable {
         // line name
         public String name;
         public List<Object[]> data = new ArrayList<Object[]>();
+        public Marker marker = new Marker();
+        public int yAxis = 0;
 
         public Line add(Date date, Float y) {
             boolean add = true;
@@ -148,14 +152,26 @@ public class HighChart implements Serializable {
             });
             return this;
         }
+
+        public Line yAxis(int i) {
+            this.yAxis = i;
+            return this;
+        }
     }
 
     /**
      * 饼图的数据; 数据 + 名称; 百分比会由 HighChart 自行计算
      */
     public class Pie implements Serializable {
+        private static final long serialVersionUID = -5409000856476815150L;
         public String name;
         public Float data;
+        public Marker marker = new Marker();
     }
 
+    public class Marker implements Serializable {
+        private static final long serialVersionUID = -5061528374647700719L;
+        public boolean enabled = true;
+        public float radius = 2;
+    }
 }
