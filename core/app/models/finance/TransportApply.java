@@ -114,4 +114,34 @@ public class TransportApply extends Apply {
             Validation.addError("", "请款单至少需要一个拥有供应商的运输单.");
         return new F.T2<List<Shipment>, Set<Cooperator>>(shipments, coopers);
     }
+
+    /**
+     * 总请款金额
+     *
+     * @return
+     */
+    public F.T2<Float, Float> totalFees() {
+        float usd = 0;
+        float cny = 0;
+        for(Payment payment : this.payments) {
+            usd += payment.totalFees()._1;
+            cny += payment.totalFees()._2;
+        }
+        return new F.T2<Float, Float>(usd, cny);
+    }
+
+    /**
+     * 总实际支付金额
+     */
+    public F.T2<Float, Float> totalActualPaid() {
+        float usd = 0;
+        float cny = 0;
+        for(Payment payment : this.payments) {
+            if(payment.actualCurrency != null) {
+                usd += payment.actualCurrency.toUSD(payment.actualPaid);
+                cny += payment.actualCurrency.toCNY(payment.actualPaid);
+            }
+        }
+        return new F.T2<Float, Float>(usd, cny);
+    }
 }
