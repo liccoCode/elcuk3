@@ -62,7 +62,6 @@ public class ProcureUnits extends Controller {
         p.dateType = "attrs.planDeliveryDate";
         p.from = date;
         p.to = date;
-
         ProcureUnits.index(p);
     }
 
@@ -75,7 +74,6 @@ public class ProcureUnits extends Controller {
         p.from = new Date();
         p.to = new Date();
         p.isPlaced = ProcurePost.PLACEDSTATE.NOARRIVE;
-
         ProcureUnits.index(p);
     }
 

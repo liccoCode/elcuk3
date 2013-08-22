@@ -67,14 +67,14 @@
       </div>
 
       <div class="input-prepend input-append inline">
-        <a href="/procureunits/planView?date=${tomorrow1}" class="btn btn-primary" rel="popover"
-           content="明天需要交货的采购计划">明天计划</a>
-        <a href="/procureunits/planView?date=${tomorrow2}" class="btn btn-primary" rel="popover"
-           content="后天需要交货的采购计划">后天计划</a>
-        <a href="/procureunits/planView?date=${tomorrow3}" class="btn btn-primary" rel="popover"
-           content="第三天需要交货的采购计划">大后天计划</a>
-        <a href="/procureunits/noPlaced" class="btn btn-primary" rel="popover" content="发货时间为当天,
-        同时货物还没有抵达货代的采购计划">当天未抵达</a>
+        <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-primary" rel="popover"
+           content="明天需要交货的采购计划" data-disable-with="loading">明天计划</a>
+        <a href="@{ProcureUnits.planView(tomorrow2)}" class="btn btn-primary" rel="popover"
+           content="后天需要交货的采购计划" data-disable-with="loading">后天计划</a>
+        <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-primary" rel="popover"
+           content="第三天需要交货的采购计划" data-disable-with="loading">大后天计划</a>
+        <a href="@{ProcureUnits.noPlaced()}" class="btn btn-primary" rel="popover" content="发货时间为当天,
+        同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
       </div>
 
     </div>
