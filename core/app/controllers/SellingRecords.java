@@ -3,7 +3,7 @@ package controllers;
 import jobs.analyze.SellingRecordCaculateJob;
 import models.market.SellingRecord;
 import models.view.dto.HighChart;
-import models.view.post.SellingRecordLinePost;
+import models.view.post.SellingRecordChartsPost;
 import models.view.post.SellingRecordsPost;
 import org.joda.time.DateTime;
 import play.data.binding.As;
@@ -48,8 +48,15 @@ public class SellingRecords extends Controller {
      *
      * @param p
      */
-    public static void lines(SellingRecordLinePost p) {
-        if(p == null) p = new SellingRecordLinePost();
+    public static void lines(SellingRecordChartsPost p) {
+        if(p == null) p = new SellingRecordChartsPost("line");
+        HighChart chart = p.query().get(0);
+        renderJSON(chart);
+    }
+
+    public static void columns(SellingRecordChartsPost p) {
+        if(p == null) p = new SellingRecordChartsPost("column");
+        p.lineType = "column";
         HighChart chart = p.query().get(0);
         renderJSON(chart);
     }

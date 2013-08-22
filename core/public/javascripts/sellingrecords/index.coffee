@@ -11,7 +11,7 @@ $ ->
     $div.load('/sellingrecords/table', $('.search_form').serialize(), (r) ->
       LoadMask.unmask()
     )
-  ).on('click', '.pagination a[page]', (e) ->
+  ).on('click', '.pagination a[page]',(e) ->
     $a = $(@)
     $('#post_page').val($a.attr('page'))
     $a.parents('table').parent().trigger('ajaxFresh')
@@ -20,13 +20,14 @@ $ ->
     $td = $(@)
     $('#post_val').val($td.text().trim())
     $('#lines').trigger('ajaxFresh')
+    $('#columns').trigger('ajaxFresh')
   )
 
-  # lines
-  $('#lines').on('ajaxFresh', () ->
+  # lines # columns
+  $("#chartsDiv").on('ajaxFresh', '#lines, #columns', () ->
     $div = $(@)
     LoadMask.mask()
-    $.ajax('/sellingrecords/lines', {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
+    $.ajax("/sellingrecords/#{$div.attr('id')}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
       .done((r) ->
         $div.highcharts('StockChart', {
           title:
@@ -46,6 +47,7 @@ $ ->
       )
   )
 
+
   $('a[data-toggle=tab]').on('shown', (e) ->
     $('#post_page').val(1)
     $("#{$(e.target).attr('href')}").trigger('ajaxFresh')
@@ -57,8 +59,10 @@ $ ->
     type = $('#divTabs li.active a').attr('href')[1..-1]
     $("##{type}").trigger('ajaxFresh')
     $('#lines').trigger('ajaxFresh')
+    $('#columns').trigger('ajaxFresh')
     false
   )
 
   $('a[data-toggle=tab]:contains(Selling)').tab('show')
   $('#lines').trigger('ajaxFresh')
+  $('#columns').trigger('ajaxFresh')

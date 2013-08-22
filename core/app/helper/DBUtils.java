@@ -50,21 +50,34 @@ public class DBUtils {
             while(rs.next()) {
                 ++rowSize;
                 if(rowSize >= 2) throw new FastRuntimeException("Only Deal one Row!");
-
-                for(int i = 1; i <= mete.getColumnCount(); i++) {
-                    Object value = rs.getObject(i);
-                    if(value != null && value.getClass() == Timestamp.class) {
-                        Timestamp dateValue = (Timestamp) value;
-                        row.put(mete.getColumnLabel(i), new Date(dateValue.getTime()));
-                    } else {
-                        row.put(mete.getColumnLabel(i), value);
-                    }
-                }
+                row = mapOneRow(mete, rs);
             }
             rs.close();
             ps.close();
         } catch(Exception e) {
             throw new FastRuntimeException(e);
+        }
+        return row;
+    }
+
+    /**
+     * 映射 DB 一行数据进行 Map<String, Object>
+     *
+     * @param mete
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
+    private static Map<String, Object> mapOneRow(ResultSetMetaData mete, ResultSet rs) throws SQLException {
+        Map<String, Object> row = new HashMap<String, Object>();
+        for(int i = 1; i <= mete.getColumnCount(); i++) {
+            Object value = rs.getObject(i);
+            if(value != null && value.getClass() == Timestamp.class) {
+                Timestamp dateValue = (Timestamp) value;
+                row.put(mete.getColumnLabel(i), new Date(dateValue.getTime()));
+            } else {
+                row.put(mete.getColumnLabel(i), value);
+            }
         }
         return row;
     }
@@ -98,13 +111,7 @@ public class DBUtils {
             ResultSetMetaData mete = ps.getMetaData();
 
             while(rs.next()) {
-                Map<String, Object> row = new HashMap<String, Object>();
-
-                for(int i = 1; i <= mete.getColumnCount(); i++) {
-                    row.put(mete.getColumnLabel(i), rs.getObject(i));
-                }
-
-                rows.add(row);
+                rows.add(mapOneRow(mete, rs));
             }
 
         } catch(Exception e) {

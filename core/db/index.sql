@@ -12,3 +12,6 @@ CREATE INDEX selling_merchantsku ON Selling (merchantSKU(17));
 
 # 首页统计 Ticket 信息用.
 CREATE INDEX ticket_type_state_createAt ON Ticket (type, state, createAt);
+
+# 进行 SellingRecord 的统计
+CREATE INDEX sellingrecord_date ON SellingRecord(date);
