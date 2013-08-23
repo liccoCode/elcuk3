@@ -69,12 +69,13 @@ public class Notification extends Model {
      */
     public Date notifyAt;
 
+    /**
+     * 是否阅读 通知
+     */
     @Enumerated(EnumType.STRING)
     public S state = S.UNCHECKED;
 
     public enum S {
-        /**
-         *                */
         CHECKED {
             @Override
             public String label() {

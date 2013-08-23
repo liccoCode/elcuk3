@@ -3,6 +3,7 @@ package controllers;
 import helper.J;
 import models.Notification;
 import models.view.Ret;
+import models.view.post.NotificationPost;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.mvc.Controller;
@@ -54,33 +55,43 @@ public class Notifications extends Controller {
     /**
      * 当前用户的通知信息列表
      */
-    public static void index() {
-        renderArgs.put("notifications", Login.current().notificationFeeds(1));
-        render();
+    public static void index(NotificationPost p) {
+        //renderArgs.put("notifications", Login.current().notificationFeeds(1));
+        if(p == null) p = new NotificationPost();
+        List<Notification> notifications = p.query();
+
+        render(notifications, p);
+    }
+
+    /**
+     * 显示 当前用户 八条最新通知
+     */
+    public static void newsNotifications() {
+        List<Notification> notifications = Notification.find("user=? and state = ? ORDER BY createAt DESC",
+                Login.current(),
+                Notification.S.UNCHECKED).fetch(1, 8);
+        renderJSON(J.G(notifications));
     }
 
     /**
      * 计算当前用户的通知信息的数量
      */
     public static void amount() {
-        renderText(Notification.count("user=? and state = 'UNCHECKED' ", Login.current()));
+        renderText(Notification.count("user=? and state = ? ", Login.current(), Notification.S.UNCHECKED));
     }
 
     /**
      * 修改通知状态为 已阅
      */
-    public static void updateState(List<Long> noteIDs) {
-
+    public static void updateState(String[] noteIDs) {
         if(noteIDs != null) {
-            for(Long tempNoteID : noteIDs) {
-
+            for(String tempNoteID : noteIDs) {
                 Notification temp = Notification.findById(tempNoteID);
                 temp.state = Notification.S.CHECKED;
                 temp.save();
             }
         }
-
-        index();
+        renderJSON(new Ret(true, "通知已标记为已读"));
     }
 
 }

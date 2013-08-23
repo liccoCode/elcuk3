@@ -1,8 +1,3 @@
-#显示用户有多少未读的信息
-$(document).ready ->
-  htmlobj = $.ajax({url: "/Notifications/amount" , async: false})
-  $("#Notify_number").html(htmlobj.responseText);
-
 window.Notify =
 # 检查浏览器是否开启了 Notification 功能, 没有则提示打开
   checkNotify: () ->
@@ -58,3 +53,35 @@ window.Notify =
       )
 
 
+$ ->
+   htmlobj = $.ajax({url: "/Notifications/amount" , async: false})
+   $("#Notify_number").html(htmlobj.responseText);
+
+   #加载当前用户最新的八条信息
+   $("#notification_btn").on("click",(e) ->
+       e.preventDefault()
+       $.post("/Notifications/newsNotifications",  (r)->
+        if r
+           Param = list : r
+        else
+           Param = list : [{title:"See Notifications"}]
+        $("#notifications").html( _.template($('#news-Notifications-model-template').html(), Param) )
+       , 'json')
+
+   )
+
+   $("#update_state").on("click",(e) ->
+        e.preventDefault()
+        checkboxArray = new Array();
+        $('input:checkbox:checked[name="noteID"]').each((index,checkbox)->
+          checkboxArray[index]=checkbox.value
+         )
+         if checkboxArray.length == 0
+           noty({text: '未选中通知', type: 'error', timeout: 3000})
+         else
+           $.ajax("/Notifications/updateState",{type:'POST',dataType:'json',data:{noteIDs:checkboxArray}}).done((r)->
+             noty({text: r.message, type: 'success', timeout: 3000})
+           ).fail((r)->
+             noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+           )
+     )
