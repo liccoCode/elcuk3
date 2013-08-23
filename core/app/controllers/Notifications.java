@@ -86,7 +86,7 @@ public class Notifications extends Controller {
     public static void updateState(String[] noteIDs) {
         if(noteIDs != null) {
             for(String tempNoteID : noteIDs) {
-                Notification temp = Notification.findById(tempNoteID);
+                Notification temp = Notification.findById(Long.parseLong(tempNoteID));
                 temp.state = Notification.S.CHECKED;
                 temp.save();
             }

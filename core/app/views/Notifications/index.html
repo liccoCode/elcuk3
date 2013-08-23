@@ -11,7 +11,8 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend  inline">
-      <a href="#"  class="btn btn-primary" id="update_state" rel="popover" content="将选中的通知标记为已读">已查阅</a>
+      <a href="#" class="btn btn-primary" id="update_state" rel="popover" content="将选中的通知标记为已读" >
+        已查阅</a>
     </div>
 
     <div class="input-prepend  inline">
@@ -58,7 +59,7 @@
             <td>
               <label>
                   #{if note?.state == models.Notification.S.UNCHECKED}
-                    <label><input  type="checkbox" name="noteID" value="${note.id}"></label>
+                    <label><input type="checkbox" name="noteID" value="${note.id}"></label>
                   #{/if}
               </label>
             </td>

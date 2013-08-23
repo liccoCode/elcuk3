@@ -54,8 +54,12 @@ window.Notify =
 
 
 $ ->
-   htmlobj = $.ajax({url: "/Notifications/amount" , async: false})
-   $("#Notify_number").html(htmlobj.responseText);
+   #统计当前用户的 新通知记录的条数
+   NewsCount = ->
+    htmlobj = $.ajax({url: "/Notifications/amount" , async: false})
+    $("#Notify_number").html(htmlobj.responseText);
+
+   NewsCount()
 
    #加载当前用户最新的八条信息
    $("#notification_btn").on("click",(e) ->
@@ -70,6 +74,7 @@ $ ->
 
    )
 
+   #将选中的通知状态更改成已读
    $("#update_state").on("click",(e) ->
         e.preventDefault()
         checkboxArray = new Array();
@@ -79,9 +84,13 @@ $ ->
          if checkboxArray.length == 0
            noty({text: '未选中通知', type: 'error', timeout: 3000})
          else
+           LoadMask.mask()
            $.ajax("/Notifications/updateState",{type:'POST',dataType:'json',data:{noteIDs:checkboxArray}}).done((r)->
              noty({text: r.message, type: 'success', timeout: 3000})
+             $('input:checkbox:checked[name="noteID"]').remove()
+             NewsCount()
            ).fail((r)->
              noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
            )
+           LoadMask.unmask()
      )
