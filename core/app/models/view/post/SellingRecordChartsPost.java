@@ -202,7 +202,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
                 float profit = NumberUtils.toFloat(row.get("profit").toString());
-                float sales = NumberUtils.toInt(row.get("sales").toString());
+                float sales = NumberUtils.toFloat(row.get("sales").toString());
                 highChart.line("销售利润率").yAxis(1).add(date, (sales == 0) ? 0 : (profit / sales));
             }
         });

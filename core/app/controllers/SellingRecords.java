@@ -12,6 +12,7 @@ import play.mvc.With;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 销售财务分析
@@ -61,8 +62,8 @@ public class SellingRecords extends Controller {
         renderJSON(chart);
     }
 
-    public static void job(@As("yyyy-MM-dd") Date date) {
-        new SellingRecordCaculateJob(new DateTime(date)).now();
+    public static void job(@As("yyyy-MM-dd") Date date) throws ExecutionException, InterruptedException {
+        new SellingRecordCaculateJob(new DateTime(date)).now().get();
         renderHtml("<h3>SellingRecordCaculateJob 开始执行</h3>");
     }
 
