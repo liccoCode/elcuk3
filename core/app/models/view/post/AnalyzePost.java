@@ -25,6 +25,7 @@ import java.util.*;
  * Time: 10:16 AM
  */
 public class AnalyzePost extends Post<AnalyzeDTO> {
+    private static final long serialVersionUID = -1015281567545340148L;
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
     public static final String ANALYZE_RUNNING = "analyze_running";
@@ -414,10 +415,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         }
     }
 
-    private static class UnContainsPredicate implements Predicate {
+    public static class UnContainsPredicate implements Predicate {
         private String str;
 
-        private UnContainsPredicate(String str) {
+        public UnContainsPredicate(String str) {
             this.str = str;
         }
 

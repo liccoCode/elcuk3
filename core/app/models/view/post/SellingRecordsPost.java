@@ -22,6 +22,8 @@ import java.util.*;
  * Time: 2:12 PM
  */
 public class SellingRecordsPost extends Post<SellingRecord> {
+    private static final long serialVersionUID = 7039370941066949195L;
+
     public SellingRecordsPost() {
         this.from = new DateTime(this.to).minusMonths(1).toDate();
         this.perSize = 20;
@@ -35,6 +37,9 @@ public class SellingRecordsPost extends Post<SellingRecord> {
      * Selling, SKU, Category 三个种类
      */
     public String type = "selling";
+
+    // 是否过滤掉含有 ,2 的 sid/sku; 默认过滤
+    public boolean filterDot2 = true;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -72,6 +77,8 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         if(StringUtils.isNotBlank(this.market)) {
             CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
         }
+        if(this.filterDot2)
+            CollectionUtils.filter(records, new AnalyzePost.UnContainsPredicate(","));
         return this.programPager(records);
     }
 
