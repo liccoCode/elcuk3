@@ -65,16 +65,11 @@ public class Analyzes extends Controller {
      * @param p
      */
     public static void analyzes(final AnalyzePost p) {
-        List<AnalyzeDTO> dtos = await(new Job<List<AnalyzeDTO>>() {
-            @Override
-            public List<AnalyzeDTO> doJobWithResult() throws Exception {
-                return p.query();
-            }
-        }.now());
-        if(dtos == null) {
-            renderHtml("<h3>正在后台计算中, 请 10 mn 后再尝试</h3>");
-        } else {
+        try {
+            List<AnalyzeDTO> dtos = p.query();
             render("Analyzes/" + p.type + ".html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
     }
 
@@ -88,22 +83,6 @@ public class Analyzes extends Controller {
                 @Override
                 public HighChart doJobWithResult() throws Exception {
                     return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
-                }
-            }.now());
-            renderJSON(J.json(chart));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.S(e)));
-        }
-    }
-
-    @Check("analyzes.ajaxsales")
-    public static void ajaxSales(final AnalyzePost p) {
-        try {
-            response.cacheFor("10mn");
-            HighChart chart = await(new Job<HighChart>() {
-                @Override
-                public HighChart doJobWithResult() throws Exception {
-                    return OrderItem.ajaxHighChartSales(p.val, p.type, p.from, p.to);
                 }
             }.now());
             renderJSON(J.json(chart));

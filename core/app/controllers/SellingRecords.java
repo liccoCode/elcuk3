@@ -1,18 +1,13 @@
 package controllers;
 
-import jobs.analyze.SellingRecordCaculateJob;
 import models.market.SellingRecord;
 import models.view.dto.HighChart;
 import models.view.post.SellingRecordChartsPost;
 import models.view.post.SellingRecordsPost;
-import org.joda.time.DateTime;
-import play.data.binding.As;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * 销售财务分析
@@ -64,11 +59,6 @@ public class SellingRecords extends Controller {
         p.lineType = "column";
         HighChart chart = p.query().get(0);
         renderJSON(chart);
-    }
-
-    public static void job(@As("yyyy-MM-dd") Date date) throws ExecutionException, InterruptedException {
-        new SellingRecordCaculateJob(new DateTime(date)).now().get();
-        renderHtml("<h3>SellingRecordCaculateJob 开始执行</h3>");
     }
 
 }

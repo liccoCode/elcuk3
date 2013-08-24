@@ -59,8 +59,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
     public List<SellingRecord> records() {
         List<SellingRecord> records = Cache.get("sellingRecordCaculateJob", List.class);
         if(records == null || records.size() == 0) {
-            String running = Cache.get(SellingRecordCaculateJob.RUNNING, String.class);
-            if(StringUtils.isNotBlank(running))
+            if(SellingRecordCaculateJob.isRunning())
                 throw new FastRuntimeException("正在计算中, 请等待 10 分钟后重试.");
             new SellingRecordCaculateJob(new DateTime(this.dateTime)).now();
         }

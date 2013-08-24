@@ -122,28 +122,9 @@ $ ->
         if r.flag is false
           alert(r.message)
         else
-          lines =
-            pv_uk:
-              {name: 'PageView(uk)', data: []}
-            pv_de:
-              {name: 'PageView(de)', data: []}
-            pv_fr:
-              {name: 'PageView(fr)', data: []}
-            pv_us:
-              {name: 'PageView(us)', data: []}
-            ss_uk:
-              {name: 'Session(uk)', data: []}
-            ss_de:
-              {name: 'Session(de)', data: []}
-            ss_fr:
-              {name: 'Session(fr)', data: []}
-            ss_us:
-              {name: 'Session(us)', data: []}
           sessionLine.head('Selling[' + params['p.val'] + '] SS')
           sessionLine.clearLines()
-          for k,v of r
-            lines[k].data.push([o['_1'], o['_2']]) for o in v
-            sessionLine.series.push(lines[k])
+          sessionLine.series = r['series']
           $('#' + sessionLine.id()).data('char', new Highcharts.Chart(sessionLine))
       finally
         LoadMask.unmask(TOPTAB.contentSelector())
@@ -157,21 +138,9 @@ $ ->
         if r.flag is false
           alert(r.message)
         else
-          lines =
-            tn_uk:
-              {name: 'TurnRatio(uk)', data: []}
-            tn_de:
-              {name: 'TurnRatio(de)', data: []}
-            tn_fr:
-              {name: 'TurnRatio(fr)', data: []}
-            tn_us:
-              {name: 'TurnRatio(us)', data: []}
           turnOverLine.head('Selling[' + params['p.val'] + '] 转化率')
           turnOverLine.clearLines()
-          for k, v of r
-            lines[k].data.push([o['_1'], o['_2']]) for o in v
-            # 填充完曲线数据
-            turnOverLine.series.push(lines[k]) # 添加曲线
+          turnOverLine.series = r['series']
           $('#' + turnOverLine.id()).data('char', new Highcharts.Chart(turnOverLine))
       finally
         LoadMask.unmask(TOPTAB.contentSelector())

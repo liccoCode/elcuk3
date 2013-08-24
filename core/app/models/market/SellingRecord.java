@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.view.dto.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -13,7 +14,6 @@ import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -293,10 +293,7 @@ public class SellingRecord extends GenericModel {
      * @param to
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartPVAndSS(String msku,
-                                                                                 Account acc,
-                                                                                 Date from,
-                                                                                 Date to) {
+    public static HighChart ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
         /**
          * 格式 map[lineName, datas]
          * datas -> [
@@ -304,44 +301,27 @@ public class SellingRecord extends GenericModel {
          * [1282304000000, 99.9]
          * ]
          */
-        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
-                .map("pv_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("ss_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("pv_de", new ArrayList<F.T2<Long, Float>>())
-                .put("ss_de", new ArrayList<F.T2<Long, Float>>())
-                .put("pv_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("ss_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("pv_us", new ArrayList<F.T2<Long, Float>>())
-                .put("ss_us", new ArrayList<F.T2<Long, Float>>())
-                .build();
+        HighChart chart = new HighChart("line");
 
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
-                highCharLines.get("pv_uk")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_uk")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                chart.line("PageView(uk)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.line("Session(uk)").add(rcd.date, rcd.sessions.floatValue());
             } else if(rcd.market == M.AMAZON_DE) {
-                highCharLines.get("pv_de")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_de")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                chart.line("PageView(de)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.line("Session(de)").add(rcd.date, rcd.sessions.floatValue());
             } else if(rcd.market == M.AMAZON_FR) {
-                highCharLines.get("pv_fr")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_fr")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                chart.line("PageView(fr)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.line("Session(fr)").add(rcd.date, rcd.sessions.floatValue());
             } else if(rcd.market == M.AMAZON_US) {
-                highCharLines.get("pv_us")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.pageViews.floatValue()));
-                highCharLines.get("ss_us")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), rcd.sessions.floatValue()));
+                chart.line("PageView(us)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.line("Session(us)").add(rcd.date, rcd.sessions.floatValue());
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
         }
-        return highCharLines;
+        return chart;
     }
 
 
@@ -350,37 +330,24 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Map<String, ArrayList<F.T2<Long, Float>>> ajaxHighChartTurnRatio(String msku,
-                                                                                   Account acc,
-                                                                                   Date from,
-                                                                                   Date to) {
-        Map<String, ArrayList<F.T2<Long, Float>>> highCharLines = GTs.MapBuilder
-                .map("tn_uk", new ArrayList<F.T2<Long, Float>>())
-                .put("tn_de", new ArrayList<F.T2<Long, Float>>())
-                .put("tn_fr", new ArrayList<F.T2<Long, Float>>())
-                .put("tn_us", new ArrayList<F.T2<Long, Float>>())
-                .build();
+    public static HighChart ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
+        HighChart chart = new HighChart("line");
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
-            float turnRatio = Webs
-                    .scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
+            float turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
             if(rcd.market == M.AMAZON_UK)
-                highCharLines.get("tn_uk")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                chart.line("TurnRatio(uk)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_DE)
-                highCharLines.get("tn_de")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                chart.line("TurnRatio(de)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_FR)
-                highCharLines.get("tn_fr")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                chart.line("TurnRatio(fr)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_US)
-                highCharLines.get("tn_us")
-                        .add(new F.T2<Long, Float>(rcd.date.getTime(), turnRatio));
+                chart.line("TurnRatio(us)").add(rcd.date, turnRatio);
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }
-        return highCharLines;
+        return chart;
     }
 
     /**

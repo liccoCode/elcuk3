@@ -45,7 +45,7 @@ public class SellingRecordCaculateJob extends Job {
     @Override
     public void doJob() {
         try {
-            Cache.add(RUNNING, "running");
+            Cache.add(RUNNING, RUNNING);
             // 当天产生的数据
             Map<String, Integer> sellingUnits = sellingUnits(dateTime.toDate());
             Map<String, Float> sellingSales = sellingSales(dateTime.toDate());
@@ -388,5 +388,9 @@ public class SellingRecordCaculateJob extends Job {
         }
 
         return new F.T2<Float, Integer>(totalCost, totalNumberSum);
+    }
+
+    public static boolean isRunning() {
+        return StringUtils.isNotBlank(Cache.get(RUNNING, String.class));
     }
 }

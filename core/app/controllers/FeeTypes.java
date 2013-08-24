@@ -4,6 +4,7 @@ import exception.PaymentException;
 import models.finance.FeeType;
 import models.view.Ret;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * Date: 1/28/13
  * Time: 4:25 PM
  */
+@With({GlobalExceptionHandler.class, Secure.class})
 public class FeeTypes extends Controller {
 
     @Check("feetypes.index")

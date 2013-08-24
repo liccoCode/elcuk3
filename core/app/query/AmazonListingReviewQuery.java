@@ -67,12 +67,23 @@ public class AmazonListingReviewQuery {
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, F.T2<Float, Date>> latestReviewT2Map = new HashMap<String, F.T2<Float, Date>>();
         for(Map<String, Object> row : rows) {
-            if(row.get("dt") == null) continue;
-            Timestamp dt = (Timestamp) row.get("dt");
+            Object dtObj = row.get("dt");
+            if(dtObj == null) continue;
+            long times = 0;
+            if(dtObj.getClass().equals(Timestamp.class)) {
+                Timestamp dt = (Timestamp) dtObj;
+                times = dt.getTime();
+            } else if(dtObj.getClass().equals(Date.class)) {
+                Date dt = (Date) dtObj;
+                times = dt.getTime();
+            } else if(dtObj.getClass().equals(java.sql.Date.class)) {
+                java.sql.Date dt = (java.sql.Date) dtObj;
+                times = dt.getTime();
+            }
             latestReviewT2Map.put(row.get("sku").toString(),
                     new F.T2<Float, Date>(
                             NumberUtils.toFloat(row.get("rating").toString()),
-                            new Date(dt.getTime()))
+                            new Date(times))
             );
         }
         return latestReviewT2Map;

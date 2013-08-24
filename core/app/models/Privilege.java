@@ -85,7 +85,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("listings.index", "Listing 页面"));
         privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
-        privileges.add(new Privilege("analyzes.index", "销量分析 页面"));
         privileges.add(new Privilege("amazonoperations", "Amazon 操作"));
 
         privileges.add(new Privilege("support", "售后模块"));
@@ -116,8 +115,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
 
         // Analyzes 页面
-        privileges.add(new Privilege("analyzes.ajaxsales", "查看销售额"));
-        //TODO 删除 analyzes.allskucsv
+        privileges.add(new Privilege("analyzes.index", "销量分析 页面"));
 
         // 采购单页面
         privileges.add(new Privilege("deliveryments.cancel", "取消采购单"));
