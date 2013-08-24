@@ -17,29 +17,44 @@
 <div class="row-fluid">
   <div class="span12">
     <form class="search_form">
-      <div class="input-prepend inline">
-        <span class="add-on">From:</span>
-        <input type="date" id="a_from" class="input input-small" name="p.from" value="${p.from.date()}">
-      </div>
+      <div class="span12">
 
-      <div class="input-prepend inline">
-        <span class="add-on">TO:</span>
-        <input type="date" id="a_to" name="p.to" value="${p.to.date()}">
-      </div>
-      <select name="p.market" class="input-small inline">
-        <option value="">Market</option>
-      #{list items:models.market.M.values()}
-        <option value="${_.name()}">${_.toString()}</option>
-      #{/list}
-      </select>
-      <label class="checkbox inline">
-        <input type="checkbox" name="filterDot2" value="false">
-        选择,2
-      </label>
+        <div class="input-prepend inline">
+          <span class="add-on">From:</span>
+          <input type="date" id="a_from" class="input input-small" name="p.from" value="${p.from.date()}">
+        </div>
 
-      <input type="hidden" id="post_page" name="p.page" value="1">
-      <input type="hidden" id="post_type" name="p.type" value="selling">
-      <input type="hidden" id="post_val" name="p.val">
+        <div class="input-prepend inline">
+          <span class="add-on">TO:</span>
+          <input type="date" id="a_to" name="p.to" value="${p.to.date()}">
+        </div>
+          <div class="btn inline reload">Reload Lines</div>
+        <select name="p.market" class="input-small inline">
+          <option value="">Market</option>
+        #{list items:models.market.M.values()}
+          <option value="${_.name()}">${_.toString()}</option>
+        #{/list}
+        </select>
+        <label class="checkbox inline">
+          <input type="checkbox" name="filterDot2" value="false">
+          选择,2
+        </label>
+        <select name="p.desc" class="input-mini inline">
+          <option value="true">升序</option>
+          <option value="false">降序</option>
+        </select>
+
+        <div class="input-append">
+          <input type="text" class="input-large" name="p.search" value="" placeholder="过滤 Selling/SKU/Category">
+          <a class="btn" data-disable-with='搜索中...'>搜索</a>
+        </div>
+
+
+        <input type="hidden" id="post_page" name="p.page" value="1">
+        <input type="hidden" id="post_type" name="p.type" value="selling">
+        <input type="hidden" id="post_val" name="p.val">
+        <input type="hidden" id="post_orderby" name="p.orderBy">
+      </div>
     </form>
   </div>
 </div>

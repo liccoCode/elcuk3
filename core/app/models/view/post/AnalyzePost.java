@@ -415,10 +415,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         }
     }
 
-    public static class UnContainsPredicate implements Predicate {
+    private static class UnContainsPredicate implements Predicate {
         private String str;
 
-        public UnContainsPredicate(String str) {
+        private UnContainsPredicate(String str) {
             this.str = str;
         }
 

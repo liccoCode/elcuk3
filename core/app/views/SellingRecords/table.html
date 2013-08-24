@@ -7,15 +7,15 @@ ${msg}
 #{else }
 <table class="table table-bordered table-condensed">
   <tr>
-    <td class="span2">SellingID</td>
-    <td>销量</td>
-    <td>销售额</td>
-    <td>实际收入</td>
-    <td>采购成本</td>
-    <td>运输成本</td>
-    <td>利润</td>
-    <td>成本利润率</td>
-    <td>销售利润率</td>
+    <td class="span3">Key</td>
+    <td orderby='units'>销量 <i class="icon-sort"></i></td>
+    <td orderby='sales'>销售额 <i class="icon-sort"></i></td>
+    <td orderby='income'>实际收入 <i class="icon-sort"></i></td>
+    <td orderby='procureCost'>采购成本 <i class="icon-sort"></i></td>
+    <td orderby='shipCost'>运输成本 <i class="icon-sort"></i></td>
+    <td orderby='profit'>利润 <i class="icon-sort"></i></td>
+    <td orderby='costProfitRatio'>成本利润率 <i class="icon-sort"></i></td>
+    <td orderby='saleProfitRatio'>销售利润率 <i class="icon-sort"></i></td>
   </tr>
     #{list items:records, as: 'record'}
       <tr>

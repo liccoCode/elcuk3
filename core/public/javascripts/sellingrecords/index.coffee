@@ -14,13 +14,17 @@ $ ->
   ).on('click', '.pagination a[page]',(e) ->
     $a = $(@)
     $('#post_page').val($a.attr('page'))
-    $a.parents('table').parent().trigger('ajaxFresh')
+    ajaxFreshAcitveTableTab()
     false
   ).on('click', '.point', (e) ->
     $td = $(@)
     $('#post_val').val($td.text().trim())
-    $('#lines').trigger('ajaxFresh')
-    $('#columns').trigger('ajaxFresh')
+    ajaxFreshLines()
+    ajaxFreshColumns()
+  ).on('click', 'td[orderby]', (e) ->
+    $td = $(@)
+    $('#post_orderby').val($td.attr('orderby'))
+    ajaxFreshAcitveTableTab()
   )
 
   # lines # columns
@@ -50,19 +54,34 @@ $ ->
 
   $('a[data-toggle=tab]').on('shown', (e) ->
     $('#post_page').val(1)
-    $("#{$(e.target).attr('href')}").trigger('ajaxFresh')
+    ajaxFreshAcitveTableTab()
   )
 
-  $('.search_form [name=p\\.market]').change((e) ->
+  $('.search_form').on('change', '[name=p\\.market]', (e) ->
     # 1. trigger #sid and set page to 1
     $('#post_page').val(1)
-    type = $('#divTabs li.active a').attr('href')[1..-1]
-    $("##{type}").trigger('ajaxFresh')
-    $('#lines').trigger('ajaxFresh')
-    $('#columns').trigger('ajaxFresh')
+    ajaxFreshAcitveTableTab()
+    ajaxFreshLines()
+    ajaxFreshColumns()
     false
+  ).on('click', '.btn:contains(搜索)', (e) ->
+    ajaxFreshAcitveTableTab()
+    false
+  ).on('click', '.reload', (e) ->
+    ajaxFreshLines()
   )
 
+  ajaxFreshAcitveTableTab = ->
+    type = $('#divTabs li.active a').attr('href')
+    $("#{type}").trigger('ajaxFresh')
+
+  ajaxFreshLines = ->
+    $('#lines').trigger('ajaxFresh')
+
+  ajaxFreshColumns = ->
+    $('#columns').trigger('ajaxFresh')
+
+
   $('a[data-toggle=tab]:contains(Selling)').tab('show')
-  $('#lines').trigger('ajaxFresh')
-  $('#columns').trigger('ajaxFresh')
+  ajaxFreshLines()
+  ajaxFreshColumns()

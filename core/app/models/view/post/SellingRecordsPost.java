@@ -13,6 +13,7 @@ import play.cache.Cache;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -40,6 +41,9 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     // 是否过滤掉含有 ,2 的 sid/sku; 默认过滤
     public boolean filterDot2 = true;
+
+    public String orderBy = "sales";
+    public boolean desc = true;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -78,8 +82,65 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
         }
         if(this.filterDot2)
-            CollectionUtils.filter(records, new AnalyzePost.UnContainsPredicate(","));
+            CollectionUtils.filter(records, new UnContainsPredicate(","));
+        if(StringUtils.isNotBlank(this.search))
+            CollectionUtils.filter(records, new SearchPredicate(this.search));
+        if(StringUtils.isNotBlank(this.orderBy))
+            Collections.sort(records, new FieldComparator(this.orderBy, this.desc));
         return this.programPager(records);
+    }
+
+    private static class FieldComparator implements Comparator<SellingRecord> {
+        private Field field;
+        private boolean desc = true;
+
+        private FieldComparator(String fieldName, Boolean desc) {
+            try {
+                this.field = SellingRecord.class.getField(fieldName);
+            } catch(Exception e) {
+                try {
+                    this.field = SellingRecord.class.getField("sales");
+                } catch(Exception e1) {
+                    //ignore
+                }
+            }
+            this.desc = desc == null ? true : desc;
+        }
+
+        @Override
+        public int compare(SellingRecord o1, SellingRecord o2) {
+            try {
+                Float differ = 0f;
+                if(desc) differ = (this.field.getFloat(o2) - this.field.getFloat(o1));
+                else differ = (this.field.getFloat(o1) - this.field.getFloat(o2));
+                // 避免太小无法正确比较大小
+                if(differ < 1) differ *= 100;
+                else if(differ < 0.1) differ *= 1000;
+                else if(differ < 0.01) differ *= 10000;
+                return differ.intValue();
+            } catch(Exception e) {
+                // 错误,没有这个字段,无法排序
+                return 0;
+            }
+        }
+    }
+
+    private static class SearchPredicate implements Predicate {
+        private String str;
+
+        private SearchPredicate(String str) {
+            this.str = str;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            SellingRecord dto = (SellingRecord) o;
+            if(str.startsWith("^"))
+                return dto.selling.sellingId.toLowerCase()
+                        .startsWith(StringUtils.replace(str.toLowerCase(), "^", ""));
+            else
+                return dto.selling.sellingId.toLowerCase().contains(str.toLowerCase());
+        }
     }
 
     private static class MarketPredicate implements Predicate {
@@ -95,6 +156,20 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             return this.market.equals(dto.market);
         }
 
+    }
+
+    private static class UnContainsPredicate implements Predicate {
+        private String str;
+
+        private UnContainsPredicate(String str) {
+            this.str = str;
+        }
+
+        @Override
+        public boolean evaluate(Object o) {
+            SellingRecord dto = (SellingRecord) o;
+            return !dto.selling.sellingId.contains(this.str);
+        }
     }
 
     /**
