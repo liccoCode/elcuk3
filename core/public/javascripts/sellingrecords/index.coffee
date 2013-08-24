@@ -49,6 +49,10 @@ $ ->
         })
         LoadMask.unmask()
       )
+      .fail((xhr, text, error) ->
+        noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
+        LoadMask.unmask()
+      )
   )
 
 

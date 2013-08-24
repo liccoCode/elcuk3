@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class SellingRecords extends Controller {
 
+    @Check("sellingrecords.index")
     public static void index() {
         SellingRecordsPost p = new SellingRecordsPost();
         render(p);
@@ -33,6 +34,7 @@ public class SellingRecords extends Controller {
      *
      * @param p
      */
+    @Check("sellingrecords.table")
     public static void table(SellingRecordsPost p) {
         if(p == null) p = new SellingRecordsPost();
         try {
@@ -49,12 +51,14 @@ public class SellingRecords extends Controller {
      *
      * @param p
      */
+    @Check("sellingrecords.lines")
     public static void lines(SellingRecordChartsPost p) {
         if(p == null) p = new SellingRecordChartsPost("line");
         HighChart chart = p.query().get(0);
         renderJSON(chart);
     }
 
+    @Check("sellingrecords.columns")
     public static void columns(SellingRecordChartsPost p) {
         if(p == null) p = new SellingRecordChartsPost("column");
         p.lineType = "column";

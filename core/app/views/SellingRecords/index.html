@@ -9,9 +9,13 @@
 #{/set}
 
 <div class="row-fluid" id='chartsDiv'>
+#{power.ck "sellingrecords.lines"}
   <div class="span6" id="lines" style="min-height:400px"></div>
+#{/power.ck }
 
+#{power.ck "sellingrecords.columns"}
   <div class="span6" id="columns" style="min-height:400px"></div>
+#{/power.ck }
 </div>
 
 <div class="row-fluid">
@@ -28,7 +32,7 @@
           <span class="add-on">TO:</span>
           <input type="date" id="a_to" name="p.to" value="${p.to.date()}">
         </div>
-          <div class="btn inline reload">Reload Lines</div>
+        <div class="btn inline reload">Reload Lines</div>
         <select name="p.market" class="input-small inline">
           <option value="">Market</option>
         #{list items:models.market.M.values()}
@@ -59,6 +63,7 @@
   </div>
 </div>
 
+#{power.ck "sellingrecords.table"}
 <ul id="divTabs" class='nav nav-tabs'>
   <li><a href="#selling" data-toggle="tab">Selling</a></li>
   <li><a href="#sku" data-toggle="tab">SKU</a></li>
@@ -69,3 +74,4 @@
   <div class="tab-pane" id="sku"></div>
   <div class="tab-pane" id="category"></div>
 </div>
+#{/power.ck }
