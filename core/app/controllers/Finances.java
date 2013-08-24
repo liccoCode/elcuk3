@@ -3,7 +3,6 @@ package controllers;
 import jobs.AmazonFinancePatchJob;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
-import models.Notification;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.JobRequest;
@@ -51,11 +50,8 @@ public class Finances extends Controller {
         AmazonFinancePatchJob worker = new AmazonFinancePatchJob(acc, new Date());
         List<Error> errors = await(worker.now());
         if(errors.size() > 0) {
-            Notification
-                    .notifies("Settlement 费用文件因 " + errors.toString() + " 处理失败.", Notification.PM);
             renderJSON(new Ret(false, errors.toString()));
         } else {
-            Notification.notifies("Settlement 费用文件处理完成.", Notification.PM);
             renderJSON(new Ret(true, "成功处理"));
         }
     }

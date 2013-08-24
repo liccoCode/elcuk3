@@ -33,6 +33,11 @@ public class ProcurePost extends Post<ProcureUnit> {
         DATE_TYPES.add(new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"));
     }
 
+    /**
+     * 在 ProcureUnits中，planView 和noPlaced 方法 需要调用 index，必须重写，否则总是构造方法中的时间
+     */
+    public Date from;
+    public Date to;
 
     public long whouseId;
 
@@ -40,7 +45,7 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public ProcureUnit.STAGE stage;
 
-    public boolean isPlaced = false;
+    public PLACEDSTATE isPlaced;
 
     public Shipment.T shipType;
 
@@ -48,6 +53,26 @@ public class ProcurePost extends Post<ProcureUnit> {
      * 选择过滤的日期类型
      */
     public String dateType;
+
+
+    public enum PLACEDSTATE {
+        ARRIVE {
+            @Override
+            public String label() {
+                return "抵达货代处";
+            }
+        },
+        NOARRIVE {
+            @Override
+            public String label() {
+                return "未抵达货代处";
+            }
+
+        };
+
+        public abstract String label();
+    }
+
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -109,9 +134,9 @@ public class ProcurePost extends Post<ProcureUnit> {
                 params.add(this.shipType);
             }
 
-            if(this.isPlaced) {
+            if(this.isPlaced != null) {
                 sbd.append(" AND isPlaced=? ");
-                params.add(this.isPlaced);
+                params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
             }
 
             if(StringUtils.isNotBlank(this.search)) {
