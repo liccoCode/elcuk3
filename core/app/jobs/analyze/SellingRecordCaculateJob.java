@@ -14,13 +14,14 @@ import play.Play;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.jobs.Job;
+import play.jobs.On;
 import play.libs.F;
 
 import java.util.*;
 
 /**
  * 周期:
- * 轮询: 7, 15, 23 三个时间点执行三次
+ * 轮询: 8, 16, 23 三个时间点执行三次(避开 SellingSaleAnalyzeJob 的计算)
  * 每天用于计算 SellingRecord 的后台任务.
  * <p/>
  * 每天需要计算三次, 但由于数据越到后面越准确, 所以一天内的后一次计算可以覆盖前一次计算的结果
@@ -28,7 +29,10 @@ import java.util.*;
  * Date: 8/14/13
  * Time: 4:54 PM
  */
+@On("0 0 0,8,16,23 * * ?")
 public class SellingRecordCaculateJob extends Job {
+    public static final String RUNNING = "sellingRecordCaculateJobRunning";
+
     private DateTime dateTime = DateTime.now();
 
     public SellingRecordCaculateJob() {
@@ -41,7 +45,7 @@ public class SellingRecordCaculateJob extends Job {
     @Override
     public void doJob() {
         try {
-            Cache.add("sellingRecordCaculateJobRunning", "running");
+            Cache.add(RUNNING, "running");
             // 当天产生的数据
             Map<String, Integer> sellingUnits = sellingUnits(dateTime.toDate());
             Map<String, Float> sellingSales = sellingSales(dateTime.toDate());
@@ -89,7 +93,7 @@ public class SellingRecordCaculateJob extends Job {
             }
             Cache.add("sellingRecordCaculateJob", sellingRecords);
         } finally {
-            Cache.delete("sellingRecordCaculateJobRunning");
+            Cache.delete(RUNNING);
         }
     }
 

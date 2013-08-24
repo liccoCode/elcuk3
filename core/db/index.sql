@@ -18,3 +18,6 @@ CREATE INDEX ticket_type_state_createAt ON Ticket (type, state, createAt);
 
 # 进行 SellingRecord 的统计
 CREATE INDEX sellingrecord_date ON SellingRecord(date);
+
+# SaleFee 变大了, 这个很需要
+CREATE INDEX salefee_date ON SaleFee (date)
