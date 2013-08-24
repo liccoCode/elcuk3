@@ -25,6 +25,7 @@ import java.util.*;
  * Time: 10:16 AM
  */
 public class AnalyzePost extends Post<AnalyzeDTO> {
+    private static final long serialVersionUID = -1015281567545340148L;
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
     public static final String AnalyzeDTO_SKU_CACHE = "analyze_post_sku";
     public static final String ANALYZE_RUNNING = "analyze_running";
@@ -347,15 +348,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.market))
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
 
-        this.count = dtos.size();
-        List<AnalyzeDTO> afterPager = new ArrayList<AnalyzeDTO>();
-        int index = (this.page - 1) * this.perSize;
-        int end = index + this.perSize;
-        for(; index < end; index++) {
-            if(index >= this.count) break;
-            afterPager.add(dtos.get(index));
-        }
-        return afterPager;
+        return this.programPager(dtos);
     }
 
     @Override

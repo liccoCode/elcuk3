@@ -181,6 +181,12 @@ public class Privilege extends Model {
         privileges.add(new Privilege("paymentunits.postfromtransport", "添加运输相关请款项目"));
         privileges.add(new Privilege("paymentunits.approve", "批准请款项目"));
 
+        // SellingRecords
+        privileges.add(new Privilege("sellingrecords.index", "销售财务分析页面"));
+        privileges.add(new Privilege("sellingrecords.table", "销售财务分析表格"));
+        privileges.add(new Privilege("sellingrecords.lines", "销售财务分析曲线"));
+        privileges.add(new Privilege("sellingrecords.columns", "销售财务分析柱状图"));
+
 
         // FeeTypes 控制器
         privileges.add(new Privilege("feetypes", "费用类型"));

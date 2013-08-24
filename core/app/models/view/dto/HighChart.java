@@ -1,8 +1,5 @@
 package models.view.dto;
 
-import org.apache.commons.lang.StringUtils;
-import play.utils.FastRuntimeException;
-
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +13,13 @@ import java.util.concurrent.TimeUnit;
  * Time: 10:52 AM
  */
 public class HighChart implements Serializable {
+    public HighChart() {
+    }
+
+    public HighChart(String type) {
+        this.type = type;
+    }
+
     private static final long serialVersionUID = 8112933425792176924L;
 
     // 图形的 title
@@ -27,20 +31,13 @@ public class HighChart implements Serializable {
 
     // 曲线
     public List series = new ArrayList();
-    private String type = "";
+
+    private String type = "line";
 
 
     public HighChart startAt(long datetimeMillions) {
         this.pointStart = datetimeMillions;
         return this;
-    }
-
-    private void check(String type) {
-        if(StringUtils.isNotBlank(this.type) && !type.equalsIgnoreCase(this.type))
-            throw new FastRuntimeException("One HighChart instance only handler one chart type."
-                    + " You request " + type + " for " + this.type + " chart");
-        if(StringUtils.isBlank(this.type))
-            this.type = type;
     }
 
     /**
@@ -51,13 +48,12 @@ public class HighChart implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public Line line(String name) {
-        this.check("line");
         for(Object obj : this.series) {
             Line line = (Line) obj;
             if(name.equalsIgnoreCase(line.name))
                 return line;
         }
-        Line line = new Line(name);
+        Line line = new Line(name, this.type);
         this.series.add(line);
         return line;
     }
@@ -94,7 +90,6 @@ public class HighChart implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public Pie pie(String name, Float data) {
-        this.check("pie");
         for(Object obj : this.series) {
             Pie pie = (Pie) obj;
             if(name.equalsIgnoreCase(pie.name)) {
@@ -114,13 +109,24 @@ public class HighChart implements Serializable {
      * 线图的数据, 线的名称 + 线的数据, x 轴用时间代替了.
      */
     public class Line implements Serializable {
+        private static final long serialVersionUID = 27276048153447664L;
+
         Line(String name) {
             this.name = name;
+        }
+
+        Line(String name, String type) {
+            this.name = name;
+            this.type = type;
+            if("line".equals(this.type)) this.marker = new Marker();
         }
 
         // line name
         public String name;
         public List<Object[]> data = new ArrayList<Object[]>();
+        public Marker marker;
+        public int yAxis = 0;
+        public String type = "line";
 
         public Line add(Date date, Float y) {
             boolean add = true;
@@ -148,14 +154,26 @@ public class HighChart implements Serializable {
             });
             return this;
         }
+
+        public Line yAxis(int i) {
+            this.yAxis = i;
+            return this;
+        }
     }
 
     /**
      * 饼图的数据; 数据 + 名称; 百分比会由 HighChart 自行计算
      */
     public class Pie implements Serializable {
+        private static final long serialVersionUID = -5409000856476815150L;
         public String name;
         public Float data;
+        public Marker marker = new Marker();
     }
 
+    public class Marker implements Serializable {
+        private static final long serialVersionUID = -5061528374647700719L;
+        public boolean enabled = true;
+        public float radius = 2;
+    }
 }

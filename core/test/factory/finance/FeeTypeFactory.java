@@ -156,6 +156,37 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         return type;
     }
 
+    @Factory(name = "loadingunloadingfee")
+    public FeeType loadingunloadingfee() {
+        FeeType type = new FeeType();
+        type.name = "loadingunloadingfee";
+        type.parent = FeeType.findById("transport");
+        return type;
+    }
+
+    @Factory(name = "palleting")
+    public FeeType palleting() {
+        FeeType type = new FeeType();
+        type.name = "palleting";
+        type.parent = FeeType.findById("transport");
+        return type;
+    }
+
+    @Factory(name = "trayfee")
+    public FeeType trayfee() {
+        FeeType type = new FeeType();
+        type.name = "trayfee";
+        type.parent = FeeType.findById("transport");
+        return type;
+    }
+
+    @Factory(name = "vorlageprovision")
+    public FeeType vorlageprovision() {
+        FeeType type = new FeeType();
+        type.name = "vorlageprovision";
+        type.parent = FeeType.findById("transport");
+        return type;
+    }
 
     /**
      * FeeType 的初始化
@@ -167,7 +198,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
                 "productcharges", "fbaperorderfulfillmentfee", "fbaperunitfulfillmentfee",
                 "fbapickpackfeeperunit", "transportshipping", "transportduty",
                 "fbastoragefee", "fbaweightbasedfee", "fbaweighthandlingfee", "giftwrap", "giftwrapchargeback",
-                "shipping", "shippingchargeback")) {
+                "shipping", "shippingchargeback", "loadingunloadingfee", "palleting", "trayfee", "vorlageprovision")) {
             FactoryBoy.create(FeeType.class, fee);
         }
     }

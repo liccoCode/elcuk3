@@ -4,6 +4,7 @@ import factory.FactoryBoy;
 import factory.ModelFactory;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
+import models.procure.Shipment;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,6 +20,7 @@ public class ShipItemFactory extends ModelFactory<ShipItem> {
         shipItem.qty = 200;
         shipItem.unit = FactoryBoy.lastOrCreate(ProcureUnit.class);
         shipItem.recivedQty = 100;
+        shipItem.shipment = FactoryBoy.lastOrCreate(Shipment.class);
         return shipItem;
     }
 }
