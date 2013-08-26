@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import models.view.dto.HighChart;
+import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -301,22 +301,22 @@ public class SellingRecord extends GenericModel {
          * [1282304000000, 99.9]
          * ]
          */
-        HighChart chart = new HighChart("line");
+        HighChart chart = new HighChart();
 
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             if(rcd.market == M.AMAZON_UK) {
-                chart.line("PageView(uk)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.line("Session(uk)").add(rcd.date, rcd.sessions.floatValue());
+                chart.series("PageView(uk)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(uk)").add(rcd.date, rcd.sessions.floatValue());
             } else if(rcd.market == M.AMAZON_DE) {
-                chart.line("PageView(de)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.line("Session(de)").add(rcd.date, rcd.sessions.floatValue());
+                chart.series("PageView(de)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(de)").add(rcd.date, rcd.sessions.floatValue());
             } else if(rcd.market == M.AMAZON_FR) {
-                chart.line("PageView(fr)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.line("Session(fr)").add(rcd.date, rcd.sessions.floatValue());
+                chart.series("PageView(fr)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(fr)").add(rcd.date, rcd.sessions.floatValue());
             } else if(rcd.market == M.AMAZON_US) {
-                chart.line("PageView(us)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.line("Session(us)").add(rcd.date, rcd.sessions.floatValue());
+                chart.series("PageView(us)").add(rcd.date, rcd.pageViews.floatValue());
+                chart.series("Session(us)").add(rcd.date, rcd.sessions.floatValue());
             } else {
                 Logger.info("Skip one Market %s.", rcd.market);
             }
@@ -331,19 +331,19 @@ public class SellingRecord extends GenericModel {
      * @return
      */
     public static HighChart ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
-        HighChart chart = new HighChart("line");
+        HighChart chart = new HighChart();
         List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
         for(SellingRecord rcd : records) {
             float turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
             if(rcd.sessions <= 0) turnRatio = 0f;
             if(rcd.market == M.AMAZON_UK)
-                chart.line("TurnRatio(uk)").add(rcd.date, turnRatio);
+                chart.series("TurnRatio(uk)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_DE)
-                chart.line("TurnRatio(de)").add(rcd.date, turnRatio);
+                chart.series("TurnRatio(de)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_FR)
-                chart.line("TurnRatio(fr)").add(rcd.date, turnRatio);
+                chart.series("TurnRatio(fr)").add(rcd.date, turnRatio);
             else if(rcd.market == M.AMAZON_US)
-                chart.line("TurnRatio(us)").add(rcd.date, turnRatio);
+                chart.series("TurnRatio(us)").add(rcd.date, turnRatio);
             else
                 Logger.info("Skip One Makret %s.", rcd.market);
         }

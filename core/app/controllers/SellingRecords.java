@@ -1,7 +1,7 @@
 package controllers;
 
 import models.market.SellingRecord;
-import models.view.dto.HighChart;
+import models.view.highchart.HighChart;
 import models.view.post.SellingRecordChartsPost;
 import models.view.post.SellingRecordsPost;
 import play.mvc.Controller;

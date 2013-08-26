@@ -6,7 +6,7 @@ import models.market.*;
 import models.product.Category;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
-import models.view.dto.HighChart;
+import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;

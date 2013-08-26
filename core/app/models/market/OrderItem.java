@@ -2,7 +2,9 @@ package models.market;
 
 import helper.*;
 import models.product.Product;
-import models.view.dto.HighChart;
+import models.view.highchart.AbstractSeries;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -183,8 +185,9 @@ public class OrderItem extends GenericModel {
                             .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
                     synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
                         for(AnalyzeVO vo : lineVos) {
-                            finalLines.line("unit_all").add(vo.date, vo.qty.floatValue());
-                            finalLines.line("unit_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+                            finalLines.series("unit_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.series("unit_" + m.name().toLowerCase()).add(vo.date,
+                                    vo.qty.floatValue());
                         }
                     }
                     return null;
@@ -196,7 +199,9 @@ public class OrderItem extends GenericModel {
                 }
             });
 
-            finalLines.sort();
+            for(AbstractSeries aline : finalLines.series) {
+                ((Series.Line) aline).sort();
+            }
             Cache.add(cacked_key, finalLines, "8h");
         }
 
@@ -205,6 +210,7 @@ public class OrderItem extends GenericModel {
 
     /**
      * 不同 Category 销量的百分比;
+     * TODO 取消销售额饼图
      *
      * @param type units/sales
      * @param from
@@ -221,7 +227,7 @@ public class OrderItem extends GenericModel {
             pieChart = Cache.get(key, HighChart.class);
             if(pieChart != null) return pieChart;
 
-            pieChart = new HighChart();
+            pieChart = new HighChart(Series.PIE);
             List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
             if(acc != null) {
                 // 转换成为不同对应市场的时间
@@ -251,9 +257,9 @@ public class OrderItem extends GenericModel {
             }
             for(AnalyzeVO vo : vos) {
                 if(StringUtils.equals(type, "sales"))
-                    pieChart.pie(vo.sku, vo.usdCost);
+                    pieChart.series("销售额").add(vo.sku, vo.usdCost);
                 else
-                    pieChart.pie(vo.sku, vo.qty.floatValue());
+                    pieChart.series("销量").add(vo.sku, vo.qty.floatValue());
             }
             Cache.add(key, pieChart, "12h");
         }
