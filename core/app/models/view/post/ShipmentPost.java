@@ -120,7 +120,7 @@ public class ShipmentPost extends Post {
                 sbd.append(" AND (")
                         .append("s.trackNo LIKE ?")
                         .append(" OR it.unit.fba.shipmentId LIKE ?")
-                        .append(" OR u.sid LIKE ?")
+                        .append(" OR u.selling_sellingId LIKE ?")
                         .append(")");
                 for(int i = 0; i < 3; i++) params.add(word);
             }

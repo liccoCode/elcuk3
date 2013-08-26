@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import play.i18n.Messages;
 import play.utils.FastRuntimeException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,8 +17,9 @@ import java.util.List;
  * Date: 1/14/13
  * Time: 12:18 PM
  */
-public class ERecordBuilder {
+public class ERecordBuilder implements Serializable {
 
+    private static final long serialVersionUID = -2609240025264483736L;
     private String key;
     private String keyMsg;
 

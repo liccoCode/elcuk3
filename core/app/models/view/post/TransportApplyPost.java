@@ -1,8 +1,8 @@
 package models.view.post;
 
+
 import helper.Dates;
-import models.finance.Apply;
-import models.finance.ProcureApply;
+import models.finance.TransportApply;
 import org.joda.time.DateTime;
 import play.libs.F;
 
@@ -10,15 +10,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * User: wyatt
- * Date: 4/2/13
- * Time: 3:25 PM
- */
-public class ProcreApplyPost extends Post<Apply> {
 
-    public ProcreApplyPost() {
+/**
+ * 物流请款
+ * <p/>
+ * Created by IntelliJ IDEA.
+ * User: DyLanM
+ * Date: 13-8-5
+ * Time: 上午10:09
+ */
+public class TransportApplyPost extends Post<TransportApply> {
+
+    public TransportApplyPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusMonths(2).toDate();
         this.to = now.toDate();
@@ -26,17 +29,22 @@ public class ProcreApplyPost extends Post<Apply> {
         this.perSize = 25;
     }
 
-    public ProcreApplyPost(int perSize) {
+    public TransportApplyPost(int perSize) {
         this.perSize = perSize;
     }
 
     public Date from;
+
     public Date to;
 
     public DateType dateType;
 
-    public Long supplierId;
+    public Long cooperId;
 
+    /**
+     * 请款人 ID
+     */
+    public Long userId;
 
     public enum DateType {
 
@@ -60,12 +68,12 @@ public class ProcreApplyPost extends Post<Apply> {
     @Override
     public F.T2<String, List<Object>> params() {
 
-        StringBuilder sql = new StringBuilder(" 1=1 ");
+        StringBuffer sql = new StringBuffer(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
-                sql.append(" AND createdAt>=?  AND createdAt <=?");
+                sql.append(" AND createdAt>=? AND createdAt<=?");
             } else {
                 sql.append(" AND updateAt>=? AND updateAt<=?");
             }
@@ -73,12 +81,17 @@ public class ProcreApplyPost extends Post<Apply> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.supplierId != null) {
-            sql.append(" AND cooperator.id=? ");
-            params.add(this.supplierId);
+        if(this.userId != null) {
+            sql.append(" AND cooperator.id = ? ");
+            params.add(this.cooperId);
         }
 
-        if(this.search != null && !"".equals(this.search.trim())) {
+        if(this.userId != null) {
+            sql.append(" AND applier.id = ? ");
+            params.add(this.userId);
+        }
+
+        if(this.search != null && !"".equals(this.search)) {
             sql.append(" AND serialNumber like ?");
             params.add(this.word());
         }
@@ -86,20 +99,20 @@ public class ProcreApplyPost extends Post<Apply> {
         return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
-    public List<Apply> query() {
+    public List<TransportApply> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = this.count(params);
-        return ProcureApply.find(params._1 + "ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page,
-                this.perSize);
+        this.count = count(params);
+        return TransportApply.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray())
+                .fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureApply.count(params._1, params._2.toArray());
+        return TransportApply.count(params._1, params._2.toArray());
     }
 
     @Override
     public Long getTotalCount() {
-        return ProcureApply.count();
+        return TransportApply.count();
     }
 }

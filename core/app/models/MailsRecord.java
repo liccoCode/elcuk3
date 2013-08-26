@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
 import helper.Dates;
-import models.view.dto.HighChart;
+import models.view.highchart.HighChart;
 import notifiers.FBAMails;
 import notifiers.Mails;
 import notifiers.SystemMails;
@@ -146,11 +146,9 @@ public class MailsRecord extends Model {
                     counts.put(record.templateName, counts.get(record.templateName) + 1);
                 }
             }
-            lines.line("all_records").add(travel.toDate(), totalCount);
-            Iterator<String> ite = counts.keySet().iterator();
-            while(ite.hasNext()) {
-                String key = ite.next();
-                lines.line(key).add(travel.toDate(), counts.get(key));
+            lines.series("all_records").add(travel.toDate(), totalCount);
+            for(String key : counts.keySet()) {
+                lines.series(key).add(travel.toDate(), counts.get(key));
                 counts.put(key, 0f);
             }
             travel = travel.plusDays(1);
@@ -177,7 +175,7 @@ public class MailsRecord extends Model {
 
         synchronized(MailsRecord.class) {
 
-            StringBuffer querystr = new StringBuffer(
+            StringBuilder querystr = new StringBuilder(
                     "type=? and createdAt between ? and ? and success=?");
             List<Object> paras = new ArrayList<Object>();
             paras.add(type);

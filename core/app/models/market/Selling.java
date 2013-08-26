@@ -4,12 +4,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import jobs.analyze.SellingSaleAnalyzeJob;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
 import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
-import models.view.post.AnalyzePost;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -411,9 +411,9 @@ public class Selling extends GenericModel {
             if(!find) {
                 throw new FastRuntimeException(String.format("更新失败, %s 不在缓存中..", this.sellingId));
             } else {
-                Date expireTime = Cache.get(AnalyzePost.AnalyzeDTO_SID_CACHE + ".time", Date.class);
+                Date expireTime = Cache.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE + ".time", Date.class);
                 long diffSecond = (expireTime.getTime() - System.currentTimeMillis()) / 1000;
-                Cache.set(AnalyzePost.AnalyzeDTO_SID_CACHE, dtos, diffSecond + "s");
+                Cache.set(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE, dtos, diffSecond + "s");
             }
         }
         return this.save();
