@@ -112,6 +112,7 @@ public class Privilege extends Model {
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
 
         // 首页
+        // TODO delete
         privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
 
         // Analyzes 页面
