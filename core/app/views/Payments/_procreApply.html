@@ -10,6 +10,7 @@
       #{elseif payment.state == models.finance.Payment.S.WAITING}
         <a href="@{Payments.lockIt(payment.id)}" data-method='post' class="btn btn-warning">锁定准备付款</a>
       #{/elseif}
+    <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
   </div>
   <table class="table table-bordered table-condensed">
     <tr>

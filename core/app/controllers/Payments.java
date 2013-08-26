@@ -13,6 +13,7 @@ import play.Logger;
 import play.cache.CacheFor;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -153,6 +154,19 @@ public class Payments extends Controller {
         else
             flash.success("付款单取消成功.");
         show(id);
+    }
+
+
+    /**
+     * 为付款单生成 PDF 文档
+     *
+     * @param id
+     */
+    public static void pdf(Long id) {
+        Payment payment = Payment.findById(id);
+        PDF.Options options = new PDF.Options();
+        options.filename = "Invoice_" + id + ".pdf";
+        PDF.renderPDF(payment, options);
     }
 
 }
