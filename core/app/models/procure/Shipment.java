@@ -462,7 +462,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
-        shipitem.save();
+        this.items.add(shipitem.<ShipItem>save());
         //TODO c: 添加日志
     }
 
@@ -851,7 +851,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
         // 海运/空运的运输运费无法绑定运输项目, 只能平摊
         if(this.type == T.EXPRESS && FeeType.transportShipping().equals(fee.feeType))
-            Validation.addError("", "运输费用需要关联运输项目");
+            Validation.addError("", "快递的运输费用需要通过运输项目记录");
 
         if(Validation.hasErrors()) return;
         fee.shipment = this;

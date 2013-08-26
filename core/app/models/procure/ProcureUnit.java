@@ -6,7 +6,6 @@ import helper.Dates;
 import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
-import models.Notification;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
@@ -367,10 +366,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         this.attrs = attrs;
 
-        if(this.attrs.planQty < this.attrs.qty)
-            Notification.notifies(String.format("%s 超额交货", this.sku),
-                    String.format("采购计划 %s 超额交货, 请从采购单 %s 找到产品的运输单进行调整, 避免运输数量不足.", this.id,
-                            this.deliveryment.id), Notification.SHIPPER);
+
 
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)

@@ -1,5 +1,7 @@
 package jobs;
 
+import jobs.analyze.SellingRecordCaculateJob;
+import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.promise.FinanceShippedPromise;
 import models.Jobex;
 import models.finance.SaleFee;
@@ -32,6 +34,8 @@ public class AmazonFinanceCheckJob extends Job {
 
     @Override
     public void doJob() throws InterruptedException, ExecutionException, TimeoutException {
+        // 不和两个大计算量的任何重合
+        if(SellingSaleAnalyzeJob.isRnning() || SellingRecordCaculateJob.isRunning()) return;
         // 1. 寻找需要处理的订单, 并且按照 market 进行分组
         // 2. 派发给 Promise Job 进行出来.
         if(!Jobex.findByClassName(AmazonFinanceCheckJob.class.getName()).isExcute()) return;

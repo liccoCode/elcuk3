@@ -6,6 +6,7 @@ import models.embedded.CategorySettings;
 import models.support.TicketReason;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -156,6 +157,17 @@ public class Category extends GenericModel {
 
     public static boolean exist(String id) {
         return Category.count("categoryId=?", id) > 0;
+    }
+
+    /**
+     * 通过 SKU 返回 Category
+     *
+     * @param sku
+     * @return
+     */
+    public static String skuToCategoryId(String sku) {
+        if(StringUtils.isBlank(sku)) return "";
+        return sku.substring(0, 2);
     }
 
     /**
