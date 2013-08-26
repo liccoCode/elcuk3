@@ -56,7 +56,6 @@ public class Notifications extends Controller {
      * 当前用户的通知信息列表
      */
     public static void index(NotificationPost p) {
-        //renderArgs.put("notifications", Login.current().notificationFeeds(1));
         if(p == null) p = new NotificationPost();
         List<Notification> notifications = p.query();
 

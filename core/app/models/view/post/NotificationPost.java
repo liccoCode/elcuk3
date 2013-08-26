@@ -3,7 +3,6 @@ package models.view.post;
 import helper.Dates;
 import models.Notification;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -49,10 +48,7 @@ public class NotificationPost extends Post<Notification> {
 
 
     public NotificationPost() {
-        DateTime now = DateTime.now(Dates.timeZone(null));
-        this.from = now.minusDays(5).toDate();
-        this.to = now.toDate();
-        this.dateType = DateType.NOTIFICATION;
+        this.state = Notification.S.UNCHECKED;
         this.perSize = 25;
     }
 
