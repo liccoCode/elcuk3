@@ -46,6 +46,8 @@ $ ->
       if r.flag == true
         $("#fee_#{$btn.data('id')}").remove()
         noty({text: r.message, type: 'success', timeout: 3000})
+        #计算页面所有运输单费用信息的各种币种的总和
+        $('table.paymentInfo').trigger("statistic_data")
       else
         text = _.map(r,(err)->
           err.message
@@ -71,6 +73,8 @@ $ ->
           .after(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
         noty({text: "成功添加 #{r['currency']} #{r['amount']} #{r.feeType.nickName}", type: 'success', timeout: 3000})
         $form.trigger('reset')
+        #计算页面所有运输单费用信息的各种币种的总和
+        $('table.paymentInfo').trigger("statistic_data")
       LoadMask.unmask()
     , 'json')
   )
@@ -121,6 +125,8 @@ $ ->
         label = feeStateLabel(r['state'])
         $tr.replaceWith(_.template($('#tr-paymentunit-template').html(), {fee: r, label: label}))
         noty({text: '更新成功', type: 'success', timeout: 3000})
+        #计算页面所有运输单费用信息的各种币种的总和
+        $('table.paymentInfo').trigger("statistic_data")
       LoadMask.unmask()
     ).fail((r) ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
@@ -192,3 +198,39 @@ $ ->
           )
     false
   )
+
+$ ->
+  #为运输单费用信息的TABLE，增加计算方法
+  $('table.paymentInfo').on('statistic_data', (e) ->
+    e.preventDefault()
+    $table = $(@)
+    #删除生成的TR 防止统计错误
+    if $table.find("tr[name='_show_amount']").remove().length != 0
+      $table.find("tr[name='_show_amount']").remove()
+    #根据币种的不同 统计总金额
+    amountMap = {}
+    $table.find('tr:gt(0)').each((index, element)->
+      tr_node = $(element)
+      #获取是否有子元素 有子元素证明该行变成了编辑状态
+      currency_children = tr_node.find("td:eq(2)").children(":first").length;
+      if currency_children == 0
+        currency = tr_node.find("td:eq(2)").text();
+        total = tr_node.find("td:eq(6)").text().trim().substr(1)
+      else
+        currency = tr_node.find("td:eq(2)").children(":first").val();
+        total = tr_node.find("td:eq(6)").children(":first").val();
+
+      if amountMap[currency] == undefined
+        amountMap[currency] = total;
+      else
+        amountMap[currency] = parseFloat(amountMap[currency]) + parseFloat(total);
+    )
+    #展示 统计结果
+    $table.find("tr:last-child").after('<tr name="_show_amount" class="alert alert-success" style="text-align:left"><td colspan="12"><h4>运输单费用统计</h4></td></tr>');
+    message = ""
+    message += "&nbsp;&nbsp; #{key} : #{value}" for key, value of amountMap
+    $table.find("tr:last-child").after("<tr name='_show_amount'><td colspan='11'>#{message}</td></tr>")
+  )
+
+  #计算页面所有运输单费用信息的各种币种的总和
+  $('table.paymentInfo').trigger("statistic_data")

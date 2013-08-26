@@ -1,6 +1,5 @@
 package jobs;
 
-import jobs.analyze.SellingSaleAnalyzeJob;
 import jobs.fixs.ReviewFixJob;
 import play.Logger;
 import play.Play;
@@ -53,13 +52,10 @@ public class JobsSetup {
             every(ReviewInfoFetchJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
-            every(SellingRecordGenerateJob.class, "1h");
             every(ShipmentSyncJob.class, "5mn");
             every(TicketStateSyncJob.class, "1mn");
             every(ReviewFixJob.class, "1mn");
 
-            // 数据分析的计算任务
-            every(SellingSaleAnalyzeJob.class, "8h");
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
     }

@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import play.data.validation.Required;
 
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +14,9 @@ import java.util.Date;
  * Time: 9:44 AM
  */
 @Embeddable
-public class ShipmentDates {
+public class ShipmentDates implements Serializable{
+
+    private static final long serialVersionUID = -8792808495254263522L;
     /**
      * 预计发货日期
      */

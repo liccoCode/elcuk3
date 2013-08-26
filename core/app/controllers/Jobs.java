@@ -1,31 +1,18 @@
 package controllers;
 
 import helper.Webs;
-import jobs.AmazonFBAQtySyncJob;
 import jobs.AmazonOrderUpdateJob;
-import jobs.FeedbackCrawlJob;
-import jobs.SellingRecordGenerateJob;
 import jobs.promise.FeedbackFixPromise;
 import jobs.promise.SellingRecordFixPromise;
-import jobs.works.ListingReviewsWork;
 import models.Jobex;
-import models.market.*;
+import models.market.JobRequest;
 import models.view.Ret;
-import notifiers.Mails;
-import org.joda.time.DateTime;
 import play.data.validation.Validation;
-import play.jobs.Job;
-import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -92,16 +79,6 @@ public class Jobs extends Controller {
      */
     public static void sellingRecordFix(Date begin, int days) {
         new SellingRecordFixPromise(begin, days).now();
-        renderText("任务已提交, 完成后有 Notification 提醒");
-    }
-
-    /**
-     * 修复 SellingRecord 根据当前天数的偏移天数
-     *
-     * @param offset
-     */
-    public static void sellingRecordGenerate(int offset) {
-        new SellingRecordGenerateJob(DateTime.now().minusDays(offset)).now();
         renderText("任务已提交, 完成后有 Notification 提醒");
     }
 

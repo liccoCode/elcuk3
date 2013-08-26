@@ -38,3 +38,7 @@ privileges.add(new Privilege("shipitems.adjust", "运输单项目调整"));
 privileges.add(new Privilege("shipitems.received", "修改运输计划接收数量"));
 privileges.add(new Privilege("products.saleamazonlisting", "Amazon 上架"));
 privileges.add(new Privilege("excels.deliveryment", "生成采购单 Excel"));
+privileges.add(new Privilege("sellingrecords.index", "销售财务分析页面"));
+privileges.add(new Privilege("sellingrecords.table", "销售财务分析表格"));
+privileges.add(new Privilege("sellingrecords.lines", "销售财务分析曲线"));
+privileges.add(new Privilege("sellingrecords.columns", "销售财务分析柱状图"));

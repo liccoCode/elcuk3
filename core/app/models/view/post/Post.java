@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -85,14 +86,33 @@ public abstract class Post<T> implements Serializable, Cloneable {
 
     /**
      * 当前这个 Model 的所有数据
+     *
      * @return
      */
     public Long getTotalCount() {
-        throw new UnsupportedOperationException("请自行实现");
+        throw new UnsupportedOperationException("需要分页, 请自行实现获取 TotalCount 的方法");
     }
 
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    /**
+     * 使用程序自己对 List 集合进行分页操作
+     *
+     * @param dtos
+     * @return
+     */
+    public List<T> programPager(List<T> dtos) {
+        this.count = dtos.size();
+        List<T> afterPager = new ArrayList<T>();
+        int index = (this.page - 1) * this.perSize;
+        int end = index + this.perSize;
+        for(; index < end; index++) {
+            if(index >= this.count) break;
+            afterPager.add(dtos.get(index));
+        }
+        return afterPager;
     }
 }

@@ -60,7 +60,7 @@ public class ProcreApplyPost extends Post<Apply> {
     @Override
     public F.T2<String, List<Object>> params() {
 
-        StringBuffer sql = new StringBuffer(" 1=1 ");
+        StringBuilder sql = new StringBuilder(" 1=1 ");
         List<Object> params = new ArrayList<Object>();
 
         if(this.dateType != null) {

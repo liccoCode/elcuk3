@@ -2,7 +2,9 @@ package models.market;
 
 import helper.*;
 import models.product.Product;
-import models.view.dto.HighChart;
+import models.view.highchart.AbstractSeries;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
@@ -154,56 +156,6 @@ public class OrderItem extends GenericModel {
     }
 
     /**
-     * 销量的图形图表
-     *
-     * @param val
-     * @param acc
-     * @param type
-     * @param from
-     * @param to
-     * @return
-     */
-    @Cached("8h")
-    public static HighChart ajaxHighChartSales(final String val, final String type, Date from, Date to) {
-        String cached_key = Caches.Q.cacheKey("sales", val, type, from, to);
-        HighChart lines = Cache.get(cached_key, HighChart.class);
-        if(lines != null) return lines;
-        synchronized(cached_key.intern()) {
-            lines = Cache.get(cached_key, HighChart.class);
-            if(lines != null) return lines;
-
-            // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
-
-            final HighChart finalLines = new HighChart().startAt(_from.getTime());
-            Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
-                @Override
-                public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
-                    List<AnalyzeVO> lineVos = OrderItemQuery
-                            .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
-                    synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
-                        for(AnalyzeVO vo : lineVos) {
-                            finalLines.line("sale_all").add(vo.date, vo.qty.floatValue());
-                            finalLines.line("sale_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
-                        }
-                    }
-                    return null;
-                }
-
-                @Override
-                public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder";
-                }
-            });
-
-            finalLines.sort();
-            Cache.add(cached_key, finalLines, "8h");
-        }
-        return Cache.get(cached_key, HighChart.class);
-    }
-
-    /**
      * <pre>
      * 通过 OrderItem 计算指定的 skuOrMsku 在一个时间段内的销量情况, 并且返回的 Map 组装成 HightChart 使用的格式;
      * HightChart 的使用 http://jsfiddle.net/kSkYN/6937/
@@ -233,8 +185,9 @@ public class OrderItem extends GenericModel {
                             .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
                     synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
                         for(AnalyzeVO vo : lineVos) {
-                            finalLines.line("unit_all").add(vo.date, vo.qty.floatValue());
-                            finalLines.line("unit_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+                            finalLines.series("unit_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.series("unit_" + m.name().toLowerCase()).add(vo.date,
+                                    vo.qty.floatValue());
                         }
                     }
                     return null;
@@ -246,7 +199,9 @@ public class OrderItem extends GenericModel {
                 }
             });
 
-            finalLines.sort();
+            for(AbstractSeries aline : finalLines.series) {
+                ((Series.Line) aline).sort();
+            }
             Cache.add(cacked_key, finalLines, "8h");
         }
 
@@ -255,6 +210,7 @@ public class OrderItem extends GenericModel {
 
     /**
      * 不同 Category 销量的百分比;
+     * TODO 取消销售额饼图
      *
      * @param type units/sales
      * @param from
@@ -271,7 +227,7 @@ public class OrderItem extends GenericModel {
             pieChart = Cache.get(key, HighChart.class);
             if(pieChart != null) return pieChart;
 
-            pieChart = new HighChart();
+            pieChart = new HighChart(Series.PIE);
             List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
             if(acc != null) {
                 // 转换成为不同对应市场的时间
@@ -301,17 +257,12 @@ public class OrderItem extends GenericModel {
             }
             for(AnalyzeVO vo : vos) {
                 if(StringUtils.equals(type, "sales"))
-                    pieChart.pie(vo.sku, vo.usdCost);
+                    pieChart.series("销售额").add(vo.sku, vo.usdCost);
                 else
-                    pieChart.pie(vo.sku, vo.qty.floatValue());
+                    pieChart.series("销量").add(vo.sku, vo.qty.floatValue());
             }
             Cache.add(key, pieChart, "12h");
         }
         return pieChart;
-    }
-
-
-    public static List<OrderItem> orderRelateItems(String orderId) {
-        return OrderItem.find("order.orderId=?", orderId).fetch();
     }
 }
