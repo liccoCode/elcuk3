@@ -55,7 +55,7 @@ public class PaymentUnitQuery {
          */
         // 这里不区分 SKU 了, 统计运输总数量的平均值
         SqlSelect sql = new SqlSelect()
-                .select("sum(p.amount + p.fixValue) / sum(p.unitQty) as avgPrice", "p.currency as currency")
+                .select("sum(p.amount + p.fixValue) / sum(si.qty) as avgPrice", "p.currency as currency")
                 .from("PaymentUnit p")
                 .leftJoin("ShipItem si ON si.id=p.shipItem_id")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")
@@ -128,7 +128,7 @@ public class PaymentUnitQuery {
         // 2
         for(Currency crcy : currencyAvgFeeMap.keySet()) {
             SqlSelect sql = new SqlSelect()
-                    .select("sum(p.amount + p.fixValue) / sum(p.unitQty) as avgPrice", "u.sku", "p.currency")
+                    .select("sum(p.amount + p.fixValue) / sum(si.qty) as avgPrice", "u.sku", "p.currency")
                     .from("PaymentUnit p")
                     .leftJoin("ShipItem si ON si.id=p.shipItem_id")
                     .leftJoin("ProcureUnit u ON u.id=si.unit_id")

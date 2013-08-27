@@ -8,12 +8,10 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import query.PaymentUnitQuery;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -290,34 +288,6 @@ public class PaymentUnit extends Model {
      */
     public float amount() {
         return this.amount + this.fixValue;
-    }
-
-    /**
-     * 运输费用的均价, 没有运输项目. 统一币种为 CNY 则为单价(unitPrice)
-     *
-     * @return
-     */
-    public float averagePrice() {
-        if(this.shipment != null) {
-            Shipment.T shipType = this.shipment.type;
-            PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
-            DateTime now = DateTime.now();
-            DateTime threeMonthAgo = now.minusMonths(3);
-
-            if(this.shipItem != null && shipType == Shipment.T.EXPRESS) {
-                String sku = this.shipItem.unit.sku;
-                Float price = aveFeeQuery.avgSkuExpressTransportshippingFee(threeMonthAgo.toDate(), now.toDate(), sku)
-                        .get(sku);
-                return price == null ? 0 : price;
-            } else if(shipType == Shipment.T.SEA) {
-                return aveFeeQuery.avgSkuSEATransportshippingFee(threeMonthAgo.toDate(), now.toDate());
-            } else if(shipType == Shipment.T.AIR) {
-                return aveFeeQuery.avgSkuAIRTransportshippingFee(threeMonthAgo.toDate(), now.toDate());
-            } else {
-                return this.currency.toCNY(this.unitPrice);
-            }
-        }
-        return this.currency.toCNY(this.unitPrice);
     }
 
     /**

@@ -5,13 +5,14 @@
         "nickName": "${fee.feeType.nickName}",
         "memo": "${fee.feeType.memo}"
     },
-    "amount": "${fee.amount}",
+    "amount": "${fee.amount.format('#.###')}",
     "currency": "${fee.currency}",
     "symbol": "${fee.currency.symbol()}",
     "unitPrice": "${fee.unitPrice}",
     "unitQty": "${fee.unitQty}",
     "memo": "${fee.memo}",
-    "averagePrice": "${helper.Currency.CNY.symbol()} ${fee.averagePrice()}",
+    "averagePrice": "${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}",
+    "currentAvgPrice": "${helper.Currency.CNY.symbol()} ${fee.currentAvgPrice().format('#.###')}",
     "state": "${fee.state}",
     "createdAt": "${fee.createdAt.format('yyyy-MM-dd HH:mm:ss')}",
     "shipItem": {
