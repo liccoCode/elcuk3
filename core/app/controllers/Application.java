@@ -11,6 +11,7 @@ import models.market.Orderr;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.dto.DashBoard;
+import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
@@ -37,11 +38,17 @@ public class Application extends Controller {
         String json = await(new Job<String>() {
             @Override
             public String doJobWithResult() throws Exception {
-                return J.json(
-                        OrderItem.categoryPercent(
-                                type, Dates.morning(date), Dates.night(date),
-                                Account.<Account>findById(aid))
-                );
+                long begin = System.currentTimeMillis();
+                Logger.info("percent begin...");
+                try {
+                    return J.json(
+                            OrderItem.categoryPercent(
+                                    type, Dates.morning(date), Dates.night(date),
+                                    Account.<Account>findById(aid))
+                    );
+                } finally {
+                    Logger.info("percent end. %sms", System.currentTimeMillis() - begin);
+                }
             }
         }.now());
         renderJSON(json);
