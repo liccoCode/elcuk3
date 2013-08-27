@@ -10,11 +10,25 @@
 
 <div class="row-fluid" id='chartsDiv'>
 #{power.ck "sellingrecords.lines"}
-  <div class="span6" id="lines" style="min-height:400px"></div>
+  <div class="span6">
+    <div id="lines" style="min-height:400px"></div>
+    <div class="btn-toolbar">
+      <a class="btn btn-mini btn-primary">费用图</a>
+      <a class="btn btn-mini btn-success">利润率图</a>
+      <a class="btn btn-mini btn-warning">成本图</a>
+    </div>
+  </div>
 #{/power.ck }
 
 #{power.ck "sellingrecords.columns"}
-  <div class="span6" id="columns" style="min-height:400px"></div>
+  <div class="span6">
+    <div id="columns" style="min-height:400px"></div>
+    <div class="btn-toolbar">
+      <a class="btn btn-mini btn-primary">费用图</a>
+      <a class="btn btn-mini btn-success">利润率图</a>
+      <a class="btn btn-mini btn-warning">成本图</a>
+    </div>
+  </div>
 #{/power.ck }
 </div>
 
