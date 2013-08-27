@@ -65,10 +65,10 @@ public class Notifications extends Controller {
     /**
      * 显示 当前用户 八条最新通知
      */
-    public static void newsNotifications() {
+    public static void latest() {
         List<Notification> notifications = Notification.find("user=? and state = ? ORDER BY createAt DESC",
                 Login.current(),
-                Notification.S.UNCHECKED).fetch(1, 8);
+                Notification.S.UNCHECKED).fetch(8);
         renderJSON(J.G(notifications));
     }
 
@@ -82,14 +82,14 @@ public class Notifications extends Controller {
     /**
      * 修改通知状态为 已阅
      */
-    public static void updateState(String[] noteIDs) {
-        if(noteIDs != null) {
-            for(String tempNoteID : noteIDs) {
-                Notification temp = Notification.findById(Long.parseLong(tempNoteID));
-                temp.state = Notification.S.CHECKED;
-                temp.save();
-            }
+    public static void updateState(List<String> noteID) {
+
+        if(noteID != null) {
+            Notification.changState(noteID);
+        } else {
+            renderJSON(new Ret("未选中，无法更新状态"));
         }
+
         renderJSON(new Ret(true, "通知已标记为已读"));
     }
 

@@ -12,7 +12,8 @@
   <div class="span12">
     <div class="input-prepend  inline">
       <a href="#" class="btn btn-primary" id="update_state" rel="popover" content="将选中的通知标记为已读" >
-        已查阅</a>
+        已查阅
+      </a>
     </div>
 
     <div class="input-prepend  inline">
@@ -43,45 +44,46 @@
 </div>
 
 
-<div class="row">
-  <div class="span12">
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <th><label><input type="checkbox" class="checkall"></label></th>
-        <th>#</th>
-        <th>标题</th>
-        <th>内容</th>
-        <th>创建时间</th>
-        <th>通知时间</th>
-      </tr>
-        #{list items:notifications, as:'note'}
-          <tr>
-            <td>
-              <label>
-                  #{if note?.state == models.Notification.S.UNCHECKED}
-                    <label><input type="checkbox" name="noteID" value="${note.id}"></label>
-                  #{/if}
-              </label>
-            </td>
-            <td><a name="${note.createAt}">${note.id}</a></td>
-            <td>${note.title}</td>
-            <td>${note.content}</td>
-            <td>#{time_tooltip time:note.createAt, datetime:true/}</td>
-            <td>#{time_tooltip time:note.notifyAt, datetime:true/}</td>
-          </tr>
-        #{/list}
-    </table>
-  </div>
-</div>
-#{/form}
-
+#{if notifications.size() == 0}
 <div class="row-fluid" id="order_list">
   <div class="span12">
-  #{if notifications.size() == 0}
     暂时还没有通知
-  #{/if}
-  #{else }
-      #{bootstrap_pager pi:p, url:'' /}
-  #{/else}
   </div>
 </div>
+#{/if}
+#{else }
+<div class="row">
+   <div class="span12">
+      <table class="table table-bordered table-condensed">
+        <tr>
+           <th><label><input type="checkbox" class="checkall"></label></th>
+           <th>#</th>
+           <th>标题</th>
+           <th>内容</th>
+           <th>创建时间</th>
+           <th>通知时间</th>
+        </tr>
+      #{list items:notifications, as:'note'}
+        <tr>
+           <td>
+             <label>
+               #{if note?.state == models.Notification.S.UNCHECKED}
+                 <label><input type="checkbox" name="noteID" value="${note.id}"></label>
+               #{/if}
+             </label>
+           </td>
+           <td><a name="${note.createAt}">${note.id}</a></td>
+           <td>${note.title}</td>
+           <td>${note.content}</td>
+           <td>#{time_tooltip time:note.createAt, datetime:true/}</td>
+           <td>#{time_tooltip time:note.notifyAt, datetime:true/}</td>
+        </tr>
+       #{/list}
+      </table>
+   </div>
+</div>
+#{bootstrap_pager pi:p, url:'' /}
+#{/else}
+#{/form}
+
+

@@ -52,7 +52,6 @@ window.Notify =
       , interval * 1000
       )
 
-
 $ ->
    #统计当前用户的 新通知记录的条数
    NewsCount = ->
@@ -64,30 +63,31 @@ $ ->
    #加载当前用户最新的八条信息
    $("#notification_btn").on("click",(e) ->
        e.preventDefault()
-       $.post("/Notifications/newsNotifications",  (r)->
-        if r
-           Param = list : r
-        else
-           Param = list : [{title:"See Notifications"}]
-        $("#notifications").html( _.template($('#news-Notifications-model-template').html(), Param) )
-       , 'json')
+       $.ajax("/Notifications/latest", {type: 'POST', dataType: 'json'}).done((r) ->
+              param = if r
+                          r
+                      else
+                          [{title: 'See Notifications'}]
+              #清空数据
+              $("#notifications").find("li").remove()
+              $.each(param,(index,element)->
+                  $("#notifications").append(_.template($('#news-Notifications-model-template').html(), {noti:element}))
+              )
+       )
 
    )
 
    #将选中的通知状态更改成已读
    $("#update_state").on("click",(e) ->
-        e.preventDefault()
-        checkboxArray = new Array();
-        $('input:checkbox:checked[name="noteID"]').each((index,checkbox)->
-          checkboxArray[index]=checkbox.value
-         )
-         if checkboxArray.length == 0
+         e.preventDefault()
+         $checkbox = $('input:checkbox:checked[name="noteID"]')
+         if $checkbox.serialize().length == 0
            noty({text: '未选中通知', type: 'error', timeout: 3000})
          else
            LoadMask.mask()
-           $.ajax("/Notifications/updateState",{type:'POST',dataType:'json',data:{noteIDs:checkboxArray}}).done((r)->
+           $.ajax("/Notifications/updateState",{type:'POST',dataType:'json',data:$checkbox.serialize()}).done((r)->
              noty({text: r.message, type: 'success', timeout: 3000})
-             $('input:checkbox:checked[name="noteID"]').remove()
+             $checkbox.remove()
              NewsCount()
            ).fail((r)->
              noty({text: '服务器发生错误!', type: 'error', timeout: 5000})

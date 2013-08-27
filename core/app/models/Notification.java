@@ -226,5 +226,20 @@ public class Notification extends Model {
         USER_QUEUE_CACHE.remove(user.username);
     }
 
+    /**
+     * 更改 通知的状态
+     *
+     * @param state
+     */
+    public void changState(S state) {
+        this.state = state;
+        this.save();
+    }
 
+    public static void changState(List<String> id) {
+        for(String tempNoteID : id) {
+            Notification temp = Notification.findById(Long.parseLong(tempNoteID));
+            temp.changState(Notification.S.CHECKED);
+        }
+    }
 }

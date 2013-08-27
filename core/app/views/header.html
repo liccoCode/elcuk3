@@ -161,12 +161,9 @@
 </div>
 
 <script type="text/template" id='news-Notifications-model-template'>
-  <% for(var i = 0,length = list.length; i < length; i++) { %>
-        <% var item = list[i] %>
       <li >
-        <a href="/Notifications/index#<%=item.id%>" rel="popover" content="<%=item.content%>" placement="left">
-          <%=item.title%>
+        <a href="/Notifications/index#<%=noti.id%>" rel="popover" content="<%=noti.content%>" placement="left">
+          <%=noti.title%>
         </a>
      </li>
-  <% } %>
 </script>

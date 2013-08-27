@@ -1,5 +1,6 @@
 package models.view.post;
 
+import controllers.Login;
 import helper.Dates;
 import models.Notification;
 import org.apache.commons.lang.StringUtils;
@@ -11,7 +12,7 @@ import java.util.List;
 
 /**
  * 通知 搜索功能
- *
+ * <p/>
  * Created by IntelliJ IDEA.
  * User: wyattpan
  * Date: 10/15/12
@@ -60,8 +61,10 @@ public class NotificationPost extends Post<Notification> {
     @Override
     public F.T2<String, List<Object>> params() {
 
-        StringBuilder sbd = new StringBuilder(" 1=1 ");
+        StringBuilder sbd = new StringBuilder(" 1=1 AND user=?");
         List<Object> params = new ArrayList<Object>();
+
+        params.add(Login.current());
 
         if(this.dateType != null) {
             if(this.dateType == DateType.NOTIFICATION) {
@@ -73,7 +76,7 @@ public class NotificationPost extends Post<Notification> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.state != null){
+        if(this.state != null) {
             sbd.append("AND state = ?");
             params.add(this.state);
         }
