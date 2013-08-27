@@ -5,7 +5,6 @@ import models.Notification;
 import models.view.Ret;
 import models.view.post.NotificationPost;
 import org.apache.commons.lang.StringUtils;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -41,16 +40,7 @@ public class Notifications extends Controller {
         redirect("/users/home");
     }
 
-    /**
-     * 下一个通知
-     */
-    public static void nextNotification() {
-        F.Option<Notification> notification = Notification.next(Login.current());
-        if(notification.isDefined())
-            renderJSON(J.G(notification.get()));
-        else
-            renderJSON(new Ret(false));
-    }
+
 
     /**
      * 当前用户的通知信息列表
