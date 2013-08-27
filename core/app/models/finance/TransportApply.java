@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
-import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.Entity;
@@ -77,10 +76,7 @@ public class TransportApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "",
-                Arrays.asList(Messages.get("transportapply.save"),
-                        Messages.get("shipment.departFromApply"))
-        );
+        return ElcukRecord.records(this.id + "", Arrays.asList("transportapply.save", "shipment.departFromApply"));
     }
 
 
@@ -117,5 +113,35 @@ public class TransportApply extends Apply {
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的运输单.");
         return new F.T2<List<Shipment>, Set<Cooperator>>(shipments, coopers);
+    }
+
+    /**
+     * 总请款金额
+     *
+     * @return
+     */
+    public F.T2<Float, Float> totalFees() {
+        float usd = 0;
+        float cny = 0;
+        for(Payment payment : this.payments) {
+            usd += payment.totalFees()._1;
+            cny += payment.totalFees()._2;
+        }
+        return new F.T2<Float, Float>(usd, cny);
+    }
+
+    /**
+     * 总实际支付金额
+     */
+    public F.T2<Float, Float> totalActualPaid() {
+        float usd = 0;
+        float cny = 0;
+        for(Payment payment : this.payments) {
+            if(payment.actualCurrency != null) {
+                usd += payment.actualCurrency.toUSD(payment.actualPaid);
+                cny += payment.actualCurrency.toCNY(payment.actualPaid);
+            }
+        }
+        return new F.T2<Float, Float>(usd, cny);
     }
 }

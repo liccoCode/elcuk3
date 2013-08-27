@@ -66,9 +66,13 @@ $ ->
   updateMainInfo = (target) ->
     $mainInfo = $('#mainInfo')
     ratio = extraRatio(target)
-    # 汇率
-    $('#currencyFromTo').text($('#request_currency').text() + " -> " + target)
-    $('#ratioInfo').text(ratio)
+    # 汇率 from -> target
+    $('#currencyFromTo').text("#{$('#request_currency').text()} -> #{target}")
+    $('#ratioTo').text(ratio)
+
+    # 汇率 target -> from
+    $('#currencyToFrom').text("#{target} -> #{$('#request_currency').text()}")
+    $('#reverRatioTo').text((1 / ratio).toFixed(8))
 
     # 需要支付的 币种/金额
     $('#paidCurrency').text(target)
@@ -81,15 +85,16 @@ $ ->
 
   # 抽取两个挂牌价中的汇率
   extraRatio = (target) ->
-    ratio = if 'CNY' == target
-      if target == $('#request_currency').text()
-        1
+    from = $('#request_currency').text()
+    ratio = if 'CNY' == from
+      if from == target
+        1.toFixed(8)
       else
-        tr = $("#boc_rate tr td:contains(#{currencyMap[$('#request_currency').text()]})").parents('tr')
-        (parseFloat(tr.find('td:eq(1)').css('color', 'red').text()) / 100).toFixed(4)
+        tr = $("#boc_rate tr td:contains(#{currencyMap[target]})").parents('tr')
+        (100 / parseFloat(tr.find('td:eq(1)').css('color', 'red').text())).toFixed(8)
     else
       tr = $("#ex_rate tr td:contains(#{target})").parents('tr')
-      (parseFloat(tr.find('td:eq(2)').css('color', 'red').text())).toFixed(4)
+      (parseFloat(tr.find('td:eq(2)').css('color', 'red').text())).toFixed(8)
     $('#ratioInput').val(ratio)
     ratio
 

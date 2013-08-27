@@ -4,18 +4,23 @@ import exception.PaymentException;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.market.Selling;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Whouse;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +32,50 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class ProcureUnits extends Controller {
 
+    @Before(only = {"index"})
+    public static void beforeIndex() {
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        renderArgs.put("whouses", Whouse.<Whouse>findAll());
+        renderArgs.put("logs", ElcukRecord.fid("procures.remove").<ElcukRecord>fetch(50));
+        renderArgs.put("cooperators", cooperators);
+
+        //为视图提供日期
+        DateTime dateTime = new DateTime();
+        renderArgs.put("tomorrow1", dateTime.plusDays(1).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow2", dateTime.plusDays(2).toString("yyyy-MM-dd"));
+        renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
+    }
+
+    @Check("procures.index")
+    public static void index(ProcurePost p) {
+        if(p == null) p = new ProcurePost();
+        render(p);
+    }
+
+    /**
+     * 明天 后天 大后天 计划视图
+     */
+    public static void planView(Date date) {
+        ProcurePost p = new ProcurePost(ProcureUnit.STAGE.DELIVERY);
+        p.dateType = "attrs.planDeliveryDate";
+        p.from = date;
+        p.to = date;
+        ProcureUnits.index(p);
+    }
+
+    /**
+     * 发货时间为当天, 同时货物还没有抵达货代的采购计划
+     */
+    public static void noPlaced() {
+        ProcurePost p = new ProcurePost();
+        p.dateType = "attrs.planArrivDate";
+        p.from = new Date();
+        p.to = new Date();
+        p.isPlaced = ProcurePost.PLACEDSTATE.NOARRIVE;
+        ProcureUnits.index(p);
+    }
+
+
     public static void blank(String sid) {
         ProcureUnit unit = new ProcureUnit();
         unit.selling = Selling.findById(sid);
@@ -36,6 +85,56 @@ public class ProcureUnits extends Controller {
             Analyzes.index();
         }
         render(unit, whouses);
+    }
+
+    /**
+     * 某一个 ProcureUnit 交货
+     */
+    public static void deliveryUnit(long id) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        renderArgs.put("attrs", unit.attrs);
+        render(unit);
+    }
+
+    @Check("procures.delivery")
+    public static void reverDelivery(long id, String msg) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        unit.revertDelivery(msg);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("撤销成功");
+        }
+        deliveryUnit(id);
+    }
+
+    /**
+     * 交货更新
+     *
+     * @param attrs
+     */
+    @Check("procures.delivery")
+    public static void delivery(UnitAttrs attrs, long id, String cmt) {
+        attrs.validate();
+        ProcureUnit unit = ProcureUnit.findById(id);
+        if(Validation.hasErrors()) {
+            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
+        }
+        unit.comment = cmt;
+        try {
+            Boolean isFullDelivery = unit.delivery(attrs);
+            if(isFullDelivery) {
+                flash.success("ProcureUnit %s 全部交货!", unit.id);
+            } else {
+                flash.success("ProcureUnits %s 超额交货, 预计交货 %s, 实际交货 %s",
+                        unit.id, unit.attrs.planQty, unit.attrs.qty);
+            }
+        } catch(Exception e) {
+            Validation.addError("", Webs.E(e));
+            render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
+        }
+
+        Deliveryments.show(unit.deliveryment.id);
     }
 
     public static void create(ProcureUnit unit, String shipmentId) {
@@ -108,10 +207,10 @@ public class ProcureUnits extends Controller {
             Webs.errorToFlash(flash);
             ProcurePost p = new ProcurePost();
             p.search = "id:" + id;
-            Procures.index(p);
+            index(p);
         }
         flash.success("删除成功, 所关联的运输项目也成功删除.");
-        Procures.index(null);
+        index(null);
     }
 
     /**

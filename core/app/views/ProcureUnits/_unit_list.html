@@ -11,6 +11,7 @@
     <th>#</th>
     <th>Selling</th>
     <th>Sku</th>
+    <th>FBA-ShipmentId</th>
     <th>采购单</th>
     <th>仓库</th>
     <th>供应商</th>
@@ -43,6 +44,9 @@
     </td>
     <td>
       <a href="@{Products.show(unit.sku)}" target="_blank">${unit.sku}</a>
+    </td>
+    <td>
+       ${unit.fba?.shipmentId}
     </td>
     <td>
         #{if unit.deliveryment}
@@ -146,7 +150,7 @@
               <div class="btn-toolbar">
                   #{power.ck "procures.delivery"}
                     <!-- 交货页面 -->
-                    <a href="@{Procures.deliveryUnit()}/${unit.id}" class="btn btn-small btn-warning">交货</a>
+                    <a href="@{ProcureUnits.deliveryUnit(unit.id)}" class="btn btn-small btn-warning">交货</a>
                   #{/power.ck}
                   #{power.ck "procures.dosplitunit"}
                     <!-- 分拆采购单元 -->
@@ -164,15 +168,7 @@
                   #{/ifnot}
               </div>
               <div class="btn-toolbar">
-                  #{ifnot unit.fba}
-                      #{power.ck 'fbas.deploytoamazon'}
-                        <a href="@{FBAs.deployToAmazon(unit.id)}" data-method='POST' class="btn btn-small btn-success"
-                           data-disable-with="创建中...">
-                          创建 FBA
-                        </a>
-                      #{/power.ck}
-                  #{/ifnot}
-                  #{else }
+                  #{if unit.fba}
                       #{power.ck 'fbas.update'}
                         <a href="@{FBAs.update(unit.id)}" class="btn btn-small btn-warning"
                            data-method='PUT' data-disable-with='更新中...'>
@@ -181,7 +177,7 @@
                       #{/power.ck}
                     <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
                     <a href="@{FBAs.boxLabel(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱外麦</a>
-                  #{/else}
+                  #{/if}
               </div>
             #{/if}
         </div>

@@ -29,6 +29,7 @@ import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
 import java.io.File;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -38,7 +39,9 @@ import java.util.*;
  * Time: 3:54 PM
  */
 @Embeddable
-public class AmazonProps {
+public class AmazonProps implements Serializable {
+
+    private static final long serialVersionUID = 6222748512793596823L;
 
     public enum T {
         ARRAY_TO_STR,

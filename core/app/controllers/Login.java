@@ -1,17 +1,20 @@
 package controllers;
 
 import helper.Constant;
+import jobs.analyze.SellingRecordCaculateJob;
 import models.Privilege;
 import models.User;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.krysalis.barcode4j.HumanReadablePlacement;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.impl.code128.Code128Constants;
 import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.krysalis.barcode4j.tools.MimeTypes;
 import play.Logger;
+import play.data.binding.As;
 import play.mvc.Util;
 
 import java.awt.image.BufferedImage;
@@ -19,9 +22,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 用户登陆限制
@@ -157,4 +162,17 @@ public class Login extends Secure.Security {
         renderBinary(file);
         renderBinary(file.toURI().toURL().openStream());
     }
+
+    /**
+     * 触发使用计算使用
+     *
+     * @param date
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    public static void job(@As("yyyy-MM-dd") Date date) throws ExecutionException, InterruptedException {
+        new SellingRecordCaculateJob(new DateTime(date)).now().get();
+        renderHtml("<h3>SellingRecordCaculateJob 开始执行</h3>");
+    }
+
 }

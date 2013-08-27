@@ -25,7 +25,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
-        this.dateType = DateType.delivery;
+        this.dateType = DateType.DELIVERY;
     }
 
     /**
@@ -38,7 +38,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         /**
          * 创建时间
          */
-        create {
+        CREATE {
             @Override
             public String label() {
                 return "创建时间";
@@ -47,7 +47,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         /**
          * 交货时间
          */
-        delivery {
+        DELIVERY {
             @Override
             public String label() {
                 return "交货时间";
@@ -90,7 +90,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         List<Object> params = new ArrayList<Object>();
 
         if(this.dateType != null) {
-            if(this.dateType == DateType.delivery) {
+            if(this.dateType == DateType.DELIVERY) {
                 sbd.append(" u.attrs.planDeliveryDate>=? AND u.attrs.planDeliveryDate<=?");
             } else {
                 sbd.append(" d.createDate>=? AND d.createDate<=?");

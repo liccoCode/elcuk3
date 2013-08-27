@@ -52,10 +52,10 @@ public class JobsSetup {
             every(ReviewInfoFetchJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
-            every(SellingRecordGenerateJob.class, "1h");
             every(ShipmentSyncJob.class, "5mn");
             every(TicketStateSyncJob.class, "1mn");
             every(ReviewFixJob.class, "1mn");
+
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
     }

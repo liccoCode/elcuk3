@@ -1,14 +1,19 @@
 package controllers;
 
 import helper.Webs;
+import models.User;
 import models.finance.Apply;
 import models.finance.FeeType;
 import models.finance.ProcureApply;
 import models.finance.TransportApply;
+import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.post.ProcreApplyPost;
 import models.view.post.ShipmentPost;
+import models.view.post.TransportApplyPost;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -24,16 +29,34 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Applys extends Controller {
 
-    @Check("applys.index")
-    public static void index() {
-        List<Apply> applyes = ProcureApply.find("ORDER BY createdAt DESC").fetch();
-        render(applyes);
+    @Before(only = {"procures", "transports"})
+    public static void beforIndex() {
+        List<Cooperator> suppliers = Cooperator.suppliers();
+
+        renderArgs.put("suppliers", suppliers);
     }
 
-    public static void transports() {
-        List<Apply> applyes = TransportApply.find("ORDER BY createdAt DESC").fetch();
-        render(applyes);
+
+    @Check("applys.index")
+    public static void procures(ProcreApplyPost p) {
+        List<Apply> applyes = null;
+        if(p == null) p = new ProcreApplyPost();
+        applyes = p.query();
+
+        render(applyes, p);
     }
+
+    /**
+     * 物流请款  列表
+     */
+    public static void transports(TransportApplyPost p) {
+        List<User> users = User.findAll();
+        List<TransportApply> applyes = null;
+        if(p == null) p = new TransportApplyPost();
+        applyes = p.query();
+        render(applyes, p, users);
+    }
+
 
     /**
      * 采购请款单

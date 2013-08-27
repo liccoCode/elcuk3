@@ -7,19 +7,25 @@ u(rl): 方法
 #{set begin: ((_pi.page - 3) >= 1) ? (_pi.page - 3) : 1 /}
 #{set end: ((_pi.page + 3) <= _pi.totalPage) ? (_pi.page + 3) : _pi.totalPage/}
 <div class="pagination pagination-centered">
-    <ul>
-        <li><a page="1" href="${_url + "?p=1"}">首页</a></li>
-    #{if begin < end}
-        #{list items:begin..end, as:'i'}
-            #{if _pi.page == i}
-                <li class="active"><a page="${i}" href="#">${i}</a></li>
-            #{/if}
-            #{else }
-                <li><a page="${i}" href="${_url + "?p=" + i}">${i}</a></li>
-            #{/else}
-        #{/list}
-    #{/if}
-        <li><a page="${_pi.totalPage}" href="${_url + "?p=" + _pi.totalPage}">尾页(${_pi.totalPage}
-            |${_pi.count})</a></li>
-    </ul>
+  <ul>
+    <li><a page="1" href="${_url + "?p=1"}">首页</a></li>
+  #{if begin < end}
+      #{list items:begin..end, as:'i'}
+          #{if _pi.page == i}
+            <li class="active"><a page="${i}" href="#">${i}</a></li>
+          #{/if}
+          #{else }
+            <li><a page="${i}" href="${_url + "?p=" + i}">${i}</a></li>
+          #{/else}
+      #{/list}
+  #{/if}
+    <li>
+      <a page="${_pi.totalPage}" href="${_url + "?p=" + _pi.totalPage}">
+        尾页(总 ${_pi.totalPage} 页)
+      </a>
+    </li>
+    <li>
+      <a>总数据: ${_pi.totalCount}</a>
+    </li>
+  </ul>
 </div>

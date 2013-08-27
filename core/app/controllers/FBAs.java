@@ -1,7 +1,6 @@
 package controllers;
 
 import helper.Webs;
-import models.embedded.ERecordBuilder;
 import models.market.Account;
 import models.procure.FBAShipment;
 import models.procure.ProcureUnit;
@@ -10,6 +9,8 @@ import play.data.validation.Validation;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -21,28 +22,25 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class})
 public class FBAs extends Controller {
-    /**
-     * 通过 ProcureUnit 创建其对应的 FBA
-     *
-     * @param procureUnitId 采购计划 ID
-     */
-    @Check("fbas.deploytoamazon")
-    public static void deployToAmazon(Long procureUnitId) {
-        ProcureUnit unit = ProcureUnit.findById(procureUnitId);
 
-        unit.postFbaShipment();
+    @Check("fbas.deploytoamazon")
+    public static void deploysToAmazon(String deliveryId, List<Long> pids) {
+        if(pids == null || pids.size() == 0)
+            Validation.addError("", "必须选择需要创建的采购计划");
+
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-
-        } else {
-            new ERecordBuilder("shipment.createFBA")
-                    .msgArgs(unit.id, unit.sku, unit.fba.shipmentId)
-                    .fid(unit.id)
-                    .save();
-            flash.success("成功在 Amazon 创建 FBA: %s", unit.fba.shipmentId);
+            Deliveryments.show(deliveryId);
         }
 
-        Deliveryments.show(unit.deliveryment.id);
+        ProcureUnit.postFbaShipments(pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+
+            flash.success("选择的采购计划全部成功创建 FBA");
+        }
+        Deliveryments.show(deliveryId);
     }
 
     @Check("fbas.update")

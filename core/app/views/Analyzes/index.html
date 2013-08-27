@@ -10,9 +10,6 @@
 <div class="tabbable tabs-left">
   <ul id="top_tab" class="nav nav-tabs">
     <li class="active"><a href="#basic" data-toggle="tab">基础</a></li>
-  #{power.ck 'analyzes.ajaxsales'}
-    <li><a href="#root" data-toggle="tab">Root</a></li>
-  #{/power.ck}
   </ul>
 
 
@@ -28,16 +25,6 @@
         <div id="tl" class="span12" style="height:280px;line-height:10px;font-size:8pt;"></div>
       </div>
     </div>
-
-  #{power.ck 'analyzes.ajaxsales'}
-    <div class="tab-pane fade" id="root">
-      <div class="row-fluid">
-        <div id="a_sales" class="span6" style="height:280px"></div>
-        <div class="span6">这个里面的为需要权限控制查看的曲线</div>
-      </div>
-    </div>
-  #{/power.ck}
-
   </div>
 </div>
 
@@ -85,9 +72,9 @@
           <button class="btn" id="a_search">搜索</button>
         </div>
 
-        <button id="clear_cache" class="btn btn-primary pull-right" style="margin-right:5px;">
-          Cached At ${models.view.post.AnalyzePost.cachedDate('sid').datetime()}
-        </button>
+        <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;">
+          Next Refrech At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
+        </a>
 
         <input type="hidden" name="p.page" value="1">
         <input type="hidden" name="p.type" value="sid">

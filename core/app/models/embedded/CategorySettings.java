@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,8 @@ import java.util.Map;
  * Time: 10:02 AM
  */
 @Embeddable
-public class CategorySettings {
+public class CategorySettings implements Serializable {
+    private static final long serialVersionUID = -5252562469109859931L;
     /**
      * Amazon 允许的节点, 使用 , 分割
      */

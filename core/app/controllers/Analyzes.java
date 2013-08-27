@@ -6,13 +6,12 @@ import models.market.*;
 import models.product.Category;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
-import models.view.dto.HighChart;
+import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.cache.CacheFor;
 import play.jobs.Job;
 import play.mvc.After;
@@ -66,19 +65,12 @@ public class Analyzes extends Controller {
      * @param p
      */
     public static void analyzes(final AnalyzePost p) {
-        List<AnalyzeDTO> dtos = await(new Job<List<AnalyzeDTO>>() {
-            @Override
-            public List<AnalyzeDTO> doJobWithResult() throws Exception {
-                return p.query();
-            }
-        }.now());
-        render("Analyzes/" + p.type + ".html", dtos, p);
-    }
-
-    public static void clear() {
-        Cache.delete(AnalyzePost.AnalyzeDTO_SID_CACHE);
-        Cache.delete(AnalyzePost.AnalyzeDTO_SKU_CACHE);
-        renderJSON(new Ret());
+        try {
+            List<AnalyzeDTO> dtos = p.query();
+            render("Analyzes/" + p.type + ".html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<h3>" + e.getMessage() + "</h3>");
+        }
     }
 
     /**
@@ -91,22 +83,6 @@ public class Analyzes extends Controller {
                 @Override
                 public HighChart doJobWithResult() throws Exception {
                     return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
-                }
-            }.now());
-            renderJSON(J.json(chart));
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.S(e)));
-        }
-    }
-
-    @Check("analyzes.ajaxsales")
-    public static void ajaxSales(final AnalyzePost p) {
-        try {
-            response.cacheFor("10mn");
-            HighChart chart = await(new Job<HighChart>() {
-                @Override
-                public HighChart doJobWithResult() throws Exception {
-                    return OrderItem.ajaxHighChartSales(p.val, p.type, p.from, p.to);
                 }
             }.now());
             renderJSON(J.json(chart));

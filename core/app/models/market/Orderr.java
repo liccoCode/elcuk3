@@ -497,10 +497,4 @@ public class Orderr extends GenericModel {
         for(Orderr o : orderrs) orderIds.add(o.orderId);
         return orderIds;
     }
-
-    public static void warnningToDeal(Date from, Date to, M market) {
-        DBUtils.row("UPDATE Orderr set warnning=false WHERE warnning=true AND market=?" +
-                " AND createDate>=? AND createDate<=?",
-                market.name(), market.withTimeZone(from), market.withTimeZone(to));
-    }
 }

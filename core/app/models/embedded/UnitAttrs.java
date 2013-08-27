@@ -8,6 +8,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -17,7 +18,9 @@ import java.util.Date;
  * Time: 2:24 PM
  */
 @Embeddable
-public class UnitAttrs {
+public class UnitAttrs implements Serializable {
+
+    private static final long serialVersionUID = 1146012808015481704L;
     /**
      * 预计发货时间
      */
