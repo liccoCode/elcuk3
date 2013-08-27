@@ -1,6 +1,8 @@
 package controllers;
 
 import exception.PaymentException;
+import helper.Constant;
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -20,6 +22,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +53,61 @@ public class ProcureUnits extends Controller {
     public static void index(ProcurePost p) {
         if(p == null) p = new ProcurePost();
         render(p);
+    }
+
+    /**
+     * 将搜索结果 打成ZIP包，进行下载
+     */
+    public static void downloadFBAZIP(ProcurePost p) {
+
+        List<ProcureUnit> procureUnitsList = p.query();
+
+        if(procureUnitsList != null && procureUnitsList.size() != 0) {
+
+            synchronized(ProcureUnits.class) {
+
+                //创建FBA根目录，存放工厂FBA文件
+                File dirfile = dirfile = new File(Constant.TMP, "FBA");
+                dirfile.mkdir();
+
+                for(ProcureUnit procureUnit : procureUnitsList) {
+
+                    String name = procureUnit.cooperator.name;
+                    String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
+
+                    //生成工厂的文件夹. 格式：预计交货日期-工厂名称
+                    File factoryDir = new File(dirfile.getPath() + "/", String.format("%s-%s-出货FBA", date, name));
+                    factoryDir.mkdir();
+
+                    // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
+                    String namePDF = String.format("[%s][%s][%s][%s]内麦.pdf",
+                            procureUnit.whouse.country,
+                            procureUnit.shipType.label(),
+                            procureUnit.attrs.planQty,
+                            procureUnit.product.abbreviation
+                    );
+
+                    //生成箱内卖 PDF
+                    procureUnit.FBAasPDF(renderArgs, factoryDir.getPath(), namePDF, "FBAs/boxLabel.html");
+
+                    namePDF = String.format("[%s][%s][%s][%s]外麦.pdf",
+                            procureUnit.whouse.country,
+                            procureUnit.shipType.label(),
+                            procureUnit.attrs.planQty,
+                            procureUnit.product.abbreviation
+                    );
+
+                    //生成箱外卖 PDF
+                    procureUnit.FBAasPDF(renderArgs, factoryDir.getPath(), namePDF, "FBAs/packingSlip.html");
+
+                }
+
+                File zip = new File(Constant.TMP + "/FBA.zip");
+                play.libs.Files.zip(dirfile, zip);
+
+                renderBinary(zip);
+            }
+        }
     }
 
     /**

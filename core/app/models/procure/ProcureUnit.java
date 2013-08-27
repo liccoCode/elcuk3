@@ -11,10 +11,12 @@ import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
 import mws.FBA;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -22,9 +24,15 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
+import play.modules.pdf.PDF;
+import play.mvc.Scope;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -365,7 +373,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("检查不合格");
 
         this.attrs = attrs;
-
 
 
         new ERecordBuilder("procureunit.delivery")
@@ -872,5 +879,43 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return false;
             } else return true;
         }
+    }
+
+    /**
+     * 指定文件路径，生成PDF
+     *
+     * @param renderArgs 模板中的数据
+     * @param folderPath 指定PDF文件，生成的文件目录
+     * @param PDFName    PDF名称
+     * @param template   PDF模板页面  如 ：FBAs/boxLabel.html
+     */
+    public void FBAasPDF(Scope.RenderArgs renderArgs, String folderPath, String PDFName, String template) {
+
+
+        File filePDF = new File(folderPath + "/", PDFName);
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(filePDF);
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        PDF.Options options = new PDF.Options();
+        options.pageSize = IHtmlToPdfTransformer.A4P;
+
+        PDF.PDFDocument singleDoc = new PDF.PDFDocument();
+        singleDoc.options = options;
+        singleDoc.template = template;
+
+        PDF.MultiPDFDocuments docs = new PDF.MultiPDFDocuments();
+        docs.add(singleDoc);
+
+        //设置模板数据
+        renderArgs.put("shipmentId", this.fba.shipmentId);
+        renderArgs.put("fba", this.fba);
+        renderArgs.put("shipFrom", Account.address(this.fba.account.type));
+
+        //PDF
+        PDF.renderTemplateAsPDF(out, docs, options);
     }
 }
