@@ -10,11 +10,11 @@ window.Notify =
 
 $ ->
    #统计当前用户的 新通知记录的条数
-   NewsCount = ->
+   newsCount = ->
     htmlobj = $.ajax({url: "/Notifications/amount" , async: false})
     $("#Notify_number").html(htmlobj.responseText);
 
-   NewsCount()
+   newsCount()
 
    #加载当前用户最新的八条信息
    $("#notification_btn").on("click",(e) ->
@@ -44,7 +44,7 @@ $ ->
            $.ajax("/Notifications/updateState",{type:'POST',dataType:'json',data:$checkbox.serialize()}).done((r)->
              noty({text: r.message, type: 'success', timeout: 3000})
              $checkbox.remove()
-             NewsCount()
+             newsCount()
            ).fail((r)->
              noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
            )
