@@ -65,6 +65,7 @@ POST    /payment/files/upload                               Payments.uploads
 GET     /payment/{id}                                       Payments.show
 DELETE  /payment/{id}                                       Payments.cancel
 POST    /payment/{id}/pay                                   Payments.payForIt
+GET     /payment/{id}/pdf                                   Payments.pdf
 POST    /payment/{id}/shouldPaid                            Payments.shouldPaidUpdate
 POST    /payment/{id}/lock                                  Payments.lockIt
 DELETE  /payment/{id}/lock                                  Payments.unlock
