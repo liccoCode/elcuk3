@@ -98,5 +98,9 @@ public class NotificationPost extends Post<Notification> {
         return Notification.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
-
+    @Override
+    public Long getTotalCount() {
+        F.T2<String, List<Object>> params = params();
+        return Notification.count(params._1, params._2.toArray());
+    }
 }
