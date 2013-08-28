@@ -23,7 +23,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -198,12 +200,22 @@ public class ProcureUnits extends Controller {
         new ElcukRecord(Messages.get("procureunit.update"),
                 Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
 
-                //通知当前操作用户 和采购计划创建人，发送删除成功的通知
-        Notification.notifiesToUsers(String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
+        //通知采购单 和采购计划创建人，运输人员
+        Set<User> userSet = new HashSet<User>();
+        userSet.add(managedUnit.handler);
+        for(Shipment shipment : managedUnit.relateShipment()) {
+            if(shipment.creater != null)
+            userSet.add(shipment.creater);
+        }
+
+        Notification.notifiesToUsers(
+                String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
+
                 String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
                         oldPlanQty, managedUnit.attrs.planQty,
                         Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
-                Login.current(), managedUnit.handler);
+                userSet.toArray(new User[userSet.size()])
+        );
 
         flash.success("成功修改采购计划!", id);
         edit(id);
@@ -211,7 +223,16 @@ public class ProcureUnits extends Controller {
 
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+
+        Set<User> userSet = new HashSet<User>();
+        userSet.add(unit.handler);
+        for(Shipment shipment : unit.relateShipment()) {
+           if(shipment.creater != null)
+            userSet.add(shipment.creater);
+        }
+
         unit.remove();
+
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcurePost p = new ProcurePost();
@@ -220,8 +241,9 @@ public class ProcureUnits extends Controller {
         }
 
         //通知当前操作用户 和采购计划创建人，发送删除成功的通知
+
         String notifiMessage = String.format("采购计划 %s 删除", id);
-        Notification.notifiesToUsers(notifiMessage, notifiMessage, Login.current(), unit.handler);
+        Notification.notifiesToUsers(notifiMessage, notifiMessage, userSet.toArray(new User[userSet.size()]));
 
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         index(null);

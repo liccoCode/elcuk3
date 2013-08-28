@@ -132,11 +132,10 @@ public class Notification extends GenericModel {
 
     /**
      * 向某些用户 通知信息
-     *
      */
     public static void notifiesToUsers(String title, String content, User... users) {
         for(User u : users) {
-            Notification notify = new Notification(u, title, content).save();
+            new Notification(u, title, content).save();
         }
     }
 
