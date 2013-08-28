@@ -46,38 +46,47 @@ public class PaymentUnitQuery {
         return currencies;
     }
 
-    public Float avgShipmentTransportshippingFee(Shipment.T shipType, String feeTypeName,
-                                                 Date from, Date to, String... skus) {
+    public Float avgShipmentTransportshippingFee(Shipment.T shipType, String feeTypeName, Date from, Date to) {
         /**
          * 1. 找到所有币种
          * 2. 每个币种进行统计总额
+         *  2.1. 找到总金额
+         *  2.2. 找到总数量
+         *  2.3. 计算平均值
          * 3. 统一为 CNY 币种
          */
         // 这里不区分 SKU 了, 统计运输总数量的平均值
-        SqlSelect sql = new SqlSelect()
-                .select("sum(p.amount + p.fixValue) / sum(si.qty) as avgPrice", "p.currency as currency")
+        SqlSelect totalAmount = new SqlSelect()
+                .select("sum(p.amount + p.fixValue) as sumFee", "p.currency as currency",
+                        "group_concat(s.id) as shipmentIds")
                 .from("PaymentUnit p")
-                .leftJoin("ShipItem si ON si.id=p.shipItem_id")
-                .leftJoin("Shipment s ON si.shipment_id=s.id")
+                .leftJoin("Shipment s ON p.shipment_id=s.id")
                 .where("p.createdAt>=?").param(from)
                 .where("p.createdAt<=?").param(to)
                 .where("p.feeType_name=?").param(feeTypeName)
                 .where("s.type=?").param(shipType.name())
                 .groupBy("p.currency");
-        // 没有指定 sku 则查询全部
-        if(skus != null && skus.length > 0) {
-            sql.leftJoin("ProcureUnit u ON u.id=si.unit_id").where(SqlSelect.whereIn("u.sku", skus));
-        }
 
-        List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+        List<Map<String, Object>> rows = DBUtils.rows(totalAmount.toString(), totalAmount.getParams().toArray());
 
         float cnyAveFee = 0;
+        int totalQty = 0;
+
+        List<String> shipmentIds = new ArrayList<String>();
         for(Map<String, Object> row : rows) {
             Currency currency = Currency.valueOf(row.get("currency").toString());
-            cnyAveFee += currency.toCNY(NumberUtils.toFloat(row.get("avgPrice").toString()));
+            cnyAveFee += currency.toCNY(NumberUtils.toFloat(row.get("sumFee").toString()));
+            shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentIds").toString(), ",")));
         }
 
-        return cnyAveFee / (rows.size() <= 0 ? 1 : rows.size());
+        SqlSelect totalQtySql = new SqlSelect()
+                .select("sum(qty) as qty")
+                .from("ShipItem")
+                .where(SqlSelect.whereIn("shipment_id", shipmentIds));
+        Map<String, Object> row = DBUtils.row(totalQtySql.toString());
+        totalQty = row.get("qty") == null ? 0 : NumberUtils.toInt(row.get("qty").toString());
+
+        return totalQty == 0 ? 0 : (cnyAveFee / totalQty);
     }
 
     /**
@@ -88,8 +97,8 @@ public class PaymentUnitQuery {
      * @param skus
      * @return
      */
-    public Float avgSkuAIRTransportshippingFee(Date from, Date to, String... skus) {
-        return avgShipmentTransportshippingFee(Shipment.T.AIR, "transportshipping", from, to, skus);
+    public Float avgSkuAIRTransportshippingFee(Date from, Date to) {
+        return avgShipmentTransportshippingFee(Shipment.T.AIR, "transportshipping", from, to);
     }
 
     /**
@@ -100,8 +109,8 @@ public class PaymentUnitQuery {
      * @param skus
      * @return
      */
-    public Float avgSkuSEATransportshippingFee(Date from, Date to, String... skus) {
-        return avgShipmentTransportshippingFee(Shipment.T.SEA, "transportshipping", from, to, skus);
+    public Float avgSkuSEATransportshippingFee(Date from, Date to) {
+        return avgShipmentTransportshippingFee(Shipment.T.SEA, "transportshipping", from, to);
     }
 
     /**

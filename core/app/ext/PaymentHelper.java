@@ -1,12 +1,16 @@
 package ext;
 
+import models.finance.FeeType;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.ProcureUnit;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
 import play.templates.JavaExtensions;
 import query.PaymentUnitQuery;
+
+import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -88,6 +92,7 @@ public class PaymentHelper extends JavaExtensions {
      * @return
      */
     public static float averagePrice(PaymentUnit unit) {
+        if(unit.feeType != FeeType.transportShipping()) return unit.currency.toCNY(unit.unitPrice);
         if(unit.shipment != null) {
             Shipment.T shipType = unit.shipment.type;
             PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
@@ -111,6 +116,7 @@ public class PaymentHelper extends JavaExtensions {
     }
 
     public static float currentAvgPrice(PaymentUnit unit) {
+        if(unit.feeType != FeeType.transportShipping()) return unit.currency.toCNY(unit.unitPrice);
         if(unit.shipment != null) {
             Shipment.T shipType = unit.shipment.type;
             PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
@@ -119,11 +125,11 @@ public class PaymentHelper extends JavaExtensions {
 
             if(unit.shipItem != null && shipType == Shipment.T.EXPRESS) {
                 return unit.shipItem.qty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) / unit.shipItem.qty);
-            } else if(shipType == Shipment.T.SEA) {
-                // TODO 海运空运的当前均价需要调整
-                return aveFeeQuery.avgSkuSEATransportshippingFee(threeMonthAgo.toDate(), now.toDate());
-            } else if(shipType == Shipment.T.AIR) {
-                return aveFeeQuery.avgSkuAIRTransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+            } else if(Arrays.asList(Shipment.T.AIR, Shipment.T.SEA).contains(shipType)) {
+                // 总运输费用平摊到所有产品
+                int sumQty = 0;
+                for(ShipItem itm : unit.shipment.items) sumQty += itm.qty;
+                return sumQty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) / sumQty);
             } else {
                 return unit.currency.toCNY(unit.unitPrice);
             }

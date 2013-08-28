@@ -221,12 +221,11 @@ $ ->
 
       if amountMap[currency]
         amountMap[currency] += parseFloat(total);
-      else
+      else if currency
         amountMap[currency] = parseFloat(total);
     )
     #展示 统计结果
-    console.log(amountMap)
-    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v}</span>  ").join(',')
+    message = _.map(amountMap, (v, k) -> "  <span class='label label-success'>#{k}: #{v}</span>  ").join('&nbsp;')
     $table.find('tbody').append(_.template($('#statisticFee-template').html(), {msg: message}))
   )
 
