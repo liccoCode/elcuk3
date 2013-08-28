@@ -79,35 +79,21 @@ public class ProcureUnits extends Controller {
                     File factoryDir = new File(dirfile.getPath() + "/", String.format("%s-%s-出货FBA", date, name));
                     factoryDir.mkdir();
 
-                    // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
-                    String namePDF = String.format("[%s][%s][%s][%s]内麦.pdf",
-                            procureUnit.whouse.country,
-                            procureUnit.shipType.label(),
-                            procureUnit.attrs.planQty,
-                            procureUnit.product.abbreviation
-                    );
-
-                    //生成箱内卖 PDF
-                    procureUnit.FBAasPDF(renderArgs, factoryDir.getPath(), namePDF, "FBAs/boxLabel.html");
-
-                    namePDF = String.format("[%s][%s][%s][%s]外麦.pdf",
-                            procureUnit.whouse.country,
-                            procureUnit.shipType.label(),
-                            procureUnit.attrs.planQty,
-                            procureUnit.product.abbreviation
-                    );
-
-                    //生成箱外卖 PDF
-                    procureUnit.FBAasPDF(renderArgs, factoryDir.getPath(), namePDF, "FBAs/packingSlip.html");
+                    //生成 PDF
+                    procureUnit.fbaAsPDF(factoryDir.getPath());
 
                 }
 
                 File zip = new File(Constant.TMP + "/FBA.zip");
                 play.libs.Files.zip(dirfile, zip);
 
+                dirfile.delete();
+                zip.deleteOnExit();
+
                 renderBinary(zip);
             }
         }
+
     }
 
     /**

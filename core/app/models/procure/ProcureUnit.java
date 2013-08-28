@@ -3,6 +3,7 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.PDF;
 import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
@@ -16,7 +17,6 @@ import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
 import mws.FBA;
-import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -24,15 +24,10 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
-import play.modules.pdf.PDF;
 import play.mvc.Scope;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -884,38 +879,27 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 指定文件路径，生成PDF
      *
-     * @param renderArgs 模板中的数据
      * @param folderPath 指定PDF文件，生成的文件目录
-     * @param PDFName    PDF名称
-     * @param template   PDF模板页面  如 ：FBAs/boxLabel.html
      */
-    public void FBAasPDF(Scope.RenderArgs renderArgs, String folderPath, String PDFName, String template) {
+    public void fbaAsPDF(String folderPath) {
+        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
+        templateBinding.put("shipmentId", this.fba.shipmentId);
+        templateBinding.put("fba", this.fba);
+        templateBinding.put("shipFrom", Account.address(this.fba.account.type));
 
+        // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
+        String namePDF = String.format("[%s][%s][%s][%s]",
+                this.whouse.country,
+                this.shipType.label(),
+                this.attrs.planQty,
+                this.product.abbreviation
+        );
 
-        File filePDF = new File(folderPath + "/", PDFName);
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(filePDF);
-        } catch(FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        //生成箱内卖 PDF
+        PDF.fbaAsPDF(folderPath, String.format(namePDF + "%s", "内麦.pdf"),"FBAs/packingSlip.html" , templateBinding);
 
-        PDF.Options options = new PDF.Options();
-        options.pageSize = IHtmlToPdfTransformer.A4P;
+        //生成箱外卖 PDF
+        PDF.fbaAsPDF(folderPath, String.format(namePDF + "%s", "外麦.pdf"),"FBAs/boxLabel.html", templateBinding);
 
-        PDF.PDFDocument singleDoc = new PDF.PDFDocument();
-        singleDoc.options = options;
-        singleDoc.template = template;
-
-        PDF.MultiPDFDocuments docs = new PDF.MultiPDFDocuments();
-        docs.add(singleDoc);
-
-        //设置模板数据
-        renderArgs.put("shipmentId", this.fba.shipmentId);
-        renderArgs.put("fba", this.fba);
-        renderArgs.put("shipFrom", Account.address(this.fba.account.type));
-
-        //PDF
-        PDF.renderTemplateAsPDF(out, docs, options);
     }
 }
