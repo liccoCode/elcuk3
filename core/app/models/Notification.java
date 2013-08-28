@@ -3,12 +3,13 @@ package models;
 import com.google.gson.annotations.Expose;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Required;
-import play.db.jpa.Model;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 用户的提醒消息(push)
@@ -18,16 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
-public class Notification extends Model {
+public class Notification extends GenericModel {
     public static final int SERVICE = 1;
     public static final int PROCURE = 2;
     public static final int SHIPPER = 3;
     public static final int PM = 4;
-    /**
-     * 用来记录用户 Notification 的 Queue Map
-     */
-    private static final Map<String, BlockingQueue<Notification>> USER_QUEUE_CACHE = new ConcurrentHashMap<String, BlockingQueue<Notification>>();
-
 
     public Notification() {
         this.createAt = new Date();
@@ -39,6 +35,11 @@ public class Notification extends Model {
         this.title = title;
         this.content = content;
     }
+
+    @Id
+    @GeneratedValue
+    @Expose
+    public Long id;
 
     @ManyToOne
     public User user;
@@ -130,6 +131,16 @@ public class Notification extends Model {
     }
 
     /**
+     * 向某些用户 通知信息
+     *
+     */
+    public static void notifiesToUsers(String title, String content, User... users) {
+        for(User u : users) {
+            Notification notify = new Notification(u, title, content).save();
+        }
+    }
+
+    /**
      * 通知某一个组(1: service group, 2: procure group, 3: shipper group, 4: PM group)
      *
      * @param group   1: service group, 2: procure group, 3: shipper group, 4: PM group
@@ -176,9 +187,9 @@ public class Notification extends Model {
         this.save();
     }
 
-    public static void changState(List<String> id) {
-        for(String tempNoteID : id) {
-            Notification temp = Notification.findById(Long.parseLong(tempNoteID));
+    public static void changState(List<Long> id) {
+        for(Long tempNoteID : id) {
+            Notification temp = Notification.findById(tempNoteID);
             temp.changState(Notification.S.CHECKED);
         }
     }

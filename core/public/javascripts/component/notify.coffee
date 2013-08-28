@@ -12,14 +12,15 @@ $ ->
   #统计当前用户的 新通知记录的条数
   newsCount = ->
     htmlobj = $.ajax({url: "/Notifications/amount", async: false})
-    $("#Notify_number").html(htmlobj.responseText);
+    $("#notifyNumber").html(htmlobj.responseText);
 
   newsCount()
 
   #加载当前用户最新的八条信息
-  $("#notification_btn").on("click", (e) ->
+  $("#notificationBtn").on("click", (e) ->
     e.preventDefault()
     $.ajax("/Notifications/latest", {type: 'POST', dataType: 'json'}).done((r) ->
+      newsCount()
       param = if r
         r
       else
@@ -27,14 +28,16 @@ $ ->
       #清空数据
       $("#notifications").find("li").remove()
       $.each(param, (index, element)->
-        $("#notifications").append(_.template($('#news-Notifications-model-template').html(), {noti: element}))
+        $("#notifications").append(_.template($('#news-notifications-model-template').html(), {noty: element}))
       )
+      $("#notifications").append("<li><a href='/Notifications/index' class='label' >See more</a></li>")
+      checkedOnEvent()
     )
 
   )
 
   #将选中的通知状态更改成已读
-  $("#update_state").on("click", (e) ->
+  $("#updateState").on("click", (e) ->
     e.preventDefault()
     LoadMask.mask()
     $checkbox = $('input:checkbox:checked[name="noteID"]')
@@ -55,3 +58,17 @@ $ ->
         )
 
   )
+
+  checkedOnEvent = ->
+    $("#notifications .label-info").on("click",(e) ->
+      $span = $(@)
+
+      $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:{noteID:$span.attr("data-id")}})
+        .done((r)->
+          noty({text: r.message, type: 'success', timeout: 3000})
+          $("#notificationBtn").trigger("click")
+        )
+        .fail((r)->
+          noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+        )
+    )

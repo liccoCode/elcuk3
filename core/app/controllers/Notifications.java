@@ -72,7 +72,7 @@ public class Notifications extends Controller {
     /**
      * 修改通知状态为 已阅
      */
-    public static void updateState(List<String> noteID) {
+    public static void updateState(List<Long> noteID) {
 
         if(noteID != null) {
             Notification.changState(noteID);
