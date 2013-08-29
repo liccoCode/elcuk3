@@ -58,40 +58,30 @@ public class ProcureUnits extends Controller {
     /**
      * 将搜索结果 打成ZIP包，进行下载
      */
-    public static void downloadFBAZIP(ProcurePost p) {
-
+    public static synchronized void downloadFBAZIP(ProcurePost p) {
         List<ProcureUnit> procureUnitsList = p.query();
 
         if(procureUnitsList != null && procureUnitsList.size() != 0) {
+            //创建FBA根目录，存放工厂FBA文件
+            File dirfile = dirfile = new File(Constant.TMP, "FBA");
+            dirfile.mkdir();
 
-            synchronized(ProcureUnits.class) {
+            for(ProcureUnit procureUnit : procureUnitsList) {
+                String name = procureUnit.cooperator.name;
+                String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
 
-                //创建FBA根目录，存放工厂FBA文件
-                File dirfile = dirfile = new File(Constant.TMP, "FBA");
-                dirfile.mkdir();
-
-                for(ProcureUnit procureUnit : procureUnitsList) {
-
-                    String name = procureUnit.cooperator.name;
-                    String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
-
-                    //生成工厂的文件夹. 格式：预计交货日期-工厂名称
-                    File factoryDir = new File(dirfile.getPath() + "/", String.format("%s-%s-出货FBA", date, name));
-                    factoryDir.mkdir();
-
-                    //生成 PDF
-                    procureUnit.fbaAsPDF(factoryDir.getPath());
-
-                }
-
-                File zip = new File(Constant.TMP + "/FBA.zip");
-                play.libs.Files.zip(dirfile, zip);
-
-                dirfile.delete();
-                zip.deleteOnExit();
-
-                renderBinary(zip);
+                //生成工厂的文件夹. 格式：预计交货日期-工厂名称
+                File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
+                factoryDir.mkdir();
+                //生成 PDF
+                procureUnit.fbaAsPDF(factoryDir);
             }
+
+            File zip = new File(Constant.TMP + "/FBA.zip");
+            play.libs.Files.zip(dirfile, zip);
+            dirfile.delete();
+            zip.deleteOnExit();
+            renderBinary(zip);
         }
 
     }

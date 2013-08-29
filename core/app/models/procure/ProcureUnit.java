@@ -24,10 +24,10 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
-import play.mvc.Scope;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -879,14 +879,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 指定文件路径，生成PDF
      *
-     * @param folderPath 指定PDF文件，生成的文件目录
+     * @param folder 指定PDF文件，生成的文件目录
      */
-    public void fbaAsPDF(String folderPath) {
-        Scope.RenderArgs templateBinding = Scope.RenderArgs.current();
-        templateBinding.put("shipmentId", this.fba.shipmentId);
-        templateBinding.put("fba", this.fba);
-        templateBinding.put("shipFrom", Account.address(this.fba.account.type));
-
+    public void fbaAsPDF(File folder) {
         // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
         String namePDF = String.format("[%s][%s][%s][%s]",
                 this.whouse.country,
@@ -895,11 +890,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 this.product.abbreviation
         );
 
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("shipmentId", this.fba.shipmentId);
+        map.put("shipFrom", Account.address(this.fba.account.type));
+        map.put("fba", this.fba);
+
         //生成箱内卖 PDF
-        PDF.fbaAsPDF(folderPath, String.format(namePDF + "%s", "内麦.pdf"),"FBAs/packingSlip.html" , templateBinding);
+        PDF.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", map);
 
         //生成箱外卖 PDF
-        PDF.fbaAsPDF(folderPath, String.format(namePDF + "%s", "外麦.pdf"),"FBAs/boxLabel.html", templateBinding);
+        PDF.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
 
     }
 }
