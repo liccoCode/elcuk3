@@ -201,11 +201,12 @@ public class ProcureUnits extends Controller {
                 Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
 
         //通知采购单 和采购计划创建人，运输人员
-        Set<User> userSet = new HashSet<User>();
-        userSet.add(managedUnit.handler);
+        Set<User> users = new HashSet<User>();
+        users.add(managedUnit.handler);
+        users.add(managedUnit.deliveryment.handler);
         for(Shipment shipment : managedUnit.relateShipment()) {
             if(shipment.creater != null)
-            userSet.add(shipment.creater);
+                users.add(shipment.creater);
         }
 
         Notification.notifiesToUsers(
@@ -214,7 +215,7 @@ public class ProcureUnits extends Controller {
                 String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
                         oldPlanQty, managedUnit.attrs.planQty,
                         Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
-                userSet.toArray(new User[userSet.size()])
+                users.toArray(new User[users.size()])
         );
 
         flash.success("成功修改采购计划!", id);
@@ -224,11 +225,12 @@ public class ProcureUnits extends Controller {
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
 
-        Set<User> userSet = new HashSet<User>();
-        userSet.add(unit.handler);
+        Set<User> users = new HashSet<User>();
+        users.add(unit.handler);
+        users.add(unit.deliveryment.handler);
         for(Shipment shipment : unit.relateShipment()) {
            if(shipment.creater != null)
-            userSet.add(shipment.creater);
+               users.add(shipment.creater);
         }
 
         unit.remove();
@@ -243,7 +245,7 @@ public class ProcureUnits extends Controller {
         //通知当前操作用户 和采购计划创建人，发送删除成功的通知
 
         String notifiMessage = String.format("采购计划 %s 删除", id);
-        Notification.notifiesToUsers(notifiMessage, notifiMessage, userSet.toArray(new User[userSet.size()]));
+        Notification.notifiesToUsers(notifiMessage, notifiMessage, users.toArray(new User[users.size()]));
 
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         index(null);

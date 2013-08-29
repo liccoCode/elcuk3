@@ -20,7 +20,6 @@ $ ->
   $("#notificationBtn").on("click", (e) ->
     e.preventDefault()
     $.ajax("/Notifications/latest", {type: 'POST', dataType: 'json'}).done((r) ->
-      newsCount()
       param = if r
         r
       else
@@ -31,7 +30,6 @@ $ ->
         $("#notifications").append(_.template($('#news-notifications-model-template').html(), {noty: element}))
       )
       $("#notifications").append("<li><a href='/Notifications/index' class='label' >See more</a></li>")
-      checkedOnEvent()
     )
 
   )
@@ -39,36 +37,34 @@ $ ->
   #将选中的通知状态更改成已读
   $("#updateState").on("click", (e) ->
     e.preventDefault()
-    LoadMask.mask()
     $checkbox = $('input:checkbox:checked[name="noteID"]')
     if $checkbox.serialize().length == 0
       noty({text: '未选中通知', type: 'error', timeout: 3000})
     else
-
-      $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data: $checkbox.serialize()})
-        .done((r)->
-          noty({text: r.message, type: 'success', timeout: 3000})
-          $checkbox.remove()
-          newsCount()
-          LoadMask.unmask()
-        )
-        .fail((r)->
-          noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
-          LoadMask.unmask()
-        )
-
+      updateState($checkbox.serialize(), ->
+         newsCount()
+         $('input:checkbox:checked[name="noteID"]').remove()
+      )
   )
 
-  checkedOnEvent = ->
-    $("#notifications .label-info").on("click",(e) ->
+  #右上角提示框，已阅按钮事件
+  $(document).on("click",".dropdown-menu .label-info",(e) ->
       $span = $(@)
-
-      $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:{noteID:$span.attr("data-id")}})
-        .done((r)->
-          noty({text: r.message, type: 'success', timeout: 3000})
-          $("#notificationBtn").trigger("click")
-        )
-        .fail((r)->
-          noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
-        )
+      updateState({noteID:$span.attr("data-id")}, ->
+         $("#notificationBtn").trigger("click")
+         newsCount()
+      )
     )
+
+  updateState = (datas,funtion)->
+    LoadMask.mask()
+    $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:datas})
+       .done((r)->
+          noty({text: r.message, type: 'success', timeout: 3000})
+          funtion()
+          LoadMask.unmask()
+       )
+       .fail((r)->
+         noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+         LoadMask.unmask()
+       )
