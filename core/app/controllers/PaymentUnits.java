@@ -9,7 +9,6 @@ import models.finance.PaymentUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
-import play.Logger;
 import play.data.validation.Validation;
 import play.jobs.Job;
 import play.mvc.Controller;
@@ -102,14 +101,8 @@ public class PaymentUnits extends Controller {
         List<ElcukRecord> records = await(new Job<List<ElcukRecord>>() {
             @Override
             public List<ElcukRecord> doJobWithResult() {
-                long begin = System.currentTimeMillis();
-                Logger.info("records begin...");
-                try {
-                    PaymentUnit feeUnit = PaymentUnit.findById(id);
-                    return feeUnit.updateRecords();
-                } finally {
-                    Logger.info("records end. %sms", System.currentTimeMillis() - begin);
-                }
+                PaymentUnit feeUnit = PaymentUnit.findById(id);
+                return feeUnit.updateRecords();
             }
         }.now());
         renderJSON(J.json(records));
