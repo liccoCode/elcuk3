@@ -26,7 +26,7 @@
 <div id='shipments'>
 #{list items:apply.shipments, as:'ship'}
   <div class="row-fluid" id="shipment_${ship.id}">
-    <div class="span4">
+    <div class="span3">
       <div class="row-fluid">
         <div class="span7">
           <dl class="dl-horizontal">
@@ -71,7 +71,7 @@
       </div>
     </div>
 
-    <div class="span8">
+    <div class="span9">
         #{render 'Shipments/_paymentunits.html', ship: ship, feeTypes: feeTypes/}
     </div>
   </div>
