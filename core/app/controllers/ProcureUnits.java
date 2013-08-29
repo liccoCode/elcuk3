@@ -18,6 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -79,7 +80,7 @@ public class ProcureUnits extends Controller {
 
             File zip = new File(Constant.TMP + "/FBA.zip");
             play.libs.Files.zip(dirfile, zip);
-            dirfile.delete();
+            Files.delete(dirfile);
             zip.deleteOnExit();
             renderBinary(zip);
         }
