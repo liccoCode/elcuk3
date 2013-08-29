@@ -11,7 +11,6 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
-import play.Logger;
 import play.data.validation.Error;
 import play.jobs.Job;
 import play.libs.F;
@@ -78,21 +77,14 @@ public class Sellings extends Controller {
         List<Error> errors = await(new Job<List<play.data.validation.Error>>() {
             @Override
             public List<Error> doJobWithResult() {
-                long begin = System.currentTimeMillis();
-                Logger.info("imageUpload begin...");
+                List<Error> errors = new ArrayList<Error>();
+                Selling s = Selling.findById(sid);
                 try {
-
-                    List<Error> errors = new ArrayList<Error>();
-                    Selling s = Selling.findById(sid);
-                    try {
-                        s.uploadAmazonImg(imgs, false);
-                    } catch(Exception e) {
-                        errors.add(new Error("", Webs.E(e), new String[]{}));
-                    }
-                    return errors;
-                } finally {
-                    Logger.info("imageUpload end. %sms", System.currentTimeMillis() - begin);
+                    s.uploadAmazonImg(imgs, false);
+                } catch(Exception e) {
+                    errors.add(new Error("", Webs.E(e), new String[]{}));
                 }
+                return errors;
             }
         }.now());
         if(errors.size() > 0) {
@@ -126,15 +118,9 @@ public class Sellings extends Controller {
         await(new Job<Selling>() {
             @Override
             public Selling doJobWithResult() {
-                long begin = System.currentTimeMillis();
-                Logger.info("syncAmazon begin...");
-                try {
-                    Selling selling = Selling.findById(sid);
-                    selling.syncFromAmazon();
-                    return selling;
-                } finally {
-                    Logger.info("syncAmazon end. %sms", System.currentTimeMillis() - begin);
-                }
+                Selling selling = Selling.findById(sid);
+                selling.syncFromAmazon();
+                return selling;
             }
 
         }.now());
@@ -150,23 +136,17 @@ public class Sellings extends Controller {
         File file = await(new Job<File>() {
             @Override
             public File doJobWithResult() {
-                long begin = System.currentTimeMillis();
-                Logger.info("sellingLabel begin...");
+                Selling selling = Selling.findById(id);
+                byte[] bytes = selling.downloadFnSkuLabel();
+                String fileName = String.format("%s.pdf", id);
+                File file = new File(Constant.LABEL_PATH, fileName);
+                file.delete(); // 删除原来的, 再写新的
                 try {
-                    Selling selling = Selling.findById(id);
-                    byte[] bytes = selling.downloadFnSkuLabel();
-                    String fileName = String.format("%s.pdf", id);
-                    File file = new File(Constant.LABEL_PATH, fileName);
-                    file.delete(); // 删除原来的, 再写新的
-                    try {
-                        FileUtils.writeByteArrayToFile(file, bytes);
-                    } catch(IOException e) {
-                        // ignore
-                    }
-                    return file;
-                } finally {
-                    Logger.info("sellingLabel end. %sms", System.currentTimeMillis() - begin);
+                    FileUtils.writeByteArrayToFile(file, bytes);
+                } catch(IOException e) {
+                    // ignore
                 }
+                return file;
             }
         }.now());
         renderBinary(file, id + ".pdf");

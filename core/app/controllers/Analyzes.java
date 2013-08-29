@@ -82,13 +82,7 @@ public class Analyzes extends Controller {
             HighChart chart = await(new Job<HighChart>() {
                 @Override
                 public HighChart doJobWithResult() throws Exception {
-                    long begin = System.currentTimeMillis();
-                    Logger.info("ajaxUnit begin...");
-                    try {
-                        return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
-                    } finally {
-                        Logger.info("ajaxUnit end. %sms", System.currentTimeMillis() - begin);
-                    }
+                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
                 }
             }.now());
             renderJSON(J.json(chart));
@@ -106,14 +100,8 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    long begin = System.currentTimeMillis();
-                    Logger.info("ajaxSellingRecord begin...");
-                    try {
-                        return J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
-                                Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
-                    } finally {
-                        Logger.info("ajaxSellingRecord end. %sms", System.currentTimeMillis() - begin);
-                    }
+                    return J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
+                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
                 }
             }.now());
             renderJSON(json);
@@ -131,14 +119,8 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    long begin = System.currentTimeMillis();
-                    Logger.info("ajaxSellingTurn begin...");
-                    try {
-                        return J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
-                                Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
-                    } finally {
-                        Logger.info("ajaxSellingTurn end. %sms", System.currentTimeMillis() - begin);
-                    }
+                    return J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
+                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
                 }
             }.now());
             renderJSON(json);
