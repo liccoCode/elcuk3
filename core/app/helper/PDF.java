@@ -30,7 +30,7 @@ public class PDF {
     public static void templateAsPDF(File folder, String PDFName, String template, Map<String, Object> args) {
         OutputStream out = null;
         try {
-            out = new FileOutputStream(new File(folder, PDFName));
+            out = new FileOutputStream(folder.getPath()+"/"+PDFName);
         } catch(FileNotFoundException e) {
             e.printStackTrace();
         }
