@@ -87,6 +87,7 @@ public class NotificationPost extends Post<Notification> {
             params.add(this.word());
         }
 
+        sbd.append(" ORDER BY createAt DESC");
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 

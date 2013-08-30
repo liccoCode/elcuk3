@@ -48,7 +48,7 @@ $ ->
   )
 
   #右上角提示框，已阅按钮事件
-  $(document).on("click",".dropdown-menu .label-info",(e) ->
+  $(document).on("click",".dropdown-menu a[data-id]",(e) ->
       $span = $(@)
       updateState({noteID:$span.attr("data-id")}, ->
          $("#notificationBtn").trigger("click")
@@ -60,7 +60,11 @@ $ ->
     LoadMask.mask()
     $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:datas})
        .done((r)->
-          noty({text: r.message, type: 'success', timeout: 3000})
+          type = if r.flag
+                     'success'
+                 else
+                     'error'
+          noty({text: r.message, type:type , timeout: 3000})
           funtion()
           LoadMask.unmask()
        )

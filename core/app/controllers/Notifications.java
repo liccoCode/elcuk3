@@ -41,7 +41,6 @@ public class Notifications extends Controller {
     }
 
 
-
     /**
      * 当前用户的通知信息列表
      */

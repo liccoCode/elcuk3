@@ -152,7 +152,7 @@
           </li>
           <li>
             <a href="#" class="dropdown-toggle" id="notificationBtn" data-toggle="dropdown">
-            Notify(<b id="notifyNumber"></b>) <b class="caret"></b></a>
+              Notify(<b id="notifyNumber"></b>) <b class="caret"></b></a>
             <ul class="dropdown-menu" id="notifications">
               <li>Loading....</li>
             </ul>
@@ -164,9 +164,9 @@
 </div>
 
 <script type="text/template" id='news-notifications-model-template'>
-      <li >
-           <a href="#" rel="popover" content="<%= noty.content%>" placement="left">
-               <%= noty.title%>  <span  class="label label-info" data-id="<%= noty.id%>">已查阅</span>
-           </a>
-     </li>
+  <li>
+    <a href="#" data-id="<%= noty.id%>" rel="popover" content="<%= noty.content%>" placement="left">
+      <%= noty.title%> <span class="label label-info">点击查阅</span>
+    </a>
+  </li>
 </script>
