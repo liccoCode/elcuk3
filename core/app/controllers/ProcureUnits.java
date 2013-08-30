@@ -78,7 +78,10 @@ public class ProcureUnits extends Controller {
                     //生成 PDF
                     procureUnit.fbaAsPDF(factoryDir);
                 }
-            } finally {
+            }catch(Exception e){
+               renderText(e.getMessage());
+           }
+            finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");
                 play.libs.Files.zip(dirfile, zip);
                 Files.delete(dirfile);

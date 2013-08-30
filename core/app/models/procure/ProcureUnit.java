@@ -28,6 +28,7 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -881,7 +882,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param folder 指定PDF文件，生成的文件目录
      */
-    public void fbaAsPDF(File folder) {
+    public void fbaAsPDF(File folder) throws FileNotFoundException {
 
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
@@ -902,8 +903,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
             //生成箱外卖 PDF
             PDF.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
-        }else{
-            PDF.templateAsPDF(folder, "IdNumber-"+this.id+"-SKU-"+this.sku + "—缺少FBA无法创建.pdf", "FBAs/packingSlip.html",
+        } else {
+            PDF.templateAsPDF(folder, "IdNumber-" + this.id + "-SKU-" + this.sku + "—缺少FBA无法创建.pdf",
+                    "FBAs/packingSlip.html",
                     null);
         }
     }

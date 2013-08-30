@@ -27,13 +27,9 @@ public class PDF {
      * @param template PDF模板页面  如 ：FBAs/boxLabel.html
      * @param args     模板中的数据
      */
-    public static void templateAsPDF(File folder, String PDFName, String template, Map<String, Object> args) {
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(folder.getPath()+"/"+PDFName);
-        } catch(FileNotFoundException e) {
-            e.printStackTrace();
-        }
+    public static void templateAsPDF(File folder, String PDFName, String template, Map<String,
+            Object> args) throws FileNotFoundException {
+        OutputStream out = new FileOutputStream(folder.getPath() + "/" + PDFName);
 
         PDFDocument singleDoc = new PDFDocument();
         singleDoc.template = template;
