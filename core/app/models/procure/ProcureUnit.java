@@ -3,7 +3,7 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
-import helper.PDF;
+import helper.PDFs;
 import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
@@ -17,6 +17,7 @@ import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
 import mws.FBA;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -28,7 +29,6 @@ import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -878,11 +878,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     * 指定文件路径，生成PDF
+     *指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
      *
      * @param folder 指定PDF文件，生成的文件目录
      */
-    public void fbaAsPDF(File folder) throws FileNotFoundException {
+    public void fbaAsPDF(File folder) throws Exception {
 
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
@@ -899,14 +899,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             map.put("fba", this.fba);
 
             //生成箱内卖 PDF
-            PDF.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", map);
+            PDFs.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", map);
 
             //生成箱外卖 PDF
-            PDF.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
+            PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
         } else {
-            PDF.templateAsPDF(folder, "IdNumber-" + this.id + "-SKU-" + this.sku + "—缺少FBA无法创建.pdf",
-                    "FBAs/packingSlip.html",
-                    null);
+            String message = "#"+this.id+"  "+this.sku+" 还没创建 FBA";
+            FileUtils.writeStringToFile(new File(folder,message+".text"),message,"UTF-8");
         }
     }
 }

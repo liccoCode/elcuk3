@@ -1,6 +1,7 @@
 package helper;
 
 
+import play.modules.pdf.PDF;
 import play.modules.pdf.PDF.PDFDocument;
 import play.modules.pdf.RenderPDFTemplate;
 import play.mvc.Http;
@@ -17,24 +18,24 @@ import java.util.Map;
  * Date: 13-8-28
  * Time: 下午10:51
  */
-public class PDF {
+public class PDFs {
 
     /**
-     * 指定文件路径，生成PDF
+     * 指定文件夹，生成PDF
      *
      * @param folder   指定PDF文件，生成的文件目录
-     * @param PDFName  PDF名称
+     * @param pdfame  PDF名称
      * @param template PDF模板页面  如 ：FBAs/boxLabel.html
      * @param args     模板中的数据
      */
-    public static void templateAsPDF(File folder, String PDFName, String template, Map<String,
+    public static void templateAsPDF(File folder, String  pdfame, String template, Map<String,
             Object> args) throws FileNotFoundException {
-        OutputStream out = new FileOutputStream(folder.getPath() + "/" + PDFName);
+        OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfame);
 
         PDFDocument singleDoc = new PDFDocument();
         singleDoc.template = template;
 
-        RenderPDFTemplate renderer = new RenderPDFTemplate(new play.modules.pdf.PDF.MultiPDFDocuments().add(singleDoc),
+        RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc),
                 args);
         renderer.writePDF(out, Http.Request.current(), Http.Response.current());
     }

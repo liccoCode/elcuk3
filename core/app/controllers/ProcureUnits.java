@@ -59,15 +59,13 @@ public class ProcureUnits extends Controller {
     /**
      * 将搜索结果 打成ZIP包，进行下载
      */
-    public static synchronized void downloadFBAZIP(ProcurePost p) {
+    public static synchronized void downloadFBAZIP(ProcurePost p) throws Exception {
         List<ProcureUnit> procureUnitsList = p.query();
-
         if(procureUnitsList != null && procureUnitsList.size() != 0) {
             //创建FBA根目录，存放工厂FBA文件
-            File dirfile = dirfile = new File(Constant.TMP, "FBA");
-           try {
+            File dirfile = new File(Constant.TMP, "FBA");
+            try {
                 dirfile.mkdir();
-
                 for(ProcureUnit procureUnit : procureUnitsList) {
                     String name = procureUnit.cooperator.name;
                     String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
@@ -78,23 +76,18 @@ public class ProcureUnits extends Controller {
                     //生成 PDF
                     procureUnit.fbaAsPDF(factoryDir);
                 }
-            }catch(Exception e){
-               renderText(e.getMessage());
-           }
-            finally {
+            } catch(Exception e) {
+                throw e;
+            } finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");
-                play.libs.Files.zip(dirfile, zip);
+                Files.zip(dirfile, zip);
                 Files.delete(dirfile);
                 zip.deleteOnExit();
                 renderBinary(zip);
             }
-
-
         } else {
-
             renderText("没有数据无法生成zip文件！");
         }
-
     }
 
     /**
