@@ -65,24 +65,31 @@ public class ProcureUnits extends Controller {
         if(procureUnitsList != null && procureUnitsList.size() != 0) {
             //创建FBA根目录，存放工厂FBA文件
             File dirfile = dirfile = new File(Constant.TMP, "FBA");
-            dirfile.mkdir();
+           try {
+                dirfile.mkdir();
 
-            for(ProcureUnit procureUnit : procureUnitsList) {
-                String name = procureUnit.cooperator.name;
-                String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
+                for(ProcureUnit procureUnit : procureUnitsList) {
+                    String name = procureUnit.cooperator.name;
+                    String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
 
-                //生成工厂的文件夹. 格式：预计交货日期-工厂名称
-                File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
-                factoryDir.mkdir();
-                //生成 PDF
-                procureUnit.fbaAsPDF(factoryDir);
+                    //生成工厂的文件夹. 格式：预计交货日期-工厂名称
+                    File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
+                    factoryDir.mkdir();
+                    //生成 PDF
+                    procureUnit.fbaAsPDF(factoryDir);
+                }
+            } finally {
+                File zip = new File(Constant.TMP + "/FBA.zip");
+                play.libs.Files.zip(dirfile, zip);
+                Files.delete(dirfile);
+                zip.deleteOnExit();
+                renderBinary(zip);
             }
 
-            File zip = new File(Constant.TMP + "/FBA.zip");
-            play.libs.Files.zip(dirfile, zip);
-            Files.delete(dirfile);
-            zip.deleteOnExit();
-            renderBinary(zip);
+
+        } else {
+
+            renderText("没有数据无法生成zip文件！");
         }
 
     }

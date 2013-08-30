@@ -882,24 +882,29 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @param folder 指定PDF文件，生成的文件目录
      */
     public void fbaAsPDF(File folder) {
-        // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
-        String namePDF = String.format("[%s][%s][%s][%s]",
-                this.whouse.country,
-                this.shipType.label(),
-                this.attrs.planQty,
-                this.product.abbreviation
-        );
 
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("shipmentId", this.fba.shipmentId);
-        map.put("shipFrom", Account.address(this.fba.account.type));
-        map.put("fba", this.fba);
+        if(fba != null) {
+            // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
+            String namePDF = String.format("[%s][%s][%s][%s]",
+                    this.whouse.country,
+                    this.shipType.label(),
+                    this.attrs.planQty,
+                    this.product.abbreviation
+            );
 
-        //生成箱内卖 PDF
-        PDF.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", map);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("shipmentId", this.fba.shipmentId);
+            map.put("shipFrom", Account.address(this.fba.account.type));
+            map.put("fba", this.fba);
 
-        //生成箱外卖 PDF
-        PDF.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
+            //生成箱内卖 PDF
+            PDF.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", map);
 
+            //生成箱外卖 PDF
+            PDF.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
+        }else{
+            PDF.templateAsPDF(folder, "IdNumber-"+this.id+"-SKU-"+this.sku + "—缺少FBA无法创建.pdf", "FBAs/packingSlip.html",
+                    null);
+        }
     }
 }
