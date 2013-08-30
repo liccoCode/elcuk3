@@ -370,7 +370,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
         this.attrs = attrs;
 
-
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
                 .fid(this.id)
