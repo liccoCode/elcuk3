@@ -4,7 +4,7 @@
     #{script 'highstock.js'/}
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
-    #{script 'analyzes/analyzes.coffee'/}
+    #{script 'analyzes/analyzesNew.coffee'/}
 #{/set}
 
 <div class="tabbable tabs-left">
@@ -76,8 +76,8 @@
           Next Refrech At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
         </a>
 
-        <input type="hidden" name="p.page" value="1">
-        <input type="hidden" name="p.type" value="sid">
+        <input type="hidden" id="post_page" name="p.page" value="1">
+        <input type="hidden" id="post_type" name="p.type" value="sid">
 
         <input type="hidden" name="p.orderBy" value="day7">
         <input type="hidden" name="p.val" value="all">
