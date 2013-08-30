@@ -55,8 +55,8 @@ $ ->
          newsCount()
       )
     )
-
-  updateState = (datas,funtion)->
+  #更改 通知信息的状态为 已读
+  updateState = (datas,func)->
     LoadMask.mask()
     $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:datas})
        .done((r)->
@@ -65,7 +65,7 @@ $ ->
                  else
                      'error'
           noty({text: r.message, type:type , timeout: 3000})
-          funtion()
+          func.call(this)
           LoadMask.unmask()
        )
        .fail((r)->

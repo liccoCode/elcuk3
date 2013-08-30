@@ -27,11 +27,9 @@
 
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.NotificationPost.DateType.values(), value:p.dateType /}
-
         #{select_enum name:'p.state', items:models.Notification.S.values(), value:p.state}
-          <option value="">状态</option>
+           <option value="">状态</option>
         #{/select_enum}
-
     </div>
 
     <div class="input-prepend input-append inline">

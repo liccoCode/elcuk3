@@ -189,17 +189,13 @@ public class ProcureUnits extends Controller {
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-
-
         managedUnit.update(unit, shipmentId);
         if(Validation.hasErrors()) {
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
-
         new ElcukRecord(Messages.get("procureunit.update"),
                 Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
-
         //通知采购单 和采购计划创建人，运输人员
         Set<User> users = new HashSet<User>();
         users.add(managedUnit.handler);
@@ -208,7 +204,6 @@ public class ProcureUnits extends Controller {
             if(shipment.creater != null)
                 users.add(shipment.creater);
         }
-
         Notification.notifiesToUsers(
                 String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
 
@@ -224,26 +219,21 @@ public class ProcureUnits extends Controller {
 
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
-
         Set<User> users = new HashSet<User>();
         users.add(unit.handler);
         users.add(unit.deliveryment.handler);
         for(Shipment shipment : unit.relateShipment()) {
-           if(shipment.creater != null)
-               users.add(shipment.creater);
+            if(shipment.creater != null)
+                users.add(shipment.creater);
         }
-
         unit.remove();
-
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcurePost p = new ProcurePost();
             p.search = "id:" + id;
             index(p);
         }
-
         //通知当前操作用户 和采购计划创建人，发送删除成功的通知
-
         String notifiMessage = String.format("采购计划 %s 删除", id);
         Notification.notifiesToUsers(notifiMessage, notifiMessage, users.toArray(new User[users.size()]));
 

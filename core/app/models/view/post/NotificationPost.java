@@ -63,7 +63,6 @@ public class NotificationPost extends Post<Notification> {
 
         StringBuilder sbd = new StringBuilder(" 1=1 AND user=?");
         List<Object> params = new ArrayList<Object>();
-
         params.add(Login.current());
 
         if(this.dateType != null) {
@@ -82,7 +81,6 @@ public class NotificationPost extends Post<Notification> {
         }
 
         if(StringUtils.isNotBlank(this.search)) {
-
             sbd.append(" AND title like ?");
             params.add(this.word());
         }

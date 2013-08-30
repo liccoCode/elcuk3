@@ -186,10 +186,10 @@ public class Notification extends GenericModel {
         this.save();
     }
 
-    public static void changState(List<Long> id) {
-        for(Long tempNoteID : id) {
-            Notification temp = Notification.findById(tempNoteID);
-            temp.changState(Notification.S.CHECKED);
+    public static void changState(List<Long> ids) {
+        for(Long id : ids) {
+            Notification notification = Notification.findById(id);
+            notification.changState(Notification.S.CHECKED);
         }
     }
 }
