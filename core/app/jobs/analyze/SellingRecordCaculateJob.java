@@ -18,6 +18,7 @@ import play.jobs.On;
 import play.libs.F;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 周期:
@@ -136,18 +137,37 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * Selling 的 Amazon 消耗的费用;
+     * <p/>
+     * 因为 Amazon 收费的不及时, 所以对于离当天 10 天内的数据, 使用最近 10~40 天之间的平均数进行计算.
      *
      * @param date
      * @return
      */
     public Map<String, Float> sellingAmazonFee(Date date) {
-        List<FeeType> fees = FeeType.amazon().children;
-        List<String> feesTypeName = new ArrayList<String>();
-        for(FeeType fee : fees) {
-            if("shipping".equals(fee.name)) continue;
-            feesTypeName.add(fee.name);
+        if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
+            DateTime now = DateTime.now();
+            SqlSelect sql = new SqlSelect()
+                    .select("selling_sellingId as sellingId", "(sum(sales - income) / count(sales)) as amzFee")
+                    .from("SellingRecord")
+                    .where("date>=?").param(Dates.morning(now.minusDays(40).toDate()))
+                    .where("date<=?").param(Dates.night(now.minusDays(10).toDate()))
+                    .groupBy("selling_sellingId");
+            List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+
+            Map<String, Float> sellingAmzFeeMap = new HashMap<String, Float>();
+            for(Map<String, Object> row : rows) {
+                sellingAmzFeeMap.put(row.get("sellingId").toString(), NumberUtils.toFloat(row.get("amzFee").toString()));
+            }
+            return sellingAmzFeeMap;
+        } else {
+            List<FeeType> fees = FeeType.amazon().children;
+            List<String> feesTypeName = new ArrayList<String>();
+            for(FeeType fee : fees) {
+                if("shipping".equals(fee.name)) continue;
+                feesTypeName.add(fee.name);
+            }
+            return sellingFeeTypesCost(date, feesTypeName);
         }
-        return sellingFeeTypesCost(date, feesTypeName);
     }
 
     /**

@@ -86,6 +86,7 @@ $ ->
     false
   ).on('click', '.btn:contains(搜索)', (e) ->
     ajaxFreshAcitveTableTab()
+    $("[name='p.search']").focus()
     false
   ).on('click', '.reload', (e) ->
     ajaxFreshLines()
