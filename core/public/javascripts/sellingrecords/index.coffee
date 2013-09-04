@@ -60,9 +60,9 @@ $ ->
       when '成本图'
         ['运输成本', '采购成本']
       when '利润率图'
-        ['成本利润率', '销售利润率']
+        ['成本利润率', '销售利润率', 'Amazon 收费比率']
       else
-        ['销售额', '利润', '实际收入', 'Amazon 收费']
+        ['销售额', '利润', '实际收入', 'Amazon 收费', 'FBA 收费', '销量']
     _.each($("##{chartType}").highcharts().series, (v) ->
       if v.name in hideSeries
         v.show()
@@ -86,6 +86,7 @@ $ ->
     false
   ).on('click', '.btn:contains(搜索)', (e) ->
     ajaxFreshAcitveTableTab()
+    $("[name='p.search']").focus()
     false
   ).on('click', '.reload', (e) ->
     ajaxFreshLines()
