@@ -4,6 +4,7 @@ import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.FeeType;
+import models.market.M;
 import models.market.Selling;
 import models.market.SellingRecord;
 import models.procure.Shipment;
@@ -63,16 +64,15 @@ public class SellingRecordCaculateJob extends Job {
                 String sid = selling.sellingId;
                 SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 // amz 扣费
-                record.amzFee = sellingAmzFee.get(sid) == null ? 0 : sellingAmzFee.get(sid);
+                record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
                 // amzFba 扣费
-                record.fbaFee = sellingFBAFee.get(sid) == null ? 0 : sellingFBAFee.get(sid);
+                record.fbaFee = sellingFBAFee.get(sid) == null ? 0 : Math.abs(sellingFBAFee.get(sid));
                 // 销量
                 record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
                 // 销售额
                 record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
                 // 实际收入 = 销量 - amazon 扣费
-                record.income = record.sales - Math.abs(record.amzFee);
-
+                record.income = record.sales - record.amzFee;
 
                 F.T2<Float, Integer> procureCostAndQty = sellingProcreCost(selling, dateTime.toDate());
                 // 采购成本
@@ -108,11 +108,22 @@ public class SellingRecordCaculateJob extends Job {
      * Selling 的销量数据
      */
     public Map<String, Integer> sellingUnits(Date date) {
+        Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
+        for(M m : M.values()) {
+            if(m.isEbay()) continue;
+            sellingUnits.putAll(sellingUnits(date, m));
+        }
+        return sellingUnits;
+    }
+
+    public Map<String, Integer> sellingUnits(Date date, M market) {
+        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
         SqlSelect sql = new SqlSelect()
                 .select("selling_sellingId as sellingId", "sum(quantity) as qty")
                 .from("OrderItem")
-                .where("createDate>=?").param(Dates.morning(date))
-                .where("createDate<=?").param(Dates.night(date))
+                .where("market=?").param(market.name())
+                .where("createDate>=?").param(actualDatePair._1.toDate())
+                .where("createDate<=?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
@@ -220,18 +231,29 @@ public class SellingRecordCaculateJob extends Job {
     }
 
     /**
-     * 查询某天销售中, 每个 Selling 所涉及的 OrderId 是哪些
+     * 查询某天销售中, 每个 Selling 所涉及的 OrderId 是哪些;
+     * 不同的市场需要拥有不同的时间段
      */
     public Map<String, List<String>> oneDaySellingOrderIds(Date date) {
+        Map<String, List<String>> sellingOrders = new HashMap<String, List<String>>();
+        for(M m : M.values()) {
+            if(m.isEbay()) continue;
+            sellingOrders.putAll(oneDaySellingOrderIds(date, m));
+        }
+        return sellingOrders;
+    }
+
+    public Map<String, List<String>> oneDaySellingOrderIds(Date date, M market) {
         // 设置 group_concat_max_len 最大为 20M
+        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
         DBUtils.execute("set group_concat_max_len=20971520");
         SqlSelect sellingOdsSql = new SqlSelect()
                 .select("selling_sellingId as sellingId", "group_concat(order_orderId) as orderIds")
                 .from("OrderItem")
-                .where("createDate>=?").param(Dates.morning(date))
-                .where("createDate<=?").param(Dates.night(date))
+                .where("market=?").param(market.name())
+                .where("createDate>=?").param(actualDatePair._1.toDate())
+                .where("createDate<=?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
-
         Map<String, List<String>> sellingOrders = new HashMap<String, List<String>>();
         List<Map<String, Object>> rows = DBUtils.rows(sellingOdsSql.toString(), sellingOdsSql.getParams().toArray());
         for(Map<String, Object> row : rows) {

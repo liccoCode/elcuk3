@@ -161,7 +161,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("销量").add(date, NumberUtils.toFloat(row.get("units").toString()));
+                highChart.series("销量").yAxis(1).add(date, NumberUtils.toFloat(row.get("units").toString()));
             }
         });
     }
