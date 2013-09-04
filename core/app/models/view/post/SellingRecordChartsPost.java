@@ -54,9 +54,9 @@ public class SellingRecordChartsPost extends Post<HighChart> {
     public F.T2<String, List<Object>> params() {
         SqlSelect sql = new SqlSelect();
         sql.select("sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.income) income",
-                "sum(sr.profit) profit", "sum(sr.procureCost) procureCost",
-                "sum(sr.procureNumberSum) procureNumberSum", "sum(sr.shipCost) shipCost",
-                "sum(sr.shipNumberSum) shipNumberSum");
+                "sum(sr.profit) profit", "sum(sr.amzFee) amzFee", "sum(sr.fbaFee) fbaFee",
+                "sum(sr.procureNumberSum) procureNumberSum", "sum(sr.procureCost) procureCost",
+                "sum(sr.shipNumberSum) shipNumberSum", "sum(sr.shipCost) shipCost");
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }
@@ -130,6 +130,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         this.procureCostSeries(chart, rows);
         this.amzFeeSeries(chart, rows);
         this.amzFeeRatioSeries(chart, rows);
+        this.amzFbaFeeSeries(chart, rows);
         return Arrays.asList(chart);
     }
 
@@ -254,9 +255,8 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float sales = NumberUtils.toFloat(row.get("sales").toString());
-                float income = NumberUtils.toFloat(row.get("income").toString());
-                highChart.series("Amazon 收费").add(date, sales - income);
+                float amzFee = NumberUtils.toFloat(row.get("amzFee").toString());
+                highChart.series("Amazon 收费").add(date, amzFee);
             }
         });
     }
@@ -269,9 +269,21 @@ public class SellingRecordChartsPost extends Post<HighChart> {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
                 float sales = NumberUtils.toFloat(row.get("sales").toString());
-                float income = NumberUtils.toFloat(row.get("income").toString());
-                float amzFee = sales - income;
+                float amzFee = NumberUtils.toFloat(row.get("amzFee").toString());
                 highChart.series("Amazon 收费比率").yAxis(1).add(date, sales == 0 ? 0 : (amzFee / sales));
+            }
+        });
+    }
+
+    /**
+     * Amazon FBA 收费曲线
+     */
+    private HighChart amzFbaFeeSeries(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                float fbaFee = NumberUtils.toFloat(row.get("fbaFee").toString());
+                highChart.series("FBA 收费").yAxis(1).add(date, fbaFee);
             }
         });
     }
