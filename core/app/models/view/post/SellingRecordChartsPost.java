@@ -128,7 +128,8 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         this.incomeSeries(chart, rows);
         this.shipCostSeries(chart, rows);
         this.procureCostSeries(chart, rows);
-        this.amazonFeeSeries(chart, rows);
+        this.amzFeeSeries(chart, rows);
+        this.amzFeeRatioSeries(chart, rows);
         return Arrays.asList(chart);
     }
 
@@ -164,6 +165,9 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         });
     }
 
+    /**
+     * 利润曲线
+     */
     private HighChart profitSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
             @Override
@@ -176,8 +180,6 @@ public class SellingRecordChartsPost extends Post<HighChart> {
     /**
      * 成本利润率, (SellingRecordCaculateJob 中也有对应的计算)
      * 成本利润率 = 利润 / (采购成本 + 运输成本)
-     *
-     * @return
      */
     private HighChart costProfitRatioSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
@@ -196,8 +198,6 @@ public class SellingRecordChartsPost extends Post<HighChart> {
     /**
      * 销售利润率, (SellingRecordCaculateJob 中也有对应的计算)
      * 销售利润率 = 利润 / 销售额
-     *
-     * @return
      */
     private HighChart saleProfitRatioSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
@@ -210,6 +210,9 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         });
     }
 
+    /**
+     * 收入曲线
+     */
     private HighChart incomeSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
             @Override
@@ -219,6 +222,9 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         });
     }
 
+    /**
+     * 采购成本曲线
+     */
     private HighChart procureCostSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
             @Override
@@ -229,6 +235,9 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         });
     }
 
+    /**
+     * 运输成本曲线
+     */
     private HighChart shipCostSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
             @Override
@@ -238,13 +247,31 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         });
     }
 
-    private HighChart amazonFeeSeries(HighChart highChart, List<Map<String, Object>> rows) {
+    /**
+     * Amazon 收费曲线
+     */
+    private HighChart amzFeeSeries(HighChart highChart, List<Map<String, Object>> rows) {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
                 float sales = NumberUtils.toFloat(row.get("sales").toString());
                 float income = NumberUtils.toFloat(row.get("income").toString());
                 highChart.series("Amazon 收费").add(date, sales - income);
+            }
+        });
+    }
+
+    /**
+     * Amazon 收费比率
+     */
+    private HighChart amzFeeRatioSeries(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                float sales = NumberUtils.toFloat(row.get("sales").toString());
+                float income = NumberUtils.toFloat(row.get("income").toString());
+                float amzFee = sales - income;
+                highChart.series("Amazon 收费比率").yAxis(1).add(date, sales == 0 ? 0 : (amzFee / sales));
             }
         });
     }
