@@ -367,7 +367,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs = attrs;
 
 
-
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
                 .fid(this.id)
@@ -872,5 +871,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return false;
             } else return true;
         }
+    }
+
+    /**
+     * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
+     */
+    public User[] editToUsers() {
+        Set<User> users = new HashSet<User>();
+        users.add(this.handler);
+        if(this.deliveryment != null)
+            users.add(this.deliveryment.handler);
+        for(Shipment shipment : this.relateShipment()) {
+            if(shipment.creater != null)
+                users.add(shipment.creater);
+        }
+        return users.toArray(new User[users.size()]);
     }
 }

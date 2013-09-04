@@ -65,7 +65,7 @@ $ ->
                  else
                      'error'
           noty({text: r.message, type:type , timeout: 3000})
-          func.call(this)
+          func()
           LoadMask.unmask()
        )
        .fail((r)->
