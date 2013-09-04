@@ -34,6 +34,8 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     public String market;
 
+    public String categoryId;
+
     /**
      * Selling, SKU, Category 三个种类
      */
@@ -80,6 +82,9 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         if(StringUtils.isNotBlank(this.market)) {
             CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
         }
+        if(StringUtils.isNotBlank(this.categoryId))
+                    CollectionUtils.filter(records, new SearchPredicate("^" + this.categoryId));
+
         if(this.filterDot2)
             CollectionUtils.filter(records, new UnContainsPredicate(","));
         if(StringUtils.isNotBlank(this.search))
