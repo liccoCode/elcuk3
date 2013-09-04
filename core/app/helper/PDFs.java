@@ -24,13 +24,13 @@ public class PDFs {
      * 指定文件夹，生成PDF
      *
      * @param folder   指定PDF文件，生成的文件目录
-     * @param pdfame  PDF名称
+     * @param pdfName  PDF名称
      * @param template PDF模板页面  如 ：FBAs/boxLabel.html
      * @param args     模板中的数据
      */
-    public static void templateAsPDF(File folder, String  pdfame, String template, Map<String,
+    public static void templateAsPDF(File folder, String  pdfName, String template, Map<String,
             Object> args) throws FileNotFoundException {
-        OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfame);
+        OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfName);
 
         PDFDocument singleDoc = new PDFDocument();
         singleDoc.template = template;
