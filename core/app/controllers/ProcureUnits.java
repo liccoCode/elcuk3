@@ -198,7 +198,6 @@ public class ProcureUnits extends Controller {
         User[] users = managedUnit.editToUsers();
         Notification.notifiesToUsers(
                 String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
-
                 String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
                         oldPlanQty, managedUnit.attrs.planQty,
                         Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
