@@ -46,13 +46,29 @@ $ ->
             enabled: false
           yAxis: [{},{labels: {format: '{value}'}, opposite: true}]
           series: r['series']
-        })
+        }).parent().find('.btn-mini:eq(0)').click()
         LoadMask.unmask()
       )
       .fail((xhr, text, error) ->
         noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
         LoadMask.unmask()
       )
+  ).on('click', '.btn-toolbar > .btn-mini', (e) ->
+    $btn = $(@)
+    chartType = $btn.parent().prev().attr('id')
+    hideSeries = switch $btn.text()
+      when '成本图'
+        ['运输成本', '采购成本']
+      when '利润率图'
+        ['成本利润率', '销售利润率']
+      else
+        ['销售额', '利润', '实际收入', 'Amazon 收费']
+    _.each($("##{chartType}").highcharts().series, (v) ->
+      if v.name in hideSeries
+        v.show()
+      else
+        v.hide()
+    )
   )
 
 
