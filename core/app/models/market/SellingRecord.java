@@ -107,6 +107,16 @@ public class SellingRecord extends GenericModel {
     public float income = 0;
 
     /**
+     * Amazon 所有收取的费用
+     */
+    public float amzFee = 0;
+
+    /**
+     * Amazon FBA 收取的费用
+     */
+    public float fbaFee = 0;
+
+    /**
      * (单个产品)采购成本
      */
     public float procureCost = 0;

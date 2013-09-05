@@ -116,6 +116,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Required
     public String declareName;
 
+    /**
+      * 产品简称
+      */
+    @Required
+    public String abbreviation;
+
     public Product() {
     }
 
@@ -169,6 +175,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "申报价值必须填写");
         if(this.declareName == null)
             Validation.addError("", "产品品名必须填写");
+        if(this.abbreviation == null)
+            Validation.addError("", "产品简称必须填写");
+
 
         if(Validation.hasErrors()) return;
 

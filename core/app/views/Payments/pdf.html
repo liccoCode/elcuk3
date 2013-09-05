@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>${payment.paymentNumber} 付款单</title>
+#{stylesheet 'bootstrap.min.css'/}
+  <style type="text/css">
+    body{
+      font-family:STXihei, serif;
+    }
+  </style>
+</head>
+<body>
+#{if payment.pApply}
+
+
+<h3>${payment.cooperator.fullName} - ${payment.paymentNumber} 付款单</h3>
+<h3>${payment.state.label()}</h3>
+<table class="table table-condensed table-bordered">
+  <tr>
+    <td class="span1">采购订单号</td>
+    <td>采购单元</td>
+    <td>SKU</td>
+    <td class="span2">实际交货</td>
+    <td>单价</td>
+    <td>金额</td>
+    <td>修正值</td>
+    <td>付款日期</td>
+    <td>实际交货日期</td>
+  </tr>
+    #{set qty: 0/}
+    #{set amount: 0/}
+    #{set fixValue: 0/}
+    #{list items:payment.units(), as:'paymentunit'}
+      <tr>
+          #{set unit: paymentunit.procureUnit/}
+        <td>${unit.deliveryment.id}</td>
+        <td>#${unit.id}</td>
+        <td>${unit.product.sku}</td>
+        <td>${unit.qty()}</td>
+        <td>${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
+        <td>${paymentunit.currency.symbol()} ${paymentunit.amount}</td>
+        <td>${paymentunit.currency.symbol()} ${paymentunit.fixValue}</td>
+        <td>${payment.paymentDate.date()}</td>
+        <td>${unit.attrs.deliveryDate.date()}</td>
+      </tr>
+        #{set qty: qty + unit.qty()/}
+        #{set amount: amount + paymentunit.amount/}
+        #{set fixValue: fixValue + paymentunit.fixValue/}
+    #{/list}
+  <tr>
+    <td colspan="2">&nbsp;</td>
+    <td>总数量:</td>
+    <td>${qty}</td>
+    <td>总金额:</td>
+    <td>${amount}</td>
+    <td>${fixValue}</td>
+    <td>:总修正</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4"></td>
+    <td>美元汇率</td>
+    <td colspan="4">${payment.rate}</td>
+  </tr>
+  <tr>
+    <td colspan="2">&nbsp;</td>
+    <td>应付金额</td>
+    <td>${payment.currency.symbol()} ${payment.approvalAmount()}</td>
+    <td>应付美金</td>
+    <td colspan="4">${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+  </tr>
+</table>
+    #{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
+    #{if images}
+        #{list items:images, as:'img'}
+        <img src="http://e.easya.cc/attachs/image?a.fileName=${img.fileName}">
+        #{/list}
+    #{/if}
+    #{else }
+    还未上传凭证
+    #{/else}
+#{/if}
+#{else }
+暂时还不支持运输单付款单信息显示
+#{/else}
+</body>
+</html>
