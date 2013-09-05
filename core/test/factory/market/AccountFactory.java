@@ -33,7 +33,7 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
-        acc.password = "pw5165688104";
+        acc.password = "13297472505de";
         acc.closeable = false;
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
         acc.isSaleAcc = true;
@@ -47,7 +47,7 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
-        acc.password = "pw5165688104";
+        acc.password = "13297472505de";
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
         acc.closeable = false;
         acc.isSaleAcc = true;
@@ -62,9 +62,24 @@ public class AccountFactory extends ModelFactory<Account> {
         acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
-        acc.password = "pw5165688104";
+        acc.password = "13297472505us";
         acc.closeable = false;
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.isSaleAcc = true;
+        return acc;
+    }
+
+    @Factory(name = "uk")
+    public Account uk() {
+        Account acc = new Account();
+        acc.type = M.AMAZON_UK;
+        acc.id = 1l;
+        acc.accessKey = "AKIAI6EBPJLG64HWDBGQ";
+        acc.merchantId = "AJUR3R8UN71M4";
+        acc.username = "wyatt@easyacceu.com";
+        acc.password = "13297472505uk";
+        acc.closeable = false;
+        acc.token = "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf";
         acc.isSaleAcc = true;
         return acc;
     }
