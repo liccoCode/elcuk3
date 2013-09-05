@@ -106,6 +106,9 @@ $ ->
       .done((r) ->
        if r['series'].length != 0
         $div.highcharts('StockChart', {
+          credits:
+             text:'easycc'
+             href:''
           title:
             text: headName
           legend:
