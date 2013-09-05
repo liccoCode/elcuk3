@@ -4,6 +4,7 @@ import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.FeeType;
+import models.market.M;
 import models.market.Selling;
 import models.market.SellingRecord;
 import models.procure.Shipment;
@@ -18,6 +19,9 @@ import play.jobs.On;
 import play.libs.F;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static models.market.Orderr.S;
 
 /**
  * 周期:
@@ -33,6 +37,14 @@ import java.util.*;
 public class SellingRecordCaculateJob extends Job {
     public static final String RUNNING = "sellingRecordCaculateJobRunning";
 
+    /**
+     * 使用类的成员变量, 便于当前 Job 进行计算
+     */
+    private Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
+    private Map<String, Float> sellingSales = new HashMap<String, Float>();
+    private Map<String, Float> sellingAmzFee = new HashMap<String, Float>();
+    private Map<String, Float> sellingFBAFee = new HashMap<String, Float>();
+
     private DateTime dateTime = DateTime.now();
 
     public SellingRecordCaculateJob() {
@@ -47,9 +59,10 @@ public class SellingRecordCaculateJob extends Job {
         try {
             Cache.add(RUNNING, RUNNING);
             // 当天产生的数据
-            Map<String, Integer> sellingUnits = sellingUnits(dateTime.toDate());
-            Map<String, Float> sellingSales = sellingSales(dateTime.toDate());
-            Map<String, Float> sellingAmzFee = sellingAmazonFee(dateTime.toDate());
+            sellingUnits(dateTime.toDate());
+            sellingSales(dateTime.toDate());
+            sellingAmazonFee(dateTime.toDate());
+            sellingAmazonFBAFee(dateTime.toDate());
 
             List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
             // 需要计算的所有数据
@@ -61,13 +74,15 @@ public class SellingRecordCaculateJob extends Job {
                 String sid = selling.sellingId;
                 SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 // amz 扣费
-                float amzfee = sellingAmzFee.get(sid) == null ? 0 : sellingAmzFee.get(sid);
+                record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
+                // amzFba 扣费
+                record.fbaFee = sellingFBAFee.get(sid) == null ? 0 : Math.abs(sellingFBAFee.get(sid));
                 // 销量
                 record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
                 // 销售额
                 record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
                 // 实际收入 = 销量 - amazon 扣费
-                record.income = record.sales - Math.abs(amzfee);
+                record.income = record.sales - record.amzFee;
 
                 F.T2<Float, Integer> procureCostAndQty = sellingProcreCost(selling, dateTime.toDate());
                 // 采购成本
@@ -101,15 +116,27 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * Selling 的销量数据
-     *
-     * @return
      */
     public Map<String, Integer> sellingUnits(Date date) {
+        Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
+        for(M m : M.values()) {
+            if(m.isEbay()) continue;
+            sellingUnits.putAll(sellingUnits(date, m));
+        }
+        this.sellingUnits = sellingUnits;
+        return sellingUnits;
+    }
+
+    public Map<String, Integer> sellingUnits(Date date, M market) {
+        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
         SqlSelect sql = new SqlSelect()
-                .select("selling_sellingId as sellingId", "sum(quantity) as qty")
-                .from("OrderItem")
-                .where("createDate>=?").param(Dates.morning(date))
-                .where("createDate<=?").param(Dates.night(date))
+                .select("oi.selling_sellingId as sellingId", "sum(oi.quantity) as qty")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(actualDatePair._1.toDate())
+                .where("oi.createDate<=?").param(actualDatePair._2.toDate())
+                .where(SqlSelect.whereIn("o.state", Arrays.asList(S.PENDING.name(), S.PAYMENT.name(), S.SHIPPED.name())))
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
@@ -123,39 +150,108 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * Selling 的销售额数据;
-     *
-     * @return
+     * <p/>
+     * 因为 Amazon 收费的不及时, 所以对于离当天 10 天内的数据, 使用最近 10~40 天之间的平均数进行计算.
      */
     public Map<String, Float> sellingSales(Date date) {
-        /**
-         * 1. 找到某天 OrderItem 中所有涉及的 Selling 与每个 Selling 涉及的 Order.id
-         * 2. 根据每个 selling 所涉及的 id 与费用类型, 计算处每个 Selling 的销售额
-         */
-        return sellingFeeTypesCost(date, Arrays.asList("productcharges", "shipping"));
+        if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
+            DateTime now = DateTime.now();
+            SqlSelect sql = new SqlSelect()
+                    .select("selling_sellingId as sellingId", "(sum(sales) / sum(units)) as price")
+                    .from("SellingRecord")
+                    .where("date>=?").param(Dates.morning(now.minusDays(40).toDate()))
+                    .where("date<=?").param(Dates.night(now.minusDays(10).toDate()))
+                    .groupBy("selling_sellingId");
+            List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+            Map<String, Float> sellingPrice = new HashMap<String, Float>();
+            for(Map<String, Object> row : rows) {
+                Object priceObj = row.get("price");
+                if(priceObj == null) priceObj = "0";
+                sellingPrice.put(row.get("sellingId").toString(), NumberUtils.toFloat(priceObj.toString()));
+            }
+            Map<String, Float> sellingSales = new HashMap<String, Float>();
+            for(Map.Entry<String, Integer> entry : this.sellingUnits.entrySet()) {
+                Float price = sellingPrice.get(entry.getKey());
+                sellingSales.put(entry.getKey(), (price == null ? 0 : price) * entry.getValue());
+            }
+            this.sellingSales = sellingSales;
+        } else {
+            /**
+             * 1. 找到某天 OrderItem 中所有涉及的 Selling 与每个 Selling 涉及的 Order.id
+             * 2. 根据每个 selling 所涉及的 id 与费用类型, 计算处每个 Selling 的销售额
+             */
+            this.sellingSales = sellingFeeTypesCost(date, Arrays.asList("productcharges", "shipping"));
+        }
+        return this.sellingSales;
     }
 
     /**
      * Selling 的 Amazon 消耗的费用;
-     *
-     * @param date
-     * @return
+     * <p/>
+     * 因为 Amazon 收费的不及时, 所以对于离当天 10 天内的数据, 使用最近 10~40 天之间的平均数进行计算.
      */
     public Map<String, Float> sellingAmazonFee(Date date) {
-        List<FeeType> fees = FeeType.amazon().children;
-        List<String> feesTypeName = new ArrayList<String>();
-        for(FeeType fee : fees) {
-            if("shipping".equals(fee.name)) continue;
-            feesTypeName.add(fee.name);
+        if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
+            DateTime now = DateTime.now();
+            SqlSelect sql = new SqlSelect()
+                    .select("selling_sellingId as sellingId", "(sum(amzFee) / count(amzFee)) as amzFee")
+                    .from("SellingRecord")
+                    .where("date>=?").param(Dates.morning(now.minusDays(40).toDate()))
+                    .where("date<=?").param(Dates.night(now.minusDays(10).toDate()))
+                    .groupBy("selling_sellingId");
+            List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+
+            Map<String, Float> sellingAmzFeeMap = new HashMap<String, Float>();
+            for(Map<String, Object> row : rows) {
+                sellingAmzFeeMap.put(row.get("sellingId").toString(), NumberUtils.toFloat(row.get("amzFee").toString()));
+            }
+            this.sellingAmzFee = sellingAmzFeeMap;
+        } else {
+            List<FeeType> fees = FeeType.amazon().children;
+            List<String> feesTypeName = new ArrayList<String>();
+            for(FeeType fee : fees) {
+                if("shipping".equals(fee.name)) continue;
+                feesTypeName.add(fee.name);
+            }
+            this.sellingAmzFee = sellingFeeTypesCost(date, feesTypeName);
         }
-        return sellingFeeTypesCost(date, feesTypeName);
+        return this.sellingAmzFee;
+    }
+
+    /**
+     * Selling 的 FBA 销售的费用
+     * <p/>
+     * 因为 Amazon 收费的不及时, 所以对于离当天 10 天内的数据, 使用最近 10~40 天之间的平均数进行计算.
+     */
+    public Map<String, Float> sellingAmazonFBAFee(Date date) {
+        if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
+            DateTime now = DateTime.now();
+            SqlSelect sql = new SqlSelect()
+                    .select("selling_sellingId as sellingId", "(sum(fbaFee) / count(fbaFee)) as fbaFee")
+                    .from("SellingRecord")
+                    .where("date>=?").param(Dates.morning(now.minusDays(40).toDate()))
+                    .where("date<=?").param(Dates.night(now.minusDays(10).toDate()))
+                    .groupBy("selling_sellingId");
+            List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+
+            Map<String, Float> sellingAmzFeeMap = new HashMap<String, Float>();
+            for(Map<String, Object> row : rows) {
+                sellingAmzFeeMap.put(row.get("sellingId").toString(), NumberUtils.toFloat(row.get("fbaFee").toString()));
+            }
+            this.sellingFBAFee = sellingAmzFeeMap;
+        } else {
+            List<FeeType> fees = FeeType.fbaFees();
+            List<String> feesTypeName = new ArrayList<String>();
+            for(FeeType fee : fees) {
+                feesTypeName.add(fee.name);
+            }
+            this.sellingFBAFee = sellingFeeTypesCost(date, feesTypeName);
+        }
+        return this.sellingFBAFee;
     }
 
     /**
      * 指定 amazon 费用类型, 返回当天所有 Selling 这些费用类型的总费用
-     *
-     * @param date
-     * @param feeTypes
-     * @return
      */
     public Map<String, Float> sellingFeeTypesCost(Date date, List<String> feeTypes) {
         Map<String, List<String>> sellingOrders = oneDaySellingOrderIds(date);
@@ -176,20 +272,29 @@ public class SellingRecordCaculateJob extends Job {
     }
 
     /**
-     * 查询某天销售中, 每个 Selling 所涉及的 OrderId 是哪些
-     *
-     * @return
+     * 查询某天销售中, 每个 Selling 所涉及的 OrderId 是哪些;
+     * 不同的市场需要拥有不同的时间段
      */
     public Map<String, List<String>> oneDaySellingOrderIds(Date date) {
+        Map<String, List<String>> sellingOrders = new HashMap<String, List<String>>();
+        for(M m : M.values()) {
+            if(m.isEbay()) continue;
+            sellingOrders.putAll(oneDaySellingOrderIds(date, m));
+        }
+        return sellingOrders;
+    }
+
+    public Map<String, List<String>> oneDaySellingOrderIds(Date date, M market) {
         // 设置 group_concat_max_len 最大为 20M
+        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
         DBUtils.execute("set group_concat_max_len=20971520");
         SqlSelect sellingOdsSql = new SqlSelect()
                 .select("selling_sellingId as sellingId", "group_concat(order_orderId) as orderIds")
                 .from("OrderItem")
-                .where("createDate>=?").param(Dates.morning(date))
-                .where("createDate<=?").param(Dates.night(date))
+                .where("market=?").param(market.name())
+                .where("createDate>=?").param(actualDatePair._1.toDate())
+                .where("createDate<=?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
-
         Map<String, List<String>> sellingOrders = new HashMap<String, List<String>>();
         List<Map<String, Object>> rows = DBUtils.rows(sellingOdsSql.toString(), sellingOdsSql.getParams().toArray());
         for(Map<String, Object> row : rows) {
@@ -202,10 +307,6 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * 某一个 Selling 的采购成本(发货时间与指定日期相同); 币种统一为 USD
-     *
-     * @param selling
-     * @param date
-     * @return
      */
     public F.T2<Float, Integer> sellingProcreCost(Selling selling, Date date) {
         /**
@@ -244,10 +345,6 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * 某一个 Selling 的运输成本; 币种统一为 USD
-     *
-     * @param selling
-     * @param date
-     * @return
      */
     public F.T2<Float, Integer> sellingShipCost(Selling selling, Date date) {
         /**
@@ -324,8 +421,6 @@ public class SellingRecordCaculateJob extends Job {
     /**
      * 计算平均费用
      *
-     * @param costs
-     * @param numberSums
      * @return ._1: 平均价格, ._2: 总费用, ._3: 总数量
      */
     private F.T3<Float, Float, Integer> avgFee(List<Float> costs, List<Integer> numberSums) {
@@ -339,8 +434,6 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * 计算 PaymentUnit 中指定条件下涉及到的运输单的总费用与总数量
-     *
-     * @return
      */
     private F.T2<Float, Integer> shipmentTotalCostAndTotalNumber(Date date, List<String> feeTypes,
                                                                  Shipment.T... shipTypes) {

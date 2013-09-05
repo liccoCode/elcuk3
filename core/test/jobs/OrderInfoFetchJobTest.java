@@ -37,4 +37,15 @@ public class OrderInfoFetchJobTest extends UnitTest {
         assertThat(orderr.userid, is("A22O0T26R4FF86"));
         assertThat(orderr.phone, is("2068496599"));
     }
+
+    @Test
+    public void testOrderDetailUserIdAndEmailAndPhoneDENewPage() {
+        String html = IO.readContentAsString(Play.getFile("test/html/jobs/102-9624788-3525012.html"));
+        Orderr orderr = FactoryBoy.build(Orderr.class);
+        OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(orderr, html);
+
+        assertThat(orderr.email, is("ksyx1yry74z6hzy@marketplace.amazon.com"));
+        assertThat(orderr.userid, is("AHFIQ2DYR6WSW"));
+        assertThat(orderr.phone, is("610-704-5762"));
+    }
 }

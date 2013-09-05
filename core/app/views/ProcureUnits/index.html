@@ -62,7 +62,7 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" class="input-medium" name="p.search" value="${p.search}">
+        <input type="text" class="input-medium" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
@@ -75,8 +75,11 @@
            content="第三天需要交货的采购计划" data-disable-with="loading">大后天计划</a>
         <a href="@{ProcureUnits.noPlaced()}" class="btn btn-primary" rel="popover" content="发货时间为当天,
         同时货物还没有抵达货代的采购计划" data-disable-with="loading">当天未抵达</a>
+        <a href="@{ProcureUnits.downloadFBAZIP(p)}" target="_blank" class="btn btn-success"
+           rel="popover" content="将搜索出来的数据，按照日期-工厂名称进行压缩打包 ">
+          <i class="icon-download-alt"></i>下载ZIP包
+        </a>
       </div>
-
     </div>
   </form>
 </div>
