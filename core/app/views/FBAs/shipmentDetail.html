@@ -25,7 +25,8 @@
               交期:
            </td>
            <td width="18%" style="text-align:left;" COLSPAN="4">
-            <SPAN> ${procureUnit?.attrs?.planDeliveryDate.format("yyyy年MM月dd日")} </SPAN>
+            <SPAN>${procureUnit.attrs.deliveryDate==null?procureUnit?.attrs?.planDeliveryDate?.format("yyyy年MM月dd日")
+            :procureUnit?.attrs?.deliveryDate?.format("yyyy年MM月dd日")} </SPAN>
            </td>
            <td  width="20%" style="font-weight:bold; font-size:12pt">
                 运输方式
