@@ -6,6 +6,7 @@ import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -94,6 +95,16 @@ public class FeeType extends GenericModel {
 
     public static FeeType amazon() {
         return FeeType.findById("amazon");
+    }
+
+    public static List<FeeType> fbaFees() {
+        List<FeeType> amzFees = amazon().children;
+        List<FeeType> fbaFees = new ArrayList<FeeType>();
+        for(FeeType fee : amzFees) {
+            if(!fee.name.startsWith("fba")) continue;
+            fbaFees.add(fee);
+        }
+        return fbaFees;
     }
 
     /**

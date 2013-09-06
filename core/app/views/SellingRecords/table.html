@@ -1,8 +1,8 @@
-#{if msg}
-${msg}
+#{if flash.error}
+${flash.error}
 #{/if}
 #{elseif records == null || records.size() == 0}
-还在计算中, 请等待 10 分钟后再试
+没有记录
 #{/elseif}
 #{else }
 <table class="table table-bordered table-condensed">
