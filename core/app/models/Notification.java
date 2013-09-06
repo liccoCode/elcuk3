@@ -191,7 +191,7 @@ public class Notification extends GenericModel {
      *
      * @param ids
      */
-    public static void markStateAsChecked(List<Long> ids) {
+    public static void markAsRead(List<Long> ids) {
         for(Long id : ids) {
             Notification notification = Notification.findById(id);
             notification.changState(Notification.S.CHECKED);
