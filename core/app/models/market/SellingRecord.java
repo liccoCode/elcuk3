@@ -154,7 +154,6 @@ public class SellingRecord extends GenericModel {
     /**
      * 记录的时间
      */
-    @Temporal(TemporalType.DATE)
     @Expose
     public Date date = new Date();
 

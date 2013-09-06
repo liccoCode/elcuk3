@@ -60,7 +60,7 @@ public abstract class AbstractSeries implements Serializable {
     public <T extends AbstractSeries> T add(Float y, Object key) {
         boolean add = true;
         Object k = key;
-        if(key.getClass().equals(Date.class))
+        if(key.getClass().equals(Date.class) || key.getClass().equals(java.sql.Date.class) )
             k = ((Date) key).getTime();
 
         for(Object[] d : this.data) {
