@@ -878,7 +878,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     /**
      * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
      */
-    public User[] editToUsers() {
+    public Set<User> editToUsers() {
         Set<User> users = new HashSet<User>();
         users.add(this.handler);
         if(this.deliveryment != null)
@@ -887,12 +887,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(shipment.creater != null)
                 users.add(shipment.creater);
         }
-        return users.toArray(new User[users.size()]);
+        return users;
     }
 
     /**
-     *
      * 指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
+     *
      * @param folder 指定PDF文件，生成的文件目录
      */
     public void fbaAsPDF(File folder) throws Exception {

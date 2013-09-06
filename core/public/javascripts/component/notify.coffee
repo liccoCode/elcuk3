@@ -48,7 +48,7 @@ $ ->
   )
 
   #右上角提示框，已阅按钮事件
-  $(document).on("click",".dropdown-menu a[data-id]",(e) ->
+  $(document).on("click", ".dropdown-menu a[data-id]", (e) ->
       $span = $(@)
       updateState({noteID:$span.attr("data-id")}, ->
          $("#notificationBtn").trigger("click")
@@ -56,7 +56,7 @@ $ ->
       )
     )
   #更改 通知信息的状态为 已读
-  updateState = (datas,func)->
+  updateState = (datas, func)->
     LoadMask.mask()
     $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:datas})
        .done((r)->
@@ -69,6 +69,6 @@ $ ->
           LoadMask.unmask()
        )
        .fail((r)->
-         noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
-         LoadMask.unmask()
+          noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+          LoadMask.unmask()
        )
