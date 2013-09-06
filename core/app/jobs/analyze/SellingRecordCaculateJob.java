@@ -21,6 +21,8 @@ import play.libs.F;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static models.market.Orderr.S;
+
 /**
  * 周期:
  * 轮询: 8, 16, 23 三个时间点执行三次(避开 SellingSaleAnalyzeJob 的计算)
@@ -119,11 +121,13 @@ public class SellingRecordCaculateJob extends Job {
     public Map<String, Integer> sellingUnits(Date date, M market) {
         F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
         SqlSelect sql = new SqlSelect()
-                .select("selling_sellingId as sellingId", "sum(quantity) as qty")
-                .from("OrderItem")
-                .where("market=?").param(market.name())
-                .where("createDate>=?").param(actualDatePair._1.toDate())
-                .where("createDate<=?").param(actualDatePair._2.toDate())
+                .select("oi.selling_sellingId as sellingId", "sum(oi.quantity) as qty")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(actualDatePair._1.toDate())
+                .where("oi.createDate<=?").param(actualDatePair._2.toDate())
+                .where(SqlSelect.whereIn("o.state", Arrays.asList(S.PENDING.name(), S.PAYMENT.name(), S.SHIPPED.name())))
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
