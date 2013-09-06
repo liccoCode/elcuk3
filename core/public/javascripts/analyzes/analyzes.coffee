@@ -107,7 +107,7 @@ $ ->
        if r['series'].length != 0
         $div.highcharts('StockChart', {
           credits:
-             text:'easycc'
+             text:'EasyAcc'
              href:''
           title:
             text: headName
