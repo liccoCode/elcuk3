@@ -1,6 +1,7 @@
 package models.view.highchart;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +61,9 @@ public abstract class AbstractSeries implements Serializable {
     public <T extends AbstractSeries> T add(Float y, Object key) {
         boolean add = true;
         Object k = key;
-        if(key.getClass().equals(Date.class) || key.getClass().equals(java.sql.Date.class) )
+        if(key.getClass().equals(Date.class)
+                || key.getClass().equals(java.sql.Date.class)
+                || key.getClass().equals(Timestamp.class))
             k = ((Date) key).getTime();
 
         for(Object[] d : this.data) {
