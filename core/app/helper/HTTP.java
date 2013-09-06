@@ -147,7 +147,6 @@ public class HTTP {
      */
     public static String get(CookieStore cookieStore, String url) {
         try {
-            HTTP.clearExpiredCookie();
             return EntityUtils.toString(
                     cookieStore(cookieStore).execute(new HttpGet(url)).getEntity(),
                     "UTF-8");
@@ -181,7 +180,6 @@ public class HTTP {
                               Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
-            HTTP.clearExpiredCookie();
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toString(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {
@@ -232,7 +230,6 @@ public class HTTP {
                                   Collection<? extends NameValuePair> params) {
         HttpPost post = new HttpPost(url);
         try {
-            HTTP.clearExpiredCookie();
             post.setEntity(new UrlEncodedFormEntity(new ArrayList<NameValuePair>(params), "UTF-8"));
             return EntityUtils.toByteArray(cookieStore(cookieStore).execute(post).getEntity());
         } catch(Exception e) {

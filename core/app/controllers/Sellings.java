@@ -80,7 +80,7 @@ public class Sellings extends Controller {
                 List<Error> errors = new ArrayList<Error>();
                 Selling s = Selling.findById(sid);
                 try {
-                    s.uploadAmazonImg(imgs, false);
+                    s.uploadAmazonImg(imgs);
                 } catch(Exception e) {
                     errors.add(new Error("", Webs.E(e), new String[]{}));
                 }
