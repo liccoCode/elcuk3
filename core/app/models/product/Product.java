@@ -506,6 +506,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 远程访问 New Asin
+     * TODO 是不是可以有新的方法去获取这个 ASIN ?
      *
      * @param selling
      * @param fetchNewAsinParam
