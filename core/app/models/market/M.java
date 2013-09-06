@@ -23,47 +23,75 @@ public enum M {
         @Override
         public String label() {
             return "英国亚马逊";
+        };
+        @Override
+        public String countryName(){
+            return "英国";
         }
     },
     AMAZON_DE {
         @Override
         public String label() {
             return "德国亚马逊";
+        };
+        @Override
+        public String countryName(){
+            return "德国";
         }
     },
     AMAZON_FR {
         @Override
         public String label() {
             return "法国亚马逊";
+        };
+        @Override
+        public String countryName(){
+            return "法国";
         }
     },
     AMAZON_IT {
         @Override
         public String label() {
             return "意大利亚马逊";
+        };
+        @Override
+        public String countryName(){
+            return "意大利";
         }
     },
     AMAZON_ES {
         @Override
         public String label() {
             return "西班牙亚马逊";
+        };
+        @Override
+        public String countryName(){
+            return "西班牙";
         }
     },
     AMAZON_US {
         @Override
         public String label() {
             return "美国亚马逊";
+        };
+        @Override
+        public String countryName(){
+            return "美国";
         }
     },
     EBAY_UK {
         @Override
         public String label() {
             return "英国 Ebay";
+        };
+        @Override
+        public String countryName(){
+            return "英国";
         }
     };
 
     public abstract String label();
-
+    public abstract String countryName();
 
     /**
      * 为 Amazon 不同市场的 Id, 与 Market 对应
