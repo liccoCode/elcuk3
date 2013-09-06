@@ -2,7 +2,10 @@ package models.procure;
 
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
-import helper.*;
+import helper.Dates;
+import helper.PDFs;
+import helper.Reflects;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
@@ -884,7 +887,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
             String namePDF = String.format("[%s][%s][%s][%s]",
-                    Countrys.countryName(this.whouse.country),
+                    this.selling.market.countryName(),
                     this.shipType.label(),
                     this.attrs.planQty,
                     this.product.abbreviation
