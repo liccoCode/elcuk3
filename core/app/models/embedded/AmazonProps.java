@@ -318,9 +318,9 @@ public class AmazonProps implements Serializable {
                 msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
             throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
 
-        String[] bulletPoints = new String[5];
-        String[] searchTerms = new String[5];
-        String[] rbns = new String[2];
+        List<String> bulletPoints = new ArrayList<String>();
+        List<String> searchTerms = new ArrayList<String>();
+        List<String> rbns = new ArrayList<String>();
 
         this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
@@ -342,18 +342,18 @@ public class AmazonProps implements Serializable {
             else if("offering_start_date".equals(name))
                 this.launchDate = Dates.listingFromFmt(sell.market, val);
             else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
-            else if("bullet_point[0]".equals(name)) bulletPoints[0] = val;
-            else if("bullet_point[1]".equals(name)) bulletPoints[1] = val;
-            else if("bullet_point[2]".equals(name)) bulletPoints[2] = val;
-            else if("bullet_point[3]".equals(name)) bulletPoints[3] = val;
-            else if("bullet_point[4]".equals(name)) bulletPoints[4] = val;
-            else if("generic_keywords[0]".equals(name)) searchTerms[0] = val;
-            else if("generic_keywords[1]".equals(name)) searchTerms[1] = val;
-            else if("generic_keywords[2]".equals(name)) searchTerms[2] = val;
-            else if("generic_keywords[3]".equals(name)) searchTerms[3] = val;
-            else if("generic_keywords[4]".equals(name)) searchTerms[4] = val;
-            else if("recommended_browse_nodes[0]".equals(name)) rbns[0] = val;
-            else if("recommended_browse_nodes[1]".equals(name)) rbns[1] = val;
+            else if("bullet_point[0]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[1]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[2]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[3]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[4]".equals(name)) bulletPoints.add(val);
+            else if("generic_keywords[0]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[1]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[2]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[3]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[4]".equals(name)) searchTerms.add(val);
+            else if("recommended_browse_nodes[0]".equals(name)) rbns.add(val);
+            else if("recommended_browse_nodes[1]".equals(name)) rbns.add(val);
             else if("our_price".equals(name))
                 this.standerPrice = Webs
                         .amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);

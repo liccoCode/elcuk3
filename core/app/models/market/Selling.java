@@ -8,7 +8,6 @@ import jobs.analyze.SellingSaleAnalyzeJob;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
-import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -346,17 +345,6 @@ public class Selling extends GenericModel {
             // 还原
             this.account.changeRegion(this.account.type);
         }
-    }
-
-    /**
-     * 指定一个 Whouse, 加载出此 Selling 在此仓库中的唯一的库存
-     *
-     * @param whouse
-     * @return
-     */
-    public SellingQTY uniqueQTY(Whouse whouse) {
-        return SellingQTY
-                .findById(String.format("%s_%s", this.merchantSKU.toUpperCase(), whouse.id));
     }
 
     /**
