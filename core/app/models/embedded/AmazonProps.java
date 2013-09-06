@@ -269,8 +269,8 @@ public class AmazonProps implements Serializable {
         if(StringUtils.isBlank(this.searchTerms)) return;
         String[] searchTermsArr = StringUtils.splitByWholeSeparator(this.searchTerms, Webs.SPLIT);
         for(int i = 0; i < searchTermsArr.length; i++) {
-            if(searchTermsArr[i].length() > 50)
-                throw new FastRuntimeException("SearchTerm length must blew than 50.");
+            if(searchTermsArr[i].length() > 2000)
+                throw new FastRuntimeException("SearchTerm length must blew than 2000.");
             params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
         }
         // length = 3, 0~2, need 3,4

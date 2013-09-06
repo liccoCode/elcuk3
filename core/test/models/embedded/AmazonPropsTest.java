@@ -2,6 +2,7 @@ package models.embedded;
 
 import factory.FactoryBoy;
 import factory.callback.BuildCallback;
+import models.market.M;
 import models.market.Selling;
 import org.apache.http.NameValuePair;
 import org.joda.time.DateTime;
@@ -45,20 +46,27 @@ public class AmazonPropsTest extends UnitTest {
             public void build(Selling target) {
                 target.merchantSKU = "71KDPW-BLCPU,607198983568";
                 target.asin = "B00DU8PP8G";
+//                target.market = M.AMAZON_DE;
+                target.market = M.AMAZON_ES;
                 AmazonProps aps = target.aps;
-                aps.title = "EasyAcc Schutzhülle für Kindle Paperwhite Case Leder Tasche hülle Mit Sleep / Wake up Funktion - Blau";
+//                aps.title = "EasyAcc Schutzhülle für Kindle Paperwhite Case Leder Tasche hülle Mit Sleep / Wake up Funktion - Blau";
+                aps.title = "EasyAcc Funda Inteligente para Kindle Paperwhite Funda (Cuero Sintético, azul)";
                 aps.manufacturer = "EasyAcc";
                 aps.brand = "EasyAcc";
                 aps.manufacturerPartNumber = "Paperwhite";
                 aps.rbns.clear();
-                aps.rbns.add("815150031");
-                aps.rbns.add("671887031");
-                //29.99, 9.99
-                aps.standerPrice = 29.99f;
-                aps.salePrice = 9.99f;
-                aps.startDate = DateTime.parse("2013-09-07").toDate();
-                aps.endDate = DateTime.parse("2015-01-01").toDate();
+                //de
+//                aps.rbns.add("815150031");
+//                aps.rbns.add("671887031");
+                aps.rbns.add("937811031");
+                //25.99, 19.99
+                aps.standerPrice = 25.99f;
+                aps.salePrice = 19.99f;
+                aps.startDate = DateTime.parse("2013-05-19").toDate();
+                aps.endDate = DateTime.parse("2015-05-16").toDate();
                 aps.isGiftWrap = true;
+                //de
+                /*
                 aps.productDesc = "<b style=\"color:#3399cc\">Material</b><br>\n" +
                         "<b>Außenseite</b>---Extrem haltbares Kunstleder. Sie müssen sich keine Sorgen wegen Verschleiß oder Kratzern machen. Authentische Lederoptik.<br>\n" +
                         "<b>Innenseite</b>--- Weiche Innenseite, das spezielle Material schützt und reinigt den Bildschirm.<br><br>\n" +
@@ -69,7 +77,22 @@ public class AmazonPropsTest extends UnitTest {
                         "<b>Magnetischer Verschluss</b> - Der starke Magnetverschluss sorgt für einen sicheren halt der Lasche. Damit Ihr Gerät beim Transport im Rucksack oder in der Handtasche auch immer gut geschützt ist. Z.B. vor Erschütterungen und äußeren Einflüsen.<br>\n" +
                         "<b>Automatischer Ruhezustand und Aufwecken</b>---Versetzen Sie Ihr Gerät beim Schließen in den Ruhezustand und wecken Sie es beim Öffnen wieder auf. Dazu einfach nur den Deckel schließen und öffnen. Sie sparen damit mehr Energie und schützen den Einschaltknopf<br>\n" +
                         "<b>Magnetic closure</b>---Strong magnetic closure makes sure your lid closed well to protect your device while in a backpack, handbag or briefcase with shake";
+                        */
+                aps.productDesc =
+                        "Exterior: sintético PU de cuero, con una buena resistencia al desgaste y tacto cómodo. <br>\n" +
+                                "\n" +
+                                "Interior: pelusa suave, con buena sensación del tacto, las salvaguardias y limpia la pantalla.<br>\n" +
+                                "\n" +
+                                "¡Una medida sólo para Amazon Kindle Paperwhite. Todos los puertos y botones cortados; Deja un acceso completo a todas las teclas / del puerto USB<br>\n" +
+                                "\n" +
+                                "Sueño auto y despierta función toma el dispositivo va a dormir una vez que se cierre y al instante despertándolo al abrirlo listo para su uso<br>\n" +
+                                "\n" +
+                                "\n" +
+                                "Diseño funcional; corte aseado y punto gratuito de mano de obra exquisita, todos los puertos y botones de fácil acceso.<br>";
+
                 aps.keyFeturess.clear();
+                aps.searchTermss.clear();
+                /*
                 aps.keyFeturess
                         .add("Außenseite: Strapazierfähiges Kunstleder mit echter Lederoptik und hoher Haltbarkeit; Innenseite: Mikrofaser, angenehm weich, schützt und reinigt den Bildschirm effektiv");
                 aps.keyFeturess
@@ -80,12 +103,22 @@ public class AmazonPropsTest extends UnitTest {
                         .add("Versetzt Ihr Gerät beim Schließen automatisch in den Ruhezustand und schaltet es beim Öffnen wieder ein");
                 aps.keyFeturess
                         .add("Der starke Magnetverschluss sorgt für einen sicheren halt der Lasche. Damit Ihr Gerät beim Transport im Rucksack oder in der Handtasche auch immer gut geschützt ist. Z.B. vor Erschütterungen und äußeren Einflüsen.");
-                aps.searchTermss.clear();
                 aps.searchTermss.add("Leder Schutzhülle Hüllen Tasche Lederhülle");
                 aps.searchTermss.add("Leather Case Cover Premium Leder Case book");
                 aps.searchTermss.add("ForeFront Cases® Hülle für Kindle Paperwhite");
                 aps.searchTermss.add("Swees UltraSlim Cover für Kindle Paperwhite");
                 aps.searchTermss.add("grün rosa lila schwarz");
+                        */
+
+                aps.searchTermss
+                        .add("Azul kindle paperwhite Funda de cuero inteligente con 360 ° de rotación acción giratoria para orientación vertical y horizontal con Free Screen Protector y Stylus Touch Pen kindle paperwhite por Stuff4 ®");
+                aps.searchTermss.add("Funda smart case convertible en soporte para kindle paperwhite color negro");
+                aps.searchTermss
+                        .add("rooCASE de doble vista (negro) Cubierta folio caso de kindle paperwhite - Paisaje de apoyo y vista vertical");
+                aps.searchTermss
+                        .add("ForeFront Cases® - Funda de cuero sintético para el nuevo kindle paperwhite / Cubierta magnética con modo reposo para la nueva generación kindle paperwhite + Lápiz óptico y protector de pantalla - Negro");
+                aps.searchTermss
+                        .add("AmazonBasics - Funda de cuero con soporte ajustable de AmazonBasics para kindle paperwhite color negro");
             }
         });
         selling.account.loginAmazonSellerCenter();
