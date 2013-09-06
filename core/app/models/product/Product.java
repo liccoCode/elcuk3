@@ -9,7 +9,6 @@ import models.ElcukRecord;
 import models.embedded.AmazonProps;
 import models.market.Listing;
 import models.market.M;
-import models.market.PriceStrategy;
 import models.market.Selling;
 import models.procure.Cooperator;
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +26,7 @@ import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
+import play.libs.F;
 import play.utils.FastRuntimeException;
 import query.ProductQuery;
 
@@ -117,8 +117,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public String declareName;
 
     /**
-      * 产品简称
-      */
+     * 产品简称
+     */
     @Required
     public String abbreviation;
 
@@ -226,55 +226,46 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public Selling saleAmazon(Selling selling) {
         /**
-         * 0. 属性的逻辑性检查
-         *  - TODO UPC 相同的 Selling 需要对 MSKU 进行一致性检查
-         *  - merchantSKU 修正为全大写
-         *  - merchantSKU 的格式为 [sku,upc] 如果不一样, 则抛异常
+         * 0. 业务属性检查
          * 1. 将 Listing 相关信息同步到 Selling 上
          * 2. 检查 UPC 的值, 这个值需要在这检查一下已经使用过的 UPC 与还没有使用的 UPC.
          * 3. 开始上架
          */
-        selling.merchantSKU = selling.merchantSKU.toUpperCase();
-        try {
-            if(!StringUtils.equals(StringUtils.split(selling.merchantSKU, ",")[1], selling.aps.upc))
-                throw new FastRuntimeException("MerchantSKU 的格式不正确! 格式为: [sku],[upc],[other]");
-        } catch(Exception e) {
-            throw new FastRuntimeException(
-                    String.format("(%s) 解析 MerchantSKU 的格式错误!", selling.merchantSKU));
-        }
+        if(StringUtils.isBlank(selling.merchantSKU))
+            Validation.addError("", "Selling 的 msku 必须存在.");
+        if(!selling.isMSkuValid())
+            Validation.addError("", "MerchantSKU 格式错误, 请检查. SKU,UPC");
+        if(selling.account == null || !selling.account.isPersistent())
+            Validation.addError("", "请选择正确的 Account 账户");
+        selling.aps.validate();
+        if(Validation.hasErrors()) return null;
 
-        selling.price = selling.aps.salePrice;
-
-        selling.type = Selling.T.FBA;
-        selling.priceStrategy = new PriceStrategy(selling);
         selling.state = Selling.S.SELLING;
-
         selling.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
 
+        /**
+         * !. 前提,在确定了账户的 Region 的情况下!
+         * 1. 访问选择 big Category 页面
+         * 2. 根据 big Category 获取详细 Category JSON 数据
+         * 3. 进入填写创建 Product 详细信息页面
+         * 4. 访问 Match.ajax 查看是否拥有 matchingAsinList?, 设置 matchASIN
+         * 5. 填充参数
+         * <pre>
+         * 		<div id="matchingAsinList" class="hide">
+         * <div>QjAwOEFSN1g2WQ==</div>
+         * </div>
+         * </pre>
+         * 6. 提交创建 Selling 的参数
+         */
         synchronized(selling.account.cookieStore()) {
             selling.account.changeRegion(selling.market);
-            /**
-             * !. 前提,在确定了账户的 Region 的情况下!
-             * 1. 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 的 classify 页面, 有一个隐藏 token
-             * 2. 拿着隐藏 Token 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 进入 identify 页面
-             * 3. 访问 Match.ajax 查看是否拥有 matchingAsinList?, 设置 matchASIN
-             * 4. 填充参数
-             * <pre>
-             * 		<div id="matchingAsinList" class="hide">
-             * <div>QjAwOEFSN1g2WQ==</div>
-             * </div>
-             * </pre>
-             * 5. 提交创建 Selling 的参数
-             */
             Set<NameValuePair> classifyHiddenParams = saleAmazonStep1(selling);
-
-            Document saleSellingPage = saleAmazonStep2(selling, classifyHiddenParams);
-
-            saleAmazonStep3(selling, saleSellingPage);
-
-            Set<NameValuePair> sellingParams = saleAmazonStep4(selling, saleSellingPage);
-
-            saleAmazonStep5(selling, sellingParams);
+            classifyHiddenParams.addAll(saleAmazonStep2(selling));
+            Document saleSellingPage = saleAmazonStep3(selling, classifyHiddenParams);
+            saleAmazonStep4(selling, saleSellingPage);
+            Set<NameValuePair> sellingParams = saleAmazonStep5(selling, saleSellingPage);
+            saleAmazonStep6(selling, sellingParams);
+            selling.account.changeRegion(selling.account.type);
         }
 
         selling.listing = Listing.findById(Listing.lid(selling.asin, selling.market));
@@ -285,209 +276,78 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 上架
+     * 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 的 classify 页面, 有一个隐藏 token
      *
      * @param selling
-     * @param sellingParams
-     */
-    private void saleAmazonStep5(Selling selling, Set<NameValuePair> sellingParams) {
-        /**
-         * 上架时候的错误信息全部返回给前台.
-         */
-        String body = HTTP
-                .post(selling.account.cookieStore(), selling.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/,
-                        sellingParams);
-        // 记录任何上架操作都记录日志. 大不了自己删除...
-        FLog.fileLog(String.format("%s.%s.%s.step3.html", selling.merchantSKU, selling.account.id,
-                System.currentTimeMillis()), body, FLog.T.SALES
-        );
-
-        Document afterPostPage = Jsoup.parse(body);
-        // 检查是否提交成功了, 没有成功则抛出异常.
-        if(afterPostPage.select("#productHeaderForTabs").first() != null &&
-                afterPostPage.select(".messageboxerror").first() != null)
-            throw new FastRuntimeException(
-                    afterPostPage.select(".messageboxerror").first().text());
-
-        // 最后获取成功成见 Listing 以后的 ASIN
-        Element form = afterPostPage.select("form").first();
-        if(form == null) throw new FastRuntimeException(
-                String.format("提交的参数错误.(详细错误信息咨询 IT 查看 E_LOG/listing_sale/%s.%s.step3.html)",
-                        selling.merchantSKU, selling.account.id));
-
-        List<NameValuePair> fetchNewAsinParam = new ArrayList<NameValuePair>();
-        // 用于最后一个 inventory-status/status.html 页面跳转
-        List<NameValuePair> finalFormParam = new ArrayList<NameValuePair>();
-        for(Element hidden : form.select("input")) {
-            String name = hidden.attr("name");
-            finalFormParam.add(new BasicNameValuePair(name, hidden.val()));
-            if("newItemAsin".equals(name)) selling.asin = hidden.val();
-            else if("itemCreateWtqRequestId".equalsIgnoreCase(name))
-                fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
-            else if("newItemSku".equalsIgnoreCase(name)) {
-                fetchNewAsinParam.add(new BasicNameValuePair(name, selling.merchantSKU));
-                fetchNewAsinParam.add(new BasicNameValuePair("sku", selling.merchantSKU));
-            }
-        }
-
-        // inventory-status/status.html 页面的访问, 会自行进行 302 转向访问
-        body = HTTP.post(selling.account.cookieStore(), form.attr("action"), finalFormParam);
-        FLog.fileLog(
-                String.format("%s.%s.%s.step4.html", selling.merchantSKU, selling.account.id,
-                        System.currentTimeMillis()), body, FLog.T.SALES);
-
-        // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
-        if(StringUtils.isBlank(selling.asin) && StringUtils.isBlank(selling.aps.matchAsin)) {
-            try {
-                selling.asin = getNewAsin(selling, fetchNewAsinParam, 0);
-            } catch(InterruptedException e) {
-                Logger.warn(Webs.E(e));
-                throw new FastRuntimeException(e.getMessage());
-            }
-        }
-        if(StringUtils.isBlank(selling.asin)) { // 最后的 asin 检查
-            String msg = afterPostPage.select(".messageboxerror").first().text();
-            if(StringUtils.isBlank(msg)) msg = "未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!";
-            throw new FastRuntimeException(msg);
-        }
-    }
-
-    /**
-     * 填充参数; 向 saleSellingPage 中需要的字段根据 Selling 填充数据
-     *
-     * @param selling
-     * @param saleSellingPage
      * @return
      */
-    private Set<NameValuePair> saleAmazonStep4(Selling selling, Document saleSellingPage) {
-        Elements inputs = saleSellingPage.select("form[name=productForm] input");
-        Set<NameValuePair> sellingParams = new HashSet<NameValuePair>();
+    public Set<NameValuePair> saleAmazonStep1(Selling selling) {
+        String body = HTTP.get(
+                selling.account.cookieStore(),
+                selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/
+        );
+        if(Play.mode.isDev())
+            FLog.fileLog(String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
+
+        Document doc = Jsoup.parse(body);
+        Elements inputs = doc.select("form[name=selectProductTypeForm] input");
+        Set<NameValuePair> classifyHiddenParams = new HashSet<NameValuePair>();
         for(Element input : inputs) {
             String name = input.attr("name");
-            String tagType = input.attr("type");
-            if("radio".equals(tagType)) { //对于 radio 的只能选择 checked 的,不能让后面的元素把前面的值给覆盖了.
-                if(StringUtils.isBlank(input.attr("checked"))) continue;
-                sellingParams.add(new BasicNameValuePair(name, input.val()));
-            } else if("checkbox".equals(tagType)) {
-                /**
-                 * Amazon  中 checkbox 都是不需要提交的. 都有一个 hidden 的元素与其对应
-                 * - offering_can_be_gift_wrapped
-                 * - offering_can_be_gift_messaged
-                 * - connector_gender(female/female)
-                 * - connector_gender(male/male)
-                 * - connector_gender(male/female)
-                 * - hot_shoe_included
-                 * - traffic_features_description(Traffic only)
-                 * - traffic_features_description(Live HD traffic)
-                 * - traffic_features_description(Live traffic)
-                 * - are_batteries_included
-                 * - is_discontinued_by_manufacturer
-                 * 有以上这么些元素收到影响
-                 */
+            if(!Arrays.asList("encoded_session_hidden_map", "activeClientTimeOnTask").contains(name))
+                continue;
+            classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
+        }
+        return classifyHiddenParams;
+    }
 
-            } else { // 非 Radio 的 input 按照如下处理
-                if("item_name".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, selling.aps.title));
-                else if("manufacturer".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, selling.aps.manufacturer));
-                else if("brand_name".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, StringUtils.isBlank(
-                            selling.aps.brand) ? "EasyAcc" : selling.aps.brand)); // ?? 这个品牌的名字现在都使用我们自己的?
-                else if("part_number".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name,
-                            selling.aps.manufacturerPartNumber));
-                else if("model".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, selling.aps.modelNumber));
-                else if("external_id".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, selling.aps.upc));
-                else if("offering_sku".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, selling.merchantSKU));
-                else if("our_price".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name,
-                            // TODO price 都为 AMAZON_UK 的原因是, 手动将市场上的语言设置为了 English
-                            Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.standerPrice)));
-                else if("discounted_price".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name,
-                            Webs.priceLocalNumberFormat(M.AMAZON_UK, selling.aps.salePrice)));
-                else if("discounted_price_start_date".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name,
-                            Dates.listingUpdateFmt(selling.market, selling.aps.startDate)));
-                else if("discounted_price_end_date".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name,
-                            Dates.listingUpdateFmt(selling.market, selling.aps.endDate)));
-                else if("Offer_Inventory_Quantity".equals(name))
-                    sellingParams
-                            .add(new BasicNameValuePair(name, selling.aps.quantity + ""));
-                else if("activeClientTimeOnTask".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name,
-                            "166279")); // 这个值是通过 JS 计算的, 而 JS 仅仅是计算一个时间, 算法无关
-                else if("offering_can_be_gift_wrapped".equals(name) && selling.aps.isGiftWrap)
-                    sellingParams.add(new BasicNameValuePair(name, "on"));
-                else if("offering_can_be_gift_messaged".equals(name) &&
-                        selling.aps.isGiftMessage)
-                    sellingParams.add(new BasicNameValuePair(name, "on"));
-                else if("matchAsin".equals(name))
-                    sellingParams.add(new BasicNameValuePair(name, selling.aps.matchAsin));
-                else if("encoded_session_hidden_map".equals(name)) {
-                    sellingParams.add(new BasicNameValuePair(name, input.val()));
-                    // 在发现了 encoded_session_hidden_map 以后需要添加这样一个属性(JS 动态添加的)
-                    sellingParams.add(new BasicNameValuePair("sessionMapPresent", "true"));
-                } else if(StringUtils.startsWith(name, "bullet_point")) {
-                    selling.aps.bulletPointsCheck(sellingParams);
-                } else if(StringUtils.startsWith(name, "generic_keywords")) {
-                    selling.aps.searchTermsCheck(sellingParams);
-                } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
-                    if(selling.aps.rbns != null) {
-                        if(selling.aps.rbns.size() == 1)
-                            sellingParams
-                                    .add(new BasicNameValuePair("recommended_browse_nodes[0]",
-                                            selling.aps.rbns.get(0)));
-                        else if(selling.aps.rbns.size() == 2) {
-                            sellingParams
-                                    .add(new BasicNameValuePair("recommended_browse_nodes[0]",
-                                            selling.aps.rbns.get(0)));
-                            sellingParams
-                                    .add(new BasicNameValuePair("recommended_browse_nodes[1]",
-                                            selling.aps.rbns.get(1)));
-                        }
-                    }
-                } else {
-                    sellingParams.add(new BasicNameValuePair(name, input.val()));
-                }
-            }
-        }
-        /**
-         * Product Description
-         * Condition Note -- 有需要再补充
-         * Seller Warranty Description -- 有需要再补充
-         */
-        for(Element textarea : saleSellingPage.select("form[name=productForm] textarea")) {
-            String name = textarea.attr("name");
-            if("product_description".equals(name)) {
-                sellingParams.add(new BasicNameValuePair(name, selling.aps.productDesc));
-            } else {
-                sellingParams.add(new BasicNameValuePair(name, textarea.val()));
-            }
-        }
+    public Set<NameValuePair> saleAmazonStep2(Selling sell) {
+        String amzBigCategory = category.settings.choseAmazonCategory(sell.market);
+        if(StringUtils.isBlank(amzBigCategory))
+            throw new FastRuntimeException(
+                    String.format("Category %s 没有设定市场 %s 对应的值", category.categoryId, sell.market));
+        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        params.add(new BasicNameValuePair("category", amzBigCategory.substring(0, amzBigCategory.lastIndexOf("/"))));
+        String body = HTTP.post(sell.account.cookieStore(), sell.account.type.browseCategoryAmzn(), params);
+        if(Play.mode.isDev())
+            FLog.fileLog(String.format("%s.%s.step2.html", sell.merchantSKU, sell.account.id), body, FLog.T.SALES);
 
-        for(Element select : saleSellingPage.select("form[name=productForm] select")) {
-            String name = select.attr("name");
-            // Condition
-            if("offering_condition".equals(name)) {
-                // 商品的 Condition 设置为 NEW
-                sellingParams.add(new BasicNameValuePair(name, "New|New"));
-            } else {
-                sellingParams.add(new BasicNameValuePair(name, select.select("option[selected]").val()));
-            }
+        params.clear();
+        params.add(new BasicNameValuePair("category", ""));
+        JsonElement json = new JsonParser().parse(body);
+        for(JsonElement element : json.getAsJsonArray()) {
+            JsonObject obj = element.getAsJsonObject();
+            if(!amzBigCategory.equals(obj.get("id").getAsString())) continue;
+            params.add(new BasicNameValuePair("newCategory", amzBigCategory));
+            params.add(new BasicNameValuePair("productType", obj.get("productType").getAsString()));
+            params.add(new BasicNameValuePair("displayPath",
+                    String.format("All Product Categories/%s/%s",
+                            obj.get("displayPath").getAsString(),
+                            obj.get("displayName").getAsString()
+                    )));
+            params.add(new BasicNameValuePair("itemType", obj.get("itemType").getAsString()));
         }
-        return sellingParams;
+        return params;
+    }
+
+    public Document saleAmazonStep3(Selling selling, Set<NameValuePair> classifyHiddenParams) {
+        String body = HTTP.post(selling.account.cookieStore(),
+                selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/,
+                classifyHiddenParams);
+        if(Play.mode.isDev())
+            FLog.fileLog(String.format("%s.%s.step3.html", selling.merchantSKU, selling.account.id), body, FLog.T.SALES);
+        Document doc = Jsoup.parse(body);
+        Elements inputs = doc.select("form[name=productForm] input");
+        if(inputs == null || inputs.size() <= 7)
+            throw new FastRuntimeException("没有进入第二步 Identify 页面 (填写上架新产品详细内容的页面)!");
+        return doc;
     }
 
 
     /**
      * 访问 Match.ajax 查看是否拥有 matchingAsinList?, 设置 matchASIN
      */
-    private void saleAmazonStep3(Selling selling, Document saleSellingPage) {
+    public void saleAmazonStep4(Selling selling, Document saleSellingPage) {
         /**
          * 每一个类别下提交的参数都不一样, 但通过 JS console 测试 us/de 两个市场,
          * 如果 UPC 是已经使用过的, 则只需要提交两个参数
@@ -546,53 +406,102 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 访问 https://catalog-sc.amazon.co.uk/abis/Classify/SelectCategory 的 classify 页面, 有一个隐藏 token
+     * 填充参数; 向 saleSellingPage 中需要的字段根据 Selling 填充数据
      *
      * @param selling
+     * @param saleSellingPage
      * @return
      */
-    private Set<NameValuePair> saleAmazonStep1(Selling selling) {
-        String body = HTTP.get(
-                selling.account.cookieStore(),
-                selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/
-        );
-        if(Play.mode.isDev())
-            FLog.fileLog(
-                    String.format("%s.%s.step1.html", selling.merchantSKU, selling.account.id),
-                    body, FLog.T.SALES);
+    public Set<NameValuePair> saleAmazonStep5(Selling selling, Document saleSellingPage) {
+        Map<String, String> uniqParams = new HashMap<String, String>();
+        uniqParams.put("offering_sku", selling.merchantSKU);
+        uniqParams.put("external_id", selling.aps.upc);
+        uniqParams.put("Offer_Inventory_Quantity", "0");
+        uniqParams.put("matchAsin", selling.aps.matchAsin);
+        uniqParams.put("sessionMapPresent", "true");
+        uniqParams.put("offering_condition", "New|New");
 
-        Document doc = Jsoup.parse(body);
-        Elements inputs = doc.select("form[name=selectProductTypeForm] input");
-        Set<NameValuePair> classifyHiddenParams = new HashSet<NameValuePair>();
-        for(Element input : inputs) {
-            String name = input.attr("name");
-            if(StringUtils.isBlank(category.settings.choseAmazonCategory(selling.market)))
-                throw new FastRuntimeException(
-                        String.format("Category %s 没有设定市场 %s 对应的值", category.categoryId,
-                                selling.market));
-            if("newCategory".equals(name))
-                classifyHiddenParams.add(new BasicNameValuePair(name,
-                        category.settings.choseAmazonCategory(selling.market)));
-            else
-                classifyHiddenParams.add(new BasicNameValuePair(name, input.val()));
+        F.T2<Collection<NameValuePair>, String> t2 = selling.aps
+                .generateDeployProps(saleSellingPage.outerHtml(), selling);
+        for(NameValuePair pair : t2._1) {
+            if(uniqParams.containsKey(pair.getName())) continue;
+            uniqParams.put(pair.getName(), pair.getValue());
         }
-        return classifyHiddenParams;
+
+        Set<NameValuePair> sellingParams = new HashSet<NameValuePair>();
+        for(Map.Entry<String, String> entry : uniqParams.entrySet()) {
+            sellingParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+            Logger.info("%s=%s", entry.getKey(), entry.getValue());
+        }
+        return sellingParams;
     }
 
-    private Document saleAmazonStep2(Selling selling, Set<NameValuePair> classifyHiddenParams) {
-        String body = HTTP.post(selling.account.cookieStore(),
-                selling.account.type.saleSellingLink()/*从账户所在的 Market 提交*/,
-                classifyHiddenParams);
-        if(Play.mode.isDev())
-            FLog.fileLog(
-                    String.format("%s.%s.step2.html", selling.merchantSKU, selling.account.id),
-                    body, FLog.T.SALES);
-        Document doc = Jsoup.parse(body);
 
-        Elements inputs = doc.select("form[name=productForm] input");
-        if(inputs == null || inputs.size() <= 7)
-            throw new FastRuntimeException("没有进入第二步 Identify 页面!");
-        return doc;
+    /**
+     * 上架
+     *
+     * @param sell
+     * @param sellingParams
+     */
+    public void saleAmazonStep6(Selling sell, Set<NameValuePair> sellingParams) {
+        /**
+         * 上架时候的错误信息全部返回给前台.
+         */
+        String body = HTTP.post(sell.account.cookieStore(),
+                sell.account.type.saleSellingPostLink()/*从账户所在的 Market 提交*/,
+                sellingParams);
+        // 记录任何上架操作都记录日志. 大不了自己删除...
+        FLog.fileLog(String.format("%s.%s.%s.step6.1.html", sell.merchantSKU, sell.account.id,
+                System.currentTimeMillis()), body, FLog.T.SALES
+        );
+
+        Document afterPostPage = Jsoup.parse(body);
+        // 检查是否提交成功了, 没有成功则抛出异常.
+        if(afterPostPage.select("#productHeaderForTabs").first() != null &&
+                afterPostPage.select(".messageboxerror").first() != null)
+            throw new FastRuntimeException(
+                    afterPostPage.select(".messageboxerror").first().text());
+
+        // 最后获取成功创建 Listing 以后的 ASIN
+        Element form = afterPostPage.select("form").first();
+        if(form == null) throw new FastRuntimeException(
+                String.format("提交的参数错误.(详细错误信息咨询 IT 查看 E_LOG/listing_sale/%s.%s.step3.html)",
+                        sell.merchantSKU, sell.account.id));
+
+        List<NameValuePair> fetchNewAsinParam = new ArrayList<NameValuePair>();
+        // 用于最后一个 inventory-status/status.html 页面跳转
+        List<NameValuePair> finalFormParam = new ArrayList<NameValuePair>();
+        for(Element hidden : form.select("input")) {
+            String name = hidden.attr("name");
+            finalFormParam.add(new BasicNameValuePair(name, hidden.val()));
+            if("newItemAsin".equals(name)) sell.asin = hidden.val();
+            else if("itemCreateWtqRequestId".equalsIgnoreCase(name))
+                fetchNewAsinParam.add(new BasicNameValuePair(name, hidden.val()));
+            else if("newItemSku".equalsIgnoreCase(name)) {
+                fetchNewAsinParam.add(new BasicNameValuePair(name, sell.merchantSKU));
+                fetchNewAsinParam.add(new BasicNameValuePair("sku", sell.merchantSKU));
+            }
+        }
+
+        // inventory-status/status.html 页面的访问, 会自行进行 302 转向访问
+        body = HTTP.post(sell.account.cookieStore(), form.attr("action"), finalFormParam);
+        FLog.fileLog(String.format("%s.%s.%s.step6.2.html", sell.merchantSKU, sell.account.id,
+                System.currentTimeMillis()), body, FLog.T.SALES);
+
+        // asin 最后没有解析出来, 并且 matchAsin 为空, 表示为全新的 upc 创建 Listing 需要额外的一步骤
+        if(StringUtils.isBlank(sell.asin) && StringUtils.isBlank(sell.aps.matchAsin)) {
+            try {
+                sell.asin = getNewAsin(sell, fetchNewAsinParam, 0);
+            } catch(InterruptedException e) {
+                Logger.warn(Webs.E(e));
+                throw new FastRuntimeException(e.getMessage());
+            }
+        }
+        if(StringUtils.isBlank(sell.asin)) { // 最后的 asin 检查
+            String msg = afterPostPage.select(".messageboxerror").first().text();
+            if(StringUtils.isBlank(msg)) msg = "未知原因模拟手动创建 Selling 失败, 请 IT 仔细查找问题!";
+            throw new FastRuntimeException(msg);
+        }
     }
 
     /**
@@ -615,16 +524,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if("SUCCEEDED".equalsIgnoreCase(jsonObj.get("status").getAsString()))
             return jsonObj.get("asin").getAsString();
         else if("PENDING".equalsIgnoreCase(jsonObj.get("status").getAsString())) {
-            FLog.fileLog(String.format("%s.%s.times_%s.js", selling.merchantSKU, selling.account.id,
-                    times), jsonStr, FLog.T.SALES);
+            Logger.info("GetNewAsin: [%s]", jsonStr);
             if(times > 30) // 尝试 30 次吧... 12 次还是会有 PENDING 的问题
                 throw new FastRuntimeException(
                         "使用全新 UPC 创建最后一部获取 ASIN 还在 PENDING 状态, 需要使用 AmazonSellingSyncJob 进行异步获取 ASIN.");
             Thread.sleep(2500);
             return getNewAsin(selling, fetchNewAsinParam, ++times);
         } else {
-            FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id),
-                    jsonStr, FLog.T.SALES);
+            FLog.fileLog(String.format("%s.%s.js", selling.merchantSKU, selling.account.id), jsonStr, FLog.T.SALES);
             throw new FastRuntimeException(
                     "使用全新 UPC 创建 Selling 在最后获取 ASIN 的时候失败, 请联系 IT 仔细查找问题原因.");
         }

@@ -2,6 +2,7 @@ package models.embedded;
 
 import factory.FactoryBoy;
 import factory.callback.BuildCallback;
+import helper.Webs;
 import models.market.M;
 import models.market.Selling;
 import org.apache.http.NameValuePair;
@@ -40,14 +41,14 @@ public class AmazonPropsTest extends UnitTest {
     }
 
     @Test
-    public void testDeploy() {
+    public void testDeploy() throws IOException, ClassNotFoundException {
         Selling selling = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
             @Override
             public void build(Selling target) {
-                target.merchantSKU = "71KDPW-BLCPU,607198983568";
-                target.asin = "B00DU8PP8G";
+                target.merchantSKU = "73SMS4MINI-BVMGL,881165105706";
+                target.asin = "B00EZJHUEQ";
 //                target.market = M.AMAZON_DE;
-                target.market = M.AMAZON_ES;
+                target.market = M.AMAZON_IT;
                 AmazonProps aps = target.aps;
 //                aps.title = "EasyAcc Schutzhülle für Kindle Paperwhite Case Leder Tasche hülle Mit Sleep / Wake up Funktion - Blau";
                 aps.title = "EasyAcc Funda Inteligente para Kindle Paperwhite Funda (Cuero Sintético, azul)";
@@ -92,7 +93,6 @@ public class AmazonPropsTest extends UnitTest {
 
                 aps.keyFeturess.clear();
                 aps.searchTermss.clear();
-                /*
                 aps.keyFeturess
                         .add("Außenseite: Strapazierfähiges Kunstleder mit echter Lederoptik und hoher Haltbarkeit; Innenseite: Mikrofaser, angenehm weich, schützt und reinigt den Bildschirm effektiv");
                 aps.keyFeturess
@@ -108,20 +108,10 @@ public class AmazonPropsTest extends UnitTest {
                 aps.searchTermss.add("ForeFront Cases® Hülle für Kindle Paperwhite");
                 aps.searchTermss.add("Swees UltraSlim Cover für Kindle Paperwhite");
                 aps.searchTermss.add("grün rosa lila schwarz");
-                        */
 
-                aps.searchTermss
-                        .add("Azul kindle paperwhite Funda de cuero inteligente con 360 ° de rotación acción giratoria para orientación vertical y horizontal con Free Screen Protector y Stylus Touch Pen kindle paperwhite por Stuff4 ®");
-                aps.searchTermss.add("Funda smart case convertible en soporte para kindle paperwhite color negro");
-                aps.searchTermss
-                        .add("rooCASE de doble vista (negro) Cubierta folio caso de kindle paperwhite - Paisaje de apoyo y vista vertical");
-                aps.searchTermss
-                        .add("ForeFront Cases® - Funda de cuero sintético para el nuevo kindle paperwhite / Cubierta magnética con modo reposo para la nueva generación kindle paperwhite + Lápiz óptico y protector de pantalla - Negro");
-                aps.searchTermss
-                        .add("AmazonBasics - Funda de cuero con soporte ajustable de AmazonBasics para kindle paperwhite color negro");
             }
         });
-        selling.account.loginAmazonSellerCenter();
+        Webs.dev_login(selling.account);
         selling.deploy();
     }
 }

@@ -315,8 +315,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return String
-                        .format("http://www.%s/gp/registry/wishlist", this.toString());
+                return String.format("http://www.%s/gp/registry/wishlist", this.toString());
             case EBAY_UK:
                 return "unknow..";
             default:
@@ -332,9 +331,8 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return String
-                        .format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list",
-                                this.toString());
+                return String.format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list",
+                        this.toString());
             case EBAY_UK:
                 return "unknow..";
             default:
@@ -350,8 +348,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return String
-                        .format("http://www.%s/dp/%s", this.toString(), asin);
+                return String.format("http://www.%s/dp/%s", this.toString(), asin);
             case EBAY_UK:
                 return "unknow..";
             default:
@@ -419,14 +416,12 @@ public enum M {
         switch(this) {
             case AMAZON_UK:
             case AMAZON_US:
-                return "https://sellercentral." + this.toString() +
-                        "/gp/orders-v2/details?orderID=" + oid;
+                return "https://sellercentral." + this.toString() + "/gp/orders-v2/details?orderID=" + oid;
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-                return "https://sellercentral.amazon.de" +
-                        "/gp/orders-v2/details?orderID=" + oid;
+                return "https://sellercentral.amazon.de/gp/orders-v2/details?orderID=" + oid;
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -454,8 +449,7 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return "https://sellercentral." + this.toString() +
-                        "/gp/orders-v2/remote-actions/action.html";
+                return "https://sellercentral." + this.toString() + "/gp/orders-v2/remote-actions/action.html";
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -475,11 +469,9 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/Classify/SelectCategory",
-                        this.toString());
+                return String.format("https://catalog-sc.%s/abis/Classify/SelectCategory", this.toString());
             case AMAZON_US:
-                return String
-                        .format("https://catalog.%s/abis/Classify/SelectCategory", this.toString());
+                return String.format("https://catalog.%s/abis/Classify/SelectCategory", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -500,11 +492,25 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/product/ProcessCreateProduct",
-                        this.toString());
+                return String.format("https://catalog-sc.%s/abis/product/ProcessCreateProduct", this.toString());
             case AMAZON_US:
-                return String.format("https://catalog.%s/abis/product/ProcessCreateProduct",
-                        this.toString());
+                return String.format("https://catalog.%s/abis/product/ProcessCreateProduct", this.toString());
+            case EBAY_UK:
+            default:
+                throw new NotSupportChangeRegionFastException();
+        }
+    }
+
+    public String browseCategoryAmzn() {
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+                return String.format("https://catalog-sc.%s/abis/Classify/BrowseCategory.amzn", this.toString());
+            case AMAZON_US:
+                return String.format("https://catalog.%s/abis/Classify/BrowseCategory.amzn", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
@@ -527,13 +533,13 @@ public enum M {
             case AMAZON_FR:
             case AMAZON_IT:
             case AMAZON_US:
-                return String.format("https://sellercentral.%s/myi/search/ajax/ProductCreateStatus",
-                        this.toString());
+                return String.format("https://sellercentral.%s/myi/search/ajax/ProductCreateStatus", this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
         }
     }
+
 
     public String matchAsinAjaxLink() {
         switch(this) {
@@ -542,29 +548,10 @@ public enum M {
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-                return String.format("https://catalog-sc.%s/abis/product/ajax/Match.ajax",
-                        this.toString());
+                return String.format("https://catalog-sc.%s/abis/product/ajax/Match.ajax", this.toString());
             case AMAZON_US:
                 return String
                         .format("https://catalog.%s/abis/product/ajax/Match.ajax", this.toString());
-            case EBAY_UK:
-            default:
-                throw new NotSupportChangeRegionFastException();
-        }
-    }
-
-    public String saleSellingStateLink() {
-        //https://sellercentral.amazon.de/gp/ezdpc-gui/inventory-status/status.html
-        switch(this) {
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-                return String
-                        .format("https://sellercentral.%s/gp/ezdpc-gui/inventory-status/status.html",
-                                this.toString());
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();

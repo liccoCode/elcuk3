@@ -43,6 +43,12 @@ public class CategorySettings implements Serializable {
     @Column(columnDefinition = "varchar(100) DEFAULT ''")
     public String amazonFRCategory;
 
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonITCategory;
+
+    @Column(columnDefinition = "varchar(100) DEFAULT ''")
+    public String amazonESCategory;
+
     public Map<String, String> amazonNodeMap() {
         String[] nodes = StringUtils.split(amazonNode, ",");
         Map<String, String> nodeMap = new HashMap<String, String>();
@@ -67,6 +73,10 @@ public class CategorySettings implements Serializable {
             return amazonCategory;
         } else if(market == M.AMAZON_FR) {
             return amazonFRCategory;
+        } else if(market == M.AMAZON_ES) {
+            return amazonESCategory;
+        } else if(market == M.AMAZON_IT) {
+            return amazonITCategory;
         } else {
             return "";
         }

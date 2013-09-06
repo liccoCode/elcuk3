@@ -16,7 +16,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
@@ -182,14 +181,18 @@ public class AmazonProps implements Serializable {
     public boolean isGiftMessage = false;
 
     public void validate() {
-        Validation.required(Messages.get("aps.title"), this.title);
-        Validation.required(Messages.get("aps.upc"), this.upc);
-        Validation.required(Messages.get("aps.manufac"), this.manufacturer);
-        Validation.required(Messages.get("aps.rbn"), this.rbns.toArray());
-        Validation.required(Messages.get("aps.price"), this.standerPrice);
-        Validation.required(Messages.get("aps.tech"), this.keyFeturess);
-        Validation.required(Messages.get("aps.keys"), this.searchTermss);
-        Validation.required(Messages.get("aps.prodDesc"), this.productDesc);
+        if(StringUtils.isBlank(this.title))
+            Validation.addError("", "Title 必须填写");
+        if(StringUtils.isBlank(this.upc))
+            Validation.addError("", "UPC 必须存在");
+        if(StringUtils.isBlank(this.manufacturer))
+            this.manufacturer = "EasyAcc";
+        if(this.standerPrice == null || this.standerPrice <= 0)
+            Validation.addError("", "产品标价必须大于 0");
+        if(this.salePrice == null || this.salePrice <= 0)
+            Validation.addError("", "产品真实销售价必须大于 0");
+        if(this.standerPrice != null && this.salePrice != null && this.salePrice > this.standerPrice)
+            Validation.addError("", "产品真实销售价必须小于产品标价");
     }
 
     /**
@@ -269,8 +272,8 @@ public class AmazonProps implements Serializable {
         if(StringUtils.isBlank(this.searchTerms)) return;
         String[] searchTermsArr = StringUtils.splitByWholeSeparator(this.searchTerms, Webs.SPLIT);
         for(int i = 0; i < searchTermsArr.length; i++) {
-            if(searchTermsArr[i].length() > 2000)
-                throw new FastRuntimeException("SearchTerm length must blew than 2000.");
+            if(searchTermsArr[i].length() > 50)
+                throw new FastRuntimeException("SearchTerm length must blew than 50.");
             params.add(new BasicNameValuePair("generic_keywords[" + i + "]", searchTermsArr[i]));
         }
         // length = 3, 0~2, need 3,4
@@ -408,7 +411,6 @@ public class AmazonProps implements Serializable {
 
             // Vital Info
             if("item_name".equals(name)) {
-
                 addParams(name, this.title, params);
             } else if("manufacturer".equals(name)) {
                 addParams(name, this.manufacturer, params);
