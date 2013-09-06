@@ -6,7 +6,6 @@ import factory.annotation.Factory;
 import models.embedded.AmazonProps;
 import models.market.Account;
 import models.market.M;
-import models.market.PriceStrategy;
 import models.market.Selling;
 
 /**
@@ -32,16 +31,6 @@ public class SellingFactory extends ModelFactory<Selling> {
         selling.fnSku = "FNSKU";
         selling.merchantSKU = "merchantSKU";
         selling.shippingPrice = 12f;
-
-        PriceStrategy strategy = new PriceStrategy();
-        strategy.type = PriceStrategy.T.FixedPrice;
-        strategy.margin = 1f;
-        strategy.cost = 29f;
-        strategy.lowest = 12f;
-        strategy.max = 30f;
-        selling.priceStrategy = strategy;
-
-        selling.type = Selling.T.FBA;
         return selling;
     }
 

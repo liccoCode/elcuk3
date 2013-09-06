@@ -88,10 +88,6 @@ public class Selling extends GenericModel {
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<SellingQTY>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @Expose
-    public PriceStrategy priceStrategy;
-
     /**
      * 上架后用来唯一标示这个 Selling 的 Id;
      * sellingId: msku|market.nickName|acc.id
@@ -128,18 +124,12 @@ public class Selling extends GenericModel {
     @Expose
     public S state;
 
-    @Enumerated(EnumType.STRING)
-    @Expose
-    public T type;
-
 
     /**
      * 给这个 Selling 人工设置的 PS 值
      */
     public Float ps = 0f;
 
-    @Expose
-    public Float price = 0f;
 
     @Expose
     public Float shippingPrice = 0f;
@@ -267,9 +257,6 @@ public class Selling extends GenericModel {
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
-        this.type = T.AMAZON;
-        // 做修复, 当数据从 Amazon 同步回数据以后, 已经拥有 PriceStrategy 所需要的信息了
-        if(this.priceStrategy == null) this.priceStrategy = new PriceStrategy(this);
         this.save();
     }
 
@@ -474,6 +461,15 @@ public class Selling extends GenericModel {
 
     public static boolean exist(String merchantSKU) {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
+    }
+
+    public boolean isMSkuValid() {
+        if(StringUtils.isBlank(this.merchantSKU)) return false;
+        String[] args = StringUtils.split(this.merchantSKU, ",");
+        if(args.length != 2) return false;
+        if(!args[1].equals(this.aps.upc)) return false;
+        this.merchantSKU = this.merchantSKU.toUpperCase();
+        return true;
     }
 
 }
