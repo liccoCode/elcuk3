@@ -317,49 +317,34 @@ public class Selling extends GenericModel {
     public void deploy() {
         this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);//将数组参数转换成字符串再进行处理
         synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
-            switch(this.market) {
-                case AMAZON_DE:
-                case AMAZON_ES:
-                case AMAZON_FR:
-                case AMAZON_IT:
-                case AMAZON_UK:
-                case AMAZON_US:
-                    // 1. 切换 Selling 所在区域
-                    this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+            if(!this.market.isAmazon()) return;
+            // 1. 切换 Selling 所在区域
+            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
-                    // 2. 设置需要提交的值
-                    String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                    F.T2<Collection<NameValuePair>, Document> paramDocTuple = this.aps.generateDeployProps(html, this);
+            // 2. 设置需要提交的值
+            String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+            F.T2<Collection<NameValuePair>, String> paramDocTuple = this.aps.generateDeployProps(html, this);
 
-                    // 3. 提交
-                    String[] args = StringUtils.split(
-                            paramDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
-                    html = HTTP.post(this.account.cookieStore(),
-                            // 更新的链接需要账号所在地的 URL
-                            M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
-                            paramDocTuple._1
-                    );
-                    if(StringUtils.isBlank(html)) // 这个最先检查
-                        throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+            // 3. 提交
+            String[] args = StringUtils.split(paramDocTuple._2, ";");
+            html = HTTP.post(this.account.cookieStore(),
+                    // 更新的链接需要账号所在地的 URL
+                    M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
+                    paramDocTuple._1
+            );
+            if(StringUtils.isBlank(html)) // 这个最先检查
+                throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
 
-                    if(Play.mode.isDev())
-                        IO.writeContent(html, new File(
-                                String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            Document doc = Jsoup.parse(html);
+            Elements error = doc.select(".messageboxerror li");
+            if(error.size() > 0)
+                throw new FastRuntimeException("Error:" + error.text());
 
-                    Document doc = Jsoup.parse(html);
-                    Elements error = doc.select(".messageboxerror li");
-                    if(error.size() > 0)
-                        throw new FastRuntimeException("Error:" + error.text());
+            // 4. 更新回数据库
+            this.save();
 
-                    // 4. 更新回数据库
-                    this.save();
-
-                    // 还原
-                    this.account.changeRegion(this.account.type);
-                    break;
-                case EBAY_UK:
-                    break;
-            }
+            // 还原
+            this.account.changeRegion(this.account.type);
         }
     }
 

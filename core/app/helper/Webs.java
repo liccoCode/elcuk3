@@ -13,11 +13,13 @@ import play.data.validation.Validation;
 import play.libs.F;
 import play.libs.Mail;
 import play.mvc.Scope;
+import play.utils.FastRuntimeException;
 
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,8 @@ public class Webs {
     //这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)
     public static final NumberFormat NN_DE = NumberFormat.getNumberInstance(Locale.GERMANY);
     public static final NumberFormat NN_UK = NumberFormat.getNumberInstance(Locale.UK);
+    // us 与 uk 一样
+    public static final NumberFormat NN_US = NumberFormat.getNumberInstance(Locale.US);
 
     //这种是可以解析  £1,234.23(UK), $1,234.23(US), 1.234,23 €(DE)
     public static final NumberFormat NC_UK = NumberFormat.getCurrencyInstance(Locale.UK);
@@ -167,11 +171,9 @@ public class Webs {
      * @param priceStr
      * @return
      */
-    public static F.T2<M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr,
-                                                                  M defaultMarket) {
+    public static F.T2<M, Float> amzPriceFormat(String priceStr, M defaultMarket) {
         if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
-        StringBuilder sbd = new StringBuilder(priceStr);
-        String dot = Character.toString(sbd.charAt(sbd.length() - 3));
+        String dot = Character.toString(priceStr.charAt(priceStr.length() - 3));
         if(dot.equals(".")) { // uk/us 格式
             return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
@@ -179,6 +181,44 @@ public class Webs {
         } else {
             Logger.error("Not support price format.");
             return new F.T2<M, Float>(defaultMarket, 999f);
+        }
+    }
+
+    /**
+     * amazon 上架的时候价格格式的自动选择. 是根据格式选择, 还是 market 选择
+     *
+     * @return
+     */
+    public static String amzPriceToFormat(Number price, String format) {
+        String dot = Character.toString(format.charAt(format.length() - 3));
+        if(".".equals(dot)) {
+            return NN_US.format(price.doubleValue());
+        } else if(",".equals(dot)) {
+            return NN_DE.format(price.doubleValue());
+        } else {
+            throw new FastRuntimeException("Unsupport dot format on PriceToFormat. [" + dot + "]");
+        }
+    }
+
+    /**
+     * 将 Amazon 上的数字字符串自动转换为数字(自动判断是 DE 还说 UK 格式)
+     *
+     * @param priceStr
+     * @return
+     */
+    public static Double amzFormatToPrice(String priceStr) {
+        String dot = Character.toString(priceStr.charAt(priceStr.length() - 3));
+        try {
+            if(".".equals(dot)) {
+                return NN_US.parse(priceStr).doubleValue();
+            } else if(",".equals(dot)) {
+                return NN_DE.parse(priceStr).doubleValue();
+            } else {
+                throw new FastRuntimeException("Unsupport dot format on FormatToPrice. [" + dot + "]");
+            }
+        } catch(ParseException e) {
+            e.printStackTrace();
+            throw new FastRuntimeException(e);
         }
     }
 
