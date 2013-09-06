@@ -74,7 +74,7 @@ public class Notifications extends Controller {
     public static void updateState(List<Long> noteID) {
 
         if(noteID != null) {
-            Notification.changState(noteID);
+            Notification.markStateAsChecked(noteID);
         } else {
             renderJSON(new Ret("未选中，无法更新状态"));
         }

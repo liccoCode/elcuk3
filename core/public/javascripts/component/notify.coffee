@@ -26,7 +26,7 @@ $ ->
         [{title: 'See Notifications'}]
       #清空数据
       $("#notifications").find("li").remove()
-      $.each(param, (index, element)->
+      _.each(param, (element,index)->
         $("#notifications").append(_.template($('#news-notifications-model-template').html(), {noty: element}))
       )
       $("#notifications").append("<li><a href='/Notifications/index' class='label' >See more</a></li>")
@@ -51,10 +51,11 @@ $ ->
   $(document).on("click", ".dropdown-menu a[data-id]", (e) ->
       $span = $(@)
       updateState({noteID:$span.attr("data-id")}, ->
-         $("#notificationBtn").trigger("click")
+         $("#notificationBtn").click()
          newsCount()
       )
     )
+
   #更改 通知信息的状态为 已读
   updateState = (datas, func)->
     LoadMask.mask()

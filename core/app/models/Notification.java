@@ -186,7 +186,12 @@ public class Notification extends GenericModel {
         this.save();
     }
 
-    public static void changState(List<Long> ids) {
+    /**
+     * 将通知 变成 已读状态
+     *
+     * @param ids
+     */
+    public static void markStateAsChecked(List<Long> ids) {
         for(Long id : ids) {
             Notification notification = Notification.findById(id);
             notification.changState(Notification.S.CHECKED);
