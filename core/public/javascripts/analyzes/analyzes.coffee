@@ -162,16 +162,7 @@ $ ->
        $postVal.val(categoryId)
 
     head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
-    #图形节点点击事件
-    plotEvents ={
-       click:(e)->
-         window.open('/analyzes/pie?msku='+$postVal.val()+'&date=' + Highcharts.dateFormat('%Y-%m-%d', event.point.x),
-          $postVal,
-         'width=520,height=620,location=yes,status=yes'
-         )
-    }
-
-    $("#a_units").trigger("ajaxFresh",[head,"Units",plotEvents,'没有数据, 无法绘制曲线...'])
+    $("#a_units").trigger("ajaxFresh",[head,"Units",{},'没有数据, 无法绘制曲线...'])
 
   # 转换率的曲线
   ajaxTurnOverLine = ->
