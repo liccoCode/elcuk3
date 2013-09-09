@@ -44,7 +44,7 @@ public class OrderInfoFetchJob extends Job {
                 OrderInfoFetchJob.orderDetailUserIdAndEmailAndPhone(ord, html);
                 ord.save();
             } catch(Exception e) {
-                Logger.warn("Parse Order(%s) Info Error! email:%s, userId:%s, email:%s. [%s]",
+                Logger.warn("Parse Order(%s) Info Error! email:%s, userId:%s, phone:%s. [%s]",
                         ord.orderId, ord.email, ord.userid, ord.phone, Webs.S(e));
             }
         }
@@ -86,12 +86,12 @@ public class OrderInfoFetchJob extends Job {
         if(lin == null) {
             // 找不到上面的记录的时候, 将这个订单的警告信息记录在 memo 中
             lin = doc.select("#_myoV2PageTopMessagePlaceholder").first();
-            if(StringUtils.contains(lin.text().toLowerCase(), "cancelled") ||
+            if(StringUtils.isNotBlank(lin.text()) && StringUtils.contains(lin.text().toLowerCase(), "cancelled") ||
                     StringUtils.contains(lin.text().toLowerCase(), "storniert")/*德语*/) {
                 Logger.info("Order %s state from %s to %s", order.orderId, order.state, Orderr.S.CANCEL);
                 order.state = Orderr.S.CANCEL;
+                order.memo = lin.text();
             }
-            order.memo = lin.text();
         } else {
             Elements smallers = doc.select(".smaller");
             for(Element smaller : smallers) {

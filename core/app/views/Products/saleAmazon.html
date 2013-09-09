@@ -7,7 +7,6 @@
 
   <p>&nbsp;</p>
   <ul>
-    <li>现在在系统中通过 Product 上架还没有将模板功能实现, 所以现在的参数, 都需要自己手动填写.</li>
     <li>Preview 功能拥有提示 Amazon 不允许的标签的功能, 能够方便的在这里检查出不允许的标签并查看到预览效果.</li>
     <li>Price 价格会根据这个 Selling 所在的市场来进行判断单位, 所以只需要填写对应市场的价格数值即可, 不用去转换.</li>
     <li>MerchantSKU 是根据 SKU 与 UPC 来确定的, 不允许手动修改. 所以对于 FBA 不发, 需要创建一个自卖产品的, 建议不在系统中处理.</li>
@@ -102,8 +101,8 @@
   <td>
     <div class="input-prepend">
     #{rbn_info /}
-      <input type="text" style="width:80px;" name="s.aps.rbns[0]" value="${s.aps.rbns[0]}">
-      <input type="text" style="width:80px;" name="s.aps.rbns[1]" value="${s.aps.rbns[1]}">
+      <input type="text" style="width:80px;" name="s.aps.rbns" value="${s.aps.rbns[0]}">
+      <input type="text" style="width:80px;" name="s.aps.rbns" value="${s.aps.rbns[1]}">
     </div>
   </td>
   <th>Qty:</th>
@@ -155,9 +154,9 @@
 <tr>
   <td colspan="4">
     <div class="input-prepend offset1">
-      <button id="sid_preview_popover" class="btn" rel="popover" full-width='full-width' placement='bottom' trigger='toggle'
-              data-content="请先预览" title="Detail Preview">
-        <i class="icon-search"></i></button>
+      <button id="sid_preview_popover" class="btn" rel="popover" placement='bottom' data-content="请先预览" title="Detail Preview">
+        <i class="icon-search"></i>
+      </button>
       <input type="text" id="sid_helper" style="width:160px;" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
       <button class="btn" rel="popover"><i class="icon-edit"></i></button>
     </div>
@@ -168,7 +167,7 @@
   <th rowspan="5">Technical:</th>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[0]" value="${s.aps.keyFeturess[0]}">
+      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[0]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -177,7 +176,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[1]" value="${s.aps.keyFeturess[1]}">
+      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[1]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -186,7 +185,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[2]" value="${s.aps.keyFeturess[2]}">
+      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[2]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -195,7 +194,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[3]" value="${s.aps.keyFeturess[3]}">
+      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[3]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -204,7 +203,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess[4]" value="${s.aps.keyFeturess[4]}">
+      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[4]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -214,7 +213,7 @@
   <th rowspan="5">SearchTerms:</th>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss[0]" value="${s.aps.searchTermss[0]}">
+      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[0]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -223,7 +222,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss[1]" value="${s.aps.searchTermss[1]}">
+      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[1]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -232,7 +231,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss[2]" value="${s.aps.searchTermss[2]}">
+      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[2]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -241,7 +240,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss[3]" value="${s.aps.searchTermss[3]}">
+      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[3]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -250,7 +249,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss[4]" value="${s.aps.searchTermss[4]}">
+      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[4]}">
       <span class="add-on"></span>
     </div>
   </td>

@@ -19,6 +19,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -95,17 +96,17 @@ public class Products extends Controller {
         /**
          * 从前台上传来的一系列的值检查
          */
-        // 检查
-        validation.valid(s);
-        s.aps.validate();
-        if(Validation.hasErrors()) render("Products/saleAmazon.html", s, pro);
-
         try {
             Selling se = pro.saleAmazon(s);
-            flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
-            redirect("/Sellings/selling/" + se.sellingId);
-        } catch(Exception e) {
-            Validation.addError("", e.getMessage());
+            if(Validation.hasErrors()) {
+                Webs.errorToFlash(flash);
+                render("Products/saleAmazon.html", s, pro);
+            } else {
+                flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
+                redirect("/Sellings/selling/" + se.sellingId);
+            }
+        } catch(FastRuntimeException e) {
+            flash.error(e.getMessage());
             render("Products/saleAmazon.html", s, pro);
         }
     }
