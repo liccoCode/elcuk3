@@ -1,6 +1,8 @@
 package factory.product;
 
+import factory.FactoryBoy;
 import factory.ModelFactory;
+import models.product.Category;
 import models.product.Product;
 
 /**
@@ -20,6 +22,7 @@ public class ProductFactory extends ModelFactory<Product> {
         sku.lengths = 12f;
         sku.weight = 12f;
         sku.width = 12f;
+        sku.category = FactoryBoy.lastOrCreate(Category.class);
 
         return sku;
     }

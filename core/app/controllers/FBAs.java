@@ -59,12 +59,14 @@ public class FBAs extends Controller {
      * 箱內麦
      *
      * @param id
+     *
      */
     public static void packingSlip(Long id, boolean html) {
         final FBAShipment fba = FBAShipment.findById(id);
         renderArgs.put("shipmentId", fba.shipmentId);
         renderArgs.put("fba", fba);
         renderArgs.put("shipFrom", Account.address(fba.account.type));
+
         if(html) {
             render();
         } else {
@@ -84,11 +86,17 @@ public class FBAs extends Controller {
         renderArgs.put("shipmentId", fba.shipmentId);
         renderArgs.put("fba", fba);
         renderArgs.put("shipFrom", Account.address(fba.account.type));
+
+        ProcureUnit procureUnit = fba.units.get(0);
+
+        renderArgs.put("procureUnit",procureUnit);
+
         if(html) {
             render();
         } else {
             PDF.Options options = new PDF.Options();
-            options.pageSize = IHtmlToPdfTransformer.A4P;
+            //只设置 width height    margin 为零
+            options.pageSize =  new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
             renderPDF(options);
         }
     }
