@@ -9,7 +9,6 @@ import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.joda.time.DateTime;
-import org.joda.time.Instant;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Email;
@@ -20,9 +19,9 @@ import query.vo.OrderrVO;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -436,43 +435,6 @@ public class Orderr extends GenericModel {
     }
 
 
-    /**
-     * 查看某一天订单的饼图数据
-     *
-     * @param msku
-     * @param date
-     * @return
-     */
-    public static Map<String, AtomicInteger> orderPieChart(String msku, Date date) {
-        DateTime day = Instant.parse(new DateTime(date.getTime()).toString("yyyy-MM-dd"))
-                .toDateTime();
-        Date dayBegin = day.toDate();
-        Date dayEnd = day.plusDays(1).toDate();
-
-        List<Orderr> orderrs = Orderr.ordersInRange(dayBegin, dayEnd);
-
-        Map<String, AtomicInteger> rtMap = new LinkedHashMap<String, AtomicInteger>();
-        for(Long begin = dayBegin.getTime(); begin < dayEnd.getTime();
-            begin += TimeUnit.HOURS.toMillis(1)) {
-            rtMap.put(begin.toString(), new AtomicInteger(0));
-            for(Orderr or : orderrs) {
-                for(OrderItem oi : or.items) {
-                    if(oi.selling.merchantSKU.equals(msku) ||
-                            "all".equalsIgnoreCase(msku)) {//如果搜索的 MerchantSKU 为 all 也进行计算
-                        if(or.createDate.getTime() < begin ||
-                                or.createDate.getTime() > begin + TimeUnit.HOURS.toMillis(1))
-                            continue;
-
-                        if(rtMap.containsKey(begin.toString())) {
-                            rtMap.get(begin.toString()).incrementAndGet(); //因为是统计的订单, 所以数量都是以 1 递增
-                        }
-                    }
-                }
-            }
-        }
-
-        return rtMap;
-    }
 
     /**
      * 简单抽取常用的根据时间加载订单的方法
