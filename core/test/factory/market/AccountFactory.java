@@ -25,46 +25,65 @@ public class AccountFactory extends ModelFactory<Account> {
     }
 
 
-    @Factory(name = "de")
+    @Factory(name = "ide")
     public Account de() {
-        Account acc = new Account();
-        acc.type = M.AMAZON_DE;
+        Account acc = deNoId();
         acc.id = 2l;
-        acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
-        acc.merchantId = "A22H6OV6Q7XBYK";
-        acc.username = "wyatt@easyacceu.com";
-        acc.password = "pw5165688104";
-        acc.closeable = false;
-        acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
-        acc.isSaleAcc = true;
         return acc;
     }
 
-    @Factory(name = "ide")
+    @Factory(name = "de")
     public Account deNoId() {
         Account acc = new Account();
         acc.type = M.AMAZON_DE;
         acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
-        acc.password = "pw5165688104";
+        acc.password = "13297472505de";
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
         acc.closeable = false;
         acc.isSaleAcc = true;
         return acc;
     }
 
-    @Factory(name = "us")
+    @Factory(name = "ius")
     public Account us() {
+        Account acc = noIdUS();
+        acc.id = 131l;
+        return acc;
+    }
+
+    @Factory(name = "us")
+    public Account noIdUS() {
         Account acc = new Account();
         acc.type = M.AMAZON_US;
-        acc.id = 131l;
         acc.accessKey = "AKIAIAEPZK5CZEIVZFCQ";
         acc.merchantId = "A22H6OV6Q7XBYK";
         acc.username = "wyatt@easyacceu.com";
-        acc.password = "pw5165688104";
+        acc.password = "13297472505us";
         acc.closeable = false;
         acc.token = "fC57b00QsLKfRbYoY7fbUQmb2j2wonv81vWFWuNF";
+        acc.isSaleAcc = true;
+        return acc;
+    }
+
+    @Factory(name = "iuk")
+    public Account uk() {
+        Account acc = noIdUK();
+        acc.id = 1l;
+        return acc;
+    }
+
+    @Factory(name = "uk")
+    public Account noIdUK() {
+        Account acc = new Account();
+        acc.type = M.AMAZON_UK;
+        acc.accessKey = "AKIAI6EBPJLG64HWDBGQ";
+        acc.merchantId = "AJUR3R8UN71M4";
+        acc.username = "wyatt@easyacceu.com";
+        acc.password = "13297472505uk";
+        acc.closeable = false;
+        acc.token = "3e3TWsDOt6KBfubRzEIRWZuhSuxa+aRGWvnnjJuf";
         acc.isSaleAcc = true;
         return acc;
     }

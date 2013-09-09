@@ -1,7 +1,6 @@
 package models.embedded;
 
 import com.google.gson.annotations.Expose;
-import helper.Constant;
 import helper.Dates;
 import helper.FLog;
 import helper.Webs;
@@ -15,20 +14,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import play.Logger;
-import play.Play;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.i18n.Messages;
 import play.libs.F;
-import play.libs.IO;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
-import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
@@ -187,14 +181,18 @@ public class AmazonProps implements Serializable {
     public boolean isGiftMessage = false;
 
     public void validate() {
-        Validation.required(Messages.get("aps.title"), this.title);
-        Validation.required(Messages.get("aps.upc"), this.upc);
-        Validation.required(Messages.get("aps.manufac"), this.manufacturer);
-        Validation.required(Messages.get("aps.rbn"), this.rbns.toArray());
-        Validation.required(Messages.get("aps.price"), this.standerPrice);
-        Validation.required(Messages.get("aps.tech"), this.keyFeturess);
-        Validation.required(Messages.get("aps.keys"), this.searchTermss);
-        Validation.required(Messages.get("aps.prodDesc"), this.productDesc);
+        if(StringUtils.isBlank(this.title))
+            Validation.addError("", "Title 必须填写");
+        if(StringUtils.isBlank(this.upc))
+            Validation.addError("", "UPC 必须存在");
+        if(StringUtils.isBlank(this.manufacturer))
+            this.manufacturer = "EasyAcc";
+        if(this.standerPrice == null || this.standerPrice <= 0)
+            Validation.addError("", "产品标价必须大于 0");
+        if(this.salePrice == null || this.salePrice <= 0)
+            Validation.addError("", "产品真实销售价必须大于 0");
+        if(this.standerPrice != null && this.salePrice != null && this.salePrice > this.standerPrice)
+            Validation.addError("", "产品真实销售价必须小于产品标价");
     }
 
     /**
@@ -249,19 +247,18 @@ public class AmazonProps implements Serializable {
      * @param params
      */
     public void bulletPointsCheck(Collection<NameValuePair> params) {
+        if(StringUtils.isBlank(this.keyFetures)) return;
         // 这里使用自己进行字符串
         String[] keyFeturesArr = StringUtils.splitByWholeSeparator(this.keyFetures, Webs.SPLIT);
         for(int i = 0; i < keyFeturesArr.length; i++) {
             if(keyFeturesArr[i].length() > 2000)
-                throw new FastRuntimeException("Bullet Point Length must blew than 50.");
+                throw new FastRuntimeException("Bullet Point Length must blew than 2000.");
             params.add(new BasicNameValuePair("bullet_point[" + i + "]", keyFeturesArr[i]));
         }
         int missingIndex = 5 - keyFeturesArr.length;
         if(missingIndex > 0) {
             for(int i = 1; i <= missingIndex; i++) {
-                params.add(
-                        new BasicNameValuePair("bullet_point[" + (keyFeturesArr.length + i) + "]",
-                                ""));
+                params.add(new BasicNameValuePair("bullet_point[" + (keyFeturesArr.length + i) + "]", ""));
             }
         }
     }
@@ -272,8 +269,8 @@ public class AmazonProps implements Serializable {
      * @param params
      */
     public void searchTermsCheck(Collection<NameValuePair> params) {
-        String[] searchTermsArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(
-                this.searchTerms, Webs.SPLIT);
+        if(StringUtils.isBlank(this.searchTerms)) return;
+        String[] searchTermsArr = StringUtils.splitByWholeSeparator(this.searchTerms, Webs.SPLIT);
         for(int i = 0; i < searchTermsArr.length; i++) {
             if(searchTermsArr[i].length() > 50)
                 throw new FastRuntimeException("SearchTerm length must blew than 50.");
@@ -283,8 +280,7 @@ public class AmazonProps implements Serializable {
         int missingIndex = 5 - searchTermsArr.length; // missingIndex = 5 - 3 = 2
         if(missingIndex > 0) {
             for(int i = 1; i <= missingIndex; i++) {
-                params.add(new BasicNameValuePair(
-                        "generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
+                params.add(new BasicNameValuePair("generic_keywords[" + (searchTermsArr.length + i) + "]", ""));
             }
         }
     }
@@ -325,16 +321,16 @@ public class AmazonProps implements Serializable {
                 msku.toUpperCase())) // 系统里面全部使用大写, 而 Amazon 上大小写敏感, 在这里转换成系统内使用的.
             throw new FastRuntimeException("同步的 Selling Msku 不一样! 请立即联系 IT 查看问题.");
 
-        String[] bulletPoints = new String[5];
-        String[] searchTerms = new String[5];
-        String[] rbns = new String[2];
+        List<String> bulletPoints = new ArrayList<String>();
+        List<String> searchTerms = new ArrayList<String>();
+        List<String> rbns = new ArrayList<String>();
 
         this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
 //        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
         this.condition_ = doc.select("#offering_condition_display").text().trim()
                 .toUpperCase(); // 默认为 NEW
-        F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(
+        F.T2<M, Float> our_price = Webs.amzPriceFormat(
                 doc.select("#our_price").val(), sell.account.type);
         for(Element input : inputs) {
             String name = input.attr("name");
@@ -349,18 +345,18 @@ public class AmazonProps implements Serializable {
             else if("offering_start_date".equals(name))
                 this.launchDate = Dates.listingFromFmt(sell.market, val);
             else if("legal_disclaimer_description".equals(name)) this.legalDisclaimerDesc = val;
-            else if("bullet_point[0]".equals(name)) bulletPoints[0] = val;
-            else if("bullet_point[1]".equals(name)) bulletPoints[1] = val;
-            else if("bullet_point[2]".equals(name)) bulletPoints[2] = val;
-            else if("bullet_point[3]".equals(name)) bulletPoints[3] = val;
-            else if("bullet_point[4]".equals(name)) bulletPoints[4] = val;
-            else if("generic_keywords[0]".equals(name)) searchTerms[0] = val;
-            else if("generic_keywords[1]".equals(name)) searchTerms[1] = val;
-            else if("generic_keywords[2]".equals(name)) searchTerms[2] = val;
-            else if("generic_keywords[3]".equals(name)) searchTerms[3] = val;
-            else if("generic_keywords[4]".equals(name)) searchTerms[4] = val;
-            else if("recommended_browse_nodes[0]".equals(name)) rbns[0] = val;
-            else if("recommended_browse_nodes[1]".equals(name)) rbns[1] = val;
+            else if("bullet_point[0]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[1]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[2]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[3]".equals(name)) bulletPoints.add(val);
+            else if("bullet_point[4]".equals(name)) bulletPoints.add(val);
+            else if("generic_keywords[0]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[1]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[2]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[3]".equals(name)) searchTerms.add(val);
+            else if("generic_keywords[4]".equals(name)) searchTerms.add(val);
+            else if("recommended_browse_nodes[0]".equals(name)) rbns.add(val);
+            else if("recommended_browse_nodes[1]".equals(name)) rbns.add(val);
             else if("our_price".equals(name))
                 this.standerPrice = Webs
                         .amazonPriceNumber(our_price._1/*同 deploy->our_price*/, val);
@@ -385,100 +381,100 @@ public class AmazonProps implements Serializable {
      * @param sell
      * @return
      */
-    public F.T2<Collection<NameValuePair>, Document> generateDeployProps(String html, Selling sell) {
-        if(Play.mode.isDev())
-            IO.writeContent(html,
-                    new File(String.format("%s/%s_%s.html", Constant.E_DATE, sell.merchantSKU, sell.asin)));
-
+    public F.T2<Collection<NameValuePair>, String> generateDeployProps(String html, Selling sell) {
+        if(this.productDesc.length() > 2000)
+            throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
+        if(this.standerPrice == null || this.standerPrice <= 0)
+            throw new FastRuntimeException("Selling StandPrice is below 0 !!");
+        if(this.salePrice == null || this.salePrice <= 0)
+            throw new FastRuntimeException("Selling SalePrice is below 0 !!");
         Document doc = Jsoup.parse(html);
         // ----- Input 框框
-        Elements inputs = doc.select("form[name=productForm] input");
+        Element form = doc.select("form[name=productForm]").first();
+        Elements inputs = form.select("input");
+
+        String priceFormat = doc.select("#Parentour_price-span").first().nextElementSibling().text();
+
         if(inputs.size() == 0) {
-            FLog.fileLog(String.format("%s_%s.html", sell.merchantSKU, sell.asin), html,
-                    FLog.T.DEPLOY);
+            FLog.fileLog(String.format("%s_%s.html", sell.merchantSKU, sell.asin), html, FLog.T.DEPLOY);
             String msg = doc.select("div").text();
             if(StringUtils.isBlank(msg)) msg = "Display Post page visit Error. Please try again.";
             throw new FastRuntimeException(String.format("Listing Sync Error. %s", msg));
         }
+
         Set<NameValuePair> params = new HashSet<NameValuePair>();
-        F.T2<M, Float> our_price = Webs.amazonPriceNumberAutoJudgeFormat(
+        F.T2<M, Float> our_price = Webs.amzPriceFormat(
                 doc.select("#our_price").val(), sell.account.type);
+
         for(Element el : inputs) {
             String name = el.attr("name").toLowerCase().trim();
-            if("our_price".equals(name) && this.standerPrice != null && this.standerPrice > 0)
-                params.add(new BasicNameValuePair(name,
-                        Webs.priceLocalNumberFormat(our_price._1, this.standerPrice)));
-            else if(StringUtils.startsWith(name, "generic_keywords") &&
-                    StringUtils.isNotBlank(this.searchTerms))
-                this.searchTermsCheck(params);
-            else if(StringUtils.startsWith(name, "bullet_point") &&
-                    StringUtils.isNotBlank(this.keyFetures))
+
+            // Vital Info
+            if("item_name".equals(name)) {
+                addParams(name, this.title, params);
+            } else if("manufacturer".equals(name)) {
+                addParams(name, this.manufacturer, params);
+            } else if("brand_name".equals(name)) {
+                addParams(name, this.brand, params);
+            } else if("part_number".equals(name)) {
+                addParams(name, this.manufacturerPartNumber, params);
+            } else if("model".equals(name)) {
+                addParams(name, this.modelNumber, params);
+            } else if(name.startsWith("recommended_browse_nodes")) {
+                for(int i = 0; i < this.rbns.size(); i++) {
+                    addParams(name + "[" + i + "]", this.rbns.get(i), params);
+                }
+            }
+
+            // Offer
+            else if("our_price".equals(name)) { // 显示价格
+                if(this.standerPrice == null || this.standerPrice <= 0) this.standerPrice = 999f;
+                addParams(name, Webs.amzPriceToFormat(this.standerPrice, priceFormat), params);
+            } else if("discounted_price".equals(name)) {
+                // 价格, 两个日期, discounted_price_start_date, discounted_price_end_date
+                addParams(name, Webs.amzPriceToFormat(this.salePrice, priceFormat), params);
+                addParams("discounted_price_start_date", Dates.listingUpdateFmt(sell.market, this.startDate), params);
+                addParams("discounted_price_end_date", Dates.listingUpdateFmt(sell.market, this.endDate), params);
+            } else if("offering_can_be_gift_wrapped".equals(name))
+                addParams(name, this.isGiftWrap ? "on" : "false", params);
+            else if("offering_can_be_gift_messaged".equals(name)) {
+                addParams(name, this.isGiftMessage ? "on" : "false", params);
+            } else if("quantity".equals(name)) {
+                addParams(name, "0", params);
+            }
+
+            // Description & Keywords
+            else if(name.startsWith("bullet_point")) {
                 this.bulletPointsCheck(params);
-            else if("manufacturer".equals(name))
-                params.add(new BasicNameValuePair(name, this.manufacturer));
-            else if("item_name".equals(name))
-                params.add(new BasicNameValuePair(name, this.title));
-            else if("part_number".equals(name))
-                params.add(new BasicNameValuePair(name, this.manufacturerPartNumber));
-            else if("quantity".equals(name))
-                params.add(new BasicNameValuePair(name,
-                        (this.quantity == null ? 0 : this.quantity) + ""));
-            else if("offering_can_be_gift_wrapped".equals(name) && this.isGiftWrap)
-                params.add(new BasicNameValuePair(name, "on"));
-            else if("offering_can_be_gift_messaged".equals(name) && this.isGiftMessage)
-                params.add(new BasicNameValuePair(name, "on"));
-            else if("discounted_price".equals(name) || "discounted_price_start_date".equals(name) ||
-                    "discounted_price_end_date".equals(name)) {
-                if(this.startDate != null && this.endDate != null &&
-                        this.salePrice != null && this.salePrice > 0 &&
-                        this.endDate.getTime() > this.startDate.getTime()) {
-                    params.add(new BasicNameValuePair("discounted_price",
-                            /*our_price*/
-                            Webs.priceLocalNumberFormat(our_price._1, this.salePrice)));
-                    params.add(new BasicNameValuePair("discounted_price_start_date",
-                            Dates.listingUpdateFmt(sell.market, this.startDate)));
-                    params.add(new BasicNameValuePair("discounted_price_end_date",
-                            Dates.listingUpdateFmt(sell.market, this.endDate)));
-                }
-            } else if(StringUtils.startsWith(name, "recommended_browse_nodes")) {
-                if(this.rbns != null && this.rbns.size() >= 1) {
-                    for(int i = 0; i < this.rbns.size(); i++) {
-                        params.add(new BasicNameValuePair("recommended_browse_nodes[" + i + "]", this.rbns.get(i)));
-                    }
-                }
+            } else if(name.startsWith("generic_keywords")) {
+                this.searchTermsCheck(params);
             } else if("activeClientTimeOnTask".equals(name)) {
-                // Amazon 的一个记录值
-                params.add(new BasicNameValuePair(name, 18059 + ""));
+                addParams(name, 18059 + "", params);
             } else {
-                /**
-                 * 因为 Amazon 的 checkbox 都是 checkbox 与 hidden 一并出现, 所以:
-                 *  排除掉 checkbox , 只需要提交 checkbox 关联的 hidden 元素
-                 */
-                if("checkbox".equals(el.attr("type"))) {
-                    Logger.info("Skip param: %s, type; %s", name, el.attr("type"));
-                    continue;
-                }
-                params.add(new BasicNameValuePair(name, el.val()));
+                // checkbox?
+                addParams(name, el.val(), params);
             }
         }
         // ------------ TextArea 框框
-        Elements textareas = doc.select("form[name=productForm] textarea");
+        Elements textareas = form.select("textarea");
         for(Element text : textareas) {
             String name = text.attr("name");
             if("product_description".equals(name) && StringUtils.isNotBlank(this.productDesc)) {
-                if(this.productDesc.length() > 2000)
-                    throw new FastRuntimeException("Product Descriptoin must blew then 2000.");
                 params.add(new BasicNameValuePair(name, this.productDesc));
             } else {
                 params.add(new BasicNameValuePair(name, text.val()));
             }
         }
+
         // ------------ Select 框框
-        Elements selects = doc.select("form[name=productForm] select");
+        Elements selects = doc.select("select");
         for(Element select : selects) {
-            params.add(new BasicNameValuePair(select.attr("name"),
-                    select.select("option[selected]").val()));
+            params.add(new BasicNameValuePair(select.attr("name"), select.select("option[selected]").val()));
         }
-        return new F.T2<Collection<NameValuePair>, Document>(params, doc);
+        return new F.T2<Collection<NameValuePair>, String>(params, form.attr("action"));
+    }
+
+    private void addParams(String name, String value, Collection<NameValuePair> params) {
+        params.add(new BasicNameValuePair(name, value));
     }
 }

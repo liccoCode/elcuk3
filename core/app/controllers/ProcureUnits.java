@@ -1,6 +1,8 @@
 package controllers;
 
 import exception.PaymentException;
+import helper.Constant;
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
@@ -16,10 +18,12 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.i18n.Messages;
+import play.libs.Files;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +54,40 @@ public class ProcureUnits extends Controller {
     public static void index(ProcurePost p) {
         if(p == null) p = new ProcurePost();
         render(p);
+    }
+
+    /**
+     * 将搜索结果 打成ZIP包，进行下载
+     */
+    public static synchronized void downloadFBAZIP(ProcurePost p) throws Exception {
+        List<ProcureUnit> procureUnitsList = p.query();
+        if(procureUnitsList != null && procureUnitsList.size() != 0) {
+            //创建FBA根目录，存放工厂FBA文件
+            File dirfile = new File(Constant.TMP, "FBA");
+            try {
+                dirfile.mkdir();
+                for(ProcureUnit procureUnit : procureUnitsList) {
+                    String name = procureUnit.cooperator.name;
+                    String date = Dates.date2Date(procureUnit.attrs.planDeliveryDate);
+
+                    //生成工厂的文件夹. 格式：预计交货日期-工厂名称
+                    File factoryDir = new File(dirfile, String.format("%s-%s-出货FBA", date, name));
+                    factoryDir.mkdir();
+                    //生成 PDF
+                    procureUnit.fbaAsPDF(factoryDir);
+                }
+            } catch(Exception e) {
+                throw e;
+            } finally {
+                File zip = new File(Constant.TMP + "/FBA.zip");
+                Files.zip(dirfile, zip);
+                Files.delete(dirfile);
+                zip.deleteOnExit();
+                renderBinary(zip);
+            }
+        } else {
+            renderText("没有数据无法生成zip文件！");
+        }
     }
 
     /**

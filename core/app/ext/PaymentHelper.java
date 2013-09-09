@@ -119,9 +119,7 @@ public class PaymentHelper extends JavaExtensions {
         if(unit.feeType != FeeType.transportShipping()) return unit.currency.toCNY(unit.unitPrice);
         if(unit.shipment != null) {
             Shipment.T shipType = unit.shipment.type;
-            PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
             DateTime now = DateTime.now();
-            DateTime threeMonthAgo = now.minusMonths(3);
 
             if(unit.shipItem != null && shipType == Shipment.T.EXPRESS) {
                 return unit.shipItem.qty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) / unit.shipItem.qty);

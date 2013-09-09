@@ -3,6 +3,7 @@ package models.procure;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.google.gson.annotations.Expose;
 import helper.Dates;
+import helper.PDFs;
 import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
@@ -11,10 +12,12 @@ import models.embedded.ERecordBuilder;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.market.Account;
 import models.market.Selling;
 import models.product.Product;
 import models.product.Whouse;
 import mws.FBA;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Check;
 import play.data.validation.CheckWith;
@@ -22,9 +25,11 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
+import play.modules.pdf.PDF;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -365,8 +370,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("检查不合格");
 
         this.attrs = attrs;
-
-
 
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
@@ -871,6 +874,43 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 setMessage("validation.sku", unit.product.sku);
                 return false;
             } else return true;
+        }
+    }
+
+    /**
+     * 指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
+     *
+     * @param folder 指定PDF文件，生成的文件目录
+     */
+    public void fbaAsPDF(File folder) throws Exception {
+
+        if(fba != null) {
+            // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
+            String namePDF = String.format("[%s][%s][%s][%s]",
+                    this.selling.market.countryName(),
+                    this.shipType.label(),
+                    this.attrs.planQty,
+                    this.product.abbreviation
+            );
+
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("shipmentId", this.fba.shipmentId);
+            map.put("shipFrom", Account.address(this.fba.account.type));
+            map.put("fba", this.fba);
+            map.put("procureUnit", this);
+
+            PDF.Options options = new PDF.Options();
+            //只设置 width height    margin 为零
+            options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+
+            //生成箱内卖 PDF
+            PDFs.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", options, map);
+
+            //生成箱外卖 PDF
+            PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
+        } else {
+            String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
+            FileUtils.writeStringToFile(new File(folder, message + ".text"), message, "UTF-8");
         }
     }
 }

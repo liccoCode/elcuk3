@@ -7,6 +7,7 @@ import models.view.post.SellingRecordChartsPost;
 import models.view.post.SellingRecordsPost;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -23,6 +24,11 @@ public class SellingRecords extends Controller {
     public static void index() {
         List<String> categoryIds = Category.category_ids();
         SellingRecordsPost p = new SellingRecordsPost();
+        try {
+            p.records();
+        } catch(FastRuntimeException e) {
+            flash.error(e.getMessage());
+        }
         render(p, categoryIds);
     }
 
@@ -38,7 +44,7 @@ public class SellingRecords extends Controller {
             List<SellingRecord> records = p.query();
             render(records, p);
         } catch(Exception e) {
-            renderArgs.put("msg", e.getMessage());
+            flash.error(e.getMessage());
             render(p);
         }
     }

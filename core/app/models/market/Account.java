@@ -214,11 +214,11 @@ public class Account extends Model {
                     }
 
 
-                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) ||
-                            StringUtils.isNotBlank(this.cookie("at-main")) ||
-                            StringUtils.isNotBlank(this.cookie("at-acbuk"))) {
+                    if(StringUtils.isNotBlank(this.cookie("at-acbde")) || //DE
+                            StringUtils.isNotBlank(this.cookie("at-main")) || //US
+                            StringUtils.isNotBlank(this.cookie("at-acbuk"))) { //UK
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
-                        HTTP.client().getCookieStore().clearExpired(new Date());
+                        HTTP.clearExpiredCookie();
                     } else {
                         Logger.warn("%s Seller Central Login Failed!", this.prettyName());
                     }
@@ -265,7 +265,7 @@ public class Account extends Model {
 
         for(Element el : inputs) {
             String att = el.attr("name");
-            if("email".equals(att))
+            if("username".equals(att))
                 params.add(new BasicNameValuePair(att, this.username));
             else if("password".equals(att))
                 params.add(new BasicNameValuePair(att, this.password));
