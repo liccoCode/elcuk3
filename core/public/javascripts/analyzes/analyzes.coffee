@@ -68,11 +68,13 @@ $ ->
   # 绑定 sid tab 中修改 ps 值
   $('#sid').on('change', 'input[ps]', () ->
     LoadMask.mask()
-    $.ajax("/analyzes/ps", {type: 'POST', data:{sid: $(@).attr('sid'), ps: $(@).val()}, dataType: 'json'})
+    $.ajax("/analyzes/ps", {type: 'POST', data: {sid: $(@).attr('sid'), ps: $(@).val()}, dataType: 'json'})
       .done((r) ->
-         if r.flag is false
-           alert(r.message)
-           LoadMask.unmask()
+        if r.flag is false
+          noty({text: r.message, type: 'error', timeout: 3000})
+        else
+          noty({text: "修改成功！", type: 'success', timeout: 3000})
+        LoadMask.unmask()
       )
   )
 
