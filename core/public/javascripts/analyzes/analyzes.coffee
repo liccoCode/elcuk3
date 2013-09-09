@@ -25,11 +25,11 @@ $ ->
      $postType = $('#postType')
 
      #绘制单个Selling的曲线图时,去掉Category条件
-     categoryIdNode = $('select[name|="p.categoryId"]')
-     categoryId = categoryIdNode.val()
-     categoryIdNode.val("")
+     $categoryNode = $('select[name|="p.categoryId"]')
+     categoryId = $categoryNode.val()
+     $categoryNode.val("")
      ajaxSaleUnitLines()
-     categoryIdNode.val(categoryId)
+     $categoryNode.val(categoryId)
 
      # 转换率与 PageView
      if $postType.val() == "sid"
@@ -68,11 +68,11 @@ $ ->
   # 绑定 sid tab 中修改 ps 值
   $('#sid').on('change', 'input[ps]', () ->
     LoadMask.mask()
-    $.post('/analyzes/ps', {sid: $(@).attr('sid'), ps: $(@).val()})
+    $.ajax("/analyzes/ps", {type: 'POST', data:{sid: $(@).attr('sid'), ps: $(@).val()}, dataType: 'json'})
       .done((r) ->
-        if r.flag is false
-          alert(r.message)
-        LoadMask.unmask()
+         if r.flag is false
+           alert(r.message)
+           LoadMask.unmask()
       )
   )
 
@@ -99,7 +99,7 @@ $ ->
 
   #parameters：
     # headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
-  $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e,headName,yName,plotEvents,noDataDisplayMessage) ->
+  $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
     $div = $(@)
     LoadMask.mask()
     $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
