@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Collection;
 
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.core.Is.is;
 
 /**
  * Created by IntelliJ IDEA.
