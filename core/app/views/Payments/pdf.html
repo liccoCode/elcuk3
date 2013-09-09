@@ -142,15 +142,29 @@
    </tr>
    <tr>
      <td colspan="4"></td>
+     #{if payment.state == models.finance.Payment.S.WAITING}
      <td>美元汇率</td>
+     <td colspan="4">
+      ${(payment.currency.toUSD(payment.approvalAmount()) / payment.approvalAmount())}
+     </td>
+     #{/if}
+     #{elseif payment.state == models.finance.Payment.S.PAID}
+     <td>${payment.actualCurrency.currencyName()}汇率</td>
      <td colspan="4">${payment.rate}</td>
+     #{/elseif}
    </tr>
   <tr>
     <td colspan="2">&nbsp;</td>
-    <td>应付金额</td>
+    <td>应付${payment.currency.currencyName()}</td>
     <td>${payment.currency.symbol()} ${payment.approvalAmount()}</td>
+    #{if payment.state == models.finance.Payment.S.WAITING}
     <td>应付美金</td>
-    <td colspan="4">${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+    <td colspan="4">${(payment.currency.toUSD(payment.approvalAmount())).format('#.##')}</td>
+    #{/if}
+    #{elseif payment.state == models.finance.Payment.S.PAID}
+    <td>应付${payment.actualCurrency.currencyName()}</td>
+    <td colspan="4">${payment.actualCurrency.symbol()}${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+    #{/elseif}
   </tr>
 </table>
     #{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
