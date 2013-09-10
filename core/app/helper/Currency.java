@@ -74,7 +74,7 @@ public enum Currency {
         }
 
         @Override
-        public String currencyName() {
+        public String label() {
             return "英镑";
         }
 
@@ -139,7 +139,7 @@ public enum Currency {
         }
 
         @Override
-        public String currencyName() {
+        public String label() {
             return "欧元";
         }
 
@@ -204,7 +204,7 @@ public enum Currency {
         }
 
         @Override
-        public String currencyName() {
+        public String label() {
             return "人民币";
         }
 
@@ -268,7 +268,7 @@ public enum Currency {
         }
 
         @Override
-        public String currencyName() {
+        public String label() {
             return "美元";
         }
 
@@ -327,7 +327,7 @@ public enum Currency {
         }
 
         @Override
-        public String currencyName() {
+        public String label() {
             return "港币";
         }
 
@@ -358,7 +358,7 @@ public enum Currency {
 
     public abstract String symbol();
 
-    public abstract String currencyName();
+    public abstract String label();
 
     //CNY
     private static float CNY_EUR = 0.124664933f;

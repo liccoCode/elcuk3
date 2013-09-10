@@ -1,0 +1,80 @@
+<h3>${payment.cooperator.fullName} - ${payment.paymentNumber} 付款单</h3>
+<h3>${payment.state.label()}</h3>
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th class="span1">运输单号</th>
+    <th>费用类型</th>
+    <th>单价</th>
+    <th>数量</th>
+    <th>均价</th>
+    <td>修正值</td>
+    <td>付款日期</td>
+  </tr>
+  #{set qty: 0/}
+  #{set amount: 0/}
+  #{set fixValue: 0/}
+  #{list items:payment.units(), as:'fee'}
+   <tr>
+     <td>
+       #{if fee.shipItem}
+         ${fee.shipment.id}#${fee.shipItem.id}
+       #{/if}
+       #{else }
+         ${fee.shipment.id}
+       #{/else}
+     </td>
+     <td>${fee.feeType.nickName}</td>
+     <td>${fee.currency.symbol()}${fee.unitPrice}</td>
+     <td>${fee.unitQty}</td>
+     <td>${fee.currency.symbol()} ${fee.averagePrice()}</td>
+     <td>${fee.fixValue}</td>
+     <td>${payment.paymentDate.date()}</td>
+    </tr>
+   #{set qty: qty + fee.unitQty/}
+   #{set amount: amount + fee.amount()/}
+   #{set fixValue: fixValue + fee.fixValue/}
+ #{/list}
+   <tr>
+     <td></td>
+     <td>总数量:</td>
+     <td>${qty}</td>
+     <td>总金额:</td>
+     <td>${amount}</td>
+     <td>总修正:</td>
+     <td>${helper.Currency.CNY.symbol()} ${fixValue}</td>
+   </tr>
+   <tr>
+     <td colspan="4"></td>
+     #{if payment.state == models.finance.Payment.S.WAITING}
+     <td>美元汇率</td>
+     <td colspan="4">${payment.currency.ratio(helper.Currency.USD)}</td>
+     #{/if}
+     #{elseif payment.state == models.finance.Payment.S.PAID}
+     <td>${payment.actualCurrency.label()}汇率</td>
+     <td colspan="4">${payment.rate}</td>
+     #{/elseif}
+   </tr>
+  <tr>
+    <td colspan="2">&nbsp;</td>
+    <td>应付${payment.currency.label()}</td>
+    <td>${payment.currency.symbol()} ${payment.approvalAmount()}</td>
+    #{if payment.state == models.finance.Payment.S.WAITING}
+    <td>应付美金</td>
+    <td colspan="4">${(payment.currency.toUSD(payment.approvalAmount())).format('#.##')}</td>
+    #{/if}
+    #{elseif payment.state == models.finance.Payment.S.PAID}
+    <td>应付${payment.actualCurrency.label()}</td>
+    <td colspan="4">${payment.actualCurrency.symbol()}${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+    #{/elseif}
+  </tr>
+</table>
+#{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
+#{if images}
+  #{list items:images, as:'img'}
+  <img src="http://e.easya.cc/attachs/image?a.fileName=${img.fileName}">
+  #{/list}
+#{/if}
+#{else }
+  还未上传凭证
+#{/else}
+
