@@ -129,6 +129,16 @@ finance.FeeType(transport):
 
 finance.FeeType(transportshipping):
   name: 'transportshipping'
-  memo: '运输运费'
+  memo: '快递费'
   parent: transport
 
+finance.FeeType(shipping):
+  name: 'oceanfreight'
+  memo: '海运费'
+  parent: transport
+
+
+finance.FeeType(shipping):
+  name: 'airfee'
+  memo: '空运费'
+  parent: transport
