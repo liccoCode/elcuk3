@@ -183,7 +183,7 @@ public class Feedback extends GenericModel {
 
     public void comment(String memo) {
         if(!StringUtils.contains(this.memo, memo))
-            this.memo = String.format("%s\r\n%s", memo, this.memo);
+            this.memo = String.format("%s%n%s", memo, this.memo);
     }
 
 

@@ -545,7 +545,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public void comment(String cmt) {
-        this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
+        this.comment = String.format("%s%n%s", cmt, this.comment).trim();
     }
 
 

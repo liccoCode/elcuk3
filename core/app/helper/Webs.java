@@ -110,6 +110,7 @@ public class Webs {
             FileInputStream fis = new FileInputStream(jsonFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
             CookieStore cookieStore = (CookieStore) ois.readObject();
+            ois.close();
             Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
         }
         Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());

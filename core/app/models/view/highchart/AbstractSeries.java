@@ -85,7 +85,7 @@ public abstract class AbstractSeries implements Serializable {
      * 也可在 plotOptions:{series:{marker:{xxx}}}
      * 在这, 直接设到每一条曲线上
      */
-    public class Marker implements Serializable {
+    public static class Marker implements Serializable {
         private static final long serialVersionUID = -5061528374647700719L;
         public boolean enabled = true;
         public float radius = 2;
