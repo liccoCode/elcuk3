@@ -77,7 +77,7 @@ public abstract class Post<T> implements Serializable, Cloneable {
     }
 
     public int totalPage() {
-        return new Double(Math.ceil(this.count / ((float) this.perSize))).intValue();
+        return (int) (Math.ceil(this.count / ((float) this.perSize)));
     }
 
     public int getTotalPage() {

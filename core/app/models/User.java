@@ -235,7 +235,6 @@ public class User extends Model {
          */
         //TODO 这里的缓存都是通过 Model 自己进行的缓存, 只能够支持单机缓存, 无法分布式.
         Privilege.privileges(this.username);
-        Notification.initUserNotificationQueue(this);
     }
 
     /**
@@ -250,7 +249,6 @@ public class User extends Model {
          */
         Login.clearUserCache(this);
         Privilege.clearUserPrivilegesCache(this);
-        Notification.clearUserNotificationQueue(this);
     }
 
     /**

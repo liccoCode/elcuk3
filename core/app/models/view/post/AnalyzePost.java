@@ -34,6 +34,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     public AnalyzePost() {
         this.from = DateTime.now().minusMonths(1).toDate();
+        this.to = new Date();
         this.perSize = 20;
     }
 

@@ -48,7 +48,7 @@ public class Ret {
         if(errors != null) {
             StringBuilder sbd = new StringBuilder();
             for(String key : errors.keySet()) {
-                sbd.append(String.format("%s -> %s \r\n", key, errors.get(key)));
+                sbd.append(String.format("%s -> %s %n", key, errors.get(key)));
             }
             this.message = sbd.toString();
         }

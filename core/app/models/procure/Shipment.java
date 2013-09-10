@@ -469,7 +469,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;
-        this.memo = String.format("%s\r\n%s", cmt, this.memo).trim();
+        this.memo = String.format("%s%n%s", cmt, this.memo).trim();
     }
 
     /**

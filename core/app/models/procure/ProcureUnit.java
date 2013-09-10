@@ -25,6 +25,7 @@ import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
+import play.modules.pdf.PDF;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -369,7 +370,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("检查不合格");
 
         this.attrs = attrs;
-
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
                 .fid(this.id)
@@ -544,7 +544,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public void comment(String cmt) {
-        this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
+        this.comment = String.format("%s%n%s", cmt, this.comment).trim();
     }
 
 
@@ -877,7 +877,22 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
-     *指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
+     * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
+     */
+    public Set<User> editToUsers() {
+        Set<User> users = new HashSet<User>();
+        users.add(this.handler);
+        if(this.deliveryment != null)
+            users.add(this.deliveryment.handler);
+        for(Shipment shipment : this.relateShipment()) {
+            if(shipment.creater != null)
+                users.add(shipment.creater);
+        }
+        return users;
+    }
+
+    /**
+     * 指定文件夹，为当前采购计划所关联的 FBA 生成 箱內麦 与 箱外麦
      *
      * @param folder 指定PDF文件，生成的文件目录
      */
@@ -886,7 +901,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(fba != null) {
             // PDF 文件名称 :[国家] [运输方式] [数量] [产品简称] 外/内麦
             String namePDF = String.format("[%s][%s][%s][%s]",
-                    this.whouse.country,
+                    this.selling.market.countryName(),
                     this.shipType.label(),
                     this.attrs.planQty,
                     this.product.abbreviation
@@ -896,15 +911,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             map.put("shipmentId", this.fba.shipmentId);
             map.put("shipFrom", Account.address(this.fba.account.type));
             map.put("fba", this.fba);
+            map.put("procureUnit", this);
+
+            PDF.Options options = new PDF.Options();
+            //只设置 width height    margin 为零
+            options.pageSize = new org.allcolor.yahp.converter.IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
 
             //生成箱内卖 PDF
-            PDFs.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", map);
+            PDFs.templateAsPDF(folder, namePDF + "内麦.pdf", "FBAs/packingSlip.html", options, map);
 
             //生成箱外卖 PDF
-            PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", map);
+            PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
         } else {
-            String message = "#"+this.id+"  "+this.sku+" 还没创建 FBA";
-            FileUtils.writeStringToFile(new File(folder,message+".text"),message,"UTF-8");
+            String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
+            FileUtils.writeStringToFile(new File(folder, message + ".text"), message, "UTF-8");
         }
     }
 }

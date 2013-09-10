@@ -156,9 +156,9 @@ public class Dates {
             case AMAZON_UK:
             case AMAZON_FR:
             case AMAZON_ES:
+            case AMAZON_IT:
                 return new DateTime(date).toString("dd/MM/yyyy");
             case AMAZON_DE:
-            case AMAZON_IT:
                 return new DateTime(date).toString("dd.MM.yyyy");
             case AMAZON_US:
                 return new DateTime(date).toString("MM/dd/yyyy");
