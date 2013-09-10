@@ -17,27 +17,27 @@
       <b>SHIP FROM:</b><br>
 
 
-    ${shipFrom.name}<br>
-    ${shipFrom.addressLine1}<br>
-    ${shipFrom.city},&nbsp;
-    ${shipFrom.stateOrProvinceCode}&nbsp;
-    ${shipFrom.postalCode}<br>
+    ${shipFrom?.name}<br>
+    ${shipFrom?.addressLine1}<br>
+    ${shipFrom?.city},&nbsp;
+    ${shipFrom?.stateOrProvinceCode}&nbsp;
+    ${shipFrom?.postalCode}<br>
 
     </td>
     <td width="50%" align="left" style="font-size: 12px;">
       <b> SHIP TO:</b><br>
 
-      <b>${fba.fbaCenter.name}</b><br>
-      <b>${fba.fbaCenter.addressLine1}</b><br>
-      <b>${fba.fbaCenter.postalCode}</b>
-      <b>${fba.fbaCenter.city}</b><br>
-      <b>${fba.codeToCounrty()}</b><br>
+      <b>${fba?.fbaCenter?.name}</b><br>
+      <b>${fba?.fbaCenter?.addressLine1}</b><br>
+      <b>${fba?.fbaCenter?.postalCode}</b>
+      <b>${fba?.fbaCenter?.city}</b><br>
+      <b>${fba?.codeToCounrty()}</b><br>
 
     </td>
   </tr>
   <tr bgcolor="black">
     <td colspan="3" style="background:#000000">
-      <span style="color:#ffffff;font-size:10px;font-weight:bold;padding-left:2px;">${fba.title}</span>
+      <span style="color:#ffffff;font-size:10px;font-weight:bold;padding-left:2px;">${fba?.title}</span>
     </td>
   </tr>
   <tr>
