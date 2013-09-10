@@ -279,7 +279,7 @@ public class Ticket extends Model {
         if(this.resolver == null) throw new FastRuntimeException("请给 Ticket 添加负责人.");
         if(StringUtils.isBlank(reason)) throw new FastRuntimeException("必须要输入原因.");
         this.state = TicketState.CLOSE;
-        this.memo = String.format("Closed By %s At [%s] for [ %s ]\r\n",
+        this.memo = String.format("Closed By %s At [%s] for [ %s ]%n",
                 User.username(),
                 Dates.date2DateTime(),
                 reason.trim()) + this.memo;

@@ -26,14 +26,16 @@ public class PDFs {
      * @param folder   指定PDF文件，生成的文件目录
      * @param pdfName  PDF名称
      * @param template PDF模板页面  如 ：FBAs/boxLabel.html
+     * @param options  PDF  页面大小   不设置 默认为 A4  20.8d, 29.6d, 1d
      * @param args     模板中的数据
      */
-    public static void templateAsPDF(File folder, String  pdfName, String template, Map<String,
+    public static void templateAsPDF(File folder, String pdfName, String template, PDF.Options options, Map<String,
             Object> args) throws FileNotFoundException {
         OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfName);
 
         PDFDocument singleDoc = new PDFDocument();
         singleDoc.template = template;
+        singleDoc.options = options;
 
         RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc),
                 args);

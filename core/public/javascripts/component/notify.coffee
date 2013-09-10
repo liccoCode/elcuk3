@@ -7,47 +7,69 @@ window.Notify =
     else
       if Number(browser[1].slice(0, 2)) < 21
         alert("请使用 Chrome 22 版本以上的浏览器, 当前版本为: #{browser[1]}")
+
+$ ->
+  #统计当前用户的 新通知记录的条数
+  newsCount = ->
+    htmlobj = $.ajax({url: "/Notifications/amount", async: false})
+    $("#notifyNumber").html(htmlobj.responseText);
+
+  newsCount()
+
+  #加载当前用户最新的八条信息
+  $("#notificationBtn").on("click", (e) ->
+    e.preventDefault()
+    $.ajax("/Notifications/latest", {type: 'POST', dataType: 'json'}).done((r) ->
+      param = if r
+        r
       else
-        # 为首页 header 栏增加 Notification 开关功能
-        if window.webkitNotifications
-          if webkitNotifications.checkPermission() isnt 0
-            $('#notification_btn').css('background', 'yellow')
-            alert("请点击页面上黄色高亮的 Notify 打开 Elcuk2 的 Notification 提醒功能, 以接收系统内的通知消息.")
-            $('#notification_btn').click ->
-              window.webkitNotifications.requestPermission()
-        else
-          console.log('无法使用 Notification 功能')
-          $('#notification_btn').click ->
-            alert('无法使用桌面 Notification 提醒, 请使用 Chrome 浏览器.')
-
-  notify: (title, text, timeout = 6, pic = '/img/green.png') ->
-    notification = webkitNotifications.createNotification(pic, title, text)
-    notification.show()
-    setTimeout(->
-      notification.cancel()
-    , timeout * 1000)
-
-  alarm: (title, text, timeout = 3) ->
-    @notify(title, text, timeout, '/img/alarm.png')
-
-  ok: (title, text, timeout = 3) ->
-    @notify(title, text, timeout, '/img/ok.png')
-
-
-# 是否发开可以提示消息?
-  isOn: () ->
-    window.webkitNotifications and webkitNotifications.checkPermission() is 0
-
-# 轮询检查系统是否有消息发出
-  loopCheck: (interval = 15) ->
-    self = @
-    if self.isOn()
-      setInterval(->
-        console.log(Date.now())
-        $.get("/Notifications/nextNotification", {}, (r) ->
-          if r['title']
-            self.notify("#{r.title} #{r.createAt}", r['content'])
-        )
-        # 15 s
-      , interval * 1000
+        [{title: 'See Notifications'}]
+      #清空数据
+      $("#notifications").find("li").remove()
+      _.each(param, (element,index)->
+        $("#notifications").append(_.template($('#news-notifications-model-template').html(), {noty: element}))
       )
+      $("#notifications").append("<li><a href='/Notifications/index' class='label' >See more</a></li>")
+    )
+
+  )
+
+  #将选中的通知状态更改成已读
+  $("#updateState").on("click", (e) ->
+    e.preventDefault()
+    $checkbox = $('input:checkbox:checked[name="noteID"]')
+    if $checkbox.serialize().length == 0
+      noty({text: '未选中通知', type: 'error', timeout: 3000})
+    else
+      updateState($checkbox.serialize(), ->
+         newsCount()
+         $('input:checkbox:checked[name="noteID"]').remove()
+      )
+  )
+
+  #右上角提示框，已阅按钮事件
+  $(document).on("click", ".dropdown-menu a[data-id]", (e) ->
+      $span = $(@)
+      updateState({noteID:$span.attr("data-id")}, ->
+         $("#notificationBtn").click()
+         newsCount()
+      )
+    )
+
+  #更改 通知信息的状态为 已读
+  updateState = (datas, func)->
+    LoadMask.mask()
+    $.ajax("/Notifications/updateState", {type: 'POST', dataType: 'json', data:datas})
+       .done((r)->
+          type = if r.flag
+                     'success'
+                 else
+                     'error'
+          noty({text: r.message, type:type , timeout: 3000})
+          func()
+          LoadMask.unmask()
+       )
+       .fail((r)->
+          noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
+          LoadMask.unmask()
+       )
