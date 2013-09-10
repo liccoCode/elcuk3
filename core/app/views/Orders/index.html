@@ -56,6 +56,14 @@
         <option ${p.warnning == false ? 'selected' : ''} value="false">正常的订单</option>
       </select>
 
+      <select name="p.promotion" class="inline">
+        <option value="null" ${p.promotion=="null" ? 'selected' : ''}>不属于促销订单</option>
+        <option value="promorebates" ${p.promotion=="promorebates" ? 'selected' : ''}>全部促销订单</option>
+        #{list items:feeTypes}
+        <option ${_.name == p.promotion ? 'selected' : ''} value="${_.name}">${_.memo}</option>
+        #{/list}
+      </select>
+
       <div class="inline input-append" id="search_btns">
         <input type="hidden" name="p.page" value="${p.page}">
         <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">

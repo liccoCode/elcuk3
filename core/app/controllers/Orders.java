@@ -1,5 +1,6 @@
 package controllers;
 
+import models.finance.FeeType;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
@@ -20,9 +21,10 @@ public class Orders extends Controller {
 
     public static void index(OrderPOST p) {
         List<Account> accs = Account.openedSaleAcc();
+        List<FeeType> feeTypes = FeeType.find("parent.name=?", "promorebates").fetch();;
         if(p == null) p = new OrderPOST();
         List<Orderr> orders = p.query();
-        render(p, orders, accs);
+        render(p, orders, accs,feeTypes);
     }
 
     public static void show(String id) {

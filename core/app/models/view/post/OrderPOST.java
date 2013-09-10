@@ -46,6 +46,8 @@ public class OrderPOST extends Post<Orderr> {
 
     public Boolean warnning = false;
 
+    public String promotion;
+
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
         F.T2<String, List<Object>> params = params();
@@ -68,7 +70,9 @@ public class OrderPOST extends Post<Orderr> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder(" FROM Orderr o");
-        sbd.append(" LEFT JOIN o.items oi WHERE 1=1 ");
+        sbd.append(" LEFT JOIN o.items oi ");
+        sbd.append(" LEFT JOIN o.fees fe ");
+        sbd.append(" WHERE 1=1");
         List<Object> params = new ArrayList<Object>();
         if(this.accountId != null) {
             sbd.append("AND o.account.id=? ");
@@ -105,6 +109,14 @@ public class OrderPOST extends Post<Orderr> {
         if(this.warnning != null) {
             sbd.append("AND o.warnning=?");
             params.add(this.warnning);
+        }
+
+        if(this.promotion != null && !"".equals(this.promotion) && !"null".equals(this.promotion)){
+            if("promorebates".equals(this.promotion.trim()))
+               sbd.append("AND fe.type.parent.name=?");
+            else
+               sbd.append("AND fe.type.name=?");
+            params.add(this.promotion); //促销费用
         }
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
@@ -148,6 +160,7 @@ public class OrderPOST extends Post<Orderr> {
             sbd.append("ORDER BY o.").append(this.orderBy).append(" ")
                     .append(StringUtils.isNotBlank(this.desc) ? this.desc : "ASC");
         }
+
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
 
