@@ -370,7 +370,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             throw new FastRuntimeException("检查不合格");
 
         this.attrs = attrs;
-
         new ERecordBuilder("procureunit.delivery")
                 .msgArgs(this.attrs.qty, this.attrs.planQty)
                 .fid(this.id)
@@ -545,7 +544,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public void comment(String cmt) {
-        this.comment = String.format("%s\r\n%s", cmt, this.comment).trim();
+        this.comment = String.format("%s%n%s", cmt, this.comment).trim();
     }
 
 
@@ -875,6 +874,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 return false;
             } else return true;
         }
+    }
+
+    /**
+     * 采购计划，修改，删除时，通知 采购计划的所有者, 运输相关人员, 采购相关人员
+     */
+    public Set<User> editToUsers() {
+        Set<User> users = new HashSet<User>();
+        users.add(this.handler);
+        if(this.deliveryment != null)
+            users.add(this.deliveryment.handler);
+        for(Shipment shipment : this.relateShipment()) {
+            if(shipment.creater != null)
+                users.add(shipment.creater);
+        }
+        return users;
     }
 
     /**

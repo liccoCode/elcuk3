@@ -189,7 +189,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                         "Skip Add one Listing/Selling. asin[" + t_asin + "_" + market.toString() +
                                 "]";
                 Logger.warn(line);
-                Webs.systemMail(warMsg, String.format("%s <br/>\r\n%s", line, Webs.E(e)));
+                Webs.systemMail(warMsg, String.format("%s <br/>%n%s", line, Webs.E(e)));
             }
         }
         return sellAndListingTuple;

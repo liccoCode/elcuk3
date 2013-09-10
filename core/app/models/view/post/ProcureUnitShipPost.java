@@ -17,6 +17,8 @@ import java.util.List;
  * Time: 10:10 AM
  */
 public class ProcureUnitShipPost extends Post<ProcureUnit> {
+    private static final long serialVersionUID = -8171825936576265590L;
+
     public ProcureUnitShipPost() {
         DateTime now = new DateTime();
         this.to = now.plusDays(14).toDate();

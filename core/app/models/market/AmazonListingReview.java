@@ -468,7 +468,7 @@ public class AmazonListingReview extends GenericModel {
     }
 
     public void comment(String comment) {
-        this.comment = String.format("%s\r\n%s", comment.trim(), this.comment);
+        this.comment = String.format("%s%n%s", comment.trim(), this.comment);
     }
 
     /**

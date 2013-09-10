@@ -3,11 +3,12 @@ package controllers;
 import helper.J;
 import models.Notification;
 import models.view.Ret;
+import models.view.post.NotificationPost;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Validation;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
+
+import java.util.List;
 
 /**
  * 每个用户的 Notification
@@ -39,14 +40,46 @@ public class Notifications extends Controller {
         redirect("/users/home");
     }
 
+
     /**
-     * 下一个通知
+     * 当前用户的通知信息列表
      */
-    public static void nextNotification() {
-        F.Option<Notification> notification = Notification.next(Login.current());
-        if(notification.isDefined())
-            renderJSON(J.G(notification.get()));
-        else
-            renderJSON(new Ret(false));
+    public static void index(NotificationPost p) {
+        if(p == null) p = new NotificationPost();
+        List<Notification> notifications = p.query();
+
+        render(notifications, p);
     }
+
+    /**
+     * 显示 当前用户 八条最新通知
+     */
+    public static void latest() {
+        List<Notification> notifications = Notification.find("user=? and state = ? ORDER BY createAt DESC",
+                Login.current(),
+                Notification.S.UNCHECKED).fetch(8);
+        renderJSON(J.G(notifications));
+    }
+
+    /**
+     * 计算当前用户的通知信息的数量
+     */
+    public static void amount() {
+        renderText(Notification.count("user=? and state = ? ", Login.current(), Notification.S.UNCHECKED));
+    }
+
+    /**
+     * 修改通知状态为 已阅
+     */
+    public static void updateState(List<Long> noteID) {
+
+        if(noteID != null) {
+            Notification.markAsRead(noteID);
+        } else {
+            renderJSON(new Ret("未选中，无法更新状态"));
+        }
+
+        renderJSON(new Ret(true, "通知已标记为已读"));
+    }
+
 }

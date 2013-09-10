@@ -25,7 +25,7 @@
               交期:
            </td>
            <td width="18%" style="text-align:left;" COLSPAN="4">
-            <SPAN>${procureUnit.attrs.deliveryDate==null?procureUnit?.attrs?.planDeliveryDate?.format("yyyy年MM月dd日")
+            <SPAN>${procureUnit?.attrs?.deliveryDate==null?procureUnit?.attrs?.planDeliveryDate?.format("yyyy年MM月dd日")
             :procureUnit?.attrs?.deliveryDate?.format("yyyy年MM月dd日")} </SPAN>
            </td>
            <td  width="20%" style="font-weight:bold; font-size:12pt">
@@ -45,18 +45,19 @@
           <td width="8%">
             籍号
           </td>
-          <td width="18%" style="border:1px solid #000000; padding-left:6px;">
+          <td width="8%" style="border:1px solid #000000; padding-left:6px;">
+
           </td>
           <td width="8%" style="text-align:left;">
             去往国家
           </td>
           <td width="12%" style="border:1px solid #000000; padding-left:6px;">
-            ${procureUnit?.selling?.market.countryName()}
+            ${procureUnit?.selling?.market?.countryName()}
           </td>
           <td width="8%">
             整箱重量
           </td>
-          <td width="16%" style="border:1px solid #000000; padding-left:6px;">
+          <td width="13%" style="border:1px solid #000000; padding-left:6px;">
           </td>
           <td width="10%" style="line-height:0.7em;">
             箱子体积<br>
@@ -101,7 +102,7 @@
          </tr>
          <tr>
            <td height="110px;" colspan="4" style="vertical-align:top;text-align:left;" >
-             <span style="font-size:7pt;font-weight:bold;">备注信息 :</span><span style="font-size:5pt">(如果箱中含有多个型号SKU，请在备注中写明！)</span>
+
            </td>
          </tr>
       </table>
