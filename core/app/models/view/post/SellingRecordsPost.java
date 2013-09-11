@@ -215,12 +215,11 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             record.income += rcd.income;
             record.procureCost += rcd.procureCost;
             record.procureNumberSum += rcd.procureNumberSum;
-            record.shipCost += rcd.shipCost;
-            record.shipNumberSum += rcd.shipNumberSum;
             record.profit += rcd.profit;
         }
         for(SellingRecord record : skuRecordsMap.values()) {
-            record.costProfitRatio = record.profit / (record.shipCost + record.procureCost);
+            // TODO 需要重新计算
+            record.costProfitRatio = record.profit / (/*record.expressCost + */record.procureCost);
             record.saleProfitRatio = record.profit / record.sales;
         }
         return new ArrayList<SellingRecord>(skuRecordsMap.values());

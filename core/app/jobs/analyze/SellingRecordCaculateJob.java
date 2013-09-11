@@ -17,6 +17,7 @@ import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
+import services.MetricShipCostService;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,8 @@ public class SellingRecordCaculateJob extends Job {
     private Map<String, Float> sellingSales = new HashMap<String, Float>();
     private Map<String, Float> sellingAmzFee = new HashMap<String, Float>();
     private Map<String, Float> sellingFBAFee = new HashMap<String, Float>();
+
+    private MetricShipCostService shipCostService = new MetricShipCostService();
 
     private DateTime dateTime = DateTime.now();
 
@@ -89,12 +92,12 @@ public class SellingRecordCaculateJob extends Job {
                 record.procureCost = procureCostAndQty._1;
                 record.procureNumberSum = procureCostAndQty._2;
 
-                F.T2<Float, Integer> shipCostAndQty = sellingShipCost(selling, dateTime.toDate());
-                // 运输成本
-                record.shipCost = shipCostAndQty._1;
-                record.shipNumberSum = shipCostAndQty._2;
+                // 快递运输成本
+                F.T2<Float, Float> shipCostAndQty = shipCostService.expressCost(selling, dateTime.toDate());
+                // TODO 调整
 
-                float procureAndShipCost = (record.shipCost * record.units) + (record.procureCost * record.units);
+                float procureAndShipCost = /*(record.expressCost * record.units) 需要重新计算 +*/
+                        (record.procureCost * record.units);
                 // 利润 = 实际收入 - 采购成本 - 运输成本
                 record.profit = record.income - procureAndShipCost;
                 // 成本利润率 = 利润 / (采购成本 + 运输成本)
@@ -341,18 +344,6 @@ public class SellingRecordCaculateJob extends Job {
             toDayProcureCost = (record.procureCost * record.procureNumberSum + toDayTotalProcureCost) / procureNumberSum;
         }
         return new F.T2<Float, Integer>(toDayProcureCost, procureNumberSum);
-    }
-
-    /**
-     * 某一个 Selling 的运输成本; 币种统一为 USD
-     */
-    public F.T2<Float, Integer> sellingShipCost(Selling selling, Date date) {
-        /**
-         * 快递: 计算出总费用, 总重量. 算出单位重量运费, 再根据产品自重计算出单个产品运费.
-         * 海运: 计算出总费用, 总体积. 算出单位体积运费, 再根据产品自己体积计算出单个产品运费.
-         */
-
-        return null;
     }
 
     /**

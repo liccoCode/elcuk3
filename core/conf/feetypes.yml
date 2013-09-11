@@ -127,18 +127,23 @@ finance.FeeType(transport):
   name: 'transport'
   memo: '运输方面所涉及的费用类型'
 
+finance.FeeType(dutyandvat):
+  name: 'dutyandvat'
+  memo: '关税和VAT'
+  parent: transport
+
 finance.FeeType(transportshipping):
   name: 'transportshipping'
   memo: '快递费'
   parent: transport
 
-finance.FeeType(shipping):
+finance.FeeType(oceanfreight):
   name: 'oceanfreight'
   memo: '海运费'
   parent: transport
 
 
-finance.FeeType(shipping):
+finance.FeeType(airfee):
   name: 'airfee'
   memo: '空运费'
   parent: transport

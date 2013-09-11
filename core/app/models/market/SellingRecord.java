@@ -127,14 +127,34 @@ public class SellingRecord extends GenericModel {
     public int procureNumberSum = 0;
 
     /**
-     * (单个产品)运输成本
+     * 快递运输成本($ N/kg)
      */
-    public float shipCost = 0;
+    public float expressCost = 0;
 
     /**
-     * 运输到目前为之, 总共运输的数量
+     * 运输到目前为之, 总共的快递运输重量(kg)
      */
-    public int shipNumberSum = 0;
+    public float expressKilogram = 0;
+
+    /**
+     * 空运的运输成本($ N/kg)
+     */
+    public float airCost = 0;
+
+    /**
+     * 到目前为之, 总共的空运运输重量(kg)
+     */
+    public float airKilogram = 0;
+
+    /**
+     * 海运运输成本($ N/m3)
+     */
+    public float seaCost = 0;
+
+    /**
+     * 到目前为止, 总共的海运运输体积(立方米)
+     */
+    public float seaCubicMeter = 0;
 
     /**
      * 利润 = 销售额 - (总)采购成本 - (总)运输成本
@@ -448,8 +468,8 @@ public class SellingRecord extends GenericModel {
                 ", income=" + income +
                 ", procureCost=" + procureCost +
                 ", procureNumberSum=" + procureNumberSum +
-                ", shipCost=" + shipCost +
-                ", shipNumberSum=" + shipNumberSum +
+                ", expressCost=" + expressCost +
+                ", expressKilogram=" + expressKilogram +
                 ", profit=" + profit +
                 ", costProfitRatio=" + costProfitRatio +
                 ", saleProfitRatio=" + saleProfitRatio +
