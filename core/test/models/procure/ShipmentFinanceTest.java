@@ -66,7 +66,7 @@ public class ShipmentFinanceTest extends UnitTest {
         assertThat(unit.currency, is(Currency.CNY));
         assertThat(unit.amount, is((float) (10000 - 2 * 2000)));
         assertThat(unit.unitPrice, is((float) (10000 - 2 * 2000)));
-        assertThat(unit.unitQty, is(1));
+        assertThat(unit.unitQty, is(1f));
         assertThat(PaymentUnit.count(), is(5l));
     }
 
