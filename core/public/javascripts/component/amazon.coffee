@@ -1,95 +1,80 @@
 $ ->
   # 检查字符串长度
   validateMaxLength = (maxLength, obj) ->
-    o = $(obj)
-    length = unescape(encodeURI(jsEscapeHtml(o.val().trim()))).length
-    o.find('~ span').html((maxLength - length) + " bytes left")
-    if length > maxLength then o.css('color', 'red') else o.css('color', '')
+    $text = $(obj)
+    length = unescape(encodeURI(jsEscapeHtml($text.val().trim()))).length
+    $text.find('~ span').html((maxLength - length) + " bytes left")
+    if length > maxLength then $text.css('color', 'red') else $text.css('color', '')
     false
 
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
-  # bullet_point 的检查
-  $('input[bullet_point]').keyup(
-    (e) ->
-      return false if e.keyCode is 13
-      validateMaxLength(2000, @)
-  ).keyup().blur ->
-    validateMaxLength(2000, @)
 
-  # search Terms 的检查
-  $('input[searchterms]').keyup(
-    (e) ->
-      return false if e.keyCode is 13
-      validateMaxLength(50, @)
-  ).keyup().blur ->
-    validateMaxLength(50, @)
+  # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
+  $('#saleAmazonForm').on('keyup blur', "input.bulletPoint, input.searchTermss", (e) ->
+    return false if e.keyCode is 13
+    validateMaxLength($(@).data('length'), @)
+  ).on('keyup', ".proDesc", (e) ->
+    validateMaxLength($(@).data('length'), @)
+  ).on('blur', ".proDesc", (e) ->
+    validateMaxLength($(@).data('length'), @)
+    previewBtn.call(@, e)
+  ).on('click', '.btn:contains(Preview)', (e) ->
+    previewBtn.call(@, e)
+    false
+  )
+  $("input.bulletPoint, input.searchTermss").blur()
 
   # 预览 Desc 的方法
   previewBtn = (e) ->
-    e.preventDefault()
-    ownerDiv = $(@).parent()
+    $ownerDiv = $(@).parent()
     invalidTag = false
-    for tag in ownerDiv.siblings('div').html(ownerDiv.find(':input').val()).find('*')
+    for tag in $ownerDiv.siblings('div').html($ownerDiv.find(':input').val()).find('*')
       switch tag.nodeName.toString().toLowerCase()
         when 'br','p','b','#text'
           break
         else
           invalidTag = true
           $(tag).css('background', 'yellow')
-    alert('使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!') if invalidTag is true
+    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
 
-  # Product DESC 输入, 字数计算
-  $('textarea[name=s\\.aps\\.productDesc]').blur(previewBtn).keyup(
-    ->
-      validateMaxLength(2000, @)
-  )
-  # 自己按一下, 再页面开始的时候计算一次
-    .keyup().find('~ button').click(previewBtn).click()
+  $('#sellingPreview').on('click', '#sid_preview',(e) ->
+    noty({text: _.template($('#tsp-show-template').html(), {tsp: $(@).data('tsp')})})
+    false
+  ).on('change', 'input',(e) ->
+    #  自动补全的 sid 的功能条
+    $input = $(@)
+    if $input.data('sids') is undefined
+      $input.data('sids', $input.data('source'))
+    return false if !(@value in $input.data('sids'))
 
-  #  自动补全的 sid 的功能条
-  SID_PREVIEW_TEMPLATE = "<div><h3>Technical</h3><p id='t'></p><hr><h3>SearchTerms</h3><p id='s'></p><hr><h3>ProductDesc</h3><p id='p'></p></div>"
-  $('#sid_helper').change ->
-    o = $(@)
-    if o.data('sids') is undefined
-      o.data('sids', JSON.parse(o.attr('data-source')))
-
-    return false if !(@value in o.data('sids'))
-
-    toolBar = o.parent()
-    toolBar.mask('加载数据中...')
-    $.getJSON('/sellings/tsp', sid: @value,
-      (json) ->
-        html = $(SID_PREVIEW_TEMPLATE)
-        html.find('#t').html(json['t'].join('<br/><br/>'))
-        html.find('#s').html(json['s'].join('<br/><br/>'))
-        html.find('#p').html(json['p'][0])
-        $('#sid_preview_popover').attr('data-content', html.html()).data('tsp', json).mouseover().click();
-        toolBar.unmask()
-    )
-
-  #预览按钮事件
-  $('#sid_preview_popover').click((e) ->
-    e.preventDefault()
-    $(@).popover('toggle')
-  )
-
-  # 加载 tsp 数据的按钮
-  $('#sid_helper + button').click((e) ->
-    e.preventDefault()
-    json = $('#sid_preview_popover').data('tsp')
+    LoadMask.mask()
+    $.ajax('/sellings/tsp', {type: 'GET', data: {sid: @value}, dataType: 'json'})
+      .done((r) ->
+        $('#sid_preview').data('tsp', r)
+        noty({text: _.template($('#tsp-show-template').html(), {tsp: r})})
+        LoadMask.unmask()
+      )
+  ).on('click', 'button:contains(填充)', (e) ->
+    # 加载 tsp 数据的按钮
+    json = $('#sid_preview').data('tsp')
     if json is undefined
-      alert('还没有数据, 请先预览!')
+      noty({text: '还没有数据, 请先预览!', type: 'warning', timeout: 3000})
       return false
     # product Desc
-    $('[name=s\\.aps\\.productDesc]').val(json['p'][0]).blur()
+    $("[name='s.aps.productDesc']").val(json['p'][0]).blur()
     # technical
-    for t, i in json['t']
-      $('[name=s\\.aps\\.keyFeturess\\[' + i + '\\]]').val(t).blur()
+    tech = json['t']
+    $("[name='s.aps.keyFeturess']").each((i) ->
+      $(@).val(if tech[i] then tech[i] else '').blur()
+    )
     # searchTerms
-    for s, i in json['s']
-      $('[name=s\\.aps\\.searchTermss\\[' + i + '\\]]').val(s).blur()
+    search = json['s']
+    $("[name='s.aps.searchTermss']").each((i) ->
+      $(@).val(if search[i] then search[i] else '').blur()
+    )
+    false
   )
 
   # 显示 Selling 上架信息的 Modal 窗口
@@ -110,11 +95,12 @@ $ ->
     if close_callback
       cancel_btn.on('click', close_callback)
     else
-      cancel_btn.on('click', -> modal.modal('hide'))
+      cancel_btn.on('click', ->
+        modal.modal('hide'))
     $('#check_apply').off('click').on('click', callback)
 
   # upc 检查 Selling 的关闭事件
-  modal_upc_check_close =  (e) ->
+  modal_upc_check_close = (e) ->
     e.preventDefault()
     $('#msku').val(->
       $('#check_modal').modal('hide')
@@ -139,7 +125,6 @@ $ ->
     $('#market').val(0)
     $('#check_modal').modal('hide')
 
-
   #Market 更换价格单位按钮
   $('#market').change ->
     # 1. SKU + Market 的 Selling 提示
@@ -150,10 +135,9 @@ $ ->
           alert r.message
         else
           show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_sku_check_close, modal_sku_check_cancel)
-      );
+      )
     # 2. 货币符号的变化. -> modal_sku_check_close
     false
-
 
   # 账号对应的市场切换
   $('#account').change ->
@@ -171,11 +155,12 @@ $ ->
   # UPC 检查
   $('#check_upc').click (e) ->
     e.preventDefault()
-    $('#msku').val(-> @value.split(',')[0])
+    $('#msku').val(->
+      @value.split(',')[0])
     upc = $(@).removeClass('btn-warning btn-success').addClass('btn-warning').prev().val()
     if !$.isNumeric(upc)
       alert('UPC 必须是数字')
-      return false
+    return false
 
     $.getJSON('/products/upcCheck', {upc: upc})
       .done((r) ->
