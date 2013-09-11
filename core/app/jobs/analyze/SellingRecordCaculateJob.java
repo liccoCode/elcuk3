@@ -7,7 +7,6 @@ import models.finance.FeeType;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingRecord;
-import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -358,57 +357,6 @@ public class SellingRecordCaculateJob extends Job {
         for(Integer number : numberSums) totalNumber += number;
         if(totalNumber == 0) return new F.T3<Float, Float, Integer>(0f, totalCost, totalNumber);
         return new F.T3<Float, Float, Integer>(totalCost / totalNumber, totalCost, totalNumber);
-    }
-
-    /**
-     * 计算 PaymentUnit 中指定条件下涉及到的运输单的总费用与总数量
-     */
-    private F.T2<Float, Integer> shipmentTotalCostAndTotalNumber(Date date, List<String> feeTypes,
-                                                                 Shipment.T... shipTypes) {
-        /**
-         * 1. 找出当前 PaymentUnit 涉及的 ShipmentIds 与总费用
-         * 2. 根据 ShipmentIds 找出涉及的总数量
-         */
-        List<String> shipTypeNames = new ArrayList<String>();
-        for(Shipment.T type : shipTypes) shipTypeNames.add(type.name());
-        SqlSelect airAndSeaShipFeeSql = new SqlSelect()
-                .select("p.currency as currency", "sum(p.unitPrice * p.unitQty + p.fixValue) as cost",
-                        "group_concat(distinct p.shipment_id) as shipmentIds")
-                .from("PaymentUnit p")
-                .leftJoin("Shipment s ON p.shipment_id=s.id")
-                .where(SqlSelect.whereIn("s.type", shipTypeNames))
-                .where("p.createdAt>=?").param(Dates.morning(date))
-                .where("p.createdAt<=?").param(Dates.night(date))
-                .where(SqlSelect.whereIn("p.feeType_name", feeTypes))
-                .groupBy("p.currency");
-
-        Set<String> shipmentIds = new HashSet<String>();
-        float totalCost = 0;
-        int totalNumberSum = 0;
-
-        List<Map<String, Object>> rows = DBUtils
-                .rows(airAndSeaShipFeeSql.toString(), airAndSeaShipFeeSql.getParams().toArray());
-        for(Map<String, Object> row : rows) {
-            Currency currency = Currency.valueOf(row.get("currency").toString());
-            totalCost += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
-            String shipmentIdStr = row.get("shipmentIds").toString();
-            if(StringUtils.isNotBlank(shipmentIdStr)) {
-                Collections.addAll(shipmentIds, StringUtils.split(shipmentIdStr, ","));
-            }
-        }
-
-        if(shipmentIds.size() > 0) {
-            SqlSelect airAndSeaShipNumberSumSql = new SqlSelect()
-                    .select("sum(qty) as qty")
-                    .from("ShipItem")
-                    .where(SqlSelect.whereIn("shipment_id", shipmentIds));
-
-            Map<String, Object> row = DBUtils.row(airAndSeaShipNumberSumSql.toString());
-            if(StringUtils.isNotBlank(row.get("qty").toString()))
-                totalNumberSum = NumberUtils.toInt(row.get("qty").toString());
-        }
-
-        return new F.T2<Float, Integer>(totalCost, totalNumberSum);
     }
 
     public static boolean isRunning() {

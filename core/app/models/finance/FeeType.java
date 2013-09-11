@@ -174,6 +174,15 @@ public class FeeType extends GenericModel {
         return FeeType.findById("transportshipping");
     }
 
+    public static FeeType oceanfreight() {
+        return FeeType.findById("oceanfreight");
+    }
+
+    public static FeeType airFee() {
+        return FeeType.findById("airFee");
+    }
+
+
     /**
      * 运输关税
      *

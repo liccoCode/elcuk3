@@ -46,6 +46,26 @@ public class MetricShipCostServiceTest extends UnitTest {
         assertThat(t2._2, is(20f));
     }
 
+    @Test
+    public void testAirCost() {
+        Selling sell = FactoryBoy.create(Selling.class, "de");
+        sellingShipCostFixtures();
+        F.T2<Float, Float> t2 = service.airCost(sell, new Date());
+        // 1049.18 USD
+        assertThat((double) t2._1, is(closeTo(5.24, 0.1d)));
+        assertThat(t2._2, is(200f));
+    }
+
+    @Test
+    public void testSeaCost() {
+        Selling sell = FactoryBoy.create(Selling.class, "de");
+        sellingShipCostFixtures();
+        F.T2<Float, Float> t2 = service.seaCost(sell, new Date());
+        // 1426.22 USD
+        assertThat((double) t2._1, is(closeTo(4.75, 0.1d)));
+        assertThat(t2._2, is(300f));
+    }
+
     private void sellingShipCostFixtures() {
         /**
          * 1. 准备 1 个 FBA 快递的运输费用
