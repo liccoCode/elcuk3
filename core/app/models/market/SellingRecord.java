@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.product.Product;
 import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
@@ -187,17 +188,9 @@ public class SellingRecord extends GenericModel {
     @Expose
     public Date date = new Date();
 
-    public void updateAttr(SellingRecord nsrd) {
-        if(!StringUtils.equals(this.id, nsrd.id))
-            throw new FastRuntimeException("不相同的 SellingReocrd 不能进行更新!");
-        if(nsrd.units != null && nsrd.units > 0) this.units = nsrd.units;
-        if(nsrd.orders != null && nsrd.orders > 0) this.orders = nsrd.orders;
-        if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0)
-            this.orderCanceld = nsrd.orderCanceld;
-        if(nsrd.sales > 0) this.sales = nsrd.sales;
-        if(nsrd.salePrice != null && nsrd.salePrice > 0) this.salePrice = nsrd.salePrice;
-        if(nsrd.pageViews != null && nsrd.pageViews > 0) this.pageViews = nsrd.pageViews;
-        if(nsrd.sessions != null && nsrd.sessions > 0) this.sessions = nsrd.sessions;
+    public float sumShipCost() {
+        Product product = Product.findByMerchantSKU(this.selling.merchantSKU);
+        return ((this.airKilogram + this.expressCost) * product.weight) + (this.seaCubicMeter * product.cubicMeter());
     }
 
     /**
@@ -458,7 +451,11 @@ public class SellingRecord extends GenericModel {
     @Override
     public String toString() {
         return "SellingRecord{" +
-                "sessions=" + sessions +
+                "selling=" + selling +
+                ", account=" + account +
+                ", market=" + market +
+                ", id='" + id + '\'' +
+                ", sessions=" + sessions +
                 ", pageViews=" + pageViews +
                 ", orders=" + orders +
                 ", orderCanceld=" + orderCanceld +
@@ -466,10 +463,16 @@ public class SellingRecord extends GenericModel {
                 ", units=" + units +
                 ", sales=" + sales +
                 ", income=" + income +
+                ", amzFee=" + amzFee +
+                ", fbaFee=" + fbaFee +
                 ", procureCost=" + procureCost +
                 ", procureNumberSum=" + procureNumberSum +
                 ", expressCost=" + expressCost +
                 ", expressKilogram=" + expressKilogram +
+                ", airCost=" + airCost +
+                ", airKilogram=" + airKilogram +
+                ", seaCost=" + seaCost +
+                ", seaCubicMeter=" + seaCubicMeter +
                 ", profit=" + profit +
                 ", costProfitRatio=" + costProfitRatio +
                 ", saleProfitRatio=" + saleProfitRatio +

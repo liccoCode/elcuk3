@@ -24,29 +24,31 @@ public class MetricShipCostService {
     /**
      * 计算某一个 Selling 某一天的快递运费
      *
-     * @return 单个快递运费, 总重量
+     * @return 单个快递运费, 总重量, 这一天的总费用
      */
-    public F.T2<Float, Float> expressCost(Selling selling, Date oneDay) {
+    public F.T3<Float, Float, Float> expressCost(Selling selling, Date oneDay) {
         return baseCost(selling, oneDay, Shipment.T.EXPRESS, FeeType.expressFee());
     }
 
 
     /**
      * 计算某一个 Selling 某一天的空运运费
+     * @return 单个空运运费, 总重量, 这一天的总费用
      */
-    public F.T2<Float, Float> airCost(Selling selling, Date oneDay) {
+    public F.T3<Float, Float, Float> airCost(Selling selling, Date oneDay) {
         return baseCost(selling, oneDay, Shipment.T.AIR, FeeType.airFee());
     }
 
 
     /**
      * 计算某一个 Selling 某一天的海运运费
+     * @return 单个海运运费, 总重量, 这一天的总费用
      */
-    public F.T2<Float, Float> seaCost(Selling selling, Date oneDay) {
+    public F.T3<Float, Float, Float> seaCost(Selling selling, Date oneDay) {
         return baseCost(selling, oneDay, Shipment.T.SEA, FeeType.oceanfreight());
     }
 
-    public F.T2<Float, Float> baseCost(Selling selling, Date oneDay, Shipment.T type, FeeType feeType) {
+    public F.T3<Float, Float, Float> baseCost(Selling selling, Date oneDay, Shipment.T type, FeeType feeType) {
         /**
          * 1. 找到昨天的 SellingRecord 的数据, 用于统计计算今天的值.
          * 2. 从今天支付完成的运输付款单出发, 找出当天 selling 所涉及的所有快递/空运/海运运输单的总费用(不包括 VAT和关税)与总运输重量.
@@ -89,23 +91,22 @@ public class MetricShipCostService {
                 .where("feeType_name=?").param(feeType.name);
 
 
-        float totalFees = oneDayRecord.expressCost;
+        float currentFee = 0;
         float totalKilogram = oneDayRecord.expressKilogram;
 
         List<Map<String, Object>> rows = DBUtils.rows(sumFeeSql.toString(), sumFeeSql.getParams().toArray());
         for(Map<String, Object> row : rows) {
             if(row.get("currency") == null) continue;
             helper.Currency currency = helper.Currency.valueOf(row.get("currency").toString());
-            totalFees += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
+            currentFee += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
         }
         Map<String, Object> totalKg = DBUtils.row(sumKilogram.toString(), sumKilogram.getParams().toArray());
         totalKilogram += (totalKg.get("kg") == null ? 0 : NumberUtils.toFloat(totalKg.get("kg").toString()));
 
-        System.out.println(String.format("%s / %s = %s", totalFees, totalKilogram, totalFees / totalKilogram));
-
-        return new F.T2<Float, Float>(
-                totalKilogram == 0 ? 0 : totalFees / totalKilogram,
-                totalKilogram);
+        return new F.T3<Float, Float, Float>(
+                totalKilogram == 0 ? 0 : (oneDayRecord.expressCost + currentFee) / totalKilogram,
+                totalKilogram,
+                currentFee);
     }
 
 }
