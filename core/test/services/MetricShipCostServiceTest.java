@@ -2,6 +2,7 @@ package services;
 
 import factory.FactoryBoy;
 import factory.callback.BuildCallback;
+import factory.finance.FeeTypeFactory;
 import helper.Currency;
 import models.finance.FeeType;
 import models.finance.Payment;
@@ -29,24 +30,26 @@ public class MetricShipCostServiceTest extends UnitTest {
     @Before
     public void setUp() {
         FactoryBoy.deleteAll();
+        FeeTypeFactory.feeTypeInit();
     }
 
     MetricShipCostService service = new MetricShipCostService();
 
     @Test
     public void testExpressCost() {
-        Selling sell = FactoryBoy.create(Selling.class);
+        Selling sell = FactoryBoy.create(Selling.class, "de");
         sellingShipCostFixtures();
 
         F.T2<Float, Float> t2 = service.expressCost(sell, new Date());
-        assertThat((double) t2._1, is(closeTo(30.192, 0.1d)));
-        assertThat(t2._2, is(520f));
+        // 124.7 USD
+        assertThat((double) t2._1, is(closeTo(6.2, 0.1d)));
+        assertThat(t2._2, is(20f));
     }
 
     private void sellingShipCostFixtures() {
         /**
          * 1. 准备 1 个 FBA 快递的运输费用
-         * --- 600 (20) 快递费, 200 关税
+         * --- 760 (20) 快递费, 200 关税
          * 2. 准备 1 个海运的运输费用
          * --- 8700 (300) 海运费,  300 关税
          * 3. 准备 1 个空运的运输费用

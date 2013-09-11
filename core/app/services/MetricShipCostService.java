@@ -46,29 +46,35 @@ public class MetricShipCostService {
                 .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
                 .groupBy("s.id");
 
-        Map<String, Object> row = DBUtils.row(effectShipmentSql.toString(), effectShipmentSql.getParams().toArray());
+        Map<String, Object> idsRs = DBUtils.row(effectShipmentSql.toString(), effectShipmentSql.getParams().toArray());
 
         List<String> effectShipmentIds = new ArrayList<String>();
-        effectShipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentIds").toString(), ",")));
+        effectShipmentIds.addAll(Arrays.asList(StringUtils.split(idsRs.get("shipmentIds").toString(), ",")));
 
         SqlSelect sumBase = new SqlSelect().from("PaymentUnit pu")
                 .where(SqlSelect.whereIn("pu.shipment_id", effectShipmentIds));
         // 通过运输单找他们的总运输费用
         SqlSelect sumFeeSql = new SqlSelect(sumBase)
-                .select("sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost")
-                .where("pu.feeType_name!=?").param("dutyandvat")/*固定的 VAT 和关税的费用类型*/;
+                .select("sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost", "pu.currency")
+                .where("pu.feeType_name!=?").param("dutyandvat")/*固定的 VAT 和关税的费用类型*/
+                .groupBy("pu.currency");
         // 通过运输单找他们的总重量
         SqlSelect sumKilogram = new SqlSelect(sumBase)
                 .select("sum(unitQty) kg")
                 .where("feeType_name=?").param("transportshipping")/*固定的快递费名称*/;
 
-        Map<String, Object> totalFeeRow = DBUtils.row(sumFeeSql.toString(), sumFeeSql.getParams().toArray());
-        Map<String, Object> totalKg = DBUtils.row(sumKilogram.toString(), sumKilogram.getParams().toArray());
 
-        float totalFees = oneDayRecord.expressCost +
-                (totalFeeRow.get("cost") == null ? 0 : NumberUtils.toFloat(totalFeeRow.get("cost").toString()));
-        float totalKilogram = oneDayRecord.expressKilogram +
-                (totalKg.get("kg") == null ? 0 : NumberUtils.toFloat(totalKg.get("kg").toString()));
+        float totalFees = oneDayRecord.expressCost;
+        float totalKilogram = oneDayRecord.expressKilogram;
+
+        List<Map<String, Object>> rows = DBUtils.rows(sumFeeSql.toString(), sumFeeSql.getParams().toArray());
+        for(Map<String, Object> row : rows) {
+            if(row.get("currency") == null) continue;
+            helper.Currency currency = helper.Currency.valueOf(row.get("currency").toString());
+            totalFees += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
+        }
+        Map<String, Object> totalKg = DBUtils.row(sumKilogram.toString(), sumKilogram.getParams().toArray());
+        totalKilogram += (totalKg.get("kg") == null ? 0 : NumberUtils.toFloat(totalKg.get("kg").toString()));
 
         return new F.T2<Float, Float>(
                 totalKilogram == 0 ? 0 : totalFees / totalKilogram,
