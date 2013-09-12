@@ -16,6 +16,7 @@ import play.libs.F;
 import play.test.UnitTest;
 
 import java.util.Date;
+import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.number.IsCloseTo.closeTo;
@@ -40,30 +41,40 @@ public class MetricShipCostServiceTest extends UnitTest {
         Selling sell = FactoryBoy.create(Selling.class, "de");
         sellingShipCostFixtures();
 
-        F.T2<Float, Float> t2 = service.expressCost(sell, new Date());
+        F.T3<Float, Float, Float> t3 = service.expressCost(sell, new Date());
         // 124.7 USD
-        assertThat((double) t2._1, is(closeTo(6.2, 0.1d)));
-        assertThat(t2._2, is(20f));
+        assertThat((double) t3._1, is(closeTo(6.2, 0.1d)));
+        assertThat(t3._2, is(20f));
     }
 
     @Test
     public void testAirCost() {
         Selling sell = FactoryBoy.create(Selling.class, "de");
         sellingShipCostFixtures();
-        F.T2<Float, Float> t2 = service.airCost(sell, new Date());
+        F.T3<Float, Float, Float> t3 = service.airCost(sell, new Date());
         // 1049.18 USD
-        assertThat((double) t2._1, is(closeTo(5.24, 0.1d)));
-        assertThat(t2._2, is(200f));
+        assertThat((double) t3._1, is(closeTo(5.24, 0.1d)));
+        assertThat(t3._2, is(200f));
     }
 
     @Test
     public void testSeaCost() {
         Selling sell = FactoryBoy.create(Selling.class, "de");
         sellingShipCostFixtures();
-        F.T2<Float, Float> t2 = service.seaCost(sell, new Date());
+        F.T3<Float, Float, Float> t3 = service.seaCost(sell, new Date());
         // 1426.22 USD
-        assertThat((double) t2._1, is(closeTo(4.75, 0.1d)));
-        assertThat(t2._2, is(300f));
+        assertThat((double) t3._1, is(closeTo(4.75, 0.1d)));
+        assertThat(t3._2, is(300f));
+    }
+
+    @Test
+    public void testSellingVATFee() {
+        Selling sell = FactoryBoy.create(Selling.class, "de");
+        sellingShipCostFixtures();
+
+        Map<String, Float> vats = service.sellingVATFee(new Date());
+        // 780 -> 127.1 USD;  900 个数量, 计算单个申报价格
+        assertThat((double) vats.get(sell.sellingId), is(closeTo(0.141d, 0.01d)));
     }
 
     private void sellingShipCostFixtures() {

@@ -158,6 +158,11 @@ public class SellingRecord extends GenericModel {
     public float seaCubicMeter = 0;
 
     /**
+     * 产品的关税和VAT费用
+     */
+    public float dutyAndVAT = 0;
+
+    /**
      * 利润 = 销售额 - (总)采购成本 - (总)运输成本
      */
     public float profit = 0;
@@ -198,6 +203,16 @@ public class SellingRecord extends GenericModel {
         Product product = Product.findByMerchantSKU(this.selling.merchantSKU);
         return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
                 this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
+    }
+
+    /**
+     * 统计采购物流的总成本(包括 VAT)
+     *
+     * @return
+     */
+    public float procureAndShipCost() {
+        // 物流 + VAT + 采购
+        return this.sumShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
     }
 
     /**
