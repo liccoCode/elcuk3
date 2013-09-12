@@ -550,6 +550,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
+     * 立方米
+     * @return
+     */
+    public float cubicMeter() {
+        return this.lengths * this.heigh * this.width * 1000 * 1000 * 1000;
+    }
+
+    /**
      * 此产品拥有的图片的数量
      *
      * @return

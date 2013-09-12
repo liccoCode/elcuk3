@@ -37,7 +37,7 @@ public class ShipmentFinanceTest extends UnitTest {
                 target.shipment = ship;
                 target.currency = Currency.CNY;
                 target.amount = 2000;
-                target.feeType = FeeType.transportDuty();
+                target.feeType = FeeType.dutyAndVAT();
             }
         });
 
@@ -45,7 +45,7 @@ public class ShipmentFinanceTest extends UnitTest {
             @Override
             public void build(PaymentUnit target) {
                 target.shipment = ship;
-                target.feeType = FeeType.transportShipping();
+                target.feeType = FeeType.expressFee();
             }
         });
 
@@ -66,7 +66,7 @@ public class ShipmentFinanceTest extends UnitTest {
         assertThat(unit.currency, is(Currency.CNY));
         assertThat(unit.amount, is((float) (10000 - 2 * 2000)));
         assertThat(unit.unitPrice, is((float) (10000 - 2 * 2000)));
-        assertThat(unit.unitQty, is(1));
+        assertThat(unit.unitQty, is(1f));
         assertThat(PaymentUnit.count(), is(5l));
     }
 
