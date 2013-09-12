@@ -188,9 +188,16 @@ public class SellingRecord extends GenericModel {
     @Expose
     public Date date = new Date();
 
+    /**
+     * 根据已经计算好的 快递/空运/海运 运费, 用于估计计算物流成本
+     *
+     * @return
+     */
     public float sumShipCost() {
+        if((this.seaCubicMeter + this.expressKilogram + this.airKilogram) == 0) return 0;
         Product product = Product.findByMerchantSKU(this.selling.merchantSKU);
-        return ((this.airKilogram + this.expressCost) * product.weight) + (this.seaCubicMeter * product.cubicMeter());
+        return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
+                this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
     }
 
     /**

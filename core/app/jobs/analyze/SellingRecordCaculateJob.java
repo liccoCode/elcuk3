@@ -95,21 +95,18 @@ public class SellingRecordCaculateJob extends Job {
                 F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
                 record.expressCost = costAndKg._1;
                 record.expressKilogram = costAndKg._2;
-                float currencShipCost = costAndKg._3;
 
                 // 空运运输成本
                 costAndKg = shipCostService.airCost(selling, dateTime.toDate());
                 record.airCost = costAndKg._1;
                 record.airKilogram = costAndKg._2;
-                currencShipCost += costAndKg._3;
 
                 // 海运运输成本
                 costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
                 record.seaCost = costAndKg._1;
                 record.seaCubicMeter = costAndKg._2;
-                currencShipCost += costAndKg._3;
 
-                float procureAndShipCost = currencShipCost + (record.procureCost * record.units);
+                float procureAndShipCost = record.sumShipCost() + (record.procureCost * record.units);
                 // 利润 = 实际收入 - 采购成本 - 运输成本
                 record.profit = record.income - procureAndShipCost;
                 // 成本利润率 = 利润 / (采购成本 + 运输成本)
