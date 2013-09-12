@@ -156,17 +156,17 @@ $ ->
   $('#check_upc').click (e) ->
     e.preventDefault()
     $('#msku').val(->
-      @value.split(',')[0])
+      @value.split(',')[0]
+    )
     upc = $(@).removeClass('btn-warning btn-success').addClass('btn-warning').prev().val()
     if !$.isNumeric(upc)
       alert('UPC 必须是数字')
-    return false
+      return false
 
-    $.getJSON('/products/upcCheck', {upc: upc})
+    $.ajax('/products/upcCheck', {type: 'GET', data: {upc: upc}, dataType: 'json'})
       .done((r) ->
         if r.flag is false
           alert(r.message)
         else
           show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_upc_check_close)
       )
-
