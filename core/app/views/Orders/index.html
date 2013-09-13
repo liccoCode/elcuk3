@@ -57,11 +57,9 @@
       </select>
 
       <select name="p.promotion" class="inline">
-        <option value="null" ${p.promotion=="null" ? 'selected' : ''}>不属于促销订单</option>
-        <option value="promorebates" ${p.promotion=="promorebates" ? 'selected' : ''}>全部促销订单</option>
-        #{list items:feeTypes}
-        <option ${_.name == p.promotion ? 'selected' : ''} value="${_.name}">${_.memo}</option>
-        #{/list}
+        <option value=""}>全部订单</option>
+        <option value="true"  ${p.promotion == true ? 'selected' : ''}>过滤出促销订单</option>
+        <option value="false" ${p.promotion == false ? 'selected' : ''}>不是促销订单</option>
       </select>
 
       <div class="inline input-append" id="search_btns">
