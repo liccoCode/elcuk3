@@ -83,7 +83,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
         }
         if(StringUtils.isNotBlank(this.categoryId))
-                    CollectionUtils.filter(records, new SearchPredicate("^" + this.categoryId));
+            CollectionUtils.filter(records, new SearchPredicate("^" + this.categoryId));
 
         if(this.filterDot2)
             CollectionUtils.filter(records, new UnContainsPredicate(","));

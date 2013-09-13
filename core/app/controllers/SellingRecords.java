@@ -22,7 +22,7 @@ public class SellingRecords extends Controller {
 
     @Check("sellingrecords.index")
     public static void index() {
-        List<String> categoryIds = Category.category_ids();
+        List<String> categoryIds = Category.categoryIds();
         SellingRecordsPost p = new SellingRecordsPost();
         try {
             p.records();
