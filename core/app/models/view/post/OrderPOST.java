@@ -46,7 +46,7 @@ public class OrderPOST extends Post<Orderr> {
 
     public Boolean warnning = false;
 
-    public String promotion;
+    public Boolean promotion = null;
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
@@ -111,12 +111,13 @@ public class OrderPOST extends Post<Orderr> {
             params.add(this.warnning);
         }
 
-        if(this.promotion != null && !"".equals(this.promotion) && !"null".equals(this.promotion)){
-            if("promorebates".equals(this.promotion.trim()))
-               sbd.append("AND fe.type.parent.name=?");
+        if(this.promotion != null){
+            if(this.promotion)
+               sbd.append("AND fe.type.parent.name=? OR fe.type.name=?");
             else
-               sbd.append("AND fe.type.name=?");
-            params.add(this.promotion); //促销费用
+               sbd.append("AND fe.type.parent.name!=? OR fe.type.name!=?");
+            params.add("promorebates"); //促销费用
+            params.add("promorebates");
         }
 
         //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
