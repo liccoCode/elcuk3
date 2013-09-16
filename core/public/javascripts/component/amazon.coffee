@@ -53,7 +53,7 @@ $ ->
     $.ajax('/sellings/tsp', {type: 'GET', data: {sid: @value}, dataType: 'json'})
       .done((r) ->
         $('#sid_preview').data('tsp', r)
-        noty({text: '加载成功, 可点击 "放大镜" 查看详细信息或者点击 "填充" 进行填充'})
+        noty({text: '加载成功, 可点击 "放大镜" 查看详细信息或者点击 "填充" 进行填充', type: 'success', timeout: 3000})
         LoadMask.unmask()
       )
   ).on('click', 'button:contains(填充)', (e) ->
