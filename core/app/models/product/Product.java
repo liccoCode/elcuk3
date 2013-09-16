@@ -272,7 +272,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(selling.listing == null) selling.listing = new Listing(selling, this).save();
 
         selling.sid();
-        return selling.save();
+        return selling.merge();
     }
 
     /**
@@ -314,18 +314,22 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
         params.clear();
         params.add(new BasicNameValuePair("category", ""));
-        JsonElement json = new JsonParser().parse(body);
-        for(JsonElement element : json.getAsJsonArray()) {
-            JsonObject obj = element.getAsJsonObject();
-            if(!amzBigCategory.equals(obj.get("id").getAsString())) continue;
-            params.add(new BasicNameValuePair("newCategory", amzBigCategory));
-            params.add(new BasicNameValuePair("productType", obj.get("productType").getAsString()));
-            params.add(new BasicNameValuePair("displayPath",
-                    String.format("All Product Categories/%s/%s",
-                            obj.get("displayPath").getAsString(),
-                            obj.get("displayName").getAsString()
-                    )));
-            params.add(new BasicNameValuePair("itemType", obj.get("itemType").getAsString()));
+        try {
+            JsonElement json = new JsonParser().parse(body);
+            for(JsonElement element : json.getAsJsonArray()) {
+                JsonObject obj = element.getAsJsonObject();
+                if(!amzBigCategory.equals(obj.get("id").getAsString())) continue;
+                params.add(new BasicNameValuePair("newCategory", amzBigCategory));
+                params.add(new BasicNameValuePair("productType", obj.get("productType").getAsString()));
+                params.add(new BasicNameValuePair("displayPath",
+                        String.format("All Product Categories/%s/%s",
+                                obj.get("displayPath").getAsString(),
+                                obj.get("displayName").getAsString()
+                        )));
+                params.add(new BasicNameValuePair("itemType", obj.get("itemType").getAsString()));
+            }
+        } catch(Exception e) {
+            Validation.addError("", e.getMessage() + " ---- " + body);
         }
         return params;
     }

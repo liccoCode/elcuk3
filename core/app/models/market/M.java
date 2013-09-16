@@ -538,7 +538,7 @@ public enum M {
             case AMAZON_IT:
                 return String.format("https://catalog-sc.%s/abis/Classify/BrowseCategory.amzn", this.toString());
             case AMAZON_US:
-                return String.format("https://catalog.%s/abis/Classify/BrowseCategory.amzn", this.toString());
+                return "https://catalog.amazon.com/abis/Classify/BrowseCategory.amzn";
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
