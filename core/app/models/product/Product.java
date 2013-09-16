@@ -431,7 +431,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         Set<NameValuePair> sellingParams = new HashSet<NameValuePair>();
         for(Map.Entry<String, String> entry : uniqParams.entrySet()) {
             sellingParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-            Logger.info("%s=%s", entry.getKey(), entry.getValue());
         }
         return sellingParams;
     }
@@ -551,6 +550,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 立方米
+     *
      * @return
      */
     public float cubicMeter() {
