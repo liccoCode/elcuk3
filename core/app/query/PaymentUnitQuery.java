@@ -98,6 +98,7 @@ public class PaymentUnitQuery {
      * @return
      */
     public Float avgSkuAIRTransportshippingFee(Date from, Date to) {
+        //TODO transportshipping 的名称需要调整!
         return avgShipmentTransportshippingFee(Shipment.T.AIR, "transportshipping", from, to);
     }
 

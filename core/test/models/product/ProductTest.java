@@ -42,7 +42,7 @@ public class ProductTest extends UnitTest {
                 aps.upc = "655886518448";
             }
         });
-        p.category.settings.amazonITCategory = "consumer_electronics/consumer_electronics";
+        p.category.settings.amazonCategory = "622960011/7053657011";
 
         Webs.dev_login(sell.account);
         return new F.T2<Product, Selling>(p, sell);
