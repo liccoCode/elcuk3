@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
+import models.product.Product;
 import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
@@ -127,14 +128,39 @@ public class SellingRecord extends GenericModel {
     public int procureNumberSum = 0;
 
     /**
-     * (单个产品)运输成本
+     * 快递运输成本($ N/kg)
      */
-    public float shipCost = 0;
+    public float expressCost = 0;
 
     /**
-     * 运输到目前为之, 总共运输的数量
+     * 运输到目前为之, 总共的快递运输重量(kg)
      */
-    public int shipNumberSum = 0;
+    public float expressKilogram = 0;
+
+    /**
+     * 空运的运输成本($ N/kg)
+     */
+    public float airCost = 0;
+
+    /**
+     * 到目前为之, 总共的空运运输重量(kg)
+     */
+    public float airKilogram = 0;
+
+    /**
+     * 海运运输成本($ N/m3)
+     */
+    public float seaCost = 0;
+
+    /**
+     * 到目前为止, 总共的海运运输体积(立方米)
+     */
+    public float seaCubicMeter = 0;
+
+    /**
+     * 产品的关税和VAT费用
+     */
+    public float dutyAndVAT = 0;
 
     /**
      * 利润 = 销售额 - (总)采购成本 - (总)运输成本
@@ -167,17 +193,26 @@ public class SellingRecord extends GenericModel {
     @Expose
     public Date date = new Date();
 
-    public void updateAttr(SellingRecord nsrd) {
-        if(!StringUtils.equals(this.id, nsrd.id))
-            throw new FastRuntimeException("不相同的 SellingReocrd 不能进行更新!");
-        if(nsrd.units != null && nsrd.units > 0) this.units = nsrd.units;
-        if(nsrd.orders != null && nsrd.orders > 0) this.orders = nsrd.orders;
-        if(nsrd.orderCanceld != null && nsrd.orderCanceld > 0)
-            this.orderCanceld = nsrd.orderCanceld;
-        if(nsrd.sales > 0) this.sales = nsrd.sales;
-        if(nsrd.salePrice != null && nsrd.salePrice > 0) this.salePrice = nsrd.salePrice;
-        if(nsrd.pageViews != null && nsrd.pageViews > 0) this.pageViews = nsrd.pageViews;
-        if(nsrd.sessions != null && nsrd.sessions > 0) this.sessions = nsrd.sessions;
+    /**
+     * 根据已经计算好的 快递/空运/海运 运费, 用于估计计算物流成本
+     *
+     * @return
+     */
+    public float sumShipCost() {
+        if((this.seaCubicMeter + this.expressKilogram + this.airKilogram) == 0) return 0;
+        Product product = Product.findByMerchantSKU(this.selling.merchantSKU);
+        return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
+                this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
+    }
+
+    /**
+     * 统计采购物流的总成本(包括 VAT)
+     *
+     * @return
+     */
+    public float procureAndShipCost() {
+        // 物流 + VAT + 采购
+        return this.sumShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
     }
 
     /**
@@ -438,7 +473,11 @@ public class SellingRecord extends GenericModel {
     @Override
     public String toString() {
         return "SellingRecord{" +
-                "sessions=" + sessions +
+                "selling=" + selling +
+                ", account=" + account +
+                ", market=" + market +
+                ", id='" + id + '\'' +
+                ", sessions=" + sessions +
                 ", pageViews=" + pageViews +
                 ", orders=" + orders +
                 ", orderCanceld=" + orderCanceld +
@@ -446,10 +485,16 @@ public class SellingRecord extends GenericModel {
                 ", units=" + units +
                 ", sales=" + sales +
                 ", income=" + income +
+                ", amzFee=" + amzFee +
+                ", fbaFee=" + fbaFee +
                 ", procureCost=" + procureCost +
                 ", procureNumberSum=" + procureNumberSum +
-                ", shipCost=" + shipCost +
-                ", shipNumberSum=" + shipNumberSum +
+                ", expressCost=" + expressCost +
+                ", expressKilogram=" + expressKilogram +
+                ", airCost=" + airCost +
+                ", airKilogram=" + airKilogram +
+                ", seaCost=" + seaCost +
+                ", seaCubicMeter=" + seaCubicMeter +
                 ", profit=" + profit +
                 ", costProfitRatio=" + costProfitRatio +
                 ", saleProfitRatio=" + saleProfitRatio +

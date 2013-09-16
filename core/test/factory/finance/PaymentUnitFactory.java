@@ -5,6 +5,7 @@ import factory.ModelFactory;
 import factory.annotation.Factory;
 import helper.Currency;
 import models.finance.FeeType;
+import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.ProcureUnit;
 
@@ -35,6 +36,7 @@ public class PaymentUnitFactory extends ModelFactory<PaymentUnit> {
         unit.currency = Currency.CNY;
         unit.procureUnit = FactoryBoy.lastOrCreate(ProcureUnit.class);
         unit.feeType = FactoryBoy.lastOrCreate(FeeType.class);
+        unit.payment = FactoryBoy.lastOrCreate(Payment.class);
         return unit;
     }
 }

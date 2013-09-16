@@ -155,7 +155,7 @@ public class PaymentUnit extends Model {
     /**
      * 费用数量
      */
-    public int unitQty = 1;
+    public float unitQty = 1;
 
     @OneToOne
     public FeeType feeType;
