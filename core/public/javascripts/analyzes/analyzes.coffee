@@ -123,7 +123,7 @@ $ ->
             enabled: false
           xAxis:
             type: 'datetime'
-          yAxis: [{},{labels: {format: '{value}'}, opposite: true},title:{text:yName}]
+          yAxis: { min: 0 }
           plotOptions:
             series: # 需要从服务器获取开始时间
                cursor: 'pointer',
