@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import models.product.Product;
 import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
@@ -200,7 +199,6 @@ public class SellingRecord extends GenericModel {
      */
     public float sumShipCost() {
         if((this.seaCubicMeter + this.expressKilogram + this.airKilogram) == 0) return 0;
-        Product product = Product.findByMerchantSKU(this.selling.merchantSKU);
         return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
                 this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
     }
