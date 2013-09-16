@@ -272,7 +272,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(selling.listing == null) selling.listing = new Listing(selling, this).save();
 
         selling.sid();
-        return selling.merge();
+        return selling.<Selling>merge().save();
     }
 
     /**
