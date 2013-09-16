@@ -165,24 +165,33 @@
 
             <tr>
               <th>交货地址</th>
-              <td colspan="3">
+              <td colspan="7">
                 <input type="text" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
               </td>
-
-              <td colspan="2">
-                <button class="btn btn-success" data-loading id="load_product_terms">加载产品要求</button>
-              </td>
-              <td colspan="2"></td>
             </tr>
 
             <tr>
               <th>交易条款<br>(供应商)</th>
               <td colspan="3">
-                <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12">${dmt.cooperator.tradingTerms}</textarea>
+                <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
+                .tradingTerms}</textarea>
               </td>
               <th>产品要求<br>(产品线)</th>
               <td colspan="3">
-                <textarea rows="8" name="excel.productTerms" id="excel_productTerms" class="span12"></textarea>
+                <div style="overflow:auto;height:150px;width:780px;">
+                 #{list items:dmt.units, as:'procureUnit' }
+                     #{list items:procureUnit.cooperator.cooperItems, as:'cooperItem'}
+                       #{if procureUnit.sku == cooperItem.product.sku}
+                         <a href="@{Cooperators.editCooperItem()}?copItem.id=${cooperItem.id}" target="_blank"
+                            class="btn btn-small btn-info" rel="popover"
+                              content="<span class='label label-info'>产品要求:</span> ${cooperItem.productTerms}<br><span
+                             class='label label-info'>Memo:</span> ${cooperItem.memo}" >
+                          ${cooperItem.product.sku}
+                         </a>
+                       #{/if}
+                     #{/list}
+                 #{/list}
+                </div>
               </td>
             </tr>
 
