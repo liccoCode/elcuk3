@@ -1,0 +1,78 @@
+<h3>${payment.cooperator.fullName} - ${payment.paymentNumber} 付款单</h3>
+<h3>${payment.state.label()}</h3>
+<table class="table table-condensed table-bordered">
+  <tr>
+    <td class="span1">采购订单号</td>
+    <td>采购单元</td>
+    <td>SKU</td>
+    <td class="span2">实际交货</td>
+    <td>单价</td>
+    <td>金额</td>
+    <td>修正值</td>
+    <td>付款日期</td>
+    <td>实际交货日期</td>
+  </tr>
+    #{set qty: 0/}
+    #{set amount: 0/}
+    #{set fixValue: 0/}
+    #{list items:payment.units(), as:'paymentunit'}
+      <tr>
+        #{set unit: paymentunit.procureUnit/}
+        <td>${unit.deliveryment.id}</td>
+        <td>#${unit.id}</td>
+        <td>${unit.product.sku}</td>
+        <td>${unit.qty()}</td>
+        <td>${unit.attrs.currency.symbol()} ${unit.attrs.price}</td>
+        <td>${paymentunit.currency.symbol()} ${paymentunit.amount}</td>
+        <td>${paymentunit.currency.symbol()} ${paymentunit.fixValue}</td>
+        <td>${payment.paymentDate.date()}</td>
+        <td>${unit.attrs.deliveryDate.date()}</td>
+      </tr>
+        #{set qty: qty + unit.qty()/}
+        #{set amount: amount + paymentunit.amount/}
+        #{set fixValue: fixValue + paymentunit.fixValue/}
+    #{/list}
+  <tr>
+    <td colspan="2">&nbsp;</td>
+    <td>总数量:</td>
+    <td>${qty}</td>
+    <td>总金额:</td>
+    <td>${amount}</td>
+    <td>${fixValue}</td>
+    <td>:总修正</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td colspan="4"></td>
+    #{if payment.state != models.finance.Payment.S.PAID}
+    <td>美元汇率</td>
+    <td colspan="4">${payment.currency.ratio(helper.Currency.USD)}</td>
+    #{/if}
+    #{else}
+    <td>${payment.actualCurrency.label()}汇率</td>
+    <td colspan="4">${payment.rate}</td>
+    #{/else}
+  </tr>
+  <tr>
+    <td colspan="2">&nbsp;</td>
+    <td>应付${payment.currency.label()}</td>
+    #{if payment.state != models.finance.Payment.S.PAID}
+    <td>${payment.currency.symbol()} ${payment.approvalAmount()}</td>
+    <td>应付美金</td>
+    <td colspan="4">${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+    #{/if}
+    #{else}
+    <td>应付${payment.actualCurrency.label()}</td>
+    <td colspan="4">${payment.actualCurrency.symbol()}${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
+    #{/else}
+  </tr>
+</table>
+#{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
+#{if images}
+  #{list items:images, as:'img'}
+  <img src="http://e.easya.cc/attachs/image?a.fileName=${img.fileName}">
+  #{/list}
+#{/if}
+#{else }
+  还未上传凭证
+#{/else}
