@@ -45,27 +45,27 @@
    </tr>
    <tr>
      <td colspan="4"></td>
-     #{if payment.state == models.finance.Payment.S.WAITING}
+     #{if payment.state != models.finance.Payment.S.PAID}
      <td>美元汇率</td>
      <td colspan="4">${payment.currency.ratio(helper.Currency.USD)}</td>
      #{/if}
-     #{elseif payment.state == models.finance.Payment.S.PAID}
+     #{else}
      <td>${payment.actualCurrency.label()}汇率</td>
      <td colspan="4">${payment.rate}</td>
-     #{/elseif}
+     #{/else}
    </tr>
   <tr>
     <td colspan="2">&nbsp;</td>
     <td>应付${payment.currency.label()}</td>
     <td>${payment.currency.symbol()} ${payment.approvalAmount()}</td>
-    #{if payment.state == models.finance.Payment.S.WAITING}
+    #{if payment.state != models.finance.Payment.S.PAID}
     <td>应付美金</td>
     <td colspan="4">${helper.Currency.USD.symbol()}${(payment.currency.toUSD(payment.approvalAmount())).format('#.##')}</td>
     #{/if}
-    #{elseif payment.state == models.finance.Payment.S.PAID}
+    #{else}
     <td>应付${payment.actualCurrency.label()}</td>
     <td colspan="4">${payment.actualCurrency.symbol()}${(payment.rate * payment.approvalAmount()).format('#.##')}</td>
-    #{/elseif}
+    #{/else}
   </tr>
 </table>
 #{set images: models.product.Attach.attaches(payment.id + "", 'PAYMENTS')/}
