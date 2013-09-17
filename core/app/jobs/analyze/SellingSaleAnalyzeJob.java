@@ -18,14 +18,14 @@ import java.util.*;
 
 /**
  * 周期:
- * 轮询: 0, 7, 15 三个时间点执行三次
+ * 轮询: 0:20, 7:20, 15:20 三个时间点执行三次
  * 为系统后台任务
  * <p/>
  * User: wyatt
  * Date: 8/13/13
  * Time: 3:06 PM
  */
-@On("0 0 0,7,15 * * ?")
+@On("0 20 0,7,15 * * ?")
 public class SellingSaleAnalyzeJob extends Job {
     public static final String RUNNING = "analyze_running";
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
