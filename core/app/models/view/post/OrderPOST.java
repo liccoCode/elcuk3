@@ -71,7 +71,6 @@ public class OrderPOST extends Post<Orderr> {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder(" FROM Orderr o");
         sbd.append(" LEFT JOIN o.items oi ");
-        //sbd.append(" LEFT JOIN o.fees fe ");
         sbd.append(" WHERE 1=1");
         List<Object> params = new ArrayList<Object>();
         if(this.accountId != null) {
@@ -111,12 +110,12 @@ public class OrderPOST extends Post<Orderr> {
             params.add(this.warnning);
         }
 
-        if(this.promotion != null){
+        if(this.promotion != null) {
             if(this.promotion)
-               sbd.append("AND orderId in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
+                sbd.append("AND orderId in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
             else
-                sbd.append("AND orderId not in(select order.orderId from SaleFee where type.name=? OR type.parent" +
-                        ".name=?)");
+                sbd.append(
+                        "AND orderId not in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
             params.add("promorebates"); //促销费用
             params.add("promorebates");
         }
