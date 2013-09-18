@@ -425,4 +425,20 @@ public class Webs {
                 "December",
         });
     }
+
+    /**
+     *
+     *格式化文字，前台 popover 使用
+     */
+    public static String formatMessage(String title,String message) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(title);
+        if( StringUtils.isNotEmpty(message)) {
+            String[] messageArray = StringUtils.split(message, "\n");
+            for(String text : messageArray) {
+                stringBuffer.append("<p>").append(text).append("<p>");
+            }
+        }
+        return stringBuffer.toString();
+    }
 }
