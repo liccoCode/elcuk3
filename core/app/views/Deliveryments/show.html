@@ -145,6 +145,8 @@
               <td colspan="7">
                 <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
 英国快递/英国空运/英国海运/德国快递+美国快递   指定货代是：盖亚伟航 周先生  电话: 18926019499 仓库地址是：深圳市宝安区民治街道民治大道樟坑一区15栋1楼15-4号商铺（民治地铁站、原南景新村铁路桥对面）
+
+德国空运/德国海运/美国空运/美国海运 指定的货代是: 国建汉唐物流 徐先生 QQ516722101，电话15813728307仓库管理员林先生 15920059701 仓库地址是：深圳龙岗区坂田火车站旁货站物流中心105号仓库仓库
                 </textarea>
               </td>
             </tr>
@@ -157,7 +159,7 @@
               </td>
               <th>产品要求<br>(产品线)</th>
               <td colspan="3">
-                <div style="overflow:auto;height:150px;width:780px;">
+                <div style="overflow:auto;height:150px;width:580px;">
                  #{list items:dmt.units, as:'procureUnit' }
                      #{list items:procureUnit.cooperator.cooperItems, as:'cooperItem'}
                        #{if procureUnit.sku == cooperItem.product.sku}
