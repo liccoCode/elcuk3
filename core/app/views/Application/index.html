@@ -5,10 +5,6 @@
     #{script 'Application/app.coffee'/}
 #{/set}
 
-#{info_row title:('Ticket 处理情况总览 <small class="muted">' + new Date().CN() +'</small>').raw()/}
-<div class="row-fluid" id="overview">
-</div>
-
 #{info_row title:'FBA 仓库库存容量总览'/}
 #{list items:fbaWhouse, as:'fba'}
 <div class="row-fluid" style="margin-bottom:20px;">
@@ -16,9 +12,6 @@ ${fba.capaticyContent.raw()}
 </div>
 #{/list}
 
-#{cache 'feedbacksOverView'}
-    #{render 'Application/feedbackOverView.html', feedbacksOverView: models.market.Feedback.frontPageTable()/}
-#{/cache}
 #{render 'Application/_orderTable.html', dashborad: dashborad /}
 
 <div class="row-fluid">

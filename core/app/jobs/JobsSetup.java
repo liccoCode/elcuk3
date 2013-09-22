@@ -53,7 +53,6 @@ public class JobsSetup {
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
-            every(TicketStateSyncJob.class, "1mn");
             every(ReviewFixJob.class, "1mn");
 
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
