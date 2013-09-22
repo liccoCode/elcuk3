@@ -3,7 +3,6 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.product.Product;
-import org.apache.commons.lang.StringUtils;
 import play.data.validation.Min;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
@@ -133,28 +132,5 @@ public class CooperItem extends Model {
      */
     public CooperItem checkAndRemove() {
         return this.delete();
-    }
-
-    /**
-     *
-     *格式化产品要求，前台 popover 使用
-     */
-    public String formatProductTerms() {
-        StringBuffer message = new StringBuffer();
-        message.append("<span class='label label-info'>产品要求:</span><br>");
-        if( StringUtils.isNotEmpty(this.productTerms)) {
-            String[] messageArray = StringUtils.split(this.productTerms, "\n");
-            for(String text : messageArray) {
-                message.append("<p>").append(text).append("<p>");
-            }
-        }
-        if( StringUtils.isNotEmpty(this.memo)) {
-            message.append("<span class='label label-info'>Memo:</span><br>");
-            String[] messageArray = StringUtils.split(this.memo, "\n");
-            for(String text : messageArray) {
-                message.append("<p>").append(text).append("<p>");
-            }
-        }
-        return message.toString();
     }
 }

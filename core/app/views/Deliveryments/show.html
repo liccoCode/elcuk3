@@ -163,9 +163,8 @@
                  #{list items:dmt.units, as:'procureUnit' }
                      #{list items:procureUnit.cooperator.cooperItems, as:'cooperItem'}
                        #{if procureUnit.sku == cooperItem.product.sku}
-                         <a href="@{Cooperators.editCooperItem()}?copItem.id=${cooperItem.id}"
-                            target="_blank"class="btn btn-small btn-info" rel="popover" content="${cooperItem
-                         .formatProductTerms()}" >
+                         <a href="@{Cooperators.editCooperItem(cooperItem.id)}"
+                            target="_blank"class="btn btn-small btn-info" rel="popover" content="${ext.CooperItemHelper.formatProductTerms(cooperItem)}" >
                           ${cooperItem.product.sku}
                          </a>
                        #{/if}

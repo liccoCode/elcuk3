@@ -90,7 +90,8 @@ public class Cooperators extends Controller {
         render(copItem, cop);
     }
 
-    public static void editCooperItem(CooperItem copItem) {
+    public static void editCooperItem(long cooperId) {
+        CooperItem copItem = CooperItem.findById(cooperId);
         renderArgs.put("cop", copItem.cooperator);
         renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
         render("Cooperators/newCooperItem.html", copItem);
