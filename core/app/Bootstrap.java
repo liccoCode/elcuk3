@@ -3,13 +3,11 @@ import helper.Dates;
 import helper.HTTP;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
-import jobs.loop.OsTicketBeanstalkdCheck;
 import models.ElcukConfig;
 import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
-import mws.S3;
 import play.Play;
 import play.jobs.Job;
 import play.jobs.OnApplicationStart;
@@ -52,14 +50,6 @@ public class Bootstrap extends Job {
         JobsSetup.init();
         Account.initOfferIds();
         ElcukConfig.init();
-
-        if(Play.mode.isProd())
-            S3.init();
-
-        if(Play.mode.isProd() || (Play.mode.isDev() &&
-                "true".equalsIgnoreCase(Play.configuration.getProperty("beanstalkd.dev")))) {
-            OsTicketBeanstalkdCheck.begin();
-        }
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.

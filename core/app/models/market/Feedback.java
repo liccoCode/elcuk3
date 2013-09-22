@@ -5,23 +5,21 @@ import helper.GTs;
 import helper.OsTicket;
 import models.product.Category;
 import models.product.Product;
-import models.support.Ticket;
-import models.support.TicketReason;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.GenericModel;
-import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,9 +39,6 @@ public class Feedback extends GenericModel {
 
     @OneToOne
     public Account account;
-
-    @OneToOne(mappedBy = "feedback", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
-    public Ticket ticket;
 
     /**
      * Feedback 每一个订单只有一个, 所以直接使用 OrderId 作为 feedback Id
@@ -102,8 +97,8 @@ public class Feedback extends GenericModel {
         if(this.score > 3) return;
 
         if(this.score <= 3 && this.isSelfBuildListing()) {
-            this.ticket = this.openTicket(null);
-            this.ticket.save();
+            // TODO Feedback 创建 Review 入口
+//            this.openTicket(null);
             Mails.feedbackWarnning(this);
         }
 
@@ -153,12 +148,14 @@ public class Feedback extends GenericModel {
     /**
      * 向 OsTicket 系统开启一个新的 Ticket
      *
+     * TODO Feedback 创建 Review 的 API
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
-    public Ticket openTicket(String title) {
+    public void openTicket(String title) {
+        if(1 == 1) return;
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
-            return (this.ticket != null ? this.ticket : Ticket.findByOsTicketId(this.osTicketId));
+            return;
         }
         String name = this.orderId;
         String email = this.email;
@@ -173,12 +170,7 @@ public class Feedback extends GenericModel {
         this.osTicketId = OsTicket
                 .openOsTicket(name, email, subject, content, OsTicket.TopicID.FEEDBACK,
                         "Feedback " + this.orderId);
-        if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
-            return null;
-        } else {
-            if(this.ticket == null) return new Ticket(this);
-            else return this.ticket;
-        }
+        return;
     }
 
     public void comment(String memo) {
@@ -245,127 +237,5 @@ public class Feedback extends GenericModel {
                     Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);
         }
         return cats;
-    }
-
-    /**
-     * 返回此 Feedback 的所有的没有 tag 的标签与其涉及的 Cat 的所有标签
-     * 如果没有 Ticket 的话, 那么这个方法返回 空 tag T2
-     *
-     * @return
-     */
-    public F.T2<Set<TicketReason>, Set<TicketReason>> untagAndAllTags() {
-        Set<TicketReason> unTagsReasons = new HashSet<TicketReason>();
-        Set<TicketReason> allReasons = new HashSet<TicketReason>();
-        if(this.ticket == null)
-            return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
-        List<Category> cats = this.relateCats();
-
-        for(Category cat : cats) allReasons.addAll(cat.reasons);
-
-        if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
-            unTagsReasons.addAll(allReasons);
-        } else {// Feedback 本身拥有 tag 才如此计算
-            for(TicketReason reason : allReasons) {
-                for(TicketReason taged : this.ticket.reasons) {
-                    if(!reason.equals(taged)) unTagsReasons.add(reason);
-                }
-            }
-        }
-
-        return new F.T2<Set<TicketReason>, Set<TicketReason>>(unTagsReasons, allReasons);
-    }
-
-    /**
-     * 首页计算的 Feedback 的数据
-     *
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<String, List<F.T3<Long, Long, Long>>> frontPageTable() {
-        Map<String, List<F.T3<Long, Long, Long>>> feedbacksOverView = new LinkedHashMap<String, List<F.T3<Long, Long, Long>>>();
-        List<Account> accs = Account.openedSaleAcc();
-        for(Account acc : accs) {
-            List<F.T3<Long, Long, Long>> fbk = new ArrayList<F.T3<Long, Long, Long>>();
-            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 1));
-            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 2));
-            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 3));
-            fbk.add(Feedback.accountOneTypeFeedbackCount(acc, 4));
-            feedbacksOverView.put(acc.prettyName(), fbk);
-        }
-        // 避免短时间的重复计算
-        return feedbacksOverView;
-    }
-
-    /**
-     * 一个账户:(table)
-     * a. N 天的
-     * b. positive , negtive, all Feedback 数量
-     *
-     * @param acc
-     * @param type 四种类型: 1->30天;  2->90天;  3->365天; 4->LifeTime
-     * @return T3: ._1: +; ._2: -; ._3: all
-     */
-    public static F.T3<Long, Long, Long> accountOneTypeFeedbackCount(Account acc, int type) {
-        DateTime now = DateTime.now();
-        Date night = Dates.night(now.toDate());
-        // 注意: 使用 minusDays 不是用 月,年是需要具体的天数, 月可能有 28/29/30/31 天这样的差别
-        if(type == 1) {
-            return new F.T3<Long, Long, Long>(
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night,
-                            true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night,
-                            false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(30).toDate()), night,
-                            null));
-        } else if(type == 2) {
-            return new F.T3<Long, Long, Long>(
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night,
-                            true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night,
-                            false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(90).toDate()), night,
-                            null));
-        } else if(type == 3) {
-            return new F.T3<Long, Long, Long>(
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night,
-                            true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night,
-                            false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusDays(365).toDate()), night,
-                            null));
-        } else if(type == 4) {
-            return new F.T3<Long, Long, Long>(
-                    // 10 年是为了获取所有长度
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night,
-                            true),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night,
-                            false),
-                    Feedback.feedbackCount(acc, Dates.morning(now.minusYears(10).toDate()), night,
-                            null));
-        }
-        return new F.T3<Long, Long, Long>(0l, 0l, 0l);
-    }
-
-    /**
-     * 某一个用户一段时间内的 Feedback
-     *
-     * @param acc
-     * @param from
-     * @param to
-     * @param good 是否为好的;  true: +; false:-; null:all
-     * @return
-     */
-    public static Long feedbackCount(Account acc, Date from, Date to, Boolean good) {
-        if(good == null)
-            return Feedback.count("account=? AND market=? AND createDate>=? AND createDate<=?", acc,
-                    acc.type, from, to);
-        else if(good)
-            return Feedback
-                    .count("account=? AND market=? AND createDate>=? AND createDate<=? AND score>=4",
-                            acc, acc.type, from, to);
-        else
-            return Feedback
-                    .count("account=? AND market=? AND createDate>=? AND createDate<=? AND score<4",
-                            acc, acc.type, from, to);
     }
 }

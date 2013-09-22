@@ -44,7 +44,7 @@ $ ->
             enabled: false
           rangeSelector:
             enabled: false
-          yAxis: [{},{labels: {format: '{value}'}, opposite: true}]
+          yAxis: [{min: 0},{min: 0, labels: {format: '{value}'}, opposite: true}]
           series: r['series']
         }).parent().find('.btn-mini:eq(0)').click()
         LoadMask.unmask()

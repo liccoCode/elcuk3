@@ -140,10 +140,11 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         return type;
     }
 
-    @Factory(name = "transportduty")
+    @Factory(name = "dutyandvat")
     public FeeType duty() {
         FeeType type = new FeeType();
-        type.name = "transportduty";
+        type.name = "dutyandvat";
+        type.memo = "VAT和关税";
         type.parent = FeeType.findById("transport");
         return type;
     }
@@ -152,6 +153,22 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
     public FeeType transportShipping() {
         FeeType type = new FeeType();
         type.name = "transportshipping";
+        type.parent = FeeType.findById("transport");
+        return type;
+    }
+
+    @Factory(name = "oceanfreight")
+    public FeeType oceanfreight() {
+        FeeType type = new FeeType();
+        type.name = "oceanfreight";
+        type.parent = FeeType.findById("transport");
+        return type;
+    }
+
+    @Factory(name = "airfee")
+    public FeeType airfee() {
+        FeeType type = new FeeType();
+        type.name = "airfee";
         type.parent = FeeType.findById("transport");
         return type;
     }
@@ -196,7 +213,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FactoryBoy.create(FeeType.class, "transport");
         for(String fee : Arrays.asList("commission", "crossborderfulfilmentfee", "disposalcomplete",
                 "productcharges", "fbaperorderfulfillmentfee", "fbaperunitfulfillmentfee",
-                "fbapickpackfeeperunit", "transportshipping", "transportduty",
+                "fbapickpackfeeperunit", "transportshipping", "dutyandvat", "oceanfreight", "airfee",
                 "fbastoragefee", "fbaweightbasedfee", "fbaweighthandlingfee", "giftwrap", "giftwrapchargeback",
                 "shipping", "shippingchargeback", "loadingunloadingfee", "palleting", "trayfee", "vorlageprovision")) {
             FactoryBoy.create(FeeType.class, fee);

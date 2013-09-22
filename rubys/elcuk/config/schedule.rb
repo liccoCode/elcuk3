@@ -26,10 +26,15 @@ every 4.hours do
   command '/usr/sbin/ntpdate 0.cn.pool.ntp.org'
 end
 
-every :monday, at: '01' do
-  command 'ruby /root/rubys/weekly.rb'
+every 16.hours do
+  command 'ruby /root/rubys/sellingrecord.rb'
 end
 
-every 5.minutes do
-  command 'ruby /root/rubys/osticket.rb'
-end
+# 每周一早上的一周日报链接
+#every :monday, at: '01' do
+#  command 'ruby /root/rubys/weekly.rb'
+#end
+
+#every 5.minutes do
+#  command 'ruby /root/rubys/osticket.rb'
+#end
