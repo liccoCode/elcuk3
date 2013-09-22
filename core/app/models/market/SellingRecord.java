@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import models.product.Product;
 import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
@@ -158,6 +157,11 @@ public class SellingRecord extends GenericModel {
     public float seaCubicMeter = 0;
 
     /**
+     * 产品的关税和VAT费用
+     */
+    public float dutyAndVAT = 0;
+
+    /**
      * 利润 = 销售额 - (总)采购成本 - (总)运输成本
      */
     public float profit = 0;
@@ -188,9 +192,25 @@ public class SellingRecord extends GenericModel {
     @Expose
     public Date date = new Date();
 
+    /**
+     * 根据已经计算好的 快递/空运/海运 运费, 用于估计计算物流成本
+     *
+     * @return
+     */
     public float sumShipCost() {
-        Product product = Product.findByMerchantSKU(this.selling.merchantSKU);
-        return ((this.airKilogram + this.expressCost) * product.weight) + (this.seaCubicMeter * product.cubicMeter());
+        if((this.seaCubicMeter + this.expressKilogram + this.airKilogram) == 0) return 0;
+        return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
+                this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
+    }
+
+    /**
+     * 统计采购物流的总成本(包括 VAT)
+     *
+     * @return
+     */
+    public float procureAndShipCost() {
+        // 物流 + VAT + 采购
+        return this.sumShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
     }
 
     /**

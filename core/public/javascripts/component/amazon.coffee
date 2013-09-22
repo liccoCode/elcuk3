@@ -53,7 +53,7 @@ $ ->
     $.ajax('/sellings/tsp', {type: 'GET', data: {sid: @value}, dataType: 'json'})
       .done((r) ->
         $('#sid_preview').data('tsp', r)
-        noty({text: _.template($('#tsp-show-template').html(), {tsp: r})})
+        noty({text: '加载成功, 可点击 "放大镜" 查看详细信息或者点击 "填充" 进行填充', type: 'success', timeout: 3000})
         LoadMask.unmask()
       )
   ).on('click', 'button:contains(填充)', (e) ->
@@ -156,17 +156,17 @@ $ ->
   $('#check_upc').click (e) ->
     e.preventDefault()
     $('#msku').val(->
-      @value.split(',')[0])
+      @value.split(',')[0]
+    )
     upc = $(@).removeClass('btn-warning btn-success').addClass('btn-warning').prev().val()
     if !$.isNumeric(upc)
       alert('UPC 必须是数字')
-    return false
+      return false
 
-    $.getJSON('/products/upcCheck', {upc: upc})
+    $.ajax('/products/upcCheck', {type: 'GET', data: {upc: upc}, dataType: 'json'})
       .done((r) ->
         if r.flag is false
           alert(r.message)
         else
           show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_upc_check_close)
       )
-

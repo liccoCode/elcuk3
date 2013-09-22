@@ -61,6 +61,7 @@ public class SellingRecordCaculateJob extends Job {
         try {
             Cache.add(RUNNING, RUNNING);
             // 当天产生的数据
+            Map<String, Float> sellingVATFee = shipCostService.sellingVATFee(dateTime.toDate());
             sellingUnits(dateTime.toDate());
             sellingSales(dateTime.toDate());
             sellingAmazonFee(dateTime.toDate());
@@ -95,25 +96,25 @@ public class SellingRecordCaculateJob extends Job {
                 F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
                 record.expressCost = costAndKg._1;
                 record.expressKilogram = costAndKg._2;
-                float currencShipCost = costAndKg._3;
 
                 // 空运运输成本
                 costAndKg = shipCostService.airCost(selling, dateTime.toDate());
                 record.airCost = costAndKg._1;
                 record.airKilogram = costAndKg._2;
-                currencShipCost += costAndKg._3;
 
                 // 海运运输成本
                 costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
                 record.seaCost = costAndKg._1;
                 record.seaCubicMeter = costAndKg._2;
-                currencShipCost += costAndKg._3;
 
-                float procureAndShipCost = currencShipCost + (record.procureCost * record.units);
-                // 利润 = 实际收入 - 采购成本 - 运输成本
-                record.profit = record.income - procureAndShipCost;
-                // 成本利润率 = 利润 / (采购成本 + 运输成本)
-                record.costProfitRatio = procureAndShipCost == 0 ? 0 : (record.profit / procureAndShipCost);
+                // VAT 的费用
+                record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
+
+                // 利润 = 实际收入 - 采购成本 - 运输成本 - VAT
+                record.profit = record.income - record.procureAndShipCost();
+                // 成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
+                record.costProfitRatio =
+                        record.procureAndShipCost() == 0 ? 0 : (record.profit / record.procureAndShipCost());
                 // 销售利润率 = 利润 / 销售额
                 record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
                 record.save();
@@ -358,19 +359,6 @@ public class SellingRecordCaculateJob extends Job {
         return new F.T2<Float, Integer>(toDayProcureCost, procureNumberSum);
     }
 
-    /**
-     * 计算平均费用
-     *
-     * @return ._1: 平均价格, ._2: 总费用, ._3: 总数量
-     */
-    private F.T3<Float, Float, Integer> avgFee(List<Float> costs, List<Integer> numberSums) {
-        float totalCost = 0;
-        int totalNumber = 0;
-        for(Float cost : costs) totalCost += cost;
-        for(Integer number : numberSums) totalNumber += number;
-        if(totalNumber == 0) return new F.T3<Float, Float, Integer>(0f, totalCost, totalNumber);
-        return new F.T3<Float, Float, Integer>(totalCost / totalNumber, totalCost, totalNumber);
-    }
 
     public static boolean isRunning() {
         return StringUtils.isNotBlank(Cache.get(RUNNING, String.class));

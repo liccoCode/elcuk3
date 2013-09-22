@@ -1,5 +1,6 @@
 package services;
 
+import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.FeeType;
@@ -33,6 +34,7 @@ public class MetricShipCostService {
 
     /**
      * 计算某一个 Selling 某一天的空运运费
+     *
      * @return 单个空运运费, 总重量, 这一天的总费用
      */
     public F.T3<Float, Float, Float> airCost(Selling selling, Date oneDay) {
@@ -42,6 +44,7 @@ public class MetricShipCostService {
 
     /**
      * 计算某一个 Selling 某一天的海运运费
+     *
      * @return 单个海运运费, 总重量, 这一天的总费用
      */
     public F.T3<Float, Float, Float> seaCost(Selling selling, Date oneDay) {
@@ -109,4 +112,68 @@ public class MetricShipCostService {
                 currentFee);
     }
 
+    /**
+     * 计算出 oneDay 所有涉及到的 Selling 的 VAT 费用
+     *
+     * @return
+     */
+    public Map<String, Float> sellingVATFee(Date oneDay) {
+        /**
+         * 1. 找出当天已经支付的 VAT 的费用类型的总费用和涉及的运输单
+         * 2. 通过运输单找出相关的 Selling
+         */
+
+        SqlSelect vatSql = new SqlSelect()
+                .select("group_concat(pu.shipment_id) shipmentIds", "pu.currency"
+                        , "sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost")
+                .from("PaymentUnit pu")
+                .leftJoin("Payment p ON p.id=pu.payment_id")
+                .where("pu.feeType_name=?").param("dutyandvat")/*固定费用类型*/
+                .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
+                .groupBy("pu.shipment_id", "pu.currency");
+        List<Map<String, Object>> rows = DBUtils.rows(vatSql.toString(), vatSql.getParams().toArray());
+
+        // 所有关税 USD
+        float totalVATFee = 0;
+        Set<String> shipmentIds = new HashSet<String>();
+        for(Map<String, Object> row : rows) {
+            helper.Currency currency = Currency.valueOf(row.get("currency").toString());
+            totalVATFee += row.get("cost") == null ? 0 : currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
+            if(row.get("shipmentIds") != null) {
+                shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentIds").toString(), ",")));
+            }
+        }
+
+        SqlSelect effectSellingSql = new SqlSelect()
+                .select("s.sellingId", "sum(si.qty) qty", "round(sum(si.qty * p.declaredValue), 2) x")
+                .from("Selling s")
+                .leftJoin("ProcureUnit u ON u.selling_sellingId=s.sellingId")
+                .leftJoin("Product p ON p.sku=u.product_sku")
+                .leftJoin("ShipItem si ON si.unit_id=u.id")
+                .leftJoin("Shipment t ON t.id=si.shipment_id")
+                .where(SqlSelect.whereIn("t.id", shipmentIds));
+
+        Map<String, Float> sellingsVAT = new HashMap<String, Float>();
+        Map<String, Integer> sellingsQty = new HashMap<String, Integer>();
+        rows = DBUtils.rows(effectSellingSql.toString(), effectSellingSql.getParams().toArray());
+
+        // (440x + 220x + 124x)[sumX] = (2000)[totalVATFee] -> x = 2.55
+        // 440 * 2.55 / 400[qty] = 2.805 [单个 VAT]
+        float sumX = 0;
+        for(Map<String, Object> row : rows) {
+            if(row.get("sellingId") == null || StringUtils.isBlank(row.get("sellingId").toString())) continue;
+            float nX = row.get("x") == null ? 0 : NumberUtils.toFloat(row.get("x").toString());
+            sumX += nX;
+            sellingsQty.put(row.get("sellingId").toString(),
+                    row.get("qty") == null ? 0 : NumberUtils.toInt(row.get("qty").toString()));
+            sellingsVAT.put(row.get("sellingId").toString(), nX);
+        }
+        float x = sumX == 0 ? 0 : (totalVATFee / sumX);
+        for(Map.Entry<String, Float> entry : sellingsVAT.entrySet()) {
+            int qty = sellingsQty.get(entry.getKey());
+            entry.setValue(qty == 0 ? 0 : (entry.getValue() * x) / qty);
+        }
+
+        return sellingsVAT;
+    }
 }
