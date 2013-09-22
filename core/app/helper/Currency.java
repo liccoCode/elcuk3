@@ -74,6 +74,11 @@ public enum Currency {
         }
 
         @Override
+        public String label() {
+            return "英镑";
+        }
+
+        @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
             // 619.71 -> 6.1971
@@ -131,6 +136,11 @@ public enum Currency {
         @Override
         public String symbol() {
             return "€";
+        }
+
+        @Override
+        public String label() {
+            return "欧元";
         }
 
         @Override
@@ -194,6 +204,11 @@ public enum Currency {
         }
 
         @Override
+        public String label() {
+            return "人民币";
+        }
+
+        @Override
         public Float rate(String html) {
             return 1.0f;
         }
@@ -253,6 +268,11 @@ public enum Currency {
         }
 
         @Override
+        public String label() {
+            return "美元";
+        }
+
+        @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
             // 619.71 -> 6.1971
@@ -307,6 +327,11 @@ public enum Currency {
         }
 
         @Override
+        public String label() {
+            return "港币";
+        }
+
+        @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
             // 78.309 -> 0.78309
@@ -332,6 +357,8 @@ public enum Currency {
     public abstract float ratio(Currency currency);
 
     public abstract String symbol();
+
+    public abstract String label();
 
     //CNY
     private static float CNY_EUR = 0.124664933f;
