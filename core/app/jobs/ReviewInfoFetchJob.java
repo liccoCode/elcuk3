@@ -8,16 +8,10 @@ import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.M;
-import models.support.Ticket;
-import models.support.TicketState;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.Play;
 import play.jobs.Job;
 import play.libs.F;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * <pre>
@@ -36,17 +30,7 @@ public class ReviewInfoFetchJob extends Job {
         if(!Jobex.findByClassName(ReviewInfoFetchJob.class.getName()).isExcute()) return;
         int size = 30;
         if(Play.mode.isDev()) size = 10;
-        List<Ticket> tickets = Ticket
-                .find("type=? AND isSuccess=? AND state NOT IN (?,?) ORDER BY lastSyncTime",
-                        Ticket.T.REVIEW, false, TicketState.PRE_CLOSE, TicketState.CLOSE)
-                .fetch(size);
-        Logger.info("ReviewInfoFetchJob to Amazon sync %s tickets.", tickets.size());
-        for(Ticket ticket : tickets) {
-            JsonElement el = ReviewInfoFetchJob.syncSingleReview(ticket.review);
-            ReviewInfoFetchJob.checkReviewDealState(ticket, el);
-            ticket.lastSyncTime = new Date();
-            ticket.save();
-        }
+        //TODO 对 Review 的跟踪检查, 检查 Reivew 是否删除, 评分是否变化.
     }
 
 
@@ -78,29 +62,5 @@ public class ReviewInfoFetchJob extends Job {
         }
         return reviewElement;
     }
-
-    /**
-     * 对 Review Ticket 进行状态检查处理
-     * 1. 检查是否被删除, 如果被删除, 那么 Ticket State 进入 PRE_CLOSE
-     *
-     * @param ticket
-     */
-    public static void checkReviewDealState(Ticket ticket, JsonElement reviewElement) {
-        if(ticket.review == null) {
-            Logger.warn("ReviewInfoFetchJob deal an no Review Ticket(id|fid) [%s|%s]", ticket.id,
-                    ticket.fid);
-            return;
-        }
-
-        JsonObject reviewObj = reviewElement.getAsJsonObject();
-
-        if(reviewObj.get("isRemove").getAsBoolean()) {
-            ticket.review.isRemove = true;
-            ticket.isSuccess = ticket.review.isRemove;
-            ticket.state = TicketState.PRE_CLOSE;
-            ticket.review.comment(String.format("Review 已经被买家自行删除(%s).", Dates.date2Date()));
-        }
-    }
-
 
 }

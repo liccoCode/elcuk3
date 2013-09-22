@@ -1,7 +1,6 @@
 package controllers;
 
 import models.market.Account;
-import models.market.Feedback;
 import models.market.Orderr;
 import models.view.post.OrderPOST;
 import play.mvc.Controller;
@@ -26,12 +25,7 @@ public class Orders extends Controller {
     }
 
     public static void show(String id) {
-        Feedback f = Feedback.findById(id);
-        if(f != null && f.ticket != null)
-            redirect("/Feedbacks/show/" + id);
-        else {
-            Orderr ord = Orderr.findById(id);
-            render(ord);
-        }
+        Orderr ord = Orderr.findById(id);
+        render(ord);
     }
 }
