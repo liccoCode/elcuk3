@@ -1,6 +1,5 @@
 package jobs;
 
-import jobs.fixs.ReviewFixJob;
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -34,17 +33,21 @@ public class JobsSetup {
             every(AmazonOrderFetchJob.class, "1h");
             every(OrderInfoFetchJob.class, "1mn");
 
+            // Amazon Job 的处理
+            every(AmazonReviewCheckJob.class, "1mn");
+            every(AmazonReviewCrawlJob.class, "1mn");
+
+            // Feedback Job 处理
+            every(FeedbackCrawlJob.class, "30mn");
+            every(FeedbackInfoFetchJob.class, "5mn");
+
             every(OrderMailCheck.class, "10mn");
-            every(AmazonReviewCheckJob.class, "5s");
             every(AmazonFBACapaticyWatcherJob.class, "30mn");
             every(AmazonFBAQtySyncJob.class, "5mn");
-            every(AmazonReviewCrawlJob.class, "5s");
             every(AmazonSellingSyncJob.class, "1h");
             every(AmazonFBAInventoryReceivedJob.class, "20mn");
             every(CheckerProductCheckJob.class, "1d");
             every(FAndRNotificationJob.class, "1h");
-            every(FeedbackCrawlJob.class, "30mn");
-            every(FeedbackInfoFetchJob.class, "5mn");
             every(AmazonFinanceCheckJob.class, "1mn");
             every(KeepSessionJob.class, "5mn");
             every(ListingDriverlJob.class, "1s");
@@ -53,7 +56,6 @@ public class JobsSetup {
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
-            every(ReviewFixJob.class, "1mn");
 
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }

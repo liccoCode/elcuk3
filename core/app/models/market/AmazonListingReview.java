@@ -243,7 +243,7 @@ public class AmazonListingReview extends GenericModel {
     public AmazonListingReview createReview() {
         if(!Validation.current().valid(this).ok)
             throw new FastRuntimeException("Not Valid, more details see Validation.errors()");
-        this.createDate = new Date();
+        if(this.createDate == null) this.createDate = new Date();
         // 将初始的 Review 数据全部记录下来
         this.originJson = J.G(this);
         if(this.listing == null)
@@ -269,20 +269,18 @@ public class AmazonListingReview extends GenericModel {
             throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
 
         this.listingId = newReview.listingId;
-        if(newReview.rating != null &&
-                !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
+        //如果两次 Rating 的值不一样需要记录
+        if(newReview.rating != null && !this.rating.equals(newReview.rating)) {
             this.lastRating = this.rating;
-            this.comment(
-                    String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating,
-                            Dates.date2DateTime()));
+            this.comment(String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating,
+                    Dates.date2DateTime()));
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
         if(StringUtils.isNotBlank(newReview.title)) this.title = newReview.title;
         if(StringUtils.isNotBlank(newReview.review)) this.review = newReview.review;
         if(newReview.helpUp != null && newReview.helpUp > 0) this.helpUp = newReview.helpUp;
-        if(newReview.helpClick != null && newReview.helpClick > 0)
-            this.helpClick = newReview.helpClick;
+        if(newReview.helpClick != null && newReview.helpClick > 0) this.helpClick = newReview.helpClick;
         if(StringUtils.isNotBlank(newReview.userid)) this.userid = newReview.userid;
         if(StringUtils.isNotBlank(newReview.username)) this.username = newReview.username;
         //reviewDate 不修改了
@@ -310,21 +308,6 @@ public class AmazonListingReview extends GenericModel {
     }
 
     /**
-     * 判断 Rating 与 lastRating 的差别, 是上升了(+)还是下降了(-), 还是没变(0)
-     *
-     * @return
-     */
-    public int isUpOrDown() {
-        if(this.lastRating > this.rating)
-            return -1;
-        else if(this.lastRating < this.rating)
-            return +1;
-        else
-            return 0;
-    }
-
-
-    /**
      * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
      * 在 Check 方法执行完成以后将数据同步回数据库;
      * 如果此 Review 需要开 Ticket 进行处理, 也在此判断了
@@ -335,7 +318,6 @@ public class AmazonListingReview extends GenericModel {
             return;// 判断这个 Listing 是我们自己有上架的
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0)
             return;// 超过 70 天的不处理
-
 
 //        Rating < 4 并且为自建的 Listing 的开 OsTicket
 //        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒

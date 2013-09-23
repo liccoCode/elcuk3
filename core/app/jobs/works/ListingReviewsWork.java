@@ -69,8 +69,6 @@ public class ListingReviewsWork extends Job<Listing> {
              * 新添加, 直接 Save
              *
              * 更新, 需要对某一些字段进行判断后更新并添加 Comment
-             *
-             * TODO 这里单独加载每一个 Review 而不是使用批量加载, 尽管会有性能影响, 但现在这个不是问题的时候不考虑
              */
             JsonArray array = reviews.getAsJsonArray();
             action._1.lastUpdateTime = System.currentTimeMillis();
@@ -78,10 +76,11 @@ public class ListingReviewsWork extends Job<Listing> {
                 AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                 AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
                 if(fromDB == null) {
-                    if(action._1.listingId.equals(review.listingId))
+                    if(action._1.listingId.equals(review.listingId)) {
                         review.listing = action._1;
-                    else
+                    } else {
                         review.listing = Listing.findById(review.listingId);
+                    }
                     review.createDate = review.reviewDate;
                     review.isOwner = review.listing.product != null;
                     Orderr ord = review.tryToRelateOrderByUserId();
