@@ -34,11 +34,13 @@ public class JobsSetup {
             every(AmazonOrderFetchJob.class, "1h");
             every(OrderInfoFetchJob.class, "1mn");
 
+            // Amazon Job 的处理
+            every(AmazonReviewCheckJob.class, "1mn");
+            every(AmazonReviewCrawlJob.class, "1mn");
+
             every(OrderMailCheck.class, "10mn");
-            every(AmazonReviewCheckJob.class, "5s");
             every(AmazonFBACapaticyWatcherJob.class, "30mn");
             every(AmazonFBAQtySyncJob.class, "5mn");
-            every(AmazonReviewCrawlJob.class, "5s");
             every(AmazonSellingSyncJob.class, "1h");
             every(AmazonFBAInventoryReceivedJob.class, "20mn");
             every(CheckerProductCheckJob.class, "1d");

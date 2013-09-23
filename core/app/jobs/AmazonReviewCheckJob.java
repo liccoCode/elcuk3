@@ -25,9 +25,8 @@ public class AmazonReviewCheckJob extends Job {
         if(!Jobex.findByClassName(AmazonReviewCheckJob.class.getName()).isExcute()) return;
         // 抓取没有删除, 并且按照最后更新时间的升序排列;
         // 自己或者其他让的 Listing 都检查.
-        List<AmazonListingReview> reviewsToBeCheck = AmazonListingReview
-                .find("isRemove=false ORDER BY updateAt ASC").fetch(20);
-        for(AmazonListingReview review : reviewsToBeCheck) {
+        List<AmazonListingReview> reviews = AmazonListingReview.find("isRemove=false ORDER BY updateAt ASC").fetch(20);
+        for(AmazonListingReview review : reviews) {
             JsonElement rvObj = Crawl.crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
             JsonObject obj = rvObj.getAsJsonObject();
             if(obj.get("isRemove").getAsBoolean()) {
@@ -36,6 +35,6 @@ public class AmazonReviewCheckJob extends Job {
             }
         }
 
-        // TODO 思考对于 Review 还需要有哪些检查?
+        // 如果对 Listing Review 还有其他检查, 可以在这里编写
     }
 }

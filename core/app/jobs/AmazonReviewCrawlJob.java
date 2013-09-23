@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * 用来发现新的 Reivew 与更新已经存在的 Review
  * * 周期:
- * - 轮询周期: 5s
- * - Duration: 5mn
+ * - 轮询周期: 1mn
+ * - Duration: 5mn (间隔时间可适当延长)
  * User: wyattpan
  * Date: 9/25/12
  * Time: 9:12 PM
