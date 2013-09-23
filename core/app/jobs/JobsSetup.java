@@ -33,9 +33,9 @@ public class JobsSetup {
             every(AmazonOrderFetchJob.class, "1h");
             every(OrderInfoFetchJob.class, "1mn");
 
-            // Amazon Job 的处理
-            every(AmazonReviewCheckJob.class, "1mn");
+            // Amazon Review Job 的处理
             every(AmazonReviewCrawlJob.class, "1mn");
+            every(AmazonReviewCheckJob.class, "1mn");
 
             // Feedback Job 处理
             every(FeedbackCrawlJob.class, "30mn");
@@ -52,7 +52,6 @@ public class JobsSetup {
             every(KeepSessionJob.class, "5mn");
             every(ListingDriverlJob.class, "1s");
             every(ListingSchedulJob.class, "1mn");
-            every(ReviewInfoFetchJob.class, "1mn");
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
