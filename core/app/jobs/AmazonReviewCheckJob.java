@@ -30,8 +30,7 @@ public class AmazonReviewCheckJob extends Job {
         // 自己或者其他让的 Listing 都检查.
         List<AmazonListingReview> reviews = AmazonListingReview.find(
                 "isRemove=false AND createDate>=? ORDER BY updateAt ASC",
-                DateTime.now().minusDays(70).toDate()).fetch
-                (20);
+                DateTime.now().minusDays(70).toDate()).fetch(20);
         for(AmazonListingReview review : reviews) {
             JsonElement reviewElement = Crawl
                     .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
