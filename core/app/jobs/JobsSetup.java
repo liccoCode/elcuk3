@@ -37,6 +37,10 @@ public class JobsSetup {
             every(AmazonReviewCheckJob.class, "1mn");
             every(AmazonReviewCrawlJob.class, "1mn");
 
+            // Feedback Job 处理
+            every(FeedbackCrawlJob.class, "30mn");
+            every(FeedbackInfoFetchJob.class, "5mn");
+
             every(OrderMailCheck.class, "10mn");
             every(AmazonFBACapaticyWatcherJob.class, "30mn");
             every(AmazonFBAQtySyncJob.class, "5mn");
@@ -44,8 +48,6 @@ public class JobsSetup {
             every(AmazonFBAInventoryReceivedJob.class, "20mn");
             every(CheckerProductCheckJob.class, "1d");
             every(FAndRNotificationJob.class, "1h");
-            every(FeedbackCrawlJob.class, "30mn");
-            every(FeedbackInfoFetchJob.class, "5mn");
             every(AmazonFinanceCheckJob.class, "1mn");
             every(KeepSessionJob.class, "5mn");
             every(ListingDriverlJob.class, "1s");
