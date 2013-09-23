@@ -30,8 +30,7 @@ public class FeedbackInfoFetchJob extends Job {
     @Override
     public void doJob() {
         if(!Jobex.findByClassName(FeedbackInfoFetchJob.class.getName()).isExcute()) return;
-        // TODO 用来处理跟踪系统内 Feedback 的情况. 例如 Feedback 分数改变了,  Feedback 被删除了
-        // TODO 需要重写
+        // TODO 检查最近 90 天的 Feedback , 用于检查是否删除.
     }
 
     /**
@@ -45,10 +44,11 @@ public class FeedbackInfoFetchJob extends Job {
         if(feedbackViewHtml == null) return false;
         feedbackViewHtml = feedbackViewHtml.toLowerCase();
         String[] removeFlag = new String[]{
-                //TODO 如果有 fr 市场, 还需要添加发问的删除
                 "bestellung wurde entfernt", // de: order was removed
-                "order was removed", // uk: order was removed
-                "orden fue eliminado" // fr: order was removed
+                "order was removed", // uk/us: order was removed
+                "orden fue eliminado", // fr: order was removed
+                "Se ha eliminado la", // es: Removed
+                "stato rimosso" // it: been removed
         };
         for(String flag : removeFlag) {
             if(StringUtils.contains(feedbackViewHtml, flag))
@@ -66,8 +66,7 @@ public class FeedbackInfoFetchJob extends Job {
     public static boolean isRequestSuccess(String body) {
         //<status>login</status>
         //<status>success</status>
-        return StringUtils
-                .contains(StringUtils.substringBetween(body, "<status>", "</status>"), "success");
+        return StringUtils.contains(StringUtils.substringBetween(body, "<status>", "</status>"), "success");
     }
 
     /**

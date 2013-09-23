@@ -8,6 +8,7 @@ import models.Jobex;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.jobs.Job;
 
 import java.util.List;
@@ -27,7 +28,10 @@ public class AmazonReviewCheckJob extends Job {
         if(!Jobex.findByClassName(AmazonReviewCheckJob.class.getName()).isExcute()) return;
         // 抓取没有删除, 并且按照最后更新时间的升序排列;
         // 自己或者其他让的 Listing 都检查.
-        List<AmazonListingReview> reviews = AmazonListingReview.find("isRemove=false ORDER BY updateAt ASC").fetch(20);
+        List<AmazonListingReview> reviews = AmazonListingReview.find(
+                "isRemove=false AND createDate>=? ORDER BY updateAt ASC",
+                DateTime.now().minusDays(70).toDate()).fetch
+                (20);
         for(AmazonListingReview review : reviews) {
             JsonElement reviewElement = Crawl
                     .crawlReview(Listing.unLid(review.listingId)._2.toString(), review.reviewId);
