@@ -1,6 +1,7 @@
 import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
+import helper.Jitbit;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import models.ElcukConfig;
@@ -44,6 +45,8 @@ public class Bootstrap extends Job {
             Fixtures.loadModels("feetypes.yml");
         }
 
+        Jitbit.sharedSecret = Play.configuration.getProperty("JitBit.sharedSecret");
+        Jitbit.submitterEmail = Play.configuration.getProperty("JitBit.submitterEmail");
 
         HTTP.init();
         Privilege.init();
@@ -56,5 +59,7 @@ public class Bootstrap extends Job {
             Account.initLogin();
             new ListingSchedulJob().now();
         }
+
+
     }
 }
