@@ -21,6 +21,11 @@ public class AmazonReviewCrawlJob extends Job {
     @Override
     public void doJob() {
         if(!Jobex.findByClassName(AmazonReviewCrawlJob.class.getName()).isExcute()) return;
+
+        /**
+         * 抓取与更新 Listing Review 是一个渠道, 区别在于找到 review 之后的处理方式不一样.
+         */
+
         List<Listing> listings = Listing.latestNeedReviewListing(10);
         for(Listing lst : listings) {
             // 无论成功否, 被检查过就得记录下.

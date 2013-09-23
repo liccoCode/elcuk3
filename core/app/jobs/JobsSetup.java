@@ -1,6 +1,5 @@
 package jobs;
 
-import jobs.fixs.ReviewFixJob;
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -55,7 +54,6 @@ public class JobsSetup {
             every(SellingCategoryCheckerJob.class, "1d");
             every(SellingRecordCheckJob.class, "5mn");
             every(ShipmentSyncJob.class, "5mn");
-            every(ReviewFixJob.class, "1mn");
 
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
