@@ -25,12 +25,12 @@ $ ->
     return unless $(@).val()
     mask = $('#generate_excel')
     mask.mask('加载中...')
-    buyer = $.ajax("/users/showJson", {type: 'POST', dataType: 'json', data:{id: $(@).val()}})
-               .done((r)->
-                    unless r.flag
-                      $('#excel_buyer').val(r['username'])
-                      $("#excel_buyerPhone").val(r['phone'])
-                    mask.unmask()
+    $.ajax("/users/showJson", {type: 'POST', dataType: 'json', data:{id: $(@).val()}})
+      .done((r)->
+        unless r.flag
+          $('#excel_buyer').val(r['username'])
+          $("#excel_buyerPhone").val(r['phone'])
+        mask.unmask()
     )
 
   do ->
