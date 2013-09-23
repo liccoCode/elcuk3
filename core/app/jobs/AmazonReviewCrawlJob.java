@@ -5,6 +5,7 @@ import models.Jobex;
 import models.market.Listing;
 import play.jobs.Job;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,8 +21,11 @@ public class AmazonReviewCrawlJob extends Job {
     @Override
     public void doJob() {
         if(!Jobex.findByClassName(AmazonReviewCrawlJob.class.getName()).isExcute()) return;
-        List<Listing> listings = Listing.find("ORDER BY lastUpdateTime").fetch(10);
+        List<Listing> listings = Listing.latestNeedReviewListing(10);
         for(Listing lst : listings) {
+            // 无论成功否, 被检查过就得记录下.
+            lst.lastReviewCheckDate = new Date();
+            lst.save();
             new ListingReviewsWork(lst.listingId).now();
         }
     }
