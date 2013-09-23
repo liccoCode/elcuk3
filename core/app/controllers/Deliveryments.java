@@ -7,8 +7,6 @@ import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
-import models.product.Category;
-import models.view.Ret;
 import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
@@ -21,7 +19,6 @@ import play.mvc.With;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 采购单控制器
@@ -166,19 +163,6 @@ public class Deliveryments extends Controller {
         show(dmt.id);
     }
 
-    /**
-     * 获取某一个采购单所有产品的产品要求
-     */
-    public static void productTerms(String id) {
-        Deliveryment dmt = Deliveryment.findById(id);
-        Set<Category> categoryses = dmt.unitsCategorys();
-        StringBuilder sbd = new StringBuilder("");
-        for(Category cate : categoryses) {
-            if(StringUtils.isNotBlank(cate.productTerms))
-                sbd.append(cate.productTerms);
-        }
-        renderJSON(new Ret(true, sbd.toString()));
-    }
 
     /**
      * 为采购单提交请款单申请

@@ -141,48 +141,36 @@
         <form id="generate_excel" method="post" action="@{Excels.deliveryment()}">
           <table class="table table-bordered table-condensed">
             <tr>
-              <th>选择联系人</th>
-              <td>
-                <select id="chosereceiver">
-                  <option value="">请选择</option>
-                    #{list items:shippers, as:'sp'}
-                      <option value="${sp.id}">${sp.name}</option>
-                    #{/list}
-                </select>
-              </td>
-
-              <th>收货联系人</th>
-              <td>
-                <input type="text" name="excel.receiver" id="excel_receiver">
-              </td>
-
-              <th>移动电话</th>
-              <td><input type="text" name="excel.receiverPhone" id="excel_receiverPhone"></td>
-
-              <th>固定电话</th>
-              <td><input type="text" name="excel.receiverTel" id="excel_receiverTel"></td>
-            </tr>
-
-            <tr>
               <th>交货地址</th>
-              <td colspan="3">
-                <input type="text" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
-              </td>
+              <td colspan="7">
+                <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress">
+英国快递/英国空运/英国海运/德国快递+美国快递   指定货代是：盖亚伟航 周先生  电话: 18926019499 仓库地址是：深圳市宝安区民治街道民治大道樟坑一区15栋1楼15-4号商铺（民治地铁站、原南景新村铁路桥对面）
 
-              <td colspan="2">
-                <button class="btn btn-success" data-loading id="load_product_terms">加载产品要求</button>
+德国空运/德国海运/美国空运/美国海运 指定的货代是: 国建汉唐物流 徐先生 QQ516722101，电话15813728307仓库管理员林先生 15920059701 仓库地址是：深圳龙岗区坂田火车站旁货站物流中心105号仓库仓库
+                </textarea>
               </td>
-              <td colspan="2"></td>
             </tr>
 
             <tr>
               <th>交易条款<br>(供应商)</th>
               <td colspan="3">
-                <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12">${dmt.cooperator.tradingTerms}</textarea>
+                <textarea rows="8" name="excel.tradeTerms" id="excel_tradeTerms" class="span12"> ${dmt.cooperator
+                .tradingTerms}</textarea>
               </td>
               <th>产品要求<br>(产品线)</th>
               <td colspan="3">
-                <textarea rows="8" name="excel.productTerms" id="excel_productTerms" class="span12"></textarea>
+                <div style="overflow:auto;height:150px;width:580px;">
+                 #{list items:dmt.units, as:'procureUnit' }
+                     #{list items:procureUnit.cooperator.cooperItems, as:'cooperItem'}
+                       #{if procureUnit.sku == cooperItem.product.sku}
+                         <a href="@{Cooperators.editCooperItem(cooperItem.id)}"
+                            target="_blank"class="btn btn-small btn-info" rel="popover" content="${ext.CooperItemHelper.formatProductTerms(cooperItem)}" >
+                          ${cooperItem.product.sku}
+                         </a>
+                       #{/if}
+                     #{/list}
+                 #{/list}
+                </div>
               </td>
             </tr>
 
