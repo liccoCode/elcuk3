@@ -74,6 +74,12 @@ public class CooperItem extends Model {
     @Lob
     public String memo;
 
+    /**
+     * 要求工厂 对该产品的要求
+     */
+    @Lob
+    public String productTerms;
+
     public CooperItem checkAndUpdate() {
         this.check();
         return this.save();
