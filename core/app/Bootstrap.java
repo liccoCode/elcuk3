@@ -1,7 +1,6 @@
 import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
-import helper.Jitbit;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import models.ElcukConfig;
@@ -44,8 +43,6 @@ public class Bootstrap extends Job {
             Fixtures.delete(FeeType.class);
             Fixtures.loadModels("feetypes.yml");
         }
-
-        Jitbit.sharedSecret = Play.configuration.getProperty("JitBit.sharedSecret");
 
 
         HTTP.init();
