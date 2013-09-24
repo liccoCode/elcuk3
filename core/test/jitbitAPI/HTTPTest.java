@@ -53,6 +53,6 @@ public class HTTPTest extends UnitTest {
     @Test
     public void TestAPI(){
 
-        Jitbit.addTicket("我是一个标题qqsfsafasfGGG","啊，这是我的内容。qqsfgggGGG",Jitbit.Category.SOFTWARE);
+        Jitbit.addTicket("wppurking@gmail.com","我是一个标题qqsfsafasfGGG","啊，这是我的内容。qqsfgggGGG",Jitbit.Category.SOFTWARE);
     }
 }

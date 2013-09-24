@@ -23,7 +23,6 @@ public class Jitbit {
      * Bootstrap init
      */
     public static  String sharedSecret = "TDumhG4zptUACz";
-    public static  String submitterEmail = "wppurking@gmail.com";
 
     /**
      * 分类
@@ -32,7 +31,7 @@ public class Jitbit {
         SOFTWARE {
             @Override
             public String value() {
-                return "11111313";
+                return "63513";
             }
         };
 
@@ -40,7 +39,7 @@ public class Jitbit {
 
     }
 
-    public static String addTicket( String subject, String body,Category category) {
+    public static String addTicket(String submitterEmail, String subject, String body,Category category) {
         List<NameValuePair> param = new ArrayList<NameValuePair>();
         param.add(new BasicNameValuePair("sharedSecret", sharedSecret));
         param.add(new BasicNameValuePair("submitterEmail", submitterEmail));

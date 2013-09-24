@@ -46,7 +46,7 @@ public class Bootstrap extends Job {
         }
 
         Jitbit.sharedSecret = Play.configuration.getProperty("JitBit.sharedSecret");
-        Jitbit.submitterEmail = Play.configuration.getProperty("JitBit.submitterEmail");
+
 
         HTTP.init();
         Privilege.init();
