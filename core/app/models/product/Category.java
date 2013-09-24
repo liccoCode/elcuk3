@@ -145,7 +145,7 @@ public class Category extends GenericModel {
         return result;
     }
 
-    public static List<String> category_ids() {
+    public static List<String> categoryIds() {
         List<Map<String, Object>> rows = DBUtils
                 .rows("SELECT categoryId FROM Category ORDER BY categoryId");
         List<String> categoryIds = new ArrayList<String>();

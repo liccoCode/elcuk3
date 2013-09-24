@@ -1,6 +1,7 @@
 package controllers;
 
 import models.market.SellingRecord;
+import models.product.Category;
 import models.view.highchart.HighChart;
 import models.view.post.SellingRecordChartsPost;
 import models.view.post.SellingRecordsPost;
@@ -22,13 +23,14 @@ public class SellingRecords extends Controller {
 
     @Check("sellingrecords.index")
     public static void index() {
+        List<String> categoryIds = Category.categoryIds();
         SellingRecordsPost p = new SellingRecordsPost();
         try {
             p.records();
         } catch(FastRuntimeException e) {
             flash.error(e.getMessage());
         }
-        render(p);
+        render(p, categoryIds);
     }
 
     /**
