@@ -28,7 +28,6 @@ public class JitbitTest extends UnitTest {
         String ticketId = Jitbit.addTicket(submitterEmail, "我是一个标题qqsfsafasfGGG", "啊，这是我的内容。qqsfgggGGG",
                 Jitbit.Category.SOFTWARE);
 
-
         List<NameValuePair> param = new ArrayList<NameValuePair>();
         param.add(new BasicNameValuePair("sharedSecret", Jitbit.SHAREDSECRET));
         param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
