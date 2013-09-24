@@ -37,7 +37,7 @@ public class Analyzes extends Controller {
     @Check("analyzes.index")
     public static void index() {
         List<Account> accs = Account.openedSaleAcc();
-        List<String> categoryIds = Category.category_ids();
+        List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
         render(accs, categoryIds, p);
     }
