@@ -19,30 +19,11 @@ public class DeliveryExcel {
      */
     public String deliveryAddress;
 
-    /**
-     * 收货人
-     */
-    public String receiver;
-
-    /**
-     * 收货人移动电话
-     */
-    public String receiverPhone;
-
-    /**
-     * 收货人固定电话
-     */
-    public String receiverTel;
 
     /**
      * 交易条款
      */
     public String tradeTerms;
-
-    /**
-     * 产品要求
-     */
-    public String productTerms;
 
     /**
      * 供货方
@@ -82,19 +63,6 @@ public class DeliveryExcel {
 
     public Deliveryment dmt;
 
-    /**
-     * 生成 Product Terms
-     *
-     * @return
-     */
-    public String productTerms() {
-        if(StringUtils.isBlank(this.productTerms)) return "产品要求:\n";
-        StringBuilder terms = new StringBuilder("产品要求:\n");
-        String[] lines = StringUtils.split(this.productTerms, "\n");
-        for(int i = 0; i < lines.length; i++)
-            terms.append(i + 1).append(".").append(lines[i]).append("\n");
-        return terms.toString();
-    }
 
     public List<String> tradeTerms() {
         List<String> termLines = new ArrayList<String>();
