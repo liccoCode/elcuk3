@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
 
+    private static final long serialVersionUID = -4124213853478159984L;
+
     public Selling() {
         this.aps = new AmazonProps();
         this.state = S.NEW;

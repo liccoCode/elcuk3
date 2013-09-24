@@ -272,7 +272,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(selling.listing == null) selling.listing = new Listing(selling, this).save();
 
         selling.sid();
-        return selling.save();
+        return selling.<Selling>merge().save();
     }
 
     /**
@@ -314,18 +314,22 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
         params.clear();
         params.add(new BasicNameValuePair("category", ""));
-        JsonElement json = new JsonParser().parse(body);
-        for(JsonElement element : json.getAsJsonArray()) {
-            JsonObject obj = element.getAsJsonObject();
-            if(!amzBigCategory.equals(obj.get("id").getAsString())) continue;
-            params.add(new BasicNameValuePair("newCategory", amzBigCategory));
-            params.add(new BasicNameValuePair("productType", obj.get("productType").getAsString()));
-            params.add(new BasicNameValuePair("displayPath",
-                    String.format("All Product Categories/%s/%s",
-                            obj.get("displayPath").getAsString(),
-                            obj.get("displayName").getAsString()
-                    )));
-            params.add(new BasicNameValuePair("itemType", obj.get("itemType").getAsString()));
+        try {
+            JsonElement json = new JsonParser().parse(body);
+            for(JsonElement element : json.getAsJsonArray()) {
+                JsonObject obj = element.getAsJsonObject();
+                if(!amzBigCategory.equals(obj.get("id").getAsString())) continue;
+                params.add(new BasicNameValuePair("newCategory", amzBigCategory));
+                params.add(new BasicNameValuePair("productType", obj.get("productType").getAsString()));
+                params.add(new BasicNameValuePair("displayPath",
+                        String.format("All Product Categories/%s/%s",
+                                obj.get("displayPath").getAsString(),
+                                obj.get("displayName").getAsString()
+                        )));
+                params.add(new BasicNameValuePair("itemType", obj.get("itemType").getAsString()));
+            }
+        } catch(Exception e) {
+            Validation.addError("", e.getMessage() + " ---- " + body);
         }
         return params;
     }
@@ -431,7 +435,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         Set<NameValuePair> sellingParams = new HashSet<NameValuePair>();
         for(Map.Entry<String, String> entry : uniqParams.entrySet()) {
             sellingParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-            Logger.info("%s=%s", entry.getKey(), entry.getValue());
         }
         return sellingParams;
     }
@@ -547,6 +550,15 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         return Cooperator
                 .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id",
                         this.sku).fetch();
+    }
+
+    /**
+     * 立方米
+     *
+     * @return
+     */
+    public float cubicMeter() {
+        return this.lengths * this.heigh * this.width * 1000 * 1000 * 1000;
     }
 
     /**

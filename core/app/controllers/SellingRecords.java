@@ -4,6 +4,7 @@ import models.market.SellingRecord;
 import models.view.highchart.HighChart;
 import models.view.post.SellingRecordChartsPost;
 import models.view.post.SellingRecordsPost;
+import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -53,6 +54,7 @@ public class SellingRecords extends Controller {
      * @param p
      */
     @Check("sellingrecords.lines")
+    @CacheFor(value = "1h")
     public static void lines(SellingRecordChartsPost p) {
         if(p == null) p = new SellingRecordChartsPost("line");
         HighChart chart = p.query().get(0);
@@ -60,6 +62,7 @@ public class SellingRecords extends Controller {
     }
 
     @Check("sellingrecords.columns")
+    @CacheFor(value = "1h")
     public static void columns(SellingRecordChartsPost p) {
         if(p == null) p = new SellingRecordChartsPost("column");
         p.lineType = "column";

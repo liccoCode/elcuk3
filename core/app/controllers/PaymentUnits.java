@@ -151,7 +151,7 @@ public class PaymentUnits extends Controller {
     @Check("paymentunits.postfromtransport")
     public static void fromShipItem(Long id, PaymentUnit fee) {
         ShipItem itm = ShipItem.findById(id);
-        itm.produceFee(fee, FeeType.transportShipping());
+        itm.produceFee(fee, FeeType.expressFee());
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else

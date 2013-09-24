@@ -1,6 +1,7 @@
 #{extends 'main.html'/}
 #{script 'component/amazon.coffee'/}
 
+#{flash_alert /}
 #{errorMsgs /}
 <div class="alert alert-block alert-success fade in">
   <h4 class="alert-heading">Amazon 上架功能简介</h4>
@@ -34,7 +35,7 @@
   </blockquote>
 </div>
 
-<form action="@{Products.saleAmazonListing()}" method="post" autocomplete="off">
+<form id='saleAmazonForm' action="@{Products.saleAmazonListing()}" method="post" autocomplete="off">
 <table class="table table-condensed">
 <tr>
   <td colspan="4">
@@ -153,12 +154,12 @@
 
 <tr>
   <td colspan="4">
-    <div class="input-prepend offset1">
-      <button id="sid_preview_popover" class="btn" rel="popover" placement='bottom' data-content="请先预览" title="Detail Preview">
+    <div class="input-prepend input-append offset1" id="sellingPreview">
+      <button id="sid_preview" class="btn">
         <i class="icon-search"></i>
       </button>
-      <input type="text" id="sid_helper" style="width:160px;" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
-      <button class="btn" rel="popover"><i class="icon-edit"></i></button>
+      <input type="text" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
+      <button class="btn">填充</button>
     </div>
   </td>
 </tr>
@@ -167,7 +168,8 @@
   <th rowspan="5">Technical:</th>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[0]}">
+      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+             value="${s.aps.keyFeturess[0]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -176,7 +178,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[1]}">
+      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+             value="${s.aps.keyFeturess[1]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -185,7 +188,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[2]}">
+      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+             value="${s.aps.keyFeturess[2]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -194,7 +198,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[3]}">
+      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+             value="${s.aps.keyFeturess[3]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -203,7 +208,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" bullet_point class="span11" name="s.aps.keyFeturess" value="${s.aps.keyFeturess[4]}">
+      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+             value="${s.aps.keyFeturess[4]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -213,7 +219,8 @@
   <th rowspan="5">SearchTerms:</th>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[0]}">
+      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+             value="${s.aps.searchTermss[0]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -222,7 +229,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[1]}">
+      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+             value="${s.aps.searchTermss[1]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -231,7 +239,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[2]}">
+      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+             value="${s.aps.searchTermss[2]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -240,7 +249,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[3]}">
+      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+             value="${s.aps.searchTermss[3]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -249,7 +259,8 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" searchterms class="span11" name="s.aps.searchTermss" value="${s.aps.searchTermss[4]}">
+      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+             value="${s.aps.searchTermss[4]}">
       <span class="add-on"></span>
     </div>
   </td>
@@ -259,8 +270,8 @@
   <th>ProductDesc:</th>
   <td colspan="3">
     <div class="input-append">
-      <textarea rows="10" name="s.aps.productDesc" class="span12">${s.aps.productDesc}</textarea>
-
+      <textarea rows="10" name="s.aps.productDesc" data-length='2000'
+                class="span12 proDesc">${s.aps.productDesc?.trim()}</textarea>
       <div class="clearfix"></div>
       <span class="add-on">2000 bytes left</span>
       <button class="btn">Preview</button>
@@ -270,3 +281,19 @@
 </tr>
 </table>
 </form>
+
+<script type="text/template" id="tsp-show-template">
+  <h3>Product Desc</h3>
+
+  <p><%= tsp['p'][0] %></p>
+
+  <h3>Technical</h3>
+
+  <p><%= tsp['t'].join('<br>') %></p>
+
+  <h3>Search Terms</h3>
+
+  <p><%= tsp['s'].join('<br>') %></p>
+
+  <p>点击关闭, 点击 "放大镜" 重复查看</p>
+</script>

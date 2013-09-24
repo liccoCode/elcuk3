@@ -33,16 +33,16 @@ public class ProductTest extends UnitTest {
 
     public F.T2<Product, Selling> initData() throws IOException, ClassNotFoundException {
         Product p = FactoryBoy.create(Product.class);
-        Selling sell = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
+        Selling sell = FactoryBoy.build(Selling.class, "us", new BuildCallback<Selling>() {
             @Override
             public void build(Selling target) {
-                target.merchantSKU = "73SMS4MINI-BVMGL,881165105706";
-                target.market = M.AMAZON_IT;
+                target.merchantSKU = "80WT8400-BY,655886518448";
+                target.market = M.AMAZON_US;
                 AmazonProps aps = target.aps;
-                aps.upc = "881165105706";
+                aps.upc = "655886518448";
             }
         });
-        p.category.settings.amazonITCategory = "consumer_electronics/consumer_electronics";
+        p.category.settings.amazonCategory = "622960011/7053657011";
 
         Webs.dev_login(sell.account);
         return new F.T2<Product, Selling>(p, sell);
