@@ -9,6 +9,9 @@ import play.test.UnitTest;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.internal.matchers.StringContains.containsString;
+
 /**
  * jibit  API
  * <p/>
@@ -35,7 +38,9 @@ public class JitbitTest extends UnitTest {
 
         JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
-        assertEquals(true, jsonElement.toString().contains("\"TicketID\":" + ticketId));
+        assertThat(jsonElement.toString(), is(containsString(ticketId)));
 
     }
+
+
 }

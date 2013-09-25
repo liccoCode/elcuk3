@@ -27,7 +27,7 @@ public class Jitbit {
      * Bootstrap init
      */
     public static void init() {
-        SHAREDSECRET = Play.configuration.getProperty("JitBit.sharedSecret");
+        SHAREDSECRET = Play.configuration.getProperty("Jitbit.sharedSecret");
     }
 
     /**
