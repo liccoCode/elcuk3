@@ -430,7 +430,7 @@ if(typeof Object.create !== 'function'){
         });
     });
 
-
+})(jQuery);
 
 // Helpers
 window.noty = function noty(options){
@@ -449,7 +449,7 @@ window.noty = function noty(options){
         'onClosed': 'callback.afterClose'
     };
 
-    $.each(options, function(key, value){
+    jQuery.each(options, function(key, value){
         if(old_to_new[key]){
             using_old++;
             var _new = old_to_new[key].split('.');
@@ -463,7 +463,7 @@ window.noty = function noty(options){
     });
 
     if(!options.closeWith){
-        options.closeWith = $.noty.defaults.closeWith;
+        options.closeWith = jQuery.noty.defaults.closeWith;
     }
 
     if(options.hasOwnProperty('closeButton')){
@@ -500,15 +500,15 @@ window.noty = function noty(options){
     }
 
     if(!options.hasOwnProperty('dismissQueue')){
-        options.dismissQueue = $.noty.defaults.dismissQueue;
+        options.dismissQueue = jQuery.noty.defaults.dismissQueue;
     }
 
     if(!options.hasOwnProperty('maxVisible')){
-        options.maxVisible = $.noty.defaults.maxVisible;
+        options.maxVisible = jQuery.noty.defaults.maxVisible;
     }
 
     if(options.buttons){
-        $.each(options.buttons, function(i, button){
+        jQuery.each(options.buttons, function(i, button){
             if(button.click){
                 using_old++;
                 button.onClick = button.click;
@@ -531,7 +531,5 @@ window.noty = function noty(options){
     // console.log(options);
     // End of the BC
 
-    return $.notyRenderer.init(options);
+    return jQuery.notyRenderer.init(options);
 }
-
-})(jQuery);
