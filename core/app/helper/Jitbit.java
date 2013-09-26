@@ -1,6 +1,7 @@
 package helper;
 
-import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
@@ -67,14 +68,14 @@ public class Jitbit {
         if("0".equals(json)) {
             addUser(submitterEmail, username);
             json = HTTP.post("https://easyacc.jitbit.com/helpdesk/api/AddTicketFromEmail", param);
+        } else if(StringUtils.contains(json, "sign in")) {
+            Logger.error("username:%s submitterEmail:%s JitBit创建Ticket失败,密钥失效:\n%s", username, submitterEmail, json);
+            throw new RuntimeException("密钥失效! JitBit 创建 Ticket.");
+        } else if(!NumberUtils.isNumber(json)) {
+            Logger.error("username:%s submitterEmail:%s JitBit创建Ticket失败,密钥失效:\n%s", username, submitterEmail, json);
+            throw new RuntimeException("JitBit 创建 Ticket.");
         }
-
-        try {
-            return new JsonParser().parse(json).getAsString();
-        } catch(com.google.gson.JsonSyntaxException e) {
-            Logger.error("username:%s submitterEmail:%s JitBit创建Ticket,密钥失效:\n%s", username, submitterEmail, json);
-            throw new RuntimeException("JitBit 创建 Ticket  密钥失效 ", e);
-        }
+        return json;
     }
 
     /**
@@ -89,13 +90,15 @@ public class Jitbit {
         param.add(new BasicNameValuePair("password", "1234567890"));
         param.add(new BasicNameValuePair("email", submitterEmail));
         param.add(new BasicNameValuePair("sendWelcomeEmail", "false"));
-        String json = null;
-        try {
-            json = HTTP.post("https://easyacc.jitbit.com/helpdesk/api/AddUser", param);
-            return new JsonParser().parse(json).getAsString();
-        } catch(com.google.gson.JsonSyntaxException e) {
+        String json = HTTP.post("https://easyacc.jitbit.com/helpdesk/api/AddUser", param);
+
+        if(StringUtils.contains(json, "Something went wrong.")) {
             Logger.error("username:%s submitterEmail:%s JitBit 创建 User 失败:\n%s", username, submitterEmail, json);
-            throw new RuntimeException("JitBit 创建User 失败,用户名称或者邮箱已存在 ", e);
+            throw new RuntimeException("JitBit 创建User 失败,用户名称或者邮箱已存在!");
+        } else if(!NumberUtils.isNumber(json)) {
+            Logger.error("username:%s submitterEmail:%s JitBit 创建 User 失败:\n%s", username, submitterEmail, json);
+            throw new RuntimeException("JitBit 创建User 失败!");
         }
+        return json;
     }
 }
