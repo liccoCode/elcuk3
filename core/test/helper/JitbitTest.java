@@ -29,8 +29,16 @@ public class JitbitTest extends UnitTest {
     public void tokenTest() {
         Jitbit.SHAREDSECRET = "12345";
         String submitterEmail = "wppurking@gmail.com";
-        String ticketId = Jitbit.addTicket(submitterEmail, "admin", null, null,
+        Throwable t = null;
+        try{
+          String ticketId = Jitbit.addTicket(submitterEmail, "admin", null, null,
                 Jitbit.Category.SOFTWARE);
+        }catch(Exception e){
+            t = e;
+        }
+        assertNotNull(t);
+        assertTrue(t instanceof RuntimeException);
+        assertTrue(t.getMessage().contains("密钥失效! JitBit 创建 Ticket."));
     }
 
     /**
