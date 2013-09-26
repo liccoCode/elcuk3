@@ -45,7 +45,16 @@ public class Jitbit {
 
     }
 
-    public static String addTicket(String submitterEmail, String subject, String body, Category category) {
+    /**
+     * 向 JitBit系统创建一个 Ticket 并返回该 Ticket ID
+     * param: submitterEmail   客户邮箱
+     * param: username         客户名称
+     * param: subject          邮件标题
+     * param: body             邮件类型
+     * param: category         邮件类型
+     */
+    public static String addTicket(String submitterEmail,String username, String subject, String body,
+                                   Category category) {
         List<NameValuePair> param = new ArrayList<NameValuePair>();
         param.add(new BasicNameValuePair("sharedSecret", SHAREDSECRET));
         param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
