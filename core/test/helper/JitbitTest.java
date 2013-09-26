@@ -19,16 +19,23 @@ import static org.junit.internal.matchers.StringContains.containsString;
  */
 public class JitbitTest extends UnitTest {
 
+
+    @Test
+    public void addUserTest(){
+
+       String json = Jitbit.addUser("124820430@qq1.com","tom1");
+    }
+
+
     /**
      * 通过密钥和邮箱账户创建Ticket
      */
+    public void addTicketTest() {
 
-    @Test
-    public void testJitbit() {
+        //String submitterEmail = "wppurking@gmail.com";
+        String submitterEmail = "124820430@qq.com";
 
-        String submitterEmail = "wppurking@gmail.com";
-
-        String ticketId = Jitbit.addTicket(submitterEmail, "我是一个标题qqsfsafasfGGG", "啊，这是我的内容。qqsfgggGGG",
+        String ticketId = Jitbit.addTicket(submitterEmail,"tom", null, null,
                 Jitbit.Category.SOFTWARE);
 
         List<NameValuePair> param = new ArrayList<NameValuePair>();
@@ -39,7 +46,6 @@ public class JitbitTest extends UnitTest {
         JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
         assertThat(jsonElement.toString(), is(containsString(ticketId)));
-
     }
 
 
