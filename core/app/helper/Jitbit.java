@@ -73,7 +73,7 @@ public class Jitbit {
             throw new RuntimeException("密钥失效! JitBit 创建 Ticket.");
         } else if(!NumberUtils.isNumber(json)) {
             Logger.error("username:%s submitterEmail:%s JitBit创建Ticket失败,密钥失效:\n%s", username, submitterEmail, json);
-            throw new RuntimeException("JitBit 创建 Ticket.");
+            throw new RuntimeException("向 JitBit 创建 Ticket.");
         }
         return json;
     }
@@ -97,7 +97,7 @@ public class Jitbit {
             throw new RuntimeException("JitBit 创建User 失败,用户名称或者邮箱已存在!");
         } else if(!NumberUtils.isNumber(json)) {
             Logger.error("username:%s submitterEmail:%s JitBit 创建 User 失败:\n%s", username, submitterEmail, json);
-            throw new RuntimeException("JitBit 创建User 失败!");
+            throw new RuntimeException("向 JitBit 创建User 失败!");
         }
         return json;
     }
