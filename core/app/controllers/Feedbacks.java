@@ -1,6 +1,6 @@
 package controllers;
 
-import jobs.FeedbackInfoFetchJob;
+import jobs.FeedbackCheckJob;
 import models.market.Feedback;
 import models.product.Category;
 import play.mvc.Controller;
@@ -29,10 +29,10 @@ public class Feedbacks extends Controller {
 
     public static void check(String id) {
         Feedback feedback = Feedback.findById(id);
-        String html = FeedbackInfoFetchJob
-                .fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
-        feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
-        if(FeedbackInfoFetchJob.isRequestSuccess(html))
+        String html = FeedbackCheckJob
+                .ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
+        feedback.isRemove = FeedbackCheckJob.isFeedbackRemove(html);
+        if(FeedbackCheckJob.isRequestSuccess(html))
             flash.success("刷新成功. [%s -> %s]", feedback.orderId, feedback.isRemove);
         else
             flash.error("刷新成功. [%s -> %s]", feedback.orderId, feedback.isRemove);

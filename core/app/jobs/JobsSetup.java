@@ -39,7 +39,7 @@ public class JobsSetup {
 
             // Feedback Job 处理
             every(FeedbackCrawlJob.class, "30mn");
-            every(FeedbackInfoFetchJob.class, "5mn");
+            every(FeedbackCheckJob.class, "5mn");
 
             every(OrderMailCheck.class, "10mn");
             every(AmazonFBACapaticyWatcherJob.class, "30mn");

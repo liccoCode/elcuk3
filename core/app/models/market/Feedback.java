@@ -49,6 +49,11 @@ public class Feedback extends GenericModel {
 
     public Date createDate;
 
+    /**
+     * 什么时候更新
+     */
+    public Date updateAt;
+
     @Required
     public Float score;
 
@@ -84,6 +89,12 @@ public class Feedback extends GenericModel {
 
 
     public Feedback() {
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void beforeUpdate() {
+        this.updateAt = new Date();
     }
 
     /**
@@ -147,8 +158,9 @@ public class Feedback extends GenericModel {
 
     /**
      * 向 OsTicket 系统开启一个新的 Ticket
-     *
+     * <p/>
      * TODO Feedback 创建 Review 的 API
+     *
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
     public void openTicket(String title) {

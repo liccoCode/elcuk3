@@ -1,23 +1,23 @@
 package jobs;
 
-import helper.FLog;
 import helper.HTTP;
 import models.Jobex;
 import models.market.Account;
+import models.market.Feedback;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.joda.time.DateTime;
 import play.Logger;
-import play.Play;
 import play.jobs.Job;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
- * <pre>
- * 用来补充性质的更新已经在系统中的 Feedback 的信息;
- * 会加载所有有 OsTicketId 的 Feedback , 然后对她们进行更新:
- * 1. 如果发现 Feedback 消失了, 则记录此 Feedback 被处理完了
- * 2. 同时可以更新 Feedback 记录的最新时间(包含时分秒)
+ * 检查 Feedback 是否被删除.
+ * * 被 Amazon 划掉
+ * * 被 Amazon 删除
+ * * 被用户删除
  * 周期:
  * - 轮询周期: 5mn
  * - Duration: 40mn
@@ -26,18 +26,44 @@ import java.util.Arrays;
  * Date: 8/9/12
  * Time: 3:44 PM
  */
-public class FeedbackInfoFetchJob extends Job {
+public class FeedbackCheckJob extends Job {
     @Override
     public void doJob() {
-        if(!Jobex.findByClassName(FeedbackInfoFetchJob.class.getName()).isExcute()) return;
-        // TODO 检查最近 90 天的 Feedback , 用于检查是否删除.
+        if(!Jobex.findByClassName(FeedbackCheckJob.class.getName()).isExcute()) return;
+        List<Feedback> feedbacks = Feedback.find("isRemove=? AND createDate>=? ORDER BY updateAt ASC",
+                false, DateTime.now().minusDays(70).toDate()).fetch(20);
+        for(Feedback feedback : feedbacks) {
+            FeedbackCheckJob.ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
+        }
+    }
+
+    /**
+     * 检查一次 Feedback
+     *
+     * @param orderId Feedback 与 Order 相关
+     */
+    public static Feedback check(String orderId) {
+        return check(Feedback.<Feedback>findById(orderId));
+    }
+
+    /**
+     * 检查一次 Feedback
+     */
+    public static Feedback check(Feedback feedback) {
+        String html = FeedbackCheckJob.ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
+        if(FeedbackCheckJob.isRequestSuccess(html)) {
+            feedback.isRemove = FeedbackCheckJob.isFeedbackRemove(html);
+            feedback.save();
+        } else {
+            Logger.warn("FeedbackCheckJob check request is not valid.");
+        }
+        return feedback;
     }
 
     /**
      * 判断这个 Feedback 是否已经被 Remove
      *
      * @param body
-     * @return
      */
     public static boolean isFeedbackRemove(String body) {
         String feedbackViewHtml = StringUtils.substringBetween(body, "newform");
@@ -75,20 +101,16 @@ public class FeedbackInfoFetchJob extends Job {
      * 2. 没有 Feedback
      * 3. Feedback 被删除了
      */
-    public static String fetchAmazonFeedbackHtml(Account account, String orderId) {
+    public static String ajaxLoadFeedbackOnOrderDetailPage(Account account, String orderId) {
         // 需要使用 Feedback 相关联的账户, 而非 Feedback 所在的市场. (出在历史的 uk 账号在 de 购买东西, 以后不会有这样的情况,但需要修复这个问题)
         String url = account.type.feedbackLink();
         Logger.info("Sync Feedback %s [%s]", url, orderId);
-        String body = HTTP.post(account.cookieStore(), url, Arrays.asList(
+
+        return HTTP.post(account.cookieStore(), url, Arrays.asList(
                 new BasicNameValuePair("action", "show-feedback"),
                 new BasicNameValuePair("orderID", orderId),
                 new BasicNameValuePair("applicationPath", "/gp/orders-v2")
         ));
-
-        if(Play.mode.isDev())
-            FLog.fileLog(String.format("feedback.check.%s.%s.html", account.prettyName(), orderId),
-                    body, FLog.T.HTTP_ERROR);
-        return body;
     }
 
 }
