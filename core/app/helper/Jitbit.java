@@ -70,10 +70,10 @@ public class Jitbit {
             json = HTTP.post("https://easyacc.jitbit.com/helpdesk/api/AddTicketFromEmail", param);
         } else if(StringUtils.contains(json, "sign in")) {
             Logger.error("username:%s submitterEmail:%s JitBit创建Ticket失败,密钥失效:\n%s", username, submitterEmail, json);
-            throw new RuntimeException("密钥失效! JitBit 创建 Ticket.");
+            throw new RuntimeException("密钥失效! JitBit 创建 Ticket 失败!");
         } else if(!NumberUtils.isNumber(json)) {
             Logger.error("username:%s submitterEmail:%s JitBit创建Ticket失败,密钥失效:\n%s", username, submitterEmail, json);
-            throw new RuntimeException("向 JitBit 创建 Ticket.");
+            throw new RuntimeException("向 JitBit 创建 Ticket 失败!");
         }
         return json;
     }
