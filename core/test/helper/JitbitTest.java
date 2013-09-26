@@ -22,7 +22,6 @@ public class JitbitTest extends UnitTest {
 
     @Test
     public void addUserTest(){
-
        String json = Jitbit.addUser("124820430@qq1.com","tom1");
     }
 
@@ -31,7 +30,6 @@ public class JitbitTest extends UnitTest {
      * 通过密钥和邮箱账户创建Ticket
      */
     public void addTicketTest() {
-
         //String submitterEmail = "wppurking@gmail.com";
         String submitterEmail = "124820430@qq.com";
 

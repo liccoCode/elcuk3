@@ -62,10 +62,7 @@ public class Jitbit {
         param.add(new BasicNameValuePair("subject", subject));
         param.add(new BasicNameValuePair("body", body));
 
-
         String json = HTTP.post("https://easyacc.jitbit.com/helpdesk/api/AddTicketFromEmail", param);
-
-        System.out.println(" ---- :  " + json);
         //JiBit 只能向系统内的用户发送邮箱 0: 邮箱不存在
         if("0".equals(json)) {
             addUser(submitterEmail, username);
@@ -86,7 +83,6 @@ public class Jitbit {
      * username 或者 邮箱 不能重复
      */
     public static String addUser(String submitterEmail, String username) {
-
         List<NameValuePair> param = new ArrayList<NameValuePair>();
         param.add(new BasicNameValuePair("sharedSecret", SHAREDSECRET));
         param.add(new BasicNameValuePair("username", username));
