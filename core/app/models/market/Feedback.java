@@ -2,7 +2,7 @@ package models.market;
 
 import helper.Dates;
 import helper.GTs;
-import helper.OsTicket;
+import helper.Jitbit;
 import models.product.Category;
 import models.product.Product;
 import notifiers.Mails;
@@ -78,7 +78,7 @@ public class Feedback extends GenericModel {
     public Integer mailedTimes = 0;
 
     /**
-     * 关联的 OsTicket 系统中的 Id, 如果没有则需要向 OsTicket 系统指定的 URL 创建 Ticket.
+     * 关联的 OsTicket/jitbit 系统中的 Id, 如果没有则需要向 OsTicket 系统指定的 URL 创建 Ticket.
      */
     public String osTicketId;
 
@@ -108,8 +108,7 @@ public class Feedback extends GenericModel {
         if(this.score > 3) return;
 
         if(this.score <= 3 && this.isSelfBuildListing()) {
-            // TODO Feedback 创建 Review 入口
-//            this.openTicket(null);
+            this.openTicket(null);
             Mails.feedbackWarnning(this);
         }
 
@@ -158,13 +157,10 @@ public class Feedback extends GenericModel {
 
     /**
      * 向 OsTicket 系统开启一个新的 Ticket
-     * <p/>
-     * TODO Feedback 创建 Review 的 API
      *
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
     public void openTicket(String title) {
-        if(1 == 1) return;
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
             return;
@@ -179,10 +175,7 @@ public class Feedback extends GenericModel {
         if(StringUtils.isBlank(subject))
             subject = "You left a negative feedback, Please give us a chance to make up!";
 
-        this.osTicketId = OsTicket
-                .openOsTicket(name, email, subject, content, OsTicket.TopicID.FEEDBACK,
-                        "Feedback " + this.orderId);
-        return;
+        this.osTicketId = Jitbit.addTicket(email, subject, content, Jitbit.Category.SOFTWARE);
     }
 
     public void comment(String memo) {

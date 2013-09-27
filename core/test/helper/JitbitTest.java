@@ -39,7 +39,6 @@ public class JitbitTest extends UnitTest {
         JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
         assertThat(jsonElement.toString(), is(containsString(ticketId)));
-
     }
 
 
