@@ -6,7 +6,7 @@ import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.GTs;
 import helper.J;
-import helper.OsTicket;
+import helper.Jitbit;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -319,14 +319,11 @@ public class AmazonListingReview extends GenericModel {
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0)
             return;// 超过 70 天的不处理
 
-//        Rating < 4 并且为自建的 Listing 的开 OsTicket
-//        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒
-        if(this.rating != null && this.rating < 4) {
-            //TODO 触发 Review 的点
-//            this.openTicket(null);
+        if(this.rating != null && this.rating <= 3) {
+            this.openTicket(null);
             Mails.listingReviewWarn(this);
+            this.save();
         }
-        this.save();
     }
 
 
@@ -428,16 +425,14 @@ public class AmazonListingReview extends GenericModel {
 
     /**
      * AmazonListingReview 开 OsTicket, 在 OsTicket 创建一个 Ticket 的同时,也在系统中创建
-     * TODO 通过 Review 创建 Ticket 的 api
      */
-    public void openTicket(String title) {
-        if(1 == 1) return;
+    public String openTicket(String title) {
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Review OsTicket is exist! %s", this.osTicketId);
-            return;
+            return null;
         }
 
-        String name = String.format("%s - %s", this.username, this.listingId);
+        String name = String.format("%s(%s)", this.username, this.userid);
         String subject = title;
         String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
 
@@ -449,18 +444,16 @@ public class AmazonListingReview extends GenericModel {
             }
         }
 
-        this.orderr = this.tryToRelateOrderByUserId();
+        if(this.orderr == null) this.orderr = this.tryToRelateOrderByUserId();
         if(this.orderr == null) {
             Logger.warn("Review (%s) relate order have no email.", this.alrId);
             subject += " - No Order found...";
             content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
-
-            this.osTicketId = OsTicket.openOsTicket(name, "support@easyacceu.com", subject, content,
-                    OsTicket.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
+            this.osTicketId = Jitbit.addTicket("support@easya.cc", "support", subject, content, Jitbit.Category.REVIEW);
         } else {
-            this.osTicketId = OsTicket.openOsTicket(name, this.orderr.email, subject, content,
-                    OsTicket.TopicID.REVIEW, "Review " + this.alrId);
+            this.osTicketId = Jitbit.addTicket(this.orderr.email, name, subject, content, Jitbit.Category.REVIEW);
         }
+        return this.osTicketId;
     }
 
     /**

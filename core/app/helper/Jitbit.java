@@ -6,6 +6,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import play.Logger;
 import play.Play;
+import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,27 @@ public class Jitbit {
             public String value() {
                 return "63513";
             }
+        },
+
+        REVIEW {
+            @Override
+            public String value() {
+                return "64618";
+            }
+        },
+
+        FEEDBACK {
+            @Override
+            public String value() {
+                return "64617";
+            }
+        },
+
+        MORE_THAN_ONE_LISTING {
+            @Override
+            public String value() {
+                return "64629";
+            }
         };
 
         public abstract String value();
@@ -56,6 +78,11 @@ public class Jitbit {
      */
     public static String addTicket(String submitterEmail, String username, String subject, String body,
                                    Category category) {
+        if(StringUtils.isBlank(username))
+            throw new FastRuntimeException("Username 必须存在!");
+        if(StringUtils.isBlank(submitterEmail))
+            throw new FastRuntimeException("用户邮箱必须存在");
+
         List<NameValuePair> param = new ArrayList<NameValuePair>();
         param.add(new BasicNameValuePair("sharedSecret", SHAREDSECRET));
         param.add(new BasicNameValuePair("submitterEmail", submitterEmail));

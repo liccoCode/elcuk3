@@ -105,14 +105,11 @@ public class Feedback extends GenericModel {
          * 1. 判断是否需要发送警告邮件;
          * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
          */
-        if(this.score > 3) return;
-
         if(this.score <= 3 && this.isSelfBuildListing()) {
             this.openTicket(null);
             Mails.feedbackWarnning(this);
+            this.save();
         }
-
-        this.save();
     }
 
     /**
@@ -160,10 +157,10 @@ public class Feedback extends GenericModel {
      *
      * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
      */
-    public void openTicket(String title) {
+    public String openTicket(String title) {
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
-            return;
+            return null;
         }
         String name = this.orderId;
         String email = this.email;
@@ -175,7 +172,8 @@ public class Feedback extends GenericModel {
         if(StringUtils.isBlank(subject))
             subject = "You left a negative feedback, Please give us a chance to make up!";
 
-        this.osTicketId = Jitbit.addTicket(email, subject, content, Jitbit.Category.SOFTWARE);
+        this.osTicketId = Jitbit.addTicket(email, name, subject, content, Jitbit.Category.FEEDBACK);
+        return this.osTicketId;
     }
 
     public void comment(String memo) {
