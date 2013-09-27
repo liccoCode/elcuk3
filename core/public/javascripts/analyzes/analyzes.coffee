@@ -1,3 +1,5 @@
+# timeline/timeline_js/timeline-api.js 中覆盖了 JQuery对象，所以重置
+window.jQuery = window.$
 $ ->
   Highcharts.setOptions(global:{useUTC: false})
 
