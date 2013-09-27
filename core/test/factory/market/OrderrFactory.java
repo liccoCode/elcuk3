@@ -17,6 +17,7 @@ public class OrderrFactory extends ModelFactory<Orderr> {
     public Orderr define() {
         Orderr orderr = new Orderr();
         orderr.orderId = "403-3852686-2505963";
+        orderr.email = "81798950@qq.com";
         orderr.market = M.AMAZON_FR;
         orderr.paymentDate = new Date();
         orderr.address = "Kdfdsj";

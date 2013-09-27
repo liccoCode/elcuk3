@@ -160,9 +160,10 @@ public class Listing extends GenericModel {
     @Expose
     public Long lastUpdateTime;
 
-    @Expose
-    public Long nextUpdateTime;
-
+    /**
+     * 上一次做 Review Check 的时间
+     */
+    public Date lastReviewCheckDate;
 
     public void setAsin(String asin) {
         this.asin = asin;
@@ -202,57 +203,6 @@ public class Listing extends GenericModel {
 
 
     /**
-     * 加载此 Listing 所具有的所有 Selling 的状态的个数
-     * NEW, 0
-     * SELLING, 1
-     * NO_INVENTORY, 2
-     * HOlD, 3
-     * DOWN 4
-     *
-     * @return
-     */
-    public Integer[] relateSellingStateQtys(String nickMarketName) {
-        Integer[] stateQtys = {0, 0, 0, 0, 0};
-        for(Selling s : this.sellings) {
-            if(!nickMarketName.equalsIgnoreCase(s.market.nickName())) continue;
-            switch(s.state) {
-                case NEW:
-                    stateQtys[0] += 1;
-                    break;
-                case SELLING:
-                    stateQtys[1] += 1;
-                    break;
-                case NO_INVENTORY:
-                    stateQtys[2] += 1;
-                    break;
-                case HOlD:
-                    stateQtys[3] += 1;
-                    break;
-                case DOWN:
-                    stateQtys[4] += 1;
-                    break;
-                default:
-                    Logger.warn("Other State? Can not happed!");
-            }
-        }
-        return stateQtys;
-    }
-
-    /**
-     * 通过 Account 此 Listing 所属的所有 Selling 中过滤出指定 Account 的; 否则与 this.sellings 一样
-     *
-     * @param a
-     * @return
-     */
-    public List<Selling> sellings(Account a) {
-        if(a != null && a.id != null && a.id > 0) {
-            return Selling.find("listing=? AND account=?", this, a).fetch();
-        } else {
-            return this.sellings;
-        }
-    }
-
-    /**
      * 从所有 ListingOffer 中查找自己
      *
      * @return
@@ -267,21 +217,6 @@ public class Listing extends GenericModel {
         }
         return null;
     }
-
-    /**
-     * 从 ListingOffer 中价格最低的价格
-     *
-     * @return 如果没有 ListingOffer 则返回 -1
-     */
-    public Float lowestPrice() {
-        float lowest = Float.MAX_VALUE;
-        if(this.offers == null || this.offers.size() == 0) return -1f;
-        for(ListingOffer offer : this.offers) {
-            if(offer.price < lowest) lowest = offer.price;
-        }
-        return lowest;
-    }
-
 
     /**
      * 根据 Listing 的状态, 进行 Listing 的检查并更新;
@@ -377,10 +312,8 @@ public class Listing extends GenericModel {
                         this.listingId);
         List<F.T2<Long, Integer>> monthTable = new ArrayList<F.T2<Long, Integer>>();
         for(Map<String, Object> row : rows) {
-            Map<Long, Integer> oneMonth = new HashMap<Long, Integer>();
             monthTable.add(new F.T2<Long, Integer>(
-                    DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM"))
-                            .getMillis(),
+                    DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
                     ((Long) row.get("count")).intValue()));
         }
         return monthTable;
@@ -406,19 +339,8 @@ public class Listing extends GenericModel {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "Listing{" +
-                "listingId='" + listingId + '\'' +
-                ", title='" + title + '\'' +
-                ", reviews=" + reviews +
-                ", rating=" + rating +
-                ", byWho='" + byWho + '\'' +
-                ", saleRank=" + saleRank +
-                ", displayPrice=" + displayPrice +
-                ", lastUpdateTime=" + lastUpdateTime +
-                ", nextUpdateTime=" + nextUpdateTime +
-                '}';
+    public static List<Listing> latestNeedReviewListing(int size) {
+        return Listing.find("ORDER BY lastReviewCheckDate ASC").fetch(size);
     }
 
     /**

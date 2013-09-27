@@ -25,7 +25,7 @@
         <td><a href="@@{Feedbacks.show()}/${fd.orderId}" target="_blank">${fd.length()}</a></td>
         <td title="${fd.createDate?.date()}">${fd.createDate?.since()}</td>
         <td style="color:${ext.TicketHelper.color(fd.score)}">${fd.score}</td>
-        <td><a href="${fd.osTicketLink()}" target="_blank">${fd.osTicketId}</a></td>
+        <td><a href="#等待添加" target="_blank">${fd.osTicketId}</a></td>
     </tr>
 #{/list}
 </table>
