@@ -6,9 +6,7 @@ import com.google.gson.annotations.Expose;
 import helper.Dates;
 import helper.GTs;
 import helper.J;
-import helper.OsTicket;
-import models.support.Ticket;
-import models.support.TicketReason;
+import helper.Jitbit;
 import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -41,9 +39,6 @@ public class AmazonListingReview extends GenericModel {
      */
     @OneToOne
     public Orderr orderr;
-
-    @OneToOne(mappedBy = "review", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
-    public Ticket ticket;
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
@@ -248,7 +243,7 @@ public class AmazonListingReview extends GenericModel {
     public AmazonListingReview createReview() {
         if(!Validation.current().valid(this).ok)
             throw new FastRuntimeException("Not Valid, more details see Validation.errors()");
-        this.createDate = new Date();
+        if(this.createDate == null) this.createDate = new Date();
         // 将初始的 Review 数据全部记录下来
         this.originJson = J.G(this);
         if(this.listing == null)
@@ -274,22 +269,18 @@ public class AmazonListingReview extends GenericModel {
             throw new FastRuntimeException("Not the same AmazonListingReview, can not be update!");
 
         this.listingId = newReview.listingId;
-        if(newReview.rating != null &&
-                !this.rating.equals(newReview.rating)) { //如果两次 Rating 的值不一样需要记录
+        //如果两次 Rating 的值不一样需要记录
+        if(newReview.rating != null && !this.rating.equals(newReview.rating)) {
             this.lastRating = this.rating;
-            this.comment(
-                    String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating,
-                            Dates.date2DateTime()));
-            if(this.ticket != null)
-                this.ticket.isSuccess = (newReview.rating >= 4) && (this.lastRating <= 3);
+            this.comment(String.format("Rating from %s to %s At %s", this.lastRating, newReview.rating,
+                    Dates.date2DateTime()));
             this.mailedTimes = 0;// 允许重新发送一次邮件
         }
         if(newReview.rating != null) this.rating = newReview.rating;
         if(StringUtils.isNotBlank(newReview.title)) this.title = newReview.title;
         if(StringUtils.isNotBlank(newReview.review)) this.review = newReview.review;
         if(newReview.helpUp != null && newReview.helpUp > 0) this.helpUp = newReview.helpUp;
-        if(newReview.helpClick != null && newReview.helpClick > 0)
-            this.helpClick = newReview.helpClick;
+        if(newReview.helpClick != null && newReview.helpClick > 0) this.helpClick = newReview.helpClick;
         if(StringUtils.isNotBlank(newReview.userid)) this.userid = newReview.userid;
         if(StringUtils.isNotBlank(newReview.username)) this.username = newReview.username;
         //reviewDate 不修改了
@@ -317,21 +308,6 @@ public class AmazonListingReview extends GenericModel {
     }
 
     /**
-     * 判断 Rating 与 lastRating 的差别, 是上升了(+)还是下降了(-), 还是没变(0)
-     *
-     * @return
-     */
-    public int isUpOrDown() {
-        if(this.lastRating > this.rating)
-            return -1;
-        else if(this.lastRating < this.rating)
-            return +1;
-        else
-            return 0;
-    }
-
-
-    /**
      * 对此 AmazonListingReview 进行检查, 判断是否需要进行警告通知
      * 在 Check 方法执行完成以后将数据同步回数据库;
      * 如果此 Review 需要开 Ticket 进行处理, 也在此判断了
@@ -343,16 +319,11 @@ public class AmazonListingReview extends GenericModel {
         if(this.createDate.getTime() - DateTime.now().plusDays(-70).getMillis() < 0)
             return;// 超过 70 天的不处理
 
-
-//        Rating < 4 并且为自建的 Listing 的开 OsTicket
-//        Rating <= 4 并且为自建的 Lisitng 的发送邮件提醒
-        if(this.rating != null && this.rating < 4) {
-            this.ticket = this.openTicket(null);
+        if(this.rating != null && this.rating <= 3) {
+            this.openTicket(null);
             Mails.listingReviewWarn(this);
-            if(!Listing.isSelfBuildListing(this.listing.title) && this.ticket != null)
-                this.ticket.isNotSelf();
+            this.save();
         }
-        this.save();
     }
 
 
@@ -378,25 +349,6 @@ public class AmazonListingReview extends GenericModel {
         sb.append(", comment='").append(comment).append('\'');
         sb.append('}');
         return sb.toString();
-    }
-
-    /**
-     * 为此 Review 添加为什么是负评
-     *
-     * @param lr
-     */
-    public AmazonListingReview addWhyNegtive(TicketReason lr) {
-        /**
-         * 0. 此原因是否存在?
-         * 1. 检查这个 lr 是否与这个 Review 所属在与 Category 下?
-         * 2. 检查这个原因是否已经在此 Review 中存在了?
-         */
-        if(!lr.isPersistent()) throw new FastRuntimeException("此原因不存在!");
-        if(!this.listing.product.category.categoryId.equals(lr.category.categoryId))
-            throw new FastRuntimeException("此原因与这个 Listing 不属于一个类别");
-        if(lr.tickets.contains(this.ticket)) throw new FastRuntimeException("此原因已经存在, 不需要重复添加");
-        this.ticket.reasons.add(lr);
-        return this.save();
     }
 
     @Override
@@ -468,19 +420,19 @@ public class AmazonListingReview extends GenericModel {
     }
 
     public void comment(String comment) {
-        this.comment = String.format("%s\r\n%s", comment.trim(), this.comment);
+        this.comment = String.format("%s%n%s", comment.trim(), this.comment);
     }
 
     /**
      * AmazonListingReview 开 OsTicket, 在 OsTicket 创建一个 Ticket 的同时,也在系统中创建
      */
-    public Ticket openTicket(String title) {
+    public String openTicket(String title) {
         if(StringUtils.isNotBlank(this.osTicketId)) {
             Logger.info("Review OsTicket is exist! %s", this.osTicketId);
             return null;
         }
 
-        String name = String.format("%s - %s", this.username, this.listingId);
+        String name = String.format("%s(%s)", this.username, this.userid);
         String subject = title;
         String content = GTs.render("OsTicketReviewWarn", GTs.newMap("review", this).build());
 
@@ -492,24 +444,16 @@ public class AmazonListingReview extends GenericModel {
             }
         }
 
-        this.orderr = this.tryToRelateOrderByUserId();
+        if(this.orderr == null) this.orderr = this.tryToRelateOrderByUserId();
         if(this.orderr == null) {
             Logger.warn("Review (%s) relate order have no email.", this.alrId);
             subject += " - No Order found...";
             content += "\r\n检查: 1. 是我们的跟的 Listing 产生的? 2. 订单的 userId 还没抓取回来? 3. 是非购买用户留的?";
-
-            this.osTicketId = OsTicket.openOsTicket(name, "support@easyacceu.com", subject, content,
-                    OsTicket.TopicID.REVIEW, "Review " + this.alrId) + "-noemail";
+            this.osTicketId = Jitbit.addTicket("support@easya.cc", "support", subject, content, Jitbit.Category.REVIEW);
         } else {
-            this.osTicketId = OsTicket.openOsTicket(name, this.orderr.email, subject, content,
-                    OsTicket.TopicID.REVIEW, "Review " + this.alrId);
+            this.osTicketId = Jitbit.addTicket(this.orderr.email, name, subject, content, Jitbit.Category.REVIEW);
         }
-        if(StringUtils.isBlank(this.osTicketId)) { // 这表示没在 OsTicket 系统没有创建成功
-            return null;
-        } else {
-            if(this.ticket == null) return new Ticket(this);
-            else return this.ticket;
-        }
+        return this.osTicketId;
     }
 
     /**
@@ -594,26 +538,4 @@ public class AmazonListingReview extends GenericModel {
         return reviewLeftClicks;
     }
 
-    /**
-     * @return
-     */
-    public F.T2<List<TicketReason>, List<String>> unTagedReasons() {
-        List<TicketReason> unTaged = new ArrayList<TicketReason>();
-        List<String> reasonNames = new ArrayList<String>();
-
-        if(this.ticket == null)
-            return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
-
-        if(this.ticket.reasons == null || this.ticket.reasons.size() == 0) {
-            unTaged.addAll(this.listing.product.category.reasons);
-        } else {
-            for(TicketReason rea : this.listing.product.category.reasons) {
-                for(TicketReason lrea : this.ticket.reasons) {
-                    if(!lrea.equals(rea)) unTaged.add(rea);
-                }
-            }
-        }
-        for(TicketReason ra : unTaged) reasonNames.add(ra.reason);
-        return new F.T2<List<TicketReason>, List<String>>(unTaged, reasonNames);
-    }
 }

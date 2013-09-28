@@ -86,6 +86,18 @@
               </td>
             </tr>
             <tr>
+              <td style="width:100px;">AmzITCategory:</td>
+              <td colspan="3">
+                <input type="text" class="span12" name="cat.settings.amazonITCategory" value="${cat.settings?.amazonITCategory}" placeHolder="Amazon.it CLASSIFY 阶段的类型">
+              </td>
+            </tr>
+            <tr>
+              <td style="width:100px;">AmzESCategory:</td>
+              <td colspan="3">
+                <input type="text" class="span12" name="cat.settings.amazonESCategory" value="${cat.settings?.amazonESCategory}" placeHolder="Amazon.es CLASSIFY 阶段的类型">
+              </td>
+            </tr>
+            <tr>
               <td>产品要求</td>
               <td colspan="3">
                 <textarea name="cat.productTerms" class="span12" rows="10">${cat.productTerms}</textarea>
@@ -105,35 +117,6 @@
             </tr>
           </table>
         </form>
-      </div>
-
-
-        #{info_row title:'Reason'/}
-      <div>
-        <table class="table table-condensed table-bordered">
-          <tr>
-            <th>#</th>
-            <th>Reason</th>
-            <th>Memo</th>
-            <th width="70"></th>
-          </tr>
-            #{list items:cat.reasons, as:'ra'}
-              <tr>
-                <td>${ra.id}</td>
-                <td>${ra.reason}</td>
-                <td>${ra.memo}</td>
-                <td>
-                  <a href="@{TicketReasons.edit(ra.id)}" class="btn btn-mini btn-primary"><i class="icon-edit"></i></a>
-                  <a href="@{TicketReasons.remove}?lrid=${ra.id}" class="remove btn btn-mini btn-danger"><i class="icon-trash"></i></a>
-                </td>
-              </tr>
-            #{/list}
-          <tr>
-            <td colspan="4">
-              <a href="@{TicketReasons.blank()}?catId=${cat.categoryId}" class="btn btn-primary">添加原因</a>
-            </td>
-          </tr>
-        </table>
       </div>
 
 

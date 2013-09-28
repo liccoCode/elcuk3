@@ -3,7 +3,6 @@ package models.product;
 import com.google.gson.annotations.Expose;
 import helper.DBUtils;
 import models.embedded.CategorySettings;
-import models.support.TicketReason;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
@@ -34,9 +33,6 @@ public class Category extends GenericModel {
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Brand> brands;
-
-    @OneToMany(mappedBy = "category")
-    public List<TicketReason> reasons = new ArrayList<TicketReason>();
 
     @Id
     @Expose
@@ -105,9 +101,6 @@ public class Category extends GenericModel {
          */
         if(this.brands.size() > 0)
             Validation.addError("", String.format("拥有 %s brands 关联, 无法删除.", this.brands.size()));
-        if(this.reasons.size() > 0)
-            Validation.addError("",
-                    String.format("拥有 %s TicketReason 关联, 无法删除.", this.reasons.size()));
         if(Validation.hasErrors()) return;
         this.delete();
     }
@@ -145,7 +138,7 @@ public class Category extends GenericModel {
         return result;
     }
 
-    public static List<String> category_ids() {
+    public static List<String> categoryIds() {
         List<Map<String, Object>> rows = DBUtils
                 .rows("SELECT categoryId FROM Category ORDER BY categoryId");
         List<String> categoryIds = new ArrayList<String>();

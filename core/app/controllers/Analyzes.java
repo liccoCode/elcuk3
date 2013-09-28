@@ -2,14 +2,16 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
-import models.market.*;
+import models.market.Account;
+import models.market.OrderItem;
+import models.market.Selling;
+import models.market.SellingRecord;
 import models.product.Category;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import org.apache.commons.lang.math.NumberUtils;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
@@ -20,15 +22,11 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 数据分析页面的控制器
- * TODO 备忘: 采购计划的 timeline 库 -> http://www.simile-widgets.org/timeline/
+ * 备忘: 采购计划的 timeline 库 -> http://www.simile-widgets.org/timeline/
  * User: wyattpan
  * Date: 1/19/12
  * Time: 2:14 PM
@@ -39,7 +37,7 @@ public class Analyzes extends Controller {
     @Check("analyzes.index")
     public static void index() {
         List<Account> accs = Account.openedSaleAcc();
-        List<String> categoryIds = Category.category_ids();
+        List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
         render(accs, categoryIds, p);
     }
@@ -137,22 +135,6 @@ public class Analyzes extends Controller {
      */
     public static void ajaxProcureUnitTimeline(String type, String val) {
         renderJSON(J.G(AnalyzePost.timelineEvents(type, val)));
-    }
-
-    /**
-     * 给出某一天订单销量的时间区间饼图
-     *
-     * @param msku
-     */
-    public static void pie(String msku, Date date) {
-        Map<String, AtomicInteger> dataMap = Orderr.orderPieChart(msku, date);
-        List<String> datax = new ArrayList<String>();
-        for(String key : dataMap.keySet()) {
-            datax.add("'" + new DateTime(Long.parseLong(key)).toString("HH:mm:ss") + "'");
-        }
-        List<AtomicInteger> datay = new ArrayList<AtomicInteger>(dataMap.values());
-        response.cacheFor("10mn");
-        render(datax, datay, date);
     }
 
     public static void ps(String sid, Float ps) {

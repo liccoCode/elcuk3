@@ -1,5 +1,4 @@
 import helper.HTTP;
-import jobs.loop.OsTicketBeanstalkdCheck;
 import play.jobs.Job;
 import play.jobs.OnApplicationStop;
 
@@ -14,6 +13,5 @@ public class Shutdown extends Job {
     @Override
     public void doJob() {
         HTTP.stop();
-        OsTicketBeanstalkdCheck.stop();
     }
 }

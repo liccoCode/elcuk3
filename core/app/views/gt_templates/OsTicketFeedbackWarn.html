@@ -1,14 +1,14 @@
 Order:
-Id: ${f.orderId} ; State: ${f.orderr.state} ; CreateDate: ${f.createDate.format('yyyy-MM-dd')} ; Score: ${f.score}
+Id: ${f.orderId} ; State: ${f.orderr?.state} ; CreateDate: ${f.createDate.format('yyyy-MM-dd')} ; Score: ${f.score}
 
 Comment:
 ${f.feedback.raw()}
 
-#{if f.orderr.items == null || f.orderr.items.size() == 0}
+#{if f.orderr?.items == null || f.orderr?.items?.size() == 0}
 Not Found OrderItem!
 #{/if}
 #{else }
-    #{list items:f.orderr.items, as:'oi'}
+    #{list items:f.orderr?.items, as:'oi'}
     - ${oi.product.sku}
     [${oi.listingName}]
     [${oi.selling.asinLink()}]

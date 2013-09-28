@@ -8,7 +8,6 @@ import jobs.analyze.SellingSaleAnalyzeJob;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
-import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
@@ -42,6 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
+
+    private static final long serialVersionUID = -4124213853478159984L;
 
     public Selling() {
         this.aps = new AmazonProps();
@@ -89,10 +90,6 @@ public class Selling extends GenericModel {
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<SellingQTY>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @Expose
-    public PriceStrategy priceStrategy;
-
     /**
      * 上架后用来唯一标示这个 Selling 的 Id;
      * sellingId: msku|market.nickName|acc.id
@@ -129,18 +126,12 @@ public class Selling extends GenericModel {
     @Expose
     public S state;
 
-    @Enumerated(EnumType.STRING)
-    @Expose
-    public T type;
-
 
     /**
      * 给这个 Selling 人工设置的 PS 值
      */
     public Float ps = 0f;
 
-    @Expose
-    public Float price = 0f;
 
     @Expose
     public Float shippingPrice = 0f;
@@ -268,9 +259,6 @@ public class Selling extends GenericModel {
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
-        this.type = T.AMAZON;
-        // 做修复, 当数据从 Amazon 同步回数据以后, 已经拥有 PriceStrategy 所需要的信息了
-        if(this.priceStrategy == null) this.priceStrategy = new PriceStrategy(this);
         this.save();
     }
 
@@ -317,61 +305,35 @@ public class Selling extends GenericModel {
     public void deploy() {
         this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);//将数组参数转换成字符串再进行处理
         synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
-            switch(this.market) {
-                case AMAZON_DE:
-                case AMAZON_ES:
-                case AMAZON_FR:
-                case AMAZON_IT:
-                case AMAZON_UK:
-                case AMAZON_US:
-                    // 1. 切换 Selling 所在区域
-                    this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+            if(!this.market.isAmazon()) return;
+            // 1. 切换 Selling 所在区域
+            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
-                    // 2. 设置需要提交的值
-                    String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                    F.T2<Collection<NameValuePair>, Document> paramDocTuple = this.aps.generateDeployProps(html, this);
+            // 2. 设置需要提交的值
+            String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+            F.T2<Collection<NameValuePair>, String> paramDocTuple = this.aps.generateDeployProps(html, this);
 
-                    // 3. 提交
-                    String[] args = StringUtils.split(
-                            paramDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
-                    html = HTTP.post(this.account.cookieStore(),
-                            // 更新的链接需要账号所在地的 URL
-                            M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
-                            paramDocTuple._1
-                    );
-                    if(StringUtils.isBlank(html)) // 这个最先检查
-                        throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+            // 3. 提交
+            String[] args = StringUtils.split(paramDocTuple._2, ";");
+            html = HTTP.post(this.account.cookieStore(),
+                    // 更新的链接需要账号所在地的 URL
+                    M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
+                    paramDocTuple._1
+            );
+            if(StringUtils.isBlank(html)) // 这个最先检查
+                throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
 
-                    if(Play.mode.isDev())
-                        IO.writeContent(html, new File(
-                                String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            Document doc = Jsoup.parse(html);
+            Elements error = doc.select(".messageboxerror li");
+            if(error.size() > 0)
+                throw new FastRuntimeException("Error:" + error.text());
 
-                    Document doc = Jsoup.parse(html);
-                    Elements error = doc.select(".messageboxerror li");
-                    if(error.size() > 0)
-                        throw new FastRuntimeException("Error:" + error.text());
+            // 4. 更新回数据库
+            this.save();
 
-                    // 4. 更新回数据库
-                    this.save();
-
-                    // 还原
-                    this.account.changeRegion(this.account.type);
-                    break;
-                case EBAY_UK:
-                    break;
-            }
+            // 还原
+            this.account.changeRegion(this.account.type);
         }
-    }
-
-    /**
-     * 指定一个 Whouse, 加载出此 Selling 在此仓库中的唯一的库存
-     *
-     * @param whouse
-     * @return
-     */
-    public SellingQTY uniqueQTY(Whouse whouse) {
-        return SellingQTY
-                .findById(String.format("%s_%s", this.merchantSKU.toUpperCase(), whouse.id));
     }
 
     /**
@@ -501,6 +463,15 @@ public class Selling extends GenericModel {
 
     public static boolean exist(String merchantSKU) {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
+    }
+
+    public boolean isMSkuValid() {
+        if(StringUtils.isBlank(this.merchantSKU)) return false;
+        String[] args = StringUtils.split(this.merchantSKU, ",");
+        if(args.length != 2) return false;
+        if(!args[1].equals(this.aps.upc)) return false;
+        this.merchantSKU = this.merchantSKU.toUpperCase();
+        return true;
     }
 
 }

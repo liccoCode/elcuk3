@@ -92,7 +92,7 @@ public class PaymentHelper extends JavaExtensions {
      * @return
      */
     public static float averagePrice(PaymentUnit unit) {
-        if(unit.feeType != FeeType.transportShipping()) return unit.currency.toCNY(unit.unitPrice);
+        if(unit.feeType != FeeType.expressFee()) return unit.currency.toCNY(unit.unitPrice);
         if(unit.shipment != null) {
             Shipment.T shipType = unit.shipment.type;
             PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
@@ -116,7 +116,7 @@ public class PaymentHelper extends JavaExtensions {
     }
 
     public static float currentAvgPrice(PaymentUnit unit) {
-        if(unit.feeType != FeeType.transportShipping()) return unit.currency.toCNY(unit.unitPrice);
+        if(unit.feeType != FeeType.expressFee()) return unit.currency.toCNY(unit.unitPrice);
         if(unit.shipment != null) {
             Shipment.T shipType = unit.shipment.type;
             DateTime now = DateTime.now();

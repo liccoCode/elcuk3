@@ -40,21 +40,6 @@
           </li>
         #{/power.ck}
 
-        #{power.ck "support"}
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">售后模块<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                #{power.ck "tickets.index"}
-                  <li><a href="@{Tickets.index()}">Tickets 工作台</a></li>
-                #{/power.ck}
-                #{power.ck "ticketanalyzes.index"}
-                  <li><a href="@{TicketAnalyzes.index()}">Tickets 分析</a></li>
-                #{/power.ck}
-            </ul>
-          </li>
-        #{/power.ck}
-
-
         #{power.ck "product"}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">产品模块<b class="caret"></b></a>
@@ -147,13 +132,15 @@
 
         <ul class="nav pull-right">
           <li class="divider-vertical"></li>
-          <li><a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
+          <li>
+            <a href="javascript:;">Hello, ${controllers.Secure.Security.connected()}</a>
           </li>
           <li>
-            <a href="#" class="dropdown-toggle" id="notification_btn" data-toggle="dropdown">Notify
-              <b class="caret"></b></a>
+            <a href="#" class="dropdown-toggle" id="notificationBtn" data-toggle="dropdown">
+              Notify(<b id="notifyNumber"></b>) <b class="caret"></b>
+            </a>
             <ul class="dropdown-menu" id="notifications">
-              <a href="@{Users.home()}" rel="popover">See Notifications</a>
+              <li>Loading....</li>
             </ul>
           </li>
         </ul>
@@ -161,3 +148,11 @@
     </div>
   </div>
 </div>
+
+<script type="text/template" id='news-notifications-model-template'>
+  <li>
+    <a href="#" data-id="<%= noty.id%>" rel="popover" content="<%= noty.content%>" placement="left">
+      <%= noty.title%> <span class="label label-info">点击查阅</span>
+    </a>
+  </li>
+</script>

@@ -8,10 +8,8 @@ import helper.Currency;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
-import models.market.SellingRecord;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import play.db.jpa.JPA;
@@ -67,34 +65,6 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         assertThat(costAndQty._2, is(0));
     }
 
-    @Test
-    public void testSellingShipCost() {
-        sellingShipCostFixtures();
-        Date now = new Date();
-        ProcureUnit unit = ProcureUnit.all().first();
-        SellingRecordCaculateJob job = new SellingRecordCaculateJob();
-        F.T2<Float, Integer> costAndQty = job.sellingShipCost(unit.selling, now);
-        assertThat((double) costAndQty._1, closeTo(3.63, 0.2)); // 3.72
-        assertThat(costAndQty._2, is(900));
-    }
-
-    @Test
-    public void testSellingShipCostWithSellingRecord() {
-        sellingShipCostFixtures();
-        DateTime now = DateTime.now();
-        Selling selling = Selling.all().first();
-        ProcureUnit unit = ProcureUnit.all().first();
-        SellingRecord record = SellingRecord.oneDay(selling.sellingId, now.minusDays(1).toDate());
-        record.procureCost = 4.85f;
-        record.procureNumberSum = 1200;
-        record.save();
-
-        SellingRecordCaculateJob job = new SellingRecordCaculateJob();
-        F.T2<Float, Integer> costAndQty = job.sellingShipCost(unit.selling, now.toDate());
-        assertThat((double) costAndQty._1, closeTo(4.365, 0.2));
-        assertThat(costAndQty._2, is(900 + 1200));
-    }
-
     private void sellingShipCostFixtures() {
         /**
          * 1. 准备 1 个 FBA 快递的运输费用
@@ -109,7 +79,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         PaymentUnit expressShipfee = FactoryBoy.build(PaymentUnit.class, new BuildCallback<PaymentUnit>() {
             @Override
             public void build(PaymentUnit target) {
-                target.feeType = FeeType.transportShipping();
+                target.feeType = FeeType.expressFee();
                 target.unitPrice = 38;
                 target.unitQty = 20;
                 target.currency = Currency.CNY;
@@ -118,13 +88,13 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         PaymentUnit expressOtherFee = FactoryBoy.build(PaymentUnit.class, new BuildCallback<PaymentUnit>() {
             @Override
             public void build(PaymentUnit target) {
-                target.feeType = FeeType.transportDuty();
+                target.feeType = FeeType.dutyAndVAT();
                 target.unitPrice = 200;
                 target.unitQty = 1;
                 target.currency = Currency.USD;
             }
         });
-        expressShipment.items.get(0).produceFee(expressShipfee, FeeType.transportShipping());
+        expressShipment.items.get(0).produceFee(expressShipfee, FeeType.expressFee());
         expressShipment.produceFee(expressOtherFee);
 
         // 2 海运
@@ -134,7 +104,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         PaymentUnit seaShipFee = FactoryBoy.build(PaymentUnit.class, new BuildCallback<PaymentUnit>() {
             @Override
             public void build(PaymentUnit target) {
-                target.feeType = FeeType.transportShipping();
+                target.feeType = FeeType.expressFee();
                 target.unitPrice = 29;
                 target.unitQty = 300;//300 kg
                 target.currency = Currency.CNY;
@@ -143,7 +113,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         PaymentUnit seaShipOtherFee = FactoryBoy.build(PaymentUnit.class, new BuildCallback<PaymentUnit>() {
             @Override
             public void build(PaymentUnit target) {
-                target.feeType = FeeType.transportDuty();
+                target.feeType = FeeType.dutyAndVAT();
                 target.unitPrice = 300;
                 target.currency = Currency.USD;
             }
@@ -159,7 +129,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         PaymentUnit airShipFee = FactoryBoy.build(PaymentUnit.class, new BuildCallback<PaymentUnit>() {
             @Override
             public void build(PaymentUnit target) {
-                target.feeType = FeeType.transportShipping();
+                target.feeType = FeeType.expressFee();
                 target.unitPrice = 32;
                 target.unitQty = 200;//300 kg
                 target.currency = Currency.CNY;
@@ -168,7 +138,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
         PaymentUnit airShipOtherFee = FactoryBoy.build(PaymentUnit.class, new BuildCallback<PaymentUnit>() {
             @Override
             public void build(PaymentUnit target) {
-                target.feeType = FeeType.transportDuty();
+                target.feeType = FeeType.dutyAndVAT();
                 target.unitPrice = 280;
                 target.currency = Currency.USD;
             }

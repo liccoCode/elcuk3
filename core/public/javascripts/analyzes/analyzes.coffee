@@ -1,218 +1,182 @@
 $ ->
-  Highcharts.setOptions(global:
-    {useUTC: false})
-  SKU = 'sku'
-  SID = 'sid'
-  # 这里的 31 天是与 sku/sid 的分析数据中的 day30 所计算的数据保持一致
-  defaultDate = $.DateUtil.addDay(-31)
-  now = $.DateUtil.addDay(31, defaultDate)
+  Highcharts.setOptions(global:{useUTC: false})
 
-  class Tabs
-    constructor: (name) ->
-      @tabs_id = "#{name}_tab"
-      @content_id = "#{name}_tabContent"
+  # table 数据列表
+  $("#below_tabContent").on("ajaxFresh","#sid,#sku",() ->
+      $div =$(@)
+      $("#postType").val($div.attr("id"))
+      LoadMask.mask()
+      $div.load("/Analyzes/analyzes",$('.search_form').serialize(),(r) ->
+        LoadMask.unmask()
+      )
 
-    tabs: ->
-      $("##{@tabs_id}")
-    content: ->
-      $("##{@content_id}")
-    active: ->
-      $("##{@tabs_id} [data-toggle=tab]").parent().filter('.active').find('a').attr('href')[1..-1]
-    contentSelector: ->
-      "#" + @content_id
-    clearSessionStoreage: ->
-      delete sessionStorage[@contentSelector() + "_times"]
-      @
+    #分页事件 bootstrap_pager.html
+  ).on("click",".pagination a[page]",(e) ->
+     e.preventDefault()
+     $a = $(@)
+     $('#postPage').val($a.attr('page'))
+     ajaxFreshAcitveTableTab()
+
+    #SKU | SID 项目的详细查看事件
+  ).on("click",".sid,.sku",(e) ->
+     $td = $(@)
+     sidOrSku = $td.text().trim()
+     $('#postVal').val(sidOrSku)
+     $postType = $('#postType')
+
+     #绘制单个Selling的曲线图时,去掉Category条件
+     $categoryNode = $('select[name|="p.categoryId"]')
+     categoryId = $categoryNode.val()
+     $categoryNode.val("")
+     ajaxSaleUnitLines()
+     $categoryNode.val(categoryId)
+
+     # 转换率与 PageView
+     if $postType.val() == "sid"
+       ajaxSessionLine()
+       ajaxTurnOverLine()
+     else
+       pageViewDefaultContent()
+
+     #timeline
+     paintProcureUnitInTimeline($postType.val(), sidOrSku)
+
+     # 选中 效果
+     $td.parents('table').find('tr').removeClass('selected')
+     $td.parents('tr').addClass('selected')
+
+   #列排序事件
+  ).on('click', 'th[orderby]', (e) ->
+      $td = $(@)
+      $('#postOrderBy').val($td.attr('orderby'))
+      ajaxFreshAcitveTableTab()
+  )
 
 
-  # 获取下面的 Tab 元素组合
-  BELOWTAB = new Tabs("below").clearSessionStoreage()
 
-  # 获取上面的 Tab 元素组合
-  TOPTAB = new Tabs("top").clearSessionStoreage()
+  #当前选中的tab，调用相对应数据
+  ajaxFreshAcitveTableTab = ->
+     type = $("#below_tab li.active a").attr("href")
+     $("#{type}").trigger("ajaxFresh")
 
-  # 用来构造给 HighChart 使用的默认 options 的方法
-  lineOp = (container, yName) ->
-    chart:
-      renderTo: container
-    title:
-      text: 'Chart Title'
-    xAxis:
-      type: 'datetime'
-    yAxis:
-      title:
-        text: yName
-      min: 0
-    plotOptions:
-      series: # 需要从服务器获取开始时间
-        cursor: 'pointer'
-        point:
-          events:
-            {}
-    tooltip:
-      shared: true
-      formatter: ->
-        s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
-        @points.forEach((point) ->
-          totalY = point.series.yData.reduce((a, b)->
-            a + b
-          )
-          s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
-        )
-        s
-      crosshairs: true
-      xDateFormat: '%Y-%m-%d'
-    series: []
-    # 设置这条线的'标题'
-    head: (title) ->
-      @title.text = title
-      @
-    click: (func) ->
-      @plotOptions.series.point.events.click = func
-      @
-    mouseOver: (func) ->
-      @plotOptions.series.point.events.mouseOver = func
-      @
-    mouseOut: (func) ->
-      @plotOptions.series.point.events.mouseOut = func
-      @
-    formatter: (func) ->
-      @tooltip.formatter = func
-      @
-    clearLines: () ->
-      @series = []
-      @
-    xStart: (datetime_millions) ->
-      @plotOptions.series.pointStart = datetime_millions
-      @
-    id: ->
-      container
+  #  Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshAcitveTableTab()不然会得到旧的TYPE
+  $('a[data-toggle=tab]').on('shown', (e) ->
+    $('#postPage').val(1)
+    ajaxFreshAcitveTableTab()
+  )
+
+  # 绑定 sid tab 中修改 ps 值
+  $('#sid').on('change', 'input[ps]', () ->
+    LoadMask.mask()
+    $.ajax("/analyzes/ps", {type: 'POST', data: {sid: $(@).attr('sid'), ps: $(@).val()}, dataType: 'json'})
+      .done((r) ->
+        if r.flag is false
+          noty({text: r.message, type: 'error', timeout: 3000})
+        else
+          noty({text: "修改成功！", type: 'success', timeout: 3000})
+        LoadMask.unmask()
+      )
+  )
+
+  # Form 搜索功能
+  $(".search_form").on("change","[name=p\\.market]",(e) ->
+      ajaxFreshAcitveTableTab()
+
+   #搜索按钮
+  ).on("click",".btn:contains(搜索)",(e) ->
+    e.preventDefault()
+    if $('select[name|="p.categoryId"]').val() is ''
+       $("#postVal").val('all')
+    else
+       ajaxSaleUnitLines()
+
+    ajaxFreshAcitveTableTab()
+
+   #重新加载全部的销售线
+  ).on("click",".btn:contains(Reload)",(e) ->
+    e.preventDefault()
+    ajaxSaleUnitLines()
+  )
+
+
+  #parameters：
+    # headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
+  $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
+    $div = $(@)
+    LoadMask.mask()
+    $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
+      .done((r) ->
+       if r['series'].length != 0
+        $div.highcharts('StockChart', {
+          credits:
+             text:'EasyAcc'
+             href:''
+          title:
+            text: headName
+          legend:
+            enabled: true
+          navigator:
+            enabled: false
+          scrollbar:
+            enabled: false
+          rangeSelector:
+            enabled: false
+          xAxis:
+            type: 'datetime'
+          yAxis: { min: 0 }
+          plotOptions:
+            series: # 需要从服务器获取开始时间
+               cursor: 'pointer',
+               events: plotEvents
+          tooltip:
+            shared: true
+            formatter: ->
+              s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
+              @points.forEach((point) ->
+                totalY = point.series.yData.reduce((a, b)->
+                  a + b
+                )
+                s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
+              )
+              s
+            crosshairs: true
+            xDateFormat: '%Y-%m-%d'
+          series: r['series']
+        })
+       else
+        $div.html(noDataDisplayMessage)
+       LoadMask.unmask()
+      )
+      .fail((xhr, text, error) ->
+        noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
+        LoadMask.unmask()
+      )
+  )
 
   # 销售订单曲线
-  newSaleUnitLines = ->
-    lineOp('a_units', 'Units').click(->
-      val = paramsObj()['p.val']
-      window.open('/analyzes/pie?msku=' + val + '&date=' + $.DateUtil.fmt2(new Date(@x)),
-      val,
-      'width=520,height=620,location=yes,status=yes'
-      )
-    )
+  ajaxSaleUnitLines = ->
+    categoryId = $('select[name|="p.categoryId"]').val()
+    $postVal = $('#postVal')
+    if categoryId is ''
+       displayStr = $postVal.val()
+    else
+       displayStr = 'Category:' + categoryId
+       $postVal.val(categoryId)
 
-  # 销售销量曲线
-  newSalesLines = ->
-    lineOp('a_sales', 'Sales(USD)').click(->
-      alert(@series.name + ":::::" + @x + ":::" + @y)
-    )
+    head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
+    $("#a_units").trigger("ajaxFresh",[head,"Units",{},'没有数据, 无法绘制曲线...'])
 
   # 转换率的曲线
-  turnOverLine = lineOp('a_turn', '转化率')
-
-  # Session 数量曲线
-  sessionLine = lineOp('a_ss', 'Session && PV')
-
-  # 获取页面 Form 表单参数
-  paramsObj = () ->
-    $.formArrayToObj($('#click_param').formToArray())
+  ajaxTurnOverLine = ->
+    #无数据提示
+    noDataDisplay = '<div class="alert alert-success"><h3 style="text-align:center">请双击需要查看的 Selling 查看转化率</h3></div>'
+    $("#a_turn").trigger("ajaxFresh",['Selling['+$('#postVal')+'] 转化率', "转化率", {}, noDataDisplay])
 
   # 绘制 Session 的曲线
-  ss_line = (params) ->
-    LoadMask.mask(TOPTAB.contentSelector())
-    $.getJSON('/analyzes/ajaxSellingRecord', params, (r) ->
-      try
-        if r.flag is false
-          alert(r.message)
-        else
-          sessionLine.head('Selling[' + params['p.val'] + '] SS')
-          sessionLine.clearLines()
-          sessionLine.series = r['series']
-          $('#' + sessionLine.id()).data('char', new Highcharts.Chart(sessionLine))
-      finally
-        LoadMask.unmask(TOPTAB.contentSelector())
-    )
-
-  # 绘制转换率曲线
-  turn_line = (params) ->
-    LoadMask.mask(TOPTAB.contentSelector())
-    $.getJSON('/analyzes/ajaxSellingTurn', params, (r) ->
-      try
-        if r.flag is false
-          alert(r.message)
-        else
-          turnOverLine.head('Selling[' + params['p.val'] + '] 转化率')
-          turnOverLine.clearLines()
-          turnOverLine.series = r['series']
-          $('#' + turnOverLine.id()).data('char', new Highcharts.Chart(turnOverLine))
-      finally
-        LoadMask.unmask(TOPTAB.contentSelector())
-    )
-
-  # 绘制销量曲线
-  unit_line = (params) ->
-    LoadMask.mask()
-
-    if params['p.categoryId'] is ''
-      displayStr = params['p.val']
-    else
-      displayStr = 'Category:' + params['p.categoryId']
-      params['p.val'] = params['p.categoryId']
-
-    $.getJSON('/analyzes/ajaxUnit', params, (r) ->
-      try
-        if r.flag is false
-          alert(r.message)
-        else
-          unitLines = newSaleUnitLines()
-          if r['series'].length == 0
-            $('#' + unitLines.id()).html('没有数据, 无法绘制曲线...')
-          else
-            unitLines.head("Selling [<span style='color:orange'>" + displayStr + "</span> | " + params['p.type']?.toUpperCase() + "] Unit Order")
-            names =
-              unit_all: 'Unit Order(all)'
-              unit_amazon_uk: 'Unit Order(uk)'
-              unit_amazon_de: 'Unit Order(de)'
-              unit_amazon_fr: 'Unit Order(fr)'
-              unit_amazon_us: 'Unit Order(us)'
-              unit_amazon_it: 'Unit Order(it)'
-              unit_amazon_es: 'Unit Order(es)'
-            # 将曲线的名字更换为可读性更强的
-            r['series'].map((l) ->
-              l.name = names[l.name])
-            for line in r['series']
-              unitLines.series.push(line)
-            $('#' + unitLines.id()).data('char', new Highcharts.Chart(unitLines));
-      finally
-        LoadMask.unmask()
-    )
-
-  # 绘制销售额曲线
-  sale_line = (params) ->
-    LoadMask.mask()
-    $.getJSON('/analyzes/ajaxSales', params,
-    (r) ->
-      try
-        if r.flag is false
-          alert(r.message)
-        else
-          display_sku = params['p.val']
-          salesLines = newSalesLines()
-          salesLines.head("Selling [<span style='color:orange'>" + display_sku + "</span> | " + params['p.type']?.toUpperCase() + "] Sales(USD)")
-          names =
-            sale_all: 'Sales(all)'
-            sale_amazon_uk: 'Sales(uk)'
-            sale_amazon_de: 'Sales(de)'
-            sale_amazon_fr: 'Sales(fr)'
-            sale_amazon_us: 'Sales(us)'
-            sale_amazon_es: 'Sales(es)'
-            sale_amazon_it: 'Sales(it)'
-          r['series'].map((l) ->
-            l.name = names[l.name])
-          for line in r['series']
-            salesLines.series.push(line)
-          #          salesLines.xStart(r['pointStart'])
-          $('#' + salesLines.id()).data('char', new Highcharts.Chart(salesLines))
-      finally
-        LoadMask.unmask()
-    )
+  ajaxSessionLine = ->
+    #无数据提示
+    noDataDisplay = '<div class="alert alert-success"><h3 style="text-align:center">双击查看 Selling 的 PageView & Session</h3></div>'
+    $("#a_ss").trigger("ajaxFresh",['Selling['+$('#postVal')+'] SS', "Session && PV", {}, noDataDisplay])
 
   # 清理 Session 转化率与 PageView
   pageViewDefaultContent = () ->
@@ -222,7 +186,7 @@ $ ->
 
   # 绘制 ProcureUnit 的 timeline 中的数据
   paintProcureUnitInTimeline = (type, val)->
-    LoadMask.mask(BELOWTAB.contentSelector())
+    LoadMask.mask()
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
     (r) ->
       try
@@ -233,135 +197,12 @@ $ ->
           eventSource.clear()
           eventSource.loadJSON(r, '/')
       finally
-        LoadMask.unmask(BELOWTAB.contentSelector())
-    )
-
-  # 绑定 sid tab 中修改 ps 值
-  $('#sid').on('change', 'input[ps]', () ->
-    LoadMask.mask()
-    $.post('/analyzes/ps', {sid: $(@).attr('sid'), ps: $(@).val()})
-      .done((r) ->
-        if r.flag is false
-          alert(r.message)
         LoadMask.unmask()
-      )
-  )
-
-  # Ajax Load 页面下方的 MSKU 与 SKU 两个 Tab 的数据
-  sellRankLoad = (params)->
-    LoadMask.mask(BELOWTAB.contentSelector())
-    $("##{params['p.type']}").load('/Analyzes/analyzes', $.param(params),
-    LoadMask.unmask(BELOWTAB.contentSelector())
     )
 
-  # SKU | SID 项目的详细查看事件
-  $('#below_tabContent').on('click', '.sid,.sku', (e) ->
-    $self = $(@)
-    sidOrSku = $self.text().trim()
-    params = paramsObj()
-    params['p.val'] = sidOrSku
 
-    #timeline
-    paintProcureUnitInTimeline(params['p.type'], sidOrSku)
-
-    # 销量图或者销售额图
-    switch(TOPTAB.active())
-      when 'root'
-        sale_line(params)
-      when 'basic'
-      #绘制单个Selling的曲线图时,去掉Category条件
-        params['p.categoryId'] = ''
-        unit_line(params)
-      else
-        console.log('skip')
-
-    # 转换率与 PageView
-    if params['p.type'] == SID
-      ss_line(params)
-      turn_line(params)
-    else
-      pageViewDefaultContent()
-
-    # 选中
-    $self.parents('table').find('tr').removeClass('selected')
-    $self.parents('tr').addClass('selected')
-  )
-
-  # 为 SKU | SID 项目添加排序事件
-  $('#below_tabContent').on('click', 'th.sortable', (e) ->
-    $('[name=p\\.desc]').val(-> return if $(@).val() == 'false' then true else false)
-    $('[name=p\\.orderBy]').val($(@).attr('name'))
-    sellRankLoad(paramsObj())
-  )
-
-  # 为 SKU | SID 添加分页事件
-  $('#below_tabContent').on('click', 'div.pagination a', (e) ->
-    $('[name=p\\.page]').val($(@).attr('page'))
-    sellRankLoad(paramsObj())
-  )
-
-  # init
-  $('#a_from').data('dateinput').setValue(defaultDate)
-  $('#a_to').data('dateinput').setValue(now)
-
-  # 给 搜索 按钮添加事件
-  $('#a_search').click (e) ->
-    e.preventDefault()
-    params = paramsObj()
-    if params['p.categoryId'] is ''
-      params['p.val'] = 'all'
-    else
-      unit_line(params)
-    #重新搜索数据、加载曲线图
-    sellRankLoad(params)
-
-  # 重新加载全部的销售线
-  $('#all_search').click (e) ->
-    e.preventDefault()
-    switch(BELOWTAB.active())
-      when 'root'
-        sale_line(paramsObj())
-      else
-        unit_line(paramsObj())
-
-  # 为页面下方的 Tab 切换添加事件
-  BELOWTAB.tabs().on('shown', '[data-toggle=tab]',(e) ->
-    tabId = $(e.target).attr('href').substr(1)
-    params = paramsObj()
-    params['p.type'] = tabId
-    $('[name=p\\.type]').val(tabId)
-    if $("##{tabId}").html() is 'wait'
-      params['p.val'] = 'all' if $('[name=p\\.categoryId]').val() is ''
-      sellRankLoad(params)
-  ).find('a:first').trigger('shown')
-
-  # 为页面上访的曲线 Tab 添加切换事件
-  TOPTAB.tabs().find('[data-toggle=tab]').on('shown', (e) ->
-    tabId = $(e.target).attr('href').substr(1)
-    if tabId is 'basic'
-      # tab[basic] 中所存在的需要重新绘制的 div 元素 id
-      for id in ['a_units', 'a_turn', 'a_ss', 'tl']
-        div = $("##{id}")
-        # timeline 的重新绘制
-        if id is 'tl'
-          div.data('timeline')?.layout()
-        else
-          if div.data('char')
-            div.data('char')?.redraw()
-          else
-            unit_line(paramsObj()) if id == 'a_units'
-    else if tabId is 'root'
-      # tab[root] 中所存在的需要重新绘制的 div 元素 id
-      for id in ['a_sales']
-        div = $("##{id}")
-        if div.data('char')
-          div.data('char')?.redraw()
-        else
-          sale_line(paramsObj())
-  )
-
-  # ---------- 初始化加载页面数据 --------------
-  # 销量线
-  unit_line(paramsObj())
+  # 页面 初始化数据
+  ajaxFreshAcitveTableTab()
+  ajaxSaleUnitLines()
   # 默认 PageView 线
   pageViewDefaultContent()
