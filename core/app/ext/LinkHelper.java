@@ -3,7 +3,6 @@ package ext;
 import helper.Webs;
 import models.market.*;
 import models.procure.FBAShipment;
-import models.support.Ticket;
 import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import play.templates.JavaExtensions;
@@ -142,23 +141,6 @@ public class LinkHelper extends JavaExtensions {
             default:
                 return "";
         }
-    }
-
-
-    public static String osTicketLink(Ticket ticket) {
-        return String.format("http://t.easya.cc/scp/tickets.php?id=%s", ticket.osTicketId());
-    }
-
-    public static String osTicketLink(AmazonListingReview review) {
-        if(StringUtils.isBlank(review.osTicketId)) review.osTicketId = "";
-        return String
-                .format("http://t.easya.cc/scp/tickets.php?id=%s", review.osTicketId.split("-")[0]);
-    }
-
-    public static String osTicketLink(Feedback feedback) {
-        if(StringUtils.isBlank(feedback.osTicketId)) feedback.osTicketId = "";
-        return String.format("http://t.easya.cc/scp/tickets.php?id=%s",
-                feedback.osTicketId.split("-")[0]);
     }
 
     public static String fbaLink(FBAShipment fba) {

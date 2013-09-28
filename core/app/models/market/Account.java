@@ -236,8 +236,7 @@ public class Account extends Model {
                 break;
             default:
                 Logger.warn(
-                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
-                                " is not support!");
+                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type + " is not support!");
         }
     }
 

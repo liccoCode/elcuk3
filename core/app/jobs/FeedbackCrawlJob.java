@@ -5,7 +5,6 @@ import models.Jobex;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.M;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -18,9 +17,9 @@ import play.Logger;
 import play.Play;
 import play.data.validation.Validation;
 import play.jobs.Job;
+import play.libs.IO;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +49,6 @@ public class FeedbackCrawlJob extends Job {
     @Override
     public void doJob() {
         Currency.updateCRY();// 每一次的轮训, 都更新一次 CRY
-
         if(!Jobex.findByClassName(FeedbackCrawlJob.class.getName()).isExcute()) return;
 
         List<Account> accs = Account.openedSaleAcc();
@@ -106,27 +104,25 @@ public class FeedbackCrawlJob extends Job {
         String feedbackHtml = FeedbackCrawlJob.fetchFeedback(acc, i);
         List<Feedback> feedbacks = FeedbackCrawlJob.parseFeedBackFromHTML(feedbackHtml);
         if(feedbacks.size() == 0) {
-            Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username,
-                    market, i));
+            Logger.info(String.format("Fetch %s %s, page %s has no more feedbacks.", acc.username, market, i));
         } else {
-            Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i,
-                    feedbacks.size()));
+            Logger.info(String.format("Fetch %s %s, page %s, total %s.", acc.username, market, i, feedbacks.size()));
         }
 
-        for(Feedback f : feedbacks) {
-            Feedback managed = Feedback.findById(f.orderId);
+        for(Feedback feedback : feedbacks) {
+            Feedback managed = Feedback.findById(feedback.orderId);
             if(managed == null) {
                 try {
-                    f.checkAndSave(acc);
-                    f.checkMailAndTicket();
-                    Logger.info("Save Feedback %s, score: %s", f.orderId, f.score);
+                    feedback.checkAndSave(acc);
+                    feedback.checkMailAndTicket();
+                    Logger.info("Save Feedback %s, score: %s", feedback.orderId, feedback.score);
                 } catch(Exception e) {
                     Logger.warn(Webs.E(e) + "|" + J.json(Validation.errors()));
                 }
             } else {
-                managed.updateAttr(f);
+                managed.updateAttr(feedback);
                 managed.checkMailAndTicket();
-                Logger.info("Update Feedback %s, score: %s", f.orderId, f.score);
+                Logger.info("Update Feedback %s, score: %s", feedback.orderId, feedback.score);
             }
         }
         return feedbacks;
@@ -140,16 +136,10 @@ public class FeedbackCrawlJob extends Job {
      */
     public static String fetchFeedback(Account acc, int page) {
         String body = HTTP.get(acc.cookieStore(), acc.type.feedbackPage(page));
+        String filePath = Constant.E_LOGS + "/" + acc.type.name() + ".id_" + acc.id + "feedback_p" + page + ".html";
         if(Play.mode.isDev()) {
-            try {
-                FileUtils.writeStringToFile(new File(
-                        Constant.E_LOGS + "/" + acc.type.name() + ".id_" + acc.id + "feedback_p" + page + ".html"),
-                        body);
-            } catch(IOException e) {
-                //ignore
-            }
+            IO.writeContent(body, new File(filePath));
         }
-
         return body;
     }
 
@@ -161,20 +151,8 @@ public class FeedbackCrawlJob extends Job {
      */
     public static List<Feedback> parseFeedBackFromHTML(String html) {
         Document doc = Jsoup.parse(html);
-        M market = null;
+        M market = selectMarket(doc);
 
-        Element marketEl = doc.select("#sc-mkt-switcher-form").first();
-        if(marketEl != null) {
-            market = M.AMAZON_US;
-        } else {
-            marketEl = doc.select("#merchant-website").first();
-            if(marketEl == null) {
-                Webs.systemMail("Feedback Market parse Error!", html);
-                return new ArrayList<Feedback>();
-            } else {
-                market = M.val(doc.select("#marketplaceSelect option[selected]").first().text().trim());
-            }
-        }
         Elements feedbacks = doc.select("td[valign=center][align=middle] tr[valign=center]");
         List<Feedback> feedbackList = new ArrayList<Feedback>();
         for(Element feb : feedbacks) {
@@ -182,13 +160,23 @@ public class FeedbackCrawlJob extends Job {
             Feedback feedback = new Feedback();
             Elements tds = feb.select("td");
             //time
-            if(market == M.AMAZON_US)
+            if(market == M.AMAZON_US) {
                 feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("MM/dd/yy")).toDate();
-            else
+            } else {
                 feedback.createDate = DateTime.parse(tds.get(0).text(), DateTimeFormat.forPattern("dd/MM/yyyy"))
                         .toDate();
+            }
             //score
             feedback.score = NumberUtils.toFloat(StringUtils.replace(tds.get(1).select("b").html(), "&nbsp;", ""));
+
+            // isremove
+            Element span = tds.get(1).select("span").first();
+            if(span != null && "text-decoration:line-through".equals(span.attr("style"))) {
+                feedback.isRemove = true;
+            } else {
+                feedback.isRemove = false;
+            }
+
             //comments
             feedback.feedback = StringUtils.trim(tds.get(2).childNode(0).toString());
             Element b = tds.get(2).select("b").first();
@@ -206,5 +194,17 @@ public class FeedbackCrawlJob extends Job {
             feedbackList.add(feedback);
         }
         return feedbackList;
+    }
+
+    /**
+     * 通过 Document 检查出是那一个市场
+     *
+     * @param doc
+     * @return
+     */
+    public static M selectMarket(Document doc) {
+        Element multiMarketSelect = doc.select("#sc-mkt-switcher-select").first();
+        if(multiMarketSelect == null) return M.AMAZON_US;
+        return M.val(multiMarketSelect.select("option[selected]").text());
     }
 }
