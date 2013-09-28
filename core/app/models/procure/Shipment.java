@@ -469,7 +469,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;
-        this.memo = String.format("%s\r\n%s", cmt, this.memo).trim();
+        this.memo = String.format("%s%n%s", cmt, this.memo).trim();
     }
 
     /**
@@ -848,9 +848,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void produceFee(PaymentUnit fee) {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
-        if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        if(fee.unitQty < 1f) Validation.addError("", "数量必须大于等于 1");
         // 海运/空运的运输运费无法绑定运输项目, 只能平摊
-        if(this.type == T.EXPRESS && FeeType.transportShipping().equals(fee.feeType))
+        if(this.type == T.EXPRESS && FeeType.expressFee().equals(fee.feeType))
             Validation.addError("", "快递的运输费用需要通过运输项目记录");
 
         if(Validation.hasErrors()) return;
@@ -869,7 +869,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 当前的自动关税计算, 仅仅产生一项关税, 多次创建则被忽略
      */
     public void applyShipItemDuty() {
-        FeeType transportDuty = FeeType.transportDuty();
+        FeeType transportDuty = FeeType.dutyAndVAT();
         for(ShipItem itm : this.items) {
             if(PaymentUnit.count("feeType=? AND shipItem=?", transportDuty, itm) > 0) continue;
             PaymentUnit fee = new PaymentUnit();
@@ -896,7 +896,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 统计所有已经支付的关税金额
          * 3. 计算出关税差额
          */
-        FeeType duty = FeeType.transportDuty();
+        FeeType duty = FeeType.dutyAndVAT();
         if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
         for(PaymentUnit fee : this.fees) {
             if(fee.feeType.equals(duty)) {

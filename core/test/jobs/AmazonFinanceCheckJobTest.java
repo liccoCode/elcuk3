@@ -37,7 +37,7 @@ public class AmazonFinanceCheckJobTest extends UnitTest {
     public void testDoJob() throws InterruptedException, ExecutionException, TimeoutException {
         FactoryBoy.create(Jobex.class, "financeCheck");
 
-        final Account acc = FactoryBoy.create(Account.class, "ide");
+        final Account acc = FactoryBoy.create(Account.class, "de");
         acc.loginAmazonSellerCenter();
         FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
             @Override
@@ -53,7 +53,7 @@ public class AmazonFinanceCheckJobTest extends UnitTest {
     @Test
     public void testSaveFees() {
         FactoryBoy.create(Orderr.class);
-        final Account acc = FactoryBoy.create(Account.class, "ide");
+        final Account acc = FactoryBoy.create(Account.class, "de");
         List<SaleFee> fees = new ArrayList<SaleFee>();
         for(int i = 0; i <= 4; i++) {
             fees.add(FactoryBoy.build(SaleFee.class, new BuildCallback<SaleFee>() {

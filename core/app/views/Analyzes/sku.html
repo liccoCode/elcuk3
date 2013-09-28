@@ -2,23 +2,23 @@
 <table class="table table-condensed table-bordered">
   <tr>
     <th title="可双击下面 SKU">SKU</th>
-    <th name="plan" class="sortable">计划中 <i class="icon-sort"></i></th>
-    <th name="working" class="sortable">制作中 <i class="icon-sort"></i></th>
-    <th name="worked" class="sortable">交货 <i class="icon-sort"></i></th>
-    <th name="way" class="sortable">在途 <i class="icon-sort"></i></th>
-    <th name="inbound" class="sortable">入库 <i class="icon-sort"></i></th>
-    <th name="qty" class="sortable">在库 <i class="icon-sort"></i></th>
-    <th name="reviewRatio" class="sortable">Reviews <i class="icon-sort"></i></th>
-    <th name="rating" class="sortable">Rating <i class="icon-sort"></i></th>
+    <th orderby='plan' name="plan" class="sortable">计划中 <i class="icon-sort"></i></th>
+    <th orderby='working' name="working" class="sortable">制作中 <i class="icon-sort"></i></th>
+    <th orderby='worked' name="worked" class="sortable">交货 <i class="icon-sort"></i></th>
+    <th orderby='way' name="way" class="sortable">在途 <i class="icon-sort"></i></th>
+    <th orderby='inbound' name="inbound" class="sortable">入库 <i class="icon-sort"></i></th>
+    <th orderby='qty' name="qty" class="sortable">在库 <i class="icon-sort"></i></th>
+    <th orderby='reviewRatio' name="reviewRatio" class="sortable">Reviews <i class="icon-sort"></i></th>
+    <th orderby='rating' name="rating" class="sortable">Rating <i class="icon-sort"></i></th>
     <th name="lastRating">评分趋势</th>
     <th>PS</th>
-    <th name="day1" class="sortable">Day1 <i class="icon-sort"></i></th>
-    <th name="difference" class="sortable">
+    <th orderby='day1' name="day1" class="sortable">Day1 <i class="icon-sort"></i></th>
+    <th orderby='difference' name="difference" class="sortable">
       <abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr>
       <i class="icon-sort"></i>
     </th>
-    <th name="day7" class="sortable">Day7(ave)<i class="icon-sort"></i></th>
-    <th name="day30" class="sortable">Day30(ave)<i class="icon-sort"></i></th>
+    <th orderby='day7' name="day7" class="sortable">Day7(ave)<i class="icon-sort"></i></th>
+    <th orderby='day30' name="day30" class="sortable">Day30(ave)<i class="icon-sort"></i></th>
     <th colspan="2">_TOR</th>
   </tr>
 #{list items:dtos, as:'dto'}

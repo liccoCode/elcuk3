@@ -178,25 +178,9 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                     selling.aps.title = lst.title;
                     selling.account = acc;
                     selling.shippingPrice = 0f;
-                    selling.aps.standerPrice = selling.price = lst.displayPrice;
+                    selling.aps.standerPrice = lst.displayPrice;
                     selling.ps = 2f;
                     selling.state = Selling.S.SELLING;
-
-                    PriceStrategy priceStrategy = new PriceStrategy();
-                    priceStrategy.type = PriceStrategy.T.FixedPrice;
-                    if(StringUtils.isNotBlank(t_fulfilchannel) &&
-                            StringUtils.startsWith(t_fulfilchannel.toLowerCase(), "amazon"))
-                        selling.type = Selling.T.FBA;
-                    else
-                        selling.type = Selling.T.AMAZON;
-
-
-                    // 新添加的 PriceStrategy,
-                    priceStrategy.cost = lst.displayPrice * 0.5f; //成本价格位展示价格的 50%
-                    priceStrategy.margin = 0.3f;//利润位 30%
-                    priceStrategy.lowest = priceStrategy.cost * 1.05f; //最低价格位成本价格的 1.05 倍
-                    priceStrategy.max = priceStrategy.cost * 3f; //最高价格位成本价格的 3 倍
-                    selling.priceStrategy = priceStrategy;
                     selling.listing = lst;
                     sellAndListingTuple._1.add(selling);
                 }
@@ -205,7 +189,7 @@ public class AmazonSellingSyncJob extends Job implements JobRequest.AmazonJob {
                         "Skip Add one Listing/Selling. asin[" + t_asin + "_" + market.toString() +
                                 "]";
                 Logger.warn(line);
-                Webs.systemMail(warMsg, String.format("%s <br/>\r\n%s", line, Webs.E(e)));
+                Webs.systemMail(warMsg, String.format("%s <br/>%n%s", line, Webs.E(e)));
             }
         }
         return sellAndListingTuple;

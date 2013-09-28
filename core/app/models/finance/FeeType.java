@@ -166,20 +166,29 @@ public class FeeType extends GenericModel {
     }
 
     /**
-     * 运输运费
+     * 快递费
      *
      * @return
      */
-    public static FeeType transportShipping() {
+    public static FeeType expressFee() {
         return FeeType.findById("transportshipping");
     }
+
+    public static FeeType oceanfreight() {
+        return FeeType.findById("oceanfreight");
+    }
+
+    public static FeeType airFee() {
+        return FeeType.findById("airFee");
+    }
+
 
     /**
      * 运输关税
      *
      * @return
      */
-    public static FeeType transportDuty() {
-        return FeeType.findById("transportduty");
+    public static FeeType dutyAndVAT() {
+        return FeeType.findById("dutyandvat");
     }
 }

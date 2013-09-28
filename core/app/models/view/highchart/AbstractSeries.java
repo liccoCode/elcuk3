@@ -1,6 +1,7 @@
 package models.view.highchart;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +61,9 @@ public abstract class AbstractSeries implements Serializable {
     public <T extends AbstractSeries> T add(Float y, Object key) {
         boolean add = true;
         Object k = key;
-        if(key.getClass().equals(Date.class))
+        if(key.getClass().equals(Date.class)
+                || key.getClass().equals(java.sql.Date.class)
+                || key.getClass().equals(Timestamp.class))
             k = ((Date) key).getTime();
 
         for(Object[] d : this.data) {
@@ -85,7 +88,7 @@ public abstract class AbstractSeries implements Serializable {
      * 也可在 plotOptions:{series:{marker:{xxx}}}
      * 在这, 直接设到每一条曲线上
      */
-    public class Marker implements Serializable {
+    public static class Marker implements Serializable {
         private static final long serialVersionUID = -5061528374647700719L;
         public boolean enabled = true;
         public float radius = 2;

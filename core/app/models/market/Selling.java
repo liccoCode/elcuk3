@@ -8,10 +8,7 @@ import jobs.analyze.SellingSaleAnalyzeJob;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
-import models.product.Whouse;
 import models.view.dto.AnalyzeDTO;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -44,6 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Selling extends GenericModel {
+
+    private static final long serialVersionUID = -4124213853478159984L;
 
     public Selling() {
         this.aps = new AmazonProps();
@@ -88,14 +87,8 @@ public class Selling extends GenericModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
-    @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-                    CascadeType.REFRESH})
+    @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<SellingQTY>();
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @Expose
-    public PriceStrategy priceStrategy;
 
     /**
      * 上架后用来唯一标示这个 Selling 的 Id;
@@ -133,18 +126,12 @@ public class Selling extends GenericModel {
     @Expose
     public S state;
 
-    @Enumerated(EnumType.STRING)
-    @Expose
-    public T type;
-
 
     /**
      * 给这个 Selling 人工设置的 PS 值
      */
     public Float ps = 0f;
 
-    @Expose
-    public Float price = 0f;
 
     @Expose
     public Float shippingPrice = 0f;
@@ -181,7 +168,7 @@ public class Selling extends GenericModel {
      * 这个 Selling 向 Amazon 上传图片.;
      * 将所有图片都上传一遍;
      */
-    public void uploadAmazonImg(String imageName, boolean waterMark) {
+    public void uploadAmazonImg(String imageName) {
         // 用来处理最后删除图片时使用的名称
         Map<String, AtomicBoolean> usedAmazonFileName = GTs.MapBuilder
                 .map("MAIN", new AtomicBoolean(false))
@@ -217,35 +204,25 @@ public class Selling extends GenericModel {
             Attach attch = Attach.findByFileName(images[i]);
             if(attch == null)
                 throw new FastRuntimeException("填写的图片名称(" + images[i] + ")不存在! 请重新上传.");
-            if(waterMark) {
-                // TODO 如果需要打水印, 在这里处理
-                throw new UnsupportedOperationException("功能还没实现.");
-            } else {
-                uploadImages.put(fileParamName, new File(attch.location));
-            }
+            uploadImages.put(fileParamName, new File(attch.location));
             usedAmazonFileName.get(fileParamName).set(true);
         }
         synchronized(this.account.cookieStore()) {
             this.account.changeRegion(this.market); // 切换到这个 Selling 的市场
-            Logger.info("Upload Picture to Amazon AND Synchronized[%s].",
-                    this.account.prettyName());
+            Logger.info("Upload Picture to Amazon AND Synchronized[%s].", this.account.prettyName());
             String body = HTTP
-                    .upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params,
-                            uploadImages);
+                    .upload(this.account.cookieStore(), this.account.type.uploadImageLink(), params, uploadImages);
             if(Play.mode.isDev())
-                FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body,
-                        FLog.T.IMGUPLOAD);
-            JsonObject imgRsp = new JsonParser()
-                    .parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
+                FLog.fileLog(String.format("%s.%s.html", this.sellingId, this.account.id), body, FLog.T.IMGUPLOAD);
+            JsonObject imgRsp = new JsonParser().parse(Jsoup.parse(body).select("#jsontransport").text())
+                    .getAsJsonObject();
             //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
             //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
             if("failure".equals(imgRsp.get("status").getAsString())) {
-                Logger.info("Upload Picture to Amazon Failed.(%s)",
-                        imgRsp.get("errorMessage").getAsString());
+                Logger.info("Upload Picture to Amazon Failed.(%s)", imgRsp.get("errorMessage").getAsString());
                 throw new FastRuntimeException(imgRsp.get("errorMessage").getAsString());
             } else {
-                Logger.info("Upload Picture to Amazon Success.(%s)",
-                        imgRsp.get("imageUrl").getAsString());
+                Logger.info("Upload Picture to Amazon Success.(%s)", imgRsp.get("imageUrl").getAsString());
             }
             //https://catalog-sc.amazon.de/abis/image/RemoveImage.ajax?asin=B0083QX8AW&variant=MAIN/PT01/...
             for(String fileName : usedAmazonFileName.keySet()) {
@@ -273,19 +250,15 @@ public class Selling extends GenericModel {
             // 2. 获取修改 Selling 的页面, 获取参数
             html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
             if(StringUtils.isBlank(html))
-                throw new FastRuntimeException(
-                        String.format("Visit %s page is empty.", M.listingEditPage(this)));
-            if(Play.mode.isDev())
-                IO.writeContent(html, new File(
-                        String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU,
-                                this.asin)));
+                throw new FastRuntimeException(String.format("Visit %s page is empty.", M.listingEditPage(this)));
+            if(Play.mode.isDev()) {
+                IO.writeContent(html,
+                        new File(String.format("%s/%s_%s.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            }
             this.account.changeRegion(this.account.type);
         }
         // 3. 将需要的参数同步进来
         this.aps.syncPropFromAmazonPostPage(html, this);
-        this.type = T.AMAZON;
-        // 做修复, 当数据从 Amazon 同步回数据以后, 已经拥有 PriceStrategy 所需要的信息了
-        if(this.priceStrategy == null) this.priceStrategy = new PriceStrategy(this);
         this.save();
     }
 
@@ -332,61 +305,35 @@ public class Selling extends GenericModel {
     public void deploy() {
         this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);//将数组参数转换成字符串再进行处理
         synchronized(this.account.cookieStore()) { // 锁住这个 Account 的 CookieStore
-            switch(this.market) {
-                case AMAZON_DE:
-                case AMAZON_ES:
-                case AMAZON_FR:
-                case AMAZON_IT:
-                case AMAZON_UK:
-                case AMAZON_US:
-                    // 1. 切换 Selling 所在区域
-                    this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
+            if(!this.market.isAmazon()) return;
+            // 1. 切换 Selling 所在区域
+            this.account.changeRegion(this.market); // 跳转到对应的渠道,不然会更新成不同的市场
 
-                    // 2. 设置需要提交的值
-                    String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
-                    F.T2<Collection<NameValuePair>, Document> paramDocTuple = this.aps.generateDeployProps(html, this);
+            // 2. 设置需要提交的值
+            String html = HTTP.get(this.account.cookieStore(), M.listingEditPage(this));
+            F.T2<Collection<NameValuePair>, String> paramDocTuple = this.aps.generateDeployProps(html, this);
 
-                    // 3. 提交
-                    String[] args = StringUtils.split(
-                            paramDocTuple._2.select("form[name=productForm]").first().attr("action"), ";");
-                    html = HTTP.post(this.account.cookieStore(),
-                            // 更新的链接需要账号所在地的 URL
-                            M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
-                            paramDocTuple._1
-                    );
-                    if(StringUtils.isBlank(html)) // 这个最先检查
-                        throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
+            // 3. 提交
+            String[] args = StringUtils.split(paramDocTuple._2, ";");
+            html = HTTP.post(this.account.cookieStore(),
+                    // 更新的链接需要账号所在地的 URL
+                    M.listingPostPage(this.account.type, (args.length >= 2 ? args[1] : "")),
+                    paramDocTuple._1
+            );
+            if(StringUtils.isBlank(html)) // 这个最先检查
+                throw new FastRuntimeException("Selling update is failed! Return Content is Empty!");
 
-                    if(Play.mode.isDev())
-                        IO.writeContent(html, new File(
-                                String.format("%s/%s_%s_posted.html", Constant.E_DATE, this.merchantSKU, this.asin)));
+            Document doc = Jsoup.parse(html);
+            Elements error = doc.select(".messageboxerror li");
+            if(error.size() > 0)
+                throw new FastRuntimeException("Error:" + error.text());
 
-                    Document doc = Jsoup.parse(html);
-                    Elements error = doc.select(".messageboxerror li");
-                    if(error.size() > 0)
-                        throw new FastRuntimeException("Error:" + error.text());
+            // 4. 更新回数据库
+            this.save();
 
-                    // 4. 更新回数据库
-                    this.save();
-
-                    // 还原
-                    this.account.changeRegion(this.account.type);
-                    break;
-                case EBAY_UK:
-                    break;
-            }
+            // 还原
+            this.account.changeRegion(this.account.type);
         }
-    }
-
-    /**
-     * 指定一个 Whouse, 加载出此 Selling 在此仓库中的唯一的库存
-     *
-     * @param whouse
-     * @return
-     */
-    public SellingQTY uniqueQTY(Whouse whouse) {
-        return SellingQTY
-                .findById(String.format("%s_%s", this.merchantSKU.toUpperCase(), whouse.id));
     }
 
     /**
@@ -420,46 +367,6 @@ public class Selling extends GenericModel {
     }
 
     /**
-     * 将当前对象的值复制到老的 Selling 对象中去
-     *
-     * @param newSelling
-     * @return 返回更新后的
-     */
-    public Selling updateAttr(Selling newSelling) {
-        if(StringUtils.isNotBlank(newSelling.aps.title)) this.aps.title = newSelling.aps.title;
-        if(StringUtils.isNotBlank(newSelling.aps.modelNumber))
-            this.aps.modelNumber = newSelling.aps.modelNumber;
-        if(StringUtils.isNotBlank(newSelling.aps.manufacturer))
-            this.aps.manufacturer = newSelling.aps.manufacturer;
-        if(StringUtils.isNotBlank(newSelling.aps.keyFetures))
-            this.aps.keyFetures = newSelling.aps.keyFetures;
-        if(StringUtils.isNotBlank(this.aps.RBN)) this.aps.RBN = newSelling.aps.RBN;
-        if(StringUtils.isNotBlank(this.aps.manufacturerPartNumber))
-            this.aps.manufacturerPartNumber = newSelling.aps.manufacturerPartNumber;
-        if(StringUtils.isNotBlank(this.aps.condition_))
-            this.aps.condition_ = newSelling.aps.condition_;
-        if(newSelling.aps.standerPrice != null && newSelling.aps.standerPrice > 0)
-            this.aps.standerPrice = newSelling.aps.standerPrice;
-        if(newSelling.aps.salePrice != null && newSelling.aps.salePrice > 0)
-            this.aps.salePrice = newSelling.aps.salePrice;
-        if(newSelling.aps.startDate != null) this.aps.startDate = newSelling.aps.startDate;
-        if(newSelling.aps.endDate != null) this.aps.endDate = newSelling.aps.endDate;
-        if(StringUtils.isNotBlank(newSelling.aps.legalDisclaimerDesc))
-            this.aps.legalDisclaimerDesc = newSelling.aps.legalDisclaimerDesc;
-        if(StringUtils.isNotBlank(this.aps.sellerWarrantyDesc))
-            this.aps.sellerWarrantyDesc = newSelling.aps.sellerWarrantyDesc;
-
-        if(StringUtils.isNotBlank(this.aps.productDesc))
-            this.aps.productDesc = newSelling.aps.productDesc;
-        if(StringUtils.isNotBlank(this.aps.searchTerms))
-            this.aps.searchTerms = newSelling.aps.searchTerms;
-        if(StringUtils.isNotBlank(this.aps.platinumKeywords))
-            this.aps.platinumKeywords = newSelling.aps.platinumKeywords;
-
-        return this.save();
-    }
-
-    /**
      * 加载指定 Product 所属的 Family 下的所有 Selling 与 SellingId
      *
      * @param msku
@@ -471,69 +378,6 @@ public class Selling extends GenericModel {
         List<String> sids = new ArrayList<String>();
         for(Selling s : sellings) sids.add(s.sellingId);
         return new F.T2<List<Selling>, List<String>>(sellings, sids);
-    }
-
-    /**
-     * 返回所有 Selling 的 sid
-     *
-     * @return
-     */
-    public static List<String> allSID() {
-        return allSid(false);
-    }
-
-    /**
-     * 返回所有 Selling 的 SID 提供是否过滤掉一些市场提出的不合法元素的选择
-     *
-     * @param filter 是否过滤
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static List<String> allSid(boolean filter) {
-        String cacheKey = "selling.allsid";
-        List<String> sids = Cache.get(cacheKey, List.class);
-        if(sids != null) return sids;
-
-        sids = new ArrayList<String>();
-        List<Selling> sellings = Selling.all().fetch();
-        for(Selling s : sellings) sids.add(s.sellingId);
-
-        // 是否需要过滤掉一些不合法元素
-        if(filter) {
-            CollectionUtils.filter(sids, new Predicate() {
-                @Override
-                public boolean evaluate(Object o) {
-                    String msg = o.toString();
-                    String[] args = StringUtils.split(msg, Webs.S);
-                    String[] mskuArr = StringUtils.split(args[0], ",");
-                    if(StringUtils.contains(msg, "A_UK|2")) // A_UK 市场不允许有 账号 2(DE 独立账号)
-                        return false;
-                    else if(StringUtils
-                            .contains(msg, "A_DE|1")) // A_DE 市场不允许有 账号 1(UK 独立账号)
-                        return false;
-                    else if(StringUtils.contains(msg, "A_FR"))
-                        return false;
-                    else if(mskuArr.length >= 2 && mskuArr[1].length() < 3)
-                        return false;
-                    else
-                        return true;
-                }
-            });
-        }
-        Cache.add(cacheKey, sids, "2h");
-        return sids;
-    }
-
-    /**
-     * 返回当前 Selling 的 Review 平均 rating 值
-     *
-     * @return
-     */
-    public Float avgRating() {
-        Double rating = (Double) DBUtils
-                .row("select avg(rating) as avgRating from AmazonListingReview where listing_listingId=?",
-                        this.listing.listingId).get("avgRating");
-        return rating == null ? 0f : Webs.scale2PointUp(rating.floatValue());
     }
 
     /**
@@ -617,20 +461,17 @@ public class Selling extends GenericModel {
         return String.format("%s|%s|%s", msku, market.nickName(), acc.id).toUpperCase();
     }
 
-    /**
-     * 将 sid 重新分割成 3 部分
-     *
-     * @return
-     */
-    public static F.T3<String, String, String> sidT3(String sid) {
-        List<String> args = new ArrayList<String>(Arrays.asList(StringUtils.split(sid, "|")));
-        int differSize = 3 - args.size();
-        for(int i = 0; i < differSize; i++) args.add("");
-        return new F.T3<String, String, String>(args.get(0), args.get(1), args.get(2));
-    }
-
     public static boolean exist(String merchantSKU) {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
+    }
+
+    public boolean isMSkuValid() {
+        if(StringUtils.isBlank(this.merchantSKU)) return false;
+        String[] args = StringUtils.split(this.merchantSKU, ",");
+        if(args.length != 2) return false;
+        if(!args[1].equals(this.aps.upc)) return false;
+        this.merchantSKU = this.merchantSKU.toUpperCase();
+        return true;
     }
 
 }

@@ -8,17 +8,12 @@
 #{/set}
 
 <div class="tabbable tabs-left">
-  <ul id="top_tab" class="nav nav-tabs">
-    <li class="active"><a href="#basic" data-toggle="tab">基础</a></li>
-  </ul>
-
-
   <div id="top_tabContent" class="tab-content">
     <div class="tab-pane fade in active" id="basic">
       <div class="row-fluid">
-        <div id="a_units" class="span6" style="height:280px"></div>
-        <div id="a_turn" style="min-height:280px;" class="span3"></div>
-        <div id="a_ss" style="min-height:280px;" class="span3"></div>
+        <div id="a_units" data-method="ajaxUnit" class="span6" style="height:280px"></div>
+        <div id="a_turn" data-method="ajaxSellingTurn" style="min-height:280px;" class="span3"></div>
+        <div id="a_ss" data-method="ajaxSellingRecord" style="min-height:280px;" class="span3"></div>
       </div>
 
       <div class="row-fluid">
@@ -36,12 +31,12 @@
       <div class="span12">
         <div class="input-prepend inline">
           <span class="add-on">From:</span>
-          <input type="date" id="a_from" name="p.from">
+          <input type="date" id="a_from" name="p.from" value="${p.from.date()}">
         </div>
 
         <div class="input-prepend input-append inline">
           <span class="add-on">TO:</span>
-          <input type="date" id="a_to" name="p.to">
+          <input type="date" id="a_to" name="p.to"  value="${p.to.date()}">
           <button class="btn" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
             Reload
           </button>
@@ -76,11 +71,11 @@
           Next Refrech At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
         </a>
 
-        <input type="hidden" name="p.page" value="1">
-        <input type="hidden" name="p.type" value="sid">
+        <input type="hidden" id="postPage" name="p.page" value="1">
+        <input type="hidden" id="postType" name="p.type" value="sid">
 
-        <input type="hidden" name="p.orderBy" value="day7">
-        <input type="hidden" name="p.val" value="all">
+        <input type="hidden" id="postOrderBy" name="p.orderBy" value="day7">
+        <input type="hidden" id="postVal" name="p.val" value="all">
         <input type="hidden" name="p.desc">
       </div>
     </form>

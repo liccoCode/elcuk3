@@ -7,7 +7,6 @@ import models.finance.FeeType;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingRecord;
-import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -17,9 +16,12 @@ import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
+import services.MetricShipCostService;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static models.market.Orderr.S;
 
 /**
  * 周期:
@@ -35,6 +37,16 @@ import java.util.concurrent.TimeUnit;
 public class SellingRecordCaculateJob extends Job {
     public static final String RUNNING = "sellingRecordCaculateJobRunning";
 
+    /**
+     * 使用类的成员变量, 便于当前 Job 进行计算
+     */
+    private Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
+    private Map<String, Float> sellingSales = new HashMap<String, Float>();
+    private Map<String, Float> sellingAmzFee = new HashMap<String, Float>();
+    private Map<String, Float> sellingFBAFee = new HashMap<String, Float>();
+
+    private MetricShipCostService shipCostService = new MetricShipCostService();
+
     private DateTime dateTime = DateTime.now();
 
     public SellingRecordCaculateJob() {
@@ -49,10 +61,11 @@ public class SellingRecordCaculateJob extends Job {
         try {
             Cache.add(RUNNING, RUNNING);
             // 当天产生的数据
-            Map<String, Integer> sellingUnits = sellingUnits(dateTime.toDate());
-            Map<String, Float> sellingSales = sellingSales(dateTime.toDate());
-            Map<String, Float> sellingAmzFee = sellingAmazonFee(dateTime.toDate());
-            Map<String, Float> sellingFBAFee = sellingAmazonFBAFee(dateTime.toDate());
+            Map<String, Float> sellingVATFee = shipCostService.sellingVATFee(dateTime.toDate());
+            sellingUnits(dateTime.toDate());
+            sellingSales(dateTime.toDate());
+            sellingAmazonFee(dateTime.toDate());
+            sellingAmazonFBAFee(dateTime.toDate());
 
             List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
             // 需要计算的所有数据
@@ -79,16 +92,29 @@ public class SellingRecordCaculateJob extends Job {
                 record.procureCost = procureCostAndQty._1;
                 record.procureNumberSum = procureCostAndQty._2;
 
-                F.T2<Float, Integer> shipCostAndQty = sellingShipCost(selling, dateTime.toDate());
-                // 运输成本
-                record.shipCost = shipCostAndQty._1;
-                record.shipNumberSum = shipCostAndQty._2;
+                // 快递运输成本
+                F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
+                record.expressCost = costAndKg._1;
+                record.expressKilogram = costAndKg._2;
 
-                float procureAndShipCost = (record.shipCost * record.units) + (record.procureCost * record.units);
-                // 利润 = 实际收入 - 采购成本 - 运输成本
-                record.profit = record.income - procureAndShipCost;
-                // 成本利润率 = 利润 / (采购成本 + 运输成本)
-                record.costProfitRatio = procureAndShipCost == 0 ? 0 : (record.profit / procureAndShipCost);
+                // 空运运输成本
+                costAndKg = shipCostService.airCost(selling, dateTime.toDate());
+                record.airCost = costAndKg._1;
+                record.airKilogram = costAndKg._2;
+
+                // 海运运输成本
+                costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
+                record.seaCost = costAndKg._1;
+                record.seaCubicMeter = costAndKg._2;
+
+                // VAT 的费用
+                record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
+
+                // 利润 = 实际收入 - 采购成本 - 运输成本 - VAT
+                record.profit = record.income - record.procureAndShipCost();
+                // 成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
+                record.costProfitRatio =
+                        record.procureAndShipCost() == 0 ? 0 : (record.profit / record.procureAndShipCost());
                 // 销售利润率 = 利润 / 销售额
                 record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
                 record.save();
@@ -113,17 +139,20 @@ public class SellingRecordCaculateJob extends Job {
             if(m.isEbay()) continue;
             sellingUnits.putAll(sellingUnits(date, m));
         }
+        this.sellingUnits = sellingUnits;
         return sellingUnits;
     }
 
     public Map<String, Integer> sellingUnits(Date date, M market) {
         F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
         SqlSelect sql = new SqlSelect()
-                .select("selling_sellingId as sellingId", "sum(quantity) as qty")
-                .from("OrderItem")
-                .where("market=?").param(market.name())
-                .where("createDate>=?").param(actualDatePair._1.toDate())
-                .where("createDate<=?").param(actualDatePair._2.toDate())
+                .select("oi.selling_sellingId as sellingId", "sum(oi.quantity) as qty")
+                .from("OrderItem oi")
+                .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
+                .where("oi.market=?").param(market.name())
+                .where("oi.createDate>=?").param(actualDatePair._1.toDate())
+                .where("oi.createDate<=?").param(actualDatePair._2.toDate())
+                .where(SqlSelect.whereIn("o.state", Arrays.asList(S.PENDING.name(), S.PAYMENT.name(), S.SHIPPED.name())))
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
@@ -137,13 +166,39 @@ public class SellingRecordCaculateJob extends Job {
 
     /**
      * Selling 的销售额数据;
+     * <p/>
+     * 因为 Amazon 收费的不及时, 所以对于离当天 10 天内的数据, 使用最近 10~40 天之间的平均数进行计算.
      */
     public Map<String, Float> sellingSales(Date date) {
-        /**
-         * 1. 找到某天 OrderItem 中所有涉及的 Selling 与每个 Selling 涉及的 Order.id
-         * 2. 根据每个 selling 所涉及的 id 与费用类型, 计算处每个 Selling 的销售额
-         */
-        return sellingFeeTypesCost(date, Arrays.asList("productcharges", "shipping"));
+        if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
+            DateTime now = DateTime.now();
+            SqlSelect sql = new SqlSelect()
+                    .select("selling_sellingId as sellingId", "(sum(sales) / sum(units)) as price")
+                    .from("SellingRecord")
+                    .where("date>=?").param(Dates.morning(now.minusDays(40).toDate()))
+                    .where("date<=?").param(Dates.night(now.minusDays(10).toDate()))
+                    .groupBy("selling_sellingId");
+            List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
+            Map<String, Float> sellingPrice = new HashMap<String, Float>();
+            for(Map<String, Object> row : rows) {
+                Object priceObj = row.get("price");
+                if(priceObj == null) priceObj = "0";
+                sellingPrice.put(row.get("sellingId").toString(), NumberUtils.toFloat(priceObj.toString()));
+            }
+            Map<String, Float> sellingSales = new HashMap<String, Float>();
+            for(Map.Entry<String, Integer> entry : this.sellingUnits.entrySet()) {
+                Float price = sellingPrice.get(entry.getKey());
+                sellingSales.put(entry.getKey(), (price == null ? 0 : price) * entry.getValue());
+            }
+            this.sellingSales = sellingSales;
+        } else {
+            /**
+             * 1. 找到某天 OrderItem 中所有涉及的 Selling 与每个 Selling 涉及的 Order.id
+             * 2. 根据每个 selling 所涉及的 id 与费用类型, 计算处每个 Selling 的销售额
+             */
+            this.sellingSales = sellingFeeTypesCost(date, Arrays.asList("productcharges", "shipping"));
+        }
+        return this.sellingSales;
     }
 
     /**
@@ -166,7 +221,7 @@ public class SellingRecordCaculateJob extends Job {
             for(Map<String, Object> row : rows) {
                 sellingAmzFeeMap.put(row.get("sellingId").toString(), NumberUtils.toFloat(row.get("amzFee").toString()));
             }
-            return sellingAmzFeeMap;
+            this.sellingAmzFee = sellingAmzFeeMap;
         } else {
             List<FeeType> fees = FeeType.amazon().children;
             List<String> feesTypeName = new ArrayList<String>();
@@ -174,8 +229,9 @@ public class SellingRecordCaculateJob extends Job {
                 if("shipping".equals(fee.name)) continue;
                 feesTypeName.add(fee.name);
             }
-            return sellingFeeTypesCost(date, feesTypeName);
+            this.sellingAmzFee = sellingFeeTypesCost(date, feesTypeName);
         }
+        return this.sellingAmzFee;
     }
 
     /**
@@ -198,15 +254,16 @@ public class SellingRecordCaculateJob extends Job {
             for(Map<String, Object> row : rows) {
                 sellingAmzFeeMap.put(row.get("sellingId").toString(), NumberUtils.toFloat(row.get("fbaFee").toString()));
             }
-            return sellingAmzFeeMap;
+            this.sellingFBAFee = sellingAmzFeeMap;
         } else {
             List<FeeType> fees = FeeType.fbaFees();
             List<String> feesTypeName = new ArrayList<String>();
             for(FeeType fee : fees) {
                 feesTypeName.add(fee.name);
             }
-            return sellingFeeTypesCost(date, feesTypeName);
+            this.sellingFBAFee = sellingFeeTypesCost(date, feesTypeName);
         }
+        return this.sellingFBAFee;
     }
 
     /**
@@ -302,145 +359,6 @@ public class SellingRecordCaculateJob extends Job {
         return new F.T2<Float, Integer>(toDayProcureCost, procureNumberSum);
     }
 
-    /**
-     * 某一个 Selling 的运输成本; 币种统一为 USD
-     */
-    public F.T2<Float, Integer> sellingShipCost(Selling selling, Date date) {
-        /**
-         * 1. 确定昨天的运输成本与到昨天位置的运输数量
-         * 2. 从今天所有的快递运输单中寻找, 找出今天 selling 快递的平均运输价格与数量
-         * 3. 找到今天所有的运输单, 计算出海运/空运平均运输价格与这个 selling 的数量
-         * 4. 根据 1,2,3 通过 总价格 / 总数量 得出今天的平均运输成本
-         */
-        DateTime oneDay = new DateTime(date);
-        SellingRecord record = SellingRecord.oneDay(selling.sellingId, oneDay.minusDays(1).toDate());
-
-        List<FeeType> transportFees = FeeType.transports();
-        List<String> nonTransportshippingTypeFees = new ArrayList<String>();
-        for(FeeType typeName : transportFees) {
-            if("transportshipping".equals(typeName.name)) continue;
-            nonTransportshippingTypeFees.add(typeName.name);
-        }
-
-        SqlSelect expressFeeTemplate = new SqlSelect()
-                .from("PaymentUnit p")
-                .leftJoin("Shipment s ON p.shipment_id=s.id")
-                .leftJoin("ShipItem si ON p.shipItem_id=si.id")
-                .leftJoin("ProcureUnit pi ON si.unit_id=pi.id")
-                .where("p.createdAt>=?").param(Dates.morning(oneDay.toDate()))
-                .where("p.createdAt<=?").param(Dates.night(oneDay.toDate()))
-                .where("s.type=?").param(Shipment.T.EXPRESS.name());
-
-        // 快递运输总运费
-        float expressShipCost = 0;
-        // 快递运输总数量
-        int expressShipNumberSum = 0;
-        // 1. 找出某个 Selling 快递的运输费用
-        SqlSelect sellingTransportShippingFeeSql = new SqlSelect(expressFeeTemplate)
-                .select("p.currency as currency", "sum(p.unitPrice * p.unitQty + p.fixValue) as cost",
-                        "sum(si.qty) as qty")
-                .where("pi.selling_sellingId=?").param(selling.sellingId)
-                        // 先只计算快递的运输运费
-                .where("p.feeType_name=?").param("transportshipping");
-
-        List<Map<String, Object>> rows = DBUtils.rows(sellingTransportShippingFeeSql.toString(),
-                sellingTransportShippingFeeSql.getParams().toArray());
-        for(Map<String, Object> row : rows) {
-            if(row.get("currency") == null) continue;
-            Currency currency = Currency.valueOf(row.get("currency").toString());
-            expressShipCost += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
-            expressShipNumberSum += NumberUtils.toInt(row.get("qty").toString());
-        }
-
-        // 2. 找出某个 Selling 快递运输单的其他费用并均摊
-        F.T2<Float, Integer> expressNonShippingFeeCostAndNumber = shipmentTotalCostAndTotalNumber(
-                oneDay.toDate(), nonTransportshippingTypeFees, Shipment.T.EXPRESS);
-        if(expressNonShippingFeeCostAndNumber._2 != 0)
-            expressShipCost += (expressNonShippingFeeCostAndNumber._1 / expressNonShippingFeeCostAndNumber._2) *
-                    expressShipNumberSum;
-
-
-        // 海运/空运费用
-        /**
-         * 1. 找到当前产生了费用所涉及的 Shipment, 统计总费用
-         * 2. 统计这些 Shipment 总运输的产品的数量
-         */
-        List<String> transportshippingTypeFees = new ArrayList<String>(nonTransportshippingTypeFees);
-        transportshippingTypeFees.add("transportshipping");
-        F.T2<Float, Integer> airAndSeaCostAndNumber = shipmentTotalCostAndTotalNumber(
-                oneDay.toDate(), transportshippingTypeFees, Shipment.T.AIR, Shipment.T.SEA);
-
-        F.T3<Float, Float, Integer> t3 = avgFee(
-                Arrays.asList(record.shipCost * record.shipNumberSum, expressShipCost, airAndSeaCostAndNumber._1),
-                Arrays.asList(record.shipNumberSum, expressShipNumberSum, airAndSeaCostAndNumber._2));
-
-        return new F.T2<Float, Integer>(t3._1, t3._3);
-    }
-
-    /**
-     * 计算平均费用
-     *
-     * @return ._1: 平均价格, ._2: 总费用, ._3: 总数量
-     */
-    private F.T3<Float, Float, Integer> avgFee(List<Float> costs, List<Integer> numberSums) {
-        float totalCost = 0;
-        int totalNumber = 0;
-        for(Float cost : costs) totalCost += cost;
-        for(Integer number : numberSums) totalNumber += number;
-        if(totalNumber == 0) return new F.T3<Float, Float, Integer>(0f, totalCost, totalNumber);
-        return new F.T3<Float, Float, Integer>(totalCost / totalNumber, totalCost, totalNumber);
-    }
-
-    /**
-     * 计算 PaymentUnit 中指定条件下涉及到的运输单的总费用与总数量
-     */
-    private F.T2<Float, Integer> shipmentTotalCostAndTotalNumber(Date date, List<String> feeTypes,
-                                                                 Shipment.T... shipTypes) {
-        /**
-         * 1. 找出当前 PaymentUnit 涉及的 ShipmentIds 与总费用
-         * 2. 根据 ShipmentIds 找出涉及的总数量
-         */
-        List<String> shipTypeNames = new ArrayList<String>();
-        for(Shipment.T type : shipTypes) shipTypeNames.add(type.name());
-        SqlSelect airAndSeaShipFeeSql = new SqlSelect()
-                .select("p.currency as currency", "sum(p.unitPrice * p.unitQty + p.fixValue) as cost",
-                        "group_concat(distinct p.shipment_id) as shipmentIds")
-                .from("PaymentUnit p")
-                .leftJoin("Shipment s ON p.shipment_id=s.id")
-                .where(SqlSelect.whereIn("s.type", shipTypeNames))
-                .where("p.createdAt>=?").param(Dates.morning(date))
-                .where("p.createdAt<=?").param(Dates.night(date))
-                .where(SqlSelect.whereIn("p.feeType_name", feeTypes))
-                .groupBy("p.currency");
-
-        Set<String> shipmentIds = new HashSet<String>();
-        float totalCost = 0;
-        int totalNumberSum = 0;
-
-        List<Map<String, Object>> rows = DBUtils
-                .rows(airAndSeaShipFeeSql.toString(), airAndSeaShipFeeSql.getParams().toArray());
-        for(Map<String, Object> row : rows) {
-            Currency currency = Currency.valueOf(row.get("currency").toString());
-            totalCost += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
-            String shipmentIdStr = row.get("shipmentIds").toString();
-            if(StringUtils.isNotBlank(shipmentIdStr)) {
-                Collections.addAll(shipmentIds, StringUtils.split(shipmentIdStr, ","));
-            }
-        }
-
-        if(shipmentIds.size() > 0) {
-            SqlSelect airAndSeaShipNumberSumSql = new SqlSelect()
-                    .select("sum(qty) as qty")
-                    .from("ShipItem")
-                    .where(SqlSelect.whereIn("shipment_id", shipmentIds));
-
-            Map<String, Object> row = DBUtils.row(airAndSeaShipNumberSumSql.toString());
-            if(StringUtils.isNotBlank(row.get("qty").toString()))
-                totalNumberSum = NumberUtils.toInt(row.get("qty").toString());
-        }
-
-        return new F.T2<Float, Integer>(totalCost, totalNumberSum);
-    }
 
     public static boolean isRunning() {
         return StringUtils.isNotBlank(Cache.get(RUNNING, String.class));

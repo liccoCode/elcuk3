@@ -54,6 +54,10 @@ public class ProcurePost extends Post<ProcureUnit> {
      */
     public String dateType;
 
+    /**
+     * 在 ProcureUnits中，downloadFBAZIP 方法 需要调用 传入 POST 查询条件， PLay 无法解析父类的属性，必须重写
+     */
+    public String search;
 
     public enum PLACEDSTATE {
         ARRIVE {

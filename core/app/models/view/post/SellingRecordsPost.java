@@ -34,6 +34,8 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     public String market;
 
+    public String categoryId;
+
     /**
      * Selling, SKU, Category 三个种类
      */
@@ -80,6 +82,9 @@ public class SellingRecordsPost extends Post<SellingRecord> {
         if(StringUtils.isNotBlank(this.market)) {
             CollectionUtils.filter(records, new MarketPredicate(M.val(this.market)));
         }
+        if(StringUtils.isNotBlank(this.categoryId))
+            CollectionUtils.filter(records, new SearchPredicate("^" + this.categoryId));
+
         if(this.filterDot2)
             CollectionUtils.filter(records, new UnContainsPredicate(","));
         if(StringUtils.isNotBlank(this.search))
@@ -215,12 +220,11 @@ public class SellingRecordsPost extends Post<SellingRecord> {
             record.income += rcd.income;
             record.procureCost += rcd.procureCost;
             record.procureNumberSum += rcd.procureNumberSum;
-            record.shipCost += rcd.shipCost;
-            record.shipNumberSum += rcd.shipNumberSum;
             record.profit += rcd.profit;
         }
         for(SellingRecord record : skuRecordsMap.values()) {
-            record.costProfitRatio = record.profit / (record.shipCost + record.procureCost);
+            // TODO 需要重新计算
+            record.costProfitRatio = record.profit / (/*record.expressCost + */record.procureCost);
             record.saleProfitRatio = record.profit / record.sales;
         }
         return new ArrayList<SellingRecord>(skuRecordsMap.values());

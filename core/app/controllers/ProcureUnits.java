@@ -5,6 +5,7 @@ import helper.Constant;
 import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
+import models.Notification;
 import models.User;
 import models.embedded.UnitAttrs;
 import models.finance.FeeType;
@@ -26,6 +27,7 @@ import play.mvc.With;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -186,7 +188,6 @@ public class ProcureUnits extends Controller {
             render("ProcureUnits/blank.html", unit, whouses);
         }
 
-
         unit.save();
 
         if(unit.shipType != Shipment.T.EXPRESS) {
@@ -223,16 +224,22 @@ public class ProcureUnits extends Controller {
     public static void update(Long id, Integer oldPlanQty, ProcureUnit unit, String shipmentId) {
         List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
         ProcureUnit managedUnit = ProcureUnit.findById(id);
-
-
         managedUnit.update(unit, shipmentId);
         if(Validation.hasErrors()) {
             unit.id = managedUnit.id;
             render("ProcureUnits/edit.html", unit, oldPlanQty, whouses);
         }
-
         new ElcukRecord(Messages.get("procureunit.update"),
                 Messages.get("action.base", managedUnit.to_log()), managedUnit.id + "").save();
+        //通知采购单 和采购计划创建人，运输人员
+        Set<User> users = managedUnit.editToUsers();
+        Notification.notifiesToUsers(
+                String.format("采购计划 #%s(%s) 变更", managedUnit.id, managedUnit.sku),
+                String.format("计划采购量从 %s 变更为 %s, 预计交货日期: %s, 请检查相关采购单",
+                        oldPlanQty, managedUnit.attrs.planQty,
+                        Dates.date2Date(managedUnit.attrs.planDeliveryDate)),
+                users.toArray(new User[users.size()])
+        );
 
         flash.success("成功修改采购计划!", id);
         edit(id);
@@ -240,6 +247,7 @@ public class ProcureUnits extends Controller {
 
     public static void destroy(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
+        Set<User> users = unit.editToUsers();
         unit.remove();
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
@@ -247,6 +255,10 @@ public class ProcureUnits extends Controller {
             p.search = "id:" + id;
             index(p);
         }
+        //通知当前操作用户 和采购计划创建人，发送删除成功的通知
+        String notifiMessage = String.format("采购计划 %s 删除", id);
+        Notification.notifiesToUsers(notifiMessage, notifiMessage, users.toArray(new User[users.size()]));
+
         flash.success("删除成功, 所关联的运输项目也成功删除.");
         index(null);
     }
