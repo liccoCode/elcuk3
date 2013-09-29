@@ -6,6 +6,7 @@ import models.ElcukRecord;
 import models.finance.FeeType;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.procure.Cooperator;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
@@ -171,6 +172,7 @@ public class PaymentUnits extends Controller {
         ship.produceFee(fee);
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
+        fee.cooperator = Cooperator.findById(fee.cooperator.id);
         render("PaymentUnits/show.json", fee);
     }
 

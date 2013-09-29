@@ -127,6 +127,12 @@ public class PaymentUnit extends Model {
     @ManyToOne
     public Shipment shipment;
 
+    /**
+     *费用关系人
+     */
+    @OneToOne
+    public Cooperator cooperator;
+
     public Date createdAt;
 
     /**
