@@ -96,7 +96,7 @@ public class Webs {
      */
     public static void dev_login(Account acc) throws IOException, ClassNotFoundException {
         File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
-        if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(3)))
+        if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(1)))
             jsonFile.delete();
 
         if(!jsonFile.exists()) {
