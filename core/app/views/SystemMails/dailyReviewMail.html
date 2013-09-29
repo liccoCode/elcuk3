@@ -1,53 +1,53 @@
 #{set r5:jobs.FAndRNotificationJob.divReviewInToFive(reviews)/}
 <h2>Totla have ${reviews.size()} new Reviews last day.</h2>
 <div>
-    <p>One Rating:  ${r5._1.size()}</p>
+  <p>One Rating:  ${r5._1.size()}</p>
 
-    <p>Two Rating:  ${r5._2.size()}</p>
+  <p>Two Rating:  ${r5._2.size()}</p>
 
-    <p>Three Rating:  ${r5._3.size()}</p>
+  <p>Three Rating:  ${r5._3.size()}</p>
 
-    <p>Four Rating:  ${r5._4.size()}</p>
+  <p>Four Rating:  ${r5._4.size()}</p>
 
-    <p>Five Rating:  ${r5._5.size()}</p>
+  <p>Five Rating:  ${r5._5.size()}</p>
 </div>
 <table>
-    <tr>
-        <th>Seller</th>
-        <th>Title</th>
-        <th>UserId</th>
-        <th>UserName</th>
-        <th>ReviewDate</th>
-        <th>ReviewId</th>
-        <th>Review Length</th>
-        <th>Rating</th>
-        <th>Click</th>
-        <th>Purchased</th>
-        <th>RealName</th>
-        <th>VineVoice</th>
-        <th>Vedio</th>
-        <th>TopN</th>
-        <th>Rank</th>
-        <th>OsTicketId</th>
-    </tr>
+  <tr>
+    <th>Seller</th>
+    <th>Title</th>
+    <th>UserId</th>
+    <th>UserName</th>
+    <th>ReviewDate</th>
+    <th>ReviewId</th>
+    <th>Review Length</th>
+    <th>Rating</th>
+    <th>Click</th>
+    <th>Purchased</th>
+    <th>RealName</th>
+    <th>VineVoice</th>
+    <th>Vedio</th>
+    <th>TopN</th>
+    <th>Rank</th>
+    <th>OsTicketId</th>
+  </tr>
 #{list items:reviews, as:'rv'}
-    <tr>
-        <td style="${rv.isSelf ? "" : "background:#BBB"}">${rv.listing?.byWho}</td>
-        <td>${rv.title}</td>
-        <td><a href="${rv.userReviewLink()}" target="_blank">${rv.userid}</a></td>
-        <td>${rv.username}</td>
-        <td>${rv.reviewDate?.since()}</td>
-        <td><a href="${rv.reviewLink()}" target="_blank">${rv.reviewId}</a></td>
-        <td><a href="http://e.easya.cc/reviews/show?rid=${rv.reviewId}">${rv.length()}</a></td>
-        <td style="color:${ext.TicketHelper.color(rv.rating)}">${rv.rating}</td>
-        <td>${rv.helpUp} / ${rv.helpClick}</td>
-        <td>#{yesOrNo f:rv.purchased /}</td>
-        <td>#{yesOrNo f:rv.isRealName /}</td>
-        <td>#{yesOrNo f:rv.isVineVoice /}</td>
-        <td>#{yesOrNo f:rv.isVedio /}</td>
-        <td>${rv.topN}</td>
-        <td>${rv.reviewRank}</td>
-        <td><a href="#等待添加" target="_blank">${rv.osTicketId}</a></td>
-    </tr>
+  <tr>
+    <td style="${rv.isSelf ? "" : "background:#BBB"}">${rv.listing?.byWho}</td>
+    <td>${rv.title}</td>
+    <td><a href="${rv.userReviewLink()}" target="_blank">${rv.userid}</a></td>
+    <td>${rv.username}</td>
+    <td>${rv.reviewDate?.since()}</td>
+    <td><a href="${rv.reviewLink()}" target="_blank">${rv.reviewId}</a></td>
+    <td><a href="http://e.easya.cc/reviews/show?rid=${rv.reviewId}">${rv.length()}</a></td>
+    <td style="color:${ext.ReviewHelper.color(rv.rating)}">${rv.rating}</td>
+    <td>${rv.helpUp} / ${rv.helpClick}</td>
+    <td>#{yesOrNo f:rv.purchased /}</td>
+    <td>#{yesOrNo f:rv.isRealName /}</td>
+    <td>#{yesOrNo f:rv.isVineVoice /}</td>
+    <td>#{yesOrNo f:rv.isVedio /}</td>
+    <td>${rv.topN}</td>
+    <td>${rv.reviewRank}</td>
+    <td><a href="#等待添加" target="_blank">${rv.osTicketId}</a></td>
+  </tr>
 #{/list}
 </table>
