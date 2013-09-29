@@ -23,9 +23,12 @@ public enum M {
         @Override
         public String label() {
             return "英国亚马逊";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "英国";
         }
     },
@@ -33,9 +36,12 @@ public enum M {
         @Override
         public String label() {
             return "德国亚马逊";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "德国";
         }
     },
@@ -43,9 +49,12 @@ public enum M {
         @Override
         public String label() {
             return "法国亚马逊";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "法国";
         }
     },
@@ -53,9 +62,12 @@ public enum M {
         @Override
         public String label() {
             return "意大利亚马逊";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "意大利";
         }
     },
@@ -63,9 +75,12 @@ public enum M {
         @Override
         public String label() {
             return "西班牙亚马逊";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "西班牙";
         }
     },
@@ -73,9 +88,12 @@ public enum M {
         @Override
         public String label() {
             return "美国亚马逊";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "美国";
         }
     },
@@ -83,14 +101,18 @@ public enum M {
         @Override
         public String label() {
             return "英国 Ebay";
-        };
+        }
+
+        ;
+
         @Override
-        public String countryName(){
+        public String countryName() {
             return "英国";
         }
     };
 
     public abstract String label();
+
     public abstract String countryName();
 
     /**
@@ -472,12 +494,13 @@ public enum M {
         //https://sellercentral.amazon.de/gp/orders-v2/remote-actions/action.html
         switch(this) {
             case AMAZON_UK:
+            case AMAZON_US:
+                return "https://sellercentral." + this.toString() + "/gp/orders-v2/remote-actions/action.html";
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-            case AMAZON_US:
-                return "https://sellercentral." + this.toString() + "/gp/orders-v2/remote-actions/action.html";
+                return "https://sellercentral." + AMAZON_DE.toString() + "/gp/orders-v2/remote-actions/action.html";
             case EBAY_UK:
             default:
                 throw new NotSupportChangeRegionFastException();
