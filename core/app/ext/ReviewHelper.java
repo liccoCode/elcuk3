@@ -3,7 +3,6 @@ package ext;
 import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.market.Orderr;
-import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.libs.F;
@@ -125,4 +124,50 @@ public class ReviewHelper extends JavaExtensions {
         len = Math.min(len, real_len);
         return String.format("%s...", str.substring(0, len));
     }
+
+    /**
+     * 根据一个数字, 计算这个数字对应的颜色(5 分评价常用)
+     *
+     * @param rate
+     * @return
+     */
+    public static String color(Number rate) {
+        if(rate.intValue() >= 5) {
+            return "#3ED76A";
+        } else if(rate.intValue() >= 4) {
+            return "#ADFF1F";
+        } else if(rate.intValue() >= 3) {
+            return "#FFE107";
+        } else if(rate.intValue() >= 2) {
+            return "#D54C00";
+        } else if(rate.intValue() >= 1) {
+            return "#E03F00";
+        } else {
+            return "#FF1101";
+        }
+    }
+
+    /**
+     * 根据百分比进行颜色调整
+     *
+     * @param percent
+     * @return
+     */
+    public static String pctColor(Number percent) {
+        float pct = 0;
+        if(percent.floatValue() < 1) pct = percent.floatValue() * 100;
+        else pct = percent.floatValue();
+        if(pct <= 20) {
+            return "#DF534E";
+        } else if(pct <= 50) {
+            return "#F9A732";
+        } else if(pct <= 70) {
+            return "#4FB5D3";
+        } else if(pct <= 100) {
+            return "#5FBF5F";
+        } else {
+            return "#FF1101";
+        }
+    }
+
 }

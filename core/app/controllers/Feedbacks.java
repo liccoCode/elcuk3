@@ -1,17 +1,15 @@
 package controllers;
 
-import jobs.FeedbackInfoFetchJob;
+import jobs.FeedbackCheckJob;
+import jobs.FeedbackCrawlJob;
+import models.market.Account;
 import models.market.Feedback;
+import models.market.M;
 import models.product.Category;
-import models.support.Ticket;
-import models.support.TicketReason;
-import models.view.Ret;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * 管理 Feedbacks 的功能
@@ -28,26 +26,25 @@ public class Feedbacks extends Controller {
             redirect("/Orders/show/" + id);
         } else {
             List<Category> cats = feedback.relateCats();
-            F.T2<Set<TicketReason>, Set<TicketReason>> unTagAndAll = feedback.untagAndAllTags();
-            render(feedback, cats, unTagAndAll);
+            render(feedback, cats);
         }
     }
 
     public static void check(String id) {
         Feedback feedback = Feedback.findById(id);
-        String html = FeedbackInfoFetchJob
-                .fetchAmazonFeedbackHtml(feedback.account, feedback.orderId);
-        feedback.isRemove = FeedbackInfoFetchJob.isFeedbackRemove(html);
-        if(FeedbackInfoFetchJob.isRequestSuccess(html))
+        String html = FeedbackCheckJob.ajaxLoadFeedbackOnOrderDetailPage(feedback.account, feedback.orderId);
+        feedback.isRemove = FeedbackCheckJob.isFeedbackRemove(html);
+        if(FeedbackCheckJob.isRequestSuccess(html))
             flash.success("刷新成功. [%s -> %s]", feedback.orderId, feedback.isRemove);
         else
-            flash.error("刷新成功. [%s -> %s]", feedback.orderId, feedback.isRemove);
+            flash.error("刷新失败. [%s -> %s]", feedback.orderId, feedback.isRemove);
         redirect("/feedbacks/show/" + feedback.orderId);
     }
 
-    public static void iFeedback() {
-        Ticket.initFeedbackFix();
-        renderJSON(new Ret());
+    public static void fixOnePage(long aid, M m, int p) {
+        long begin = System.currentTimeMillis();
+        Account account = Account.findById(aid);
+        List<Feedback> feedbacks = FeedbackCrawlJob.fetchAccountFeedbackOnePage(account, m, p);
+        renderText("Success: %s, passed: %s ms", feedbacks.size(), System.currentTimeMillis() - begin);
     }
-
 }
