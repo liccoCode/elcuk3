@@ -33,6 +33,7 @@ import static org.junit.matchers.JUnitMatchers.both;
 import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 /**
  * Created by IntelliJ IDEA.
@@ -53,7 +54,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         Account account = FactoryBoy.build(Account.class, "de");
         String orderId = "403-2580115-3776367";
         String html = IO.readContentAsString(Play.getFile("test/html/jobs/promise/" + orderId + ".html"));
-        FinanceShippedPromise promise = new FinanceShippedPromise(account, account.type, null, 8);
+        FinanceShippedPromise promise = spy(new FinanceShippedPromise(account, account.type, null, 8));
 
         doReturn(html).when(promise).transactionView(anyString());
         List<String> urls = promise.transactionURLs(orderId);
@@ -256,4 +257,139 @@ public class FinanceShippedPromiseTest extends UnitTest {
         assertThat((double) fees.get(2).cost, is(closeTo(-1.36d, 0.01)));
     }
 
+    @Ignore("选择性测试, 直接访问到真是网络环境了")
+    @Test
+    public void testDoJobWithResultES() throws Exception {
+        Account account = FactoryBoy.create(Account.class, "de");
+        Orderr orderr = FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
+            @Override
+            public void build(Orderr target) {
+                target.orderId = "403-8021184-5905937";
+            }
+        });
+
+        // 因为 FactoryBoy.deleteAll 对 SaleFee 进行了 DDL 操作, 必须将当前 Transaction commit 才可以, 否则会出现
+        // Lock wait timeout exceeded; try restarting transaction
+        // ref: http://gladness.itpub.net/post/6254/62883
+        DB.getConnection().commit();
+
+        Webs.dev_login(account);
+
+        List<Orderr> orders = new ArrayList<Orderr>();
+        orders.add(orderr);
+        FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_ES, Orderr.ids(orders), 8);
+        F.Promise<List<SaleFee>> feesPromise = promise.now();
+        List<SaleFee> fees = feesPromise.get(1, TimeUnit.MINUTES);
+        assertThat(fees.size(), is(10));
+
+        assertThat(fees.get(0).type, is(FeeType.productCharger()));
+        assertThat(fees.get(1).type, is(FeeType.productCharger()));
+        assertThat(fees.get(2).type, is(FeeType.promotions()));
+        assertThat(fees.get(3).type, is(FeeType.promotions()));
+        assertThat(fees.get(4).type, is(FeeType.shipping()));
+
+        assertThat(fees.get(5).type, is(FeeType.findById("commission")));
+        assertThat(fees.get(6).type, is(FeeType.findById("crossborderfulfilmentfee")));
+        assertThat(fees.get(7).type, is(FeeType.findById("fbapickpackfeeperunit")));
+        assertThat(fees.get(8).type, is(FeeType.findById("fbaweighthandlingfee")));
+        assertThat(fees.get(9).type, is(FeeType.findById("shippingchargeback")));
+
+        assertThat(fees.get(5).currency, is(Currency.EUR));
+        assertThat((double) fees.get(5).cost, is(closeTo(-7.10d, 0.01)));
+        assertThat(fees.get(4).currency, is(Currency.EUR));
+        assertThat((double) fees.get(4).cost, is(closeTo(2.99d, 0.01)));
+    }
+
+    @Ignore("选择性测试, 直接访问到真是网络环境了")
+    @Test
+    public void testDoJobWithResultFR() throws Exception {
+        Account account = FactoryBoy.create(Account.class, "de");
+        Orderr orderr = FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
+            @Override
+            public void build(Orderr target) {
+                target.orderId = "171-5516934-2662725";
+            }
+        });
+
+        // 因为 FactoryBoy.deleteAll 对 SaleFee 进行了 DDL 操作, 必须将当前 Transaction commit 才可以, 否则会出现
+        // Lock wait timeout exceeded; try restarting transaction
+        // ref: http://gladness.itpub.net/post/6254/62883
+        DB.getConnection().commit();
+
+        Webs.dev_login(account);
+
+        List<Orderr> orders = new ArrayList<Orderr>();
+        orders.add(orderr);
+        FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_FR, Orderr.ids(orders), 8);
+        F.Promise<List<SaleFee>> feesPromise = promise.now();
+        List<SaleFee> fees = feesPromise.get(1, TimeUnit.MINUTES);
+        assertThat(fees.size(), is(8));
+
+        assertThat(fees.get(0).type, is(FeeType.productCharger()));
+        assertThat(fees.get(1).type, is(FeeType.productCharger()));
+        assertThat(fees.get(2).type, is(FeeType.promotions()));
+        assertThat(fees.get(3).type, is(FeeType.promotions()));
+
+        assertThat(fees.get(4).type, is(FeeType.findById("commission")));
+        assertThat(fees.get(5).type, is(FeeType.findById("crossborderfulfilmentfee")));
+        assertThat(fees.get(6).type, is(FeeType.findById("fbapickpackfeeperunit")));
+        assertThat(fees.get(7).type, is(FeeType.findById("fbaweighthandlingfee")));
+
+        assertThat(fees.get(4).currency, is(Currency.EUR));
+        assertThat((double) fees.get(4).cost, is(closeTo(-14.59d, 0.01)));
+        assertThat(fees.get(5).currency, is(Currency.EUR));
+        assertThat((double) fees.get(5).cost, is(closeTo(-4.20d, 0.01)));
+    }
+
+    @Ignore("选择性测试, 直接访问到真是网络环境了")
+    @Test
+    public void testDoJobWithResultIT() throws Exception {
+        Account account = FactoryBoy.create(Account.class, "de");
+        Orderr orderr = FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
+            @Override
+            public void build(Orderr target) {
+                target.orderId = "403-8722498-3247509";
+            }
+        });
+
+        // 因为 FactoryBoy.deleteAll 对 SaleFee 进行了 DDL 操作, 必须将当前 Transaction commit 才可以, 否则会出现
+        // Lock wait timeout exceeded; try restarting transaction
+        // ref: http://gladness.itpub.net/post/6254/62883
+        DB.getConnection().commit();
+
+        Webs.dev_login(account);
+
+        List<Orderr> orders = new ArrayList<Orderr>();
+        orders.add(orderr);
+        FinanceShippedPromise promise = new FinanceShippedPromise(account, M.AMAZON_IT, Orderr.ids(orders), 8);
+        F.Promise<List<SaleFee>> feesPromise = promise.now();
+        List<SaleFee> fees = feesPromise.get(1, TimeUnit.MINUTES);
+        assertThat(fees.size(), is(12));
+
+        assertThat(fees.get(0).type, is(FeeType.productCharger()));
+        assertThat(fees.get(0).currency, is(Currency.EUR));
+        assertThat((double) fees.get(0).cost, is(closeTo(37.99d, 0.01)));
+        assertThat(fees.get(1).type, is(FeeType.productCharger()));
+        assertThat(fees.get(2).type, is(FeeType.productCharger()));
+        assertThat(fees.get(3).type, is(FeeType.productCharger()));
+
+        assertThat(fees.get(4).type, is(FeeType.promotions()));
+        assertThat(fees.get(5).type, is(FeeType.promotions()));
+        assertThat(fees.get(6).type, is(FeeType.promotions()));
+        assertThat(fees.get(6).currency, is(Currency.EUR));
+        assertThat((double) fees.get(6).cost, is(closeTo(-0.66d, 0.01)));
+        assertThat(fees.get(7).type, is(FeeType.promotions()));
+        assertThat(fees.get(7).currency, is(Currency.EUR));
+        assertThat((double) fees.get(7).cost, is(closeTo(0.0d, 0.01)));
+
+        assertThat(fees.get(8).type, is(FeeType.findById("commission")));
+        assertThat(fees.get(8).currency, is(Currency.EUR));
+        assertThat((double) fees.get(8).cost, is(closeTo(-9.12d, 0.01)));
+        assertThat(fees.get(9).type, is(FeeType.findById("crossborderfulfilmentfee")));
+        assertThat(fees.get(9).currency, is(Currency.EUR));
+        assertThat((double) fees.get(9).cost, is(closeTo(-8.40d, 0.01)));
+        assertThat(fees.get(10).type, is(FeeType.findById("fbapickpackfeeperunit")));
+        assertThat(fees.get(11).type, is(FeeType.findById("fbaweighthandlingfee")));
+
+    }
 }
