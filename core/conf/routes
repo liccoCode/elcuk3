@@ -55,6 +55,7 @@ POST    /feetype/{name}/delete                               FeeTypes.remove
 GET     /orders                                             Orders.index
 POST    /orders                                             Orders.index
 GET     /order/{id}                                         Orders.show
+POST    /order/{id}/fees                                    Orders.refreshFee
 
 # Payments
 GET     /payments                                           Payments.index

@@ -63,6 +63,7 @@ public class MWSReports {
                     if(job.type == JobRequest.T.GET_FBA_FULFILLMENT_INVENTORY_RECEIPTS_DATA) {
                         time = time.minusMonths(3); // 最近 3 个月
                     } else {
+                        // TODO 思考如何让数据同步更准确
                         time = time.minusDays(7); // 新订单的获取, 捕捉最近 7 天内的
                     }
                     DatatypeFactory df = DatatypeFactory.newInstance();

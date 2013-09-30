@@ -65,3 +65,42 @@
     </form>
   </div>
 </div>
+
+<div class="row">
+  <div class="span4">
+    <h5 class="alert">重新抓取指定 Order 的费用</h5>
+
+    <form action="@{Finances.promotion()}" method="post">
+      <table class="table table-bordered table-condensed">
+        <tr>
+          <td>
+            <select name="m" style="width:150px;">
+            #{list items:models.market.M.values()}
+              <option value="${_.name()}">${_.label()}</option>
+            #{/list}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <select name="aid" style="width:150px;">
+            #{list items:accs}
+              <option value="${_.id}">${_.prettyName()}</option>
+            #{/list}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <textarea name="orderId" style="width:95%" placeholder="OrderIds"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <button class="btn btn-primary">Ok</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
