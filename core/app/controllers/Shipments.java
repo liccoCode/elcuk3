@@ -130,7 +130,7 @@ public class Shipments extends Controller {
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
         ship.endShipByComputer();
-        List<Cooperator> cooperators = Cooperator.findAll();
+        List<Cooperator> cooperators = Cooperator.shippers();
         render(ship, cooperators);
     }
 
