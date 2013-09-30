@@ -188,6 +188,9 @@
       <input type="number" readonly="" class="input-mini" class="amount" value="<%= fee.amount%>">
     </td>
     <td>
+      <%= fee.cooperator.name %>
+    </td>
+    <td>
       <textarea name="fee.memo"><%= fee.memo %></textarea>
     </td>
     <td><%= fee.payee.username %></td>

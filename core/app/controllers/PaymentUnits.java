@@ -169,10 +169,10 @@ public class PaymentUnits extends Controller {
     @Check("paymentunits.postfromtransport")
     public static void fromShipment(String id, PaymentUnit fee) {
         Shipment ship = Shipment.findById(id);
+        fee.cooperator = Cooperator.findById(fee.cooperator.id);
         ship.produceFee(fee);
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.VJson(Validation.errors())));
-        fee.cooperator = Cooperator.findById(fee.cooperator.id);
         render("PaymentUnits/show.json", fee);
     }
 
