@@ -47,6 +47,12 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
     private List<String> errorMsg = new ArrayList<String>();
 
 
+    public FinanceShippedPromise(Account account, M market, List<String> orderIds) {
+        this.account = account;
+        this.market = market;
+        this.orderIds = orderIds;
+        this.leftOrders = -1;
+    }
     public FinanceShippedPromise(Account account, M market, List<String> orderIds, long leftOrders) {
         this.account = account;
         this.market = market;
@@ -298,7 +304,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         } else if(text.contains("per unit fulfillment")) {
             return FeeType.findById("fbaperunitfulfillmentfee");
         } else if(text.contains("per order fulfillment") || text.contains("per order fulfilment")) {
-            System.out.println(FeeType.findById("fbaperorderfulfilmentfee"));
             return FeeType.findById("fbaperorderfulfilmentfee");
         } else if(text.contains("variable closing")) {
             return FeeType.findById("variableclosingfee");

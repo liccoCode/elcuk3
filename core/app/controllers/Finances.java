@@ -3,15 +3,19 @@ package controllers;
 import jobs.AmazonFinancePatchJob;
 import jobs.AmazonOrderFetchJob;
 import jobs.AmazonOrderUpdateJob;
+import jobs.promise.FinanceShippedPromise;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.JobRequest;
+import models.market.M;
 import models.view.Ret;
+import org.apache.commons.lang3.StringUtils;
 import play.data.validation.Error;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +72,18 @@ public class Finances extends Controller {
             new AmazonOrderFetchJob().callBack(req);
         }
         renderText("已经处理.");
+    }
+
+    public static void promotion(String orderId, long aid, String m) {
+        List<String> orderIds = Arrays.asList(StringUtils.split(orderId, ","));
+        Account acc = Account.findById(aid);
+        M market = M.val(m);
+        try {
+            List<SaleFee> fees = new FinanceShippedPromise(acc, market, orderIds, 10).now().get();
+            renderText(fees);
+        } catch(Exception e) {
+            renderText(e.getMessage());
+        }
     }
 
 }
