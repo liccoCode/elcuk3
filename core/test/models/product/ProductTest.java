@@ -4,6 +4,7 @@ import factory.FactoryBoy;
 import factory.callback.BuildCallback;
 import helper.Webs;
 import models.embedded.AmazonProps;
+import models.embedded.CategorySettings;
 import models.market.M;
 import models.market.Selling;
 import org.apache.http.NameValuePair;
@@ -31,18 +32,27 @@ public class ProductTest extends UnitTest {
         FactoryBoy.deleteAll();
     }
 
+    private void amzCategory(String category, CategorySettings settings) {
+        settings.amazonCategory = category;
+        settings.amazonUKCategory = category;
+        settings.amazonDECategory = category;
+        settings.amazonESCategory = category;
+        settings.amazonFRCategory = category;
+        settings.amazonITCategory = category;
+    }
+
     public F.T2<Product, Selling> initData() throws IOException, ClassNotFoundException {
         Product p = FactoryBoy.create(Product.class);
-        Selling sell = FactoryBoy.build(Selling.class, "us", new BuildCallback<Selling>() {
+        Selling sell = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
             @Override
             public void build(Selling target) {
-                target.merchantSKU = "80WT8400-BY,655886518448";
-                target.market = M.AMAZON_US;
+                target.merchantSKU = "71MDE10311-BPU,884802273783";
+                target.market = M.AMAZON_DE;
                 AmazonProps aps = target.aps;
-                aps.upc = "655886518448";
+                aps.upc = "884802273783";
             }
         });
-        p.category.settings.amazonCategory = "622960011/7053657011";
+        amzCategory("consumer_electronics/computer/personal_computer", p.category.settings);
 
         Webs.dev_login(sell.account);
         return new F.T2<Product, Selling>(p, sell);
@@ -55,6 +65,7 @@ public class ProductTest extends UnitTest {
         Selling sell = t2._2;
         p.saleAmazon(sell);
     }
+
 
     @Ignore
     @Test
