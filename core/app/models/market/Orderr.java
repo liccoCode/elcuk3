@@ -94,7 +94,6 @@ public class Orderr extends GenericModel {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @OrderBy("date ASC,cost DESC")
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<SaleFee> fees = new ArrayList<SaleFee>();
     //-------------- Basic ----------------
 
@@ -433,7 +432,6 @@ public class Orderr extends GenericModel {
         Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
         return dashBoard;
     }
-
 
 
     /**
