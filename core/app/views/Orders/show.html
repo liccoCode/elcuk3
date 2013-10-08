@@ -2,6 +2,7 @@
     #{extends 'main.html'/}
     #{set title:'Orders'/}
     #{set 'moreScripts'}
+        #{script 'orders/orders.coffee'/}
     #{/set}
 #{/ifnot}
 
@@ -9,106 +10,112 @@
 读取的 Order 不存在!
 #{/if}
 #{else }
+<div class="btn-toolbar" id='funcs'>
+  <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning  btn-small">重新抓取费用</button>
+    #{if ord.feedback}
+      <a href="@{Feedbacks.show(ord.orderId)}" class="btn btn-success btn-small">跳转到 Feedback</a>
+    #{/if}
+</div>
 <div class="label label-info">Order Basic</div>
 <div>
-    <table class="table table-condensed table-bordered">
-        <tr>
-            <td>OrderId:</td>
-            <td>
-                <a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}
-                </a></td>
-            <td>Address:</td>
-            <td>${ord.address}</td>
-            <td>Address1:</td>
-            <td>${ord.address1.raw()}</td>
-            <td>Reciver:</td>
-            <td>${ord.reciver}</td>
-        </tr>
-        <tr>
-            <td>ArriveDate:</td>
-            <td>${ord.arriveDate}</td>
-            <td>Buyer:</td>
-            <td>${ord.buyer}</td>
-            <td>City:</td>
-            <td>${ord.city}</td>
-            <td>Country:</td>
-            <td>${ord.country}</td>
-        </tr>
-        <tr>
-            <td>CreateDate:</td>
-            <td>${ord.createDate}</td>
-            <td>Email:</td>
-            <td>${ord.email}</td>
-            <td>Market:</td>
-            <td>${ord.market.toString()}</td>
-            <td>PaymentDate:</td>
-            <td>${ord.paymentDate}</td>
-        </tr>
-        <tr>
-            <td>Phone:</td>
-            <td>${ord.phone}</td>
-            <td>PostalCode:</td>
-            <td>${ord.postalCode}</td>
-            <td>Province:</td>
-            <td>${ord.province}</td>
-            <td>Account</td>
-            <td>${ord.account.prettyName()}</td>
-        </tr>
-        <tr>
-            <td>ShipDate:</td>
-            <td>${ord.shipDate}</td>
-            <td>ShipLevel:</td>
-            <td>${ord.shipLevel}</td>
-            <td>ShippingAmount:</td>
-            <td>${ord.shippingAmount}</td>
-            <td>ShippingService:</td>
-            <td>${ord.shippingService}</td>
-        </tr>
-        <tr>
-            <td>State:</td>
-            <td style="color:${'#' + ord.state.color()}}">${ord.state}</td>
-            <td>TotalAmount:</td>
-            <td>${ord.totalAmount}</td>
-            <td>TrackNo:</td>
-            <td>${ord.trackNo}</td>
-            <td>UserId:</td>
-            <td>${ord.userid}</td>
-        </tr>
-        <tr>
-            <td>Memo</td>
-            <td colspan="7">${ord.memo}</td>
-        </tr>
-    </table>
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <td>OrderId:</td>
+      <td>
+        <a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}
+        </a></td>
+      <td>Address:</td>
+      <td>${ord.address}</td>
+      <td>Address1:</td>
+      <td>${ord.address1.raw()}</td>
+      <td>Reciver:</td>
+      <td>${ord.reciver}</td>
+    </tr>
+    <tr>
+      <td>ArriveDate:</td>
+      <td>${ord.arriveDate}</td>
+      <td>Buyer:</td>
+      <td>${ord.buyer}</td>
+      <td>City:</td>
+      <td>${ord.city}</td>
+      <td>Country:</td>
+      <td>${ord.country}</td>
+    </tr>
+    <tr>
+      <td>CreateDate:</td>
+      <td>${ord.createDate}</td>
+      <td>Email:</td>
+      <td>${ord.email}</td>
+      <td>Market:</td>
+      <td>${ord.market.toString()}</td>
+      <td>PaymentDate:</td>
+      <td>${ord.paymentDate}</td>
+    </tr>
+    <tr>
+      <td>Phone:</td>
+      <td>${ord.phone}</td>
+      <td>PostalCode:</td>
+      <td>${ord.postalCode}</td>
+      <td>Province:</td>
+      <td>${ord.province}</td>
+      <td>Account</td>
+      <td>${ord.account.prettyName()}</td>
+    </tr>
+    <tr>
+      <td>ShipDate:</td>
+      <td>${ord.shipDate}</td>
+      <td>ShipLevel:</td>
+      <td>${ord.shipLevel}</td>
+      <td>ShippingAmount:</td>
+      <td>${ord.shippingAmount}</td>
+      <td>ShippingService:</td>
+      <td>${ord.shippingService}</td>
+    </tr>
+    <tr>
+      <td>State:</td>
+      <td style="color:${'#' + ord.state.color()}}">${ord.state}</td>
+      <td>TotalAmount:</td>
+      <td>${ord.totalAmount}</td>
+      <td>TrackNo:</td>
+      <td>${ord.trackNo}</td>
+      <td>UserId:</td>
+      <td>${ord.userid}</td>
+    </tr>
+    <tr>
+      <td>Memo</td>
+      <td colspan="7">${ord.memo}</td>
+    </tr>
+  </table>
 </div>
 
 <div class="label label-info">Order Items</div>
 <div>
-    <table class="table table-bordered">
+  <table class="table table-bordered">
+    <tr>
+      <th>SKU</th>
+      <th>Id</th>
+      <th>Qty</th>
+      <th>Price</th>
+      <th>ShipPrice</th>
+      <th>ProductName</th>
+      <th>CreateDate</th>
+      <th>Memo</th>
+    </tr>
+      #{list items:ord.items, as:'item'}
         <tr>
-            <th>SKU</th>
-            <th>Id</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>ShipPrice</th>
-            <th>ProductName</th>
-            <th>CreateDate</th>
-            <th>Memo</th>
+          <td>${item.product.sku}</td>
+          <td>${item.id}</td>
+          <td>${item.quantity}</td>
+          <td>${item.price} ${item.currency}</td>
+          <td>${item.shippingPrice}</td>
+          <td>
+            <a target="_blank" href="${item.selling.asinLink()}"><i class="icon-external-link"></i> ${item.listingName}
+            </a></td>
+          <td>${item.createDate}</td>
+          <td>${item.memo}</td>
         </tr>
-        #{list items:ord.items, as:'item'}
-            <tr>
-                <td>${item.product.sku}</td>
-                <td>${item.id}</td>
-                <td>${item.quantity}</td>
-                <td>${item.price} ${item.currency}</td>
-                <td>${item.shippingPrice}</td>
-                <td>
-                    <a target="_blank" href="${item.selling.asinLink()}"><i class="icon-external-link"></i> ${item.listingName}
-                    </a></td>
-                <td>${item.createDate}</td>
-                <td>${item.memo}</td>
-            </tr>
-        #{/list}
-    </table>
+      #{/list}
+  </table>
 </div>
 
 <div class="label label-info">Order Fees</div>

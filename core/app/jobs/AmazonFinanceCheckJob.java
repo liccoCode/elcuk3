@@ -68,7 +68,11 @@ public class AmazonFinanceCheckJob extends Job {
                 acc = accMap.get(m.name());
             }
 
-            new FinanceShippedPromise(acc, m, orderSize).now();
+            // 让 DB 的查询在同一个线程, 但抓取进入另外的线程
+            String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate DESC";
+            List<Orderr> orders = Orderr.find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
+            long leftOrders = Orderr.count(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
+            new FinanceShippedPromise(acc, m, Orderr.ids(orders), leftOrders).now();
         }
 
     }
@@ -104,10 +108,10 @@ public class AmazonFinanceCheckJob extends Job {
     }
 
     public static String deleteSaleFees(List<Orderr> orders) {
-        List<String> orderIds = new ArrayList<String>();
-        for(Orderr order : orders) {
-            orderIds.add(order.orderId);
-        }
+        return deleteSaleFees(Orderr.ids(orders));
+    }
+
+    public static String deleteSaleFees(Collection<String> orderIds) {
         String sql = "DELETE FROM SaleFee WHERE " + SqlSelect.whereIn("order_orderId", orderIds);
         DB.execute(sql);
         return sql;

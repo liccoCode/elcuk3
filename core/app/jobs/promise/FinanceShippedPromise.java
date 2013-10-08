@@ -37,15 +37,27 @@ import java.util.List;
 public class FinanceShippedPromise extends Job<List<SaleFee>> {
     private Account account;
     private M market;
-    private int orderSize = 8;
+    /**
+     * 传递一个值
+     */
+    private long leftOrders = 0;
+    private List<String> orderIds = new ArrayList<String>();
     private List<String> missingFeeType = new ArrayList<String>();
     private List<String> warnningOrders = new ArrayList<String>();
     private List<String> errorMsg = new ArrayList<String>();
 
-    public FinanceShippedPromise(Account account, M market, int orderSize) {
+
+    public FinanceShippedPromise(Account account, M market, List<String> orderIds) {
         this.account = account;
         this.market = market;
-        this.orderSize = orderSize;
+        this.orderIds = orderIds;
+        this.leftOrders = -1;
+    }
+    public FinanceShippedPromise(Account account, M market, List<String> orderIds, long leftOrders) {
+        this.account = account;
+        this.market = market;
+        this.orderIds = orderIds;
+        this.leftOrders = leftOrders;
     }
 
     @Override
@@ -53,34 +65,32 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         // 1. 访问 Transaction View 获取 transaction detail URL
         // 2. 访问 transaction detail URL 解析出订单的 SaleFee
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate DESC";
-        List<Orderr> orders = Orderr.find(jpql, this.account, this.market, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
-        long leftOrders = Orderr.count(jpql, this.account, this.market, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
-        if(orders.size() > 0) {
-            // 这里会让同账户, 不同市场的请求 block 住
+        if(orderIds != null && orderIds.size() > 0) {
             synchronized(this.account.cookieStore()) {
                 try {
                     this.account.changeRegion(this.market);
-                    for(Orderr order : orders) {
-                        List<String> urls = this.transactionURLs(order.orderId);
+                    for(String orderId : orderIds) {
+                        List<String> urls = this.transactionURLs(orderId);
                         List<SaleFee> orderFees = new ArrayList<SaleFee>();
                         for(String url : urls) {
                             orderFees.addAll(this.saleFees(url));
                         }
                         fees.addAll(orderFees);
-                        Orderr changeOrderr = Orderr.findById(order.orderId);
-                        changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
-                        changeOrderr.save();
+                        if(FinanceShippedPromise.isWarnning(orderFees)) {
+                            Orderr changeOrderr = Orderr.findById(orderId);
+                            changeOrderr.warnning = FinanceShippedPromise.isWarnning(orderFees);
+                            changeOrderr.save();
+                        }
                     }
                 } finally {
                     this.account.changeRegion(this.account.type);
                     emailWarnningCheck();
                 }
             }
-            AmazonFinanceCheckJob.deleteSaleFees(orders);
+            AmazonFinanceCheckJob.deleteSaleFees(orderIds);
             AmazonFinanceCheckJob.saveFees(fees);
             Logger.info("AmazonFinanceCheckJob deal %s %s %s Orders and %s SaleFees, left %s Orders to fetch.",
-                    this.account.prettyName(), this.market.name(), orders.size(), fees.size(), leftOrders);
+                    this.account.prettyName(), this.market.name(), orderIds.size(), fees.size(), this.leftOrders);
         } else {
             Logger.info("AmazonFinanceCheckJob %s %s No Fees founded.", this.account.prettyName(), this.market);
         }
@@ -132,15 +142,82 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         List<SaleFee> fees = new ArrayList<SaleFee>();
 
         fees.addAll(productCharges(doc, url));
+        fees.addAll(promotionFee(doc, url));
         fees.addAll(otherFee(doc, url));
         fees.addAll(amazonFee(doc, url));
         Logger.info("Shipped Order SaleFee(%s): %s", fees.size(), url);
         return fees;
     }
 
-    public List<SaleFee> amazonFee(Document doc, String url) {
+    /**
+     * 抽取 ProductCharges 费用
+     *
+     * @param doc
+     * @param url
+     * @return
+     */
+    public List<SaleFee> productCharges(Document doc, String url) {
+        return haveFiveTdChild(doc, url, "#breakdown_data_Product_charges", FeeType.productCharger());
+    }
+
+    public List<SaleFee> promotionFee(Document doc, String url) {
+        return haveFiveTdChild(doc, url, "#breakdown_data_Promo_rebates", FeeType.promotions());
+    }
+
+    private List<SaleFee> haveFiveTdChild(Document doc, String url, String select, FeeType feeType) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        Element amazons = doc.select("#breakdown_data_Amazon_fees").first();
+        Element promotions = doc.select(select).first();
+        if(promotions == null) return fees;
+        Element nextPromotion = promotions.nextElementSibling();
+        while(nextPromotion != null) {
+            if(nextPromotion.children().size() < 5)
+                nextPromotion = nextPromotion.nextElementSibling();
+            if(StringUtils.isNotBlank(nextPromotion.id()))
+                break;
+
+            SaleFee fee = new SaleFee();
+            fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
+            fee.account = this.account;
+            fee.cost = this.fee(nextPromotion.select("td:eq(4)").text());
+            fee.market = this.market;
+            fee.currency = this.currency(nextPromotion.select("td:eq(4)").text());
+            fee.usdCost = fee.currency.toUSD(fee.cost);
+            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
+            fee.qty = NumberUtils.toInt(nextPromotion.select("td:eq(2)").text().split(":")[1], 1);
+            fee.type = feeType;
+            if(feeTypeCheck(fee, nextPromotion, url))
+                fees.add(fee);
+
+            nextPromotion = nextPromotion.nextElementSibling();
+        }
+        return fees;
+    }
+
+    /**
+     * 抽取 others fee 部分的费用(例如 shipping)
+     *
+     * @param doc
+     * @param url
+     * @return
+     */
+    public List<SaleFee> otherFee(Document doc, String url) {
+        return haveThreeTdChild(doc, url, "#breakdown_data_Other", FeeType.shipping());
+    }
+
+    /**
+     * 抽取 Amazon Fees 部分的费用
+     *
+     * @param doc
+     * @param url
+     * @return
+     */
+    public List<SaleFee> amazonFee(Document doc, String url) {
+        return haveThreeTdChild(doc, url, "#breakdown_data_Amazon_fees", null);
+    }
+
+    private List<SaleFee> haveThreeTdChild(Document doc, String url, String select, FeeType feeType) {
+        List<SaleFee> fees = new ArrayList<SaleFee>();
+        Element amazons = doc.select(select).first();
         if(amazons == null) return fees;
         Element nextElement = amazons.nextElementSibling();
         while(nextElement != null) {
@@ -158,7 +235,11 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             fee.usdCost = fee.currency.toUSD(fee.cost);
             fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
             fee.qty = 1;
-            fee.type = this.amazonFeeType(nextElement.select("td:eq(0)").text());
+            if(feeType == null) {
+                fee.type = this.amazonFeeType(nextElement.select("td:eq(0)").text());
+            } else {
+                fee.type = feeType;
+            }
             if(feeTypeCheck(fee, nextElement, url))
                 fees.add(fee);
             nextElement = nextElement.nextElementSibling();
@@ -222,7 +303,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             return FeeType.findById("promorebates");
         } else if(text.contains("per unit fulfillment")) {
             return FeeType.findById("fbaperunitfulfillmentfee");
-        } else if(text.contains("per order fulfillment")) {
+        } else if(text.contains("per order fulfillment") || text.contains("per order fulfilment")) {
             return FeeType.findById("fbaperorderfulfilmentfee");
         } else if(text.contains("variable closing")) {
             return FeeType.findById("variableclosingfee");
@@ -231,66 +312,6 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         } else {
             return null;
         }
-    }
-
-    public List<SaleFee> otherFee(Document doc, String url) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        Element others = doc.select("#breakdown_data_Other").first();
-        if(others == null) return fees;
-        Element nextElement = others.nextElementSibling();
-
-        while(nextElement != null) {
-            if(nextElement.children().size() < 3)
-                nextElement = nextElement.nextElementSibling();
-            if(StringUtils.isNotBlank(nextElement.id()))
-                break;
-
-            SaleFee fee = new SaleFee();
-            fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
-            fee.account = this.account;
-            fee.cost = this.fee(nextElement.select("td:eq(2)").text());
-            fee.market = this.market;
-            fee.currency = this.currency(nextElement.select("td:eq(2)").text());
-            fee.usdCost = fee.currency.toUSD(fee.cost);
-            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
-            fee.qty = 1;
-            fee.type = FeeType.shipping();
-            if(feeTypeCheck(fee, nextElement, url))
-                fees.add(fee);
-
-            nextElement = nextElement.nextElementSibling();
-        }
-        return fees;
-    }
-
-    public List<SaleFee> productCharges(Document doc, String url) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        Element productCharge = doc.select("#breakdown_data_Product_charges").first();
-        if(productCharge == null) return fees;
-        Element nextElement = productCharge.nextElementSibling();
-
-        while(nextElement != null) {
-            if(nextElement.children().size() < 5)
-                nextElement = nextElement.nextElementSibling();
-            if(StringUtils.isNotBlank(nextElement.id()))
-                break;
-
-            SaleFee fee = new SaleFee();
-            fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
-            fee.account = this.account;
-            fee.cost = this.fee(nextElement.select("td:eq(4)").text());
-            fee.market = this.market;
-            fee.currency = this.currency(nextElement.select("td:eq(4)").text());
-            fee.usdCost = fee.currency.toUSD(fee.cost);
-            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
-            fee.qty = NumberUtils.toInt(nextElement.select("td:eq(2)").text().split(":")[1], 1);
-            fee.type = FeeType.productCharger();
-            if(feeTypeCheck(fee, nextElement, url))
-                fees.add(fee);
-
-            nextElement = nextElement.nextElementSibling();
-        }
-        return fees;
     }
 
     public List<String> transactionURLs(String orderId) {
