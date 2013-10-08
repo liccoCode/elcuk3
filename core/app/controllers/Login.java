@@ -59,9 +59,7 @@ public class Login extends Secure.Security {
         if(user == null) return false;
         if("root_user".equals(user.username)) return true;
         Set<Privilege> privileges = Privilege.privileges(user.username);
-        Privilege privilege = (Privilege) CollectionUtils
-                .find(privileges, new PrivilegePrediect(profile.toLowerCase()));
-        return privilege != null;
+        return CollectionUtils.find(privileges, new PrivilegePrediect(profile.toLowerCase())) != null;
     }
 
     /**

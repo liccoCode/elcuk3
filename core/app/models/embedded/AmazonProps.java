@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.joda.time.DateTime;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -108,12 +109,12 @@ public class AmazonProps implements Serializable {
      * 促销产品价格的开始日期
      */
     @Expose
-    public Date startDate;
+    public Date startDate = DateTime.now().toDate();
     /**
      * 促销产品价格的结束日期
      */
     @Expose
-    public Date endDate;
+    public Date endDate = DateTime.now().plusYears(3).toDate();
 
     /**
      * Does your item have a legal disclaimer associated with it?
@@ -403,8 +404,6 @@ public class AmazonProps implements Serializable {
         }
 
         Set<NameValuePair> params = new HashSet<NameValuePair>();
-        F.T2<M, Float> our_price = Webs.amzPriceFormat(
-                doc.select("#our_price").val(), sell.account.type);
 
         for(Element el : inputs) {
             String name = el.attr("name").toLowerCase().trim();
@@ -433,8 +432,10 @@ public class AmazonProps implements Serializable {
             } else if("discounted_price".equals(name)) {
                 // 价格, 两个日期, discounted_price_start_date, discounted_price_end_date
                 addParams(name, Webs.amzPriceToFormat(this.salePrice, priceFormat), params);
-                addParams("discounted_price_start_date", Dates.listingUpdateFmt(sell.market, this.startDate), params);
-                addParams("discounted_price_end_date", Dates.listingUpdateFmt(sell.market, this.endDate), params);
+            } else if("discounted_price_start_date".equals(name)) {
+                addParams(name, Dates.listingUpdateFmt(sell.market, this.startDate), params);
+            } else if("discounted_price_end_date".equals(name)) {
+                addParams(name, Dates.listingUpdateFmt(sell.market, this.endDate), params);
             } else if("offering_can_be_gift_wrapped".equals(name))
                 addParams(name, this.isGiftWrap ? "on" : "false", params);
             else if("offering_can_be_gift_messaged".equals(name)) {
@@ -450,8 +451,10 @@ public class AmazonProps implements Serializable {
                 this.searchTermsCheck(params);
             } else if("activeClientTimeOnTask".equals(name)) {
                 addParams(name, 18059 + "", params);
+            } else if("checkbox".equals(el.attr("type"))) {
+                addParams(name, "checked".equals(el.attr("checked")) ? "on" : "false", params);
+                // checkbox 过滤
             } else {
-                // checkbox?
                 addParams(name, el.val(), params);
             }
         }
