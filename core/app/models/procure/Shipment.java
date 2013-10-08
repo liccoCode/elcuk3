@@ -534,11 +534,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.save();
     }
 
-    private void noExpressValidate() {
-        if(this.type == T.EXPRESS)
-            Validation.addError("", "快递运输单不需要手动处理");
-    }
-
     private void shouldSomeStateValidate(S state, String action) {
         if(this.state != state)
             Validation.addError("", "运输单应该在 " + state.label() + " 再进行" + action + "操作");
@@ -567,9 +562,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Mails.shipment_clearance(this);
         } else {
             shouldSomeStateValidate(S.SHIPPING, "到港");
-
             if(Validation.hasErrors()) return;
-
             if(date == null) date = new Date();
         }
         this.state = S.CLEARANCE;
@@ -584,7 +577,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param date
      */
     public void pickGoods(Date date) {
-        noExpressValidate();
         shouldSomeStateValidate(S.CLEARANCE, "提货");
 
         if(Validation.hasErrors()) return;
@@ -601,7 +593,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param date
      */
     public void booking(Date date) {
-        noExpressValidate();
         shouldSomeStateValidate(S.PACKAGE, "预约");
 
         if(Validation.hasErrors()) return;
