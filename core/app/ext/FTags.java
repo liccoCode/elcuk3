@@ -36,6 +36,7 @@ public class FTags extends FastTags {
         } catch(TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         } catch(Exception e) {
+            e.printStackTrace();
             throw new TemplateNotFoundException("FastTag", template.template, fromLine);
         }
     }

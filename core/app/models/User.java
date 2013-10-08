@@ -27,6 +27,8 @@ import java.util.*;
 @Entity
 @org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class User extends Model {
+    private static final long serialVersionUID = 4195929532608535016L;
+
     public enum P {
         GUEST,
         NORMAL,
