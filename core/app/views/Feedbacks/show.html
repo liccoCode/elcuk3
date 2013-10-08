@@ -6,66 +6,66 @@
 #{flash_alert /}
 <div class="label label-info">Feedback</div>
 <div>
-    <table class="table table-condensed table-bordered">
-        <tr>
-            <th>OrderId</th>
-            <td>
-                <a href="${feedback.orderr.orderLink()}" target="_blank">
-                    <i class="icon-external-link"></i> ${feedback.orderId}
-                </a>
-            </td>
-            <th>UserId</th>
-            <td>${feedback.orderr.userid}</td>
-            <th>Score</th>
-            <td>${feedback.score}</td>
-        </tr>
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <th>OrderId</th>
+      <td>
+        <a href="${feedback.orderr.orderLink()}" target="_blank">
+          <i class="icon-external-link"></i> ${feedback.orderId}
+        </a>
+      </td>
+      <th>UserId</th>
+      <td>${feedback.orderr.userid}</td>
+      <th>Score</th>
+      <td>${feedback.score}</td>
+    </tr>
 
-        <tr>
-            <th>Email</th>
-            <td>${feedback.email}</td>
-            <th>Market</th>
-            <td>${feedback.market}</td>
-            <th>OsTicketId</th>
-            <td>No Ticket 处理</td>
-        </tr>
+    <tr>
+      <th>Email</th>
+      <td>${feedback.email}</td>
+      <th>Market</th>
+      <td>${feedback.market}</td>
+      <th>OsTicketId</th>
+      <td>No Ticket 处理</td>
+    </tr>
 
-        <tr>
-            <td colspan="6">
-                <div class="row-fluid">
-                    <div class="span6">没有 Ticket 处理者了</div>
+    <tr>
+      <td colspan="6">
+        <div class="row-fluid">
+          <div class="span6">没有 Ticket 处理者了</div>
 
-                    <div class="span6">
-                    #{list items:feedback.orderr.items, as:'oitm'}
-                        <img src="${oitm.selling.listing.picUrls}">
-                    #{/list}
-                    </div>
-                </div>
+          <div class="span6">
+          #{list items:feedback.orderr.items, as:'oitm'}
+            <img src="${oitm.selling.listing.picUrls}">
+          #{/list}
+          </div>
+        </div>
 
-            </td>
-        </tr>
+      </td>
+    </tr>
 
 
-        <tr>
-            <td colspan="6" class="alert alert-info">
-                <h4 rel="popover" content="Feedback 的留言" placement="left" width='auto'>
-                    <i class="icon-question-sign"></i> Feedback
-                </h4>
+    <tr>
+      <td colspan="6" class="alert alert-info">
+        <h4 rel="popover" content="Feedback 的留言" placement="left" width='auto'>
+          <i class="icon-question-sign"></i> Feedback
+        </h4>
 
-                <p>${feedback.feedback.raw()}</p>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="6" class="alert alert-success">
-                <h4 rel="popover" content="系统自行添加的对 Feedback 的记录" placement="left" width='auto'>
-                    <i class="icon-question-sign"></i> Feedback Comment
-                </h4>
+        <p>${feedback.feedback.raw()}</p>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="6" class="alert alert-success">
+        <h4 rel="popover" content="系统自行添加的对 Feedback 的记录" placement="left" width='auto'>
+          <i class="icon-question-sign"></i> Feedback Comment
+        </h4>
 
-                <p>${feedback.memo.raw()}</p>
-            </td>
-        </tr>
-    </table>
+        <p>${feedback.memo.raw()}</p>
+      </td>
+    </tr>
+  </table>
 </div>
 
 #{if feedback.orderr != null}
-    #{render 'Orders/show.html', ord: feedback.orderr, part: true/}
+<a href="@{Orders.show(feedback.orderId)}">跳转到订单 ${feedback.orderId}</a>
 #{/if}
