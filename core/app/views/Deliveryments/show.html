@@ -162,7 +162,7 @@
                 <div style="overflow:auto;height:150px;width:580px;">
                   #{list items:dmt.getCopperItems(), as:'cooperItem'}
                     <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank"class="btn btn-small
-                    btn-info" rel="popover" content="${ext.CooperItemHelper.formatProductTerms(cooperItem)}" >
+                    btn-info" rel="popover" content="${cooperItem.formatProductTerms()}" >
                       ${cooperItem.product.sku}
                      </a>
                   #{/list}
