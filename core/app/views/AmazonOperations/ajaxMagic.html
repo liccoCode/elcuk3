@@ -42,7 +42,7 @@
         <td>#{yesOrNo f:r.isVineVoice /}</td>
         <td>#{yesOrNo f:r.purchased /}</td>
         <td>#{yesOrNo f:r.isRealName /}</td>
-        <td style="background-color:${ext.TicketHelper.color(r.rating)}">${r.rating}</td>
+        <td style="background-color:${r.rating.color()}">${r.rating}</td>
         <td style="cursor:pointer;background:${r.color()}" data-toggle="toggle" data-target="#review_${r.reviewId}">
             <span class="badge badge-inverse">${r.length()}</span>
             #{if r.isWithinTop1000()}
