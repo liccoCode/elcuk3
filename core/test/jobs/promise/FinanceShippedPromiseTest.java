@@ -21,6 +21,7 @@ import play.libs.F;
 import play.libs.IO;
 import play.test.UnitTest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -60,6 +61,19 @@ public class FinanceShippedPromiseTest extends UnitTest {
         List<String> urls = promise.transactionURLs(orderId);
         assertThat(urls.size(), is(1));
         assertThat(urls.get(0), is(containsString("transaction_id=2013154JN1dVmcbRKeKMsWCKF_9xg")));
+    }
+
+    @Ignore("选择性测试, 直接访问到真是网络环境了")
+    @Test
+    public void testTransactionURLsUS() throws IOException, ClassNotFoundException {
+        Account account = FactoryBoy.create(Account.class, "us");
+        Webs.dev_login(account);
+        String orderId = "102-6196603-4956252";
+        FinanceShippedPromise promise = new FinanceShippedPromise(account, account.type, null, 8);
+
+        List<String> urls = promise.transactionURLs(orderId);
+        assertThat(urls.size(), is(1));
+        assertThat(urls.get(0), is(containsString("transaction_id=2013274_hAo33APRC6VqnQ0J2qnng")));
     }
 
     @Test
