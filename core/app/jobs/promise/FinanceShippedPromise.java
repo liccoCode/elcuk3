@@ -53,6 +53,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         this.orderIds = orderIds;
         this.leftOrders = -1;
     }
+
     public FinanceShippedPromise(Account account, M market, List<String> orderIds, long leftOrders) {
         this.account = account;
         this.market = market;
@@ -157,40 +158,11 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
      * @return
      */
     public List<SaleFee> productCharges(Document doc, String url) {
-        return haveFiveTdChild(doc, url, "#breakdown_data_Product_charges", FeeType.productCharger());
+        return adjustFiveOrThreeChild(doc, url, "#breakdown_data_Product_charges", FeeType.productCharger());
     }
 
     public List<SaleFee> promotionFee(Document doc, String url) {
-        return haveFiveTdChild(doc, url, "#breakdown_data_Promo_rebates", FeeType.promotions());
-    }
-
-    private List<SaleFee> haveFiveTdChild(Document doc, String url, String select, FeeType feeType) {
-        List<SaleFee> fees = new ArrayList<SaleFee>();
-        Element promotions = doc.select(select).first();
-        if(promotions == null) return fees;
-        Element nextPromotion = promotions.nextElementSibling();
-        while(nextPromotion != null) {
-            if(nextPromotion.children().size() < 5)
-                nextPromotion = nextPromotion.nextElementSibling();
-            if(StringUtils.isNotBlank(nextPromotion.id()))
-                break;
-
-            SaleFee fee = new SaleFee();
-            fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
-            fee.account = this.account;
-            fee.cost = this.fee(nextPromotion.select("td:eq(4)").text());
-            fee.market = this.market;
-            fee.currency = this.currency(nextPromotion.select("td:eq(4)").text());
-            fee.usdCost = fee.currency.toUSD(fee.cost);
-            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
-            fee.qty = NumberUtils.toInt(nextPromotion.select("td:eq(2)").text().split(":")[1], 1);
-            fee.type = feeType;
-            if(feeTypeCheck(fee, nextPromotion, url))
-                fees.add(fee);
-
-            nextPromotion = nextPromotion.nextElementSibling();
-        }
-        return fees;
+        return adjustFiveOrThreeChild(doc, url, "#breakdown_data_Promo_rebates", FeeType.promotions());
     }
 
     /**
@@ -201,7 +173,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
      * @return
      */
     public List<SaleFee> otherFee(Document doc, String url) {
-        return haveThreeTdChild(doc, url, "#breakdown_data_Other", FeeType.shipping());
+        return adjustFiveOrThreeChild(doc, url, "#breakdown_data_Other", FeeType.shipping());
     }
 
     /**
@@ -212,39 +184,73 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
      * @return
      */
     public List<SaleFee> amazonFee(Document doc, String url) {
-        return haveThreeTdChild(doc, url, "#breakdown_data_Amazon_fees", null);
+        return adjustFiveOrThreeChild(doc, url, "#breakdown_data_Amazon_fees", null);
     }
 
-    private List<SaleFee> haveThreeTdChild(Document doc, String url, String select, FeeType feeType) {
+    /**
+     * 自动选择使用拥有 5 个 td 子元素还是 3 个 td 子元素进行解析
+     *
+     * @param doc
+     * @param url
+     * @param select
+     * @param feeType
+     * @return
+     */
+    private List<SaleFee> adjustFiveOrThreeChild(Document doc, String url, String select, FeeType feeType) {
         List<SaleFee> fees = new ArrayList<SaleFee>();
-        Element amazons = doc.select(select).first();
-        if(amazons == null) return fees;
-        Element nextElement = amazons.nextElementSibling();
-        while(nextElement != null) {
-            if(nextElement.children().size() < 3)
-                nextElement = nextElement.nextElementSibling();
-            if(StringUtils.isNotBlank(nextElement.id()))
+        Element promotions = doc.select(select).first();
+        if(promotions == null) return fees;
+        Element nextPromotion = promotions.nextElementSibling();
+        while(nextPromotion != null) {
+            if(StringUtils.isNotBlank(nextPromotion.id()))
                 break;
 
-            SaleFee fee = new SaleFee();
-            fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
-            fee.account = this.account;
-            fee.cost = this.fee(nextElement.select("td:eq(2)").text());
-            fee.market = this.market;
-            fee.currency = this.currency(nextElement.select("td:eq(2)").text());
-            fee.usdCost = fee.currency.toUSD(fee.cost);
-            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
-            fee.qty = 1;
-            if(feeType == null) {
-                fee.type = this.amazonFeeType(nextElement.select("td:eq(0)").text());
-            } else {
-                fee.type = feeType;
+            SaleFee fee = null;
+            if(nextPromotion.children().size() == 5) {
+                fee = haveFiveTdChild(doc, url, nextPromotion, feeType);
+            } else if(nextPromotion.children().size() == 3) {
+                fee = haveThreeTdChild(doc, url, nextPromotion, feeType);
             }
-            if(feeTypeCheck(fee, nextElement, url))
-                fees.add(fee);
-            nextElement = nextElement.nextElementSibling();
+            if(fee != null) fees.add(fee);
+            nextPromotion = nextPromotion.nextElementSibling();
         }
         return fees;
+    }
+
+    private SaleFee haveFiveTdChild(Document doc, String url, Element nextTr, FeeType feeType) {
+        if(nextTr.children().size() != 5)
+            return null;
+
+        SaleFee fee = new SaleFee();
+        fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
+        fee.account = this.account;
+        fee.market = this.market;
+        fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
+        fee.cost = this.fee(nextTr.select("td:eq(4)").text());
+        fee.currency = this.currency(nextTr.select("td:eq(4)").text());
+        fee.usdCost = fee.currency.toUSD(fee.cost);
+        fee.qty = NumberUtils.toInt(nextTr.select("td:eq(2)").text().split(":")[1].trim(), 1);
+        fee.type = feeType;
+        return feeTypeCheck(fee, nextTr, url) ? fee : null;
+    }
+
+    private SaleFee haveThreeTdChild(Document doc, String url, Element nextTr, FeeType feeType) {
+        if(nextTr.children().size() != 3)
+            return null;
+
+        SaleFee fee = new SaleFee();
+        fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
+        fee.account = this.account;
+        fee.market = this.market;
+        fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
+
+        fee.cost = this.fee(nextTr.select("td:eq(2)").text());
+        fee.currency = this.currency(nextTr.select("td:eq(2)").text());
+        fee.usdCost = fee.currency.toUSD(fee.cost);
+        fee.qty = 1;
+        fee.type = this.amazonFeeType(nextTr.select("td:eq(0)").text());
+        if(fee.type == null) fee.type = feeType;
+        return feeTypeCheck(fee, nextTr, url) ? fee : null;
     }
 
     /**
