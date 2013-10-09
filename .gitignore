@@ -17,6 +17,11 @@ test-result
 eclipse
 modules
 server.pid
+*.log
+*.rdb
 *.iml
 *.ipr
 *.iws
+*.ids
+
+core/test/*.json
