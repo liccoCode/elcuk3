@@ -53,6 +53,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         this.orderIds = orderIds;
         this.leftOrders = -1;
     }
+
     public FinanceShippedPromise(Account account, M market, List<String> orderIds, long leftOrders) {
         this.account = account;
         this.market = market;
@@ -170,7 +171,7 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         if(promotions == null) return fees;
         Element nextPromotion = promotions.nextElementSibling();
         while(nextPromotion != null) {
-            if(nextPromotion.children().size() < 5)
+            if(nextPromotion.children().size() < 3)
                 nextPromotion = nextPromotion.nextElementSibling();
             if(StringUtils.isNotBlank(nextPromotion.id()))
                 break;
@@ -178,13 +179,22 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             SaleFee fee = new SaleFee();
             fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
             fee.account = this.account;
-            fee.cost = this.fee(nextPromotion.select("td:eq(4)").text());
             fee.market = this.market;
-            fee.currency = this.currency(nextPromotion.select("td:eq(4)").text());
-            fee.usdCost = fee.currency.toUSD(fee.cost);
             fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
-            fee.qty = NumberUtils.toInt(nextPromotion.select("td:eq(2)").text().split(":")[1], 1);
-            fee.type = feeType;
+            if(nextPromotion.children().size() >= 5) {
+                fee.cost = this.fee(nextPromotion.select("td:eq(4)").text());
+                fee.currency = this.currency(nextPromotion.select("td:eq(4)").text());
+                fee.usdCost = fee.currency.toUSD(fee.cost);
+                fee.qty = NumberUtils.toInt(nextPromotion.select("td:eq(2)").text().split(":")[1].trim(), 1);
+                fee.type = feeType;
+            } else if(nextPromotion.children().size() == 3) {
+                // us 102-6196603-4956252 的情况
+                fee.cost = this.fee(nextPromotion.select("td:eq(2)").text());
+                fee.currency = this.currency(nextPromotion.select("td:eq(2)").text());
+                fee.usdCost = fee.currency.toUSD(fee.cost);
+                fee.qty = 1;
+                fee.type = this.amazonFeeType(nextPromotion.select("td:eq(0)").text());
+            }
             if(feeTypeCheck(fee, nextPromotion, url))
                 fees.add(fee);
 
@@ -229,11 +239,12 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
             SaleFee fee = new SaleFee();
             fee.orderId = StringUtils.split(StringUtils.splitByWholeSeparator(url, "orderId=")[1], "&")[0];
             fee.account = this.account;
-            fee.cost = this.fee(nextElement.select("td:eq(2)").text());
             fee.market = this.market;
+            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
+
+            fee.cost = this.fee(nextElement.select("td:eq(2)").text());
             fee.currency = this.currency(nextElement.select("td:eq(2)").text());
             fee.usdCost = fee.currency.toUSD(fee.cost);
-            fee.date = this.date(doc.select("#transaction_date").text().split(":")[1].trim());
             fee.qty = 1;
             if(feeType == null) {
                 fee.type = this.amazonFeeType(nextElement.select("td:eq(0)").text());

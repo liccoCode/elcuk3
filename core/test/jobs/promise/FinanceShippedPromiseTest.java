@@ -147,7 +147,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         Orderr orderr = FactoryBoy.create(Orderr.class, new BuildCallback<Orderr>() {
             @Override
             public void build(Orderr target) {
-                target.orderId = "107-2874174-4269032";
+                target.orderId = "102-6196603-4956252";
             }
         });
 
@@ -166,16 +166,24 @@ public class FinanceShippedPromiseTest extends UnitTest {
         assertThat(fees.size(), is(8));
 
         assertThat(fees.get(0).type, is(FeeType.productCharger()));
-        assertThat(fees.get(1).type, is(FeeType.productCharger()));
-        assertThat(fees.get(2).type, is(FeeType.promotions()));
-        assertThat(fees.get(3).type, is(FeeType.promotions()));
+        assertThat(fees.get(0).qty, is(2));
+        assertThat((double) fees.get(0).cost, is(closeTo(34.98, 0.1)));
+
+        assertThat(fees.get(1).type, is(FeeType.promotions()));
+        assertThat(fees.get(1).qty, is(2));
+        assertThat((double) fees.get(1).cost, is(0d));
+
+        assertThat(fees.get(2).type, is(FeeType.shipping()));
+        assertThat((double) fees.get(2).cost, is(closeTo(-8.45, 0.1)));
+
+        assertThat(fees.get(3).type, is(FeeType.shipping()));
+        assertThat((double) fees.get(3).cost, is(closeTo(8.45, 0.1)));
 
         assertThat(fees.get(4).type, is(FeeType.findById("commission")));
         assertThat(fees.get(5).type, is(FeeType.findById("fbaperorderfulfilmentfee")));
         assertThat(fees.get(6).type, is(FeeType.findById("fbaperunitfulfillmentfee")));
         assertThat(fees.get(7).type, is(FeeType.findById("fbaweightbasedfee")));
 
-        assertThat((double) fees.get(2).cost, is(closeTo(-1.96d, 0.01)));
         assertThat(fees.get(2).currency, is(Currency.USD));
     }
 
