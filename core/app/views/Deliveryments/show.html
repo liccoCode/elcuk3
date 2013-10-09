@@ -160,16 +160,12 @@
               <th>产品要求<br>(产品线)</th>
               <td colspan="3">
                 <div style="overflow:auto;height:150px;width:580px;">
-                 #{list items:dmt.units, as:'procureUnit' }
-                     #{list items:procureUnit.cooperator.cooperItems, as:'cooperItem'}
-                       #{if procureUnit.sku == cooperItem.product.sku}
-                         <a href="@{Cooperators.editCooperItem(cooperItem.id)}"
-                            target="_blank"class="btn btn-small btn-info" rel="popover" content="${ext.CooperItemHelper.formatProductTerms(cooperItem)}" >
-                          ${cooperItem.product.sku}
-                         </a>
-                       #{/if}
-                     #{/list}
-                 #{/list}
+                  #{list items:dmt.getCopperItems(), as:'cooperItem'}
+                    <a href="@{Cooperators.editCooperItem(cooperItem.id)}" target="_blank"class="btn btn-small
+                    btn-info" rel="popover" content="${CooperItemHelper.formatProductTerms(cooperItem)}" >
+                      ${cooperItem.product.sku}
+                     </a>
+                  #{/list}
                 </div>
               </td>
             </tr>
