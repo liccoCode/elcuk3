@@ -111,17 +111,19 @@ $ ->
   ajaxBocRate = ->
     LoadMask.mask()
     $('#boc_rate').load('/payment/boc', ->
+      $('#currency').change()
       LoadMask.unmask()
     )
 
   ajaxExRate = (from = $('#request_currency').text()) ->
     LoadMask.mask()
     $('#ex_rate').load("/payment/xe?currency=#{from}", ->
+      $('#currency').change()
       LoadMask.unmask()
     )
 
-  ajaxExRate()
   ajaxBocRate()
+  ajaxExRate()
 
   # 初始化上传图片
   # 1. 首先初始化 dropbox

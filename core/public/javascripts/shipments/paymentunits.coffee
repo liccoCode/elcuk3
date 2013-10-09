@@ -199,7 +199,6 @@ $ ->
     false
   )
 
-$ ->
   #为运输单费用信息的TABLE，增加计算方法
   $('table.paymentInfo').on('statisticFee', (e) ->
     e.preventDefault()
