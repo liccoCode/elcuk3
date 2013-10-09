@@ -424,4 +424,17 @@ public class Deliveryment extends GenericModel {
         return true;
     }
 
+    /**
+     * 查找，属于该采购单的产品要求
+     */
+    public List<CooperItem> getCopperItems() {
+        List<CooperItem> cooperItems = new ArrayList<CooperItem>();
+
+        for(ProcureUnit procureUnit : this.units) {
+            CooperItem cooperItem = CooperItem.find("cooperator.id=? AND product.sku=?", procureUnit.cooperator.id,
+                    procureUnit.product.sku).first();
+            cooperItems.add(cooperItem);
+        }
+        return cooperItems;
+    }
 }
