@@ -8,10 +8,11 @@ import helper.Webs;
 import models.market.AmazonListingReview;
 import models.market.Listing;
 import models.market.Orderr;
-import org.joda.time.DateTime;
 import play.Logger;
 import play.data.validation.Validation;
 import play.jobs.Job;
+
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,7 +45,6 @@ public class ListingReviewsWork extends Job<Listing> {
              * 更新, 需要对某一些字段进行判断后更新并添加 Comment
              */
             JsonArray array = reviews.getAsJsonArray();
-            listing.lastReviewCheckDate = DateTime.now().toDate();
             for(JsonElement e : array) {
                 AmazonListingReview review = AmazonListingReview.parseAmazonReviewJson(e); // 不是用 merge 是因为有些值需要处理
                 AmazonListingReview fromDB = AmazonListingReview.findById(review.alrId);
@@ -69,9 +69,11 @@ public class ListingReviewsWork extends Job<Listing> {
                     fromDB.checkMailAndTicket();
                 }
             }
-            listing.save();
         } catch(Exception e) {
             Logger.warn("Listing Review have [%s].", Webs.E(e));
+        } finally {
+            listing.lastReviewCheckDate = new Date();
+            listing.save();
         }
 
     }
