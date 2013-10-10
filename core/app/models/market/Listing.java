@@ -163,7 +163,7 @@ public class Listing extends GenericModel {
     /**
      * 上一次做 Review Check 的时间
      */
-    public Date lastReviewCheckDate;
+    public Date lastReviewCheckDate = new Date();
 
     public void setAsin(String asin) {
         this.asin = asin;
