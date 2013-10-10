@@ -105,7 +105,7 @@ public class PaymentUnitTest extends UnitTest {
 
         assertThat(paymentUnitOne.payment, is(paymentUnittwo.payment));
 
-        assertThat(Payment.count("SELECT COUNT(id) FROM Payment where id=?", paymentUnitOne.payment.id), is(1l));
+        assertThat(Payment.count("id=?", paymentUnitOne.payment.id), is(1l));
     }
 
     /**
@@ -154,7 +154,7 @@ public class PaymentUnitTest extends UnitTest {
 
         assertThat(paymentUnitOne.payment.id, not(paymentUnittwo.payment.id));
 
-        assertThat(Payment.count("SELECT COUNT(id) FROM Payment where id=?", paymentUnitOne.payment.id), is(1l));
-        assertThat(Payment.count("SELECT COUNT(id) FROM Payment where id=?", paymentUnittwo.payment.id), is(1l));
+        assertThat(Payment.count("id=?", paymentUnitOne.payment.id), is(1l));
+        assertThat(Payment.count("id=?", paymentUnittwo.payment.id), is(1l));
     }
 }
