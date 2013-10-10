@@ -9,7 +9,6 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import play.data.validation.Validation;
 import play.test.UnitTest;
@@ -17,6 +16,7 @@ import play.test.UnitTest;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 
 /**
  * 付费明细
@@ -31,7 +31,6 @@ public class PaymentUnitTest extends UnitTest {
     /**
      * 通过 paymentUnit 创建付款单
      */
-    @Ignore
     @Test
     public void testTransportApprove() {
         FactoryBoy.create(Account.class, "de");
@@ -59,7 +58,7 @@ public class PaymentUnitTest extends UnitTest {
 
         assertNotNull(paymentUnit.payment);
 
-        assertThat(Payment.count(), is(Long.parseLong("1")));
+        assertThat(Payment.count(), is(1l));
     }
 
 
@@ -71,7 +70,6 @@ public class PaymentUnitTest extends UnitTest {
      * <p/>
      * 预期结果：共属于同一个payment
      */
-    @Ignore
     @Test
     public void testTransportApproveManyCooperator() {
         FactoryBoy.create(Account.class, "de");
@@ -105,13 +103,15 @@ public class PaymentUnitTest extends UnitTest {
         assertNotNull(paymentUnitOne.payment);
         assertNotNull(paymentUnittwo.payment);
 
-        assertEquals(paymentUnitOne.payment, paymentUnittwo.payment);
+        assertThat(paymentUnitOne.payment, is(paymentUnittwo.payment));
+
+        assertThat(Payment.count("SELECT COUNT(id) FROM Payment where id=?", paymentUnitOne.payment.id), is(1l));
     }
 
     /**
      * 通过 paymentUnit 创建付款单
-     +* 条件：
-     * 同一个请款单sa           ]\
+     * 条件：
+     * 同一个请款单
      * 不同费用联系人
      * <p/>
      * 预期结果：不同费用联系人同的不同，产生两条对应的 payment
@@ -123,7 +123,7 @@ public class PaymentUnitTest extends UnitTest {
         FactoryBoy.create(ProcureUnit.class);
         FactoryBoy.create(Shipment.class);
         FactoryBoy.create(PaymentTarget.class);
-         final List<Cooperator> cooperators = FactoryBoy.batchCreate(2, Cooperator.class, "shipper",
+        final List<Cooperator> cooperators = FactoryBoy.batchCreate(2, Cooperator.class, "shipper",
                 new SequenceCallback<Cooperator>() {
                     @Override
                     public void sequence(Cooperator target, int i) {
@@ -137,7 +137,7 @@ public class PaymentUnitTest extends UnitTest {
                     @Override
                     public void sequence(PaymentUnit target, int i) {
                         // i 初始值为：1
-                        target.cooperator = cooperators.get(i-1);
+                        target.cooperator = cooperators.get(i - 1);
                         target.shipment = FactoryBoy.lastOrCreate(Shipment.class);
                         target.shipment.apply = FactoryBoy.lastOrCreate(TransportApply.class);
                     }
@@ -152,6 +152,9 @@ public class PaymentUnitTest extends UnitTest {
         assertNotNull(paymentUnitOne.payment);
         assertNotNull(paymentUnittwo.payment);
 
-        assertNotSame(paymentUnitOne.payment, paymentUnittwo.payment);
+        assertThat(paymentUnitOne.payment.id, not(paymentUnittwo.payment.id));
+
+        assertThat(Payment.count("SELECT COUNT(id) FROM Payment where id=?", paymentUnitOne.payment.id), is(1l));
+        assertThat(Payment.count("SELECT COUNT(id) FROM Payment where id=?", paymentUnittwo.payment.id), is(1l));
     }
 }
