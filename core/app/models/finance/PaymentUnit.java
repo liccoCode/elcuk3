@@ -128,10 +128,10 @@ public class PaymentUnit extends Model {
     public Shipment shipment;
 
     /**
-     *费用关系人
-     *
-     *在物流请款中，可能货物是由其它的运输商进行运输，要进行分别付费。
-     *默认值是当前，运输商
+     * 费用关系人
+     * <p/>
+     * 在物流请款中，可能货物是由其它的运输商进行运输，要进行分别付费。
+     * 默认值是当前，运输商
      */
     @OneToOne
     public Cooperator cooperator;
@@ -240,9 +240,15 @@ public class PaymentUnit extends Model {
          * 1. 判断是否拥有请款单
          * 2. 判断状态是否软删除, 软删除不允许处理
          * 3. 判断状态是否允许
+         * 4. 费用关系人是否有支付方式
          */
+        if(this.cooperator == null)
+            this.cooperator = this.shipment.cooper;
+
         if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
         if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
+        if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0)
+            Validation.addError("", "请添加合作伙伴" + this.cooperator.name + "的支付方式信息");
         if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state))
             Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
         if(Validation.hasErrors()) return;

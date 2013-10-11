@@ -39,5 +39,5 @@ public abstract class Apply extends Model {
      * 在每个子类中自行设置
      */
 
-    public abstract void generateSerialNumber(Cooperator cooper);
+    public abstract String generateSerialNumber(Cooperator cooper);
 }

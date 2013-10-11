@@ -503,7 +503,6 @@ public class Payment extends Model {
          * 2. 根据年份 + cooperator 确定是今天的第几次请款
          * 3. 生成 PaymentNumber
          */
-        String year = DateTime.now().toString("yyyy");
         // 找到 2013-01-01 ~ [2014-01-01 (- 1s)]
         long count = 0;
         if(apply instanceof TransportApply) {
@@ -513,7 +512,7 @@ public class Payment extends Model {
             count = Payment.count("pApply=?", apply);
             this.pApply = (ProcureApply) apply;
         }
-        this.paymentNumber = String.format("[%s]-%02d", apply.serialNumber, count + 1);
+        this.paymentNumber = String.format("[%s]-%02d", apply.generateSerialNumber(this.cooperator), count + 1);
         return this;
     }
 
