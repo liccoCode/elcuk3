@@ -865,6 +865,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             fee.currency = Currency.CNY;
             fee.unitPrice = Webs.scalePointUp(4, (float) (itm.unit.product.declaredValue * 6.35 * 0.2));
             fee.unitQty = itm.qty;
+            fee.cooperator = this.cooper;
             itm.produceFee(fee, transportDuty);
             if(Validation.hasErrors()) return;
 
