@@ -103,7 +103,7 @@ public class ProcureApply extends Apply {
         return currency;
     }
 
-    public void generateSerialNumber(Cooperator cooperator) {
+    public String generateSerialNumber(Cooperator cooperator) {
         /**
          * 1. 确定当前的年份
          * 2. 根据年份 + cooperator 确定是今天的第几次请款
@@ -118,7 +118,7 @@ public class ProcureApply extends Apply {
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
                 Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
         // count + 1 为新创建的编号
-        this.serialNumber = String.format("QK-%s-%03d-%s", this.cooperator.name, count + 1, now.toString("yy"));
+        return String.format("QK-%s-%03d-%s", this.cooperator.name, count + 1, now.toString("yy"));
     }
 
     public List<ElcukRecord> records() {
@@ -182,7 +182,7 @@ public class ProcureApply extends Apply {
 
         // 生成 ProcureApply
         ProcureApply apply = new ProcureApply();
-        apply.generateSerialNumber(dmtAndCop._2.iterator().next());
+        apply.serialNumber = apply.generateSerialNumber(dmtAndCop._2.iterator().next());
         apply.createdAt = apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();

@@ -43,7 +43,7 @@ public class TransportApply extends Apply {
 
 
     @Override
-    public void generateSerialNumber(Cooperator cooper) {
+    public String generateSerialNumber(Cooperator cooper) {
         /**
          * format: [SQK-合作伙伴-[当年第几次]-[年份]
          */
@@ -54,7 +54,7 @@ public class TransportApply extends Apply {
                 this.cooperator,
                 Dates.cn(String.format("%s-01-01", year)).toDate(),
                 Dates.cn(String.format("%s-01-01", year)).plusYears(1).minusSeconds(1).toDate());
-        this.serialNumber = String.format("SQK-%s-%03d-%s", this.cooperator.name, count + 1, now.toString("yy"));
+        return String.format("SQK-%s-%03d-%s", this.cooperator.name, count + 1, now.toString("yy"));
     }
 
     /**
@@ -90,7 +90,7 @@ public class TransportApply extends Apply {
 
         if(Validation.hasErrors()) return null;
         TransportApply apply = new TransportApply();
-        apply.generateSerialNumber(shipCoperPair._2.iterator().next());
+        apply.serialNumber = apply.generateSerialNumber(shipCoperPair._2.iterator().next());
         apply.createdAt = apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();

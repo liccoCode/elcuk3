@@ -11,8 +11,8 @@
     "unitPrice": "${fee.unitPrice}",
     "unitQty": "${fee.unitQty}",
     "cooperator":{
-        "id":"${fee.cooperator.id}",
-      "name":"${fee.cooperator.name}"
+        "id":"${fee?.cooperator?.id}",
+      "name":"${fee?.cooperator?.name}"
     },
     "memo": "${fee.memo}",
     "averagePrice": "${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}",

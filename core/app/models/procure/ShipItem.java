@@ -292,6 +292,7 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "运输运费类型不存在, 请添加");
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.unitQty < 1) Validation.addError("", "数量必须大于等于 1");
+        if(fee.cooperator == null) Validation.addError("", "请指定请款费用的费用关系人");
         if(Validation.hasErrors()) return;
         fee.shipItem = this;
         fee.shipment = this.shipment;
