@@ -114,6 +114,18 @@
       </div>
 
       <div class="control-group">
+        <label class="control-label">费用关系人</label>
+
+        <div class="controls">
+          <select name="fee.cooperator.id" class="input-small">
+            #{list items:cooperators, as:'cooper'}
+             <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
+            #{/list}
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
         <label class="control-label">备注</label>
 
         <div class="controls">
