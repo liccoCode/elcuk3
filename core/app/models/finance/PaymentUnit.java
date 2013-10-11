@@ -127,6 +127,15 @@ public class PaymentUnit extends Model {
     @ManyToOne
     public Shipment shipment;
 
+    /**
+     *费用关系人
+     *
+     *在物流请款中，可能货物是由其它的运输商进行运输，要进行分别付费。
+     *默认值是当前，运输商
+     */
+    @OneToOne
+    public Cooperator cooperator;
+
     public Date createdAt;
 
     /**
@@ -238,7 +247,7 @@ public class PaymentUnit extends Model {
             Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
         if(Validation.hasErrors()) return;
         if(this.payment == null) {
-            this.payment = Payment.buildPayment(this.shipment.cooper, this.currency, this.amount(), this.shipment.apply)
+            this.payment = Payment.buildPayment(this.cooperator, this.currency, this.amount(), this.shipment.apply)
                     .save();
         }
         this.state = S.APPROVAL;

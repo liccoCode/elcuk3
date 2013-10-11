@@ -10,6 +10,10 @@
     "symbol": "${fee.currency.symbol()}",
     "unitPrice": "${fee.unitPrice}",
     "unitQty": "${fee.unitQty}",
+    "cooperator":{
+        "id":"${fee.cooperator.id}",
+      "name":"${fee.cooperator.name}"
+    },
     "memo": "${fee.memo}",
     "averagePrice": "${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}",
     "currentAvgPrice": "${helper.Currency.CNY.symbol()} ${fee.currentAvgPrice().format('#.###')}",
