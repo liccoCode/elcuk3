@@ -18,7 +18,11 @@ import models.procure.ProcureUnit;
 public class PaymentUnitFactory extends ModelFactory<PaymentUnit> {
     @Override
     public PaymentUnit define() {
-        PaymentUnit unit = withOutState();
+        PaymentUnit unit = new PaymentUnit();
+        unit.amount = 1000;
+        unit.currency = Currency.CNY;
+        unit.procureUnit = FactoryBoy.lastOrCreate(ProcureUnit.class);
+        unit.feeType = FactoryBoy.lastOrCreate(FeeType.class);
         unit.state = PaymentUnit.S.APPLY;
         return unit;
     }
@@ -27,6 +31,16 @@ public class PaymentUnitFactory extends ModelFactory<PaymentUnit> {
     public PaymentUnit plan() {
         PaymentUnit unit = withOutState();
         unit.state = PaymentUnit.S.DENY;
+        return unit;
+    }
+
+    @Factory(name = "noPayment")
+    public PaymentUnit noPayment() {
+        PaymentUnit unit = new PaymentUnit();
+        unit.amount = 1000;
+        unit.currency = Currency.CNY;
+        unit.procureUnit = FactoryBoy.lastOrCreate(ProcureUnit.class);
+        unit.feeType = FactoryBoy.lastOrCreate(FeeType.class);
         return unit;
     }
 

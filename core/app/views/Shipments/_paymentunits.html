@@ -14,6 +14,7 @@
           <th class="span2">(3m)均价</th>
           <th class="span2">(now)均价</th>
           <th class="span2">总价</th>
+          <th class="span2">费用关系人</th>
           <th class="span3">备注</th>
           <th>申请人</th>
           <th class="span2">申请时间</th>
@@ -34,6 +35,7 @@
                 <i class="icon-search"></i>
               #{/if}
           </td>
+          <td>${fee.cooperator?.name}</td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
           <td>#{time_tooltip time:fee.createdAt /}</td>
@@ -79,6 +81,14 @@
 
         <label>总价
           <input type="number" readonly="" class="input-mini amount">
+        </label>
+
+        <label>费用关系人
+           <select name="fee.cooperator.id" class="input-small">
+             #{list items:cooperators, as:'cooper'}
+              <option ${ship.cooper.id == cooper.id ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
+             #{/list}
+           </select>
         </label>
 
         <label>备注
@@ -138,6 +148,7 @@
       <i class="icon-search"></i>
       <% } %>
     </td>
+    <td><%= fee.cooperator.name %></td>
     <td><%= fee.memo %></td>
     <td><%= fee.payee.username %></td>
     <td><%= fee.createdAt %></td>
@@ -175,6 +186,9 @@
     <td><%= fee.currentAvgPrice %></td>
     <td>
       <input type="number" readonly="" class="input-mini" class="amount" value="<%= fee.amount%>">
+    </td>
+    <td>
+      <%= fee.cooperator.name %>
     </td>
     <td>
       <textarea name="fee.memo"><%= fee.memo %></textarea>

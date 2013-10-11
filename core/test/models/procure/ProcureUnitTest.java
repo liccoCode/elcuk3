@@ -5,6 +5,7 @@ import factory.callback.BuildCallback;
 import helper.Currency;
 import models.ElcukRecord;
 import models.finance.PaymentUnit;
+import models.market.Selling;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,8 @@ public class ProcureUnitTest extends UnitTest {
 
     @Test
     public void testUpdate() {
+        FactoryBoy.create(Selling.class, "de");
+
         ProcureUnit planUnit = FactoryBoy.create(ProcureUnit.class, "plan");
         ProcureUnit updateUnit = FactoryBoy.build(ProcureUnit.class, "plan");
 
@@ -48,6 +51,8 @@ public class ProcureUnitTest extends UnitTest {
 
     @Test
     public void testBeforeDoneUpdate() {
+        FactoryBoy.create(Selling.class, "de");
+
         ProcureUnit unit = FactoryBoy.build(ProcureUnit.class, "plan");
         ProcureUnit updateUnit = FactoryBoy.build(ProcureUnit.class, "plan");
 
@@ -71,6 +76,8 @@ public class ProcureUnitTest extends UnitTest {
 
     @Test
     public void testRemoveNotValid() {
+        FactoryBoy.create(Selling.class, "de");
+
         List<ProcureUnit.STAGE> stages = Arrays.asList(STAGE.CLOSE, STAGE.DONE,
                 STAGE.INBOUND, STAGE.SHIP_OVER, STAGE.SHIPPING);
         for(final STAGE stage : stages) {
@@ -88,6 +95,8 @@ public class ProcureUnitTest extends UnitTest {
 
     @Test
     public void testZRemove() {
+        FactoryBoy.create(Selling.class, "de");
+
 //        List<ProcureUnit.STAGE> stages = Arrays.asList(STAGE.PLAN, STAGE.DELIVERY);
         List<ProcureUnit.STAGE> stages = Arrays.asList(STAGE.PLAN);
         for(final STAGE stage : stages) {
