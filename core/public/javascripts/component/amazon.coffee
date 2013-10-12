@@ -12,7 +12,7 @@ $ ->
 
 
   # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
-  $('#saleAmazonForm').on('keyup blur', "input.bulletPoint, input.searchTermss", (e) ->
+  $('#saleAmazonForm').on('keyup blur', ".bulletPoint, .searchTermss", (e) ->
     return false if e.keyCode is 13
     validateMaxLength($(@).data('length'), @)
   ).on('keyup', ".proDesc", (e) ->
@@ -24,7 +24,7 @@ $ ->
     previewBtn.call(@, e)
     false
   )
-  $("input.bulletPoint, input.searchTermss").blur()
+  $("input.bulletPoint, input.searchTermss, .proDesc").blur()
 
   # 预览 Desc 的方法
   previewBtn = (e) ->

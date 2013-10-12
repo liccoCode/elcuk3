@@ -35,7 +35,7 @@ public class FeeType extends GenericModel {
     public FeeType parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    public List<FeeType> children;
+    public List<FeeType> children = new ArrayList<FeeType>();
 
     /**
      * 这项费用的简单名称
