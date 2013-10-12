@@ -49,7 +49,9 @@ public class DBUtils {
             int rowSize = 0;
             while(rs.next()) {
                 ++rowSize;
-                if(rowSize >= 2) throw new FastRuntimeException("Only Deal one Row!");
+                if(rowSize >= 2)
+                    throw new FastRuntimeException(
+                            String.format("Only Deal one Row! %s -> %s", sql, Arrays.toString(params)));
                 row = mapOneRow(mete, rs);
             }
             rs.close();

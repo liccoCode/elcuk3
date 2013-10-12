@@ -26,6 +26,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "commission";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -35,6 +36,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "promorebates";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -43,6 +45,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "crossborderfulfilmentfee";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -51,6 +54,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "disposalcomplete";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -59,6 +63,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "fbaperorderfulfilmentfee";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -67,6 +72,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "fbaperunitfulfillmentfee";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -75,6 +81,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "fbapickpackfeeperunit";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -83,6 +90,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "fbastoragefee";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -91,6 +99,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "fbaweightbasedfee";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -99,6 +108,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "fbaweighthandlingfee";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -107,6 +117,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "giftwrap";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -115,6 +126,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "giftwrapchargeback";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -123,6 +135,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "productcharges";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -131,6 +144,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "shippingchargeback";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -139,6 +153,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "shipping";
         type.parent = FeeType.amazon();
+        type.parent.children.add(type);
         return type;
     }
 
@@ -155,6 +170,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         type.name = "dutyandvat";
         type.memo = "VAT和关税";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -163,6 +179,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "transportshipping";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -171,6 +188,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "oceanfreight";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -179,6 +197,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "airfee";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -187,6 +206,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "loadingunloadingfee";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -195,6 +215,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "palleting";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -203,6 +224,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "trayfee";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 
@@ -211,6 +233,7 @@ public class FeeTypeFactory extends ModelFactory<FeeType> {
         FeeType type = new FeeType();
         type.name = "vorlageprovision";
         type.parent = FeeType.findById("transport");
+        type.parent.children.add(type);
         return type;
     }
 

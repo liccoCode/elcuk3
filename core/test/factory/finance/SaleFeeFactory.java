@@ -2,10 +2,10 @@ package factory.finance;
 
 import factory.FactoryBoy;
 import factory.ModelFactory;
+import factory.annotation.Factory;
 import helper.Currency;
 import models.finance.FeeType;
 import models.finance.SaleFee;
-import models.market.Account;
 import models.market.M;
 import models.market.Orderr;
 
@@ -26,10 +26,17 @@ public class SaleFeeFactory extends ModelFactory<SaleFee> {
         fee.currency = Currency.USD;
         fee.cost = 12.99f;
         fee.usdCost = 12.99f;
-        fee.account = FactoryBoy.build(Account.class);
         fee.market = M.AMAZON_DE;
         fee.qty = 1;
-        fee.order = FactoryBoy.build(Orderr.class);
+        return fee;
+    }
+
+    @Factory(name = "de")
+    public SaleFee de() {
+        SaleFee fee = define();
+        fee.market = M.AMAZON_DE;
+        fee.type = FactoryBoy.lastOrCreate(FeeType.class);
+        fee.order = FactoryBoy.lastOrCreate(Orderr.class);
         fee.orderId = fee.order.orderId;
         return fee;
     }

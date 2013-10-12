@@ -58,7 +58,7 @@ $ ->
     chartType = $btn.parent().prev().attr('id')
     hideSeries = switch $btn.text()
       when '成本图'
-        ['运输成本', '采购成本']
+        ['运输成本', '采购成本', '快递成本', '海运成本', '空运成本']
       when '利润率图'
         ['成本利润率', '销售利润率', 'Amazon 收费比率']
       else

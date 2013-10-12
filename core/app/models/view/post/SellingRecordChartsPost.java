@@ -120,17 +120,24 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         if(isColumn()) chart = new HighChart(Series.COLUMN);
         else chart = new HighChart(Series.LINE);
         // 将各自曲线的计算分别打散到各自的方法中, 虽然便利多次, 方便权限控制
+        // 销量方面
         this.salesSeries(chart, rows);
         this.unitsSeries(chart, rows);
+        // 利润方面
         this.profitSeries(chart, rows);
         this.costProfitRatioSeries(chart, rows);
         this.saleProfitRatioSeries(chart, rows);
         this.incomeSeries(chart, rows);
+        // 成本方面
         this.shipCostSeries(chart, rows);
+        this.airCost(chart, rows);
+        this.expressCost(chart, rows);
+        this.seaCost(chart, rows);
         this.procureCostSeries(chart, rows);
+        // Amazon fee 方面
         this.amzFeeSeries(chart, rows);
-        this.amzFeeRatioSeries(chart, rows);
         this.amzFbaFeeSeries(chart, rows);
+        this.amzFeeRatioSeries(chart, rows);
         return Arrays.asList(chart);
     }
 
@@ -243,7 +250,46 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("运输成本").add(date, NumberUtils.toFloat(row.get("expressCost").toString()));
+                float expressCost = NumberUtils.toFloat(row.get("expressCost").toString()); // 20%
+                float seaCost = NumberUtils.toFloat(row.get("seaCost").toString()); // 50%
+                float airCost = NumberUtils.toFloat(row.get("airCost").toString()); // 30%
+                highChart.series("运输成本").add(date, (expressCost * 0.2f + seaCost * 0.5f + airCost * 0.3f));
+            }
+        });
+    }
+
+    /**
+     * 快递运输成本
+     */
+    private HighChart expressCost(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                highChart.series("快递成本").add(date, NumberUtils.toFloat(row.get("expressCost").toString()));
+            }
+        });
+    }
+
+    /**
+     * 空运运输成本
+     */
+    private HighChart seaCost(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                highChart.series("海运成本").add(date, NumberUtils.toFloat(row.get("seaCost").toString()));
+            }
+        });
+    }
+
+    /**
+     * 海运运输成本
+     */
+    private HighChart airCost(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                highChart.series("空运成本").add(date, NumberUtils.toFloat(row.get("airCost").toString()));
             }
         });
     }
