@@ -2,12 +2,14 @@ package jobs.analyze;
 
 import helper.DBUtils;
 import helper.Dates;
+import helper.Webs;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.db.helper.SqlSelect;
@@ -94,53 +96,57 @@ public class SellingRecordCaculateJob extends Job {
 
 
             for(Selling selling : sellings) {
-                String sid = selling.sellingId;
-                SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
-                // amz 扣费
-                record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
-                // amzFba 扣费
-                record.fbaFee = sellingFBAFee.get(sid) == null ? 0 : Math.abs(sellingFBAFee.get(sid));
-                // 销量
-                record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
-                // 销售额
-                record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
-                // 实际收入 = 销量 - amazon 扣费
-                record.income = record.sales - record.amzFee;
+                try {
+                    String sid = selling.sellingId;
+                    SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
+                    // amz 扣费
+                    record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
+                    // amzFba 扣费
+                    record.fbaFee = sellingFBAFee.get(sid) == null ? 0 : Math.abs(sellingFBAFee.get(sid));
+                    // 销量
+                    record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
+                    // 销售额
+                    record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
+                    // 实际收入 = 销量 - amazon 扣费
+                    record.income = record.sales - record.amzFee;
 
-                F.T2<Float, Integer> procureCostAndQty = pcCostService.sellingProcreCost(selling, dateTime.toDate());
-                // 采购成本
-                record.procureCost = procureCostAndQty._1;
-                record.procureNumberSum = procureCostAndQty._2;
+                    F.T2<Float, Integer> procureCostAndQty = pcCostService.sellingProcreCost(selling, dateTime.toDate());
+                    // 采购成本
+                    record.procureCost = procureCostAndQty._1;
+                    record.procureNumberSum = procureCostAndQty._2;
 
-                // 快递运输成本
-                F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
-                record.expressCost = costAndKg._1;
-                record.expressKilogram = costAndKg._2;
+                    // 快递运输成本
+                    F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
+                    record.expressCost = costAndKg._1;
+                    record.expressKilogram = costAndKg._2;
 
-                // 空运运输成本
-                costAndKg = shipCostService.airCost(selling, dateTime.toDate());
-                record.airCost = costAndKg._1;
-                record.airKilogram = costAndKg._2;
+                    // 空运运输成本
+                    costAndKg = shipCostService.airCost(selling, dateTime.toDate());
+                    record.airCost = costAndKg._1;
+                    record.airKilogram = costAndKg._2;
 
-                // 海运运输成本
-                costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
-                record.seaCost = costAndKg._1;
-                record.seaCubicMeter = costAndKg._2;
+                    // 海运运输成本
+                    costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
+                    record.seaCost = costAndKg._1;
+                    record.seaCubicMeter = costAndKg._2;
 
-                // VAT 的费用
-                record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
+                    // VAT 的费用
+                    record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
 
-                // 利润 = 实际收入 - 采购成本 - 运输成本 - VAT
-                record.profit = record.income - record.procureAndShipCost();
-                // 成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
-                record.costProfitRatio =
-                        record.procureAndShipCost() == 0 ? 0 : (record.profit / record.procureAndShipCost());
-                // 销售利润率 = 利润 / 销售额
-                record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
-                record.save();
+                    // 利润 = 实际收入 - 采购成本 - 运输成本 - VAT
+                    record.profit = record.income - record.procureAndShipCost();
+                    // 成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
+                    record.costProfitRatio =
+                            record.procureAndShipCost() == 0 ? 0 : (record.profit / record.procureAndShipCost());
+                    // 销售利润率 = 利润 / 销售额
+                    record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
+                    record.save();
 
-                // TODO: 还有总销售额和总利润
-                sellingRecords.add(record);
+                    // TODO: 还有总销售额和总利润
+                    sellingRecords.add(record);
+                } catch(Exception e) {
+                    Logger.error(Webs.S(e));
+                }
             }
             Cache.add("sellingRecordCaculateJob", sellingRecords);
         } catch(Exception e) {
