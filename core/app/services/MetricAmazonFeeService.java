@@ -37,7 +37,7 @@ public class MetricAmazonFeeService {
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
             Map<String, Float> sellingAmzFeeMap = new HashMap<String, Float>();
             for(Selling sell : sellings) {
-                sellingAmzFeeMap.put(sell.sellingId, (2.8f + sell.aps.salePrice));
+                sellingAmzFeeMap.put(sell.sellingId, (2.8f + (sell.aps.salePrice == null ? 0 : sell.aps.salePrice)));
             }
             return sellingAmzFeeMap;
         } else {

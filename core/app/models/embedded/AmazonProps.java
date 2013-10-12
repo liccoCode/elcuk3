@@ -104,7 +104,7 @@ public class AmazonProps implements Serializable {
     public Float standerPrice;
 
     @Expose
-    public Float salePrice;
+    public Float salePrice = 0f;
     /**
      * 促销产品价格的开始日期
      */

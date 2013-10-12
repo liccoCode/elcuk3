@@ -56,7 +56,8 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         sql.select("sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.income) income",
                 "sum(sr.profit) profit", "sum(sr.amzFee) amzFee", "sum(sr.fbaFee) fbaFee",
                 "sum(sr.procureNumberSum) procureNumberSum", "sum(sr.procureCost) procureCost",
-                "sum(sr.expressKilogram) expressKilogram", "sum(sr.expressCost) expressCost");
+                "sum(sr.expressKilogram) expressKilogram", "sum(sr.expressCost) expressCost",
+                "sum(sr.airCost) airCost", "sum(seaCost) seaCost");
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }
@@ -250,10 +251,10 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float expressCost = NumberUtils.toFloat(row.get("expressCost").toString()); // 20%
-                float seaCost = NumberUtils.toFloat(row.get("seaCost").toString()); // 50%
-                float airCost = NumberUtils.toFloat(row.get("airCost").toString()); // 30%
-                highChart.series("运输成本").add(date, (expressCost * 0.2f + seaCost * 0.5f + airCost * 0.3f));
+                float expressCost = NumberUtils.toFloat(row.get("expressCost").toString()); // 33%
+                float seaCost = NumberUtils.toFloat(row.get("seaCost").toString()); // 33%
+                float airCost = NumberUtils.toFloat(row.get("airCost").toString()); // 33%
+                highChart.series("运输成本").add(date, (expressCost * 0.333f + seaCost * 0.333f + airCost * 0.333f));
             }
         });
     }

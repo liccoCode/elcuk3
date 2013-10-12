@@ -143,6 +143,8 @@ public class SellingRecordCaculateJob extends Job {
                 sellingRecords.add(record);
             }
             Cache.add("sellingRecordCaculateJob", sellingRecords);
+        } catch(Exception e) {
+            e.printStackTrace();
         } finally {
             Cache.delete(RUNNING);
         }
@@ -192,7 +194,7 @@ public class SellingRecordCaculateJob extends Job {
             this.sellingSales.clear();
             for(Selling sell : sellings) {
                 int units = this.sellingUnits.get(sell.sellingId);
-                this.sellingSales.put(sell.sellingId, units * sell.aps.salePrice);
+                this.sellingSales.put(sell.sellingId, units * (sell.aps.salePrice == null ? 0 : sell.aps.salePrice));
             }
         } else {
             /**
