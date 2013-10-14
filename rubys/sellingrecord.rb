@@ -1,6 +1,5 @@
 require "active_support/core_ext"
 # 1. 设置时间天数
-# 2. 两个线程各自计算
 Time::DATE_FORMATS[:date] = "%Y-%m-%d"
 
 def recaculate_records(begin_date, times)
@@ -13,6 +12,10 @@ end
 
 # 前 30, 29, 28 天
 start = Time.now - 30.days
+recaculate_records(start)
+
+# 前  18, 17, 16 天
+start = Time.now - 18.days
 recaculate_records(start)
 
 # 前 3, 2, 1 天的
