@@ -142,6 +142,8 @@ public class SellingRecordCaculateJob extends Job {
                     record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
                     record.save();
 
+                    Logger.info("SellingRecord: %s, units: %s, sales: %s",
+                            record.selling.sellingId, record.units, record.sales);
                     // TODO: 还有总销售额和总利润
                     sellingRecords.add(record);
                 } catch(Exception e) {
@@ -199,7 +201,8 @@ public class SellingRecordCaculateJob extends Job {
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
             this.sellingSales.clear();
             for(Selling sell : sellings) {
-                int units = this.sellingUnits.get(sell.sellingId);
+                Integer units = this.sellingUnits.get(sell.sellingId);
+                if(units == null) units = 0;
                 this.sellingSales.put(sell.sellingId, units * (sell.aps.salePrice == null ? 0 : sell.aps.salePrice));
             }
         } else {

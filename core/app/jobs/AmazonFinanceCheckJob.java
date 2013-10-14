@@ -69,6 +69,7 @@ public class AmazonFinanceCheckJob extends Job {
             }
 
             // 让 DB 的查询在同一个线程, 但抓取进入另外的线程
+            // TODO 性能有问题
             String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate DESC";
             List<Orderr> orders = Orderr.find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
             long leftOrders = Orderr.count(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED);

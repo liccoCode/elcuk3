@@ -32,6 +32,7 @@ public class OrderMailCheck extends Job {
         /**
          * Check 需要发送邀请 Review 的邮件的订单
          */
+        // TODO 性能有问题
         List<Orderr> needReview = Orderr
                 .find("state=? AND reviewMailed=false AND createDate<=? AND createDate>=? AND market IN (?,?,?) " +
                         "ORDER BY createDate",

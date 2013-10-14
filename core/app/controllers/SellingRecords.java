@@ -1,5 +1,6 @@
 package controllers;
 
+import jobs.analyze.SellingRecordCaculateJob;
 import models.market.SellingRecord;
 import models.product.Category;
 import models.view.highchart.HighChart;
@@ -10,6 +11,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,6 +72,10 @@ public class SellingRecords extends Controller {
         p.lineType = "column";
         HighChart chart = p.query().get(0);
         renderJSON(chart);
+    }
+
+    public static void units(Date date) {
+        renderJSON(new SellingRecordCaculateJob().sellingUnits(date));
     }
 
 }

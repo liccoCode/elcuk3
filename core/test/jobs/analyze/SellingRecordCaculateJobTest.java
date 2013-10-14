@@ -15,6 +15,7 @@ import org.junit.Test;
 import play.db.jpa.JPA;
 import play.libs.F;
 import play.test.UnitTest;
+import services.MetricProcureCostService;
 
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +34,10 @@ public class SellingRecordCaculateJobTest extends UnitTest {
     public void testSetUP() {
         FactoryBoy.deleteAll();
         FeeTypeFactory.feeTypeInit();
+        service = new MetricProcureCostService();
     }
+
+    private MetricProcureCostService service;
 
     @Test
     public void testSellingProcreCost() {
@@ -49,8 +53,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
             }
         });
         JPA.em().flush();
-        SellingRecordCaculateJob job = new SellingRecordCaculateJob();
-        F.T2<Float, Integer> costAndQty = job.sellingProcreCost(selling, now);
+        F.T2<Float, Integer> costAndQty = service.sellingProcreCost(selling, now);
         assertThat((double) costAndQty._1, closeTo(((600 * 19 / 6.13) + (300 * 19)) / sumCount.get(), 1));
         assertThat(costAndQty._2, is(900));
     }
@@ -59,8 +62,7 @@ public class SellingRecordCaculateJobTest extends UnitTest {
     public void testSellingProcreCostNoCost() {
         final Date now = new Date();
         Selling selling = FactoryBoy.create(Selling.class);
-        SellingRecordCaculateJob job = new SellingRecordCaculateJob();
-        F.T2<Float, Integer> costAndQty = job.sellingProcreCost(selling, now);
+        F.T2<Float, Integer> costAndQty = service.sellingProcreCost(selling, now);
         assertThat((double) costAndQty._1, is(0d));
         assertThat(costAndQty._2, is(0));
     }

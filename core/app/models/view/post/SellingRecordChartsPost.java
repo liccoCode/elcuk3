@@ -57,7 +57,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
                 "sum(sr.profit) profit", "sum(sr.amzFee) amzFee", "sum(sr.fbaFee) fbaFee",
                 "sum(sr.procureNumberSum) procureNumberSum", "sum(sr.procureCost) procureCost",
                 "sum(sr.expressKilogram) expressKilogram", "sum(sr.expressCost) expressCost",
-                "sum(sr.airCost) airCost", "sum(seaCost) seaCost");
+                "sum(sr.airCost) airCost", "sum(sr.seaCost) seaCost");
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }

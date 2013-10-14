@@ -50,6 +50,7 @@ public class OrderInfoFetchJob extends Job {
         }
     }
 
+    // TODO 性能有问题
     public static List<Orderr> needCompleteInfoOrders(int size) {
         /**
          * 1. userid, email, phone 的检查

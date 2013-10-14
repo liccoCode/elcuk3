@@ -39,6 +39,7 @@ public class AmazonOrderItemDiscover extends Job<List<OrderItem>> {
         List<Account> accounts = Account.openedSaleAcc();
         for(Account acc : accounts) {
             // 只搜索 1 个月内的
+            // TODO 性能有问题
             List<Orderr> orderrs = Orderr.find(
                     "SIZE(items)=0 AND account=? AND createDate>=? AND state!=? ORDER BY createDate",
                     acc, DateTime.now().minusMonths(1).toDate(), Orderr.S.CANCEL
