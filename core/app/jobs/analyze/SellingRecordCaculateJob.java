@@ -142,8 +142,6 @@ public class SellingRecordCaculateJob extends Job {
                     record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
                     record.save();
 
-                    Logger.info("SellingRecord: %s, units: %s, sales: %s",
-                            record.selling.sellingId, record.units, record.sales);
                     // TODO: 还有总销售额和总利润
                     sellingRecords.add(record);
                 } catch(Exception e) {

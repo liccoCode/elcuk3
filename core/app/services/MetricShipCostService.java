@@ -70,7 +70,7 @@ public class MetricShipCostService {
                 .where("u.selling_sellingId=?").param(selling.sellingId)
                 .where("s.type=?").param(type.name())
                 .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
-                .groupBy("s.id");
+                .groupBy("u.selling_sellingId");
 
         Map<String, Object> idsRs = DBUtils.row(effectShipmentSql.toString(), effectShipmentSql.getParams().toArray());
 
