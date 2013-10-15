@@ -47,6 +47,7 @@ public class PaymentUnitFactory extends ModelFactory<PaymentUnit> {
     private PaymentUnit withOutState() {
         PaymentUnit unit = new PaymentUnit();
         unit.amount = 1000;
+        unit.unitQty = 1;
         unit.currency = Currency.CNY;
         unit.procureUnit = FactoryBoy.lastOrCreate(ProcureUnit.class);
         unit.feeType = FactoryBoy.lastOrCreate(FeeType.class);

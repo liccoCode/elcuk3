@@ -130,7 +130,7 @@ public class MetricShipCostService {
                 .leftJoin("Payment p ON p.id=pu.payment_id")
                 .where("pu.feeType_name=?").param("dutyandvat")/*固定费用类型*/
                 .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
-                .groupBy("pu.shipment_id", "pu.currency");
+                .groupBy("pu.currency");
         List<Map<String, Object>> rows = DBUtils.rows(vatSql.toString(), vatSql.getParams().toArray());
 
         // 所有关税 USD
@@ -143,6 +143,7 @@ public class MetricShipCostService {
                 shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentIds").toString(), ",")));
             }
         }
+        // 产出 shipmentIds 与 totalVATFee
 
         SqlSelect effectSellingSql = new SqlSelect()
                 .select("s.sellingId", "sum(si.qty) qty", "round(sum(si.qty * p.declaredValue), 2) x")
@@ -151,10 +152,11 @@ public class MetricShipCostService {
                 .leftJoin("Product p ON p.sku=u.product_sku")
                 .leftJoin("ShipItem si ON si.unit_id=u.id")
                 .leftJoin("Shipment t ON t.id=si.shipment_id")
-                .where(SqlSelect.whereIn("t.id", shipmentIds));
+                .where(SqlSelect.whereIn("t.id", shipmentIds))
+                .groupBy("s.sellingId");
 
         Map<String, Float> sellingsVAT = new HashMap<String, Float>();
-        Map<String, Integer> sellingsQty = new HashMap<String, Integer>();
+        Map<String, Float> sellingsX = new HashMap<String, Float>();
         rows = DBUtils.rows(effectSellingSql.toString(), effectSellingSql.getParams().toArray());
 
         // (440x + 220x + 124x)[sumX] = (2000)[totalVATFee] -> x = 2.55
@@ -164,14 +166,12 @@ public class MetricShipCostService {
             if(row.get("sellingId") == null || StringUtils.isBlank(row.get("sellingId").toString())) continue;
             float nX = row.get("x") == null ? 0 : NumberUtils.toFloat(row.get("x").toString());
             sumX += nX;
-            sellingsQty.put(row.get("sellingId").toString(),
-                    row.get("qty") == null ? 0 : NumberUtils.toInt(row.get("qty").toString()));
-            sellingsVAT.put(row.get("sellingId").toString(), nX);
+            sellingsX.put(row.get("sellingId").toString(), nX);
         }
         float x = sumX == 0 ? 0 : (totalVATFee / sumX);
-        for(Map.Entry<String, Float> entry : sellingsVAT.entrySet()) {
-            int qty = sellingsQty.get(entry.getKey());
-            entry.setValue(qty == 0 ? 0 : (entry.getValue() * x) / qty);
+
+        for(String sid : sellingsX.keySet()) {
+            sellingsVAT.put(sid, x * sellingsX.get(sid));
         }
 
         return sellingsVAT;
