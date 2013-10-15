@@ -21,7 +21,7 @@ public class OrderItemFactory extends ModelFactory<OrderItem> {
     @Override
     public OrderItem define() {
         OrderItem itm = new OrderItem();
-        itm.id = "orderItem";
+        itm.id = "orderItem_id";
         itm.createDate = DateHelper.t("2011-10-07 10:02:19");
         itm.discountPrice = 0f;
         itm.feesAmaount = 0f;

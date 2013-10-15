@@ -66,7 +66,7 @@ public class MetricSalesService {
         Map<String, Integer> sellingOrders = new HashMap<String, Integer>();
         for(M m : M.values()) {
             if(m.isEbay()) continue;
-            sellingOrders.putAll(sellingUnits(date, m));
+            sellingOrders.putAll(sellingOrders(date, m));
         }
         return sellingOrders;
     }
@@ -106,9 +106,9 @@ public class MetricSalesService {
                 Integer units = sellingUnits.get(sell.sellingId);
                 if(units == null) units = 0;
                 helper.Currency currency = Currency.USD;
-                if(sell.account.isADE) currency = Currency.EUR;
-                else if(sell.account.isAUK) currency = Currency.GBP;
-                else if(sell.account.isAUS) currency = Currency.USD;
+                if(sell.account.type == M.AMAZON_DE) currency = Currency.EUR;
+                else if(sell.account.type == M.AMAZON_UK) currency = Currency.GBP;
+                else if(sell.account.type == M.AMAZON_US) currency = Currency.USD;
                 sellingSales.put(sell.sellingId,
                         units * (sell.aps.salePrice == null ? 0 : currency.toUSD(sell.aps.salePrice)));
             }
