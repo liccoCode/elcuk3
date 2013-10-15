@@ -1,6 +1,5 @@
 package controllers;
 
-import jobs.analyze.SellingRecordCaculateJob;
 import models.market.SellingRecord;
 import models.product.Category;
 import models.view.highchart.HighChart;
@@ -10,6 +9,7 @@ import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
+import services.MetricSalesService;
 
 import java.util.Date;
 import java.util.List;
@@ -75,7 +75,7 @@ public class SellingRecords extends Controller {
     }
 
     public static void units(Date date) {
-        renderJSON(new SellingRecordCaculateJob().sellingUnits(date));
+        renderJSON(new MetricSalesService().sellingUnits(date));
     }
 
 }

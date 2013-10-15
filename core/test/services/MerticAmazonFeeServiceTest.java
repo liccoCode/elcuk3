@@ -15,6 +15,7 @@ import play.test.UnitTest;
 import util.DateHelper;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.greaterThan;
@@ -79,7 +80,9 @@ public class MerticAmazonFeeServiceTest extends UnitTest {
 
         assertThat(FeeType.amazon().children.size(), is(greaterThan(1)));
 
-        Map<String, Float> map = service.sellingAmazonFee(DateHelper.t("2013-09-21"), Lists.newArrayList(s));
+        Map<String, Integer> sellOrders = new HashMap<String, Integer>();
+        sellOrders.put(s.sellingId, 1);
+        Map<String, Float> map = service.sellingAmazonFee(DateHelper.t("2013-09-21"), Lists.newArrayList(s), sellOrders);
 
         assertThat(map.get(s.sellingId).doubleValue(), is(closeTo(9, 0.1)));
     }
@@ -95,7 +98,9 @@ public class MerticAmazonFeeServiceTest extends UnitTest {
 
         assertThat(FeeType.amazon().children.size(), is(greaterThan(1)));
 
-        Map<String, Float> map = service.sellingAmazonFee(DateHelper.t("2013-09-21"), Lists.newArrayList(s));
+        Map<String, Integer> sellOrders = new HashMap<String, Integer>();
+        sellOrders.put(s.sellingId, 1);
+        Map<String, Float> map = service.sellingAmazonFee(DateHelper.t("2013-09-21"), Lists.newArrayList(s), sellOrders);
 
         assertThat(map.get(s.sellingId), is(nullValue()));
     }

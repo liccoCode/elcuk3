@@ -20,7 +20,9 @@ import models.product.Whouse;
 public class ProcureUnitFactory extends ModelFactory<ProcureUnit> {
     @Override
     public ProcureUnit define() {
-        ProcureUnit unit = base();
+        ProcureUnit unit = new ProcureUnit();
+        unit.attrs.price = 19f;
+        unit.attrs.currency = Currency.CNY;
         unit.stage = ProcureUnit.STAGE.PLAN;
         unit.attrs.planQty = 200;
         unit.attrs.qty = 200;

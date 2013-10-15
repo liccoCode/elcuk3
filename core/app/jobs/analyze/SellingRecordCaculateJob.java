@@ -91,6 +91,8 @@ public class SellingRecordCaculateJob extends Job {
                 try {
                     String sid = selling.sellingId;
                     SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
+                    // 销售价格
+                    record.salePrice = selling.aps.salePrice == null ? 0 : selling.aps.salePrice;
                     // amz 扣费
                     record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
                     // amzFba 扣费

@@ -57,7 +57,8 @@ public class SellingRecordChartsPost extends Post<HighChart> {
                 "sum(sr.profit) profit", "sum(sr.amzFee) amzFee", "sum(sr.fbaFee) fbaFee",
                 "sum(sr.procureNumberSum) procureNumberSum", "sum(sr.procureCost) procureCost",
                 "sum(sr.expressKilogram) expressKilogram", "sum(sr.expressCost) expressCost",
-                "sum(sr.airCost) airCost", "sum(sr.seaCost) seaCost");
+                "sum(sr.airCost) airCost", "sum(sr.seaCost) seaCost",
+                "avg(sr.salePrice) salePrice");
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }
@@ -122,6 +123,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         else chart = new HighChart(Series.LINE);
         // 将各自曲线的计算分别打散到各自的方法中, 虽然便利多次, 方便权限控制
         // 销量方面
+        this.salePrice(chart, rows);
         this.salesSeries(chart, rows);
         this.unitsSeries(chart, rows);
         // 利润方面
@@ -140,6 +142,15 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         this.amzFbaFeeSeries(chart, rows);
         this.amzFeeRatioSeries(chart, rows);
         return Arrays.asList(chart);
+    }
+
+    public HighChart salePrice(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                highChart.series("销售价格").add(date, NumberUtils.toFloat(row.get("salePrice").toString()));
+            }
+        });
     }
 
     /**
