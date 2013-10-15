@@ -101,8 +101,10 @@ public class FeeType extends GenericModel {
         List<FeeType> amzFees = amazon().children;
         List<FeeType> fbaFees = new ArrayList<FeeType>();
         for(FeeType fee : amzFees) {
-            if(!fee.name.startsWith("fba")) continue;
-            fbaFees.add(fee);
+            //TODO 需要在数据结构上将 FBA 与 Amazon 费用区分开.
+            if(fee.name.contains("fba") || fee.name.contains("fulfil")) {
+                fbaFees.add(fee);
+            }
         }
         return fbaFees;
     }

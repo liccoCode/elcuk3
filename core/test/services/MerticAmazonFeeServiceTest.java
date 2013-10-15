@@ -40,7 +40,12 @@ public class MerticAmazonFeeServiceTest extends UnitTest {
     private MetricAmazonFeeService service;
 
     private void deAmazonFeeDB(final Date createDate) {
-        FactoryBoy.create(Selling.class, "de");
+        FactoryBoy.create(Selling.class, "de", new BuildCallback<Selling>() {
+            @Override
+            public void build(Selling target) {
+                target.aps.salePrice = 22.99f;
+            }
+        });
         FactoryBoy.create(Orderr.class, "de", new BuildCallback<Orderr>() {
             @Override
             public void build(Orderr target) {
@@ -57,7 +62,7 @@ public class MerticAmazonFeeServiceTest extends UnitTest {
             @Override
             public void build(SaleFee target) {
                 target.type = FeeType.findById("crossborderfulfilmentfee");
-                target.usdCost = 6f;
+                target.usdCost = -5f;
             }
         });
 
@@ -65,9 +70,31 @@ public class MerticAmazonFeeServiceTest extends UnitTest {
             @Override
             public void build(SaleFee target) {
                 target.type = FeeType.findById("fbaperunitfulfillmentfee");
-                target.usdCost = 3f;
+                target.usdCost = -1.8f;
             }
         });
+        FactoryBoy.create(SaleFee.class, "de", new BuildCallback<SaleFee>() {
+            @Override
+            public void build(SaleFee target) {
+                target.type = FeeType.findById("fbaweighthandlingfee");
+                target.usdCost = -1.491f;
+            }
+        });
+        FactoryBoy.create(SaleFee.class, "de", new BuildCallback<SaleFee>() {
+            @Override
+            public void build(SaleFee target) {
+                target.type = FeeType.findById("commission");
+                target.usdCost = -2.182f;
+            }
+        });
+        FactoryBoy.create(SaleFee.class, "de", new BuildCallback<SaleFee>() {
+            @Override
+            public void build(SaleFee target) {
+                target.type = FeeType.productCharger();
+                target.usdCost = 31.158f;
+            }
+        });
+
     }
 
     /**
@@ -84,7 +111,22 @@ public class MerticAmazonFeeServiceTest extends UnitTest {
         sellOrders.put(s.sellingId, 1);
         Map<String, Float> map = service.sellingAmazonFee(DateHelper.t("2013-09-21"), Lists.newArrayList(s), sellOrders);
 
-        assertThat(map.get(s.sellingId).doubleValue(), is(closeTo(9, 0.1)));
+        assertThat(map.get(s.sellingId).doubleValue(), is(closeTo(-10.473, 0.1)));
+    }
+
+    @Test
+    public void testQueryDeFBAFee() {
+        deAmazonFeeDB(DateHelper.t("2013-09-21 18:23:00"));
+        Selling s = Selling.all().first();
+
+        assertThat(FeeType.amazon().children.size(), is(greaterThan(1)));
+
+        Map<String, Integer> sellOrders = new HashMap<String, Integer>();
+        sellOrders.put(s.sellingId, 1);
+        Map<String, Float> map = service.sellingAmazonFBAFee(DateHelper.t("2013-09-21"), Lists.newArrayList(s),
+                sellOrders);
+
+        assertThat(map.get(s.sellingId).doubleValue(), is(closeTo(-8.291, 0.1)));
     }
 
 

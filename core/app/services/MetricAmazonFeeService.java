@@ -46,9 +46,10 @@ public class MetricAmazonFeeService {
         } else {
             List<FeeType> fees = FeeType.amazon().children;
             List<String> feesTypeName = new ArrayList<String>();
-            for(FeeType fee : fees) {
-                if("shipping".equals(fee.name)) continue;
-                feesTypeName.add(fee.name);
+            for(FeeType feeType : fees) {
+                if(feeType == FeeType.productCharger()) continue;
+                if("shipping".equals(feeType.name)) continue;
+                feesTypeName.add(feeType.name);
             }
             return sellingFeeTypesCost(date, feesTypeName);
         }
@@ -78,8 +79,9 @@ public class MetricAmazonFeeService {
         } else {
             List<FeeType> fees = FeeType.fbaFees();
             List<String> feesTypeName = new ArrayList<String>();
-            for(FeeType fee : fees) {
-                feesTypeName.add(fee.name);
+            for(FeeType feeType : fees) {
+                if(feeType == FeeType.productCharger()) continue;
+                feesTypeName.add(feeType.name);
             }
             return sellingFeeTypesCost(date, feesTypeName);
         }
