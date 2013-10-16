@@ -43,7 +43,7 @@ public class MetricShipCostService {
                 .where("p.state=?").param(Payment.S.PAID.name())
                 .where("fy.parent_name=?").param("transport")
                 .where("pu.feeType_name!=?").param("dutyandvat")
-                .where("s.type=").param(Shipment.T.SEA.name())
+                .where("s.type=?").param(Shipment.T.SEA.name())
                 .groupBy("pu.currency");
 
         Set<String> shipmentIds = new HashSet<String>();
@@ -66,16 +66,18 @@ public class MetricShipCostService {
                 .select("sum(pu.unitQty) weight")
                 .from("PaymentUnit pu")
                 .where("pu.feeType_name=?").param("oceanfreight")
-                .where(SqlSelect.whereIn("s.shipmentId", shipmentIds));
+                .where(SqlSelect.whereIn("pu.shipment_id", shipmentIds));
         Map<String, Object> weightRow = DBUtils.row(totalWeightSql.toString(), totalWeightSql.getParams().toArray());
         totalWeight = weightRow.get("weight") == null ? 0 : NumberUtils.toFloat(weightRow.get("weight").toString());
 
-        // 3. 找出 Selling 的体积 m3
+        // 3. 找出 Selling 的体积 m3/数量
         Map<String, Float> sellingCubicMeters = new HashMap<String, Float>();
+        Map<String, Float> sellingSeaShipQty = new HashMap<String, Float>();
         Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
         SqlSelect sellingCubicMeterSql = new SqlSelect()
                 // cm3 -> m3 (/1000*1000*1000)
-                .select("u.selling_sellingId sellingId", "((p.width * p.heigh * p.lengths) / (1000*1000*1000)) m3")
+                .select("u.selling_sellingId sellingId", "sum(si.qty) qty",
+                        "((p.width * p.heigh * p.lengths) / (1000*1000*1000)) m3")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON s.id=si.shipment_id")
                 .leftJoin("ProcureUnit u ON u.id=si.unit_id")
@@ -87,12 +89,14 @@ public class MetricShipCostService {
             if(row.get("sellingId") == null) continue;
             sellingCubicMeters.put(row.get("sellingId").toString(),
                     row.get("m3") == null ? 0 : NumberUtils.toFloat(row.get("m3").toString()));
+            sellingSeaShipQty.put(row.get("sellingId").toString(),
+                    row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString()));
         }
 
         float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
         if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "','"));
         for(String sid : sellingCubicMeters.keySet()) {
-            sellingSeaCost.put(sid, sellingCubicMeters.get(sid) * perCubicMeter);
+            sellingSeaCost.put(sid, sellingCubicMeters.get(sid) * perCubicMeter * sellingSeaShipQty.get(sid));
         }
 
         return sellingSeaCost;
