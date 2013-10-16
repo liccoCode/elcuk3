@@ -111,6 +111,7 @@ public class SellingRecordCaculateJob extends Job {
                     record.procureCost = procureCostAndQty._1;
                     record.procureNumberSum = procureCostAndQty._2;
 
+                    /*
                     // 快递运输成本
                     F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
                     record.expressCost = costAndKg._1;
@@ -125,6 +126,7 @@ public class SellingRecordCaculateJob extends Job {
                     costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
                     record.seaCost = costAndKg._1;
                     record.seaCubicMeter = costAndKg._2;
+                    */
 
                     // VAT 的费用
                     record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
