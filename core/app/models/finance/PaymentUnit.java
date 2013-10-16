@@ -421,6 +421,9 @@ public class PaymentUnit extends Model {
      * @param fee
      */
     public PaymentUnit fixUnitValue(PaymentUnit fee) {
+        if(this.state == S.PAID)
+            Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
+        if(Validation.hasErrors()) return this;
         fee.amount = fee.unitPrice * fee.unitQty;
         List<String> logs = new ArrayList<String>();
         logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
