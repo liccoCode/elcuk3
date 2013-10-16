@@ -213,6 +213,21 @@ public class OrderItemQuery {
     }
 
     /**
+     * 获取 AnalyzeVO 的门面方法, 内涵处理 all, cateogyrId, sid, sku 的派发
+     *
+     * @param market
+     * @param val
+     * @param type
+     * @param from
+     * @param to
+     * @return
+     */
+    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to) {
+        Connection conn = DB.getConnection();
+        return getAnalyzeVOsFacade(market, val, type, from, to, conn);
+    }
+
+    /**
      * sid 的销量曲线
      *
      * @param from
