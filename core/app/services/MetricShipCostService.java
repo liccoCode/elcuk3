@@ -88,19 +88,15 @@ public class MetricShipCostService {
         }
         // 产出 shipmentIds, 总费用 totalSeaFee
         SqlSelect sellingWeight = new SqlSelect()
-                .select("se.sellingId", "sum(pu.unitQty)")
+                .select("sum(pu.unitQty)")
                 .from("PaymentUnit pu")
                 .leftJoin("Payment p ON p.id=pu.payment_id")
                 .leftJoin("Shipment s ON pu.shipment_id=s.id")
-                .leftJoin("ShipItem si ON si.shipment_id=s.id")
-                .leftJoin("ProcureUnit u ON si.unit_id=u.id")
-                .leftJoin("Selling se ON u.selling_sellingId=se.sellingId")
-                .leftJoin("FeeType fy ON pu.feeType_name=fy.name")
                 .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
                 .where("p.state=?").param(Payment.S.PAID.name())
-                .where("fy.parent_name=?").param("transport")
-                .where("pu.feeType_name!=?").param("dutyandvat")
-                .groupBy("se.sellingId");
+                .where("pu.feeType_name=?").param("oceanfreight");
+
+
         return null;
     }
 
