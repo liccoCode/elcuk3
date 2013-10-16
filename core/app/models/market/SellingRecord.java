@@ -440,8 +440,8 @@ public class SellingRecord extends GenericModel {
             record = new SellingRecord(selling, oneDay);
             record.selling = selling;
             record.account = selling.account;
-            record.orderCanceld = (int) Orderr
-                    .count("state=? AND createDate=?", Orderr.S.CANCEL, record.date);
+            record.orderCanceld = (int) Orderr.count("state=? AND date_format(createDate, '%Y-%m-%d')=?",
+                    Orderr.S.CANCEL, record.date);
             record.save();
         }
         return record;
