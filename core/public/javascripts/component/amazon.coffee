@@ -10,6 +10,18 @@ $ ->
   jsEscapeHtml = (string) ->
     $("<div/>").text(string).html()
 
+      # 预览 Desc 的方法
+  previewBtn = (e) ->
+    $ownerDiv = $(@).parent()
+    invalidTag = false
+    for tag in $ownerDiv.siblings('div').html($ownerDiv.find(':input').val()).find('*')
+      switch tag.nodeName.toString().toLowerCase()
+        when 'br','p','b','#text'
+          break
+        else
+          invalidTag = true
+          $(tag).css('background', 'yellow')
+    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
 
   # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
   $('#saleAmazonForm').on('keyup blur', ".bulletPoint, .searchTermss", (e) ->
@@ -25,19 +37,6 @@ $ ->
     false
   )
   $("input.bulletPoint, input.searchTermss, .proDesc").blur()
-
-  # 预览 Desc 的方法
-  previewBtn = (e) ->
-    $ownerDiv = $(@).parent()
-    invalidTag = false
-    for tag in $ownerDiv.siblings('div').html($ownerDiv.find(':input').val()).find('*')
-      switch tag.nodeName.toString().toLowerCase()
-        when 'br','p','b','#text'
-          break
-        else
-          invalidTag = true
-          $(tag).css('background', 'yellow')
-    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
 
   $('#sellingPreview').on('click', '#sid_preview',(e) ->
     noty({text: _.template($('#tsp-show-template').html(), {tsp: $(@).data('tsp')})})

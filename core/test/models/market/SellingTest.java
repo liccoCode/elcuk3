@@ -4,6 +4,7 @@ import factory.FactoryBoy;
 import factory.callback.BuildCallback;
 import helper.Webs;
 import models.embedded.AmazonProps;
+import org.junit.Ignore;
 import org.junit.Test;
 import play.test.UnitTest;
 
@@ -18,6 +19,7 @@ import static org.hamcrest.core.Is.is;
  * Time: 8:23 PM
  */
 public class SellingTest extends UnitTest {
+    @Ignore
     @Test
     public void testSyncFromAmazon() throws IOException, ClassNotFoundException {
         Selling selling = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
@@ -49,5 +51,19 @@ public class SellingTest extends UnitTest {
         assertThat(aps.searchTermss.size(), is(5));
         assertThat(aps.searchTermss.get(0), is("Gecko custodia protettiva cover per Google Nexus 7"));
         assertThat(aps.searchTermss.get(4), is("cover protezione e supporto rotazione Nexus 7 2013"));
+    }
+
+    @Test
+    public void testIsMSkuValid() {
+        Selling s = FactoryBoy.build(Selling.class, new BuildCallback<Selling>() {
+            @Override
+            public void build(Selling target) {
+                target.merchantSKU = "88HSSG1-B,885618738909";
+                target.aps.upc = "885618738909";
+            }
+        });
+        boolean flag = s.isMSkuValid();
+
+        assertThat(flag, is(true));
     }
 }

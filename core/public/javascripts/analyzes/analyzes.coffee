@@ -120,11 +120,13 @@ $ ->
             legend:
               enabled: true
             navigator:
-              enabled: false
+              enabled: true
             scrollbar:
               enabled: false
             rangeSelector:
-              enabled: false
+              enabled: true
+              buttons: [{type:'week', count: 1, text: '1w'}, {type:'month', count: 1, text: '1m'}]
+              selected: 1
             xAxis:
               type: 'datetime'
             yAxis: { min: 0 }
