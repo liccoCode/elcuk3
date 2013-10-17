@@ -56,7 +56,7 @@ public class Promises {
             }
             try {
                 for(FutureTask<T> task : futures) {
-                    vos.add(task.get(20, TimeUnit.MINUTES));
+                    vos.add(task.get(45, TimeUnit.MINUTES));
                 }
             } catch(Exception e) {
                 throw new FastRuntimeException(
