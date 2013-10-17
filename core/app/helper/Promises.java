@@ -112,8 +112,10 @@ public class Promises {
 
         public void close() {
             try {
-                connHolder.get().close();
-                connHolder.set(null);
+                if(connHolder.get() != null) {
+                    connHolder.get().close();
+                    connHolder.set(null);
+                }
             } catch(SQLException e) {
                 throw new FastRuntimeException(e);
             }

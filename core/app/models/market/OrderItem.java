@@ -182,7 +182,8 @@ public class OrderItem extends GenericModel {
             Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
                 @Override
                 public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
-                    List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to);
+                    List<AnalyzeVO> lineVos = OrderItemQuery
+                            .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
                     synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
                         for(AnalyzeVO vo : lineVos) {
                             finalLines.series("unit_all").add(vo.date, vo.qty.floatValue());

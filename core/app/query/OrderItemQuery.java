@@ -113,7 +113,11 @@ public class OrderItemQuery {
      * @return
      */
     public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to) {
-        Connection conn = DB.getConnection();
+        return getAnalyzeVOsFacade(market, val, type, from, to, DB.getConnection());
+    }
+
+    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to,
+                                                      Connection conn) {
         List<AnalyzeVO> lineVos;
         OrderItemQuery query = new OrderItemQuery();
         if("all".equals(val)) {
