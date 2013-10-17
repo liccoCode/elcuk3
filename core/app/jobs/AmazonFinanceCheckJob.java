@@ -72,8 +72,7 @@ public class AmazonFinanceCheckJob extends Job {
             // TODO 性能有问题
             String jpql = "account=? AND market=? AND state IN (?,?) AND SIZE(fees)=0 ORDER BY createDate DESC";
             List<Orderr> orders = Orderr.find(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(orderSize);
-            long leftOrders = Orderr.count(jpql, acc, m, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
-            new FinanceShippedPromise(acc, m, Orderr.ids(orders), leftOrders).now();
+            new FinanceShippedPromise(acc, m, Orderr.ids(orders)).now();
         }
 
     }
