@@ -1,8 +1,6 @@
 package query;
 
 import helper.DBUtils;
-import helper.Dates;
-import models.market.Feedback;
 import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
@@ -14,11 +12,7 @@ import play.utils.FastRuntimeException;
 import query.vo.AnalyzeVO;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * OrderItem Dao, 使用特定 JPQL 或者 SQL 语句加载的数据
@@ -108,86 +102,6 @@ public class OrderItemQuery {
     }
 
 
-    public String feedbackSKU(Feedback feedback) {
-        Connection conn = DB.getConnection();
-
-        String sku = null;
-        try {
-            PreparedStatement ps = conn
-                    .prepareStatement("SELECT product_sku FROM OrderItem WHERE order_orderId=?");
-            ps.setString(1, feedback.orderId);
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                sku = rs.getString("product_sku");
-            }
-            rs.close();
-            ps.close();
-        } catch(SQLException e) {
-            //ignore
-        }
-        return sku;
-    }
-
-    /**
-     * SKU 的 Feedback 的数量
-     *
-     * @param sku
-     * @return
-     */
-    public int skuFeedbackCount(String sku) {
-        Connection conn = DB.getConnection();
-        int count = 0;
-        try {
-            PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(i.product_sku) FROM Feedback f LEFT JOIN OrderItem i ON f.orderr_orderId=i.order_orderId WHERE i.product_sku=?");
-            ps.setString(1, sku);
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                count = rs.getInt(1);
-            }
-            rs.close();
-            ps.close();
-        } catch(SQLException e) {
-            //ignore
-        }
-        return count;
-    }
-
-    public Map<String, AtomicInteger> skuSales() {
-        DateTime dt = DateTime.now();
-        return skuSales(dt.minusYears(2).toDate(), dt.toDate());
-    }
-
-    public Map<String, AtomicInteger> skuSales(Date from, Date to) {
-        Date begin = Dates.morning(from);
-        Date end = Dates.night(to);
-
-        Connection conn = DB.getConnection();
-
-        Map<String, AtomicInteger> skuSales = new HashMap<String, AtomicInteger>();
-        try {
-            PreparedStatement ps = conn.prepareStatement(
-                    "SELECT quantity, product_sku FROM OrderItem WHERE createDate>=? AND createDate<=?");
-            ps.setDate(1, new java.sql.Date(begin.getTime()));
-            ps.setDate(2, new java.sql.Date(end.getTime()));
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                String sku = rs.getString("product_sku");
-                int quantity = rs.getInt("quantity");
-                if(!skuSales.containsKey(sku))
-                    skuSales.put(sku, new AtomicInteger(quantity));
-                else
-                    skuSales.get(sku).addAndGet(quantity);
-            }
-            rs.close();
-            ps.close();
-        } catch(SQLException e) {
-            //ignore
-        }
-
-        return skuSales;
-    }
-
     /**
      * 获取 AnalyzeVO 的门面方法, 内涵处理 all, cateogyrId, sid, sku 的派发
      *
@@ -198,8 +112,8 @@ public class OrderItemQuery {
      * @param to
      * @return
      */
-    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to,
-                                                      Connection conn) {
+    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to) {
+        Connection conn = DB.getConnection();
         List<AnalyzeVO> lineVos;
         OrderItemQuery query = new OrderItemQuery();
         if("all".equals(val)) {
@@ -214,21 +128,6 @@ public class OrderItemQuery {
             throw new FastRuntimeException("不支持的类型!");
         }
         return lineVos;
-    }
-
-    /**
-     * 获取 AnalyzeVO 的门面方法, 内涵处理 all, cateogyrId, sid, sku 的派发
-     *
-     * @param market
-     * @param val
-     * @param type
-     * @param from
-     * @param to
-     * @return
-     */
-    public static List<AnalyzeVO> getAnalyzeVOsFacade(M market, String val, String type, Date from, Date to) {
-        Connection conn = DB.getConnection();
-        return getAnalyzeVOsFacade(market, val, type, from, to, conn);
     }
 
     /**
@@ -250,9 +149,9 @@ public class OrderItemQuery {
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .leftJoin("Selling s ON oi.selling_sellingId=s.sellingId")
                 .where("s.merchantSKU=?").param(sid)
-                .where("oi.createDate>=?").param(market.withTimeZone(from).toDate())
-                .where("oi.createDate<=?").param(market.withTimeZone(to).toDate())
-                .where("oi.market=?").param(market.name())
+                .where("o.createDate>=?").param(market.withTimeZone(from).toDate())
+                .where("o.createDate<=?").param(market.withTimeZone(to).toDate())
+                .where("o.market=?").param(market.name())
                 .where("o.state NOT IN (?,?,?)")
                 .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(), Orderr.S.RETURNNEW.name())
                 .groupBy("_date");
@@ -279,9 +178,9 @@ public class OrderItemQuery {
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId")
                 .leftJoin("Product p ON p.sku=oi.product_sku")
                 .where("p.sku=?").param(sku)
-                .where("oi.createDate>=?").param(market.withTimeZone(from).toDate())
-                .where("oi.createDate<=?").param(market.withTimeZone(to).toDate())
-                .where("oi.market=?").param(market.name())
+                .where("o.createDate>=?").param(market.withTimeZone(from).toDate())
+                .where("o.createDate<=?").param(market.withTimeZone(to).toDate())
+                .where("o.market=?").param(market.name())
                 .where("o.state NOT IN (?,?,?)")
                 .params(Orderr.S.CANCEL.name(), Orderr.S.REFUNDED.name(), Orderr.S.RETURNNEW.name())
                 .groupBy("_date");
@@ -307,10 +206,11 @@ public class OrderItemQuery {
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON oi.order_orderId=o.orderId");
         if(StringUtils.isNotBlank(categoryId))
-            sql.leftJoin("Product p ON p.sku=oi.product_sku").where("p.category_categoryId=?").param(categoryId);
+            sql.leftJoin("Product p ON p.sku=oi.product_sku")
+                    .where("p.category_categoryId=?").param(categoryId);
         sql.where("o.createDate>=?").param(market.withTimeZone(from).toDate())
                 .where("o.createDate<=?").param(market.withTimeZone(to).toDate())
-                .where("oi.market=?").param(market.name())
+                .where("o.market=?").param(market.name())
                 .where("o.state IN (?,?,?)")
                 .params(Orderr.S.PAYMENT.name(), Orderr.S.PENDING.name(), Orderr.S.SHIPPED.name())
                 .groupBy("_date");

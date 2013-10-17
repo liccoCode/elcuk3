@@ -3,6 +3,8 @@ package helper;
 import net.sf.ehcache.concurrent.ReadWriteLockSync;
 import play.cache.Cache;
 
+import java.util.Date;
+
 /**
  * 固定的缓存的 Key
  * User: wyattpan
@@ -48,7 +50,14 @@ public class Caches {
         public static String cacheKey(Object... params) {
             StringBuilder sbd = new StringBuilder();
             for(Object obj : params) {
-                sbd.append((obj == null) ? "null" : obj.toString()).append("|");
+                if(obj == null) {
+                    sbd.append("null");
+                } else if(obj.getClass() == Date.class) {
+                    sbd.append(Dates.date2Date((Date) obj));
+                } else {
+                    sbd.append(obj.toString());
+                }
+                sbd.append("|");
             }
             sbd.deleteCharAt(sbd.length() - 1);
             return sbd.toString();
