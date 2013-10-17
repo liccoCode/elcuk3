@@ -77,15 +77,10 @@ public class Analyzes extends Controller {
     public static void ajaxUnit(final AnalyzePost p) {
         try {
             response.cacheFor("10mn");
-            HighChart chart = await(new Job<HighChart>() {
-                @Override
-                public HighChart doJobWithResult() throws Exception {
-                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
-                }
-            }.now());
+            HighChart chart = OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.S(e)));
+            renderJSON(new Ret(Webs.E(e)));
         }
     }
 

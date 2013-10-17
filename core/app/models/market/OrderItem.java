@@ -6,8 +6,10 @@ import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
@@ -15,6 +17,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单的具体订单项
@@ -166,9 +169,15 @@ public class OrderItem extends GenericModel {
     @Cached("8h")
     public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
+        String runningKey = cacked_key + ".running";
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
-        synchronized(cacked_key.intern()) { // 使用 cacked_key 在 String pool 中的对象
+        if(Cache.get(runningKey) != null)
+            throw new FastRuntimeException(String.format("%s %s 的 %s %s 已经在计算了, 无需重复查询.",
+                    Dates.date2Date(from), Dates.date2Date(to), type, val));
+
+        try {
+            Cache.add(runningKey, "running");
             lines = Cache.get(cacked_key, HighChart.class);
             if(lines != null) return lines;
 
@@ -177,19 +186,33 @@ public class OrderItem extends GenericModel {
             final Date _to = Dates.night(to);
 
             final HighChart finalLines = new HighChart();
-
-            for(final M m : Promises.MARKETS) {
-                List<AnalyzeVO> lineVos = OrderItemQuery.getAnalyzeVOsFacade(m, val, type, _from, _to);
-                for(AnalyzeVO vo : lineVos) {
-                    finalLines.series("unit_all").add(vo.date, vo.qty.floatValue());
-                    finalLines.series("unit_" + m.name().toLowerCase()).add(vo.date, vo.qty.floatValue());
+            Promises.forkJoin(new Promises.DBCallback<Map<M, List<AnalyzeVO>>>() {
+                @Override
+                public Map<M, List<AnalyzeVO>> doJobWithResult(M m) {
+                    List<AnalyzeVO> lineVos = OrderItemQuery
+                            .getAnalyzeVOsFacade(m, val, type, _from, _to, getConnection());
+                    synchronized(finalLines) { // 避免 finalLines 内部因多线程并发修改数组的问题
+                        for(AnalyzeVO vo : lineVos) {
+                            finalLines.series("unit_all").add(vo.date, vo.qty.floatValue());
+                            finalLines.series("unit_" + m.name().toLowerCase()).add(vo.date,
+                                    vo.qty.floatValue());
+                        }
+                    }
+                    return null;
                 }
-            }
+
+                @Override
+                public String id() {
+                    return "OrderItem.ajaxHighChartUnitOrder";
+                }
+            });
 
             for(AbstractSeries aline : finalLines.series) {
                 ((Series.Line) aline).sort();
             }
             Cache.add(cacked_key, finalLines, "8h");
+        } finally {
+            Cache.delete(runningKey);
         }
 
         return Cache.get(cacked_key, HighChart.class);
@@ -223,24 +246,13 @@ public class OrderItem extends GenericModel {
                         acc.type.withTimeZone(to).toDate(),
                         acc.id);
             } else {
-                List<List<AnalyzeVO>> results = Promises.forkJoin(new Promises.DBCallback<List<AnalyzeVO>>() {
-                    @Override
-                    public List<AnalyzeVO> doJobWithResult(M m) {
-                        return new OrderItemQuery().groupCategory(
-                                m.withTimeZone(from).toDate(),
-                                m.withTimeZone(to).toDate(),
-                                m,
-                                getConnection());
-                    }
-
-                    @Override
-                    public String id() {
-                        return "OrderItem.categoryPercent";
-                    }
-                });
-                for(List<AnalyzeVO> result : results) {
-                    vos.addAll(result);
+                Logger.info("OrderItem.categoryPercent begin...");
+                long begin = System.currentTimeMillis();
+                for(M m : Promises.MARKETS) {
+                    vos.addAll(new OrderItemQuery()
+                            .groupCategory(m.withTimeZone(from).toDate(), m.withTimeZone(to).toDate(), m));
                 }
+                Logger.info("OrderItem.categoryPercent passed %s ms...", System.currentTimeMillis() - begin);
             }
             for(AnalyzeVO vo : vos) {
                 if(StringUtils.equals(type, "sales"))

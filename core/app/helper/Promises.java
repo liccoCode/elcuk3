@@ -56,9 +56,8 @@ public class Promises {
             }
             try {
                 for(FutureTask<T> task : futures) {
-                    vos.add(task.get(5, TimeUnit.MINUTES));
+                    vos.add(task.get(45, TimeUnit.MINUTES));
                 }
-
             } catch(Exception e) {
                 throw new FastRuntimeException(
                         String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
@@ -112,8 +111,10 @@ public class Promises {
 
         public void close() {
             try {
-                connHolder.get().close();
-                connHolder.set(null);
+                if(connHolder.get() != null) {
+                    connHolder.get().close();
+                    connHolder.set(null);
+                }
             } catch(SQLException e) {
                 throw new FastRuntimeException(e);
             }
