@@ -56,9 +56,8 @@ public class Promises {
             }
             try {
                 for(FutureTask<T> task : futures) {
-                    vos.add(task.get(5, TimeUnit.MINUTES));
+                    vos.add(task.get(20, TimeUnit.MINUTES));
                 }
-
             } catch(Exception e) {
                 throw new FastRuntimeException(
                         String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
