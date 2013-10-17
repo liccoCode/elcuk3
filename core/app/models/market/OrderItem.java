@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
+import play.utils.FastRuntimeException;
 import query.OrderItemQuery;
 import query.vo.AnalyzeVO;
 
@@ -168,9 +169,15 @@ public class OrderItem extends GenericModel {
     @Cached("8h")
     public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
+        String runningKey = cacked_key + ".running";
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
-        synchronized(cacked_key.intern()) { // 使用 cacked_key 在 String pool 中的对象
+        if(Cache.get(runningKey) != null)
+            throw new FastRuntimeException(String.format("%s %s 的 %s %s 已经在计算了, 无需重复查询.",
+                    Dates.date2Date(from), Dates.date2Date(to), type, val));
+
+        try {
+            Cache.add(runningKey, "running");
             lines = Cache.get(cacked_key, HighChart.class);
             if(lines != null) return lines;
 
@@ -204,6 +211,8 @@ public class OrderItem extends GenericModel {
                 ((Series.Line) aline).sort();
             }
             Cache.add(cacked_key, finalLines, "8h");
+        } finally {
+            Cache.delete(runningKey);
         }
 
         return Cache.get(cacked_key, HighChart.class);

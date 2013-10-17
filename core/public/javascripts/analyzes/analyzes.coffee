@@ -108,46 +108,48 @@ $ ->
     LoadMask.mask()
     $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
       .done((r) ->
-       if r['series'].length != 0
-        $div.highcharts('StockChart', {
-          credits:
-             text:'EasyAcc'
-             href:''
-          title:
-            text: headName
-          legend:
-            enabled: true
-          navigator:
-            enabled: false
-          scrollbar:
-            enabled: false
-          rangeSelector:
-            enabled: false
-          xAxis:
-            type: 'datetime'
-          yAxis: { min: 0 }
-          plotOptions:
-            series: # 需要从服务器获取开始时间
-               cursor: 'pointer',
-               events: plotEvents
-          tooltip:
-            shared: true
-            formatter: ->
-              s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
-              @points.forEach((point) ->
-                totalY = point.series.yData.reduce((a, b)->
-                  a + b
+        if r.flag == false
+          noty({text: r.message.split("|")[0], type: 'warning', timeout: 3000})
+        else if r['series'].length != 0
+          $div.highcharts('StockChart', {
+            credits:
+              text:'EasyAcc'
+              href:''
+            title:
+              text: headName
+            legend:
+              enabled: true
+            navigator:
+              enabled: false
+            scrollbar:
+              enabled: false
+            rangeSelector:
+              enabled: false
+            xAxis:
+              type: 'datetime'
+            yAxis: { min: 0 }
+            plotOptions:
+              series: # 需要从服务器获取开始时间
+                cursor: 'pointer',
+                events: plotEvents
+            tooltip:
+              shared: true
+              formatter: ->
+                s = "<b>#{Highcharts.dateFormat('%Y-%m-%d', @x)}</b><br>"
+                @points.forEach((point) ->
+                  totalY = point.series.yData.reduce((a, b)->
+                    a + b
+                  )
+                  s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
                 )
-                s += "<span style=\"color:#{point.series.color}\">#{point.series.name}</span>: <b>#{point.y} (#{totalY})</b><br/>"
-              )
-              s
-            crosshairs: true
-            xDateFormat: '%Y-%m-%d'
-          series: r['series']
-        })
-       else
-        $div.html(noDataDisplayMessage)
-       LoadMask.unmask()
+                s
+              crosshairs: true
+              xDateFormat: '%Y-%m-%d'
+            series: r['series']
+          })
+        else
+          $div.html(noDataDisplayMessage)
+        LoadMask.unmask()
       )
       .fail((xhr, text, error) ->
         noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
