@@ -6,6 +6,7 @@ import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import query.OrderItemQuery;
@@ -223,24 +224,13 @@ public class OrderItem extends GenericModel {
                         acc.type.withTimeZone(to).toDate(),
                         acc.id);
             } else {
-                List<List<AnalyzeVO>> results = Promises.forkJoin(new Promises.DBCallback<List<AnalyzeVO>>() {
-                    @Override
-                    public List<AnalyzeVO> doJobWithResult(M m) {
-                        return new OrderItemQuery().groupCategory(
-                                m.withTimeZone(from).toDate(),
-                                m.withTimeZone(to).toDate(),
-                                m,
-                                getConnection());
-                    }
-
-                    @Override
-                    public String id() {
-                        return "OrderItem.categoryPercent";
-                    }
-                });
-                for(List<AnalyzeVO> result : results) {
-                    vos.addAll(result);
+                Logger.info("OrderItem.categoryPercent begin...");
+                long begin = System.currentTimeMillis();
+                for(M m : Promises.MARKETS) {
+                    vos.addAll(new OrderItemQuery()
+                            .groupCategory(m.withTimeZone(from).toDate(), m.withTimeZone(to).toDate(), m));
                 }
+                Logger.info("OrderItem.categoryPercent passed %s ms...", System.currentTimeMillis() - begin);
             }
             for(AnalyzeVO vo : vos) {
                 if(StringUtils.equals(type, "sales"))

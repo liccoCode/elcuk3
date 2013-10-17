@@ -49,6 +49,10 @@ public class OrderItemQuery {
         return rows2Vo(rows);
     }
 
+    public List<AnalyzeVO> groupCategory(Date from, Date to, M market) {
+        return groupCategory(from, to, market, DB.getConnection());
+    }
+
     public List<AnalyzeVO> groupCategory(Date from, Date to, M market, Connection conn) {
         SqlSelect sql = new SqlSelect()
                 // tip: just a hack
