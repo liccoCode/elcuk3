@@ -18,7 +18,6 @@ require:
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
-    - com.trendrr -> beanstalk 1.0
     - elcuk -> mws 1.0:
         exclude:
           - org.codehaus.woodstox -> *
@@ -70,12 +69,10 @@ repositories:
         root: "file:///${user.home}/.m2/repository/"
         contains:
             - com.elcuk2 -> *
-            - com.trendrr -> *
             - elcuk -> *
     - My Local Repo Win:
         type: iBiblio
         root: "file://e:/.m2/repository/"
         contains:
             - com.elcuk2 -> *
-            - com.trendrr -> *
             - elcuk -> *
