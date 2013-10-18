@@ -60,8 +60,9 @@ public class OrderInfoFetchJob extends Job {
         String sql = "state IN (?,?) AND (userid is null OR email is null OR phone is null)";
         List<Orderr> orders = Orderr.find(sql + " ORDER BY createDate DESC",
                 Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(size);
-        long counts = Orderr.count(sql, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
-        Logger.info("OrderInfoFetchJob fetch %s / %s orders.", orders.size(), counts);
+        //TODO
+//        long counts = Orderr.count(sql, Orderr.S.SHIPPED, Orderr.S.REFUNDED);
+        Logger.info("OrderInfoFetchJob fetch %s orders.", orders.size());
         return orders;
     }
 
