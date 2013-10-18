@@ -109,7 +109,7 @@ $ ->
     $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
       .done((r) ->
         if r.flag == false
-          noty({text: r.message.split("|")[0], type: 'warning', timeout: 3000})
+          noty({text: r.message.split("|F")[0], type: 'warning', timeout: 5000})
         else if r['series'].length != 0
           $div.highcharts('StockChart', {
             credits:

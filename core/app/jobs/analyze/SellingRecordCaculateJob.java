@@ -1,5 +1,6 @@
 package jobs.analyze;
 
+import helper.Caches;
 import helper.Webs;
 import models.market.Selling;
 import models.market.SellingRecord;
@@ -32,7 +33,6 @@ import java.util.Map;
  */
 @On("0 0 0,8,16,23 * * ?")
 public class SellingRecordCaculateJob extends Job {
-    public static final String RUNNING = "sellingRecordCaculateJobRunning";
 
     private MetricShipCostService shipCostService = new MetricShipCostService();
     private MetricAmazonFeeService amzService = new MetricAmazonFeeService();
@@ -69,7 +69,7 @@ public class SellingRecordCaculateJob extends Job {
              * 历史总销售额: 每天计算都会累加一份
              * 历史总利润额: 每天计算都会累加一份
              */
-            Cache.add(RUNNING, RUNNING);
+            Cache.add(Caches.SELLINGRECORD_RUNNING, "running");
             // 当天产生的数据
             // 需要计算的所有数据
             List<Selling> sellings = null;
@@ -150,12 +150,12 @@ public class SellingRecordCaculateJob extends Job {
         } catch(Exception e) {
             e.printStackTrace();
         } finally {
-            Cache.delete(RUNNING);
+            Cache.delete(Caches.SELLINGRECORD_RUNNING);
         }
     }
 
 
     public static boolean isRunning() {
-        return StringUtils.isNotBlank(Cache.get(RUNNING, String.class));
+        return StringUtils.isNotBlank(Cache.get(Caches.SELLINGRECORD_RUNNING, String.class));
     }
 }

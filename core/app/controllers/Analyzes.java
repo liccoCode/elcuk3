@@ -76,7 +76,6 @@ public class Analyzes extends Controller {
      */
     public static void ajaxUnit(final AnalyzePost p) {
         try {
-            response.cacheFor("10mn");
             HighChart chart = OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
             renderJSON(J.json(chart));
         } catch(Exception e) {

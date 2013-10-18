@@ -1,9 +1,13 @@
 package helper;
 
 import net.sf.ehcache.concurrent.ReadWriteLockSync;
+import org.apache.commons.lang3.StringUtils;
+import play.Logger;
 import play.cache.Cache;
+import play.modules.redis.RedisCacheImpl;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * 固定的缓存的 Key
@@ -36,6 +40,9 @@ public class Caches {
     public static final String SKUS = "caches.skus";
 
     public static final String FAMILYS = "caches.familys";
+
+    public static final String ORDERITEM_AJAXUNITRUNNING = "ajaxHighChartUnitOrder.running";
+    public static final String SELLINGRECORD_RUNNING = "sellingRecordCaculateJob.running";
 
     /**
      * Query Cache
@@ -83,5 +90,25 @@ public class Caches {
         public static void put(Object element, String exprestion, Object... params) {
             Cache.add(Q.cacheKey(params), element, exprestion);
         }
+    }
+
+    /**
+     * 批量删除所有 redis 中的 running keys
+     */
+    @SuppressWarnings("unchecked")
+    public static void clearRedisRunningKeys() {
+        Set<String> runningkeys = RedisCacheImpl.getCacheConnection().keys("*.running");
+        if(runningkeys != null && runningkeys.size() > 0) {
+            Logger.info("Delete running keys: %s", StringUtils.join(runningkeys, ","));
+            RedisCacheImpl.getCacheConnection().del(runningkeys.toArray(new String[runningkeys.size()]));
+        }
+    }
+
+    /**
+     * 有针对性的指定删除某些 running keys
+     */
+    public static void clearRunningCacheKey() {
+        Cache.delete(ORDERITEM_AJAXUNITRUNNING);
+        Cache.delete(SELLINGRECORD_RUNNING);
     }
 }

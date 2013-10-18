@@ -169,15 +169,15 @@ public class OrderItem extends GenericModel {
     @Cached("8h")
     public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
-        String runningKey = cacked_key + ".running";
         HighChart lines = Cache.get(cacked_key, HighChart.class);
+        String runningValue = Cache.get(Caches.ORDERITEM_AJAXUNITRUNNING, String.class);
         if(lines != null) return lines;
-        if(Cache.get(runningKey) != null)
-            throw new FastRuntimeException(String.format("%s %s 的 %s %s 已经在计算了, 无需重复查询.",
-                    Dates.date2Date(from), Dates.date2Date(to), type, val));
+        if(StringUtils.isNotBlank(runningValue))
+            throw new FastRuntimeException(String.format("当前正在处理[%s]的搜索, 您的 [%s] 搜索请等待 30s 后再尝试.",
+                    runningValue, cacked_key));
 
         try {
-            Cache.add(runningKey, "running");
+            Cache.add(Caches.ORDERITEM_AJAXUNITRUNNING, cacked_key);
             lines = Cache.get(cacked_key, HighChart.class);
             if(lines != null) return lines;
 
@@ -212,7 +212,7 @@ public class OrderItem extends GenericModel {
             }
             Cache.add(cacked_key, finalLines, "8h");
         } finally {
-            Cache.delete(runningKey);
+            Cache.delete(Caches.ORDERITEM_AJAXUNITRUNNING);
         }
 
         return Cache.get(cacked_key, HighChart.class);
