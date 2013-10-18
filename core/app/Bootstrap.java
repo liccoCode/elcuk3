@@ -1,3 +1,4 @@
+import helper.Caches;
 import helper.Currency;
 import helper.Dates;
 import helper.HTTP;
@@ -50,6 +51,7 @@ public class Bootstrap extends Job {
         JobsSetup.init();
         Account.initOfferIds();
         ElcukConfig.init();
+        Caches.clearRedisRunningKeys();
 
         if(Play.mode.isProd()) {
             Currency.updateCRY();// 系统刚刚启动以后进行一次 Currency 的更新.
