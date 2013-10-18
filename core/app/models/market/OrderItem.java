@@ -171,7 +171,10 @@ public class OrderItem extends GenericModel {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         String runningKey = cacked_key + ".running";
         HighChart lines = Cache.get(cacked_key, HighChart.class);
-        if(lines != null) return lines;
+        if(lines != null) {
+            Cache.delete(runningKey);
+            return lines;
+        }
         if(Cache.get(runningKey) != null)
             throw new FastRuntimeException(String.format("%s %s 的 %s %s 已经在计算了, 无需重复查询.",
                     Dates.date2Date(from), Dates.date2Date(to), type, val));

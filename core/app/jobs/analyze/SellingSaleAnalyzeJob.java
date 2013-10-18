@@ -75,59 +75,62 @@ public class SellingSaleAnalyzeJob extends Job {
         if(dtos != null) return dtos;
 
         synchronized(AnalyzeDTO.class) {
-            Cache.add(RUNNING, RUNNING);
-            dtos = Cache.get(cacke_key, List.class);
-            if(dtos != null) return dtos;
+            try {
+                Cache.add(RUNNING, RUNNING);
+                dtos = Cache.get(cacke_key, List.class);
+                if(dtos != null) return dtos;
 
-            dtos = new ArrayList<AnalyzeDTO>();
-            boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
+                dtos = new ArrayList<AnalyzeDTO>();
+                boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
 
-            // 准备计算用的数据容器
-            Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
-            if(isSku) {
-                for(String sku : new ProductQuery().skus()) {
-                    analyzeMap.put(sku, new AnalyzeDTO(sku));
+                // 准备计算用的数据容器
+                Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
+                if(isSku) {
+                    for(String sku : new ProductQuery().skus()) {
+                        analyzeMap.put(sku, new AnalyzeDTO(sku));
+                    }
+                } else {
+                    for(AnalyzeDTO dto : new SellingQuery().analyzePostDTO()) {
+                        analyzeMap.put(dto.fid, dto);
+                    }
                 }
-            } else {
-                for(AnalyzeDTO dto : new SellingQuery().analyzePostDTO()) {
-                    analyzeMap.put(dto.fid, dto);
+
+                // 销量 AnalyzeVO
+                pullDaySales(isSku, analyzeMap);
+
+                // ProcureUnit
+                for(AnalyzeDTO dto : analyzeMap.values()) {
+                    // 切换 ProcureUnit 的 sku/sid 的参数?
+                    // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
+                    List<ProcureUnit> untis = ProcureUnit.find(
+                            (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage NOT IN (?,?)",
+                            dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER)
+                            .fetch();
+
+                    // plan, working, worked, way
+                    for(ProcureUnit unit : untis) {
+                        if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
+                        else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
+                        else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
+                        else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
+                        else if(unit.stage == ProcureUnit.STAGE.INBOUND)
+                            dto.inbound += (unit.qty() - unit.inboundingQty());
+                    }
+                    dto.difference = dto.day1 - dto.day7 / 7;
+                    dtos.add(dto);
                 }
+
+                // qty cal
+                pullQtyToDTO(isSku, analyzeMap);
+
+                // review
+                pullReviewToDTO(isSku, analyzeMap);
+
+                Cache.add(cacke_key, dtos, "8h");
+                Cache.set(cacke_key + ".time", DateTime.now().plusHours(8).toDate(), "8h");
+            } finally {
+                Cache.delete(RUNNING);
             }
-
-            // 销量 AnalyzeVO
-            pullDaySales(isSku, analyzeMap);
-
-            // ProcureUnit
-            for(AnalyzeDTO dto : analyzeMap.values()) {
-                // 切换 ProcureUnit 的 sku/sid 的参数?
-                // todo:需要添加时间限制, 减少需要计算的 ProcureUnit 吗?
-                List<ProcureUnit> untis = ProcureUnit.find(
-                        (isSku ? "product.sku=?" : "selling.sellingId=?") + " AND stage NOT IN (?,?)",
-                        dto.fid, ProcureUnit.STAGE.CLOSE, ProcureUnit.STAGE.SHIP_OVER)
-                        .fetch();
-
-                // plan, working, worked, way
-                for(ProcureUnit unit : untis) {
-                    if(unit.stage == ProcureUnit.STAGE.PLAN) dto.plan += unit.qty();
-                    else if(unit.stage == ProcureUnit.STAGE.DELIVERY) dto.working += unit.qty();
-                    else if(unit.stage == ProcureUnit.STAGE.DONE) dto.worked += unit.qty();
-                    else if(unit.stage == ProcureUnit.STAGE.SHIPPING) dto.way += unit.qty();
-                    else if(unit.stage == ProcureUnit.STAGE.INBOUND)
-                        dto.inbound += (unit.qty() - unit.inboundingQty());
-                }
-                dto.difference = dto.day1 - dto.day7 / 7;
-                dtos.add(dto);
-            }
-
-            // qty cal
-            pullQtyToDTO(isSku, analyzeMap);
-
-            // review
-            pullReviewToDTO(isSku, analyzeMap);
-
-            Cache.add(cacke_key, dtos, "8h");
-            Cache.set(cacke_key + ".time", DateTime.now().plusHours(8).toDate(), "8h");
-            Cache.delete(RUNNING);
         }
 
         return dtos;
