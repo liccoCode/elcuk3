@@ -59,12 +59,15 @@ public class OrderPOST extends Post<Orderr> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return Orderr.count("SELECT COUNT(o)" + params._1, params._2.toArray());
+//        return Orderr.count("SELECT COUNT(o)" + params._1, params._2.toArray());
+        // 66w 暂时不用计算 Order Count,因为 innodb 会全表扫描.
+        // TODO 这里的分页算法需要改
+        return 660000l;
     }
 
     @Override
     public Long getTotalCount() {
-        return Orderr.count();
+        return 660000l;
     }
 
     @Override
