@@ -3,6 +3,7 @@ package models.view.post;
 import helper.DBUtils;
 import helper.Dates;
 import models.market.M;
+import models.market.SellingRecord;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
@@ -265,7 +266,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
                 float expressCost = NumberUtils.toFloat(row.get("expressCost").toString()); // 33%
                 float seaCost = NumberUtils.toFloat(row.get("seaCost").toString()); // 33%
                 float airCost = NumberUtils.toFloat(row.get("airCost").toString()); // 33%
-                highChart.series("运输成本").add(date, (expressCost * 0.333f + seaCost * 0.333f + airCost * 0.333f));
+                highChart.series("运输成本").add(date, new SellingRecord(expressCost, seaCost, airCost).mergeToShipCost());
             }
         });
     }

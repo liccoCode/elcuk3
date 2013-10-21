@@ -40,6 +40,15 @@ public class SellingRecord extends GenericModel {
         this.date = date;
     }
 
+    /**
+     * 用于封装 快递/海运/空运 费用统计成为运输成本用.
+     */
+    public SellingRecord(float expressCost, float seaCost, float airCost) {
+        this.seaCost = seaCost;
+        this.expressCost = expressCost;
+        this.airCost = airCost;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Selling selling;
 
@@ -197,10 +206,8 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public float sumShipCost() {
-        if((this.seaCubicMeter + this.expressKilogram + this.airKilogram) == 0) return 0;
-        return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
-                this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
+    public float mergeToShipCost() {
+        return (this.expressCost * 0.333f) + (this.seaCost * 0.333f) + (this.airCost * 0.333f);
     }
 
     /**
@@ -210,7 +217,7 @@ public class SellingRecord extends GenericModel {
      */
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
-        return this.sumShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
+        return this.mergeToShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
     }
 
     /**

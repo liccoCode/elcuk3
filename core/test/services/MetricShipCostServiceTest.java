@@ -15,6 +15,7 @@ import models.procure.Shipment;
 import models.product.Product;
 import org.junit.Before;
 import org.junit.Test;
+import play.data.validation.Validation;
 import play.test.UnitTest;
 
 import java.util.Date;
@@ -34,6 +35,7 @@ public class MetricShipCostServiceTest extends UnitTest {
     public void setUp() {
         FactoryBoy.deleteAll();
         FeeTypeFactory.feeTypeInit();
+        Validation.clear();
     }
 
     MetricShipCostService service = new MetricShipCostService();
@@ -58,7 +60,7 @@ public class MetricShipCostServiceTest extends UnitTest {
         assertThat((double) sellingSeaCost.get(s1.sellingId), is(closeTo(14.10, 0.3)));
     }
 
-    //    @Test
+    @Test
     public void testSellingVATFee() {
         procureUnitBaseFixtures();
         spSea = new Shipment().buildFromProcureUnits(Lists.newArrayList(pu1.id));
@@ -140,6 +142,7 @@ public class MetricShipCostServiceTest extends UnitTest {
                 target.selling = s1;
                 target.product = p1;
                 target.attrs.qty = 200;
+                target.shipType = Shipment.T.SEA;
                 target.attrs.planShipDate = new Date();
             }
         });
@@ -150,17 +153,18 @@ public class MetricShipCostServiceTest extends UnitTest {
                 target.selling = s2;
                 target.product = p2;
                 target.attrs.qty = 400;
+                target.shipType = Shipment.T.AIR;
                 target.attrs.planShipDate = new Date();
             }
         });
-
-        spSea = FactoryBoy.create(Shipment.class, "sea");
-        spAir = FactoryBoy.create(Shipment.class, "air");
-        spExpress = FactoryBoy.create(Shipment.class);
     }
 
 
     private void shipmentFixtures() {
+        spSea = FactoryBoy.create(Shipment.class, "sea");
+        spAir = FactoryBoy.create(Shipment.class, "air");
+        spExpress = FactoryBoy.create(Shipment.class);
+
         spSea.addToShip(pu1);
         spAir.addToShip(pu2);
         spExpress.addToShip(pu1);

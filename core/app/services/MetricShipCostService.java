@@ -96,7 +96,8 @@ public class MetricShipCostService {
         float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
         if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "','"));
         for(String sid : sellingCubicMeters.keySet()) {
-            sellingSeaCost.put(sid, sellingCubicMeters.get(sid) * perCubicMeter * sellingSeaShipQty.get(sid));
+            float cubicMeters = sellingCubicMeters.get(sid) * sellingSeaShipQty.get(sid);
+            sellingSeaCost.put(sid, cubicMeters * perCubicMeter);
         }
 
         return sellingSeaCost;
