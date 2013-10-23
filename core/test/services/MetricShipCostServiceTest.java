@@ -41,10 +41,13 @@ public class MetricShipCostServiceTest extends UnitTest {
     MetricShipCostService service = new MetricShipCostService();
     Selling s1;
     Selling s2;
+    Selling s3;
     Product p1;
     Product p2;
+    Product p3;
     ProcureUnit pu1;
     ProcureUnit pu2;
+    ProcureUnit pu3;
     Shipment spSea;
     Shipment spAir;
     Shipment spExpress;
@@ -64,7 +67,7 @@ public class MetricShipCostServiceTest extends UnitTest {
         assertThat((double) sellingSeaCost.get(s1.sellingId), is(closeTo(.070525616, 0.02)));
     }
 
-    @Test
+    //    @Test
     public void testAirCost() {
         procureUnitBaseFixtures();
         shipmentFixtures();
@@ -74,6 +77,15 @@ public class MetricShipCostServiceTest extends UnitTest {
         // p2 的重量为 0.33 kg
         // 所以当前每一个 s1 的运费为: 3.925729927 * 0.33 = 1.295490876
         assertThat((double) sellingAirCost.get(s2.sellingId), is(closeTo(1.23, 0.1)));
+    }
+
+    @Test
+    public void testExpressCost() {
+        procureUnitBaseFixtures();
+        shipmentFixtures();
+        Map<String, Float> sellingSeaCost = service.expressCost(new Date());
+
+        assertThat((double) sellingSeaCost.get(s3.sellingId), is(closeTo(38.26485, 0.2)));
     }
 
     //    @Test
@@ -130,6 +142,12 @@ public class MetricShipCostServiceTest extends UnitTest {
                 target.sellingId = "Sell2";
             }
         });
+        s3 = FactoryBoy.create(Selling.class, "de", new BuildCallback<Selling>() {
+            @Override
+            public void build(Selling target) {
+                target.sellingId = "Sell3";
+            }
+        });
 
         p1 = FactoryBoy.create(Product.class, new BuildCallback<Product>() {
             @Override
@@ -145,6 +163,17 @@ public class MetricShipCostServiceTest extends UnitTest {
             @Override
             public void build(Product target) {
                 target.sku = "88SPP8-BSQ";
+                target.declaredValue = 2.5f;
+                target.heigh = 25f;
+                target.lengths = 100f;
+                target.width = 25f;
+                target.weight = 0.33f;
+            }
+        });
+        p3 = FactoryBoy.create(Product.class, new BuildCallback<Product>() {
+            @Override
+            public void build(Product target) {
+                target.sku = "88SPP8-BSQ2";
                 target.declaredValue = 2.5f;
                 target.heigh = 25f;
                 target.lengths = 100f;
@@ -174,6 +203,17 @@ public class MetricShipCostServiceTest extends UnitTest {
                 target.attrs.planShipDate = new Date();
             }
         });
+
+        pu3 = FactoryBoy.create(ProcureUnit.class, "plan", new BuildCallback<ProcureUnit>() {
+            @Override
+            public void build(ProcureUnit target) {
+                target.selling = s3;
+                target.product = p3;
+                target.attrs.qty = 400;
+                target.shipType = Shipment.T.EXPRESS;
+                target.attrs.planShipDate = new Date();
+            }
+        });
     }
 
 
@@ -184,7 +224,7 @@ public class MetricShipCostServiceTest extends UnitTest {
 
         spSea.addToShip(pu1);
         spAir.addToShip(pu2);
-        spExpress.addToShip(pu1);
+        spExpress.addToShip(pu3);
         Payment payment = FactoryBoy.create(Payment.class, "paid");
 
         // 海运
@@ -199,6 +239,14 @@ public class MetricShipCostServiceTest extends UnitTest {
         createPaymentUnit(FeeType.<FeeType>findById("loadingunloadingfee"),
                 150f, 1, payment, Currency.GBP, PaymentUnit.S.PAID, spAir);
         createPaymentUnit(FeeType.dutyAndVAT(), 500f, 1, payment, Currency.USD, PaymentUnit.S.PAID, spAir);
+
+        // 快递
+        createPaymentUnit(FeeType.expressFee(), 36.27f, 22f, payment, Currency.USD, PaymentUnit.S.PAID,
+                spExpress.items.get(0));
+        createPaymentUnit(FeeType.<FeeType>findById("loadingunloadingfee"), 36.27f, 22f, payment, Currency.USD,
+                PaymentUnit.S.PAID, spExpress.items.get(0));
+        createPaymentUnit(FeeType.dutyAndVAT(), 500f, 1, payment, Currency.USD, PaymentUnit.S.PAID,
+                spExpress.items.get(0));
     }
 
     private void createPaymentUnit(final FeeType feeType, final float unitPrice, final float unitQty,

@@ -147,6 +147,92 @@ public class MetricShipCostService {
      * @param oneDay
      * @return
      */
+    public Map<String, Float> expressCost(Date oneDay) {
+        /**
+         * 1. 寻找当天支付的 Payment 的快递运输单所涉及的 selling 与费用, 数量
+         * 2. 寻找出快递运费之外的费用, 按照个数进行分摊
+         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
+         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
+         */
+        Set<String> shipmentIds = new HashSet<String>();
+        // USD
+        float totalSeaFee = 0;
+
+        float totalQty = 0;
+
+        // 1. 当天支付快递运输单中的 selling 的费用
+        Map<String, Float> sellExpressCost = new HashMap<String, Float>();
+        SqlSelect shipIdsAndFee = new SqlSelect()
+                .select("pu.unitPrice", "pu.currency", "pu.unitQty", "u.selling_sellingId sellingId",
+                        "pu.shipment_id shipmentId", "si.qty")
+                .from("PaymentUnit pu")
+                .leftJoin("Payment p ON p.id=pu.payment_id")
+                .leftJoin("ShipItem si ON si.id=pu.shipItem_id")
+                .leftJoin("Shipment s ON s.id=pu.shipment_id")
+                .leftJoin("ProcureUnit u ON u.id=si.unit_id")
+                .leftJoin("Product pd ON pd.sku=u.product_sku")
+                .where("s.type=?").param(Shipment.T.EXPRESS.name())
+                .where("p.state=?").param(Payment.S.PAID.name())
+                .where("pu.feeType_name=?").param(FeeType.expressFee().name)
+                .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay));
+
+        List<Map<String, Object>> rows = DBUtils.rows(shipIdsAndFee.toString(), shipIdsAndFee.getParams().toArray());
+        for(Map<String, Object> row : rows) {
+            if(row.get("sellingId") == null) continue;
+            Currency currency = Currency.valueOf(row.get("currency").toString());
+            String sid = row.get("sellingId").toString();
+            float expressCost = row.get("unitPrice") == null ? 0 : currency
+                    .toUSD(NumberUtils.toFloat(row.get("unitPrice").toString()));
+            float cost = 0;
+            if(sellExpressCost.containsKey(sid)) {
+                cost = sellExpressCost.get(sid);
+                // 3, 5, 6, 4:  (((3+5/2 + 6) / 2) + 4 ) / 2 = 4.5  ==  (3 + 5 + 6 + 4) / 4
+                sellExpressCost.put(sid, (cost + expressCost) / 2);
+            } else {
+                sellExpressCost.put(sid, expressCost);
+            }
+
+            if(row.get("shipmentId") != null)
+                shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentId").toString(), ",")));
+
+            float qty = row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString());
+            totalQty += qty;
+        }
+
+        // 2. 计算除开快递运费之外的费用 (USD)
+        float totalOtherFee = 0;
+        SqlSelect expressOtherFeeSql = new SqlSelect()
+                .select("pu.currency", "sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost")
+                .from("PaymentUnit pu")
+                .leftJoin("Payment p ON p.id=pu.payment_id")
+                .leftJoin("Shipment s ON s.id=pu.shipment_id")
+                .leftJoin("FeeType fy ON fy.name=pu.feeType_name")
+                .leftJoin("ShipItem si ON si.id=pu.shipItem_id")
+                .where("p.state=?").param(Payment.S.PAID.name())
+                .where("pu.feeType_name NOT IN (?,?)").params("dutyandvat", FeeType.expressFee().name)
+                .where("fy.parent_name=?").param("transport")
+                .where(SqlSelect.whereIn("pu.shipment_id", shipmentIds))
+                .groupBy("pu.currency");
+        rows = DBUtils.rows(expressOtherFeeSql.toString(), expressOtherFeeSql.getParams().toArray());
+        for(Map<String, Object> row : rows) {
+            Currency curcy = Currency.valueOf(row.get("currency").toString());
+            totalOtherFee += row.get("cost") == null ? 0 : curcy.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
+        }
+
+        // 3. 将其他费用和核心的费用合并
+        float perQty = totalOtherFee / totalQty;
+        for(String sid : sellExpressCost.keySet()) {
+            sellExpressCost.put(sid, sellExpressCost.get(sid) + perQty);
+        }
+        return sellExpressCost;
+    }
+
+    /**
+     * 计算某一天所有 Selling 的快递运费 (没有运输的则没有)
+     *
+     * @param oneDay
+     * @return
+     */
     public Map<String, Float> airCost(Date oneDay) {
         /**
          * * 与海运的计算类似
