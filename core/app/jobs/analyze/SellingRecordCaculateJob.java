@@ -87,6 +87,7 @@ public class SellingRecordCaculateJob extends Job {
             List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
 
             Map<String, Float> seaCost = shipCostService.seaCost(dateTime.toDate());
+            Map<String, Float> airCost = shipCostService.airCost(dateTime.toDate());
 
 
             for(Selling selling : sellings) {
@@ -114,17 +115,16 @@ public class SellingRecordCaculateJob extends Job {
                     record.procureCost = procureCostAndQty._1;
                     record.procureNumberSum = procureCostAndQty._2;
 
-                    // 快递运输成本
+                    // 海运运输成本
                     Float seaCostPrice = seaCost.get(sid);
                     record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
-                    /*
 
                     // 空运运输成本
-                    costAndKg = shipCostService.airCost(selling, dateTime.toDate());
-                    record.airCost = costAndKg._1;
-                    record.airKilogram = costAndKg._2;
+                    Float airCostPrice = airCost.get(sid);
+                    record.airCost = airCostPrice == null ? yesterdayRcd.airCost : airCostPrice;
 
-                    // 海运运输成本
+                    /*
+                    // 快递运输成本
                     costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
                     record.seaCost = costAndKg._1;
                     record.seaCubicMeter = costAndKg._2;

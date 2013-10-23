@@ -124,16 +124,18 @@ public class MetricShipCostService {
         // 2. 寻找付费的总体积 m3
         float totalWeight = totalWeight(shipmentIds, FeeType.oceanfreight());
 
-        // 3. 找出 Selling 的体积 m3/数量
+        // 3. 找出单位体积的运费. 总费用 / 总体积数
         float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
         if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "','"));
-        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
 
+        // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
+        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
         Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
+        float coefficienta = 1; // 从真实体积到运输体积需要一个系数用来计算抛货, 用来抵消装箱多余的空间差
+
         for(String sid : sellingGroup.keySet()) {
             Map<String, Float> group = sellingGroup.get(sid);
-            float cubicMeters = group.get("qty") * group.get("m3");
-            sellingSeaCost.put(sid, cubicMeters * perCubicMeter);
+            sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
         }
 
         return sellingSeaCost;
@@ -158,14 +160,28 @@ public class MetricShipCostService {
         float totalSeaFee;
 
         // 1. 寻找所涉及的 运输单 和 总费用
-        F.T2<Float, Set<String>> t2 = oneDayTotalFeeAndEffectShipments(oneDay, Shipment.T.SEA);
+        F.T2<Float, Set<String>> t2 = oneDayTotalFeeAndEffectShipments(oneDay, Shipment.T.AIR);
         totalSeaFee = t2._1;
         shipmentIds = t2._2;
 
         // 2. 寻找付费的总体积 m3
         float totalWeight = totalWeight(shipmentIds, FeeType.airFee());
 
-        return null;
+        // 3. 找出单位重量的运费. 总费用 / 总重量
+        float perKilogram = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
+        if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 airfee 费用?", StringUtils.join(shipmentIds, "','"));
+
+        // 4. 根据 selling 自己的 m3 与 perKg 计算出每个 selling 的运费
+        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
+        Map<String, Float> sellingAirCost = new HashMap<String, Float>();
+        float coefficienta = 1; // 从真实重量到运输重量需要一个系数用来计算抛货, 用来抵消装箱多余的重量差
+
+        for(String sid : sellingGroup.keySet()) {
+            Map<String, Float> group = sellingGroup.get(sid);
+            sellingAirCost.put(sid, group.get("kg") * perKilogram * coefficienta);
+        }
+
+        return sellingAirCost;
     }
 
     /**
