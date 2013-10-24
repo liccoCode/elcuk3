@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
+ * 对 HighChart 在后端处理数据的抽象类
  * User: wyatt
  * Date: 8/24/13
  * Time: 11:52 PM

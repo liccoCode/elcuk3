@@ -123,21 +123,25 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         if(isColumn()) chart = new HighChart(Series.COLUMN);
         else chart = new HighChart(Series.LINE);
         // 将各自曲线的计算分别打散到各自的方法中, 虽然便利多次, 方便权限控制
+
         // 销量方面
         this.salePrice(chart, rows);
         this.salesSeries(chart, rows);
         this.unitsSeries(chart, rows);
+
         // 利润方面
         this.profitSeries(chart, rows);
         this.costProfitRatioSeries(chart, rows);
         this.saleProfitRatioSeries(chart, rows);
         this.incomeSeries(chart, rows);
+
         // 成本方面
         this.shipCostSeries(chart, rows);
         this.airCost(chart, rows);
         this.expressCost(chart, rows);
         this.seaCost(chart, rows);
         this.procureCostSeries(chart, rows);
+
         // Amazon fee 方面
         this.amzFeeSeries(chart, rows);
         this.amzFbaFeeSeries(chart, rows);
