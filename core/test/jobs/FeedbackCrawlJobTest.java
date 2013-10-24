@@ -1,6 +1,6 @@
 package jobs;
 
-import com.google.gson.JsonElement;
+import com.alibaba.fastjson.JSONObject;
 import factory.FactoryBoy;
 import helper.Dates;
 import helper.HTTP;
@@ -210,8 +210,8 @@ public class FeedbackCrawlJobTest extends UnitTest {
 //        param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
         param.add(new BasicNameValuePair("id", ticketId));
 
-        JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
+        JSONObject jsonObject = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
-        assertThat(jsonElement.toString(), is(containsString(ticketId)));
+        assertThat(jsonObject.toString(), is(containsString(ticketId)));
     }
 }

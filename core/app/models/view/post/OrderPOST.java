@@ -1,21 +1,19 @@
 package models.view.post;
 
+import com.alibaba.fastjson.JSONObject;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
+import play.utils.FastRuntimeException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -25,12 +23,14 @@ import java.util.regex.Pattern;
  * Time: 6:59 PM
  */
 public class OrderPOST extends ESPost<Orderr> {
-    public DateTime from;
-    public DateTime to;
+
+    // 崩溃: 如果使用 from 其类型变为了 Integer, 所以在 Order Post 中改名为 begin
+    public Date begin;
+    public Date end;
 
     public OrderPOST() {
-        this.to = DateTime.now();
-        this.from = this.to.minusDays(7);
+        this.end = DateTime.now().toDate();
+        this.begin = DateTime.now().minusDays(7).toDate();
         this.perSize = 25;
         this.page = 1;
     }
@@ -60,22 +60,27 @@ public class OrderPOST extends ESPost<Orderr> {
 
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
-        SearchRequestBuilder builder = this.params();
-        SearchResponse resp = builder.execute().actionGet();
-
-        this.count = resp.getHits().totalHits();
-
-        Set<String> orderIds = new HashSet<String>();
-        for(SearchHit hit : resp.getHits()) {
-            if(hit.getSource().get("orderId") == null) continue;
-            orderIds.add(hit.getSource().get("orderId").toString());
+        SearchSourceBuilder builder = this.params();
+        System.out.println(builder);
+        try {
+            JSONObject result = ES.search("elcuk2", "order", builder);
+            JSONObject hits = result.getJSONObject("hits");
+            this.count = hits.getLong("total");
+            Set<String> orderIds = new HashSet<String>();
+            for(Object obj : hits.getJSONArray("hits")) {
+                JSONObject hit = (JSONObject) obj;
+                orderIds.add(hit.getJSONObject("_source").getString("orderId"));
+            }
+            if(orderIds.size() <= 0)
+                throw new FastRuntimeException("没有结果");
+            return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
+        } catch(Exception e) {
+            return new ArrayList<Orderr>();
         }
-
-        return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
     }
 
     @Override
-    public Long count(SearchRequestBuilder searchBuilder) {
+    public Long count(SearchSourceBuilder searchBuilder) {
         return this.count;
     }
 
@@ -84,28 +89,29 @@ public class OrderPOST extends ESPost<Orderr> {
     }
 
     @Override
-    public SearchRequestBuilder params() {
+    public SearchSourceBuilder params() {
         BoolFilterBuilder boolFilter = FilterBuilders.boolFilter()
                 .must(FilterBuilders.rangeFilter("createDate")
-                        .from(this.from)
-                        .to(this.to));
+                        .from(this.begin)
+                        .to(this.end));
 
 
-        SearchRequestBuilder builder = ES.client().prepareSearch("elcuk2")
-                .setTypes("order")
-                .setQuery(QueryBuilders
-                        .queryString(StringUtils.isBlank(this.search) ? "*" : this.search)
-                        .field("sids")
-                        .field("buyer")
-                        .field("email")
-                        .field("address")
-                        .field("orderId")
-                        .field("userid")
-                        .field("trackNo"))
-                .setFilter(boolFilter)
-                .setExplain(true)
-                .setFrom(this.getFrom())
-                .setSize(this.perSize);
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+//        builder..prepareSearch("elcuk2")
+//                .setTypes("order")
+        builder.query(QueryBuilders
+                .queryString(StringUtils.isBlank(this.search) ? "*" : this.search)
+                .field("sids")
+                .field("buyer")
+                .field("email")
+                .field("address")
+                .field("orderId")
+                .field("userid")
+                .field("trackNo"))
+                .filter(boolFilter)
+                .explain(true)
+                .from(this.getFrom())
+                .size(this.perSize);
 
 
         if(this.market != null) {

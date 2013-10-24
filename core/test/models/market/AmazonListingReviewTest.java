@@ -1,6 +1,6 @@
 package models.market;
 
-import com.google.gson.JsonElement;
+import com.alibaba.fastjson.JSONObject;
 import factory.FactoryBoy;
 import helper.HTTP;
 import helper.Jitbit;
@@ -38,8 +38,8 @@ public class AmazonListingReviewTest extends UnitTest {
 //        param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
         param.add(new BasicNameValuePair("id", ticketId));
 
-        JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
+        JSONObject jsonObj = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
-        assertThat(jsonElement.toString(), is(containsString(ticketId)));
+        assertThat(jsonObj.toString(), is(containsString(ticketId)));
     }
 }

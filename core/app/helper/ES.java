@@ -1,48 +1,25 @@
 package helper;
 
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import play.Logger;
-
-import java.util.Map;
+import com.alibaba.fastjson.JSONObject;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 /**
- * Created by IntelliJ IDEA.
+ * 简单的集成 ES 的搜索功能. 不是用 ElasticSearch 提供的 API 是因为
+ * -> http://blog.florian-hopf.de/2013/05/getting-started-with-elasticsearch-part.html)
+ * <p/>
+ * 其无需进入到 ES 的集群中, 只需要使用简单的 Restful 接口调用即可
  * User: wyatt
  * Date: 10/24/13
  * Time: 4:19 PM
  */
 public class ES {
-    private static Client client;
+    public static final String ES_HOST = "http://gengar.easya.cc:9200";
 
-    public static void init() {
-        if(client != null) return;
-        try {
-            ES.close();
-            client = new TransportClient().addTransportAddress(new InetSocketTransportAddress("gengar.easya.cc", 9300));
-            Logger.info("ElasticSearch Server success connect.");
-        } catch(Exception e) {
-            Logger.error("!!!! ElasticSearch Server can not connecte  !!!!");
-            System.exit(0);
-        }
+    public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
+        return HTTP.postJson(ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
     }
 
-    public static Map<String, Object> get(String index, String type, String id) {
-        return client.prepareGet(index, type, id).execute().actionGet().getSource();
-    }
-
-    public static Client client() {
-        return client;
-    }
-
-    public static void close() {
-        if(client != null) {
-            try {
-                client.close();
-            } catch(Exception e) {
-                Logger.warn("In Dev runtime error.");
-            }
-        }
+    public static JSONObject get(String index, String type, String id) {
+        return HTTP.getJson(ES_HOST + "/" + index + "/" + type + "/" + id);
     }
 }

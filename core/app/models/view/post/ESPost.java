@@ -1,9 +1,10 @@
 package models.view.post;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,8 +16,8 @@ import java.util.List;
  */
 public abstract class ESPost<T> implements Serializable, Cloneable {
 
-    public DateTime to = DateTime.now();
-    public DateTime from = to.minusMonths(2);
+    public Date end = DateTime.now().toDate();
+    public Date begin = DateTime.now().minusMonths(2).toDate();
     public String search;
 
     public int page = 1;
@@ -28,7 +29,7 @@ public abstract class ESPost<T> implements Serializable, Cloneable {
      *
      * @return
      */
-    public abstract SearchRequestBuilder params();
+    public abstract SearchSourceBuilder params();
 
 
     /**
@@ -36,7 +37,7 @@ public abstract class ESPost<T> implements Serializable, Cloneable {
      *
      * @return
      */
-    public Long count(SearchRequestBuilder searchBuilder) {
+    public Long count(SearchSourceBuilder searchBuilder) {
         throw new UnsupportedOperationException("请自行实现");
     }
 
