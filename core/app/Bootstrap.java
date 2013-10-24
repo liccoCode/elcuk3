@@ -1,7 +1,4 @@
-import helper.Caches;
-import helper.Currency;
-import helper.Dates;
-import helper.HTTP;
+import helper.*;
 import jobs.JobsSetup;
 import jobs.ListingSchedulJob;
 import models.ElcukConfig;
@@ -51,6 +48,7 @@ public class Bootstrap extends Job {
         JobsSetup.init();
         Account.initOfferIds();
         ElcukConfig.init();
+        ES.init();
         Caches.clearRedisRunningKeys();
 
         if(Play.mode.isProd()) {

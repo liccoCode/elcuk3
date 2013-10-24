@@ -1,4 +1,5 @@
 import helper.Caches;
+import helper.ES;
 import helper.HTTP;
 import play.jobs.Job;
 import play.jobs.OnApplicationStop;
@@ -13,6 +14,7 @@ import play.jobs.OnApplicationStop;
 public class Shutdown extends Job {
     @Override
     public void doJob() {
+        ES.close();
         Caches.clearRunningCacheKey();
         HTTP.stop();
     }
