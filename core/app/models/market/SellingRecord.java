@@ -143,6 +143,7 @@ public class SellingRecord extends GenericModel {
     /**
      * 运输到目前为之, 总共的快递运输重量(kg)
      */
+    @Deprecated
     public float expressKilogram = 0;
 
     /**
@@ -153,6 +154,7 @@ public class SellingRecord extends GenericModel {
     /**
      * 到目前为之, 总共的空运运输重量(kg)
      */
+    @Deprecated
     public float airKilogram = 0;
 
     /**
@@ -162,7 +164,9 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 到目前为止, 总共的海运运输体积(立方米)
+     * //
      */
+    @Deprecated
     public float seaCubicMeter = 0;
 
     /**
@@ -495,11 +499,8 @@ public class SellingRecord extends GenericModel {
                 ", procureCost=" + procureCost +
                 ", procureNumberSum=" + procureNumberSum +
                 ", expressCost=" + expressCost +
-                ", expressKilogram=" + expressKilogram +
                 ", airCost=" + airCost +
-                ", airKilogram=" + airKilogram +
                 ", seaCost=" + seaCost +
-                ", seaCubicMeter=" + seaCubicMeter +
                 ", profit=" + profit +
                 ", costProfitRatio=" + costProfitRatio +
                 ", saleProfitRatio=" + saleProfitRatio +

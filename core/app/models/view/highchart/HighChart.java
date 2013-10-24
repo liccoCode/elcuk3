@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * 对客户端使用 HighChart 的数据的补充与传递
  * <p/>
- * 现在只提供 Line 类型的参数, 如果还需要其他再做重构
  * User: wyatt
  * Date: 1/21/13
  * Time: 10:52 AM

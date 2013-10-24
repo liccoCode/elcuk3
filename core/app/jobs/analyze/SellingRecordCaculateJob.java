@@ -88,6 +88,7 @@ public class SellingRecordCaculateJob extends Job {
 
             Map<String, Float> seaCost = shipCostService.seaCost(dateTime.toDate());
             Map<String, Float> airCost = shipCostService.airCost(dateTime.toDate());
+            Map<String, Float> expressCost = shipCostService.expressCost(dateTime.toDate());
 
 
             for(Selling selling : sellings) {
@@ -123,12 +124,9 @@ public class SellingRecordCaculateJob extends Job {
                     Float airCostPrice = airCost.get(sid);
                     record.airCost = airCostPrice == null ? yesterdayRcd.airCost : airCostPrice;
 
-                    /*
                     // 快递运输成本
-                    costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
-                    record.seaCost = costAndKg._1;
-                    record.seaCubicMeter = costAndKg._2;
-                    */
+                    Float expressCostPrice = expressCost.get(sid);
+                    record.seaCost = expressCostPrice == null ? yesterdayRcd.seaCost : expressCostPrice;
 
                     // VAT 的费用
                     record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);

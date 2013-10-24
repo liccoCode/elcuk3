@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * Created by IntelliJ IDEA.
+ * 对 HighChart 的曲线的抽象
  * User: wyatt
  * Date: 8/24/13
  * Time: 11:53 PM
