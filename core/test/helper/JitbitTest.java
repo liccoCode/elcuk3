@@ -1,6 +1,6 @@
 package helper;
 
-import com.google.gson.JsonElement;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Ignore;
@@ -59,9 +59,9 @@ public class JitbitTest extends UnitTest {
         param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
         param.add(new BasicNameValuePair("id", ticketId));
 
-        JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
+        JSONObject jsonObject = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
-        assertThat(jsonElement.toString(), is(containsString(ticketId)));
+        assertThat(jsonObject.toString(), is(containsString(ticketId)));
     }
 
     /**
@@ -82,9 +82,9 @@ public class JitbitTest extends UnitTest {
         param.add(new BasicNameValuePair("submitterEmail", submitterEmail));
         param.add(new BasicNameValuePair("id", ticketId));
 
-        JsonElement jsonElement = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
+        JSONObject jsonObj = HTTP.postJson("https://easyacc.jitbit.com/helpdesk/api/GetTicket", param);
 
-        assertThat(jsonElement.toString(), is(containsString(ticketId)));
+        assertThat(jsonObj.toString(), is(containsString(ticketId)));
     }
 
 }

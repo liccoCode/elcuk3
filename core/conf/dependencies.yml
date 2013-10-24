@@ -25,8 +25,8 @@ require:
     - com.jamonapi -> jamon 2.7.3 #监控
     - xerces -> xercesImpl 2.10.0
     - org.jsoup -> jsoup 1.7.1
-    - org.apache.httpcomponents -> httpclient 4.1.2
-    - org.apache.httpcomponents -> httpmime 4.1.2
+    - org.apache.httpcomponents -> httpclient 4.2.3
+    - org.apache.httpcomponents -> httpmime 4.2.3
     - com.alibaba -> fastjson 1.1.19
     - net.sf.opencsv -> opencsv 2.3
     - org.squirrelframework -> squirrel-foundation 0.2.1

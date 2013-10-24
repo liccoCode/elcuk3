@@ -1,6 +1,6 @@
 package http;
 
-import com.google.gson.JsonObject;
+import com.alibaba.fastjson.JSONObject;
 import helper.OsTicket;
 import org.junit.Test;
 import play.test.UnitTest;
@@ -16,10 +16,10 @@ import java.util.Arrays;
 public class OsTicketTest extends UnitTest {
     @Test
     public void testPostSyncTicket() {
-        JsonObject obj = OsTicket.communicationWithOsTicket(Arrays.asList("436978", "731229"));
+        JSONObject obj = OsTicket.communicationWithOsTicket(Arrays.asList("436978", "731229"));
         System.out.println(obj);
-        assertEquals(true, obj.get("flag").getAsBoolean());
-        assertEquals(2, obj.get("msgs").getAsJsonArray().size());
+        assertEquals(true, obj.getBoolean("flag"));
+        assertEquals(2, obj.getJSONArray("msgs").size());
     }
 
     @Test

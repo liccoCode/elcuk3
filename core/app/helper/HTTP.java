@@ -1,5 +1,7 @@
 package helper;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import org.apache.http.*;
@@ -10,15 +12,17 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.RequestAcceptEncoding;
+import org.apache.http.client.protocol.ResponseContentEncoding;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -34,6 +38,7 @@ import play.libs.MimeTypes;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -64,11 +69,13 @@ public class HTTP {
             HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
             HttpConnectionParams.setConnectionTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
 
-            ThreadSafeClientConnManager multipThread = new ThreadSafeClientConnManager();
+            PoolingClientConnectionManager multipThread = new PoolingClientConnectionManager();
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
             multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
 
-            client = new ContentEncodingHttpClient(multipThread, params);
+            client = new DefaultHttpClient(multipThread);
+            client.addRequestInterceptor(new RequestAcceptEncoding());
+            client.addResponseInterceptor(new ResponseContentEncoding());
             client.setRedirectStrategy(new DefaultRedirectStrategy() {
                 @Override
                 public boolean isRedirected(HttpRequest request, HttpResponse response,
@@ -138,6 +145,10 @@ public class HTTP {
         return get(null, url);
     }
 
+    public static JSONObject getJson(String url) {
+        return JSON.parseObject(get(null, url));
+    }
+
     /**
      * 传入指定的 CookieStore
      *
@@ -185,6 +196,41 @@ public class HTTP {
         } catch(Exception e) {
             Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
             return "";
+        }
+    }
+
+    public static JSONObject postJson(String url, Collection<? extends NameValuePair> params) {
+        Logger.debug("HTTP.post Json [%s]", url);
+        String json = post(url, params);
+        try {
+            return JSON.parseObject(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
+
+    // 修改 JsonElement -> JSONELement 面太广
+    public static JsonElement json(String url) {
+        Logger.debug("HTTP.get Json [%s]", url);
+        String json = get(url);
+        try {
+            return new JsonParser().parse(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
+    public static JSONObject json(String url, Collection<? extends NameValuePair> params) {
+        Logger.debug("HTTP.post Json [%s]", url);
+        String json = post(url, params);
+        try {
+            return JSON.parseObject(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
         }
     }
 
@@ -270,33 +316,26 @@ public class HTTP {
         }
     }
 
-    public static JsonElement postJson(String url, Collection<? extends NameValuePair> params) {
-        Logger.debug("HTTP.post Json [%s]", url);
-        String json = post(url, params);
+
+    // -------------------- body string ----------------------
+
+    public static String post(String url, String body) {
+        HttpPost post = new HttpPost(url);
         try {
-            return new JsonParser().parse(json);
+
+            post.setEntity(new StringEntity(body, Charset.forName("UTF-8")));
+            return EntityUtils.toString(client().execute(post).getEntity());
         } catch(Exception e) {
-            Logger.error("Bad JSON: \n%s", json);
-            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            return "";
         }
     }
 
-    public static JsonElement json(String url) {
-        Logger.debug("HTTP.get Json [%s]", url);
-        String json = get(url);
-        try {
-            return new JsonParser().parse(json);
-        } catch(Exception e) {
-            Logger.error("Bad JSON: \n%s", json);
-            throw new RuntimeException("Cannot parse JSON (check logs)", e);
-        }
-    }
-
-    public static JsonElement json(String url, Collection<? extends NameValuePair> params) {
+    public static JSONObject postJson(String url, String body) {
         Logger.debug("HTTP.post Json [%s]", url);
-        String json = post(url, params);
+        String json = post(url, body);
         try {
-            return new JsonParser().parse(json);
+            return JSON.parseObject(json);
         } catch(Exception e) {
             Logger.error("Bad JSON: \n%s", json);
             throw new RuntimeException("Cannot parse JSON (check logs)", e);

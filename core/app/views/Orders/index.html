@@ -10,12 +10,12 @@
     <div class="span12">
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
-        <input type="date" style="width:100px;" id="p_from" name="p.from" value="${p.from?.date()}">
+        <input type="date" style="width:100px;" id="p_from" name="p.begin" value="${p.begin?.date()}">
       </div>
 
       <div class="input-prepend inline">
         <span class="add-on">To:</span>
-        <input type="date" style="width:100px;" id="p_to" name="p.to" value="${p.to?.date()}">
+        <input type="date" style="width:100px;" id="p_to" name="p.end" value="${p.end?.date()}">
       </div>
 
       <select id="o_market" name="p.market" class="inline">
@@ -37,34 +37,36 @@
       #{/list}
       </select>
 
-      <input type="hidden" name="p.orderBy" id="orderBy" value="createDate">
-      <select name="p.desc" class="inline">
-        <option value="DESC">DESC</option>
-        <option value="ASC">ASC</option>
-      </select>
+      <!-- TODO 暂时不支持排序 -->
+    *{<input type="hidden" name="p.orderBy" id="orderBy" value="createDate">}*
+    *{<select name="p.desc" class="inline">}*
+    *{<option value="DESC">DESC</option>}*
+    *{<option value="ASC">ASC</option>}*
+    *{</select>}*
 
-      <select name="p.paymentInfo" class="inline">
-        <option value="">支付信息</option>
-        <option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>
-        <option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息
-        </option>
-      </select>
+    *{<select name="p.paymentInfo" class="inline">}*
+    *{<option value="">支付信息</option>}*
+    *{<option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>}*
+    *{<option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息}*
+    *{</option>}*
+    *{</select>}*
 
-      <select name="p.warnning" class="inline">
-        <option value="">全部订单</option>
-        <option ${p.warnning == true ? 'selected' : ''} value="true">过滤出警告订单</option>
-        <option ${p.warnning == false ? 'selected' : ''} value="false">正常的订单</option>
-      </select>
+    *{<select name="p.warnning" class="inline">}*
+    *{<option value="">全部订单</option>}*
+    *{<option ${p.warnning == true ? 'selected' : ''} value="true">过滤出警告订单</option>}*
+    *{<option ${p.warnning == false ? 'selected' : ''} value="false">正常的订单</option>}*
+    *{</select>}*
 
-      <select name="p.promotion" class="inline">
-        <option value=""}>全部订单</option>
-        <option value="true"  ${p.promotion == true ? 'selected' : ''}>过滤出促销订单</option>
-        <option value="false" ${p.promotion == false ? 'selected' : ''}>不是促销订单</option>
-      </select>
+    *{<select name="p.promotion" class="inline">}*
+    *{<option value="">全部订单</option>}*
+    *{<option value="true"  ${p.promotion == true ? 'selected' : ''}>过滤出促销订单</option>}*
+    *{<option value="false" ${p.promotion == false ? 'selected' : ''}>不是促销订单</option>}*
+    *{</select>}*
 
       <div class="inline input-append" id="search_btns">
         <input type="hidden" name="p.page" value="${p.page}">
-        <input type="text" style="width:120px;" name="p.search" placeholder="关键字搜索; +2 销售数量大于 2;" value="${p.search}">
+        <!-- TODO  +2 销售数量大于 2 暂时不支持 -->
+        <input type="text" style="width:160px;" name="p.search" placeholder="例 *cvd4hs8y6m, 可带 *" value="${p.search}">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
     </div>
@@ -80,7 +82,7 @@
     <table class="table table-condensed table-bordered">
         #{render 'Orders/_order_table_tr.html', items:orders/}
       <tr class="tb_footer">
-        <td colspan="10">
+        <td colspan="12">
             #{bootstrap_pager pi:p, url:'' /}
         </td>
       </tr>

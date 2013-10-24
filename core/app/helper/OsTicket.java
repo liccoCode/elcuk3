@@ -1,7 +1,6 @@
 package helper;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -61,12 +60,11 @@ public class OsTicket {
      * @param ticketIds
      * @return
      */
-    public static JsonObject communicationWithOsTicket(List<String> ticketIds) {
+    public static JSONObject communicationWithOsTicket(List<String> ticketIds) {
         Logger.info("Update Tickets: %s", StringUtils.join(ticketIds, ","));
-        JsonElement rs = HTTP.postJson(OsTicket.OS_TICKET_SYNC_TICKETS,
+        return HTTP.postJson(OsTicket.OS_TICKET_SYNC_TICKETS,
                 Arrays.asList(new BasicNameValuePair("ticketIds", StringUtils.join(ticketIds, ",")))
         );
-        return rs.getAsJsonObject();
     }
 
     /**
@@ -80,7 +78,8 @@ public class OsTicket {
      * @param errorMsg 系统中需要 log 的错误信息,主要记录 orderid, reviewid 等这样的信息
      * @return 如果成功, 则返回 TicketId , 否则返回"空"字符串
      */
-    public static String openOsTicket(String name, String email, String subject, String content, TopicID topicId, String errorMsg) {
+    public static String openOsTicket(String name, String email, String subject, String content, TopicID topicId,
+                                      String errorMsg) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("name", name));
         params.add(new BasicNameValuePair("email", email));
@@ -93,16 +92,16 @@ public class OsTicket {
         params.add(new BasicNameValuePair("message", content));
 
         try {
-            JsonElement jsonel = HTTP.postJson(OsTicket.OS_TICKET_NEW_TICKET, params);
-            JsonObject obj = jsonel.getAsJsonObject();
+            JSONObject obj = HTTP.postJson(OsTicket.OS_TICKET_NEW_TICKET, params);
             if(obj == null) {
                 Logger.error("OpenOsTicket fetch content Error!");
                 return "";
             }
-            if(obj.get("flag").getAsBoolean()) { // 成功创建
-                return obj.get("tid").getAsString();
+            if(obj.getBoolean("flag")) { // 成功创建
+                return obj.getString("tid");
             } else {
-                Logger.warn(String.format("%s post to OsTicket failed because of [%s]", errorMsg, obj.get("message").getAsString()));
+                Logger.warn(String.format("%s post to OsTicket failed because of [%s]", errorMsg,
+                        obj.getString("message")));
             }
         } catch(Exception e) {
             Logger.error("OpenOsTicket fetch IO Error!");
@@ -122,13 +121,12 @@ public class OsTicket {
         params.add(new BasicNameValuePair("id", ticketId));
         params.add(new BasicNameValuePair("user", user));
         params.add(new BasicNameValuePair("note", note));
-        JsonElement jsonEl = HTTP.postJson(OsTicket.OS_TICKET_CLOSE_TICKET, params);
-        JsonObject obj = jsonEl.getAsJsonObject();
+        JSONObject obj = HTTP.postJson(OsTicket.OS_TICKET_CLOSE_TICKET, params);
         if(obj == null) {
             Logger.error("CloseOsTicket fetch content Error!");
             return false;
         }
-        if(obj.get("flag").getAsBoolean())
+        if(obj.getBoolean("flag"))
             return true;
         else {
             Logger.warn(String.format("%s[%s] Ticket close failed.", ticketId, user));
