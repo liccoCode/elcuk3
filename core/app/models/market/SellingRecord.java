@@ -452,7 +452,7 @@ public class SellingRecord extends GenericModel {
             record.selling = selling;
             record.account = selling.account;
             record.orderCanceld = (int) Orderr.count("state=? AND date_format(createDate, '%Y-%m-%d')=?",
-                    Orderr.S.CANCEL, record.date);
+                    Orderr.S.CANCEL, Dates.date2Date(record.date));
             record.save();
         }
         return record;
