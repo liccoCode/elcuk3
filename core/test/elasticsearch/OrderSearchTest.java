@@ -1,9 +1,11 @@
 package elasticsearch;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
+import models.view.post.OrderPOST;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -12,7 +14,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import play.test.UnitTest;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,5 +62,53 @@ public class OrderSearchTest extends UnitTest {
 
         JSONObject obj = ES.search("elcuk2", "order", builder);
         assertThat(obj.getJSONObject("hits").getJSONArray("hits").size(), is(5));
+    }
+
+    // 需要保证 gengar 服务器上 ES 的 order_bak type 存在
+    // TODO: order_index_em.rb -> +: limit 1000 ;  +: order_bak
+    @Test
+    public void testPromotionSearch() {
+        OrderPOST post = new OrderPOST();
+        post.search = "";
+        post.promotion = true;
+        SearchSourceBuilder builder = post.params();
+
+        JSONObject result = ES.search("elcuk2", "order_bak", builder);
+        JSONObject hits = result.getJSONObject("hits");
+        JSONArray innerHits = hits.getJSONArray("hits");
+
+        assertThat(innerHits.size(), is(22));
+        assertThat(innerHits.getJSONObject(0).getJSONObject("_source").getString("promotionIDs"), is(notNullValue()));
+    }
+
+    @Test
+    public void testNoPromotionSearch() {
+        OrderPOST post = new OrderPOST();
+        post.search = "";
+        post.promotion = false;
+        SearchSourceBuilder builder = post.params();
+
+        JSONObject result = ES.search("elcuk2", "order_bak", builder);
+        JSONObject hits = result.getJSONObject("hits");
+        JSONArray innerHits = hits.getJSONArray("hits");
+
+        assertThat(innerHits.size(), is(25));
+        assertThat(innerHits.getJSONObject(0).getJSONObject("_source").getString("promotionIDs"), is(nullValue()));
+    }
+
+    @Test
+    public void testPromotionStringSearch() {
+        OrderPOST post = new OrderPOST();
+        post.begin = DateTime.parse("2013-01-01T09:33:54.795Z").toDate();
+        post.search = "20% off";
+        SearchSourceBuilder builder = post.params();
+
+        JSONObject result = ES.search("elcuk2", "order_bak", builder);
+        JSONObject hits = result.getJSONObject("hits");
+        JSONArray innerHits = hits.getJSONArray("hits");
+
+        assertThat(innerHits.size(), is(25));
+        assertThat(innerHits.getJSONObject(0).getJSONObject("_source").getString("promotionIDs"),
+                is(containsString("20% off")));
     }
 }

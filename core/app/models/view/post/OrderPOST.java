@@ -4,12 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import helper.ES;
 import models.market.M;
 import models.market.Orderr;
-import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
+import play.Play;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
@@ -45,7 +46,7 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public M market;
 
-    public Orderr.S state;
+    public Orderr.S state = Orderr.S.SHIPPED;
 
     public String orderBy = "createDate";
 
@@ -97,25 +98,36 @@ public class OrderPOST extends ESPost<Orderr> {
 
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
-//        builder..prepareSearch("elcuk2")
-//                .setTypes("order")
         builder.query(QueryBuilders
-                .queryString(StringUtils.isBlank(this.search) ? "*" : this.search)
+                .queryString(this.search())
                 .field("sids")
                 .field("buyer")
                 .field("email")
                 .field("address")
                 .field("orderId")
                 .field("userid")
-                .field("trackNo"))
-                .filter(boolFilter)
-                .explain(true)
-                .from(this.getFrom())
-                .size(this.perSize);
+                .field("trackNo")
+                .field("upc")
+                .field("asin")
+                .field("promotionIDs")
+        ).filter(boolFilter)
+                .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
 
+        if(this.promotion != null) {
+            FilterBuilder boolBuilder;
+            if(this.promotion) {
+                boolBuilder = FilterBuilders.missingFilter("promotionIDs").nullValue(true);
+            } else {
+                boolBuilder = FilterBuilders.existsFilter("promotionIDs");
+            }
+            boolFilter.mustNot(boolBuilder);
+        }
 
         if(this.market != null) {
             boolFilter.should(FilterBuilders.termFilter("market", this.market.name().toLowerCase()));
+            // 市场变更, 具体查询时间也需要变更
+            this.begin = this.market.withTimeZone(this.begin).toDate();
+            this.end = this.market.withTimeZone(this.end).toDate();
         }
         if(this.state != null) {
             boolFilter.should(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
@@ -153,29 +165,9 @@ public class OrderPOST extends ESPost<Orderr> {
             }
         }
 
-        if(this.market != null) {
-            sbd.append("AND o.market=? ");
-            params.add(this.market);
-        }
-
-        if(this.state != null) {
-            sbd.append("AND o.state=? ");
-            params.add(this.state);
-        }
-
         if(this.warnning != null) {
             sbd.append("AND o.warnning=?");
             params.add(this.warnning);
-        }
-
-        if(this.promotion != null) {
-            if(this.promotion)
-                sbd.append("AND orderId in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
-            else
-                sbd.append(
-                        "AND orderId not in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
-            params.add("promorebates"); //促销费用
-            params.add("promorebates");
         }
 
         if(StringUtils.isNotBlank(this.search)) {

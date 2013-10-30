@@ -1,5 +1,6 @@
 package models.view.post;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 
@@ -60,5 +61,13 @@ public abstract class ESPost<T> implements Serializable, Cloneable {
 
     public int getTotalPage() {
         return totalPage();
+    }
+
+    public String search() {
+        if(StringUtils.isBlank(this.search)) {
+            return "*";
+        } else {
+            return this.search.toLowerCase();
+        }
     }
 }
