@@ -6,14 +6,15 @@ require "multi_json"
 require "pp"
 
 SQL = <<SQL
-select o.orderId, o.account_id, concat_ws(' ', o.address, o.address1) address, o.arriveDate, o.createDate, o.paymentDate, o.shipDate, o.buyer, o.email, o.market, o.state, o.trackNo, o.userid, group_concat(oi.selling_sellingId, "@") sids 
+select s.asin, s.upc, o.orderId, o.account_id, group_concat(oi.promotionIDs) promotionIDs, concat_ws(' ', o.address, o.address1) address, o.arriveDate, o.createDate, o.paymentDate, o.shipDate, o.buyer, o.email, o.market, o.state, o.trackNo, o.userid, group_concat(oi.selling_sellingId, "@") sids 
 from Orderr o
 left join OrderItem oi ON o.orderId=oi.order_orderId
+left join Selling s ON oi.selling_sellingId=s.sellingId
 group by o.orderId
 SQL
 
 MAPPING = <<M
-{"order": {"properties": {"account_id": {"type": "integer"},"address": {"type": "string"},"arriveDate": {"type": "date","format": "dateOptionalTime" }, "buyer": { "type": "string" }, "createDate": { "type": "date", "format": "dateOptionalTime" }, "email": { "type": "string" }, "market": { "type": "string" }, "orderId": { "type": "string" }, "paymentDate": { "type": "date", "format": "dateOptionalTime" }, "shipDate": { "type": "date", "format": "dateOptionalTime" }, "sids": { "type": "string" }, "state": { "type": "string" }, "trackNo": { "type": "string" }, "userid": { "type": "string" } } } }
+{"order": {"properties": {"asin": {"type": "string"},"upc": {"type": "string"},"promotionIDs": {"type": "string"},"account_id": {"type": "integer"},"address": {"type": "string"},"arriveDate": {"type": "date","format": "dateOptionalTime" }, "buyer": { "type": "string" }, "createDate": { "type": "date", "format": "dateOptionalTime" }, "email": { "type": "string" }, "market": { "type": "string" }, "orderId": { "type": "string" }, "paymentDate": { "type": "date", "format": "dateOptionalTime" }, "shipDate": { "type": "date", "format": "dateOptionalTime" }, "sids": { "type": "string" }, "state": { "type": "string" }, "trackNo": { "type": "string" }, "userid": { "type": "string" } } } }
 M
 ES_HOST = "http://localhost:9200"
 DB_HOST = "localhost"
