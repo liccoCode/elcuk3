@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.Caches;
 import jobs.analyze.SellingRecordCaculateJob;
 import models.market.M;
 import models.market.SellingRecord;
@@ -59,11 +60,13 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     @SuppressWarnings("unchecked")
     public List<SellingRecord> records() {
-        List<SellingRecord> records = Cache.get("sellingRecordCaculateJob", List.class);
-        if(records == null || records.size() == 0) {
+        List<SellingRecord> records = Cache.get(Caches.SELLINGRECORD, List.class);
+        if(records == null) {
             if(!SellingRecordCaculateJob.isRunning())
                 new SellingRecordCaculateJob(new DateTime(this.dateTime)).now();
             throw new FastRuntimeException("正在计算中, 请等待 10 分钟后重试.");
+        } else if(records.size() == 0) {
+            throw new FastRuntimeException("没有成功计算出 SellingRecord 列表, 请联系 IT 检查算法.");
         }
         return records;
     }

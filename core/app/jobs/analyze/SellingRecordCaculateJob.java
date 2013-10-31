@@ -146,7 +146,7 @@ public class SellingRecordCaculateJob extends Job {
                     Logger.error(Webs.S(e));
                 }
             }
-            Cache.add("sellingRecordCaculateJob", sellingRecords);
+            Cache.add(Caches.SELLINGRECORD, sellingRecords);
         } catch(Exception e) {
             e.printStackTrace();
         } finally {
