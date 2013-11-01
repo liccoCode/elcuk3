@@ -32,7 +32,6 @@ $ ->
       self = @
       LoadMask.mask(mask_selector)
       $.get('/application/percent', {type: type, date: date, m: @market}, (r) ->
-        title = self.title(type)
         title = r['series'][0]['name']
         console.log(r['series'][0]['name'])
         $("##{self.container}").highcharts({
@@ -55,11 +54,6 @@ $ ->
         LoadMask.unmask(mask_selector)
       )
 
-    title: (type) ->
-      cat = "<span style=\"color:#F67300\">销量</span>"
-      "EasyAcc 类型#{cat}百分比"
-
-
   # 重新绘制所有的 Pie 图
   drawPies = (date) ->
     new PieChart("cat_percent", 'amazon_de').percent('all', date)
@@ -70,8 +64,7 @@ $ ->
     new PieChart("cat_percent_it", 'amazon_it').percent('units', date)
     new PieChart("cat_percent_fr", 'amazon_fr').percent('units', date)
 
-  #drawPies($.DateUtil.fmt2(new Date()))
-  drawPies('2013-10-25')
+  drawPies($("#orders tr:last td:eq(0)").attr('date'))
 
   #为table 中的日期添加查看指定天的 类别百分比数据
   $('#orders td[date]').css('cursor', 'pointer').click ->
