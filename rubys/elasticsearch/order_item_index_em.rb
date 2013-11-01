@@ -5,18 +5,19 @@ require "time"
 require "multi_json"
 require "pp"
 
-ES_HOST = "http://localhost:9200"
+ES_HOST = "http://gengar.easya.cc:9200"
 DB_HOST = "localhost"
 
 MAPPING = <<E
-{ "orderitem": { "properties": { "createDate": { "type": "date", "format": "dateOptionalTime" }, "sku": { "type": "string" }, "sid": { "type": "string" }, "id": { "type": "string" }, "market": { "type": "string" }, "order_orderId": { "type": "string" }, "quantity": { "type": "integer" }, "selling_sellingId": { "type": "string" }, "usdCost": { "type": "double" } } } }
+{ "orderitem": { "properties": { "createDate": { "type": "date", "format": "dateOptionalTime" }, "cat": { "type": "string" }, "sku": { "type": "string" }, "msku": { "type": "string" }, "id": { "type": "string" }, "market": { "type": "string" }, "order_orderId": { "type": "string" }, "quantity": { "type": "integer" }, "selling_sellingId": { "type": "string" }, "usdCost": { "type": "double" } } } }
 E
 
 
 class OrderItemES
   SQL = """
-  select s.merchantSKU sid, oi.product_sku sku, oi.id, oi.createDate, oi.quantity, oi.order_orderId, oi.selling_sellingId, oi.usdCost, oi.market, oi.promotionIDs from OrderItem oi
+  select p.category_categoryId cat, s.merchantSKU msku, oi.product_sku sku, oi.id, oi.createDate, oi.quantity, oi.order_orderId, oi.selling_sellingId, oi.usdCost, oi.market, oi.promotionIDs from OrderItem oi
   left join Selling s ON s.sellingId=oi.selling_sellingId
+  left join Product p ON p.sku=oi.product_sku
   """
 
   INDEX = "elcuk2"
