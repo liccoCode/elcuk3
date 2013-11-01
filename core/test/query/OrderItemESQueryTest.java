@@ -189,4 +189,29 @@ public class OrderItemESQueryTest extends UnitTest {
         assertThat((Long) row3[0], is(1382572800000l));
         assertThat((Float) row3[1], is(362f));
     }
+
+    @Test
+    //TODO
+    public void testCategoryPieUS() {
+        Series.Pie pie = esQuery.categoryPie(M.AMAZON_US,
+                DateHelper.t("2013-10-30 00:00:00"),
+                DateHelper.t("2013-10-31 00:00:00"));
+
+        assertThat(pie.data.size(), is(9));
+
+        for(Object[] data : pie.data) {
+            String key = data[0].toString();
+            Float val = (Float) data[1];
+            if(key.equals("11"))
+                assertThat(val, is(49f));
+            else if(key.equals("12"))
+                assertThat(val, is(1f));
+            else if(key.equals("70"))
+                assertThat(val, is(53f));
+            else if(key.equals("71"))
+                assertThat(val, is(10f));
+            else if(key.equals("70"))
+                assertThat(val, is(53f));
+        }
+    }
 }

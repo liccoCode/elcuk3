@@ -219,7 +219,7 @@ public class OrderItem extends GenericModel {
      * @param acc  de/uk/us/all
      * @return
      */
-    public static HighChart categoryPercent(String type, final Date from, final Date to, Account acc) {
+    public static HighChart categoryPie(String type, final Date from, final Date to, Account acc) {
         String key = Caches.Q.cacheKey(type, from, to, acc);
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
@@ -237,13 +237,13 @@ public class OrderItem extends GenericModel {
                         acc.type.withTimeZone(to).toDate(),
                         acc.id);
             } else {
-                Logger.info("OrderItem.categoryPercent begin...");
+                Logger.info("OrderItem.categoryPie begin...");
                 long begin = System.currentTimeMillis();
                 for(M m : Promises.MARKETS) {
                     vos.addAll(new OrderItemQuery()
                             .groupCategory(m.withTimeZone(from).toDate(), m.withTimeZone(to).toDate(), m));
                 }
-                Logger.info("OrderItem.categoryPercent passed %s ms...", System.currentTimeMillis() - begin);
+                Logger.info("OrderItem.categoryPie passed %s ms...", System.currentTimeMillis() - begin);
             }
             for(AnalyzeVO vo : vos) {
                 if(StringUtils.equals(type, "sales"))

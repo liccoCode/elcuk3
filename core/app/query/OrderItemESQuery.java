@@ -113,4 +113,39 @@ public class OrderItemESQuery {
         line.sort();
         return line;
     }
+
+    public Series.Pie categoryPie(M market, Date from, Date to) {
+        if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
+
+        DateTime fromD = market.withTimeZone(from);
+        DateTime toD = market.withTimeZone(to);
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(QueryBuilders.matchAllQuery())
+                .facet(FacetBuilders.termsStatsFacet("units")
+                        .keyField("cat")
+                        .valueField("quantity")
+                        .size(30) // category 数量
+                        .facetFilter(FilterBuilders.boolFilter()
+                                .must(FilterBuilders.termFilter("market", market.name().toLowerCase()))
+                                .must(FilterBuilders.rangeFilter("createDate")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat))
+                                )
+                        )
+                ).size(0);
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject facets = result.getJSONObject("facets");
+        JSONArray terms = facets.getJSONObject("units").getJSONArray("terms");
+
+        Series.Pie pie = new Series.Pie(market.label() + "销量百分比");
+
+        for(Object o : terms) {
+            JSONObject term = (JSONObject) o;
+            pie.add(term.getFloat("total"), term.getString("term"));
+        }
+
+        return pie;
+    }
 }
