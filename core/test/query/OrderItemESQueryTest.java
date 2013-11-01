@@ -31,16 +31,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(74f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(77f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(56f));
     }
 
@@ -51,16 +51,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(36f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(35f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(34f));
     }
 
@@ -72,16 +72,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(19f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(17f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(9f));
     }
 
@@ -93,16 +93,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(5f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(4f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(3f));
     }
 
@@ -114,16 +114,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(351f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(336f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(276f));
     }
 
@@ -135,16 +135,17 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(98f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(104f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(90f));
     }
 
@@ -156,16 +157,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(1566f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(1605f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(1447f));
     }
 
@@ -177,16 +178,16 @@ public class OrderItemESQueryTest extends UnitTest {
 
         assertThat(line.data.size(), is(3));
         Object[] row1 = line.data.get(0);
-        assertThat((Long) row1[0], is(1382400000000l));
+        assertThat((Long) row1[0], is(1382371200000l));
         assertThat((Float) row1[1], is(424f));
 
         Object[] row2 = line.data.get(1);
-        assertThat((Long) row2[0], is(1382486400000l));
+        assertThat((Long) row2[0], is(1382457600000l));
         assertThat((Float) row2[1], is(313f));
 
 
         Object[] row3 = line.data.get(2);
-        assertThat((Long) row3[0], is(1382572800000l));
+        assertThat((Long) row3[0], is(1382544000000l));
         assertThat((Float) row3[1], is(362f));
     }
 
@@ -194,24 +195,30 @@ public class OrderItemESQueryTest extends UnitTest {
     //TODO
     public void testCategoryPieUS() {
         Series.Pie pie = esQuery.categoryPie(M.AMAZON_US,
-                DateHelper.t("2013-10-30 00:00:00"),
-                DateHelper.t("2013-10-31 00:00:00"));
+                DateHelper.t("2013-10-25 00:00:00"),
+                DateHelper.t("2013-10-26 00:00:00"));
 
-        assertThat(pie.data.size(), is(9));
+        assertThat(pie.data.size(), is(8));
 
         for(Object[] data : pie.data) {
             String key = data[0].toString();
             Float val = (Float) data[1];
             if(key.equals("11"))
-                assertThat(val, is(49f));
-            else if(key.equals("12"))
-                assertThat(val, is(1f));
+                assertThat(val, is(93f));
             else if(key.equals("70"))
-                assertThat(val, is(53f));
+                assertThat(val, is(42f));
             else if(key.equals("71"))
-                assertThat(val, is(10f));
-            else if(key.equals("70"))
-                assertThat(val, is(53f));
+                assertThat(val, is(6f));
+            else if(key.equals("72"))
+                assertThat(val, is(9f));
+            else if(key.equals("73"))
+                assertThat(val, is(42f));
+            else if(key.equals("80"))
+                assertThat(val, is(87f));
+            else if(key.equals("82"))
+                assertThat(val, is(5f));
+            else if(key.equals("88"))
+                assertThat(val, is(31f));
         }
     }
 }

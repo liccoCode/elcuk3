@@ -2,21 +2,16 @@ package models.market;
 
 import helper.*;
 import models.product.Product;
+import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
-import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
-import query.OrderItemQuery;
-import query.vo.AnalyzeVO;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 订单的具体订单项
@@ -219,8 +214,8 @@ public class OrderItem extends GenericModel {
      * @param acc  de/uk/us/all
      * @return
      */
-    public static HighChart categoryPie(String type, final Date from, final Date to, Account acc) {
-        String key = Caches.Q.cacheKey(type, from, to, acc);
+    public static HighChart categoryPie(String type, final Date from, final Date to, M market) {
+        String key = Caches.Q.cacheKey(type, from, to, market.name());
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
 
@@ -229,29 +224,29 @@ public class OrderItem extends GenericModel {
             if(pieChart != null) return pieChart;
 
             pieChart = new HighChart(Series.PIE);
-            List<AnalyzeVO> vos = new ArrayList<AnalyzeVO>();
-            if(acc != null) {
-                // 转换成为不同对应市场的时间
-                vos = new OrderItemQuery().groupCategory(
-                        acc.type.withTimeZone(from).toDate(),
-                        acc.type.withTimeZone(to).toDate(),
-                        acc.id);
+
+            final OrderItemESQuery esQuery = new OrderItemESQuery();
+            if("all".equals(type)) {
+                final HighChart finalPieChart = pieChart;
+                Promises.forkJoin(new Promises.Callback<Object>() {
+                    @Override
+                    public Object doJobWithResult(M m) {
+                        finalPieChart.series(esQuery.categoryPie(m, from, to));
+                        return null;
+                    }
+
+                    @Override
+                    public String id() {
+                        return "OrderItem.categoryPie";
+                    }
+                });
+                AbstractSeries pie = pieChart.sumSeries();
+                pieChart.series.clear();
+                pieChart.series.add(pie);
             } else {
-                Logger.info("OrderItem.categoryPie begin...");
-                long begin = System.currentTimeMillis();
-                for(M m : Promises.MARKETS) {
-                    vos.addAll(new OrderItemQuery()
-                            .groupCategory(m.withTimeZone(from).toDate(), m.withTimeZone(to).toDate(), m));
-                }
-                Logger.info("OrderItem.categoryPie passed %s ms...", System.currentTimeMillis() - begin);
+                pieChart.series(esQuery.categoryPie(market, from, to));
             }
-            for(AnalyzeVO vo : vos) {
-                if(StringUtils.equals(type, "sales"))
-                    pieChart.series("销售额").add(vo.sku, vo.usdCost);
-                else
-                    pieChart.series("销量").add(vo.sku, vo.qty.floatValue());
-            }
-            Cache.add(key, pieChart, "12h");
+            Cache.add(key, pieChart, "8h");
         }
         return pieChart;
     }

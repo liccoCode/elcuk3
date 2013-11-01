@@ -1,4 +1,4 @@
-role :e, 'root@e.easya.cc'
+role :e, 'root@pangoro.easya.cc'
 namespace :play do
 
   desc "Push Code"
