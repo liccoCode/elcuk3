@@ -25,14 +25,16 @@ $ ->
     e.preventDefault()
 
   class PieChart
-    constructor: (@container, @aid) ->
+    constructor: (@container, @market) ->
 
     # units/sales
     percent: (type = 'units', date = $.DateUtil.fmt2(new Date()), mask_selector = '#orders') =>
       self = @
       LoadMask.mask(mask_selector)
-      $.get('/application/percent', {type: type, date: date, aid: @aid}, (r) ->
+      $.get('/application/percent', {type: type, date: date, m: @market}, (r) ->
         title = self.title(type)
+        title = r['series'][0]['name']
+        console.log(r['series'][0]['name'])
         $("##{self.container}").highcharts({
           title: {
             text: title
@@ -54,36 +56,23 @@ $ ->
       )
 
     title: (type) ->
-      t =
-        units: '销量'
-        sales: '销售额'
-      m =
-        1: '.UK'
-        2: '.DE'
-        131: '.US'
-        0: ''
-      cat = "<span style=\"color:#F67300\">#{t[type]}</span>"
-      "EasyAcc#{m[@aid]} 类型#{cat}百分比"
+      cat = "<span style=\"color:#F67300\">销量</span>"
+      "EasyAcc 类型#{cat}百分比"
 
 
   # 重新绘制所有的 Pie 图
   drawPies = (date) ->
-    new PieChart("cat_percent", 0).percent('units', date)
-    new PieChart("cat_percent_de", 2).percent('units', date)
-    new PieChart("cat_percent_us", 1).percent('units', date)
-    new PieChart("cat_percent_uk", 131).percent('units', date)
+    new PieChart("cat_percent", 'amazon_de').percent('all', date)
+    new PieChart("cat_percent_de", 'amazon_de').percent('units', date)
+    new PieChart("cat_percent_us", 'amazon_us').percent('units', date)
+    new PieChart("cat_percent_uk", 'amazon_uk').percent('units', date)
+    new PieChart("cat_percent_es", 'amazon_es').percent('units', date)
+    new PieChart("cat_percent_it", 'amazon_it').percent('units', date)
+    new PieChart("cat_percent_fr", 'amazon_fr').percent('units', date)
 
-#    new PieChart("sales_percent", 0).percent('sales', date)
-#    new PieChart("sales_percent_de", 2).percent('sales', date)
-#    new PieChart("sales_percent_us", 131).percent('sales', date)
-#    new PieChart("sales_percent_uk", 1).percent('sales', date)
-
-
-  $('#overview').load("/ticketanalyzes/overview?full=false")
-  drawPies($("#orders tr:last td:eq(0)").attr('date'))
+  #drawPies($.DateUtil.fmt2(new Date()))
+  drawPies('2013-10-25')
 
   #为table 中的日期添加查看指定天的 类别百分比数据
   $('#orders td[date]').css('cursor', 'pointer').click ->
     drawPies(@getAttribute('date'))
-
-  Notify.checkNotify()

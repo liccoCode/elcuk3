@@ -107,7 +107,7 @@ public class OrderItemESQuery {
             line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
         }
         long interval = TimeUnit.DAYS.toMillis(1);
-        for(long i = from.getTime(); i <= to.getTime(); i += interval) {
+        for(long i = from.getTime(); i < to.getTime(); i += interval) {
             line.add(0f, i);
         }
         line.sort();
