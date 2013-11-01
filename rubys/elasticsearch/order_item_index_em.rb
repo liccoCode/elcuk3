@@ -9,13 +9,14 @@ ES_HOST = "http://localhost:9200"
 DB_HOST = "localhost"
 
 MAPPING = <<E
-{ "orderitem": { "properties": { "createDate": { "type": "date", "format": "dateOptionalTime" }, "id": { "type": "string" }, "market": { "type": "string" }, "order_orderId": { "type": "string" }, "quantity": { "type": "integer" }, "selling_sellingId": { "type": "string" }, "usdCost": { "type": "double" } } } }
+{ "orderitem": { "properties": { "createDate": { "type": "date", "format": "dateOptionalTime" }, "sku": { "type": "string" }, "sid": { "type": "string" }, "id": { "type": "string" }, "market": { "type": "string" }, "order_orderId": { "type": "string" }, "quantity": { "type": "integer" }, "selling_sellingId": { "type": "string" }, "usdCost": { "type": "double" } } } }
 E
 
 
 class OrderItemES
   SQL = """
-  select id, createDate, quantity, order_orderId, selling_sellingId, usdCost, market, promotionIDs from OrderItem limit 10;
+  select s.merchantSKU sid, oi.product_sku sku, oi.id, oi.createDate, oi.quantity, oi.order_orderId, oi.selling_sellingId, oi.usdCost, oi.market, oi.promotionIDs from OrderItem oi
+  left join Selling s ON s.sellingId=oi.selling_sellingId
   """
 
   INDEX = "elcuk2"
