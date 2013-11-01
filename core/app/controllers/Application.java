@@ -38,7 +38,7 @@ public class Application extends Controller {
             @Override
             public String doJobWithResult() throws Exception {
                 return J.json(
-                        OrderItem.categoryPercent(
+                        OrderItem.categoryPie(
                                 type, Dates.morning(date), Dates.night(date),
                                 Account.<Account>findById(aid))
                 );

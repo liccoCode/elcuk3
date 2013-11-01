@@ -52,14 +52,47 @@ public class HighChart implements Serializable {
 
         AbstractSeries s = null;
         if(Series.LINE.equals(this.type)) {
-            s = new Series.Line(name, this.type);
+            s = new Series.Line(name);
         } else if(Series.COLUMN.equals(this.type)) {
-            s = new Series.Column(name, this.type);
+            s = new Series.Column(name);
         } else if(Series.PIE.equals(this.type)) {
-            s = new Series.Pie(name, this.type);
+            s = new Series.Pie(name);
         }
         this.series.add(s);
         return s;
     }
 
+    public boolean series(AbstractSeries serie) {
+        if(serie.type.equals(this.type)) {
+            this.series.add(serie);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 生成一个汇总的曲线
+     *
+     * @return
+     */
+    public AbstractSeries sumSeries() {
+        AbstractSeries s = null;
+        if(Series.LINE.equals(this.type)) {
+            s = new Series.Line("汇总");
+        } else if(Series.COLUMN.equals(this.type)) {
+            s = new Series.Column("汇总");
+        } else if(Series.PIE.equals(this.type)) {
+            s = new Series.Pie("汇总");
+        }
+
+        for(AbstractSeries series : this.series) {
+            for(Object[] data : series.data) {
+                s.add((Float) data[1], data[0]);
+            }
+        }
+        if(s.type.equals(Series.LINE)) {
+            ((Series.Line) s).sort();
+        }
+        return s;
+    }
 }

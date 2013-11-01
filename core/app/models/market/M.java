@@ -25,8 +25,6 @@ public enum M {
             return "英国亚马逊";
         }
 
-        ;
-
         @Override
         public String countryName() {
             return "英国";
@@ -38,7 +36,6 @@ public enum M {
             return "德国亚马逊";
         }
 
-        ;
 
         @Override
         public String countryName() {
@@ -51,7 +48,6 @@ public enum M {
             return "法国亚马逊";
         }
 
-        ;
 
         @Override
         public String countryName() {
@@ -64,7 +60,6 @@ public enum M {
             return "意大利亚马逊";
         }
 
-        ;
 
         @Override
         public String countryName() {
@@ -77,8 +72,6 @@ public enum M {
             return "西班牙亚马逊";
         }
 
-        ;
-
         @Override
         public String countryName() {
             return "西班牙";
@@ -90,8 +83,6 @@ public enum M {
             return "美国亚马逊";
         }
 
-        ;
-
         @Override
         public String countryName() {
             return "美国";
@@ -102,8 +93,6 @@ public enum M {
         public String label() {
             return "英国 Ebay";
         }
-
-        ;
 
         @Override
         public String countryName() {
