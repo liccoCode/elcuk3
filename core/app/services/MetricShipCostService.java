@@ -5,12 +5,10 @@ import helper.DBUtils;
 import helper.Dates;
 import models.finance.FeeType;
 import models.finance.Payment;
-import models.market.Selling;
-import models.market.SellingRecord;
 import models.procure.Shipment;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.joda.time.DateTime;
+import play.Logger;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
@@ -23,60 +21,26 @@ import java.util.*;
  * Time: 3:46 PM
  */
 public class MetricShipCostService {
-
     /**
-     * 计算某一个 Selling 某一天的快递运费
-     *
-     * @return 单个快递运费, 总重量, 这一天的总费用
+     * 统计当天的 [总运费] 与涉及到的 [运输单]
      */
-    public F.T3<Float, Float, Float> expressCost(Selling selling, Date oneDay) {
-        return baseCost(selling, oneDay, Shipment.T.EXPRESS, FeeType.expressFee());
-    }
+    public F.T2<Float, Set<String>> oneDayTotalFeeAndEffectShipments(Date oneDay, Shipment.T shipType) {
+        Set<String> shipmentIds = new HashSet<String>();
+        float totalSeaFee = 0;
 
-
-    /**
-     * 计算某一个 Selling 某一天的空运运费
-     *
-     * @return 单个空运运费, 总重量, 这一天的总费用
-     */
-    public F.T3<Float, Float, Float> airCost(Selling selling, Date oneDay) {
-        return baseCost(selling, oneDay, Shipment.T.AIR, FeeType.airFee());
-    }
-
-
-    /**
-     * 计算某一个 Selling 某一天的海运运费
-     *
-     * @return 单个海运运费, 总重量, 这一天的总费用
-     */
-    public F.T3<Float, Float, Float> seaCost(Selling selling, Date oneDay) {
-        return baseCost(selling, oneDay, Shipment.T.SEA, FeeType.oceanfreight());
-    }
-
-    /**
-     * 计算某一天所有 Selling 的海运运费
-     */
-    public Map<String, Float> seaCost(Date oneDay) {
-        /**
-         * 1. 通过 Payment 找到当天付款的运输单 ids, 以及总费用(排除 VAT关税)
-         * 2. 通过 Payment 找到每个 Selling 的海运费 体积.
-         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
-         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
-         */
         SqlSelect shipIdsAndFee = new SqlSelect()
-                .select("group_concat(pu.shipment_id) shipmentIds", "pu.currency",
+                .select("group_concat(distinct(s.id)) shipmentIds", "pu.currency",
                         "sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost")
                 .from("PaymentUnit pu")
+                .leftJoin("Shipment s ON s.id=pu.shipment_id")
                 .leftJoin("Payment p ON p.id=pu.payment_id")
                 .leftJoin("FeeType fy ON pu.feeType_name=fy.name")
                 .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
                 .where("p.state=?").param(Payment.S.PAID.name())
                 .where("fy.parent_name=?").param("transport")
                 .where("pu.feeType_name!=?").param("dutyandvat")
+                .where("s.type=?").param(shipType.name())
                 .groupBy("pu.currency");
-
-        Set<String> shipmentIds = new HashSet<String>();
-        float totalSeaFee = 0;
 
         List<Map<String, Object>> rows = DBUtils.rows(shipIdsAndFee.toString(), shipIdsAndFee.getParams().toArray());
         for(Map<String, Object> row : rows) {
@@ -86,81 +50,224 @@ public class MetricShipCostService {
                 shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentIds").toString(), ",")));
             }
         }
-        // 产出 shipmentIds, 总费用 totalSeaFee
-        SqlSelect sellingWeight = new SqlSelect()
-                .select("sum(pu.unitQty)")
-                .from("PaymentUnit pu")
-                .leftJoin("Payment p ON p.id=pu.payment_id")
-                .leftJoin("Shipment s ON pu.shipment_id=s.id")
-                .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
-                .where("p.state=?").param(Payment.S.PAID.name())
-                .where("pu.feeType_name=?").param("oceanfreight");
-
-
-        return null;
+        return new F.T2<Float, Set<String>>(totalSeaFee, shipmentIds);
     }
 
-    public F.T3<Float, Float, Float> baseCost(Selling selling, Date oneDay, Shipment.T type, FeeType feeType) {
+    /**
+     * 获取总重量/体积
+     * <p/>
+     * Ps:
+     * PaymentUnit.unitQty: 海运记录的单位是立方米, 空运/快递记录的单位是kg
+     *
+     * @param shipmentIds
+     * @param feeType
+     * @return
+     */
+    public float totalWeight(Set<String> shipmentIds, FeeType feeType) {
+        SqlSelect totalWeightSql = new SqlSelect()
+                .select("sum(pu.unitQty) weight")
+                .from("PaymentUnit pu")
+                .where("pu.feeType_name=?").param(feeType.name)
+                .where(SqlSelect.whereIn("pu.shipment_id", shipmentIds));
+        Map<String, Object> weightRow = DBUtils.row(totalWeightSql.toString(), totalWeightSql.getParams().toArray());
+        return weightRow.get("weight") == null ? 0 : NumberUtils.toFloat(weightRow.get("weight").toString());
+    }
+
+    public Map<String, Map<String, Float>> sellingQtyRecordWeightAndVolume(Set<String> shipmentIds) {
+        SqlSelect sellingCubicMeterSql = new SqlSelect()
+                // cm3 -> m3 (/1000*1000*1000)
+                .select("u.selling_sellingId sellingId", "sum(si.qty) qty",
+                        "((p.width * p.heigh * p.lengths) / (1000*1000*1000)) m3",
+                        "p.weight kg")
+                .from("ShipItem si")
+                .leftJoin("Shipment s ON s.id=si.shipment_id")
+                .leftJoin("ProcureUnit u ON u.id=si.unit_id")
+                .leftJoin("Product p ON p.sku=u.product_sku")
+                .where(SqlSelect.whereIn("s.id", shipmentIds))
+                .groupBy("u.selling_sellingId");
+        List<Map<String, Object>> rows = DBUtils.
+                rows(sellingCubicMeterSql.toString(), sellingCubicMeterSql.getParams().toArray());
+
+        Map<String, Map<String, Float>> sellingGroup = new HashMap<String, Map<String, Float>>();
+        for(Map<String, Object> row : rows) {
+            if(row.get("sellingId") == null) continue;
+            Map<String, Float> qtyWeightAndVolumn = new HashMap<String, Float>();
+            qtyWeightAndVolumn.put("qty", row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString()));
+            qtyWeightAndVolumn.put("m3", row.get("m3") == null ? 0 : NumberUtils.toFloat(row.get("m3").toString()));
+            qtyWeightAndVolumn.put("kg", row.get("kg") == null ? 0 : NumberUtils.toFloat(row.get("kg").toString()));
+            sellingGroup.put(row.get("sellingId").toString(), qtyWeightAndVolumn);
+        }
+        return sellingGroup;
+    }
+
+    /**
+     * 计算某一天所有 Selling 的海运运费 (没有运输的则没有)
+     */
+    public Map<String, Float> seaCost(Date oneDay) {
         /**
-         * 1. 找到昨天的 SellingRecord 的数据, 用于统计计算今天的值.
-         * 2. 从今天支付完成的运输付款单出发, 找出当天 selling 所涉及的所有快递/空运/海运运输单的总费用(不包括 VAT和关税)与总运输重量.
-         * 3. 计算出昨天和今天的总费用与总重量, 然后通过 总费用/总重量 计算出 $N/kg(m3) 的值
-         * 4. 根据 selling 自己所涉及的 sku 的重量 * $N/kg(m3) 计算出当前 selling 的运输成本.
+         * 1. 通过 Payment 找到当天付款的运输单 ids, 以及总费用(排除 VAT关税)
+         * 2. 通过 Payment 找到支付的总体积 (通过费用类型为 oceanfreight 的费用统计)
+         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
+         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
          */
-        SellingRecord yesterdayRecord = SellingRecord.oneDay(selling.sellingId,
-                new DateTime(oneDay).minusDays(1).toDate());
-        // 通过 PaymentUnit 找涉及的运输单
-        SqlSelect effectShipmentSql = new SqlSelect()
-                .select("group_concat(s.id) as shipmentIds")
+
+        Set<String> shipmentIds;
+        // USD
+        float totalSeaFee;
+
+        // 1. 寻找所涉及的 运输单 和 总费用
+        F.T2<Float, Set<String>> t2 = oneDayTotalFeeAndEffectShipments(oneDay, Shipment.T.SEA);
+        totalSeaFee = t2._1;
+        shipmentIds = t2._2;
+
+
+        // 2. 寻找付费的总体积 m3
+        float totalWeight = totalWeight(shipmentIds, FeeType.oceanfreight());
+
+        // 3. 找出单位体积的运费. 总费用 / 总体积数
+        float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
+        if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "','"));
+
+        // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
+        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
+        Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
+        float coefficienta = 1; // 从真实体积到运输体积需要一个系数用来计算抛货, 用来抵消装箱多余的空间差
+
+        for(String sid : sellingGroup.keySet()) {
+            Map<String, Float> group = sellingGroup.get(sid);
+            sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
+        }
+
+        return sellingSeaCost;
+    }
+
+    /**
+     * 计算某一天所有 Selling 的快递运费 (没有运输的则没有)
+     *
+     * @param oneDay
+     * @return
+     */
+    public Map<String, Float> expressCost(Date oneDay) {
+        /**
+         * 1. 寻找当天支付的 Payment 的快递运输单所涉及的 selling 与费用, 数量
+         * 2. 寻找出快递运费之外的费用, 按照个数进行分摊
+         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
+         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
+         */
+        Set<String> shipmentIds = new HashSet<String>();
+        // USD
+        float totalSeaFee = 0;
+
+        float totalQty = 0;
+
+        // 1. 当天支付快递运输单中的 selling 的费用
+        Map<String, Float> sellExpressCost = new HashMap<String, Float>();
+        SqlSelect shipIdsAndFee = new SqlSelect()
+                .select("pu.unitPrice", "pu.currency", "pu.unitQty", "u.selling_sellingId sellingId",
+                        "pu.shipment_id shipmentId", "si.qty")
+                .from("PaymentUnit pu")
+                .leftJoin("Payment p ON p.id=pu.payment_id")
+                .leftJoin("ShipItem si ON si.id=pu.shipItem_id")
+                .leftJoin("Shipment s ON s.id=pu.shipment_id")
+                .leftJoin("ProcureUnit u ON u.id=si.unit_id")
+                .leftJoin("Product pd ON pd.sku=u.product_sku")
+                .where("s.type=?").param(Shipment.T.EXPRESS.name())
+                .where("p.state=?").param(Payment.S.PAID.name())
+                .where("pu.feeType_name=?").param(FeeType.expressFee().name)
+                .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay));
+
+        List<Map<String, Object>> rows = DBUtils.rows(shipIdsAndFee.toString(), shipIdsAndFee.getParams().toArray());
+        for(Map<String, Object> row : rows) {
+            if(row.get("sellingId") == null) continue;
+            Currency currency = Currency.valueOf(row.get("currency").toString());
+            String sid = row.get("sellingId").toString();
+            float expressCost = row.get("unitPrice") == null ? 0 : currency
+                    .toUSD(NumberUtils.toFloat(row.get("unitPrice").toString()));
+            float cost = 0;
+            if(sellExpressCost.containsKey(sid)) {
+                cost = sellExpressCost.get(sid);
+                // 3, 5, 6, 4:  (((3+5/2 + 6) / 2) + 4 ) / 2 = 4.5  ==  (3 + 5 + 6 + 4) / 4
+                sellExpressCost.put(sid, (cost + expressCost) / 2);
+            } else {
+                sellExpressCost.put(sid, expressCost);
+            }
+
+            if(row.get("shipmentId") != null)
+                shipmentIds.addAll(Arrays.asList(StringUtils.split(row.get("shipmentId").toString(), ",")));
+
+            float qty = row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString());
+            totalQty += qty;
+        }
+
+        // 2. 计算除开快递运费之外的费用 (USD)
+        float totalOtherFee = 0;
+        SqlSelect expressOtherFeeSql = new SqlSelect()
+                .select("pu.currency", "sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost")
                 .from("PaymentUnit pu")
                 .leftJoin("Payment p ON p.id=pu.payment_id")
                 .leftJoin("Shipment s ON s.id=pu.shipment_id")
-                .leftJoin("ShipItem si ON s.id=si.shipment_id")
-                .leftJoin("ProcureUnit u ON u.id=si.unit_id")
-                .where("u.selling_sellingId=?").param(selling.sellingId)
-                .where("s.type=?").param(type.name())
-                .where("date_format(p.paymentDate, '%Y-%m-%d')=?").param(Dates.date2Date(oneDay))
+                .leftJoin("FeeType fy ON fy.name=pu.feeType_name")
+                .leftJoin("ShipItem si ON si.id=pu.shipItem_id")
                 .where("p.state=?").param(Payment.S.PAID.name())
-                .groupBy("u.selling_sellingId");
-
-        Map<String, Object> idsRs = DBUtils.row(effectShipmentSql.toString(), effectShipmentSql.getParams().toArray());
-
-        List<String> effectShipmentIds = new ArrayList<String>();
-        if(idsRs.size() > 0)
-            effectShipmentIds.addAll(Arrays.asList(StringUtils.split(idsRs.get("shipmentIds").toString(), ",")));
-
-
-        SqlSelect sumBase = new SqlSelect().from("PaymentUnit pu")
-                .leftJoin("Shipment s ON s.id=pu.shipment_id")
-                .where(SqlSelect.whereIn("pu.shipment_id", effectShipmentIds))
-                .where("s.type=?").param(type.name()); // 这里重复检查运输单类型, 是避免 effectShipmentIds 为空
-        // 通过运输单找他们的总运输费用
-        SqlSelect sumFeeSql = new SqlSelect(sumBase)
-                .select("sum(pu.unitPrice * pu.unitQty + pu.fixValue) cost", "pu.currency")
-                .where("pu.feeType_name!=?").param("dutyandvat")/*固定的 VAT 和关税的费用类型*/
+                .where("pu.feeType_name NOT IN (?,?)").params("dutyandvat", FeeType.expressFee().name)
+                .where("fy.parent_name=?").param("transport")
+                .where(SqlSelect.whereIn("pu.shipment_id", shipmentIds))
                 .groupBy("pu.currency");
-        // 通过运输单找他们的总重量
-        SqlSelect sumKilogram = new SqlSelect(sumBase)
-                .select("sum(unitQty) kg")
-                .where("feeType_name=?").param(feeType.name);
-
-
-        float currentFee = 0;
-        float totalKilogram = yesterdayRecord.expressKilogram;
-
-        List<Map<String, Object>> rows = DBUtils.rows(sumFeeSql.toString(), sumFeeSql.getParams().toArray());
+        rows = DBUtils.rows(expressOtherFeeSql.toString(), expressOtherFeeSql.getParams().toArray());
         for(Map<String, Object> row : rows) {
-            if(row.get("currency") == null) continue;
-            helper.Currency currency = helper.Currency.valueOf(row.get("currency").toString());
-            currentFee += currency.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
+            Currency curcy = Currency.valueOf(row.get("currency").toString());
+            totalOtherFee += row.get("cost") == null ? 0 : curcy.toUSD(NumberUtils.toFloat(row.get("cost").toString()));
         }
-        Map<String, Object> totalKg = DBUtils.row(sumKilogram.toString(), sumKilogram.getParams().toArray());
-        totalKilogram += (totalKg.get("kg") == null ? 0 : NumberUtils.toFloat(totalKg.get("kg").toString()));
 
-        return new F.T3<Float, Float, Float>(
-                totalKilogram == 0 ? 0 : (yesterdayRecord.expressCost + currentFee) / totalKilogram,
-                totalKilogram,
-                currentFee);
+        // 3. 将其他费用和核心的费用合并
+        float perQty = totalOtherFee / totalQty;
+        for(String sid : sellExpressCost.keySet()) {
+            sellExpressCost.put(sid, sellExpressCost.get(sid) + perQty);
+        }
+        return sellExpressCost;
+    }
+
+    /**
+     * 计算某一天所有 Selling 的快递运费 (没有运输的则没有)
+     *
+     * @param oneDay
+     * @return
+     */
+    public Map<String, Float> airCost(Date oneDay) {
+        /**
+         * * 与海运的计算类似
+         * 1. 通过 Payment 找到当天付款的运输单 ids, 以及总费用(排除 VAT关税)
+         * 2. 通过 Payment 找到支付的总重量 (根据 airfee 费用类型来统计)
+         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
+         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
+         */
+        Set<String> shipmentIds;
+        // USD
+        float totalSeaFee;
+
+        // 1. 寻找所涉及的 运输单 和 总费用
+        F.T2<Float, Set<String>> t2 = oneDayTotalFeeAndEffectShipments(oneDay, Shipment.T.AIR);
+        totalSeaFee = t2._1;
+        shipmentIds = t2._2;
+
+        // 2. 寻找付费的总体积 m3
+        float totalWeight = totalWeight(shipmentIds, FeeType.airFee());
+
+        // 3. 找出单位重量的运费. 总费用 / 总重量
+        float perKilogram = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
+        if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 airfee 费用?", StringUtils.join(shipmentIds, "','"));
+
+        // 4. 根据 selling 自己的 m3 与 perKg 计算出每个 selling 的运费
+        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
+        Map<String, Float> sellingAirCost = new HashMap<String, Float>();
+        float coefficienta = 1; // 从真实重量到运输重量需要一个系数用来计算抛货, 用来抵消装箱多余的重量差
+
+        for(String sid : sellingGroup.keySet()) {
+            Map<String, Float> group = sellingGroup.get(sid);
+            sellingAirCost.put(sid, group.get("kg") * perKilogram * coefficienta);
+        }
+
+        return sellingAirCost;
     }
 
     /**

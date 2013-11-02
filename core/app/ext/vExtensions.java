@@ -47,6 +47,13 @@ public class vExtensions extends JavaExtensions {
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
+    public static String date(DateTime date) {
+        return date.toString("yyyy-MM-dd");
+    }
+    public static String datetime(DateTime date) {
+        return date.toString("yyyy-MM-dd HH:mm:ss");
+    }
+
     public static String dayAfter(int day) {
         return DateTime.now().plusDays(day).toString("yyyy-MM-dd");
     }

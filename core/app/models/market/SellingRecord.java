@@ -40,6 +40,15 @@ public class SellingRecord extends GenericModel {
         this.date = date;
     }
 
+    /**
+     * 用于封装 快递/海运/空运 费用统计成为运输成本用.
+     */
+    public SellingRecord(float expressCost, float seaCost, float airCost) {
+        this.seaCost = seaCost;
+        this.expressCost = expressCost;
+        this.airCost = airCost;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Selling selling;
 
@@ -134,6 +143,7 @@ public class SellingRecord extends GenericModel {
     /**
      * 运输到目前为之, 总共的快递运输重量(kg)
      */
+    @Deprecated
     public float expressKilogram = 0;
 
     /**
@@ -144,6 +154,7 @@ public class SellingRecord extends GenericModel {
     /**
      * 到目前为之, 总共的空运运输重量(kg)
      */
+    @Deprecated
     public float airKilogram = 0;
 
     /**
@@ -153,7 +164,9 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 到目前为止, 总共的海运运输体积(立方米)
+     * //
      */
+    @Deprecated
     public float seaCubicMeter = 0;
 
     /**
@@ -197,10 +210,8 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public float sumShipCost() {
-        if((this.seaCubicMeter + this.expressKilogram + this.airKilogram) == 0) return 0;
-        return (this.seaCost * this.seaCubicMeter + this.expressCost * this.expressKilogram +
-                this.airCost * this.airKilogram) / (this.seaCubicMeter + this.expressKilogram + this.airKilogram);
+    public float mergeToShipCost() {
+        return (this.expressCost * 0.333f) + (this.seaCost * 0.333f) + (this.airCost * 0.333f);
     }
 
     /**
@@ -210,7 +221,7 @@ public class SellingRecord extends GenericModel {
      */
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
-        return this.sumShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
+        return this.mergeToShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
     }
 
     /**
@@ -441,7 +452,7 @@ public class SellingRecord extends GenericModel {
             record.selling = selling;
             record.account = selling.account;
             record.orderCanceld = (int) Orderr.count("state=? AND date_format(createDate, '%Y-%m-%d')=?",
-                    Orderr.S.CANCEL, record.date);
+                    Orderr.S.CANCEL, Dates.date2Date(record.date));
             record.save();
         }
         return record;
@@ -488,11 +499,8 @@ public class SellingRecord extends GenericModel {
                 ", procureCost=" + procureCost +
                 ", procureNumberSum=" + procureNumberSum +
                 ", expressCost=" + expressCost +
-                ", expressKilogram=" + expressKilogram +
                 ", airCost=" + airCost +
-                ", airKilogram=" + airKilogram +
                 ", seaCost=" + seaCost +
-                ", seaCubicMeter=" + seaCubicMeter +
                 ", profit=" + profit +
                 ", costProfitRatio=" + costProfitRatio +
                 ", saleProfitRatio=" + saleProfitRatio +

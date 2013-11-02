@@ -127,17 +127,14 @@ public class Dates {
         switch(market) {
             case AMAZON_UK:
             case EBAY_UK:
-                return DateTimeZone.forID("Europe/London");
+                return DateTimeZone.forOffsetHours(0);
             case AMAZON_DE:
-                return DateTimeZone.forID("Europe/Berlin");
             case AMAZON_IT:
-                return DateTimeZone.forID("Europe/Rome");
             case AMAZON_FR:
-                return DateTimeZone.forID("Europe/Paris");
             case AMAZON_ES:
-                return DateTimeZone.forID("Europe/Madrid");
+                return DateTimeZone.forOffsetHours(1);
             case AMAZON_US:
-                return DateTimeZone.forID("America/Los_Angeles");
+                return DateTimeZone.forOffsetHours(-7);
             default:
                 return Dates.CN;
         }

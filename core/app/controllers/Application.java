@@ -4,17 +4,15 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import jobs.analyze.SellingSaleAnalyzeJob;
-import models.market.Account;
-import models.market.Feedback;
-import models.market.OrderItem;
-import models.market.Orderr;
+import models.market.*;
 import models.product.Whouse;
 import models.view.Ret;
 import models.view.dto.DashBoard;
+import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
+import play.data.validation.Validation;
 import play.db.jpa.JPA;
-import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -33,17 +31,13 @@ public class Application extends Controller {
         render(dashborad, fbaWhouse);
     }
 
-    public static void percent(final String type, final Date date, final long aid) {
-        String json = await(new Job<String>() {
-            @Override
-            public String doJobWithResult() throws Exception {
-                return J.json(
-                        OrderItem.categoryPercent(
-                                type, Dates.morning(date), Dates.night(date),
-                                Account.<Account>findById(aid))
-                );
-            }
-        }.now());
+    public static void percent(String type, Date date, String m) {
+        M market = M.val(m);
+        if(market == null) Validation.addError("", "市场填写错误");
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false));
+        String json = J.json(OrderItem
+                .categoryPie(type, Dates.morning(date), Dates.morning(new DateTime(date).plusDays(1).toDate()), market));
         renderJSON(json);
     }
 

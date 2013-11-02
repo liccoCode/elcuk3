@@ -86,11 +86,16 @@ public class SellingRecordCaculateJob extends Job {
 
             List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
 
+            Map<String, Float> seaCost = shipCostService.seaCost(dateTime.toDate());
+            Map<String, Float> airCost = shipCostService.airCost(dateTime.toDate());
+            Map<String, Float> expressCost = shipCostService.expressCost(dateTime.toDate());
+
 
             for(Selling selling : sellings) {
                 try {
                     String sid = selling.sellingId;
                     SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
+                    SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
                     // 销售价格
                     record.salePrice = selling.aps.salePrice == null ? 0 : selling.aps.salePrice;
                     // amz 扣费
@@ -111,20 +116,17 @@ public class SellingRecordCaculateJob extends Job {
                     record.procureCost = procureCostAndQty._1;
                     record.procureNumberSum = procureCostAndQty._2;
 
-                    // 快递运输成本
-                    F.T3<Float, Float, Float> costAndKg = shipCostService.expressCost(selling, dateTime.toDate());
-                    record.expressCost = costAndKg._1;
-                    record.expressKilogram = costAndKg._2;
+                    // 海运运输成本
+                    Float seaCostPrice = seaCost.get(sid);
+                    record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
 
                     // 空运运输成本
-                    costAndKg = shipCostService.airCost(selling, dateTime.toDate());
-                    record.airCost = costAndKg._1;
-                    record.airKilogram = costAndKg._2;
+                    Float airCostPrice = airCost.get(sid);
+                    record.airCost = airCostPrice == null ? yesterdayRcd.airCost : airCostPrice;
 
-                    // 海运运输成本
-                    costAndKg = shipCostService.seaCost(selling, dateTime.toDate());
-                    record.seaCost = costAndKg._1;
-                    record.seaCubicMeter = costAndKg._2;
+                    // 快递运输成本
+                    Float expressCostPrice = expressCost.get(sid);
+                    record.seaCost = expressCostPrice == null ? yesterdayRcd.seaCost : expressCostPrice;
 
                     // VAT 的费用
                     record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
@@ -144,7 +146,7 @@ public class SellingRecordCaculateJob extends Job {
                     Logger.error(Webs.S(e));
                 }
             }
-            Cache.add("sellingRecordCaculateJob", sellingRecords);
+            Cache.add(Caches.SELLINGRECORD, sellingRecords);
         } catch(Exception e) {
             e.printStackTrace();
         } finally {

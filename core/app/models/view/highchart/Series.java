@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * Created by IntelliJ IDEA.
+ * 对 HighChart 的曲线的抽象
  * User: wyatt
  * Date: 8/24/13
  * Time: 11:53 PM
@@ -20,8 +20,8 @@ public class Series {
     public static class Line extends AbstractSeries {
         private static final long serialVersionUID = 27276048153447664L;
 
-        public Line(String name, String type) {
-            super(name, type);
+        public Line(String name) {
+            super(name, LINE);
             this.marker = new Marker();
         }
 
@@ -45,8 +45,8 @@ public class Series {
      */
     public static class Column extends AbstractSeries {
 
-        public Column(String name, String type) {
-            super(name, type);
+        public Column(String name) {
+            super(name, COLUMN);
         }
     }
 
@@ -56,8 +56,8 @@ public class Series {
     public static class Pie extends AbstractSeries {
         private static final long serialVersionUID = -5409000856476815150L;
 
-        public Pie(String name, String type) {
-            super(name, type);
+        public Pie(String name) {
+            super(name, PIE);
         }
     }
 

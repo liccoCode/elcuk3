@@ -3,6 +3,7 @@ package models.view.post;
 import helper.DBUtils;
 import helper.Dates;
 import models.market.M;
+import models.market.SellingRecord;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
@@ -122,21 +123,25 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         if(isColumn()) chart = new HighChart(Series.COLUMN);
         else chart = new HighChart(Series.LINE);
         // 将各自曲线的计算分别打散到各自的方法中, 虽然便利多次, 方便权限控制
+
         // 销量方面
         this.salePrice(chart, rows);
         this.salesSeries(chart, rows);
         this.unitsSeries(chart, rows);
+
         // 利润方面
         this.profitSeries(chart, rows);
         this.costProfitRatioSeries(chart, rows);
         this.saleProfitRatioSeries(chart, rows);
         this.incomeSeries(chart, rows);
+
         // 成本方面
         this.shipCostSeries(chart, rows);
         this.airCost(chart, rows);
         this.expressCost(chart, rows);
         this.seaCost(chart, rows);
         this.procureCostSeries(chart, rows);
+
         // Amazon fee 方面
         this.amzFeeSeries(chart, rows);
         this.amzFbaFeeSeries(chart, rows);
@@ -265,7 +270,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
                 float expressCost = NumberUtils.toFloat(row.get("expressCost").toString()); // 33%
                 float seaCost = NumberUtils.toFloat(row.get("seaCost").toString()); // 33%
                 float airCost = NumberUtils.toFloat(row.get("airCost").toString()); // 33%
-                highChart.series("运输成本").add(date, (expressCost * 0.333f + seaCost * 0.333f + airCost * 0.333f));
+                highChart.series("运输成本").add(date, new SellingRecord(expressCost, seaCost, airCost).mergeToShipCost());
             }
         });
     }

@@ -1,16 +1,20 @@
 package models.view.post;
 
-import helper.Dates;
+import com.alibaba.fastjson.JSONObject;
+import helper.ES;
 import models.market.M;
 import models.market.Orderr;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.elasticsearch.index.query.BoolFilterBuilder;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
-import play.libs.F;
+import play.Play;
+import play.db.helper.SqlSelect;
+import play.utils.FastRuntimeException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -19,11 +23,17 @@ import java.util.regex.Pattern;
  * Date: 4/5/12
  * Time: 6:59 PM
  */
-public class OrderPOST extends Post<Orderr> {
+public class OrderPOST extends ESPost<Orderr> {
+
+    // 崩溃: 如果使用 from 其类型变为了 Integer, 所以在 Order Post 中改名为 begin
+    public Date begin;
+    public Date end;
+
     public OrderPOST() {
-        this.from = new DateTime().withZone(Dates.timeZone(null)).minusDays(7).toDate();
-        this.to = new DateTime().withZone(Dates.timeZone(null)).toDate();
+        this.end = DateTime.now().toDate();
+        this.begin = DateTime.now().minusDays(7).toDate();
         this.perSize = 25;
+        this.page = 1;
     }
 
     public OrderPOST(int perSize) {
@@ -36,7 +46,7 @@ public class OrderPOST extends Post<Orderr> {
 
     public M market;
 
-    public Orderr.S state;
+    public Orderr.S state = Orderr.S.SHIPPED;
 
     public String orderBy = "createDate";
 
@@ -48,30 +58,89 @@ public class OrderPOST extends Post<Orderr> {
 
     public Boolean promotion = null;
 
+
     @SuppressWarnings("unchecked")
     public List<Orderr> query() {
-        F.T2<String, List<Object>> params = params();
-        this.count = this.count(params);
-
-        return Orderr.find("SELECT o" + params._1, params._2.toArray()).fetch(this.page,
-                this.perSize);
+        SearchSourceBuilder builder = this.params();
+        System.out.println(builder);
+        try {
+            JSONObject result = ES.search("elcuk2", "order", builder);
+            JSONObject hits = result.getJSONObject("hits");
+            this.count = hits.getLong("total");
+            Set<String> orderIds = new HashSet<String>();
+            for(Object obj : hits.getJSONArray("hits")) {
+                JSONObject hit = (JSONObject) obj;
+                orderIds.add(hit.getJSONObject("_source").getString("orderId"));
+            }
+            if(orderIds.size() <= 0)
+                throw new FastRuntimeException("没有结果");
+            return Orderr.find(SqlSelect.whereIn("orderId", orderIds)).fetch();
+        } catch(Exception e) {
+            return new ArrayList<Orderr>();
+        }
     }
 
     @Override
-    public Long count(F.T2<String, List<Object>> params) {
-//        return Orderr.count("SELECT COUNT(o)" + params._1, params._2.toArray());
-        // 66w 暂时不用计算 Order Count,因为 innodb 会全表扫描.
-        // TODO 这里的分页算法需要改
-        return 660000l;
+    public Long count(SearchSourceBuilder searchBuilder) {
+        return this.count;
     }
 
-    @Override
     public Long getTotalCount() {
-        return 660000l;
+        return this.count;
     }
 
     @Override
-    public F.T2<String, List<Object>> params() {
+    public SearchSourceBuilder params() {
+        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter()
+                .must(FilterBuilders.rangeFilter("createDate")
+                        .from(this.begin)
+                        .to(this.end));
+
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders
+                .queryString(this.search())
+                .field("sids")
+                .field("buyer")
+                .field("email")
+                .field("address")
+                .field("orderId")
+                .field("userid")
+                .field("trackNo")
+                .field("upc")
+                .field("asin")
+                .field("promotionIDs")
+        ).filter(boolFilter)
+                .from(this.getFrom()).size(this.perSize).explain(Play.mode.isDev());
+
+        if(this.promotion != null) {
+            FilterBuilder boolBuilder;
+            if(this.promotion) {
+                boolBuilder = FilterBuilders.missingFilter("promotionIDs").nullValue(true);
+            } else {
+                boolBuilder = FilterBuilders.existsFilter("promotionIDs");
+            }
+            boolFilter.mustNot(boolBuilder);
+        }
+
+        if(this.market != null) {
+            boolFilter.should(FilterBuilders.termFilter("market", this.market.name().toLowerCase()));
+            // 市场变更, 具体查询时间也需要变更
+            this.begin = this.market.withTimeZone(this.begin).toDate();
+            this.end = this.market.withTimeZone(this.end).toDate();
+        }
+        if(this.state != null) {
+            boolFilter.should(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+        }
+        if(this.accountId != null) {
+            boolFilter.should(FilterBuilders.termFilter("account_id", this.accountId));
+        }
+        return builder;
+    }
+
+    /*
+    @Override
+    public F.T2<String, List<Object>> para2ms() {
         StringBuilder sbd = new StringBuilder(" FROM Orderr o");
         sbd.append(" LEFT JOIN o.items oi ");
         sbd.append(" WHERE 1=1");
@@ -83,12 +152,10 @@ public class OrderPOST extends Post<Orderr> {
 
         if(this.from != null && this.to != null) {
             sbd.append("AND o.createDate>=? AND o.createDate<=? ");
-            /**
-             * 如果选择了某一个市场, 则需要将时间也匹配上时区; 例:
-             * 1. 搜索 2013-01-17 日美国市场的订单
-             * 2. 转换语义: 搜索北京时间 2013-01-17 16:00:00 ~ 2013-01-18 16:00:00 的美国市场的订单
-             * 3. 转换后搜索
-             */
+//             * 如果选择了某一个市场, 则需要将时间也匹配上时区; 例:
+//             * 1. 搜索 2013-01-17 日美国市场的订单
+//             * 2. 转换语义: 搜索北京时间 2013-01-17 16:00:00 ~ 2013-01-18 16:00:00 的美国市场的订单
+//             * 3. 转换后搜索
             if(this.market != null) {
                 params.add(this.market.withTimeZone(this.from).toDate());
                 params.add(this.market.withTimeZone(Dates.night(this.to)).toDate());
@@ -98,32 +165,11 @@ public class OrderPOST extends Post<Orderr> {
             }
         }
 
-        if(this.market != null) {
-            sbd.append("AND o.market=? ");
-            params.add(this.market);
-        }
-
-        if(this.state != null) {
-            sbd.append("AND o.state=? ");
-            params.add(this.state);
-        }
-
         if(this.warnning != null) {
             sbd.append("AND o.warnning=?");
             params.add(this.warnning);
         }
 
-        if(this.promotion != null) {
-            if(this.promotion)
-                sbd.append("AND orderId in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
-            else
-                sbd.append(
-                        "AND orderId not in(select order.orderId from SaleFee where type.name=? OR type.parent.name=?)");
-            params.add("promorebates"); //促销费用
-            params.add("promorebates");
-        }
-
-        //TODO 现在这里是所有其他字段的模糊搜索, 后续速度不够的时候可以添加模糊搜索的等级.
         if(StringUtils.isNotBlank(this.search)) {
             // 支持 +23 这样搜索订单的购买数大于某个值
             Matcher matcher = ORDER_NUM_PATTERN.matcher(this.search);
@@ -167,5 +213,6 @@ public class OrderPOST extends Post<Orderr> {
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
     }
+            */
 
 }
