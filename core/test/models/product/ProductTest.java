@@ -46,20 +46,24 @@ public class ProductTest extends UnitTest {
         Selling sell = FactoryBoy.build(Selling.class, "de", new BuildCallback<Selling>() {
             @Override
             public void build(Selling target) {
-                target.merchantSKU = "71MDE10311-BPU,884802273783";
+                target.merchantSKU = "71MDE10311-BPU,887550300725";
                 target.market = M.AMAZON_DE;
                 AmazonProps aps = target.aps;
-                aps.upc = "884802273783";
+                aps.upc = "887550300725";
+                aps.rbns.add("815150031");
+                aps.rbns.add("123");
             }
         });
         amzCategory("consumer_electronics/computer/personal_computer", p.category.settings);
 
+        sell.account.password = "amz13297472505de";
         Webs.dev_login(sell.account);
         return new F.T2<Product, Selling>(p, sell);
     }
 
+    //    @Ignore
     @Test
-    public void testSaleAmazonStep3() throws IOException, ClassNotFoundException {
+    public void testSaleAmazon() throws IOException, ClassNotFoundException {
         F.T2<Product, Selling> t2 = initData();
         Product p = t2._1;
         Selling sell = t2._2;

@@ -286,6 +286,16 @@ public class AmazonProps implements Serializable {
         }
     }
 
+    public void rbnCheck(Collection<NameValuePair> params) {
+        if(StringUtils.isBlank(this.RBN) && this.rbns.size() == 0) return;
+        if(this.rbns.size() >= 1) {
+            params.add(new BasicNameValuePair("recommended_browse_nodes[0]", this.rbns.get(0)));
+        } else {
+            String[] rbns = StringUtils.split(this.RBN, ",");
+            params.add(new BasicNameValuePair("recommended_browse_nodes[0]", rbns[0]));
+        }
+    }
+
     /**
      * 从修改 Listing 页面中获取数据, 并同步到此 Aps 中
      *
@@ -328,7 +338,6 @@ public class AmazonProps implements Serializable {
 
         this.upc = doc.select("#external_id_display").text().trim();
         this.productDesc = doc.select("#product_description").text().trim();
-//        this.aps.condition_ = doc.select("#offering_condition option[selected]").first().text(); // 默认为 NEW
         this.condition_ = doc.select("#offering_condition_display").text().trim()
                 .toUpperCase(); // 默认为 NEW
         F.T2<M, Float> our_price = Webs.amzPriceFormat(
@@ -420,9 +429,7 @@ public class AmazonProps implements Serializable {
             } else if("model".equals(name)) {
                 addParams(name, this.modelNumber, params);
             } else if(name.startsWith("recommended_browse_nodes")) {
-                for(int i = 0; i < this.rbns.size(); i++) {
-                    addParams(name + "[" + i + "]", this.rbns.get(i), params);
-                }
+                this.rbnCheck(params);
             }
 
             // Offer
