@@ -61,9 +61,8 @@ public class HTTP {
     public static void init() {
         synchronized(HTTP.class) {
             HttpParams params = new BasicHttpParams();
-            HttpProtocolParams.setContentCharset(params, org.apache.http.protocol.HTTP.UTF_8);
-            HttpProtocolParams
-                    .setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
+            HttpProtocolParams.setContentCharset(params, "UTF-8");
+            HttpProtocolParams.setUserAgent(params, Play.configuration.getProperty("http.userAgent"));
             HttpClientParams.setRedirecting(params, true);
             // Socket 超时不能设置太短, 不然像下载这样的操作会很容易超时
             HttpConnectionParams.setSoTimeout(params, (int) TimeUnit.SECONDS.toMillis(90));
@@ -73,7 +72,7 @@ public class HTTP {
             multipThread.setDefaultMaxPerRoute(8); // 每一个站点最多只允许 8 个链接
             multipThread.setMaxTotal(40); // 所有站点最多允许 40 个链接
 
-            client = new DefaultHttpClient(multipThread);
+            client = new DefaultHttpClient(multipThread, params);
             client.addRequestInterceptor(new RequestAcceptEncoding());
             client.addResponseInterceptor(new ResponseContentEncoding());
             client.setRedirectStrategy(new DefaultRedirectStrategy() {
