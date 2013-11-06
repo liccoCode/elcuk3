@@ -198,7 +198,7 @@ public class OrderItem extends GenericModel {
                 }
             });
             highChart.series(highChart.sumSeries());
-            Cache.add(cacked_key, highChart, "8h");
+            Cache.add(cacked_key, highChart, "2h");
         }
 
         return Cache.get(cacked_key, HighChart.class);
