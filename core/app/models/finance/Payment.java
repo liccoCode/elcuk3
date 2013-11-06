@@ -107,7 +107,7 @@ public class Payment extends Model {
 
     /**
      * 每一份请款单都会拥有一个唯一的请款单编号. 组成:
-     * [Cooperator.name]-[numberOfYear]-[Year(Short)]
+     * [p/tApply.serialNumber]-[付款次数]
      * QW-004-13
      */
     @Required
@@ -186,25 +186,6 @@ public class Payment extends Model {
         //todo: Payments 的上传需要特殊处理. 如何上传到 S3?
         FileUtils.copyFile(a.file, new File(a.location));
         a.save();
-    }
-
-    /**
-     * 从 PaymentUnits 中提取 PaymentTarget, 如果没有 PaymentUnit 那么则返回所有 PaymentTargets
-     *
-     * @return
-     */
-    public List<PaymentTarget> paymentTargetFromPaymentUnits() {
-        if(this.units().size() > 0) {
-            PaymentUnit firstPaymentUnit = this.units().get(0);
-            if(firstPaymentUnit.deliveryment != null) {
-                return firstPaymentUnit.deliveryment.cooperator.paymentMethods;
-            } else {
-                //TODO 对 shipment 的判断还需要添加
-                return new ArrayList<PaymentTarget>();
-            }
-        } else {
-            return PaymentTarget.findAll();
-        }
     }
 
     public void cancel(String reason) {
@@ -508,11 +489,12 @@ public class Payment extends Model {
         if(apply instanceof TransportApply) {
             count = Payment.count("tApply=?", apply);
             this.tApply = (TransportApply) apply;
+            this.paymentNumber = String.format("[%s]-%02d", this.tApply.serialNumber, count + 1);
         } else if(apply instanceof ProcureApply) {
             count = Payment.count("pApply=?", apply);
             this.pApply = (ProcureApply) apply;
+            this.paymentNumber = String.format("[%s]-%02d", this.pApply.serialNumber, count + 1);
         }
-        this.paymentNumber = String.format("[%s]-%02d", apply.generateSerialNumber(this.cooperator), count + 1);
         return this;
     }
 
