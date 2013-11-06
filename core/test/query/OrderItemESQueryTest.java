@@ -7,6 +7,7 @@ import org.junit.Test;
 import play.test.UnitTest;
 import util.DateHelper;
 
+import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -146,7 +147,7 @@ public class OrderItemESQueryTest extends UnitTest {
 
         Object[] row3 = line.data.get(2);
         assertThat((Long) row3[0], is(1382544000000l));
-        assertThat((Float) row3[1], is(90f));
+        assertThat((Float) row3[1], is(89f));
     }
 
     @Test
@@ -188,11 +189,10 @@ public class OrderItemESQueryTest extends UnitTest {
 
         Object[] row3 = line.data.get(2);
         assertThat((Long) row3[0], is(1382544000000l));
-        assertThat((Float) row3[1], is(362f));
+        assertThat((Float) row3[1], is(361f));
     }
 
     @Test
-    //TODO
     public void testCategoryPieUS() {
         Series.Pie pie = esQuery.categoryPie(M.AMAZON_US,
                 DateHelper.t("2013-10-25 00:00:00"),
@@ -221,4 +221,23 @@ public class OrderItemESQueryTest extends UnitTest {
                 assertThat(val, is(31f));
         }
     }
+
+
+    @Test
+    public void testBaseMoveingAve() {
+        Series.Line line = esQuery.baseMoveingAve("", "all", M.AMAZON_DE,
+                DateHelper.t("2013-10-06 00:00:00"),
+                DateHelper.t("2013-11-06 00:00:00"));
+
+        assertThat(line.data.size(), is(32));
+        Object[] row1 = line.data.get(0);
+        assertThat((Long) row1[0], is(1381014000000l));
+        assertThat(((Float) row1[1]).doubleValue(), is(closeTo(1509d, 1.0)));
+
+        Object[] row2 = line.data.get(31);
+        assertThat((Long) row2[0], is(1383692400000l));
+        assertThat(((Float) row2[1]).doubleValue(), is(closeTo(1614d, 1.0)));
+    }
+
+
 }

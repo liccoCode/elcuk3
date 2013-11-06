@@ -10,7 +10,7 @@ public class CooperItemHelper extends JavaExtensions {
      * 格式化产品要求，前台 popover 使用
      */
     public static String formatProductTerms(CooperItem cooperItem) {
-        StringBuffer message = new StringBuffer();
+        StringBuilder message = new StringBuilder();
         message.append("<span class='label label-info'>产品要求:</span><br>");
         if(StringUtils.isNotEmpty(cooperItem.productTerms)) {
             String[] messageArray = StringUtils.split(cooperItem.productTerms, "\n");

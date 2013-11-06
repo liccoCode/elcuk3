@@ -157,6 +157,30 @@ $ ->
         noty({text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}", type: 'error', timeout: 3000})
         LoadMask.unmask()
       )
+  ).on('click', '.btn-toolbar > .btn-small', (e) ->
+    $btn = $(@)
+    events = _.filter($('#a_units').highcharts().series, (serie) ->
+      serie.name in ["#{$btn.text()}亚马逊 滑动平均", '滑动平均 汇总']
+    )
+    if events.length == 0
+      LoadMask.mask()
+      $market = $("[name='p.market']")
+      $market.data('oldMarket', $market.val()).val($btn.data('market'))
+      $.ajax('/analyzes/ajaxMovingAve', {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
+        .done((r) ->
+          $market.val($market.data('oldMarket'))
+          if r.flag == false
+            noty({text: r.message.split("|F")[0], type: 'warning', timeout: 5000})
+          else
+            _.each(r['series'], (ele) ->
+              $('#a_units').highcharts().addSeries({name: ele['name'], data: ele['data']})
+            )
+          LoadMask.unmask()
+        )
+    else
+      _.each($('#a_units').highcharts().series, (serie) ->
+        serie.remove() if serie.name in ["#{$btn.text()}亚马逊 滑动平均", '滑动平均 汇总']
+      )
   )
 
   # 销售订单曲线

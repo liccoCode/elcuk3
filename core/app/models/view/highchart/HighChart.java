@@ -75,14 +75,14 @@ public class HighChart implements Serializable {
      *
      * @return
      */
-    public AbstractSeries sumSeries() {
+    public AbstractSeries sumSeries(String name) {
         AbstractSeries s = null;
         if(Series.LINE.equals(this.type)) {
-            s = new Series.Line("汇总");
+            s = new Series.Line(name + " 汇总");
         } else if(Series.COLUMN.equals(this.type)) {
-            s = new Series.Column("汇总");
+            s = new Series.Column(name + "汇总");
         } else if(Series.PIE.equals(this.type)) {
-            s = new Series.Pie("汇总");
+            s = new Series.Pie(name + "汇总");
         }
 
         for(AbstractSeries series : this.series) {
