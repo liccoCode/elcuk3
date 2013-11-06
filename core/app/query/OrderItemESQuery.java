@@ -11,6 +11,7 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.facet.range.RangeFacetBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -18,7 +19,6 @@ import play.utils.FastRuntimeException;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 通过向 ElasticSearch 进行搜索的 OrderItem Query
@@ -27,6 +27,21 @@ import java.util.concurrent.TimeUnit;
  * Time: 11:44 AM
  */
 public class OrderItemESQuery {
+
+    public Series.Line salesFade(String type, String val, M m, Date from, Date to) {
+        if("all".equals(val)) {
+            return this.allSalesAndUnits(m, from, to);
+        } else if(val.matches("^\\d{2}$")) {
+            return this.catSalesAndUnits(val, m, from, to);
+        } else if("sid".equals(type)) {
+            return this.mskuSalesAndUnits(val, m, from, to);
+        } else if("sku".equals(type)) {
+            return this.skuSalesAndUnits(val, m, from, to);
+        } else {
+            throw new FastRuntimeException("不支持的类型!");
+        }
+    }
+
     /**
      * 通过 ES 计算出指定日期段的销量和销售额.
      * PS: 时间为北京时间, 当传入 market 后, 会计算成为对应市场的那个时间.
@@ -55,13 +70,62 @@ public class OrderItemESQuery {
         return base("\"" + sid + "\"", "msku", market, from, to);
     }
 
+    /**
+     * 某个市场上某个类别的销量汇总
+     *
+     * @param market
+     */
     public Series.Line catSalesAndUnits(String cat, M market, Date from, Date to) {
         return base("\"" + cat + "\"", "cat", market, from, to);
     }
 
+    /**
+     * 某个市场上的所有销量汇总
+     *
+     * @param market
+     */
     public Series.Line allSalesAndUnits(M market, Date from, Date to) {
         return base("", "all", market, from, to);
     }
+
+    // ---------------------- 滑动平均 --------------------------
+    public Series.Line movingAvgFade(String type, String val, M m, Date from, Date to) {
+        if("all".equals(val)) {
+            return this.allSalesMovingAvg(m, from, to);
+        } else if(val.matches("^\\d{2}$")) {
+            return this.catSalesMovingAvg(val, m, from, to);
+        } else if("sid".equals(type)) {
+            return this.mskuSalesMovingAvg(val, m, from, to);
+        } else if("sku".equals(type)) {
+            return this.skuSalesMovingAvg(val, m, from, to);
+        } else {
+            throw new FastRuntimeException("不支持的类型!");
+        }
+    }
+
+    public Series.Line skuSalesMovingAvg(String sku, M market, Date from, Date to) {
+        return baseMoveingAve("\"" + sku + "\"", "sku", market, from, to);
+    }
+
+    public Series.Line mskuSalesMovingAvg(String sid, M market, Date from, Date to) {
+        String[] args = StringUtils.split(sid, "|");
+        if(args.length == 3) sid = args[0];
+        return baseMoveingAve("\"" + sid + "\"", "msku", market, from, to);
+    }
+
+    public Series.Line catSalesMovingAvg(String cat, M market, Date from, Date to) {
+        return baseMoveingAve("\"" + cat + "\"", "cat", market, from, to);
+    }
+
+    /**
+     * 某个市场上的滑动平均销量
+     *
+     * @param market
+     */
+    public Series.Line allSalesMovingAvg(M market, Date from, Date to) {
+        return baseMoveingAve("", "all", market, from, to);
+    }
+
 
     /**
      * @param val
@@ -92,7 +156,7 @@ public class OrderItemESQuery {
                         )
                 ).size(0);
         if(StringUtils.isBlank(val)) {
-            search.query(QueryBuilders.queryString("*"));
+            search.query(QueryBuilders.matchAllQuery());
         } else {
             search.query(QueryBuilders.queryString(val).defaultField(type));
         }
@@ -106,11 +170,58 @@ public class OrderItemESQuery {
             JSONObject entry = (JSONObject) o;
             line.add(Dates.date2JDate(entry.getDate("time")), entry.getFloat("total"));
         }
-        long interval = TimeUnit.DAYS.toMillis(1);
-        for(long i = from.getTime(); i < to.getTime(); i += interval) {
-            line.add(0f, i);
+
+        DateTime datePointer = new DateTime(from);
+        while(datePointer.getMillis() <= to.getTime()) {
+            line.add(0f, Dates.date2JDate(from));
+            datePointer = datePointer.plusDays(1);
         }
         line.sort();
+        return line;
+    }
+
+    /**
+     * 计算滑动平均
+     *
+     * @return
+     */
+    public Series.Line baseMoveingAve(String val, String type, M market, Date from, Date to) {
+        if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
+        if(!Arrays.asList("sku", "msku", "cat", "all").contains(type))
+            throw new FastRuntimeException("还不支持 " + type + " " + "类型");
+
+        DateTime fromD = market.withTimeZone(from);
+        DateTime toD = market.withTimeZone(to);
+        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
+
+        RangeFacetBuilder facetBuilder = FacetBuilders.rangeFacet("moving_ave")
+                .keyField("createDate").valueField("quantity")
+                .facetFilter(FilterBuilders.termFilter("market", market.name().toLowerCase()));
+        DateTime datePointer = new DateTime(fromD);
+        while(datePointer.getMillis() <= toD.getMillis()) {
+            facetBuilder.addRange(datePointer.minusDays(7).toString(isoFormat), datePointer.toString(isoFormat));
+            // 以天为单位, 指针向前移动
+            datePointer = datePointer.plusDays(1);
+        }
+
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .facet(facetBuilder)
+                .size(0);
+        if(StringUtils.isBlank(val)) {
+            search.query(QueryBuilders.matchAllQuery());
+        } else {
+            search.query(QueryBuilders.queryString(val).defaultField(type));
+        }
+
+        JSONObject result = ES.search("elcuk2", "orderitem", search);
+        JSONObject facets = result.getJSONObject("facets");
+        JSONArray movingAveRanges = facets.getJSONObject("moving_ave").getJSONArray("ranges");
+
+        Series.Line line = new Series.Line(market.label() + " 滑动平均");
+        for(Object o : movingAveRanges) {
+            JSONObject range = (JSONObject) o;
+            line.add(Dates.date2JDate(range.getDate("to")), range.getFloat("total") / 7);
+        }
         return line;
     }
 
@@ -139,7 +250,7 @@ public class OrderItemESQuery {
         JSONObject facets = result.getJSONObject("facets");
         JSONArray terms = facets.getJSONObject("units").getJSONArray("terms");
 
-        Series.Pie pie = new Series.Pie(market.label() + "销量百分比");
+        Series.Pie pie = new Series.Pie(market.label() + " 销量百分比");
 
         for(Object o : terms) {
             JSONObject term = (JSONObject) o;

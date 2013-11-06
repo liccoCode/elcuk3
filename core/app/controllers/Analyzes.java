@@ -2,10 +2,7 @@ package controllers;
 
 import helper.J;
 import helper.Webs;
-import models.market.Account;
-import models.market.OrderItem;
-import models.market.Selling;
-import models.market.SellingRecord;
+import models.market.*;
 import models.product.Category;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
@@ -74,9 +71,19 @@ public class Analyzes extends Controller {
     /**
      * 加载指定 Selling 的时间段内的销量与销售额数据
      */
-    public static void ajaxUnit(final AnalyzePost p) {
+    public static void ajaxUnit(AnalyzePost p) {
         try {
             HighChart chart = OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+            renderJSON(J.json(chart));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.E(e)));
+        }
+    }
+
+    public static void ajaxMovingAve(AnalyzePost p) {
+        try {
+            M m = M.val(p.market);
+            HighChart chart = OrderItem.ajaxHighChartMovinAvg(p.val, p.type, m, p.from, p.to);
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));

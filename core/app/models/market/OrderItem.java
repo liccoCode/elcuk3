@@ -7,7 +7,6 @@ import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
-import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
 
 import javax.persistence.*;
@@ -160,7 +159,7 @@ public class OrderItem extends GenericModel {
      * @param val 需要查询的 all, categoryId, sku, sid
      * @param to  @return {series_size, days, series_n}
      */
-    @Cached("8h")
+    @Cached("2h")
     public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
@@ -178,17 +177,7 @@ public class OrderItem extends GenericModel {
             Promises.forkJoin(new Promises.Callback<Object>() {
                 @Override
                 public Object doJobWithResult(M m) {
-                    if("all".equals(val)) {
-                        highChart.series(esQuery.allSalesAndUnits(m, _from, _to));
-                    } else if(val.matches("^\\d{2}$")) {
-                        highChart.series(esQuery.catSalesAndUnits(val, m, _from, _to));
-                    } else if("sid".equals(type)) {
-                        highChart.series(esQuery.mskuSalesAndUnits(val, m, _from, _to));
-                    } else if("sku".equals(type)) {
-                        highChart.series(esQuery.skuSalesAndUnits(val, m, _from, _to));
-                    } else {
-                        throw new FastRuntimeException("不支持的类型!");
-                    }
+                    highChart.series(esQuery.salesFade(type, val, m, _from, _to));
                     return null;
                 }
 
@@ -197,10 +186,38 @@ public class OrderItem extends GenericModel {
                     return "OrderItem.ajaxHighChartUnitOrder(ES)";
                 }
             });
-            highChart.series(highChart.sumSeries());
-            Cache.add(cacked_key, highChart, "8h");
+            highChart.series(highChart.sumSeries("销量"));
+            Cache.add(cacked_key, highChart, "2h");
         }
+        return Cache.get(cacked_key, HighChart.class);
+    }
 
+    public static HighChart ajaxHighChartMovinAvg(final String val, final String type, M m, Date from,
+                                                  Date to) {
+        String cacked_key = Caches.Q.cacheKey("moving_avg", m, val, type, from, to);
+        HighChart lines = Cache.get(cacked_key, HighChart.class);
+        if(lines != null) return lines;
+        synchronized(cacked_key.intern()) {
+            lines = Cache.get(cacked_key, HighChart.class);
+            if(lines != null) return lines;
+
+            // 做内部参数的容错
+            final Date _from = Dates.morning(from);
+            final Date _to = Dates.night(to);
+
+            HighChart highChart = new HighChart();
+            OrderItemESQuery esQuery = new OrderItemESQuery();
+            if(m == null) {
+                HighChart tmphighChart = new HighChart();
+                for(M market : Promises.MARKETS) {
+                    tmphighChart.series(esQuery.movingAvgFade(type, val, market, _from, _to));
+                }
+                highChart.series(tmphighChart.sumSeries("滑动平均"));
+            } else {
+                highChart.series(esQuery.movingAvgFade(type, val, m, _from, _to));
+            }
+            Cache.add(cacked_key, highChart, "2h");
+        }
         return Cache.get(cacked_key, HighChart.class);
     }
 
@@ -240,7 +257,7 @@ public class OrderItem extends GenericModel {
                         return "OrderItem.categoryPie";
                     }
                 });
-                AbstractSeries pie = pieChart.sumSeries();
+                AbstractSeries pie = pieChart.sumSeries("销量百分比");
                 pieChart.series.clear();
                 pieChart.series.add(pie);
             } else {
