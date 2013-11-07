@@ -3,8 +3,8 @@ package services;
 import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
+import helper.Promises;
 import models.market.M;
-import models.market.Orderr;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -29,24 +29,23 @@ public class MetricSalesService {
      */
     public Map<String, Integer> sellingUnits(Date date) {
         Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
-        for(M m : M.values()) {
-            if(m.isEbay()) continue;
+        for(M m : Promises.MARKETS) {
             sellingUnits.putAll(sellingUnits(date, m));
         }
         return sellingUnits;
     }
 
     public Map<String, Integer> sellingUnits(Date date, M market) {
-        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
+        DateTime dt = new DateTime(date);
+        F.T2<DateTime, DateTime> actualDatePair = market
+                .withTimeZone(Dates.morning(date), Dates.morning(dt.plusDays(1).toDate()));
         SqlSelect sql = new SqlSelect()
                 .select("oi.selling_sellingId as sellingId", "sum(oi.quantity) as qty")
                 .from("OrderItem oi")
                 .leftJoin("Orderr o ON o.orderId=oi.order_orderId")
                 .where("oi.market=?").param(market.name())
                 .where("oi.createDate>=?").param(actualDatePair._1.toDate())
-                .where("oi.createDate<=?").param(actualDatePair._2.toDate())
-                .where(SqlSelect.whereIn("o.state", Arrays
-                        .asList(Orderr.S.PENDING.name(), Orderr.S.PAYMENT.name(), Orderr.S.SHIPPED.name())))
+                .where("oi.createDate<?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingUnits = new HashMap<String, Integer>();
@@ -64,25 +63,22 @@ public class MetricSalesService {
      */
     public Map<String, Integer> sellingOrders(Date date) {
         Map<String, Integer> sellingOrders = new HashMap<String, Integer>();
-        for(M m : M.values()) {
-            if(m.isEbay()) continue;
+        for(M m : Promises.MARKETS) {
             sellingOrders.putAll(sellingOrders(date, m));
         }
         return sellingOrders;
     }
 
     public Map<String, Integer> sellingOrders(Date date, M market) {
-        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.night(date));
+        DateTime dt = new DateTime(date).plusDays(1);
+        F.T2<DateTime, DateTime> actualDatePair = market.withTimeZone(Dates.morning(date), Dates.morning(dt.toDate()));
         SqlSelect sql = new SqlSelect()
                 .select("oi.selling_sellingId as sellingId", "count(o.orderId) as qty")
                 .from("Orderr o")
                 .leftJoin("OrderItem oi ON o.orderId=oi.order_orderId")
                 .where("o.market=?").param(market.name())
                 .where("o.createDate>=?").param(actualDatePair._1.toDate())
-                .where("o.createDate<=?").param(actualDatePair._2.toDate())
-                .where(SqlSelect
-                        .whereIn("o.state", Arrays.asList(Orderr.S.PENDING.name(), Orderr.S.PAYMENT.name(), Orderr
-                                .S.SHIPPED.name())))
+                .where("o.createDate<?").param(actualDatePair._2.toDate())
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingOrders = new HashMap<String, Integer>();

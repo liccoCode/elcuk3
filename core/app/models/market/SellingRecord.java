@@ -86,12 +86,6 @@ public class SellingRecord extends GenericModel {
     public Integer orders = 0;
 
     /**
-     * 当天产生的 Cancel 的订单数量(计算系统数据)
-     */
-    @Expose
-    public Integer orderCanceld = 0;
-
-    /**
      * 当天的销售价格(通过 Amazon 解析)
      */
     @Expose
@@ -321,7 +315,6 @@ public class SellingRecord extends GenericModel {
                     groupByDate.get(key).sessions += rcd.sessions;
                     groupByDate.get(key).pageViews += rcd.pageViews;
                     groupByDate.get(key).orders += rcd.orders;
-                    groupByDate.get(key).orderCanceld += rcd.orderCanceld;
                     groupByDate.get(key).sales += rcd.sales;
                     groupByDate.get(key).units += rcd.units;
                 } else
@@ -451,8 +444,6 @@ public class SellingRecord extends GenericModel {
             record = new SellingRecord(selling, oneDay);
             record.selling = selling;
             record.account = selling.account;
-            record.orderCanceld = (int) Orderr.count("state=? AND date_format(createDate, '%Y-%m-%d')=?",
-                    Orderr.S.CANCEL, Dates.date2Date(record.date));
             record.save();
         }
         return record;
@@ -489,7 +480,6 @@ public class SellingRecord extends GenericModel {
                 ", sessions=" + sessions +
                 ", pageViews=" + pageViews +
                 ", orders=" + orders +
-                ", orderCanceld=" + orderCanceld +
                 ", salePrice=" + salePrice +
                 ", units=" + units +
                 ", sales=" + sales +
