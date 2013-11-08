@@ -23,10 +23,10 @@ every 4.hours do
   command '/usr/sbin/ntpdate 0.cn.pool.ntp.org'
 end
 
-every :day, :at => "3:00" do
+every :day, :at => "7:00, 22:00" do
   command 'ruby /root/rubys/order_index_em.rb'
 end
 
-every :day, :at => "3:30" do
+every :day, :at => "7:30, 22:30" do
   command 'ruby /root/rubys/order_item_index_em.rb'
 end

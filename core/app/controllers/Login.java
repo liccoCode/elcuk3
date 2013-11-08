@@ -170,7 +170,7 @@ public class Login extends Secure.Security {
      */
     public static void job(@As("yyyy-MM-dd") Date date) throws ExecutionException, InterruptedException {
         Logger.info(request.remoteAddress);
-        new SellingRecordCaculateJob(new DateTime(date)).now().get();
+        new SellingRecordCaculateJob(new DateTime(date), false).now().get();
         renderHtml("<h3>SellingRecordCaculateJob 开始执行</h3>");
     }
 
