@@ -219,6 +219,24 @@ public class SellingRecord extends GenericModel {
     }
 
     /**
+     * 计算成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
+     */
+    public float costProfitRatio() {
+        if(this.procureAndShipCost() == 0) return 0;
+        if(this.units == 0) return 0;
+        // 计算出 单个产品的利润 / 单个产品的总成本
+        return (this.profit / this.units) / this.procureAndShipCost();
+    }
+
+    /**
+     * 销售利润率 = 利润 / 销售额
+     */
+    public float saleProfitRatio() {
+        if(this.sales == 0) return 0;
+        return this.profit / this.sales;
+    }
+
+    /**
      * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录; 返回的 Selling 如果数据库中有则是持久化的, 数据库中没有则是新的
      * 记录 Selling 的 Price, Session, PageView
      * <p/>
@@ -226,8 +244,7 @@ public class SellingRecord extends GenericModel {
      *
      * @return
      */
-    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market,
-                                                                        Date oneDay) {
+    public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
         Set<SellingRecord> records = new HashSet<SellingRecord>();
         JsonArray rows = null;
         int curentPage = 0;
@@ -297,8 +314,7 @@ public class SellingRecord extends GenericModel {
      */
     @SuppressWarnings("unchecked")
     @Cached("4h") // 具体的缓存统一到页面上,这里的缓存 5mn 用来防止多次加载
-    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from,
-                                                               Date to) {
+    public static List<SellingRecord> accountMskuRelateRecords(Account acc, String msku, Date from, Date to) {
         String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
         List<SellingRecord> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null) return cacheElement;
@@ -333,11 +349,7 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 加载出一段时间内指定 Selling 的 PageView 与 Session 数据, 给前台的 HighChar 使用
-     *
-     * @param msku
-     * @param from
-     * @param to
-     * @return
+     * // TODO 这个方 HighChar 是不是需要挪到 view package 中的 object 去?
      */
     public static HighChart ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
         /**
@@ -373,8 +385,7 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 加载一段时间内指定 Selling 的转换率曲线数据, 给前台的 HighChar 使用
-     *
-     * @return
+     * // TODO 这个方 HighChar 是不是需要挪到 view package 中的 object 去?
      */
     public static HighChart ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
         HighChart chart = new HighChart();
@@ -398,9 +409,6 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 产生当天的 Id
-     *
-     * @param sid
-     * @return
      */
     public static String id(String sid) {
         return id(sid, DateTime.now().toDate());

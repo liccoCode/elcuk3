@@ -429,6 +429,11 @@ public class Selling extends GenericModel {
     }
 
 
+    public Float salePriceWithCurrency() {
+        if(this.aps.salePrice == null) return 0f;
+        return this.market.currency().toUSD(this.aps.salePrice);
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;

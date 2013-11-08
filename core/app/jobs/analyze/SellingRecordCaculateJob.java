@@ -97,7 +97,7 @@ public class SellingRecordCaculateJob extends Job {
                     SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                     SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
                     // 销售价格
-                    record.salePrice = selling.aps.salePrice == null ? 0 : selling.aps.salePrice;
+                    record.salePrice = selling.aps.salePrice == null ? 0 : selling.salePriceWithCurrency();
                     // amz 扣费
                     record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
                     // amzFba 扣费
@@ -129,15 +129,13 @@ public class SellingRecordCaculateJob extends Job {
                     record.seaCost = expressCostPrice == null ? yesterdayRcd.seaCost : expressCostPrice;
 
                     // VAT 的费用
-                    record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
+                    record.dutyAndVAT =
+                            sellingVATFee.get(sid) == null ? yesterdayRcd.dutyAndVAT : sellingVATFee.get(sid);
 
-                    // 利润 = 实际收入 - 采购成本 - 运输成本 - VAT
+                    // 总利润 = 实际收入 - 采购成本 - 运输成本 - VAT
                     record.profit = record.income - record.procureAndShipCost();
-                    // 成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
-                    record.costProfitRatio =
-                            record.procureAndShipCost() == 0 ? 0 : (record.profit / record.procureAndShipCost());
-                    // 销售利润率 = 利润 / 销售额
-                    record.saleProfitRatio = record.sales == 0 ? 0 : (record.profit / record.sales);
+                    record.costProfitRatio = record.costProfitRatio();
+                    record.saleProfitRatio = record.saleProfitRatio();
                     record.save();
 
                     // TODO: 还有总销售额和总利润
@@ -146,7 +144,7 @@ public class SellingRecordCaculateJob extends Job {
                     Logger.error(Webs.S(e));
                 }
             }
-            Cache.add(Caches.SELLINGRECORD, sellingRecords);
+            Cache.add(Caches.SELLINGRECORD, sellingRecords, "12h");
         } catch(Exception e) {
             e.printStackTrace();
         } finally {

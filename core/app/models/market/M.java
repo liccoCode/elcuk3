@@ -2,6 +2,7 @@ package models.market;
 
 
 import exception.NotSupportChangeRegionFastException;
+import helper.Currency;
 import helper.Dates;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -208,6 +209,22 @@ public enum M {
             case EBAY_UK:
             default:
                 return "&pound;";
+        }
+    }
+
+    public Currency currency() {
+        switch(this) {
+            case AMAZON_US:
+                return Currency.USD;
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+                return Currency.EUR;
+            case AMAZON_UK:
+            case EBAY_UK:
+            default:
+                return Currency.GBP;
         }
     }
 
