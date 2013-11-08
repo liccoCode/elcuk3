@@ -43,10 +43,7 @@ public class SellingRecordCaculateJob extends Job {
     private boolean isCache = true;
 
     public SellingRecordCaculateJob() {
-    }
-
-    public SellingRecordCaculateJob(DateTime dateTime) {
-        this.dateTime = dateTime;
+        this.dateTime = DateTime.now();
         this.isCache = true;
     }
 
@@ -59,7 +56,7 @@ public class SellingRecordCaculateJob extends Job {
     public void doJob() {
         if(this.isCache) {
             try {
-                Logger.info("SellingRecordCaculateJob begin (cached)");
+                Logger.info("SellingRecordCaculateJob begin %s (cached)", dateTime.toString("yyyy-MM-dd"));
                 Cache.add(Caches.SELLINGRECORD_RUNNING, "running");
                 List<SellingRecord> sellingRecords = metric();
                 Cache.add(Caches.SELLINGRECORD, sellingRecords, "12h");
@@ -69,7 +66,7 @@ public class SellingRecordCaculateJob extends Job {
                 Cache.delete(Caches.SELLINGRECORD_RUNNING);
             }
         } else {
-            Logger.info("SellingRecordCaculateJob begin (nocached)");
+            Logger.info("SellingRecordCaculateJob begin %s (nocached)", dateTime.toString("yyyy-MM-dd"));
             metric();
         }
     }
@@ -120,7 +117,8 @@ public class SellingRecordCaculateJob extends Job {
                 SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
                 // 销售价格
-                record.salePrice = selling.aps.salePrice == null ? 0 : selling.salePriceWithCurrency();
+                record.salePrice =
+                        selling.aps.salePrice == null ? yesterdayRcd.salePrice : selling.salePriceWithCurrency();
                 // amz 扣费
                 record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
                 // amzFba 扣费

@@ -83,9 +83,9 @@ public class MetricSalesService {
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Integer> sellingOrders = new HashMap<String, Integer>();
         for(Map<String, Object> row : rows) {
-            String sellingId = row.get("sellingId").toString();
-            if(StringUtils.isBlank(sellingId)) continue;
-            sellingOrders.put(sellingId, NumberUtils.toInt(row.get("qty").toString()));
+            Object sellingId = row.get("sellingId");
+            if(sellingId == null || StringUtils.isBlank(sellingId.toString())) continue;
+            sellingOrders.put(sellingId.toString(), NumberUtils.toInt(row.get("qty").toString()));
         }
         return sellingOrders;
     }

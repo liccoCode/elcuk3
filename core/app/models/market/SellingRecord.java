@@ -215,7 +215,7 @@ public class SellingRecord extends GenericModel {
      */
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
-        return this.mergeToShipCost() + (this.dutyAndVAT * this.units) + (this.procureCost * this.units);
+        return (this.mergeToShipCost() + this.dutyAndVAT + this.procureCost) * this.units;
     }
 
     /**
@@ -224,8 +224,9 @@ public class SellingRecord extends GenericModel {
     public float costProfitRatio() {
         if(this.procureAndShipCost() == 0) return 0;
         if(this.units == 0) return 0;
-        // 计算出 单个产品的利润 / 单个产品的总成本
-        return (this.profit / this.units) / this.procureAndShipCost();
+        Logger.info("Sid: %s , Profit: %s, ShipCost: %s", this.selling.sellingId, this.profit,
+                this.procureAndShipCost());
+        return this.profit / this.procureAndShipCost();
     }
 
     /**
