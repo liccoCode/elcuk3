@@ -1,6 +1,5 @@
 package helper;
 
-import com.google.gson.JsonObject;
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.Jsoup;
@@ -452,13 +451,11 @@ public enum Currency {
     private static Float ratio(String from, String to) {
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
-            JsonObject json = HTTP.json(
-                    ("http://www.google.com/ig/calculator?hl=en&q=1" + from + "=?" +
-                            to)).getAsJsonObject();
-            Logger.info(
-                    "[" + json.get("lhs").getAsString() + " TO " + json.get("rhs").getAsString() +
-                            "]");
-            return NumberUtils.toFloat(json.get("rhs").getAsString().split(" ")[0], -1);
+            String html = HTTP.get("https://www.google.com/finance/converter?a=1&from=" + from + "&to=" + to);
+            Document doc = Jsoup.parse(html);
+            String toStr = doc.select("#currency_converter_result .bld").text();
+            Logger.info("[1 %s TO %s]", from, toStr);
+            return NumberUtils.toFloat(toStr.split(" ")[0].trim());
         } catch(Exception e) {
             Logger.warn(Webs.E(e));
         }
