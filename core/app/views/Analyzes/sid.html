@@ -20,8 +20,16 @@
     </th>
     <th orderby='day7' name="day7" class="sortable">Day7(ave)<i class="icon-sort"></i></th>
     <th orderby='day30' name="day30" class="sortable">Day30(ave)<i class="icon-sort"></i></th>
-    <th colspan="2">TOR</th>
-    <th colspan="2">_TOR</th>
+    <th colspan="2">
+      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天; --- 根据人工设置的 ps 计算的这个产品现在(在库 + 在途)的货物还能够周转多少天">
+        TOR
+      </abbr>
+    </th>
+    <th colspan="2">
+      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天; --- 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 在产)的货物还能够周转多少天">
+        _TOR
+      </abbr>
+    </th>
   </tr>
 #{list items:dtos, as:'dto'}
   <tr>
