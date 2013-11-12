@@ -30,8 +30,9 @@ public class OrderPOST extends ESPost<Orderr> {
     public Date end;
 
     public OrderPOST() {
-        this.end = DateTime.now().toDate();
-        this.begin = DateTime.now().minusDays(7).toDate();
+        DateTime now = DateTime.now().withTimeAtStartOfDay();
+        this.end = now.toDate();
+        this.begin = now.minusDays(7).toDate();
         this.perSize = 25;
         this.page = 1;
     }
@@ -91,11 +92,7 @@ public class OrderPOST extends ESPost<Orderr> {
 
     @Override
     public SearchSourceBuilder params() {
-        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter()
-                .must(FilterBuilders.rangeFilter("createDate")
-                        .from(this.begin)
-                        .to(this.end));
-
+        BoolFilterBuilder boolFilter = FilterBuilders.boolFilter();
 
         SearchSourceBuilder builder = new SearchSourceBuilder();
         builder.query(QueryBuilders
@@ -124,16 +121,21 @@ public class OrderPOST extends ESPost<Orderr> {
         }
 
         if(this.market != null) {
-            boolFilter.should(FilterBuilders.termFilter("market", this.market.name().toLowerCase()));
-            // 市场变更, 具体查询时间也需要变更
-            this.begin = this.market.withTimeZone(this.begin).toDate();
-            this.end = this.market.withTimeZone(this.end).toDate();
+            boolFilter.must(FilterBuilders.termFilter("market", this.market.name().toLowerCase()))
+                    .must(FilterBuilders.rangeFilter("createDate")
+                            // 市场变更, 具体查询时间也需要变更
+                            .from(this.market.withTimeZone(this.begin).toDate())
+                            .to(this.market.withTimeZone(this.end).toDate()));
+        } else {
+            boolFilter.must(FilterBuilders.rangeFilter("createDate").from(this.begin).to(this.end));
         }
+
+
         if(this.state != null) {
-            boolFilter.should(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
+            boolFilter.must(FilterBuilders.termFilter("state", this.state.name().toLowerCase()));
         }
         if(this.accountId != null) {
-            boolFilter.should(FilterBuilders.termFilter("account_id", this.accountId));
+            boolFilter.must(FilterBuilders.termFilter("account_id", this.accountId));
         }
         return builder;
     }
