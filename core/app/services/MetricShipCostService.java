@@ -64,6 +64,7 @@ public class MetricShipCostService {
      * @return
      */
     public float totalWeight(Set<String> shipmentIds, FeeType feeType) {
+        if(shipmentIds.size() == 0) return 0;
         SqlSelect totalWeightSql = new SqlSelect()
                 .select("sum(pu.unitQty) weight")
                 .from("PaymentUnit pu")
@@ -117,7 +118,7 @@ public class MetricShipCostService {
 
         // 2. 寻找付费的总体积 m3
         float totalWeight = totalWeight(shipmentIds, FeeType.oceanfreight());
-        Logger.info("MetricShipCostService.seaCost.1: %s, %s", StringUtils.join(shipmentIds, ","), totalSeaFee);
+        Logger.info("MetricShipCostService.seaCost.1: %s, %s", StringUtils.join(shipmentIds, ","), totalWeight);
 
         // 3. 找出单位体积的运费. 总费用 / 总体积数
         float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;

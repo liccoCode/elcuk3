@@ -138,11 +138,16 @@ public class SellingRecordCaculateJob extends Job {
                 record.procureNumberSum = procureCostAndQty._2;
 
                 if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                    Logger.info("SellingRecordCaculateJob.metric %s:  %s\n\r%s", sid, record, yesterdayRcd);
+                    Logger.info("SellingRecordCaculateJob.metric.v2 %s:  today:%s, yestoday:%s",
+                            sid, record, yesterdayRcd);
                 }
                 // 海运运输成本
                 Float seaCostPrice = seaCost.get(sid);
                 record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
+                if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
+                    Logger.info("SellingRecordCaculateJob.seaCost.v2 %s: %s %s; %s",
+                            sid, seaCostPrice, yesterdayRcd.seaCost, seaCost);
+                }
 
                 // 空运运输成本
                 Float airCostPrice = airCost.get(sid);
