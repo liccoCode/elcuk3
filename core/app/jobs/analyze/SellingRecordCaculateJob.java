@@ -137,17 +137,9 @@ public class SellingRecordCaculateJob extends Job {
                 record.procureCost = procureCostAndQty._1;
                 record.procureNumberSum = procureCostAndQty._2;
 
-                if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                    Logger.info("SellingRecordCaculateJob.metric.v2 %s:  today:%s, yestoday:%s",
-                            sid, record, yesterdayRcd);
-                }
                 // 海运运输成本
                 Float seaCostPrice = seaCost.get(sid);
                 record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
-                if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                    Logger.info("SellingRecordCaculateJob.seaCost.v2 %s: %s %s; %s",
-                            sid, seaCostPrice, yesterdayRcd.seaCost, seaCost);
-                }
 
                 // 空运运输成本
                 Float airCostPrice = airCost.get(sid);
@@ -155,7 +147,7 @@ public class SellingRecordCaculateJob extends Job {
 
                 // 快递运输成本
                 Float expressCostPrice = expressCost.get(sid);
-                record.seaCost = expressCostPrice == null ? yesterdayRcd.seaCost : expressCostPrice;
+                record.expressCost = expressCostPrice == null ? yesterdayRcd.expressCost : expressCostPrice;
 
                 // VAT 的费用
                 record.dutyAndVAT =

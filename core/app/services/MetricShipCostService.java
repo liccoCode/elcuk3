@@ -122,7 +122,8 @@ public class MetricShipCostService {
 
         // 3. 找出单位体积的运费. 总费用 / 总体积数
         float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
-        if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "','"));
+        if(totalWeight == 0 && shipmentIds.isEmpty())
+            Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "'," + "'"));
 
         // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
         Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
@@ -132,11 +133,6 @@ public class MetricShipCostService {
         for(String sid : sellingGroup.keySet()) {
             Map<String, Float> group = sellingGroup.get(sid);
             sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
-            if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                Logger.info("MetricShipCostService.seaCost.2 %s: %s / %s = %s, %s * %s = %s", sid,
-                        totalSeaFee, totalWeight, perCubicMeter, group.get("m3"), perCubicMeter,
-                        sellingSeaCost.get(sid));
-            }
         }
 
         return sellingSeaCost;
@@ -257,7 +253,8 @@ public class MetricShipCostService {
 
         // 3. 找出单位重量的运费. 总费用 / 总重量
         float perKilogram = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
-        if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 airfee 费用?", StringUtils.join(shipmentIds, "','"));
+        if(totalWeight == 0 && shipmentIds.isEmpty())
+            Logger.warn("运输单 ['%s'] 中没有 airfee 费用?", StringUtils.join(shipmentIds, "','"));
 
         // 4. 根据 selling 自己的 m3 与 perKg 计算出每个 selling 的运费
         Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
@@ -267,10 +264,6 @@ public class MetricShipCostService {
         for(String sid : sellingGroup.keySet()) {
             Map<String, Float> group = sellingGroup.get(sid);
             sellingAirCost.put(sid, group.get("kg") * perKilogram * coefficienta);
-            if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                Logger.info("MetricShipCostService.airfee.2: %s / %s = %s, %s * %s = %s",
-                        totalSeaFee, totalWeight, perKilogram, group.get("kg"), perKilogram, sellingAirCost.get(sid));
-            }
         }
 
         return sellingAirCost;
