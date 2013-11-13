@@ -73,26 +73,20 @@ public class MetricShipCostService {
         return weightRow.get("weight") == null ? 0 : NumberUtils.toFloat(weightRow.get("weight").toString());
     }
 
-    public Map<String, Map<String, Float>> sellingQtyRecordWeightAndVolume(Set<String> shipmentIds) {
+    public Map<String, Map<String, Float>> sellingRecordWeightAndVolume() {
         SqlSelect sellingCubicMeterSql = new SqlSelect()
                 // cm3 -> m3 (/1000*1000*1000)
-                .select("u.selling_sellingId sellingId", "sum(si.qty) qty",
-                        "((p.width * p.heigh * p.lengths) / (1000*1000*1000)) m3",
-                        "p.weight kg")
-                .from("ShipItem si")
-                .leftJoin("Shipment s ON s.id=si.shipment_id")
-                .leftJoin("ProcureUnit u ON u.id=si.unit_id")
-                .leftJoin("Product p ON p.sku=u.product_sku")
-                .where(SqlSelect.whereIn("s.id", shipmentIds))
-                .groupBy("u.selling_sellingId");
-        List<Map<String, Object>> rows = DBUtils.
-                rows(sellingCubicMeterSql.toString(), sellingCubicMeterSql.getParams().toArray());
+                .select("s.sellingId", "((p.width * p.heigh * p.lengths) / (1000*1000*1000)) m3", "p.weight kg")
+                .from("Selling s")
+                .leftJoin("Listing l ON l.listingId=s.listing_listingId")
+                .leftJoin("Product p ON p.sku=l.product_sku")
+                .groupBy("s.sellingid");
+        List<Map<String, Object>> rows = DBUtils.rows(sellingCubicMeterSql.toString());
 
         Map<String, Map<String, Float>> sellingGroup = new HashMap<String, Map<String, Float>>();
         for(Map<String, Object> row : rows) {
             if(row.get("sellingId") == null) continue;
             Map<String, Float> qtyWeightAndVolumn = new HashMap<String, Float>();
-            qtyWeightAndVolumn.put("qty", row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString()));
             qtyWeightAndVolumn.put("m3", row.get("m3") == null ? 0 : NumberUtils.toFloat(row.get("m3").toString()));
             qtyWeightAndVolumn.put("kg", row.get("kg") == null ? 0 : NumberUtils.toFloat(row.get("kg").toString()));
             sellingGroup.put(row.get("sellingId").toString(), qtyWeightAndVolumn);
@@ -123,13 +117,14 @@ public class MetricShipCostService {
 
         // 2. 寻找付费的总体积 m3
         float totalWeight = totalWeight(shipmentIds, FeeType.oceanfreight());
+        Logger.info("MetricShipCostService.seaCost.1: %s, %s", StringUtils.join(shipmentIds, ","), totalSeaFee);
 
         // 3. 找出单位体积的运费. 总费用 / 总体积数
         float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
         if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "','"));
 
         // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
-        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
+        Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
         Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
         float coefficienta = 1; // 从真实体积到运输体积需要一个系数用来计算抛货, 用来抵消装箱多余的空间差
 
@@ -137,7 +132,7 @@ public class MetricShipCostService {
             Map<String, Float> group = sellingGroup.get(sid);
             sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
             if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                Logger.info("MetricShipCostService.seaCost: %s / %s = %s, %s * %s = %s",
+                Logger.info("MetricShipCostService.seaCost.2 %s: %s / %s = %s, %s * %s = %s", sid,
                         totalSeaFee, totalWeight, perCubicMeter, group.get("m3"), perCubicMeter,
                         sellingSeaCost.get(sid));
             }
@@ -257,13 +252,14 @@ public class MetricShipCostService {
 
         // 2. 寻找付费的总体积 m3
         float totalWeight = totalWeight(shipmentIds, FeeType.airFee());
+        Logger.info("MetricShipCostService.airFee.1: %s, %s", StringUtils.join(shipmentIds, ","), totalSeaFee);
 
         // 3. 找出单位重量的运费. 总费用 / 总重量
         float perKilogram = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
         if(totalWeight == 0) Logger.warn("运输单 ['%s'] 中没有 airfee 费用?", StringUtils.join(shipmentIds, "','"));
 
         // 4. 根据 selling 自己的 m3 与 perKg 计算出每个 selling 的运费
-        Map<String, Map<String, Float>> sellingGroup = sellingQtyRecordWeightAndVolume(shipmentIds);
+        Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
         Map<String, Float> sellingAirCost = new HashMap<String, Float>();
         float coefficienta = 1; // 从真实重量到运输重量需要一个系数用来计算抛货, 用来抵消装箱多余的重量差
 
@@ -271,7 +267,7 @@ public class MetricShipCostService {
             Map<String, Float> group = sellingGroup.get(sid);
             sellingAirCost.put(sid, group.get("kg") * perKilogram * coefficienta);
             if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
-                Logger.info("MetricShipCostService.airfee: %s / %s = %s, %s * %s = %s",
+                Logger.info("MetricShipCostService.airfee.2: %s / %s = %s, %s * %s = %s",
                         totalSeaFee, totalWeight, perKilogram, group.get("kg"), perKilogram, sellingAirCost.get(sid));
             }
         }

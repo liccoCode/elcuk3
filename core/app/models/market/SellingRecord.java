@@ -224,8 +224,6 @@ public class SellingRecord extends GenericModel {
     public float costProfitRatio() {
         if(this.procureAndShipCost() == 0) return 0;
         if(this.units == 0) return 0;
-        Logger.info("Sid: %s , Profit: %s, ShipCost: %s", this.selling.sellingId, this.profit,
-                this.procureAndShipCost());
         return this.profit / this.procureAndShipCost();
     }
 

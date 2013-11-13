@@ -116,7 +116,6 @@ public class SellingRecordCaculateJob extends Job {
                 String sid = selling.sellingId;
                 SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
-                Logger.info("SellingRecordCaculateJob.metric: %s, %s", record.date, yesterdayRcd.date);
                 // 销售价格
                 record.salePrice =
                         selling.aps.salePrice == null ? yesterdayRcd.salePrice : selling.salePriceWithCurrency();
@@ -138,6 +137,9 @@ public class SellingRecordCaculateJob extends Job {
                 record.procureCost = procureCostAndQty._1;
                 record.procureNumberSum = procureCostAndQty._2;
 
+                if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
+                    Logger.info("SellingRecordCaculateJob.metric %s:  %s\n\r%s", sid, record, yesterdayRcd);
+                }
                 // 海运运输成本
                 Float seaCostPrice = seaCost.get(sid);
                 record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
