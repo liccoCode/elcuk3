@@ -96,19 +96,44 @@ public class SellingRecordCaculateJob extends Job {
         if(Play.mode.isProd()) sellings = Selling.findAll();
         else sellings = Selling.find("sellingId like '80%'").fetch();
 
+        long begin = System.currentTimeMillis();
         Map<String, Integer> sellingUnits = salesService.sellingUnits(dateTime.toDate());
+        Logger.info("SellingUnit: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+
         Map<String, Integer> sellOrders = salesService.sellingOrders(dateTime.toDate());
+        Logger.info("SellingOrders: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+
         Map<String, Float> sellingSales = salesService.sellingSales(dateTime.toDate(), sellings, sellingUnits);
+        Logger.info("SellingSales: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
 
         Map<String, Float> sellingVATFee = shipCostService.sellingVATFee(dateTime.toDate());
+        Logger.info("SellingVAT: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+
         Map<String, Float> sellingAmzFee = amzService.sellingAmazonFee(dateTime.toDate(), sellings, sellOrders);
+        Logger.info("SellingAmazon: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+
         Map<String, Float> sellingFBAFee = amzService.sellingAmazonFBAFee(dateTime.toDate(), sellings, sellOrders);
+        Logger.info("SellingFBA: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
 
         List<SellingRecord> sellingRecords = new ArrayList<SellingRecord>();
 
         Map<String, Float> seaCost = shipCostService.seaCost(dateTime.toDate());
+        Logger.info("SellingSeaCost: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+
         Map<String, Float> airCost = shipCostService.airCost(dateTime.toDate());
+        Logger.info("SellingAirCost: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
+
         Map<String, Float> expressCost = shipCostService.expressCost(dateTime.toDate());
+        Logger.info("SellingExpressCost: %s ms", System.currentTimeMillis() - begin);
+        begin = System.currentTimeMillis();
 
 
         for(Selling selling : sellings) {
@@ -127,9 +152,11 @@ public class SellingRecordCaculateJob extends Job {
                 // 订单量
                 record.orders = sellOrders.get(sid) == null ? 0 : sellOrders.get(sid);
                 // amz 扣费
-                record.amzFee = record.totalToSingle(Math.abs(sellingAmzFee.get(sid)));
+                Float amzFeeF = sellingAmzFee.get(sid);
+                record.amzFee = record.totalToSingle(Math.abs(amzFeeF == null ? 0 : amzFeeF));
                 // amzFba 扣费
-                record.fbaFee = record.totalToSingle(Math.abs(sellingFBAFee.get(sid)));
+                Float fbaFeeF = sellingFBAFee.get(sid);
+                record.fbaFee = record.totalToSingle(Math.abs(fbaFeeF == null ? 0 : fbaFeeF));
                 // 实际收入 = 销量 - amazon 扣费
                 record.income = record.totalToSingle(record.sales) - record.amzFee;
 
@@ -166,6 +193,7 @@ public class SellingRecordCaculateJob extends Job {
                 Logger.error("SellingRecordCaculateJob:" + Webs.S(e));
             }
         }
+        Logger.info("Selling Loop: %s ms", System.currentTimeMillis() - begin);
         return sellingRecords;
     }
 

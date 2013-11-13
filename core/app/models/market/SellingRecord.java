@@ -210,12 +210,13 @@ public class SellingRecord extends GenericModel {
     public float shipCost(Float seaCost, String name) {
         SqlSelect lastSeaCost = new SqlSelect()
                 .select(name + " lastValue").from("SellingRecord")
-                .where("selling_sellingId").param(this.selling.sellingId)
+                .where("selling_sellingId=?").param(this.selling.sellingId)
                 .where(name + ">0")
                 .orderBy("date DESC")
                 .limit(1);
         Map<String, Object> row = DBUtils.row(lastSeaCost.toString(), lastSeaCost.getParams().toArray());
-        float lastValue = NumberUtils.toFloat(row.get("lastValue").toString());
+        Object lastValueObj = row.get("lastValue");
+        float lastValue = lastValueObj == null ? 0 : NumberUtils.toFloat(lastValueObj.toString());
         if(seaCost == null) return lastValue;
         return (seaCost + lastValue) / 2;
     }
@@ -226,7 +227,7 @@ public class SellingRecord extends GenericModel {
     public float totalToSingle(Float totalFee) {
         if(this.units == null || this.units < 0) throw new FastRuntimeException("请先计算 units 的值");
         if(totalFee == null) return 0;
-        if(this.units == 0 ) return 0;
+        if(this.units == 0) return 0;
         return totalFee / this.units;
     }
 
@@ -246,6 +247,7 @@ public class SellingRecord extends GenericModel {
      */
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
+        if(this.units == 0) return 0;
         return (this.mergeToShipCost() + this.dutyAndVAT + this.procureCost);
     }
 

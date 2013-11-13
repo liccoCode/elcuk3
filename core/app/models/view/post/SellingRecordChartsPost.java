@@ -34,7 +34,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         this.lineType = lineType;
     }
 
-    public Date from = DateTime.now().minusMonths(1).toDate();
+    public Date from = DateTime.now().withTimeAtStartOfDay().minusMonths(1).toDate();
     public Date to = new Date();
 
     public String market;
@@ -76,6 +76,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
          * 14. 关税 VAT
          */
         sql.select(
+                "sr.date",
                 // 费用
                 "sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.amzFee * sr.units) amzFee",
                 "sum(sr.fbaFee * sr.units) fbaFee", "sum(sr.income * sr.units) income",
@@ -86,7 +87,10 @@ public class SellingRecordChartsPost extends Post<HighChart> {
                 "sum(sr.procureCost * sr.units) procureCost", "sum(sr.airCost * sr.units) airCost",
                 "sum(sr.expressCost * sr.units) expressCost", "sum(sr.seaCost * sr.units) seaCost",
                 "sum(sr.dutyAndVAT * sr.units) dutyAndVAT"
-        ).from("SellingRecord sr");
+        ).from("SellingRecord sr")
+                .where("date>=?").param(this.from)
+                .where("date<?").param(new DateTime(this.to).plusDays(1).withTimeAtStartOfDay().toDate())
+                .groupBy("sr.date");
 
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
