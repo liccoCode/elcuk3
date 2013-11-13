@@ -1,7 +1,6 @@
 package models.view.post;
 
 import helper.DBUtils;
-import helper.Dates;
 import models.market.M;
 import models.market.SellingRecord;
 import models.view.highchart.HighChart;
@@ -11,6 +10,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -34,10 +34,11 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         this.lineType = lineType;
     }
 
-    public Date from = DateTime.now().minusMonths(1).toDate();
+    public Date from = DateTime.now().withTimeAtStartOfDay().minusMonths(1).toDate();
     public Date to = new Date();
 
     public String market;
+    public String categoryId;
 
     public String lineType = Series.LINE;
 
@@ -54,22 +55,51 @@ public class SellingRecordChartsPost extends Post<HighChart> {
     @Override
     public F.T2<String, List<Object>> params() {
         SqlSelect sql = new SqlSelect();
-        sql.select("sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.income) income",
-                "sum(sr.profit) profit", "sum(sr.amzFee) amzFee", "sum(sr.fbaFee) fbaFee",
-                "sum(sr.procureNumberSum) procureNumberSum", "sum(sr.procureCost) procureCost",
-                "sum(sr.expressKilogram) expressKilogram", "sum(sr.expressCost) expressCost",
-                "sum(sr.airCost) airCost", "sum(sr.seaCost) seaCost",
-                "avg(sr.salePrice) salePrice");
+        // ------- 汇总曲线 ----------
+        /**
+         * 0. 销售价格 (单个才出现)
+         * --- 费用 ----
+         * 1. 销售额
+         * 2. 销量
+         * 4. amazon 收费
+         * 5. fba 收费
+         * 6. 实际收入
+         * --- 利润 ---
+         * 7. 利润
+         * 8. 成本利润率
+         * 9. 销售利润率
+         * --- 成本 ---
+         * 10. 采购成本
+         * 11. 空运成本
+         * 12. 快递成本
+         * 13. 海运成本
+         * 14. 关税 VAT
+         */
+        sql.select(
+                "sr.date",
+                // 费用
+                "sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.amzFee * sr.units) amzFee",
+                "sum(sr.fbaFee * sr.units) fbaFee", "sum(sr.income * sr.units) income",
+                // 利润
+                "sum(sr.profit * sr.units) profit", "avg(sr.costProfitRatio) costProfitRatio",
+                "avg(sr.saleProfitRatio) saleProfitRatio",
+                // 成本
+                "sum(sr.procureCost * sr.units) procureCost", "sum(sr.airCost * sr.units) airCost",
+                "sum(sr.expressCost * sr.units) expressCost", "sum(sr.seaCost * sr.units) seaCost",
+                "sum(sr.dutyAndVAT * sr.units) dutyAndVAT"
+        ).from("SellingRecord sr")
+                .where("date>=?").param(this.from)
+                .where("date<?").param(new DateTime(this.to).plusDays(1).withTimeAtStartOfDay().toDate())
+                .groupBy("sr.date");
+
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }
-        this.whereLineType(sql);
-        // from,to 会再 whereLineType 中改变
-        sql.from("SellingRecord sr")
-                .where("sr.date>=?").param(Dates.morning(this.from))
-                .where("sr.date<=?").params(Dates.night(this.to));
-        this.whereType(sql);
-        //"l.product_sku,
+
+        if(StringUtils.isNotBlank(this.categoryId)) {
+            sql.where(String.format("sr.selling_sellingId like '%s%%'", this.categoryId));
+        }
+
         return new F.T2<String, List<Object>>(sql.toString(), sql.getParams());
     }
 
@@ -77,75 +107,56 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return "column".equals(this.lineType);
     }
 
-    private void whereLineType(SqlSelect sql) {
-        if(StringUtils.isBlank(this.lineType) || "line".equals(this.lineType)) {
-            sql.select("sr.date").groupBy("date");
-
-        } else if(isColumn()) {
-            this.to = new Date();
-            this.from = new DateTime(this.to).minusMonths(12).toDate();
-            sql.select("date_format(sr.date, '%Y-%m-01') as date")
-                    .groupBy("date_format(sr.date, '%Y-%m')");
-        }
-    }
-
-    private void whereType(SqlSelect sql) {
-        if("selling".equals(this.type)) {
-            if(StringUtils.isNotBlank(this.val)) {
-                sql.select("sr.selling_sellingId as sellingId")
-                        .where("sr.selling_sellingId=?").param(this.val);
-            }
-        } else if("sku".equals(this.type)) {
-            if(StringUtils.isNotBlank(this.val)) {
-                sql.select("l.product_sku as sku")
-                        .leftJoin("Selling s ON s.sellingId=sr.selling_sellingId")
-                        .leftJoin("Listing l ON l.listingId=s.listing_listingId")
-                        .where("l.product_sku=?").param(this.val);
-            }
-        } else if("category".equals(this.type)) {
-            if(StringUtils.isNotBlank(this.val)) {
-                sql.select("p.category_categoryId as categoryId")
-                        .leftJoin("Selling s ON s.sellingId=sr.selling_sellingId")
-                        .leftJoin("Listing l ON l.listingId=s.listing_listingId")
-                        .leftJoin("Product p ON p.sku=l.product_sku")
-                        .where("p.category_categoryId=?").param(this.val);
-            }
-        }
-    }
-
-
     @Override
     @SuppressWarnings("unchecked")
     public List<HighChart> query() {
         F.T2<String, List<Object>> t2 = this.params();
         List<Map<String, Object>> rows = DBUtils.rows(t2._1, t2._2.toArray());
         HighChart chart;
-        if(isColumn()) chart = new HighChart(Series.COLUMN);
+        if(isColumn()) throw new FastRuntimeException("暂时还不支持 Column 柱状图.");
         else chart = new HighChart(Series.LINE);
         // 将各自曲线的计算分别打散到各自的方法中, 虽然便利多次, 方便权限控制
 
-        // 销量方面
-        this.salePrice(chart, rows);
+        /**
+         * 0. 销售价格 (单个才出现)
+         * --- 费用 ----
+         * 1. 销售额
+         * 2. 销量
+         * 4. amazon 收费
+         * 5. fba 收费
+         * 6. 实际收入
+         * --- 利润 ---
+         * 7. 利润
+         * 8. 成本利润率
+         * 9. 销售利润率
+         * --- 成本 ---
+         * 10. 采购成本
+         * 11. 空运成本
+         * 12. 快递成本
+         * 13. 海运成本
+         * 14. 关税 VAT
+         */
+
+        // 费用
+//        this.salePrice(chart, rows);
         this.salesSeries(chart, rows);
         this.unitsSeries(chart, rows);
+        this.amzFeeSeries(chart, rows);
+        this.amzFbaFeeSeries(chart, rows);
+        this.incomeSeries(chart, rows);
 
-        // 利润方面
+        // 利润
         this.profitSeries(chart, rows);
         this.costProfitRatioSeries(chart, rows);
         this.saleProfitRatioSeries(chart, rows);
-        this.incomeSeries(chart, rows);
 
-        // 成本方面
-        this.shipCostSeries(chart, rows);
+        // 成本
+        this.procureCostSeries(chart, rows);
         this.airCost(chart, rows);
         this.expressCost(chart, rows);
         this.seaCost(chart, rows);
-        this.procureCostSeries(chart, rows);
+        this.shipCostSeries(chart, rows);
 
-        // Amazon fee 方面
-        this.amzFeeSeries(chart, rows);
-        this.amzFbaFeeSeries(chart, rows);
-        this.amzFeeRatioSeries(chart, rows);
         return Arrays.asList(chart);
     }
 
@@ -210,12 +221,8 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float profit = NumberUtils.toFloat(row.get("profit").toString());
-                float units = NumberUtils.toInt(row.get("units").toString());
-                float shipCost = NumberUtils.toFloat(row.get("expressCost").toString()) * units;
-                float procureCost = NumberUtils.toFloat(row.get("procureCost").toString()) * units;
                 highChart.series("成本利润率").yAxis(1)
-                        .add(date, (shipCost + procureCost == 0) ? 0 : (profit / (shipCost + procureCost)));
+                        .add(date, NumberUtils.toFloat(row.get("costProfitRatio").toString()));
             }
         });
     }
@@ -228,9 +235,8 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         return rows(highChart, rows, new Callback() {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float profit = NumberUtils.toFloat(row.get("profit").toString());
-                float sales = NumberUtils.toFloat(row.get("sales").toString());
-                highChart.series("销售利润率").yAxis(1).add(date, (sales == 0) ? 0 : (profit / sales));
+                highChart.series("销售利润率").yAxis(1)
+                        .add(date, NumberUtils.toFloat(row.get("saleProfitRatio").toString()));
             }
         });
     }
@@ -324,19 +330,6 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         });
     }
 
-    /**
-     * Amazon 收费比率
-     */
-    private HighChart amzFeeRatioSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float sales = NumberUtils.toFloat(row.get("sales").toString());
-                float amzFee = NumberUtils.toFloat(row.get("amzFee").toString());
-                highChart.series("Amazon 收费比率").yAxis(1).add(date, sales == 0 ? 0 : (amzFee / sales));
-            }
-        });
-    }
 
     /**
      * Amazon FBA 收费曲线

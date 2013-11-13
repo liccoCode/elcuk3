@@ -58,11 +58,11 @@ $ ->
     chartType = $btn.parent().prev().attr('id')
     hideSeries = switch $btn.text()
       when '成本图'
-        ['运输成本', '采购成本', '快递成本', '海运成本', '空运成本']
+        ['运输成本', '采购成本', '空运成本', '快递成本', '海运成本', '关税 VAT']
       when '利润率图'
-        ['成本利润率', '销售利润率', 'Amazon 收费比率']
+        ['利润', '成本利润率', '销售利润率']
       else
-        ['销售额', '利润', '实际收入', 'Amazon 收费', 'FBA 收费', '销量']
+        ['销售额', '销量', 'Amazon 收费', 'FBA 收费', '实际收入']
     _.each($("##{chartType}").highcharts().series, (v) ->
       if v.name in hideSeries
         v.show()

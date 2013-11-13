@@ -60,6 +60,7 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     @SuppressWarnings("unchecked")
     public List<SellingRecord> records() {
+        // TODO 搜索页面下方出现的 table 中的数据需要修改
         List<SellingRecord> records = Cache.get(Caches.SELLINGRECORD, List.class);
         if(records == null) {
             if(!SellingRecordCaculateJob.isRunning())

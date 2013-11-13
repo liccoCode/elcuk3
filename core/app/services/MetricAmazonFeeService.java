@@ -1,5 +1,6 @@
 package services;
 
+import helper.Caches;
 import helper.DBUtils;
 import helper.Dates;
 import models.finance.FeeType;
@@ -8,6 +9,7 @@ import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.cache.Cache;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
@@ -91,13 +93,23 @@ public class MetricAmazonFeeService {
      * 查询某天销售中, 每个 Selling 所涉及的 OrderId 是哪些;
      * 不同的市场需要拥有不同的时间段
      */
+    @SuppressWarnings("unchecked")
     public Map<String, List<String>> oneDaySellingOrderIds(Date date) {
-        Map<String, List<String>> sellingOrders = new HashMap<String, List<String>>();
-        for(M m : M.values()) {
-            if(m.isEbay()) continue;
-            sellingOrders.putAll(oneDaySellingOrderIds(date, m));
+        String cacheKey = Caches.Q.cacheKey("oneDaySellingOrderIds", date);
+        Map<String, List<String>> sellingOrders = Cache.get(cacheKey, Map.class);
+        if(sellingOrders != null) return sellingOrders;
+        synchronized(cacheKey.intern()) {
+            sellingOrders = Cache.get(cacheKey, Map.class);
+            if(sellingOrders != null) return sellingOrders;
+
+            sellingOrders = new HashMap<String, List<String>>();
+            for(M m : M.values()) {
+                if(m.isEbay()) continue;
+                sellingOrders.putAll(oneDaySellingOrderIds(date, m));
+            }
+            Cache.add(cacheKey, sellingOrders, "3mn");
         }
-        return sellingOrders;
+        return Cache.get(cacheKey, Map.class);
     }
 
     public Map<String, List<String>> oneDaySellingOrderIds(Date date, M market) {
