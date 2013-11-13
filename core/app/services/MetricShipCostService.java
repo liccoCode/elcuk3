@@ -136,6 +136,11 @@ public class MetricShipCostService {
         for(String sid : sellingGroup.keySet()) {
             Map<String, Float> group = sellingGroup.get(sid);
             sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
+            if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
+                Logger.info("MetricShipCostService.seaCost: %s / %s = %s, %s * %s = %s",
+                        totalSeaFee, totalWeight, perCubicMeter, group.get("m3"), perCubicMeter,
+                        sellingSeaCost.get(sid));
+            }
         }
 
         return sellingSeaCost;
@@ -265,6 +270,10 @@ public class MetricShipCostService {
         for(String sid : sellingGroup.keySet()) {
             Map<String, Float> group = sellingGroup.get(sid);
             sellingAirCost.put(sid, group.get("kg") * perKilogram * coefficienta);
+            if("73SMS4-BSVIEW,694622177518|A_DE|2".equals(sid)) {
+                Logger.info("MetricShipCostService.airfee: %s / %s = %s, %s * %s = %s",
+                        totalSeaFee, totalWeight, perKilogram, group.get("kg"), perKilogram, sellingAirCost.get(sid));
+            }
         }
 
         return sellingAirCost;

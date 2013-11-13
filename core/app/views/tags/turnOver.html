@@ -1,5 +1,5 @@
 *{_turnOver: turnOver 值}*
-#{if _turnOver < 8 && _turnOver >= 0}
+#{if _turnOver < 30 && _turnOver >= 0}
 <td rel="popover" title="估计卖完的时间" data-content="${_turnOver.intValue().dayAfter()}" placement="left" width="auto" style="color:red;">${_turnOver.format("#.##")}</td>
 #{/if}
 #{elseif _turnOver <= 0}

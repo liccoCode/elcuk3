@@ -43,12 +43,12 @@ public class SellingRecordCaculateJob extends Job {
     private boolean isCache = true;
 
     public SellingRecordCaculateJob() {
-        this.dateTime = DateTime.now();
+        this.dateTime = DateTime.now().withTimeAtStartOfDay();
         this.isCache = true;
     }
 
     public SellingRecordCaculateJob(DateTime dateTime, boolean isCache) {
-        this.dateTime = dateTime;
+        this.dateTime = dateTime.withTimeAtStartOfDay();
         this.isCache = isCache;
     }
 
@@ -116,6 +116,7 @@ public class SellingRecordCaculateJob extends Job {
                 String sid = selling.sellingId;
                 SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
+                Logger.info("SellingRecordCaculateJob.metric: %s, %s", record.date, yesterdayRcd.date);
                 // 销售价格
                 record.salePrice =
                         selling.aps.salePrice == null ? yesterdayRcd.salePrice : selling.salePriceWithCurrency();
