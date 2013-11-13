@@ -137,6 +137,8 @@ public class SellingRecordCaculateJob extends Job {
                 record.procureCost = procureCostAndQty._1;
                 record.procureNumberSum = procureCostAndQty._2;
 
+                // TODO: 运输成本的思考: 真的需要每天记录一个值吗? 这样记录的曲线有意义吗?
+
                 // 海运运输成本
                 Float seaCostPrice = seaCost.get(sid);
                 record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
@@ -150,8 +152,7 @@ public class SellingRecordCaculateJob extends Job {
                 record.expressCost = expressCostPrice == null ? yesterdayRcd.expressCost : expressCostPrice;
 
                 // VAT 的费用
-                record.dutyAndVAT =
-                        sellingVATFee.get(sid) == null ? yesterdayRcd.dutyAndVAT : sellingVATFee.get(sid);
+                record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
 
                 // 总利润 = 实际收入 - 采购成本 - 运输成本 - VAT
                 record.profit = record.income - record.procureAndShipCost();
