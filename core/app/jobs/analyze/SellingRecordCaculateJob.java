@@ -116,21 +116,22 @@ public class SellingRecordCaculateJob extends Job {
                 String sid = selling.sellingId;
                 SellingRecord record = SellingRecord.oneDay(sid, dateTime.toDate());
                 SellingRecord yesterdayRcd = SellingRecord.oneDay(sid, dateTime.minusDays(1).toDate());
-                // 销售价格
-                record.salePrice =
-                        selling.aps.salePrice == null ? yesterdayRcd.salePrice : selling.salePriceWithCurrency();
-                // amz 扣费
-                record.amzFee = sellingAmzFee.get(sid) == null ? 0 : Math.abs(sellingAmzFee.get(sid));
-                // amzFba 扣费
-                record.fbaFee = sellingFBAFee.get(sid) == null ? 0 : Math.abs(sellingFBAFee.get(sid));
                 // 销量
                 record.units = sellingUnits.get(sid) == null ? 0 : sellingUnits.get(sid);
                 // 销售额
                 record.sales = sellingSales.get(sid) == null ? 0 : sellingSales.get(sid);
+                // 销售价格
+                record.salePrice = selling.aps.salePrice == null ?
+                        (record.units == 0 ? yesterdayRcd.salePrice : record.sales / record.units)
+                        : selling.salePriceWithCurrency();
                 // 订单量
                 record.orders = sellOrders.get(sid) == null ? 0 : sellOrders.get(sid);
+                // amz 扣费
+                record.amzFee = record.totalToSingle(Math.abs(sellingAmzFee.get(sid)));
+                // amzFba 扣费
+                record.fbaFee = record.totalToSingle(Math.abs(sellingFBAFee.get(sid)));
                 // 实际收入 = 销量 - amazon 扣费
-                record.income = record.sales - record.amzFee;
+                record.income = record.totalToSingle(record.sales) - record.amzFee;
 
                 F.T2<Float, Integer> procureCostAndQty = pcCostService.sellingProcreCost(selling, dateTime.toDate());
                 // 采购成本
@@ -140,21 +141,18 @@ public class SellingRecordCaculateJob extends Job {
                 // TODO: 运输成本的思考: 真的需要每天记录一个值吗? 这样记录的曲线有意义吗?
 
                 // 海运运输成本
-                Float seaCostPrice = seaCost.get(sid);
-                record.seaCost = seaCostPrice == null ? yesterdayRcd.seaCost : seaCostPrice;
+                record.seaCost = record.shipCost(seaCost.get(sid), "seaCost");
 
                 // 空运运输成本
-                Float airCostPrice = airCost.get(sid);
-                record.airCost = airCostPrice == null ? yesterdayRcd.airCost : airCostPrice;
+                record.airCost = record.shipCost(airCost.get(sid), "airCost");
 
                 // 快递运输成本
-                Float expressCostPrice = expressCost.get(sid);
-                record.expressCost = expressCostPrice == null ? yesterdayRcd.expressCost : expressCostPrice;
+                record.expressCost = record.shipCost(expressCost.get(sid), "expressCost");
 
                 // VAT 的费用
-                record.dutyAndVAT = sellingVATFee.get(sid) == null ? 0 : sellingVATFee.get(sid);
+                record.dutyAndVAT = record.shipCost(sellingVATFee.get(sid), "dutyandvat");
 
-                // 总利润 = 实际收入 - 采购成本 - 运输成本 - VAT
+                // 单个利润 = 实际收入 - 采购成本 - 运输成本 - VAT
                 record.profit = record.income - record.procureAndShipCost();
                 record.costProfitRatio = record.costProfitRatio();
                 record.saleProfitRatio = record.saleProfitRatio();

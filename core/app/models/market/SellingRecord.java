@@ -9,10 +9,12 @@ import helper.*;
 import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
@@ -105,7 +107,7 @@ public class SellingRecord extends GenericModel {
     public float sales = 0;
 
     /**
-     * 实际收入 = 销售额(包括 shipping fee) - amazon 扣费 (包括 shipping refuned)
+     * 实际收入 = 单个销售额(包括 shipping fee) - amazon 扣费 (包括 shipping refuned)
      */
     public float income = 0;
 
@@ -169,12 +171,12 @@ public class SellingRecord extends GenericModel {
     public float dutyAndVAT = 0;
 
     /**
-     * 利润 = 销售额 - (总)采购成本 - (总)运输成本
+     * 单个利润 = 销售额 - 采购成本 - 运输成本
      */
     public float profit = 0;
 
     /**
-     * 成本利润率 = 利润 / ((总)采购成本 + (总)运输成本)
+     * 成本利润率 = 利润 / (采购成本 + 运输成本)
      */
     public float costProfitRatio = 0;
 
@@ -200,6 +202,35 @@ public class SellingRecord extends GenericModel {
     public Date date = new Date();
 
     /**
+     * 使用平均值的方式对成本等进行均等化处理;
+     * ps: 为什么不和采购成本计算一样, 使用长时间的平均值?
+     * 答: 因为运输等成本的计算无法获取最细节的运输量, 都是根据体重,重量均等下来的.
+     * 同时, 按照现在的算法进行如此的计算, 难度相当大.
+     */
+    public float shipCost(Float seaCost, String name) {
+        SqlSelect lastSeaCost = new SqlSelect()
+                .select(name + " lastValue").from("SellingRecord")
+                .where("selling_sellingId").param(this.selling.sellingId)
+                .where(name + ">0")
+                .orderBy("date DESC")
+                .limit(1);
+        Map<String, Object> row = DBUtils.row(lastSeaCost.toString(), lastSeaCost.getParams().toArray());
+        float lastValue = NumberUtils.toFloat(row.get("lastValue").toString());
+        if(seaCost == null) return lastValue;
+        return (seaCost + lastValue) / 2;
+    }
+
+    /**
+     * 将计算出的费用根据 units 数量换算成单个的费用
+     */
+    public float totalToSingle(Float totalFee) {
+        if(this.units == null || this.units < 0) throw new FastRuntimeException("请先计算 units 的值");
+        if(totalFee == null) return 0;
+        if(this.units == 0 ) return 0;
+        return totalFee / this.units;
+    }
+
+    /**
      * 根据已经计算好的 快递/空运/海运 运费, 用于估计计算物流成本
      *
      * @return
@@ -209,17 +240,17 @@ public class SellingRecord extends GenericModel {
     }
 
     /**
-     * 统计采购物流的总成本(包括 VAT)
+     * 统计采购物流的单个成本(包括 VAT)
      *
      * @return
      */
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
-        return (this.mergeToShipCost() + this.dutyAndVAT + this.procureCost) * this.units;
+        return (this.mergeToShipCost() + this.dutyAndVAT + this.procureCost);
     }
 
     /**
-     * 计算成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
+     * 计算单个成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
      */
     public float costProfitRatio() {
         if(this.procureAndShipCost() == 0) return 0;
@@ -228,12 +259,13 @@ public class SellingRecord extends GenericModel {
     }
 
     /**
-     * 销售利润率 = 利润 / 销售额
+     * 单个销售利润率 = 利润 / 销售额
      */
     public float saleProfitRatio() {
         if(this.sales == 0) return 0;
-        return this.profit / this.sales;
+        return this.profit / (this.sales / this.units);
     }
+
 
     /**
      * 通过 Amazon 的 BusinessReports 产生一组 SellingRecord, 以便更新或者是记录; 返回的 Selling 如果数据库中有则是持久化的, 数据库中没有则是新的
