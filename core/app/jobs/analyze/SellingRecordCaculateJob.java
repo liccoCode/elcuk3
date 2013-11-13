@@ -154,7 +154,9 @@ public class SellingRecordCaculateJob extends Job {
 
                 // 单个利润 = 实际收入 - 采购成本 - 运输成本 - VAT
                 record.profit = record.income - record.procureAndShipCost();
+                // 成本利润率
                 record.costProfitRatio = record.costProfitRatio();
+                // 销售利润率
                 record.saleProfitRatio = record.saleProfitRatio();
                 record.save();
 
