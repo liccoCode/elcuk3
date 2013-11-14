@@ -208,6 +208,7 @@ public class SellingRecord extends GenericModel {
      * 同时, 按照现在的算法进行如此的计算, 难度相当大.
      */
     public float mergeWithLatest(Float currentValue, String name) {
+        if(currentValue == null) currentValue = 0f;
         SqlSelect lastSeaCost = new SqlSelect()
                 .select(name + " lastValue").from("SellingRecord")
                 .where("selling_sellingId=?").param(this.selling.sellingId)
@@ -217,8 +218,10 @@ public class SellingRecord extends GenericModel {
         Map<String, Object> row = DBUtils.row(lastSeaCost.toString(), lastSeaCost.getParams().toArray());
         Object lastValueObj = row.get("lastValue");
         float lastValue = lastValueObj == null ? 0 : NumberUtils.toFloat(lastValueObj.toString());
-        if(currentValue == null) return lastValue;
-        return (currentValue + lastValue) / 2;
+        if(currentValue == 0 && lastValue == 0) return 0; // 当前值为 0, 最后值也为 0 ,那么没得玩就是 0
+        if(currentValue <= 0.001 && lastValue > 0) return lastValue; // 当前值非常小, 最后值不为0 使用最后值
+        if(lastValue < 0.001 && currentValue > 0) return currentValue; // 如果最后一个值非常小, 当前值大于 0 则使用当前值
+        return (currentValue + lastValue) / 2; // 正常使用 (当前值 + 最后值) / 2
     }
 
     /**

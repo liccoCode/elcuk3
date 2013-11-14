@@ -272,7 +272,7 @@ public class MetricShipCostService {
     /**
      * 计算出 oneDay 所有涉及到的 Selling 的 VAT 费用
      * <p/>
-     * 如果 oneDay 没有, 则为 0
+     * 如果当前没有 VAT 费用, 则为空
      *
      * @return
      */
@@ -305,37 +305,39 @@ public class MetricShipCostService {
         }
         // 产出 shipmentIds 与 totalVATFee
 
-        SqlSelect effectSellingSql = new SqlSelect()
-                .select("s.sellingId", "sum(si.qty) qty", "round(sum(si.qty * p.declaredValue), 2) x")
-                .from("Selling s")
-                .leftJoin("ProcureUnit u ON u.selling_sellingId=s.sellingId")
-                .leftJoin("Product p ON p.sku=u.product_sku")
-                .leftJoin("ShipItem si ON si.unit_id=u.id")
-                .leftJoin("Shipment t ON t.id=si.shipment_id")
-                .where(SqlSelect.whereIn("t.id", shipmentIds))
-                .groupBy("s.sellingId");
-
         Map<String, Float> sellingsVAT = new HashMap<String, Float>();
-        Map<String, Float> sellingsX = new HashMap<String, Float>();
-        Map<String, Float> sellingsQty = new HashMap<String, Float>();
-        rows = DBUtils.rows(effectSellingSql.toString(), effectSellingSql.getParams().toArray());
+        if(shipmentIds.size() > 0) {
+            SqlSelect effectSellingSql = new SqlSelect()
+                    .select("s.sellingId", "sum(si.qty) qty", "round(sum(si.qty * p.declaredValue), 2) x")
+                    .from("Selling s")
+                    .leftJoin("ProcureUnit u ON u.selling_sellingId=s.sellingId")
+                    .leftJoin("Product p ON p.sku=u.product_sku")
+                    .leftJoin("ShipItem si ON si.unit_id=u.id")
+                    .leftJoin("Shipment t ON t.id=si.shipment_id")
+                    .where(SqlSelect.whereIn("t.id", shipmentIds))
+                    .groupBy("s.sellingId");
 
-        // (440x + 220x + 124x)[sumX] = (2000)[totalVATFee] -> x = 2.55
-        // 440 * 2.55 / 400[qty] = 2.805 [单个 VAT]
-        float sumX = 0;
-        for(Map<String, Object> row : rows) {
-            if(row.get("sellingId") == null || StringUtils.isBlank(row.get("sellingId").toString())) continue;
-            float nX = row.get("x") == null ? 0 : NumberUtils.toFloat(row.get("x").toString());
-            sumX += nX;
-            sellingsX.put(row.get("sellingId").toString(), nX);
-            sellingsQty.put(row.get("sellingId").toString(),
-                    row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString()));
-        }
-        float x = sumX == 0 ? 0 : (totalVATFee / sumX);
+            Map<String, Float> sellingsX = new HashMap<String, Float>();
+            Map<String, Float> sellingsQty = new HashMap<String, Float>();
+            rows = DBUtils.rows(effectSellingSql.toString(), effectSellingSql.getParams().toArray());
 
-        for(String sid : sellingsX.keySet()) {
-            float qty = sellingsQty.get(sid);
-            sellingsVAT.put(sid, qty == 0 ? 0 : ((x * sellingsX.get(sid)) / qty));
+            // (440x + 220x + 124x)[sumX] = (2000)[totalVATFee] -> x = 2.55
+            // 440 * 2.55 / 400[qty] = 2.805 [单个 VAT]
+            float sumX = 0;
+            for(Map<String, Object> row : rows) {
+                if(row.get("sellingId") == null || StringUtils.isBlank(row.get("sellingId").toString())) continue;
+                float nX = row.get("x") == null ? 0 : NumberUtils.toFloat(row.get("x").toString());
+                sumX += nX;
+                sellingsX.put(row.get("sellingId").toString(), nX);
+                sellingsQty.put(row.get("sellingId").toString(),
+                        row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString()));
+            }
+            float x = sumX == 0 ? 0 : (totalVATFee / sumX);
+
+            for(String sid : sellingsX.keySet()) {
+                float qty = sellingsQty.get(sid);
+                sellingsVAT.put(sid, qty == 0 ? 0 : ((x * sellingsX.get(sid)) / qty));
+            }
         }
 
         return sellingsVAT;
