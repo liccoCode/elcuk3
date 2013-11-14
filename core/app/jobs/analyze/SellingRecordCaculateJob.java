@@ -113,11 +113,11 @@ public class SellingRecordCaculateJob extends Job {
         Logger.info("SellingVAT: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> sellingAmzFee = amzService.sellingAmazonFee(dateTime.toDate(), sellings, sellOrders);
+        Map<String, Float> sellingAmzFee = amzService.sellingAmazonFee(dateTime.toDate(), sellings);
         Logger.info("SellingAmazon: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 
-        Map<String, Float> sellingFBAFee = amzService.sellingAmazonFBAFee(dateTime.toDate(), sellings, sellOrders);
+        Map<String, Float> sellingFBAFee = amzService.sellingAmazonFBAFee(dateTime.toDate(), sellings);
         Logger.info("SellingFBA: %s ms", System.currentTimeMillis() - begin);
         begin = System.currentTimeMillis();
 

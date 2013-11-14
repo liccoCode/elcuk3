@@ -156,6 +156,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
         this.expressCost(chart, rows);
         this.seaCost(chart, rows);
         this.shipCostSeries(chart, rows);
+        this.dutyAndVatSeries(chart, rows);
 
         return Arrays.asList(chart);
     }
@@ -313,6 +314,15 @@ public class SellingRecordChartsPost extends Post<HighChart> {
             @Override
             public void each(HighChart highChart, Date date, Map<String, Object> row) {
                 highChart.series("空运成本").add(date, NumberUtils.toFloat(row.get("airCost").toString()));
+            }
+        });
+    }
+
+    private HighChart dutyAndVatSeries(HighChart highChart, List<Map<String, Object>> rows) {
+        return rows(highChart, rows, new Callback() {
+            @Override
+            public void each(HighChart highChart, Date date, Map<String, Object> row) {
+                highChart.series("关税VAT").add(date, NumberUtils.toFloat(row.get("dutyAndVAT").toString()));
             }
         });
     }

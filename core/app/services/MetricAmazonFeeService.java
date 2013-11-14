@@ -35,14 +35,12 @@ public class MetricAmazonFeeService {
      * 统一起来取  2.8 USD
      * Commission: 按照销售价 13% 取
      */
-    public Map<String, Float> sellingAmazonFee(Date date, List<Selling> sellings, Map<String, Integer> sellingOrders) {
+    public Map<String, Float> sellingAmazonFee(Date date, List<Selling> sellings) {
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
             Map<String, Float> sellingAmzFeeMap = new HashMap<String, Float>();
             for(Selling sell : sellings) {
                 if(sell.aps.salePrice == null) sell.aps.salePrice = 0f;
-                Integer orders = sellingOrders.get(sell.sellingId);
-                if(orders == null) orders = 0;
-                sellingAmzFeeMap.put(sell.sellingId, (2.8f + (sell.aps.salePrice * 0.13f) * orders));
+                sellingAmzFeeMap.put(sell.sellingId, (2.8f + (sell.aps.salePrice * 0.13f)));
             }
             return sellingAmzFeeMap;
         } else {
@@ -68,14 +66,11 @@ public class MetricAmazonFeeService {
      * DE: fbaweighthandlingfee, fbapickpackfeeperunit => 有高有低, 取 3.1 USD
      * 统一起来取  2.8 USD
      */
-    public Map<String, Float> sellingAmazonFBAFee(Date date, List<Selling> sellings,
-                                                  Map<String, Integer> sellingOrders) {
+    public Map<String, Float> sellingAmazonFBAFee(Date date, List<Selling> sellings) {
         if((System.currentTimeMillis() - date.getTime()) <= TimeUnit.DAYS.toMillis(10)) {
             Map<String, Float> sellingAmzFbaFeeMap = new HashMap<String, Float>();
             for(Selling sell : sellings) {
-                Integer orders = sellingOrders.get(sell.sellingId);
-                if(orders == null) orders = 0;
-                sellingAmzFbaFeeMap.put(sell.sellingId, 2.8f * orders);
+                sellingAmzFbaFeeMap.put(sell.sellingId, 2.8f);
             }
             return sellingAmzFbaFeeMap;
         } else {
