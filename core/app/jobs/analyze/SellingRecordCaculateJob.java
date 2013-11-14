@@ -181,15 +181,6 @@ public class SellingRecordCaculateJob extends Job {
                 // VAT 的费用
                 record.dutyAndVAT = record.mergeWithLatest(sellingVATFee.get(sid), "dutyandvat");
 
-                if(sid.startsWith("80")) {
-                    Logger.info("SellingRecordCaculateJob.metric.seaCost %s: %s ==== %s", sid, record.seaCost, seaCost);
-                    Logger.info("SellingRecordCaculateJob.metric.airCost %s: %s ==== %s", sid, record.airCost, airCost);
-                    Logger.info("SellingRecordCaculateJob.metric.expressCost %s: %s ==== %s", sid, record.expressCost,
-                            expressCost);
-                    Logger.info("SellingRecordCaculateJob.metric.dutyandvat %s: %s ==== %s", sid, record.dutyAndVAT,
-                            sellingVATFee);
-                }
-
                 // 单个利润 = 实际收入 - 采购成本 - 运输成本 - VAT
                 record.profit = record.income - record.procureAndShipCost();
                 // 成本利润率

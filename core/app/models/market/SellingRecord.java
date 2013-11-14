@@ -209,19 +209,25 @@ public class SellingRecord extends GenericModel {
      */
     public float mergeWithLatest(Float currentValue, String name) {
         if(currentValue == null) currentValue = 0f;
-        SqlSelect lastSeaCost = new SqlSelect()
+        SqlSelect lastValueSql = new SqlSelect()
                 .select(name + " lastValue").from("SellingRecord")
                 .where("selling_sellingId=?").param(this.selling.sellingId)
                 .where(name + ">0")
                 .orderBy("date DESC")
                 .limit(1);
-        Map<String, Object> row = DBUtils.row(lastSeaCost.toString(), lastSeaCost.getParams().toArray());
+        Map<String, Object> row = DBUtils.row(lastValueSql.toString(), lastValueSql.getParams().toArray());
         Object lastValueObj = row.get("lastValue");
+        float finalValue = 0;
         float lastValue = lastValueObj == null ? 0 : NumberUtils.toFloat(lastValueObj.toString());
-        if(currentValue == 0 && lastValue == 0) return 0; // 当前值为 0, 最后值也为 0 ,那么没得玩就是 0
-        if(currentValue <= 0.001 && lastValue > 0) return lastValue; // 当前值非常小, 最后值不为0 使用最后值
-        if(lastValue < 0.001 && currentValue > 0) return currentValue; // 如果最后一个值非常小, 当前值大于 0 则使用当前值
-        return (currentValue + lastValue) / 2; // 正常使用 (当前值 + 最后值) / 2
+        if(currentValue <= 0.001 && lastValue <= 0.001) finalValue = 0; // 当前值为 0, 最后值也为 0 ,那么没得玩就是 0
+        if(currentValue <= 0.001 && lastValue > 0.001) finalValue = lastValue; // 当前值非常小, 最后值不为0 使用最后值
+        if(currentValue > 0.001 && lastValue <= 0.001) finalValue = currentValue; // 如果最后一个值非常小, 当前值大于 0 则使用当前值
+        finalValue = (currentValue + lastValue) / 2;// 正常使用 (当前值 + 最后值) / 2
+        if(this.selling.sellingId.startsWith("80")) {
+            Logger.info("[%s - Name: %s, current: %s, last: %s, final: %s]",
+                    this.selling.sellingId, name, currentValue, lastValue, finalValue);
+        }
+        return finalValue;
     }
 
     /**
