@@ -924,7 +924,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", "FBAs/boxLabel.html", options, map);
         } else {
             String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
-            FileUtils.writeStringToFile(new File(folder, message + ".text"), message, "UTF-8");
+            FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
         }
     }
 }

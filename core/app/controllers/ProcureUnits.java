@@ -67,6 +67,7 @@ public class ProcureUnits extends Controller {
             //创建FBA根目录，存放工厂FBA文件
             File dirfile = new File(Constant.TMP, "FBA");
             try {
+                Files.delete(dirfile);
                 dirfile.mkdir();
                 for(ProcureUnit procureUnit : procureUnitsList) {
                     String name = procureUnit.cooperator.name;
@@ -78,12 +79,9 @@ public class ProcureUnits extends Controller {
                     //生成 PDF
                     procureUnit.fbaAsPDF(factoryDir);
                 }
-            } catch(Exception e) {
-                throw e;
             } finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");
                 Files.zip(dirfile, zip);
-                Files.delete(dirfile);
                 zip.deleteOnExit();
                 renderBinary(zip);
             }
