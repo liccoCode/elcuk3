@@ -329,7 +329,7 @@ public class MetricShipCostService {
             sumX += nX;
             sellingsX.put(row.get("sellingId").toString(), nX);
             sellingsQty.put(row.get("sellingId").toString(),
-                    row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty)").toString()));
+                    row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty").toString()));
         }
         float x = sumX == 0 ? 0 : (totalVATFee / sumX);
 
