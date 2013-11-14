@@ -1,13 +1,14 @@
 package helper;
 
 
+import org.apache.commons.lang3.StringUtils;
+import play.Logger;
 import play.modules.pdf.PDF;
 import play.modules.pdf.PDF.PDFDocument;
 import play.modules.pdf.RenderPDFTemplate;
 import play.mvc.Http;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Map;
@@ -30,16 +31,21 @@ public class PDFs {
      * @param args     模板中的数据
      */
     public static void templateAsPDF(File folder, String pdfName, String template, PDF.Options options, Map<String,
-            Object> args) throws FileNotFoundException {
-        OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfName);
+            Object> args) {
+        try {
+            pdfName = StringUtils.replace(pdfName, "/", "|");
+            OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfName);
 
-        PDFDocument singleDoc = new PDFDocument();
-        singleDoc.template = template;
-        singleDoc.options = options;
+            PDFDocument singleDoc = new PDFDocument();
+            singleDoc.template = template;
+            singleDoc.options = options;
 
-        RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc),
-                args);
-        renderer.writePDF(out, Http.Request.current(), Http.Response.current());
+            RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc),
+                    args);
+            renderer.writePDF(out, Http.Request.current(), Http.Response.current());
+        } catch(Exception e) {
+            Logger.error(Webs.S(e));
+        }
     }
 
 }
