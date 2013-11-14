@@ -248,7 +248,7 @@ public class SellingRecord extends GenericModel {
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
         if(this.units == 0) return 0;
-        return (this.mergeToShipCost() + this.dutyAndVAT + this.procureCost);
+        return this.mergeToShipCost() + this.procureCost /*+this.dutyAndVAT dutyAndVAT 调整正确以后再进行统计*/;
     }
 
     /**
