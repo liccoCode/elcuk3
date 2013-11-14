@@ -168,16 +168,27 @@ public class SellingRecordCaculateJob extends Job {
                 // TODO: 运输成本的思考: 真的需要每天记录一个值吗? 这样记录的曲线有意义吗?
 
                 // 海运运输成本
-                record.seaCost = record.shipCost(seaCost.get(sid), "seaCost");
+                record.seaCost = record.mergeWithLatest(seaCost.get(sid), "seaCost");
+
 
                 // 空运运输成本
-                record.airCost = record.shipCost(airCost.get(sid), "airCost");
+                record.airCost = record.mergeWithLatest(airCost.get(sid), "airCost");
 
                 // 快递运输成本
-                record.expressCost = record.shipCost(expressCost.get(sid), "expressCost");
+                record.expressCost = record.mergeWithLatest(expressCost.get(sid), "expressCost");
+
 
                 // VAT 的费用
-                record.dutyAndVAT = record.shipCost(sellingVATFee.get(sid), "dutyandvat");
+                record.dutyAndVAT = record.mergeWithLatest(sellingVATFee.get(sid), "dutyandvat");
+
+                if(sid.startsWith("80")) {
+                    Logger.info("SellingRecordCaculateJob.metric.seaCost %s: %s ==== %s", sid, record.seaCost, seaCost);
+                    Logger.info("SellingRecordCaculateJob.metric.airCost %s: %s ==== %s", sid, record.airCost, airCost);
+                    Logger.info("SellingRecordCaculateJob.metric.expressCost %s: %s ==== %s", sid, record.expressCost,
+                            expressCost);
+                    Logger.info("SellingRecordCaculateJob.metric.dutyandvat %s: %s ==== %s", sid, record.dutyAndVAT,
+                            sellingVATFee);
+                }
 
                 // 单个利润 = 实际收入 - 采购成本 - 运输成本 - VAT
                 record.profit = record.income - record.procureAndShipCost();

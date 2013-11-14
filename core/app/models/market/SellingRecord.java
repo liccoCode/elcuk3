@@ -207,7 +207,7 @@ public class SellingRecord extends GenericModel {
      * 答: 因为运输等成本的计算无法获取最细节的运输量, 都是根据体重,重量均等下来的.
      * 同时, 按照现在的算法进行如此的计算, 难度相当大.
      */
-    public float shipCost(Float seaCost, String name) {
+    public float mergeWithLatest(Float currentValue, String name) {
         SqlSelect lastSeaCost = new SqlSelect()
                 .select(name + " lastValue").from("SellingRecord")
                 .where("selling_sellingId=?").param(this.selling.sellingId)
@@ -217,8 +217,8 @@ public class SellingRecord extends GenericModel {
         Map<String, Object> row = DBUtils.row(lastSeaCost.toString(), lastSeaCost.getParams().toArray());
         Object lastValueObj = row.get("lastValue");
         float lastValue = lastValueObj == null ? 0 : NumberUtils.toFloat(lastValueObj.toString());
-        if(seaCost == null) return lastValue;
-        return (seaCost + lastValue) / 2;
+        if(currentValue == null) return lastValue;
+        return (currentValue + lastValue) / 2;
     }
 
     /**
