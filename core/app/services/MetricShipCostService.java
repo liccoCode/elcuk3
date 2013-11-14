@@ -317,6 +317,7 @@ public class MetricShipCostService {
 
         Map<String, Float> sellingsVAT = new HashMap<String, Float>();
         Map<String, Float> sellingsX = new HashMap<String, Float>();
+        Map<String, Float> sellingsQty = new HashMap<String, Float>();
         rows = DBUtils.rows(effectSellingSql.toString(), effectSellingSql.getParams().toArray());
 
         // (440x + 220x + 124x)[sumX] = (2000)[totalVATFee] -> x = 2.55
@@ -327,11 +328,14 @@ public class MetricShipCostService {
             float nX = row.get("x") == null ? 0 : NumberUtils.toFloat(row.get("x").toString());
             sumX += nX;
             sellingsX.put(row.get("sellingId").toString(), nX);
+            sellingsQty.put(row.get("sellingId").toString(),
+                    row.get("qty") == null ? 0 : NumberUtils.toFloat(row.get("qty)").toString()));
         }
         float x = sumX == 0 ? 0 : (totalVATFee / sumX);
 
         for(String sid : sellingsX.keySet()) {
-            sellingsVAT.put(sid, x * sellingsX.get(sid));
+            float qty = sellingsQty.get(sid);
+            sellingsVAT.put(sid, qty == 0 ? 0 : ((x * sellingsX.get(sid)) / qty));
         }
 
         return sellingsVAT;
