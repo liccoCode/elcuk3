@@ -3,7 +3,8 @@ package controllers;
 import models.market.SellingRecord;
 import models.product.Category;
 import models.view.highchart.HighChart;
-import models.view.post.SellingRecordChartsPost;
+import models.view.post.SellingRecordColumnChartPost;
+import models.view.post.SellingRecordLineChartPost;
 import models.view.post.SellingRecordsPost;
 import play.cache.CacheFor;
 import play.mvc.Controller;
@@ -59,17 +60,16 @@ public class SellingRecords extends Controller {
      */
     @Check("sellingrecords.lines")
     @CacheFor(value = "1h")
-    public static void lines(SellingRecordChartsPost p) {
-        if(p == null) p = new SellingRecordChartsPost("line");
+    public static void lines(SellingRecordLineChartPost p) {
+        if(p == null) p = new SellingRecordLineChartPost();
         HighChart chart = p.query().get(0);
         renderJSON(chart);
     }
 
     @Check("sellingrecords.columns")
     @CacheFor(value = "1h")
-    public static void columns(SellingRecordChartsPost p) {
-        if(p == null) p = new SellingRecordChartsPost("column");
-        p.lineType = "column";
+    public static void columns(SellingRecordColumnChartPost p) {
+        if(p == null) p = new SellingRecordColumnChartPost();
         HighChart chart = p.query().get(0);
         renderJSON(chart);
     }

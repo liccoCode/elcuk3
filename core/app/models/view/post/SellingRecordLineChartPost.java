@@ -10,7 +10,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
-import play.utils.FastRuntimeException;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -23,15 +22,10 @@ import java.util.Map;
  * Date: 8/22/13
  * Time: 10:13 AM
  */
-public class SellingRecordChartsPost extends Post<HighChart> {
+public class SellingRecordLineChartPost extends Post<HighChart> {
     private static final long serialVersionUID = -4430976832961134222L;
 
-    public SellingRecordChartsPost() {
-        this.lineType = Series.LINE;
-    }
-
-    public SellingRecordChartsPost(String lineType) {
-        this.lineType = lineType;
+    public SellingRecordLineChartPost() {
     }
 
     public Date from = DateTime.now().withTimeAtStartOfDay().minusMonths(1).toDate();
@@ -39,8 +33,6 @@ public class SellingRecordChartsPost extends Post<HighChart> {
 
     public String market;
     public String categoryId;
-
-    public String lineType = Series.LINE;
 
     /**
      * 搜索字词
@@ -52,9 +44,46 @@ public class SellingRecordChartsPost extends Post<HighChart> {
      */
     public String type = "selling";
 
+    /**
+     * 汇总曲线
+     */
+    private SqlSelect sumLine() {
+        return new SqlSelect().select(
+                "sr.date",
+                // 费用
+                "sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.amzFee * sr.units) amzFee",
+                "sum(sr.fbaFee * sr.units) fbaFee", "sum(sr.income * sr.units) income",
+                // 利润
+                "sum(sr.profit * sr.units) profit", "avg(sr.costProfitRatio) costProfitRatio",
+                "avg(sr.saleProfitRatio) saleProfitRatio",
+                // 成本
+                "sum(sr.procureCost * sr.units) procureCost", "sum(sr.airCost * sr.units) airCost",
+                "sum(sr.expressCost * sr.units) expressCost", "sum(sr.seaCost * sr.units) seaCost",
+                "sum(sr.dutyAndVAT * sr.units) dutyAndVAT"
+        );
+    }
+
+    /**
+     * 单个 Selling 曲线
+     */
+    private SqlSelect singleLine() {
+        return new SqlSelect().select(
+                "sr.date",
+                // 费用
+                "sr.sales sales", "sr.units units", "sr.amzFee amzFee",
+                "sr.fbaFee fbaFee", "sr.income income",
+                // 利润
+                "sr.profit profit", "sr.costProfitRatio costProfitRatio", "sr.saleProfitRatio saleProfitRatio",
+                // 成本
+                "sr.procureCost procureCost", "sr.airCost airCost", "sr.expressCost expressCost", "sr.seaCost seaCost",
+                "sr.dutyAndVAT dutyAndVAT"
+        );
+    }
+
     @Override
     public F.T2<String, List<Object>> params() {
-        SqlSelect sql = new SqlSelect();
+        boolean isSum = StringUtils.isBlank(this.val);
+        SqlSelect sql = isSum ? sumLine() : singleLine();
         // ------- 汇总曲线 ----------
         /**
          * 0. 销售价格 (单个才出现)
@@ -75,36 +104,31 @@ public class SellingRecordChartsPost extends Post<HighChart> {
          * 13. 海运成本
          * 14. 关税 VAT
          */
-        sql.select(
-                "sr.date",
-                // 费用
-                "sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.amzFee * sr.units) amzFee",
-                "sum(sr.fbaFee * sr.units) fbaFee", "sum(sr.income * sr.units) income",
-                // 利润
-                "sum(sr.profit * sr.units) profit", "avg(sr.costProfitRatio) costProfitRatio",
-                "avg(sr.saleProfitRatio) saleProfitRatio",
-                // 成本
-                "sum(sr.procureCost * sr.units) procureCost", "sum(sr.airCost * sr.units) airCost",
-                "sum(sr.expressCost * sr.units) expressCost", "sum(sr.seaCost * sr.units) seaCost",
-                "sum(sr.dutyAndVAT * sr.units) dutyAndVAT"
-        ).from("SellingRecord sr")
-                .where("date>=?").param(this.from)
-                .where("date<?").param(new DateTime(this.to).plusDays(1).withTimeAtStartOfDay().toDate())
+        sql.from("SellingRecord sr")
+                .where("sr.date>=?").param(this.from)
+                .where("sr.date<?").param(new DateTime(this.to).plusDays(1).withTimeAtStartOfDay().toDate())
                 .groupBy("sr.date");
 
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }
 
-        if(StringUtils.isNotBlank(this.categoryId)) {
+        // 仅仅当 isSum 统计的时候生效
+        if(isSum && StringUtils.isNotBlank(this.categoryId)) {
             sql.where(String.format("sr.selling_sellingId like '%s%%'", this.categoryId));
         }
 
-        return new F.T2<String, List<Object>>(sql.toString(), sql.getParams());
-    }
+        if(!isSum && StringUtils.contains(this.val, "|")) {
+            // 如果是 SellingId
+            sql.where("sr.selling_sellingId=?").param(this.val.trim());
+        } else if(!isSum) {
+            // 如果是 SKU;  将 Selling 处理为 SKU
+            String sid = StringUtils.split(this.val, "|")[0];
+            String sku = StringUtils.split(sid, ",")[0];
+            sql.where(String.format("sr.selling_sellingId like '%s%%'", sku));
+        }
 
-    private boolean isColumn() {
-        return "column".equals(this.lineType);
+        return new F.T2<String, List<Object>>(sql.toString(), sql.getParams());
     }
 
     @Override
@@ -112,9 +136,7 @@ public class SellingRecordChartsPost extends Post<HighChart> {
     public List<HighChart> query() {
         F.T2<String, List<Object>> t2 = this.params();
         List<Map<String, Object>> rows = DBUtils.rows(t2._1, t2._2.toArray());
-        HighChart chart;
-        if(isColumn()) throw new FastRuntimeException("暂时还不支持 Column 柱状图.");
-        else chart = new HighChart(Series.LINE);
+        HighChart chart = new HighChart(Series.LINE);
         // 将各自曲线的计算分别打散到各自的方法中, 虽然便利多次, 方便权限控制
 
         /**

@@ -53,9 +53,14 @@
           <option value="${_.name()}">${_.toString()}</option>
         #{/list}
         </select>
-        #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'inline'}
-           #{option ''}Category#{/option}
-        #{/select}
+
+        <select name="p.categoryId" class='input-small inline'>
+          <option value="">Category</option>
+        #{list items: categoryIds}
+          <option ${p.categoryId == _ ? 'selected' : ''} value="${_}">${_}</option>
+        #{/list}
+        </select>
+
         <label class="checkbox inline">
           <input type="checkbox" name="filterDot2" value="false">
           选择,2
