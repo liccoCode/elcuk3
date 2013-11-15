@@ -96,49 +96,6 @@ public class MetricShipCostService {
     }
 
     /**
-     * 计算某一天所有 Selling 的海运运费 (没有运输的则没有)
-     */
-    public Map<String, Float> seaCost(Date oneDay) {
-        /**
-         * 1. 通过 Payment 找到当天付款的运输单 ids, 以及总费用(排除 VAT关税)
-         * 2. 通过 Payment 找到支付的总体积 (通过费用类型为 oceanfreight 的费用统计)
-         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
-         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
-         */
-
-        Set<String> shipmentIds;
-        // USD
-        float totalSeaFee;
-
-        // 1. 寻找所涉及的 运输单 和 总费用
-        F.T2<Float, Set<String>> t2 = oneDayTotalFeeAndEffectShipments(oneDay, Shipment.T.SEA);
-        totalSeaFee = t2._1;
-        shipmentIds = t2._2;
-
-
-        // 2. 寻找付费的总体积 m3
-        float totalWeight = totalWeight(shipmentIds, FeeType.oceanfreight());
-        Logger.info("MetricShipCostService.seaCost.1: %s, %s", StringUtils.join(shipmentIds, ","), totalWeight);
-
-        // 3. 找出单位体积的运费. 总费用 / 总体积数
-        float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
-        if(totalWeight == 0 && shipmentIds.isEmpty())
-            Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "'," + "'"));
-
-        // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
-        Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
-        Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
-        float coefficienta = 1; // 从真实体积到运输体积需要一个系数用来计算抛货, 用来抵消装箱多余的空间差
-
-        for(String sid : sellingGroup.keySet()) {
-            Map<String, Float> group = sellingGroup.get(sid);
-            sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
-        }
-
-        return sellingSeaCost;
-    }
-
-    /**
      * 计算某一天所有 Selling 的快递运费 (没有运输的则没有)
      *
      * @param oneDay
@@ -222,6 +179,50 @@ public class MetricShipCostService {
             sellExpressCost.put(sid, sellExpressCost.get(sid) + perQty);
         }
         return sellExpressCost;
+    }
+
+
+    /**
+     * 计算某一天所有 Selling 的海运运费 (没有运输的则没有)
+     */
+    public Map<String, Float> seaCost(Date oneDay) {
+        /**
+         * 1. 通过 Payment 找到当天付款的运输单 ids, 以及总费用(排除 VAT关税)
+         * 2. 通过 Payment 找到支付的总体积 (通过费用类型为 oceanfreight 的费用统计)
+         * 3. 根据 Selling 的 Product 找出产品重量, 并根据总费用计算出单位体积的费用.
+         * 4. 根据 Selling 记录的体积, 计算出此 Selling 的海运费用
+         */
+
+        Set<String> shipmentIds;
+        // USD
+        float totalSeaFee;
+
+        // 1. 寻找所涉及的 运输单 和 总费用
+        F.T2<Float, Set<String>> t2 = oneDayTotalFeeAndEffectShipments(oneDay, Shipment.T.SEA);
+        totalSeaFee = t2._1;
+        shipmentIds = t2._2;
+
+
+        // 2. 寻找付费的总体积 m3
+        float totalWeight = totalWeight(shipmentIds, FeeType.oceanfreight());
+        Logger.debug("MetricShipCostService.seaCost.1: %s, %s", StringUtils.join(shipmentIds, ","), totalWeight);
+
+        // 3. 找出单位体积的运费. 总费用 / 总体积数
+        float perCubicMeter = totalWeight == 0 ? 0 : totalSeaFee / totalWeight;
+        if(totalWeight == 0 && shipmentIds.isEmpty())
+            Logger.warn("运输单 ['%s'] 中没有 oceanfreight 费用?", StringUtils.join(shipmentIds, "'," + "'"));
+
+        // 4. 根据 selling 自己的 m3 与 perCubicMeter 计算每个 selling 的运费
+        Map<String, Map<String, Float>> sellingGroup = sellingRecordWeightAndVolume();
+        Map<String, Float> sellingSeaCost = new HashMap<String, Float>();
+        float coefficienta = 1; // 从真实体积到运输体积需要一个系数用来计算抛货, 用来抵消装箱多余的空间差
+
+        for(String sid : sellingGroup.keySet()) {
+            Map<String, Float> group = sellingGroup.get(sid);
+            sellingSeaCost.put(sid, group.get("m3") * perCubicMeter * coefficienta);
+        }
+
+        return sellingSeaCost;
     }
 
     /**
