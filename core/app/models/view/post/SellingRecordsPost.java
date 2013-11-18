@@ -62,6 +62,10 @@ public class SellingRecordsPost extends Post<SellingRecord> {
 
     @Override
     public List<SellingRecord> query() {
+        if("selling".equals(this.type)) {
+            throw new UnsupportedOperationException("还不支持查看" + this.type + "类型的数据");
+        }
+
         SqlSelect sql = new SqlSelect()
                 .select(
                         "sr.selling_sellingId",
