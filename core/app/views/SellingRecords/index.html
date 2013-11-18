@@ -46,7 +46,7 @@
           <span class="add-on">TO:</span>
           <input type="date" id="a_to" name="p.to" value="${p.to.date()}">
         </div>
-        <div class="btn inline reload">Reload Lines</div>
+        <div class="btn inline reload">Reload</div>
         <select name="p.market" class="input-small inline">
           <option value="">Market</option>
         #{list items:models.market.M.values()}
@@ -61,10 +61,10 @@
         #{/list}
         </select>
 
-        <label class="checkbox inline">
-          <input type="checkbox" name="filterDot2" value="false">
-          选择,2
-        </label>
+        *{<label class="checkbox inline">}*
+          *{<input type="checkbox" name="filterDot2" value="false">}*
+          *{选择,2}*
+        *{</label>}*
         <select name="p.desc" class="input-mini inline">
           <option value="true">升序</option>
           <option value="false">降序</option>
@@ -89,11 +89,9 @@
 <ul id="divTabs" class='nav nav-tabs'>
   <li><a href="#selling" data-toggle="tab">Selling</a></li>
   <li><a href="#sku" data-toggle="tab">SKU</a></li>
-  <li><a href="#category" data-toggle="tab">Category</a></li>
 </ul>
 <div id="sellingSkuCategoryDivs" class="tab-content">
   <div class="tab-pane" id="selling"></div>
   <div class="tab-pane" id="sku"></div>
-  <div class="tab-pane" id="category"></div>
 </div>
 #{/power.ck }

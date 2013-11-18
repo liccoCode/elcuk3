@@ -2,7 +2,7 @@ $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
   # tables
-  $('#sellingSkuCategoryDivs').on('ajaxFresh', '#selling, #sku, #category',() ->
+  $('#sellingSkuCategoryDivs').on('ajaxFresh', '#selling, #sku',() ->
     # 1. 收集 Market 的参数
     # 2. 加载数据
     $div = $(@)
@@ -33,9 +33,10 @@ $ ->
     LoadMask.mask()
     $.ajax("/sellingrecords/#{$div.attr('id')}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
       .done((r) ->
+        title = "#{$("[name='p.categoryId']").val()} 曲线图"
         $div.highcharts('StockChart', {
           title:
-            text: "#{$('#post_val').val()} 曲线图"
+            text: title
           legend:
             enabled: true
           navigator:
@@ -77,7 +78,7 @@ $ ->
     ajaxFreshAcitveTableTab()
   )
 
-  $('.search_form').on('change', '[name=p\\.market]', (e) ->
+  $('.search_form').on('change', "[name='p.market'], [name='p.categoryId']", (e) ->
     # 1. trigger #sid and set page to 1
     $('#post_page').val(1)
     ajaxFreshAcitveTableTab()
@@ -90,6 +91,7 @@ $ ->
     false
   ).on('click', '.reload', (e) ->
     ajaxFreshLines()
+    ajaxFreshAcitveTableTab()
   )
 
   ajaxFreshAcitveTableTab = ->

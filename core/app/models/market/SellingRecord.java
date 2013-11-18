@@ -43,6 +43,14 @@ public class SellingRecord extends GenericModel {
     }
 
     /**
+     * 仅仅用于 SellingRecordPost
+     */
+    public SellingRecord(String sellingId) {
+        this.selling = new Selling();
+        this.selling.sellingId = sellingId;
+    }
+
+    /**
      * 用于封装 快递/海运/空运 费用统计成为运输成本用.
      */
     public SellingRecord(float expressCost, float seaCost, float airCost) {

@@ -9,7 +9,6 @@ import models.view.post.SellingRecordsPost;
 import play.cache.CacheFor;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 import services.MetricSalesService;
 
 import java.util.Date;
@@ -28,11 +27,6 @@ public class SellingRecords extends Controller {
     public static void index() {
         List<String> categoryIds = Category.categoryIds();
         SellingRecordsPost p = new SellingRecordsPost();
-        try {
-            p.records();
-        } catch(FastRuntimeException e) {
-            flash.error(e.getMessage());
-        }
         render(p, categoryIds);
     }
 
