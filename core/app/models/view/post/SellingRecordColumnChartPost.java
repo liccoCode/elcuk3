@@ -40,6 +40,6 @@ public class SellingRecordColumnChartPost extends Post<HighChart> {
 
     @Override
     public List<HighChart> query() {
-        throw new UnsupportedOperationException("功能还没完成");
+        throw new UnsupportedOperationException("查看柱状图的功能还没完成");
     }
 }
