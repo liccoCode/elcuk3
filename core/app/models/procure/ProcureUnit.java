@@ -459,6 +459,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.qty", unit.attrs.qty));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         return logs;
     }
 
