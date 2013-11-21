@@ -2,11 +2,10 @@ package models.view.post;
 
 import helper.DBUtils;
 import models.market.M;
-import models.market.SellingRecord;
+import models.view.SellingRecordsCharts;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
@@ -24,6 +23,7 @@ import java.util.Map;
  */
 public class SellingRecordLineChartPost extends Post<HighChart> {
     private static final long serialVersionUID = -4430976832961134222L;
+    private SellingRecordsCharts drawer = new SellingRecordsCharts();
 
     public SellingRecordLineChartPost() {
     }
@@ -44,12 +44,16 @@ public class SellingRecordLineChartPost extends Post<HighChart> {
      */
     public String type = "selling";
 
+    public boolean isSum() {
+        return StringUtils.isBlank(this.val);
+    }
+
     /**
      * 汇总曲线
      */
     private SqlSelect sumLine() {
         return new SqlSelect().select(
-                "sr.date",
+                "sr.date _date",
                 // 费用
                 "sum(sr.sales) as sales", "sum(sr.units) as units", "sum(sr.amzFee * sr.units) amzFee",
                 "sum(sr.fbaFee * sr.units) fbaFee", "sum(sr.income * sr.units) income",
@@ -68,7 +72,8 @@ public class SellingRecordLineChartPost extends Post<HighChart> {
      */
     private SqlSelect singleLine() {
         return new SqlSelect().select(
-                "sr.date",
+                "sr.date _date",
+                "sr.salePrice",
                 // 费用
                 "sr.sales sales", "sr.units units", "sr.amzFee amzFee",
                 "sr.fbaFee fbaFee", "sr.income income",
@@ -82,8 +87,7 @@ public class SellingRecordLineChartPost extends Post<HighChart> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        boolean isSum = StringUtils.isBlank(this.val);
-        SqlSelect sql = isSum ? sumLine() : singleLine();
+        SqlSelect sql = isSum() ? sumLine() : singleLine();
         // ------- 汇总曲线 ----------
         /**
          * 0. 销售价格 (单个才出现)
@@ -107,21 +111,21 @@ public class SellingRecordLineChartPost extends Post<HighChart> {
         sql.from("SellingRecord sr")
                 .where("sr.date>=?").param(this.from)
                 .where("sr.date<?").param(new DateTime(this.to).plusDays(1).withTimeAtStartOfDay().toDate())
-                .groupBy("sr.date");
+                .groupBy("_date");
 
         if(StringUtils.isNotBlank(this.market)) {
             sql.where("sr.market=?").param(M.val(this.market).name());
         }
 
         // 仅仅当 isSum 统计的时候生效
-        if(isSum && StringUtils.isNotBlank(this.categoryId)) {
+        if(isSum() && StringUtils.isNotBlank(this.categoryId)) {
             sql.where(String.format("sr.selling_sellingId like '%s%%'", this.categoryId));
         }
 
-        if(!isSum && StringUtils.contains(this.val, "|")) {
+        if(!isSum() && StringUtils.contains(this.val, "|")) {
             // 如果是 SellingId
             sql.where("sr.selling_sellingId=?").param(this.val.trim());
-        } else if(!isSum) {
+        } else if(!isSum()) {
             // 如果是 SKU;  将 Selling 处理为 SKU
             String sid = StringUtils.split(this.val, "|")[0];
             String sku = StringUtils.split(sid, ",")[0];
@@ -160,237 +164,29 @@ public class SellingRecordLineChartPost extends Post<HighChart> {
          */
 
         // 费用
-//        this.salePrice(chart, rows);
-        this.salesSeries(chart, rows);
-        this.unitsSeries(chart, rows);
-        this.amzFeeSeries(chart, rows);
-        this.amzFbaFeeSeries(chart, rows);
-        this.incomeSeries(chart, rows);
+        if(!isSum()) {
+            drawer.salePrice(chart, rows);
+        }
+        drawer.salesSeries(chart, rows);
+        drawer.unitsSeries(chart, rows);
+        drawer.amzFeeSeries(chart, rows);
+        drawer.amzFbaFeeSeries(chart, rows);
+        drawer.incomeSeries(chart, rows);
 
         // 利润
-        this.profitSeries(chart, rows);
-        this.costProfitRatioSeries(chart, rows);
-        this.saleProfitRatioSeries(chart, rows);
+        drawer.profitSeries(chart, rows);
+        drawer.costProfitRatioSeries(chart, rows);
+        drawer.saleProfitRatioSeries(chart, rows);
 
         // 成本
-        this.procureCostSeries(chart, rows);
-        this.airCost(chart, rows);
-        this.expressCost(chart, rows);
-        this.seaCost(chart, rows);
-        this.shipCostSeries(chart, rows);
-        this.dutyAndVatSeries(chart, rows);
+        drawer.procureCostSeries(chart, rows);
+        drawer.airCost(chart, rows);
+        drawer.expressCost(chart, rows);
+        drawer.seaCost(chart, rows);
+        drawer.shipCostSeries(chart, rows);
+        drawer.dutyAndVatSeries(chart, rows);
 
         return Arrays.asList(chart);
     }
 
-    public HighChart salePrice(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("销售价格").add(date, NumberUtils.toFloat(row.get("salePrice").toString()));
-            }
-        });
-    }
-
-    /**
-     * 销售额曲线
-     *
-     * @param highChart
-     * @param rows
-     * @return
-     */
-    private HighChart salesSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("销售额").add(date, NumberUtils.toFloat(row.get("sales").toString()));
-            }
-        });
-    }
-
-    /**
-     * 销量曲线
-     *
-     * @param highChart
-     * @param rows
-     * @return
-     */
-    private HighChart unitsSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("销量").yAxis(1).add(date, NumberUtils.toFloat(row.get("units").toString()));
-            }
-        });
-    }
-
-    /**
-     * 利润曲线
-     */
-    private HighChart profitSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("利润").add(date, NumberUtils.toFloat(row.get("profit").toString()));
-            }
-        });
-    }
-
-    /**
-     * 成本利润率, (SellingRecordCaculateJob 中也有对应的计算)
-     * 成本利润率 = 利润 / (采购成本 + 运输成本)
-     */
-    private HighChart costProfitRatioSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("成本利润率").yAxis(1)
-                        .add(date, NumberUtils.toFloat(row.get("costProfitRatio").toString()));
-            }
-        });
-    }
-
-    /**
-     * 销售利润率, (SellingRecordCaculateJob 中也有对应的计算)
-     * 销售利润率 = 利润 / 销售额
-     */
-    private HighChart saleProfitRatioSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("销售利润率").yAxis(1)
-                        .add(date, NumberUtils.toFloat(row.get("saleProfitRatio").toString()));
-            }
-        });
-    }
-
-    /**
-     * 收入曲线
-     */
-    private HighChart incomeSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("实际收入").add(date, NumberUtils.toFloat(row.get("income").toString()));
-            }
-        });
-    }
-
-    /**
-     * 采购成本曲线
-     */
-    private HighChart procureCostSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("采购成本")
-                        .add(date, NumberUtils.toFloat(row.get("procureCost").toString()));
-            }
-        });
-    }
-
-    /**
-     * 运输成本曲线
-     */
-    private HighChart shipCostSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float expressCost = NumberUtils.toFloat(row.get("expressCost").toString()); // 33%
-                float seaCost = NumberUtils.toFloat(row.get("seaCost").toString()); // 33%
-                float airCost = NumberUtils.toFloat(row.get("airCost").toString()); // 33%
-                highChart.series("运输成本").add(date, new SellingRecord(expressCost, seaCost, airCost).mergeToShipCost());
-            }
-        });
-    }
-
-    /**
-     * 快递运输成本
-     */
-    private HighChart expressCost(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("快递成本").add(date, NumberUtils.toFloat(row.get("expressCost").toString()));
-            }
-        });
-    }
-
-    /**
-     * 空运运输成本
-     */
-    private HighChart seaCost(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("海运成本").add(date, NumberUtils.toFloat(row.get("seaCost").toString()));
-            }
-        });
-    }
-
-    /**
-     * 海运运输成本
-     */
-    private HighChart airCost(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("空运成本").add(date, NumberUtils.toFloat(row.get("airCost").toString()));
-            }
-        });
-    }
-
-    private HighChart dutyAndVatSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                highChart.series("关税VAT").add(date, NumberUtils.toFloat(row.get("dutyAndVAT").toString()));
-            }
-        });
-    }
-
-    /**
-     * Amazon 收费曲线
-     */
-    private HighChart amzFeeSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float amzFee = NumberUtils.toFloat(row.get("amzFee").toString());
-                highChart.series("Amazon 收费").add(date, amzFee);
-            }
-        });
-    }
-
-
-    /**
-     * Amazon FBA 收费曲线
-     */
-    private HighChart amzFbaFeeSeries(HighChart highChart, List<Map<String, Object>> rows) {
-        return rows(highChart, rows, new Callback() {
-            @Override
-            public void each(HighChart highChart, Date date, Map<String, Object> row) {
-                float fbaFee = NumberUtils.toFloat(row.get("fbaFee").toString());
-                highChart.series("FBA 收费").yAxis(1).add(date, fbaFee);
-            }
-        });
-    }
-
-    private HighChart rows(HighChart highChart, List<Map<String, Object>> rows, Callback callback) {
-        for(Map<String, Object> row : rows) {
-            Object key = row.get("date");
-            Date date;
-            if(key.getClass().equals(String.class)) {
-                date = DateTime.parse(key.toString()).toDate();
-            } else {
-                date = (Date) key;
-            }
-            callback.each(highChart, date, row);
-        }
-        return highChart;
-    }
-
-    interface Callback {
-        public void each(HighChart highChart, Date date, Map<String, Object> row);
-    }
 }
