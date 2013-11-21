@@ -42,8 +42,6 @@ public class Caches {
     public static final String FAMILYS = "caches.familys";
 
     public static final String ORDERITEM_AJAXUNITRUNNING = "ajaxHighChartUnitOrder.running";
-    public static final String SELLINGRECORD = "sellingRecordCaculateJob";
-    public static final String SELLINGRECORD_RUNNING = SELLINGRECORD + ".running";
 
     /**
      * Query Cache
@@ -110,6 +108,5 @@ public class Caches {
      */
     public static void clearRunningCacheKey() {
         Cache.delete(ORDERITEM_AJAXUNITRUNNING);
-        Cache.delete(SELLINGRECORD_RUNNING);
     }
 }

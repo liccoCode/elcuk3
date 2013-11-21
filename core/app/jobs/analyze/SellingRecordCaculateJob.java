@@ -1,14 +1,11 @@
 package jobs.analyze;
 
-import helper.Caches;
 import helper.Webs;
 import models.market.Selling;
 import models.market.SellingRecord;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
-import play.cache.Cache;
 import play.jobs.Job;
 import play.jobs.On;
 import play.libs.F;
@@ -40,35 +37,19 @@ public class SellingRecordCaculateJob extends Job {
     private MetricSalesService salesService = new MetricSalesService();
 
     private DateTime dateTime = DateTime.now();
-    private boolean isCache = true;
 
     public SellingRecordCaculateJob() {
         this.dateTime = DateTime.now().withTimeAtStartOfDay();
-        this.isCache = true;
     }
 
-    public SellingRecordCaculateJob(DateTime dateTime, boolean isCache) {
+    public SellingRecordCaculateJob(DateTime dateTime) {
         this.dateTime = dateTime.withTimeAtStartOfDay();
-        this.isCache = isCache;
     }
 
     @Override
     public void doJob() {
-        if(this.isCache) {
-            try {
-                Logger.info("SellingRecordCaculateJob begin %s (cached)", dateTime.toString("yyyy-MM-dd"));
-                Cache.add(Caches.SELLINGRECORD_RUNNING, "running");
-                List<SellingRecord> sellingRecords = metric();
-                Cache.add(Caches.SELLINGRECORD, sellingRecords, "12h");
-            } catch(Exception e) {
-                e.printStackTrace();
-            } finally {
-                Cache.delete(Caches.SELLINGRECORD_RUNNING);
-            }
-        } else {
-            Logger.info("SellingRecordCaculateJob begin %s (nocached)", dateTime.toString("yyyy-MM-dd"));
-            metric();
-        }
+        Logger.info("SellingRecordCaculateJob begin %s (nocached)", dateTime.toString("yyyy-MM-dd"));
+        metric();
     }
 
     public List<SellingRecord> metric() {
@@ -199,8 +180,4 @@ public class SellingRecordCaculateJob extends Job {
         return sellingRecords;
     }
 
-
-    public static boolean isRunning() {
-        return StringUtils.isNotBlank(Cache.get(Caches.SELLINGRECORD_RUNNING, String.class));
-    }
 }
