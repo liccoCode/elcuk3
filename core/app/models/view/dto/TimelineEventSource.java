@@ -237,7 +237,8 @@ public class TimelineEventSource {
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
             this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                    this.unit.id, this.unit.stage.label(), this.unit.qty(), this.lastDays);
+                    // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
+                    this.unit.id, this.unit.stage.label(), this.unit.attrs.planQty, this.lastDays);
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
             this.link = "/procureunits?p.search=id:" + this.unit.id;
             return this;
