@@ -23,8 +23,7 @@ $ ->
     ajaxFreshColumns($td.text().trim())
   ).on('click', 'td[orderby]', (e) ->
     $td = $(@)
-    $('#post_orderby').val($td.attr('orderby'))
-    ajaxFreshAcitveTableTab()
+    noty({text: "财务分析页面还处于 beta 版本, #{$td.text()} 排序还未实现", type: 'information', timeout: 5000})
   )
 
   # lines # columns
