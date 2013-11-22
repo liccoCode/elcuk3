@@ -19,8 +19,8 @@ $ ->
   ).on('click', '.point', (e) ->
     $td = $(@)
     $('#post_val').val($td.text().trim())
-    ajaxFreshLines()
-    ajaxFreshColumns()
+    ajaxFreshLines($td.text().trim())
+    ajaxFreshColumns($td.text().trim())
   ).on('click', 'td[orderby]', (e) ->
     $td = $(@)
     $('#post_orderby').val($td.attr('orderby'))
@@ -33,10 +33,9 @@ $ ->
     LoadMask.mask()
     $.ajax("/sellingrecords/#{$div.attr('id')}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
       .done((r) ->
-        title = "#{$("[name='p.categoryId']").val()} 曲线图"
         $div.highcharts('StockChart', {
           title:
-            text: title
+            text: $div.data('title') # 将 title 值记录到元素身上, 处理元素的时候进行改变
           legend:
             enabled: true
           navigator:
@@ -98,11 +97,11 @@ $ ->
     type = $('#divTabs li.active a').attr('href')
     $("#{type}").trigger('ajaxFresh')
 
-  ajaxFreshLines = ->
-    $('#lines').trigger('ajaxFresh')
+  ajaxFreshLines = (title = "#{$("[name='p.categoryId']").val()}")->
+    $('#lines').data('title', "#{title}  曲线图").trigger('ajaxFresh')
 
-  ajaxFreshColumns = ->
-    $('#columns').trigger('ajaxFresh')
+  ajaxFreshColumns = (title = "#{$("[name='p.categoryId']").val()}") ->
+    $('#columns').data('title', "#{title} 柱状图").trigger('ajaxFresh')
 
 
   $('a[data-toggle=tab]:contains(Selling)').tab('show')
