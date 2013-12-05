@@ -135,8 +135,8 @@ public class SubmitFeedSample {
         // To enable retry, recreate the InputStream and resubmit the feed
         // with the new InputStream. 
         //
-        // request.setFeedContent( new FileInputStream("my-feed.xml" /*or
-        // "my-flat-file.txt" if you use flat files*/);
+//        request.setFeedContent( new FileInputStream("my-feed.xml" /*or
+//        "my-flat-file.txt" if you use flat files*/);
 
         invokeSubmitFeed(service, request);
 
