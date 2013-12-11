@@ -2,10 +2,10 @@
 # 自己定义的各种 capistrano 命令
 
 base = "easya.cc"
-h_r="root@r.#{base}"
-h_e="root@e.#{base}"
-h_t="root@t.#{base}"
-h_db="root@db.#{base}"
+h_r="root@floette.#{base}"
+h_e="root@pangoro.#{base}"
+h_t="root@floette.#{base}"
+h_db="root@aggron.#{base}"
 
 lobal_backups="/Volumes/wyatt/backups"
 
@@ -26,6 +26,13 @@ namespace :bak do
     run "backup perform -t elcuk"
     # 备份的是数据库文件, 将数据弄成完全与服务器一样,多余的删除
     system("rsync -axzv --progress --delete #{h_db}:~/backups/elcuk #{lobal_backups}/")
+  end
+
+  desc "对 Sciurus 的数据库"
+  task :ebay, hosts: h_db  do
+    run "backup perform -t sciurus"
+    # 备份的是数据库文件, 将数据弄成完全与服务器一样,多余的删除
+    system("rsync -axzv --progress --delete #{h_db}:~/backups/sciurus #{lobal_backups}/")
   end
 
   desc "备份 Elcuk2 的图片文件"
