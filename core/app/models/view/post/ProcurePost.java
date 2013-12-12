@@ -146,9 +146,10 @@ public class ProcurePost extends Post<ProcureUnit> {
                 String word = this.word();
                 sbd.append(" AND (")
                         .append("product.sku LIKE ? OR ")
-                        .append("selling.sellingId LIKE ?")
+                        .append("selling.sellingId LIKE ? OR ")
+                        .append("fba.shipmentId LIKE ?")
                         .append(") ");
-                for(int i = 0; i < 2; i++) params.add(word);
+                for(int i = 0; i < 3; i++) params.add(word);
             }
         }
 
