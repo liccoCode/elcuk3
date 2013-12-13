@@ -112,7 +112,7 @@ public class Account extends Model {
     public String accessKey;
 
     /**
-     * Amazon MerchantID
+     * Amazon MerchantID/SellerId
      */
     @Expose
     public String merchantId;
