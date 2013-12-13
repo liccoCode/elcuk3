@@ -70,12 +70,12 @@ public class MWSReports {
 
             ReportRequestInfo info = service.getReportRequestList(req)
                     .getGetReportRequestListResult().getReportRequestInfoList().get(0);
-            if("_DONE_".equals(request.procressState)) {
+            if("_DONE_".equals(info.getReportProcessingStatus())) {
                 request.state = JobRequest.S.DONE;
                 request.reportId = getReportId(request);
-            } else if("_DONE_NO_DATA_".equals(request.procressState)) {
+            } else if("_DONE_NO_DATA_".equals(info.getReportProcessingStatus())) {
                 request.state = JobRequest.S.CLOSE;
-            } else if("_CANCELLED_".equals(request.procressState)) {
+            } else if("_CANCELLED_".equals(info.getReportProcessingStatus())) {
                 request.state = JobRequest.S.CANCEL;
             } else {
                 request.state = JobRequest.S.PROCRESS;
