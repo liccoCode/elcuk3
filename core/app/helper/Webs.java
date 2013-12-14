@@ -111,9 +111,9 @@ public class Webs {
             ObjectInputStream ois = new ObjectInputStream(fis);
             CookieStore cookieStore = (CookieStore) ois.readObject();
             ois.close();
-            Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
+            Account.cookieMap().put(Account.cookieKey(acc.uniqueName, acc.type), cookieStore);
         }
-        Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
+        Account.cookieMap().get(Account.cookieKey(acc.uniqueName, acc.type)).clearExpired(new Date());
     }
 
     /**
