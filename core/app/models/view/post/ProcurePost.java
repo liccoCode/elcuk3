@@ -6,6 +6,7 @@ import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
  */
 public class ProcurePost extends Post<ProcureUnit> {
     private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
+    private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
 
     static {
@@ -106,51 +108,59 @@ public class ProcurePost extends Post<ProcureUnit> {
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<Object>();
 
-        long procrueId = isSearchForId();
-        if(procrueId > 0) {
+        Long procrueId = isSearchForId();
+        if(procrueId != null) {
             sbd.append("id=?");
             params.add(procrueId);
-        } else {
-            if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
-            sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
-                    .append("<=?");
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
+            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        }
 
-            if(this.whouseId > 0) {
-                sbd.append(" AND whouse.id=?");
-                params.add(this.whouseId);
-            }
+        String fba = isSearchFBA();
+        if(fba != null) {
+            sbd.append("fba.shipmentId=?");
+            params.add(fba);
+            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        }
 
-            if(this.cooperatorId > 0) {
-                sbd.append(" AND cooperator.id=? ");
-                params.add(this.cooperatorId);
-            }
+        if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
+        sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
+                .append("<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
 
-            if(this.stage != null) {
-                sbd.append(" AND stage=? ");
-                params.add(this.stage);
-            }
+        if(this.whouseId > 0) {
+            sbd.append(" AND whouse.id=?");
+            params.add(this.whouseId);
+        }
 
-            if(this.shipType != null) {
-                sbd.append(" AND shipType=? ");
-                params.add(this.shipType);
-            }
+        if(this.cooperatorId > 0) {
+            sbd.append(" AND cooperator.id=? ");
+            params.add(this.cooperatorId);
+        }
 
-            if(this.isPlaced != null) {
-                sbd.append(" AND isPlaced=? ");
-                params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
-            }
+        if(this.stage != null) {
+            sbd.append(" AND stage=? ");
+            params.add(this.stage);
+        }
 
-            if(StringUtils.isNotBlank(this.search)) {
-                String word = this.word();
-                sbd.append(" AND (")
-                        .append("product.sku LIKE ? OR ")
-                        .append("selling.sellingId LIKE ?")
+        if(this.shipType != null) {
+            sbd.append(" AND shipType=? ");
+            params.add(this.shipType);
+        }
+
+        if(this.isPlaced != null) {
+            sbd.append(" AND isPlaced=? ");
+            params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
+        }
+
+        if(StringUtils.isNotBlank(this.search)) {
+            String word = this.word();
+            sbd.append(" AND (")
+                    .append("product.sku LIKE ? OR ")
+                    .append("selling.sellingId LIKE ?")
 //                        .append("fba.shipmentId LIKE ?")
-                        .append(") ");
-                for(int i = 0; i < 2; i++) params.add(word);
-            }
+                    .append(") ");
+            for(int i = 0; i < 2; i++) params.add(word);
         }
 
         return new F.T2<String, List<Object>>(sbd.toString(), params);
@@ -161,11 +171,27 @@ public class ProcurePost extends Post<ProcureUnit> {
      *
      * @return
      */
-    private long isSearchForId() {
+    private Long isSearchForId() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
         }
-        return 0;
+        return null;
+    }
+
+    /**
+     * 根据正则表达式搜索是否有类似 id:123 这样的搜索如果有则直接进行 id 搜索
+     *
+     * @return
+     */
+    private String isSearchFBA() {
+        if(StringUtils.isNotBlank(this.search)) {
+            Matcher matcher = FBA.matcher(this.search);
+            if(matcher.find()) {
+                Logger.info("IsSearchFBA: %s [search: %s]", matcher.group(1), this.search);
+                return matcher.group(1);
+            }
+        }
+        return null;
     }
 }
