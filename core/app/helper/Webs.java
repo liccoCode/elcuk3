@@ -307,6 +307,15 @@ public class Webs {
     }
 
     /**
+     * 添加错误, 调用则抛出 FastRuntimeException
+     */
+    public static void error(String errorMsg) {
+        Validation.addError("", errorMsg);
+        if(Validation.hasErrors())
+            throw new FastRuntimeException(errorMsg);
+    }
+
+    /**
      * 直接把 Exception 的堆栈信息全部打印出来
      *
      * @param e

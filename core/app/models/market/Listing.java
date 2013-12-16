@@ -102,16 +102,16 @@ public class Listing extends GenericModel {
      * title xxxx by [??]
      */
     @Expose
-    public String byWho;
+    public String byWho = "EasyAcc";
 
     @Expose
-    public Integer reviews;
+    public Integer reviews = 0;
 
     @Expose
-    public Float rating;
+    public Float rating = 0f;
 
     @Expose
-    public Integer likes;
+    public Integer likes = 0;
 
     @Lob
     @Expose
@@ -486,17 +486,24 @@ public class Listing extends GenericModel {
 
     /**
      * 获得被跟踪的Listing
-     *
-     * @return
      */
     public static List<Listing> trackedListings() {
         return Listing.find("isTracked = true").fetch();
     }
 
+    public static Listing blankListing(String asin, M market, Product sku) {
+        Listing lst = new Listing();
+        lst.asin = asin;
+        lst.market = market;
+        lst.listingId = lid(asin, market);
+        lst.product = sku;
+        lst.title = "空 Listing, 请手动调用一次抓取";
+        return lst;
+    }
+
+
     /**
      * 关闭Listing被跟的警告
-     *
-     * @param
      */
     public void closeWarnning() {
         if(!Listing.isSelfBuildListing(this.title))

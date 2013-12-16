@@ -49,7 +49,7 @@ public class Selling extends GenericModel {
         this.state = S.NEW;
     }
 
-    /**
+    /*
      * Selling 的状态
      */
     public enum S {
@@ -93,7 +93,7 @@ public class Selling extends GenericModel {
 
 
     /**
-     * 1. 在 Amazon 上架的唯一的 merchantSKU;
+     * 1. 在 Amazon 上架的唯一的 merchantSKU(SKU,UPC);
      * 2. 在 ebay 上唯一的 itemid(因为 ebay 的 itemid 是唯一的, 所以对于 ebay 的 selling, merchantSKU 与 asin 将会一样)
      */
     @Column(nullable = false)
@@ -368,32 +368,14 @@ public class Selling extends GenericModel {
     /**
      * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
      */
-    public Selling patchASelling(String sku, String upc, String asin, M market, Account acc,
-                                 Product product, boolean haveUpc) {
-        String sid = Selling.sid(String.format("%s,%s", sku, upc), market, acc);
-        if(!haveUpc) {
-            sid = Selling.sid(sku, market, acc);
-        }
-        if(Selling.findById(sid) != null)
-            throw new FastRuntimeException("Selling 已经存在, 不需要再添加!");
-        this.sellingId = sid;
-        this.asin = asin;
-        this.merchantSKU = StringUtils.split(sid, "|")[0];
-        this.save();
+    public Selling patchToListing() {
+        if(Selling.exist(this.sid())) Webs.error("Selling 已经存在");
+        Product sku = Product.findByMerchantSKU(this.merchantSKU);
+        if(sku == null) Webs.error("SKU 产品不存在");
 
-        Listing lst = Listing.findById(Listing.lid(asin, market));
-        if(lst == null) {
-            lst = new Listing(this, product);
-            lst.listingId = Listing.lid(asin, market);
-            lst.title = "请进行 Listing 页面进行重新抓取.";
-            lst.market = market;
-            lst.save();
-        }
-
+        Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
+        if(lst == null) lst = Listing.blankListing(asin, market, sku).save();
         this.listing = lst;
-        this.account = acc;
-        this.market = market;
-        this.aps.upc = upc;
         return this.save();
     }
 
@@ -403,13 +385,15 @@ public class Selling extends GenericModel {
      * @return
      */
     public String sid() {
-        if(StringUtils.isBlank(this.merchantSKU))
-            throw new FastRuntimeException("Selling.sid merchantSKU can not be empty.");
-        if(this.market == null)
-            throw new FastRuntimeException("Selling.sid market can not be null.");
-        if(this.account == null)
-            throw new FastRuntimeException("Selling.sid account can not be null.");
-        this.sellingId = Selling.sid(this.merchantSKU, this.market, this.account);
+        if(StringUtils.isBlank(this.sellingId)) {
+            if(StringUtils.isBlank(this.merchantSKU))
+                throw new FastRuntimeException("Selling merchantSKU can not be empty.");
+            if(this.market == null)
+                throw new FastRuntimeException("Selling market can not be null.");
+            if(this.account == null)
+                throw new FastRuntimeException("Selling account can not be null.");
+            this.sellingId = Selling.sid(this.merchantSKU, this.market, this.account);
+        }
         return this.sellingId;
     }
 
@@ -453,6 +437,17 @@ public class Selling extends GenericModel {
 
     public static boolean exist(String merchantSKU) {
         return Selling.find("merchantSKU=?", merchantSKU).first() != null;
+    }
+
+    public static Selling blankSelling(String msku, String asin, String upc, Account acc, M market) {
+        Selling selling = new Selling();
+        selling.account = acc;
+        selling.merchantSKU = msku;
+        selling.asin = asin;
+        selling.aps.upc = upc;
+        selling.market = market;
+        selling.sid();
+        return selling;
     }
 
     public boolean isMSkuValid() {
