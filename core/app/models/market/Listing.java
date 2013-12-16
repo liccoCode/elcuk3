@@ -203,22 +203,6 @@ public class Listing extends GenericModel {
 
 
     /**
-     * 从所有 ListingOffer 中查找自己
-     *
-     * @return
-     */
-    public ListingOffer easyacceu() {
-        if(this.offers == null) return null;
-        for(ListingOffer offer : this.offers) {
-            if("AJUR3R8UN71M4".equalsIgnoreCase(offer.offerId) ||
-                    "A22H6OV6Q7XBYK".equalsIgnoreCase(offer.offerId)) {
-                return offer;
-            }
-        }
-        return null;
-    }
-
-    /**
      * 根据 Listing 的状态, 进行 Listing 的检查并更新;
      * 1. 如果这个 Listing 是我们自己的, 检查是否被跟.
      */
