@@ -62,14 +62,6 @@ public class Selling extends GenericModel {
          */
         SELLING,
         /**
-         * 由于没有库存已经自动下架
-         */
-        NO_INVENTORY,
-        /**
-         * 手动进行暂停销售, 根据不同网站的规则或者情况达到暂停销售的状态
-         */
-        HOlD,
-        /**
          * 完全下架, 如果可以还能够重新上架
          */
         DOWN
@@ -132,15 +124,8 @@ public class Selling extends GenericModel {
      */
     public Float ps = 0f;
 
-
     @Expose
     public Float shippingPrice = 0f;
-
-    /**
-     * 使用 "," 分隔的, 与此 Selling 对应市场的 ASIN, 当有多个 ASIN 的时候,用来追踪最低价格
-     */
-    @Expose
-    public String priceMatchAsin;
 
     /**
      * 此 Listing 在 FBA 仓库中所使用的外键 sku
