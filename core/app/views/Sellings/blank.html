@@ -1,0 +1,59 @@
+#{extends 'main.html'/}
+#{set title:'添加 Selling'/}
+#{set 'moreStyles'}
+    #{stylesheet 'market.css'/}
+#{/set}
+
+#{errorMsgs /}
+<div class="row">
+  <form action="@{Sellings.create()}" class="form-horizontal" id='new_selling'>
+    <h4 class="text-center">手动添加 Selling</h4>
+
+    <div class="control-group">
+      <label class="control-label" for="sku">SKU</label>
+
+      <div class="controls">
+        <input type="text" id="sku" name="sku" placeholder="产品编号">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="upc">UPC</label>
+
+      <div class="controls">
+        <input type="text" id="upc" name="upc" placeholder="Universal Product Code">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="asin">ASIN</label>
+
+      <div class="controls">
+        <input type="text" id="asin" name="asin" placeholder="Amazon Standard Identification Number">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="market">Market</label>
+
+      <div class="controls">
+      #{select 'market', items:models.market.M.values()}#{/select}
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="acc.id">Account</label>
+
+      <div class="controls">
+      #{select 'acc.id', items:accs}#{/select}
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="controls">
+        <button type="submit" class="btn" data-disable-with='提交中..'>提交</button>
+      </div>
+    </div>
+
+  </form>
+</div>

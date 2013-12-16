@@ -6,7 +6,6 @@ import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -187,10 +186,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     private String isSearchFBA() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = FBA.matcher(this.search);
-            if(matcher.find()) {
-                Logger.info("IsSearchFBA: %s [search: %s]", matcher.group(1), this.search);
-                return matcher.group(1);
-            }
+            if(matcher.find()) return matcher.group(1);
         }
         return null;
     }

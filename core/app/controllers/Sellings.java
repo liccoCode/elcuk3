@@ -5,17 +5,21 @@ import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.embedded.AmazonProps;
+import models.market.Account;
 import models.market.Listing;
+import models.market.M;
 import models.market.Selling;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.helper.Validate;
 import play.data.validation.Error;
+import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,6 +95,33 @@ public class Sellings extends Controller {
             renderJSON(new Ret(false, errors.toString()));
         } else {
             renderJSON(new Ret(true));
+        }
+    }
+
+    /**
+     * 添加 selling 页面
+     */
+    public static void blank() {
+        List<Account> accs = Account.openedSaleAcc();
+        render(accs);
+    }
+
+    public static void create(String sku, String upc, String asin, String market, Account acc) {
+        try {
+            if(StringUtils.isBlank(sku)) Webs.error("SKU 必须存在");
+            if(StringUtils.isBlank(upc)) Webs.error("UPC 必须存在");
+            if(StringUtils.isBlank(asin)) Webs.error("ASIN 必须存在");
+            if(StringUtils.isBlank(market)) Webs.error("Market 必须存在");
+
+            String msku = String.format("%s,%s", sku.trim(), upc.trim());
+            Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
+            selling.patchToListing();
+            flash.success("手动添加 Selling 成功.");
+            Sellings.selling(selling.sellingId);
+        } catch(FastRuntimeException e) {
+            List<Account> accs = Account.openedSaleAcc();
+            Validation.addError("", e.getMessage());
+            render("Sellings/blank.html", accs);
         }
     }
 
