@@ -45,7 +45,7 @@
       <label class="control-label" for="acc.id">Account</label>
 
       <div class="controls">
-      #{select 'acc.id', items:accs}#{/select}
+      #{select 'acc.id', items:models.market.Account.openedSaleAcc()}#{/select}
       </div>
     </div>
 

@@ -102,8 +102,7 @@ public class Sellings extends Controller {
      * 添加 selling 页面
      */
     public static void blank() {
-        List<Account> accs = Account.openedSaleAcc();
-        render(accs);
+        render();
     }
 
     public static void create(String sku, String upc, String asin, String market, Account acc) {
@@ -119,9 +118,22 @@ public class Sellings extends Controller {
             flash.success("手动添加 Selling 成功.");
             Sellings.selling(selling.sellingId);
         } catch(FastRuntimeException e) {
-            List<Account> accs = Account.openedSaleAcc();
             Validation.addError("", e.getMessage());
-            render("Sellings/blank.html", accs);
+            render("Sellings/blank.html");
+        }
+    }
+
+    public static void changeListing(Selling s, String listingId) {
+        try {
+            Listing lst = Listing.findById(listingId);
+            if(lst == null) Webs.error("Listing %s 不存在", listingId);
+            String oldListingId = s.listing.listingId;
+            s.changeListing(lst);
+            flash.success("成功将 Selling %s 从 %s 转移到 %s", s.sellingId, oldListingId, listingId);
+            Sellings.selling(s.sellingId);
+        } catch(FastRuntimeException e) {
+            flash.error(e.getMessage());
+            Sellings.selling(s.sellingId);
         }
     }
 

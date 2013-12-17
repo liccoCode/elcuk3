@@ -223,6 +223,16 @@ public class Selling extends GenericModel {
         this.save();
     }
 
+    public Selling changeListing(Listing listing) {
+        String sku = Product.merchantSKUtoSKU(this.merchantSKU);
+        if(listing.listingId.equals(this.listing.listingId)) Webs.error("Listing 是一样的, 不需要更改");
+        if(!sku.equals(listing.product.sku)) Webs.error("不可以切换到不同的 SKU");
+        this.listing = listing;
+        this.asin = listing.asin;
+        this.market = listing.market;
+        return this.save();
+    }
+
     /**
      * 从 amazon 将数据同步回来
      */

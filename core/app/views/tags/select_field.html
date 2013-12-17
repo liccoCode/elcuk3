@@ -1,0 +1,12 @@
+<div class="control-group">
+  <label class="control-label" for="${_id}">${_label}</label>
+
+  <div class="controls">
+    <select id="${_id}" name="${_name}" class="${_span ? _span : 'span10'}">
+    #{list items:_items}
+      <option ${_value ? (_ == _value ? 'selected' : '') : ''} value="${_propertyVal ? _[_propertyVal] : _['id']}">${_}</option>
+    #{/list}
+    </select>
+    <span class="help-inline" id="${_id}_hint"></span>
+  </div>
+</div>
