@@ -3,9 +3,9 @@
 
   <div class="controls">
     <input type="text" id="${_id}" ${_disabled ? 'disabled' : ''} ${_readonly ? 'readonly' : ''}
-           class="${_span ? _span : 'span10'}" name="${_name}"
-           placeholder="${_label}"
-           value="${_value ? _value : ''}">
+           class="${_span?:'span10'}" name="${_name}"
+           placeholder="${_placeholder?:_label}"
+           value="${_value?:''}">
     <span class="help-inline" id="${_id}_hint"></span>
   </div>
 </div>

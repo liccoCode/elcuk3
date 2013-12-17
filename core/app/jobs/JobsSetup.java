@@ -1,5 +1,6 @@
 package jobs;
 
+import jobs.driver.DriverJob;
 import play.Logger;
 import play.Play;
 import play.exceptions.UnexpectedException;
@@ -59,7 +60,7 @@ public class JobsSetup {
             every(ShipmentSyncJob.class, "5mn");
 
             every(KeepSessionJob.class, "29mn");
-
+            new DriverJob().now();
             Logger.info("JobPlguin setup %s jobs.", JobsSetup.jobs);
         }
     }
