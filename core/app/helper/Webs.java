@@ -111,9 +111,9 @@ public class Webs {
             ObjectInputStream ois = new ObjectInputStream(fis);
             CookieStore cookieStore = (CookieStore) ois.readObject();
             ois.close();
-            Account.cookieMap().put(Account.cookieKey(acc.id, acc.type), cookieStore);
+            Account.cookieMap().put(Account.cookieKey(acc.uniqueName, acc.type), cookieStore);
         }
-        Account.cookieMap().get(Account.cookieKey(acc.id, acc.type)).clearExpired(new Date());
+        Account.cookieMap().get(Account.cookieKey(acc.uniqueName, acc.type)).clearExpired(new Date());
     }
 
     /**
@@ -304,6 +304,15 @@ public class Webs {
     public static <E extends Throwable> String E(E e) {
         if(Play.mode.isDev()) e.printStackTrace();
         return e.getMessage() + "|" + e.getClass().getSimpleName();
+    }
+
+    /**
+     * 添加错误, 调用则抛出 FastRuntimeException
+     */
+    public static void error(String errorMsg) {
+        Validation.addError("", errorMsg);
+        if(Validation.hasErrors())
+            throw new FastRuntimeException(errorMsg);
     }
 
     /**

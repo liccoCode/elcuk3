@@ -1,18 +1,11 @@
 package controllers;
 
-import helper.Webs;
 import models.ElcukConfig;
-import models.market.Account;
-import models.market.M;
-import models.market.Selling;
-import models.product.Product;
-import org.apache.commons.lang.StringUtils;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,52 +43,52 @@ public class Elcuk extends Controller {
     /**
      * 修复 Amazon 上已经有的 Selling 没有则无法创建
      */
-    @Check("finances.addselling")
-    public static void addSelling(String url, String skuAndUpc, Boolean haveUpc) {
-        // 修复方法, 直接写在 Controller 中了.
-        if(haveUpc == null) haveUpc = true;
-        String[] skuAndUpcArr = StringUtils.split(skuAndUpc, ",");
-        if(skuAndUpcArr.length != 2) {
-            flash.error("Merchant Sku 格式错误, 必须为 [SKU],[UPC]");
-            index();
-        }
-        String[] parts = Elcuk.parseUrl(url);
-        if(parts.length != 3) {
-            flash.error("URL 格式错误!");
-            index();
-        }
-        Product product = Product.findById(skuAndUpcArr[0]);
-        if(product == null) {
-            flash.error("Product 不存在!");
-            index();
-        }
-
-        M market = M.val(parts[1]);
-        String asin = parts[2];
-
-        Account acc = null;
-        if(market == M.AMAZON_UK)
-            acc = Account.findById(1l);
-        else if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR, M.AMAZON_IT).contains(market))
-            acc = Account.findById(2l);
-        else if(market == M.AMAZON_US)
-            acc = Account.findById(131l);
-        else {
-            flash.error("%s 市场还不支持!", market);
-            index();
-        }
-
-        try {
-            Selling selling = new Selling().patchASelling(
-                    skuAndUpcArr[0], skuAndUpcArr[1], asin, market, acc, product, haveUpc
-            );
-            flash.success("添加成功, 可进入 Selling 进行 Sync 同步信息.");
-            redirect("/sellings/selling/" + selling.sellingId);
-        } catch(Exception e) {
-            flash.error(Webs.E(e));
-            index();
-        }
-    }
+//    @Check("finances.addselling")
+//    public static void addSelling(String url, String skuAndUpc, Boolean haveUpc) {
+//        // 修复方法, 直接写在 Controller 中了.
+//        if(haveUpc == null) haveUpc = true;
+//        String[] skuAndUpcArr = StringUtils.split(skuAndUpc, ",");
+//        if(skuAndUpcArr.length != 2) {
+//            flash.error("Merchant Sku 格式错误, 必须为 [SKU],[UPC]");
+//            index();
+//        }
+//        String[] parts = Elcuk.parseUrl(url);
+//        if(parts.length != 3) {
+//            flash.error("URL 格式错误!");
+//            index();
+//        }
+//        Product product = Product.findById(skuAndUpcArr[0]);
+//        if(product == null) {
+//            flash.error("Product 不存在!");
+//            index();
+//        }
+//
+//        M market = M.val(parts[1]);
+//        String asin = parts[2];
+//
+//        Account acc = null;
+//        if(market == M.AMAZON_UK)
+//            acc = Account.findById(1l);
+//        else if(Arrays.asList(M.AMAZON_DE, M.AMAZON_ES, M.AMAZON_FR, M.AMAZON_IT).contains(market))
+//            acc = Account.findById(2l);
+//        else if(market == M.AMAZON_US)
+//            acc = Account.findById(131l);
+//        else {
+//            flash.error("%s 市场还不支持!", market);
+//            index();
+//        }
+//
+//        try {
+//            Selling selling = new Selling().patchASelling(
+//                    skuAndUpcArr[0], skuAndUpcArr[1], asin, market, acc, product, haveUpc
+//            );
+//            flash.success("添加成功, 可进入 Selling 进行 Sync 同步信息.");
+//            redirect("/sellings/selling/" + selling.sellingId);
+//        } catch(Exception e) {
+//            flash.error(Webs.E(e));
+//            index();
+//        }
+//    }
 
 
     /**

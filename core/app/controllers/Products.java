@@ -19,7 +19,6 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -77,7 +76,7 @@ public class Products extends Controller {
         redirect("/Products/show/" + pro.sku);
     }
 
-    @Before(only = {"saleAmazon", "saleAmazonListing"})
+    @Before(only = {"saleAmazon"})
     public static void beforeSaleAmazon() {
         String sku = Products.extarSku();
         if(StringUtils.isNotBlank(sku))
@@ -91,25 +90,8 @@ public class Products extends Controller {
         render(pro, s);
     }
 
-    @Check("products.saleamazonlisting")
-    public static void saleAmazonListing(Selling s, Product pro) {
-        /**
-         * 从前台上传来的一系列的值检查
-         */
-        try {
-            Selling se = pro.saleAmazon(s);
-            if(Validation.hasErrors()) {
-                Webs.errorToFlash(flash);
-                render("Products/saleAmazon.html", s, pro);
-            } else {
-                flash.success("在 %s 上架成功 ASIN: %s.", se.market.toString(), se.asin);
-                redirect("/Sellings/selling/" + se.sellingId);
-            }
-        } catch(FastRuntimeException e) {
-            flash.error(e.getMessage());
-            render("Products/saleAmazon.html", s, pro);
-        }
-    }
+    // TODO 删除权限
+//    @Check("products.saleamazonlisting")
 
 
     /**

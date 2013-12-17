@@ -2,6 +2,7 @@ package models.market;
 
 import factory.FactoryBoy;
 import org.apache.http.NameValuePair;
+import org.junit.Before;
 import org.junit.Test;
 import play.libs.F;
 import play.test.UnitTest;
@@ -22,9 +23,14 @@ import static org.junit.matchers.JUnitMatchers.containsString;
  * Time: 9:59 AM
  */
 public class AccountTest extends UnitTest {
+    @Before
+    public void setUp() {
+        FactoryBoy.deleteAll();
+    }
+
     @Test
     public void testLoginAmazonSellerCenterStep1DE() throws IOException {
-        Account acc = FactoryBoy.build(Account.class, "de");
+        Account acc = FactoryBoy.create(Account.class, "de");
         acc.cookieStore().clear();
         F.T2<List<NameValuePair>, String> params = acc.loginAmazonSellerCenterStep1();
         Map<String, String> pairs = new HashMap<String, String>();
@@ -42,7 +48,7 @@ public class AccountTest extends UnitTest {
 
     @Test
     public void testLoginAmazonSellerCenter() {
-        Account acc = FactoryBoy.build(Account.class, "de");
+        Account acc = FactoryBoy.create(Account.class, "de");
         acc.cookieStore().clear();
         acc.loginAmazonSellerCenter();
 
@@ -52,7 +58,7 @@ public class AccountTest extends UnitTest {
 
     @Test
     public void testLoginAmazonSellerCenterUS() {
-        Account acc = FactoryBoy.build(Account.class, "us");
+        Account acc = FactoryBoy.create(Account.class, "us");
         acc.cookieStore().clear();
         acc.loginAmazonSellerCenter();
 
@@ -61,7 +67,7 @@ public class AccountTest extends UnitTest {
 
     @Test
     public void testLoginAmazonSellerCenterUK() {
-        Account acc = FactoryBoy.build(Account.class, "uk");
+        Account acc = FactoryBoy.create(Account.class, "uk");
         acc.cookieStore().clear();
         acc.loginAmazonSellerCenter();
 
