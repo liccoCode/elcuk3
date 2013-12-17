@@ -26,6 +26,7 @@
   <div class="tab-pane fade" id='selling'>
     <div class="row-fluid">
       <div class="offset2 span8">
+        <h4>在这里对 Selling 的 Listing 进行修正(只允许同 SKU)</h4>
           #{form @Sellings.changeListing(), id: 'changeListing', class: 'form'}
               #{text_field id: 'sellingId_read', readonly: true, name: 's.sellingId', label: 'SellingId', value: s.sellingId /}
               #{text_field id:'listing', name: 'listingId', label: 'Listing', value: s.listing?.listingId /}
