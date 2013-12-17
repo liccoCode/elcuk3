@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class GTs {
     public static final String BASE_PATH = "/app/views/gt_templates/%s.html";
-
+    public static final String BASE_PATH2 = "/app/views/gt_templates/%s.txt";
     /**
      * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出; 模板都是以 html 结尾;
      * 例:
@@ -29,7 +29,19 @@ public class GTs {
         Template t = TemplateLoader.load(VirtualFile.fromRelativePath(String.format(BASE_PATH, name)));
         return t.render(args);
     }
-
+    /**
+     * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出; 模板都是以 txt 结尾;
+     * 例:
+     * GTs.render('templateName', GTs.newMap('key', val).build());
+     *
+     * @param name , 区分大小写
+     * @param args
+     * @return
+    */
+    public static String renderTxt(String name, Map<String, Object> args) {
+            Template t = TemplateLoader.load(VirtualFile.fromRelativePath(String.format(BASE_PATH2, name)));
+            return t.render(args);
+    }
     /**
      * 通过 key 与模板源文件进行模板内容输出
      *

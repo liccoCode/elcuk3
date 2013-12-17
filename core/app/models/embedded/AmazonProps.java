@@ -181,6 +181,12 @@ public class AmazonProps implements Serializable {
     public boolean isGiftWrap = true;
     public boolean isGiftMessage = false;
 
+    /**
+     * 亚马逊上架的时候需要提供的product的type
+     */
+    public String feedProductType;
+
+
     public void validate() {
         if(StringUtils.isBlank(this.title))
             Validation.addError("", "Title 必须填写");

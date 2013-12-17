@@ -139,7 +139,7 @@
 
 <tr>
   <th>Gift Options</th>
-  <td colspan="3">
+  <td >
     <label class="checkbox inline">
       <input name="s.aps.isGiftWrap" type="checkbox" ${s.aps.isGiftWrap ? 'checked':''} value="true">
       Gift&nbsp;Wrap
@@ -148,6 +148,21 @@
       <input name="s.aps.isGiftMessage" type="checkbox" ${s.aps.isGiftMessage ? 'checked':''} value="true">
       Gift&nbsp;Message
     </label>
+  </td>
+  <th>Feed Product Type:</th>
+  <td>
+      <div class="input-append input-prepend">
+            <select class="span2" name="s.aps.feedProductType">
+                <option value="ComputerComponent" selected>ComputerComponent</option>
+                <option value="ComputerDriveOrStorage">ComputerDriveOrStorage</option>
+                <option value="Monitor">Monitor</option>
+                <option value="NotebookComputer">NotebookComputer</option>
+                <option value="PersonalComputer">PersonalComputer</option>
+                <option value="Printer">Printer</option>
+                <option value="Scanner">Scanner</option>
+                <option value="VideoProjector">VideoProjector</option>
+            </select>
+      </div>
   </td>
 </tr>
 
