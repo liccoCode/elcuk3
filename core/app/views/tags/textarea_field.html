@@ -1,0 +1,10 @@
+<div class="control-group">
+  <label class="control-label" for="${_id}">${_label}</label>
+
+  <div class="controls">
+    <textarea rows="${_rows ? _rows : '5'}" id="${_id}" ${_disabled ? 'disabled' : ''}
+              class="${_span ? _span : 'span10'}" name="${_name}"
+              placeholder="${_label}">${_value ? _value : ''}</textarea>
+    <span class="help-inline" id="${_id}_hint"></span>
+  </div>
+</div>

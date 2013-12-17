@@ -35,7 +35,7 @@
   </blockquote>
 </div>
 
-<form id='saleAmazonForm' action="@{Products.saleAmazonListing()}" method="post" autocomplete="off">
+<form id='saleAmazonForm' action="" method="post" autocomplete="off">
 <table class="table table-condensed">
 <tr>
   <td colspan="4">
@@ -167,7 +167,7 @@
   <th rowspan="5">Technical:</th>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+      <input id='bulletPoint1' type="text" class="span11" name="s.aps.keyFeturess"
              value="${s.aps.keyFeturess[0]}">
       <span class="add-on"></span>
     </div>
@@ -177,7 +177,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+      <input id='bulletPoint2' type="text" class="span11" name="s.aps.keyFeturess"
              value="${s.aps.keyFeturess[1]}">
       <span class="add-on"></span>
     </div>
@@ -187,7 +187,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+      <input id='bulletPoint3' type="text" class="span11" name="s.aps.keyFeturess"
              value="${s.aps.keyFeturess[2]}">
       <span class="add-on"></span>
     </div>
@@ -197,7 +197,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+      <input id='bulletPoint4' type="text" class="span11" name="s.aps.keyFeturess"
              value="${s.aps.keyFeturess[3]}">
       <span class="add-on"></span>
     </div>
@@ -207,7 +207,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
+      <input id='bulletPoint5' type="text" class="span11" name="s.aps.keyFeturess"
              value="${s.aps.keyFeturess[4]}">
       <span class="add-on"></span>
     </div>
@@ -218,7 +218,7 @@
   <th rowspan="5">SearchTerms:</th>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+      <input id="searchTerms1" type="text" class="span11" name="s.aps.searchTermss"
              value="${s.aps.searchTermss[0]}">
       <span class="add-on"></span>
     </div>
@@ -228,7 +228,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+      <input id='searchTerms2' type="text" class="span11" name="s.aps.searchTermss"
              value="${s.aps.searchTermss[1]}">
       <span class="add-on"></span>
     </div>
@@ -238,7 +238,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+      <input id='searchTerms3' type="text" class="span11" name="s.aps.searchTermss"
              value="${s.aps.searchTermss[2]}">
       <span class="add-on"></span>
     </div>
@@ -248,7 +248,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+      <input id='searchTerms4' type="text" class="span11" name="s.aps.searchTermss"
              value="${s.aps.searchTermss[3]}">
       <span class="add-on"></span>
     </div>
@@ -258,7 +258,7 @@
 <tr>
   <td colspan="3">
     <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
+      <input id='searchTerms5' type="text" class="span11" name="s.aps.searchTermss"
              value="${s.aps.searchTermss[4]}">
       <span class="add-on"></span>
     </div>
@@ -269,13 +269,13 @@
   <th>ProductDesc:</th>
   <td colspan="3">
     <div class="input-append">
-      <textarea rows="10" name="s.aps.productDesc" data-length='2000'
+      <textarea id='productDesc' rows="10" name="s.aps.productDesc" data-length='2000'
                 class="span12 proDesc">${s.aps.productDesc?.trim()}</textarea>
       <div class="clearfix"></div>
       <span class="add-on">2000 bytes left</span>
       <button class="btn">Preview</button>
     </div>
-    <div style='margin-top:-1px;border-top:1px dashed;'></div>
+    <div id='previewDesc' style='margin-top:-1px;border-top:1px dashed;'></div>
   </td>
 </tr>
 </table>
