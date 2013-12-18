@@ -81,13 +81,13 @@ public class Products extends Controller {
         String sku = Products.extarSku();
         if(StringUtils.isNotBlank(sku))
             renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
-        renderArgs.put("accs", Account.openedSaleAcc());
     }
 
     public static void saleAmazon(String id) {
-        Product pro = Product.findByMerchantSKU(id);
+        Product product = Product.findByMerchantSKU(id);
         Selling s = new Selling();
-        render(pro, s);
+        renderArgs.put("accs", Account.openedSaleAcc());
+        render(product, s);
     }
 
     // TODO 删除权限
