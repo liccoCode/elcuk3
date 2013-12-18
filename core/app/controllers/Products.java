@@ -153,7 +153,7 @@ public class Products extends Controller {
          * 2. 通过 UPC 与
          */
         try {
-            List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
+            List<Selling> upcSellings = Selling.find("aps.upc=?", upc).fetch();
             renderJSON(J.G(upcSellings));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -161,7 +161,7 @@ public class Products extends Controller {
     }
 
     public static void skuMarketCheck(String sku, String market) {
-        Product product = Product.findById(sku);
+        Product product = Product.findById(StringUtils.split(sku, ",")[0]);
         M mkt = M.AMAZON_DE;
         try {
             mkt = M.val(market);

@@ -215,3 +215,4 @@ $(function(){
     LoadMask.clear();
 });
 
+$.noty.defaults = $.extend({}, $.noty.defaults, {layout: 'topCenter', timeout: '5000'});
