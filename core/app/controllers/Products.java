@@ -89,7 +89,7 @@ public class Products extends Controller {
         try {
             checkAuthenticity();
             s.patchSkuToListing("productType");
-            renderJSON(J.json(s));
+            renderJSON(new Ret(true, s.sellingId));
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(e.getMessage()));
         }
