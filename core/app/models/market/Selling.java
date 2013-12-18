@@ -465,6 +465,6 @@ public class Selling extends GenericModel {
      * @return String 生成的模板文件
      */
     public static String generateFeedTemplateFile(List<Selling> sellingList) {
-        return GTs.renderTxt("feed_template_consumerElectronics_de", GTs.newMap("sellingList", sellingList).build());
+        return GTs.renderTxt("feed_template_computers_de", GTs.newMap("sellingList", sellingList).build());
     }
 }

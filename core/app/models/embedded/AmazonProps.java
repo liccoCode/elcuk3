@@ -186,6 +186,10 @@ public class AmazonProps implements Serializable {
      */
     public String feedProductType;
 
+    /**
+     * 模板的类型
+     */
+    public String templateType;
 
     public void validate() {
         if(StringUtils.isBlank(this.title))

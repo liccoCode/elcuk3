@@ -20,6 +20,10 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -92,7 +96,13 @@ public class Products extends Controller {
 
     // TODO 删除权限
 //    @Check("products.saleamazonlisting")
-
+    public static void saleAmazonListing(Selling s, Product pro) {
+        if(s != null) {
+            List<Selling> sellings = new ArrayList<Selling>();
+            sellings.add(s);
+            renderText(Selling.generateFeedTemplateFile(sellings));
+        }
+    }
 
     /**
      * ========== Product ===============
