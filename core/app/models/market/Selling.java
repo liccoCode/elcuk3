@@ -407,6 +407,13 @@ public class Selling extends GenericModel {
         return this.sellingId;
     }
 
+    /**
+     * 提交的与此 Selling 有关的 Feed
+     */
+    public List<Feed> feeds() {
+        return Feed.find("fid=?", this.sellingId).fetch();
+    }
+
 
     public Float salePriceWithCurrency() {
         if(this.aps.salePrice == null) return 0f;
