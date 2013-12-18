@@ -376,16 +376,41 @@ public class Selling extends GenericModel {
     }
 
     /**
+     * 通过 Product 上架页面提交的信息, 使用 UPC 代替 ASIN, 等待 ASIN 被成功填充, 再更新 asin 为具体的 Asin 值
+     *
+     * @return
+     */
+    public Selling patchSkuToListing(String productType) {
+        // 以 Amazon 的 Template File 所必须要的值为准
+        if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
+        if(!isMSkuValid()) Webs.error("Merchant SKU 不合法. [SKU],[UPC]");
+        if(StringUtils.isBlank(this.aps.title)) Webs.error("Selling Title 必须存在");
+        if(StringUtils.isBlank(this.aps.brand)) Webs.error("品牌必须填写");
+        if(StringUtils.isBlank(this.aps.manufacturer)) Webs.error("Manufacturer 必须填写");
+        if(StringUtils.isBlank(this.aps.RBN)) Webs.error("Recommanded Browser Nodes 必须填写");
+        if(StringUtils.isBlank(productType)) Webs.error("所属模板的 Product Type 必须填写");
+        if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
+        if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
+        this.asin = this.aps.upc;
+        return patchToListing();
+    }
+
+    /**
      * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
      */
     public Selling patchToListing() {
         if(Selling.exist(this.sid())) Webs.error("Selling 已经存在");
-        Product sku = Product.findByMerchantSKU(this.merchantSKU);
-        if(sku == null) Webs.error("SKU 产品不存在");
+        Product product = Product.findByMerchantSKU(this.merchantSKU);
+        if(product == null) Webs.error("SKU 产品不存在");
+
+        List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
+        if(images == null || images.size() == 0) Webs.error("请添加 %s 并上传其图片后再处理 Selling.", product.sku);
+        this.aps.imageName = images.get(0).fileName;
 
         Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
-        if(lst == null) lst = Listing.blankListing(asin, market, sku).save();
+        if(lst == null) lst = Listing.blankListing(asin, market, product).save();
         this.listing = lst;
+        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
         return this.save();
     }
 

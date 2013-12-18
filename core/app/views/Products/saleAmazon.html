@@ -28,11 +28,11 @@
 <div class="row-fluid">
   <div class="btn-toolbar" id="btns">
     <div class="btn-group">
-      <button class="btn btn-success">提交 Feed 创建 Selling</button>
+      <button class="btn btn-success" id="submitSale" data-disable-with='提交请求中...'>提交 Feed 创建 Selling</button>
     </div>
   </div>
 
-#{form @Sellings.update(), class: 'form-horizontal', id: 'saleAmazonForm'}
+#{form @Products.saleAmazonListing(), class: 'form-horizontal', id: 'saleAmazonForm'}
   <div class="span10">
       #{text_field id:'title', name: 's.aps.title', label: '标题', value: '' /}
   </div>

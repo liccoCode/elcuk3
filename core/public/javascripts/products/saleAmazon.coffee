@@ -61,3 +61,16 @@ $ ->
           showSellingModal("#{$('#msku').val()} (#{r.length})", r)
       )
     false
+
+  $('#submitSale').click ->
+    $form = $('#saleAmazonForm')
+    $.ajax($form.attr('action'), {data: $form.serialize(), method: 'POST'})
+      .done((r) ->
+        if r.flag
+          noty({text: '成功, 等待完成'})
+        else
+          noty({text: r.message, type: 'error'})
+      )
+      .fail((r) ->
+        noty({text: r.responseText, type: 'error'})
+      )

@@ -19,6 +19,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.util.List;
 
@@ -76,13 +77,6 @@ public class Products extends Controller {
         redirect("/Products/show/" + pro.sku);
     }
 
-    @Before(only = {"saleAmazon"})
-    public static void beforeSaleAmazon() {
-        String sku = Products.extarSku();
-        if(StringUtils.isNotBlank(sku))
-            renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
-    }
-
     public static void saleAmazon(String id) {
         Product product = Product.findByMerchantSKU(id);
         Selling s = new Selling();
@@ -90,8 +84,16 @@ public class Products extends Controller {
         render(product, s);
     }
 
-    // TODO 删除权限
-//    @Check("products.saleamazonlisting")
+    @Check("products.saleamazonlisting")
+    public static void saleAmazonListing(Selling s) {
+        try {
+            checkAuthenticity();
+            s.patchSkuToListing("productType");
+            renderJSON(J.json(s));
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(e.getMessage()));
+        }
+    }
 
 
     /**
