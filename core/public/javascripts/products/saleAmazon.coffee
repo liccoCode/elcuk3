@@ -2,7 +2,14 @@ $ ->
   $('#check_apply').click(->
     $('#msku').val(->
       $('#check_modal').modal('hide')
-      "#{@value.split(",")[0]},#{$('[name=s\\.aps\\.upc]').val()}"
+      "#{@value.split(",")[0]},#{$('#upc').val()}"
+    )
+    false
+  )
+  $('#check_cancel').click(->
+    $('#msku').val(->
+      $('#check_modal').modal('hide')
+      "#{@value.split(",")[0]}"
     )
     false
   )
