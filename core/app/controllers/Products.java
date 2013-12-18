@@ -19,6 +19,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -80,20 +81,14 @@ public class Products extends Controller {
         redirect("/Products/show/" + pro.sku);
     }
 
-    @Before(only = {"saleAmazon"})
-    public static void beforeSaleAmazon() {
-        String sku = Products.extarSku();
-        if(StringUtils.isNotBlank(sku))
-            renderArgs.put("sids", J.json(Selling.sameFamilySellings(sku)._2));
-        renderArgs.put("accs", Account.openedSaleAcc());
-    }
-
     public static void saleAmazon(String id) {
-        Product pro = Product.findByMerchantSKU(id);
+        Product product = Product.findByMerchantSKU(id);
         Selling s = new Selling();
-        render(pro, s);
+        renderArgs.put("accs", Account.openedSaleAcc());
+        render(product, s);
     }
 
+<<<<<<< HEAD
     // TODO 删除权限
 //    @Check("products.saleamazonlisting")
     public static void saleAmazonListing(Selling s, Product pro) {
@@ -103,6 +98,19 @@ public class Products extends Controller {
             renderText(Selling.generateFeedTemplateFile(sellings));
         }
     }
+=======
+    @Check("products.saleamazonlisting")
+    public static void saleAmazonListing(Selling s) {
+        try {
+            checkAuthenticity();
+            s.patchSkuToListing("productType");
+            renderJSON(J.json(s));
+        } catch(FastRuntimeException e) {
+            renderJSON(new Ret(e.getMessage()));
+        }
+    }
+
+>>>>>>> wyatt/market
 
     /**
      * ========== Product ===============
@@ -163,7 +171,7 @@ public class Products extends Controller {
          * 2. 通过 UPC 与
          */
         try {
-            List<Selling> upcSellings = Selling.find("aps.upc like '%" + upc + "%'").fetch();
+            List<Selling> upcSellings = Selling.find("aps.upc=?", upc).fetch();
             renderJSON(J.G(upcSellings));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -171,7 +179,7 @@ public class Products extends Controller {
     }
 
     public static void skuMarketCheck(String sku, String market) {
-        Product product = Product.findById(sku);
+        Product product = Product.findById(StringUtils.split(sku, ",")[0]);
         M mkt = M.AMAZON_DE;
         try {
             mkt = M.val(market);

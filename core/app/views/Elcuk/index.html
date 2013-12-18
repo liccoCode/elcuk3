@@ -8,7 +8,8 @@
 #{flash_alert /}
 <div class="row-fluid">
   <div class="span4 bs-docs-form">
-    <form action="@{Elcuk.updateConfig()}" id="shipConfigForm" class="form-horizontal" data-method="PUT" method="POST">
+    <form action="@{Elcuk.updateConfig()}" id="shipConfigForm" class="form-horizontal" data-method="PUT"
+          method="POST">
       <div class="control-group">
         <label class="control-label">市场:</label>
 
@@ -64,33 +65,4 @@
     </form>
   </div>
 
-  <div class="span3 bs-docs-form">
-    <form action="@{Elcuk.addSelling()}" method="post">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <td>
-            <input type="text" name="url" class="span12" placeHolder="http://www.amazon.co.uk/dp/B00AE3TZCW">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <input type="text" name="skuAndUpc" placeHolder="[SKU],[UPC]">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label class="inline">
-              <input type="checkbox" name="haveUpc" value="false" style="margin-top:0;margin-bottom:3px">
-              <span>MSKU 不含 UPC</span>
-            </label>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <button class="btn btn-primary">添加</button>
-          </td>
-        </tr>
-      </table>
-    </form>
-  </div>
 </div>

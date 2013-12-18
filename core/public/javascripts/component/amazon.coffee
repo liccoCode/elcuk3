@@ -3,7 +3,7 @@ $ ->
   validateMaxLength = (maxLength, obj) ->
     $text = $(obj)
     length = unescape(encodeURI(jsEscapeHtml($text.val().trim()))).length
-    $text.find('~ span').html((maxLength - length) + " bytes left")
+    $text.find('~ .help-inline').html((maxLength - length) + " bytes left")
     if length > maxLength then $text.css('color', 'red') else $text.css('color', '')
     false
 
@@ -12,9 +12,8 @@ $ ->
 
       # 预览 Desc 的方法
   previewBtn = (e) ->
-    $ownerDiv = $(@).parent()
     invalidTag = false
-    for tag in $ownerDiv.siblings('div').html($ownerDiv.find(':input').val()).find('*')
+    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
       switch tag.nodeName.toString().toLowerCase()
         when 'br','p','b','#text'
           break
@@ -23,21 +22,34 @@ $ ->
           $(tag).css('background', 'yellow')
     noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
 
+  valid_length = (element) ->
+    console.log(element.getAttribute('id'))
+    if element.getAttribute('id').indexOf('bulletPoint') > -1
+        2000
+      else if element.getAttribute('id').indexOf('searchTerms') > -1
+        50
+      else if element.getAttribute('id').indexOf('productDesc') > -1
+        2000
+      else
+        1000
+
   # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
-  $('#saleAmazonForm').on('keyup blur', ".bulletPoint, .searchTermss", (e) ->
+  $('#saleAmazonForm').on('keyup blur', "[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss']", (e) ->
     return false if e.keyCode is 13
-    validateMaxLength($(@).data('length'), @)
-  ).on('keyup', ".proDesc", (e) ->
-    validateMaxLength($(@).data('length'), @)
-  ).on('blur', ".proDesc", (e) ->
-    validateMaxLength($(@).data('length'), @)
+    validateMaxLength(valid_length(@), @)
+  ).on('keyup', "[name='s.aps.productDesc']", (e) ->
+    validateMaxLength(valid_length(@), @)
+  ).on('blur', "[name='s.aps.productDesc']", (e) ->
+    validateMaxLength(valid_length(@), @)
     previewBtn.call(@, e)
   ).on('click', '.btn:contains(Preview)', (e) ->
     previewBtn.call(@, e)
     false
   )
-  $("input.bulletPoint, input.searchTermss, .proDesc").blur()
 
+  $("[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss'],[name='s.aps.productDesc']").blur()
+
+  # 方便提供自动加载其他 Selling 的功能
   $('#sellingPreview').on('click', '#sid_preview',(e) ->
     noty({text: _.template($('#tsp-show-template').html(), {tsp: $(@).data('tsp')})})
     false
@@ -75,97 +87,3 @@ $ ->
     )
     false
   )
-
-  # 显示 Selling 上架信息的 Modal 窗口
-  show_selling_modal = (title, sellings, callback, close_callback = undefined) ->
-    $.Deferred()
-    modal = $('#check_modal').find('#upc_num').html(title).end()
-    if sellings.length == 0
-      modal.find('.innder-modal').html('<p>暂时没有上架 Selling</p>')
-    else
-      template = modal.find('.innder-modal').html('').end().find('.template')
-      sellings.forEach (obj, index, arr) ->
-        modal.find('.innder-modal').append(
-          template.clone().removeClass('template').find('.check_id').html('SKU: ' + obj.sellingId).end()
-            .find('.check_title').html(obj.aps.title).end()
-        )
-    modal.modal('show')
-    cancel_btn = $('#check_cancel').off('clicl')
-    if close_callback
-      cancel_btn.on('click', close_callback)
-    else
-      cancel_btn.on('click', ->
-        modal.modal('hide'))
-    $('#check_apply').off('click').on('click', callback)
-
-  # upc 检查 Selling 的关闭事件
-  modal_upc_check_close = (e) ->
-    e.preventDefault()
-    $('#msku').val(->
-      $('#check_modal').modal('hide')
-      $('#check_upc').removeClass('btn-warning').addClass('btn-success')
-      "#{@value},#{$('[name=s\\.aps\\.upc]').val()}"
-    )
-
-  modal_sku_check_close = (e) ->
-    e.preventDefault()
-    $('#check_modal').modal('hide')
-    currency = ''
-    switch $('#market').val()
-      when 'AMAZON_UK', 'EBAY_UK'
-        currency = '&pound;'
-      when 'AMAZON_US'
-        currency = "$"
-      else
-        currency = '&euro;'
-    $('span.currency').html(currency)
-
-  modal_sku_check_cancel = (e) ->
-    $('#market').val(0)
-    $('#check_modal').modal('hide')
-
-  #Market 更换价格单位按钮
-  $('#market').change ->
-    # 1. SKU + Market 的 Selling 提示
-    market = $(@).val()
-    $.getJSON('/products/skuMarketCheck', {sku: $('#sku').val(), market: market})
-      .done((r) ->
-        if r.flag is false
-          alert r.message
-        else
-          show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_sku_check_close, modal_sku_check_cancel)
-      )
-    # 2. 货币符号的变化. -> modal_sku_check_close
-    false
-
-  # 账号对应的市场切换
-  $('#account').change ->
-    switch $(@).find("option:selected").text().split('.')[0]
-      when 'A_US'
-        val = "com"
-      when 'A_DE'
-        val = "de"
-      when 'A_UK'
-        val = 'co.uk'
-      else
-        val = ''
-    $("#market option:contains(amazon.#{val})").prop('selected', true).change()
-
-  # UPC 检查
-  $('#check_upc').click (e) ->
-    e.preventDefault()
-    $('#msku').val(->
-      @value.split(',')[0]
-    )
-    upc = $(@).removeClass('btn-warning btn-success').addClass('btn-warning').prev().val()
-    if !$.isNumeric(upc)
-      alert('UPC 必须是数字')
-      return false
-
-    $.ajax('/products/upcCheck', {type: 'GET', data: {upc: upc}, dataType: 'json'})
-      .done((r) ->
-        if r.flag is false
-          alert(r.message)
-        else
-          show_selling_modal("#{$('#sku').val()} (#{r.length})", r, modal_upc_check_close)
-      )

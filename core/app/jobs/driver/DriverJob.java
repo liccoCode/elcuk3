@@ -28,7 +28,8 @@ public class DriverJob extends Job {
                     .select("id", "className", "jsonArgs", "scheduleAt", "state")
                     .from("Gjob")
                     .where("state=?").param(GJob.S.DB.name())
-                    .where("scheduleAt<=?").param(new Date());
+                    .where("scheduleAt<=?").param(new Date())
+                    .limit(10);
             List<Map<String, Object>> rows = DBUtils
                     .rows(sql.toString(), sql.getParams().toArray());
             for(Map<String, Object> job : rows) {
@@ -47,6 +48,7 @@ public class DriverJob extends Job {
                 }
             }
         } finally {
+            // 这个频率参数可变, 可配置
             new DriverJob().in(2);
         }
     }

@@ -1,27 +1,17 @@
-#{extends 'main.html'/}
-#{script 'component/amazon.coffee'/}
-
-#{flash_alert /}
-#{errorMsgs /}
-<div class="alert alert-block alert-success fade in">
-  <h4 class="alert-heading">Amazon 上架功能简介</h4>
-
-  <p>&nbsp;</p>
-  <ul>
-    <li>Preview 功能拥有提示 Amazon 不允许的标签的功能, 能够方便的在这里检查出不允许的标签并查看到预览效果.</li>
-    <li>Price 价格会根据这个 Selling 所在的市场来进行判断单位, 所以只需要填写对应市场的价格数值即可, 不用去转换.</li>
-    <li>MerchantSKU 是根据 SKU 与 UPC 来确定的, 不允许手动修改. 所以对于 FBA 不发, 需要创建一个自卖产品的, 建议不在系统中处理.</li>
-    <li>UPC 会检查并且给出已经上架的 Selling (需要处理历史数据...).</li>
-    <li>RBN 可以的参考信息还需要进行补全.</li>
-    <li>通过 Product 上架, 会自动创建 Listing(如果 Listing 存在, 则不会改变), Selling.</li>
-  </ul>
-</div>
+#{extends 'main_full.html'/}
+#{set 'moreStyles'}
+    #{stylesheet 'market.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'component/amazon.coffee'/}
+    #{script 'products/saleAmazon.coffee'/}
+#{/set}
 <div id='check_modal' class="modal hide fade">
   <div class="modal-header">
     <h3>使用 <span id="upc_num"></span> 上架的 Selling</h3>
   </div>
   <div class="modal-body">
-    <p class="text-error">当前 SKU 为: ${pro.sku}</p>
+    <p class="text-error">当前 SKU 为: ${product.sku}</p>
 
     <div class="innder-modal"></div>
   </div>
@@ -35,6 +25,7 @@
   </blockquote>
 </div>
 
+<<<<<<< HEAD
 <form id='saleAmazonForm' action="@{Products.saleAmazonListing()}" method="post" autocomplete="off">
 <table class="table table-condensed">
 <tr>
@@ -215,86 +206,64 @@
       <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
              value="${s.aps.keyFeturess[3]}">
       <span class="add-on"></span>
+=======
+<div class="row-fluid">
+  <div class="btn-toolbar" id="btns">
+    <div class="btn-group">
+      <button class="btn btn-success" id="submitSale" data-disable-with='提交请求中...'>提交 Feed 创建 Selling</button>
+>>>>>>> wyatt/market
     </div>
-  </td>
-</tr>
+  </div>
 
-<tr>
-  <td colspan="3">
-    <div class="input-append">
-      <input type="text" class="span11 bulletPoint" data-length='2000' name="s.aps.keyFeturess"
-             value="${s.aps.keyFeturess[4]}">
-      <span class="add-on"></span>
-    </div>
-  </td>
-</tr>
+#{form @Products.saleAmazonListing(), class: 'form-horizontal', id: 'saleAmazonForm'}
+  <div class="span10">
+      #{text_field id:'title', name: 's.aps.title', label: '标题', value: '' /}
+  </div>
+  <div class="span5">
+      #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku/}
+      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: '' /}
+      #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: 'EasyAcc' /}
+      #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: 'EasyAcc'/}
+      #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: '' /}
+      #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期',  value: '2013-12-01' /}
+      #{text_field id:'RBN', name: 's.aps.rbns[]', label: 'Recommanded Browser Nodes', value: '' /}
 
-<tr>
-  <th rowspan="5">SearchTerms:</th>
-  <td colspan="3">
-    <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
-             value="${s.aps.searchTermss[0]}">
-      <span class="add-on"></span>
-    </div>
-  </td>
-</tr>
+      #{checkbox_wrap id:'giftwrap', label: '附加选项'}
+        <label class="checkbox">
+          <input type="checkbox" id='giftwrap' checked name="s.aps.isGiftWrap" value="true">
+          GiftWrap
+        </label>
+      #{/checkbox_wrap}
+  </div>
+  <div class="span5">
+      #{select_field id:'account', name: 's.account.id', label: '上架账户', items: accs /}
+      #{select_field id:'market', name: 's.market', label:'市场', items: models.market.M.values() /}
+      #{text_field id:'partNumber', name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: '' /}
+      #{text_field id:'qty', name: 's.aps.quantity', label: '库存', readonly: true, value: '0' /}
+      #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优化销售价格(DE 没有)', value: '' /}
+      #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
+      #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
+  </div>
 
-<tr>
-  <td colspan="3">
-    <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
-             value="${s.aps.searchTermss[1]}">
-      <span class="add-on"></span>
-    </div>
-  </td>
-</tr>
+  <div class="span10">
+      #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: ''/}
+      #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: '' /}
+      #{text_field id:'bulletPoint3', name: 's.aps.keyFeturess[2]', label: '', value: ''/}
+      #{text_field id:'bulletPoint4', name: 's.aps.keyFeturess[3]', label: '', value: ''/}
+      #{text_field id:'bulletPoint5', name: 's.aps.keyFeturess[4]', label: '', value: ''/}
 
-<tr>
-  <td colspan="3">
-    <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
-             value="${s.aps.searchTermss[2]}">
-      <span class="add-on"></span>
-    </div>
-  </td>
-</tr>
+      #{text_field id:'searchTerms1', name: 's.aps.searchTermss[0]', label: 'SearchTerms 1~5', value: ''/}
+      #{text_field id:'searchTerms2', name: 's.aps.searchTermss[1]', label: '', value: ''/}
+      #{text_field id:'searchTerms3', name: 's.aps.searchTermss[2]', label: '', value: ''/}
+      #{text_field id:'searchTerms4', name: 's.aps.searchTermss[3]', label: '', value: ''/}
+      #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: ''/}
 
-<tr>
-  <td colspan="3">
-    <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
-             value="${s.aps.searchTermss[3]}">
-      <span class="add-on"></span>
-    </div>
-  </td>
-</tr>
+      #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: '' /}
+  </div>
+  <div class="offset1 span9" id="previewDesc"></div>
+#{/form}
+</div>
 
-<tr>
-  <td colspan="3">
-    <div class="input-append">
-      <input type="text" class="span11 searchTermss" data-length='50' name="s.aps.searchTermss"
-             value="${s.aps.searchTermss[4]}">
-      <span class="add-on"></span>
-    </div>
-  </td>
-</tr>
-
-<tr>
-  <th>ProductDesc:</th>
-  <td colspan="3">
-    <div class="input-append">
-      <textarea rows="10" name="s.aps.productDesc" data-length='2000'
-                class="span12 proDesc">${s.aps.productDesc?.trim()}</textarea>
-      <div class="clearfix"></div>
-      <span class="add-on">2000 bytes left</span>
-      <button class="btn">Preview</button>
-    </div>
-    <div style='margin-top:-1px;border-top:1px dashed;'></div>
-  </td>
-</tr>
-</table>
-</form>
 
 <script type="text/template" id="tsp-show-template">
   <h3>Product Desc</h3>

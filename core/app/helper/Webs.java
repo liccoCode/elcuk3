@@ -309,8 +309,8 @@ public class Webs {
     /**
      * 添加错误, 调用则抛出 FastRuntimeException
      */
-    public static void error(String errorMsg) {
-        Validation.addError("", errorMsg);
+    public static void error(String errorMsg, String... args) {
+        Validation.addError("", errorMsg, args);
         if(Validation.hasErrors())
             throw new FastRuntimeException(errorMsg);
     }

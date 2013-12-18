@@ -6,6 +6,7 @@ import com.amazonaws.mws.model.GetFeedSubmissionResultResponse;
 import com.amazonaws.mws.model.SubmitFeedRequest;
 import com.amazonaws.mws.model.SubmitFeedResponse;
 import helper.Constant;
+import models.market.Account;
 import models.market.JobRequest;
 import org.apache.commons.io.FileUtils;
 
@@ -27,6 +28,55 @@ public class MWSFeeds {
             public String toString() {
                 return "_POST_PRODUCT_DATA_";
             }
+        }
+    }
+
+    private Account account;
+
+    public MWSFeeds() {
+    }
+
+    public MWSFeeds(Account account) {
+        this.account = account;
+    }
+
+    /**
+     * 直接通过 Account 来提交 Feed
+     */
+    public String submitFeed(File feed, T feedType) {
+        MarketplaceWebService service = mws.MWSReports.client(account);
+        SubmitFeedRequest req = new SubmitFeedRequest()
+                .withMerchant(account.merchantId)
+                .withFeedType(feedType.toString());
+
+        try {
+            req.setFeedContent(new FileInputStream(feed));
+            SubmitFeedResponse resp = service.submitFeedFromFile(req);
+            return resp.getSubmitFeedResult().getFeedSubmissionInfo().getFeedSubmissionId();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 通过 FeedId 获取下载好的 Feed 结果
+     */
+    public File getFeedResult(String feedId) {
+        MarketplaceWebService service = mws.MWSReports.client(account);
+        GetFeedSubmissionResultRequest req = new GetFeedSubmissionResultRequest()
+                .withMerchant(account.merchantId)
+                .withFeedSubmissionId(feedId);
+        try {
+            GetFeedSubmissionResultResponse resp = service.getFeedSubmissionResult(req);
+            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+            req.setFeedSubmissionResultOutputStream(byteBuffer);
+
+            String path = String.format(Constant.E_DATE + "/%s", feedId);
+            File file = new File(path);
+            FileUtils.write(file, byteBuffer.toString("UTF-8"));
+            return file;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

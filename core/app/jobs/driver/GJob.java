@@ -61,4 +61,8 @@ public class GJob extends Model {
     public static GJob perform(String className, Map<String, Object> args) {
         return perform(className, args, new Date());
     }
+
+    public static GJob perform(Class clazz, Map<String, Object> args) {
+        return perform(clazz.getName(), args, new Date());
+    }
 }

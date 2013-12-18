@@ -1,292 +1,42 @@
-#{extends 'main.html'/}
+#{extends 'main_full.html'/}
 #{set title:s.sellingId/}
 #{set 'moreScripts'}
     #{script 'sellings/selling.coffee'/}
     #{script 'component/amazon.coffee'/}
 #{/set}
+#{set 'moreStyles'}
+    #{stylesheet 'market.css'/}
+#{/set}
 #{if s.market.isAmazon()}
     #{flash_alert /}
+<ul class="nav nav-tabs">
+  <li class="active">
+    <a href="#amazon" data-toggle='tab'>Amazon</a>
+  </li>
+  <li>
+    <a href="#selling" data-toggle='tab'>Selling</a>
+  </li>
+</ul>
 
-<div class="row">
-    #{if s.state == models.market.Selling.S.DOWN}
-      <div class="alert alert-error">
-        <p style="text-align:center;">Selling ${s.sellingId} 已经不在 Amazon 中存在了, 系统中已经标记为 DOWN, 不再允许向
-          Amazon 发送请求</p>
+<div id="selling_tabs" class="tab-content">
+  <div class="tab-pane fade active in" id='amazon'>
+      #{include 'Sellings/_amazon.html'/}
+  </div>
+
+  <div class="tab-pane fade" id='selling'>
+    <div class="row-fluid">
+      <div class="offset2 span8">
+        <h4>在这里对 Selling 的 Listing 进行修正(只允许同 SKU)</h4>
+          #{form @Sellings.changeListing(), id: 'changeListing', class: 'form'}
+              #{text_field id: 'sellingId_read', readonly: true, name: 's.sellingId', label: 'SellingId', value: s.sellingId /}
+              #{text_field id:'listing', name: 'listingId', label: 'Listing', value: s.listing?.listingId /}
+            <button type="submit" class="btn">更换</button>
+          #{/form}
       </div>
-    #{/if}
-    #{else }
-      <div class="span12">
-        <div class="btn-group" style="margin:5px 0;display:inline-block;">
-          <button class="btn btn-warning"
-                  content="直接更新到数据库"
-                  placement='bottom' rel="popover" title="Local Update Button">
-            Update
-          </button>
-          <button class="btn btn-warning"
-                  content="更新到 Amazon 同时更新到数据库"
-                  placement='bottom' rel="popover" title="Sync To Amazon Button">
-            Deploy
-          </button>
-          <button class="btn btn-warning"
-                  content="从 Amazon 同步回来更新到数据库"
-                  placement='bottom' rel="popover" title="Sync From Amazon Button">
-            Sync
-          </button>
-        </div>
-        <div class="btn-group" style="margin:5px 0;display:inline-block;">
-          <a class="btn btn-success" href="@{Listings.listing(s.listing.listingId)}">${s.listing.listingId}</a>
-          <a class="btn btn-success" href="@{Products.show()}/${s.merchantSKU.split(",")[0]}">${s.merchantSKU.split(",")[0]}</a>
-        </div>
-      </div>
-    #{/else}
-</div>
-
-<div class="row">
-  <div class="span12">
-
-  <table id="saleAmazonForm" class="table table-condensed">
-      <tr id="image_tr">
-          <th rowspan="2">Images</th>
-          <td colspan="3">
-              <ul class="thumbnails" id="images" sku='${s.merchantSKU.split(",")[0]}'></ul>
-          </td>
-      </tr>
-
-      <tr>
-          <td colspan="3">
-              <div class="input-prepend span12">
-                  <button id="img_cal" placement='left' class="btn" rel="popover" title="Image Check Button"
-                  content="图片按照 0~8 设置好编号以后,点击此按钮预览生成的值."
-                  ><i class="icon-eye-open"></i></button>
-                  <button class="btn" placement='left' rel="popover" title="Image Upload Button"
-                  content="图片按照 0~8 设置好编号以后,点击此按钮会直接更新到 Selling 并保存, 与其他信息的更新分开.<span style='color:red'>提交 Amazon 只保留拥有编号的图片</span>"
-                  ><i class="icon-picture"></i></button>
-                  <input type="text" class="span12" name="s.aps.imageName" readonly value="${s.aps.imageName}">
-              </div>
-          </td>
-      </tr>
-
-      <tr>
-          <th>Title:</th>
-          <td colspan="3"><textarea rows="2" name="s.aps.title" class="span12">${s.aps.title}</textarea>
-          </td>
-      </tr>
-      <tr>
-          <th>MSKU:</th>
-          <td>
-              <input type="text" name="s.merchantSKU" readonly="" value="${s.merchantSKU}">
-              <input type="hidden" name="s.sellingId" id="s_sellingId" value="${s.sellingId}">
-              <input type="hidden" name="p.sku" value="${s.listing.product.sku}">
-          </td>
-          <th>Acc:</th>
-          <td>
-              <select name="s.account.id" size="1">
-                  <option value="${s.account.id}">${s.account.prettyName()}</option>
-              </select>
-          </td>
-      </tr>
-      <tr>
-          <th>UPC:</th>
-          <td>
-              <div class="input-append">
-                  <input type="text" style="width:110px;" readonly name="s.aps.upc" value="${s.aps.upc}">
-                  <span class="add-on"><a target="_blank" href="${s.asinLink()}">${s.asin}</a></span>
-              </div>
-          </td>
-          <th>Condition/Market:</th>
-          <td>
-              <div class="input-append">
-                  <input type="text" readonly="" name="s.aps.condition_" value="${s.aps.condition_}" class="span1">
-                  <select name="s.market" class="span2">
-                      <option value="${s.market.name()}">${s.market}</option>
-                  </select>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <th>Manufac:</th>
-          <td><input type="text" name="s.aps.manufacturer" value="${s.aps.manufacturer}"></td>
-          <th>PartNumber:</th>
-          <td>
-              <input type="text" name="s.aps.manufacturerPartNumber" value="${s.aps.manufacturerPartNumber}">
-          </td>
-      </tr>
-
-      <tr>
-          <th>RBN:</th>
-          <td>
-              <div class="input-prepend">
-                  <input type="text" style="width:80px;" name="s.aps.rbns[0]" value="${s.aps?.rbns[0]}">
-                  <input type="text" style="width:80px;" name="s.aps.rbns[1]" value="${s.aps?.rbns[1]}">
-              </div>
-          </td>
-          <th>Qty(非库存):</th>
-          <td><input type="text" name="s.aps.quantity" value="${s.aps.quantity}"></td>
-      </tr>
-
-      <tr>
-          <th>Price:</th>
-          <td>
-              <div class="input-prepend">
-                  <span class="currency add-on">${s.market.htmlCurrency().raw()}</span>
-                  <input type="text" class="span2" name="s.aps.standerPrice" placeHolder="Ex:19.99" value="${s.aps.standerPrice}">
-              </div>
-          </td>
-          <th>SalePrice:</th>
-          <td>
-              <div class="input-prepend">
-                  <div class="input-prepend">
-                      <span class="currency add-on">${s.market.htmlCurrency().raw()}</span>
-                      <input type="text" class="span2" name="s.aps.salePrice" placeHolder="Ex:15.99" value="${s.aps.salePrice}">
-                  </div>
-              </div>
-          </td>
-      </tr>
-
-      <tr>
-          <th>StartDate</th>
-          <td><input type="text" name="s.aps.startDate" value="${s.aps.startDate.format("yyyy-MM-dd")}">
-          </td>
-          <th>EndtDate</th>
-          <td><input type="text" name="s.aps.endDate" value="${s.aps.endDate.format("yyyy-MM-dd")}"></td>
-      </tr>
-
-      <tr>
-          <th>Gift Options</th>
-          <td>
-              <label class="checkbox inline">
-                  <input name="s.aps.isGiftWrap" type="checkbox" ${s.aps.isGiftWrap ? 'checked':''} value="true">
-                  Gift&nbsp;Wrap
-              </label>
-              <label class="checkbox inline">
-                  <input name="s.aps.isGiftMessage" type="checkbox" ${s.aps.isGiftMessage ? 'checked':''} value="true">
-                  Gift&nbsp;Message
-              </label>
-          </td>
-          <th>FnSku</th>
-          <td><input type="text" name="s.fnSku" value="${s.fnSku}"></td>
-      </tr>
-
-      <!-- 功能条 -->
-      <tr>
-          <td colspan="4">
-              <div class="input-prepend input-append offset1">
-                  <button id="sid_preview_popover" class="btn" rel="popover" placement='bottom' trigger='toggle' width="800px" data-content="请先预览" title="Detail Preview">
-                      <i class="icon-search"></i>
-                  </button>
-                  <input type="text" id="sid_helper" style="width:160px;" data-provide="typeahead" data-items="4" data-source="${sids}" placeHolder="同 Product SID">
-                  <button class="btn" rel="popover"><i class="icon-edit"></i></button>
-              </div>
-          </td>
-      </tr>
-
-      <tr>
-          <th rowspan="5">Technical:</th>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 bulletPoint" data-length='2000' name="s.aps.keyFeturess[0]" value="${s.aps.keyFeturess[0]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 bulletPoint" data-length='2000' name="s.aps.keyFeturess[1]" value="${s.aps.keyFeturess[1]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 bulletPoint" data-length='2000' name="s.aps.keyFeturess[2]" value="${s.aps.keyFeturess[2]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 bulletPoint" data-length='2000' name="s.aps.keyFeturess[3]" value="${s.aps.keyFeturess[3]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 bulletPoint" data-length='2000' name="s.aps.keyFeturess[4]"
-                         value="${s.aps.keyFeturess[4]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-
-
-      <tr>
-          <th rowspan="5">SearchTerms:</th>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 searchTermss" data-length="50" name="s.aps.searchTermss[0]"
-                         value="${s.aps.searchTermss[0]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 searchTermss" data-length="50" name="s.aps.searchTermss[1]" value="${s.aps.searchTermss[1]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 searchTermss" data-length="50" name="s.aps.searchTermss[2]" value="${s.aps.searchTermss[2]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 searchTermss" data-length="50" name="s.aps.searchTermss[3]" value="${s.aps.searchTermss[3]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-      <tr>
-          <td colspan="3">
-              <div class="input-append">
-                  <input type="text" class="span12 searchTermss" data-length="50" name="s.aps.searchTermss[4]" value="${s.aps.searchTermss[4]?.raw()}">
-                  <span class="add-on"></span>
-              </div>
-          </td>
-      </tr>
-
-      <tr>
-          <th>ProductDesc:</th>
-          <td colspan="3">
-              <div class="input-append">
-                  <textarea rows="10" name="s.aps.productDesc" data-length='2000'
-                            class="span12 proDesc">${s.aps.productDesc?.raw()}</textarea>
-                  <div class="clearfix"></div>
-                  <span class="add-on">2000 bytes left</span>
-                  <button class="btn">Preview</button>
-              </div>
-              <div style='margin-top:-1px;border-top:1px dashed;'></div>
-          </td>
-      </tr>
-  </table>
+    </div>
   </div>
 </div>
 #{/if}
-#{elseif s.market.isEbay()}
-Ebay
-#{/elseif}
 #{else }
 Market ${s.market} 还不支持!
 #{/else}
