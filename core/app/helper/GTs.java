@@ -1,5 +1,6 @@
 package helper;
 
+import play.exceptions.TemplateNotFoundException;
 import play.modules.gtengineplugin.TemplateLoader;
 import play.templates.Template;
 import play.vfs.VirtualFile;
@@ -14,10 +15,13 @@ import java.util.Map;
  * Time: 11:46 AM
  */
 public class GTs {
-    public static final String BASE_PATH = "/app/views/gt_templates/%s.html";
+    public static final String BASE_PATH = "/app/views/gt_templates/%s";
 
     /**
-     * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出; 模板都是以 html 结尾;
+     * 从默认的路径(views/gt_templates)下寻找文件进行模板内容输出;首先查询以.html结尾的模板，
+     *
+     * 如果未找到则再查询以.txt结尾的模板，找到则停止查找，全部未找到则抛出TemplateNotFoundException异常;
+     *
      * 例:
      * GTs.render('templateName', GTs.newMap('key', val).build());
      *
@@ -26,7 +30,15 @@ public class GTs {
      * @return
      */
     public static String render(String name, Map<String, Object> args) {
-        Template t = TemplateLoader.load(VirtualFile.fromRelativePath(String.format(BASE_PATH, name)));
+        VirtualFile file = null;
+        file = VirtualFile.fromRelativePath(String.format(BASE_PATH, name + ".html"));
+        if(!file.exists()) {
+            file = VirtualFile.fromRelativePath(String.format(BASE_PATH, name + ".txt"));
+            if(!file.exists()) {
+                throw new TemplateNotFoundException("模板未找到，请检查模板文件名正确性");
+            }
+        }
+        Template t = TemplateLoader.load(file);
         return t.render(args);
     }
 

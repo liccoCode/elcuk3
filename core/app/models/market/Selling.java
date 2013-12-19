@@ -495,4 +495,12 @@ public class Selling extends GenericModel {
         return true;
     }
 
+    /**
+     * 生成Selling对象的Feed文件
+     * @param sellingList Selling对象的List集合
+     * @return String 生成的模板文件
+     */
+    public static String generateFeedTemplateFile(List<Selling> sellingList) {
+        return GTs.render("feed_template_consumerElectronics_de", GTs.newMap("sellingList", sellingList).build());
+    }
 }
