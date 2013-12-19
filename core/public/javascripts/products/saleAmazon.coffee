@@ -64,13 +64,16 @@ $ ->
 
   $('#submitSale').click ->
     $form = $('#saleAmazonForm')
+    LoadMask.mask()
     $.ajax($form.attr('action'), {data: $form.serialize(), method: 'POST'})
       .done((r) ->
         if r.flag
           noty({text: "成功创建 Selling #{r.message}"})
         else
           noty({text: r.message, type: 'error'})
+        LoadMask.unmask()
       )
       .fail((r) ->
         noty({text: r.responseText, type: 'error'})
+        LoadMask.unmask()
       )

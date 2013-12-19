@@ -374,6 +374,7 @@ public class Selling extends GenericModel {
     public Selling patchSkuToListing(String productType) {
         // 以 Amazon 的 Template File 所必须要的值为准
         if(StringUtils.isBlank(this.aps.upc)) Webs.error("UPC 必须填写");
+        if(this.aps.upc.length() != 12) Webs.error("UPC 的格式错误,其为 12 位数字");
         if(!isMSkuValid()) Webs.error("Merchant SKU 不合法. [SKU],[UPC]");
         if(StringUtils.isBlank(this.aps.title)) Webs.error("Selling Title 必须存在");
         if(StringUtils.isBlank(this.aps.brand)) Webs.error("品牌必须填写");
