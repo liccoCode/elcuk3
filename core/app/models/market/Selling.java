@@ -1,10 +1,13 @@
 package models.market;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import jobs.driver.GJob;
+import jobs.perform.SubmitFeedJob;
 import models.embedded.AmazonProps;
 import models.product.Attach;
 import models.product.Product;
@@ -385,8 +388,13 @@ public class Selling extends GenericModel {
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
-        //TODO 保存 Feed 并且提交 Feed 任务.
-        return patchToListing();
+        patchToListing();
+        Feed feed = Feed.newSellingFeed(Selling.generateFeedTemplateFile(Lists.newArrayList(this)), this);
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("account.id", this.account.id);
+        args.put("feed.id", feed.id);
+        GJob.perform(SubmitFeedJob.class, args);
+        return this;
     }
 
     /**
@@ -398,7 +406,7 @@ public class Selling extends GenericModel {
         if(product == null) Webs.error("SKU 产品不存在");
 
         List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
-        if(images == null || images.size() == 0) Webs.error("请添加 %s 并上传其图片后再处理 Selling.", product.sku);
+        if(images == null || images.size() == 0) Webs.error("请添加 " + product.sku + " 并上传其图片后再处理 Selling.");
         this.aps.imageName = images.get(0).fileName;
 
         Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
@@ -497,6 +505,7 @@ public class Selling extends GenericModel {
 
     /**
      * 生成Selling对象的Feed文件
+     *
      * @param sellingList Selling对象的List集合
      * @return String 生成的模板文件
      */

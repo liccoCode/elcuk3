@@ -17,7 +17,9 @@ import java.util.Date;
 public class Feed extends Model {
     private static final long serialVersionUID = 370209511312724644L;
 
-    @Column(nullable = false, unique = true)
+    public Feed() {
+    }
+
     public String feedId;
 
     /**
@@ -38,5 +40,13 @@ public class Feed extends Model {
     public Date createdAt;
 
     public Date updatedAt;
+
+
+    public static Feed newSellingFeed(String content, Selling selling) {
+        Feed feed = new Feed();
+        feed.content = content;
+        feed.fid = selling.sellingId;
+        return feed.save();
+    }
 
 }

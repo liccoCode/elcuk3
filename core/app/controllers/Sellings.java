@@ -126,7 +126,7 @@ public class Sellings extends Controller {
     public static void changeListing(Selling s, String listingId) {
         try {
             Listing lst = Listing.findById(listingId);
-            if(lst == null) Webs.error("Listing %s 不存在", listingId);
+            if(lst == null) Webs.error("Listing " + listingId + "不存在");
             String oldListingId = s.listing.listingId;
             s.changeListing(lst);
             flash.success("成功将 Selling %s 从 %s 转移到 %s", s.sellingId, oldListingId, listingId);
