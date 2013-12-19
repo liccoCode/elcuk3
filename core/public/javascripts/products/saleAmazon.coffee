@@ -67,7 +67,7 @@ $ ->
     $.ajax($form.attr('action'), {data: $form.serialize(), method: 'POST'})
       .done((r) ->
         if r.flag
-          noty({text: '成功, 等待完成'})
+          noty({text: "成功创建 Selling #{r.message}"})
         else
           noty({text: r.message, type: 'error'})
       )
