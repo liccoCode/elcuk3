@@ -165,6 +165,7 @@ public class Account extends Model {
     }
 
     public String cookie(String name) {
+
         return cookie(name, null);
     }
 
