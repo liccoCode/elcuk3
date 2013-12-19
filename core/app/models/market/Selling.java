@@ -385,6 +385,7 @@ public class Selling extends GenericModel {
         if(this.aps.standerPrice == null || this.aps.standerPrice <= 0) Webs.error("标准价格必须大于 0");
         if(this.aps.salePrice == null || this.aps.salePrice <= 0) Webs.error("优惠价格必须大于 0");
         this.asin = this.aps.upc;
+        //TODO 保存 Feed 并且提交 Feed 任务.
         return patchToListing();
     }
 
